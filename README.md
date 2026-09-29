@@ -1,7 +1,7 @@
 # 6502
 
-A cycle-accurate MOS 6502 core in C#, and the machines built on it. The BBC
-Micro comes first, then the NES.
+A cycle-accurate MOS 6502 core in C#, and the machines built on it: the KIM-1
+first, then the BBC Micro, then the NES.
 
 This is built in public. The design, the plan and every step of the work are
 in this repository, and the journey is written up at

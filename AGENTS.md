@@ -5,8 +5,8 @@ Guidance for AI agents (and people) working in this repository.
 ## What this is
 
 A cycle-accurate MOS 6502 core in C# on .NET 10, and the machines built on it:
-the BBC Micro first, then the NES. Built in public, with the journey written
-up at 6502.dbhq.uk.
+the KIM-1 first, then the BBC Micro, then the NES. Built in public, with the
+journey written up at 6502.dbhq.uk.
 
 ## Layout
 
@@ -26,8 +26,8 @@ per cycle, and the machine advances its other chips inside each call. A cycle
 that happens without a bus access, or a bus access that is not a cycle, is a
 bug.
 
-**2. The core knows no machine.** Nothing in the core refers to the BBC Micro,
-the NES or any other machine. Machine behaviour, including stalls and slow
+**2. The core knows no machine.** Nothing in the core refers to the KIM-1, the
+BBC Micro, the NES or any other machine. Machine behaviour, including stalls and slow
 devices, lives in that machine's bus.
 
 **3. Nothing third-party is committed.** No ROM, no game, no test data and no
