@@ -7,6 +7,17 @@ This is built in public. The design, the plan and every step of the work are
 in this repository, and the journey is written up at
 [6502.dbhq.uk](https://6502.dbhq.uk/), which is not live yet.
 
+## Where this is going
+
+The end goal is a verified port of *Mega Man 2*, checked against the original
+by running both side by side. That needs an NES accurate enough to trust, which
+needs a cycle-accurate 6502 under it. The design is in
+[`docs/superpowers/specs/2026-09-29-6502-design.md`](docs/superpowers/specs/2026-09-29-6502-design.md).
+
+*Mega Man* is a trademark of Capcom Co., Ltd. This project is not affiliated
+with, endorsed by or sponsored by Capcom. Nothing of Capcom's is in this
+repository.
+
 ## Where it stands
 
 Design. There is no code yet.

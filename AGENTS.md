@@ -11,7 +11,8 @@ up at 6502.dbhq.uk.
 ## Layout
 
 ```
-docs/          # the design, the plan and the roadmap
+docs/superpowers/specs/   # the design; each stage gets its own spec here
+docs/superpowers/plans/   # the plan for each spec
 ```
 
 More arrives with the code. Keep this section true as it does.
@@ -34,6 +35,11 @@ third-party test program. Tests download what they need from a pinned commit
 and check it against a recorded hash. Some of it is GPL and this repository is
 MIT.
 
-**4. No figure is typed by hand.** A pass count, a percentage or a speed on the
+**4. Nothing of Capcom's, ever.** No *Mega Man 2* ROM, graphics, music or code
+in this repository or on the site, and the port itself lives in a separate
+private repository. The project names the game and carries a non-affiliation
+line; it never carries the game.
+
+**5. No figure is typed by hand.** A pass count, a percentage or a speed on the
 site or in the docs comes from test output. A number that was true when it was
 written and is false now is worse than no number.
