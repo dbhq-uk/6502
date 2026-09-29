@@ -1,0 +1,11 @@
+bin/
+obj/
+dist/
+node_modules/
+*.user
+*.log
+.claude/
+
+# Test data and test programs are downloaded at test time, pinned by hash,
+# and never committed. See AGENTS.md.
+.testdata/
