@@ -15,9 +15,9 @@ different regions, the earliest is given.
 
 | Mark | Meaning |
 |---|---|
-| **Core** | Runs on this repository's NMOS 6502 core as designed |
-| **Core, no decimal** | The same core with decimal mode switched off |
-| **65C02** | Needs the CMOS 65C02 extension: new instructions, and the NMOS quirks fixed. Tom Harte's SingleStepTests has sets for the WDC, Rockwell and Synertek 65C02s, so it can be proven the same way the core is |
+| **Core** | Runs on this repository's core as the NMOS 6502 |
+| **Core, no decimal** | Runs on the core as the NES's 2A03, with decimal mode removed |
+| **65C02** | Runs on the core as one of its three 65C02 variants: WDC, Rockwell or Synertek. Each is proven against its own set of Tom Harte's SingleStepTests, the same way as the NMOS chip |
 | **Other** | A different CPU on 6502 foundations. Out of scope |
 
 ## The chips
@@ -223,11 +223,10 @@ new machines around it.
 ## What this means for this project
 
 - The three machines planned, the KIM-1, the BBC Micro Model B and the NES,
-  all run on the core as designed, the NES with decimal mode switched off.
+  all run on the core, the NES with decimal mode removed.
 - Nearly every 6502 machine from 1976 to 1985 does too.
-- The 65C02 extension would open the BBC Master, the later Apple IIs, the
-  Atari Lynx, the Watara Supervision and every modern machine above. It is a
-  modest extension, and it can be proven against Harte's 65C02 test sets.
+- The core also covers the 65C02, which opens the BBC Master, the later Apple
+  IIs, the Atari Lynx, the Watara Supervision and every modern machine above.
 - The 65C816, the HuC6280 and the 4510 family are different CPUs, and out of
   scope.
 

@@ -4,9 +4,9 @@ Guidance for AI agents (and people) working in this repository.
 
 ## What this is
 
-A cycle-accurate MOS 6502 core in C# on .NET 10, and the machines built on it:
-the KIM-1 first, then the BBC Micro, then the NES. Built in public, with the
-journey written up at 6502.dbhq.uk.
+A cycle-accurate 6502 core in C# on .NET 10, covering the NMOS 6502 and the
+CMOS 65C02, and the machines built on it: the KIM-1 first, then the BBC Micro,
+then the NES. Built in public, with the journey written up at 6502.dbhq.uk.
 
 ## Layout
 
