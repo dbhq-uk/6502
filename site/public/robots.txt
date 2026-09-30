@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://6502.dbhq.uk/sitemap-index.xml

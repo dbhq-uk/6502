@@ -1,0 +1,48 @@
+/* The look: a phosphor terminal, after the Modal reference (Dan, 30 Sep 2026).
+   It is a DELIBERATE FORK of the DBHQ brand, green where the brand is blue, and
+   DESIGN.md says why. Do not "correct" it back to dbhq.uk's paper.
+
+   One rule above the rest: the lime is used ONCE per screen, as a fill. */
+:root {
+  /* surfaces */
+  --void: #000000;
+  --iron: #181818;
+  --veil: #212525;
+  --card: #1f2a33;
+
+  /* lines */
+  --hairline: #1f2a33;
+  --circuit: #485346;
+  --pine: #3e4a3c;
+
+  /* the accent, rationed */
+  --lime: #7fee64;
+
+  /* text: phosphor greens, lightest to dimmest */
+  --white: #ddffdc;
+  --mint: #def0dd;
+  --moss-80: #aed2a4;
+  --moss-70: #9cbf93;
+  --sage-60: #8cab87;
+  --sage-40: #677d64;
+  --fern: #859984;
+  /* The reference's #697368 measures 4.25 to 1 on black, under the 4.5 that AA
+     asks of small text, so this is lightened to #737d72 (4.91). tests/design.test.mjs
+     holds it. */
+  --deep: #737d72;
+
+  /* type */
+  --font-head: "Inter Tight Variable", "Inter Tight", system-ui, sans-serif;
+  --font-body: "Inter Variable", "Inter", system-ui, sans-serif;
+  --font-mono: "Fira Mono", ui-monospace, "SF Mono", monospace;
+
+  /* radii */
+  --r-card: 8px;
+  --r-window: 16px;
+  --r-btn: 12px;
+  --r-pill: 9999px;
+
+  /* layout */
+  --max: 1280px;
+  --pad: clamp(20px, 5vw, 40px);
+}

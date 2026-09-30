@@ -128,3 +128,35 @@ Every number a page shows now comes through one module. A page that needs a coun
 
 - The Harte figure is 1278, not 1280, and the reason is the one recorded under task 2: four variants have 256 passing cases and the WDC variant has 254 (1278 = 4 x 256 + 254). Summing from the file gets it right where a typed 5 x 256 would not.
 - The results file in this working tree was made from a run at commit `a8de702`, read from the `commit` field of `site/src/data/results.json`, which is earlier than the current commit. The task 4 changes touch no .NET code, so the counts are unchanged, but a published site must be built from a results file made at the commit it ships.
+
+## Task 5: The shell
+
+The look, the page layout, the analytics and consent files, and the first two pages (About and the 404 page). Every later page is built inside this layout.
+
+### What was built
+
+- **The look.** `site/src/styles/tokens.css` holds every colour, font and radius as a named token, and `global.css` uses them by name. It is the phosphor terminal decided on 30 September: black canvas, pale-green text, one lime accent.
+- **The layout and its parts.** `site/src/layouts/Base.astro` with a header, a footer that carries the Capcom non-affiliation line word for word, a `Card` for figures and a native `<dialog>` for the consent choice.
+- **Analytics, consent-gated.** `site/public/analytics.js` sets all four Consent Mode v2 signals to denied and loads the Google tag only from inside `__dbhqEnableGA()`, which runs only on the live host and only after a visitor accepts. `consent.js` owns the prompt. Both are same-origin files because the Content-Security-Policy in `site/public/_headers` has no `unsafe-inline` for scripts. The measurement ID is the estate's one, not a new data stream.
+- **`machines-table.js`, `robots.txt`, `favicon.svg`.** The first adds sortable headers and filters to the tables that arrive in later tasks.
+- **Two pages.** `about.astro` and `404.astro`.
+- **Four test files, and a helper.** `site.test.mjs` (rules for every built page), `analytics.test.mjs`, `design.test.mjs` (contrast ratios read off the tokens) and `html.test.mjs` (every built page through `html-validate`).
+- **New packages.** `@fontsource-variable/inter`, `@fontsource-variable/inter-tight` and `@fontsource/fira-mono` (self-hosted fonts, so the CSP needs no font host) and, as a dev dependency, `html-validate`. The versions in `site/package.json` after the install are `^5.3.0` for the three fonts and `^11.16.1` for `html-validate`.
+
+### Decisions
+
+- **The tests were written before the code they test.** The site tests import `site/src/lib/site.mjs`, which did not exist, so they could fail first.
+- **Nothing is measured off the live host.** The tag loads only when `location.hostname` is `6502.dbhq.uk`, so a local preview or a Pages branch build never calls Google. The deploy stays switched off; nothing here touches Cloudflare or the estate's analytics settings.
+- **Decline comes first, and is the same size as Accept.** A test holds the order.
+
+### What the tests showed
+
+- Before the code existed, `npm test` in `site/` ran 23 tests: 20 passed, and 3 test files failed to load (`site.test.mjs` with `ERR_MODULE_NOT_FOUND` for `site/src/lib/site.mjs`, and `analytics.test.mjs` and `design.test.mjs` because their inputs did not exist yet).
+- With every file written from the brief, `npm test` in `site/` built the site and ran 43 tests, and all 43 passed: the 19 from tasks 1 to 4, and 24 new (11 in `site.test.mjs`, 6 in `analytics.test.mjs`, 6 in `design.test.mjs`, 1 in `html.test.mjs`).
+- `find dist -name '*.html'` in `site/` lists two built pages, `dist/404.html` and `dist/about/index.html`. The rules above are therefore checked against two pages so far, and get stronger as pages arrive.
+- No file was changed from the brief.
+
+### What surprised
+
+- Before any page existed, the build still succeeded and the HTML validity test passed, because it had no pages to check. A rule that runs over "every built page" says nothing about a site with none, which is why `site.test.mjs` has a test that fails when no page was built.
+- `npm install` printed a warning that `esbuild@0.28.2` has an install script not yet covered by `allowScripts`. The install and build worked without it, and nothing was approved.

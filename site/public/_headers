@@ -1,0 +1,32 @@
+# Cloudflare Pages response headers for every route on 6502.dbhq.uk.
+# https://developers.cloudflare.com/pages/configuration/headers/
+#
+# These apply AT THE EDGE ONLY. `astro preview` will not send them, so verify
+# with `curl -I` against the deployed host, never against a local server.
+#
+# THE CSP ALLOWS EXACTLY ONE THIRD-PARTY ORIGIN, and it is Google Analytics.
+# Everything else is 'self': no font host, no embed, no inline script.
+# script-src has no 'unsafe-inline', which is why analytics.js and consent.js
+# are same-origin files rather than Google's inline snippet.
+#
+# GA IS CONSENT-GATED AND NOTHING LOADS UNTIL A VISITOR ACCEPTS. The origins
+# below are permission to load, not a decision to. GA4 sets its cookie on the
+# shared .dbhq.uk parent, so a cookie dropped here without consent is a cookie
+# across the whole estate.
+#
+# style-src needs 'unsafe-inline' because Astro inlines every stylesheet
+# (build.inlineStylesheets: 'always'), which keeps the first paint unblocked.
+# That is the only other relaxation here.
+#
+# Adding any further origin means asking what it sets and whether the consent
+# prompt covers it.
+/*
+  Strict-Transport-Security: max-age=15552000; includeSubDomains
+  Content-Security-Policy: default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'none'; form-action 'none'; script-src 'self' https://www.googletagmanager.com; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data: https://www.googletagmanager.com https://www.google-analytics.com https://*.google-analytics.com; connect-src 'self' https://www.googletagmanager.com https://www.google-analytics.com https://*.google-analytics.com https://*.analytics.google.com; manifest-src 'self'; frame-src 'none'; upgrade-insecure-requests
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
+  X-Frame-Options: DENY
+  Permissions-Policy: geolocation=(), camera=(), microphone=(), payment=(), usb=()
+
+/_astro/*
+  Cache-Control: public, max-age=31536000, immutable

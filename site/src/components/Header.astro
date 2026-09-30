@@ -1,0 +1,14 @@
+---
+import { NAV, SITE } from '../lib/site.mjs';
+const { path } = Astro.props;
+---
+
+<header class="top">
+  <div class="wrap">
+    <a class="brand" href="/">6502 <small>by dbhq</small></a>
+    <nav class="links" aria-label="Main">
+      {NAV.map((item) => <a href={item.href} aria-current={path.startsWith(item.href) ? 'page' : undefined}>{item.label}</a>)}
+    </nav>
+    <a class="btn ghost small" href={SITE.repo}>GitHub</a>
+  </div>
+</header>
