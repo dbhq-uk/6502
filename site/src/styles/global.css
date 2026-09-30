@@ -89,6 +89,8 @@ section { padding: clamp(56px, 7vw, 96px) 0; }
 .proof { position: relative; }
 .proof::before { content: ""; position: absolute; inset: 0; background: var(--waveform) right center / 62% auto no-repeat; opacity: 0.5; -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 40%); mask-image: linear-gradient(90deg, transparent 0, #000 40%); pointer-events: none; }
 .proof > .wrap { position: relative; }
+/* Below 900px the text spans the whole width, so it sits over the waveform's lines. At 0.5 the brightest line lowered the body text to about 2 to 1; at 0.18 it is held above 4.5 to 1. */
+@media (max-width: 900px) { .proof::before { opacity: 0.18; } }
 .tex { position: relative; background: var(--void) var(--traces) center / 640px; }
 .tex::before { content: ""; position: absolute; inset: 0; background: rgba(0, 0, 0, 0.55); }
 .tex > .wrap { position: relative; }

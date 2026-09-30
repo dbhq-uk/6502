@@ -17,6 +17,19 @@ test('every page has a title, a description and an https canonical link on the s
   }
 });
 
+test('every internal link and asset resolves to a built file', () => {
+  const missing = [];
+  for (const p of all) {
+    for (const m of p.html.matchAll(/\b(?:href|src)="([^"#?]+)[^"]*"/g)) {
+      const target = m[1];
+      if (!target.startsWith('/') || target.startsWith('//')) continue;
+      const file = target.endsWith('/') ? path.join(DIST, target, 'index.html') : path.join(DIST, target);
+      if (!fs.existsSync(file)) missing.push(`${p.url} -> ${target}`);
+    }
+  }
+  assert.deepEqual(missing, []);
+});
+
 test('every page carries the Capcom non-affiliation line word for word', () => {
   for (const p of all) assert.ok(visibleText(p.html).includes(CAPCOM), `${p.url} is missing the Capcom line`);
 });

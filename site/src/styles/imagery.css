@@ -1,0 +1,6 @@
+/* The generated imagery, as custom properties so a stylesheet can use it as a
+   background. Vite rewrites each url() to the hashed file in the build. */
+:root {
+  --waveform: url("../assets/imagery/waveform.webp");
+  --traces: url("../assets/imagery/traces.webp");
+}

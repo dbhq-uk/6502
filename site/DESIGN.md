@@ -1,0 +1,77 @@
+# Design notes
+
+The look of 6502.dbhq.uk, and why it is what it is.
+
+## A deliberate fork of the DBHQ brand
+
+The site is a phosphor terminal, after the Modal reference: a pure black canvas,
+pale-green type, hairline borders, no shadows, and code-window cards for test
+output. The DBHQ brand is blue and the other DBHQ sites are paper (dbhq.uk) or
+ink (skills.dbhq.uk). This one is green, on purpose: it is a hardware project,
+and the look carries that. Dan chose it on 30 September 2026 from five mocks:
+paper, ink, an amber phosphor, a Basedash-style serif look, and this.
+
+**Do not "fix" it back to dbhq.uk's paper.** The fork is the decision.
+
+- **One lime accent, once per screen, as a fill.** The lime is the single
+  strongest colour on the page, so it is rationed. A test fails the build if a
+  page uses it more than once.
+- **No shadows except the navigation bar's,** and depth is a change of surface
+  value plus a one-pixel line. A test holds it.
+- **Type:** Inter Tight for headings, Inter for body text and Fira Mono for code,
+  all open licence and self-hosted through Fontsource, so nothing loads from a
+  font host. The reference's own display face is a custom one; Inter Tight stands
+  in for it.
+- **Contrast:** the reference's dimmest text colour, `#697368`, measures 4.25 to 1
+  on black, under the 4.5 that AA asks of small text. It is lightened to
+  `#737d72` (4.91). A test computes every text pair from the real tokens.
+
+## The imagery
+
+Three generated images, made with the `imager` skill on 30 September 2026 with
+`gpt-image-2.5-flare`. Each was drafted first at low quality (four drafts, $0.018
+billed in all), then the three that worked were made again at high quality with
+the draft as the reference ($0.148 billed). The originals are 1 to 2 MB each and
+are not in git; the site ships the WebP versions in `src/assets/imagery/`.
+
+**They are illustrations and are captioned as illustrations.** None is evidence.
+The prompt asked for a 6502 die, but a model draws a plausible die and not the
+chip's real layout, so it is not a photograph or a drawing of the 6502, and a test fails the
+build if a generated image is shown without an "Illustration" caption. The KIM-1
+page will use the emulator's own rendering of the board.
+
+### hero-die
+
+The hero, below the headline, faded at the edges.
+
+- Draft: `1536x864`, quality low. Prompt: "A macro photograph of a single MOS 6502 microprocessor die seen from directly above, fine metal traces glowing in pale phosphor green (#ddffdc) with one small lime (#7fee64) highlight, deep black background, shallow depth of field, cinematic, no text, no logos"
+- Final: 1536x864, quality high, the draft passed as the reference so the composition held. The draft prompt plus: "Keep the same composition and colours as the reference image, at higher fidelity and sharper detail."
+
+### waveform
+
+Behind the proof section, on the right, faded under the text.
+
+- Draft: `1536x864`, quality low. Prompt: "Abstract stepped digital waveforms, like a logic analyser trace of a clock and data lines, thin pale phosphor-green lines (#ddffdc) on pure black, a single lime (#7fee64) trace, generous empty space on the left, very clean, no text, no numbers"
+- Final: 1536x864, quality high, the draft passed as the reference so the composition held. The draft prompt plus: "Keep the same composition and colours as the reference image, at higher fidelity and sharper detail."
+
+### traces
+
+A faint texture behind the machines section.
+
+- Draft: `1024x1024`, quality low. Prompt: "A subtle seamless texture of fine printed-circuit traces and vias in very dark green on pure black, extremely low contrast, evenly lit, no focal point, no text"
+- Final: 1024x1024, quality high, the draft passed as the reference so the composition held. The draft prompt plus: "Keep the same composition and colours as the reference image, at higher fidelity and sharper detail."
+
+### board
+
+Not used.
+
+- Draft: `1536x864`, quality low. Prompt: "A dark 1970s single-board computer seen from above at a slight angle: six red-orange seven-segment LED digits glowing in a row above a hex keypad of small square keys, black background, soft phosphor-green edge light (#ddffdc), one lime (#7fee64) glint, macro photography, shallow depth of field, no text, no logos, no letters on the keys"
+- Final: not made, dropped: it is not a KIM-1 (twelve keys where the board has twenty-four) and reads as one
+
+## What the tests hold
+
+`npm test` builds the site and then checks it. The checks that guard this design
+are in `tests/design.test.mjs` (contrast, the lime, shadows, raw colours) and
+`tests/site.test.mjs` (captions, alt text, the Capcom line, the dash and
+British English rules). The rest of the suite is about the figures and the
+content.

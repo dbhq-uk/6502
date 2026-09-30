@@ -246,3 +246,42 @@ Three pages now answer "what ran on a 6502 and what does the core run": `/machin
 ### What surprised
 
 - The new pages needed no new CSS. `.filters`, `.tablewrap`, `table.data`, `.status` and `.count` were already in `global.css` from task 5, so the contrast test, which fails on a colour rule with no surface, had nothing to place and did not change.
+
+## Task 8: The home page, the status page and the imagery
+
+The site now has a front door and a page that shows the state of the work. Both read every figure from `results.json`, `measurements.json` and the registry, and the three generated images are in.
+
+### What was built
+
+- **`/` (home).** A headline, the hero image with its "Illustration" caption, four figure cards, a terminal-style card of test results, the first three machines from the registry and the three newest journal entries.
+- **`/status/`.** Six figure cards, the test suites in a table, the speed table with the design target beside it, and `known-differences.md` rendered underneath.
+- **Three images.** `hero-die`, `waveform` and `traces` were converted from the PNG originals with `cwebp` (quality 88, 90 and 82). `ls -l` showed 322,732, 17,098 and 94,902 bytes against originals of 2,055,376, 421,970 and 1,096,527. Only the WebP files are committed. The originals stay in `/home/devops/dbhq-previews/6502/imagery/final/`.
+- **`imagery.css`** holds the two background images as custom properties, and `Base.astro` imports it before `global.css`. `Base.astro` already existed from task 5, so this task added one import line to it rather than creating it.
+- **`DESIGN.md`** records the fork of the brand, the imagery prompts, model, quality and cost. The cost and model were checked against `~/.dbhq/imager/history.jsonl` with a short Python script: the four low-quality drafts billed $0.017955 in all and the three finals $0.147563, which are the $0.018 and $0.148 written there. The model is `gpt-image-2.5-flare` on every row. The brief and the history agree. Two lines in the brief's text pointed at files that do not exist (`tests/pages.test.mjs` and a site README), so they now say `tests/site.test.mjs` and "the figures and the content".
+- **`figures-on-pages.test.mjs`.** Three tests: every number on both pages is a generated figure or a named literal, both pages name the commit their results came from, and the home page shows the machines count.
+- **The internal-link test** moved into `site.test.mjs`, as the brief says: every `href` and `src` that starts with `/` must resolve to a built file.
+
+### What the tests showed
+
+- With `figures-on-pages.test.mjs` written and no pages, `node --test tests/figures-on-pages.test.mjs` in `site/` ran 3 tests and all 3 failed with `Cannot read properties of undefined (reading 'html')`, because `page('/')` and `page('/status/')` found nothing.
+- With everything in place, `npm test` in `site/` ran 66 tests and all 66 passed: the 62 before this task, plus the 3 in `figures-on-pages.test.mjs` and the 1 link test. The brief expected 56 from 52 with the same 4 tests, and 66 is that plus the 10 that the task 5 review added and the 5 that the task 6 review added.
+- `npm run build` printed `14 page(s) built`: the 12 from task 7, the home page and the status page.
+- To check the tests catch a wrong multiple, `{fmt1(fig.speedAot)} times` on the home page was replaced with a typed `25.0 times` and `npm test` failed with `/ shows numbers that are not generated figures: 25.0`. The change was reverted and the suite went back to 66 passing. **The guard has a limit:** a typed `25` or a typed `24.4` would pass, because both are values the test allows. It catches a number that is not in the data, not one that is in the data and in the wrong place.
+
+### The speed target is not met, and the pages do not say it is
+
+The design target is 25 times a 2 MHz machine. The best ahead-of-time run in `measurements.json` is 48.85 MHz, which is 24.4 times, so the target is not met. The home page shows `24.4 times` and says nothing about the target. The status page says "The design's target is 25 times" and, in the table below it, shows `24.4` for the ahead-of-time build. The brief's wording was read against that and left as it is: it states the target and the measurement, and claims neither that the target is met nor that 24.4 is 25. `fmt1` gives 24.4 from 24.425, which rounds down.
+
+### Two defects and one check
+
+- **A missing space on the status page.** The brief's template put a line break between `{longDate(...)}` and `on`, and Astro dropped the whitespace, so the built page read "Measured on 30 September 2026on a KVM virtual machine". `grep -o "2026.\{0,8\}on a KVM" dist/status/index.html` showed `2026on a KVM`. An explicit `{' '}` after the date fixed it, and the same grep then showed `2026 on a KVM`.
+- **The waveform lowered text contrast on narrow screens.** The design test only reads colour rules, so it cannot see text over an image. To check, a Playwright script loaded the built home page at five widths, made all text in the section transparent, took a full-page screenshot and measured the brightest background pixel under every text box. At 901, 1280 and 1920 pixels the brightest pixel was black, so body text (`--sage-60`) measured 8.29 to 1. Below the 900 pixel breakpoint the two columns stack, the text runs across the whole width and the waveform lines sit under it: at 390 pixels the worst background had luminance 0.1473 and `--sage-60` measured 2.10 to 1, and at 768 pixels 1.73 to 1. That fails 4.5 to 1. `global.css` now sets `.proof::before` to opacity 0.18 below 900 pixels. Measured again the same way, `--sage-60` is 5.89 to 1 at 390 pixels and 5.55 to 1 at 768, and the heading and the eyebrow are higher. Desktop is unchanged at opacity 0.5.
+- **The traces texture.** It sits under a 0.55 black overlay, which the CSS does have (`.tex::before`). The same script measured the worst background at 0.0133 luminance at 1280 pixels, and `--sage-60` is 6.54 to 1 on it, the eyebrow colour 8.12 and the link colour `--fern` 5.44. The only text in `.note` on that section is a link in `--fern`. `--sage-40` would measure 3.71 there and fail, so plain `.note` text must not be placed over that texture. The other text in the section sits on opaque cards.
+- **The hero image** carries no text. The headline is above it and the caption below it, on the black canvas, so the image cannot lower any text contrast.
+
+No entry was added to the contrast table in `design.test.mjs` and nothing in it was weakened: `.hero`, `.proof` and `.tex` set no text colour, so the test had nothing new to place.
+
+### What surprised
+
+- The results the pages show are from commit `a8de702`, which is the commit `results.json` names, not the head of the branch. `results.json` is git-ignored and was generated at 15:37 today. It is a true statement of where the figures came from.
+- The home page says "0 of 51" machines implemented and links "All 56 machines in the family". Both come from the registry: 51 are in scope and 56 are listed.
