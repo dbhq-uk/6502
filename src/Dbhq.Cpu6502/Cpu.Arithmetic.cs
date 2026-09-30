@@ -56,9 +56,9 @@ public sealed partial class Cpu
     }
 
     /// <summary>
-    /// Decimal ADC as Bruce Clark describes it. The NMOS chip takes N and V
-    /// from the sum before the high digit is adjusted and Z from the binary
-    /// sum; the 65C02 takes N and Z from the result.
+    /// Decimal ADC as Bruce Clark describes it. Both chips take V from the sum
+    /// before the high digit is adjusted. The NMOS chip also takes N from that
+    /// sum and Z from the binary sum; the 65C02 takes N and Z from the result.
     /// </summary>
     private void AdcDecimal(byte value, int carryIn)
     {
