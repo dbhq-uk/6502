@@ -158,14 +158,14 @@ None. The harness worked as designed on first build.
 
 ## Task 3: Loads, stores, logic and shifts
 
-The 117 shared opcodes that are neither arithmetic nor control flow. Each instruction reads like the chip's cycles: an instruction's cycles are counted from its `Read` and `Write` calls. Read-modify-write goes through `ReadForModify`, which reads a value, writes it back on the NMOS chip, then re-reads it on the 65C02.
+The 117 shared opcodes that are neither arithmetic nor control flow. Each instruction reads like the chip's cycles: an instruction's cycles are counted from its `Read` and `Write` calls. Read-modify-write goes through `ReadForModify`, which reads a value, then on the NMOS chip writes it back, or on the 65C02 reads it again.
 
 ### What was built
 
 Three modified or created files:
 
 - **`src/Dbhq.Cpu6502/Cpu.Logic.cs`** (new file): A partial class containing the shift and logic helpers: `Asl`, `Lsr`, `Rol`, `Ror`, `And`, `Ora`, `Eor`, `Compare`, `Bit`, and the read-modify-write helpers `AslAt`, `LsrAt`, `RolAt`, `RorAt`, `IncAt`, `DecAt`. Every helper is written to align with the bus cycles of its instruction.
-- **`src/Dbhq.Cpu6502/Cpu.Official.cs`** (modified): Expanded `ExecuteOfficial` from 2 opcodes to 117 opcodes. Opcodes are grouped by function: loads (18), stores (13), transfers (6), flags (7), increments and decrements (12), compares (14), logic (26), and shifts and rotates (20). The NOP instruction (0xEA) is preserved. Group counts verified by counting `case` labels: `grep -c "case 0x" src/Dbhq.Cpu6502/Cpu.Official.cs` returns 117.
+- **`src/Dbhq.Cpu6502/Cpu.Official.cs`** (modified): Expanded `ExecuteOfficial` from 2 opcodes to 117 opcodes. Opcodes are grouped by function: loads (18), stores (13), transfers (6), flags (7), increments and decrements (12), compares (14), logic (26), and shifts and rotates (20), plus NOP (0xEA), the 117th. Group counts verified by counting `case` labels: `grep -c "case 0x" src/Dbhq.Cpu6502/Cpu.Official.cs` returns 117.
 - **`tests/Dbhq.Cpu6502.Tests/Harte/Coverage.cs`** (modified): Updated the coverage list from `FirstInstructions` (2 opcodes) to `LoadsStoresLogicAndShifts` (117 opcodes). The array lists every opcode once in ascending order, spanning 0x01 to 0xFE.
 
 ### Instructions implemented
@@ -180,6 +180,7 @@ One hundred seventeen instructions:
 - **Compares (14)**: CMP #, CMP zp, CMP zp,X, CMP abs, CMP abs,X, CMP abs,Y, CMP (ind,X), CMP (ind),Y; CPX #, CPX zp, CPX abs; CPY #, CPY zp, CPY abs.
 - **Logic (26)**: AND #, AND zp, AND zp,X, AND abs, AND abs,X, AND abs,Y, AND (ind,X), AND (ind),Y; ORA #, ORA zp, ORA zp,X, ORA abs, ORA abs,X, ORA abs,Y, ORA (ind,X), ORA (ind),Y; EOR #, EOR zp, EOR zp,X, EOR abs, EOR abs,X, EOR abs,Y, EOR (ind,X), EOR (ind),Y; BIT zp, BIT abs.
 - **Shifts and rotates (20)**: ASL A, ASL zp, ASL zp,X, ASL abs, ASL abs,X; LSR A, LSR zp, LSR zp,X, LSR abs, LSR abs,X; ROL A, ROL zp, ROL zp,X, ROL abs, ROL abs,X; ROR A, ROR zp, ROR zp,X, ROR abs, ROR abs,X.
+- **NOP (1)**: 0xEA, a no-op that reads the next byte and takes two cycles.
 
 ### The red step: opcodes not implemented
 
@@ -208,11 +209,11 @@ Passed!  - Failed:     0, Passed:   595, Skipped:     0, Total:   595, Duration:
 
 The 595 passing tests are:
 
-- **CpuTests** (7 test methods): `ResetTakesSevenCyclesAndReadsTheVector` (1 method), `ResetClearsDecimalModeOnlyOnThe65C02` with 5 variant cases (5 rows), `NopIsTwoCyclesAndReadsTheByteAfterIt` (1 method).
-- **HarteRunnerTests** (3 test methods): `ACorrectCasePasses`, `AWrongCycleIsNamed`, `TheDecimalExceptionIsOneCycleWide`.
-- **Harte opcode tests** (585 theory cases): 117 opcodes x 5 CPU variants = 585 cases. Each generates one theory method per variant.
+- **CpuTests**: 3 methods, 7 cases (`ResetTakesSevenCyclesAndReadsTheVector`, `ResetClearsDecimalModeOnlyOnThe65C02` with 5 variant cases, `NopIsTwoCyclesAndReadsTheByteAfterIt`).
+- **HarteRunnerTests** (3 methods): `ACorrectCasePasses`, `AWrongCycleIsNamed`, `TheDecimalExceptionIsOneCycleWide`.
+- **Harte opcode tests**: 5 theory methods (one per variant), 585 cases (117 opcodes x 5 variants).
 
-The test run took 2 minutes 3 seconds on a single machine.
+The test run took 2 minutes 52 seconds on a single machine.
 
 ### Decisions made
 
