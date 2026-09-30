@@ -46,9 +46,9 @@ set, because neither can be tested one instruction at a time.
 
 **How the tests treat it.** Tests of our own check what they do: `WAI` waits
 for an interrupt and then either takes it or carries on, depending on the
-interrupt-disable flag, and `STP` stops until reset. The cycle counts come
-from WDC's datasheet. How many cycles `WAI` takes to wake is not asserted,
-because no reference we trust gives it.
+interrupt-disable flag, and `STP` stops until reset. The cycle counts follow
+WDC's datasheet and are not checked against the chip. How many cycles `WAI`
+takes to wake is not asserted, because no reference we trust gives it.
 
 ## 65C02 interrupt timing
 
@@ -56,11 +56,22 @@ because no reference we trust gives it.
 transistor-level model, and the 65C02 uses the same timing rules in the core.
 There is no public transistor-level model of the 65C02 to check that against.
 
-**How the tests treat it.** The 65C02's own interrupt behaviour, such as
-clearing the decimal flag, is checked against WDC's datasheet. That is a
-reading of a document rather than the chip, and those tests say so. Whether
-the 65C02 times interrupts exactly as the NMOS chip does is assumed, not
-shown.
+**How the tests treat it.** The 65C02's own interrupt behaviour follows WDC's
+datasheet for the decimal-flag clear, the `WAI` and `STP` cycle counts and the
+wake rules. It is not checked against the chip. That the 65C02 times
+interrupts like the NMOS chip is assumed. The tests check the decimal flag
+and the pushed P, and the `WAI` and `STP` cycle counts, wake outcome and
+stop-until-reset; they hold no bus logs of a 65C02 taking an interrupt.
+
+## JAM
+
+**What.** The NMOS `JAM` opcodes (for example `$02`) lock the chip up. Harte
+records one step of one: the opcode fetch plus ten reads.
+
+**How the tests treat it.** The core makes those eleven bus accesses and
+matches Harte's data. What happens after that is not checked against any
+reference: the core reads `$FFFF` on every `Step`, ignores IRQ and NMI, and
+is cleared by `Reset`.
 
 ## Unstable NMOS opcodes
 
