@@ -2,7 +2,7 @@
 import { getEntry, render } from 'astro:content';
 import Base from '../layouts/Base.astro';
 import Card from '../components/Card.astro';
-import { fig, results, measurements } from '../lib/data.mjs';
+import { fig, results, measurements, registry } from '../lib/data.mjs';
 import { fmt, fmt1, REFERENCE_MHZ, targetVerdict } from '../lib/figures.mjs';
 import { best } from '../lib/measurements.mjs';
 import { longDate } from '../lib/site.mjs';
@@ -11,6 +11,8 @@ const known = await getEntry('docs', 'known-differences');
 const { Content } = await render(known);
 const suites = Object.entries(results.suites).sort(([a], [b]) => a.localeCompare(b));
 const modes = Object.values(measurements.modes);
+const kim = registry.machines.find((m) => m.id === 'kim-1');
+const kimMhz = Number(/([\d.]+) MHz/.exec(kim?.cpu ?? '')?.[1]);
 const spread = (mode) => `${fmt1(Math.min(...mode.runs.map((r) => r.mhz)))} to ${fmt1(best(mode))}`;
 ---
 
@@ -50,7 +52,7 @@ const spread = (mode) => `${fmt1(Math.min(...mode.runs.map((r) => r.mhz)))} to $
     <div class="wrap narrow">
       <h2>Speed</h2>
       <p style="margin: 14px 0 24px">
-        How many cycles a second the core runs, as a multiple of a {REFERENCE_MHZ} MHz machine. The design's target is {fmt(fig.speedTarget)} times a {REFERENCE_MHZ} MHz machine, for the core alone, and it does not say which build that means. The best native run is {fmt1(fig.speedNative)} times: {targetVerdict(fig.speedNative)}. The best browser run, compiled ahead of time, is {fmt1(fig.speedAot)} times: {targetVerdict(fig.speedAot)}. Measured on {longDate(new Date(measurements.collected))}{' '}
+        How many cycles a second the core runs, as a multiple of a {REFERENCE_MHZ} MHz machine. The design's target is at least {fmt(fig.speedTarget)} times real speed, for the core alone, and it does not say which build that means. Against this site's reference, a {REFERENCE_MHZ} MHz machine (the BBC Micro's clock), the best native run is {fmt1(fig.speedNative)} times: {targetVerdict(fig.speedNative)}. The best browser run, compiled ahead of time, is {fmt1(fig.speedAot)} times: {targetVerdict(fig.speedAot)}. The reference is this site's choice, not the design's, and the verdicts assume it: the KIM-1 runs at {fmt(kimMhz)} MHz, so against that machine every multiple would be {fmt(REFERENCE_MHZ / kimMhz)} times as large. Measured on {longDate(new Date(measurements.collected))}{' '}
         on {measurements.machine.description}, in {measurements.machine.browser}. {measurements.workload} One machine, one day: the figures are a record, not a promise.
       </p>
       <div class="tablewrap">

@@ -140,3 +140,20 @@ test('the home page shows the count of machines implemented and where the result
   assert.ok(text.includes(`${fmt(f.machinesImplemented)} of ${fmt(f.machinesInScope)}`), 'the machines implemented figure is missing');
   assert.match(text, /Test run on commit/);
 });
+
+// The design says "at least 25 times real speed, for the core alone". The 2 MHz
+// reference is this site's own choice, and the verdicts depend on it, so no
+// sentence may put the design's target and a clock in the same breath.
+test('the design target and the 2 MHz reference are never in one sentence: the reference is the site\'s, not the design\'s', () => {
+  for (const url of ['/', '/status/']) {
+    const text = withoutDocument(url, readable(page(url).html.replace(/<time\b[\s\S]*?<\/time>/g, ' ')));
+    const sentences = text.split(/(?<=[.!?])\s+/);
+    const both = sentences.filter((s) => /\btarget\b/i.test(s) && /\bMHz\b/.test(s));
+    assert.deepEqual(both, [], `${url} attributes the MHz reference to the design's target`);
+    const target = sentences.find((s) => /\btarget is\b/i.test(s));
+    assert.ok(target && /at least/.test(target) && /real speed/.test(target) && /for the core alone/.test(target), `${url} does not quote the design's target as the design words it`);
+  }
+  const status = readable(page('/status/').html);
+  assert.match(status, /this site's choice, not the design's/);
+  assert.match(status, /so against that machine every multiple would be/);
+});

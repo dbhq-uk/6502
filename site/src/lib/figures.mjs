@@ -1,9 +1,9 @@
 import { counts } from './registry.mjs';
 import { best } from './measurements.mjs';
 
-/** The design's speed target, as a multiple of a 2 MHz machine. A constant of the design, not a result. */
+/** The design's speed target: "at least 25 times real speed, for the core alone". A constant of the design, not a result. Whether a run meets it depends on REFERENCE_MHZ, which is the site's own choice. */
 export const SPEED_TARGET = 25;
-/** The clock of the reference machine the speed is compared with, in MHz. */
+/** The clock of the reference machine the speed is compared with, in MHz: the BBC Micro's. This site's own choice, not the design's. */
 export const REFERENCE_MHZ = 2;
 
 /** Whether a speed, as a multiple of the reference machine, meets the design's target. Worded here so no page types the verdict. */
