@@ -6,6 +6,9 @@ export const SPEED_TARGET = 25;
 /** The clock of the reference machine the speed is compared with, in MHz. */
 export const REFERENCE_MHZ = 2;
 
+/** Whether a speed, as a multiple of the reference machine, meets the design's target. Worded here so no page types the verdict. */
+export const targetVerdict = (multiple) => (multiple >= SPEED_TARGET ? 'met' : 'not yet met');
+
 export const fmt = (n) => n.toLocaleString('en-GB');
 export const fmt1 = (n) => n.toLocaleString('en-GB', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
 

@@ -3,7 +3,7 @@ import { getEntry, render } from 'astro:content';
 import Base from '../layouts/Base.astro';
 import Card from '../components/Card.astro';
 import { fig, results, measurements } from '../lib/data.mjs';
-import { fmt, fmt1, REFERENCE_MHZ } from '../lib/figures.mjs';
+import { fmt, fmt1, REFERENCE_MHZ, targetVerdict } from '../lib/figures.mjs';
 import { best } from '../lib/measurements.mjs';
 import { longDate } from '../lib/site.mjs';
 
@@ -14,13 +14,13 @@ const modes = Object.values(measurements.modes);
 const spread = (mode) => `${fmt1(Math.min(...mode.runs.map((r) => r.mhz)))} to ${fmt1(best(mode))}`;
 ---
 
-<Base title="Status" description="The test results of the latest build, the speed measurements, and where the core knowingly differs from a reference.">
+<Base title="Status" description="The latest test run, the speed measurements, and where the core knowingly differs from a reference.">
   <section>
     <div class="wrap">
       <div class="head">
         <p class="eyebrow">Status</p>
         <h1>Where it stands</h1>
-        <p>Every figure here is read from the test results of the latest build, or from a dated measurement.</p>
+        <p>Every figure here is read from the latest test run, or from a dated measurement.</p>
       </div>
       <div class="grid3">
         <Card as="h2" value={`${fmt(fig.machinesImplemented)} of ${fmt(fig.machinesInScope)}`} title="Machines implemented" text={`${fmt(fig.machinesInProgress)} in progress.`} />
@@ -50,7 +50,7 @@ const spread = (mode) => `${fmt1(Math.min(...mode.runs.map((r) => r.mhz)))} to $
     <div class="wrap narrow">
       <h2>Speed</h2>
       <p style="margin: 14px 0 24px">
-        How many cycles a second the core runs, as a multiple of a {REFERENCE_MHZ} MHz machine. The design's target is {fmt(fig.speedTarget)} times. Measured on {longDate(new Date(measurements.collected))}{' '}
+        How many cycles a second the core runs, as a multiple of a {REFERENCE_MHZ} MHz machine. The design's target is {fmt(fig.speedTarget)} times a {REFERENCE_MHZ} MHz machine, for the core alone, and it does not say which build that means. The best native run is {fmt1(fig.speedNative)} times: {targetVerdict(fig.speedNative)}. The best browser run, compiled ahead of time, is {fmt1(fig.speedAot)} times: {targetVerdict(fig.speedAot)}. Measured on {longDate(new Date(measurements.collected))}{' '}
         on {measurements.machine.description}, in {measurements.machine.browser}. {measurements.workload} One machine, one day: the figures are a record, not a promise.
       </p>
       <div class="tablewrap">

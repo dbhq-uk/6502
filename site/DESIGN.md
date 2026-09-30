@@ -31,7 +31,7 @@ paper, ink, an amber phosphor, a Basedash-style serif look, and this.
 Three generated images, made with the `imager` skill on 30 September 2026 with
 `gpt-image-2.5-flare`. Each was drafted first at low quality (four drafts, $0.018
 billed in all), then the three that worked were made again at high quality with
-the draft as the reference ($0.148 billed). The originals are 1 to 2 MB each and
+the draft as the reference ($0.148 billed). The originals are 0.4 to 2 MB each (`ls -l`: 421,970, 1,096,527 and 2,055,376 bytes) and
 are not in git; the site ships the WebP versions in `src/assets/imagery/`.
 
 **They are illustrations and are captioned as illustrations.** None is evidence.

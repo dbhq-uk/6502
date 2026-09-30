@@ -4,8 +4,8 @@ import { Image } from 'astro:assets';
 import Base from '../layouts/Base.astro';
 import Card from '../components/Card.astro';
 import hero from '../assets/imagery/hero-die.webp';
-import { fig, results, registry } from '../lib/data.mjs';
-import { fmt, fmt1 } from '../lib/figures.mjs';
+import { fig, results, registry, measurements } from '../lib/data.mjs';
+import { fmt, fmt1, targetVerdict } from '../lib/figures.mjs';
 import { shortDate } from '../lib/site.mjs';
 
 const entries = (await getCollection('journal'))
@@ -23,13 +23,13 @@ const suites = Object.entries(results.suites).sort(([, a], [, b]) => b.passed - 
     <p class="eyebrow">Built in public</p>
     <h1>A 6502, built in the open</h1>
     <p class="lede">
-      A cycle-accurate 6502 and 65C02 core in C#, and the machines built on it, as many as possible, each one proven. Every
+      A cycle-accurate 6502 and 65C02 core in C#, and the machines it will run, as many as possible, each one proven. Every
       step of the work is written down here, as it happens.
     </p>
     <div class="btns"><a class="btn pill" href="/journal/">Read the journal</a><a class="btn ghost" href="#status">See where it stands</a></div>
   </div>
   <figure>
-    <Image class="dieimg" src={hero} alt="Illustration of a microprocessor die" widths={[640, 1000, 1536]} sizes="(max-width: 1100px) 92vw, 1000px" data-generated />
+    <Image class="dieimg" src={hero} alt="Illustration of a microprocessor die" widths={[640, 1000, 1536]} sizes="(max-width: 1100px) 92vw, 1000px" loading="eager" fetchpriority="high" data-generated />
     <figcaption class="figure-caption">Illustration of a microprocessor die. Not a photograph of the 6502.</figcaption>
   </figure>
 
@@ -38,13 +38,13 @@ const suites = Object.entries(results.suites).sort(([, a], [, b]) => b.passed - 
       <div class="head">
         <p class="eyebrow">Status</p>
         <h2>Where it stands</h2>
-        <p>Every figure on this page comes from the test results of the latest build. None is typed by hand.</p>
+        <p>Every figure on this page comes from the latest test run, whose commit is shown below, or from a dated measurement. None is typed by hand.</p>
       </div>
       <div class="grid3">
-        <Card value={`${fmt(fig.machinesImplemented)} of ${fmt(fig.machinesInScope)}`} title="Machines implemented" text="Each runs in the browser and passes an automated test." />
+        <Card value={`${fmt(fig.machinesImplemented)} of ${fmt(fig.machinesInScope)}`} title="Machines implemented" text="A machine counts only once it runs in the browser and passes an automated test." />
         <Card value={fmt(fig.variants)} title="Variants of the core" text="The NMOS 6502, the NES's 2A03, and three 65C02s." />
-        <Card value={fmt(fig.testsPassing)} title="Tests passing" text="On the latest build, on every push." />
-        <Card value={`${fmt1(fig.speedAot)} times`} title="A 2 MHz machine, in the browser" text="Compiled ahead of time, best of five runs. One machine, on one day." />
+        <Card value={fmt(fig.testsPassing)} title="Tests passing" text="From the latest test run, on the commit shown below." />
+        <Card value={`${fmt1(fig.speedAot)} times`} title="A 2 MHz machine, in the browser" text={`Compiled ahead of time, best of ${fmt(measurements.modes.aot.runs.length)} runs, on one machine on one day. The design target is ${fmt(fig.speedTarget)} times, for the core alone: ${targetVerdict(fig.speedNative)} natively, ${targetVerdict(fig.speedAot)} in the browser.`} />
       </div>
       <p class="note">Test run on commit {results.commit?.slice(0, 7) ?? 'unknown'}.</p>
     </div>
@@ -69,7 +69,7 @@ const suites = Object.entries(results.suites).sort(([, a], [, b]) => b.passed - 
     <div class="wrap">
       <div class="head">
         <p class="eyebrow">Machines</p>
-        <h2>One core, real machines</h2>
+        <h2>The machines this core is for</h2>
         <p>The first three, and the whole family in the table.</p>
       </div>
       <div class="grid3">
@@ -102,4 +102,6 @@ const suites = Object.entries(results.suites).sort(([, a], [, b]) => b.passed - 
       </div>
     </div>
   </section>
+
+  <p class="figure-caption">Illustration: the textured backgrounds behind the proof and machines sections are generated, not measurements</p>
 </Base>

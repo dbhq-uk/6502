@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { figures, fmt, fmt1 } from '../src/lib/figures.mjs';
+import { figures, fmt, fmt1, targetVerdict, SPEED_TARGET } from '../src/lib/figures.mjs';
 import { loadRegistry, validateRegistry } from '../src/lib/registry.mjs';
 import { loadResults } from '../src/lib/results.mjs';
 import { loadMeasurements } from '../src/lib/measurements.mjs';
@@ -32,4 +32,11 @@ test('the real figures can be computed', () => {
 
 test('the real registry is valid against the real test results', () => {
   assert.deepEqual(validateRegistry(loadRegistry(), loadResults()), []);
+});
+
+test('the target verdict says met only at or above the target, and never rounds up', () => {
+  assert.equal(targetVerdict(SPEED_TARGET), 'met');
+  assert.equal(targetVerdict(SPEED_TARGET + 0.1), 'met');
+  assert.equal(targetVerdict(SPEED_TARGET - 0.001), 'not yet met');
+  assert.equal(fmt1(24.425), '24.4');
 });
