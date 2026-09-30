@@ -207,10 +207,13 @@ and `robots.txt` are present.
   `package.json`, its tests and `DESIGN.md`. It sits beside the core because its
   checks read the core's test results and the registry, and across two
   repositories those checks cannot exist.
-- **Infrastructure:** `infra/6502/` in the private `dbhq-uk/dbhq` repository,
-  with every other Cloudflare resource in the zone: the Pages project `6502`,
-  the custom domain `6502.dbhq.uk`, and one DNS record, with its state in its
-  own R2 bucket. This is the same split as terraken.
+- **Infrastructure:** `infra/` in this repository: the Pages project `6502`, the
+  custom domain `6502.dbhq.uk` and one DNS record in the `dbhq.uk` zone, with
+  its state in its own R2 bucket. This is the `modem` and `bbs` layout, where
+  the site, its Terraform and its deploy workflow sit together. (Amended 30
+  September 2026. It was first drafted in the private `dbhq-uk/dbhq` repository
+  on the `terraken` split, which exists because terraken's site tests read its
+  Go source. Nothing here needs that, so the simpler layout won.)
 - **Deploy:** `.github/workflows/deploy-site.yml` here. Its path filter is wide
   (`site/**`, `machines/**`, `docs/**`, `src/**`, `tests/**`) because a change
   to the core or a machine changes the figures.
@@ -232,7 +235,7 @@ never assumed:
 
 1. **A Cloudflare API token for this repository's deploy workflow**, scoped to
    Pages deploy and cache purge only, added as a GitHub Actions secret.
-2. **The first `terraform apply` in `infra/6502/`**, in the order HSTS forces:
+2. **The first `terraform apply` in `infra/`**, in the order HSTS forces:
    create the project, upload a real site, then publish the DNS record. `dbhq.uk`
    sends HSTS with `includeSubDomains`, so the hostname must serve valid HTTPS
    from its first request. Manual, never CI.

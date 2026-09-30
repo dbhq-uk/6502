@@ -10,8 +10,8 @@ name: deploy-site
 #
 # Cloudflare never builds from this repository: the Pages project is
 # direct-upload and serves exactly what this workflow last uploaded. The
-# project, its custom domain and the DNS record are Terraform, in the private
-# dbhq-uk/dbhq repository at infra/6502/, applied by hand and never from CI.
+# project, its custom domain and the DNS record are Terraform, in
+# infra/ in this repository, applied by hand and never from CI.
 #
 # THE DEPLOY IS SWITCHED OFF UNTIL THE SITE IS READY. It runs only when the
 # repository variable SITE_DEPLOY is "true", which is set after the Cloudflare
