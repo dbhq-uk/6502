@@ -6,9 +6,9 @@ import { SITE } from '../lib/site.mjs';
 // site's CSP has no 'unsafe-inline' in script-src.
 //
 // Decline and Accept are the same size and sit side by side with Decline first.
-// A prompt that makes refusing harder than accepting is not consent, and the
-// shared dbhq-consent key means a dark pattern here would follow the reader
-// across every *.dbhq.uk site.
+// A prompt that makes refusing harder than accepting is not consent. The
+// dbhq-consent key uses the same name and values as dbhq.uk, but localStorage is
+// scoped to one origin, so each site holds and asks for its own choice.
 //
 // Initial focus goes to the heading, not to a button, so a bare Enter on
 // opening the prompt answers nothing. This is a frontmatter comment on purpose:
@@ -22,7 +22,7 @@ import { SITE } from '../lib/site.mjs';
     every page works exactly the same either way.
   </p>
   <p class="consent-note">
-    The choice is remembered across dbhq.uk and its sites, so this is asked once. What is collected and who processes it
+    The choice is remembered in this browser, for this site only. What is collected and who processes it
     is in the <a href={SITE.privacy}>DBHQ privacy policy</a>.
   </p>
   <div class="consent-actions">

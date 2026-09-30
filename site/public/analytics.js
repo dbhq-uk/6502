@@ -67,9 +67,9 @@ window.__dbhqRevokeGA = function () {
   });
 };
 
-// A visitor who accepted on a previous visit is not asked again. The key is
-// shared across *.dbhq.uk, so accepting on dbhq.uk carries over to here and
-// the reader is asked once across the estate rather than once per site.
+// A visitor who accepted on a previous visit is not asked again. localStorage
+// is scoped to one origin, so this reads only the choice made on this site:
+// accepting on dbhq.uk does not carry over to here, and each site asks once.
 try {
   if (localStorage.getItem("dbhq-consent") === "granted") window.__dbhqEnableGA();
 } catch (e) {
