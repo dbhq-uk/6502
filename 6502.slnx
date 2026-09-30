@@ -1,6 +1,8 @@
 <Solution>
   <Folder Name="/bench/">
     <Project Path="bench/Dbhq.Cpu6502.Bench/Dbhq.Cpu6502.Bench.csproj" />
+    <Project Path="bench/Dbhq.Cpu6502.SpeedNative/Dbhq.Cpu6502.SpeedNative.csproj" />
+    <Project Path="bench/Dbhq.Cpu6502.WasmBench/Dbhq.Cpu6502.WasmBench.csproj" />
   </Folder>
   <Folder Name="/src/">
     <Project Path="src/Dbhq.Cpu6502/Dbhq.Cpu6502.csproj" />

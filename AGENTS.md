@@ -14,7 +14,7 @@ then the NES. Built in public, with the journey written up at 6502.dbhq.uk.
 6502.slnx                   # the solution
 src/Dbhq.Cpu6502/           # the core: one library, no dependencies
 tests/                      # the tests and the library they share
-bench/                      # the speed benchmark, run locally and not in CI
+bench/                      # the speed benchmarks, run locally and not in CI (native, and the browser speed check)
 tools/                      # scripts that make test data and check assumptions
   probes/                   # scripts that check assumptions against test data
 docs/superpowers/specs/     # the design; each stage gets its own spec here
