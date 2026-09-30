@@ -429,3 +429,13 @@ Every figure here is from a command run on 30 September 2026.
 - **Tests.** `npm test` in `site/` ran 112 tests, 112 passed, 0 failed, 0 skipped (the count after the final review below; it was 79 at the end of task 9).
 - **Deploy.** Nothing is deployed. `deploy-site.yml` is switched off by design: it runs only when the repository variable `SITE_DEPLOY` is `true`, and it is not set. No secret was created and no Cloudflare, Terraform or Search Console change was made.
 - **Workflows.** Both parse as YAML and `actionlint` is clean, but neither has run.
+
+## Where the infrastructure lives
+
+The Terraform for `6502.dbhq.uk` was first drafted in the private DBHQ repository, copied from `terraken`, because the design said "the same split as terraken". When it came to applying it, the question came up of why it had its own state bucket and whether it should follow `modem` or `bbs`.
+
+**The state bucket was already the pattern.** The account holds one R2 state bucket per site: `dbhq-bbs-tfstate`, `dbhq-modem-tfstate`, `dbhq-skills-tfstate`, `dbhq-terraken-tfstate`, `heliograph-tfstate`, and the shared `dbhq-tfstate` for the main site (read with the Cloudflare API bucket list on 30 September 2026). The `modem` README gives the reason: its resources once sat in the shared state, and a plan from a different project proposed destroying all three.
+
+**What differed was where the Terraform sits.** `modem` and `bbs` keep it in their own repository under `infra/`. `terraken` keeps it in the private repository, and that split exists only because terraken's site tests read its Go source. Nothing in the 6502 infrastructure needs that. So the Terraform was moved to `infra/` in this repository, the site, its Terraform and its deploy workflow now sit together, and both specs carry a dated amendment saying so. The bucket `dbhq-6502-tfstate` was created through the Cloudflare API the same day and is unchanged by the move.
+
+**A mistake worth recording.** The design copied `terraken`'s layout without asking what had caused it there. The reason for a split is part of the decision, and copying the result without the reason gave a layout that fitted worse than the simpler one already in use two repositories over.

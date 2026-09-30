@@ -16,3 +16,8 @@ bench/Dbhq.Cpu6502.WasmBench/publish/
 
 # Test run output (the .trx files the site's results are made from).
 TestResults/
+
+# Terraform's local provider cache. State lives in R2, never on disk or in git.
+infra/.terraform/
+*.tfstate
+*.tfstate.*
