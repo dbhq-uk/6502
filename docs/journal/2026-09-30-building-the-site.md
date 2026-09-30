@@ -63,3 +63,42 @@ Every figure on the site has to come from a test run, so this task turns a .NET 
 
 - The results file has 254 passed for `Wdc65C02Harte` and 256 for each of the other four Harte variants. That is not a gap: the WDC variant leaves out `$CB` (WAI) and `$DB` (STP), whose Harte files are empty, and `WaitAndStopTests` covers them instead. `docs/journal/2026-09-30-building-the-core.md` records the same 254 and the reason. The result is that the per-suite Harte counts on the site cannot be summed as 4 x 256 and must be read from the file.
 - `npm run results` and the plan's step 4 overlap: the script runs `dotnet test` itself when given no folder, so the plan's two commands in a row run the suite twice.
+
+## Task 3: The speed measurements
+
+The Status page will print speeds, and rule 5 says a speed comes from a measurement rather than from prose. So the speeds are one dated file, written by a script and read by the site.
+
+### What was built
+
+- **`bench/collect-measurements.mjs`.** Builds and runs the native speed tool, publishes the browser tool twice (interpreter, and ahead of time), runs each in Chrome and writes `site/src/data/measurements.json`. It reads only the `measured` lines, never the warm-up, and throws unless every mode has exactly the requested number of measured runs. It records the date, the machine, the browser and .NET versions, and a plain description of the workload.
+- **`site/src/lib/measurements.mjs`.** Loads the file and gives the best run of a mode in MHz.
+- **`site/tests/measurements.test.mjs`.** Three tests: only measured runs are read, the browser and machine are described in words, and the best run is the highest.
+- **`site/src/data/measurements.json`.** Committed, unlike `results.json`. A speed is a record of one machine on one day, and the file says so; it is not a claim that stays true as the code changes.
+
+### How the file was made
+
+The file was not produced in this task. `bench/collect-measurements.mjs` was run earlier the same day in a scratch copy of the repository, on this machine, and the output was copied in. Its `collected` field says `2026-09-30`. The collector was not run again here because it takes about ten minutes and the copy is from the same script and the same day. The script in this repository was written from the plan and checked only with `node --check`, which reported no error. Its live path (the builds, the browser runs) has not been run from this checkout.
+
+### What the tests showed
+
+- Before `bench/collect-measurements.mjs` existed, `node --test tests/measurements.test.mjs` in `site/` failed with `ERR_MODULE_NOT_FOUND` for that file: 0 passed, 1 failed (the file could not load).
+- With the three files written, `node --test tests/*.test.mjs` in `site/` ran 15 tests (3 new, 12 from tasks 1 and 2) and all 15 passed.
+
+### What the measurements say
+
+Read from `site/src/data/measurements.json` with a short `node -e` script. The machine is `a KVM virtual machine, DO-Premium-AMD, 8 cores`, with Chrome 153.0.8010.47 and .NET 10.0.400. Each mode has 5 measured runs of 100000001 cycles.
+
+| Mode | Best run | Worst run |
+| --- | --- | --- |
+| Native | 107.986 MHz | 103.172 MHz |
+| Browser, ahead of time | 48.85 MHz | 29.137 MHz |
+| Browser, interpreter | 4.965 MHz | 1.948 MHz |
+
+- **The design target was 25 times a 2 MHz machine, which is 50 MHz. The best ahead-of-time run is 48.85 MHz, which is 24.4 times (48.85 / 2 = 24.425).** That is below the target, by a small margin. It is not rounded up. Native clears it easily: its best run is 107.986 MHz, 54.0 times.
+- The ahead-of-time runs are not steady: 47.125, 48.85, 42.357, 29.137 and 38.027 MHz, in run order. The best is the top of a wide spread, and the worst run is 29.137 MHz (14.6 times). Any page that quotes one figure should say it is the best of five and show the spread.
+- The interpreter runs climb from 1.948 MHz to 4.965 MHz over the five runs (best 2.5 times). The first run is the slowest by more than half. That fits a JIT-less interpreter warming caches, but the file does not say why, so this is a guess and not a finding.
+
+### What surprised
+
+- Ahead-of-time is 24.4 times, not 25 or more. The target was set before this measurement existed, so the site cannot claim it is met.
+- The spread inside one mode, on one idle-as-far-as-we-know virtual machine, is larger than the gap between the best ahead-of-time run and the target.
