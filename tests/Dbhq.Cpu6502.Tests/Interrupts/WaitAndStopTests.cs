@@ -1,3 +1,4 @@
+using Dbhq.Cpu6502.TestSupport;
 using Xunit;
 
 namespace Dbhq.Cpu6502.Tests.Interrupts;
@@ -84,6 +85,42 @@ public sealed class WaitAndStopTests
         cpu.Reset();
 
         Assert.False(cpu.IsStopped);
+        Assert.Equal(0x0700, cpu.PC);
+    }
+
+    [Fact]
+    public void ResetEndsAWait()
+    {
+        var bus = CmosInterruptTests.Program(0xCB);
+        bus.Memory[0xFFFC] = 0x00;
+        bus.Memory[0xFFFD] = 0x07;
+        var cpu = new Cpu(bus, CpuVariant.Wdc65C02) { PC = 0x0400, P = 0x24 };
+        cpu.Step();
+        Assert.True(cpu.IsWaiting);
+
+        cpu.Reset();
+
+        Assert.False(cpu.IsWaiting);
+        Assert.Equal(0x0700, cpu.PC);
+    }
+
+    [Fact]
+    public void AJammedChipReadsFfffOnEveryStepUntilReset()
+    {
+        var bus = CmosInterruptTests.Program(0x02);
+        bus.Memory[0xFFFC] = 0x00;
+        bus.Memory[0xFFFD] = 0x07;
+        var cpu = new Cpu(bus, CpuVariant.Nmos6502) { PC = 0x0400, P = 0x24 };
+
+        Assert.Equal(11, cpu.Step());
+        Assert.True(cpu.IsJammed);
+        bus.Log.Clear();
+        Assert.Equal(1, cpu.Step());
+        Assert.Equal(new BusAccess(0xFFFF, 0x05, false), Assert.Single(bus.Log));
+
+        cpu.Reset();
+
+        Assert.False(cpu.IsJammed);
         Assert.Equal(0x0700, cpu.PC);
     }
 

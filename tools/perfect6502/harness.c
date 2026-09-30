@@ -102,6 +102,7 @@ int main(void)
     for (int k = 1; k <= 16; k++) run("branch-nmi", k, branch, sizeof branch, -1, -1, k, k + 2, 40);
     for (int k = 4; k <= 16; k++) run("crossing", k, crossing, sizeof crossing, k, k + 12, -1, -1, 40);
     for (int k = 1; k <= 12; k++) run("brk", k, brk, sizeof brk, -1, -1, k, k + 2, 40);
+    for (int k = 1; k <= 16; k++) run("irq-nmi", k, loop, sizeof loop, 1, 40, k, k + 2, 40);
     run("cli", 1, cli, sizeof cli, 1, 40, -1, -1, 40);
     for (int k = 1; k <= 12; k++) run("sei", k, sei, sizeof sei, k, k + 12, -1, -1, 40);
     for (int k = 1; k <= 16; k++) run("plp", k, plp, sizeof plp, k, k + 12, -1, -1, 48);

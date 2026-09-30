@@ -30,6 +30,48 @@ public sealed class HarteRunnerTests
     }
 
     [Fact]
+    public void AWrongRegisterIsNamed()
+    {
+        var wrongA = Nop(new BusAccess(0x0201, 0x42, false)) with
+        {
+            Final = new HarteState(0x0201, 0xFD, 0x01, 0, 0, 0x24, [(0x0200, 0xEA), (0x0201, 0x42)]),
+        };
+
+        string? failure = HarteRunner.RunCase(new FlatBus(), CpuVariant.Nmos6502, 0xEA, wrongA);
+
+        Assert.NotNull(failure);
+        Assert.Contains("A is $00, expected $01", failure);
+    }
+
+    [Fact]
+    public void AWrongMemoryValueIsNamed()
+    {
+        var wrongRam = Nop(new BusAccess(0x0201, 0x42, false)) with
+        {
+            Final = new HarteState(0x0201, 0xFD, 0, 0, 0, 0x24, [(0x0200, 0xEA), (0x0201, 0x99)]),
+        };
+
+        string? failure = HarteRunner.RunCase(new FlatBus(), CpuVariant.Nmos6502, 0xEA, wrongRam);
+
+        Assert.NotNull(failure);
+        Assert.Contains("memory $0201 is $42, expected $99", failure);
+    }
+
+    [Fact]
+    public void AWrongCycleCountIsNamed()
+    {
+        var extraCycle = Nop(new BusAccess(0x0201, 0x42, false)) with
+        {
+            Cycles = [new BusAccess(0x0200, 0xEA, false), new BusAccess(0x0201, 0x42, false), new BusAccess(0x0202, 0xEA, false)],
+        };
+
+        string? failure = HarteRunner.RunCase(new FlatBus(), CpuVariant.Nmos6502, 0xEA, extraCycle);
+
+        Assert.NotNull(failure);
+        Assert.Contains("2 cycles, expected 3", failure);
+    }
+
+    [Fact]
     public void TheDecimalExceptionIsOneCycleWide()
     {
         var decimalCase = Nop(new BusAccess(0x0201, 0x42, false)) with

@@ -29,9 +29,12 @@ public sealed class DormannTests
     public void DecimalTestPasses(CpuVariant variant)
     {
         TestSupport.Dormann.Program program = TestSupport.Dormann.Decimal(variant);
-        var (bus, trap) = Run(program, variant);
 
         // The decimal test reports through its ERROR byte at $0B: 0 when every case passed.
+        // The byte is uninitialised, so start it at $FF: a program that traps before it
+        // writes ERROR then fails, rather than passing on a zero it never wrote.
+        var (bus, trap) = Run(program, variant, ram => ram.Memory[0x0B] = 0xFF);
+
         Assert.True(bus.Memory[0x0B] == 0, $"{program.Name} stopped at ${trap:X4} with ERROR = {bus.Memory[0x0B]}");
     }
 
@@ -42,10 +45,11 @@ public sealed class DormannTests
         Assert.True(trap == program.Success, $"{program.Name} stopped at ${trap:X4}; success is ${program.Success:X4}. Look that address up in .testdata/dormann/build/{program.Name}/program.lst");
     }
 
-    private static (FlatBus Bus, ushort Trap) Run(TestSupport.Dormann.Program program, CpuVariant variant)
+    private static (FlatBus Bus, ushort Trap) Run(TestSupport.Dormann.Program program, CpuVariant variant, Action<FlatBus>? prepare = null)
     {
         var bus = new FlatBus { Recording = false };
         program.Memory.CopyTo(bus.Memory, 0);
+        prepare?.Invoke(bus);
         var cpu = new Cpu(bus, variant) { PC = program.Start, S = 0xFF, P = 0x24 };
         return (bus, TestSupport.Dormann.RunToTrap(cpu));
     }

@@ -6,7 +6,7 @@ namespace Dbhq.Cpu6502.Tests.Interrupts;
 /// <summary>
 /// What the 65C02 does differently when it takes an interrupt. There is no
 /// public transistor-level model of the 65C02, so these follow WDC's
-/// datasheet. See docs/known-differences.md.
+/// datasheet and are not checked against the chip. See docs/known-differences.md.
 /// </summary>
 public sealed class CmosInterruptTests
 {

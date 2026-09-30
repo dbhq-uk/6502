@@ -46,7 +46,7 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - name: No em or en dashes
         run: |
-          if LC_ALL=C.UTF-8 grep -rnP '[\x{2013}\x{2014}]' --include='*.md' --include='*.cs' --include='*.c' --include='*.sh' --include='*.yml' --exclude-dir=.testdata .; then
+          if LC_ALL=C.UTF-8 git grep -InP '[\x{2013}\x{2014}]'; then
             echo "Use a plain hyphen, not an em or en dash"
             exit 1
           fi
