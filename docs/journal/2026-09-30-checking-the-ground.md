@@ -142,6 +142,22 @@ written up in [`docs/known-differences.md`](../known-differences.md).
 
 C# names cannot start with a digit, so the code cannot be called `6502`.
 The namespace is `Dbhq.Cpu6502`, with the machines to follow as `Dbhq.Kim1`,
-`Dbhq.BbcMicro` and `Dbhq.Nes`. `Mos6502` was ruled out because it is
-already the name of a well-known 6502 emulator in C++, and the organisation
-prefix keeps the name clear of the many other 6502 projects.
+`Dbhq.BbcMicro` and `Dbhq.Nes`. Dan asked why not `Mos6502`, and the name
+was confirmed over it and over `Dbhq.Mos6502` for two reasons:
+
+- **It is the most crowded name in exactly this category.** On 30 September
+  a GitHub search found 176 repositories with "mos6502" in the name, at
+  least eight of them named exactly `mos6502`, and every one of those a 6502
+  emulator, in C++, Rust, Lua, Python and Scala. One, in Rust, supports the
+  same variants this core does.
+- **It names one maker, and the core covers four.** MOS made the NMOS 6502;
+  the 2A03 is Ricoh's, and the three 65C02s are WDC's, Rockwell's and
+  Synertek's.
+
+It is a code namespace rather than the product's name, which stays "6502",
+so the clash would not have broken anything. The organisation prefix keeps
+the code clear of it anyway.
+
+The same conversation asked who created the 6502. The answer, checked
+against its sources, is now in
+[`docs/the-6502-family.md`](../the-6502-family.md#who-made-it).
