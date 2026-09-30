@@ -22,7 +22,13 @@ public static class Coverage
         0xEC, 0xEE, 0xF6, 0xF8, 0xFE,
     ];
 
-    private static readonly byte[] Official = [..LoadsStoresLogicAndShifts];
+    // Task 4: ADC and SBC.
+    private static readonly byte[] Arithmetic =
+    [
+        0x61, 0x65, 0x69, 0x6D, 0x71, 0x75, 0x79, 0x7D, 0xE1, 0xE5, 0xE9, 0xED, 0xF1, 0xF5, 0xF9, 0xFD,
+    ];
+
+    private static readonly byte[] Official = [..LoadsStoresLogicAndShifts, ..Arithmetic];
 
     private static readonly byte[] NmosOnly = [];
 

@@ -146,6 +146,24 @@ public sealed partial class Cpu
 
             case 0xEA: Read(PC); break;
 
+            // Arithmetic
+            case 0x69: AdcAt(PC++); break;
+            case 0x65: AdcAt(Zp()); break;
+            case 0x75: AdcAt(ZpX()); break;
+            case 0x6D: AdcAt(Abs()); break;
+            case 0x7D: AdcAt(AbsX(Access.Read)); break;
+            case 0x79: AdcAt(AbsY(Access.Read)); break;
+            case 0x61: AdcAt(IzX()); break;
+            case 0x71: AdcAt(IzY(Access.Read)); break;
+            case 0xE9: SbcAt(PC++); break;
+            case 0xE5: SbcAt(Zp()); break;
+            case 0xF5: SbcAt(ZpX()); break;
+            case 0xED: SbcAt(Abs()); break;
+            case 0xFD: SbcAt(AbsX(Access.Read)); break;
+            case 0xF9: SbcAt(AbsY(Access.Read)); break;
+            case 0xE1: SbcAt(IzX()); break;
+            case 0xF1: SbcAt(IzY(Access.Read)); break;
+
             default: return false;
         }
 

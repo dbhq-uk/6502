@@ -14,12 +14,14 @@ public sealed partial class Cpu
 {
     private readonly IBus _bus;
     private readonly bool _cmos;
+    private readonly bool _decimal;
 
     public Cpu(IBus bus, CpuVariant variant)
     {
         _bus = bus;
         Variant = variant;
         _cmos = variant is CpuVariant.Synertek65C02 or CpuVariant.Rockwell65C02 or CpuVariant.Wdc65C02;
+        _decimal = variant != CpuVariant.Ricoh2A03;
         P = I | U;
     }
 

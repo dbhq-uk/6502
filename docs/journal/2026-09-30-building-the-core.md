@@ -232,3 +232,59 @@ None discovered. All test cases pass against Harte's reference data.
 ### Surprises
 
 None. The helpers worked as designed on first build. All 117 opcodes passed their first test run.
+
+## Task 4: ADC and SBC
+
+Binary and decimal arithmetic on every variant. Decimal mode follows Bruce Clark's description, which `tools/probes/check_harte_findings.py` verified against every decimal case before the plan was written. The NMOS chip takes N and V from before the high digit is adjusted and Z from the binary sum; the 65C02 takes N and Z from the result and spends one more cycle. The 2A03 has no decimal mode.
+
+### What was built
+
+Four modified or created files:
+
+- **`src/Dbhq.Cpu6502/Cpu.cs`** (modified): Added the `_decimal` field, set in the constructor from `variant != CpuVariant.Ricoh2A03` so every variant except the 2A03 can execute decimal-mode arithmetic.
+- **`src/Dbhq.Cpu6502/Cpu.Arithmetic.cs`** (new file): All arithmetic helpers: `AdcAt(address)`, `SbcAt(address)`, `Adc(value)`, `Sbc(value)`, `DecimalExtraCycle(address)`, `AdcDecimal(value, carryIn)`, `SbcDecimal(value, carryIn)`. ADC and SBC branch into binary or decimal paths depending on the decimal flag. Decimal mode calls variant-specific helpers that take N and V from the right time (before adjustment on NMOS, from result on 65C02).
+- **`src/Dbhq.Cpu6502/Cpu.Official.cs`** (modified): Expanded from 117 opcodes to 133 opcodes. Arithmetic section added: ADC (0x69, 0x65, 0x75, 0x6D, 0x7D, 0x79, 0x61, 0x71) and SBC (0xE9, 0xE5, 0xF5, 0xED, 0xFD, 0xF9, 0xE1, 0xF1), 16 case labels verified by `grep -c "case 0x" src/Dbhq.Cpu6502/Cpu.Official.cs`.
+- **`tests/Dbhq.Cpu6502.Tests/Harte/Coverage.cs`** (modified): Added the `Arithmetic` array holding the 16 ADC and SBC opcodes, and combined it with `LoadsStoresLogicAndShifts` into the `Official` list.
+
+### Instructions implemented
+
+Sixteen instructions: ADC and SBC in eight addressing modes each.
+
+- **ADC (8)**: ADC #, ADC zp, ADC zp,X, ADC abs, ADC abs,X, ADC abs,Y, ADC (ind,X), ADC (ind),Y.
+- **SBC (8)**: SBC #, SBC zp, SBC zp,X, SBC abs, SBC abs,X, SBC abs,Y, SBC (ind,X), SBC (ind),Y.
+
+### The red step: opcodes not implemented
+
+Before `Cpu.Arithmetic.cs` and the updated `Cpu.Official.cs`, running `dotnet test --filter "FullyQualifiedName~Harte"` showed 80 test failures. Each newly covered opcode failed with "is not implemented": examples included Nmos6502 $F5, Synertek65C02 $E1, Wdc65C02 $ED, Rockwell65C02 $E9, Rockwell65C02 $79. The previously implemented 117 opcodes and all harness tests continued to pass.
+
+### Tests and results
+
+All 675 tests pass:
+
+Run: `dotnet test` on 30 September 2026.
+
+```
+Passed!  - Failed:     0, Passed:   675, Skipped:     0, Total:   675, Duration: 1 m 16 s - Dbhq.Cpu6502.Tests.dll (net10.0)
+```
+
+The 675 passing tests comprise:
+
+- **CpuTests**: 3 methods, 7 cases.
+- **HarteRunnerTests**: 3 methods.
+- **Harte opcode tests**: 5 theory methods (one per variant), 665 cases (133 opcodes x 5 variants).
+
+### Decisions made
+
+**Immediate-mode ADC and SBC on the 65C02 spend an extra cycle reading the operand byte again.** This is the `DecimalExtraCycle` method, which reads the same address again when the 65C02 is in decimal mode. Alternative: handle the decimal-mode cycle in the immediate-mode cases themselves. Reason for the choice: the extra cycle is only decimal-mode specific, and centralising the logic in one method makes it clear and testable. It also covers memory-addressed ADC and SBC, so one place holds the CMOS logic.
+
+**Decimal arithmetic branches at the start of `Adc` and `Sbc`.** The binary and decimal paths are fundamentally different (binary uses one addition, decimal adjusts digits), so an early branch reads clearer than flag checks scattered through a single algorithm. Alternative: one algorithm with conditional digit adjustment. Reason: clarity; the paths are already distinct enough that trying to unify them would make each harder to follow.
+
+**The NMOS and 65C02 decimal implementations are separate methods.** `AdcDecimal` and `SbcDecimal` check `_cmos` to take N and V at the right time and Z from the right result. Alternative: pass a variant flag to one method. Reason: the logic is substantially different (NMOS adjusts the low digit and then the high; 65C02 adjusts at the end), so two methods avoid conditionals inside loops and make the difference visible.
+
+### Known differences
+
+The 65C02's extra decimal-mode cycle on ADC #imm (0x69) and SBC #imm (0xE9) is documented in `docs/known-differences.md`. Harte's data records it as a read of a fixed address that differs by variant, which looks like an artefact of how the data was made. The cycle must exist as a read; address and value are not compared. This exception is scoped to exactly cycle 2 of those two instructions when decimal mode is set. Immediate-mode ADC and SBC are the only instructions where the operand read and the extra cycle use the same address, so `DecimalExtraCycle` re-reads the same PC++ address.
+
+### Surprises
+
+None. The arithmetic operations worked as designed on first build. All 16 new opcodes passed their first test run against Harte's data for all five variants.
