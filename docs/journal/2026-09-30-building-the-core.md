@@ -402,3 +402,51 @@ JAM is stepped as Harte records it (the opcode fetch plus ten reads, then the ch
 ### Surprises
 
 None. All 105 new opcodes passed their first test run against Harte's data for the NMOS 6502 and Ricoh 2A03 variants.
+
+## Task 7: The 65C02
+
+All three variants of the 65C02 - Synertek, Rockwell and WDC - now cover every opcode. RMB, SMB, BBR and BBS are real instructions on Rockwell and WDC, but on Synertek they are no-ops whose length and timing depend on which row (verified by `grep -c "case 0x" src/Dbhq.Cpu6502/Cpu.Cmos.cs`: 34 case labels in the switch statement covering all patterns including multi-case statements). WAI and STP exist on WDC only; they set the IsWaiting and IsStopped flags, stopping the CPU until an interrupt (task 8) or reset.
+
+### What was built
+
+Three files modified and one new:
+
+- **`src/Dbhq.Cpu6502/Cpu.cs`** (modified): Added `_bitInstructions` and `_waitAndStop` flags set in the constructor (Rockwell and WDC get bit instructions; WDC only gets wait and stop). Modified `Step()` to return 0 cycles when IsStopped or IsWaiting (task 8 teaches WAI to wake).
+- **`src/Dbhq.Cpu6502/Cpu.Cmos.cs`** (new file): `ExecuteCmos` method with all 65C02-specific opcodes: the (zp) indirect mode (8 opcodes), TSB and TRB (4 opcodes), INC A and DEC A (2 opcodes), BIT zp,X and BIT abs,X (2 opcodes), BIT #imm (1 opcode), PHX, PHY, PLX, PLY (4 opcodes), STZ (4 opcodes), JMP (addr,X) (1 opcode), BRA (1 opcode), RMB and SMB (16 cases on Rockwell and WDC, 8 opcodes with address modes), BBR and BBS (16 cases on Rockwell and WDC, 8 opcodes with address modes), WAI and STP (2 opcodes on WDC only), and defined no-ops for all other 65C02-only opcodes.
+- **`tests/Dbhq.Cpu6502.Tests/Harte/Coverage.cs`** (modified): Set `CmosOnly = OtherThan(Official)`, allowing all three 65C02 variants to test every opcode (except WAI and STP on WDC, which have no Harte data).
+
+### Instructions implemented
+
+All 65C02-specific opcodes on all three variants, covering every opcode except WAI and STP (which have no reference data). The addressing mode additions are (zp) for logic and load-store (8 opcodes); new standalone instructions are INC A, DEC A, BIT #imm, BRA, JMP (addr,X) (5 opcodes); new addressing modes for existing instructions are BIT zp,X, BIT abs,X, and STZ zp, STZ zp,X, STZ abs, STZ abs,X (6 opcodes). The bit manipulation instructions RMB, SMB, BBR, BBS span rows 0-7 (16 case labels total) and exist on Rockwell and WDC only; on Synertek they are no-ops with lengths depending on the row - three cycles in even rows, four in odd ones (BBR and BBS only; RMB and SMB patterns differ).
+
+### The red step: opcodes not implemented
+
+Before `Cpu.Cmos.cs` and the updated Coverage, running `dotnet test --filter "FullyQualifiedName~Harte"` showed 1281 tests failing. Every 65C02-specific opcode reported "opcode $xx is not implemented". Examples included Synertek65C02 $12, Wdc65C02 $1C, Rockwell65C02 $3F. The previously implemented 151 official opcodes and all harness tests continued to pass.
+
+### Tests and results
+
+All 1288 tests pass.
+
+Run: `dotnet test` on 30 September 2026.
+
+```
+Passed!  - Failed:     0, Passed:  1288, Skipped:     0, Total:  1288, Duration: 1 m 18 s
+```
+
+The 1288 passing tests comprise:
+
+- **CpuTests**: 3 methods, 7 cases.
+- **HarteRunnerTests**: 3 methods.
+- **Harte opcode tests**: 5 theory methods (one per variant), 1278 cases (256 opcodes each for NMOS6502, Ricoh2A03, Synertek65C02, Rockwell65C02; 254 for Wdc65C02 excluding 0xCB and 0xDB which have no Harte data).
+
+### Decisions made
+
+No decisions: transcribed from the brief.
+
+### Known differences
+
+RMB/SMB/BBR/BBS are real instructions on Rockwell and WDC; on Synertek their opcodes are no-ops whose length and timing depend on the row, documented in `docs/known-differences.md`. WAI and STP exist on WDC only and have no Harte data; `docs/known-differences.md` records this. `Cpu.cs` was modified (added two flags and changed `Step()`); `Cpu.Cmos.cs` was created; `Coverage.cs` was modified.
+
+### Surprises
+
+None. All 105 new 65C02-specific opcodes passed their first test run against Harte's data for all three CMOS variants.

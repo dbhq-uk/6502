@@ -15,6 +15,8 @@ public sealed partial class Cpu
     private readonly IBus _bus;
     private readonly bool _cmos;
     private readonly bool _decimal;
+    private readonly bool _bitInstructions;
+    private readonly bool _waitAndStop;
 
     public Cpu(IBus bus, CpuVariant variant)
     {
@@ -22,6 +24,8 @@ public sealed partial class Cpu
         Variant = variant;
         _cmos = variant is CpuVariant.Synertek65C02 or CpuVariant.Rockwell65C02 or CpuVariant.Wdc65C02;
         _decimal = variant != CpuVariant.Ricoh2A03;
+        _bitInstructions = variant is CpuVariant.Rockwell65C02 or CpuVariant.Wdc65C02;
+        _waitAndStop = variant == CpuVariant.Wdc65C02;
         P = I | U;
     }
 
@@ -67,6 +71,12 @@ public sealed partial class Cpu
     public int Step()
     {
         long start = Cycles;
+        if (IsStopped || IsWaiting)
+        {
+            // Task 8 teaches WAI to wake.
+            return 0;
+        }
+
         if (IsJammed)
         {
             // A jammed NMOS chip keeps reading $FFFF. That is a real bus

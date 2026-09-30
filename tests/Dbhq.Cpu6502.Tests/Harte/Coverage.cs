@@ -39,7 +39,7 @@ public static class Coverage
 
     private static readonly byte[] NmosOnly = OtherThan(Official);
 
-    private static readonly byte[] CmosOnly = [];
+    private static readonly byte[] CmosOnly = OtherThan(Official);
 
     public static IEnumerable<byte> Opcodes(CpuVariant variant)
     {
