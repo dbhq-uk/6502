@@ -155,3 +155,79 @@ The 65C02's extra decimal-mode cycle on `ADC #imm` (0x69) and `SBC #imm` (0xE9) 
 ### Surprises
 
 None. The harness worked as designed on first build.
+
+## Task 3: Loads, stores, logic and shifts
+
+The 117 shared opcodes that are neither arithmetic nor control flow. Each instruction reads like the chip's cycles: an instruction's cycles are counted from its `Read` and `Write` calls. Read-modify-write goes through `ReadForModify`, which writes the old value back on the NMOS chip and re-reads it on the 65C02.
+
+### What was built
+
+Three modified or created files:
+
+- **`src/Dbhq.Cpu6502/Cpu.Logic.cs`** (new file): A partial class containing the shift and logic helpers: `Asl`, `Lsr`, `Rol`, `Ror`, `And`, `Ora`, `Eor`, `Compare`, `Bit`, and the read-modify-write helpers `AslAt`, `LsrAt`, `RolAt`, `RorAt`, `IncAt`, `DecAt`. Every helper is written to align with the bus cycles of its instruction.
+- **`src/Dbhq.Cpu6502/Cpu.Official.cs`** (modified): Expanded `ExecuteOfficial` from 2 opcodes to 117 opcodes. Opcodes are grouped by function: loads (18 opcodes), stores (13 opcodes), transfers (6 opcodes), flags (7 opcodes), increments and decrements (12 opcodes), compares (12 opcodes), logic (24 opcodes), and shifts and rotates (24 opcodes). The NOP instruction (0xEA) was already present and is preserved.
+- **`tests/Dbhq.Cpu6502.Tests/Harte/Coverage.cs`** (modified): Updated the coverage list from `FirstInstructions` (2 opcodes) to `LoadsStoresLogicAndShifts` (117 opcodes). The array lists every opcode once in ascending order, spanning 0x01 to 0xFE.
+
+### Instructions implemented
+
+One hundred seventeen instructions:
+
+- **Loads (18)**: LDA, LDX, LDY with immediate, zero page, zero page + X, zero page + Y, absolute, absolute + X, absolute + Y, and indirect-X and indirect-Y modes.
+- **Stores (13)**: STA, STX, STY with zero page, zero page + X/Y, absolute, and absolute + X/Y modes, plus indirect-X and indirect-Y.
+- **Transfers (6)**: TAX, TAY, TXA, TYA, TSX, TXS - register-to-register moves that read the next byte and discard it.
+- **Flags (7)**: CLC, SEC, CLI, SEI, CLV, CLD, SED - clear and set operations on the condition register.
+- **Increments and decrements (12)**: INC, DEC on zero page, zero page + X, absolute, and absolute + X; INX, INY, DEX, DEY on single registers.
+- **Compares (12)**: CMP, CPX, CPY with immediate, zero page, and absolute modes, spanning 12 address modes across the three registers.
+- **Logic (24)**: AND, ORA, EOR with immediate, zero page, zero page + X, absolute, absolute + X, absolute + Y, indirect-X and indirect-Y modes (24 opcodes covering all combinations); BIT with zero page and absolute.
+- **Shifts and rotates (24)**: ASL, LSR, ROL, ROR on the accumulator and at memory addresses (zero page, zero page + X, absolute, absolute + X). Read-modify-write instructions use `ReadForModify` to handle the NMOS 6502's rewrites.
+
+### The red step: opcodes not implemented
+
+Before `Cpu.Logic.cs` and the updated `Cpu.Official.cs`, running `dotnet test --filter "FullyQualifiedName~Harte"` showed 575 test failures and 13 test passes. Every failure reported an unimplemented opcode: "Nmos6502 opcode $xx is not implemented", with variant-specific messages for each of the five CPU types. Typical failure output:
+
+```
+Nmos6502 $36 fails 5 or more cases:
+36 13 1b: Nmos6502 opcode $36 is not implemented
+36 49 c9: Nmos6502 opcode $36 is not implemented
+36 c2 62: Nmos6502 opcode $36 is not implemented
+36 a9 16: Nmos6502 opcode $36 is not implemented
+36 22 3b: Nmos6502 opcode $36 is not implemented
+```
+
+The harness tests themselves (HarteRunnerTests) and the two previously implemented opcodes (0xA9 and 0xEA) continued to pass.
+
+### Tests and results
+
+All 595 tests pass:
+
+Run: `dotnet test` on 30 September 2026.
+
+```
+Passed!  - Failed:     0, Passed:   595, Skipped:     0, Total:   595, Duration: 2 m 3 s - Dbhq.Cpu6502.Tests.dll (net10.0)
+```
+
+The 595 passing tests include:
+
+- **HarteRunnerTests** (3 test methods): Harness unit tests.
+- **Harte tests for five variants** (4 opcodes each, 20 test methods): 0xA9 and 0xEA on each variant, passing as before.
+- **Harte tests for loads, stores, transfers, flags, increments, decrements, compares, logic and shifts** (570+ test methods): One test method per opcode per variant. With 117 opcodes and 5 variants, most variants generate one method each, though some generate multiple due to how xunit parametrises test data. All 570+ methods passed.
+
+The test run took 2 minutes 3 seconds on a single machine.
+
+### Decisions made
+
+**All helpers were written in a single file (`Cpu.Logic.cs`) rather than split per-instruction.** Alternative: create a separate helper file per instruction or per category. Reason for the choice: all helpers are small enough to understand in one read; reviewing them together makes the patterns visible (carry-in handling in Rol/Ror, flag updates in Compare); and they are compiled into one method by the JIT, so inlining is not affected.
+
+**Shifts and rotates use `ReadForModify` for memory operations.** The NMOS 6502's read-modify-write instructions read a value, write it back unchanged, then read it again. The 65C02 improved this: it reads and writes once. Both are cycle-exact with one `ReadForModify` call instead of separate `Read` and `Write`, because the helper knows which variant is running. The bus itself records the cycles.
+
+**Immediate-mode instructions read from PC and post-increment.** This is true of all immediate-mode opcodes: `LDA #`, `CMP #`, `AND #` and the rest. The increment is part of the fetch, not a separate cycle.
+
+**Transfer instructions read the next byte and discard it.** 0xAA (TAX) and its peers have an unused fetch as part of the two-cycle instruction. The code calls `Read(PC)` and discards the result; the read is explicit because it touches the bus.
+
+### Known differences
+
+None discovered. All test cases pass against Harte's reference data.
+
+### Surprises
+
+None. The helpers worked as designed on first build. All 117 opcodes passed their first test run.
