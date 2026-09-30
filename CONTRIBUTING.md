@@ -3,9 +3,10 @@
 ## The one rule
 
 **A difference is a number, not an argument.** Every claim about how the
-hardware behaves is backed by a test against recorded data from the real chip
-or a trusted reference. Where the reference and this code disagree, the test
-says which cycle and which byte.
+hardware behaves is backed by a test against a trusted reference, such as Tom
+Harte's SingleStepTests, a published record of every opcode's bus activity.
+Where the reference and this code disagree, the test says which cycle and which
+byte.
 
 In practice:
 

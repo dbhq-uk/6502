@@ -54,7 +54,7 @@ test('the home page does not read as though a machine already runs', () => {
 // the program that generated them. So no page may claim the data is from a real
 // chip. (A chip's own behaviour, such as unstable opcodes varying between parts, is
 // a different claim and is not matched here.)
-const HARDWARE_PROVENANCE = /(?:from|against|by) (?:the )?real (?:chip|hardware|silicon|6502)|recorded (?:data )?from (?:the |a )?(?:real|actual)|captured from|recorded from hardware|from (?:the )?(?:real )?hardware|one real chip's answer/i;
+const HARDWARE_PROVENANCE = /(?:from|against|by) (?:the )?real (?:chip|hardware|silicon|6502)|recorded (?:data )?from (?:the |a )?(?:real|actual)|captured from|recorded from hardware|from (?:the )?(?:real )?hardware|one real chip['’]s answer/i;
 
 test('no page claims the reference data was recorded from a real chip', () => {
   for (const p of pages()) {

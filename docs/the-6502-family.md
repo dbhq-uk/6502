@@ -247,7 +247,8 @@ new machines around it.
   are built is tracked in `machines/registry.json`.
 - Nearly every 6502 machine from 1976 to 1985 uses one too.
 - The core also covers the 65C02, which opens the BBC Master, the later Apple
-  IIs, the Atari Lynx, the Watara Supervision and every modern machine above.
+  IIs, the Atari Lynx, the Watara Supervision and every modern machine above
+  except the MEGA65, whose 45GS02 is a different CPU.
 - The 65C816, the HuC6280 and the 4510 family are different CPUs, and out of
   scope.
 
