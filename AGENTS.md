@@ -11,6 +11,11 @@ then the NES. Built in public, with the journey written up at 6502.dbhq.uk.
 ## Layout
 
 ```
+6502.slnx                   # the solution
+src/Dbhq.Cpu6502/           # the core: one library, no dependencies
+tests/                      # the tests and the library they share
+bench/                      # the speed benchmark, run locally
+tools/                      # scripts that make test data and check assumptions
 docs/superpowers/specs/     # the design; each stage gets its own spec here
 docs/superpowers/plans/     # the plan for each spec
 docs/journal/               # the record of how it was built; the site's source

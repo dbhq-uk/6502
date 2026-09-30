@@ -1,0 +1,52 @@
+name: Validate
+# Filtering push to main leaves each commit covered once: by its pull request
+# while it is in review, and by the push run after it merges, which is the run
+# that proves main itself is green.
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+# One run per ref, newest wins. Runs on main are exempt: they are the record of
+# whether main is green at a given commit.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    # The first run downloads Harte's data, about 5 GB, before it is cached.
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6
+        with:
+          dotnet-version: '10.0.x'
+      # Dormann's assembler, as65, is a 32-bit Linux program.
+      - name: 32-bit runtime for as65
+        run: sudo apt-get update && sudo apt-get install -y libc6-i386 lib32stdc++6
+      # Everything third-party is downloaded by the tests, pinned and
+      # hash-checked, and kept here between runs. The key changes when a pin does.
+      - name: Cache test data
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
+        with:
+          path: .testdata
+          key: testdata-${{ hashFiles('tests/Dbhq.Cpu6502.Tests/Harte/harte.manifest', 'tests/Dbhq.Cpu6502.TestSupport/Pins.cs') }}
+      - name: Test
+        run: dotnet test --configuration Release --logger "console;verbosity=normal"
+
+  dashes:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: No em or en dashes
+        run: |
+          if LC_ALL=C.UTF-8 grep -rnP '[\x{2013}\x{2014}]' --include='*.md' --include='*.cs' --include='*.c' --include='*.sh' --include='*.yml' --exclude-dir=.testdata .; then
+            echo "Use a plain hyphen, not an em or en dash"
+            exit 1
+          fi

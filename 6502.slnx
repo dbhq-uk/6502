@@ -1,0 +1,9 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/Dbhq.Cpu6502/Dbhq.Cpu6502.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/Dbhq.Cpu6502.Tests/Dbhq.Cpu6502.Tests.csproj" />
+    <Project Path="tests/Dbhq.Cpu6502.TestSupport/Dbhq.Cpu6502.TestSupport.csproj" />
+  </Folder>
+</Solution>
