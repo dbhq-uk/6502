@@ -111,7 +111,7 @@ The 65C02 machines run on the core already. Machines on a different CPU
 | Family | The account of the family | `docs/the-6502-family.md` |
 | Status | The test breakdown, the speed check, and the known differences | Test results, `docs/known-differences.md` |
 | About | What this is, the goal, licence, links | Written once in `site/` |
-| Privacy | What is collected, and when | Written once in `site/` |
+| Privacy | A link in the footer and the consent choice to DBHQ's privacy policy at https://dbhq.uk/privacy/, which covers every DBHQ site | The estate's policy; no page of its own |
 
 **The table of machines** lists the whole family, filterable by category,
 core support and status, and sortable by every column. It works without
@@ -175,7 +175,7 @@ in the private company repository, rather than inventing its own:
 - **GA loads from an external `analytics.js`** and only on the live host,
   never on localhost or a preview. The Content-Security-Policy in `_headers`
   names the Google origins that need it, and nothing else.
-- **A Privacy page** says what is collected and that it needs consent.
+- **No privacy page of its own.** The consent choice and the footer link to DBHQ's policy at https://dbhq.uk/privacy/, which says what is collected and that it needs consent. One policy for the estate, so it cannot drift from the site it describes. (Amended 30 September 2026.)
 - **Search Console:** the domain property `sc-domain:dbhq.uk` already covers the
   host. A child property for `6502.dbhq.uk` is added for its own indexing view,
   its sitemap is submitted on the roll-up, and the service account is granted
