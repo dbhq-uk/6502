@@ -96,9 +96,35 @@ Read from `site/src/data/measurements.json` with a short `node -e` script. The m
 
 - **The design target was 25 times a 2 MHz machine, which is 50 MHz. The best ahead-of-time run is 48.85 MHz, which is 24.4 times (48.85 / 2 = 24.425).** That is below the target, by a small margin. It is not rounded up. Native clears it easily: its best run is 107.986 MHz, 54.0 times.
 - The ahead-of-time runs are not steady: 47.125, 48.85, 42.357, 29.137 and 38.027 MHz, in run order. The best is the top of a wide spread, and the worst run is 29.137 MHz (14.6 times). Any page that quotes one figure should say it is the best of five and show the spread.
-- The interpreter runs climb from 1.948 MHz to 4.965 MHz over the five runs (best 2.5 times). The first run is the slowest by more than half. That fits a JIT-less interpreter warming caches, but the file does not say why, so this is a guess and not a finding.
+- The interpreter runs climb from 1.948 MHz to 4.965 MHz over the five runs (best 2.5 times). The first run, 1.948 MHz, is under 40 percent of the best, 4.965 MHz (1.948 / 4.965 = 0.392). That fits a JIT-less interpreter warming caches, but the file does not say why, so this is a guess and not a finding.
 
 ### What surprised
 
 - Ahead-of-time is 24.4 times, not 25 or more. The target was set before this measurement existed, so the site cannot claim it is met.
 - The spread inside one mode, on one idle-as-far-as-we-know virtual machine, is larger than the gap between the best ahead-of-time run and the target.
+
+## Task 4: The figures
+
+Every number a page shows now comes through one module. A page that needs a count or a speed takes it from there, and never types it.
+
+### What was built
+
+- **`site/src/lib/figures.mjs`.** Computes every figure from three inputs: the registry, the test results and the dated measurements. It counts machines by status, sums the Harte cases over the suites whose name ends in `Harte`, and gives each mode's best speed as a multiple of a 2 MHz machine. `fmt` and `fmt1` format numbers the British way. The only typed numbers are two constants that belong to the design: the speed target (25) and the reference clock (2 MHz).
+- **`site/src/lib/data.mjs`.** Loads the registry, the results and the measurements once, refuses to build if the registry or the results fail their checks, and exports the computed figures as `fig`.
+- **`site/tests/figures.test.mjs`.** Four tests: the figures from made-up inputs, the number formats, that the real figures can be computed, and that the real registry is valid against the real results.
+
+### Decisions
+
+- **The Harte figure is a sum over the suites, not a typed 4 x 256.** The variant count is the number of suites whose name ends in `Harte`, so a sixth variant would change both figures without an edit here. The alternative was to list the variants by name, which would have been a second place to keep in step.
+- **`data.mjs` throws rather than warns.** A page built from figures the checks reject would publish a claim nobody can stand behind, so the build stops.
+
+### What the tests showed
+
+- Before `figures.mjs` existed, `node --test tests/figures.test.mjs` in `site/` failed with `ERR_MODULE_NOT_FOUND` for `site/src/lib/figures.mjs`: 0 passed, 1 failed (the file could not load).
+- With the three files written, `node --test tests/*.test.mjs` in `site/` ran 19 tests (4 new, 15 from tasks 1 to 3) and all 19 passed.
+- `node -e "import('./src/lib/data.mjs').then(m=>console.log(JSON.stringify(m.fig)))"` in `site/` printed the real figures. Machines implemented 0, in scope 51, in progress 0. Variants 5. Tests passing 1480. Harte tests 1278. Dormann builds 12. Interrupt runs 150. Speed as a multiple of 2 MHz: 24.425 ahead of time, 2.4825 interpreter, 53.993 native.
+
+### What surprised
+
+- The Harte figure is 1278, not 1280, and the reason is the one recorded under task 2: four variants have 256 passing cases and the WDC variant has 254 (1278 = 4 x 256 + 254). Summing from the file gets it right where a typed 5 x 256 would not.
+- The results file in this working tree was made from a run at commit `a8de702`, read from the `commit` field of `site/src/data/results.json`, which is earlier than the current commit. The task 4 changes touch no .NET code, so the counts are unchanged, but a published site must be built from a results file made at the commit it ships.
