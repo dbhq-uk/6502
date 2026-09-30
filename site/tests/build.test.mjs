@@ -10,11 +10,11 @@ test('the expected pages were built', () => {
   }
 });
 
-test('a sitemap, robots.txt and a real 404 page were built', () => {
+test('a sitemap, robots.txt and the 404 page were built', () => {
   assert.ok(fs.existsSync(path.join(DIST, 'sitemap-index.xml')));
   const sitemap = fs.readFileSync(path.join(DIST, 'sitemap-0.xml'), 'utf8');
   assert.match(sitemap, /https:\/\/6502\.dbhq\.uk\/status\//);
-  assert.ok(!sitemap.includes('404'));
+  assert.match(fs.readFileSync(path.join(DIST, '404.html'), 'utf8'), /<h1[^>]*>\s*Page not found\s*<\/h1>/);
   assert.match(fs.readFileSync(path.join(DIST, 'robots.txt'), 'utf8'), /Sitemap: https:\/\/6502\.dbhq\.uk\/sitemap-index\.xml/);
 });
 

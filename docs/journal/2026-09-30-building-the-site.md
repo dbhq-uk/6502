@@ -317,7 +317,7 @@ The site now has checks in CI and a deploy workflow that is switched off. Nothin
 - **`validate.yml`.** The `test` job now writes a TRX file, turns it into `results.json` with `site/scripts/make-results.mjs`, and uploads it as an artifact. A new `site` job downloads that artifact into `site/src/data`, runs `npm ci` and `npm test`. The site's figures are read from `results.json` with the working directory `site`, and the artifact puts the file at `site/src/data/results.json`, so the "real results are publishable" test finds it where it looks.
 - **`deploy-site.yml`.** On a push to `main` that touches the site, the docs, the registry, the core or the tests, it runs the whole test suite, builds the site, deploys to Cloudflare Pages, purges the cache and checks that every built page, the machine-readable files and the edge headers are serving. It runs only when the repository variable `SITE_DEPLOY` is `true`. That variable is not set, no secret has been created and nothing outside the repository has been touched.
 - **`site/tests/build.test.mjs`.** Three tests: the eight pages the brief names were built, a sitemap and a `robots.txt` exist and the sitemap holds no 404, and a third that the brief did not have (below).
-- **`site/README.md`.**
+- **`site/README.md`.** How to run the site, where each part of it comes from, how to add a machine, what each test file holds, and how analytics and Search Console are set up.
 
 ### Choices and changes from the brief
 
@@ -338,7 +338,20 @@ The site now has checks in CI and a deploy workflow that is switched off. Nothin
 ### Things that cannot be checked here
 
 - Neither workflow has run. `validate.yml`'s new jobs run for the first time on the pull request, and the deploy workflow is skipped until `SITE_DEPLOY` is set. The Cloudflare project, the secrets and the steps that follow the deploy have never been exercised.
-- `npx wrangler` in the deploy step is not pinned: `site/package.json` does not list `wrangler`, so `npx` fetches whichever version is latest on the day. That is the brief's design. It is worth pinning before the switch is turned on.
+- `npx wrangler` in the deploy step was not pinned when this was first written: `site/package.json` did not list `wrangler`, so `npx` would have fetched whichever version was latest on the day. That was the brief's design, and the review below changed it.
+
+### Task 9 review: what it found and what changed
+
+The review found two defects that came from the brief itself, and five smaller ones. All were fixed in one commit.
+
+- **A manual run could publish any branch.** `deploy-site.yml` has `workflow_dispatch`, which can be started from any branch, and the upload is labelled `--branch main`. So a run from a feature branch would have put that branch's build on the live site. The deploy job now has `if: vars.SITE_DEPLOY == 'true' && github.ref == 'refs/heads/main'`, and the comment above it says so.
+- **The deploy step fetched wrangler fresh, holding the Cloudflare token.** `wrangler` is now an exact-version dev dependency (`4.145.0`, from `npm view wrangler version`), so `site/package-lock.json` carries its integrity hash, and the step runs `npm exec --no -- wrangler`, which will not download anything. Comparing the old and new lock files with a short Node script showed no existing package changed version, 83 were added, and every entry has an integrity hash. In a clean directory holding only `package.json` and the lock file, `npm ci` followed by `npx --no-install wrangler --version` and `npm exec --no -- wrangler --version` each printed `4.145.0`. npm printed warnings that it had not run the install scripts of `esbuild` and `workerd`; the version command worked without them, and whether a deploy needs them is not known until one runs. No `wrangler` command that talks to Cloudflare was run. `.github/dependabot.yml` has a new `npm` entry for `/site` with the same weekly Monday schedule, labels style and grouping as the other two.
+- **`persist-credentials: false`** is on all four checkout steps, three in `validate.yml` and one in `deploy-site.yml`. Nothing after a checkout pushes or fetches: the only git use is `git rev-parse` and `git grep` on the local copy, which need no credentials.
+- **The deploy path filter** now includes `6502.slnx`, `Directory.Build.props`, `bench/**` and `tools/**`, because they change what the tests run and so the figures.
+- **The verification curls** in the deploy workflow now have `--max-time 20 --retry 3 --retry-delay 5`, so one slow response fails one attempt and not the run.
+- **`build.test.mjs`.** The second test was called "a real 404 page" and only checked that a file existed. It now checks that `404.html` holds the heading "Page not found", and the title says "the 404 page". The `sitemap.includes('404')` line is gone, because the derived test already fails if a 404 address is in the sitemap and not in the built list.
+
+After the changes `npm test` in `site/` ran 79 tests and all 79 passed, with `14 page(s) built`. Both workflows and `dependabot.yml` parse with PyYAML and `actionlint` 1.7.12 printed nothing, exit code 0. The number of tests did not change, because nothing was added or removed.
 
 ## Where it stands
 

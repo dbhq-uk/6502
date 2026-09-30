@@ -29,3 +29,18 @@ updates:
       actions:
         patterns:
           - "*"
+
+  - package-ecosystem: npm
+    directory: /site
+    schedule:
+      interval: weekly
+      day: monday
+    labels:
+      - dependencies
+      - javascript
+    commit-message:
+      prefix: "chore"
+    groups:
+      npm:
+        patterns:
+          - "*"

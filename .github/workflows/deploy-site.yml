@@ -16,7 +16,9 @@ name: deploy-site
 # THE DEPLOY IS SWITCHED OFF UNTIL THE SITE IS READY. It runs only when the
 # repository variable SITE_DEPLOY is "true", which is set after the Cloudflare
 # project exists and the secrets below are added. Until then a push to main
-# leaves this workflow skipped rather than red.
+# leaves this workflow skipped rather than red. It also runs only from main:
+# a manual run started from another branch is skipped, because the upload below
+# is labelled main and would publish that branch's build as the live site.
 #
 # PATH FILTER. Wider than site/**: the figures come from the tests and the
 # registry, so a change to the core, a machine or the registry changes the site
@@ -31,6 +33,10 @@ on:
       - "docs/**"
       - "src/**"
       - "tests/**"
+      - "6502.slnx"
+      - "Directory.Build.props"
+      - "bench/**"
+      - "tools/**"
       - ".github/workflows/deploy-site.yml"
   workflow_dispatch:
 
@@ -43,13 +49,18 @@ permissions:
 
 jobs:
   deploy:
-    if: vars.SITE_DEPLOY == 'true'
+    if: vars.SITE_DEPLOY == 'true' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     timeout-minutes: 60
     steps:
+      # wrangler is pinned in site/package.json and site/package-lock.json, and
+      # the deploy step runs that copy with --no, so it is never fetched fresh
+      # while the Cloudflare token is in scope.
       # Actions are pinned to commit SHAs: this job holds a Cloudflare token with
       # write access, and a hijacked tag would run with it in scope.
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
       - uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6
         with:
           dotnet-version: '10.0.x'
@@ -97,7 +108,7 @@ jobs:
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-        run: npx wrangler pages deploy dist --project-name 6502 --branch main
+        run: npm exec --no -- wrangler pages deploy dist --project-name 6502 --branch main
 
       - name: Purge the Cloudflare cache
         env:
@@ -105,7 +116,7 @@ jobs:
           CF_ZONE: ${{ secrets.CLOUDFLARE_ZONE_ID }}
         run: |
           set -euo pipefail
-          RESP=$(curl -sf -X POST \
+          RESP=$(curl -sf --max-time 20 --retry 3 --retry-delay 5 -X POST \
             -H "Authorization: Bearer ${CF_TOKEN}" \
             -H "Content-Type: application/json" \
             "https://api.cloudflare.com/client/v4/zones/${CF_ZONE}/purge_cache" \
@@ -126,7 +137,7 @@ jobs:
           COUNT=0
           FAIL=0
           for p in $PAGES; do
-            CODE=$(curl -s -o /dev/null -w "%{http_code}" "https://6502.dbhq.uk${p}?cb=${GITHUB_SHA}")
+            CODE=$(curl -s --max-time 20 --retry 3 --retry-delay 5 -o /dev/null -w "%{http_code}" "https://6502.dbhq.uk${p}?cb=${GITHUB_SHA}")
             echo "${p} -> ${CODE}"
             [ "$CODE" = "200" ] || FAIL=1
             COUNT=$((COUNT + 1))
@@ -138,7 +149,7 @@ jobs:
       - name: A missing page must return 404
         run: |
           set -euo pipefail
-          CODE=$(curl -s -o /dev/null -w "%{http_code}" "https://6502.dbhq.uk/no-such-page/?cb=${GITHUB_SHA}")
+          CODE=$(curl -s --max-time 20 --retry 3 --retry-delay 5 -o /dev/null -w "%{http_code}" "https://6502.dbhq.uk/no-such-page/?cb=${GITHUB_SHA}")
           echo "missing page -> $CODE"
           [ "$CODE" = "404" ]
 
@@ -150,7 +161,7 @@ jobs:
         run: |
           set -euo pipefail
           for f in sitemap-index.xml sitemap-0.xml robots.txt analytics.js consent.js machines-table.js; do
-            CODE=$(curl -s -o /dev/null -w "%{http_code}" "https://6502.dbhq.uk/${f}?cb=${GITHUB_SHA}")
+            CODE=$(curl -s --max-time 20 --retry 3 --retry-delay 5 -o /dev/null -w "%{http_code}" "https://6502.dbhq.uk/${f}?cb=${GITHUB_SHA}")
             echo "${f} -> ${CODE}"
             [ "$CODE" = "200" ]
           done
@@ -160,7 +171,7 @@ jobs:
       - name: The response headers must be applied at the edge
         run: |
           set -euo pipefail
-          H=$(curl -sI "https://6502.dbhq.uk/?cb=${GITHUB_SHA}" | tr -d '\r')
+          H=$(curl -sI --max-time 20 --retry 3 --retry-delay 5 "https://6502.dbhq.uk/?cb=${GITHUB_SHA}" | tr -d '\r')
           echo "$H"
           grep -qi '^strict-transport-security:' <<<"$H"
           grep -qi '^content-security-policy:' <<<"$H"
