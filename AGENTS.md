@@ -14,14 +14,13 @@ then the NES. Built in public, with the journey written up at 6502.dbhq.uk.
 6502.slnx                   # the solution
 src/Dbhq.Cpu6502/           # the core: one library, no dependencies
 tests/                      # the tests and the library they share
-bench/                      # the speed benchmark, run locally
 tools/                      # scripts that make test data and check assumptions
+  probes/                   # scripts that check assumptions against test data
 docs/superpowers/specs/     # the design; each stage gets its own spec here
 docs/superpowers/plans/     # the plan for each spec
 docs/journal/               # the record of how it was built; the site's source
 docs/known-differences.md   # where the core knowingly differs from a reference
 docs/the-6502-family.md     # every 6502-family chip and machine, and what runs
-tools/probes/               # scripts that check assumptions against test data
 ```
 
 More arrives with the code. Keep this section true as it does.

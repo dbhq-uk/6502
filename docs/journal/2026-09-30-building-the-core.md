@@ -25,7 +25,7 @@ In the test support library:
 
 - `FlatBus`: A bus implementation backed by a byte array, with a `Log` recording every access.
 - `BusAccess`: A record of one bus access (address, value, is-write).
-- `RepoPaths`: Static methods to find the repository root and the `.testdata` directory.
+- `RepoPaths`: Static properties to find the repository root and the `.testdata` directory.
 
 ### Instructions implemented
 
@@ -43,9 +43,17 @@ The NMOS undocumented opcodes and the 65C02-specific instructions throw `NotImpl
 
 Every cycle is one read or one write. A throwaway read is explicit in the code, because on real hardware it reaches the bus.
 
+### The red step: build failure
+
+Before implementing `Cpu`, the tests were created referencing a class that did not exist. The build failed with "The type or namespace name 'Cpu' could not be found". This is the expected failure before any code that makes it pass.
+
+### Decisions made
+
+**All addressing mode helpers were written in task 1**, though later tasks will implement the instructions that use them. Alternative: add each helper in the task that first needs it. Reason for the choice: every helper is small enough to review in one task; reviewing thirty helpers scattered across later tasks would be harder; and the plan's code was built and tested before it was written, so the helpers are proven already.
+
 ### Tests
 
-Three tests, seven assertions passed:
+Three test methods, seven test cases, all passing:
 
 - **ResetTakesSevenCyclesAndReadsTheVector**: Verifies that reset takes seven cycles, sets the PC from the reset vector at `$FFFC`, sets the stack pointer to `$FD`, and sets the interrupt-disable flag. The bus log confirms no writes happen during reset.
 - **ResetClearsDecimalModeOnlyOnThe65C02**: Verifies that the NMOS 6502 and the 2A03 keep their decimal mode flag across reset, but all three 65C02 variants clear it.
@@ -68,3 +76,7 @@ The `Validate` workflow:
 - Installs 32-bit runtime support for Dormann's as65 assembler before it is used.
 
 The workflow is pinned to named commits: `checkout@3d3c42...`, `setup-dotnet@a98b56...`, `cache@55cc83...`.
+
+### Corrections
+
+On review, the comment for `CpuVariant.Ricoh2A03` said "in the NES", which violates constraint 2 (the core knows no machine). Corrected to "Ricoh's 2A03 and 2A07: the NMOS 6502 with decimal mode removed." The same line in `docs/superpowers/plans/2026-09-30-stage-1-core.md` was corrected to prevent the same mistake in later tasks that use the plan as a source.
