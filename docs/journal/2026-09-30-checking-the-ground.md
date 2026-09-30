@@ -161,3 +161,58 @@ the code clear of it anyway.
 The same conversation asked who created the 6502. The answer, checked
 against its sources, is now in
 [`docs/the-6502-family.md`](../the-6502-family.md#who-made-it).
+
+## Proving the plan before writing it
+
+The plan for the core was not written from the design and then hoped for.
+Every file it contains was first built in a scratch copy and run against
+every reference the design names, and only then written into the plan. The
+plan's tasks were then replayed, in order, into an empty folder, building
+with warnings as errors and running the whole suite after each one, so every
+step of it is known to work.
+
+On 30 September, with the plan's own tests run by `dotnet test`:
+
+- **Harte:** all 1,278 files that have data, 12.78 million cases across the
+  five variants, passed, in a little over two minutes.
+- **Dormann:** all twelve builds passed, on every variant each applies to.
+- **`nestest`:** all 8,991 lines matched, and its error bytes ended at zero.
+- **The transistor-level model:** all 134 interrupt runs matched, cycle for
+  cycle.
+- **Speed:** the benchmark's best run on the build machine was 98.7 MHz, 49
+  times a 2 MHz BBC Micro, against a target of 25.
+
+Three things turned up that the plan would otherwise have got wrong.
+
+**The Synertek no-ops were sampled from the wrong rows.** The table in the
+section above looked at `$07` and `$0F` and generalised. The full data showed
+the odd rows differ: `$17` reads like `LDA zp,X` and `$1F` takes an extra
+cycle. Sixteen files failed on the first run and passed after the fix, and
+the table above is now known to hold for even rows only.
+
+**The textbook interrupt rule was one cycle early.** The first version of the
+interrupt code followed the usual description: an instruction takes an
+interrupt that was active by the end of its second-to-last cycle. Against the
+transistor-level model it disagreed on 29 of the first 105 runs. The model
+shows an instruction taking an interrupt that became active by the end of its
+last cycle, with the line changed at the start of a cycle; the likely reason
+is that the usual description counts from a different point within the
+cycle. The same runs showed exactly where `BRK` stops being taken over by an
+NMI, and something the code had not expected at all: an NMI that arrives
+while `BRK` reads the low byte of its vector is lost, never taken. Two new
+families of runs were added to cover what the first set could not, a branch
+that crosses a page and an NMI around a branch, and the corrected code
+matches all 134.
+
+**Two references disagree about Synertek.** Dormann's extended test, set up
+to check the bit-instruction opcodes as no-ops, expects `$07` to be one byte
+long. Harte's data says two, and the core matches Harte on all 10,000 cases.
+Harte is the per-instruction authority here, so the Synertek build of
+Dormann's test leaves those opcodes out, using the test's own setting for
+that. It is recorded in [`docs/known-differences.md`](../known-differences.md).
+
+One smaller thing: the assembler needed a second 32-bit package,
+`lib32stdc++6`, beyond the `libc6-i386` it first asked for.
+
+The plan is
+[`docs/superpowers/plans/2026-09-30-stage-1-core.md`](../superpowers/plans/2026-09-30-stage-1-core.md).

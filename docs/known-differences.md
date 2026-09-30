@@ -2,8 +2,8 @@
 
 Where the core knowingly differs from a reference it is tested against, or
 where no reference we trust exists. Each entry says what, why, and how the
-tests treat it. This list is written before the code, from the plan, and is
-kept true as the code lands.
+tests treat it. It was written with the plan, after the plan's code had been
+run against every reference, and is kept true as the code lands.
 
 ## The 65C02's extra decimal cycle, in immediate mode
 
@@ -23,6 +23,22 @@ with the decimal flag set, the comparison checks that the third cycle exists
 and is a read, and does not compare its address or value. Everything else in
 those cases is compared as normal.
 
+## Synertek's bit-instruction opcodes, where two references disagree
+
+**What.** On the Synertek 65C02, which has no `RMB`, `SMB`, `BBR` or `BBS`,
+the opcodes in columns 7 and F are no-ops. Harte's data says the column 7
+opcodes are two bytes long and read zero page, and the column F opcodes three
+bytes, with an extra cycle in odd rows. Klaus Dormann's extended test, set up
+to check them as no-ops, expects `$07` to be one byte long.
+
+**Why we differ from Dormann.** Harte's data is the per-instruction
+authority in this project, and the core matches all of it. Which of the two
+is right about real Synertek silicon is not known here.
+
+**How the tests treat it.** The Synertek build of Dormann's extended test is
+assembled with `rkwl_wdc_op = 2`, which is the test's own setting for leaving
+those opcodes out. Everything else in that test still runs.
+
 ## `WAI` and `STP`
 
 **What.** WDC's `WAI` (`$CB`) and `STP` (`$DB`) have no data in Harte's WDC
@@ -37,12 +53,14 @@ because no reference we trust gives it.
 ## 65C02 interrupt timing
 
 **What.** The NMOS interrupt tests are checked against the Visual6502
-transistor-level model. There is no public transistor-level model of the
-65C02.
+transistor-level model, and the 65C02 uses the same timing rules in the core.
+There is no public transistor-level model of the 65C02 to check that against.
 
 **How the tests treat it.** The 65C02's own interrupt behaviour, such as
 clearing the decimal flag, is checked against WDC's datasheet. That is a
-reading of a document rather than the chip, and those tests say so.
+reading of a document rather than the chip, and those tests say so. Whether
+the 65C02 times interrupts exactly as the NMOS chip does is assumed, not
+shown.
 
 ## Unstable NMOS opcodes
 
