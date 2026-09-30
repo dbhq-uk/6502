@@ -12,6 +12,7 @@ public sealed partial class Cpu
     {
         switch (opcode)
         {
+            case 0xA9: A = NZ(Read(PC++)); break;
             case 0xEA: Read(PC); break;
 
             default: return false;

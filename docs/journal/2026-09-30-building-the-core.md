@@ -80,3 +80,78 @@ The workflow is pinned to named commits: `checkout@3d3c42...`, `setup-dotnet@a98
 ### Corrections
 
 On review, the comment for `CpuVariant.Ricoh2A03` said "in the NES", which violates constraint 2 (the core knows no machine). Corrected to "Ricoh's 2A03 and 2A07: the NMOS 6502 with decimal mode removed." The same line in `docs/superpowers/plans/2026-09-30-stage-1-core.md` was corrected to prevent the same mistake in later tasks that use the plan as a source.
+
+## Task 2: The Harte harness
+
+The test harness that proves every instruction correct by checking every cycle, register and memory location against reference test data. Tom Harte's SingleStepTests provides 1,280 files covering all opcodes across all five variants, with 10,000 cases per opcode - 12.8 million test cases.
+
+### What was built
+
+Two new test support classes:
+
+- `Pins.cs`: A static class holding every third-party commit and hash the tests use. Organizes the constants so they are easy to find and verify.
+- `PinnedFiles.cs`: Downloads a file once, checks it against a recorded git blob hash, caches it under `.testdata`, and checks it again before each use.
+
+A manifest generation script:
+
+- `tools/harte-manifest.sh`: Calls GitHub's tree API once for the pinned Harte commit and records every test file's git blob hash. Generates 1,280-line `harte.manifest` in one run.
+
+Six test classes in the `Harte` namespace:
+
+- `HarteFile.cs`: Reads a JSON file from Tom Harte's test set and parses it into records holding the initial state, final state, and the sequence of bus cycles.
+- `HarteSets.cs`: Maps each variant to its Harte folder, looks up a test file in the manifest, and fetches it (checking the hash automatically).
+- `HarteRunner.cs`: Runs test cases one at a time, cycle by cycle. Catches `NotImplementedException` and reports it as a test failure. Has one documented exception: the 65C02's extra decimal-mode cycle on `ADC #imm` and `SBC #imm`, which Harte records but whose address differs by variant. The cycle must exist as a read; its address and value are not compared.
+- `HarteRunnerTests.cs`: Unit tests proving the harness itself fails when it should. Tests a correct case passes, a wrong cycle is named, and the decimal exception is exactly one cycle wide.
+- `Coverage.cs`: Tracks which opcodes have implementations so far. Task 2 implements `0xA9` (LDA #) and `0xEA` (NOP), so it returns those two. Task 11 replaces this list with all 256 opcodes.
+- `HarteTests.cs`: Five test classes, one per variant. Each runs every implemented opcode's Harte cases, checking that bus cycles, registers, and memory match the reference data.
+
+One instruction implemented:
+
+- `0xA9` (LDA #): Load the accumulator with an immediate value. Reads one byte from the next instruction, sets the N and Z flags based on the result, and takes two cycles.
+
+Modified `src/Dbhq.Cpu6502/Cpu.Official.cs` to add LDA # and modified `tests/Dbhq.Cpu6502.Tests/Dbhq.Cpu6502.Tests.csproj` to copy the manifest to the output directory.
+
+### The red step: opcode not implemented
+
+Before `LDA #` was implemented, running the tests showed:
+
+```
+Nmos6502Harte.Opcode(opcode: 169) FAILED
+Ricoh2A03Harte.Opcode(opcode: 169) FAILED
+Synertek65C02Harte.Opcode(opcode: 169) FAILED
+Rockwell65C02Harte.Opcode(opcode: 169) FAILED
+Wdc65C02Harte.Opcode(opcode: 169) FAILED
+```
+
+Each failure reported "Nmos6502 opcode $A9 is not implemented" (or the appropriate variant). The harness test for NOP and all harness infrastructure tests passed.
+
+### Tests and results
+
+Twenty test methods passing:
+
+- **HarteRunnerTests** (3 methods): Unit tests for the harness itself. `ACorrectCasePasses` verifies a known-good case passes. `AWrongCycleIsNamed` verifies the harness catches a cycle mismatch and reports which cycle failed. `TheDecimalExceptionIsOneCycleWide` verifies the decimal-mode exception is narrowly scoped.
+- **Nmos6502Harte** (2 methods): Opcode tests for LDA # and NOP on the NMOS 6502.
+- **Ricoh2A03Harte** (2 methods): The same opcodes on the Ricoh 2A03.
+- **Synertek65C02Harte** (2 methods): The same opcodes on the Synertek 65C02.
+- **Rockwell65C02Harte** (2 methods): The same opcodes on the Rockwell 65C02.
+- **Wdc65C02Harte** (2 methods): The same opcodes on the WDC 65C02.
+
+Run: `dotnet test` on 30 September 2026.
+
+```
+Passed!  - Failed:     0, Passed:    20, Skipped:     0, Total:    20, Duration: 7 s - Dbhq.Cpu6502.Tests.dll (net10.0)
+```
+
+The first run downloaded ten files from GitHub (five for LDA #, five for NOP, one per variant), checked each against its git blob hash from the manifest, and cached them under `.testdata`. Subsequent runs use the cached copies and re-check them before running the tests.
+
+### Decisions made
+
+**The manifest was generated from GitHub's tree API, not by scanning a local download.** Harte's repository is 5 GB. Alternative: download the whole repository and hash its files locally. Reason for the choice: a single API call records all hashes in one call, at a fixed commit; the tests can then verify downloads without anyone downloading the whole 5 GB. If Harte's repository were deleted or moved, the recorded hashes mean the files can still be verified.
+
+### Known differences
+
+The 65C02's extra decimal-mode cycle on `ADC #imm` (0x69) and `SBC #imm` (0xE9) is documented in `docs/known-differences.md`. Harte's data has the cycle read a fixed address that differs by variant, which looks like an artefact of how the data was made. The cycle must exist as a read; address and value are not compared. This exception is scoped to exactly cycle 2 of those two instructions when decimal mode is set.
+
+### Surprises
+
+None. The harness worked as designed on first build.

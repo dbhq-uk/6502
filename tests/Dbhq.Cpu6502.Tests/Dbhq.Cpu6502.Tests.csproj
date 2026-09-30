@@ -13,4 +13,8 @@
     <ProjectReference Include="../../src/Dbhq.Cpu6502/Dbhq.Cpu6502.csproj" />
     <ProjectReference Include="../Dbhq.Cpu6502.TestSupport/Dbhq.Cpu6502.TestSupport.csproj" />
   </ItemGroup>
+
+  <ItemGroup>
+    <None Include="Harte/harte.manifest" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
 </Project>
