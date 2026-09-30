@@ -288,3 +288,53 @@ The 65C02's extra decimal-mode cycle on ADC #imm (0x69) and SBC #imm (0xE9) is d
 ### Surprises
 
 None. The arithmetic operations worked as designed on first build. All 16 new opcodes passed their first test run against Harte's data for all five variants.
+
+## Task 5: Control flow and the stack
+
+Branches, jumps, subroutines, break, return from interrupt, and the four stack instructions. JMP indirect handles the NMOS page-wrap bug and the 65C02 fix. The 151 shared opcodes across all variants are now fully covered.
+
+### What was built
+
+Three files modified or created:
+
+- **`src/Dbhq.Cpu6502/Cpu.ControlFlow.cs`** (new file): Control flow helpers: `Branch(taken)`, `JmpIndirect`, `Jsr`, `Rts`, `Rti`, `Brk`. Branch handles conditional jumps with the timing of the false-condition path and the cross-page-boundary penalty read. JmpIndirect models the NMOS bug (pointer never carries into the high byte) against the 65C02 fix (extra throwaway read of the wrong address).
+- **`src/Dbhq.Cpu6502/Cpu.Official.cs`** (modified): Expanded from 133 opcodes to 151. Control flow section added with branches (0x10, 0x30, 0x50, 0x70, 0x90, 0xB0, 0xD0, 0xF0), jumps (0x4C, 0x6C), subroutines (0x20, 0x60), interrupt return (0x40), break (0x00). Stack section added: PHA, PHP, PLA, PLP (0x48, 0x08, 0x68, 0x28). Case labels verified: `grep -c "case 0x" src/Dbhq.Cpu6502/Cpu.Official.cs` returns 151.
+- **`tests/Dbhq.Cpu6502.Tests/Harte/Coverage.cs`** (modified): Added `ControlFlowAndStack` array with 18 opcodes, combined with prior arrays into `Official`.
+
+### Instructions implemented
+
+Eighteen opcodes:
+
+- **Branches (8)**: BPL, BMI, BVC, BVS, BCC, BCS, BNE, BEQ (0x10, 0x30, 0x50, 0x70, 0x90, 0xB0, 0xD0, 0xF0).
+- **Jumps and subroutines (3)**: JMP abs, JMP ind, JSR (0x4C, 0x6C, 0x20).
+- **Returns (2)**: RTS, RTI (0x60, 0x40).
+- **Break (1)**: BRK (0x00).
+- **Stack (4)**: PHA, PHP, PLA, PLP (0x48, 0x08, 0x68, 0x28).
+
+### The red step: opcodes not implemented
+
+Before `Cpu.ControlFlow.cs` and the updated `Cpu.Official.cs`, running `dotnet test --filter "FullyQualifiedName~Harte"` showed test failures for each newly covered opcode. Examples included Nmos6502 $00, Ricoh2A03 $F0, Wdc65C02 $40. Each reported "opcode $xx is not implemented". The previously implemented 133 opcodes and all harness tests continued to pass.
+
+### Tests and results
+
+All 765 tests pass.
+
+Run: `dotnet test` on 30 September 2026.
+
+```
+Passed!  - Failed:     0, Passed:   765, Skipped:     0, Total:   765, Duration: 3 m 26 s - Dbhq.Cpu6502.Tests.dll (net10.0)
+```
+
+The 765 passing tests comprise:
+
+- **CpuTests**: 3 methods, 7 cases.
+- **HarteRunnerTests**: 3 methods.
+- **Harte opcode tests**: 5 theory methods (one per variant), 755 cases (151 opcodes x 5 variants).
+
+### Decisions made
+
+No decisions: transcribed from the brief.
+
+### Surprises
+
+None. All 18 new opcodes passed their first test run against Harte's data for all five variants.

@@ -164,6 +164,28 @@ public sealed partial class Cpu
             case 0xE1: SbcAt(IzX()); break;
             case 0xF1: SbcAt(IzY(Access.Read)); break;
 
+            // Control flow
+            case 0x10: Branch(!Flag(N)); break;
+            case 0x30: Branch(Flag(N)); break;
+            case 0x50: Branch(!Flag(V)); break;
+            case 0x70: Branch(Flag(V)); break;
+            case 0x90: Branch(!Flag(C)); break;
+            case 0xB0: Branch(Flag(C)); break;
+            case 0xD0: Branch(!Flag(Z)); break;
+            case 0xF0: Branch(Flag(Z)); break;
+            case 0x4C: PC = Abs(); break;
+            case 0x6C: JmpIndirect(); break;
+            case 0x20: Jsr(); break;
+            case 0x60: Rts(); break;
+            case 0x40: Rti(); break;
+            case 0x00: Brk(); break;
+
+            // Stack
+            case 0x48: Read(PC); Push(A); break;
+            case 0x08: Read(PC); Push((byte)(P | B | U)); break;
+            case 0x68: Read(PC); Read(StackAddress); A = NZ(Pull()); break;
+            case 0x28: Read(PC); Read(StackAddress); P = (byte)((Pull() & ~B) | U); break;
+
             default: return false;
         }
 

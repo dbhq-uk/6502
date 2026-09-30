@@ -28,7 +28,14 @@ public static class Coverage
         0x61, 0x65, 0x69, 0x6D, 0x71, 0x75, 0x79, 0x7D, 0xE1, 0xE5, 0xE9, 0xED, 0xF1, 0xF5, 0xF9, 0xFD,
     ];
 
-    private static readonly byte[] Official = [..LoadsStoresLogicAndShifts, ..Arithmetic];
+    // Task 5: branches, jumps, subroutines, BRK, RTI and the stack.
+    private static readonly byte[] ControlFlowAndStack =
+    [
+        0x00, 0x08, 0x10, 0x20, 0x28, 0x30, 0x40, 0x48, 0x4C, 0x50, 0x60, 0x68, 0x6C, 0x70, 0x90, 0xB0,
+        0xD0, 0xF0,
+    ];
+
+    private static readonly byte[] Official = [..LoadsStoresLogicAndShifts, ..Arithmetic, ..ControlFlowAndStack];
 
     private static readonly byte[] NmosOnly = [];
 
