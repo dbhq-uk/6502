@@ -8,6 +8,25 @@ cost $175 at the time, and the 6502 sold for less than a sixth of the price of
 it or Intel's 8080. That price is why it ended up in most of the
 machines that started home computing, and in the consoles that followed.
 
+## Who made it
+
+A team led by **Chuck Peddle** at MOS Technology in Pennsylvania. Peddle had
+worked on Motorola's 6800 and proposed a cheaper microprocessor; Motorola's
+management were not interested and told him to stop. On 19 August 1974 seven
+of them left Motorola for MOS: Peddle, **Bill Mensch**, **Rod Orgill**,
+**Wil Mathys**, **Harry Bawcom**, **Ray Hirt** and **Terry Holdt**.
+
+Peddle, Orgill and Mathys designed the architecture. Mensch, who had
+designed Motorola's 6820 interface chip, worked on the instruction decoder,
+the arithmetic unit and the registers. Bawcom, Mike Janes and Sydney-Anne
+Holt did the layout. The first chips had no rotate-right instruction, `ROR`;
+a later revision added it.
+
+Commodore bought MOS Technology in 1976. Peddle was the main designer of the
+KIM-1 and of its successor, the Commodore PET. Mensch founded the Western
+Design Center in 1978, and its first product was the 65C02, the CMOS 6502
+that WDC still makes. The core's `Wdc65C02` variant is that chip.
+
 Years are first release. Where a machine launched in different years in
 different regions, the earliest is given.
 
@@ -234,6 +253,7 @@ new machines around it.
 
 - [MOS Technology 6502](https://en.wikipedia.org/wiki/MOS_Technology_6502), Wikipedia: launch, price, variants and uses
 - [WDC 65C02](https://en.wikipedia.org/wiki/WDC_65C02), Wikipedia: 65C02 machines, differences and current production
+- [Chuck Peddle](https://en.wikipedia.org/wiki/Chuck_Peddle) and [Western Design Center](https://en.wikipedia.org/wiki/Western_Design_Center), Wikipedia: who made it
 - [KIM-1](https://en.wikipedia.org/wiki/KIM-1), [SYM-1](https://en.wikipedia.org/wiki/SYM-1) and [AIM-65](https://en.wikipedia.org/wiki/AIM-65), Wikipedia. Sources disagree on both boards' years; 1978 is the best supported
 - [6502-based home computers](https://en.wikipedia.org/wiki/Category:6502-based_home_computers), Wikipedia category
 - [Atari 6502 Vector hardware](https://www.system16.com/hardware.php?id=759), System 16
