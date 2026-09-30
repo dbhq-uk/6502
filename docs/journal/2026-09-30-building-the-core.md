@@ -432,3 +432,13 @@ The tests run on Linux, locally and in CI, and are skipped elsewhere with the re
 Red (`dotnet test --filter "FullyQualifiedName~Dormann"`, before `Dormann.cs` existed): the build failed, `DormannTests.cs(38,50): error CS0234: The type or namespace name 'Dormann' does not exist in the namespace 'Dbhq.Cpu6502.TestSupport'`.
 Green (`dotnet test`, whole suite, after the code): `Passed!  - Failed:     0, Passed:  1447, Skipped:     0, Total:  1447, Duration: 2 m 33 s`. `dotnet test --list-tests --filter "FullyQualifiedName~Dormann"` listed 12 cases from 3 methods: 5 functional + 3 extended + 4 decimal. That is the 1435 from Task 8 plus 12 = 1447.
 No decisions: transcribed from the brief.
+
+## Task 10: The disassembler and tracer; nestest matches line for line
+
+Created: `AddressingMode.cs`, `OpcodeTable.cs`, `Disassembler.cs` and `Tracer.cs` in `src/Dbhq.Cpu6502/`, and `NestestTests.cs` in `tests/Dbhq.Cpu6502.Tests/Nestest/`. Nothing modified. `OpcodeTable` knows every opcode on every variant, for disassembly only. `Disassembler` produces text form like "LDA $1234,X". `Tracer` captures CPU state and the instruction about to run, and its `ToString()` is the Nintendulator log format without the PPU column. The 8,991 lines of nestest's log are each compared with what the tracer produces.
+
+Red (`dotnet test --filter "FullyQualifiedName~Nestest"`, before any source files existed): the build failed, `NestestTests.cs(30,13): error CS0246: The type or namespace name 'TraceLine' could not be found`. Also `NestestTests.cs(30,32): error CS0103: The name 'Tracer' does not exist in the current context`.
+
+Green (`dotnet test`, whole suite, after the code): `Passed!  - Failed:     0, Passed:  1449, Skipped:     0, Total:  1449, Duration: 2 m 53 s`. That is the 1447 from Task 9 plus 2 test methods from `NestestTests`, totalling 1449. The nestest ROM and log were downloaded on first run, checked against recorded SHA-256 hashes, cached, and the run verified both error codes at $02 and $03 were zero.
+
+No decisions: transcribed from the brief.
