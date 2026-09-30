@@ -1,0 +1,12 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../../src/Dbhq.Cpu6502/Dbhq.Cpu6502.csproj" />
+    <!-- The same source file the browser app compiles: one workload, two hosts. -->
+    <Compile Include="../Dbhq.Cpu6502.WasmBench/Workload.cs" Link="Workload.cs" />
+  </ItemGroup>
+</Project>

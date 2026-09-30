@@ -10,3 +10,6 @@ node_modules/
 # and never committed. See AGENTS.md.
 .testdata/
 .superpowers/
+
+# Published output of the browser speed check, made locally.
+bench/Dbhq.Cpu6502.WasmBench/publish/

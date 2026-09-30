@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk.WebAssembly">
+  <PropertyGroup>
+    <IsPackable>false</IsPackable>
+    <!-- The JavaScript interop generator writes unsafe code for [JSExport], and refuses to compile without this. -->
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <AssemblyName>Dbhq.Cpu6502.WasmBench</AssemblyName>
+    <RootNamespace>Dbhq.Cpu6502.WasmBench</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../../src/Dbhq.Cpu6502/Dbhq.Cpu6502.csproj" />
+  </ItemGroup>
+</Project>
