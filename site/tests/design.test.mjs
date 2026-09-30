@@ -28,13 +28,113 @@ test('every text colour meets AA on the black canvas', () => {
   }
 });
 
-test('text meets AA on the card, window and nav surfaces it is actually set on', () => {
+test('the three body text colours meet AA on the card, window and nav surfaces', () => {
   for (const surface of ['iron', 'card', 'veil']) {
     for (const name of ['white', 'moss-70', 'sage-60']) {
       const ratio = contrast(color(name), color(surface));
       assert.ok(ratio >= AA, `--${name} on --${surface} is ${ratio.toFixed(2)} to 1`);
     }
   }
+});
+
+// Every rule in global.css that sets a text colour, and the surface(s) it is set on.
+// The test below fails if a colour rule is missing from this table, so a new rule
+// has to say where it sits before it can ship. The nav bar is translucent: its
+// colour is the CSS rgba blended over the black canvas, which is what a reader
+// sees at the top of a page. (Scrolled over lighter content it can differ.)
+const css = global.replace(/\/\*[\s\S]*?\*\//g, '').replace(/@media[^{]*\{/g, '');
+const rules = [...css.matchAll(/([^{}]+)\{([^}]*)\}/g)].map((m) => ({ selector: m[1].trim().replace(/\s+/g, ' '), body: m[2] }));
+
+const nav = (() => {
+  const m = /\.top \{[^}]*background: rgba\((\d+), (\d+), (\d+), ([\d.]+)\)/.exec(css);
+  assert.ok(m, 'the nav bar background is not an rgba the test can read');
+  const alpha = Number(m[4]);
+  const bg = color('void');
+  return '#' + [1, 2, 3].map((i, k) => Math.round(Number(m[i]) * alpha + parseInt(bg.slice(1 + 2 * k, 3 + 2 * k), 16) * (1 - alpha)).toString(16).padStart(2, '0')).join('');
+})();
+const surface = (name) => (name === 'nav' ? nav : color(name));
+
+const ON = {
+  body: ['void'],
+  a: ['void', 'iron'],
+  'a:hover': ['void', 'iron'],
+  '.skip': ['white'],
+  'h1, h2, h3': ['void', 'iron', 'card'],
+  '.eyebrow': ['void'],
+  '.brand': ['nav'],
+  '.brand small': ['nav'],
+  '.links a': ['nav'],
+  '.links a:hover, .links a[aria-current="page"]': ['nav'],
+  '.btn': ['iron'],
+  '.btn:hover': ['veil'],
+  '.btn.pill': ['lime'],
+  '.btn.pill:hover': ['lime'],
+  '.hero .lede': ['void'],
+  '.figure-caption': ['void'],
+  '.card b': ['card'],
+  '.chip': ['void', 'card'],
+  '.chip.on': ['white'],
+  '.note': ['void'],
+  '.win .bar span': ['iron'],
+  '.win pre': ['iron'],
+  '.win .k': ['iron'],
+  '.entry time': ['void'],
+  '.entry h2 a, .entry h3 a': ['void'],
+  '.prose code': ['iron'],
+  '.prose th': ['void'],
+  '.prose blockquote': ['void'],
+  '.meta': ['void'],
+  '.filters label': ['void'],
+  '.filters select': ['iron'],
+  '.data th': ['iron'],
+  '.status': ['void', 'card'],
+  '.status.running': ['white'],
+  '.count': ['void'],
+  footer: ['void'],
+  'footer a': ['void'],
+  'footer .linkbtn': ['void'],
+  'footer .linkbtn:hover': ['void'],
+  '.consent': ['iron'],
+  '.consent .consent-note': ['iron'],
+};
+
+test('every text colour rule is placed on a surface, and reaches AA on each one it is set on', () => {
+  const unplaced = [];
+  const failures = [];
+  for (const { selector, body } of rules) {
+    if (!/(?<![-\w])color:/.test(body)) continue;
+    const m = /(?<![-\w])color:\s*var\(--([\w-]+)\)/.exec(body);
+    if (!m) { failures.push(`${selector}: colour is not a token`); continue; }
+    if (!ON[selector]) { unplaced.push(selector); continue; }
+    for (const s of ON[selector]) {
+      const ratio = contrast(color(m[1]), surface(s));
+      if (ratio < AA) failures.push(`${selector}: --${m[1]} on ${s} is ${ratio.toFixed(2)} to 1`);
+    }
+  }
+  assert.deepEqual(unplaced, [], 'colour rules with no surface in the table');
+  assert.deepEqual(failures, []);
+  const stale = Object.keys(ON).filter((k) => !rules.some((r) => r.selector === k && /(?<![-\w])color:/.test(r.body)));
+  assert.deepEqual(stale, [], 'table entries for rules that no longer set a colour');
+});
+
+test('the two dimmest text colours are used only where they were measured to pass', () => {
+  // sage-40 and deep pass on the black canvas alone. Naming the bar they fail on keeps the reason in the suite.
+  for (const name of ['sage-40', 'deep']) {
+    assert.ok(contrast(color(name), color('void')) >= AA, `--${name} must pass on black`);
+    assert.ok(contrast(color(name), nav) < AA, `--${name} unexpectedly passes on the nav bar: widen its use or drop this guard`);
+  }
+  for (const { selector, body } of rules) {
+    const m = /(?<![-\w])color:\s*var\(--(sage-40|deep)\)/.exec(body);
+    if (m) assert.deepEqual(ON[selector], ['void'], `${selector} sets --${m[1]} on a surface other than the black canvas`);
+  }
+});
+
+test('the navigation links are never hidden, at any width', () => {
+  const hidden = rules.filter((r) => /(^|[\s,])\.(links|top|brand)\b/.test(r.selector) && /display:\s*none/.test(r.body));
+  assert.deepEqual(hidden.map((r) => r.selector), []);
+  const wrap = rules.find((r) => r.selector === '.top .wrap' && /flex-wrap:\s*wrap/.test(r.body));
+  assert.ok(wrap, 'the header must be able to wrap onto a second row');
+  assert.ok(rules.some((r) => r.selector === '.links' && /flex-wrap:\s*wrap/.test(r.body)), 'the links must be able to wrap');
 });
 
 test('the lime accent works as a fill: dark text on it, and it stands out from the canvas', () => {

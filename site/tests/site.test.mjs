@@ -36,6 +36,10 @@ test('no en or em dash anywhere in the built site, and none of the names this pr
   }
 });
 
+test('no HTML comment is served: internal notes stay in the source', () => {
+  for (const p of all) assert.ok(!/<!--/.test(p.html), `${p.url} serves an HTML comment`);
+});
+
 test('the copy is in British English', () => {
   const banned = /\b(color|colors|organize|organizes|organized|behavior|centered|analyze|recognize|optimize|catalog)\b/i;
   for (const p of all) {

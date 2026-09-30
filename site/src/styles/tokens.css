@@ -24,11 +24,15 @@
   --moss-80: #aed2a4;
   --moss-70: #9cbf93;
   --sage-60: #8cab87;
+  /* Meets AA only on the black canvas (4.69 to 1). On iron, veil and card it is
+     under 4.5, so it is used nowhere else: tests/design.test.mjs maps every
+     colour rule to its surface and fails if that changes. */
   --sage-40: #677d64;
   --fern: #859984;
   /* The reference's #697368 measures 4.25 to 1 on black, under the 4.5 that AA
-     asks of small text, so this is lightened to #737d72 (4.91). tests/design.test.mjs
-     holds it. */
+     asks of small text, so this is lightened to #737d72 (4.91 on black). That
+     holds on the canvas only: on iron it is 4.15 and on the navigation bar 3.88,
+     so it is used only on the canvas. tests/design.test.mjs holds it. */
   --deep: #737d72;
 
   /* type */

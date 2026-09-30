@@ -14,9 +14,10 @@
 # shared .dbhq.uk parent, so a cookie dropped here without consent is a cookie
 # across the whole estate.
 #
-# style-src needs 'unsafe-inline' because Astro inlines every stylesheet
-# (build.inlineStylesheets: 'always'), which keeps the first paint unblocked.
-# That is the only other relaxation here.
+# Two other relaxations, both narrow. style-src needs 'unsafe-inline' because
+# Astro inlines every stylesheet (build.inlineStylesheets: 'always'), which keeps
+# the first paint unblocked. img-src allows data: URIs for small inlined images,
+# which cannot run script.
 #
 # Adding any further origin means asking what it sets and whether the consent
 # prompt covers it.

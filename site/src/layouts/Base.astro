@@ -17,6 +17,11 @@ const { title, description } = Astro.props;
 const path = Astro.url.pathname;
 const canonical = new URL(path, SITE.url).href;
 const fullTitle = path === '/' ? title : `${title} | 6502`;
+
+// The three scripts below are external modules, deferred by type. There is no
+// inline script on this site: its CSP has no 'unsafe-inline' in script-src.
+// analytics.js must come before consent.js, because consent.js calls what it
+// defines. (A frontmatter comment on purpose: an HTML comment would be served.)
 ---
 
 <!doctype html>
@@ -35,9 +40,6 @@ const fullTitle = path === '/' ? title : `${title} | 6502`;
     <meta property="og:url" content={canonical} />
     <meta property="og:locale" content="en_GB" />
     <meta name="twitter:card" content="summary" />
-    <!-- External modules, deferred by type. There is no inline script on this
-         site: its CSP has no 'unsafe-inline' in script-src. analytics.js must
-         come before consent.js, because consent.js calls what it defines. -->
     <script is:inline type="module" src="/analytics.js"></script>
     <script is:inline type="module" src="/consent.js"></script>
     <script is:inline type="module" src="/machines-table.js"></script>

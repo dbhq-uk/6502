@@ -160,3 +160,32 @@ The look, the page layout, the analytics and consent files, and the first two pa
 
 - Before any page existed, the build still succeeded and the HTML validity test passed, because it had no pages to check. A rule that runs over "every built page" says nothing about a site with none, which is why `site.test.mjs` has a test that fails when no page was built.
 - `npm install` printed a warning that `esbuild@0.28.2` has an install script not yet covered by `allowScripts`. The install and build worked without it, and nothing was approved.
+
+### Task 5 review: what it found and what changed
+
+The review agreed the code matched the plan. It then found three defects that the plan itself had mandated, and four smaller ones. All are fixed in one follow-up commit.
+
+**What the review found, and what was changed**
+
+- **Contrast tests said more than they checked.** The test titled "text meets AA on the card, window and nav surfaces it is actually set on" only checked three colours. A throwaway node script that computes WCAG contrast from the tokens showed the real failures: `--sage-40` on `--iron` is 3.97 to 1 (used for the consent note and the terminal window's title), and `--deep` on the navigation bar is 3.88 to 1 once the 85 percent translucency over black is counted (3.62 on `--veil` alone). Both are under 4.5. **The fix changes the use, not the palette:** the consent note, the window title and the brand's "by dbhq" now use `--fern` (5.82 on iron, 5.44 on the blended nav bar, same script). `--sage-40` and `--deep` are now used only on the black canvas, where they pass (4.69 and 4.91). The `--deep` comment in `tokens.css` said it "holds", which was true only on black, and now says so.
+- **The design test now covers every colour rule.** It reads every rule in `global.css` that sets a text colour, looks up the surface it sits on in a table, and computes the ratio from the real tokens, with the nav bar's colour computed from its own `rgba`. A new colour rule with no entry in the table fails the suite, and so does a table entry for a rule that no longer exists. The nav bar's blend is over black; scrolled over lighter content it can differ, and the test comment says so.
+- **No navigation below 900px.** `.links` was `display: none` under 900px with nothing to replace it, so a phone had no way to reach any page. The header now wraps: the links drop to a second row under the brand, with no script, and the GitHub button stays. A test fails if a `display: none` returns on the links, the brand or the header, at any width.
+- **No way to withdraw consent.** Once a reader answered, the prompt never came back. The footer now has a `Cookie choice` button (a real `<button>`). `consent.js` wires it (the CSP allows no inline handler): it removes the `dbhq-consent` key, calls a new `__dbhqRevokeGA()` in `analytics.js` that puts all four Consent Mode signals back to denied, and reopens the dialog with `showModal()`.
+- **A bug found while writing that.** Accepting again in the same page load would have done nothing, because `__dbhqEnableGA()` returned early once the tag had loaded, so consent would stay denied. It now sends the granted update first when the tag is already there. A test holds that order.
+- **Enter granted consent.** Accept had `autofocus`, so a bare Enter on opening the prompt accepted. Initial focus is on the dialog heading now (`tabindex="-1"`, `autofocus`), and Decline still comes first.
+- **A comment that was untrue.** `consent.js` said Escape returns the prompt "next visit". It returns on the next page load, since nothing is stored. The comment says that.
+- **Internal notes were being served.** The HTML comments in `Consent.astro` and `Base.astro` went out in every page, and `analytics.js` is copied as it is and named another project, the analytics property and a path in another repository. The comments are now frontmatter comments, which Astro does not emit, and the `analytics.js` header describes what the file does without those names. Tests fail on any HTML comment in built output and on those names in `analytics.js`.
+- **The `_headers` comment.** It called `style-src 'unsafe-inline'` "the only other relaxation", but `img-src` also allows `data:`. Both are named now.
+- **The 404 page.** The analytics and consent-prompt checks skipped it. They now cover it, because it is built from the same layout and loads the same scripts.
+
+**What the tests showed**
+
+- `npm test` in `site/` ran 53 tests and all 53 passed: the 43 from before plus 10 new.
+- With the source under `src/` and `public/` put back to the first version and the new tests kept, the same command ran 53 tests with 43 passing and 10 failing, one for each finding above. The tests fail without the fixes.
+- `grep -c "Modal\|DESIGN.md" dist/about/index.html` printed 0, so the design notes in the stylesheet's comments are not in the served page either.
+
+**What it says about the plan**
+
+The plan mandated the contrast wording, the hidden navigation, the missing withdrawal control and Accept-first focus. Each was a defect in its own right, not a slip in copying the plan.
+
+**Not done, on purpose:** withdrawing stops measurement and cookie writing, but does not delete a `_ga` cookie already set. Deleting one on the shared parent domain is a decision about the whole estate, so it is left alone.

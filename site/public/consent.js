@@ -40,7 +40,24 @@ if (dlg) {
   dlg.querySelector("[data-consent-accept]").addEventListener("click", () => set("granted"));
   dlg.querySelector("[data-consent-decline]").addEventListener("click", () => set("denied"));
 
-  // Only ask if they have not already answered. Escape counts as no answer, so
-  // the prompt returns next visit rather than being treated as consent.
+  // The footer's "Cookie choice" button is how a reader changes their mind.
+  // It forgets the stored answer, puts all four Consent Mode signals back to
+  // denied, and asks again. Wired here because the CSP allows no inline handler.
+  const reopen = document.querySelector("[data-consent-reopen]");
+  if (reopen) {
+    reopen.addEventListener("click", () => {
+      try {
+        localStorage.removeItem("dbhq-consent");
+      } catch (e) {
+        // Nothing stored that can be removed. The signals below still reset.
+      }
+      if (typeof window.__dbhqRevokeGA === "function") window.__dbhqRevokeGA();
+      if (!dlg.open) dlg.showModal();
+    });
+  }
+
+  // Only ask if they have not already answered. Escape closes the prompt
+  // without storing anything, so it is asked again on the next page load, not
+  // only on the next visit, and is never treated as consent.
   if (choice !== "granted" && choice !== "denied") dlg.showModal();
 }
