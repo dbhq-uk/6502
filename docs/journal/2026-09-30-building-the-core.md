@@ -433,7 +433,7 @@ Red (`dotnet test --filter "FullyQualifiedName~Dormann"`, before `Dormann.cs` ex
 Green (`dotnet test`, whole suite, after the code): `Passed!  - Failed:     0, Passed:  1447, Skipped:     0, Total:  1447, Duration: 2 m 33 s`. `dotnet test --list-tests --filter "FullyQualifiedName~Dormann"` listed 12 cases from 3 methods: 5 functional + 3 extended + 4 decimal. That is the 1435 from Task 8 plus 12 = 1447.
 No decisions: transcribed from the brief.
 
-## Task 10: The disassembler and tracer; nestest matches line for line
+## Task 10: The disassembler and tracer; nestest matches on the fields it compares
 
 Created: `AddressingMode.cs`, `OpcodeTable.cs`, `Disassembler.cs` and `Tracer.cs` in `src/Dbhq.Cpu6502/`, and `NestestTests.cs` in `tests/Dbhq.Cpu6502.Tests/Nestest/`. Nothing modified. `OpcodeTable` knows every opcode on every variant, for disassembly only. `Disassembler` produces text form like "LDA $1234,X". `Tracer` captures CPU state and the instruction about to run, and its `ToString()` follows the layout of the Nintendulator log, without its PPU column and without its = xx and @ annotations. The lines of nestest's log are each compared on program counter, instruction bytes, mnemonic and undocumented mark, A, X, Y, P, SP and cycle count; operand text and the log's annotations are not compared. (`wc -l .testdata/nestest/nestest.log` gives 8991.)
 
