@@ -34,8 +34,30 @@ export function parseBrowser(text) {
   return m ? `Chrome ${m[1]}` : null;
 }
 
+/**
+ * What `systemd-detect-virt` says, or null when it says nothing. The tool prints
+ * "none" and exits 1 on a physical machine, so an exit code alone cannot tell
+ * "physical" from "the tool failed". Only the word "none" on the tool's own
+ * output means physical; a missing tool or any other failure is unknown.
+ * `runner(cmd, args)` returns the tool's output and throws on a non-zero exit,
+ * with the output on `error.stdout`, as `execFileSync` does.
+ */
+export function detectVirtualisation(runner) {
+  let out;
+  try {
+    out = runner('systemd-detect-virt', []);
+  } catch (error) {
+    out = error?.code === 'ENOENT' ? null : error?.stdout;
+  }
+  const word = typeof out === 'string' ? out.trim() : '';
+  return word === '' ? null : word;
+}
+
+/** `virtualisation` is a word from the tool, "none" for a physical machine, or null when it could not be told. */
 export function describeMachine({ virtualisation, model, cores }) {
-  const kind = virtualisation && virtualisation !== 'none' ? `a ${virtualisation.toUpperCase()} virtual machine` : 'a physical machine';
+  let kind = 'a machine of unknown type';
+  if (virtualisation === 'none') kind = 'a physical machine';
+  else if (virtualisation) kind = `a ${virtualisation.toUpperCase()} virtual machine`;
   return `${kind}, ${model}, ${cores} cores`;
 }
 
@@ -43,7 +65,6 @@ export const WORKLOAD =
   'A synthetic 6502 program of our own, run on a plain 64 KB array with no logging: 100 million cycles per run after a 5 million cycle warm-up.';
 
 const run = (cmd, args, options = {}) => execFileSync(cmd, args, { encoding: 'utf8', stdio: ['ignore', 'pipe', 'inherit'], maxBuffer: 1 << 26, ...options });
-const tryRun = (cmd, args) => { try { return run(cmd, args).trim(); } catch { return null; } };
 
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
   const runs = Number(process.argv[2] ?? 5);
@@ -77,7 +98,7 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
   const record = {
     collected: new Date().toISOString().slice(0, 10),
     machine: {
-      description: describeMachine({ virtualisation: tryRun('systemd-detect-virt', []), model: cpu ?? os.cpus()[0].model, cores: os.cpus().length }),
+      description: describeMachine({ virtualisation: detectVirtualisation(run), model: cpu ?? os.cpus()[0].model, cores: os.cpus().length }),
       browser: parseBrowser(interpreterText) ?? parseBrowser(aotText),
       dotnet: run('dotnet', ['--version']).trim(),
     },

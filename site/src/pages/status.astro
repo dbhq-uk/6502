@@ -29,8 +29,8 @@ const spread = (mode) => `${fmt1(Math.min(...mode.runs.map((r) => r.mhz)))} to $
         <Card as="h2" value={fmt(fig.variants)} title="Variants of the core" text="Each proven against its own set of Tom Harte's tests." />
         <Card as="h2" value={fmt(fig.testsPassing)} title="Tests passing" text={`${fmt(results.total.failed)} failed, ${fmt(results.total.skipped)} skipped.`} />
         <Card as="h2" value={fmt(fig.harteTests)} title="Harte opcode tests" text="Each runs the recorded cases for one opcode, cycle by cycle." />
-        <Card as="h2" value={fmt(fig.dormannBuilds)} title="Dormann builds" text="Whole programs that check their own results." />
-        <Card as="h2" value={fmt(fig.interruptRuns)} title="Interrupt runs" text="Checked cycle by cycle against a model of the chip's transistors." />
+        <Card as="h2" value={fmt(fig.dormannTestsPassed)} title="Dormann builds" text="Whole programs that check their own results." />
+        <Card as="h2" value={fmt(fig.transistorModelTestsPassed)} title="Interrupt runs" text="Checked cycle by cycle against a model of the chip's transistors." />
       </div>
       <p class="note">Test run on commit {results.commit?.slice(0, 7) ?? 'unknown'}, {longDate(new Date(results.generated))}.</p>
     </div>

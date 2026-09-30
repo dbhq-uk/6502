@@ -122,6 +122,7 @@ section { padding: clamp(56px, 7vw, 96px) 0; }
 .meta { font-family: var(--font-mono); font-size: 12.5px; color: var(--deep); letter-spacing: 0; margin-bottom: 20px; }
 
 /* the machines and chips tables */
+.filters[hidden] { display: none; }
 .filters { display: flex; flex-wrap: wrap; gap: 12px; margin: 0 0 20px; }
 .filters label { display: flex; flex-direction: column; gap: 4px; font-size: 12px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--moss-70); }
 .filters select { background: var(--iron); color: var(--white); border: 1px solid var(--circuit); border-radius: 8px; padding: 8px 12px; font: inherit; font-size: 14px; text-transform: none; letter-spacing: 0; }

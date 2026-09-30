@@ -1,9 +1,9 @@
 ---
 import { getCollection } from 'astro:content';
 import Base from '../../layouts/Base.astro';
-import { shortDate } from '../../lib/site.mjs';
+import { newestFirst, shortDate } from '../../lib/site.mjs';
 
-const entries = (await getCollection('journal')).sort((a, b) => b.data.date - a.data.date || b.data.order - a.data.order);
+const entries = (await getCollection('journal')).sort(newestFirst);
 ---
 
 <Base title="Journal" description="What was decided, what was checked, what went wrong and why, as the 6502 work happens.">

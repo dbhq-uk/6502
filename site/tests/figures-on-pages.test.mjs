@@ -39,7 +39,7 @@ function allowedNumbers() {
     '6502',
     String(REFERENCE_MHZ),
     fmt(f.machinesImplemented), fmt(f.machinesInScope), fmt(f.machinesInProgress), fmt(f.variants), fmt(f.testsPassing), fmt(f.harteTests),
-    fmt(f.dormannBuilds), fmt(f.interruptRuns), fmt(f.speedTarget), fmt1(f.speedAot), fmt1(f.speedInterpreter), fmt1(f.speedNative),
+    fmt(f.dormannTestsPassed), fmt(f.transistorModelTestsPassed), fmt(f.speedTarget), fmt1(f.speedAot), fmt1(f.speedInterpreter), fmt1(f.speedNative),
     fmt(results.total.passed), fmt(results.total.failed), fmt(results.total.skipped),
     ...Object.values(results.suites).flatMap((s) => [fmt(s.passed), fmt(s.failed), fmt(s.skipped)]),
     ...modes.flatMap((m) => [...m.runs.map((r) => fmt1(r.mhz)), fmt1(best(m)), fmt1(best(m) / REFERENCE_MHZ), fmt(m.runs.length)]),
@@ -84,8 +84,8 @@ test('each headline figure is exactly the value computed from the data', () => {
     fmt(f.variants),
     fmt(f.testsPassing),
     fmt(f.harteTests),
-    fmt(f.dormannBuilds),
-    fmt(f.interruptRuns),
+    fmt(f.dormannTestsPassed),
+    fmt(f.transistorModelTestsPassed),
   ]);
 });
 

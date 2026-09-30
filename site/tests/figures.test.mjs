@@ -15,8 +15,8 @@ test('figures are computed from the registry, the results and the measurements',
   assert.equal(f.machinesInScope, 2);
   assert.equal(f.variants, 2);
   assert.equal(f.harteTests, 22);
-  assert.equal(f.dormannBuilds, 4);
-  assert.equal(f.interruptRuns, 5);
+  assert.equal(f.dormannTestsPassed, 4);
+  assert.equal(f.transistorModelTestsPassed, 5);
   assert.equal(f.speedAot, 25);
 });
 
@@ -27,7 +27,26 @@ test('numbers are formatted the British way', () => {
 
 test('the real figures can be computed', () => {
   const f = figures({ registry: loadRegistry(), results: loadResults(), measurements: loadMeasurements() });
-  assert.ok(f.testsPassing > 0 && f.speedAot > 0);
+  for (const key of ['testsPassing', 'variants', 'harteTests', 'dormannTestsPassed', 'transistorModelTestsPassed', 'speedAot']) {
+    assert.ok(f[key] > 0, `${key} must be positive, got ${f[key]}`);
+  }
+  assert.equal(typeof f.machinesInProgress, 'number');
+  assert.ok(Number.isInteger(f.machinesInProgress) && f.machinesInProgress >= 0);
+});
+
+test('a missing suite stops the build and names the suite, rather than publishing 0', () => {
+  const registry = { machines: [], chips: [] };
+  const measurements = { modes: { native: { runs: [{ mhz: 1 }] }, interpreter: { runs: [{ mhz: 1 }] }, aot: { runs: [{ mhz: 1 }] } } };
+  const suite = { passed: 1, failed: 0, skipped: 0 };
+  const all = { XHarte: suite, DormannTests: suite, TransistorModelTests: suite };
+  const compute = (suites) => figures({ registry, results: { total: { passed: 3 }, suites }, measurements });
+  assert.doesNotThrow(() => compute(all));
+  const { DormannTests, ...withoutDormann } = all;
+  assert.throws(() => compute(withoutDormann), /"DormannTests"[\s\S]*figures\.mjs/);
+  const { TransistorModelTests, ...withoutModel } = all;
+  assert.throws(() => compute(withoutModel), /"TransistorModelTests"/);
+  // A suite that is present but has run nothing is a real 0 and is still published.
+  assert.equal(compute({ ...all, DormannTests: { passed: 0, failed: 0, skipped: 0 } }).dormannTestsPassed, 0);
 });
 
 test('the real registry is valid against the real test results', () => {
