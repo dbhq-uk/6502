@@ -30,8 +30,8 @@ const numbersIn = (text) => [...text.matchAll(NUMBER)].map((m) => m[0]);
 const dateParts = (d) => [String(d.getUTCDate()), String(d.getUTCFullYear())];
 
 // The figures a page may show, each computed from the data. Two literals name
-// things: the chip ("6502") and the reference machine's clock, which is a
-// constant of the design. Nothing else is allowed, so a typed number fails.
+// things: the chip ("6502") and the reference machine's clock, which is the
+// site's own choice (the design's target is 25 times real speed, for the core alone). Nothing else is allowed, so a typed number fails.
 function allowedNumbers() {
   const modes = Object.values(measurements.modes);
   const generated = new Date(results.generated);
@@ -130,9 +130,24 @@ test('the pages say "not yet met" when the browser build is below the target, an
   assert.ok(status.includes(`${fmt1(f.speedAot)} times: ${verdictAot}`));
 });
 
-test('the status page tells the reader which commit its figures came from', () => {
-  if (results.commit) assert.ok(visibleText(page('/status/').html).includes(results.commit.slice(0, 7)));
+test('the status page tells the reader which commit its figures came from, and the results file names a full commit', () => {
+  assert.match(results.commit ?? '', /^[0-9a-f]{40}$/, 'results.json has no full commit hash: regenerate it with make-results.mjs');
+  assert.ok(visibleText(page('/status/').html).includes(results.commit.slice(0, 7)));
   assert.match(visibleText(page('/status/').html), /Test run on commit/);
+});
+
+test('the speed figures are called one collection of runs, and the rows say what each ran in', () => {
+  const status = readable(page('/status/').html);
+  const n = fmt(measurements.modes.aot.runs.length);
+  assert.ok(status.includes(`In this collection of ${n} runs`), 'the best figures are not tied to their collection of runs');
+  assert.ok(status.includes('A different collection of runs gives a different best'));
+  // The browser is named for the browser rows only. The native row ran with no browser.
+  assert.ok(status.includes(`The browser rows of the table ran in ${measurements.machine.browser}`));
+  assert.ok(status.includes(`the ${measurements.modes.native.label} row ran directly on the machine`));
+  assert.ok(!status.includes(`, in ${measurements.machine.browser}.`), 'the browser is named as if it applied to every row');
+  // The home card dates the measurement it quotes.
+  const home = readable(page('/').html);
+  assert.match(home, new RegExp(`collected ${new Date(measurements.collected).getUTCDate()} \\w+ ${new Date(measurements.collected).getUTCFullYear()}`));
 });
 
 test('the home page shows the count of machines implemented and where the results came from', () => {

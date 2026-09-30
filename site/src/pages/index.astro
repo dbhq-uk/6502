@@ -6,10 +6,10 @@ import Card from '../components/Card.astro';
 import hero from '../assets/imagery/hero-die.webp';
 import { fig, results, registry, measurements } from '../lib/data.mjs';
 import { fmt, fmt1, REFERENCE_MHZ, targetVerdict } from '../lib/figures.mjs';
-import { shortDate } from '../lib/site.mjs';
+import { newestFirst, shortDate } from '../lib/site.mjs';
 
 const entries = (await getCollection('journal'))
-  .sort((a, b) => b.data.date - a.data.date || b.data.order - a.data.order)
+  .sort(newestFirst)
   .slice(0, 3);
 const first = registry.machines.filter((m) => m.priority).sort((a, b) => a.priority - b.priority);
 const suites = Object.entries(results.suites).sort(([, a], [, b]) => b.passed - a.passed).slice(0, 5);
@@ -44,7 +44,7 @@ const suites = Object.entries(results.suites).sort(([, a], [, b]) => b.passed - 
         <Card value={`${fmt(fig.machinesImplemented)} of ${fmt(fig.machinesInScope)}`} title="Machines implemented" text="A machine counts only once it runs in the browser and passes an automated test." />
         <Card value={fmt(fig.variants)} title="Variants of the core" text="The NMOS 6502, the NES's 2A03, and three 65C02s." />
         <Card value={fmt(fig.testsPassing)} title="Tests passing" text="From the latest test run, on the commit shown below." />
-        <Card value={`${fmt1(fig.speedAot)} times`} title={`Against a ${REFERENCE_MHZ} MHz machine, in the browser`} text={`Compiled ahead of time, best of ${fmt(measurements.modes.aot.runs.length)} runs, on one machine on one day. The design target is at least ${fmt(fig.speedTarget)} times real speed, for the core alone. Against this site's ${REFERENCE_MHZ} MHz reference it is ${targetVerdict(fig.speedNative)} natively and ${targetVerdict(fig.speedAot)} in the browser.`} />
+        <Card value={`${fmt1(fig.speedAot)} times`} title={`Against a ${REFERENCE_MHZ} MHz machine, in the browser`} text={`Compiled ahead of time, best of ${fmt(measurements.modes.aot.runs.length)} runs, on one machine, collected ${shortDate(new Date(measurements.collected))}. The design target is at least ${fmt(fig.speedTarget)} times real speed, for the core alone. Against this site's ${REFERENCE_MHZ} MHz reference it is ${targetVerdict(fig.speedNative)} natively and ${targetVerdict(fig.speedAot)} in the browser.`} />
       </div>
       <p class="note">Test run on commit {results.commit?.slice(0, 7) ?? 'unknown'}.</p>
     </div>
@@ -55,7 +55,7 @@ const suites = Object.entries(results.suites).sort(([, a], [, b]) => b.passed - 
       <div>
         <p class="eyebrow">Proof</p>
         <h2>A difference is a number, not an argument</h2>
-        <p>The core is checked against recorded data from the real chip, cycle by cycle. When something differs, the test names the cycle and the byte.</p>
+        <p>The core is checked against Tom Harte's SingleStepTests, a published record of every opcode's bus activity, cycle by cycle. When something differs, the test names the cycle and the byte.</p>
         <p>Where it knowingly differs from a reference, that is written down too.</p>
       </div>
       <div class="win">

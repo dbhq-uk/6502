@@ -94,7 +94,7 @@ Read from `site/src/data/measurements.json` with a short `node -e` script. The m
 | Browser, ahead of time | 48.85 MHz | 29.137 MHz |
 | Browser, interpreter | 4.965 MHz | 1.948 MHz |
 
-- **The design target was 25 times a 2 MHz machine, which is 50 MHz. The best ahead-of-time run is 48.85 MHz, which is 24.4 times (48.85 / 2 = 24.425).** That is below the target, by a small margin. It is not rounded up. Native clears it easily: its best run is 107.986 MHz, 54.0 times.
+- **The design target was 25 times a 2 MHz machine, which is 50 MHz.** (Corrected in task 8: the design says at least 25 times real speed for the core alone; the 2 MHz reference is this site's own.) **The best ahead-of-time run is 48.85 MHz, which is 24.4 times (48.85 / 2 = 24.425).** That is below the target, by a small margin. It is not rounded up. Native clears it easily: its best run is 107.986 MHz, 54.0 times.
 - The ahead-of-time runs are not steady: 47.125, 48.85, 42.357, 29.137 and 38.027 MHz, in run order. The best is the top of a wide spread, and the worst run is 29.137 MHz (14.6 times). Any page that quotes one figure should say it is the best of five and show the spread.
 - The interpreter runs climb from 1.948 MHz to 4.965 MHz over the five runs (best 2.5 times). The first run, 1.948 MHz, is under 40 percent of the best, 4.965 MHz (1.948 / 4.965 = 0.392). That fits a JIT-less interpreter warming caches, but the file does not say why, so this is a guess and not a finding.
 
@@ -103,13 +103,17 @@ Read from `site/src/data/measurements.json` with a short `node -e` script. The m
 - Ahead-of-time is 24.4 times, not 25 or more. The target was set before this measurement existed, so the site cannot claim it is met.
 - The spread inside one mode, on one idle-as-far-as-we-know virtual machine, is larger than the gap between the best ahead-of-time run and the target.
 
+### Two collection runs on the same day
+
+There are two collections of the same workload on the same machine on 30 September 2026, and they do not agree about the target. The first is in [`2026-09-30-the-browser-speed-check.md`](2026-09-30-the-browser-speed-check.md): its ahead-of-time runs reached 25 times a 2 MHz machine on two of five runs, best 25.48 times (50.968 MHz). The second is `site/src/data/measurements.json`, read above: its best ahead-of-time run is 48.85 MHz, 24.4 times, and all five runs are under the target. Both are honest records, and together they show that the run-to-run spread straddles the target: the same build lands above or below 25 times depending on which collection is read, so "reached" and "not yet met" are each true of one collection and not of the other. The older entry is a dated record and was not edited. The site uses the dated file, says so beside its figures ("this collection of 5 runs"), and does not claim more than that collection shows. `status.astro` reads the number of runs from the file, so the wording follows the data.
+
 ## Task 4: The figures
 
 Every number a page shows now comes through one module. A page that needs a count or a speed takes it from there, and never types it.
 
 ### What was built
 
-- **`site/src/lib/figures.mjs`.** Computes every figure from three inputs: the registry, the test results and the dated measurements. It counts machines by status, sums the Harte cases over the suites whose name ends in `Harte`, and gives each mode's best speed as a multiple of a 2 MHz machine. `fmt` and `fmt1` format numbers the British way. The only typed numbers are two constants that belong to the design: the speed target (25) and the reference clock (2 MHz).
+- **`site/src/lib/figures.mjs`.** Computes every figure from three inputs: the registry, the test results and the dated measurements. It counts machines by status, sums the Harte cases over the suites whose name ends in `Harte`, and gives each mode's best speed as a multiple of a 2 MHz machine. `fmt` and `fmt1` format numbers the British way. The only typed numbers are two constants that belong to the design: the speed target (25) and the reference clock (2 MHz). (Corrected in task 8: the design says at least 25 times real speed for the core alone; the 2 MHz reference is this site's own.)
 - **`site/src/lib/data.mjs`.** Loads the registry, the results and the measurements once, refuses to build if the registry or the results fail their checks, and exports the computed figures as `fig`.
 - **`site/tests/figures.test.mjs`.** Four tests: the figures from made-up inputs, the number formats, that the real figures can be computed, and that the real registry is valid against the real results.
 
@@ -255,9 +259,9 @@ The site now has a front door and a page that shows the state of the work. Both 
 
 - **`/` (home).** A headline, the hero image with its "Illustration" caption, four figure cards, a terminal-style card of test results, the first three machines from the registry and the three newest journal entries.
 - **`/status/`.** Six figure cards, the test suites in a table, the speed table with the design target beside it, and `known-differences.md` rendered underneath.
-- **Three images.** `hero-die`, `waveform` and `traces` were converted from the PNG originals with `cwebp` (quality 88, 90 and 82). `ls -l` showed 322,732, 17,098 and 94,902 bytes against originals of 2,055,376, 421,970 and 1,096,527. Only the WebP files are committed. The originals stay in `/home/devops/dbhq-previews/6502/imagery/final/`.
+- **Three images.** `hero-die`, `waveform` and `traces` were converted from the PNG originals with `cwebp` (quality 88, 90 and 82). `ls -l` showed 322,732, 17,098 and 94,902 bytes against originals of 2,055,376, 421,970 and 1,096,527. Only the WebP files are committed. The originals stay outside the repository, in a local previews folder.
 - **`imagery.css`** holds the two background images as custom properties, and `Base.astro` imports it before `global.css`. `Base.astro` already existed from task 5, so this task added one import line to it rather than creating it.
-- **`DESIGN.md`** records the fork of the brand, the imagery prompts, model, quality and cost. The cost and model were checked against `~/.dbhq/imager/history.jsonl` with a short Python script: the four low-quality drafts billed $0.017955 in all and the three finals $0.147563, which are the $0.018 and $0.148 written there. The model is `gpt-image-2.5-flare` on every row. The brief and the history agree. Two lines in the brief's text pointed at files that do not exist (`tests/pages.test.mjs` and a site README), so they now say `tests/site.test.mjs` and "the figures and the content".
+- **`DESIGN.md`** records the fork of the brand, the imagery prompts, model, quality and cost. The cost and model were checked against the imager tool's run history with a short Python script: the four low-quality drafts billed $0.017955 in all and the three finals $0.147563, which are the $0.018 and $0.148 written there. The model is `gpt-image-2.5-flare` on every row. The brief and the history agree. Two lines in the brief's text pointed at files that do not exist (`tests/pages.test.mjs` and a site README), so they now say `tests/site.test.mjs` and "the figures and the content".
 - **`figures-on-pages.test.mjs`.** Three tests: every number on both pages is a generated figure or a named literal, both pages name the commit their results came from, and the home page shows the machines count.
 - **The internal-link test** moved into `site.test.mjs`, as the brief says: every `href` and `src` that starts with `/` must resolve to a built file.
 
@@ -270,7 +274,7 @@ The site now has a front door and a page that shows the state of the work. Both 
 
 ### The speed target is not met, and the pages do not say it is
 
-The design target is 25 times a 2 MHz machine. The best ahead-of-time run in `measurements.json` is 48.85 MHz, which is 24.4 times, so the target is not met. The home page shows `24.4 times` and says nothing about the target. The status page says "The design's target is 25 times" and, in the table below it, shows `24.4` for the ahead-of-time build. The brief's wording was read against that and left as it is: it states the target and the measurement, and claims neither that the target is met nor that 24.4 is 25. `fmt1` gives 24.4 from 24.425, which rounds down.
+The design target is 25 times a 2 MHz machine. (Corrected in task 8: the design says at least 25 times real speed for the core alone; the 2 MHz reference is this site's own.) The best ahead-of-time run in `measurements.json` is 48.85 MHz, which is 24.4 times, so the target is not met. The home page shows `24.4 times` and says nothing about the target. The status page says "The design's target is 25 times" and, in the table below it, shows `24.4` for the ahead-of-time build. The brief's wording was read against that and left as it is: it states the target and the measurement, and claims neither that the target is met nor that 24.4 is 25. `fmt1` gives 24.4 from 24.425, which rounds down.
 
 ### Two defects and one check
 
@@ -329,7 +333,7 @@ The site now has checks in CI and a deploy workflow that is switched off. Nothin
 
 ### What the checks showed
 
-- Before the sitemap test could pass, `node --test tests/build.test.mjs` run from an empty directory failed with `ENOENT: no such file or directory, scandir '/tmp/emptycwd/dist'`, so the tests do read the build. With the real build, all 3 passed.
+- Before the sitemap test could pass, `node --test tests/build.test.mjs` run from an empty directory failed with `ENOENT: no such file or directory, scandir` on a `dist` folder inside that empty directory, so the tests do read the build. With the real build, all 3 passed.
 - To check the new test is not vacuous, the `about` entry was deleted from `dist/sitemap-0.xml` and `node --test tests/build.test.mjs` failed the sitemap test with a deep-equal assertion (2 passed, 1 failed). The file was restored and all 3 passed.
 - `python3 -c "import yaml; ..."` parsed both workflows: `validate.yml` has the jobs `test`, `site` and `dashes`, and `deploy-site.yml` has `deploy`, with `if: vars.SITE_DEPLOY == 'true'`. `actionlint` 1.7.12, downloaded to `/tmp` for the check and not added to the repository, printed nothing on both files, with exit code 0. `shellcheck` is installed here, so actionlint checked the shell in the `run` steps too.
 - The deploy workflow reads the pass and fail counts out of the log. The log came from Node 24 on this machine, which prints `ℹ pass 79`, and Node 22 in CI prints `# pass 79` when the output is piped. The two `grep` lines in the workflow were run against a captured log in each format, under `LC_ALL=C` and `LC_ALL=C.UTF-8`, and read 79 and 0 in all four cases. The page list the deploy checks is derived from `dist`: `find` gave 13 addresses, the same 13 that are in the sitemap.
@@ -355,7 +359,7 @@ After the changes `npm test` in `site/` ran 79 tests and all 79 passed, with `14
 
 ## The cleanup pass: the small findings from the task reviews
 
-The per-task reviews recorded some small findings and deferred them. This pass fixes all seven, each with a test that fails on the old behaviour. `npm test` in `site/` ran 79 tests before and 97 after, and all pass. The failing side of each test was checked, not assumed: the changed source files were stashed and the suite run against the old code (11 failed, 74 passed), and where an import error hid the detail, the old code was run directly.
+The per-task reviews recorded some small findings and deferred them. This pass fixes all seven, each with a test that fails on the old behaviour. `npm test` in `site/` ran 79 tests before and 97 after, and all pass (97 at that commit; the final review below takes it to 112). The failing side of each test was checked, not assumed: the changed source files were stashed and the suite run against the old code (11 failed, 74 passed), and where an import error hid the detail, the old code was run directly.
 
 - **A missing tool was published as "a physical machine".** `systemd-detect-virt` prints `none` and exits 1 on a physical machine, so `tryRun` returned null for both that and a missing tool, and `describeMachine` turned null into "a physical machine". A new `detectVirtualisation` in `bench/collect-measurements.mjs` reads the tool's own output: `none` means physical, a word means that virtualisation, and anything else (the tool missing, or failing without saying `none`) is null. `describeMachine` now says "a machine of unknown type" for null. The tests run real child processes through `execFileSync`, so the error shapes are the real ones. Old code, run directly: `describeMachine({ virtualisation: null, ... })` printed "a physical machine". The collected date logic was left alone.
 - **A missing suite was published as 0.** `figures.mjs` had `suites.DormannTests?.passed ?? 0`. A new `passedIn` throws, naming the suite and the fix. The two fields were renamed to say what they count: `dormannBuilds` is now `dormannTestsPassed` and `interruptRuns` is now `transistorModelTestsPassed`, with a comment above each. Five files changed for the rename (`figures.mjs`, `status.astro` and three test files). The "real figures" test now requires `variants`, `harteTests` and both suite figures to be positive and `machinesInProgress` to be a whole number.
@@ -365,13 +369,51 @@ The per-task reviews recorded some small findings and deferred them. This pass f
 - **Sorting by year put the blanks first.** Blank values always sort last now, in both directions. The comparison is in `site/public/table-sort.js`, which `machines-table.js` imports from the same origin (the script was already a module, and `script-src 'self'` allows it), and the test imports the same file. Old comparison, run directly: an ascending sort of `['1976', '', '1975']` gave `['', '1975', '1976']`. There is still no browser test, so the wiring (the click handler calling `compareCells`) is checked only by reading the import line; the comparison itself is tested.
 - **The running-machine tests were vacuous.** With no machine running, the links test checks nothing, and `/machines/[id]/` had no test. The link rule, the list of running machines and the acceptance sentence moved into `site/src/lib/machines.mjs`, and the templates use them. New tests run on a made-up registry, and nothing is written into `machines/registry.json`: a running machine with a passing suite is valid and counted in `machinesImplemented`; a missing, failing, empty or skipped suite fails validation; only a running machine is linked. Setting the link rule to always link made the test fail.
 
-The floor of 79 tests in `deploy-site.yml` was not changed. It is a floor and 97 is above it.
+The floor of 79 tests in `deploy-site.yml` was not changed in this pass. It is a floor and 97 was above it. The final review below raised it.
+
+## The final review
+
+A last review of the whole branch gave the verdict "merge after fixes" and listed eighteen items. All eighteen are fixed in one commit. `npm test` in `site/` ran 97 tests before and 112 after, all passing (`ℹ tests 112`, `ℹ pass 112`, `ℹ fail 0`), and `find dist -name index.html` finds 13 pages plus the 404.
+
+### What was wrong in the branch
+
+- **One claim was false, and four task reviews did not catch it.** The home page and the about page said where the reference data came from, and the answer was hardware. Nothing in the repository says Tom Harte's SingleStepTests are hardware traces. `README.md` says they "record the bus activity of every opcode", and `docs/known-differences.md` says one feature of that data looks like "a property of the program that generated the data, not of the chip". Both pages now say what is true: the core is checked against Tom Harte's SingleStepTests, a published record of every opcode's bus activity, cycle by cycle. The same document also called the `ANE` constant the answer of one real part, which is the same unsupported claim, so that sentence now says only that it is one answer and not every chip's. The reviews compared each page to its brief, and the brief carried the claim, so nobody checked it against a source. The new test in `honest-pages.test.mjs` fails on any page that claims hardware provenance, and a second one requires the proof paragraph to name the data.
+- **The family document said machines run on the core.** Its table key said "Runs on this repository's core" and its last section said the three planned machines "all run on the core", while the site shows none implemented. The document is rendered on `/family/`, so the document was fixed, not the page: the key now says "Uses a CPU the core implements", and the document sends the reader to `machines/registry.json` for what is built instead of stating a status that goes stale. `grep -n -i "runs on\|run on\|can run" docs/the-6502-family.md` finds nothing that says a machine runs today.
+- **Two figures for one measurement.** See "Two collection runs on the same day" in task 3. The status page now says "this collection of 5 runs", with the number read from the file, and says a different collection gives a different best.
+- **Stale statements in the record and the docs.** Task 3, task 4 and task 8 said the 2 MHz reference belongs to the design. Each now carries an inline correction. `site/README.md` said `order` was optional, said to give a new machine a page under `src/pages/machines/` (the page is generated), and called `analytics.js` and `consent.js` the estate's, though they now differ (per-site choice, reopen and withdraw). `site/DESIGN.md` said the lime is used once, but the home page's terminal window prints five "Passed" labels in lime. Both were rewritten against the code, and a test now requires the README to list every test file.
+- **Test floors.** `deploy-site.yml` still said 79, and `validate.yml` had no floor at all, so a silent skip in the pull request check would pass. Both now read the count back and require 112, with a comment that says to raise it when the suite grows, and a test requires the two numbers to be equal.
+
+### Smaller findings, and what changed
+
+- **Variants and Harte tests could publish as 0.** If no suite name ended in `Harte`, the build passed with 0 variants. `figures.mjs` now throws and names the fix, with a test.
+- **The commit hash was checked only if present.** The test now requires a 40-character hash in `results.json`.
+- **Only images marked `data-generated` were checked.** The test now takes its list from `site/src/assets/imagery/`, and requires each file that a page shows to have an "Illustration" alt text and caption, or to be used as a background. A second test stops `data-generated` from being put on an image that is not in that folder.
+- **The lime text was not counted.** `.win .k` colours five labels lime on the home page. The test now counts the fills as before, names every rule allowed to use the lime, and requires each lime label to sit inside a terminal window.
+- **Text on the traces texture was never measured.** The design test now has a `tex` surface: the brightest pixel of `traces.webp` under the stylesheet's overlay, read with `sharp`, which Astro already ships. `--sage-40` measured 3.4 to 1 there, so `.tex .note` now uses `--sage-60` (6.0), and the links and headings on that surface are in the table.
+- **The 404 page** had a canonical address that does not exist and no `noindex`. It now has neither the canonical nor `og:url`, and has `<meta name="robots" content="noindex">`. A test covers it, and checks no other page is marked noindex.
+- **The home page sorted the journal itself** and lost the tie-break. It uses `newestFirst`, and a test compares its three entries with the rule applied to the front matter.
+- **"In Chrome" was said of every row,** including the native one. The status page now says the browser rows ran in the browser and the Native row ran directly on the machine, both read from the file. The home card now says when the measurement was collected.
+- **The post-deploy check did not fetch `table-sort.js`,** which the machines script imports. It does now, and a test derives the required list from the scripts the built pages load and the scripts those import.
+- **The journal and the plan carried local paths** (a previews folder, the imager tool's history file, a scratch directory) and a private network address. They are reworded, and a test scans the journal, the rendered documents, the plan, the README and `package.json` for a home path or a private address.
+- **`package.json` hard-coded that address.** `dev` and `preview` now take `--host "${SITE_HOST:-127.0.0.1}"`, `engines` says Node 22.22 or later, and the README documents `SITE_HOST`. Checked by running `npm run dev` and `npm run preview`: each started on 127.0.0.1 and answered 200, and both were stopped afterwards with `astro dev stop` and `astro preview stop`. Port 4333 was already taken by another process on this machine, so each took the next free port, which shows the port setting and not the host was what collided.
+- **Wording.** The family page's description said "which of it"; it now says "which of them use a CPU the core implements". The status card that counts `TransistorModelTests` was called "Interrupt runs". Each of those tests is one interrupt run on the NMOS 6502 checked against a model of its transistors, so the card is now "NMOS interrupt runs".
+
+### What the checks showed
+
+- With the source and docs stashed and the new tests kept (`git stash push -- site/src site/public site/package.json docs .github site/README.md site/DESIGN.md`), `npm test` ran 112 tests: 101 passed and 11 failed. The 11 were the hardware claim, the proof paragraph naming its data, the family page, the collection-of-runs wording, the missing Harte suite, the 404 page, the deploy list, the two floors check, the local paths, `SITE_HOST` and the `tex` contrast rule. Some of the new tests (the derived image list, the named lime uses, the home page order, the README list and the commit hash) guard behaviour that was already right, so they passed on the old code and cannot show a red run.
+- `actionlint` 1.7.12 (the downloaded copy, not part of the repository) printed nothing and exited 0 on `deploy-site.yml` and `validate.yml`. PyYAML parsed both: `deploy-site.yml` has the job `deploy`, and `validate.yml` has `test`, `site` and `dashes`.
+- The `count()` function from the workflows, run on the log of a real `npm test`, read `pass=112 fail=0`.
+- `LC_ALL=C.UTF-8 git grep -InP '[\x{2013}\x{2014}]'` after `git add` printed nothing.
+
+### Skipped on purpose
+
+Recorded and not done: a host-scoped cache purge, `--ignore-scripts` on the install, a GitHub environment for the secrets, the typed "three 65C02s" on the home page, and the privacy page, which is in another repository.
 
 ## Where it stands
 
 Every figure here is from a command run on 30 September 2026.
 
 - **Pages.** `npm test` in `site/` runs the build first, and the log says `14 page(s) built`: the 13 pages that carry an `index.html` (`find dist -name index.html`) and the 404 page.
-- **Tests.** `npm test` in `site/` ran 79 tests, 79 passed, 0 failed, 0 skipped.
+- **Tests.** `npm test` in `site/` ran 112 tests, 112 passed, 0 failed, 0 skipped (the count after the final review below; it was 79 at the end of task 9).
 - **Deploy.** Nothing is deployed. `deploy-site.yml` is switched off by design: it runs only when the repository variable `SITE_DEPLOY` is `true`, and it is not set. No secret was created and no Cloudflare, Terraform or Search Console change was made.
 - **Workflows.** Both parse as YAML and `actionlint` is clean, but neither has run.

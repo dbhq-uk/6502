@@ -28,13 +28,17 @@ function passedIn(suites, name) {
 /**
  * Every figure the site shows, computed from the registry, the test results and
  * the dated measurements. Nothing here is a typed number except the two
- * constants above, which belong to the design.
+ * constants above: the target belongs to the design, and the reference clock is
+ * this site's own choice.
  */
 export function figures({ registry, results, measurements }) {
   const c = counts(registry);
   const suites = results.suites;
   const names = Object.keys(suites);
   const harte = names.filter((n) => /Harte$/.test(n));
+  if (harte.length === 0) {
+    throw new Error('The test results have no suite whose name ends in "Harte", so the variant and Harte test figures would publish as 0. Name the per-variant suites <Variant>Harte again, or update site/src/lib/figures.mjs, and regenerate the results (see site/README.md).');
+  }
   const speed = (mode) => best(measurements.modes[mode]) / REFERENCE_MHZ;
   return {
     machinesImplemented: c.running,

@@ -2,7 +2,9 @@
    It is a DELIBERATE FORK of the DBHQ brand, green where the brand is blue, and
    DESIGN.md says why. Do not "correct" it back to dbhq.uk's paper.
 
-   One rule above the rest: the lime is used ONCE per screen, as a fill. */
+   One rule above the rest: the lime is used ONCE per screen, as a fill. The
+   only other use is the syntax colour of the terminal window's text, and the
+   focus ring. */
 :root {
   /* surfaces */
   --void: #000000;

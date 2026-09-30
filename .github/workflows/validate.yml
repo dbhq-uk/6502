@@ -75,9 +75,22 @@ jobs:
       - name: Install
         working-directory: site
         run: npm ci
+      # `npm test` runs the build through its pretest script. A silent skip looks
+      # exactly like a pass, so the count is read back and a floor asserted, the
+      # same one as deploy-site.yml.
       - name: Build and verify
         working-directory: site
-        run: npm test
+        run: |
+          set -euo pipefail
+          npm test 2>&1 | tee /tmp/site-test.log
+          count() { grep -oE "(#|.) $1 [0-9]+" /tmp/site-test.log | grep -oE '[0-9]+$' | tail -1; }
+          PASS=$(count pass); FAILED=$(count fail)
+          echo "pass=${PASS:-unread} fail=${FAILED:-unread}"
+          [ "${FAILED:-1}" = "0" ]
+          # 112 tests as at 30 Sep 2026. Adding tests is expected; losing them is
+          # the failure this floor catches. Raise the number when the suite grows,
+          # here and in the same step of deploy-site.yml, which must hold the same number.
+          [ "${PASS:-0}" -ge 112 ]
 
   dashes:
     runs-on: ubuntu-latest

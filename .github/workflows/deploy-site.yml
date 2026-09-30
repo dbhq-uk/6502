@@ -99,9 +99,10 @@ jobs:
           PASS=$(count pass); FAILED=$(count fail)
           echo "pass=${PASS:-unread} fail=${FAILED:-unread}"
           [ "${FAILED:-1}" = "0" ]
-          # 79 tests as at 30 Sep 2026. Adding tests is expected; losing them is
-          # the failure this floor catches. Raise the number when the suite grows.
-          [ "${PASS:-0}" -ge 79 ]
+          # 112 tests as at 30 Sep 2026. Adding tests is expected; losing them is
+          # the failure this floor catches. Raise the number when the suite grows,
+          # here and in the same step of validate.yml, which must hold the same number.
+          [ "${PASS:-0}" -ge 112 ]
 
       - name: Deploy to Cloudflare Pages
         working-directory: site
@@ -153,6 +154,9 @@ jobs:
           echo "missing page -> $CODE"
           [ "$CODE" = "404" ]
 
+      # table-sort.js is here because machines-table.js imports it: a 404 on it
+      # breaks that whole module, and the filters and sorting quietly vanish.
+      # site/tests/build.test.mjs derives the required list from the built pages.
       # analytics.js and consent.js are in this list for a sharp reason: a 404 on
       # consent.js means the prompt never opens, and because analytics.js denies
       # by default that looks exactly like a site with no analytics rather than a
@@ -160,7 +164,7 @@ jobs:
       - name: The machine-readable files must be serving
         run: |
           set -euo pipefail
-          for f in sitemap-index.xml sitemap-0.xml robots.txt analytics.js consent.js machines-table.js; do
+          for f in sitemap-index.xml sitemap-0.xml robots.txt analytics.js consent.js machines-table.js table-sort.js; do
             CODE=$(curl -s --max-time 20 --retry 3 --retry-delay 5 -o /dev/null -w "%{http_code}" "https://6502.dbhq.uk/${f}?cb=${GITHUB_SHA}")
             echo "${f} -> ${CODE}"
             [ "$CODE" = "200" ]

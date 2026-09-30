@@ -61,6 +61,17 @@ test('an entry prints its title once, and it is the title in its front matter', 
   }
 });
 
+test('the home page shows the three newest entries, in the journal\'s own order', () => {
+  const real = files.map((f) => {
+    const front = fs.readFileSync(path.join(dir, f), 'utf8');
+    return { id: f.replace(/\.md$/, ''), data: { date: new Date(/^date: (\S+)/m.exec(front)[1]), order: Number(/^order: (\d+)/m.exec(front)[1]) } };
+  });
+  const expected = real.sort(newestFirst).slice(0, 3).map((e) => e.id);
+  const html = page('/').html;
+  const listed = [...html.slice(html.indexOf('From the journal')).matchAll(/href="\/journal\/(2[^"/]+)\/"/g)].map((m) => m[1]);
+  assert.deepEqual(listed, expected);
+});
+
 test('the journal index lists the entries newest first, and equal dates and orders are broken by file name', () => {
   const entry = (id, date, order) => ({ id, data: { date: new Date(date), order } });
   const sorted = (list) => list.sort(newestFirst).map((e) => e.id);

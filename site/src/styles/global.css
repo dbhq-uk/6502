@@ -94,6 +94,8 @@ section { padding: clamp(56px, 7vw, 96px) 0; }
 .tex { position: relative; background: var(--void) var(--traces) center / 640px; }
 .tex::before { content: ""; position: absolute; inset: 0; background: rgba(0, 0, 0, 0.55); }
 .tex > .wrap { position: relative; }
+/* --sage-40 is 3.4 to 1 on the brightest pixel of the traces under their overlay; the sage-60 below is 6.0. */
+.tex .note { color: var(--sage-60); }
 
 /* journal */
 .entries { max-width: 860px; margin: 0 auto; }

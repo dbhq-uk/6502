@@ -20,6 +20,16 @@ test('figures are computed from the registry, the results and the measurements',
   assert.equal(f.speedAot, 25);
 });
 
+test('no per-variant Harte suite stops the build, rather than publishing 0 variants and 0 Harte tests', () => {
+  const registry = { machines: [], chips: [] };
+  const measurements = { modes: { native: { runs: [{ mhz: 1 }] }, interpreter: { runs: [{ mhz: 1 }] }, aot: { runs: [{ mhz: 1 }] } } };
+  const suite = { passed: 1, failed: 0, skipped: 0 };
+  const results = { total: { passed: 2 }, suites: { DormannTests: suite, TransistorModelTests: suite } };
+  assert.throws(() => figures({ registry, results, measurements }), /"Harte"[\s\S]*figures\.mjs/);
+  results.suites.Nmos6502Harte = suite;
+  assert.equal(figures({ registry, results, measurements }).variants, 1);
+});
+
 test('numbers are formatted the British way', () => {
   assert.equal(fmt(12780), '12,780');
   assert.equal(fmt1(25.48), '25.5');

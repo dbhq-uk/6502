@@ -15,7 +15,10 @@ paper, ink, an amber phosphor, a Basedash-style serif look, and this.
 
 - **One lime accent, once per screen, as a fill.** The lime is the single
   strongest colour on the page, so it is rationed. A test fails the build if a
-  page uses it more than once.
+  page fills more than one element with it. It has two other uses, both named in
+  that test: the terminal window's text on the home page (the "Passed" labels,
+  the syntax colour of a code window, five of them there) and the keyboard focus
+  ring. A fourth use has to be argued for in the test.
 - **No shadows except the navigation bar's,** and depth is a change of surface
   value plus a one-pixel line. A test holds it.
 - **Type:** Inter Tight for headings, Inter for body text and Fira Mono for code,
@@ -24,7 +27,8 @@ paper, ink, an amber phosphor, a Basedash-style serif look, and this.
   in for it.
 - **Contrast:** the reference's dimmest text colour, `#697368`, measures 4.25 to 1
   on black, under the 4.5 that AA asks of small text. It is lightened to
-  `#737d72` (4.91). A test computes every text pair from the real tokens.
+  `#737d72` (4.91). A test computes every text pair from the real tokens, and for text on the
+  traces texture it measures the brightest pixel of the image under its overlay.
 
 ## The imagery
 
@@ -72,6 +76,7 @@ Not used.
 
 `npm test` builds the site and then checks it. The checks that guard this design
 are in `tests/design.test.mjs` (contrast, the lime, shadows, raw colours) and
-`tests/site.test.mjs` (captions, alt text, the Capcom line, the dash and
-British English rules). The rest of the suite is about the figures and the
+`tests/site.test.mjs` (captions and alt text for every file in
+`src/assets/imagery/`, the Capcom line, the dash and British English rules) and
+`tests/honest-pages.test.mjs` (the backgrounds' captions). The rest of the suite is about the figures and the
 content.

@@ -3,6 +3,9 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
 
+// sharp ships with Astro (its image service), so the texture can be measured without a new dependency.
+const sharp = (await import('sharp')).default;
+
 const styles = path.join(process.cwd(), 'src', 'styles');
 const tokens = fs.readFileSync(path.join(styles, 'tokens.css'), 'utf8');
 const global = fs.readFileSync(path.join(styles, 'global.css'), 'utf8');
@@ -52,15 +55,30 @@ const nav = (() => {
   const bg = color('void');
   return '#' + [1, 2, 3].map((i, k) => Math.round(Number(m[i]) * alpha + parseInt(bg.slice(1 + 2 * k, 3 + 2 * k), 16) * (1 - alpha)).toString(16).padStart(2, '0')).join('');
 })();
-const surface = (name) => (name === 'nav' ? nav : color(name));
+
+// The traces texture is a picture, so its "colour" is the worst case: the
+// brightest pixel of the image, under the black overlay the stylesheet puts
+// over it. Text that passes on that pixel passes everywhere on the section.
+const tex = await (async () => {
+  const overlay = /\.tex::before \{[^}]*background: rgba\(0, 0, 0, ([\d.]+)\)/.exec(css);
+  assert.ok(overlay, 'the .tex overlay is not an rgba the test can read');
+  const { data, info } = await sharp(path.join(process.cwd(), 'src', 'assets', 'imagery', 'traces.webp')).removeAlpha().raw().toBuffer({ resolveWithObject: true });
+  let best = [0, 0, 0];
+  for (let i = 0; i < data.length; i += info.channels) {
+    const px = [data[i], data[i + 1], data[i + 2]];
+    if (luminance('#' + px.map((v) => v.toString(16).padStart(2, '0')).join('')) > luminance('#' + best.map((v) => v.toString(16).padStart(2, '0')).join(''))) best = px;
+  }
+  return '#' + best.map((v) => Math.round(v * (1 - Number(overlay[1]))).toString(16).padStart(2, '0')).join('');
+})();
+const surface = (name) => (name === 'nav' ? nav : name === 'tex' ? tex : color(name));
 
 const ON = {
   body: ['void'],
-  a: ['void', 'iron'],
+  a: ['void', 'iron', 'tex'],
   'a:hover': ['void', 'iron'],
   '.skip': ['white'],
-  'h1, h2, h3': ['void', 'iron', 'card'],
-  '.eyebrow': ['void'],
+  'h1, h2, h3': ['void', 'iron', 'card', 'tex'],
+  '.eyebrow': ['void', 'tex'],
   '.brand': ['nav'],
   '.brand small': ['nav'],
   '.links a': ['nav'],
@@ -75,6 +93,7 @@ const ON = {
   '.chip': ['void', 'card'],
   '.chip.on': ['white'],
   '.note': ['void'],
+  '.tex .note': ['tex'],
   '.win .bar span': ['iron'],
   '.win pre': ['iron'],
   '.win .k': ['iron'],
