@@ -1,0 +1,55 @@
+# Known differences
+
+Where the core knowingly differs from a reference it is tested against, or
+where no reference we trust exists. Each entry says what, why, and how the
+tests treat it. This list is written before the code, from the plan, and is
+kept true as the code lands.
+
+## The 65C02's extra decimal cycle, in immediate mode
+
+**What.** On the three 65C02 variants, `ADC #imm` (`$69`) and `SBC #imm`
+(`$E9`) take one extra cycle when the decimal flag is set. Tom Harte's data
+records that cycle as a read of a fixed address: `$007F`, `$0059` or `$0056`
+for `ADC` on WDC, Rockwell and Synertek, and `$0000` for `SBC` on all three.
+
+**Why we differ.** A fixed address that changes between chips and between
+two sibling instructions looks like a property of the program that generated
+the data, not of the chip. In every other addressing mode the same extra
+cycle re-reads the operand's address, so the core does that here too: it
+re-reads the immediate byte.
+
+**How the tests treat it.** For those two opcodes, on those three variants,
+with the decimal flag set, the comparison checks that the third cycle exists
+and is a read, and does not compare its address or value. Everything else in
+those cases is compared as normal.
+
+## `WAI` and `STP`
+
+**What.** WDC's `WAI` (`$CB`) and `STP` (`$DB`) have no data in Harte's WDC
+set, because neither can be tested one instruction at a time.
+
+**How the tests treat it.** Tests of our own check what they do: `WAI` waits
+for an interrupt and then either takes it or carries on, depending on the
+interrupt-disable flag, and `STP` stops until reset. The cycle counts come
+from WDC's datasheet. How many cycles `WAI` takes to wake is not asserted,
+because no reference we trust gives it.
+
+## 65C02 interrupt timing
+
+**What.** The NMOS interrupt tests are checked against the Visual6502
+transistor-level model. There is no public transistor-level model of the
+65C02.
+
+**How the tests treat it.** The 65C02's own interrupt behaviour, such as
+clearing the decimal flag, is checked against WDC's datasheet. That is a
+reading of a document rather than the chip, and those tests say so.
+
+## Unstable NMOS opcodes
+
+**What.** `ANE`, `LXA`, `SHA`, `SHX`, `SHY` and `TAS` give results on real
+chips that vary between individual parts, and for `ANE` and `LXA` with
+temperature.
+
+**How the tests treat it.** The core matches Harte's data, which fixes the
+`ANE` and `LXA` constant at `$EE`. That is one real chip's answer, not every
+chip's.
