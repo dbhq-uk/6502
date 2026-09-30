@@ -21,7 +21,9 @@ repository.
 
 ## Where it stands
 
-Design. There is no code yet.
+The core is done, in all five variants, and proven against every check the
+design lists. `dotnet test` is the proof; the numbers live in its output.
+The site, 6502.dbhq.uk, is next.
 
 ## What "cycle-accurate" means here
 
