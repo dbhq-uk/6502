@@ -1,0 +1,24 @@
+---
+import Base from '../../layouts/Base.astro';
+import { registry, results } from '../../lib/data.mjs';
+import { fmt } from '../../lib/figures.mjs';
+
+// One page for each machine that runs. None does yet: a machine gets its page,
+// and its emulator, when its own spec is built.
+export function getStaticPaths() {
+  return registry.machines.filter((m) => m.status === 'running').map((m) => ({ params: { id: m.id }, props: { machine: m } }));
+}
+const { machine } = Astro.props;
+const suite = results.suites[machine.acceptance];
+---
+
+<Base title={machine.name} description={`${machine.name}, running on the 6502 core in the browser.`}>
+  <section>
+    <div class="wrap narrow">
+      <p class="meta"><a href="/machines/">All machines</a></p>
+      <h1>{machine.name}</h1>
+      <p>{machine.year}, {machine.cpu}.</p>
+      <p>Acceptance test {machine.acceptance}: {fmt(suite.passed)} passing.</p>
+    </div>
+  </section>
+</Base>

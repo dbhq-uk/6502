@@ -218,3 +218,31 @@ Every entry in `docs/journal/` is now a page at `/journal/<name>/`, and `/journa
 
 - `npm install @astrojs/markdown-remark` printed the same `esbuild` install-script warning as before. Nothing was approved.
 - The build printed no warnings.
+
+## Task 7: The machines, the chips and the family
+
+Three pages now answer "what ran on a 6502 and what does the core run": `/machines/`, `/chips/` and `/family/`. Each is generated from a file the repository already holds, so none carries a count typed by hand.
+
+### What was built
+
+- **`/machines/`.** One row for every machine in `machines/registry.json`, oldest first, with three filters (status, category, core) and a count line. It is a complete table with no script: `machines-table.js`, written in task 5, only adds sortable headers and makes the filters work. Without it, the filters do nothing and the table still reads in full. A machine links to its own page only when its status is `running`.
+- **`/machines/[id]/`.** One page for each running machine, showing the acceptance suite's pass count from `results.json`. The registry has no running machine, so this route builds no page yet.
+- **`/chips/`.** One row for every chip in the registry, with sortable headers and a count line.
+- **`/family/`.** The repository's own `docs/the-6502-family.md`, rendered as it is. It is a second collection, `docs`, in `site/src/content.config.ts`, which also lists `known-differences.md`. Nothing was copied, so the page cannot drift from the document. The rehype plugin from task 6 drops the document's own first heading, so the page has one `h1`.
+- **`machines.test.mjs`.** Five tests: a row for every machine, a row for every chip, links only for running machines, the sort and filter hooks and the script tag, and the family page holding a table and its opening sentence.
+
+### What was different from the brief
+
+`site/src/content.config.ts` already existed, because task 6 created it for the journal. This task added the `docs` collection to it rather than creating the file, and the journal collection is unchanged.
+
+### What the tests showed
+
+- With `machines.test.mjs` written and no page, `npm test` in `site/` ran 62 tests: 57 passed and 5 failed. All five failed with `Cannot read properties of undefined (reading 'html')`, because `page('/machines/')` and the others found no built page.
+- With the pages written, the same command ran 62 tests and all 62 passed: the 57 from before plus the 5 new.
+- `find dist -name '*.html' | wc -l` in `site/` printed 12: the 9 from task 6 plus machines, chips and family.
+- Counting in the built HTML: `grep -o '<tr data-status' dist/machines/index.html | wc -l` printed 56, and `grep -o '<tr>' dist/chips/index.html | wc -l` printed 31, which is 30 chip rows and the header row. A `node -e` over `machines/registry.json` printed 56 machines, 30 chips and 0 running, so the tables and the registry agree.
+- `npm run build` printed no warnings or errors.
+
+### What surprised
+
+- The new pages needed no new CSS. `.filters`, `.tablewrap`, `table.data`, `.status` and `.count` were already in `global.css` from task 5, so the contrast test, which fails on a colour rule with no surface, had nothing to place and did not change.

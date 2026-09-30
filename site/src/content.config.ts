@@ -15,4 +15,10 @@ const journal = defineCollection({
   }),
 });
 
-export const collections = { journal };
+// Two documents rendered as pages, unaltered.
+const docs = defineCollection({
+  loader: glob({ pattern: ['the-6502-family.md', 'known-differences.md'], base: '../docs' }),
+  schema: z.object({ title: z.string().optional() }),
+});
+
+export const collections = { journal, docs };
