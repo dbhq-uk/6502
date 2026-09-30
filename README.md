@@ -1,8 +1,9 @@
 # 6502
 
 A cycle-accurate 6502 core in C#, covering the original NMOS 6502 and the CMOS
-65C02, and the machines built on it: the KIM-1 first, then the BBC Micro, then
-the NES.
+65C02, and the aim of implementing as many 6502-family machines as possible on
+it, each one proven: the KIM-1 first, then the BBC Micro, then the NES, and
+more.
 
 This is built in public. The design, the plan and every step of the work are
 in this repository, and the journey is written up at
@@ -23,7 +24,8 @@ repository.
 
 The core is done, in all five variants, and proven against every check the
 design lists. `dotnet test` is the proof; the numbers live in its output.
-The site, 6502.dbhq.uk, is next.
+The machines and the site, 6502.dbhq.uk, are next; the design is in
+[`docs/superpowers/specs/2026-09-30-machines-and-site-design.md`](docs/superpowers/specs/2026-09-30-machines-and-site-design.md).
 
 ## What "cycle-accurate" means here
 
