@@ -423,3 +423,12 @@ The 65C02's own interrupt behaviour, and `WAI` and `STP`, are checked against WD
 Red (`dotnet test --filter "FullyQualifiedName~Interrupts"`, before `Cpu.Interrupts.cs` existed): `Failed!  - Failed:   133, Passed:    14, Skipped:     0, Total:   147`. The 133 were 126 of the 134 transistor-model runs, 3 of 4 `CmosInterruptTests` cases and 4 of 9 `WaitAndStopTests` cases. One captured failure: `irq k=7, cycle 11: ours is a read $0408 = $10, the chip's is a read $0407 = $E6`.
 Green (`dotnet test`, whole suite, after the code): `Passed!  - Failed:     0, Passed:  1435, Skipped:     0, Total:  1435`. That is the 1288 from Task 7 plus the 147 in the Interrupts filter.
 No decisions: transcribed from the brief.
+
+## Task 9: Dormann's programs
+
+Created: `IntelHex.cs` and `Dormann.cs` in `tests/Dbhq.Cpu6502.TestSupport/`, and `LinuxOnlyTheoryAttribute.cs` and `DormannTests.cs` in `tests/Dbhq.Cpu6502.Tests/Dormann/`. Nothing modified. Whole programs that check their own results, for the bugs that only appear when instructions run in sequence. They are assembled at test time with Dormann's own `as65` from a pinned commit into the git-ignored `.testdata/dormann`; the success address comes from the assembler's listing, never typed in.
+Builds, from `DormannTests.cs`: `FunctionalTestPasses` on all five variants (the 2A03 build leaves decimal mode out); `ExtendedOpcodesTestPasses` on the three 65C02 variants only (the Synertek build leaves out the bit-instruction opcodes, because Dormann's test expects one-byte no-ops there and Harte's Synertek data says otherwise, per `docs/known-differences.md`); `DecimalTestPasses` on every variant except the 2A03, reporting through its ERROR byte at `$0B`.
+The tests run on Linux, locally and in CI, and are skipped elsewhere with the reason (`LinuxOnlyTheoryAttribute`).
+Red (`dotnet test --filter "FullyQualifiedName~Dormann"`, before `Dormann.cs` existed): the build failed, `DormannTests.cs(38,50): error CS0234: The type or namespace name 'Dormann' does not exist in the namespace 'Dbhq.Cpu6502.TestSupport'`.
+Green (`dotnet test`, whole suite, after the code): `Passed!  - Failed:     0, Passed:  1447, Skipped:     0, Total:  1447, Duration: 2 m 33 s`. `dotnet test --list-tests --filter "FullyQualifiedName~Dormann"` listed 12 cases from 3 methods: 5 functional + 3 extended + 4 decimal. That is the 1435 from Task 8 plus 12 = 1447.
+No decisions: transcribed from the brief.
