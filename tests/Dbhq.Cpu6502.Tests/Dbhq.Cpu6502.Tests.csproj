@@ -16,5 +16,6 @@
 
   <ItemGroup>
     <None Include="Harte/harte.manifest" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="Interrupts/visual6502.txt" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 </Project>

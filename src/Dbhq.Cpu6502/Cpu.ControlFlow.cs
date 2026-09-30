@@ -10,9 +10,18 @@ public sealed partial class Cpu
             return;
         }
 
-        Read(PC);
         ushort target = (ushort)(PC + offset);
-        if ((target & 0xFF00) != (PC & 0xFF00))
+        bool crossesPage = (target & 0xFF00) != (PC & 0xFF00);
+        if (!crossesPage)
+        {
+            // A taken branch that stays on its page decides about interrupts
+            // at its operand cycle, not its last, so one that arrives on the
+            // last cycle waits for another instruction.
+            _pollFrozen = true;
+        }
+
+        Read(PC);
+        if (crossesPage)
         {
             Read((ushort)((PC & 0xFF00) | (target & 0x00FF)));
         }
@@ -78,12 +87,6 @@ public sealed partial class Cpu
         Push((byte)(PC >> 8));
         Push((byte)PC);
         Push((byte)(P | B | U));
-        SetFlag(I, true);
-        if (_cmos)
-        {
-            SetFlag(D, false);
-        }
-
-        PC = ReadVector(0xFFFE);
+        EnterHandler();
     }
 }

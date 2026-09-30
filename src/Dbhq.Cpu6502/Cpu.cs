@@ -66,14 +66,15 @@ public sealed partial class Cpu
     public bool IsStopped { get; private set; }
 
     /// <summary>
-    /// Runs one instruction and returns the number of cycles it took.
+    /// Runs one instruction, or one interrupt sequence, and returns the number
+    /// of cycles it took. Returns 0 while the CPU is waiting or stopped and
+    /// makes no bus access; the machine then advances its own clock.
     /// </summary>
     public int Step()
     {
         long start = Cycles;
-        if (IsStopped || IsWaiting)
+        if (IsStopped)
         {
-            // Task 8 teaches WAI to wake.
             return 0;
         }
 
@@ -85,7 +86,21 @@ public sealed partial class Cpu
             return 1;
         }
 
-        Execute(Read(PC++));
+        if (IsWaiting && !WakeFromWait())
+        {
+            return 0;
+        }
+
+        if (_interruptPending)
+        {
+            InterruptSequence();
+        }
+        else
+        {
+            Execute(Read(PC++));
+        }
+
+        Poll();
         return (int)(Cycles - start);
     }
 
@@ -95,6 +110,16 @@ public sealed partial class Cpu
     /// </summary>
     public void Reset()
     {
+        IsJammed = false;
+        IsWaiting = false;
+        IsStopped = false;
+        _needNmi = false;
+        _pollIrq = false;
+        _pollNmi = false;
+        _pollFrozen = false;
+        _pollSuppressed = false;
+        _interruptPending = false;
+
         Read(PC);
         Read(PC);
         Read(StackAddress);
@@ -124,9 +149,6 @@ public sealed partial class Cpu
         _bus.Write(address, value);
         EndCycle();
     }
-
-    /// <summary>The end of every cycle. Task 8 adds the interrupt lines here.</summary>
-    private void EndCycle() => Cycles++;
 
     private void Execute(byte opcode)
     {

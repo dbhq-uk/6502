@@ -412,3 +412,14 @@ Three files modified: `Cpu.cs` (two fields and two constructor lines setting `_b
 Test suite 975 before, 1288 after: 7 CpuTests + 3 HarteRunnerTests + 1278 Harte opcode cases (4 variants x 256 opcodes + 254 for WDC, excluding $CB and $DB).
 
 No decisions: transcribed from the brief.
+
+## Task 8: Interrupts, against the transistor-level model
+
+Created: `tools/perfect6502/harness.c` and `generate.sh`, the generated `tests/Dbhq.Cpu6502.Tests/Interrupts/visual6502.txt`, four test files in that folder (`TransistorModelRun.cs`, `TransistorModelTests.cs`, `CmosInterruptTests.cs`, `WaitAndStopTests.cs`) and `src/Dbhq.Cpu6502/Cpu.Interrupts.cs`. Replaced: `Cpu.cs`. Modified: `Cpu.ControlFlow.cs` (`Branch` and `Brk`) and the tests' `.csproj`, which now copies `visual6502.txt` to the test output.
+`generate.sh` runs the harness against perfect6502, a simulation of the chip's transistors, at a pinned commit. It printed `134 runs written to .../visual6502.txt`. The file is committed because this repository generated it.
+What the model showed, in the brief's words: an instruction takes an interrupt that became active by the end of its last cycle, as the harness frames a cycle. A taken branch that stays on its page decides at its operand cycle, so `Branch` freezes the poll. An NMI seen by the time P is pushed takes `BRK` or an IRQ over; one that arrives on the vector's low byte is lost; one on its high byte waits until the handler's first instruction has run, and `EnterHandler` does all three. `CLI`, `SEI` and `PLP` change the interrupt-disable flag after their last cycle's poll, so their effect is one instruction late, with no special code.
+After this task `Reset` clears a jammed, waiting or stopped CPU (`Reset` in `Cpu.cs` sets `IsJammed`, `IsWaiting` and `IsStopped` to false; `StpStopsEverythingUntilReset` tests the `STP` case). `WAI` wakes on an interrupt: `WaitAndStopTests` checks an IRQ with interrupts disabled, an IRQ with them enabled, and an NMI. `Step` returns 0 with no bus access while the CPU waits or is stopped.
+The 65C02's own interrupt behaviour, and `WAI` and `STP`, are checked against WDC's datasheet, not the chip, because no transistor-level model of the 65C02 is public (`docs/known-differences.md`).
+Red (`dotnet test --filter "FullyQualifiedName~Interrupts"`, before `Cpu.Interrupts.cs` existed): `Failed!  - Failed:   133, Passed:    14, Skipped:     0, Total:   147`. The 133 were 126 of the 134 transistor-model runs, 3 of 4 `CmosInterruptTests` cases and 4 of 9 `WaitAndStopTests` cases. One captured failure: `irq k=7, cycle 11: ours is a read $0408 = $10, the chip's is a read $0407 = $E6`.
+Green (`dotnet test`, whole suite, after the code): `Passed!  - Failed:     0, Passed:  1435, Skipped:     0, Total:  1435`. That is the 1288 from Task 7 plus the 147 in the Interrupts filter.
+No decisions: transcribed from the brief.
