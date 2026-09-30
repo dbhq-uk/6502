@@ -158,28 +158,28 @@ None. The harness worked as designed on first build.
 
 ## Task 3: Loads, stores, logic and shifts
 
-The 117 shared opcodes that are neither arithmetic nor control flow. Each instruction reads like the chip's cycles: an instruction's cycles are counted from its `Read` and `Write` calls. Read-modify-write goes through `ReadForModify`, which writes the old value back on the NMOS chip and re-reads it on the 65C02.
+The 117 shared opcodes that are neither arithmetic nor control flow. Each instruction reads like the chip's cycles: an instruction's cycles are counted from its `Read` and `Write` calls. Read-modify-write goes through `ReadForModify`, which reads a value, writes it back on the NMOS chip, then re-reads it on the 65C02.
 
 ### What was built
 
 Three modified or created files:
 
 - **`src/Dbhq.Cpu6502/Cpu.Logic.cs`** (new file): A partial class containing the shift and logic helpers: `Asl`, `Lsr`, `Rol`, `Ror`, `And`, `Ora`, `Eor`, `Compare`, `Bit`, and the read-modify-write helpers `AslAt`, `LsrAt`, `RolAt`, `RorAt`, `IncAt`, `DecAt`. Every helper is written to align with the bus cycles of its instruction.
-- **`src/Dbhq.Cpu6502/Cpu.Official.cs`** (modified): Expanded `ExecuteOfficial` from 2 opcodes to 117 opcodes. Opcodes are grouped by function: loads (18 opcodes), stores (13 opcodes), transfers (6 opcodes), flags (7 opcodes), increments and decrements (12 opcodes), compares (12 opcodes), logic (24 opcodes), and shifts and rotates (24 opcodes). The NOP instruction (0xEA) was already present and is preserved.
+- **`src/Dbhq.Cpu6502/Cpu.Official.cs`** (modified): Expanded `ExecuteOfficial` from 2 opcodes to 117 opcodes. Opcodes are grouped by function: loads (18), stores (13), transfers (6), flags (7), increments and decrements (12), compares (14), logic (26), and shifts and rotates (20). The NOP instruction (0xEA) is preserved. Group counts verified by counting `case` labels: `grep -c "case 0x" src/Dbhq.Cpu6502/Cpu.Official.cs` returns 117.
 - **`tests/Dbhq.Cpu6502.Tests/Harte/Coverage.cs`** (modified): Updated the coverage list from `FirstInstructions` (2 opcodes) to `LoadsStoresLogicAndShifts` (117 opcodes). The array lists every opcode once in ascending order, spanning 0x01 to 0xFE.
 
 ### Instructions implemented
 
 One hundred seventeen instructions:
 
-- **Loads (18)**: LDA, LDX, LDY with immediate, zero page, zero page + X, zero page + Y, absolute, absolute + X, absolute + Y, and indirect-X and indirect-Y modes.
-- **Stores (13)**: STA, STX, STY with zero page, zero page + X/Y, absolute, and absolute + X/Y modes, plus indirect-X and indirect-Y.
-- **Transfers (6)**: TAX, TAY, TXA, TYA, TSX, TXS - register-to-register moves that read the next byte and discard it.
-- **Flags (7)**: CLC, SEC, CLI, SEI, CLV, CLD, SED - clear and set operations on the condition register.
-- **Increments and decrements (12)**: INC, DEC on zero page, zero page + X, absolute, and absolute + X; INX, INY, DEX, DEY on single registers.
-- **Compares (12)**: CMP, CPX, CPY with immediate, zero page, and absolute modes, spanning 12 address modes across the three registers.
-- **Logic (24)**: AND, ORA, EOR with immediate, zero page, zero page + X, absolute, absolute + X, absolute + Y, indirect-X and indirect-Y modes (24 opcodes covering all combinations); BIT with zero page and absolute.
-- **Shifts and rotates (24)**: ASL, LSR, ROL, ROR on the accumulator and at memory addresses (zero page, zero page + X, absolute, absolute + X). Read-modify-write instructions use `ReadForModify` to handle the NMOS 6502's rewrites.
+- **Loads (18)**: LDA #, LDA zp, LDA zp,X, LDA abs, LDA abs,X, LDA abs,Y, LDA (ind,X), LDA (ind),Y; LDX #, LDX zp, LDX zp,Y, LDX abs, LDX abs,Y; LDY #, LDY zp, LDY zp,X, LDY abs, LDY abs,X.
+- **Stores (13)**: STA zp, STA zp,X, STA abs, STA abs,X, STA abs,Y, STA (ind,X), STA (ind),Y; STX zp, STX zp,Y, STX abs; STY zp, STY zp,X, STY abs.
+- **Transfers (6)**: TAX, TAY, TXA, TYA, TSX, TXS.
+- **Flags (7)**: CLC, SEC, CLI, SEI, CLV, CLD, SED.
+- **Increments and decrements (12)**: INC zp, INC zp,X, INC abs, INC abs,X; DEC zp, DEC zp,X, DEC abs, DEC abs,X; INX, INY, DEX, DEY.
+- **Compares (14)**: CMP #, CMP zp, CMP zp,X, CMP abs, CMP abs,X, CMP abs,Y, CMP (ind,X), CMP (ind),Y; CPX #, CPX zp, CPX abs; CPY #, CPY zp, CPY abs.
+- **Logic (26)**: AND #, AND zp, AND zp,X, AND abs, AND abs,X, AND abs,Y, AND (ind,X), AND (ind),Y; ORA #, ORA zp, ORA zp,X, ORA abs, ORA abs,X, ORA abs,Y, ORA (ind,X), ORA (ind),Y; EOR #, EOR zp, EOR zp,X, EOR abs, EOR abs,X, EOR abs,Y, EOR (ind,X), EOR (ind),Y; BIT zp, BIT abs.
+- **Shifts and rotates (20)**: ASL A, ASL zp, ASL zp,X, ASL abs, ASL abs,X; LSR A, LSR zp, LSR zp,X, LSR abs, LSR abs,X; ROL A, ROL zp, ROL zp,X, ROL abs, ROL abs,X; ROR A, ROR zp, ROR zp,X, ROR abs, ROR abs,X.
 
 ### The red step: opcodes not implemented
 
@@ -203,22 +203,22 @@ All 595 tests pass:
 Run: `dotnet test` on 30 September 2026.
 
 ```
-Passed!  - Failed:     0, Passed:   595, Skipped:     0, Total:   595, Duration: 2 m 3 s - Dbhq.Cpu6502.Tests.dll (net10.0)
+Passed!  - Failed:     0, Passed:   595, Skipped:     0, Total:   595, Duration: 2 m 52 s - Dbhq.Cpu6502.Tests.dll (net10.0)
 ```
 
-The 595 passing tests include:
+The 595 passing tests are:
 
-- **HarteRunnerTests** (3 test methods): Harness unit tests.
-- **Harte tests for five variants** (4 opcodes each, 20 test methods): 0xA9 and 0xEA on each variant, passing as before.
-- **Harte tests for loads, stores, transfers, flags, increments, decrements, compares, logic and shifts** (570+ test methods): One test method per opcode per variant. With 117 opcodes and 5 variants, most variants generate one method each, though some generate multiple due to how xunit parametrises test data. All 570+ methods passed.
+- **CpuTests** (7 test methods): `ResetTakesSevenCyclesAndReadsTheVector` (1 method), `ResetClearsDecimalModeOnlyOnThe65C02` with 5 variant cases (5 rows), `NopIsTwoCyclesAndReadsTheByteAfterIt` (1 method).
+- **HarteRunnerTests** (3 test methods): `ACorrectCasePasses`, `AWrongCycleIsNamed`, `TheDecimalExceptionIsOneCycleWide`.
+- **Harte opcode tests** (585 theory cases): 117 opcodes x 5 CPU variants = 585 cases. Each generates one theory method per variant.
 
 The test run took 2 minutes 3 seconds on a single machine.
 
 ### Decisions made
 
-**All helpers were written in a single file (`Cpu.Logic.cs`) rather than split per-instruction.** Alternative: create a separate helper file per instruction or per category. Reason for the choice: all helpers are small enough to understand in one read; reviewing them together makes the patterns visible (carry-in handling in Rol/Ror, flag updates in Compare); and they are compiled into one method by the JIT, so inlining is not affected.
+**All helpers were written in a single file (`Cpu.Logic.cs`) rather than split per-instruction.** Alternative: create a separate helper file per instruction or per category. Reason for the choice: all helpers are small enough to understand in one read; reviewing them together makes the patterns visible (carry-in handling in Rol/Ror, flag updates in Compare).
 
-**Shifts and rotates use `ReadForModify` for memory operations.** The NMOS 6502's read-modify-write instructions read a value, write it back unchanged, then read it again. The 65C02 improved this: it reads and writes once. Both are cycle-exact with one `ReadForModify` call instead of separate `Read` and `Write`, because the helper knows which variant is running. The bus itself records the cycles.
+**Shifts and rotates use `ReadForModify` for memory operations.** The NMOS 6502's read-modify-write instructions read a value at an address, write it back unchanged, then write the modified value. The 65C02 improved this: after reading the value, it reads it again instead of writing it back. One `ReadForModify` call handles both: if CMOS, it calls `Read` twice; if NMOS, it calls `Read` then `Write`. This keeps the code simple and the bus cycles accurate.
 
 **Immediate-mode instructions read from PC and post-increment.** This is true of all immediate-mode opcodes: `LDA #`, `CMP #`, `AND #` and the rest. The increment is part of the fetch, not a separate cycle.
 
