@@ -447,9 +447,9 @@ No decisions: transcribed from the brief.
 
 Modified: `tests/Dbhq.Cpu6502.Tests/Harte/Coverage.cs` (replaced: every opcode of every variant, except WAI and STP on WDC, whose Harte files are empty; `WaitAndStopTests` covers those), `README.md` ("Where it stands") and `6502.slnx` (the benchmark added). Created: `tests/Dbhq.Cpu6502.Tests/CompletenessTests.cs` (two theories over the five variants: every opcode steps without `NotImplementedException`, every opcode has a mnemonic in `OpcodeTable`), and `bench/Dbhq.Cpu6502.Bench/` (the `.csproj` and `Program.cs`).
 
-Suite: `dotnet test` gave `Passed!  - Failed:     0, Passed:  1459, Skipped:     0, Total:  1459, Duration: 3 m 29 s`. That is the 1449 from Task 10 plus 10 from `CompletenessTests` (2 theories x 5 variants). The plan's own expectation was 1459.
+Suite: `dotnet test` gave `Passed!  - Failed:     0, Passed:  1459, Skipped:     0, Total:  1459, Duration: 3 m 29 s`. That is the 1449 from Task 10 plus 10 from `CompletenessTests` (2 theories x 5 variants). The plan's own expectation was 1459. The plan expected about a minute; the local suite took 3 m 29 s.
 
-Benchmark, one machine (the build machine, 8 cores, run on 30 September 2026): `dotnet run -c Release --project bench/Dbhq.Cpu6502.Bench` printed five runs from 62.0 MHz to 82.8 MHz over 96,247,425 cycles each, and this last line: `best 82.8 MHz: 41 times a 2 MHz BBC Micro, against a target of 25`. It exited 0. It is a local benchmark and not a CI check.
+Benchmark, one machine (the build machine, 8 cores, run on 30 September 2026): `dotnet run -c Release --project bench/Dbhq.Cpu6502.Bench` printed five runs from 62.0 MHz to 82.8 MHz over 96,247,425 cycles each, and this last line: `best 82.8 MHz: 41 times a 2 MHz BBC Micro, against a target of 25`. It exited 0. The spread across the five runs was 62.0 to 82.8 MHz, and run 2 was slower than run 1, so runs vary and the best is reported. It is a local benchmark and not a CI check.
 
 The design's done criteria, each against the test that shows it:
 - All Harte cases pass in all five sets: the `Nmos6502Harte`, `Ricoh2A03Harte`, `Synertek65C02Harte`, `Rockwell65C02Harte` and `Wdc65C02Harte` classes, one theory case per opcode (`Coverage`, 1278 in all).
@@ -458,6 +458,12 @@ The design's done criteria, each against the test that shows it:
 - Every interrupt test passes: `TransistorModelTests`, `CmosInterruptTests` and `WaitAndStopTests`.
 - Nothing skipped: `Skipped:     0` in the run above.
 
-The Dormann tests are Linux-only (`LinuxOnlyTheoryAttribute`), so on another system they skip. CI must have run them. `gh run list --repo dbhq-uk/6502 --branch stage-1/core` shows `Validate` run 36700744345, on `8296f8d` (the Task 10 head), as `success`. Its log has 12 `Passed ...DormannTests` lines, no `Skipped` line and `Total tests: 1449`, `Passed: 1449`. The Task 11 push gets its own run.
+The Dormann tests are Linux-only (`LinuxOnlyTheoryAttribute`), so on another system they skip. CI must have run them. `gh run list --repo dbhq-uk/6502 --branch stage-1/core` shows `Validate` run 36700744345, on `8296f8d` (the Task 10 head), as `success`. Its log has 12 `Passed ...DormannTests` lines, no `Skipped` line and `Total tests: 1449`, `Passed: 1449`. The Task 11 push ran as Validate run 36701488787 on `8c38c7b`: `success`, 1459 of 1459 passed, 12 Dormann cases passed and 0 skipped.
 
-What the stage showed. `git log --oneline main..HEAD | wc -l` printed 20 before this commit: 9 `feat:`, 9 `fix:`, 1 `test:` and 1 `chore:`. All nine fixes changed this journal file (`git show --stat` on each), most of them to correct counts and descriptions of the code, and the Task 1 correction (a comment naming a machine, the NES, under `src/`, and the same line in the plan) is recorded above. The plan's code otherwise went in as written: Tasks 2 to 6 each recorded a first build with no surprises.
+What the stage showed. `git log --oneline main..HEAD | wc -l` printed 20 before this commit: 9 `feat:`, 9 `fix:`, 1 `test:` and 1 `chore:`. All nine fixes changed this journal file (`git show --stat` on each), most of them to correct counts and descriptions of the code, and the Task 1 correction (a comment naming a machine, the NES, under `src/`, and the same line in the plan) is recorded above.
+
+What the reference data taught, one line each, with the entry in `docs/known-differences.md` and the task section:
+- The 65C02's extra decimal-mode cycle on `ADC #imm` and `SBC #imm`: Harte's data reads a fixed address for it, and the harness makes one narrow exception (Tasks 2 and 4).
+- JAM is stepped as Harte records it, and ANE and LXA use `$EE` because Harte's data does (Task 6, "Unstable NMOS opcodes").
+- Harte's Synertek data disagrees with Dormann's expectation for the bit-instruction opcodes, so that build of the extended test leaves them out (Task 9).
+- There is no public transistor-level model of the 65C02, so its own interrupt behaviour is checked against WDC's datasheet, and that it times interrupts exactly as the NMOS chip does is assumed, not shown (Task 8, "65C02 interrupt timing").

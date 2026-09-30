@@ -4,8 +4,7 @@ using Dbhq.Cpu6502.TestSupport;
 
 // How fast the core runs on its own, measured on Dormann's functional test.
 // A local benchmark, not a CI check: CI runners vary too much to fail a build
-// on. .NET compiles hot code in stages while it runs, so the first run is
-// slow; the best of five is reported.
+// on. Runs vary, so the best of five is reported.
 const double BbcMicroHz = 2_000_000;
 const double TargetMultiple = 25;
 
