@@ -22,7 +22,10 @@ dotnet build
 dotnet test
 ```
 
-Requires the .NET 10 SDK.
+Requires the .NET 10 SDK. The first `dotnet test` downloads about 5 GB of
+test data into `.testdata/`. The Dormann tests run on Linux only and are
+skipped elsewhere. On Linux they need `libc6-i386` and `lib32stdc++6`, because
+Dormann's assembler is a 32-bit program.
 
 ## Style
 

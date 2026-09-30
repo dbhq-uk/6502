@@ -83,26 +83,26 @@ On review, the comment for `CpuVariant.Ricoh2A03` said "in the NES", which viola
 
 ## Task 2: The Harte harness
 
-The test harness that proves every instruction correct by checking every cycle, register and memory location against reference test data. Tom Harte's SingleStepTests provides 1,280 files covering all opcodes across all five variants, with 10,000 cases per opcode - 12.8 million test cases.
+The test harness that proves every instruction correct by checking every cycle, register and memory location against reference test data. Tom Harte's SingleStepTests provides 1,280 files covering all opcodes across all five variants. Two of them, the WDC `$CB` and `$DB` files, are empty, so 1,278 have data: 10,000 cases per opcode, 12.78 million test cases.
 
 ### What was built
 
 Two new test support classes:
 
-- `Pins.cs`: A static class holding every third-party commit and hash the tests use. Organizes the constants so they are easy to find and verify.
+- `Pins.cs`: A static class holding every third-party commit and hash the tests use. Organises the constants so they are easy to find and verify.
 - `PinnedFiles.cs`: Downloads a file once, checks it against a recorded git blob hash, caches it under `.testdata`, and checks it again before each use.
 
 A manifest generation script:
 
 - `tools/harte-manifest.sh`: Calls GitHub's tree API once for the pinned Harte commit and records every test file's git blob hash. Generates 1,280-line `harte.manifest` in one run.
 
-Six test classes in the `Harte` namespace:
+Six files in the `Harte` namespace:
 
 - `HarteFile.cs`: Reads a JSON file from Tom Harte's test set and parses it into records holding the initial state, final state, and the sequence of bus cycles.
 - `HarteSets.cs`: Maps each variant to its Harte folder, looks up a test file in the manifest, and fetches it (checking the hash automatically).
 - `HarteRunner.cs`: Runs test cases one at a time, cycle by cycle. Catches `NotImplementedException` and reports it as a test failure. Has one documented exception: the 65C02's extra decimal-mode cycle on `ADC #imm` and `SBC #imm`, which Harte records but whose address differs by variant. The cycle must exist as a read; its address and value are not compared.
-- `HarteRunnerTests.cs`: Unit tests proving the harness itself fails when it should. Tests a correct case passes, a wrong cycle is named, and the decimal exception is exactly one cycle wide.
-- `Coverage.cs`: Tracks which opcodes have implementations so far. Task 2 implements `0xA9` (LDA #) and `0xEA` (NOP), so it returns those two. Task 11 replaces this list with all 256 opcodes.
+- `HarteRunnerTests.cs`: Unit tests proving the harness itself fails when it should. As first written they covered a correct case passing, a wrong cycle being named, and the decimal exception being exactly one cycle wide. The final review added three more, each making the harness fail on purpose and asserting the message names the field: a wrong register (A), a wrong memory value and a wrong cycle count.
+- `Coverage.cs`: Tracks which opcodes have implementations so far. Task 2 implements `0xA9` (LDA #) and `0xEA` (NOP), so it returns those two. Task 11 replaces this list with every opcode except `WAI` and `STP` on WDC, whose Harte files are empty.
 - `HarteTests.cs`: Five test classes, one per variant. Each runs every implemented opcode's Harte cases, checking that bus cycles, registers, and memory match the reference data.
 
 One instruction implemented:
@@ -146,7 +146,7 @@ The first run downloaded ten files from GitHub (five for LDA #, five for NOP, on
 
 ### Decisions made
 
-**The manifest was generated from GitHub's tree API, not by scanning a local download.** Harte's repository is 5 GB. Alternative: download the whole repository and hash its files locally. Reason for the choice: a single API call records all hashes in one call, at a fixed commit; the tests can then verify downloads without anyone downloading the whole 5 GB. If Harte's repository were deleted or moved, the recorded hashes mean the files can still be verified.
+**The manifest was generated from GitHub's tree API, not by scanning a local download.** Harte's repository is 5 GB. Alternative: download the whole repository and hash its files locally. Reason for the choice: a single API call records all hashes in one call, at a fixed commit; the tests can then verify downloads without anyone downloading the whole 5 GB. The hashes only verify a file you already hold, or one fetched from a mirror. If Harte's repository were deleted, the recorded hashes would not bring the files back, and the tests could not fetch them.
 
 ### Known differences
 
@@ -235,7 +235,7 @@ None. The helpers worked as designed on first build. All 117 opcodes passed thei
 
 ## Task 4: ADC and SBC
 
-Binary and decimal arithmetic on every variant. Decimal mode follows Bruce Clark's description, which `tools/probes/check_harte_findings.py` verified against every decimal case before the plan was written. The NMOS chip takes N and V from before the high digit is adjusted and Z from the binary sum; the 65C02 takes N and Z from the result and spends one more cycle. The 2A03 has no decimal mode.
+Binary and decimal arithmetic on every variant. Decimal mode follows Bruce Clark's description, which `tools/probes/check_harte_findings.py` verified against every decimal case before the plan was written. For ADC, both chips take V from before the high digit is adjusted. The NMOS chip also takes N from that point and Z from the binary sum; the 65C02 takes N and Z from the result and spends one more cycle. The 2A03 has no decimal mode.
 
 ### What was built
 
@@ -297,7 +297,7 @@ Branches, jumps, subroutines, break, return from interrupt, and the four stack i
 
 Three files modified or created:
 
-- **`src/Dbhq.Cpu6502/Cpu.ControlFlow.cs`** (new file): Control flow helpers: `Branch(taken)`, `JmpIndirect`, `Jsr`, `Rts`, `Rti`, `Brk`. Branch handles conditional jumps with the timing of the false-condition path and the cross-page-boundary penalty read. JmpIndirect models the NMOS bug (pointer never carries into the high byte) against the 65C02 fix (extra throwaway read of the wrong address).
+- **`src/Dbhq.Cpu6502/Cpu.ControlFlow.cs`** (new file): Control flow helpers: `Branch(taken)`, `JmpIndirect`, `Jsr`, `Rts`, `Rti`, `Brk`. Branch: when the branch is not taken, only the operand is read; when it is taken, it adds a throwaway read at the PC, plus a wrong-page read when the target is on another page. JmpIndirect models the NMOS bug (pointer never carries into the high byte) against the 65C02 fix (extra throwaway read of the wrong address).
 - **`src/Dbhq.Cpu6502/Cpu.Official.cs`** (modified): Expanded from 133 opcodes to 151. Control flow section added with branches (0x10, 0x30, 0x50, 0x70, 0x90, 0xB0, 0xD0, 0xF0), jumps (0x4C, 0x6C), subroutines (0x20, 0x60), interrupt return (0x40), break (0x00). Stack section added: PHA, PHP, PLA, PLP (0x48, 0x08, 0x68, 0x28). Case labels verified: `grep -c "case 0x" src/Dbhq.Cpu6502/Cpu.Official.cs` returns 151.
 - **`tests/Dbhq.Cpu6502.Tests/Harte/Coverage.cs`** (modified): Added `ControlFlowAndStack` array with 18 opcodes, combined with prior arrays into `Official`.
 
@@ -313,7 +313,7 @@ Eighteen opcodes:
 
 ### The red step: opcodes not implemented
 
-Before `Cpu.ControlFlow.cs` and the updated `Cpu.Official.cs`, running `dotnet test --filter "FullyQualifiedName~Harte"` showed test failures for each newly covered opcode. Examples included Nmos6502 $00, Ricoh2A03 $F0, Wdc65C02 $40. Each reported "opcode $xx is not implemented". The previously implemented 133 opcodes and all harness tests continued to pass.
+Before `Cpu.ControlFlow.cs` and the updated `Cpu.Official.cs`, running `dotnet test --filter "FullyQualifiedName~Harte"` showed test failures for the newly covered opcodes. Each reported "opcode $xx is not implemented". The previously implemented 133 opcodes and all harness tests continued to pass.
 
 ### Tests and results
 
@@ -345,7 +345,7 @@ All NMOS-only opcodes: the no-ops of every length, the twelve JAM opcodes, the r
 
 ### What was built
 
-Four files modified:
+Three files modified:
 
 - **`src/Dbhq.Cpu6502/Cpu.cs`** (modified): Added jam handling to `Step()`. When `IsJammed` is true, `Step()` reads `$FFFF` and returns 1 cycle, keeping the clock running without executing further instructions.
 - **`src/Dbhq.Cpu6502/Cpu.Nmos.cs`** (modified): All 105 undocumented opcodes and their helpers: `ExecuteNmos(byte opcode)` with a switch covering no-ops (27 cases in six addressing-mode groups: 1-byte, 2-byte immediate, zero page, zero page,X, absolute, absolute,X), JAM (12 cases), shift-or-ALU combinations (Slo, Rla, Sre, Rra, Dcp, Isc - 42 cases each with seven forms), SAX (4 cases) and LAX (6 cases, 10 total), immediate oddities (8 cases: ANC, ALR, ARR, ANE, LXA, SBX, SBC), stores that AND with one more than the high byte (5 cases: SHY, SHX, SHA x2, TAS), and LAS (1 case). The Jam method makes the opcode fetch plus ten reads (PC, `$FFFF`, `$FFFE` twice, `$FFFF` six times), matching Harte's record. ANE and LXA use the constant `$EE`, as Harte's data does; `docs/known-differences.md` notes that real chips vary.
@@ -416,10 +416,10 @@ No decisions: transcribed from the brief.
 ## Task 8: Interrupts, against the transistor-level model
 
 Created: `tools/perfect6502/harness.c` and `generate.sh`, the generated `tests/Dbhq.Cpu6502.Tests/Interrupts/visual6502.txt`, four test files in that folder (`TransistorModelRun.cs`, `TransistorModelTests.cs`, `CmosInterruptTests.cs`, `WaitAndStopTests.cs`) and `src/Dbhq.Cpu6502/Cpu.Interrupts.cs`. Replaced: `Cpu.cs`. Modified: `Cpu.ControlFlow.cs` (`Branch` and `Brk`) and the tests' `.csproj`, which now copies `visual6502.txt` to the test output.
-`generate.sh` runs the harness against perfect6502, a simulation of the chip's transistors, at a pinned commit. It printed `134 runs written to .../visual6502.txt`. The file is committed because this repository generated it.
+`generate.sh` runs the harness against perfect6502, a simulation of the chip's transistors, at a pinned commit. It printed `134 runs written to .../visual6502.txt`. The final review added an `irq-nmi` family of 16 runs (see "Final review" below), so the file now holds 150. The file is committed because this repository generated it.
 What the model showed, in the brief's words: an instruction takes an interrupt that became active by the end of its last cycle, as the harness frames a cycle. A taken branch that stays on its page decides at its operand cycle, so `Branch` freezes the poll. An NMI seen by the time P is pushed takes `BRK` or an IRQ over; one that arrives on the vector's low byte is lost; one on its high byte waits until the handler's first instruction has run, and `EnterHandler` does all three. `CLI`, `SEI` and `PLP` change the interrupt-disable flag after their last cycle's poll, so their effect is one instruction late, with no special code.
 After this task `Reset` clears a jammed, waiting or stopped CPU (`Reset` in `Cpu.cs` sets `IsJammed`, `IsWaiting` and `IsStopped` to false; `StpStopsEverythingUntilReset` tests the `STP` case). `WAI` wakes on an interrupt: `WaitAndStopTests` checks an IRQ with interrupts disabled, an IRQ with them enabled, and an NMI. `Step` returns 0 with no bus access while the CPU waits or is stopped.
-The 65C02's own interrupt behaviour, and `WAI` and `STP`, are checked against WDC's datasheet, not the chip, because no transistor-level model of the 65C02 is public (`docs/known-differences.md`).
+The 65C02's own interrupt behaviour, and `WAI` and `STP`, follow WDC's datasheet for the decimal-flag clear, the `WAI` and `STP` cycle counts and the wake rules; not checked against the chip, because no transistor-level model of the 65C02 is public. That the 65C02 times interrupts like the NMOS chip is assumed (`docs/known-differences.md`).
 Red (`dotnet test --filter "FullyQualifiedName~Interrupts"`, before `Cpu.Interrupts.cs` existed): `Failed!  - Failed:   133, Passed:    14, Skipped:     0, Total:   147`. The 133 were 126 of the 134 transistor-model runs, 3 of 4 `CmosInterruptTests` cases and 4 of 9 `WaitAndStopTests` cases. One captured failure: `irq k=7, cycle 11: ours is a read $0408 = $10, the chip's is a read $0407 = $E6`.
 Green (`dotnet test`, whole suite, after the code): `Passed!  - Failed:     0, Passed:  1435, Skipped:     0, Total:  1435`. That is the 1288 from Task 7 plus the 147 in the Interrupts filter.
 No decisions: transcribed from the brief.
@@ -429,7 +429,7 @@ No decisions: transcribed from the brief.
 Created: `IntelHex.cs` and `Dormann.cs` in `tests/Dbhq.Cpu6502.TestSupport/`, and `LinuxOnlyTheoryAttribute.cs` and `DormannTests.cs` in `tests/Dbhq.Cpu6502.Tests/Dormann/`. Nothing modified. Whole programs that check their own results, for the bugs that only appear when instructions run in sequence. They are assembled at test time with Dormann's own `as65` from a pinned commit into the git-ignored `.testdata/dormann`; the success address comes from the assembler's listing, never typed in.
 Builds, from `DormannTests.cs`: `FunctionalTestPasses` on all five variants (the 2A03 build leaves decimal mode out); `ExtendedOpcodesTestPasses` on the three 65C02 variants only (the Synertek build leaves out the bit-instruction opcodes, because Dormann's test expects one-byte no-ops there and Harte's Synertek data says otherwise, per `docs/known-differences.md`); `DecimalTestPasses` on every variant except the 2A03, reporting through its ERROR byte at `$0B`.
 The tests run on Linux, locally and in CI, and are skipped elsewhere with the reason (`LinuxOnlyTheoryAttribute`).
-Red (`dotnet test --filter "FullyQualifiedName~Dormann"`, before `Dormann.cs` existed): the build failed, `DormannTests.cs(38,50): error CS0234: The type or namespace name 'Dormann' does not exist in the namespace 'Dbhq.Cpu6502.TestSupport'`.
+Red (`dotnet test --filter "FullyQualifiedName~Dormann"`, before `Dormann.cs` existed): the build failed, among other errors with `DormannTests.cs(38,50): error CS0234: The type or namespace name 'Dormann' does not exist in the namespace 'Dbhq.Cpu6502.TestSupport'`.
 Green (`dotnet test`, whole suite, after the code): `Passed!  - Failed:     0, Passed:  1447, Skipped:     0, Total:  1447, Duration: 2 m 33 s`. `dotnet test --list-tests --filter "FullyQualifiedName~Dormann"` listed 12 cases from 3 methods: 5 functional + 3 extended + 4 decimal. That is the 1435 from Task 8 plus 12 = 1447.
 No decisions: transcribed from the brief.
 
@@ -460,10 +460,20 @@ The design's done criteria, each against the test that shows it:
 
 The Dormann tests are Linux-only (`LinuxOnlyTheoryAttribute`), so on another system they skip. CI must have run them. `gh run list --repo dbhq-uk/6502 --branch stage-1/core` shows `Validate` run 36700744345, on `8296f8d` (the Task 10 head), as `success`. Its log has 12 `Passed ...DormannTests` lines, no `Skipped` line and `Total tests: 1449`, `Passed: 1449`. The Task 11 push ran as Validate run 36701488787 on `8c38c7b`: `success`, 1459 of 1459 passed, 12 Dormann cases passed and 0 skipped.
 
-What the stage showed. `git log --oneline main..HEAD | wc -l` printed 20 before this commit: 9 `feat:`, 9 `fix:`, 1 `test:` and 1 `chore:`. All nine fixes changed this journal file (`git show --stat` on each), most of them to correct counts and descriptions of the code, and the Task 1 correction (a comment naming a machine, the NES, under `src/`, and the same line in the plan) is recorded above.
+What the stage showed. `git log --oneline main..HEAD | wc -l` printed 20 just before the Task 11 commit (8c38c7b), and more commits followed it. Those 20 were: 9 `feat:`, 9 `fix:`, 1 `test:` and 1 `chore:`. All nine fixes changed this journal file (`git show --stat` on each), most of them to correct counts and descriptions of the code, and the Task 1 correction (a comment naming a machine, the NES, under `src/`, and the same line in the plan) is recorded above.
 
 What the reference data taught, one line each, with the entry in `docs/known-differences.md` and the task section:
 - The 65C02's extra decimal-mode cycle on `ADC #imm` and `SBC #imm`: Harte's data reads a fixed address for it, and the harness makes one narrow exception (Tasks 2 and 4).
-- JAM is stepped as Harte records it, and ANE and LXA use `$EE` because Harte's data does (Task 6, "Unstable NMOS opcodes").
+- JAM is stepped as Harte records it (Task 6, `docs/known-differences.md`, "JAM"), and ANE and LXA use `$EE` because Harte's data does (Task 6, "Unstable NMOS opcodes").
 - Harte's Synertek data disagrees with Dormann's expectation for the bit-instruction opcodes, so that build of the extended test leaves them out (Task 9).
-- There is no public transistor-level model of the 65C02, so its own interrupt behaviour is checked against WDC's datasheet, and that it times interrupts exactly as the NMOS chip does is assumed, not shown (Task 8, "65C02 interrupt timing").
+- There is no public transistor-level model of the 65C02, so its own interrupt behaviour follows WDC's datasheet for the decimal-flag clear, the `WAI` and `STP` cycle counts and the wake rules, and is not checked against the chip. That it times interrupts like the NMOS chip is assumed, not shown (Task 8, "65C02 interrupt timing").
+
+## Final review
+
+The last review of the whole branch found claims that were stronger than their tests, and gaps in what the tests could catch. Each was fixed in one wave.
+- **IRQ taken over by NMI.** The journal and spec said an NMI takes an IRQ over, but only `BRK` runs tested it. `harness.c` now has an `irq-nmi` family: an IRQ held from cycle 1 around the `loop` program, and an NMI raised on each cycle from 1 to 16. `generate.sh` printed `150 runs written`, up from 134, and all 150 passed with no change to the core (`dotnet test --filter "FullyQualifiedName~TransistorModel"`: `Total: 150`).
+- **65C02 wording.** No 65C02 bus logs exist. The tests follow WDC's datasheet for the decimal-flag clear, the `WAI` and `STP` cycle counts and the wake rules, and are not checked against the chip. Five places said "checked against"; they now say that.
+- **JAM** has its own entry in `docs/known-differences.md`. Harte records the first step (the opcode fetch plus ten reads); what follows is not checked against a reference.
+- **Tests added.** `HarteRunnerTests` gained three (wrong register, wrong memory value, wrong cycle count), and `WaitAndStopTests` two (`Reset` ends a wait, `Reset` clears a jam). The decimal Dormann test now sets its ERROR byte (`$0B`, confirmed in the assembled listing) to `$FF` before it runs, so a program that traps early fails instead of passing on an uninitialised zero.
+- **Spec, CI and docs.** The spec's cycle range, switch count and `nestest` variant (the 2A03) were wrong and are fixed. The `dashes` job now runs `git grep` over every tracked file, and `tools/harte-manifest.sh` is executable. Journal wording was corrected in several places: the Harte file counts, a hash claim, the branch timing and the red-step examples.
+- **The suite after the wave:** `dotnet test` printed `Passed!  - Failed:     0, Passed:  1480, Skipped:     0, Total:  1480, Duration: 3 m 4 s`, up from 1459 at Task 11.

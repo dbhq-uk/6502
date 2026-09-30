@@ -178,7 +178,8 @@ On 30 September, with the plan's own tests run by `dotnet test`:
 - **Dormann:** all twelve builds passed, on every variant each applies to.
 - **`nestest`:** all 8,991 lines matched on program counter, instruction bytes, mnemonic and undocumented mark, A, X, Y, P, SP and cycle count, and its error bytes ended at zero.
 - **The transistor-level model:** all 134 interrupt runs matched, cycle for
-  cycle.
+  cycle. The final review added 16 runs, an IRQ taken over by an NMI, and
+  all 150 match.
 - **Speed:** the benchmark's best run on the build machine was 98.7 MHz, 49
   times a 2 MHz BBC Micro, against a target of 25.
 
