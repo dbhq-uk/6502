@@ -48,7 +48,7 @@ number of cycles, so it overshoots by less than one instruction; the cycles
 actually run are what is reported. Every line has the same form:
 
 ```
-cycles=100000001 ms=1050.422 cycles_per_second=95199817 mhz=95.200
+cycles=<n> ms=<ms> cycles_per_second=<n> mhz=<x>
 ```
 
 Each run does a warm-up first (5 million cycles by default), timed and
@@ -78,7 +78,7 @@ dotnet publish bench/Dbhq.Cpu6502.WasmBench -c Release -o bench/Dbhq.Cpu6502.Was
 dotnet publish bench/Dbhq.Cpu6502.WasmBench -c Release -p:RunAOTCompilation=true -o bench/Dbhq.Cpu6502.WasmBench/publish/aot
 
 cd bench/Dbhq.Cpu6502.WasmBench
-npm install
+npm ci
 node run-in-browser.mjs publish/interpreter 5    # folder, runs, cycles, warm-up cycles
 node run-in-browser.mjs publish/aot 5
 ```

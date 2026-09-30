@@ -5,7 +5,7 @@ using Dbhq.Cpu6502.Bench;
 // app, on the same core, run as an ordinary .NET program. Prints the same two
 // lines the page prints.
 //
-//   dotnet run -c Release --project bench/Dbhq.Cpu6502.SpeedNative [measured cycles] [warm-up cycles]
+//   dotnet run -c Release --project bench/Dbhq.Cpu6502.SpeedNative -- [measured cycles] [warm-up cycles]
 //   dotnet run -c Release --project bench/Dbhq.Cpu6502.SpeedNative -- --listing
 if (args.Length == 1 && args[0] == "--listing")
 {

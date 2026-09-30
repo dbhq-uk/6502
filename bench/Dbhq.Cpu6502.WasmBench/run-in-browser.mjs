@@ -43,9 +43,27 @@ try {
     const browser = await chromium.launch({ executablePath: chrome, headless: true });
     if (run === 1) console.log('browser ' + browser.version());
     const page = await browser.newPage();
-    page.on('pageerror', error => console.error('page error: ' + error.message));
-    await page.goto(`${base}?cycles=${cyclesArg}&warmup=${warmupArg}`);
-    await page.waitForFunction(() => document.body.dataset.done === 'true', null, { timeout: 30 * 60 * 1000 });
+    // A page that cannot load the runtime must fail the run at once, not hang
+    // until the run's own timeout: a script error, a failed request or a 404
+    // for anything the page asks for ends the wait.
+    let fail;
+    const failed = new Promise((_, reject) => { fail = reject; });
+    failed.catch(() => {});
+    page.on('pageerror', error => fail(new Error('page error: ' + error.message)));
+    page.on('requestfailed', request => fail(new Error(`request failed: ${request.url()}`)));
+    page.on('response', response => {
+      if (response.status() >= 400) fail(new Error(`HTTP ${response.status()}: ${response.url()}`));
+    });
+    try {
+      await page.goto(`${base}?cycles=${cyclesArg}&warmup=${warmupArg}`);
+      await Promise.race([
+        page.waitForFunction(() => document.body.dataset.done === 'true', null, { timeout: 30 * 60 * 1000 }),
+        failed,
+      ]);
+    } catch (error) {
+      await browser.close();
+      throw error;
+    }
     const text = await page.locator('#log').innerText();
     for (const line of text.split('\n')) console.log(`run ${run} ${line}`);
     await browser.close();

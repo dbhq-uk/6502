@@ -6,6 +6,14 @@ that check. The question was how many 6502 cycles per second the core runs in a
 browser, in .NET's default interpreter mode and compiled ahead of time (AOT),
 against a BBC Micro's 2 million a second.
 
+**A change from the design.** The design's "Speed check first" says to run
+Dormann's program in the browser. This measures a program of our own instead.
+Dormann's programs are GPL and `AGENTS.md` rule 3 forbids committing them, and
+running one in the page would have meant fetching and assembling it in the
+browser build. That is also why the native figure here differs from the one the
+existing `bench/Dbhq.Cpu6502.Bench` prints: it runs Dormann's functional test,
+so the two are different programs and their figures are not comparable.
+
 Everything here is one machine's result, on one day, for a program of our own
 that is not a real machine's software. The project, with the commands to run it
 again, is in [`bench/Dbhq.Cpu6502.WasmBench/`](../../bench/Dbhq.Cpu6502.WasmBench/README.md).
@@ -43,15 +51,19 @@ again, is in [`bench/Dbhq.Cpu6502.WasmBench/`](../../bench/Dbhq.Cpu6502.WasmBenc
   `127.0.0.1` and run by `node run-in-browser.mjs publish/<build> 5`, which
   starts a fresh headless Chrome for every run. Native: five separate
   invocations of `dotnet bench/Dbhq.Cpu6502.SpeedNative/bin/Release/net10.0/Dbhq.Cpu6502.SpeedNative.dll`.
-- **The machine:** `nproc` printed 8; `lscpu` names the model `DO-Premium-AMD`
-  (one socket, eight cores, one thread each), `/proc/cpuinfo` showed 1996.25
-  MHz, and `free -h` showed 31 GiB. The browser was Google Chrome
+- **The machine:** a KVM virtual machine (`systemd-detect-virt` printed `kvm`),
+  `lscpu` model name `DO-Premium-AMD`. `nproc` printed 8 (one socket, eight
+  cores, one thread each), `/proc/cpuinfo` showed 1996.25 MHz, and `free -h`
+  showed 31 GiB. The browser was Google Chrome
   153.0.8010.47 (`google-chrome --version`, and the same string from
   Playwright's `browser.version()`), headless. .NET SDK 10.0.400 with the
-  `wasm-tools` workload; the browser runtime pack was 10.0.12 (from the build
-  output). The highest installed native runtime is 10.0.11. The wasm code is
-  single threaded, so the eight cores matter only in that the machine was
-  otherwise idle.
+  `wasm-tools` workload. The browser runtime pack was 10.0.12 (from the
+  publish output paths) and the native runs used runtime 10.0.11
+  (`COREHOST_TRACE=1` printed `Chose FX version
+  [/usr/share/dotnet/shared/Microsoft.NETCore.App/10.0.11]`), so the browser
+  and native builds did not run on the same runtime patch version. The machine
+  is shared: other sessions use it, and I did not check what else was running
+  during the runs. The wasm code is single threaded.
 
 ## The figures, as printed
 
@@ -134,16 +146,18 @@ the table above:
   interpreter. AOT is 50,968,400 / 107,594,112 = 0.474 of native, and the
   interpreter is 4,688,299 / 107,594,112 = 0.0436 of native, so native is 2.11
   times AOT and 22.9 times the interpreter.
-- **Against the design's target of at least 25 times real speed** (a target
-  for the core alone, as a native figure): native was above it on every run.
+- **Against the design's target of at least 25 times real speed** (the design
+  says "for the core alone" and does not say whether native or in a browser):
+  native was above it on every run.
   AOT in the browser reached 25 times a 2 MHz BBC Micro on two of five runs
   (25.12 and 25.48 times) and was below it on three (24.58, 22.92 and 24.20).
   The interpreter's runs were 2.01 to 2.34 times a 2 MHz BBC Micro.
 
 ## What that means, stated plainly
 
-The best browser figures on this machine were 2.34 times a 2 MHz BBC Micro
-with the interpreter and 25.48 times with AOT. Those are the figures; whether
+AOT reached 25 times a 2 MHz BBC Micro on two of five runs (best 25.48). The
+median run was 24.58 times, and the range was 22.92 to 25.48. The
+interpreter's range was 2.01 to 2.34 times. Those are the figures; whether
 that is headroom enough once a real machine's chips share each cycle is not
 something this measurement can say, because the workload runs on a plain array
 and none of the machine's other chips are in it.
@@ -159,16 +173,19 @@ and none of the machine's other chips are in it.
   attribute is in `Program.cs`. Warnings stay as errors.
 - **The project is in `6502.slnx`.** `dotnet build -c Release` on the whole
   solution succeeded with 0 warnings and 0 errors, and `dotnet test
-  --configuration Release` passed all 1,480 tests. CI runs `dotnet test` on
-  the solution too, and the `Validate` run on the pull request
-  (https://github.com/dbhq-uk/6502/pull/6) finished with a conclusion of
-  success, so the wasm project builds there as well (`gh run list --repo
-  dbhq-uk/6502 --branch stage-2/browser-speed`). I did not check whether that
-  runner had the `wasm-tools` workload installed.
+  --configuration Release` passed all 1,480 tests. In CI, the `Validate` run on
+  the pull request (https://github.com/dbhq-uk/6502/pull/6, `gh run view
+  --log`) shows both new projects restored, and its `dotnet test` built the
+  core, the test support library and the tests and passed. That log has no
+  build line for the two bench projects, so CI restores them but does not
+  build them; the whole-solution build was run only here. I did not check
+  whether that runner had the `wasm-tools` workload installed.
 - **The interpreter publish also relinked the native runtime:** its build
   output shows `wasm-ld` running. So "default" here means the default settings
   of `dotnet publish -c Release` for this SDK, with no AOT and no other options
-  set. I did not test other settings.
+  set. It is a plain .NET WebAssembly app (`Microsoft.NET.Sdk.WebAssembly`),
+  not Blazor WebAssembly. That a Blazor app would run the same runtime in the
+  same default mode is assumed, not tested. I did not test other settings.
 - **Publish times, one each:** the interpreter publish took 42.8 s and the AOT
   publish 2 min 5 s of wall clock (`time`). The AOT output was 18 MB in the
   publish folder against 12 MB for the interpreter (`du -sh`); `dotnet.native.wasm`
