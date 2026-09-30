@@ -307,3 +307,44 @@ The re-review found the target fix only partly done. The status page said "The d
 - **The wording.** The status page now quotes the design as it words it: "at least 25 times real speed, for the core alone", and says the design does not say which build. It then says the site measures against a 2 MHz machine, the BBC Micro's clock, gives the two verdicts against that reference, and says plainly that the reference is the site's choice and the verdicts assume it. The clocks come from the repository, not from memory: `grep -n "MHz" machines/registry.json` and `docs/the-6502-family.md` both give the KIM-1 as `6502, 1 MHz` and the BBC Micro as `6502, 2 MHz`. The page reads the KIM-1's clock out of the registry, so it says the KIM-1 runs at 1 MHz and every multiple against it would be 2 times as large, and neither number is typed. The home card title is now "Against a 2 MHz machine, in the browser", and its text quotes the design first and gives the verdicts in a separate sentence that names the site's reference.
 - **The tests.** A new test in `figures-on-pages.test.mjs` splits each page into sentences and fails if any sentence holds both "target" and "MHz", and requires the sentence with "target is" to say "at least", "real speed" and "for the core alone". The once-per-page 25 rule, the verdict test and the exact-value tests were unchanged and pass.
 - **A mistake of mine, found by the suite.** The fix-round journal text above quoted the banned phrase for the test cadence, and the built journal page then failed the very test that bans it. `npm test` had been run before that journal section was written, so the commit before this one was pushed with that test failing. The quote is reworded, and this commit is green.
+
+## Task 9: CI, deploy and the docs
+
+The site now has checks in CI and a deploy workflow that is switched off. Nothing has been deployed.
+
+### What was built
+
+- **`validate.yml`.** The `test` job now writes a TRX file, turns it into `results.json` with `site/scripts/make-results.mjs`, and uploads it as an artifact. A new `site` job downloads that artifact into `site/src/data`, runs `npm ci` and `npm test`. The site's figures are read from `results.json` with the working directory `site`, and the artifact puts the file at `site/src/data/results.json`, so the "real results are publishable" test finds it where it looks.
+- **`deploy-site.yml`.** On a push to `main` that touches the site, the docs, the registry, the core or the tests, it runs the whole test suite, builds the site, deploys to Cloudflare Pages, purges the cache and checks that every built page, the machine-readable files and the edge headers are serving. It runs only when the repository variable `SITE_DEPLOY` is `true`. That variable is not set, no secret has been created and nothing outside the repository has been touched.
+- **`site/tests/build.test.mjs`.** Three tests: the eight pages the brief names were built, a sitemap and a `robots.txt` exist and the sitemap holds no 404, and a third that the brief did not have (below).
+- **`site/README.md`.**
+
+### Choices and changes from the brief
+
+- **Node 22.22, not 22.** `site/node_modules/html-validate/package.json` says `"node": "^22.22.0 || >= 24.8.0"` and `site/node_modules/astro/package.json` says `">=22.12.0"`. The brief's `node-version: '22'` would satisfy both only if the runner resolved it to a recent 22. `actions/setup-node` uses a Node already in the runner's tool cache when one matches the range, and a cached 22.x older than 22.22 would match `22`. So the workflows say `22.22`, which a cached 22.21 does not match. `site/package.json` has no `engines` field, so nothing else states the floor.
+- **The test-count floor is 79, not 51.** The brief's own comment says to raise it when the suite grows. 51 would let 28 tests disappear unseen.
+- **A sitemap test derived from the build.** The brief's sitemap test names one page by hand and looks for no 404. It would pass with a sitemap missing every other page. The new test reads the built pages and the sitemap and requires the two lists to be equal, with the 404 excluded, and fails if fewer than eight pages were found so that an empty build cannot pass it.
+- **The README's table of checks was rewritten.** The brief's table named `pages.test.mjs` and `content.test.mjs`, which do not exist on this branch. The table now lists the thirteen test files that do, each with what it holds.
+- **Actions.** Every action is pinned by commit SHA. The three the brief adds (`setup-node`, `upload-artifact`, `download-artifact`) were each looked up with `gh api repos/actions/<name>/commits/<sha>`, which found the commit, and `git/matching-refs/tags`, which showed the tags v4.4.0, v4.6.2 and v4.3.0 pointing at them. The three already in `validate.yml` were checked the same way.
+
+### What the checks showed
+
+- Before the sitemap test could pass, `node --test tests/build.test.mjs` run from an empty directory failed with `ENOENT: no such file or directory, scandir '/tmp/emptycwd/dist'`, so the tests do read the build. With the real build, all 3 passed.
+- To check the new test is not vacuous, the `about` entry was deleted from `dist/sitemap-0.xml` and `node --test tests/build.test.mjs` failed the sitemap test with a deep-equal assertion (2 passed, 1 failed). The file was restored and all 3 passed.
+- `python3 -c "import yaml; ..."` parsed both workflows: `validate.yml` has the jobs `test`, `site` and `dashes`, and `deploy-site.yml` has `deploy`, with `if: vars.SITE_DEPLOY == 'true'`. `actionlint` 1.7.12, downloaded to `/tmp` for the check and not added to the repository, printed nothing on both files, with exit code 0. `shellcheck` is installed here, so actionlint checked the shell in the `run` steps too.
+- The deploy workflow reads the pass and fail counts out of the log. The log came from Node 24 on this machine, which prints `ℹ pass 79`, and Node 22 in CI prints `# pass 79` when the output is piped. The two `grep` lines in the workflow were run against a captured log in each format, under `LC_ALL=C` and `LC_ALL=C.UTF-8`, and read 79 and 0 in all four cases. The page list the deploy checks is derived from `dist`: `find` gave 13 addresses, the same 13 that are in the sitemap.
+- `npm test` in `site/` ran 79 tests and all 79 passed. The brief expected 58 from 56, and after the reviews of the earlier tasks the suite was at 76, so 78 was expected. The extra one is the derived sitemap test.
+
+### Things that cannot be checked here
+
+- Neither workflow has run. `validate.yml`'s new jobs run for the first time on the pull request, and the deploy workflow is skipped until `SITE_DEPLOY` is set. The Cloudflare project, the secrets and the steps that follow the deploy have never been exercised.
+- `npx wrangler` in the deploy step is not pinned: `site/package.json` does not list `wrangler`, so `npx` fetches whichever version is latest on the day. That is the brief's design. It is worth pinning before the switch is turned on.
+
+## Where it stands
+
+Every figure here is from a command run on 30 September 2026.
+
+- **Pages.** `npm test` in `site/` runs the build first, and the log says `14 page(s) built`: the 13 pages that carry an `index.html` (`find dist -name index.html`) and the 404 page.
+- **Tests.** `npm test` in `site/` ran 79 tests, 79 passed, 0 failed, 0 skipped.
+- **Deploy.** Nothing is deployed. `deploy-site.yml` is switched off by design: it runs only when the repository variable `SITE_DEPLOY` is `true`, and it is not set. No secret was created and no Cloudflare, Terraform or Search Console change was made.
+- **Workflows.** Both parse as YAML and `actionlint` is clean, but neither has run.
