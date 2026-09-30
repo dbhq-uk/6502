@@ -338,3 +338,58 @@ No decisions: transcribed from the brief.
 ### Surprises
 
 None. All 18 new opcodes passed their first test run against Harte's data for all five variants.
+
+## Task 6: The 105 undocumented NMOS opcodes
+
+All NMOS-only opcodes: the no-ops of every length, the twelve JAM opcodes, the read-modify-write combinations, LAX and SAX, the immediate oddities, and the stores that AND with the high byte. The 2A03 is NMOS, so both NMOS variants cover all 256 opcodes.
+
+### What was built
+
+Three files modified or created:
+
+- **`src/Dbhq.Cpu6502/Cpu.cs`** (modified): Added jam handling to `Step()`. When `IsJammed` is true, `Step()` reads `$FFFF` and returns 1 cycle, keeping the clock running without executing further instructions.
+- **`src/Dbhq.Cpu6502/Cpu.Nmos.cs`** (new file): All 105 undocumented opcodes and their helpers: `ExecuteNmos(byte opcode)` with a switch covering no-ops (11 cases making their addressing-mode reads), JAM (12 cases), shift-or-ALU combinations (Slo, Rla, Sre, Rra, Dcp, Isc - 42 cases), A-and-X stores and loads (8 cases), immediate oddities (6 cases), and stores that AND with one more than the high byte (SHA, SHX, SHY, TAS - 6 cases). The Jam method reads PC, reads `$FFFF`, reads `$FFFE` twice, then reads `$FFFF` six times, matching Harte's record. ANE and LXA use the constant `$EE`, as Harte's data does; `docs/known-differences.md` notes that real chips vary.
+- **`tests/Dbhq.Cpu6502.Tests/Harte/Coverage.cs`** (modified): Updated `NmosOnly` to use `OtherThan(Official)`, which computes the 105 undocumented opcodes by excluding the 151 official ones from all 256.
+
+### Instructions implemented
+
+All 105 undocumented NMOS opcodes:
+
+- **No-ops (11)**: 0x1A, 0x3A, 0x5A, 0x7A, 0xDA, 0xFA, 0x80, 0x82, 0x89, 0xC2, 0xE2, 0x04, 0x44, 0x64, 0x14, 0x34, 0x54, 0x74, 0xD4, 0xF4, 0x0C, 0x1C, 0x3C, 0x5C, 0x7C, 0xDC, 0xFC.
+- **JAM (12)**: 0x02, 0x12, 0x22, 0x32, 0x42, 0x52, 0x62, 0x72, 0x92, 0xB2, 0xD2, 0xF2.
+- **Shift-or-ALU (42)**: SLO (0x07, 0x17, 0x0F, 0x1F, 0x1B, 0x03, 0x13), RLA (0x27, 0x37, 0x2F, 0x3F, 0x3B, 0x23, 0x33), SRE (0x47, 0x57, 0x4F, 0x5F, 0x5B, 0x43, 0x53), RRA (0x67, 0x77, 0x6F, 0x7F, 0x7B, 0x63, 0x73), DCP (0xC7, 0xD7, 0xCF, 0xDF, 0xDB, 0xC3, 0xD3), ISC (0xE7, 0xF7, 0xEF, 0xFF, 0xFB, 0xE3, 0xF3).
+- **A and X together (8)**: SAX/AHX (0x87, 0x97, 0x8F, 0x83), LAX (0xA7, 0xB7, 0xAF, 0xBF, 0xA3, 0xB3).
+- **Immediate oddities (6)**: ANC (0x0B, 0x2B), ALR (0x4B), ARR (0x6B), ANE (0x8B), LXA (0xAB), SBX (0xCB), SBC variant (0xEB).
+- **Stores that AND with high byte plus one (6)**: SHX (0x9C, 0x9E), SHY (0x9F), SHA (0x93), TAS (0x9B), LAS (0xBB).
+
+### The red step: opcodes not implemented
+
+Before `Cpu.Nmos.cs` and the updated `Cpu.Official.cs`, running `dotnet test --filter "FullyQualifiedName~Harte"` showed 210 test failures on the NMOS variants. The Ricoh 2A03 reported failures for all 105 undocumented opcodes. Examples included Nmos6502 $03, Ricoh2A03 $5B, Nmos6502 $54, Nmos6502 $DF, showing "opcode $xx is not implemented". The previously implemented 151 official opcodes and all harness tests continued to pass.
+
+### Tests and results
+
+All 975 tests pass.
+
+Run: `dotnet test` on 30 September 2026.
+
+```
+Passed!  - Failed:     0, Passed:   975, Skipped:     0, Total:   975, Duration: 2 m 57 s - Dbhq.Cpu6502.Tests.dll (net10.0)
+```
+
+The 975 passing tests comprise:
+
+- **CpuTests**: 3 methods, 7 cases.
+- **HarteRunnerTests**: 3 methods.
+- **Harte opcode tests**: 5 theory methods (one per variant), 965 cases (256 opcodes x 5 variants for NMOS, 151 for CMOS variants).
+
+### Decisions made
+
+No decisions: transcribed from the brief.
+
+### Known differences
+
+JAM is stepped as Harte records it (one step with eleven reads, then the chip stays jammed). ANE and LXA use `$EE` because Harte's data does; `docs/known-differences.md` notes real chips vary.
+
+### Surprises
+
+None. All 105 new opcodes passed their first test run against Harte's data for the NMOS 6502 and Ricoh 2A03 variants.

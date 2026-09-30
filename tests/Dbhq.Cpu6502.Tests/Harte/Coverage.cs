@@ -37,7 +37,7 @@ public static class Coverage
 
     private static readonly byte[] Official = [..LoadsStoresLogicAndShifts, ..Arithmetic, ..ControlFlowAndStack];
 
-    private static readonly byte[] NmosOnly = [];
+    private static readonly byte[] NmosOnly = OtherThan(Official);
 
     private static readonly byte[] CmosOnly = [];
 

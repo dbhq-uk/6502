@@ -67,6 +67,14 @@ public sealed partial class Cpu
     public int Step()
     {
         long start = Cycles;
+        if (IsJammed)
+        {
+            // A jammed NMOS chip keeps reading $FFFF. That is a real bus
+            // access, so the machine keeps its clock.
+            Read(0xFFFF);
+            return 1;
+        }
+
         Execute(Read(PC++));
         return (int)(Cycles - start);
     }
