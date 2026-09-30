@@ -13,3 +13,6 @@ node_modules/
 
 # Published output of the browser speed check, made locally.
 bench/Dbhq.Cpu6502.WasmBench/publish/
+
+# Test run output (the .trx files the site's results are made from).
+TestResults/
