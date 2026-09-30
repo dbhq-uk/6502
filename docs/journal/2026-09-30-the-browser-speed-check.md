@@ -159,9 +159,12 @@ and none of the machine's other chips are in it.
   attribute is in `Program.cs`. Warnings stay as errors.
 - **The project is in `6502.slnx`.** `dotnet build -c Release` on the whole
   solution succeeded with 0 warnings and 0 errors, and `dotnet test
-  --configuration Release` passed all 1,480 tests. Whether CI, on a machine
-  without the `wasm-tools` workload, can build the project is recorded in the
-  pull request, not here.
+  --configuration Release` passed all 1,480 tests. CI runs `dotnet test` on
+  the solution too, and the `Validate` run on the pull request
+  (https://github.com/dbhq-uk/6502/pull/6) finished with a conclusion of
+  success, so the wasm project builds there as well (`gh run list --repo
+  dbhq-uk/6502 --branch stage-2/browser-speed`). I did not check whether that
+  runner had the `wasm-tools` workload installed.
 - **The interpreter publish also relinked the native runtime:** its build
   output shows `wasm-ld` running. So "default" here means the default settings
   of `dotnet publish -c Release` for this SDK, with no AOT and no other options
