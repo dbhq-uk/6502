@@ -1,0 +1,38 @@
+---
+import Base from '../layouts/Base.astro';
+import { SITE } from '../lib/site.mjs';
+---
+
+<Base title="About" description="What this project is, what it is for, and how it is built in public.">
+  <section>
+    <div class="wrap narrow">
+      <h1>About</h1>
+      <div class="prose">
+        <p>
+          This is a cycle-accurate 6502 and 65C02 core in C#, and the aim of implementing as many 6502-family machines as
+          possible on it, each one proven. It is built in public: the design, the plan, the code and a journal of every
+          step are in <a href={SITE.repo}>the repository</a>.
+        </p>
+        <h2>What proven means</h2>
+        <p>
+          The core is checked against Tom Harte's SingleStepTests, a published record of every opcode's bus activity, cycle
+          by cycle, against whole programs that check their own results, and against a model of the chip's transistors. A machine counts as implemented only when it runs in
+          the browser and passes an automated test in CI. Where the work knowingly differs from a reference, that is
+          written down on the <a href="/status/">status page</a>.
+        </p>
+        <h2>Nothing typed by hand</h2>
+        <p>
+          The figures on the home and status pages are read from the test results of the latest build and from dated
+          measurements. The build fails if a figure is missing.
+        </p>
+        <h2>Illustrations</h2>
+        <p>
+          The images here were generated. They are illustrations, captioned as such, and none is used as evidence. The
+          die is a plausible one drawn by a model, not the 6502's real layout.
+        </p>
+        <h2>Licence</h2>
+        <p>MIT. No ROM, no game and no third-party test program is committed to the repository.</p>
+      </div>
+    </div>
+  </section>
+</Base>

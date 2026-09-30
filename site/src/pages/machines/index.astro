@@ -1,0 +1,51 @@
+---
+import Base from '../../layouts/Base.astro';
+import { registry } from '../../lib/data.mjs';
+import { fmt } from '../../lib/figures.mjs';
+import { machineHref } from '../../lib/machines.mjs';
+import { CATEGORIES, CORES, STATUSES } from '../../lib/registry.mjs';
+
+const machines = [...registry.machines].sort((a, b) => (a.year ?? 9999) - (b.year ?? 9999) || a.name.localeCompare(b.name, 'en-GB'));
+const label = {
+  category: { 'single-board': 'Single-board', computer: 'Computer', console: 'Console', arcade: 'Arcade', peripheral: 'Peripheral', modern: 'Built today' },
+  core: { nmos: 'NMOS 6502', '2a03': '2A03', '65c02': '65C02', none: 'A different CPU' },
+  status: { running: 'Running', 'in-progress': 'In progress', planned: 'Planned', 'out-of-scope': 'Out of scope' },
+};
+const used = (key, all) => all.filter((v) => machines.some((m) => m[key] === v));
+---
+
+<Base title="Machines" description="Every 6502-family machine, and where each stands: running, in progress, planned or out of scope.">
+  <section>
+    <div class="wrap">
+      <div class="head">
+        <p class="eyebrow">Machines</p>
+        <h1>Every 6502 machine</h1>
+        <p>A machine counts as running only when it runs in the browser and passes an automated test in CI.</p>
+      </div>
+      <div class="filters" role="group" aria-label="Filter the machines" data-filters hidden>
+        <label>Status<select data-filter="status"><option value="">All</option>{used('status', STATUSES).map((v) => <option value={v}>{label.status[v]}</option>)}</select></label>
+        <label>Category<select data-filter="category"><option value="">All</option>{used('category', CATEGORIES).map((v) => <option value={v}>{label.category[v]}</option>)}</select></label>
+        <label>Core<select data-filter="core"><option value="">All</option>{used('core', CORES).map((v) => <option value={v}>{label.core[v]}</option>)}</select></label>
+      </div>
+      <div class="tablewrap">
+        <table class="data" data-sortable data-filterable>
+          <thead><tr><th scope="col">Machine</th><th scope="col">Year</th><th scope="col">Maker</th><th scope="col">Category</th><th scope="col">CPU</th><th scope="col">Core</th><th scope="col">Status</th></tr></thead>
+          <tbody>
+            {machines.map((m) => (
+              <tr data-status={m.status} data-category={m.category} data-core={m.core}>
+                <td>{machineHref(m) ? <a href={machineHref(m)}>{m.name}</a> : m.name}</td>
+                <td class="num" data-sort={m.year ?? ''}>{m.year ?? ''}</td>
+                <td>{m.maker ?? ''}</td>
+                <td>{label.category[m.category]}</td>
+                <td>{m.cpu}</td>
+                <td>{label.core[m.core]}</td>
+                <td data-sort={STATUSES.indexOf(m.status)}><span class={`status ${m.status}`}>{label.status[m.status]}</span></td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      <p class="count" data-count aria-live="polite">Showing {fmt(machines.length)} of {fmt(machines.length)}</p>
+    </div>
+  </section>
+</Base>

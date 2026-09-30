@@ -1,0 +1,11 @@
+---
+// A figure card. `as` is the heading level of its title: h3 under a section's
+// h2 (the home page), h2 directly under the page's h1 (the status page).
+const { value, title, text, as: Tag = 'h3' } = Astro.props;
+---
+
+<div class="card">
+  <b>{value}</b>
+  <Tag>{title}</Tag>
+  <p>{text}</p>
+</div>

@@ -1,3 +1,10 @@
+---
+title: "Deciding what to build"
+date: 2026-09-29
+summary: "Why the KIM-1 comes before the BBC Micro, why the 65C02 is in the core, and why every bus access is one cycle."
+order: 0
+---
+
 # 29 September 2026: deciding what to build
 
 ## Where it started

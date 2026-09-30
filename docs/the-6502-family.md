@@ -1,7 +1,8 @@
 # The 6502 family
 
-Everything that ran on a 6502 or one of its descendants, and which of them the
-core in this repository can run.
+Everything that ran on a 6502 or one of its descendants, and which of them use
+a CPU that the core in this repository implements. Which machines are built is
+tracked in `machines/registry.json`, not here.
 
 MOS Technology launched the 6502 in September 1975 at $25. Motorola's 6800
 cost $175 at the time, and the 6502 sold for less than a sixth of the price of
@@ -34,9 +35,9 @@ different regions, the earliest is given.
 
 | Mark | Meaning |
 |---|---|
-| **Core** | Runs on this repository's core as the NMOS 6502 |
-| **Core, no decimal** | Runs on the core as the NES's 2A03, with decimal mode removed |
-| **65C02** | Runs on the core as one of its three 65C02 variants: WDC, Rockwell or Synertek. Each is proven against its own set of Tom Harte's SingleStepTests, the same way as the NMOS chip |
+| **Core** | Uses a CPU the core implements, as the NMOS 6502 |
+| **Core, no decimal** | Uses a CPU the core implements, as the NES's 2A03, with decimal mode removed |
+| **65C02** | Uses a CPU the core implements, as one of its three 65C02 variants: WDC, Rockwell or Synertek. Each is proven against its own set of Tom Harte's SingleStepTests, the same way as the NMOS chip |
 | **Other** | A different CPU on 6502 foundations. Out of scope |
 
 ## The chips
@@ -242,10 +243,12 @@ new machines around it.
 ## What this means for this project
 
 - The three machines planned, the KIM-1, the BBC Micro Model B and the NES,
-  all run on the core, the NES with decimal mode removed.
-- Nearly every 6502 machine from 1976 to 1985 does too.
+  all use a CPU the core implements, the NES with decimal mode removed. Which
+  are built is tracked in `machines/registry.json`.
+- Nearly every 6502 machine from 1976 to 1985 uses one too.
 - The core also covers the 65C02, which opens the BBC Master, the later Apple
-  IIs, the Atari Lynx, the Watara Supervision and every modern machine above.
+  IIs, the Atari Lynx, the Watara Supervision and every modern machine above
+  except the MEGA65, whose 45GS02 is a different CPU.
 - The 65C816, the HuC6280 and the 4510 family are different CPUs, and out of
   scope.
 

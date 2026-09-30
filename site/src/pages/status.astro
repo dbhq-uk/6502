@@ -1,0 +1,75 @@
+---
+import { getEntry, render } from 'astro:content';
+import Base from '../layouts/Base.astro';
+import Card from '../components/Card.astro';
+import { fig, results, measurements, registry } from '../lib/data.mjs';
+import { fmt, fmt1, REFERENCE_MHZ, targetVerdict } from '../lib/figures.mjs';
+import { best } from '../lib/measurements.mjs';
+import { longDate } from '../lib/site.mjs';
+
+const known = await getEntry('docs', 'known-differences');
+const { Content } = await render(known);
+const suites = Object.entries(results.suites).sort(([a], [b]) => a.localeCompare(b));
+const modes = Object.values(measurements.modes);
+const kim = registry.machines.find((m) => m.id === 'kim-1');
+const kimMhz = Number(/([\d.]+) MHz/.exec(kim?.cpu ?? '')?.[1]);
+const collectionRuns = fmt(measurements.modes.aot.runs.length);
+const native = measurements.modes.native;
+const spread = (mode) => `${fmt1(Math.min(...mode.runs.map((r) => r.mhz)))} to ${fmt1(best(mode))}`;
+---
+
+<Base title="Status" description="The latest test run, the speed measurements, and where the core knowingly differs from a reference.">
+  <section>
+    <div class="wrap">
+      <div class="head">
+        <p class="eyebrow">Status</p>
+        <h1>Where it stands</h1>
+        <p>Every figure here is read from the latest test run, or from a dated measurement.</p>
+      </div>
+      <div class="grid3">
+        <Card as="h2" value={`${fmt(fig.machinesImplemented)} of ${fmt(fig.machinesInScope)}`} title="Machines implemented" text={`${fmt(fig.machinesInProgress)} in progress.`} />
+        <Card as="h2" value={fmt(fig.variants)} title="Variants of the core" text="Each proven against its own set of Tom Harte's tests." />
+        <Card as="h2" value={fmt(fig.testsPassing)} title="Tests passing" text={`${fmt(results.total.failed)} failed, ${fmt(results.total.skipped)} skipped.`} />
+        <Card as="h2" value={fmt(fig.harteTests)} title="Harte opcode tests" text="Each runs the recorded cases for one opcode, cycle by cycle." />
+        <Card as="h2" value={fmt(fig.dormannTestsPassed)} title="Dormann builds" text="Whole programs that check their own results." />
+        <Card as="h2" value={fmt(fig.transistorModelTestsPassed)} title="NMOS interrupt runs" text="Each checked cycle by cycle against a model of the 6502's transistors." />
+      </div>
+      <p class="note">Test run on commit {results.commit?.slice(0, 7) ?? 'unknown'}, {longDate(new Date(results.generated))}.</p>
+    </div>
+  </section>
+
+  <section>
+    <div class="wrap narrow">
+      <h2>Test suites</h2>
+      <div class="tablewrap" style="margin-top: 24px">
+        <table class="data">
+          <thead><tr><th scope="col">Suite</th><th scope="col">Passed</th><th scope="col">Failed</th><th scope="col">Skipped</th></tr></thead>
+          <tbody>{suites.map(([name, s]) => <tr><td>{name}</td><td class="num">{fmt(s.passed)}</td><td class="num">{fmt(s.failed)}</td><td class="num">{fmt(s.skipped)}</td></tr>)}</tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="wrap narrow">
+      <h2>Speed</h2>
+      <p style="margin: 14px 0 24px">
+        How many cycles a second the core runs, as a multiple of a {REFERENCE_MHZ} MHz machine. The design's target is at least {fmt(fig.speedTarget)} times real speed, for the core alone, and it does not say which build that means. In this collection of {collectionRuns} runs, against this site's reference (a {REFERENCE_MHZ} MHz machine, the BBC Micro's clock), the best native run is {fmt1(fig.speedNative)} times: {targetVerdict(fig.speedNative)}. In the same collection the best browser run, compiled ahead of time, is {fmt1(fig.speedAot)} times: {targetVerdict(fig.speedAot)}. A different collection of runs gives a different best, so these are one collection's figures. The reference is this site's choice, not the design's, and the verdicts assume it: the KIM-1 runs at {fmt(kimMhz)} MHz, so against that machine every multiple would be {fmt(REFERENCE_MHZ / kimMhz)} times as large. Measured on {longDate(new Date(measurements.collected))}{' '}
+        on {measurements.machine.description}. The browser rows of the table ran in {measurements.machine.browser}; the {native.label} row ran directly on the machine, in no browser. {measurements.workload} One machine, one day: the figures are a record, not a promise.
+      </p>
+      <div class="tablewrap">
+        <table class="data">
+          <thead><tr><th scope="col">Build</th><th scope="col">Best, MHz</th><th scope="col">Times a {REFERENCE_MHZ} MHz machine</th><th scope="col">Range, MHz</th></tr></thead>
+          <tbody>{modes.map((m) => <tr><td>{m.label}</td><td class="num">{fmt1(best(m))}</td><td class="num">{fmt1(best(m) / REFERENCE_MHZ)}</td><td class="num">{spread(m)}</td></tr>)}</tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="wrap narrow">
+      <h2>Where the core knowingly differs</h2>
+      <div class="prose" style="margin-top: 24px"><Content /></div>
+    </div>
+  </section>
+</Base>

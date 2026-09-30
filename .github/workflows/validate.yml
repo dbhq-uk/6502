@@ -24,6 +24,8 @@ jobs:
     timeout-minutes: 60
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
       - uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6
         with:
           dotnet-version: '10.0.x'
@@ -38,12 +40,64 @@ jobs:
           path: .testdata
           key: testdata-${{ hashFiles('tests/Dbhq.Cpu6502.Tests/Harte/harte.manifest', 'tests/Dbhq.Cpu6502.TestSupport/Pins.cs') }}
       - name: Test
-        run: dotnet test --configuration Release --logger "console;verbosity=normal"
+        run: dotnet test --configuration Release --logger "console;verbosity=normal" --logger "trx;LogFileName=results.trx" --results-directory TestResults
+      # The site reads its figures from the test results, so the results become
+      # a file here and the site job below picks it up. It is never committed.
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: '22.22'
+      - name: Turn the test results into the site's results.json
+        run: node site/scripts/make-results.mjs TestResults site/src/data/results.json
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: results
+          path: site/src/data/results.json
+          if-no-files-found: error
+
+  # The site's own checks: the figures trace to the results, the registry agrees
+  # with the family document, and every rule the site makes about itself holds.
+  site:
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: '22.22'
+          cache: npm
+          cache-dependency-path: site/package-lock.json
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          name: results
+          path: site/src/data
+      - name: Install
+        working-directory: site
+        run: npm ci
+      # `npm test` runs the build through its pretest script. A silent skip looks
+      # exactly like a pass, so the count is read back and a floor asserted, the
+      # same one as deploy-site.yml.
+      - name: Build and verify
+        working-directory: site
+        run: |
+          set -euo pipefail
+          npm test 2>&1 | tee /tmp/site-test.log
+          count() { grep -oE "(#|.) $1 [0-9]+" /tmp/site-test.log | grep -oE '[0-9]+$' | tail -1; }
+          PASS=$(count pass); FAILED=$(count fail)
+          echo "pass=${PASS:-unread} fail=${FAILED:-unread}"
+          [ "${FAILED:-1}" = "0" ]
+          # 112 tests as at 30 Sep 2026. Adding tests is expected; losing them is
+          # the failure this floor catches. Raise the number when the suite grows,
+          # here and in the same step of deploy-site.yml, which must hold the same number.
+          [ "${PASS:-0}" -ge 112 ]
 
   dashes:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
       - name: No em or en dashes
         run: |
           if LC_ALL=C.UTF-8 git grep -InP '[\x{2013}\x{2014}]'; then

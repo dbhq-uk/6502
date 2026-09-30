@@ -80,5 +80,5 @@ chips that vary between individual parts, and for `ANE` and `LXA` with
 temperature.
 
 **How the tests treat it.** The core matches Harte's data, which fixes the
-`ANE` and `LXA` constant at `$EE`. That is one real chip's answer, not every
+`ANE` and `LXA` constant at `$EE`. That is one answer, not every
 chip's.

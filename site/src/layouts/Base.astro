@@ -1,0 +1,57 @@
+---
+import '@fontsource-variable/inter';
+import '@fontsource-variable/inter-tight';
+import '@fontsource/fira-mono/400.css';
+import '../styles/tokens.css';
+import '../styles/imagery.css';
+import '../styles/global.css';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import Consent from '../components/Consent.astro';
+import { SITE } from '../lib/site.mjs';
+
+interface Props {
+  title: string;
+  description: string;
+  /** A page that is not a page (the 404): no canonical address and a noindex, because /404/ does not exist. */
+  noindex?: boolean;
+}
+const { title, description, noindex = false } = Astro.props;
+const path = Astro.url.pathname;
+const canonical = new URL(path, SITE.url).href;
+const fullTitle = path === '/' ? title : `${title} | 6502`;
+
+// The three scripts below are external modules, deferred by type. There is no
+// inline script on this site: its CSP has no 'unsafe-inline' in script-src.
+// analytics.js must come before consent.js, because consent.js calls what it
+// defines. (A frontmatter comment on purpose: an HTML comment would be served.)
+---
+
+<!doctype html>
+<html lang="en-GB">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{fullTitle}</title>
+    <meta name="description" content={description} />
+    {noindex ? <meta name="robots" content="noindex" /> : <link rel="canonical" href={canonical} />}
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="6502" />
+    <meta property="og:title" content={fullTitle} />
+    <meta property="og:description" content={description} />
+    {!noindex && <meta property="og:url" content={canonical} />}
+    <meta property="og:locale" content="en_GB" />
+    <meta name="twitter:card" content="summary" />
+    <script is:inline type="module" src="/analytics.js"></script>
+    <script is:inline type="module" src="/consent.js"></script>
+    <script is:inline type="module" src="/machines-table.js"></script>
+  </head>
+  <body>
+    <a class="skip" href="#main">Skip to content</a>
+    <Header path={path} />
+    <main id="main"><slot /></main>
+    <Footer />
+    <Consent />
+  </body>
+</html>

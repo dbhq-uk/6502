@@ -1,0 +1,36 @@
+---
+import Base from '../layouts/Base.astro';
+import { registry } from '../lib/data.mjs';
+import { fmt } from '../lib/figures.mjs';
+
+const label = { nmos: 'NMOS 6502', '2a03': '2A03', '65c02': '65C02', none: 'A different CPU' };
+---
+
+<Base title="Chips" description="Every 6502-family chip, what is different about it, and which core variant runs it.">
+  <section>
+    <div class="wrap">
+      <div class="head">
+        <p class="eyebrow">Chips</p>
+        <h1>Every 6502 chip</h1>
+        <p>The original, its cut-down versions, and the CMOS and 16-bit chips that followed, and which of them the core runs.</p>
+      </div>
+      <div class="tablewrap">
+        <table class="data" data-sortable>
+          <thead><tr><th scope="col">Chip</th><th scope="col">Year</th><th scope="col">What is different</th><th scope="col">Used in</th><th scope="col">Core</th></tr></thead>
+          <tbody>
+            {registry.chips.map((c) => (
+              <tr>
+                <td>{c.name}</td>
+                <td class="num" data-sort={c.year ?? ''}>{c.year ?? ''}</td>
+                <td>{c.difference}</td>
+                <td>{c.usedIn}</td>
+                <td>{label[c.core]}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      <p class="count">{fmt(registry.chips.length)} chips</p>
+    </div>
+  </section>
+</Base>

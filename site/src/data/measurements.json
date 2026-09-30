@@ -1,0 +1,101 @@
+{
+  "collected": "2026-09-30",
+  "machine": {
+    "description": "a KVM virtual machine, DO-Premium-AMD, 8 cores",
+    "browser": "Chrome 153.0.8010.47",
+    "dotnet": "10.0.400"
+  },
+  "workload": "A synthetic 6502 program of our own, run on a plain 64 KB array with no logging: 100 million cycles per run after a 5 million cycle warm-up.",
+  "modes": {
+    "native": {
+      "label": "Native",
+      "runs": [
+        {
+          "cycles": 100000001,
+          "ms": 968.465,
+          "mhz": 103.256
+        },
+        {
+          "cycles": 100000001,
+          "ms": 954.812,
+          "mhz": 104.733
+        },
+        {
+          "cycles": 100000001,
+          "ms": 926.045,
+          "mhz": 107.986
+        },
+        {
+          "cycles": 100000001,
+          "ms": 932.081,
+          "mhz": 107.287
+        },
+        {
+          "cycles": 100000001,
+          "ms": 969.259,
+          "mhz": 103.172
+        }
+      ]
+    },
+    "interpreter": {
+      "label": "Browser, interpreter",
+      "runs": [
+        {
+          "cycles": 100000001,
+          "ms": 51323,
+          "mhz": 1.948
+        },
+        {
+          "cycles": 100000001,
+          "ms": 40442.1,
+          "mhz": 2.473
+        },
+        {
+          "cycles": 100000001,
+          "ms": 33696.4,
+          "mhz": 2.968
+        },
+        {
+          "cycles": 100000001,
+          "ms": 31357.6,
+          "mhz": 3.189
+        },
+        {
+          "cycles": 100000001,
+          "ms": 20142.8,
+          "mhz": 4.965
+        }
+      ]
+    },
+    "aot": {
+      "label": "Browser, ahead of time",
+      "runs": [
+        {
+          "cycles": 100000001,
+          "ms": 2122,
+          "mhz": 47.125
+        },
+        {
+          "cycles": 100000001,
+          "ms": 2047.1,
+          "mhz": 48.85
+        },
+        {
+          "cycles": 100000001,
+          "ms": 2360.9,
+          "mhz": 42.357
+        },
+        {
+          "cycles": 100000001,
+          "ms": 3432.1,
+          "mhz": 29.137
+        },
+        {
+          "cycles": 100000001,
+          "ms": 2629.7,
+          "mhz": 38.027
+        }
+      ]
+    }
+  }
+}

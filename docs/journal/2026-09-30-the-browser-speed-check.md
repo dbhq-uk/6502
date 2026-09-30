@@ -1,3 +1,10 @@
+---
+title: "The browser speed check"
+date: 2026-09-30
+summary: "How fast the core runs in a browser, interpreted and compiled ahead of time, measured on one machine."
+order: 3
+---
+
 # 30 September 2026: the browser speed check
 
 The design says the emulators run in the browser as .NET WebAssembly apps, and

@@ -1,0 +1,107 @@
+---
+import { getCollection } from 'astro:content';
+import { Image } from 'astro:assets';
+import Base from '../layouts/Base.astro';
+import Card from '../components/Card.astro';
+import hero from '../assets/imagery/hero-die.webp';
+import { fig, results, registry, measurements } from '../lib/data.mjs';
+import { fmt, fmt1, REFERENCE_MHZ, targetVerdict } from '../lib/figures.mjs';
+import { newestFirst, shortDate } from '../lib/site.mjs';
+
+const entries = (await getCollection('journal'))
+  .sort(newestFirst)
+  .slice(0, 3);
+const first = registry.machines.filter((m) => m.priority).sort((a, b) => a.priority - b.priority);
+const suites = Object.entries(results.suites).sort(([, a], [, b]) => b.passed - a.passed).slice(0, 5);
+---
+
+<Base
+  title="A 6502, built in the open"
+  description="A cycle-accurate 6502 and 65C02 core in C#, and the aim of implementing as many 6502-family machines as possible on it, each one proven."
+>
+  <div class="wrap hero">
+    <p class="eyebrow">Built in public</p>
+    <h1>A 6502, built in the open</h1>
+    <p class="lede">
+      A cycle-accurate 6502 and 65C02 core in C#, and the machines it will run, as many as possible, each one proven. Every
+      step of the work is written down here, as it happens.
+    </p>
+    <div class="btns"><a class="btn pill" href="/journal/">Read the journal</a><a class="btn ghost" href="#status">See where it stands</a></div>
+  </div>
+  <figure>
+    <Image class="dieimg" src={hero} alt="Illustration of a microprocessor die" widths={[640, 1000, 1536]} sizes="(max-width: 1100px) 92vw, 1000px" loading="eager" fetchpriority="high" data-generated />
+    <figcaption class="figure-caption">Illustration of a microprocessor die. Not a photograph of the 6502.</figcaption>
+  </figure>
+
+  <section id="status">
+    <div class="wrap">
+      <div class="head">
+        <p class="eyebrow">Status</p>
+        <h2>Where it stands</h2>
+        <p>Every figure on this page comes from the latest test run, whose commit is shown below, or from a dated measurement. None is typed by hand.</p>
+      </div>
+      <div class="grid3">
+        <Card value={`${fmt(fig.machinesImplemented)} of ${fmt(fig.machinesInScope)}`} title="Machines implemented" text="A machine counts only once it runs in the browser and passes an automated test." />
+        <Card value={fmt(fig.variants)} title="Variants of the core" text="The NMOS 6502, the NES's 2A03, and three 65C02s." />
+        <Card value={fmt(fig.testsPassing)} title="Tests passing" text="From the latest test run, on the commit shown below." />
+        <Card value={`${fmt1(fig.speedAot)} times`} title={`Against a ${REFERENCE_MHZ} MHz machine, in the browser`} text={`Compiled ahead of time, best of ${fmt(measurements.modes.aot.runs.length)} runs, on one machine, collected ${shortDate(new Date(measurements.collected))}. The design target is at least ${fmt(fig.speedTarget)} times real speed, for the core alone. Against this site's ${REFERENCE_MHZ} MHz reference it is ${targetVerdict(fig.speedNative)} natively and ${targetVerdict(fig.speedAot)} in the browser.`} />
+      </div>
+      <p class="note">Test run on commit {results.commit?.slice(0, 7) ?? 'unknown'}.</p>
+    </div>
+  </section>
+
+  <section class="proof">
+    <div class="wrap two">
+      <div>
+        <p class="eyebrow">Proof</p>
+        <h2>A difference is a number, not an argument</h2>
+        <p>The core is checked against Tom Harte's SingleStepTests, a published record of every opcode's bus activity, cycle by cycle. When something differs, the test names the cycle and the byte.</p>
+        <p>Where it knowingly differs from a reference, that is written down too.</p>
+      </div>
+      <div class="win">
+        <div class="bar"><i></i><i></i><i></i><span>dotnet test</span></div>
+        <pre>{suites.map(([name, s]) => <><span class="k">Passed</span> {name}: {fmt(s.passed)}{'\n'}</>)}<span>Passed!  - Failed: {fmt(results.total.failed)}, Passed: {fmt(results.total.passed)}, Skipped: {fmt(results.total.skipped)}</span></pre>
+      </div>
+    </div>
+  </section>
+
+  <section class="tex">
+    <div class="wrap">
+      <div class="head">
+        <p class="eyebrow">Machines</p>
+        <h2>The machines this core is for</h2>
+        <p>The first three, and the whole family in the table.</p>
+      </div>
+      <div class="grid3">
+        {first.map((m) => (
+          <div class="card">
+            <span class={`chip${m.status === 'running' ? ' on' : ''}`}>{m.status === 'running' ? 'Running' : m.status === 'in-progress' ? 'In progress' : 'Planned'}</span>
+            <h3>{m.name}</h3>
+            <p>{m.notes ?? `${m.year}, ${m.cpu}`}</p>
+          </div>
+        ))}
+      </div>
+      <p class="note"><a href="/machines/">All {fmt(registry.machines.length)} machines in the family</a></p>
+    </div>
+  </section>
+
+  <section>
+    <div class="wrap">
+      <div class="head">
+        <p class="eyebrow">Journal</p>
+        <h2>From the journal</h2>
+        <p>What was decided, what was checked, what went wrong and why.</p>
+      </div>
+      <div class="entries">
+        {entries.map((e) => (
+          <div class="entry">
+            <time datetime={e.data.date.toISOString().slice(0, 10)}>{shortDate(e.data.date)}</time>
+            <div><h3><a href={`/journal/${e.id}/`}>{e.data.title}</a></h3><p>{e.data.summary}</p></div>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <p class="figure-caption">Illustration: the textured backgrounds behind the proof and machines sections are generated, not measurements</p>
+</Base>

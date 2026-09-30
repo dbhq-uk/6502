@@ -1,0 +1,182 @@
+name: deploy-site
+
+# Push to main -> 6502.dbhq.uk is tested, built, deployed, the edge cache purged,
+# and every page verified with a cache-buster.
+#
+# THE WHOLE TEST SUITE RUNS HERE, before the site is built, and that is the
+# point. The site's figures are read from a results.json made from this run, so
+# they describe the commit being deployed and not the last green check on some
+# other one. If a test fails, nothing deploys.
+#
+# Cloudflare never builds from this repository: the Pages project is
+# direct-upload and serves exactly what this workflow last uploaded. The
+# project, its custom domain and the DNS record are Terraform, in the private
+# dbhq-uk/dbhq repository at infra/6502/, applied by hand and never from CI.
+#
+# THE DEPLOY IS SWITCHED OFF UNTIL THE SITE IS READY. It runs only when the
+# repository variable SITE_DEPLOY is "true", which is set after the Cloudflare
+# project exists and the secrets below are added. Until then a push to main
+# leaves this workflow skipped rather than red. It also runs only from main:
+# a manual run started from another branch is skipped, because the upload below
+# is labelled main and would publish that branch's build as the live site.
+#
+# PATH FILTER. Wider than site/**: the figures come from the tests and the
+# registry, so a change to the core, a machine or the registry changes the site
+# without touching a file under site/.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "site/**"
+      - "machines/**"
+      - "docs/**"
+      - "src/**"
+      - "tests/**"
+      - "6502.slnx"
+      - "Directory.Build.props"
+      - "bench/**"
+      - "tools/**"
+      - ".github/workflows/deploy-site.yml"
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-site
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    if: vars.SITE_DEPLOY == 'true' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      # wrangler is pinned in site/package.json and site/package-lock.json, and
+      # the deploy step runs that copy with --no, so it is never fetched fresh
+      # while the Cloudflare token is in scope.
+      # Actions are pinned to commit SHAs: this job holds a Cloudflare token with
+      # write access, and a hijacked tag would run with it in scope.
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6
+        with:
+          dotnet-version: '10.0.x'
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: '22.22'
+          cache: npm
+          cache-dependency-path: site/package-lock.json
+      - name: 32-bit runtime for as65
+        run: sudo apt-get update && sudo apt-get install -y libc6-i386 lib32stdc++6
+      - name: Cache test data
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
+        with:
+          path: .testdata
+          key: testdata-${{ hashFiles('tests/Dbhq.Cpu6502.Tests/Harte/harte.manifest', 'tests/Dbhq.Cpu6502.TestSupport/Pins.cs') }}
+
+      - name: Test the core
+        run: dotnet test --configuration Release --logger "trx;LogFileName=results.trx" --results-directory TestResults
+
+      - name: Make the site's results.json
+        run: node site/scripts/make-results.mjs TestResults site/src/data/results.json
+
+      - name: Install
+        working-directory: site
+        run: npm ci
+
+      # `npm test` runs the build through its pretest script, so this one step is
+      # build-and-verify. A silent skip looks exactly like a pass, so the count
+      # is read back and a floor asserted.
+      - name: Build and verify the site
+        working-directory: site
+        run: |
+          set -euo pipefail
+          npm test 2>&1 | tee /tmp/site-test.log
+          count() { grep -oE "(#|.) $1 [0-9]+" /tmp/site-test.log | grep -oE '[0-9]+$' | tail -1; }
+          PASS=$(count pass); FAILED=$(count fail)
+          echo "pass=${PASS:-unread} fail=${FAILED:-unread}"
+          [ "${FAILED:-1}" = "0" ]
+          # 112 tests as at 30 Sep 2026. Adding tests is expected; losing them is
+          # the failure this floor catches. Raise the number when the suite grows,
+          # here and in the same step of validate.yml, which must hold the same number.
+          [ "${PASS:-0}" -ge 112 ]
+
+      - name: Deploy to Cloudflare Pages
+        working-directory: site
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: npm exec --no -- wrangler pages deploy dist --project-name 6502 --branch main
+
+      - name: Purge the Cloudflare cache
+        env:
+          CF_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CF_ZONE: ${{ secrets.CLOUDFLARE_ZONE_ID }}
+        run: |
+          set -euo pipefail
+          RESP=$(curl -sf --max-time 20 --retry 3 --retry-delay 5 -X POST \
+            -H "Authorization: Bearer ${CF_TOKEN}" \
+            -H "Content-Type: application/json" \
+            "https://api.cloudflare.com/client/v4/zones/${CF_ZONE}/purge_cache" \
+            --data '{"purge_everything":true}')
+          echo "$RESP"
+          echo "$RESP" | grep -q '"success":true'
+
+      # THE LIST IS DERIVED FROM THE BUILD, not typed out here: a hardcoded list
+      # once failed a deploy by naming a page that had correctly become a
+      # redirect. Reading dist/ means a renamed or added page cannot leave this
+      # step behind.
+      - name: Every page must be serving
+        working-directory: site
+        run: |
+          set -euo pipefail
+          PAGES=$(cd dist && find . -name index.html -printf '%h\n' | sed 's|^\.||; s|$|/|' | sed 's|^/$|/|' | sort)
+          echo "checking: $(echo "$PAGES" | tr '\n' ' ')"
+          COUNT=0
+          FAIL=0
+          for p in $PAGES; do
+            CODE=$(curl -s --max-time 20 --retry 3 --retry-delay 5 -o /dev/null -w "%{http_code}" "https://6502.dbhq.uk${p}?cb=${GITHUB_SHA}")
+            echo "${p} -> ${CODE}"
+            [ "$CODE" = "200" ] || FAIL=1
+            COUNT=$((COUNT + 1))
+          done
+          # A find that matched nothing would pass the loop silently.
+          [ "$COUNT" -ge 8 ] || { echo "only $COUNT pages found - the derivation is broken"; exit 1; }
+          [ "$FAIL" = "0" ]
+
+      - name: A missing page must return 404
+        run: |
+          set -euo pipefail
+          CODE=$(curl -s --max-time 20 --retry 3 --retry-delay 5 -o /dev/null -w "%{http_code}" "https://6502.dbhq.uk/no-such-page/?cb=${GITHUB_SHA}")
+          echo "missing page -> $CODE"
+          [ "$CODE" = "404" ]
+
+      # table-sort.js is here because machines-table.js imports it: a 404 on it
+      # breaks that whole module, and the filters and sorting quietly vanish.
+      # site/tests/build.test.mjs derives the required list from the built pages.
+      # analytics.js and consent.js are in this list for a sharp reason: a 404 on
+      # consent.js means the prompt never opens, and because analytics.js denies
+      # by default that looks exactly like a site with no analytics rather than a
+      # broken one.
+      - name: The machine-readable files must be serving
+        run: |
+          set -euo pipefail
+          for f in sitemap-index.xml sitemap-0.xml robots.txt analytics.js consent.js machines-table.js table-sort.js; do
+            CODE=$(curl -s --max-time 20 --retry 3 --retry-delay 5 -o /dev/null -w "%{http_code}" "https://6502.dbhq.uk/${f}?cb=${GITHUB_SHA}")
+            echo "${f} -> ${CODE}"
+            [ "$CODE" = "200" ]
+          done
+
+      # Headers only apply at the Cloudflare edge, so they can only be checked
+      # after the deploy.
+      - name: The response headers must be applied at the edge
+        run: |
+          set -euo pipefail
+          H=$(curl -sI --max-time 20 --retry 3 --retry-delay 5 "https://6502.dbhq.uk/?cb=${GITHUB_SHA}" | tr -d '\r')
+          echo "$H"
+          grep -qi '^strict-transport-security:' <<<"$H"
+          grep -qi '^content-security-policy:' <<<"$H"
+          grep -qi '^x-content-type-options: nosniff' <<<"$H"
