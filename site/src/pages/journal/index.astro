@@ -1,0 +1,23 @@
+---
+import { getCollection } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import { shortDate } from '../../lib/site.mjs';
+
+const entries = (await getCollection('journal')).sort((a, b) => b.data.date - a.data.date || b.data.order - a.data.order);
+---
+
+<Base title="Journal" description="What was decided, what was checked, what went wrong and why, as the 6502 work happens.">
+  <section>
+    <div class="wrap">
+      <div class="head"><p class="eyebrow">Journal</p><h1>Journal</h1><p>Written as the work happens, in the same pull request as the work.</p></div>
+      <div class="entries">
+        {entries.map((e) => (
+          <div class="entry">
+            <time datetime={e.data.date.toISOString().slice(0, 10)}>{shortDate(e.data.date)}</time>
+            <div><h2><a href={`/journal/${e.id}/`}>{e.data.title}</a></h2><p>{e.data.summary}</p></div>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+</Base>

@@ -1,3 +1,10 @@
+---
+title: "Building the core"
+date: 2026-09-30
+summary: "Eleven tasks, each reviewed, and a final review: what was built, what the tests showed, and the corrections the reviews forced."
+order: 2
+---
+
 # 30 September 2026: building the core
 
 ## Task 1: The solution, the first instruction, and CI

@@ -1,3 +1,10 @@
+---
+title: "The programme changes shape"
+date: 2026-09-30
+summary: "The site's look, its imagery, and a mission that grew from three machines to as many as possible."
+order: 4
+---
+
 # 30 September 2026: the programme changes shape
 
 The core was merged and the browser speed check was in. The next step was the

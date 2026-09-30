@@ -189,3 +189,32 @@ The review agreed the code matched the plan. It then found three defects that th
 The plan mandated the contrast wording, the hidden navigation, the missing withdrawal control and Accept-first focus. Each was a defect in its own right, not a slip in copying the plan.
 
 **Not done, on purpose:** withdrawing stops measurement and cookie writing, but does not delete a `_ga` cookie already set. Deleting one on the shared parent domain is a decision about the whole estate, so it is left alone.
+
+## Task 6: The journal
+
+Every entry in `docs/journal/` is now a page at `/journal/<name>/`, and `/journal/` lists them, newest first. The site reads the repository's own folder at build time, so writing an entry is the same act as publishing it.
+
+### What was built
+
+- **Front matter on the five older entries.** Each got a title, a date, a summary and an `order` (the position within a day), and nothing else in them changed. The entry for this site already had front matter from task 1.
+- **A content collection.** `site/src/content.config.ts` reads `../docs/journal/2*.md` and checks each entry's front matter against a schema.
+- **Two pages.** `journal/index.astro` (the list) and `journal/[id].astro` (one entry).
+- **A small markdown plugin.** `site/src/lib/rehype-journal.mjs` drops each entry's first level-one heading, because the page prints the title from the front matter, and rewrites a relative link such as `../superpowers/specs/x.md` to the same file on GitHub. Both are needed: the entries are written for the repository, where those links work, and on the site they would be dead.
+- **`journal.test.mjs`.** Four tests: front matter is complete and the date matches the file name; every entry is built and listed; no relative repository link survives; each entry has exactly one `h1`.
+- **A package.** `@astrojs/markdown-remark`, added to `site/package.json` as a dependency (`^7.3.1`).
+
+### A separate fix, found by the task 5 re-review
+
+`Consent.astro` told readers "The choice is remembered across dbhq.uk and its sites, so this is asked once", and comments in it and in `analytics.js` said the `dbhq-consent` key is shared across `*.dbhq.uk`. That is untrue: `localStorage` belongs to one origin, so `6502.dbhq.uk` cannot read what a reader chose on `dbhq.uk`. The reader is asked once on each site. The copy now says "remembered in this browser, for this site only", and both comments say why. No test asserted the old wording. It went in its own commit (`71f08b1`) before this task's. The plan document `docs/superpowers/plans/2026-09-30-site-v1.md` still carries the old wording, because it is a record of what was planned; it is not served.
+
+### What the tests showed
+
+- With the four new tests and no front matter, no plugin and no pages, `npm test` in `site/` ran 57 tests: 55 passed and 2 failed. The front matter test failed on `2026-09-29-deciding-what-to-build.md has no title`, and the built-pages test failed because `/journal/` did not exist. The other two new tests passed because they loop over journal pages, and with none they check nothing. That is the same emptiness as task 5 found, and it is why the built-pages test is the one that carries the weight.
+- With everything written from the brief, `npm test` in `site/` ran 57 tests and all 57 passed: the 53 from before plus the 4 new. The brief's count of 47 was made before task 5's review added 10 tests and includes these 4, so the same arithmetic gives 57.
+- `find dist -name '*.html' | wc -l` in `site/` printed 9: the 404 page, About, the journal list and six entries. `grep -o "<h1[^>]*>[^<]*" dist/journal/2026-09-30-building-the-core/index.html` printed one heading, `Building the core`, from the front matter.
+- `grep -o 'href="https://github.com/dbhq-uk/6502/blob[^"]*"' dist/journal/*/index.html` shows the rewritten links, for example `docs/the-6502-family.md#who-made-it` in `checking-the-ground`.
+
+### What surprised
+
+- `npm install @astrojs/markdown-remark` printed the same `esbuild` install-script warning as before. Nothing was approved.
+- The build printed no warnings.

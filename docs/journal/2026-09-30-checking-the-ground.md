@@ -1,3 +1,10 @@
+---
+title: "Checking the ground"
+date: 2026-09-30
+summary: "Every outside fact the core depends on was checked, and every behaviour its code would assume was tested against the data it will be tested against."
+order: 1
+---
+
 # 30 September 2026: checking the ground before the plan
 
 Before writing the plan for the core, every outside fact it depends on was
