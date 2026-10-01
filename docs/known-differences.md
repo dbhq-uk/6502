@@ -82,3 +82,53 @@ temperature.
 **How the tests treat it.** The core matches Harte's data, which fixes the
 `ANE` and `LXA` constant at `$EE`. That is one answer, not every
 chip's.
+
+## The KIM-1: reading the 6530 timer after it has passed zero
+
+**What.** Appendix H of the KIM-1 User Manual says that once the timer has
+counted past zero, reading either `$1706` or `$170E` will "disable the
+interrupt option". The MCS6530 data sheet says address line A3 sets the
+interrupt enable on every read or write of the timer, and `$170E` has A3 high.
+
+**Why we differ from the manual.** The data sheet describes the chip; the
+manual describes how the board's users should use it, and its own table one
+paragraph earlier says reading `$170E` enables the interrupt. Which one real
+silicon does after zero was not checked here.
+
+**How the tests treat it.** `Rriot6530Tests` checks that a read with A3 high
+enables the interrupt. Nothing on a stock KIM-1 connects the timer's
+interrupt to the CPU, so the monitor never depends on it.
+
+## The KIM-1: the data sheet's timer example, off by one
+
+**What.** The data sheet's worked example writes 52 at divide by 8. Its text
+says the interrupt comes at (52 x 8) + 1 = 417 clocks, and its two later
+readings, `$E4` at 444 and `$AC` at 500, agree with 417. Its Figure 5 says the
+interrupt occurs "at pulse 416".
+
+**How the tests treat it.** The timer follows the text and the two readings:
+the flag rises on clock N x k + 1 after the write. `TheDataSheetsWorkedExampleHolds`
+checks 25 at clock 213, 0 at 415, `$FF` at 417, `$E4` at 444 and `$AC` at 500.
+
+## The KIM-1: what is modelled rather than measured
+
+**What.** Four behaviours of the board come from a reasoned model, not from a
+reference that could be tested against:
+
+- **Open bus.** A read where nothing answers ($0400-$13FF and $1400-$16FF)
+  returns the last byte on the data bus. No measurement of a real board was
+  found.
+- **RAM at power on** is all zeros. Real static RAM starts with arbitrary
+  contents.
+- **The display.** A digit shows each segment that was on for more than half
+  of the cycles it was selected, and goes dark 20 ms after it was last
+  scanned. That stands in for the eye, not for the LEDs.
+- **Single step.** The SST logic raises NMI on the cycle the CPU fetches an
+  opcode outside `$1C00-$1FFF`. The machine treats the first access of every
+  instruction, and of every interrupt sequence, as that fetch.
+
+**How the tests treat it.** The acceptance tests depend on the display
+model and on single step, and pass with the original monitor ROM doing what
+the User Manual says it does. The open-bus value and power-on RAM are pinned
+by tests of the memory map and the boot state, so a change to either is
+seen.
