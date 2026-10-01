@@ -21,18 +21,23 @@ const laps = fmt(trace.laps);
       <div class="die">
         <section class="die-stage" data-stage tabindex="0" aria-label="3D view of the chip. Left and right arrow keys step a cycle, space plays or pauses." aria-describedby="die-caption"></section>
         <nav class="die-tour" aria-label="Tour of the chip">
+          <p class="die-tour-head"><span>The tour</span><span class="die-count"><b data-stop-number>1</b> of {STOPS.length}</span></p>
           <ol class="die-stops">
-            {STOPS.map((s) => <li><button type="button" class="btn small ghost die-stop" data-stop={s.id}>{s.title}</button></li>)}
+            {STOPS.map((s, i) => (
+              <li class="die-item" data-item={s.id}>
+                <button type="button" class="die-stop" data-stop={s.id}>
+                  <span class="die-n">{String(i + 1).padStart(2, '0')}</span>
+                  <span class="die-t">{s.title}</span>
+                </button>
+                <div class="die-text" data-stop-text={s.id}>
+                  <p>{s.text}</p>
+                </div>
+              </li>
+            ))}
           </ol>
-          {STOPS.map((s) => (
-            <div class="die-text" data-stop-text={s.id}>
-              <h2>{s.title}</h2>
-              <p>{s.text}</p>
-            </div>
-          ))}
-          <div class="btns die-move">
-            <button type="button" class="btn small" data-prev>Previous stop</button>
-            <button type="button" class="btn small" data-next>Next stop</button>
+          <div class="die-pager die-move">
+            <button type="button" class="btn small" data-prev aria-label="Previous stop">Back</button>
+            <button type="button" class="btn small" data-next aria-label="Next stop">Next stop</button>
           </div>
         </nav>
       </div>

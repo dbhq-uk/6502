@@ -36,12 +36,29 @@ Two limits the page states. The registers show the core's state when each instru
 
 The first render washed out to white: bloom was set far too strong and the lit parts all saturated. Looking at it in headless Chrome showed that at once; the tests could not have. The close-up tour stops were also too near to read. Both were fixed by looking, not by reasoning, and the page was checked again the same way.
 
+## The second pass: making it look like it is lit
+
+The first version was correct and flat. Dan asked for it to look better, and for the right-hand tour to be nicer, and pointed at two published three.js skills. One is a generic raw-WebGL guide and added nothing. The other, for three.js's WebGPU renderer and its shading language, was useful as a list of what polished scenes do: depth of field, ambient occlusion, film grain, a Fresnel rim, bloom.
+
+**Chosen over moving to the WebGPU renderer:** staying on the WebGL2 renderer and building those effects there. The only rendering available while building was software rendering in headless Chrome, which cannot show whether a WebGPU path works, and a page that only works on a GPU nobody here can test is worse than a plainer one that works everywhere.
+
+What changed:
+
+- **Rounded parts with a rim light,** so each part reads as solid and lit.
+- **A shader floor,** a grid that fades with distance and a ring that spreads outward from the chip.
+- **Focus brackets** that slide to frame the part being visited, with the region for each stop in `layout.mjs` and a test that it lies on the die.
+- **Drifting motes, film tone mapping, a vignette, light colour fringing and grain.**
+- **A slow orbit** at the overview when nobody has touched it for five seconds, off under reduced motion.
+- **The tour as a numbered timeline:** a rail that fills as stops are visited, the current stop open, a counter and a pager.
+
+The first attempt at the fringing and the tone mapping was too strong: lit cells blew out to white and had coloured edges. Both were turned down after looking at screenshots.
+
 ## Measurements, dated
 
 On 1 October 2026, on the build machine (a virtual machine, headless Chrome with software rendering, so frame rates are not worth quoting):
 
 - `dotnet run --project tools/Dbhq.Cpu6502.ChipTrace` wrote a trace of 562 bus cycles over 177 instructions, eight laps of the loop, 29,422 bytes.
-- The minified bundle was 848,128 bytes and 214,483 gzipped (`ls -l`, `gzip -c | wc -c`). That is large for a site of otherwise small pages, and it only loads on this one.
+- The minified bundle was 853,892 bytes and 216,790 gzipped (`ls -l`, `gzip -c | wc -c`). That is large for a site of otherwise small pages, and it only loads on this one.
 
 ## Not done
 

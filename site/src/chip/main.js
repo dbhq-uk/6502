@@ -12,6 +12,8 @@ import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
 import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
 import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
 import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
+import { ShaderPass } from 'three/addons/postprocessing/ShaderPass.js';
+import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
 import { CSS2DRenderer, CSS2DObject } from 'three/addons/renderers/CSS2DRenderer.js';
 import trace from '../data/chip-trace.json';
 import { DIE, PADS, COLUMNS, BLOCKS, WIRES, STOPS, FLAGS, ROWS, rowZ, padLabel } from './layout.mjs';
@@ -47,6 +49,8 @@ function start(root) {
 
   renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
   renderer.outputColorSpace = THREE.SRGBColorSpace;
+  renderer.toneMapping = THREE.ACESFilmicToneMapping;
+  renderer.toneMappingExposure = 0.92;
   stage.appendChild(renderer.domElement);
   renderer.domElement.setAttribute('aria-hidden', 'true');
 
@@ -80,11 +84,32 @@ function start(root) {
     return g;
   };
 
-  const box = (w, h, d, color, opts = {}) =>
-    new THREE.Mesh(new THREE.BoxGeometry(w, h, d), new THREE.MeshStandardMaterial({ color, roughness: 0.55, metalness: 0.35, ...opts }));
+  // Every part glows faintly at its edges where it turns away from the camera
+  // (a Fresnel rim), which is most of what makes the parts read as solid and lit.
+  const rimColor = { value: C.moss };
+  const withRim = (material) => {
+    material.onBeforeCompile = (shader) => {
+      shader.uniforms.rimColor = rimColor;
+      shader.fragmentShader = 'uniform vec3 rimColor;\n' + shader.fragmentShader.replace(
+        '#include <emissivemap_fragment>',
+        `#include <emissivemap_fragment>
+        float rimF = pow(1.0 - saturate(dot(normalize(vNormal), normalize(vViewPosition))), 3.0);
+        totalEmissiveRadiance += rimColor * rimF * 0.55;`,
+      );
+    };
+    return material;
+  };
 
+  const box = (w, h, d, color, opts = {}) =>
+    new THREE.Mesh(
+      new RoundedBoxGeometry(w, h, d, 2, Math.max(0.01, Math.min(0.16, Math.min(w, h, d) / 2 - 0.005))),
+      withRim(new THREE.MeshStandardMaterial({ color, roughness: 0.5, metalness: 0.4, ...opts })),
+    );
+
+  // Outlines are drawn on the plain box, so the rounded corners add no lines.
   const outline = (mesh, color, opacity = 0.9) => {
-    const lines = new THREE.LineSegments(new THREE.EdgesGeometry(mesh.geometry), new THREE.LineBasicMaterial({ color, transparent: true, opacity }));
+    const { width, height, depth } = mesh.geometry.parameters;
+    const lines = new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.BoxGeometry(width, height, depth)), new THREE.LineBasicMaterial({ color, transparent: true, opacity }));
     mesh.add(lines);
     return lines;
   };
@@ -112,6 +137,66 @@ function start(root) {
   grid.material.opacity = 0.18;
   scene.add(grid);
 
+  // The floor: a fine grid that fades out with distance, and a ring that
+  // spreads outward from the chip every few seconds.
+  const floorUniforms = { uTime: { value: 0 }, uColor: { value: C.pine } };
+  const floor = new THREE.Mesh(
+    new THREE.PlaneGeometry(220, 220),
+    new THREE.ShaderMaterial({
+      uniforms: floorUniforms,
+      transparent: true,
+      depthWrite: false,
+      vertexShader: 'varying vec2 vP; void main() { vP = position.xy; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }',
+      fragmentShader: `
+        varying vec2 vP; uniform float uTime; uniform vec3 uColor;
+        void main() {
+          float d = length(vP) / 90.0;
+          vec2 g = abs(fract(vP / 4.0 - 0.5) - 0.5) / fwidth(vP / 4.0);
+          float line = 1.0 - min(min(g.x, g.y), 1.0);
+          float ring = exp(-pow((d - fract(uTime * 0.06)) * 22.0, 2.0)) * (1.0 - fract(uTime * 0.06));
+          float fade = smoothstep(1.0, 0.1, d);
+          gl_FragColor = vec4(uColor * (0.9 + ring * 3.0), (line * 0.28 + ring * 0.4) * fade);
+        }`,
+    }),
+  );
+  floor.rotation.x = -Math.PI / 2;
+  floor.position.y = -DIE.thickness - 0.05;
+  scene.add(floor);
+
+  // Motes of light drifting up through the scene.
+  const MOTES = 420;
+  const motePositions = new Float32Array(MOTES * 3);
+  const moteSpeed = new Float32Array(MOTES);
+  for (let i = 0; i < MOTES; i++) {
+    motePositions.set([(Math.random() - 0.5) * 110, Math.random() * 34, (Math.random() - 0.5) * 110], i * 3);
+    moteSpeed[i] = 0.4 + Math.random() * 1.2;
+  }
+  const moteGeometry = new THREE.BufferGeometry();
+  moteGeometry.setAttribute('position', new THREE.BufferAttribute(motePositions, 3));
+  const motes = new THREE.Points(moteGeometry, new THREE.PointsMaterial({ color: C.moss, size: 0.2, transparent: true, opacity: 0.55, depthWrite: false, blending: THREE.AdditiveBlending }));
+  scene.add(motes);
+
+  // Focus brackets: four corners that slide to frame the part being visited.
+  const bracket = { x: 0, z: 0, w: 42, d: 46, tx: 0, tz: 0, tw: 42, td: 46 };
+  const bracketGeometry = new THREE.BufferGeometry();
+  bracketGeometry.setAttribute('position', new THREE.BufferAttribute(new Float32Array(8 * 2 * 3), 3));
+  const bracketLines = new THREE.LineSegments(bracketGeometry, new THREE.LineBasicMaterial({ color: C.white, transparent: true, opacity: 0.9 }));
+  bracketLines.frustumCulled = false;
+  scene.add(bracketLines);
+  const placeBrackets = () => {
+    const a = bracketGeometry.attributes.position;
+    const hw = bracket.w / 2 + 0.6, hd = bracket.d / 2 + 0.6;
+    const L = Math.min(4, bracket.w * 0.22, bracket.d * 0.22);
+    let k = 0;
+    for (const [sx, sz] of [[-1, -1], [1, -1], [1, 1], [-1, 1]]) {
+      const cx = bracket.x + sx * hw, cz = bracket.z + sz * hd;
+      a.setXYZ(k++, cx, 0.12, cz); a.setXYZ(k++, cx - sx * L, 0.12, cz);
+      a.setXYZ(k++, cx, 0.12, cz); a.setXYZ(k++, cx, 0.12, cz - sz * L);
+    }
+    a.needsUpdate = true;
+  };
+  placeBrackets();
+
   // Pads.
   const padGlow = new Map();
   for (const p of PADS) {
@@ -134,7 +219,7 @@ function start(root) {
       const a = path[i - 1], b = path[i];
       const len = a.distanceTo(b);
       if (len < 1e-3) continue;
-      const seg = new THREE.Mesh(new THREE.BoxGeometry(0.11, 0.05, len + 0.11), material);
+      const seg = new THREE.Mesh(new THREE.BoxGeometry(0.09, 0.05, len + 0.09), material);
       seg.position.copy(a).add(b).multiplyScalar(0.5);
       seg.lookAt(b.x, seg.position.y, b.z);
       scene.add(seg);
@@ -309,11 +394,24 @@ function start(root) {
   // The tour.
   const stopButtons = [...root.querySelectorAll('[data-stop]')];
   const stopTexts = [...root.querySelectorAll('[data-stop-text]')];
+  let lastVisit = 0;
+  let lastInput = 0;
+  let dragging = false;
+  controls.addEventListener('controlstart', () => { dragging = true; });
+  controls.addEventListener('controlend', () => { dragging = false; lastInput = performance.now(); });
+  const items = [...root.querySelectorAll('[data-item]')];
+  const number = root.querySelector('[data-stop-number]');
   const visit = (id, smooth = !reduced) => {
-    const s = STOPS.find((x) => x.id === id) ?? STOPS[0];
+    const at = Math.max(0, STOPS.findIndex((x) => x.id === id));
+    const s = STOPS[at];
     controls.setLookAt(...s.camera, ...s.target, smooth);
+    [bracket.tx, bracket.tz, bracket.tw, bracket.td] = s.focus;
+    lastVisit = performance.now();
+    if (!smooth) Object.assign(bracket, { x: bracket.tx, z: bracket.tz, w: bracket.tw, d: bracket.td });
     for (const b of stopButtons) b.setAttribute('aria-current', String(b.dataset.stop === s.id));
     for (const t of stopTexts) t.hidden = t.dataset.stopText !== s.id;
+    items.forEach((li, i) => { li.dataset.state = i < at ? 'done' : i === at ? 'current' : 'todo'; });
+    number.textContent = String(at + 1);
     current = s.id;
   };
   let current = STOPS[0].id;
@@ -330,6 +428,24 @@ function start(root) {
   composer.addPass(new RenderPass(scene, camera));
   const bloom = new UnrealBloomPass(new THREE.Vector2(1, 1), 0.65, 0.4, 0.78);
   composer.addPass(bloom);
+  // The last pass: a vignette, a little colour fringing towards the corners
+  // and fine grain, so the picture feels like a lens and not a diagram.
+  const look = new ShaderPass({
+    uniforms: { tDiffuse: { value: null }, uTime: { value: 0 } },
+    vertexShader: 'varying vec2 vUv; void main() { vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }',
+    fragmentShader: `
+      uniform sampler2D tDiffuse; uniform float uTime; varying vec2 vUv;
+      void main() {
+        vec2 c = vUv - 0.5; float r = dot(c, c);
+        vec2 off = c * r * 0.005;
+        vec3 col = vec3(texture2D(tDiffuse, vUv + off).r, texture2D(tDiffuse, vUv).g, texture2D(tDiffuse, vUv - off).b);
+        col *= 1.0 - smoothstep(0.12, 0.7, r) * 0.75;
+        float n = fract(sin(dot(vUv * vec2(1920.0, 1080.0) + uTime, vec2(12.9898, 78.233))) * 43758.5453);
+        col += (n - 0.5) * 0.022 * smoothstep(0.0, 0.25, max(col.r, max(col.g, col.b)));
+        gl_FragColor = vec4(col, 1.0);
+      }`,
+  });
+  composer.addPass(look);
   composer.addPass(new OutputPass());
 
   const resize = () => {
@@ -374,6 +490,27 @@ function start(root) {
       b.curve.getPointAt(b.outward ? b.t : 1 - b.t, scratch);
       b.mesh.position.copy(scratch).setY(0.18);
     }
+
+    // Time-driven parts: the floor's ring, the grain, the drifting motes, the
+    // brackets sliding to their target and breathing.
+    floorUniforms.uTime.value += dt;
+    look.uniforms.uTime.value = (now / 1000) % 100;
+    if (!reduced) {
+      const m = moteGeometry.attributes.position;
+      for (let i = 0; i < MOTES; i++) {
+        let y = m.getY(i) + moteSpeed[i] * dt;
+        if (y > 34) y = 0;
+        m.setY(i, y);
+      }
+      m.needsUpdate = true;
+    }
+    const slide = 1 - Math.exp(-7 * dt);
+    for (const k of ['x', 'z', 'w', 'd']) bracket[k] += (bracket['t' + k] - bracket[k]) * slide;
+    placeBrackets();
+    bracketLines.material.opacity = reduced ? 0.8 : 0.65 + 0.3 * Math.sin(now / 420);
+
+    // Left alone on the overview, the camera drifts slowly round the chip.
+    if (!reduced && current === 'overview' && !dragging && now - lastInput > 5000 && now - lastVisit > 4000) controls.rotate(dt * 0.07, 0, false);
 
     controls.update(dt);
     // Pad and flag labels only when close enough to read.

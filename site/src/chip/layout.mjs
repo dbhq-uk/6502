@@ -80,7 +80,7 @@ export const FLAGS = ['N', 'V', '-', 'B', 'D', 'I', 'Z', 'C'];
 // Wires are lists of [x, z] points on the die's surface, from the chip's inside
 // to its pad. Each address and data line is its own wire, so the trace can
 // light it bit by bit.
-const LANE = 0.16;
+const LANE = 0.2;
 
 function addressWire(bit) {
   const col = column(bit >= 8 ? 'ABH' : 'ABL');
@@ -124,12 +124,14 @@ export const WIRES = [
   { id: 'RES', bus: 'control', points: stub('RES', 1.6) },
 ];
 
-// The tour. Each stop is a camera position and the point it looks at, and the
+// The tour. Each stop is a camera position, the point it looks at, and the focus
+// region [x, z, width, depth] the brackets frame, and the
 // words shown beside it. The page renders the words as HTML, so they read
 // without JavaScript and the tests can check them.
 export const STOPS = [
   {
     id: 'overview',
+    focus: [0, 0, 42, 46],
     title: 'The whole chip',
     camera: [0, 47, 47],
     target: [0, 0, 4],
@@ -137,6 +139,7 @@ export const STOPS = [
   },
   {
     id: 'pins',
+    focus: [0, 0, 42, 46],
     title: 'The pins',
     camera: [-10, 22, 46],
     target: [0, 0, 16],
@@ -144,6 +147,7 @@ export const STOPS = [
   },
   {
     id: 'decoder',
+    focus: [0, -14.75, 30, 6.5],
     title: 'The instruction decoder',
     camera: [0, 24, 10],
     target: [0, 0, -12],
@@ -151,6 +155,7 @@ export const STOPS = [
   },
   {
     id: 'control',
+    focus: [-6, -8, 26, 8],
     title: 'The control logic',
     camera: [-8, 22, 12],
     target: [-2, 0, -7],
@@ -158,6 +163,7 @@ export const STOPS = [
   },
   {
     id: 'registers',
+    focus: [-0.75, 5.75, 34, 18],
     title: 'The registers',
     camera: [-10, 26, 28],
     target: [-2, 0, 5],
@@ -165,6 +171,7 @@ export const STOPS = [
   },
   {
     id: 'alu',
+    focus: [0.8, 5.75, 5, 18],
     title: 'The arithmetic unit',
     camera: [8, 24, 26],
     target: [1, 0, 5],
@@ -172,6 +179,7 @@ export const STOPS = [
   },
   {
     id: 'flags',
+    focus: [11.6, -8, 7.5, 8],
     title: 'The status flags',
     camera: [14, 22, 8],
     target: [11, 0, -7],
@@ -179,6 +187,7 @@ export const STOPS = [
   },
   {
     id: 'buses',
+    focus: [0, 0, 42, 46],
     title: 'The buses',
     camera: [32, 26, 18],
     target: [6, 0, 6],

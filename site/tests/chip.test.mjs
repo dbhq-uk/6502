@@ -72,6 +72,14 @@ test('the trace says where it came from, and was recorded on the NMOS 6502', () 
   assert.match(trace.about, /Do not edit by hand/);
 });
 
+test('every stop frames a region of the die, as [x, z, width, depth] inside it', () => {
+  for (const s of STOPS) {
+    assert.equal(s.focus?.length, 4, `${s.id} has no focus region`);
+    const [x, z, w, d] = s.focus;
+    assert.ok(w > 0 && d > 0 && Math.abs(x) + w / 2 <= 21 && Math.abs(z) + d / 2 <= 23, `${s.id} focus is off the die`);
+  }
+});
+
 test('the page has a tour stop button and text for every stop, and the stops are the ones in the layout', () => {
   const html = page('/inside/').html;
   for (const s of STOPS) {
