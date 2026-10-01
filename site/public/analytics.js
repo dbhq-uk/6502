@@ -1,15 +1,26 @@
-// GA4 with Consent Mode v2, loaded from a file rather than an inline block.
+// GA4, loaded from a file rather than an inline block.
 //
 // This site's Content-Security-Policy has no 'unsafe-inline' in script-src and
 // should not gain one. Google's own snippet is inline, so it is rewritten here
 // as an ordinary same-origin module and the tag itself is injected. Nothing
 // about the measurement changes; only where the code lives.
 //
-// DENIED BY DEFAULT. Nothing is loaded and no cookie is set until the visitor
-// accepts. consent.js owns the prompt and calls __dbhqEnableGA() on accept, and
-// __dbhqRevokeGA() when the reader withdraws. That ordering is not a nicety: GA4
-// sets its cookie on the shared .dbhq.uk parent, so a cookie dropped by this
-// site without consent would be a cookie across every site under that domain.
+// ON BY DEFAULT, WITH A NOTICE AND A SIMPLE OPT-OUT, under the PECR
+// statistical-purposes exception (Data (Use and Access) Act 2025). The site
+// launched on 1 Oct 2026 with an opt-in prompt that denied everything and
+// loaded nothing until the reader clicked Accept, and moved to this the same
+// day, to match every other site on dbhq.uk. The exception needs clear
+// information and a simple, free way to object rather than prior consent, and
+// it holds only while the measurement is statistics and nothing else - so ad
+// storage is denied, and Google Signals and ad personalisation are off in the
+// config. Do not relax either: that is the line between counting visits and
+// something the exception does not cover.
+//
+// consent.js draws the notice and calls window.dbhqAnalytics. It loads after
+// this file, so the object is always there by the time it looks.
+//
+// GA4 IS NOT LOADED AT ALL for a reader who opted out, for a likely bot, or
+// off the live host.
 //
 // THE MEASUREMENT ID IS SHARED ACROSS THE DBHQ SITES ON PURPOSE. The analytics
 // property carries exactly one data stream. A stream of this site's own would
@@ -24,6 +35,68 @@ const MEASUREMENT_ID = "G-3H3NFGSX85";
 // 6502.pages.dev serves the same bytes and is not the site.
 const PROD = location.hostname === "6502.dbhq.uk";
 
+// The choice is a cookie on .dbhq.uk, so opting out on one site opts out on
+// every dbhq.uk site - the _ga cookie it stops is shared across them too. A
+// localStorage "dbhq-consent" left by the old opt-in prompt is read once and
+// carried over: "denied" stays an opt-out.
+function readChoice() {
+  const m = document.cookie.match(/(?:^|; )dbhq_analytics=(on|off)(?:;|$)/);
+  if (m) return m[1];
+  try {
+    const old = localStorage.getItem("dbhq-consent");
+    if (old === "denied") return "off";
+    if (old === "granted") return "on";
+  } catch (e) {
+    // localStorage throws rather than returning null in some privacy modes.
+  }
+  return null;
+}
+
+function writeChoice(v) {
+  let c = "dbhq_analytics=" + v + "; Max-Age=31536000; Path=/; SameSite=Lax; Secure";
+  if (/(^|\.)dbhq\.uk$/.test(location.hostname)) c += "; Domain=dbhq.uk";
+  document.cookie = c;
+  try {
+    localStorage.removeItem("dbhq-consent");
+  } catch (e) {
+    // Nothing to remove if storage cannot be read either.
+  }
+}
+
+// Bots that run JavaScript, and scrapers rotating desktop Chrome or Firefox
+// about two years stale. Mobile, Win7/8 and Firefox ESR are exempt. Kept
+// identical on every dbhq.uk site, so one bot rule applies to one property.
+function likelyBot() {
+  try {
+    if (navigator.webdriver) return true;
+    var ua = navigator.userAgent || "";
+    if (/bot|crawl|spider|headless/i.test(ua)) return true;
+    if (/Android|Mobile|CrOS/.test(ua) || !/Windows NT 10\.0|Macintosh|X11/.test(ua)) return false;
+    var n = Math.max(0, Math.floor((Date.now() - Date.UTC(2025, 8, 2)) / 2592e6));
+    var c = /Chrome\/(\d+)\./.exec(ua);
+    if (c) return +c[1] < 140 + n - 24;
+    var f = /Firefox\/(\d+)\./.exec(ua);
+    if (f) return [115, 128, 140, 153].indexOf(+f[1]) < 0 && +f[1] < 142 + n - 24;
+  } catch (e) {}
+  return false;
+}
+
+// GA4 sets _ga on the highest domain it can (.dbhq.uk), so expire the cookies
+// on this host and on every parent domain.
+function deleteGaCookies() {
+  const parts = location.hostname.split(".");
+  document.cookie.split("; ").forEach((c) => {
+    const name = c.split("=")[0];
+    if (name === "_ga" || name.indexOf("_ga_") === 0) {
+      const expired = name + "=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/";
+      document.cookie = expired;
+      for (let i = 0; i < parts.length - 1; i++) {
+        document.cookie = expired + "; domain=." + parts.slice(i).join(".");
+      }
+    }
+  });
+}
+
 window.dataLayer = window.dataLayer || [];
 function gtag() {
   // Deliberately `arguments`, not a rest parameter: gtag reads the live
@@ -32,47 +105,52 @@ function gtag() {
 }
 window.gtag = gtag;
 
-gtag("consent", "default", {
-  ad_storage: "denied",
-  analytics_storage: "denied",
-  ad_user_data: "denied",
-  ad_personalization: "denied",
-});
+const bot = likelyBot();
+let loaded = false;
 
-window.__dbhqEnableGA = function () {
-  // Accepting again after a withdrawal, in the same page load: the tag is
-  // already there, so only the consent signal needs to go back to granted.
-  if (PROD && window.__gaLoaded) gtag("consent", "update", { analytics_storage: "granted" });
-  if (!PROD || window.__gaLoaded) return;
-  window.__gaLoaded = true;
-
-  gtag("consent", "update", { analytics_storage: "granted" });
+// THE ONLY PLACE THE TAG IS REFERENCED. Everything above it decides whether
+// this runs; nothing below it loads GA any other way.
+function load() {
+  if (!PROD || bot || loaded) return;
+  loaded = true;
+  gtag("consent", "default", {
+    analytics_storage: "granted",
+    ad_storage: "denied",
+    ad_user_data: "denied",
+    ad_personalization: "denied",
+  });
   gtag("js", new Date());
-  gtag("config", MEASUREMENT_ID);
-
+  gtag("config", MEASUREMENT_ID, {
+    allow_google_signals: false,
+    allow_ad_personalization_signals: false,
+  });
   const tag = document.createElement("script");
   tag.async = true;
   tag.src = "https://www.googletagmanager.com/gtag/js?id=" + MEASUREMENT_ID;
   document.head.appendChild(tag);
-};
-
-// Withdrawing consent puts all four signals back to denied. GA4 then stops
-// measuring and stops writing its cookie. It does not delete a cookie already set.
-window.__dbhqRevokeGA = function () {
-  gtag("consent", "update", {
-    ad_storage: "denied",
-    analytics_storage: "denied",
-    ad_user_data: "denied",
-    ad_personalization: "denied",
-  });
-};
-
-// A visitor who accepted on a previous visit is not asked again. localStorage
-// is scoped to one origin, so this reads only the choice made on this site:
-// accepting on dbhq.uk does not carry over to here, and each site asks once.
-try {
-  if (localStorage.getItem("dbhq-consent") === "granted") window.__dbhqEnableGA();
-} catch (e) {
-  // localStorage throws rather than returning null in some privacy modes.
-  // No stored choice means no consent, which is already the default.
 }
+
+window.dbhqAnalytics = {
+  choice: readChoice,
+  keepOn() {
+    writeChoice("on");
+    window["ga-disable-" + MEASUREMENT_ID] = false;
+    if (loaded) gtag("consent", "update", { analytics_storage: "granted" });
+    load();
+  },
+  // Denied consent alone still lets GA4 send cookieless pings, including the
+  // user_engagement hit it flushes when the page is left. Google's ga-disable
+  // flag stops every hit from this page; later pages do not load GA4 at all.
+  optOut() {
+    writeChoice("off");
+    window["ga-disable-" + MEASUREMENT_ID] = true;
+    if (loaded) gtag("consent", "update", { analytics_storage: "denied" });
+    deleteGaCookies();
+  },
+};
+
+// A choice carried over from the old localStorage key is written to the cookie
+// on this first visit, so the old key is gone after one page.
+const choice = readChoice();
+if (choice && !/(?:^|; )dbhq_analytics=/.test(document.cookie)) writeChoice(choice);
+if (choice !== "off") load();

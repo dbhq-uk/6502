@@ -111,7 +111,7 @@ The 65C02 machines run on the core already. Machines on a different CPU
 | Family | The account of the family | `docs/the-6502-family.md` |
 | Status | The test breakdown, the speed check, and the known differences | Test results, `docs/known-differences.md` |
 | About | What this is, the goal, licence, links | Written once in `site/` |
-| Privacy | A link in the footer and the consent choice to DBHQ's privacy policy at https://dbhq.uk/privacy/, which covers every DBHQ site | The estate's policy; no page of its own |
+| Privacy | A link in the footer and the analytics notice (the consent choice, until 1 October 2026) to DBHQ's privacy policy at https://dbhq.uk/privacy/, which covers every DBHQ site | The estate's policy; no page of its own |
 
 **The table of machines** lists the whole family, filterable by category,
 core support and status, and sortable by every column. It works without
@@ -171,11 +171,12 @@ in the private company repository, rather than inventing its own:
 - **Consent Mode v2, denied by default.** Nothing loads and no cookie is set
   until the visitor accepts. The choice is kept under the `dbhq-consent` key in
   `localStorage`, with the same three states as every other site. It is a
-  modal, drawn to match the site.
+  modal, drawn to match the site. **Superseded on 1 October 2026: see the
+  amendment below.** This is what the site launched with.
 - **GA loads from an external `analytics.js`** and only on the live host,
   never on localhost or a preview. The Content-Security-Policy in `_headers`
   names the Google origins that need it, and nothing else.
-- **No privacy page of its own.** The consent choice and the footer link to DBHQ's policy at https://dbhq.uk/privacy/, which says what is collected and that it needs consent. One policy for the estate, so it cannot drift from the site it describes. (Amended 30 September 2026.)
+- **No privacy page of its own.** The consent choice and the footer link to DBHQ's policy at https://dbhq.uk/privacy/, which says what is collected and that analytics runs unless the visitor opts out. One policy for the estate, so it cannot drift from the site it describes. (Amended 30 September 2026. The policy's analytics section is what the notice links since 1 October 2026.)
 - **Search Console:** the domain property `sc-domain:dbhq.uk` already covers the
   host. A child property for `6502.dbhq.uk` is added for its own indexing view,
   its sitemap is submitted on the roll-up, and the service account is granted
@@ -183,7 +184,37 @@ in the private company repository, rather than inventing its own:
 
 Site tests check that GA does not load before consent, that the CSP names only
 what is needed, that the measurement ID is the estate's, and that the sitemap
-and `robots.txt` are present.
+and `robots.txt` are present. (The first of those was replaced on 1 October
+2026; see the amendment below.)
+
+**Amended 1 October 2026: the site moved from an opt-in modal to the estate's
+opt-out notice.** The site launched on 1 October 2026 on the pattern above, which
+was the estate's pattern as it stood when the site was designed. On 30
+September 2026 every other DBHQ site had moved to the new one: analytics on by
+default, a non-modal notice and a simple opt-out, under the PECR
+statistical-purposes exception. This site was built the same day and so launched
+one step behind, out of line with the rest of the estate the next morning. Dan
+decided it should match. What changed, and what did not:
+
+- **Analytics runs by default on the live host,** for a visitor who has not
+  opted out and is not a likely bot. Ad storage is denied, and Google Signals
+  and ad personalisation are off in the tag, so the measurement stays statistics
+  only. This is the line the exception depends on.
+- **The choice is a cookie,** `dbhq_analytics=on|off`, on `Domain=dbhq.uk`, so
+  opting out on one DBHQ site opts out on all of them. The `localStorage`
+  `dbhq-consent` key was per origin and never did that. A choice left under the
+  old prompt is honoured and moved to the cookie: `denied` becomes off and
+  `granted` becomes on.
+- **The notice is not a modal.** It informs, and offers OK and Opt out at the same
+  weight. The footer's "Cookie settings" reopens it on every page and shows
+  whether analytics is on or off.
+- **Unchanged:** the one measurement ID, no data stream of its own, loading only
+  on `6502.dbhq.uk`, the external `analytics.js`, and a Content-Security-Policy
+  that allows no inline script and names the same three Google origins.
+- **The tests** now run `analytics.js` and `consent.js` in a sandbox with a fake
+  browser, instead of reading their text. Site tests check that an opted-out
+  visitor loads nothing, that the ad signals stay denied, and that opting out is
+  as easy as carrying on.
 
 ### Tests
 
@@ -254,7 +285,7 @@ never assumed:
 | Shared browser parts are extracted after the second machine | A framework designed up front | Two machines make the shared part visible; one does not |
 | The look is a phosphor terminal, a fork of the brand | Paper like dbhq.uk; ink like skills.dbhq.uk | Dan's call, from the Modal reference; recorded in `site/DESIGN.md` |
 | Generated imagery, captioned as illustration, never as evidence | Photographs of real parts | The site's claim is that nothing is overstated |
-| GA4 on the estate's one measurement ID, with consent | A stream of its own; no analytics | Dan's call; the estate's rule, and it keeps sessions across subdomains |
+| GA4 on the estate's one measurement ID, with consent (opt-out notice since 1 October 2026) | A stream of its own; no analytics | Dan's call; the estate's rule, and it keeps sessions across subdomains |
 | Site source here, infrastructure in the private repository | Everything in one repository | The terraken split, for the same coupling |
 
 ## Out of scope
