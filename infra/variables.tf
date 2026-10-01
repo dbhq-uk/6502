@@ -5,15 +5,13 @@ variable "cloudflare_api_token" {
 }
 
 variable "account_id" {
-  description = "Cloudflare account id. An identifier, not a credential."
+  description = "Cloudflare account id. From TF_VAR_account_id, set from CLOUDFLARE_ACCOUNT_ID by ~/.dbhq/env.sh. No default: it is an identifier rather than a credential, but this repository is public and has no need to publish it."
   type        = string
-  default     = "691c21cdcf1b3fa4add70cc166e99733"
 }
 
 variable "zone_id" {
-  description = "Zone id for dbhq.uk. The zone itself is managed by ../terraform/; this project only adds a record to it."
+  description = "Zone id for dbhq.uk. From TF_VAR_zone_id, set from CLOUDFLARE_ZONE_ID by ~/.dbhq/env.sh. No default, for the same reason as account_id. The zone itself belongs to the DBHQ repository; this project only adds a record to it."
   type        = string
-  default     = "48bb46832a2853526a1082accdac4147"
 }
 
 variable "hostname" {
