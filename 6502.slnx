@@ -6,9 +6,11 @@
   </Folder>
   <Folder Name="/src/">
     <Project Path="src/Dbhq.Cpu6502/Dbhq.Cpu6502.csproj" />
+    <Project Path="src/Dbhq.Machines.Kim1/Dbhq.Machines.Kim1.csproj" />
   </Folder>
   <Folder Name="/tests/">
     <Project Path="tests/Dbhq.Cpu6502.Tests/Dbhq.Cpu6502.Tests.csproj" />
     <Project Path="tests/Dbhq.Cpu6502.TestSupport/Dbhq.Cpu6502.TestSupport.csproj" />
+    <Project Path="tests/Dbhq.Machines.Kim1.Tests/Dbhq.Machines.Kim1.Tests.csproj" />
   </Folder>
 </Solution>
