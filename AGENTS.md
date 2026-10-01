@@ -44,10 +44,8 @@ third-party test program. Tests download what they need from a pinned commit
 and check it against a recorded hash. Some of it is GPL and this repository is
 MIT.
 
-**4. Nothing of Capcom's, ever.** No *Mega Man 2* ROM, graphics, music or code
-in this repository or on the site, and the port itself lives in a separate
-private repository. The project names the game and carries a non-affiliation
-line; it never carries the game.
+**4. No game or commercial software is committed or served.** The site bundles
+homebrew and freely licensed software only. Anything else is load-your-own.
 
 **5. No figure is typed by hand.** A pass count, a percentage or a speed that
 describes the project as it stands comes from test output. A number that was

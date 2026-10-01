@@ -140,7 +140,7 @@ The look, the page layout, the analytics and consent files, and the first two pa
 ### What was built
 
 - **The look.** `site/src/styles/tokens.css` holds every colour, font and radius as a named token, and `global.css` uses them by name. It is the phosphor terminal decided on 30 September: black canvas, pale-green text, one lime accent.
-- **The layout and its parts.** `site/src/layouts/Base.astro` with a header, a footer that carries the Capcom non-affiliation line word for word, a `Card` for figures and a native `<dialog>` for the consent choice.
+- **The layout and its parts.** `site/src/layouts/Base.astro` with a header, a footer, a `Card` for figures and a native `<dialog>` for the consent choice.
 - **Analytics, consent-gated.** `site/public/analytics.js` sets all four Consent Mode v2 signals to denied and loads the Google tag only from inside `__dbhqEnableGA()`, which runs only on the live host and only after a visitor accepts. `consent.js` owns the prompt. Both are same-origin files because the Content-Security-Policy in `site/public/_headers` has no `unsafe-inline` for scripts. The measurement ID is the estate's one, not a new data stream.
 - **`machines-table.js`, `robots.txt`, `favicon.svg`.** The first adds sortable headers and filters to the tables that arrive in later tasks.
 - **Two pages.** `about.astro` and `404.astro`.
@@ -458,3 +458,7 @@ On 1 October 2026 the Terraform was applied and the site went live at https://65
 - **Checked after.** Fifteen URLs: fourteen returned 200 (seven pages, `robots.txt`, both sitemaps, three scripts, the favicon) and a made-up path returned 404. HSTS, the CSP and `X-Frame-Options` were present. The Pages custom domain read `pending` on its last check while the hostname already served, which is its state until verification finishes.
 
 Not done yet: the CI deploy (it needs a scoped token, three secrets and `SITE_DEPLOY=true`), and Search Console.
+
+## The port goal was dropped
+
+On 1 October 2026 Dan dropped the verified port of a commercial NES game as the project's end goal. The goal is now the machines: as many 6502-family machines as possible, each running in the browser and proven by a test. The site had carried a non-affiliation line in every footer, and a test required it on every page. Both the line and the goal are gone from the README, `AGENTS.md`, both specs, the journal and the site (rule 4 in `AGENTS.md` is now about not committing or serving commercial software). The test that required the line now fails any page that names the game or carries such a line, and `npm test` in `site/` passed after the change. The older plans are left as the record of what was specified at the time.

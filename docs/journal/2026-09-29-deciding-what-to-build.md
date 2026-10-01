@@ -7,9 +7,11 @@ order: 0
 
 # 29 September 2026: deciding what to build
 
+> **Note, 1 October 2026:** the verified port described below was dropped as the project's goal, and the non-affiliation line went with it. This entry is left as the record of what was decided on 29 September. The goal is now as many 6502 machines as possible, as the later entries say.
+
 ## Where it started
 
-The idea was a verified port of *Mega Man 2*, the 1988 NES game: a
+The idea was a verified port of a commercial NES game from 1988: a
 reimplementation checked against the original by differential testing. The
 original's own instructions run on an emulator, the port runs beside it from
 the same starting bytes, and every byte of memory and video is compared on
@@ -58,10 +60,10 @@ slow). The transistor-level model survives as a referee for interrupt timing.
 functional tests, interrupt timing tests checked against the transistor-level
 model, and the `nestest` trace.
 
-***Mega Man 2* is named in public as the goal,** with a line saying the
-project is not affiliated with Capcom. Silence until the port started was
-chosen first and reversed the same hour. Nothing of Capcom's goes in the
-repository or on the site.
+**The game was named in public as the goal, with a non-affiliation line.**
+Silence until the port started was chosen first and reversed the same hour.
+Both the goal and the line were dropped on 1 October 2026, and the page no
+longer names the game.
 
 ## Also written that day
 

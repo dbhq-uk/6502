@@ -13,8 +13,8 @@ where the count, and the proof behind it, is shown.
 
 The earlier design named three machines: the KIM-1, the BBC Micro and the NES.
 They are now the first three entries of a much longer list, not the whole
-plan. The verified port of *Mega Man 2* remains a later goal that needs a
-trusted NES, and is unchanged: private, and not on the site.
+plan. The verified port of a commercial NES game that the first design named as the
+end goal was dropped on 1 October 2026, and nothing on the site refers to it.
 
 ## What "implemented" means
 
@@ -104,7 +104,7 @@ The 65C02 machines run on the core already. Machines on a different CPU
 
 | Page | Shows | Source |
 |---|---|---|
-| Home | Hero, headline figures, the machines, the latest journal entries, the Capcom line | Test results, the registry, the journal |
+| Home | Hero, headline figures, the machines, the latest journal entries | Test results, the registry, the journal |
 | Journal | Every entry, newest first, and a page per entry | `docs/journal/*.md`, read at build time |
 | Machines | **A table of every 6502-family machine**, and a page for each machine that runs | `machines/registry.json` |
 | Chips | A table of every 6502-family chip and what the core runs | The registry's chip data |
@@ -194,8 +194,7 @@ and `robots.txt` are present.
   test.
 - A journal entry without its front matter, a machine in the family document
   that is missing from the registry, or a broken internal link.
-- An en or em dash, a forbidden name, or a missing Capcom non-affiliation line
-  in a footer.
+- An en or em dash, or a forbidden name.
 - A generated image without an "Illustration" caption or alt text.
 - Text or the lime accent below the accessible contrast minimum, computed from
   the real colour tokens, or a `box-shadow` on a card.
