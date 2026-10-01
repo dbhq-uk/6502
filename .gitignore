@@ -11,6 +11,9 @@ node_modules/
 .testdata/
 .superpowers/
 
+# The chip page's bundle, made by site/scripts/build-chip.mjs before every build.
+site/public/chip.js
+
 # Published output of the browser speed check, made locally.
 bench/Dbhq.Cpu6502.WasmBench/publish/
 

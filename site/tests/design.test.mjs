@@ -113,6 +113,9 @@ const ON = {
   'footer a': ['void'],
   'footer .linkbtn': ['void'],
   'footer .linkbtn:hover': ['void'],
+  '.die-label': ['iron'],
+  '.die-field': ['void'],
+  '.die-field select': ['iron'],
   '.analytics-notice': ['iron'],
   '.analytics-notice .analytics-notice-status': ['iron'],
 };
