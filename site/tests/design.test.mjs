@@ -113,8 +113,8 @@ const ON = {
   'footer a': ['void'],
   'footer .linkbtn': ['void'],
   'footer .linkbtn:hover': ['void'],
-  '.consent': ['iron'],
-  '.consent .consent-note': ['iron'],
+  '.analytics-notice': ['iron'],
+  '.analytics-notice .analytics-notice-status': ['iron'],
 };
 
 test('every text colour rule is placed on a surface, and reaches AA on each one it is set on', () => {

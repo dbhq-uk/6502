@@ -63,7 +63,7 @@ no page to write. Its emulator is a separate piece of work.
 | `machines.test.mjs` | The machines and chips tables match the registry; only a running machine is linked (rules tested on a made-up registry, since none runs yet); the filters are hidden until the script runs; the sort comparison puts blanks last; the family page renders the repository document |
 | `journal.test.mjs` | Every journal entry has its front matter, is built once with its own title, and is listed newest first; a link to another entry is a site link and a link to any other file goes to GitHub |
 | `site.test.mjs` | Every page has a title, description and canonical link (the 404 has none and is `noindex`), no mention of the dropped port goal, one `h1` and its landmarks; no dashes or forbidden names; British English; no inline script; every internal link resolves; every image in `src/assets/imagery/` is captioned and alt-texted as an illustration; the lime fills one element and its other uses are named |
-| `analytics.test.mjs` | GA4 uses the estate's one ID, is denied by default, loads only after consent, and the CSP allows only what it needs |
+| `analytics.test.mjs` | `analytics.js` and `consent.js` are run in a sandbox with a fake browser: GA4 uses the estate's one ID, is analytics-only, loads only on the live host and for no likely bot, is never loaded for a visitor who opted out, and an old refusal is carried over; the notice shows once, Cookie settings reopens it, and OK and Opt out are the same weight; the CSP allows only what it needs |
 | `design.test.mjs` | Contrast from the real tokens, on the black canvas, the cards and the worst pixel of the traces texture; no raw colours in the stylesheet; no shadows but the navigation bar's |
 | `html.test.mjs` | Every built page is valid HTML |
 | `build.test.mjs` | The pages, the sitemap, `robots.txt` and the 404 page were built, and the sitemap lists exactly the pages that exist; the deploy checks every script the pages load; both workflows hold the same test floor; no local path or private address is published; this table lists every test file |
@@ -78,11 +78,25 @@ each image was made.
 ## Analytics and Search Console
 
 GA4 uses the estate's one measurement ID (`G-3H3NFGSX85`) with no data stream of
-its own, denied by default, and loaded only on `6502.dbhq.uk` after the visitor
-accepts. `public/analytics.js` and `public/consent.js` began as the estate's, from
-terraken, and have since changed here: the choice is remembered for this site only
-(`localStorage` belongs to one origin), and the footer's Cookie choice button asks
-again and puts every Consent Mode signal back to denied. They are external files
-because the site's CSP allows no inline script.
+its own, and runs by default on `6502.dbhq.uk` only, with a notice and a simple
+opt-out. That is the pattern every other DBHQ site moved to on 30 September 2026,
+under the PECR statistical-purposes exception: analytics only, so ad storage is
+denied and Google Signals and ad personalisation are off. This site launched on
+1 October 2026 with an opt-in modal that loaded nothing until a visitor
+accepted, and moved to the notice the same day.
+
+The choice is a cookie, `dbhq_analytics=on|off`, on `Domain=dbhq.uk`, so opting
+out here opts out on every DBHQ site. An answer left under the old prompt (the
+`dbhq-consent` key in `localStorage`) is honoured and moved to the cookie on the
+first page load. A visitor who opted out loads no Google script at all. The notice is
+not a modal. It shows until answered, offers OK and Opt out at the same weight,
+and links the estate's privacy policy. "Cookie settings" in the footer reopens it
+on every page.
+
+`public/analytics.js` and `public/consent.js` are the estate's code with this
+site's host and look. They are external files because the site's CSP allows no
+inline script. `tests/analytics.test.mjs` runs both in a sandbox rather than
+reading their text.
+
 The Search Console property for the host sits under the `sc-domain:dbhq.uk`
 roll-up. The estate's own record of both is in the private company repository.

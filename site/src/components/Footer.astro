@@ -1,12 +1,18 @@
 ---
 import { SITE } from '../lib/site.mjs';
+
+// "Cookie settings" reopens the analytics notice, so opting out, or back in, is
+// one click from every page. It ships hidden and public/consent.js reveals it:
+// without JavaScript there is no analytics to switch off, and a button that
+// does nothing is worse than none. (A frontmatter comment on purpose: an HTML
+// comment would be served to every reader.)
 ---
 
 <footer>
   <div class="wrap">
     <p>
       MIT licence. Source on <a href={SITE.repo}>GitHub</a>. A dbhq project. <a href={SITE.privacy}>Privacy policy</a>.
-      <button type="button" class="linkbtn" data-consent-reopen>Cookie choice</button>
+      <button type="button" class="linkbtn" data-analytics-settings hidden>Cookie settings</button>
     </p>
   </div>
 </footer>
