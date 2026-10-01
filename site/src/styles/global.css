@@ -146,11 +146,17 @@ footer a { color: var(--fern); }
 footer .linkbtn { background: none; border: 0; padding: 0; font: inherit; color: var(--fern); text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
 footer .linkbtn:hover { color: var(--white); }
 
-/* the consent prompt */
-.consent { inset: 0; margin: auto; max-width: min(30rem, calc(100vw - 32px)); padding: 32px; background: var(--iron); color: var(--sage-60); border: 1px solid var(--circuit); border-radius: var(--r-window); }
-.consent::backdrop { background: rgba(0, 0, 0, 0.7); }
-.consent h2 { font-size: 24px; margin-bottom: 12px; }
-.consent p + p { margin-top: 10px; }
-.consent .consent-note { font-size: 14px; color: var(--fern); }
-.consent h2:focus { outline: none; }
-.consent-actions { display: flex; gap: 12px; justify-content: flex-end; margin-top: 22px; }
+/* the analytics notice: non-modal, hairline border, no shadow, no lime */
+.analytics-notice { position: fixed; z-index: 30; left: 20px; bottom: 20px; width: min(26rem, calc(100vw - 40px)); padding: 20px; display: flex; flex-direction: column; gap: 12px; background: var(--iron); color: var(--sage-60); border: 1px solid var(--circuit); border-radius: var(--r-window); }
+/* display: flex above beats the browser's rule for [hidden], so it is restated. */
+.analytics-notice[hidden] { display: none; }
+/* No outline rule of its own: the notice takes the site's focus ring (a keyboard reopen shows it, a mouse click does not). */
+.analytics-notice p { max-width: none; font-size: 15px; line-height: 1.55; }
+.analytics-notice .analytics-notice-status { color: var(--white); font-weight: 500; }
+.analytics-notice-actions { display: flex; gap: 12px; justify-content: flex-end; }
+.analytics-notice-actions .btn { min-height: 44px; padding: 10px 24px; min-width: 112px; text-align: center; }
+/* On a phone the two buttons split the row evenly, so they stay the same width as each other. */
+@media (max-width: 480px) {
+  .analytics-notice { left: 12px; bottom: 12px; width: calc(100vw - 24px); padding: 16px; }
+  .analytics-notice-actions { display: grid; grid-template-columns: 1fr 1fr; }
+}
