@@ -1,3 +1,5 @@
+using System.Text.Json;
+using Dbhq.Cpu6502.TestSupport;
 using Xunit;
 
 namespace Dbhq.Machines.Kim1.Tests;
@@ -130,6 +132,32 @@ public sealed class Kim1AcceptanceTests
         // PC recalls where the program stopped.
         kim.Keys("[PC]");
         Assert.Equal("020A 4C", kim.Display);
+    }
+
+    /// <summary>
+    /// The program the KIM-1's web page asks a visitor to type in, read from
+    /// the same file the page is built from, run step by step, with the
+    /// display the page promises checked after every step. The page and this
+    /// test cannot drift apart: change the file and both change.
+    /// </summary>
+    [Fact]
+    public void TheProgramOnTheMachinesWebPageRunsAsThePageSays()
+    {
+        using JsonDocument file = JsonDocument.Parse(File.ReadAllText(Path.Combine(RepoPaths.Root, "machines", "kim-1", "try-it.json")));
+        JsonElement[] steps = [.. file.RootElement.GetProperty("steps").EnumerateArray()];
+        Assert.NotEmpty(steps);
+
+        // Powered on and never reset, the board shows nothing.
+        var kim = new Kim1Session();
+        Assert.Equal("       ", kim.Display);
+
+        foreach (JsonElement step in steps)
+        {
+            string keys = step.GetProperty("keys").GetString()!;
+            string display = step.GetProperty("display").GetString()!;
+            kim.Keys(keys);
+            Assert.True(Kim1Session.Matches(display, kim.Display), $"after {keys}: the page promises \"{display}\", the display shows \"{kim.Display}\"");
+        }
     }
 
     /// <summary>

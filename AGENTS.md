@@ -14,6 +14,9 @@ then the NES. Built in public, with the journey written up at 6502.dbhq.uk.
 6502.slnx                   # the solution
 src/Dbhq.Cpu6502/           # the core: one library, no dependencies
 src/Dbhq.Machines.Kim1/     # the KIM-1: its 6530s, keypad, display and bus, on the core
+src/Dbhq.Machines.Kim1.Wasm/  # the KIM-1 as .NET WebAssembly, for its page on the site
+machines/                   # registry.json, and per machine its "try it" program, which the page shows and the acceptance test runs
+site/                       # 6502.dbhq.uk: the Astro site, its tests, and the scripts that build the machines into it
 tests/                      # the tests and the library they share, one project per machine
 bench/                      # the speed benchmarks (native, and the browser speed check), run locally, neither built nor run in CI
 tools/                      # scripts that make test data and check assumptions

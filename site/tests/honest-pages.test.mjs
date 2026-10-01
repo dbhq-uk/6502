@@ -3,6 +3,8 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
 import { pages, page, visibleText } from './helpers.mjs';
+import { loadRegistry } from '../src/lib/registry.mjs';
+import { runningSentence } from '../src/lib/machines.mjs';
 
 const styles = path.join(process.cwd(), 'src', 'styles');
 const read = (name) => fs.readFileSync(path.join(styles, name), 'utf8').replace(/\/\*[\s\S]*?\*\//g, '');
@@ -40,8 +42,9 @@ test('every generated image used as a background is captioned as an illustration
   }
 });
 
-test('the home page does not read as though a machine already runs', () => {
+test('the home page claims no more machines run than the registry says, and names those that do', () => {
   const text = visibleText(page('/').html);
+  assert.ok(text.includes(runningSentence(loadRegistry())), 'the home page does not say which machines run, from the registry');
   assert.ok(text.includes('A machine counts only once it runs in the browser and passes an automated test.'));
   assert.ok(!text.includes('Each runs in the browser'));
   assert.ok(!text.includes('One core, real machines'));
@@ -78,4 +81,12 @@ test('the family page does not say that a machine runs on the core', () => {
 
 test('no page asserts a test cadence the site cannot verify', () => {
   for (const p of pages()) assert.ok(!/on every push/i.test(visibleText(p.html)), `${p.url} claims tests run on every push`);
+});
+
+// The sentence is computed, so it is tested on made-up registries: none, one and several running.
+test('the running sentence is true for none, one and several machines', () => {
+  const m = (name, status) => ({ id: name.toLowerCase(), name, status });
+  assert.equal(runningSentence({ machines: [m('KIM-1', 'in-progress'), m('NES', 'planned')] }), 'None runs in the browser yet.');
+  assert.equal(runningSentence({ machines: [m('KIM-1', 'running'), m('NES', 'planned')] }), 'Running in the browser now: KIM-1.');
+  assert.equal(runningSentence({ machines: [m('KIM-1', 'running'), m('BBC Micro', 'running'), m('NES', 'running')] }), 'Running in the browser now: KIM-1, BBC Micro and NES.');
 });

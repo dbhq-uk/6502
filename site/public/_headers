@@ -26,6 +26,15 @@
 # opt-in version already sent, unchanged: moving to opt-out changed when the
 # origins are used, not which ones.
 #
+# script-src carries 'wasm-unsafe-eval' because the KIM-1's page runs the
+# machine as WebAssembly, and a browser compiles WebAssembly only when the CSP
+# allows it. It permits WebAssembly compilation and nothing else: it does not
+# allow eval() or new Function() for JavaScript, and the .wasm files are
+# fetched from this site under connect-src 'self'. It applies site-wide rather
+# than to /machines/kim-1/ alone because Pages joins the headers of every rule
+# a path matches, and a second CSP on that path would narrow the first, not
+# widen it.
+#
 # Two other relaxations, both narrow. style-src needs 'unsafe-inline' because
 # Astro inlines every stylesheet (build.inlineStylesheets: 'always'), which keeps
 # the first paint unblocked. img-src allows data: URIs for small inlined images,
@@ -35,7 +44,7 @@
 # covers it.
 /*
   Strict-Transport-Security: max-age=15552000; includeSubDomains
-  Content-Security-Policy: default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'none'; form-action 'none'; script-src 'self' https://www.googletagmanager.com; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data: https://www.googletagmanager.com https://www.google-analytics.com https://*.google-analytics.com; connect-src 'self' https://www.googletagmanager.com https://www.google-analytics.com https://*.google-analytics.com https://*.analytics.google.com; manifest-src 'self'; frame-src 'none'; upgrade-insecure-requests
+  Content-Security-Policy: default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'none'; form-action 'none'; script-src 'self' 'wasm-unsafe-eval' https://www.googletagmanager.com; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data: https://www.googletagmanager.com https://www.google-analytics.com https://*.google-analytics.com; connect-src 'self' https://www.googletagmanager.com https://www.google-analytics.com https://*.google-analytics.com https://*.analytics.google.com; manifest-src 'self'; frame-src 'none'; upgrade-insecure-requests
   X-Content-Type-Options: nosniff
   Referrer-Policy: strict-origin-when-cross-origin
   X-Frame-Options: DENY

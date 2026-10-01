@@ -1,0 +1,40 @@
+{
+  "about": "The program a visitor types into the KIM-1 on its page at 6502.dbhq.uk. The page renders these steps, Kim1AcceptanceTests runs them on the machine and checks every display, and the site's browser check clicks them through the page's own keypad. Keys are written as the User Manual writes them: a run of hex digits is one key per character, and every other key is in brackets. In a display, x is any lit hex digit and a space is a dark digit.",
+  "steps": [
+    {
+      "keys": "[RS]",
+      "display": "xxxx xx",
+      "says": "Reset. The monitor starts and shows an address and the byte stored there."
+    },
+    {
+      "keys": "[AD] 17FA [DA] 00 [+] 1C",
+      "display": "17FB 1C",
+      "says": "Point the NMI vector at the monitor, at $1C00, so that ST can stop a program. The manual's section 4.6 asks for this before ST is used."
+    },
+    {
+      "keys": "[AD] 0200 [DA] AD [+] 10 [+] 02 [+] 18 [+] 6D [+] 11 [+] 02 [+] 8D [+] 12 [+] 02 [+] 4C [+] 0A [+] 02",
+      "display": "020C 02",
+      "says": "Enter the program at $0200: LDA $0210, CLC, ADC $0211, STA $0212, then JMP $020A, which loops for ever."
+    },
+    {
+      "keys": "[AD] 0210 [DA] 27 [+] 15",
+      "display": "0211 15",
+      "says": "Enter the two numbers it adds, $27 at $0210 and $15 at $0211."
+    },
+    {
+      "keys": "[AD] 0200 [GO]",
+      "display": "       ",
+      "says": "Run it from $0200. A running program does not scan the display, so the digits go dark."
+    },
+    {
+      "keys": "[ST]",
+      "display": "020A 4C",
+      "says": "Stop it. The monitor shows where the program stopped: the JMP at $020A."
+    },
+    {
+      "keys": "[AD] 0212",
+      "display": "0212 3C",
+      "says": "Read the result at $0212: $27 plus $15 is $3C."
+    }
+  ]
+}

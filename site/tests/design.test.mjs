@@ -90,6 +90,8 @@ const ON = {
   '.hero .lede': ['void'],
   '.figure-caption': ['void'],
   '.card b': ['card'],
+  '.card h3 a': ['card'],
+  '.card h3 a:hover': ['card'],
   '.chip': ['void', 'card'],
   '.chip.on': ['white'],
   '.note': ['void'],
@@ -115,6 +117,12 @@ const ON = {
   'footer .linkbtn:hover': ['void'],
   '.analytics-notice': ['iron'],
   '.analytics-notice .analytics-notice-status': ['iron'],
+  // The KIM-1's page. A key sits on veil, on card when hovered, on the black
+  // canvas while pressed, and on iron while it is disabled before the machine loads.
+  '.kim1 .key': ['veil', 'card', 'void', 'iron'],
+  '.kim1-status': ['iron'],
+  '.kim1-speed': ['iron'],
+  '.steps kbd': ['iron'],
 };
 
 test('every text colour rule is placed on a surface, and reaches AA on each one it is set on', () => {

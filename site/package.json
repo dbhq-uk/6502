@@ -3,7 +3,9 @@
   "type": "module",
   "version": "0.1.0",
   "private": true,
-  "engines": { "node": ">=22.22" },
+  "engines": {
+    "node": ">=22.22"
+  },
   "scripts": {
     "dev": "astro dev --host \"${SITE_HOST:-127.0.0.1}\" --port 4333",
     "build": "astro build",
@@ -11,7 +13,9 @@
     "test": "node --test tests/*.test.mjs",
     "check": "npm test",
     "preview": "astro preview --host \"${SITE_HOST:-127.0.0.1}\" --port 4333",
-    "results": "node scripts/make-results.mjs"
+    "results": "node scripts/make-results.mjs",
+    "machines": "node scripts/build-machines.mjs",
+    "browser-check": "node scripts/browser-check.mjs"
   },
   "dependencies": {
     "@astrojs/markdown-remark": "^7.3.1",
@@ -23,6 +27,7 @@
   },
   "devDependencies": {
     "html-validate": "^11.16.1",
+    "playwright-core": "1.63.0",
     "wrangler": "4.145.0"
   }
 }

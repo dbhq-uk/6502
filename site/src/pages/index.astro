@@ -7,6 +7,7 @@ import hero from '../assets/imagery/hero-die.webp';
 import { fig, results, registry, measurements } from '../lib/data.mjs';
 import { fmt, fmt1, REFERENCE_MHZ, targetVerdict } from '../lib/figures.mjs';
 import { newestFirst, shortDate } from '../lib/site.mjs';
+import { machineHref, runningSentence } from '../lib/machines.mjs';
 
 const entries = (await getCollection('journal'))
   .sort(newestFirst)
@@ -70,13 +71,13 @@ const suites = Object.entries(results.suites).sort(([, a], [, b]) => b.passed - 
       <div class="head">
         <p class="eyebrow">Machines</p>
         <h2>The machines this core is for</h2>
-        <p>The first three, and the whole family in the table.</p>
+        <p>The first three, and the whole family in the table. {runningSentence(registry)}</p>
       </div>
       <div class="grid3">
         {first.map((m) => (
           <div class="card">
             <span class={`chip${m.status === 'running' ? ' on' : ''}`}>{m.status === 'running' ? 'Running' : m.status === 'in-progress' ? 'In progress' : 'Planned'}</span>
-            <h3>{m.name}</h3>
+            <h3>{machineHref(m) ? <a href={machineHref(m)}>{m.name}</a> : m.name}</h3>
             <p>{m.notes ?? `${m.year}, ${m.cpu}`}</p>
           </div>
         ))}

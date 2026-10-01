@@ -8,7 +8,7 @@
       "category": "single-board",
       "cpu": "6502, 1 MHz",
       "core": "nmos",
-      "status": "in-progress",
+      "status": "running",
       "priority": 1,
       "acceptance": "Kim1AcceptanceTests",
       "rights": "The monitor ROM is MOS Technology's, copyright 1975, and MOS was bought by Commodore in 1976; who holds it now was not established, and no licence or permission from any holder was found. Our copy is Hans Otten's dump of real 6530-002 and 6530-003 chips, fetched from the Internet Archive and checked by SHA-256, never committed.",

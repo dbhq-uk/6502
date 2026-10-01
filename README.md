@@ -20,9 +20,10 @@ and the NES. The design is in
 
 The core is done, in all five variants, and proven against every check the
 design lists. `dotnet test` is the proof; the numbers live in its output.
-The KIM-1, the first machine, runs its original monitor ROM and passes its
-acceptance test; its page in the browser is next, and until then it is shown
-as in progress. The programme's design is in
+The KIM-1, the first machine, runs its original monitor ROM, passes its
+acceptance test, and runs in the browser at
+[6502.dbhq.uk/machines/kim-1/](https://6502.dbhq.uk/machines/kim-1/), so it
+counts as implemented. The programme's design is in
 [`docs/superpowers/specs/2026-09-30-machines-and-site-design.md`](docs/superpowers/specs/2026-09-30-machines-and-site-design.md).
 
 ## What "cycle-accurate" means here

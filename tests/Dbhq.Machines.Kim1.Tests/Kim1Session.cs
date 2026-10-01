@@ -9,11 +9,12 @@ namespace Dbhq.Machines.Kim1.Tests;
 public sealed class Kim1Session
 {
     /// <summary>How long a key is held, and then left up: 40 ms each at 1 MHz.</summary>
-    public const long HoldCycles = 40_000;
+    public const long HoldCycles = Kim1Keystrokes.HoldCycles;
 
     public Kim1Session()
     {
         Machine = new Kim1Machine(Rom002, Rom003);
+        Keystrokes = new Kim1Keystrokes(Machine);
     }
 
     /// <summary>The 6530-002's 1 KB, pinned and hash-checked, never committed.</summary>
@@ -23,6 +24,8 @@ public sealed class Kim1Session
     public static byte[] Rom003 => File.ReadAllBytes(PinnedFiles.Fetch(Pins.Kim1Rom003Url, Path.Combine("kim-1", "6530-003.bin"), PinnedFiles.Sha256(Pins.Kim1Rom003Sha256)));
 
     public Kim1Machine Machine { get; }
+
+    public Kim1Keystrokes Keystrokes { get; }
 
     /// <summary>The display as the User Manual prints it: four address digits, a space, two data digits.</summary>
     public string Display
@@ -44,60 +47,30 @@ public sealed class Kim1Session
 
     /// <summary>
     /// Presses keys in turn, written as the User Manual writes them: [AD],
-    /// [DA], [+], [GO] and [PC] in brackets, and a run of hex digits one key
-    /// per character. "[AD] 0002 [DA] 18" is eight presses. The brackets are
-    /// needed because AD and DA are also bytes: $AD is LDA absolute.
+    /// [DA], [+], [GO], [PC], [ST] and [RS] in brackets, and a run of hex
+    /// digits one key per character. "[AD] 0002 [DA] 18" is eight presses.
+    /// They go through <see cref="Kim1Keystrokes"/>, the same player the
+    /// browser page uses: each key held 40 ms, then left up 40 ms.
     /// </summary>
     public Kim1Session Keys(string keys)
     {
-        foreach (string word in keys.Split(' ', StringSplitOptions.RemoveEmptyEntries))
-        {
-            switch (word)
-            {
-                case "[AD]":
-                    Press(Kim1Key.Address);
-                    break;
-                case "[DA]":
-                    Press(Kim1Key.Data);
-                    break;
-                case "[+]":
-                    Press(Kim1Key.Plus);
-                    break;
-                case "[GO]":
-                    Press(Kim1Key.Go);
-                    break;
-                case "[PC]":
-                    Press(Kim1Key.ProgramCounter);
-                    break;
-                default:
-                    foreach (char c in word)
-                    {
-                        Press((Kim1Key)Convert.ToInt32(c.ToString(), 16));
-                    }
-
-                    break;
-            }
-        }
-
+        Keystrokes.Type(keys);
+        Keystrokes.RunUntilIdle();
         return this;
     }
 
-    public void Press(Kim1Key key)
+    public void Press(Kim1Key key) => Keys(key switch
     {
-        Machine.Keypad.Press(key);
-        Machine.Run(HoldCycles);
-        Machine.Keypad.Release(key);
-        Machine.Run(HoldCycles);
-    }
+        Kim1Key.Address => "[AD]",
+        Kim1Key.Data => "[DA]",
+        Kim1Key.Plus => "[+]",
+        Kim1Key.Go => "[GO]",
+        Kim1Key.ProgramCounter => "[PC]",
+        _ => ((int)key).ToString("X"),
+    });
 
     /// <summary>Holds ST for 40 ms and lets go, as a finger does.</summary>
-    public void Stop()
-    {
-        Machine.StopKey = true;
-        Machine.Run(HoldCycles);
-        Machine.StopKey = false;
-        Machine.Run(HoldCycles);
-    }
+    public void Stop() => Keys("[ST]");
 
     /// <summary>
     /// True when <paramref name="shown"/> matches <paramref name="expected"/>.

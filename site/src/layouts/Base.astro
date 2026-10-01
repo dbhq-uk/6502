@@ -15,8 +15,10 @@ interface Props {
   description: string;
   /** A page that is not a page (the 404): no canonical address and a noindex, because /404/ does not exist. */
   noindex?: boolean;
+  /** Same-origin module scripts this page needs beyond the three every page loads, for example a machine's driver. */
+  scripts?: string[];
 }
-const { title, description, noindex = false } = Astro.props;
+const { title, description, noindex = false, scripts = [] } = Astro.props;
 const path = Astro.url.pathname;
 const canonical = new URL(path, SITE.url).href;
 const fullTitle = path === '/' ? title : `${title} | 6502`;
@@ -47,6 +49,7 @@ const fullTitle = path === '/' ? title : `${title} | 6502`;
     <script is:inline type="module" src="/analytics.js"></script>
     <script is:inline type="module" src="/consent.js"></script>
     <script is:inline type="module" src="/machines-table.js"></script>
+    {scripts.map((src) => <script is:inline type="module" src={src}></script>)}
   </head>
   <body>
     <a class="skip" href="#main">Skip to content</a>

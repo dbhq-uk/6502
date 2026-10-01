@@ -454,7 +454,10 @@ test('the shipped scripts name no other project, property or private path', () =
 
 test('the CSP has no unsafe-inline for scripts and allows exactly the Google Analytics origins', () => {
   const GTM = 'https://www.googletagmanager.com';
-  assert.deepEqual(directives.get('script-src'), ["'self'", GTM]);
+  // 'wasm-unsafe-eval' lets the KIM-1's page compile its WebAssembly, and nothing else: no eval of JavaScript.
+  assert.deepEqual(directives.get('script-src'), ["'self'", "'wasm-unsafe-eval'", GTM]);
+  assert.ok(!directives.get('script-src').includes("'unsafe-eval'"), 'script-src allows eval');
+  assert.ok(!directives.get('script-src').includes("'unsafe-inline'"), 'script-src allows inline script');
   assert.deepEqual(directives.get('img-src'), ["'self'", 'data:', GTM, 'https://www.google-analytics.com', 'https://*.google-analytics.com']);
   assert.deepEqual(directives.get('connect-src'), ["'self'", GTM, 'https://www.google-analytics.com', 'https://*.google-analytics.com', 'https://*.analytics.google.com']);
   assert.deepEqual([...new Set(csp.match(/https:\/\/[^\s;]+/g))].sort(), ['https://*.analytics.google.com', 'https://*.google-analytics.com', GTM, 'https://www.google-analytics.com'].sort());
@@ -470,6 +473,7 @@ test('the headers comment says the site runs analytics by default and names both
   assert.match(comment, /GA RUNS BY DEFAULT/);
   assert.match(comment, /style-src needs 'unsafe-inline'/);
   assert.match(comment, /img-src allows data:/);
+  assert.match(comment, /'wasm-unsafe-eval' because the KIM-1's page runs the\n# machine as WebAssembly/);
   assert.doesNotMatch(comment, /CONSENT-GATED|nothing loads until a visitor accepts/i);
   assert.match(csp, /img-src [^;]*\bdata:/);
 });
