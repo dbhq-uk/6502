@@ -47,6 +47,11 @@ async function rom({ file, url, sha256: want }) {
   return bytes;
 }
 
+// The site's libraries find the repository from the working directory, as
+// every npm script and CI step runs in site/. Run from anywhere else, they
+// would look for Pins.cs in the wrong place.
+if (process.cwd() !== site) throw new Error(`run this from ${path.relative(process.cwd(), site) || '.'}: cd site && node scripts/build-machines.mjs`);
+
 // Fetch first: a ROM that fails its hash should stop the build before the
 // slow publish, not after it.
 const roms = await Promise.all(kim1Roms().map(async (r) => ({ ...r, bytes: await rom(r) })));

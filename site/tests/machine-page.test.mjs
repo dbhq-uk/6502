@@ -139,7 +139,7 @@ test('the page says whose ROM it runs, in the registry\'s own words, and where t
 test('both workflows build the machines before the site, with the wasm-tools workload at a pinned version', () => {
   for (const [name, text] of [['validate.yml', validate], ['deploy-site.yml', deploy]]) {
     assert.match(text, /dotnet workload install wasm-tools --version \d+\.\d+\.\d+/, `${name} does not pin the wasm-tools workload`);
-    assert.match(text, /node site\/scripts\/build-machines\.mjs/, `${name} does not build the machines`);
+    assert.match(text, /working-directory: site\n\s+run: node scripts\/build-machines\.mjs/, `${name} does not build the machines from site/`);
     assert.ok(text.indexOf('build-machines.mjs') < text.indexOf('npm test'), `${name} builds the machines after the site`);
   }
 });

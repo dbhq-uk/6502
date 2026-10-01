@@ -292,6 +292,12 @@ six of them acceptance tests. The monitor really does miss keys without it.
   does not.
 - **The family document said the KIM-1 has "a 24-key keypad".** The manual says
   23 keys and one slide switch. Corrected while placing the keys.
+- **The first CI run of the machines job failed in a second.** It ran
+  `node site/scripts/build-machines.mjs` from the repository root, and the
+  site's libraries find the repository from the working directory, which is
+  `site/` for every npm script: it looked for `Pins.cs` one folder too high.
+  Locally I had always run it from `site/`. The step now runs in `site/`, and
+  the script refuses to start anywhere else, with a message saying where to run it.
 - **`dotnet test` at the root does not build the WebAssembly project.** It builds
   test projects and what they reference, so the host is compiled only by its
   publish, in the machines job, where warnings are errors as everywhere else.
