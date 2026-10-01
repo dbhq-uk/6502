@@ -29,6 +29,14 @@ paper, ink, an amber phosphor, a Basedash-style serif look, and this.
   on black, under the 4.5 that AA asks of small text. It is lightened to
   `#737d72` (4.91). A test computes every text pair from the real tokens, and for text on the
   traces texture it measures the brightest pixel of the image under its overlay.
+- **The analytics notice is a small panel at the foot of the page, not a modal.**
+  The behaviour is the estate's: analytics on by default, a notice, a simple
+  opt-out. Only the look is this site's: an iron surface, a hairline border, no
+  shadow, no backdrop and no lime, because the lime is rationed and a cookie
+  notice should not spend it. OK and Opt out are the same size and the same
+  button, side by side, with Opt out first. Its two text colours are in the
+  contrast table in `tests/design.test.mjs`. It replaced a centred modal dialog
+  on 1 October 2026, the day after launch, to match every other DBHQ site.
 
 ## The imagery
 
