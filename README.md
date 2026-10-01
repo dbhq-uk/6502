@@ -11,14 +11,10 @@ in this repository, and the journey is written up at
 
 ## Where this is going
 
-The end goal is a verified port of *Mega Man 2*, checked against the original
-by running both side by side. That needs an NES accurate enough to trust, which
-needs a cycle-accurate 6502 under it. The design is in
+As many 6502-family machines as possible, each one running in the browser and
+proven by an automated test. The core comes first, then the KIM-1, the BBC Micro
+and the NES. The design is in
 [`docs/superpowers/specs/2026-09-29-6502-design.md`](docs/superpowers/specs/2026-09-29-6502-design.md).
-
-*Mega Man* is a trademark of Capcom Co., Ltd. This project is not affiliated
-with, endorsed by or sponsored by Capcom. Nothing of Capcom's is in this
-repository.
 
 ## Where it stands
 

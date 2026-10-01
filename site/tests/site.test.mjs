@@ -3,7 +3,6 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
 import { pages, visibleText, DIST } from './helpers.mjs';
-import { CAPCOM } from '../src/lib/site.mjs';
 
 // Rules that hold for every page the site builds, whichever pages exist yet.
 const all = pages();
@@ -30,8 +29,9 @@ test('every internal link and asset resolves to a built file', () => {
   assert.deepEqual(missing, []);
 });
 
-test('every page carries the Capcom non-affiliation line word for word', () => {
-  for (const p of all) assert.ok(visibleText(p.html).includes(CAPCOM), `${p.url} is missing the Capcom line`);
+test('no page names a commercial game as the goal, or carries a non-affiliation line', () => {
+  assert.ok(all.length > 0);
+  for (const p of all) assert.ok(!/mega ?man|capcom/i.test(visibleText(p.html)), `${p.url} still mentions the dropped port goal`);
 });
 
 // The patterns are built from character codes. Writing a dash or a project name

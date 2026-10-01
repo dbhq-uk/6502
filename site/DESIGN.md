@@ -77,6 +77,6 @@ Not used.
 `npm test` builds the site and then checks it. The checks that guard this design
 are in `tests/design.test.mjs` (contrast, the lime, shadows, raw colours) and
 `tests/site.test.mjs` (captions and alt text for every file in
-`src/assets/imagery/`, the Capcom line, the dash and British English rules) and
+`src/assets/imagery/`, the dash and British English rules) and
 `tests/honest-pages.test.mjs` (the backgrounds' captions). The rest of the suite is about the figures and the
 content.
