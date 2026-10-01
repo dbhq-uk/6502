@@ -1,24 +1,79 @@
 ---
 import Base from '../../layouts/Base.astro';
+import Kim1Panel from '../../components/Kim1Panel.astro';
 import { registry, results } from '../../lib/data.mjs';
 import { fmt } from '../../lib/figures.mjs';
-import { acceptanceSummary, runningMachines } from '../../lib/machines.mjs';
+import { acceptanceSummary, loadTryIt, parseKeys, runningMachines } from '../../lib/machines.mjs';
+import { kim1Roms } from '../../lib/pins.mjs';
 
-// One page for each machine that runs. None does yet: a machine gets its page,
-// and its emulator, when its own spec is built.
+// One page for each machine that runs, and only those. "Running" means it runs
+// in the browser, so a running machine with no panel to run it in stops the
+// build rather than publishing a page that cannot do what the status says.
 export function getStaticPaths() {
   return runningMachines(registry).map((m) => ({ params: { id: m.id }, props: { machine: m } }));
 }
 const { machine } = Astro.props;
+const Panel = { 'kim-1': Kim1Panel }[machine.id];
+if (!Panel) throw new Error(`machine ${machine.id} is running but has no panel in src/pages/machines/[id].astro, so its page could not run it`);
+const scripts = { 'kim-1': ['/kim-1.js'] }[machine.id] ?? [];
+const base = `/machines/${machine.id}/`;
+const clockMhz = Number(/([\d.]+) MHz/.exec(machine.cpu ?? '')?.[1]);
+if (!(clockMhz > 0)) throw new Error(`machine ${machine.id}: its cpu field names no clock in MHz, and the page runs it at that clock`);
+const program = loadTryIt(machine.id);
+const roms = machine.id === 'kim-1' ? kim1Roms() : [];
 ---
 
-<Base title={machine.name} description={`${machine.name}, running on the 6502 core in the browser.`}>
-  <section>
+<Base title={machine.name} description={`${machine.name}, running on the 6502 core in the browser, with its own ROM. Type a program in on its keypad and run it.`} scripts={scripts}>
+  <section class="machine-head">
     <div class="wrap narrow">
       <p class="meta"><a href="/machines/">All machines</a></p>
       <h1>{machine.name}</h1>
-      <p>{machine.year}, {machine.cpu}.</p>
+      <p>{machine.year}, {machine.maker}, {machine.cpu}.</p>
+      {machine.notes && <p>{machine.notes}</p>}
       <p>{acceptanceSummary(machine, results, fmt)}</p>
+    </div>
+  </section>
+
+  <section class="machine-run" aria-labelledby="run">
+    <div class="wrap narrow">
+      <h2 id="run">The machine</h2>
+      <Panel base={base} clockMhz={clockMhz} />
+    </div>
+  </section>
+
+  {program && (
+    <section aria-labelledby="try">
+      <div class="wrap narrow">
+        <h2 id="try">Try it</h2>
+        <div class="prose">
+        <p>Type these keys in order, by clicking them or with the keyboard. After each line the digits should show what is written beside it: x is any digit, and blank means dark. This is the program the acceptance test types in, from the same file, so the two cannot disagree.</p>
+        <ol class="steps">
+          {program.steps.map((step) => (
+            <li>
+              <p class="keys">{parseKeys(step.keys).map((k) => <kbd>{k}</kbd>)}</p>
+              <p>{step.says}</p>
+              <p class="shows">Shows <code>{step.display.trim() === '' ? 'nothing: dark' : step.display}</code></p>
+            </li>
+          ))}
+        </ol>
+        <p>With focus on the machine, the keys 0 to 9 and A to F on a keyboard press the same keys on the keypad.</p>
+        </div>
+      </div>
+    </section>
+  )}
+
+  <section aria-labelledby="rom">
+    <div class="wrap narrow">
+      <h2 id="rom">Whose ROM this is</h2>
+      <div class="prose">
+      <p>{machine.rights}</p>
+      {roms.length > 0 && (
+        <ul class="roms">
+          {roms.map((r) => <li>{r.chip}: <a href={r.url}>the pinned copy</a>, SHA-256 <code>{r.sha256}</code></li>)}
+        </ul>
+      )}
+      <p>The ROM is not in the repository. It is fetched from that address when the site is built, checked against its hash, and served from this site beside the emulator.</p>
+      </div>
     </div>
   </section>
 </Base>

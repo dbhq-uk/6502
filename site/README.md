@@ -8,8 +8,10 @@ Cloudflare Pages.
 cd site
 npm ci
 npm run results     # runs the whole test suite and writes src/data/results.json
+npm run machines    # builds the machines' WebAssembly and fetches their ROMs into public/machines/
 npm run dev         # http://127.0.0.1:4333/
 npm test            # builds the site, then checks it
+npm run browser-check   # runs the KIM-1 page in headless Chrome, after npm test has built dist/
 ```
 
 Needs Node 22.22 or later (`engines` in `package.json`). `dev` and `preview` serve
@@ -20,6 +22,15 @@ network, and no private address is committed.
 `npm run results` takes a few minutes and downloads about 5 GB of test data the
 first time. `src/data/results.json` is generated and never committed. CI
 produces it from the same test run that gates the merge.
+
+`npm run machines` needs the .NET 10 SDK with the `wasm-tools` workload
+(`dotnet workload install wasm-tools`), because the machines are compiled ahead
+of time; it takes a few minutes. It writes `public/machines/`, which is
+git-ignored: the published WebAssembly and each machine's ROM, fetched from the
+pinned URL in `tests/Dbhq.Cpu6502.TestSupport/Pins.cs` and checked against its
+SHA-256. `npm test` fails if they are missing. `npm run browser-check` needs
+Google Chrome (`CHROME_PATH` to use another); it serves `dist/` on `127.0.0.1`
+with the site's own CSP and closes the server when it is done.
 
 ## Where everything comes from
 
@@ -33,6 +44,8 @@ Nothing on the site is typed twice. The repository is the source.
 | The machines and chips tables, and the count | `machines/registry.json` |
 | Tests passing, variants, suites | `src/data/results.json`, made from the test run |
 | The speed figures | `src/data/measurements.json`, made by `bench/collect-measurements.mjs` and committed as a dated record |
+| A running machine's page | `src/pages/machines/[id].astro` with the machine's panel (the KIM-1's is `src/components/Kim1Panel.astro`, driven by `public/kim-1.js`), its "try it" program from `machines/<id>/try-it.json`, which its acceptance test also runs, and its rights from the registry |
+| A machine's WebAssembly and ROM | `public/machines/<id>/`, made by `scripts/build-machines.mjs` and never committed |
 
 **A machine counts as implemented only when it runs in the browser and passes an
 automated test in CI.** In the registry that is `status: "running"` with an
@@ -46,7 +59,9 @@ if the two disagree. It starts as `planned`. When its own spec is built and its
 acceptance test passes, set `status` to `running` and `acceptance` to the test
 class. Its page at `/machines/<id>/` is generated from the registry by
 `src/pages/machines/[id].astro`, and the machines table then links to it; there is
-no page to write. Its emulator is a separate piece of work.
+no page to write for the text. What the page cannot have without work is the
+machine itself: a running machine needs a panel in `[id].astro` that runs it,
+and the build fails without one, because "running" means it runs in the browser.
 
 ## The checks
 
@@ -59,8 +74,9 @@ no page to write. Its emulator is a separate piece of work.
 | `measurements.test.mjs` | The benchmark output is parsed correctly, and a machine is called physical only when `systemd-detect-virt` ran and said `none` (a missing tool is "a machine of unknown type") |
 | `figures.test.mjs` | The figures are computed from the registry, the results and the measurements, a missing suite (or no Harte suite) stops the build instead of publishing 0, and the target verdict never rounds up |
 | `figures-on-pages.test.mjs` | Every number on the home and status pages is a generated figure, the pages say honestly whether the speed target is met and that the figures are one collection of runs, and the results file names a full commit |
-| `honest-pages.test.mjs` | The pages claim nothing they cannot back up: no machine appears to run, no page says the reference data came from a real chip, no test cadence is asserted, every generated image used as a background is captioned |
-| `machines.test.mjs` | The machines and chips tables match the registry; only a running machine is linked (rules tested on a made-up registry, since none runs yet); the filters are hidden until the script runs; the sort comparison puts blanks last; the family page renders the repository document |
+| `honest-pages.test.mjs` | The pages claim nothing they cannot back up: the home page names exactly the machines that run, from the registry, no page says the reference data came from a real chip, no test cadence is asserted, every generated image used as a background is captioned |
+| `machines.test.mjs` | The machines and chips tables match the registry; only a running machine is linked (rules tested on a made-up registry as well as the real one); the filters are hidden until the script runs; the sort comparison puts blanks last; the family page renders the repository document |
+| `machine-page.test.mjs` | The KIM-1's page, built against the real registry: it is linked, its WebAssembly and both ROM halves were built in and the ROM matches its pins, the keypad has every key once in the board's layout, it degrades without JavaScript, the digits have a polite live summary, the program on the page is the acceptance test's own, it states the registry's rights text and the pinned sources, and both workflows build the machine before the site |
 | `journal.test.mjs` | Every journal entry has its front matter, is built once with its own title, and is listed newest first; a link to another entry is a site link and a link to any other file goes to GitHub |
 | `site.test.mjs` | Every page has a title, description and canonical link (the 404 has none and is `noindex`), no mention of the dropped port goal, one `h1` and its landmarks; no dashes or forbidden names; British English; no inline script; every internal link resolves; every image in `src/assets/imagery/` is captioned and alt-texted as an illustration; the lime fills one element and its other uses are named |
 | `analytics.test.mjs` | `analytics.js` and `consent.js` are run in a sandbox with a fake browser: GA4 uses the estate's one ID, is analytics-only, loads only on the live host and for no likely bot, is never loaded for a visitor who opted out, and an old refusal is carried over; the notice shows once, Cookie settings reopens it, and OK and Opt out are the same weight; the CSP allows only what it needs |

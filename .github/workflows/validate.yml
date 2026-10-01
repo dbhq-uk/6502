@@ -39,8 +39,12 @@ jobs:
         with:
           path: .testdata
           key: testdata-${{ hashFiles('tests/Dbhq.Cpu6502.Tests/Harte/harte.manifest', 'tests/Dbhq.Cpu6502.TestSupport/Pins.cs') }}
+      # The trx logger is given no file name on purpose. With a fixed name,
+      # every test project writes the same file and the last one to finish
+      # overwrites the others, so a whole project's suites vanish from the
+      # site's figures. Left to name its own files, it writes one per project.
       - name: Test
-        run: dotnet test --configuration Release --logger "console;verbosity=normal" --logger "trx;LogFileName=results.trx" --results-directory TestResults
+        run: dotnet test --configuration Release --logger "console;verbosity=normal" --logger trx --results-directory TestResults
       # The site reads its figures from the test results, so the results become
       # a file here and the site job below picks it up. It is never committed.
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
@@ -54,10 +58,53 @@ jobs:
           path: site/src/data/results.json
           if-no-files-found: error
 
+  # The machines' browser builds, alongside the tests: the KIM-1 as .NET
+  # WebAssembly, compiled ahead of time, and its monitor ROM, fetched from the
+  # pin in Pins.cs and hash-checked. The site job below puts them where the
+  # Astro build copies them into dist. Nothing here is committed.
+  machines:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      # The build is a pure function of these inputs, so an unchanged machine
+      # is restored rather than compiled again: AOT takes minutes. The workload
+      # version is in the key, so moving the pin rebuilds.
+      - name: Cache the machines' browser builds
+        id: cache
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
+        with:
+          path: site/public/machines
+          key: machines-sdk-10.0.400-wasm-tools-10.0.401-${{ hashFiles('src/**', 'Directory.Build.props', 'tests/Dbhq.Cpu6502.TestSupport/Pins.cs', 'site/scripts/build-machines.mjs', 'site/src/lib/pins.mjs') }}
+      # The SDK is pinned here, not left at 10.0.x, because a workload version
+      # belongs to one SDK feature band: 10.0.401 is a 10.0.400 band set.
+      - if: steps.cache.outputs.cache-hit != 'true'
+        uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6
+        with:
+          dotnet-version: '10.0.400'
+      - if: steps.cache.outputs.cache-hit != 'true'
+        name: The wasm-tools workload, pinned
+        run: dotnet workload install wasm-tools --version 10.0.401
+      - if: steps.cache.outputs.cache-hit != 'true'
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: '22.22'
+      - if: steps.cache.outputs.cache-hit != 'true'
+        name: Build the machines and fetch their ROMs
+        working-directory: site
+        run: node scripts/build-machines.mjs
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: machines
+          path: site/public/machines
+          if-no-files-found: error
+
   # The site's own checks: the figures trace to the results, the registry agrees
   # with the family document, and every rule the site makes about itself holds.
   site:
-    needs: test
+    needs: [test, machines]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -72,6 +119,10 @@ jobs:
         with:
           name: results
           path: site/src/data
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          name: machines
+          path: site/public/machines
       - name: Install
         working-directory: site
         run: npm ci
@@ -87,10 +138,16 @@ jobs:
           PASS=$(count pass); FAILED=$(count fail)
           echo "pass=${PASS:-unread} fail=${FAILED:-unread}"
           [ "${FAILED:-1}" = "0" ]
-          # 140 tests as at 1 Oct 2026. Adding tests is expected; losing them is
+          # 156 tests as at 1 Oct 2026. Adding tests is expected; losing them is
           # the failure this floor catches. Raise the number when the suite grows,
           # here and in the same step of deploy-site.yml, which must hold the same number.
-          [ "${PASS:-0}" -ge 140 ]
+          [ "${PASS:-0}" -ge 156 ]
+      # The KIM-1 page in a real browser: the built site served on 127.0.0.1
+      # with its own CSP, the try-it program clicked in through the page's own
+      # keypad, and the digits read back. The runner image ships Google Chrome.
+      - name: The KIM-1 runs in a browser
+        working-directory: site
+        run: node scripts/browser-check.mjs
 
   dashes:
     runs-on: ubuntu-latest

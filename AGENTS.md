@@ -13,7 +13,11 @@ then the NES. Built in public, with the journey written up at 6502.dbhq.uk.
 ```
 6502.slnx                   # the solution
 src/Dbhq.Cpu6502/           # the core: one library, no dependencies
-tests/                      # the tests and the library they share
+src/Dbhq.Machines.Kim1/     # the KIM-1: its 6530s, keypad, display and bus, on the core
+src/Dbhq.Machines.Kim1.Wasm/  # the KIM-1 as .NET WebAssembly, for its page on the site
+machines/                   # registry.json, and per machine its "try it" program, which the page shows and the acceptance test runs
+site/                       # 6502.dbhq.uk: the Astro site, its tests, and the scripts that build the machines into it
+tests/                      # the tests and the library they share, one project per machine
 bench/                      # the speed benchmarks (native, and the browser speed check), run locally, neither built nor run in CI
 tools/                      # scripts that make test data and check assumptions
   Dbhq.Cpu6502.ChipTrace/   # records the core's bus cycles for the site's chip page
@@ -45,8 +49,15 @@ third-party test program. Tests download what they need from a pinned commit
 and check it against a recorded hash. Some of it is GPL and this repository is
 MIT.
 
-**4. No game or commercial software is committed or served.** The site bundles
-homebrew and freely licensed software only. Anything else is load-your-own.
+**4. A machine's system ROM is used when its rights are documented.** Dan, 1 October 2026:
+"if it's documented we do it", for every machine. The documentation is the
+machine's `rights` field in `machines/registry.json` and a section in its
+journal entry: who holds the ROM, where our copy comes from (a pinned URL and a
+sha256), and what is known about permission, including when nothing could be
+found. The ROM is fetched at test and build time from that pinned source and
+checked against the hash, not committed. **Commercial games and application
+software are still not bundled; they are load-your-own.** The site says plainly,
+on each machine's page, whose ROM it runs.
 
 **5. No figure is typed by hand.** A pass count, a percentage or a speed that
 describes the project as it stands comes from test output. A number that was

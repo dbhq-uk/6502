@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="18.10.1" />
+    <PackageReference Include="xunit" Version="2.9.3" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="4.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../../src/Dbhq.Cpu6502/Dbhq.Cpu6502.csproj" />
+    <ProjectReference Include="../../src/Dbhq.Machines.Kim1/Dbhq.Machines.Kim1.csproj" />
+    <ProjectReference Include="../Dbhq.Cpu6502.TestSupport/Dbhq.Cpu6502.TestSupport.csproj" />
+  </ItemGroup>
+</Project>

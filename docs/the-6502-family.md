@@ -101,9 +101,10 @@ different regions, the earliest is given.
 
 The KIM-1 was MOS Technology's own board, sold to show engineers the 6502:
 1 KB of RAM, two 6530 chips (each a ROM, a little RAM, two I/O ports and a
-timer), a 24-key keypad and six seven-segment LED digits, for $245. *Microchess*
-by Peter Jennings, sold for it, is probably the first game for a microcomputer
-to be sold commercially. It is the first machine this project builds.
+timer), a keypad of 23 keys and a slide switch, and six seven-segment LED
+digits, for $245. *Microchess* by Peter Jennings, sold for it, is probably the
+first game for a microcomputer to be sold commercially. It is the first machine
+this project builds.
 
 ### Apple
 

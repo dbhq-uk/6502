@@ -38,6 +38,33 @@ paper, ink, an amber phosphor, a Basedash-style serif look, and this.
   contrast table in `tests/design.test.mjs`. It replaced a centred modal dialog
   on 1 October 2026, the day after launch, to match every other DBHQ site.
 
+## The KIM-1 page
+
+The first machine page, added on 1 October 2026. It is a panel on an iron
+surface with a hairline border, like the terminal window, holding the six digits
+on the black canvas and the keypad below them.
+
+- **The digits are drawn in SVG, seven segments each, in the brightest text
+  colour, `--white`.** The board's LEDs are red. Red is not in this palette, and
+  the page is a drawing of what the machine shows, not a photograph of the
+  board, so the segments take the site's phosphor green. Unlit segments are
+  `--veil`, faintly visible, as an unlit LED is.
+- **The keypad is the board's layout,** six rows of four: GO, ST, RS and the
+  SST switch, then AD, DA, PC and +, then the hex keys from C D E F down to
+  0 1 2 3. Each key is a real button in `--white` on `--veil`, `--card` when
+  hovered and the black canvas while pressed. The SST switch is a checkbox with
+  `role="switch"`, in the place the slide switch has on the board.
+- **No lime on this page.** The lime is rationed to one fill per screen, and no
+  key is more important than another; the focus ring is the lime, as everywhere.
+- **Without JavaScript** the keys are disabled, with a dashed edge rather than a
+  dimmed label, so they stay readable, and the status line says the machine
+  needs JavaScript.
+- **Screen readers** do not hear the digits flicker. The drawing is hidden from
+  them and a polite live region reads out the display once it has held still
+  for 400 ms.
+- The new text colours, the keys, the status and speed lines and the key caps
+  in the program, are in the contrast table in `tests/design.test.mjs`.
+
 ## The imagery
 
 Three generated images, made with the `imager` skill on 30 September 2026 with
@@ -50,7 +77,8 @@ are not in git; the site ships the WebP versions in `src/assets/imagery/`.
 The prompt asked for a 6502 die, but a model draws a plausible die and not the
 chip's real layout, so it is not a photograph or a drawing of the 6502, and a test fails the
 build if a generated image is shown without an "Illustration" caption. The KIM-1
-page will use the emulator's own rendering of the board.
+page uses no image at all: its digits and keypad are drawn, and driven by the
+emulator.
 
 ### hero-die
 

@@ -1,0 +1,66 @@
+---
+// The KIM-1 itself: six seven-segment digits, the keypad in the board's own
+// layout, and the SST switch. public/kim-1.js brings it to life. Without
+// JavaScript every key is disabled and the status line says why.
+//
+// The keypad is the board's: GO, ST and RS and the SST switch on the top row,
+// then AD, DA, PC and +, then the hex keys from C D E F down to 0 1 2 3.
+// The segments are drawn, not pictures: bit 0 of what the machine reports
+// is segment a (the top bar), round to bit 6, segment g (the middle bar).
+interface Props {
+  /** Where the machine's files are served from, for example /machines/kim-1/. */
+  base: string;
+  /** The board's clock in MHz, from the registry. */
+  clockMhz: number;
+}
+const { base, clockMhz } = Astro.props;
+
+const rows = [
+  ['GO', 'ST', 'RS', 'SST'],
+  ['AD', 'DA', 'PC', '+'],
+  ['C', 'D', 'E', 'F'],
+  ['8', '9', 'A', 'B'],
+  ['4', '5', '6', '7'],
+  ['0', '1', '2', '3'],
+];
+const labels: Record<string, string> = {
+  GO: 'GO, run from the address shown',
+  ST: 'ST, stop the program',
+  RS: 'RS, reset',
+  AD: 'AD, address mode',
+  DA: 'DA, data mode',
+  PC: 'PC, back to the stopped program counter',
+  '+': 'Plus, next address',
+};
+
+// Segments a to g on a 56 by 96 box: a hexagon per bar, with a small gap at
+// each joint, as LED segments have.
+const t = 4;
+const gap = 2;
+const [left, right, top, mid, bottom] = [8, 48, 8, 48, 88];
+const across = (y: number) => [[left + gap, y], [left + gap + t, y - t], [right - gap - t, y - t], [right - gap, y], [right - gap - t, y + t], [left + gap + t, y + t]];
+const down = (x: number, y1: number, y2: number) => [[x, y1 + gap], [x + t, y1 + gap + t], [x + t, y2 - gap - t], [x, y2 - gap], [x - t, y2 - gap - t], [x - t, y1 + gap + t]];
+const segments = [across(top), down(right, top, mid), down(right, mid, bottom), across(bottom), down(left, mid, bottom), down(left, top, mid), across(mid)].map((p) => p.map(([x, y]) => `${x},${y}`).join(' '));
+---
+
+<div class="kim1" data-kim1 data-base={base} data-clock-mhz={clockMhz} data-state="static">
+  <div class="kim1-display" aria-hidden="true">
+    {[0, 1, 2, 3, 4, 5].map((d) => (
+      <svg class={`digit${d === 4 ? ' gap' : ''}`} data-digit={d} viewBox="0 0 56 96">
+        {segments.map((points, s) => <polygon data-seg={s} points={points} />)}
+      </svg>
+    ))}
+  </div>
+  <p class="sr-only" aria-live="polite" data-kim1-said></p>
+  <div class="kim1-keys" role="group" aria-label="Keypad">
+    {rows.flat().map((k) =>
+      k === 'SST' ? (
+        <label class="key sst"><input type="checkbox" role="switch" data-kim1-sst disabled /> SST</label>
+      ) : (
+        <button type="button" class="key" data-key={k} aria-label={labels[k]} disabled>{k}</button>
+      ),
+    )}
+  </div>
+  <p class="kim1-status" role="status" data-kim1-status>The KIM-1 runs in your browser, and it needs JavaScript to do that. With JavaScript off, the keypad and the program below are shown, but nothing runs.</p>
+  <p class="kim1-speed" data-kim1-speed></p>
+</div>

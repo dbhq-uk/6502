@@ -48,8 +48,54 @@ permissions:
   contents: read
 
 jobs:
+  # The machines' browser builds, in a job of their own that holds no token:
+  # the KIM-1 as .NET WebAssembly, compiled ahead of time, and its monitor ROM,
+  # fetched from the pin in Pins.cs and hash-checked. The same job as
+  # validate.yml's. The deploy job puts its output where the Astro build copies
+  # it into dist.
+  machines:
+    if: vars.SITE_DEPLOY == 'true' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      # The build is a pure function of these inputs, so an unchanged machine
+      # is restored rather than compiled again: AOT takes minutes. The workload
+      # version is in the key, so moving the pin rebuilds.
+      - name: Cache the machines' browser builds
+        id: cache
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
+        with:
+          path: site/public/machines
+          key: machines-sdk-10.0.400-wasm-tools-10.0.401-${{ hashFiles('src/**', 'Directory.Build.props', 'tests/Dbhq.Cpu6502.TestSupport/Pins.cs', 'site/scripts/build-machines.mjs', 'site/src/lib/pins.mjs') }}
+      # The SDK is pinned here, not left at 10.0.x, because a workload version
+      # belongs to one SDK feature band: 10.0.401 is a 10.0.400 band set.
+      - if: steps.cache.outputs.cache-hit != 'true'
+        uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6
+        with:
+          dotnet-version: '10.0.400'
+      - if: steps.cache.outputs.cache-hit != 'true'
+        name: The wasm-tools workload, pinned
+        run: dotnet workload install wasm-tools --version 10.0.401
+      - if: steps.cache.outputs.cache-hit != 'true'
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: '22.22'
+      - if: steps.cache.outputs.cache-hit != 'true'
+        name: Build the machines and fetch their ROMs
+        working-directory: site
+        run: node scripts/build-machines.mjs
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: machines
+          path: site/public/machines
+          if-no-files-found: error
+
   deploy:
     if: vars.SITE_DEPLOY == 'true' && github.ref == 'refs/heads/main'
+    needs: machines
     runs-on: ubuntu-latest
     timeout-minutes: 60
     steps:
@@ -77,11 +123,18 @@ jobs:
           path: .testdata
           key: testdata-${{ hashFiles('tests/Dbhq.Cpu6502.Tests/Harte/harte.manifest', 'tests/Dbhq.Cpu6502.TestSupport/Pins.cs') }}
 
-      - name: Test the core
-        run: dotnet test --configuration Release --logger "trx;LogFileName=results.trx" --results-directory TestResults
+      # No trx file name, for the reason given in validate.yml: one file per
+      # test project, or the last project to finish overwrites the rest.
+      - name: Test the core and the machines
+        run: dotnet test --configuration Release --logger trx --results-directory TestResults
 
       - name: Make the site's results.json
         run: node site/scripts/make-results.mjs TestResults site/src/data/results.json
+
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          name: machines
+          path: site/public/machines
 
       - name: Install
         working-directory: site
@@ -99,10 +152,10 @@ jobs:
           PASS=$(count pass); FAILED=$(count fail)
           echo "pass=${PASS:-unread} fail=${FAILED:-unread}"
           [ "${FAILED:-1}" = "0" ]
-          # 140 tests as at 1 Oct 2026. Adding tests is expected; losing them is
+          # 156 tests as at 1 Oct 2026. Adding tests is expected; losing them is
           # the failure this floor catches. Raise the number when the suite grows,
           # here and in the same step of validate.yml, which must hold the same number.
-          [ "${PASS:-0}" -ge 140 ]
+          [ "${PASS:-0}" -ge 156 ]
 
       - name: Deploy to Cloudflare Pages
         working-directory: site
@@ -164,11 +217,38 @@ jobs:
       - name: The machine-readable files must be serving
         run: |
           set -euo pipefail
-          for f in sitemap-index.xml sitemap-0.xml robots.txt analytics.js consent.js machines-table.js table-sort.js chip.js; do
+          for f in sitemap-index.xml sitemap-0.xml robots.txt analytics.js consent.js machines-table.js table-sort.js chip.js kim-1.js; do
             CODE=$(curl -s --max-time 20 --retry 3 --retry-delay 5 -o /dev/null -w "%{http_code}" "https://6502.dbhq.uk/${f}?cb=${GITHUB_SHA}")
             echo "${f} -> ${CODE}"
             [ "$CODE" = "200" ]
           done
+
+      # The machines' files: the WebAssembly each machine page loads and its
+      # ROM. THE LIST IS DERIVED FROM THE BUILD, like the pages above. A .wasm
+      # must come back as application/wasm: WebAssembly.compileStreaming
+      # refuses any other type, and the machine would not start.
+      - name: Every machine file must be serving
+        working-directory: site/dist
+        run: |
+          set -euo pipefail
+          FILES=$(find machines -type f ! -name index.html | sort)
+          COUNT=0
+          FAIL=0
+          for f in $FILES; do
+            OUT=$(curl -s --max-time 20 --retry 3 --retry-delay 5 -o /dev/null -w "%{http_code} %{content_type}" "https://6502.dbhq.uk/${f}?cb=${GITHUB_SHA}")
+            echo "${f} -> ${OUT}"
+            CODE=${OUT%% *}
+            TYPE=${OUT#* }
+            [ "$CODE" = "200" ] || FAIL=1
+            case "$f" in
+              *.wasm) [[ "$TYPE" == application/wasm* ]] || { echo "  ${f} is not served as application/wasm"; FAIL=1; } ;;
+              *.js) [[ "$TYPE" == *javascript* ]] || { echo "  ${f} is not served as JavaScript"; FAIL=1; } ;;
+            esac
+            COUNT=$((COUNT + 1))
+          done
+          # The KIM-1 alone is two ROM halves, the loader and several .wasm files.
+          [ "$COUNT" -ge 6 ] || { echo "only $COUNT machine files found - the derivation is broken"; exit 1; }
+          [ "$FAIL" = "0" ]
 
       # Headers only apply at the Cloudflare edge, so they can only be checked
       # after the deploy.

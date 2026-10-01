@@ -7,7 +7,7 @@ more.
 
 This is built in public. The design, the plan and every step of the work are
 in this repository, and the journey is written up at
-[6502.dbhq.uk](https://6502.dbhq.uk/), which is not live yet.
+[6502.dbhq.uk](https://6502.dbhq.uk/).
 
 ## Where this is going
 
@@ -20,7 +20,10 @@ and the NES. The design is in
 
 The core is done, in all five variants, and proven against every check the
 design lists. `dotnet test` is the proof; the numbers live in its output.
-The machines and the site, 6502.dbhq.uk, are next; the design is in
+The KIM-1, the first machine, runs its original monitor ROM, passes its
+acceptance test, and runs in the browser at
+[6502.dbhq.uk/machines/kim-1/](https://6502.dbhq.uk/machines/kim-1/), so it
+counts as implemented. The programme's design is in
 [`docs/superpowers/specs/2026-09-30-machines-and-site-design.md`](docs/superpowers/specs/2026-09-30-machines-and-site-design.md).
 
 ## What "cycle-accurate" means here
