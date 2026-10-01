@@ -266,6 +266,31 @@ promises "0212 3D", the display shows "0212 3C"`; and taking out the rest betwee
 taps (the next key going down as soon as the last came up) failed seven tests,
 six of them acceptance tests. The monitor really does miss keys without it.
 
+## In CI
+
+The first green Validate run with all of this, run 36933839141 on 1 October
+2026 (`gh run view 36933839141 --json jobs`), started at 22:14:36 UTC and its
+last job ended at 22:17:29. The `machines` job ran beside the tests: the pinned
+SDK took 9 s to set up, the `wasm-tools` workload 14 s to install, and the AOT
+publish with the ROM fetch 65 s, so the job took 1 min 42 s against the test
+job's 2 min 6 s, and the site job waited for the tests, not for the machine.
+That run missed the machines cache (it was the first with this key), so a later
+run that changes nothing in the machine skips the workload and the publish. The
+test data came from its cache (17 s), downloaded by an earlier run of this pull
+request. In the site job, `npm test` took 6 s and passed 156, and the browser
+check took 24 s, on the runner's Chrome 154.0.8037.57:
+
+```
+loaded in 797 ms: Running. Press RS to start the monitor.
+step 1 ok   keys "[RS]" expected "xxxx xx" shown "0000 00" announced "Display 0000 00" (572 ms)
+step 3 ok   keys "[AD] 0200 [DA] AD [+] 10 [+] 02 [+] 18 [+] 6D [+] 11 [+] 02 [+] 8D [+] 12 [+] 02 [+] 4C [+] 0A [+] 02" expected "020C 02" shown "020C 02" announced "Display 020C 02" (3952 ms)
+step 7 ok   keys "[AD] 0212" expected "0212 3C" shown "0212 3C" announced "Display 0212 3C" (769 ms)
+page speed line: Running at the board's own 1 MHz. This browser could run it about 27 times as fast.
+no console errors, no failed requests, no CSP violations
+```
+
+(Steps 2 and 4 to 6 passed too; shortened here.)
+
 ## Surprises and mistakes
 
 - **A stale build looked like a runtime bug, twice.** The first interpreter build
@@ -306,9 +331,6 @@ six of them acceptance tests. The monitor really does miss keys without it.
 
 - No phone or real slow laptop was tried; the slower-computer figures are
   Chrome's CPU throttling.
-- The CI timings of the new `machines` job are not in this entry: they are in the
-  pull request's checks, and the first run also downloads the core's test data
-  again (the earlier commit changed `Pins.cs`).
 - The ROM still has one download source, the Internet Archive. The CI cache
   holds the built machine, ROM included, between runs, so an Archive outage
   stops only a run that changes the machine.
