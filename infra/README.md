@@ -48,6 +48,20 @@ existence and its custom domain, not its contents, which is why `main.tf` has
 
 No workflow runs Terraform.
 
+## The first apply, as it actually went (30 September 2026)
+
+Applied in the order below, with one deliberate change: the DNS record was
+published while the Pages custom domain was still `pending`, not after it was
+`active`. The domain does not leave `pending` until its CNAME exists, so waiting
+for it would never end. What made that safe is that the zone already has an
+active universal certificate for `*.dbhq.uk`, so the proxied hostname served a
+valid certificate from its first request and HSTS had nothing to refuse. It
+answered 522 for about thirty seconds, then 200. Check the zone's certificate
+packs before relying on this for a hostname that is not first-level.
+
+The real `pages.dev` subdomain came back as `6502.pages.dev`: the bare name was
+free, so the default `var.pages_target` was right.
+
 ## The order of the first apply is not the order Terraform would pick
 
 The `dbhq.uk` zone sends HSTS with `includeSubDomains`, so this hostname must

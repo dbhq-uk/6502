@@ -445,3 +445,16 @@ The Terraform for `6502.dbhq.uk` was first drafted in the private DBHQ repositor
 Dan asked whether identifiers could go in secrets rather than the repository. They could, and for this repository they now do. The account id and zone id had been committed as variable defaults, and the account id was also inside the R2 endpoint in `infra/backend.hcl`. Neither is a credential, and both are already public in other repositories, but this one has no need to publish them. The defaults are gone, the values come from `TF_VAR_account_id` and `TF_VAR_zone_id` (set from the 1Password loader the same way as the token), and the endpoint is passed at `terraform init`. The deploy workflow already read both from GitHub Actions secrets. `terraform init` with the new arguments reached the same backend and `terraform validate` passed, checked on 1 October 2026.
 
 Removing them from the files does not remove them from git history, which still holds the earlier commit, so this is hygiene for what comes next and not a recall of what was published.
+
+## The site went live
+
+On 1 October 2026 the Terraform was applied and the site went live at https://6502.dbhq.uk. The order, with what each step showed:
+
+- **R2 state token.** The bucket `dbhq-6502-tfstate` had been created through the API, and `terraform init` answered 403 until Dan added it to the token's bucket list in the dashboard. It worked straight after.
+- **Pages project.** The plan was one resource to add. Applying it created the project `6502`, and the API gave its subdomain as `6502.pages.dev`.
+- **First upload.** The .NET suite was run at the merge commit `1393d10` (`dotnet test`: 1,480 passed, 0 failed, 0 skipped, in 1 m 9 s), `results.json` was made from it, and `npm test` in `site/` built 14 pages and passed 112 tests. `wrangler pages deploy` uploaded 55 files. The pinned wrangler ran without the `esbuild` and `workerd` install scripts, which settles the open question from task 9 for this command.
+- **Custom domain.** Applying it left the domain `pending`, and it stayed `pending` for six minutes. Cloudflare verifies a Pages hostname against its CNAME, so it would not have moved without the record.
+- **DNS record.** The zone's certificate packs (API read) already include an active universal certificate for `*.dbhq.uk`, so the proxied hostname would serve a valid certificate from its first request. The record was applied, the hostname answered 522 for about thirty seconds, then 200. This is a change from the order the README set, which assumed the certificate had to be issued first. The README now says what happened.
+- **Checked after.** Fifteen URLs: fourteen returned 200 (seven pages, `robots.txt`, both sitemaps, three scripts, the favicon) and a made-up path returned 404. HSTS, the CSP and `X-Frame-Options` were present. The Pages custom domain read `pending` on its last check while the hostname already served, which is its state until verification finishes.
+
+Not done yet: the CI deploy (it needs a scoped token, three secrets and `SITE_DEPLOY=true`), and Search Console.
