@@ -20,6 +20,7 @@ site/                       # 6502.dbhq.uk: the Astro site, its tests, and the s
 tests/                      # the tests and the library they share, one project per machine
 bench/                      # the speed benchmarks (native, and the browser speed check), run locally, neither built nor run in CI
 tools/                      # scripts that make test data and check assumptions
+  Dbhq.Cpu6502.ChipTrace/   # records the core's bus cycles for the site's chip page
   probes/                   # scripts that check assumptions against test data
 docs/superpowers/specs/     # the design; each stage gets its own spec here
 docs/superpowers/plans/     # the plan for each spec

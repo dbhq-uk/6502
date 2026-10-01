@@ -193,3 +193,52 @@ footer .linkbtn:hover { color: var(--white); }
 .roms code { overflow-wrap: anywhere; }
 .machine-head p { margin-top: 12px; }
 .machine-run h2 + .kim1, .wrap > h2 + .prose { margin-top: 24px; }
+/* The chip page (/inside/): a 3D view beside a tour. The view's own colours are
+   these same tokens, read by src/chip/main.js at run time. Without JavaScript
+   or WebGL the view and its controls are hidden and the tour reads as a list. */
+.die { display: grid; grid-template-columns: minmax(0, 1fr) 340px; gap: 20px; margin-top: 32px; }
+.die-stage { padding: 0; position: relative; height: min(72vh, 680px); min-height: 380px; border: 1px solid var(--circuit); border-radius: var(--r-window); overflow: hidden; outline-offset: 3px; }
+.die-stage canvas { display: block; width: 100%; height: 100%; touch-action: none; }
+.die-labels { position: absolute; inset: 0; pointer-events: none; }
+.die-label { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0; color: var(--white); background: var(--iron); border: 1px solid var(--circuit); border-radius: 4px; padding: 1px 6px; white-space: nowrap; }
+.die-label-pad, .die-label-flag { font-size: 10px; padding: 0 4px; }
+.die-controls { display: grid; gap: 16px; margin-top: 20px; }
+.die-controls .btns { align-items: center; }
+.die-field { display: inline-flex; align-items: center; gap: 10px; font-size: 14px; color: var(--moss-70); }
+.die-field select { font: inherit; color: var(--white); background: var(--iron); border: 1px solid var(--circuit); border-radius: 8px; padding: 8px 10px; }
+.die-scrub input { flex: 1; accent-color: var(--white); }
+.die-scrub { display: flex; }
+.die-fallback { display: none; }
+[data-chip]:not([data-state="running"]) .die-stage, [data-chip]:not([data-state="running"]) .die-controls, [data-chip]:not([data-state="running"]) .die-move { display: none; }
+[data-chip]:not([data-state="running"]) .die { grid-template-columns: 1fr; }
+[data-chip][data-state="no-webgl"] .die-fallback { display: block; }
+@media (max-width: 900px) { .die { grid-template-columns: 1fr; } .die-stage { height: 60vh; } }
+.inside { padding-top: 24px; }
+.inside .head { margin-bottom: 0; }
+.inside .head h1 { font-size: clamp(34px, 5vw, 52px); }
+
+/* The tour: a numbered timeline. The rail runs down the left; each stop has a
+   dot, filled once visited, and the current stop opens to show its text. */
+.die-tour { display: flex; flex-direction: column; gap: 18px; background: var(--iron); border: 1px solid var(--circuit); border-radius: var(--r-window); padding: 22px 22px 20px; align-self: start; }
+.die-tour-head { display: flex; justify-content: space-between; align-items: baseline; font-family: var(--font-mono); font-size: 12px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--sage-60); margin: 0; }
+.die-count { letter-spacing: 0; }
+.die-count b { font-weight: 400; color: var(--white); }
+.die-stops { list-style: none; padding: 0; margin: 0; }
+.die-item { position: relative; padding-left: 30px; }
+.die-item::before { content: ""; position: absolute; left: 6px; top: 22px; bottom: -8px; width: 1px; background: var(--pine); }
+.die-item:last-child::before { display: none; }
+.die-item[data-state="done"]::before { background: var(--moss-70); }
+.die-item::after { content: ""; position: absolute; left: 0; top: 11px; width: 13px; height: 13px; box-sizing: border-box; border-radius: 50%; border: 1px solid var(--circuit); background: var(--iron); transition: background 0.3s ease-out, border-color 0.3s ease-out, transform 0.3s ease-out; }
+.die-item[data-state="done"]::after { background: var(--moss-70); border-color: var(--moss-70); }
+.die-item[data-state="current"]::after { background: var(--white); border-color: var(--white); transform: scale(1.25); }
+.die-stop { display: flex; align-items: baseline; gap: 12px; width: 100%; padding: 6px 8px 6px 0; margin: 0 0 2px; font: inherit; text-align: left; background: none; border: 0; border-radius: 8px; cursor: pointer; }
+.die-n { font-family: var(--font-mono); font-size: 12px; letter-spacing: 0; color: var(--sage-60); }
+.die-t { font-size: 16px; color: var(--moss-70); transition: color 0.3s ease-out; }
+.die-stop:hover .die-t { color: var(--white); }
+.die-stop[aria-current="true"] .die-t { color: var(--white); }
+.die-text { padding: 0 0 12px; }
+.die-text p { margin: 0; font-size: 15px; line-height: 1.6; color: var(--moss-70); animation: die-in 0.4s ease-out; }
+@keyframes die-in { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) { .die-text p { animation: none; } .die-item::after, .die-t { transition: none; } }
+.die-pager { display: flex; gap: 10px; padding-top: 4px; border-top: 1px solid var(--hairline); padding-top: 18px; }
+.die-pager .btn { flex: 1; text-align: center; }

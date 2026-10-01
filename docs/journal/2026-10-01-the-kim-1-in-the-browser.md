@@ -248,8 +248,16 @@ On 1 October 2026, `dotnet test --configuration Release --logger trx` at the
 root: 39 passed in the KIM-1 tests (35 before; the new ones are the page's
 program in `Kim1AcceptanceTests` and three in `Kim1KeystrokesTests`) and 1,480 in
 the core's. `node scripts/make-results.mjs` on that run: 1,519 passed in 19
-suites. `cd site && npm test`: 141 passed, 0 failed (125 before), so the floor in
-both workflows is now 141.
+suites. `cd site && npm test`: 141 passed, 0 failed (125 before).
+
+Then `main` moved: the `/inside/` page (pull request 17) landed while this was
+being built, and the pull request could not merge. `main` was merged into the
+branch; the conflicts were the test floor in both workflows, the list of scripts
+the deploy checks (both `chip.js` and `kim-1.js` now) and the end of
+`global.css` (both sets of rules kept). After the merge, the same commands gave
+1,481 passed in the core's tests, 39 in the KIM-1's, 1,520 in 20 suites from
+`make-results.mjs`, and 156 site tests passed with none failed (`main` had 140,
+this branch adds 16), so the floor in both workflows is 156.
 
 Two deliberate breaks, each in a scratch edit and put back: changing the last
 step's expected display in `try-it.json` to `0212 3D` failed

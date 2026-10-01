@@ -1,0 +1,74 @@
+---
+import Base from '../layouts/Base.astro';
+import { STOPS } from '../chip/layout.mjs';
+import trace from '../data/chip-trace.json';
+import { fmt } from '../lib/figures.mjs';
+
+// The figures in the caption come from the trace file itself, never typed.
+const cycles = fmt(trace.cycles.length);
+const instructions = fmt(trace.instructions.length);
+const laps = fmt(trace.laps);
+---
+
+<Base title="Inside the chip" description="A 3D diagram of the 6502 that you can fly round, lit cycle by cycle by a recorded run of this project's core.">
+  <section class="inside" data-chip>
+    <div class="wrap">
+      <div class="head">
+        <p class="eyebrow">Inside the chip</p>
+        <h1>Inside the 6502</h1>
+        <p>Fly round a diagram of the chip while this project's core runs a program through it. Pick a stop to visit a part, or drag to turn, scroll to zoom and right-drag to move.</p>
+      </div>
+      <div class="die">
+        <section class="die-stage" data-stage tabindex="0" aria-label="3D view of the chip. Left and right arrow keys step a cycle, space plays or pauses." aria-describedby="die-caption"></section>
+        <nav class="die-tour" aria-label="Tour of the chip">
+          <p class="die-tour-head"><span>The tour</span><span class="die-count"><b data-stop-number>1</b> of {STOPS.length}</span></p>
+          <ol class="die-stops">
+            {STOPS.map((s, i) => (
+              <li class="die-item" data-item={s.id}>
+                <button type="button" class="die-stop" data-stop={s.id}>
+                  <span class="die-n">{String(i + 1).padStart(2, '0')}</span>
+                  <span class="die-t">{s.title}</span>
+                </button>
+                <div class="die-text" data-stop-text={s.id}>
+                  <p>{s.text}</p>
+                </div>
+              </li>
+            ))}
+          </ol>
+          <div class="die-pager die-move">
+            <button type="button" class="btn small" data-prev aria-label="Previous stop">Back</button>
+            <button type="button" class="btn small" data-next aria-label="Next stop">Next stop</button>
+          </div>
+        </nav>
+      </div>
+      <div class="die-controls">
+        <div class="btns">
+          <button type="button" class="btn pill" data-play aria-pressed="false">Play</button>
+          <button type="button" class="btn small" data-back>Back a cycle</button>
+          <button type="button" class="btn small" data-step>Forward a cycle</button>
+          <label class="die-field">Speed
+            <select data-speed>
+              <option value="2">Slow</option>
+              <option value="8" selected>Normal</option>
+              <option value="40">Fast</option>
+            </select>
+          </label>
+        </div>
+        <label class="die-field die-scrub">Cycle
+          <input type="range" data-scrub min="0" max="0" value="0" />
+        </label>
+        <div class="win" aria-live="off">
+          <div class="bar"><i></i><i></i><i></i><span>the core, cycle by cycle</span></div>
+          <pre><span data-hud-cycle></span>
+<span data-hud-text></span>
+<span data-hud-bus></span>
+<span data-hud-regs></span></pre>
+        </div>
+      </div>
+      <p class="figure-caption" id="die-caption">Diagram, not the die. The parts are laid out after the 6502's floorplan, but their sizes and places are approximate, nothing is traced from a photograph of the chip, and the pads are drawn in the order of the package's pins. Every value it shows is recorded from this project's core: {cycles} bus cycles, {instructions} instructions and {laps} laps of the speed check's program, replayed in a loop.</p>
+      <p class="note die-fallback">The 3D view needs WebGL, which this browser has not started. The tour above reads the same without it.</p>
+      <noscript><p class="note">The 3D view needs JavaScript. The tour above reads the same without it.</p></noscript>
+    </div>
+  </section>
+  <script is:inline type="module" src="/chip.js"></script>
+</Base>

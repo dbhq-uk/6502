@@ -9,6 +9,9 @@
     <Project Path="src/Dbhq.Machines.Kim1.Wasm/Dbhq.Machines.Kim1.Wasm.csproj" />
     <Project Path="src/Dbhq.Machines.Kim1/Dbhq.Machines.Kim1.csproj" />
   </Folder>
+  <Folder Name="/tools/">
+    <Project Path="tools/Dbhq.Cpu6502.ChipTrace/Dbhq.Cpu6502.ChipTrace.csproj" />
+  </Folder>
   <Folder Name="/tests/">
     <Project Path="tests/Dbhq.Cpu6502.Tests/Dbhq.Cpu6502.Tests.csproj" />
     <Project Path="tests/Dbhq.Cpu6502.TestSupport/Dbhq.Cpu6502.TestSupport.csproj" />
