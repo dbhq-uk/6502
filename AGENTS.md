@@ -44,8 +44,15 @@ third-party test program. Tests download what they need from a pinned commit
 and check it against a recorded hash. Some of it is GPL and this repository is
 MIT.
 
-**4. No game or commercial software is committed or served.** The site bundles
-homebrew and freely licensed software only. Anything else is load-your-own.
+**4. A machine's system ROM is used when its rights are documented.** Dan, 1 October 2026:
+"if it's documented we do it", for every machine. The documentation is the
+machine's `rights` field in `machines/registry.json` and a section in its
+journal entry: who holds the ROM, where our copy comes from (a pinned URL and a
+sha256), and what is known about permission, including when nothing could be
+found. The ROM is fetched at test and build time from that pinned source and
+checked against the hash, not committed. **Commercial games and application
+software are still not bundled; they are load-your-own.** The site says plainly,
+on each machine's page, whose ROM it runs.
 
 **5. No figure is typed by hand.** A pass count, a percentage or a speed that
 describes the project as it stands comes from test output. A number that was
