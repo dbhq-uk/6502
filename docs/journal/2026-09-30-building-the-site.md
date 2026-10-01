@@ -439,3 +439,9 @@ The Terraform for `6502.dbhq.uk` was first drafted in the private DBHQ repositor
 **What differed was where the Terraform sits.** `modem` and `bbs` keep it in their own repository under `infra/`. `terraken` keeps it in the private repository, and that split exists only because terraken's site tests read its Go source. Nothing in the 6502 infrastructure needs that. So the Terraform was moved to `infra/` in this repository, the site, its Terraform and its deploy workflow now sit together, and both specs carry a dated amendment saying so. The bucket `dbhq-6502-tfstate` was created through the Cloudflare API the same day and is unchanged by the move.
 
 **A mistake worth recording.** The design copied `terraken`'s layout without asking what had caused it there. The reason for a split is part of the decision, and copying the result without the reason gave a layout that fitted worse than the simpler one already in use two repositories over.
+
+## No account or zone id in the public repository
+
+Dan asked whether identifiers could go in secrets rather than the repository. They could, and for this repository they now do. The account id and zone id had been committed as variable defaults, and the account id was also inside the R2 endpoint in `infra/backend.hcl`. Neither is a credential, and both are already public in other repositories, but this one has no need to publish them. The defaults are gone, the values come from `TF_VAR_account_id` and `TF_VAR_zone_id` (set from the 1Password loader the same way as the token), and the endpoint is passed at `terraform init`. The deploy workflow already read both from GitHub Actions secrets. `terraform init` with the new arguments reached the same backend and `terraform validate` passed, checked on 1 October 2026.
+
+Removing them from the files does not remove them from git history, which still holds the earlier commit, so this is hygiene for what comes next and not a recall of what was published.

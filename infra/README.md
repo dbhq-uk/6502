@@ -6,7 +6,10 @@ domain, and one DNS record in the `dbhq.uk` zone.
 ```bash
 source ~/.dbhq/env.sh                     # Cloudflare + R2 keys, from 1Password
 export TF_VAR_cloudflare_api_token="$CLOUDFLARE_API_TOKEN"
-terraform init -backend-config=backend.hcl
+export TF_VAR_account_id="$CLOUDFLARE_ACCOUNT_ID"
+export TF_VAR_zone_id="$CLOUDFLARE_ZONE_ID"
+terraform init -backend-config=backend.hcl \
+  -backend-config="endpoints={s3=\"https://$CLOUDFLARE_ACCOUNT_ID.r2.cloudflarestorage.com\"}"
 terraform plan
 ```
 
@@ -88,6 +91,10 @@ the service account access on it in the interface (the API cannot), and submit
 
 ## Secrets
 
-The API token is the only secret here, supplied as `TF_VAR_cloudflare_api_token`
-from 1Password and never written down. The account id, zone id, hostnames and the
-`pages.dev` target are identifiers, not credentials.
+The API token is the only credential here, supplied as `TF_VAR_cloudflare_api_token`
+from 1Password and never written down. The account id and zone id are
+identifiers, not credentials, but this repository is public and has no need to
+publish them, so they have no defaults: they come from the environment the same
+way (`TF_VAR_account_id`, `TF_VAR_zone_id`), and the R2 endpoint, which contains
+the account id, is passed at init. Hostnames and the `pages.dev` target are
+public anyway.

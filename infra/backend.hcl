@@ -1,7 +1,7 @@
 # Backend configuration for this configuration's own R2 state bucket.
 #
 # Committed on purpose. Every value here is an identifier, not a credential:
-# a bucket name and an account-scoped endpoint. The keys that open it come
+# a bucket name and a key. The keys that open it come
 # from 1Password at init time as AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY,
 # by way of `source ~/.dbhq/env.sh`, and are never written to disk.
 #
@@ -21,14 +21,16 @@
 # creating the bucket is not enough: a fresh bucket the token has never been
 # told about answers `terraform init` with a bare 403 on HeadObject, which does
 # not name the cause. Add it in the Cloudflare dashboard under R2 > API.
-#
-#   terraform init -backend-config=backend.hcl
 
 bucket = "dbhq-6502-tfstate"
 key    = "6502.tfstate"
 region = "auto"
 
-endpoints = { s3 = "https://691c21cdcf1b3fa4add70cc166e99733.r2.cloudflarestorage.com" }
+# The endpoint is not written here: it contains the account id, which this public
+# repository has no need to publish. Pass it at init, from the environment:
+#
+#   terraform init -backend-config=backend.hcl \
+#     -backend-config="endpoints={s3=\"https://$CLOUDFLARE_ACCOUNT_ID.r2.cloudflarestorage.com\"}"
 
 # R2 is S3-compatible, not S3. Each of these switches off a check that assumes
 # a real AWS endpoint on the other end, and each one fails the init without it.
