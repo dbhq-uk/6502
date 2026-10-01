@@ -80,6 +80,18 @@ Not used.
 - Draft: `1536x864`, quality low. Prompt: "A dark 1970s single-board computer seen from above at a slight angle: six red-orange seven-segment LED digits glowing in a row above a hex keypad of small square keys, black background, soft phosphor-green edge light (#ddffdc), one lime (#7fee64) glint, macro photography, shallow depth of field, no text, no logos, no letters on the keys"
 - Final: not made, dropped: it is not a KIM-1 (twelve keys where the board has twenty-four) and reads as one
 
+## The chip page
+
+`/inside/` is a 3D diagram of the chip, drawn in three.js, on the same black canvas.
+The scene's colours are the site's tokens, read from the stylesheet when the
+page starts, so nothing in the script holds a colour (a test checks that). The
+lime is used for the one pulse colour and the register flash, which are lights
+in a scene and not a fill, and the page keeps its one lime button, Play.
+
+It is a diagram and says so. The only public layout of the real die is
+share-alike and non-commercial, so the geometry is drawn by hand after the
+floorplan in outline. See the journal entry for 1 October 2026.
+
 ## What the tests hold
 
 `npm test` builds the site and then checks it. The checks that guard this design

@@ -15,6 +15,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <!-- The chip page's trace generator, compiled in so its test can run it. -->
+    <Compile Include="../../tools/Dbhq.Cpu6502.ChipTrace/ChipTrace.cs" Link="ChipTrace/ChipTrace.Generator.cs" />
+    <Compile Include="../../bench/Dbhq.Cpu6502.WasmBench/Workload.cs" Link="ChipTrace/Workload.cs" />
     <None Include="Harte/harte.manifest" CopyToOutputDirectory="PreserveNewest" />
     <None Include="Interrupts/visual6502.txt" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>

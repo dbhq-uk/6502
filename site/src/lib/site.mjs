@@ -9,6 +9,7 @@ export const NAV = [
   { href: '/journal/', label: 'Journal' },
   { href: '/machines/', label: 'Machines' },
   { href: '/chips/', label: 'Chips' },
+  { href: '/inside/', label: 'Inside' },
   { href: '/family/', label: 'Family' },
   { href: '/status/', label: 'Status' },
   { href: '/about/', label: 'About' },

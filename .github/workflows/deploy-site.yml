@@ -99,10 +99,10 @@ jobs:
           PASS=$(count pass); FAILED=$(count fail)
           echo "pass=${PASS:-unread} fail=${FAILED:-unread}"
           [ "${FAILED:-1}" = "0" ]
-          # 125 tests as at 1 Oct 2026. Adding tests is expected; losing them is
+          # 140 tests as at 1 Oct 2026. Adding tests is expected; losing them is
           # the failure this floor catches. Raise the number when the suite grows,
           # here and in the same step of validate.yml, which must hold the same number.
-          [ "${PASS:-0}" -ge 125 ]
+          [ "${PASS:-0}" -ge 140 ]
 
       - name: Deploy to Cloudflare Pages
         working-directory: site
@@ -164,7 +164,7 @@ jobs:
       - name: The machine-readable files must be serving
         run: |
           set -euo pipefail
-          for f in sitemap-index.xml sitemap-0.xml robots.txt analytics.js consent.js machines-table.js table-sort.js; do
+          for f in sitemap-index.xml sitemap-0.xml robots.txt analytics.js consent.js machines-table.js table-sort.js chip.js; do
             CODE=$(curl -s --max-time 20 --retry 3 --retry-delay 5 -o /dev/null -w "%{http_code}" "https://6502.dbhq.uk/${f}?cb=${GITHUB_SHA}")
             echo "${f} -> ${CODE}"
             [ "$CODE" = "200" ]
