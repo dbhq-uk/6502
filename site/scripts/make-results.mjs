@@ -47,7 +47,11 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
   const [folderArg, outArg] = process.argv.slice(2);
   const folder = path.resolve(folderArg ?? path.join(repo, 'TestResults'));
   if (!folderArg) {
-    execFileSync('dotnet', ['test', '--configuration', 'Release', '--logger', 'trx;LogFileName=results.trx', '--results-directory', folder], { cwd: repo, stdio: 'inherit' });
+    // Every .trx in the folder is read, so an old run's files would be counted
+    // again. The trx logger gets no file name: with one, each test project
+    // writes the same file and the last to finish overwrites the others.
+    if (fs.existsSync(folder)) for (const f of fs.readdirSync(folder).filter((n) => n.endsWith('.trx'))) fs.rmSync(path.join(folder, f));
+    execFileSync('dotnet', ['test', '--configuration', 'Release', '--logger', 'trx', '--results-directory', folder], { cwd: repo, stdio: 'inherit' });
   }
   const files = fs.readdirSync(folder).filter((f) => f.endsWith('.trx'));
   if (files.length === 0) throw new Error(`no .trx files in ${folder}`);

@@ -39,8 +39,12 @@ jobs:
         with:
           path: .testdata
           key: testdata-${{ hashFiles('tests/Dbhq.Cpu6502.Tests/Harte/harte.manifest', 'tests/Dbhq.Cpu6502.TestSupport/Pins.cs') }}
+      # The trx logger is given no file name on purpose. With a fixed name,
+      # every test project writes the same file and the last one to finish
+      # overwrites the others, so a whole project's suites vanish from the
+      # site's figures. Left to name its own files, it writes one per project.
       - name: Test
-        run: dotnet test --configuration Release --logger "console;verbosity=normal" --logger "trx;LogFileName=results.trx" --results-directory TestResults
+        run: dotnet test --configuration Release --logger "console;verbosity=normal" --logger trx --results-directory TestResults
       # The site reads its figures from the test results, so the results become
       # a file here and the site job below picks it up. It is never committed.
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
