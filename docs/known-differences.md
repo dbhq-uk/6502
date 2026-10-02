@@ -132,3 +132,66 @@ model and on single step, and pass with the original monitor ROM doing what
 the User Manual says it does. The open-bus value and power-on RAM are pinned
 by tests of the memory map and the boot state, so a change to either is
 seen.
+
+## The BBC Micro: the 6522 VIA's shift register, mode 010 only
+
+**What.** `Via6522` models one of the shift register's eight modes: 010, shift
+in under the system clock, because it is the only one the BBC's ROMs use (the
+DFS, `via.md` section 1.8). In that mode IFR2 rises `ShiftMode2Cycles` (19)
+cycles after the SR read or write that starts it. That number was measured
+with a ruler off the WDC datasheet's drawing of the CMOS part, and the sheet
+marks it `[guessing - verify]`. The eight bits are all taken from CB2 when the
+flag rises, not one per shift pulse, and CB1 puts out no shift clock.
+
+**The other modes** (000, 001, 011, 100, 101, 110 and 111) are not modelled:
+the register can be written and read, but it shifts nothing and IFR2 is never
+set. A program that uses them, which nothing on a stock Model B's boot or disc
+path does, will see no flag.
+
+**How the tests treat it.** `ShiftMode2_SetsIfr2ShiftMode2CyclesAfterAnSrRead`
+checks the flag at the constant's cycle, and `ShiftMode0_SetsNoFlag` checks
+mode 000. Neither is a check against a real chip.
+
+## The BBC Micro: timer 1 after a one-shot expiry
+
+**What.** After timer 1 expires in one-shot mode, the datasheets' text says the
+counter keeps decrementing past `$FFFF`; the datasheet's figure, and Rich
+Talbot-Watkins from real machines, say it reloads from the latch as in
+free-run (`via.md` section 1.4 and its disagreement table). Which one the
+silicon does was not settled.
+
+**Why we chose.** `Via6522` reloads in both modes, following the figure and
+the real-machine report over the text. The operating system never reads timer
+1 after a one-shot expiry, so the boot does not depend on it.
+
+**How the tests treat it.** `OneShotTimer1ReloadsFromTheLatchAfterExpiry_AnAssumption`
+pins the choice, so a change to it is seen. It is not a check against a chip.
+
+## The BBC Micro: 6522 behaviour taken from words, not measured
+
+**What.** Some of the VIA comes from the datasheets' prose or from inference,
+with no cycle count to test against, and some measured quirks are not built:
+
+- **The coincident acknowledge.** A clearing access in the cycle a flag rises
+  does not clear it, and IRQ follows a cycle late. Stardot measured this for
+  timer 1 on real Model Bs and Masters (`via.md` section 1.9). `Via6522`
+  applies it to every flag set by the clock: both timers and the shift
+  register. It does not apply it to CA1, CA2, CB1 and CB2, whose edges arrive
+  between cycles.
+- **Not built:** an ACR write in the same cycle as a timer 1 expiry (measured:
+  ACR `$00` wins), a latch write racing the timer 1 reload (measured, but the
+  rule could not be decoded from the published numbers), a change of ACR bit 5
+  taking effect one cycle late (measured), and the exact timing of a T2C-H
+  write in pulse-counting mode. All are in `via.md` sections 1.4, 1.5 and 1.9.
+- **From words only:** the CA2 and CB2 handshake and pulse outputs (low from
+  the access; in pulse mode high again at the start of the second cycle after
+  it), and timer 2 counting a PB6 pulse when PB6 is low at the start of a cycle
+  having been high at the one before.
+- **Power-on values nobody measured:** the timer counters and latches and the
+  shift register start at zero, the PB7 timer output starts high, the four
+  control lines start low, and the port inputs start at `$FF` (inputs with
+  nothing attached read 1 on a real Model B). Reset leaves no one-shot armed.
+
+**How the tests treat it.** The coincident acknowledge for timer 1 is
+`Example09`, from the real-machine result. The rest is pinned only where a
+test names it, and the BBC's own firmware uses none of it.
