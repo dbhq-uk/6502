@@ -51,6 +51,8 @@ function allowedNumbers() {
     // dates and the commit are generated text
     ...dateParts(new Date(measurements.collected)), ...dateParts(generated),
     ...numbersIn(results.commit ?? ''),
+    // the status page shows the commit's first seven characters, which can be all digits
+    ...numbersIn(results.commit?.slice(0, 7) ?? ''),
   ]);
 }
 
