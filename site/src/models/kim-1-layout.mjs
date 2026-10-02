@@ -29,6 +29,29 @@ export const PITCH = 3.9624;
 
 export const BOARD = { width: 199.7, depth: 272.8, thickness: 1.6 };
 
+/**
+ * How the photograph maps to the board: the full-size source's size and
+ * SHA-256, and the board's body on it in pixels, [left, top, right, bottom],
+ * as scripts/measure-kim1-photo.mjs printed it. The body is 3,030 by 4,139
+ * pixels, which is BOARD at PX_PER_MM. The committed copy is the same picture
+ * at 1600 pixels wide, so the same box scaled by 1600/3792.
+ */
+export const PHOTO = {
+  width: 3792,
+  height: 4675,
+  sha256: '70aa1194749165ea9dc76718ee6ae607b47355c5d8f6c2373a43fc1d2887f7b9',
+  body: [441, 248, 3471, 4387],
+};
+
+/**
+ * The copper tracks of the board's top face, traced from that photograph by
+ * scripts/make-board-tracks.mjs into a greyscale map (white is copper) covering
+ * the board's body edge to edge. Committed as src/assets/tracks/kim-1.webp and
+ * copied to `src` by scripts/build-models.mjs. It is a derivative of the
+ * photograph, so it carries the photograph's licence (src/assets/photos/README.md).
+ */
+export const TRACKS = { src: '/models/kim-1-tracks.webp', width: 1536, height: 2048 };
+
 /** The two edge-connector tabs, down the left edge: from y0 to y1, standing `out` mm proud. */
 export const TABS = [
   { y0: 11.1, y1: 101.8, out: 10.0, first: 14.9 },
@@ -111,5 +134,5 @@ const cm = (mm) => (mm / 10).toLocaleString('en-GB', { minimumFractionDigits: 1,
 
 /** The model's text alternative and caption, with every size and count read from the layout above. */
 export function describe() {
-  return `Model, not a photograph. A drawing of the KIM-1 board in three.js, measured from the photograph above: the green board, ${cm(BOARD.depth)} by ${cm(BOARD.width)} cm, with ${count(CONTACTS_PER_TAB)} gold contacts on each of its ${count(TABS.length)} edge-connector tabs; the 6502 and the two 6530s; ${count(RAM.length)} memory chips; the ${count(DISPLAY.digits.length)} red LED digits, which light with what the running machine's display shows; and the ${count(KEYS.length)} keys and the SST switch, which press the machine's own keys when clicked, and go down when a key is pressed on the keypad above. The sizes and places come from the photograph; the heights of the parts are typical ones, because a photograph taken from above does not show them.`;
+  return `Model, not a photograph. A drawing of the KIM-1 board in three.js, measured from the photograph above: the green board, ${cm(BOARD.depth)} by ${cm(BOARD.width)} cm, with the copper tracks of its top face traced from that photograph (its underside, which the photograph does not show, is left plain), and ${count(CONTACTS_PER_TAB)} gold contacts on each of its ${count(TABS.length)} edge-connector tabs; the 6502 and the two 6530s; ${count(RAM.length)} memory chips; the ${count(DISPLAY.digits.length)} red LED digits, which light with what the running machine's display shows; and the ${count(KEYS.length)} keys and the SST switch, which press the machine's own keys when clicked, and go down when a key is pressed on the keypad above. The sizes and places come from the photograph; the heights of the parts are typical ones, because a photograph taken from above does not show them.`;
 }

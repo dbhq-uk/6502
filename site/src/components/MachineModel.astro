@@ -4,17 +4,27 @@
 // the model's bundle only when the section nears the screen or the visitor
 // presses the button. Without JavaScript it never shows, and the photograph
 // and the machine's own panel are the page.
-import { MODELS, CONTROLS, CONTROLS_DESCRIPTION, modelSrc } from '../models/models.mjs';
+//
+// A model with a track map (a `texture` in its entry) gets two toggle buttons,
+// Show tracks (on to start with) and Show tracks only, and a credit for the
+// map, which is traced from the machine's photograph and so carries its
+// licence. The credit is built from the same registry entry as the
+// photograph's, so the two cannot disagree.
+import { MODELS, CONTROLS, CONTROLS_DESCRIPTION, TRACK_BUTTONS, modelSrc } from '../models/models.mjs';
 
 interface Props {
   id: string;
+  /** The machine's photograph, from the registry: the track map's credit is its credit. */
+  photo: { author: string; licence: string | null; licenceUrl?: string };
 }
-const { id } = Astro.props;
+const { id, photo } = Astro.props;
 const model = MODELS[id];
 if (!model) throw new Error(`machine ${id} has no entry in src/models/models.mjs`);
+const tracks = Boolean(model.texture);
+const help = [CONTROLS.pointer, CONTROLS.touch, CONTROLS.keys, ...(tracks ? [CONTROLS.tracks] : [])].join(' ');
 ---
 
-<section class="model" aria-labelledby="model" data-model={id} data-model-src={modelSrc(id)} data-state="idle" hidden>
+<section class="model" aria-labelledby="model" data-model={id} data-model-src={modelSrc(id)} data-model-texture={model.texture} data-state="idle" hidden>
   <div class="wrap narrow">
     <h2 id="model">A model of the board</h2>
     <section class="model-stage" data-model-stage tabindex="0" aria-label={model.label} aria-description={CONTROLS_DESCRIPTION} aria-describedby="model-about">
@@ -24,9 +34,16 @@ if (!model) throw new Error(`machine ${id} has no entry in src/models/models.mjs
     </section>
     <div class="model-controls">
       <button type="button" class="btn small" data-model-reset>Reset the view</button>
+      {tracks && (
+        <div class="model-toggles" role="group" aria-label="Tracks">
+          <button type="button" class="btn small model-toggle" data-toggle-tracks aria-pressed="true">{TRACK_BUTTONS.tracks}</button>
+          <button type="button" class="btn small model-toggle" data-toggle-tracks-only aria-pressed="false">{TRACK_BUTTONS.only}</button>
+        </div>
+      )}
       <p class="model-status" role="status" data-model-status>The 3D model loads when you scroll to it.</p>
     </div>
-    <p class="model-help" id="model-help">{CONTROLS.pointer} {CONTROLS.touch} {CONTROLS.keys}</p>
+    <p class="model-help" id="model-help">{help}</p>
     <p class="figure-caption model-about" id="model-about">{model.about}</p>
+    {tracks && <p class="figure-caption model-credit" data-model-credit>Tracks traced from the photograph above, by {photo.author}, and shared under its licence: {photo.licence === null ? 'no licence stated' : photo.licenceUrl ? <a href={photo.licenceUrl}>{photo.licence}</a> : photo.licence}.</p>}
   </div>
 </section>

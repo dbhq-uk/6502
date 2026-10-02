@@ -16,7 +16,7 @@
 //
 // A machine with no entry here gets no model section. Its photograph is a
 // different matter: that is required of every running machine, in the registry.
-import { describe as describeKim1 } from './kim-1-layout.mjs';
+import { describe as describeKim1, TRACKS as KIM1_TRACKS } from './kim-1-layout.mjs';
 
 /**
  * What the visitor is told about the controls, once, so the visible text under
@@ -32,7 +32,12 @@ export const CONTROLS = {
   pointer: 'Drag to turn it, and right-drag or Shift-drag to pan. Click the model, then scroll to zoom, or hold Ctrl or Cmd and scroll. Double-click empty space to reset the view.',
   touch: 'On a touch screen, tap the model first: then one finger turns it, and two fingers pinch to zoom and pan.',
   keys: 'With the model focused, the arrow keys turn it, Shift and the arrow keys pan, plus and minus zoom, Home resets the view, and Escape lets go of it.',
+  /** For a model with a track map: what its two buttons do. */
+  tracks: 'Show tracks puts the copper tracks on the board or takes them off, and Show tracks only fades the parts out so the tracks can be followed.',
 };
+
+/** The two buttons of a model with a track map. Labels: no full stop. */
+export const TRACK_BUTTONS = { tracks: 'Show tracks', only: 'Show tracks only' };
 
 /** What a screen reader is told about the model's keys and wheel. */
 export const CONTROLS_DESCRIPTION = `${CONTROLS.keys} The wheel zooms only while the model has focus, so the page still scrolls.`;
@@ -43,6 +48,8 @@ export const MODELS = {
     label: '3D model of the KIM-1 board. Click a key on the model to press it.',
     /** The text alternative, shown as the caption and read as the description. */
     about: describeKim1(),
+    /** Where its track map is served from: scripts/build-models.mjs copies it there beside the bundle. */
+    texture: KIM1_TRACKS.src,
   },
 };
 

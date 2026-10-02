@@ -20,7 +20,11 @@
 // and the wheel scrolls the page again; the camera goes under the board and the
 // view from there is drawn; panning far stays inside the board's bounds;
 // the distance limits hold; a double click on empty space resets the view; the
-// keyboard turns, pans, zooms and resets. Then in an emulated phone: one finger
+// keyboard turns, pans, zooms and resets. Then the copper tracks: on to start
+// with, a part-free stretch of the board has more colour variance with them
+// than without, Show tracks takes them off and Show tracks only fades the parts
+// out (read off the scene through the model's test hook) and leaves the track
+// pixels showing, both from the keyboard too. Then in an emulated phone: one finger
 // scrolls the page until a tap focuses the model, after which one finger turns
 // it and two fingers pinch-zoom, and the canvas is touch-action none only while
 // it has focus.
@@ -262,11 +266,15 @@ try {
     throw new Error('the camera never came to rest');
   };
   // The page scrolls smoothly, so a scroll is waited out before anything is measured or aimed.
+  // Three readings the same, 120 ms apart: on a loaded machine software WebGL can
+  // hold a frame back longer than one gap, and two equal readings mid-scroll passed.
   const stillScrolling = async (p) => {
     let last = -1;
-    for (let i = 0; i < 40; i++) {
+    let same = 0;
+    for (let i = 0; i < 60; i++) {
       const y = await p.evaluate(() => scrollY);
-      if (y === last) return y;
+      same = y === last ? same + 1 : 0;
+      if (same >= 2) return y;
       last = y;
       await p.waitForTimeout(120);
     }
@@ -503,6 +511,94 @@ try {
   await page.locator('[data-model-reset]').click();
   const viaButton = await settle();
   console.log(`reset button: back at the start view: ${near(viaButton.azimuth, start.azimuth) && near(viaButton.distance, start.distance)}`);
+
+  // ---- The copper tracks ----
+  const layers = () => model.evaluate((m) => m.modelLayers());
+  const tracksButton = page.locator('[data-toggle-tracks]');
+  const onlyButton = page.locator('[data-toggle-tracks-only]');
+  const pressed = async () => `${await tracksButton.getAttribute('aria-pressed')},${await onlyButton.getAttribute('aria-pressed')}`;
+  await page.evaluate(() => document.activeElement?.blur());
+  await bring();
+  await settle();
+  // A part-free stretch of the board: the bus of tracks down its left side,
+  // 10 to 30 mm in and 115 to 165 mm down, as a box on the screen.
+  const corners = await model.evaluate((m) => [[10, 115], [30, 115], [10, 165], [30, 165]].map(([x, y]) => m.modelBoardPoint(x, y)));
+  const box = await rect();
+  const clip = {
+    x: Math.min(...corners.map((c) => c.x)) - box.x, y: Math.min(...corners.map((c) => c.y)) - box.y,
+    width: Math.max(...corners.map((c) => c.x)) - Math.min(...corners.map((c) => c.x)), height: Math.max(...corners.map((c) => c.y)) - Math.min(...corners.map((c) => c.y)),
+  };
+  // Colour variance of the stretch (the sum of the three channels' variances),
+  // and the share of the whole canvas that is copper-coloured: red at least 0.6
+  // of green, and both well over blue. The tracks are, as drawn here, and so are
+  // the gold contacts; the green mask (red about 0.15 of green) and the grey
+  // and black parts are not.
+  const surfaceOf = async () => {
+    const { data, info } = await sharp(await canvas.screenshot()).removeAlpha().raw().toBuffer({ resolveWithObject: true });
+    let copper = 0;
+    const sum = [0, 0, 0], sq = [0, 0, 0];
+    let n = 0;
+    const [x0, y0, x1, y1] = [Math.round(clip.x), Math.round(clip.y), Math.round(clip.x + clip.width), Math.round(clip.y + clip.height)];
+    for (let y = 0; y < info.height; y++) {
+      for (let x = 0; x < info.width; x++) {
+        const i = (y * info.width + x) * info.channels;
+        const [r, g, b] = [data[i], data[i + 1], data[i + 2]];
+        if (r >= 0.6 * g && r - b > 25 && g - b > 15) copper++;
+        if (x >= x0 && x < x1 && y >= y0 && y < y1) { [r, g, b].forEach((v, c) => { sum[c] += v; sq[c] += v * v; }); n++; }
+      }
+    }
+    const variance = sq.reduce((a, q, c) => a + q / n - (sum[c] / n) ** 2, 0);
+    return { variance, copper: copper / (info.width * info.height), n };
+  };
+  const waitParts = (level) => page.waitForFunction((l) => document.querySelector('[data-model]').modelLayers().partsLevel === l, level, { timeout: 10_000 }).catch(() => {});
+  const l0 = await layers();
+  const p0 = await pressed();
+  const withTracks = await surfaceOf();
+  console.log(`tracks at the start: ${JSON.stringify(l0)}, buttons pressed ${p0}, section data-model-tracks "${await model.getAttribute('data-model-tracks')}"`);
+  if (!l0.tracksLoaded || !l0.tracks || p0 !== 'true,false') problems.push(`the tracks are not on at the start (${JSON.stringify(l0)}, pressed ${p0})`);
+  // Show tracks, from the keyboard: Tab to it and press Enter.
+  await tracksButton.focus();
+  await page.keyboard.press('Enter');
+  await page.waitForTimeout(400);
+  const l1 = await layers();
+  const p1 = await pressed();
+  const without = await surfaceOf();
+  console.log(`Show tracks, Enter: ${JSON.stringify(l1)}, pressed ${p1}; status "${await page.locator('[data-model-status]').innerText()}"`);
+  console.log(`the board's left-hand bus, ${Math.round(clip.width)}x${Math.round(clip.height)} px (${withTracks.n} pixels): colour variance ${withTracks.variance.toFixed(1)} with the tracks, ${without.variance.toFixed(1)} without; copper-coloured pixels on the canvas ${(withTracks.copper * 100).toFixed(2)}% with, ${(without.copper * 100).toFixed(2)}% without`);
+  if (l1.tracks || p1 !== 'false,false') problems.push(`Show tracks did not take the tracks off (${JSON.stringify(l1)}, pressed ${p1})`);
+  if (!(withTracks.variance > without.variance * 1.5)) problems.push(`the tracks do not show: colour variance ${withTracks.variance.toFixed(1)} with them against ${without.variance.toFixed(1)} without`);
+  if (!(withTracks.copper > without.copper + 0.03)) problems.push(`the tracks add too few copper-coloured pixels (${(withTracks.copper * 100).toFixed(2)}% against ${(without.copper * 100).toFixed(2)}%)`);
+  // Space puts them back.
+  await page.keyboard.press('Space');
+  await page.waitForTimeout(400);
+  const p2 = await pressed();
+  if (!(await layers()).tracks || p2 !== 'true,false') problems.push(`Space on Show tracks did not put the tracks back (pressed ${p2})`);
+  // Show tracks only: the parts fade out and go, the tracks stay.
+  await onlyButton.click();
+  await waitParts(0);
+  const l3 = await layers();
+  const p3 = await pressed();
+  const only = await surfaceOf();
+  console.log(`Show tracks only: ${JSON.stringify(l3)}, pressed ${p3}, data-model-parts "${await model.getAttribute('data-model-parts')}"; copper-coloured pixels ${(only.copper * 100).toFixed(2)}% (parts shown: ${(withTracks.copper * 100).toFixed(2)}%); the bus's colour variance ${only.variance.toFixed(1)}`);
+  if (l3.partsVisible || l3.partsLevel !== 0 || !l3.tracks || p3 !== 'true,true') problems.push(`Show tracks only did not hide the parts and keep the tracks (${JSON.stringify(l3)}, pressed ${p3})`);
+  if (!(only.copper > without.copper + 0.03) || !(only.variance > without.variance * 1.5)) problems.push('with the parts hidden the tracks do not show');
+  // A click where a key was presses nothing now.
+  const before5 = Number((await model.getAttribute('data-model-presses')) ?? 0);
+  const ghost = await model.evaluate((m) => m.modelKeyPoint('5'));
+  await page.mouse.click(ghost.x, ghost.y);
+  await page.waitForTimeout(400);
+  const after5 = Number((await model.getAttribute('data-model-presses')) ?? 0);
+  console.log(`a click where the hidden 5 key was: presses ${before5} then ${after5}`);
+  if (after5 !== before5) problems.push('a hidden key could still be clicked');
+  // Show tracks while tracks only is on: the tracks go and the parts come back.
+  await tracksButton.click();
+  await waitParts(1);
+  const l4 = await layers();
+  const p4 = await pressed();
+  console.log(`Show tracks with the parts hidden: ${JSON.stringify(l4)}, pressed ${p4}`);
+  if (l4.tracks || !l4.partsVisible || l4.partsLevel !== 1 || p4 !== 'false,false') problems.push(`turning the tracks off did not bring the parts back (${JSON.stringify(l4)}, pressed ${p4})`);
+  await tracksButton.click();
+  if ((await pressed()) !== 'true,false' || !(await layers()).tracks) problems.push('the tracks did not come back on');
 
   // A phone: one finger scrolls the page until a tap focuses the model.
   const phone = await browser.newContext({ viewport: { width: 390, height: 780 }, hasTouch: true, isMobile: true, deviceScaleFactor: 2 });

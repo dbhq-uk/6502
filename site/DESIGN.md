@@ -147,9 +147,9 @@ same black canvas, using the stage every machine's model shares
 - **Its colours are the board's, not the site's.** The page's own drawn display
   stays phosphor green, because it is a drawing of what the machine shows. The
   model is a model of a thing, so its board is green fibreglass, its contacts
-  gold, its legs tinned and its LEDs red, and its solder side a shade lighter
-  than the top so the underside reads when the camera is below. Those six
-  colours are tokens (`--model-pcb`, `--model-pcb-under`, `--model-gold`,
+  gold, its tracks copper, its legs tinned and its LEDs red, and its solder side a shade lighter
+  than the top so the underside reads when the camera is below. Those seven
+  colours are tokens (`--model-pcb`, `--model-pcb-under`, `--model-copper`, `--model-gold`,
   `--model-tin`, `--model-led`, `--model-led-off`), used by the model's scene
   and nowhere else, and none is a text colour. The chips, keypad, keys and printing use the site's own iron,
   black, white and moss.
@@ -181,6 +181,25 @@ same black canvas, using the stage every machine's model shares
   loader, which fetches the model and three.js only when the section nears the
   screen or the visitor presses "Load the 3D model". Without JavaScript the
   section never appears, and the photograph and the drawn keypad are the page.
+- **The board carries its real copper tracks** (Dan, 2 October 2026: "on the 3d
+  model i would like to see the circuit board tracks"). They are traced from the
+  photograph, not drawn, into a greyscale map (`src/assets/tracks/kim-1.webp`),
+  and the model turns that into the top face's colour, shine and relief: copper
+  `--model-copper`, a warm olive gold a little lighter than the mask, smoother
+  and slightly metallic, standing proud through a bump map; the mask stays the
+  matte `--model-pcb`. No glow: nothing on the face is emissive. The underside
+  stays plain, because the photograph does not show it, and the caption says so.
+  The map is the photograph's derivative and is credited under the model with
+  its licence.
+- **Show tracks and Show tracks only** are two toggle buttons beside Reset the
+  view, in a group named Tracks. They are the site's ordinary small buttons; a
+  pressed one is `--white` on `--veil` with a filled square before its label,
+  an unpressed one an empty square, so the state is a shape as well as a
+  colour, and `aria-pressed` says it to a screen reader. Show tracks starts
+  pressed. Show tracks only fades the parts out over 0.3 seconds (at once with
+  reduced motion) and leaves the board and its tracks; turning the tracks off
+  brings the parts back, and Show tracks only turns them on. No lime: the
+  buttons spend none of it. The pressed colour pair is in the contrast table.
 
 ## The chip page
 

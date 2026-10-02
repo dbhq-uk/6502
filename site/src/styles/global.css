@@ -215,6 +215,12 @@ footer .linkbtn:hover { color: var(--white); }
 .model-load { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); }
 [data-model]:not([data-state="idle"]) .model-load { display: none; }
 [data-model]:not([data-state="running"]) [data-model-reset] { display: none; }
+/* Show tracks and Show tracks only: toggle buttons, so a box before the label is filled when pressed, a cue that is a shape and not only a colour. No lime: the lime is rationed. */
+.model-toggles { display: flex; flex-wrap: wrap; gap: 12px; }
+[data-model]:not([data-state="running"]) .model-toggles { display: none; }
+.model-toggle::before { content: ""; display: inline-block; width: 9px; height: 9px; margin-right: 8px; border: 1px solid currentColor; border-radius: 2px; }
+.model-toggle[aria-pressed="true"] { color: var(--white); background: var(--veil); }
+.model-toggle[aria-pressed="true"]::before { background: currentColor; }
 .model-controls { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 20px; margin: 16px 0 12px; }
 .model-status { color: var(--moss-80); font-size: 14px; }
 .model-help { color: var(--moss-80); font-size: 14px; margin: 0 0 12px; }

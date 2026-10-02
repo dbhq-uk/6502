@@ -38,3 +38,26 @@ upside down in its packing box, and this shot uncropped. This one is the
 original MOS board, square on, sharp, and on black, which is the site's own
 canvas. The 3D model on the same page is measured from it. The journal for
 2 October 2026 has the full comparison.
+
+## The track map, src/assets/tracks/kim-1.webp
+
+The copper tracks on the top face of the KIM-1's 3D model are traced from the
+photograph above, so the map is a derivative of it and carries its licence:
+**CC BY-SA 2.0 fr, share-alike**. It is shared under that licence, not the
+repository's MIT, and the page credits it under the model: "Tracks traced from
+the photograph above, by Rama & Musée Bolo, cropped by Tomer T, and shared under
+its licence: CC BY-SA 2.0 fr", built from the same registry entry as the
+photograph's own credit.
+
+| | |
+|---|---|
+| What | A greyscale map of the board's top face, edge to edge of its body (not the tabs), white where there is copper: the tracks, the copper pours and the tinned pads, with the photographed parts, the labels and the silkscreen taken out |
+| Made from | The full-size source above (3792 by 4675, the SHA-256 above), not this folder's 1600 pixel copy, which has 0.42 of the resolution: at that size the tracks of the bus down the left side, 1.27 mm apart, merge |
+| Made by | `node scripts/make-board-tracks.mjs <the full-size photograph>`, on 2 October 2026. The script refuses a full-size file with any other hash. How it works and the thresholds it uses are in the script's header and in the journal for that day |
+| This copy | 1536 by 2048 pixels, lossless WebP, 293,952 bytes, SHA-256 `bfec20d30c433f4b54d817f5cec2d2b0138fae5682e82f6a1415880141180e54`. The script makes it byte for byte the same from the same source |
+| Served | Copied to `/models/kim-1-tracks.webp` by `scripts/build-models.mjs` at every build, and fetched by the model's bundle when the model loads, never with the page |
+
+To make it again: fetch the source as in the table above, check its SHA-256,
+run the script on it from `site/`, look at the result, and commit
+`src/assets/tracks/kim-1.webp`. The build does not run the script, and nothing
+in the tests or the build fetches the photograph.
