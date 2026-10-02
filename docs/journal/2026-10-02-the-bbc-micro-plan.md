@@ -122,6 +122,43 @@ bytes and matches its pin, that the operating system is `OS 1.20`, and that
 `BbcRoms` refuses an image of any other size. The tests were written first and
 failed to compile because the pins did not exist.
 
+## Task 2
+
+The second task adds `BbcBus`, the one place that implements the bus for the
+BBC Micro: 32 KB of RAM with no aliasing at `$4000`, the paged ROM chosen by the
+latch at `$FE30-$FE3F` (BASIC in slot 15, the DFS in slot 14), the operating
+system ROM at `$C000-$FBFF` and `$FF00-$FFFF`, and the 1 MHz stretch. FRED and
+JIM read `$FF`, an absent fast device reads `$FE` and an absent slow one reads
+`$00`, which is what the operating system's Tube, Econet and ADC probes need.
+
+**The stretch rule and what it is judged by.** A bus cycle at a slow address waits
+`1 + (T & 1)` extra cycles, where `T` is the cycle count before it, then does the
+access. Each cycle is judged on its own address, never on the instruction's. The
+tests drive the bus the way `STA $FDF0,X` does: the dummy read at the unfixed
+address `$FD30` is slow and the write at `$FE30` is not, and the reverse pair at
+`$FB40` and `$FC40`. They also check that a read-modify-write on a slow address
+pays on all three of its accesses. The tests were mutated once: with the wait
+fixed at one cycle, four of them failed.
+
+**The empty ROM slot is an assumption.** An empty slot reads the high byte of the
+address. The sheet measured that for an absent fast device, on one machine, not
+for an empty ROM socket (`bus.md` section 6, item 3). The operating system never
+reads an empty slot's body at boot, only the header bytes it tests, so nothing
+here depends on the choice yet.
+
+**`$FE18-$FE1F` is slow.** No source lists it. It is taken as slow, as one
+emulator treats it according to the sheet, and it only matters when Econet is
+modelled, which it will not be.
+
+**Nothing ticks yet.** `Tick()` is called once for every CPU cycle, stretch cycles
+included, and does nothing. The counting test checks that `Cycles` and the ticks
+always agree, so each chip added later is clocked once per cycle by construction.
+
+**The class is not sealed.** The brief gave `sealed`, but a test that counts the
+`Tick()` calls needs to override it, and a sealed class cannot have a virtual
+member. The override is `protected` for a class in another assembly, so the
+member is `protected internal virtual` and the test's override is `protected`.
+
 ## Mistakes
 
 - **A new test project did not compile.** It was copied from the KIM-1's test
