@@ -1,0 +1,25 @@
+<Project Sdk="Microsoft.NET.Sdk.WebAssembly">
+  <!--
+    The BBC Micro Model B as .NET WebAssembly, for its page on 6502.dbhq.uk and
+    for the browser speed check in bench/bbc-micro-speed/. A plain WebAssembly
+    app, not Blazor, in the shape of Dbhq.Machines.Kim1.Wasm. The ROMs are not in
+    here: the page gives them to Load as bytes, read from roms/bbc-micro/ and
+    checked against their pins (AGENTS.md rules 3 and 4).
+  -->
+  <PropertyGroup>
+    <IsPackable>false</IsPackable>
+    <!-- The JavaScript interop generator writes unsafe code for [JSExport], and refuses to compile without this. -->
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <AssemblyName>Dbhq.Machines.BbcMicro.Wasm</AssemblyName>
+    <RootNamespace>Dbhq.Machines.BbcMicro.Wasm</RootNamespace>
+    <!-- No culture data: nothing here formats or compares text by culture, and the ICU files would be the biggest download. -->
+    <InvariantGlobalization>true</InvariantGlobalization>
+    <!-- No symbols in the published site. -->
+    <DebugType>none</DebugType>
+    <CopyOutputSymbolsToPublishDirectory>false</CopyOutputSymbolsToPublishDirectory>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../Dbhq.Machines.BbcMicro/Dbhq.Machines.BbcMicro.csproj" />
+  </ItemGroup>
+</Project>

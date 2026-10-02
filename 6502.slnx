@@ -6,6 +6,7 @@
   </Folder>
   <Folder Name="/src/">
     <Project Path="src/Dbhq.Cpu6502/Dbhq.Cpu6502.csproj" />
+    <Project Path="src/Dbhq.Machines.BbcMicro.Wasm/Dbhq.Machines.BbcMicro.Wasm.csproj" />
     <Project Path="src/Dbhq.Machines.BbcMicro/Dbhq.Machines.BbcMicro.csproj" />
     <Project Path="src/Dbhq.Machines.Kim1.Wasm/Dbhq.Machines.Kim1.Wasm.csproj" />
     <Project Path="src/Dbhq.Machines.Kim1/Dbhq.Machines.Kim1.csproj" />

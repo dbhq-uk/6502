@@ -1,0 +1,9 @@
+{
+  "name": "dbhq-bbc-micro-speed-driver",
+  "private": true,
+  "description": "Drives the BBC Micro's browser speed check in a real Chrome. Local measurement only.",
+  "type": "module",
+  "dependencies": {
+    "playwright-core": "1.63.0"
+  }
+}
