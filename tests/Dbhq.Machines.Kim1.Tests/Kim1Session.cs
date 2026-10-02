@@ -17,11 +17,11 @@ public sealed class Kim1Session
         Keystrokes = new Kim1Keystrokes(Machine);
     }
 
-    /// <summary>The 6530-002's 1 KB, pinned and hash-checked, never committed.</summary>
-    public static byte[] Rom002 => File.ReadAllBytes(PinnedFiles.Fetch(Pins.Kim1Rom002Url, Path.Combine("kim-1", "6530-002.bin"), PinnedFiles.Sha256(Pins.Kim1Rom002Sha256)));
+    /// <summary>The 6530-002's 1 KB, from roms/ in this repository, hash-checked.</summary>
+    public static byte[] Rom002 => RepoPaths.ReadChecked(Pins.Kim1Rom002Path, Pins.Kim1Rom002Sha256);
 
     /// <summary>The 6530-003's 1 KB, likewise.</summary>
-    public static byte[] Rom003 => File.ReadAllBytes(PinnedFiles.Fetch(Pins.Kim1Rom003Url, Path.Combine("kim-1", "6530-003.bin"), PinnedFiles.Sha256(Pins.Kim1Rom003Sha256)));
+    public static byte[] Rom003 => RepoPaths.ReadChecked(Pins.Kim1Rom003Path, Pins.Kim1Rom003Sha256);
 
     public Kim1Machine Machine { get; }
 

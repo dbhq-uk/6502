@@ -5,6 +5,22 @@ public static class RepoPaths
     /// <summary>The repository root: the nearest directory above the running binaries that holds 6502.slnx.</summary>
     public static string Root { get; } = FindRoot();
 
+    /// <summary>
+    /// Reads a file committed to the repository and checks its SHA-256, so a ROM
+    /// that has been altered fails loudly instead of running.
+    /// </summary>
+    public static byte[] ReadChecked(string relativePath, string sha256Hex)
+    {
+        byte[] bytes = File.ReadAllBytes(Path.Combine(Root, relativePath));
+        string actual = Convert.ToHexStringLower(System.Security.Cryptography.SHA256.HashData(bytes));
+        if (actual != sha256Hex)
+        {
+            throw new InvalidDataException($"{relativePath} does not match its pinned hash: {actual}");
+        }
+
+        return bytes;
+    }
+
     /// <summary>Downloaded and generated test data. Git ignores it.</summary>
     public static string TestData => Path.Combine(Root, ".testdata");
 

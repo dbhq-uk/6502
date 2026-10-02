@@ -11,12 +11,11 @@
 //      ahead of time (AOT), which needs the wasm-tools workload; --interpreter
 //      publishes it without AOT instead, for comparison. The journal entry
 //      "The KIM-1 in the browser" says why AOT.
-//   2. MOS Technology's monitor ROM, the two 1 KB halves, fetched from the
-//      pinned URLs in tests/Dbhq.Cpu6502.TestSupport/Pins.cs and checked
-//      against their SHA-256 (AGENTS.md rules 3 and 4). A copy the tests
-//      already fetched into .testdata/kim-1/ is used when its hash matches.
+//   2. MOS Technology's monitor ROM, the two 1 KB halves, read from roms/ in
+//      this repository and checked against the SHA-256 pinned in
+//      tests/Dbhq.Cpu6502.TestSupport/Pins.cs (AGENTS.md rules 3 and 4).
 //
-// Needs the .NET 10 SDK, and Node 22.22 or later for fetch.
+// Needs the .NET 10 SDK and Node 22.22 or later.
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
@@ -33,17 +32,10 @@ const aot = !process.argv.includes('--interpreter');
 
 const sha256 = (bytes) => crypto.createHash('sha256').update(bytes).digest('hex');
 
-async function rom({ file, url, sha256: want }) {
-  const cached = path.join(repo, '.testdata', 'kim-1', file);
-  if (fs.existsSync(cached) && sha256(fs.readFileSync(cached)) === want) {
-    console.log(`${file}: the tests' copy in .testdata, hash checked`);
-    return fs.readFileSync(cached);
-  }
-  const response = await fetch(url);
-  if (!response.ok) throw new Error(`${url}: HTTP ${response.status}`);
-  const bytes = Buffer.from(await response.arrayBuffer());
-  if (sha256(bytes) !== want) throw new Error(`${url} does not match its pinned hash ${want}`);
-  console.log(`${file}: fetched from ${url}, hash checked`);
+async function rom({ file, path: relative, sha256: want }) {
+  const bytes = fs.readFileSync(path.join(repo, relative));
+  if (sha256(bytes) !== want) throw new Error(`${relative} does not match its pinned hash ${want}`);
+  console.log(`${file}: read from ${relative}, hash checked`);
   return bytes;
 }
 
@@ -52,7 +44,7 @@ async function rom({ file, url, sha256: want }) {
 // would look for Pins.cs in the wrong place.
 if (process.cwd() !== site) throw new Error(`run this from ${path.relative(process.cwd(), site) || '.'}: cd site && node scripts/build-machines.mjs`);
 
-// Fetch first: a ROM that fails its hash should stop the build before the
+// Read first: a ROM that fails its hash should stop the build before the
 // slow publish, not after it.
 const roms = await Promise.all(kim1Roms().map(async (r) => ({ ...r, bytes: await rom(r) })));
 

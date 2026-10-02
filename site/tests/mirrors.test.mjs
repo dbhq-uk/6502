@@ -6,7 +6,7 @@ import { REPO_ROOT } from '../src/lib/registry.mjs';
 
 // AGENTS.md rule 3: the tests and the build never depend on a third party's
 // server. Every file they fetch comes from a repository in the dbhq-uk
-// organisation (a fork or a mirror we hold), pinned to a commit and a hash.
+// organisation (a fork we hold; ROMs are committed under roms/), pinned to a commit and a hash.
 // This reads the places that fetch and fails on any other host.
 
 const SCANNED = [
@@ -57,9 +57,9 @@ test('every file the tests and the build fetch comes from a dbhq-uk repository',
   assert.deepEqual(foreign, [], 'these fetch from a host we do not control: mirror the source under dbhq-uk and pin it');
 });
 
-test('the mirrors named in Pins.cs are pinned to a full commit, not a branch', () => {
+test('the test data named in Pins.cs are pinned to a full commit, not a branch', () => {
   const pins = fs.readFileSync(path.join(REPO_ROOT, 'tests', 'Dbhq.Cpu6502.TestSupport', 'Pins.cs'), 'utf8');
   const commits = [...pins.matchAll(/(\w+Commit) = "([0-9a-f]+)"/g)];
-  assert.ok(commits.length >= 4, 'the pinned commits were not found');
+  assert.ok(commits.length >= 3, 'the pinned commits were not found');
   for (const [, name, sha] of commits) assert.match(sha, /^[0-9a-f]{40}$/, `${name} is not a full 40-character commit`);
 });
