@@ -1,7 +1,7 @@
 ---
 title: "A photograph and a model of the KIM-1"
 date: 2026-10-02
-summary: "The KIM-1's page gets a credited photograph of an original board and a 3D model of it, measured from that photograph, whose six red digits show what the running machine shows and whose keys press the machine's own. The model loads only when a visitor reaches it."
+summary: "The KIM-1's page gets a credited photograph of an original board and a 3D model of it, measured from that photograph, whose six red digits show what the running machine shows and whose keys press the machine's own. The model loads only when a visitor reaches it. Later the same day its board gets the real copper tracks, traced from the photograph."
 order: 9
 ---
 
@@ -480,3 +480,354 @@ user	0m10.937s
 sys	0m3.245s
 exit 0
 ```
+
+## The copper tracks, later the same day
+
+Dan, 2 October 2026: "on the 3d model i would like to see the circuit board
+tracks". The board was a flat green slab with the parts on it. It now carries
+the real board's copper tracks, traced from the photograph on the same page,
+not invented.
+
+### What was built
+
+- **A track map**, `site/src/assets/tracks/kim-1.webp`: greyscale, white where
+  there is copper, 1536 by 2048 pixels, lossless WebP, 293,952 bytes, covering
+  the board's body edge to edge. Committed, so the build never makes it.
+- **The script that made it**, `site/scripts/make-board-tracks.mjs`, with its
+  method and thresholds in its header. `site/README.md` says how to run it, and
+  `site/src/assets/photos/README.md` says where the map came from and under
+  which licence.
+- **The top face**: the model loads the map as a same-origin image and turns it
+  into three maps for a `MeshStandardMaterial`: colour (the mask's
+  `--model-pcb` to a new token, `--model-copper`), surface (roughness 0.55 and
+  metalness 0.1 on the mask, the plain board's own values, and 0.35 and 0.25 on
+  the copper) and relief (the map blurred by 1.5 pixels as a bump map, scale
+  1.5). Nothing on the face is emissive.
+- **Two buttons**, Show tracks and Show tracks only, beside Reset the view.
+- **The credit**, under the model's caption: "Tracks traced from the photograph
+  above, by Rama & Musée Bolo, cropped by Tomer T, and shared under its licence:
+  CC BY-SA 2.0 fr", with the licence linked, built from the photograph's own
+  registry entry.
+- **Tests**: six more in `site/tests/model.test.mjs` and one changed; the
+  browser check drives the buttons. The floor in both workflows is 188.
+
+### The photograph it was traced from, and the mapping
+
+**The full-size source, not the committed copy.** The first passes ran on
+`site/src/assets/photos/kim-1.webp`, the 1600 pixel copy in the repository, at
+6.4 pixels to the millimetre. The bus of tracks down the left of the board has
+tracks 1.27 mm apart with gaps of about 0.3 mm between them, two pixels at that
+size, and WebP had blurred them together. The full-size source, at 15.17 pixels
+to the millimetre, separates them cleanly. It was fetched again on 2 October
+2026 at 12:36 UTC from the same Commons URL as in the morning, and `sha256sum`
+gave `70aa1194749165ea9dc76718ee6ae607b47355c5d8f6c2373a43fc1d2887f7b9`, the
+hash in `site/src/assets/photos/README.md`. The script refuses a full-size file
+with any other hash, and still accepts the committed copy, at its lower
+resolution. Chosen over tracing the committed copy only because the brief asked
+for the photograph in the repository: the full-size file is the same
+photograph, and `measure-kim1-photo.mjs` already works from it.
+
+**The mapping is the one the layout already had.** The morning's measurement
+found the board's body at x 441 to 3471 and y 248 to 4387 on the full-size
+source. That box is now `PHOTO.body` in `site/src/models/kim-1-layout.mjs`,
+with the source's size and hash, and the script cuts exactly that box out and
+scales it to the map. A test holds that the box is `BOARD` at `PX_PER_MM` to
+within a pixel.
+
+**The residual perspective is under two pixels on the committed copy**, about
+0.3 mm, so the board is cut as a box, not warped. Checked by fitting a line to
+each edge of the board on the committed 1600 pixel copy (the edge being the
+first run of five pixels whose channels sum to over 90):
+
+```
+top     y = -0.0000672 x + 104.87   (21 points, largest residual 0.85 px)
+bottom  y =  0.00101 x + 1849.82    (21 points, 0.63 px)
+right   x =  0.000907 y + 1462.79   (31 points, 1.02 px)
+left    x =  0.00390 y + 182.13     (21 points between the tabs, 0.68 px)
+```
+
+Across the board that is a drift of 0.08 pixels along the top, 1.2 along the
+bottom and 1.5 down the right edge; the left edge was fitted only over the
+400 pixels between the two tabs, so its slope is the least certain. The
+morning's box, scaled to the copy, is x 186.1 to 1464.6 and y 104.6 to 1851.1,
+against edges measured at 185.7 to 1464.4 and 104.8 to 1850.5.
+
+### How the tracks were told from the mask
+
+The tracks on this board are tinned copper under a green solder mask. In the
+photograph they are a lighter, yellower green than the mask round them, and
+their centres carry a near-white highlight where the rounded tin catches the
+light. The script works in OKLab, a perceptual colour space (L lightness, a
+green to red, b blue to yellow), at the photograph's own resolution, then
+shrinks the result to the map with a smooth kernel so the edges are soft.
+
+Values read off the full-size photograph with a probe across the bus, 130 mm
+down the board, 8 to 14 mm in: the mask between tracks L 0.24 to 0.29, b 0.03
+to 0.05; a track's flanks L 0.45 to 0.67, b 0.06 to 0.12, hue 101 to 119
+degrees, saturation (chroma over L) 0.12 to 0.20; its highlight L up to 0.97,
+saturation 0.11 to 0.15. And off the parts, on a resampled copy of the
+committed photograph: the cream capacitors at hue 85 to 89, the resistors and
+other brown and grey parts 53 to 68, the ceramic chips' gold about 74, the
+orange capacitor 35. The silkscreen, probed through the letters of
+"EC-715" in the glare at the top right, has saturation 0.05 to 0.09, up to 0.14
+at its edges.
+
+The rules, all in `THRESHOLDS` in the script:
+
+- **The mask's own colour round each pixel** is an opening (a minimum, then a
+  maximum, over a square 0.8 mm each side of the pixel, wider than a track,
+  which removes the tracks) blurred over 1.6 mm. A track is measured against it,
+  so the glare across the top right does not read as copper.
+- **Strong copper**: b at least 0.02 and L at least 0.07 above the local mask,
+  saturation over 0.13, and a hue from 97 to 135 degrees with chroma over 0.03.
+- **Weak copper**: b 0.012 and L 0.05 above the mask, saturation over 0.09, hue
+  92 to 140. A weak region is kept only if it holds a strong pixel. This is
+  what keeps the highlights along the middle of a track.
+- **Pours**: b over 0.062 and L over 0.42 outright, kept only where that colour
+  covers a patch wider than 1.2 mm. The copper beside the notch between the
+  tabs is wider than the opening, so it is found this way.
+- **Pads**: silver (chroma under 0.05), L over 0.42 and 0.12 above the mask,
+  0.5 to 6 square mm, 0.6 to 3.2 mm a side, no more than 1.8 to 1 long, at least
+  0.45 of their box filled, within 0.4 mm of a track. 289 were found.
+- **Clean up**: a one-pixel closing; then everything inside the bodies of the
+  parts the model draws (the three 40-pin chips, the eight memory chips, the ten
+  logic chips, the crystal, the display and the keypad, from the layout) and
+  inside ten boxes listed by hand in `HIDDEN` (two cream capacitors whose
+  highlights passed, the "Rev. B" and "EC-715" silkscreen, four U-number
+  labels, the U18 to U23 labels over the display, and the strip down the right
+  edge with the owner's label and the glare) is set to mask; then regions under
+  0.35 square mm are dropped, holes under 1 square mm are filled, and 0.8 mm
+  round the edge is cleared.
+
+**Before cleaning**, the candidates (the weak mask) held all the tracks and
+pours, and also the edges of the silkscreen labels, the highlights on the cream
+capacitors, the glare and fibreglass weave along the right edge, specks of
+JPEG noise, and the legs of resistors. **After**, it is the copper alone.
+The final run, `node scripts/make-board-tracks.mjs <the full-size photograph>`
+on 2 October 2026:
+
+```
+photograph 3792 x 4675, SHA-256 70aa1194749165ea9dc76718ee6ae607b47355c5d8f6c2373a43fc1d2887f7b9
+board body x 441 to 3471, y 248 to 4387: 3030 x 4139 pixels, 15.17 pixels to the millimetre
+pixels: strong 1358749, weak 1841443, kept by hysteresis 1775279; pads 289; cleared 3483857 pixels; specks dropped 189; holes filled 406
+copper covers 15.1% of the board's top face
+wrote src/assets/tracks/kim-1.webp: 1536 x 2048, 293952 bytes
+```
+
+It took 3 minutes 20 seconds (`time`), on a machine with other work running.
+Run again from the committed script after the last comment edits, the map
+came out byte for byte the same: `sha256sum` gave
+`bfec20d30c433f4b54d817f5cec2d2b0138fae5682e82f6a1415880141180e54` before and
+after.
+
+**Under the model's own parts the map is mask**, because the part hides the
+board there anyway, and the bodies are cleared by the layout's own sizes. The
+pin rows either side of each chip are not cleared, so the pads under the pins
+and the tracks that run to them stay, and show when the parts are hidden.
+
+### Decisions
+
+- **Traced, not drawn.** Every track on the face is where the photograph has
+  one. Chosen over drawing plausible tracks, which would be the same mistake
+  the site already refuses for the 6502's die.
+- **A greyscale map, coloured in the browser from tokens.** Chosen over
+  committing a coloured texture: the test that the model holds no colour of its
+  own still holds, the colours stay in `tokens.css`, and one map gives the
+  colour, the shine and the relief.
+- **Colour, shine and relief, no normal map.** A bump map from the same map, so
+  there is one file. Chosen over a normal map, which would be a second file of
+  about the same size for a relief this shallow.
+- **The copper's colour.** The first token, `#9a8f45`, rendered as an olive
+  green, about (72, 88, 24) in the screenshot. I think that is the scene's mint
+  fill light, and metalness 0.45 with no environment to reflect, which leaves a
+  metallic surface dark and tinted by the light. `#b4874a` with metalness 0.25 renders about
+  (120, 104, 40): warm, lighter than the mask and distinct from the gold
+  contacts at (136, 120, 40).
+- **The underside is left plain.** The photograph shows only the component
+  side, so nothing is known of the solder side's tracks, and none are drawn.
+  Chosen over printing "underside: not photographed" on the underside: a label
+  printed on the model would read as silkscreen on the board, which the real
+  board does not carry. The caption says it instead: the tracks are on the top
+  face, and the underside, which the photograph does not show, is left plain.
+- **Tracks on to start with,** as Dan asked to see them. Show tracks takes them
+  off and the board is exactly as it was this morning, because the mask's
+  shine is the plain board's. Show tracks only fades the parts out over 0.3
+  seconds (at once with reduced motion) and leaves the board, its contacts, its
+  holes and its pads underneath. Turning the tracks off while the parts are
+  hidden brings the parts back, and Show tracks only turns the tracks on,
+  because an empty plain board is not a view of anything.
+- **Toggle buttons, not a radio group.** Two `aria-pressed` buttons in a group
+  named Tracks, as the brief asked, chosen over three radio buttons (board,
+  tracks, tracks only): the two states are independent enough to read as
+  switches, and a radio group would hide which one is the default.
+- **The pressed state is a shape as well as a colour**: a filled square before
+  the label, an empty one when not pressed, and `--white` on `--veil`, the pair
+  a hovered button already uses, which is in the contrast table.
+- **A hidden part cannot be clicked.** three.js's raycaster hits hidden objects
+  too, so the shared stage now takes the first hit whose object and every parent
+  are shown. A click where a key was, with the parts hidden, presses nothing.
+- **The map is served beside the bundle.** `scripts/build-models.mjs` copies it
+  to `public/models/kim-1-tracks.webp` at every build, and the model fetches it
+  when it mounts, so the page's first load does not change. Chosen over
+  bundling it as a hashed asset: the name is stable for the deploy's serving
+  check, which now lists it.
+- **The budget**: 400 KB for the map, held by a test, set before the final run.
+
+### Page weight
+
+`node scripts/page-weight.mjs /machines/kim-1/`, now also counting the map the
+page names in `data-model-texture`. On a build of `main` at `75bca28`:
+
+```
+/machines/kim-1/ when it opens: file, bytes, gzipped
+  /machines/kim-1/ (html)	41172	10177
+  /analytics.js	6510	2983
+  /consent.js	2743	1227
+  /machines-table.js	2416	1021
+  /kim-1.js	7013	2906
+  /model-loader.js	1679	807
+  /table-sort.js	766	449
+  /_astro/kim-1.ufzgBkwp_ZO889l.webp	87100	87072
+  total	149399	106642
+loaded later, when the visitor reaches the model:
+  /models/kim-1.js	607298	154249
+  total	607298	154249
+```
+
+On this branch:
+
+```
+/machines/kim-1/ when it opens: file, bytes, gzipped
+  /machines/kim-1/ (html)	42467	10456
+  /analytics.js	6510	2983
+  /consent.js	2743	1227
+  /machines-table.js	2416	1021
+  /kim-1.js	7013	2906
+  /model-loader.js	1679	807
+  /table-sort.js	766	449
+  /_astro/kim-1.ufzgBkwp_ZO889l.webp	87100	87072
+  total	150694	106921
+loaded later, when the visitor reaches the model:
+  /models/kim-1.js	610415	155521
+  /models/kim-1-tracks.webp	293952	293996
+  total	904367	449517
+```
+
+So the page's first load grew by 1,295 bytes of HTML (279 gzipped: the two
+buttons, the credit and the longer caption). What the model loads grew by
+297,069 bytes: 3,117 in the bundle and the 293,952-byte map, which WebP has
+already compressed, so gzip does nothing for it. The browser check confirms the
+map is fetched with the bundle and not before.
+
+### The browser check
+
+`node scripts/browser-check.mjs` on 2 October 2026, software WebGL, other work
+running on the machine. From the model's first line to the end (the program
+steps and the speed lines are as in the runs above):
+
+```
+model bundle requested before scrolling to it: no
+model: running in 3722 ms after scrolling to it, fetched /models/kim-1.js, /models/kim-1-tracks.webp; status "The model is running. Its digits show the machine's display."
+model canvas: 778x460, 39.1% of its pixels are not black
+digits match: page segments 63,91,6,91,79,57 (0212 3C), model segments 63,91,6,91,79,57 ("0212 3C")
+page key 1 clicked: model key down "1", presses 0 then 1
+model key 2 clicked at 801,559: model key down "2"; the machine showed "2121 00" after the page's 1 and "1212 12" after the model's 2
+controls: start view azimuth 0.000, polar 0.716, distance 35.795, target 0.000,-1.000,1.500; bounds -12.985,-2.000,-15.640,11.985,2.000,15.640; focused false
+hint on the model while unfocused: "Click the model, then scroll to zoom", shown true; touch-action pan-y pinch-zoom
+wheel over the unfocused model: scrollY 2695 to 2995; distance 35.795 to 35.795
+ctrl and the wheel over the unfocused model: distance 35.795 to 24.973; scrollY 2695 to 2695
+after a click on empty space: focused true, ring {"active":true,"outline":"solid","width":"2px"}, touch-action none
+wheel over the focused model, cursor on the 5 key at 765,531: distance 35.795 to 24.973; the key is now at 765,531, 0.5 px from the cursor; scrollY 2695 to 2695
+Escape: focused false, ring {"active":false,"outline":"none","width":"3px"}, touch-action pan-y pinch-zoom
+wheel after Escape: scrollY 2695 to 2995
+left-drag 233 px left and 46 px down: azimuth 0.000 to 3.196, polar 0.716 to 0.088; target unchanged true
+right-drag: target 0.000,-1.000,1.500 to 11.818,2.000,-2.064; azimuth unchanged true, distance unchanged true
+shift and left-drag: target 0.000,-1.000,1.500 to 11.841,2.000,-2.011; azimuth unchanged true
+nine right-drags, far and back and forth: target -12.985,2.000,1.308 within -12.985,-2.000,-15.640 to 11.985,2.000,15.640: true; it reached an edge: true
+under the board: polar 0.716 to 3.142 (pi/2 is 1.571, pi is 3.142); 51.7% of the canvas is not black, mean brightness 65 of 255 (from above: 39.6%, 71)
+dragged on to the stop: polar 3.142, never past pi (3.142)
+the wheel to its limits: closest 3.000 (78.3% of the canvas drawn), farthest 150.000 (2.9% drawn)
+double click on empty space: distance 150.000 to 35.795, polar 0.716, back at the start view: true
+keyboard: ArrowLeft azimuth 0.000 to -0.262; ArrowDown polar 0.716 to 0.978; Shift+ArrowLeft target x 0.000 to -2.863; Shift+ArrowUp target -2.863,-1.000,1.473 to -2.863,0.880,-0.687; + distance 35.795 to 30.425; then - twice to 40.238; Home back at the start: true
+reset button: back at the start view: true
+tracks at the start: {"tracksLoaded":true,"tracks":true,"partsVisible":true,"partsLevel":1}, buttons pressed true,false, section data-model-tracks "on"
+Show tracks, Enter: {"tracksLoaded":true,"tracks":false,"partsVisible":true,"partsLevel":1}, pressed false,false; status "The tracks are off: the board is plain."
+the board's left-hand bus, 53x73 px (3816 pixels): colour variance 1704.8 with the tracks, 17.7 without; copper-coloured pixels on the canvas 11.23% with, 1.04% without
+Show tracks only: {"tracksLoaded":true,"tracks":true,"partsVisible":false,"partsLevel":0}, pressed true,true, data-model-parts "hidden"; copper-coloured pixels 11.70% (parts shown: 11.23%); the bus's colour variance 1697.7
+a click where the hidden 5 key was: presses 2 then 2
+Show tracks with the parts hidden: {"tracksLoaded":true,"tracks":false,"partsVisible":true,"partsLevel":1}, pressed false,false
+phone, unfocused: touch-action "pan-y pinch-zoom", hint "Tap the model, then drag to turn and pinch to zoom", shown true
+phone, one finger swiped up on the unfocused model: scrollY 3241 to 3475; azimuth 0.000 to 0.000, polar 0.716 to 0.716
+phone, after a tap on the model: focused true, touch-action "none"
+phone, one finger dragged on the focused model: azimuth 0.000 to 2.199, polar 0.716 to 0.000; scrollY 3241 to 3241
+phone, two fingers spread on the focused model: distance 35.795 to 21.091; scrollY 3241 to 3241
+phone, after it loses focus: touch-action "pan-y pinch-zoom"
+no console errors, no failed requests, no CSP violations
+
+real	8m48.005s
+user	0m17.932s
+sys	0m4.572s
+exit 0
+```
+
+"53x73 px" is the screen box round a part-free stretch of the board, the bus 10
+to 30 mm in and 115 to 165 mm down, found with a new test hook,
+`modelBoardPoint(x, y)`. Its colour variance is the sum of the three channels'
+variances there. A copper-coloured pixel is one whose red is at least 0.6 of its
+green and both are well over its blue: the copper and the gold contacts, not
+the green mask or the grey parts. The 1.04% without the tracks is, I think,
+the contacts.
+
+### What is proven, and what is not
+
+Proven in headless Chrome 153 with software WebGL: the lines above. Seen, not
+measured: screenshots of the model with the tracks on, off and alone, and up
+close, looked at during tuning. Not checked: a real GPU, any browser but Chrome,
+and a screen reader on the two buttons.
+
+### Limitations
+
+- **The top side only.** The photograph shows nothing of the solder side.
+- **Tracks under the photographed parts are gaps.** Where a resistor, a
+  capacitor or a chip that the model does not draw covers a track in the
+  photograph, the track is not traced, so some tracks stop short and start again.
+  The loose red wire across the left of the board does the same to the bus.
+- **Some pads are missing.** Pads whose solder has darkened to brown are within
+  0.03 to 0.05 of the mask's lightness and have no hue to speak of, so the rules
+  cannot tell them from the mask without letting the mask in too. Their tracks
+  end a little short of where the pad would be.
+- **A little silkscreen may remain** where a label touches a track, and the
+  edges of a few photographed parts' legs.
+- **The map is 7.5 to 7.7 pixels to the millimetre**, half the source's 15.17,
+  to stay inside its budget. Close up, a track's edge is soft.
+- **The perspective**, under two pixels on the committed copy, is not corrected.
+- **The tabs are not mapped.** Their gold contacts are the model's own, as
+  before, and the tracks start at the board's edge.
+
+### Mistakes on the way
+
+- **The first hue band let the capacitors in.** With the band from 85 degrees,
+  the cream capacitors (85 to 89) came through as copper. Measuring them moved
+  the band's start to 97 (92 for weak copper).
+- **A closing that merged the bus.** Closing holes up to 0.2 mm filled the
+  0.3 mm gaps between the bus's tracks, and the bus came out as one slab. It is
+  now one pixel, and the highlights along each track are kept by the weak rule
+  instead.
+- **A lightness ceiling that cut the tracks in half.** The first rules dropped
+  anything with L over 0.8 as white ceramic or label, but the highlight along a
+  tinned track reaches 0.97. Chroma and saturation leave the white parts out
+  without it, so the ceiling went.
+- **The section's own data attribute matched a button.** The model reports its
+  state as `data-model-tracks` on the section, and the first Show tracks button
+  was `data-model-tracks` too, so a selector for the button found the section
+  first. The buttons are `data-toggle-tracks` and `data-toggle-tracks-only`.
+- **The first copper check measured the wrong colour.** It counted pixels
+  whose red beat their green, and the first copper rendered greener than red,
+  so the tracks "added no copper": 0.82% with them, 0.83% without. The colour
+  was changed (above) and the check now uses the measured rendered colours.
+- **A flaky wait in the phone check.** One run failed "a finger on the focused
+  model scrolled the page", 3222 to 3241: the check had read the scroll position
+  before the page had stopped moving, because it waited for two equal readings
+  120 ms apart, and on a loaded machine software WebGL can hold a frame back
+  longer than that. It now waits for three. The next full run passed, above.
+

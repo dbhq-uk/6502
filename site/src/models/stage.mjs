@@ -196,13 +196,17 @@ export function createStage(root, { view, bounds, minDistance = 3, maxDistance =
 
   // A click on the model, told apart from a drag: the pointer moved less than
   // a few pixels between going down and coming up.
+  // A ray hits hidden objects too (three.js does not check), so the first hit
+  // that is shown, with every parent shown, is the one that counts: a model
+  // may hide some of its parts.
   const raycaster = new Raycaster();
   const pointer = new Vector2();
+  const shown = (o) => { for (; o; o = o.parent) if (!o.visible) return false; return true; };
   const pick = (event, objects) => {
     const rect = canvas.getBoundingClientRect();
     pointer.set(((event.clientX - rect.left) / rect.width) * 2 - 1, -((event.clientY - rect.top) / rect.height) * 2 + 1);
     raycaster.setFromCamera(pointer, camera);
-    return raycaster.intersectObjects(objects, true)[0]?.object ?? null;
+    return raycaster.intersectObjects(objects, true).find((hit) => shown(hit.object))?.object ?? null;
   };
   const onClick = (objects, handler) => {
     let down = null;

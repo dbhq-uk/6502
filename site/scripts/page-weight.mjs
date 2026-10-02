@@ -9,7 +9,8 @@
 // the image figure is an upper bound. Fonts, the machine's WebAssembly and its
 // ROM are fetched by the page's scripts and stylesheet and are not counted here.
 // "Later" is each 3D model bundle the page names in data-model-src, which
-// public/model-loader.js imports only when the visitor reaches the model.
+// public/model-loader.js imports only when the visitor reaches the model, and
+// the track map it names in data-model-texture, which that bundle fetches.
 // Sizes are bytes, as built and gzipped at level 9.
 import fs from 'node:fs';
 import path from 'node:path';
@@ -31,7 +32,7 @@ while (queue.length > 0) {
   for (const m of b.toString().matchAll(/^import\b[^;]*from\s+["'](\/[^"']+\.js)["']/gm)) queue.push(m[1]);
 }
 for (const m of text.matchAll(/<img\b[^>]*\bsrc="(\/[^"]+)"/g)) opens.set(m[1], read(m[1]));
-const later = new Map([...text.matchAll(/data-model-src="(\/[^"]+)"/g)].map((m) => [m[1], read(m[1])]));
+const later = new Map([...text.matchAll(/data-model-(?:src|texture)="(\/[^"]+)"/g)].map((m) => [m[1], read(m[1])]));
 
 const report = (title, files) => {
   let raw = 0;

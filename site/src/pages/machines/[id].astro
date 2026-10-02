@@ -73,7 +73,7 @@ const roms = machine.id === 'kim-1' ? kim1Roms() : [];
     </section>
   )}
 
-  {hasModel && <MachineModel id={machine.id} />}
+  {hasModel && <MachineModel id={machine.id} photo={machine.photo} />}
 
   <section aria-labelledby="rom">
     <div class="wrap narrow">

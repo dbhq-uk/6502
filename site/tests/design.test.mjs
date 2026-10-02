@@ -139,6 +139,8 @@ const ON = {
   '.model-hint': ['iron'],
   '.model-status': ['void'],
   '.model-help': ['void'],
+  // Show tracks and Show tracks only, pressed: white on veil, the same pair as a hovered button.
+  '.model-toggle[aria-pressed="true"]': ['veil'],
 };
 
 test('every text colour rule is placed on a surface, and reaches AA on each one it is set on', () => {

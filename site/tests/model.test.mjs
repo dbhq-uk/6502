@@ -6,8 +6,12 @@ import zlib from 'node:zlib';
 import { page, visibleText, DIST } from './helpers.mjs';
 import { KIM1_KEYS } from '../src/lib/machines.mjs';
 import { REPO_ROOT } from '../src/lib/registry.mjs';
-import { MODELS, CONTROLS, CONTROLS_DESCRIPTION, modelSrc } from '../src/models/models.mjs';
-import { BOARD, TABS, CONTACTS_PER_TAB, PITCH, CHIPS, RAM, LOGIC, CRYSTAL, NAME, HOLES, DISPLAY, KEYPAD, KEY_ROWS, KEYS, SST, decode, describe } from '../src/models/kim-1-layout.mjs';
+import { MODELS, CONTROLS, CONTROLS_DESCRIPTION, TRACK_BUTTONS, modelSrc } from '../src/models/models.mjs';
+import { BOARD, TABS, CONTACTS_PER_TAB, PITCH, CHIPS, RAM, LOGIC, CRYSTAL, NAME, HOLES, DISPLAY, KEYPAD, KEY_ROWS, KEYS, SST, PHOTO, PX_PER_MM, TRACKS, decode, describe } from '../src/models/kim-1-layout.mjs';
+import { registry } from '../src/lib/data.mjs';
+
+// sharp ships with Astro (its image service), so the track map can be measured without a new dependency.
+const sharp = (await import('sharp')).default;
 
 // The machines' 3D models: the KIM-1's board, the stage every model shares,
 // and how the page loads them. The model is checked here as data and as built
@@ -142,7 +146,7 @@ test('the controls are told to the visitor in real text, under the model and on 
   const stage = /<section class="model-stage"[^>]*>/.exec(section)?.[0] ?? '';
   // One set of sentences, so the visible text and the description cannot disagree.
   const help = /<p class="model-help" id="model-help">([\s\S]*?)<\/p>/.exec(section)?.[1] ?? '';
-  assert.equal(visibleText(help), `${CONTROLS.pointer} ${CONTROLS.touch} ${CONTROLS.keys}`);
+  assert.equal(visibleText(help), `${CONTROLS.pointer} ${CONTROLS.touch} ${CONTROLS.keys} ${CONTROLS.tracks}`);
   assert.ok(stage.includes(`aria-description="${CONTROLS_DESCRIPTION}"`), 'the model has no aria-description of its keys');
   assert.ok(CONTROLS_DESCRIPTION.includes(CONTROLS.keys));
   // Every key the model answers to is named in both places.
@@ -262,4 +266,119 @@ test('the deploy checks that the model loader and every model bundle are serving
   const listed = (/for f in ([^;]*); do/.exec(deploy)?.[1] ?? '').split(/\s+/);
   assert.ok(listed.includes('model-loader.js'));
   for (const id of Object.keys(MODELS)) assert.ok(listed.includes(modelSrc(id).slice(1)), `deploy-site.yml does not check ${modelSrc(id)}`);
+});
+
+// The copper tracks. The behaviour is checked in a real browser by
+// scripts/browser-check.mjs; these hold the asset, its credit, the markup and the wiring.
+const trackFile = path.join(process.cwd(), 'src', 'assets', 'tracks', 'kim-1.webp');
+const TRACK_BUDGET = 400_000;
+
+test('the track map is committed, greyscale, the size the model expects, inside its budget, and built beside the model\'s bundle', async () => {
+  assert.ok(fs.existsSync(trackFile), 'src/assets/tracks/kim-1.webp is missing');
+  const bytes = fs.readFileSync(trackFile);
+  assert.ok(bytes.length <= TRACK_BUDGET, `the track map is ${bytes.length} bytes, over its ${TRACK_BUDGET} budget`);
+  const { data, info } = await sharp(bytes).removeAlpha().raw().toBuffer({ resolveWithObject: true });
+  assert.equal(info.format, 'raw');
+  assert.deepEqual([info.width, info.height], [TRACKS.width, TRACKS.height]);
+  assert.equal((await sharp(bytes).metadata()).format, 'webp');
+  // Greyscale, white for copper: every pixel has its three channels equal, and
+  // copper covers a real share of the board, neither none nor most of it.
+  let grey = true;
+  let copper = 0;
+  for (let i = 0; i < data.length; i += info.channels) {
+    if (data[i] !== data[i + 1] || data[i] !== data[i + 2]) grey = false;
+    if (data[i] > 127) copper++;
+  }
+  assert.ok(grey, 'the track map is not greyscale');
+  const share = copper / (info.width * info.height);
+  assert.ok(share > 0.05 && share < 0.4, `copper covers ${(share * 100).toFixed(1)}% of the map`);
+  // It covers the board's body edge to edge, the same box the photograph maps to.
+  assert.ok(Math.abs((PHOTO.body[2] - PHOTO.body[0]) - BOARD.width * PX_PER_MM) < 1);
+  assert.ok(Math.abs((PHOTO.body[3] - PHOTO.body[1]) - BOARD.depth * PX_PER_MM) < 1);
+  // Built into dist beside the bundle, byte for byte, where the model asks for it.
+  assert.equal(MODELS['kim-1'].texture, TRACKS.src);
+  assert.equal(TRACKS.src, '/models/kim-1-tracks.webp');
+  const built = path.join(DIST, TRACKS.src);
+  assert.ok(fs.existsSync(built), `${TRACKS.src} was not built into dist`);
+  assert.ok(fs.readFileSync(built).equals(bytes), `${TRACKS.src} is not the committed map`);
+});
+
+test('the track map is loaded with the model, never with the page, and the deploy checks it is serving', () => {
+  const model = fs.readFileSync(path.join(models, 'kim-1.js'), 'utf8');
+  assert.match(model, /await trackMaps\(TRACKS\.src, token\('model-pcb'\), token\('model-copper'\)\)/);
+  assert.match(model, /img\.src = src;\s*await img\.decode\(\);/, 'the map is not loaded as a same-origin image');
+  assert.match(section, new RegExp(`data-model-texture="${TRACKS.src}"`));
+  // Nothing on the page itself names it: no img, link or preload.
+  assert.doesNotMatch(html.replace(/data-model-texture="[^"]*"/, ''), /kim-1-tracks/);
+  const deploy = fs.readFileSync(path.join(REPO_ROOT, '.github', 'workflows', 'deploy-site.yml'), 'utf8');
+  const listed = (/for f in ([^;]*); do/.exec(deploy)?.[1] ?? '').split(/\s+/);
+  for (const m of Object.values(MODELS)) if (m.texture) assert.ok(listed.includes(m.texture.slice(1)), `deploy-site.yml does not check ${m.texture}`);
+  // The build copies it; nothing in the build or the tests makes it.
+  const pkg = fs.readFileSync(path.join(process.cwd(), 'package.json'), 'utf8');
+  assert.doesNotMatch(pkg, /make-board-tracks/);
+  assert.match(fs.readFileSync(path.join(process.cwd(), 'scripts', 'build-models.mjs'), 'utf8'), /fs\.copyFileSync\(tracks, `public\$\{MODELS\[id\]\.texture\}`\)/);
+});
+
+test('the top face takes the tracks as colour, shine and relief, from tokens, with no glow, and the underside gets none', () => {
+  const model = fs.readFileSync(path.join(models, 'kim-1.js'), 'utf8');
+  const tokens = fs.readFileSync(path.join(process.cwd(), 'src', 'styles', 'tokens.css'), 'utf8');
+  assert.match(tokens, /--model-copper: #[0-9a-f]{6};/);
+  assert.match(model, /new MeshStandardMaterial\(\{ map: texture\(maps\.colour, true\), roughnessMap: surface, metalnessMap: surface, roughness: 1, metalness: 1, bumpMap: texture\(maps\.relief, false\), bumpScale: RELIEF \}\)/);
+  assert.doesNotMatch(model, /emissive/, 'the tracks glow');
+  // The top face is the third of a box's six; the underside, the fourth, stays the plain solder side.
+  assert.match(model, /board\.material\[2\] = tracksOn \? top : M\.board;/);
+  assert.doesNotMatch(model, /material\[3\] =/);
+  // The tabs have their own list of faces, so the map goes on the board alone.
+  assert.match(model, /BoxGeometry\(S\(t\.out\), H\.board, S\(t\.y1 - t\.y0\)\), \[\.\.\.faces\]\)/);
+});
+
+test('Show tracks and Show tracks only are real toggle buttons, labelled, in a named group, pressed state in aria-pressed, shown once the model runs', () => {
+  const group = /<div class="model-toggles" role="group" aria-label="Tracks">([\s\S]*?)<\/div>/.exec(section)?.[1] ?? '';
+  assert.ok(group, 'no group of track buttons');
+  assert.match(group, new RegExp(`<button type="button" class="btn small model-toggle" data-toggle-tracks aria-pressed="true">${TRACK_BUTTONS.tracks}</button>`), 'Show tracks is not a button pressed to start with');
+  assert.match(group, new RegExp(`<button type="button" class="btn small model-toggle" data-toggle-tracks-only aria-pressed="false">${TRACK_BUTTONS.only}</button>`), 'Show tracks only is not a button, unpressed to start with');
+  for (const label of Object.values(TRACK_BUTTONS)) assert.doesNotMatch(label, /\.$/);
+  assert.doesNotMatch(group, /pill/, 'the buttons spend the page\'s lime');
+  const css = fs.readFileSync(path.join(process.cwd(), 'src', 'styles', 'global.css'), 'utf8');
+  assert.match(css, /\[data-model\]:not\(\[data-state="running"\]\) \.model-toggles \{ display: none; \}/);
+  assert.match(css, /\.model-toggle\[aria-pressed="true"\]::before \{ background: currentColor; \}/, 'the pressed state is told by colour alone');
+  // The wiring: each button flips its state and says so in aria-pressed; tracks only
+  // brings the tracks on, and tracks off brings the parts back.
+  const model = fs.readFileSync(path.join(models, 'kim-1.js'), 'utf8');
+  assert.match(model, /tracksButton\?\.setAttribute\('aria-pressed', String\(tracksOn\)\)/);
+  assert.match(model, /onlyButton\?\.setAttribute\('aria-pressed', String\(!partsShown\)\)/);
+  assert.match(model, /tracksOn = !tracksOn;\s*\/\/[^\n]*\n\s*if \(!tracksOn\) partsShown = true;/);
+  assert.match(model, /partsShown = !partsShown;\s*if \(!partsShown\) tracksOn = true;/);
+  // The parts fade, then go; with reduced motion at once. A hidden part cannot be clicked.
+  assert.match(model, /partsLevel = reduced \? target : /);
+  assert.match(model, /parts\.visible = level > 0;/);
+  assert.match(fs.readFileSync(path.join(models, 'stage.mjs'), 'utf8'), /\.find\(\(hit\) => shown\(hit\.object\)\)/);
+  assert.match(model, /root\.modelLayers = \(\) => \(\{/);
+  assert.match(model, /root\.modelBoardPoint = \(x, y\) =>/);
+});
+
+test('the tracks are credited as traced from the photograph, under its licence, on the page and in the photographs\' README', () => {
+  const photo = registry.machines.find((m) => m.id === 'kim-1').photo;
+  const credit = /<p class="figure-caption model-credit" data-model-credit>([\s\S]*?)<\/p>/.exec(section)?.[1] ?? '';
+  assert.equal(visibleText(credit).replace(/\s+([.,:])/g, '$1'), `Tracks traced from the photograph above, by ${photo.author}, and shared under its licence: ${photo.licence}.`);
+  assert.ok(credit.includes(`<a href="${photo.licenceUrl}">`), 'the licence is not linked');
+  assert.match(describe(), /copper tracks of its top face traced from that photograph/);
+  assert.match(describe(), /underside, which the photograph does not show, is left plain/);
+  const readme = fs.readFileSync(path.join(process.cwd(), 'src', 'assets', 'photos', 'README.md'), 'utf8');
+  assert.match(readme, /## The track map, src\/assets\/tracks\/kim-1\.webp/);
+  assert.match(readme, /share-alike/i);
+  assert.match(readme, /node scripts\/make-board-tracks\.mjs/);
+});
+
+test('the script that traced the map clears every part the model draws, and the parts it lists by hand lie on the board', async () => {
+  const { HIDDEN, THRESHOLDS, modelled } = await import('../scripts/make-board-tracks.mjs');
+  const boxes = modelled();
+  // Three 40-pin chips, eight memory chips, the logic chips, the crystal, the display and the keypad.
+  assert.equal(boxes.length, CHIPS.length + RAM.length + LOGIC.length + 3);
+  for (const [x0, y0, x1, y1] of [...boxes, ...HIDDEN]) {
+    assert.ok(x0 < x1 && y0 < y1, `the box ${x0}, ${y0}, ${x1}, ${y1} is empty`);
+    assert.ok(x0 >= 0 && y0 >= 0 && x1 <= BOARD.width + 1e-9 && y1 <= BOARD.depth + 1e-9, `the box ${x0}, ${y0}, ${x1}, ${y1} is off the board`);
+  }
+  // The tracks' hue band leaves out the parts' colours, as measured: cream capacitors at 85 to 89 degrees, resistors 50 to 65, gold 74.
+  assert.ok(THRESHOLDS.hue[0] > 89 && THRESHOLDS.weak.hue[0] > 89);
 });
