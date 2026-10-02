@@ -152,10 +152,10 @@ jobs:
           PASS=$(count pass); FAILED=$(count fail)
           echo "pass=${PASS:-unread} fail=${FAILED:-unread}"
           [ "${FAILED:-1}" = "0" ]
-          # 156 tests as at 1 Oct 2026. Adding tests is expected; losing them is
+          # 158 tests as at 2 Oct 2026. Adding tests is expected; losing them is
           # the failure this floor catches. Raise the number when the suite grows,
           # here and in the same step of validate.yml, which must hold the same number.
-          [ "${PASS:-0}" -ge 156 ]
+          [ "${PASS:-0}" -ge 158 ]
 
       - name: Deploy to Cloudflare Pages
         working-directory: site
