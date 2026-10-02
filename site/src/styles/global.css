@@ -200,13 +200,25 @@ footer .linkbtn:hover { color: var(--white); }
 .photo figcaption { display: grid; gap: 4px; padding: 10px 0 0; text-align: left; }
 /* The 3D model: hidden in the markup, shown by public/model-loader.js. */
 .model-stage { position: relative; padding: 0; height: min(64vh, 560px); min-height: 340px; margin-top: 24px; background: var(--void); border: 1px solid var(--circuit); border-radius: var(--r-window); overflow: hidden; outline-offset: 3px; }
-.model-stage canvas { display: block; width: 100%; height: 100%; touch-action: none; }
+/* Focus is what hands the wheel and a finger to the model, so a mouse click, which does not raise :focus-visible, shows the ring too. The script sets the canvas's touch-action: pan-y until the model has focus, none after. */
+.model-stage[data-active] { outline: 2px solid var(--lime); }
+.model-stage canvas { display: block; width: 100%; height: 100%; cursor: grab; }
+.model-stage canvas:active { cursor: grabbing; }
 .model-tag { position: absolute; top: 12px; left: 12px; font-family: var(--font-mono); font-size: 11px; letter-spacing: 0; color: var(--white); background: var(--iron); border: 1px solid var(--circuit); border-radius: 4px; padding: 2px 8px; pointer-events: none; }
+.model-hint { position: absolute; left: 12px; bottom: 12px; max-width: calc(100% - 24px); font-family: var(--font-mono); font-size: 11px; letter-spacing: 0; color: var(--white); background: var(--iron); border: 1px solid var(--circuit); border-radius: 4px; padding: 2px 8px; pointer-events: none; }
+.model-hint .hint-touch { display: none; }
+@media (hover: none), (pointer: coarse) {
+  .model-hint .hint-pointer { display: none; }
+  .model-hint .hint-touch { display: inline; }
+}
+[data-model]:not([data-state="running"]) .model-hint, .model-stage[data-active] .model-hint { display: none; }
 .model-load { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); }
 [data-model]:not([data-state="idle"]) .model-load { display: none; }
 [data-model]:not([data-state="running"]) [data-model-reset] { display: none; }
 .model-controls { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 20px; margin: 16px 0 12px; }
 .model-status { color: var(--moss-80); font-size: 14px; }
+.model-help { color: var(--moss-80); font-size: 14px; margin: 0 0 12px; }
+[data-model]:not([data-state="running"]) .model-help { display: none; }
 .model-about { text-align: left; }
 .machine-run h2 + .kim1, .wrap > h2 + .prose { margin-top: 24px; }
 /* The chip page (/inside/): a 3D view beside a tour. The view's own colours are

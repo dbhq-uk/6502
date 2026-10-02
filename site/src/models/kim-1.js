@@ -36,7 +36,13 @@ const S = (mm) => mm / 10;
 const H = { board: S(BOARD.thickness), dip: 0.38, standoff: 0.08, display: 0.45, keypad: 0.55, key: 0.4, travel: 0.16 };
 
 export async function mount(root) {
-  const s = createStage(root, { view: [0, 26, 25, 0, -1, 1.5], minDistance: 8, maxDistance: 75 });
+  // The camera's target is held over the board and its tabs, with two
+  // centimetres to spare, and a little above and below it: pan as far as the
+  // edge, never off it. It may go as close as a chip filling the view, and as
+  // far as the whole board small.
+  const margin = 2;
+  const bounds = [X(-Math.max(...TABS.map((t) => t.out))) - margin, -2, Z(0) - margin, X(BOARD.width) + margin, 2, Z(BOARD.depth) + margin];
+  const s = createStage(root, { view: [0, 26, 25, 0, -1, 1.5], bounds, minDistance: 3, maxDistance: 150 });
   if (!s) return;
   const { scene, token, reduced, every } = s;
   const css = getComputedStyle(document.documentElement);
@@ -46,6 +52,7 @@ export async function mount(root) {
   const standard = (name, opts = {}) => new MeshStandardMaterial({ color: token(name), roughness: 0.6, metalness: 0.1, ...opts });
   const M = {
     board: standard('model-pcb', { roughness: 0.55 }),
+    under: standard('model-pcb-under', { roughness: 0.55 }),
     gold: standard('model-gold', { roughness: 0.35, metalness: 0.35 }),
     tin: standard('model-tin', { roughness: 0.4, metalness: 0.3 }),
     chip: standard('iron', { roughness: 0.45 }),
@@ -80,23 +87,28 @@ export async function mount(root) {
   };
 
   // The board and its two tabs, with a hairline round the edge.
-  const board = add(new Mesh(new BoxGeometry(S(BOARD.width), H.board, S(BOARD.depth)), M.board), 0, -H.board / 2, 0);
+  // A box has six faces, in the order +x, -x, +y, -y, +z, -z: the fourth is the
+  // underside, which the camera can now see, so it has its own material.
+  const faces = [M.board, M.board, M.board, M.under, M.board, M.board];
+  const board = add(new Mesh(new BoxGeometry(S(BOARD.width), H.board, S(BOARD.depth)), faces), 0, -H.board / 2, 0);
   board.add(new LineSegments(new EdgesGeometry(board.geometry), new LineBasicMaterial({ color: token('circuit') })));
   for (const t of TABS) {
-    const tab = add(new Mesh(new BoxGeometry(S(t.out), H.board, S(t.y1 - t.y0)), M.board), X(-t.out / 2), -H.board / 2, Z((t.y0 + t.y1) / 2));
+    const tab = add(new Mesh(new BoxGeometry(S(t.out), H.board, S(t.y1 - t.y0)), faces), X(-t.out / 2), -H.board / 2, Z((t.y0 + t.y1) / 2));
     tab.add(new LineSegments(new EdgesGeometry(tab.geometry), new LineBasicMaterial({ color: token('circuit') })));
   }
   for (const [x, y] of HOLES) add(new Mesh(new CylinderGeometry(S(1.6), S(1.6), H.board + 0.01, 20), M.hole), X(x), -H.board / 2, Z(y));
 
-  // The gold contacts, 22 on each tab, at the connector's pitch.
-  const contacts = new InstancedMesh(new BoxGeometry(S(7.5), 0.012, S(2.4)), M.gold, TABS.length * CONTACTS_PER_TAB);
+  // The gold contacts, 22 on each tab, at the connector's pitch, on both faces of the tab.
+  const contacts = new InstancedMesh(new BoxGeometry(S(7.5), 0.012, S(2.4)), M.gold, TABS.length * CONTACTS_PER_TAB * 2);
   const place = new Object3D();
   let n = 0;
   for (const t of TABS) {
     for (let i = 0; i < CONTACTS_PER_TAB; i++) {
-      place.position.set(X(-t.out + 3.75), 0.006, Z(t.first + i * PITCH));
-      place.updateMatrix();
-      contacts.setMatrixAt(n++, place.matrix);
+      for (const y of [0.006, -H.board - 0.006]) {
+        place.position.set(X(-t.out + 3.75), y, Z(t.first + i * PITCH));
+        place.updateMatrix();
+        contacts.setMatrixAt(n++, place.matrix);
+      }
     }
   }
   scene.add(contacts);
@@ -105,6 +117,8 @@ export async function mount(root) {
   const DIP = { 40: { length: 52, body: 13.7, rows: 15.24 }, 16: { length: 19.3, body: 6.4, rows: 7.62 }, 14: { length: 19, body: 6.4, rows: 7.62 }, 8: { length: 9.6, body: 6.4, rows: 7.62 } };
   const all = [...CHIPS.map((c) => ({ ...c, along: 'x' })), ...RAM.map((c) => ({ ...c, along: 'x' })), ...LOGIC.map((c) => ({ ...c, along: 'y' }))];
   const legs = new InstancedMesh(new BoxGeometry(S(0.5), H.dip * 0.75, S(0.5)), M.tin, all.reduce((sum, c) => sum + c.pins, 0));
+  // Each leg comes through the board to a tinned pad on the underside.
+  const pads = new InstancedMesh(new BoxGeometry(S(1.7), 0.012, S(1.7)), M.tin, legs.count);
   let leg = 0;
   for (const c of all) {
     const d = DIP[c.pins];
@@ -118,7 +132,10 @@ export async function mount(root) {
         const across = (side * d.rows) / 2;
         place.position.set(X(c.x + (alongX ? along : across)), (H.dip * 0.75) / 2, Z(c.y + (alongX ? across : along)));
         place.updateMatrix();
-        legs.setMatrixAt(leg++, place.matrix);
+        legs.setMatrixAt(leg, place.matrix);
+        place.position.y = -H.board - 0.006;
+        place.updateMatrix();
+        pads.setMatrixAt(leg++, place.matrix);
       }
     }
     if (c.label) {
@@ -126,7 +143,7 @@ export async function mount(root) {
       add(label, X(c.x), H.standoff + H.dip + 0.003, Z(c.y));
     }
   }
-  scene.add(legs);
+  scene.add(legs, pads);
 
   add(new Mesh(new BoxGeometry(S(CRYSTAL.width), 0.5, S(CRYSTAL.depth)), M.tin), X(CRYSTAL.x), 0.25, Z(CRYSTAL.y));
   add(printed(NAME.text, S(NAME.width), S(NAME.depth), { size: 0.86 }), X(NAME.x), 0.004, Z(NAME.y));

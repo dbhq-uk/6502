@@ -4,7 +4,7 @@
 // the model's bundle only when the section nears the screen or the visitor
 // presses the button. Without JavaScript it never shows, and the photograph
 // and the machine's own panel are the page.
-import { MODELS, modelSrc } from '../models/models.mjs';
+import { MODELS, CONTROLS, CONTROLS_DESCRIPTION, modelSrc } from '../models/models.mjs';
 
 interface Props {
   id: string;
@@ -17,14 +17,16 @@ if (!model) throw new Error(`machine ${id} has no entry in src/models/models.mjs
 <section class="model" aria-labelledby="model" data-model={id} data-model-src={modelSrc(id)} data-state="idle" hidden>
   <div class="wrap narrow">
     <h2 id="model">A model of the board</h2>
-    <section class="model-stage" data-model-stage tabindex="0" aria-label={model.label} aria-describedby="model-about">
+    <section class="model-stage" data-model-stage tabindex="0" aria-label={model.label} aria-description={CONTROLS_DESCRIPTION} aria-describedby="model-about">
       <span class="model-tag" aria-hidden="true">Model, not a photograph</span>
+      <span class="model-hint" aria-hidden="true"><span class="hint-pointer">{CONTROLS.hint}</span><span class="hint-touch">{CONTROLS.hintTouch}</span></span>
       <button type="button" class="btn small model-load" data-model-load>Load the 3D model</button>
     </section>
     <div class="model-controls">
       <button type="button" class="btn small" data-model-reset>Reset the view</button>
       <p class="model-status" role="status" data-model-status>The 3D model loads when you scroll to it.</p>
     </div>
+    <p class="model-help" id="model-help">{CONTROLS.pointer} {CONTROLS.touch} {CONTROLS.keys}</p>
     <p class="figure-caption model-about" id="model-about">{model.about}</p>
   </div>
 </section>

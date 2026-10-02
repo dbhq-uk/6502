@@ -292,3 +292,191 @@ showed.
 - **The repository's README said no ROM was committed.** That stopped being
   true when the ROMs moved into `roms/`. Its licence section now names both
   kinds of file here that are not MIT: the ROMs and the photographs.
+
+## The model's controls, later the same day
+
+Dan, 2 October 2026: "on the 3D model should be able to move and explore it
+using standard controls". His check in headless Chrome, before anything here
+changed: left-drag turns the model, the wheel zooms and right-drag pans, so the
+library's defaults worked. Exploring it was still limited and awkward.
+
+### What was wrong
+
+- **The board could not be turned over.** `maxPolarAngle` was 0.48 of pi, so the
+  camera stayed above it: no underside, no edges.
+- **The range was narrow.** The model asked for a distance between 8 and 75, and
+  panning had no limit at all, so the board could be dragged clean off the
+  screen.
+- **The wheel trapped the page.** camera-controls called `preventDefault` on
+  every wheel event over the canvas, so a mouse wheel over the model, which is
+  460 pixels tall in the middle of the page, stopped the page scrolling.
+- **A finger trapped it too.** The canvas was `touch-action: none`, so on a
+  phone a finger on the model could not scroll the page. Reading the
+  library's source showed why the CSS rule had never been the whole story:
+  `CameraControls` sets `touch-action: none` on its canvas itself, inline, when
+  it connects, and an inline style beats the stylesheet.
+- **Nothing said what the controls were.** The only hint was in the accessible
+  name. There was no way to pan with the keyboard or to reset it with one.
+
+### What was changed, and what it was chosen over
+
+- **Full orbit.** `maxPolarAngle` is pi. Chosen over stopping a little short of
+  the pole to dodge a gimbal flip: camera-controls keeps its own up vector, and
+  the check drags to the stop and reads polar 3.142, no flip and no overshoot.
+- **The underside is a real surface.** The board was one box with one material,
+  lit from above. A box has six faces, so the fourth, the underside, now takes
+  its own material (`--model-pcb-under`, `#37602f`, a shade lighter than the
+  top). Each chip leg ends in a tinned pad on the underside, and the edge
+  contacts are gold on both faces of the tab. Two lights were added: a
+  hemisphere light whose ground colour falls on faces that look down, and a
+  second directional fill from below, opposite the key. Chosen over lighting
+  both faces with one lighter colour, which would have changed the top that was
+  measured against the photograph, and over an unlit material, which would look
+  flat. The check measures the view from below: 51.7% of the canvas drawn, mean
+  brightness 65 of 255, against 39.6% and 59 from above.
+- **Ranges.** The closest is 3 (was 8) and the farthest 150 (was 75). A node
+  one-liner on the 36 degree lens gives a visible width at distance 3 of
+  3.30 cm on the page's 778 by 460 canvas and 2.24 cm on a 390 by 340 phone
+  canvas, against a 52 mm 40-pin package, so a chip, or a key, fills the view.
+  At 150 on a square canvas it is 97.5 cm across, against a 27.3 cm board.
+- **The target is bounded.** `setBoundary` holds the camera's target in a box:
+  the board and its tabs plus 2 cm each way, and 2 cm above and below. Chosen
+  over `boundaryEnclosesCamera`, which would bound the camera itself and stop
+  the zoom-out, and over no bound. The check pans far and the target ends at
+  x -12.985, the box's edge, and stays inside it.
+- **The wheel is ours.** camera-controls' wheel is switched off and a wheel
+  listener on the canvas zooms only while the model has focus, or with Ctrl or
+  Cmd held; otherwise it does nothing and the page scrolls. It zooms **to the
+  cursor**: camera and target are scaled about the point where the cursor's ray
+  meets the board's plane, so that point stays put. The check puts the cursor on
+  the 5 key, zooms, and the key is 0.4 pixels from the cursor. Chosen over the
+  library's own `dollyToCursor`, because its Ctrl-and-wheel path calls `ZOOM`,
+  which changes the camera's zoom and ignores the distance limits.
+- **Focus is the switch.** The `tabindex="0"` section is what has focus. A
+  mouse going down on the canvas focuses it, and so does a finger's tap. While
+  it has focus the stage carries `data-active`, which draws the lime focus ring
+  (a mouse click does not raise `:focus-visible`, so the global ring would not
+  show) and hides the hint. The lime ring is a new named rule in the lime test in
+  `tests/site.test.mjs`. It is an outline, not a fill.
+- **Touch.** An unfocused canvas is `touch-action: pan-y pinch-zoom`, and
+  camera-controls' three touch actions are `NONE`. A focused one is `none`, with
+  one finger turning and two pinching and panning. The brief said `pan-y`;
+  `pan-y` alone also switches off the browser's pinch-zoom of the page, so
+  `pinch-zoom` stays. The tap focuses on pointer-up, not pointer-down, so a
+  finger that starts a scroll stays a scroll. Escape, or focus leaving, restores
+  it. The inline style is set by the script after the library sets its own.
+- **Reset.** The button stays. Home resets, and so does a double click or double
+  tap on empty space. Chosen over the `dblclick` event, which touch browsers do
+  not reliably send: the stage times two taps itself (under 350 ms, under 30
+  pixels, neither a drag). **Empty space is the black round the board**, as the
+  brief asked, meaning a click that hits nothing in the scene. The cost: zoomed in
+  until the board fills the view there is no empty space to double-click, and
+  the button and Home are the way back.
+- **Keyboard.** Arrows turn, Shift and arrows pan, plus and minus zoom, Home
+  resets, Escape lets go. Shift and a left-drag pans too, for a mouse with no
+  right button.
+- **The words.** A hint on the canvas while the model has no focus, real text
+  and not an image: "Click the model, then scroll to zoom", and for a coarse
+  pointer "Tap the model, then drag to turn and pinch to zoom". A paragraph under
+  it lists everything. The keys are also the canvas's `aria-description`. All of it
+  is generated from one object, `CONTROLS` in `src/models/models.mjs`, so the
+  visible text and the description cannot drift, and a test holds that. The accessible
+  name is now short.
+- **Colours.** One new token, `--model-pcb-under`, which is not a text colour.
+  The two new text styles are in the contrast table: `.model-hint` (white on
+  iron) and `.model-help` (`--moss-80` on black), both colours that were already
+  in use. No shadow and no lime fill.
+- **Unchanged, and still checked:** a click on a key presses the machine's key
+  (a click is a pointer that moved under 5 pixels), and the model's bundle is not
+  requested until the visitor reaches it.
+- **Reduced motion.** No easing and no auto-rotation, as before. The zoom and
+  the keys use the same `reduced` flag.
+
+### Mistakes on the way
+
+- **Held-down keys under-counted.** The plus and minus keys scaled by the
+  camera's current distance, which lags while it eases. In a first exploratory
+  run 30 presses of plus from the home view left the distance at 13.7, where
+  the same 30 presses would reach the closest. The keys now step from where the
+  camera is heading.
+- **The first Ctrl and wheel was far too fast.** It used the trackpad gain
+  for every Ctrl event, and one 300 pixel wheel went straight to the closest
+  distance, 3.000. A mouse wheel and a trackpad pinch both arrive as Ctrl and the
+  wheel, and the deltas tell them apart: a notch is 100 or so, a pinch event is a
+  few. Under 40 gets the pinch gain. The same step now gives 24.973.
+- **The first browser-check run was wrong in several places at once, none of
+  them the model's fault.** The page has `scroll-behavior: smooth`, so a
+  `scrollIntoView` was still moving when the check measured and aimed. The
+  stage was then off screen, and the stage draws only while it is on screen, so
+  the camera did not move and every reading looked like "no change". The check now
+  scrolls instantly and waits for the scroll to stop.
+- **Waiting for the camera was wrong twice.** The first wait compared two
+  readings 150 ms apart and passed in the middle of an ease, because software
+  WebGL draws a frame slowly. The page now reports where the camera is heading
+  (exact) and whether it is still on its way there. The first full run with
+  that took 6 minutes 18 seconds, because the "arrived" test was within 0.0001, and I
+  think the ease needs about nine time constants to get there at the few frames a
+  second that software WebGL manages. At 0.02 it takes 2 minutes 33 seconds. (Both from `time`.) The
+  figures that matter, the angles, the distances, the targets and the bounds,
+  are the exact end values either way.
+
+### What is proven, and what is not
+
+Proven in headless Chrome 153 with software WebGL: everything printed below.
+Touch is **synthesised** (DevTools touch events in an emulated 390 by 780 phone
+with a coarse pointer), not a real finger on a real phone. Only Chrome has been
+run. The `aria-description` is in the markup and a test holds its text, but no
+screen reader has read it.
+
+### Tests
+
+`npm test` in `site/`: 182, from 177 (five new tests in `model.test.mjs`: the
+controls in real text and in the aria-description, the focus wiring, the
+orbit, range and bounds, the lit underside, and the double-tap reset). The floor
+in both workflows is raised to 182. One existing test needed a change: the lime
+test now names the model's focus ring.
+
+### The browser check
+
+`node scripts/browser-check.mjs` on 2 October 2026, from the line after the
+model's first check to the end. Software WebGL, other work running on the machine.
+(The speed lines and the earlier steps are as in the section above.)
+
+```
+model bundle requested before scrolling to it: no
+model: running in 541 ms after scrolling to it, fetched /models/kim-1.js; status "The model is running. Its digits show the machine's display."
+model canvas: 778x460, 39.1% of its pixels are not black
+digits match: page segments 63,91,6,91,79,57 (0212 3C), model segments 63,91,6,91,79,57 ("0212 3C")
+page key 1 clicked: model key down "1", presses 0 then 1
+model key 2 clicked at 801,559: model key down "2"; the machine showed "2121 02" after the page's 1 and "1212 12" after the model's 2
+controls: start view azimuth 0.000, polar 0.716, distance 35.795, target 0.000,-1.000,1.500; bounds -12.985,-2.000,-15.640,11.985,2.000,15.640; focused false
+hint on the model while unfocused: "Click the model, then scroll to zoom", shown true; touch-action pan-y pinch-zoom
+wheel over the unfocused model: scrollY 2695 to 2995; distance 35.795 to 35.795
+ctrl and the wheel over the unfocused model: distance 35.795 to 24.973; scrollY 2695 to 2695
+after a click on empty space: focused true, ring {"active":true,"outline":"solid","width":"2px"}, touch-action none
+wheel over the focused model, cursor on the 5 key at 765,531: distance 35.795 to 24.973; the key is now at 765,531, 0.4 px from the cursor; scrollY 2695 to 2695
+Escape: focused false, ring {"active":false,"outline":"none","width":"3px"}, touch-action pan-y pinch-zoom
+wheel after Escape: scrollY 2695 to 2995
+left-drag 233 px left and 46 px down: azimuth 0.000 to 3.196, polar 0.716 to 0.088; target unchanged true
+right-drag: target 0.000,-1.000,1.500 to 11.826,2.000,-2.034; azimuth unchanged true, distance unchanged true
+shift and left-drag: target 0.000,-1.000,1.500 to 11.837,2.000,-2.010; azimuth unchanged true
+nine right-drags, far and back and forth: target -12.985,2.000,1.308 within -12.985,-2.000,-15.640 to 11.985,2.000,15.640: true; it reached an edge: true
+under the board: polar 0.716 to 3.142 (pi/2 is 1.571, pi is 3.142); 51.7% of the canvas is not black, mean brightness 65 of 255 (from above: 39.6%, 59)
+dragged on to the stop: polar 3.142, never past pi (3.142)
+the wheel to its limits: closest 3.000 (78.3% of the canvas drawn), farthest 150.000 (2.9% drawn)
+double click on empty space: distance 150.000 to 35.795, polar 0.716, back at the start view: true
+keyboard: ArrowLeft azimuth 0.000 to -0.262; ArrowDown polar 0.716 to 0.978; Shift+ArrowLeft target x 0.000 to -2.864; Shift+ArrowUp target -2.864,-1.000,1.482 to -2.864,0.880,-0.678; + distance 35.795 to 30.425; then - twice to 40.238; Home back at the start: true
+reset button: back at the start view: true
+phone, unfocused: touch-action "pan-y pinch-zoom", hint "Tap the model, then drag to turn and pinch to zoom", shown true
+phone, one finger swiped up on the unfocused model: scrollY 3241 to 3475; azimuth 0.000 to 0.000, polar 0.716 to 0.716
+phone, after a tap on the model: focused true, touch-action "none"
+phone, one finger dragged on the focused model: azimuth 0.000 to 2.199, polar 0.716 to 0.000; scrollY 3241 to 3241
+phone, two fingers spread on the focused model: distance 35.795 to 21.091; scrollY 3241 to 3241
+phone, after it loses focus: touch-action "pan-y pinch-zoom"
+no console errors, no failed requests, no CSP violations
+
+real	2m33.292s
+user	0m10.937s
+sys	0m3.245s
+exit 0
+```

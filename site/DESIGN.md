@@ -147,16 +147,34 @@ same black canvas, using the stage every machine's model shares
 - **Its colours are the board's, not the site's.** The page's own drawn display
   stays phosphor green, because it is a drawing of what the machine shows. The
   model is a model of a thing, so its board is green fibreglass, its contacts
-  gold, its legs tinned and its LEDs red. Those five colours are tokens
-  (`--model-pcb`, `--model-gold`, `--model-tin`, `--model-led`,
-  `--model-led-off`), used by the model's scene and nowhere else, and none is a
-  text colour. The chips, keypad, keys and printing use the site's own iron,
+  gold, its legs tinned and its LEDs red, and its solder side a shade lighter
+  than the top so the underside reads when the camera is below. Those six
+  colours are tokens (`--model-pcb`, `--model-pcb-under`, `--model-gold`,
+  `--model-tin`, `--model-led`, `--model-led-off`), used by the model's scene
+  and nowhere else, and none is a text colour. The chips, keypad, keys and printing use the site's own iron,
   black, white and moss.
 - **No lime.** The model spends none of it; the focus ring on the model is the
   lime, as everywhere.
 - **Its two text colours,** the corner tag (`--white` on iron) and the status
   line (`--moss-80` on black), are in the contrast table in
   `tests/design.test.mjs`.
+- **The controls are the usual ones and never trap the page.** Left-drag turns
+  it all the way round, under the board as well as over it; right-drag, or
+  Shift and left-drag, pans, with the target held inside the board's bounds
+  plus two centimetres. The wheel zooms to the cursor only while the model has
+  focus (click it, or Tab to it) or with Ctrl or Cmd held; otherwise it scrolls
+  the page. On touch, one finger scrolls the page until a tap focuses the
+  model; then one finger turns it and two pinch and pan, and the canvas is
+  `touch-action: none` only while focused. A double click or double tap on
+  empty space resets the view, as does the button. The keyboard: arrows turn,
+  Shift and arrows pan, plus and minus zoom, Home resets, Escape lets go.
+- **The focus ring is the lime, and it shows for a mouse click too,** because
+  focus is what hands the model the wheel, so the visitor can see who has it.
+  The hint on the canvas (`Click the model, then scroll to zoom`, or its touch
+  form) is iron with white text and goes while the model has focus; the full
+  list of controls is the paragraph under the model, in `--moss-80` on black,
+  and the keyboard half of it is also the canvas's `aria-description`. Both
+  text colours are in the contrast table in `tests/design.test.mjs`.
 - **It never moves by itself.** No auto-rotation, and with reduced motion the
   camera and the keys move at once instead of easing.
 - **It loads late.** The section is hidden in the markup and shown by a small

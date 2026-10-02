@@ -4,8 +4,9 @@
 // To add a machine's model (the BBC Micro is next):
 //   1. Write src/models/<id>.js, a browser module that exports
 //      `mount(root)`. It builds the scene with createStage() from ./stage.mjs,
-//      which every model shares (renderer, camera controls, the arrow keys, the
-//      reset button, the lazy render loop), and draws the machine itself. The
+//      which every model shares (renderer, camera controls and their keyboard,
+//      mouse and touch handling, the reset button, the lazy render loop), and
+//      draws the machine itself. The
 //      board or case is that machine's own code: do not generalise it.
 //   2. Add an entry here, with the text alternative the page shows beside it.
 //   3. scripts/build-models.mjs bundles every entry into public/models/<id>.js,
@@ -17,10 +18,29 @@
 // different matter: that is required of every running machine, in the registry.
 import { describe as describeKim1 } from './kim-1-layout.mjs';
 
+/**
+ * What the visitor is told about the controls, once, so the visible text under
+ * the model and its aria-description cannot disagree. The wheel zooms only
+ * while the model has focus or with Ctrl or Cmd held, so that it never traps
+ * the page's scrolling (src/models/stage.mjs).
+ */
+export const CONTROLS = {
+  /** On the canvas while the model has no focus, for a mouse. A label: no full stop. */
+  hint: 'Click the model, then scroll to zoom',
+  /** The same, for a touch screen. */
+  hintTouch: 'Tap the model, then drag to turn and pinch to zoom',
+  pointer: 'Drag to turn it, and right-drag or Shift-drag to pan. Click the model, then scroll to zoom, or hold Ctrl or Cmd and scroll. Double-click empty space to reset the view.',
+  touch: 'On a touch screen, tap the model first: then one finger turns it, and two fingers pinch to zoom and pan.',
+  keys: 'With the model focused, the arrow keys turn it, Shift and the arrow keys pan, plus and minus zoom, Home resets the view, and Escape lets go of it.',
+};
+
+/** What a screen reader is told about the model's keys and wheel. */
+export const CONTROLS_DESCRIPTION = `${CONTROLS.keys} The wheel zooms only while the model has focus, so the page still scrolls.`;
+
 export const MODELS = {
   'kim-1': {
     /** The model section's accessible name. */
-    label: '3D model of the KIM-1 board. Drag or use the arrow keys to turn it, scroll or use plus and minus to zoom, and click a key on the model to press it.',
+    label: '3D model of the KIM-1 board. Click a key on the model to press it.',
     /** The text alternative, shown as the caption and read as the description. */
     about: describeKim1(),
   },
