@@ -26,3 +26,7 @@ TestResults/
 infra/.terraform/
 *.tfstate
 *.tfstate.*
+
+# The KIM-1 model analysis's working images, remade by its scripts, and Python's caches.
+tools/kim1-model/out/
+__pycache__/

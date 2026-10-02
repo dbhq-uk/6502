@@ -1,0 +1,89 @@
+{
+ "about": "Intersection over union of copper pixels, at 8 pixels to the millimetre. \"replica\" is Eduardo Casino's KiCad replica of the Rev D board; the photographs are of Rev B boards, so the two differ in places and 1.0 is not reachable. Measured only where at least one photograph shows the board. Made by fuse.py.",
+ "sources": {
+  "bolo-top": {
+   "pxPerMm": 15.2,
+   "heldOutMedianMm": 0.123,
+   "score": 123.5
+  },
+  "bolo-end": {
+   "pxPerMm": 14.17,
+   "heldOutMedianMm": 0.1,
+   "score": 141.7
+  },
+  "rev-b-front": {
+   "pxPerMm": 13.21,
+   "heldOutMedianMm": 0.141,
+   "score": 93.7
+  },
+  "rev-b-back": {
+   "pxPerMm": 13.53,
+   "heldOutMedianMm": 0.207,
+   "score": 65.4
+  }
+ },
+ "order": [
+  "bolo-end",
+  "bolo-top",
+  "rev-b-front"
+ ],
+ "top": {
+  "seenShare": 0.6532,
+  "fromReplicaShare": 0.0762,
+  "disagreeShareOfSeenByTwo": 0.1033,
+  "after": {
+   "replica": 0.5716,
+   "zones": {
+    "top left: the bus and the three 40-pin chips": 0.6014,
+    "top right: memory, crystal and name": 0.555,
+    "middle left: the bus between the connectors": 0.659,
+    "middle right: display drivers and display": 0.5281,
+    "bottom left: cassette, teletype and timer": 0.4723,
+    "bottom right: the keypad": 0.2072
+   }
+  },
+  "before": {
+   "replica": 0.4161,
+   "zones": {
+    "top left: the bus and the three 40-pin chips": 0.5071,
+    "top right: memory, crystal and name": 0.4768,
+    "middle left: the bus between the connectors": 0.4384,
+    "middle right: display drivers and display": 0.4518,
+    "bottom left: cassette, teletype and timer": 0.2471,
+    "bottom right: the keypad": 0.144
+   }
+  }
+ },
+ "bottom": {
+  "seenShare": 0.8663,
+  "after": {
+   "replica": 0.5421,
+   "zones": {
+    "top left: the bus and the three 40-pin chips": 0.654,
+    "top right: memory, crystal and name": 0.5437,
+    "middle left: the bus between the connectors": 0.5756,
+    "middle right: display drivers and display": 0.5337,
+    "bottom left: cassette, teletype and timer": 0.5298,
+    "bottom right: the keypad": 0.2964
+   }
+  },
+  "before": {
+   "replica": 0.0,
+   "note": "the underside had no tracks"
+  }
+ },
+ "leaveOneOut": {
+  "bolo-top": {
+   "before": 0.4174,
+   "after": 0.8099
+  },
+  "bolo-end": {
+   "before": 0.4324,
+   "after": 0.8067
+  },
+  "rev-b-front": {
+   "before": 0.3829,
+   "after": 0.6604
+  }
+ }
+}
