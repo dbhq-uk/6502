@@ -13,16 +13,77 @@
       "acceptance": "Kim1AcceptanceTests",
       "rights": "The monitor ROM is MOS Technology's, copyright 1975, and MOS was bought by Commodore in 1976; who holds it now was not established, and no licence or permission from any holder was found. Our copy is Hans Otten's dump of real 6530-002 and 6530-003 chips, kept in this repository under roms/, with where it came from, and checked by SHA-256 each time it is read.",
       "notes": "The keypad, the six LED digits, the RS and ST keys, the SST switch and both 6530s, with the original monitor ROM. Not modelled: the teletype interface, the cassette interface and the expansion bus.",
-      "photo": {
-        "file": "kim-1.webp",
-        "author": "Rama & Musée Bolo, cropped by Tomer T",
-        "sourceUrl": "https://commons.wikimedia.org/wiki/File:MOS_KIM-1_IMG_4211_cropped.jpg",
-        "licence": "CC BY-SA 2.0 fr",
-        "licenceUrl": "https://creativecommons.org/licenses/by-sa/2.0/fr/deed.en",
-        "date": "2010-08-24",
-        "caption": "an original MOS Technology KIM-1, on display at the Musée Bolo, EPFL, Lausanne",
-        "alt": "An original KIM-1 board seen from directly above on a black background: a dark green circuit board with gold edge contacts on two tabs down its left side, three 40-pin chips at the top left, a column of eight memory chips, a crystal and the KIM-1 name at the top right, the six-digit display behind a dark filter, and the black keypad of 23 keys with its SST switch at the bottom right."
-      }
+      "photos": [
+        {
+          "file": "kim-1.webp",
+          "author": "Rama & Musée Bolo, cropped by Tomer T",
+          "sourceUrl": "https://commons.wikimedia.org/wiki/File:MOS_KIM-1_IMG_4211_cropped.jpg",
+          "licence": "CC BY-SA 2.0 fr",
+          "licenceUrl": "https://creativecommons.org/licenses/by-sa/2.0/fr/deed.en",
+          "date": "2010-08-24",
+          "caption": "an original MOS Technology KIM-1, on display at the Musée Bolo, EPFL, Lausanne",
+          "alt": "An original KIM-1 board seen from directly above on a black background: a dark green circuit board with gold edge contacts on two tabs down its left side, three 40-pin chips at the top left, a column of eight memory chips, a crystal and the KIM-1 name at the top right, the six-digit display behind a dark filter, and the black keypad of 23 keys with its SST switch at the bottom right.",
+          "fetched": "2026-10-02",
+          "used": "the tracks on the top face, as one of three photographs of it; the keypad's size and its keys' places, the display window, the crystal, the name and the red wire; and a check on where the chips sit"
+        },
+        {
+          "file": "kim-1-bolo-end.webp",
+          "author": "Rama & Musée Bolo",
+          "sourceUrl": "https://commons.wikimedia.org/wiki/File:MOS_KIM-1_IMG_4210.jpg",
+          "licence": "CC BY-SA 2.0 fr",
+          "licenceUrl": "https://creativecommons.org/licenses/by-sa/2.0/fr/deed.en",
+          "date": "2010-08-24",
+          "fetched": "2026-10-02",
+          "caption": "the same board at the Musée Bolo, from its other end",
+          "alt": "The same KIM-1 board photographed from above its other end on black, so the keypad is at the bottom left, the edge connector along the top and the KIM-1 name at the bottom right, with a loose red wire running across the left of the board.",
+          "used": "the tracks on the top face, as one of three photographs of it, and the heights of the parts, by triangulation with the next photograph"
+        },
+        {
+          "file": "kim-1-bolo-oblique.webp",
+          "author": "Rama & Musée Bolo",
+          "sourceUrl": "https://commons.wikimedia.org/wiki/File:MOS_KIM-1_IMG_4209.jpg",
+          "licence": "CC BY-SA 2.0 fr",
+          "licenceUrl": "https://creativecommons.org/licenses/by-sa/2.0/fr/deed.en",
+          "date": "2010-08-24",
+          "fetched": "2026-10-02",
+          "caption": "the same board at the Musée Bolo, from a low corner",
+          "alt": "The same KIM-1 board photographed at a low angle from one corner, so that the heights of its parts show: the keypad's raised bezel, the display window, the crystal's can, the chips and the cream capacitors standing on the green board.",
+          "used": "the heights of the parts, by triangulation with the photograph before"
+        },
+        {
+          "file": "kim-1-rev-b-front.webp",
+          "author": "Hans Otten's Retro Computing site, which does not name the photographer",
+          "sourceUrl": "http://retro.hansotten.nl/6502-sbc/kim-1-manuals-and-software/kim-1-revisions/",
+          "licence": null,
+          "date": "2016-03-17",
+          "fetched": "2026-10-02",
+          "caption": "another MOS Rev B KIM-1, its component side, on a white ground",
+          "alt": "Another original KIM-1 of the same revision, seen from directly above on white: a bright green board with yellow capacitors, two white ceramic chips and a purple one, the six separate LED digits and the black keypad.",
+          "used": "the tracks on the top face, as one of three photographs of it: a different board, so where a part or the red wire hides a track on the Musée Bolo's, this one often shows it; and a check on where the chips sit"
+        },
+        {
+          "file": "kim-1-rev-b-back.webp",
+          "author": "Hans Otten's Retro Computing site, which does not name the photographer",
+          "sourceUrl": "http://retro.hansotten.nl/6502-sbc/kim-1-manuals-and-software/kim-1-revisions/",
+          "licence": null,
+          "date": "2016-03-17",
+          "fetched": "2026-10-02",
+          "caption": "the same Rev B board turned over: its solder side",
+          "alt": "The solder side of the same Rev B KIM-1, seen from directly above on white: green lacquer over tinned tracks, rows of solder joints where the chips' legs come through, and the gold edge contacts now on the right.",
+          "used": "the tracks on the underside: the only photograph of it"
+        }
+      ],
+      "drawings": [
+        {
+          "title": "a replica of the KIM-1's Rev D board, in KiCad",
+          "author": "Eduardo Casino",
+          "sourceUrl": "https://github.com/eduardocasino/kim-1",
+          "licence": "CC BY-NC 4.0",
+          "licenceUrl": "https://creativecommons.org/licenses/by-nc/4.0/",
+          "fetched": "2026-10-02",
+          "used": "what every photograph is registered to; the places of the parts soldered through the board; the tracks under the chips, the display and the keypad, which no photograph shows; and the reference the tracks are measured against"
+        }
+      ]
     },
     {
       "id": "synertek-sym-1",

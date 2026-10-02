@@ -6,7 +6,9 @@
 // "When it opens" is the HTML (stylesheets are inlined into it), every script
 // it names and every same-origin script those import, and the image each <img>
 // names as its src. A browser picks a smaller copy from a srcset when it can, so
-// the image figure is an upper bound. Fonts, the machine's WebAssembly and its
+// the image figure is an upper bound. An <img> marked loading="lazy" is fetched
+// only as it nears the screen, so it is counted apart, as "when scrolled to".
+// Fonts, the machine's WebAssembly and its
 // ROM are fetched by the page's scripts and stylesheet and are not counted here.
 // "Later" is each 3D model bundle the page names in data-model-src, which
 // public/model-loader.js imports only when the visitor reaches the model, and
@@ -31,7 +33,9 @@ while (queue.length > 0) {
   opens.set(s, b);
   for (const m of b.toString().matchAll(/^import\b[^;]*from\s+["'](\/[^"']+\.js)["']/gm)) queue.push(m[1]);
 }
-for (const m of text.matchAll(/<img\b[^>]*\bsrc="(\/[^"]+)"/g)) opens.set(m[1], read(m[1]));
+const lazy = new Map();
+for (const m of text.matchAll(/<img\b[^>]*\bsrc="(\/[^"]+)"[^>]*>/g)) (/\bloading="lazy"/.test(m[0]) ? lazy : opens).set(m[1], read(m[1]));
+for (const name of opens.keys()) lazy.delete(name);
 const later = new Map([...text.matchAll(/data-model-(?:src|texture)="(\/[^"]+)"/g)].map((m) => [m[1], read(m[1])]));
 
 const report = (title, files) => {
@@ -47,4 +51,5 @@ const report = (title, files) => {
   console.log(`  total\t${raw}\t${gz}`);
 };
 report(`${url} when it opens: file, bytes, gzipped`, opens);
+if (lazy.size > 0) report('loaded when scrolled to (images marked loading="lazy"):', lazy);
 if (later.size > 0) report('loaded later, when the visitor reaches the model:', later);

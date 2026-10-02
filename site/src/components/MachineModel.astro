@@ -6,22 +6,37 @@
 // and the machine's own panel are the page.
 //
 // A model with a track map (a `texture` in its entry) gets two toggle buttons,
-// Show tracks (on to start with) and Show tracks only, and a credit for the
-// map, which is traced from the machine's photograph and so carries its
-// licence. The credit is built from the same registry entry as the
-// photograph's, so the two cannot disagree.
+// Show tracks (on to start with) and Show tracks only.
+//
+// Under it, how the model was made: what it was measured from, with the
+// figures that say how well (from src/data/<id>-model.json, which the
+// measuring scripts write, so nothing here is typed by hand), what it still
+// does not show, and a credit for every photograph and drawing it was traced
+// or measured from, saying what it took from each. The credit is built from
+// the machine's registry entry, the same `photos` and `drawings` the
+// photographs section and the registry check read, so they cannot disagree.
 import { MODELS, CONTROLS, CONTROLS_DESCRIPTION, TRACK_BUTTONS, modelSrc } from '../models/models.mjs';
 
+interface Source { author: string; sourceUrl: string; licence: string | null; licenceUrl?: string; used: string; caption?: string; title?: string }
 interface Props {
   id: string;
-  /** The machine's photograph, from the registry: the track map's credit is its credit. */
-  photo: { author: string; licence: string | null; licenceUrl?: string };
+  /** The machine's photographs and drawings, from the registry. */
+  photos: Source[];
+  drawings?: Source[];
 }
-const { id, photo } = Astro.props;
+const { id, photos, drawings = [] } = Astro.props;
 const model = MODELS[id];
 if (!model) throw new Error(`machine ${id} has no entry in src/models/models.mjs`);
 const tracks = Boolean(model.texture);
 const help = [CONTROLS.pointer, CONTROLS.touch, CONTROLS.keys, ...(tracks ? [CONTROLS.tracks] : [])].join(' ');
+const measured = import.meta.glob<{ default: object }>('../data/*-model.json', { eager: true });
+const figures = measured[`../data/${id}-model.json`]?.default;
+if (model.made && !figures) throw new Error(`machine ${id}'s model describes how it was made, but src/data/${id}-model.json is missing`);
+const made = model.made ? model.made(figures) : null;
+const sources = [
+  ...photos.map((p) => ({ ...p, what: `the photograph of ${p.caption ?? 'the original'}` })),
+  ...drawings.map((d) => ({ ...d, what: d.title })),
+];
 ---
 
 <section class="model" aria-labelledby="model" data-model={id} data-model-src={modelSrc(id)} data-model-texture={model.texture} data-state="idle" hidden>
@@ -44,6 +59,19 @@ const help = [CONTROLS.pointer, CONTROLS.touch, CONTROLS.keys, ...(tracks ? [CON
     </div>
     <p class="model-help" id="model-help">{help}</p>
     <p class="figure-caption model-about" id="model-about">{model.about}</p>
-    {tracks && <p class="figure-caption model-credit" data-model-credit>Tracks traced from the photograph above, by {photo.author}, and shared under its licence: {photo.licence === null ? 'no licence stated' : photo.licenceUrl ? <a href={photo.licenceUrl}>{photo.licence}</a> : photo.licence}.</p>}
+    {made && (
+      <div class="model-made prose" data-model-made>
+        <h3 id="model-made">How the model was made</h3>
+        {made.paragraphs.map((p) => <p>{p}</p>)}
+        <p>What it was traced and measured from:</p>
+        <ul class="model-credit" data-model-credit>
+          {sources.map((s) => <li data-model-source>{s.used.charAt(0).toUpperCase() + s.used.slice(1)}: from <a href={s.sourceUrl}>{s.what}</a>, by {s.author}, {s.licence === null ? 'no licence stated' : s.licenceUrl ? <a href={s.licenceUrl}>{s.licence}</a> : s.licence}.</li>)}
+        </ul>
+        <p>What it does not show, or shows less well:</p>
+        <ul class="model-limits" data-model-limits>
+          {made.limits.map((l) => <li>{l}</li>)}
+        </ul>
+      </div>
+    )}
   </div>
 </section>

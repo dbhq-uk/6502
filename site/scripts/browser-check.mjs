@@ -29,6 +29,12 @@
 // it and two fingers pinch-zoom, and the canvas is touch-action none only while
 // it has focus.
 //
+// Then the underside, from below: the model is turned over and the canvas is
+// sampled where the track map says the underside has copper and where it says
+// it has none, which must look different, and more different than the same
+// points mirrored. Then every photograph in the photographs section must load,
+// from this site.
+//
 //   node scripts/browser-check.mjs [--throttle N] [--measure seconds]
 //
 // --throttle N slows the browser's CPU N times (Chrome's own CPU throttling),
@@ -94,6 +100,11 @@ const origin = `http://127.0.0.1:${server.address().port}`;
 
 const matches = (expected, shown) => expected.length === shown.length && [...expected].every((c, i) => (c === 'x' ? /[0-9A-F]/.test(shown[i]) : c === shown[i]));
 const asShown = (six) => `${six.slice(0, 4)} ${six.slice(4)}`;
+// A picture of the model's canvas, as the page shows it. A clip of the page,
+// not the element's own screenshot: that waits for the element to hold still
+// over two animation frames, and software WebGL on a busy machine can take
+// longer than its timeout to draw two.
+const canvasShot = async (p) => p.screenshot({ clip: await p.locator('[data-model-canvas]').boundingBox(), timeout: STEP_TIMEOUT_MS });
 
 const problems = [];
 let browser;
@@ -194,7 +205,7 @@ try {
 
   // Its canvas draws the board: count the pixels that are not the black canvas.
   await page.waitForTimeout(500);
-  const shot = await page.locator('[data-model-canvas]').screenshot();
+  const shot = await canvasShot(page);
   const { data, info } = await sharp(shot).removeAlpha().raw().toBuffer({ resolveWithObject: true });
   let lit = 0;
   for (let i = 0; i < data.length; i += info.channels) if (Math.max(data[i], data[i + 1], data[i + 2]) > 24) lit++;
@@ -419,7 +430,7 @@ try {
   await page.keyboard.press('Home');
   await settle();
   const measure = async () => {
-    const { data, info } = await sharp(await canvas.screenshot()).removeAlpha().raw().toBuffer({ resolveWithObject: true });
+    const { data, info } = await sharp(await canvasShot(page)).removeAlpha().raw().toBuffer({ resolveWithObject: true });
     let n = 0;
     let sum = 0;
     for (let i = 0; i < data.length; i += info.channels) {
@@ -521,8 +532,10 @@ try {
   await bring();
   await settle();
   // A part-free stretch of the board: the bus of tracks down its left side,
-  // 10 to 30 mm in and 115 to 165 mm down, as a box on the screen.
-  const corners = await model.evaluate((m) => [[10, 115], [30, 115], [10, 165], [30, 165]].map(([x, y]) => m.modelBoardPoint(x, y)));
+  // 10 to 26 mm in and 160 to 200 mm down, as a box on the screen. (Since the
+  // model draws every part, the stretch the check used before, higher up, has
+  // a capacitor, a resistor and the red wire on it.)
+  const corners = await model.evaluate((m) => [[10, 160], [26, 160], [10, 200], [26, 200]].map(([x, y]) => m.modelBoardPoint(x, y)));
   const box = await rect();
   const clip = {
     x: Math.min(...corners.map((c) => c.x)) - box.x, y: Math.min(...corners.map((c) => c.y)) - box.y,
@@ -534,7 +547,7 @@ try {
   // the gold contacts; the green mask (red about 0.15 of green) and the grey
   // and black parts are not.
   const surfaceOf = async () => {
-    const { data, info } = await sharp(await canvas.screenshot()).removeAlpha().raw().toBuffer({ resolveWithObject: true });
+    const { data, info } = await sharp(await canvasShot(page)).removeAlpha().raw().toBuffer({ resolveWithObject: true });
     let copper = 0;
     const sum = [0, 0, 0], sq = [0, 0, 0];
     let n = 0;
@@ -599,6 +612,105 @@ try {
   if (l4.tracks || !l4.partsVisible || l4.partsLevel !== 1 || p4 !== 'false,false') problems.push(`turning the tracks off did not bring the parts back (${JSON.stringify(l4)}, pressed ${p4})`);
   await tracksButton.click();
   if ((await pressed()) !== 'true,false' || !(await layers()).tracks) problems.push('the tracks did not come back on');
+
+  // ---- The underside's tracks, seen from below ----
+  // The map's blue channel is the underside's copper, in the board's own frame
+  // as the component side sees it. Seen from below, every point the map calls
+  // copper must look different from every point it calls bare: the check
+  // samples the canvas at 300 of each, where the map is solidly one or the
+  // other round it, and compares the two mean colours. The same
+  // points mirrored end to end are the control: if the underside's sheet were
+  // laid the wrong way round, they would separate better than the true ones.
+  // The stage must be on the screen to draw, and focused for Home to reach it.
+  await bring();
+  await stage.focus();
+  await page.keyboard.press('Home');
+  await settle();
+  for (let i = 0; i < 6; i++) {
+    const v = await view();
+    if (v.polar > Math.PI - 0.02) break;
+    // The same way the drag under the board went above: which way turns it under depends on the browser.
+    await drag(await at(0.9, sign === 'down' ? 0.1 : 0.9), await at(0.9, sign === 'down' ? 0.9 : 0.1));
+    await settle();
+  }
+  const fromBelow = await settle();
+  const { width: MW, height: MH } = await sharp(path.join(dist, 'models', 'kim-1-tracks.webp')).metadata();
+  const blue = (await sharp(path.join(dist, 'models', 'kim-1-tracks.webp')).extractChannel(2).raw().toBuffer());
+  const pxPerMm = JSON.parse(fs.readFileSync(path.join(site, 'src', 'data', 'kim-1-model.json'), 'utf8')).tracks.mapPxPerMm;
+  // Copper is solid for 0.375 mm round the point (a pad or a wide track: a
+  // narrow track is under a pixel on the screen), bare board for a millimetre.
+  const solid = (cx, cy, want) => {
+    const r = Math.round(pxPerMm * (want ? 0.375 : 1));
+    for (let y = cy - r; y <= cy + r; y++) for (let x = cx - r; x <= cx + r; x++) {
+      if (x < 0 || y < 0 || x >= MW || y >= MH) return false;
+      if (want ? blue[y * MW + x] < 200 : blue[y * MW + x] > 30) return false;
+    }
+    return true;
+  };
+  let seed = 1;
+  const random = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+  const pick = (want) => {
+    const out = [];
+    for (let tries = 0; out.length < 300 && tries < 200_000; tries++) {
+      const x = Math.floor(random() * MW), y = Math.floor(random() * MH);
+      if (solid(x, y, want)) out.push([x / pxPerMm, y / pxPerMm]);
+    }
+    return out;
+  };
+  const copperPts = pick(true), barePts = pick(false);
+  const sampleBelow = async (pts) => {
+    await bring();
+    await page.waitForTimeout(300);
+    const box = await rect();
+    const screen = await model.evaluate((m, list) => list.map(([x, y]) => m.modelBoardPoint(x, y, true)), pts);
+    const { data, info } = await sharp(await canvasShot(page)).removeAlpha().raw().toBuffer({ resolveWithObject: true });
+    const sum = [0, 0, 0];
+    let n = 0;
+    for (const p of screen) {
+      const x = Math.round(p.x - box.x), y = Math.round(p.y - box.y);
+      if (x < 0 || y < 0 || x >= info.width || y >= info.height) continue;
+      const i = (y * info.width + x) * info.channels;
+      for (let c = 0; c < 3; c++) sum[c] += data[i + c];
+      n++;
+    }
+    return { mean: sum.map((v) => v / Math.max(n, 1)), n };
+  };
+  const apart = (a, b) => Math.hypot(...a.mean.map((v, c) => v - b.mean[c]));
+  const mirror = (pts) => pts.map(([x, y]) => [x, MH / pxPerMm - y]);
+  const onCopper = await sampleBelow(copperPts), onBare = await sampleBelow(barePts);
+  const mirroredCopper = await sampleBelow(mirror(copperPts)), mirroredBare = await sampleBelow(mirror(barePts));
+  await tracksButton.click();
+  const plainCopper = await sampleBelow(copperPts), plainBare = await sampleBelow(barePts);
+  await tracksButton.click();
+  const sep = apart(onCopper, onBare), control = apart(mirroredCopper, mirroredBare), plain = apart(plainCopper, plainBare);
+  const rgb = (m) => m.mean.map((v) => v.toFixed(0)).join(',');
+  console.log(`under the board, polar ${f3(fromBelow.polar)}, tracks on: the map's underside copper at ${onCopper.n} points is ${rgb(onCopper)}, its bare board at ${onBare.n} points ${rgb(onBare)}, ${sep.toFixed(1)} apart; the same points mirrored end to end ${control.toFixed(1)} apart; with the tracks off ${plain.toFixed(1)} apart`);
+  if (!(fromBelow.polar > Math.PI - 0.05)) problems.push(`the camera did not get under the board for the underside check (polar ${f3(fromBelow.polar)})`);
+  if (!(onCopper.n > 200 && onBare.n > 200)) problems.push(`too few underside points were on the screen (${onCopper.n} and ${onBare.n})`);
+  if (!(sep > 25)) problems.push(`from below, the underside's copper does not show (${sep.toFixed(1)} apart)`);
+  if (!(sep > 2 * control)) problems.push(`the underside's tracks are not where the map puts them: ${sep.toFixed(1)} apart, against ${control.toFixed(1)} mirrored`);
+  if (!(plain < sep / 3)) problems.push(`with the tracks off the underside still shows them (${plain.toFixed(1)} apart)`);
+  await bring();
+  await stage.focus();
+  await page.keyboard.press('Home');
+  await settle();
+  await page.evaluate(() => document.activeElement?.blur());
+
+  // ---- The photographs section: every photograph loads, from this site ----
+  const items = page.locator('[data-photo-item-img]');
+  const count = await items.count();
+  const loaded = [];
+  for (let i = 0; i < count; i++) {
+    const item = items.nth(i);
+    await item.scrollIntoViewIfNeeded();
+    await page.waitForFunction((el) => el.complete && el.naturalWidth > 0, await item.elementHandle(), { timeout: STEP_TIMEOUT_MS }).catch(() => {});
+    const got = await item.evaluate((el) => ({ file: el.closest('[data-photo-file]')?.dataset.photoFile, src: new URL(el.currentSrc).pathname, natural: `${el.naturalWidth}x${el.naturalHeight}`, ok: el.complete && el.naturalWidth > 0, local: new URL(el.currentSrc).origin === location.origin }));
+    loaded.push(got);
+    if (!got.ok) problems.push(`the photograph ${got.file} did not load`);
+    if (!got.local) problems.push(`the photograph ${got.file} is not served from this site`);
+  }
+  console.log(`photographs section: ${count} photographs; ${loaded.map((g) => `${g.file} ${g.ok ? 'loaded' : 'NOT LOADED'} ${g.src} ${g.natural}`).join('; ')}`);
+  if (count < 2) problems.push(`the photographs section shows ${count} photographs`);
 
   // A phone: one finger scrolls the page until a tap focuses the model.
   const phone = await browser.newContext({ viewport: { width: 390, height: 780 }, hasTouch: true, isMobile: true, deviceScaleFactor: 2 });

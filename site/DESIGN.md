@@ -113,14 +113,19 @@ Not used.
 
 Every machine page shows a photograph of the original device in its head,
 beside the machine's details, and credits it underneath (issue 28; Dan,
-2 October 2026). Rights are not a gate; the credit is. The photographs live in
+2 October 2026). Rights are not a gate; the credit is. A machine may have
+several (Dan, 2 October 2026: "cross-reference multiple photos"): the first in
+its registry list is the main one, in the head, and a section of its own,
+"Photographs of the original", below the model shows every one, main one
+first, each with the same credit and a line saying what the 3D model took
+from it. The photographs live in
 `src/assets/photos/`, apart from the generated imagery, and the two folders
 never share a file.
 
 - **A photograph is evidence and is captioned as one.** The caption starts
   "Photograph:", says what and where it is and when it was taken, then credits
   the author, links the source and gives the licence as the source states it,
-  or "no licence stated". All of it comes from the machine's `photo` entry in
+  or "no licence stated". All of it comes from the machine's `photos` list in
   `machines/registry.json`, so it cannot be left off. A test fails if a
   photograph is captioned or alt-texted as an illustration, and the
   "Illustration" rule above still binds every generated image.
@@ -133,6 +138,10 @@ never share a file.
   no shadow. The photograph sits on black because the source does, which suits
   the canvas.
 - Below 760 pixels it drops under the details, no wider than 360 pixels.
+- **The photographs section is a plain grid** of the same figures, as many
+  columns of at least 220 pixels as fit, on the page's narrow measure; the
+  head's photograph and its copy in the grid ask for the same widths, so it is
+  fetched once. Every image in the grid loads lazily.
 
 ## The KIM-1's 3D model
 
@@ -148,10 +157,15 @@ same black canvas, using the stage every machine's model shares
   stays phosphor green, because it is a drawing of what the machine shows. The
   model is a model of a thing, so its board is green fibreglass, its contacts
   gold, its tracks copper, its legs tinned and its LEDs red, and its solder side a shade lighter
-  than the top so the underside reads when the camera is below. Those seven
-  colours are tokens (`--model-pcb`, `--model-pcb-under`, `--model-copper`, `--model-gold`,
-  `--model-tin`, `--model-led`, `--model-led-off`), used by the model's scene
-  and nowhere else, and none is a text colour. The chips, keypad, keys and printing use the site's own iron,
+  than the top so the underside reads when the camera is below. Since the
+  model was measured from several photographs it also has the parts those
+  photographs show: the white ceramic of the 6502 and one 6530, the cream
+  capacitors, the tan resistors and the red wire across the Musée Bolo's
+  board. Those eleven colours are tokens (`--model-pcb`, `--model-pcb-under`,
+  `--model-copper`, `--model-gold`, `--model-tin`, `--model-led`,
+  `--model-led-off`, `--model-ceramic`, `--model-capacitor`, `--model-resistor`,
+  `--model-wire`), used by the model's scene and nowhere else, and none is a
+  text colour. The chips, keypad, keys and printing use the site's own iron,
   black, white and moss.
 - **No lime.** The model spends none of it; the focus ring on the model is the
   lime, as everywhere.
@@ -181,16 +195,23 @@ same black canvas, using the stage every machine's model shares
   loader, which fetches the model and three.js only when the section nears the
   screen or the visitor presses "Load the 3D model". Without JavaScript the
   section never appears, and the photograph and the drawn keypad are the page.
-- **The board carries its real copper tracks** (Dan, 2 October 2026: "on the 3d
-  model i would like to see the circuit board tracks"). They are traced from the
-  photograph, not drawn, into a greyscale map (`src/assets/tracks/kim-1.webp`),
-  and the model turns that into the top face's colour, shine and relief: copper
-  `--model-copper`, a warm olive gold a little lighter than the mask, smoother
-  and slightly metallic, standing proud through a bump map; the mask stays the
-  matte `--model-pcb`. No glow: nothing on the face is emissive. The underside
-  stays plain, because the photograph does not show it, and the caption says so.
-  The map is the photograph's derivative and is credited under the model with
-  its licence.
+- **The board carries its real copper tracks, on both faces** (Dan, 2 October
+  2026: "on the 3d model i would like to see the circuit board tracks", then
+  "cross-reference multiple photos"). They are traced from photographs, not
+  drawn, into one map (`src/assets/tracks/kim-1.webp`) whose channels are kept
+  apart by source: the top face from three photographs, the top face under the
+  parts from a replica of the layout, and the underside from its one
+  photograph. The model turns each face's copper into colour, shine and relief:
+  copper `--model-copper`, a warm olive gold a little lighter than the mask,
+  smoother and slightly metallic, standing proud through a bump map; the mask
+  stays the matte `--model-pcb`, or `--model-pcb-under` below. No glow: nothing
+  on either face is emissive. The map and the parts are credited under the
+  model, source by source, with what was taken from each.
+- **How it was made is said under it, in words with measured figures.** A short
+  note, "How the model was made", says what was cross-referenced, how well the
+  photographs register, how well the tracks agree before and after, how the
+  heights were measured, and what the model still does not show. Every figure
+  in it is read from `src/data/kim-1-model.json`, which the analysis writes.
 - **Show tracks and Show tracks only** are two toggle buttons beside Reset the
   view, in a group named Tracks. They are the site's ordinary small buttons; a
   pressed one is `--white` on `--veil` with a filled square before its label,

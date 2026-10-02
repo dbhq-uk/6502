@@ -1,7 +1,7 @@
 ---
 title: "A photograph and a model of the KIM-1"
 date: 2026-10-02
-summary: "The KIM-1's page gets a credited photograph of an original board and a 3D model of it, measured from that photograph, whose six red digits show what the running machine shows and whose keys press the machine's own. The model loads only when a visitor reaches it. Later the same day its board gets the real copper tracks, traced from the photograph."
+summary: "The KIM-1's page gets a credited photograph of an original board and a 3D model of it, measured from that photograph, whose six red digits show what the running machine shows and whose keys press the machine's own. The model loads only when a visitor reaches it. Later the same day its board gets the real copper tracks, traced from the photograph, and then five photographs of two boards and a replica of the layout are cross-referenced: tracks on both faces, measured heights, every part, and the page says how well it all agrees."
 order: 9
 ---
 
@@ -830,4 +830,642 @@ and a screen reader on the two buttons.
   before the page had stopped moving, because it waited for two equal readings
   120 ms apart, and on a loaded machine software WebGL can hold a frame back
   longer than that. It now waits for three. The next full run passed, above.
+
+
+## Cross-referencing several photographs, later the same day
+
+Dan, 2 October 2026: "Can you cross-reference multiple photos to get an
+accurate representation". Until now everything in the model came from one
+photograph, and the section above lists what that cost: heights were typical
+values, tracks under parts and under the red wire were gaps, brown pads were
+missed, the underside was plain, parts were placed to about a millimetre off a
+grid, and track edges were soft. Rights are not a gate (Dan, the same day):
+use the best photographs and credit every one.
+
+### What was built
+
+- **Five photographs, committed**, in `site/src/assets/photos/`, each with a
+  section in its README: the file, the author, the source, the licence as
+  stated, when it was taken and fetched, the original's size and SHA-256, the
+  committed copy's SHA-256, and what the model took from it.
+- **The registry's `photo` is now `photos`**, a list with the main photograph
+  first, and each entry adds `fetched` and `used`. A new `drawings` list holds
+  the replica the photographs are registered to. `validateRegistry` checks every
+  entry of both, refuses the old `photo` field, and still fails a running machine
+  with no photograph.
+- **An offline analysis in Python**, `tools/kim1-model/`, which registers every
+  photograph to one reference, traces and fuses the copper, triangulates heights
+  and places the parts, and writes what the site uses: the track map
+  `site/src/assets/tracks/kim-1.webp`, the parts list
+  `site/src/models/kim-1-parts.mjs`, and every figure the page quotes, in
+  `site/src/data/kim-1-model.json`. `tools/kim1-model/run-all.sh` runs it in
+  order from the full-size originals. The build never runs it, and nothing in
+  the build or the tests fetches a photograph.
+- **The model** now draws every chip, resistor, capacitor, diode and transistor
+  on the replica's pads (22 chips, 77 axial parts, 7 transistors, the trimmer and
+  a disc capacitor), the white ceramic of the 6502 and one 6530, the socket under
+  the other, the keypad as its own board with a bezel and keys sunk in their
+  wells, the crystal's can, and the loose red wire; at measured heights; with
+  copper on both faces.
+- **The page** has a new section, "Photographs of the original", with all five,
+  each credited and saying what the model took from it, and under the model a
+  note, "How the model was made", whose every figure is read from
+  `kim-1-model.json` by `site/src/models/kim-1-notes.mjs`, with the credits for
+  every photograph and the replica and a list of what the model still does not
+  show.
+
+The work was started by an earlier session, which wrote most of the analysis
+scripts and the registry change and then stopped before committing anything.
+This session ran every script again from the originals, fixed what failed, and
+finished the rest; every figure below is from this session's runs.
+
+### The photographs found, and which were used
+
+The searches were the earlier session's: the Commons API, the Otten page, the
+replica's repository and a web search for a photograph of a solder side. This
+session checked bitsavers and confirmed every file used against its hash.
+
+**Wikimedia Commons, `Category:KIM-1`**, listed through the Commons API: 25
+files.
+
+- Used: `MOS_KIM-1_IMG_4211_cropped.jpg` (already the main photograph),
+  `MOS_KIM-1_IMG_4210.jpg` (the same Musée Bolo board from above its other end)
+  and `MOS_KIM-1_IMG_4209.jpg` (the same board from a low corner), all three by
+  Rama & Musée Bolo, CC BY-SA 2.0 fr, taken a minute apart on 24 August 2010
+  with one camera and lens.
+- Not used, the same board: `IMG_4211` (the uncropped original of the main
+  photograph), `IMG_4211_cropped_scale` in JPEG and PNG (the main photograph
+  with a scale bar drawn on), and `IMG_4206` to `IMG_4208` (oblique views from
+  other corners). One pair is enough to triangulate, and 4209 is the lowest
+  view, so it has the longest baseline to 4210, which is nearly square on and
+  also serves the tracks. More views would mean more points to mark by hand for
+  the same kind of evidence.
+- Not used, other boards: `Commodore KIM 1.jpg` (CC0) and
+  `Commodore MOS KIM-1 (5437738203).jpg` (CC BY-SA 2.0) are whole
+  Commodore-badged boards of later revisions, at an angle;
+  `(5437737893)` and `(5437738037)` are close-ups of a Commodore board's crystal
+  and name, and of its revision label; `The legendary KIM-1 from Commodore`
+  is a Commodore board in its box; `KIM-1 single board computer.jpg` (CC BY-SA
+  4.0) is in a museum case behind glass, at an angle, with a reflection; the
+  two `HomeComputerMuseum` files show it in a display case among other things;
+  `Kim-1-computer.jpg` is 640 by 480 pixels.
+- Not boards: two pictures of the manuals' covers, the May 1976 advertisement,
+  an advertisement for another product, and three modern replicas (two KIM Uno
+  kits and a Micro-KIM).
+
+**Hans Otten's Retro Computing site, "KIM-1 revisions images"**, 32 images,
+fetched with the page on 2 October 2026 and laid out on a contact sheet. The
+page groups them by revision: none, A, B, D, E, F and G (it found no Rev C).
+
+- Used: the Rev B pair, `20160317_143332_HDR-2.jpg` (component side) and
+  `20160317_143341_HDR-2.jpg` (solder side), one board photographed square on,
+  fetched at full size (2988 by 3984) rather than the page's `-scaled` copies.
+  The Musée Bolo's board says "Rev. B" on its silkscreen, so this is the same
+  revision: the only other photograph of it found anywhere, and the only one of
+  its solder side.
+- Not used: every other revision. The copper changed between revisions (the
+  replica, of Rev D, agrees with the Rev B photographs on well under all of it,
+  below), and the model is of the Musée Bolo's Rev B board, so tracks from
+  another revision would put copper where that board has none.
+  `KIM1PCBA.jpg` is a drawing of a board's copper artwork, but at 726 by 947
+  pixels it has under 4 pixels to the millimetre, too coarse for tracks 0.3 mm
+  apart. One is a copy of the Commons photograph.
+
+**Eduardo Casino's KiCad replica**, `github.com/eduardocasino/kim-1` at commit
+`7b356b6386422cc6f7154b3524b0a9011ce33bfb`: a Rev D board, both copper layers
+and every footprint, CC BY-NC 4.0 (its schematic CC BY 4.0). Its README says it
+was traced over a high-resolution photograph scaled by the chips' footprints,
+checked against the schematic, built, and run. Used as the reference every
+photograph is registered to, for the places of the parts soldered through the
+board, and for the copper where no photograph shows the board. Not committed;
+`extract_kicad.py` checks its SHA-256 and writes what is used.
+
+**bitsavers**, `components/mosTechnology/kim-1/`: the KIM-1 User Manual of
+August 1976 (`6500-15B_KIM-1_Users_Manual_197608.pdf`, fetched at 16:48 UTC,
+7,308,281 bytes, 140 pages, SHA-256
+`d9f73dd5c587a0e507b3969db30c320dc9c93fbc5cddf093872673a613f94c90`), which holds
+the system schematic, and folders of photographs of Rev A, F and G boards. Not
+used and not committed: the replica already carries the connectivity, checked
+against that schematic, and `pdftotext` finds no drawing of the board's layout
+with dimensions in the manual; the photographs are of other revisions.
+
+The web search for a photograph of a KIM-1's solder side found the Otten page
+and the replica and nothing else new.
+
+### Downloads and copies
+
+Every original was hashed with `sha256sum` and the hash recorded in
+`tools/kim1-model/data/sources.json` and the photographs' README; every script
+refuses a file with another hash. The four new committed copies were made with
+`cwebp -q 82 -resize 1600 0 -metadata none`, the command used for the main
+photograph this morning, and running it again on the originals gave the same
+bytes for all four (their SHA-256 begin `cfba26be`, `b295c0ea`, `22ab8b61` and
+`3e1d4161`, as in the README). A test checks each committed file against the
+SHA-256 in the README.
+
+Hans Otten's site serves no https: on 2 October 2026 at 16:58 UTC `curl` to
+the https page failed the TLS handshake and the http one answered 200. So the
+validator now accepts an http source, and the credit links it as it is.
+
+### Registration
+
+Every photograph is registered to the replica's board frame, millimetres from
+the top left corner of the board's body as the component side shows it. Chosen
+over registering the photographs to the main one: the main one has its own
+perspective and lens error, which the others would inherit, and the replica is
+at true scale with both faces drawn. The method, in `register.py`: a homography
+from the body's four corners, marked by hand in each original; refined by
+OpenCV's ECC, matching a map of "lighter than the lacquer round it" in the
+photograph to the replica's copper on the same face, coarse to fine at 2, 4 and
+8 pixels to the millimetre; then the leftover shift measured in 24 mm blocks
+every 16 mm, and a smooth cubic in x and y fitted to it robustly, for the lens.
+The error is the shift left in blocks the cubic was not fitted to (it is fitted
+on half the blocks in a chequerboard and measured on the other half).
+
+`PYTHON=/tmp/kimvenv/bin/python tools/kim1-model/run-all.sh /tmp/kim/orig
+/tmp/kim/casino/kim-1.kicad_pcb` on 2 October 2026, with Python 3.12.3, numpy
+2.5.3, opencv-python-headless 5.0.0.93, Pillow 12.3.0 and scipy 1.18.1, took
+9 minutes 43 seconds (`time`). Its registration lines:
+
+```
+bolo-top: ECC cc 0.6322, 0.6053, 0.5801; 71 blocks; residual after the homography median 0.163 mm, 90th percentile 0.346, max 1.6; after the cubic correction 0.091, 0.179, 0.282 (3 outliers); held out 0.123, 0.225, 1.59
+rev-b-front: ECC cc 0.6289, 0.5875, 0.5444; 62 blocks; residual after the homography median 0.207 mm, 90th percentile 0.415, max 0.728; after the cubic correction 0.134, 0.258, 0.288 (2 outliers); held out 0.141, 0.288, 0.392
+rev-b-back: ECC cc 0.635, 0.7148, 0.7235; 150 blocks; residual after the homography median 0.241 mm, 90th percentile 0.399, max 1.348; after the cubic correction 0.182, 0.365, 0.504 (3 outliers); held out 0.207, 0.389, 0.607
+bolo-end: ECC cc 0.6447, 0.6142, 0.5764; 74 blocks; residual after the homography median 0.191 mm, 90th percentile 0.352, max 0.819; after the cubic correction 0.084, 0.156, 0.224 (6 outliers); held out 0.1, 0.192, 0.954
+bolo-oblique: ECC cc 0.5403, 0.5082, 0.4857; 60 blocks; residual after the homography median 0.207 mm, 90th percentile 0.43, max 0.999; after the cubic correction 0.099, 0.199, 0.306 (4 outliers); held out 0.125, 0.468, 1.144
+```
+
+So every photograph is registered to a tenth to a fifth of a millimetre at the
+median, on blocks held out of the fit. The largest held-out errors, 1.6 mm on
+the main photograph and 1.1 mm on the oblique one, are single blocks near the
+edges where the cubic extrapolates. The blocks are measured against the
+replica, which is a later revision, so where the two boards differ a block can
+be off for that reason and not the registration's.
+
+### The tracks
+
+`trace.py` finds the copper in each rectified photograph the same way for every
+one, with no threshold tuned against the replica, because the replica is what
+the result is measured against. In OKLab: where the board shows at all (green
+within a band round the photograph's own median hue, which is about 104 degrees
+in one photograph and 144 in another, or a light, colourless, pad-shaped blob
+touching green), and on that, copper is lighter than the lacquer round it by
+more than a threshold Otsu's method picks, with hysteresis. Print in the
+board's own colours is dropped by shape: copper is a pad or part of something
+longer than 5 mm. The packages that sit in the same place on every board, the
+chips and the LED digits, are taken from the replica's footprints as not
+showing the board, so their own markings cannot read as copper.
+
+`fuse.py` makes the map. On the top face, pixel by pixel over the three
+photographs of it: the majority where two or three see the board, a tie going
+to the better photograph (native resolution over held-out registration error);
+the one that sees it where only one does; the replica's copper where none does.
+Copper wider than 2.5 mm both ways in one photograph counts only where another
+has copper too: that is a pour, or a light part taken for one. Chosen over the
+union, which would let in each photograph's false copper, and over the
+intersection, which would drop every track one photograph cannot see. The
+replica is used only where no photograph shows the board, because the model
+follows the photographed board. The underside is its one photograph's trace.
+
+The map keeps its sources apart: red is the top face from the photographs,
+green the top face from the replica, blue the underside. Chosen over one
+greyscale map per face because the three come under different licences (below),
+and over two files because one image is one fetch. The model reads red or green
+as the top face's copper and blue as the underside's.
+
+The fuse step's output in the same run:
+
+```
+wrote site/src/assets/tracks/kim-1.webp: 1600 x 2184, 314614 bytes
+top: seen by a photograph 65.3% of the body, from the replica 7.6%; sources disagree on 10.3% of what two or more see
+top against the replica: before 0.4161, after 0.5716
+   top left: the bus and the three 40-pin chips: before 0.5071, after 0.6014
+   top right: memory, crystal and name: before 0.4768, after 0.555
+   middle left: the bus between the connectors: before 0.4384, after 0.659
+   middle right: display drivers and display: before 0.4518, after 0.5281
+   bottom left: cassette, teletype and timer: before 0.2471, after 0.4723
+   bottom right: the keypad: before 0.144, after 0.2072
+underside against the replica: 0.5421
+   top left: the bus and the three 40-pin chips: 0.654
+   top right: memory, crystal and name: 0.5437
+   middle left: the bus between the connectors: 0.5756
+   middle right: display drivers and display: 0.5337
+   bottom left: cassette, teletype and timer: 0.5298
+   bottom right: the keypad: 0.2964
+bolo-top against the other two: before 0.4174, after 0.8099
+bolo-end against the other two: before 0.4324, after 0.8067
+rev-b-front against the other two: before 0.3829, after 0.6604
+```
+
+Each figure is the intersection over union of copper pixels at 8 pixels to the
+millimetre, measured only where a photograph shows the board. **The measure
+that matters is the last three lines**: each photograph's own trace against the
+map fused from the other two, so the photograph checked is not in what it is
+checked against. Before, the map traced this morning from one photograph; after,
+the vote of the other two. The two Musée Bolo photographs agree with the
+others' vote on 81%, the other board's photograph on 66%: it is a different
+board, made the same way but not identically. Against the replica the top face
+went from 42% to 57%; it cannot reach 100%, being of Rev D. Its keypad region
+scores lowest: the keypad covers most of the board there, so few pixels are
+measured, and I have not looked into why those few disagree.
+
+The old map scored 42% even against the photograph it was traced from, which
+was a surprise. `python probe_before.py` (in `tools/kim1-model/`) says why:
+
+```
+old map against bolo-top's new trace: as placed 0.4088; at its best shift, +0.625 mm in x and -0.125 mm in y, 0.524; with a pixel's tolerance, 0.5871
+copper share where bolo-top shows the board: old map 0.314, new trace 0.255
+```
+
+It sat about 0.6 mm off where the registration puts the photograph's copper
+(I think because the old map was stretched over the board's edges as measured
+on that photograph, where the registration places copper by the copper), and it traced the
+tracks wider, so it covered 31% of the board where this trace covers 26%. Even
+moved to its best place it scores 52%, against 81% for the new map. The page
+says this in a sentence.
+
+### The heights
+
+`heights.py` measures them by triangulation between `IMG_4209` and `IMG_4210`.
+Both are registered to the board, which gives each a homography from the
+board's plane to the image; one pinhole camera is fitted to both at once (the
+same body and lens a minute apart), its focal length and principal point free,
+with a pose for each photograph, by least squares over 180 points of the board.
+A point marked in both photographs is where the two rays through it pass
+closest, and its height is above the board's top face. Each height comes with a
+range: the same point with the principal point held at the frame's centre, and
+with each mark moved by 3 pixels in eight directions. The marks are in
+`data/height-marks.json`, each saying what it is, read off crops of each
+original at 2 to 3.6 crop pixels to the pixel. The first mark is a check: the
+centre of a mounting hole, on the board itself, which must come out at 0. The
+run's lines:
+
+```
+camera, principal point free: f 16911 pixels (111.6 mm), principal point 2597, 2347; the plane fits to 1.32 pixels RMS
+camera, principal point centred: f 18121 pixels (119.6 mm), principal point 2808, 1872; the plane fits to 1.48 pixels RMS
+check: the centre of the mounting hole beside the keypad, on the board: at 122.6, 173.0 mm, 0.14 mm above the board (from -0.21 to 0.48); the rays miss by 2.8 px
+the keypad's circuit board, top face, the corner nearest the display: at 127.6, 165.8 mm, 2.13 mm above the board (from 1.79 to 2.48); the rays miss by 0.5 px
+the keypad's bezel, top face, the corner nearest the display: at 127.8, 173.7 mm, 9.05 mm above the board (from 8.70 to 9.39); the rays miss by 3.7 px
+the GO key, the middle of the hole in its O: at 139.8, 184.9 mm, 7.19 mm above the board (from 6.85 to 7.54); the rays miss by 4.2 px
+the display's window, top face, the corner by U18: at 122.0, 138.3 mm, 5.87 mm above the board (from 5.52 to 6.21); the rays miss by 2.4 px
+U2, the black 40-pin package, top face, the corner at its notched end by pin 1's row: at 27.4, 104.6 mm, 8.76 mm above the board (from 8.44 to 9.09); the rays miss by 1.0 px
+U1, the white ceramic 40-pin package, top face, the corner at its pin 1 end: at 28.3, 36.1 mm, 2.45 mm above the board (from 2.12 to 2.78); the rays miss by 1.1 px
+U12, a 16-pin memory package, top face, the corner by its U12 label: at 102.1, 10.7 mm, 2.85 mm above the board (from 2.50 to 3.19); the rays miss by 1.3 px
+U12, the same memory package, top face, the corner at its other end: at 121.1, 16.3 mm, 2.49 mm above the board (from 2.14 to 2.84); the rays miss by 2.2 px
+the crystal's can, the middle of the BME stamped on its top: at 146.6, 17.5 mm, 8.07 mm above the board (from 7.72 to 8.43); the rays miss by 0.7 px
+a transistor by the display, the end of the flat edge of its top: at 140.1, 130.2 mm, 8.19 mm above the board (from 7.84 to 8.54); the rays miss by 1.1 px
+the trimmer, the middle of the cross in its rotor: at 62.2, 231.8 mm, 3.32 mm above the board (from 3.00 to 3.65); the rays miss by 4.5 px
+the orange capacitor, a white fleck on its top: at 88.4, 174.6 mm, 9.10 mm above the board (from 8.77 to 9.44); the rays miss by 2.6 px
+U13, a 14-pin logic package, the middle of the TI logo printed on its top: at 136.0, 70.1 mm, 4.46 mm above the board (from 4.11 to 4.81); the rays miss by 2.4 px
+a cream capacitor beside the memory, the W of TAIWAN printed along its top: at 93.2, 63.7 mm, 6.39 mm above the board (from 6.05 to 6.73); the rays miss by 2.8 px
+```
+
+So a height is good to about a third of a millimetre either way, and the check
+point is 0.14 mm off the board. The focal length came out at 111.6 mm against
+the Exif's 100 mm, which is what a lens focused close does. Two surprises: U2,
+the black 6530, stands 8.76 mm tall because it is in a socket, and the ceramic
+6502 only 2.45 mm, flat on the board. The two corners of U12 differ by 0.36 mm,
+about the range. The cream capacitor, C16 on the replica, measures 6.39 mm
+against its footprint's 6.5 mm diameter.
+
+The model uses each measured height for its part and for the others of its
+kind (`HEIGHT_SOURCES` in `site/src/models/kim-1-layout.mjs` lists which), and
+the two measured capacitors take their measured heights as their diameters. A
+chip's body thickness under its measured top, the board's 1.6 mm, and the other
+resistors, capacitors and diodes' sizes are from their packages and
+footprints, not measured.
+
+**The side view, before and after**: `results.py` reads the heights the old
+model had from its code at `e0fd715` and sets them beside the measured ones:
+
+| Part | Before | Measured |
+|---|---|---|
+| a ceramic 40-pin chip | 4.6 | 2.45 |
+| the socketed 6530 | 4.6 | 8.76 |
+| a memory chip | 4.6 | 2.67 |
+| a logic chip | 4.6 | 4.46 |
+| the display window | 4.5 | 5.87 |
+| the keypad's top | 5.5 | 9.05 |
+| a key's top | 9.5 | 7.19 |
+| the crystal | 5.0 | 8.07 |
+
+(millimetres above the board; from `heights.before` in
+`site/src/data/kim-1-model.json`). The old heights were off by 2.33 mm on
+average and by 4.16 mm at worst. The new ones are the measurements themselves,
+so there is no independent after figure for the heights; the check point on the
+board, at 0.14 mm, is the nearest thing to one.
+
+### The parts' places
+
+`layout.py`. The parts soldered through the board stand on the replica's pads,
+which the photographs are registered to. Checked by finding each chip's body in
+two photographs (a template of the body's size, with bands round it where the
+board should show, slid within 3 mm of where the replica puts it); the keypad's
+bezel edges were marked by hand on the rectified main photograph, because it is
+black on a dark board with black keys in it and no threshold separated it; the
+keys' centres are fitted as a grid to the white print of their legends; the
+display window and the crystal's can are found by colour and moved so that the
+corner triangulated above is where it should be; the name by its white letters;
+the red wire by its red pixels, a point every 8 mm. The run's lines:
+
+```
+integrated circuits: 22; body found in a photograph 44 times (at least 85% of the box not showing the board); offset from the replica's centre: median 0.844 mm, 90th percentile 1.381, max 2.007
+keypad bezel: [127.81, 173.68, 188.41, 258.68] (moved by (0.91, -0.22) mm to its triangulated corner); display window: [np.float64(121.98), np.float64(138.28), np.float64(187.07), np.float64(156.78)] (moved by (np.float64(-1.35), np.float64(-0.47))); crystal can: [np.float64(136.21), np.float64(9.73), np.float64(157.05), np.float64(25.23)]
+keys: 23, on a grid of 12.5 by 12.4 mm; columns [138.91, 151.49, 164.24, 176.99], rows [184.86, 197.45, 210.07, 222.95, 235.57, 248.11]; a key's legend is 0.264 mm from its row and column at the median, 0.969 at most
+the KIM-1 name's letters: x 156.1 to 187.4, y 35.0 to 41.2 mm
+the red wire: 11768 pixels in 1 pieces, 14 points from [30.83, 193.67] to [5.08, 93.5]
+wrote site/src/models/kim-1-parts.mjs: 22 integrated circuits, 77 axial parts, 7 transistors, 2 others
+```
+
+(The `np.float64(...)` in the second line is how numpy printed the boxes; the
+script now turns them into plain numbers first.) A chip's body is found 0.84 mm from the replica's centre at the median. That
+includes parallax: the photographs are registered on the board's plane, and a
+chip's top stands a few millimetres above it, so it shifts in any photograph
+not taken from straight above. It is a check on the replica's places, not a
+correction to them. The grid of keys has a pitch of 12.5 by 12.4 mm against
+the half inch the morning's measurement expected.
+
+### What the page says
+
+The note under the model, "How the model was made", gives these figures in
+words, all read from `site/src/data/kim-1-model.json` (`results.py` writes it
+from the analysis's own data files, and a test checks the two agree), and lists
+what the model does not show. The credit under the model now names every
+photograph and the replica, each with what was taken from it, from the
+registry's `used` fields. The photographs section shows all five.
+
+### Licences
+
+The photographs keep their sources' terms: the three Musée Bolo photographs CC
+BY-SA 2.0 fr, which is share-alike; the two from Hans Otten's site no licence
+stated, and the site does not name the photographer. The replica is CC BY-NC
+4.0. The track map's red channel is traced from the photographs, its green from
+the replica, its blue from an Otten photograph, so no one licence covers it:
+share-alike asks for the same licence on a derivative, the replica asks for no
+commercial use, and the Otten photographs state nothing. Rights are not a gate
+(Dan), so it is published crediting every source, channel by channel, in the
+photographs' README and on the page; none of it is MIT, and the repository's
+README now says so, with the replica's extracted data in
+`tools/kim1-model/data/` named too.
+
+### Decisions
+
+- **One reference for everything: the replica.** Chosen over chaining the
+  photographs to the main one. Its scale is its chips' 0.1 inch pins, it has
+  both faces, and every photograph registers to it to a fifth of a millimetre.
+  The cost: the board frame is now the replica's, 200 by 273 mm, where this
+  morning's measurement gave 199.7 by 272.8, and the board's outline and tabs
+  are the replica's.
+- **Rev B photographs only, for copper.** Chosen over using every revision for
+  more coverage, because copper from another revision would be wrong copper.
+- **The replica only where no photograph shows the board** (7.6% of the top
+  face, under the chips, the display and the keypad), kept in its own channel.
+- **Heights measured where they could be**, typical where not, and said which.
+- **Every resistor, capacitor and diode drawn**, from the replica's footprints,
+  because the photographs show them all and the model drew none. Chosen over
+  drawing only the large ones.
+- **Instanced meshes** for the axial parts, their leads, the transistors and the
+  keypad's walls: a few draws instead of several hundred (below).
+- **The photographs section below the model**, not in the head: the head keeps
+  one photograph beside the details, as this morning. Every image in the section
+  loads lazily.
+- **`make-board-tracks.mjs` is deleted.** It traced the one photograph and
+  imported the old layout's names; `tools/kim1-model/` replaces it. The
+  morning's sections above still name it, as a record of that day.
+- **The budgets stay where they were**: 200,000 bytes gzipped for the model's
+  bundle and 400,000 bytes for the track map, both held by tests.
+
+### Mistakes on the way
+
+- **The shared checkout.** The earlier session's work was left uncommitted in
+  `~/dbhq-uk/6502`, and by the time this session started another session had
+  switched that checkout to its own branch for other work. Committing there would
+  have mixed the two, so this work moved to a separate worktree on
+  `feat/model-accuracy`, and the files were copied across. One of the other
+  session's new files was copied with them by mistake, and deleted from the
+  worktree before anything was committed. Cleaning the shared checkout was not
+  permitted, so its copy of this work is still there, uncommitted.
+- **The tabs came out as four.** `layout.py` grouped the outline's points by
+  their order along y, as if the outline were a polygon; it is a set of line and
+  arc segments in no order, so the gaps fell in the wrong places and the first
+  build failed reading a tab that did not exist. The tabs are now found from the
+  pairs of points furthest left, and the script stops unless there are two.
+- **The model got too heavy to draw.** With every part drawn as its own meshes
+  (five for each axial part), the first browser check timed out taking the
+  canvas's screenshot: software WebGL took 12.4 s to start the model and could
+  not hold two frames still. Instancing cut it to a few draws.
+- **The browser check's "part-free" stretch had parts on it.** It measured the
+  tracks on the bus 10 to 30 mm in and 115 to 165 mm down, and with every part
+  drawn that stretch now holds a capacitor, a resistor and the red wire, so its
+  colour varied even with the tracks off (1076.2, against 17.7 this morning) and
+  the check failed. It now uses 10 to 26 mm in and 160 to 200 mm down, checked
+  against the parts list to be clear of every part and the wire.
+- **Home went to the page, not the model.** The new underside check pressed Home
+  to reset the view while a track button had focus, so the page scrolled to the
+  top, the stage stopped drawing off screen, and the camera never came to rest.
+  The check now brings the stage on screen and focuses it first.
+- **Screenshots of the canvas timed out on a busy machine.** Playwright's
+  element screenshot waits for the element to hold still over two animation
+  frames; with the load average over 30 on 8 cores (other work), software WebGL
+  could not draw two in 30 seconds. The check now clips a page screenshot to the
+  canvas's box, with the check's own two-minute step timeout.
+- **The underside check turned the model the wrong way on the CI runner.** It
+  dragged down to go under the board, and there a drag down turned the camera
+  up, to polar 0. The check before it already finds which way a drag goes, so
+  the underside check now uses that.
+- **Too few copper points on the underside.** It first asked for copper solid for
+  a millimetre all round, which only the pours are, and found 18. Pads and wide
+  tracks, solid for 0.375 mm, number in the hundreds.
+- **A test that a commit could fail.** The CI run on the pull request's merge
+  commit failed "every number on the home and status pages is a generated
+  figure": the status page shows the commit's first seven characters, which for
+  that merge commit were `1275329`, all digits, and the test allowed only the
+  numbers inside the full hash. It now allows the seven as well. Nothing in this
+  change caused it; the next merge commit would have passed by chance.
+- **The local browser check could not finish.** With the machine's load average
+  between 33 and 81 from other work, software WebGL took more than the check's
+  15 seconds to bring the camera to rest, at different steps on different runs.
+  The record below is from the CI runner, which runs the same script in
+  headless Chrome (154 there, 153 here).
+- **The replica was described from memory.** The first text said it was drawn
+  "at true size from the board's 0.1 inch grid" and "traced from scans of a bare
+  board". Its README says it was traced over a photograph scaled by the chips'
+  footprints, and checked against the schematic; the page, the README and the
+  scripts now say that.
+
+### Page weight
+
+`node scripts/page-weight.mjs /machines/kim-1/`, which now counts an image
+marked `loading="lazy"` apart, because it is fetched only as it nears the
+screen. On a build of `main` at `e0fd715`:
+
+```
+/machines/kim-1/ when it opens: file, bytes, gzipped
+  /machines/kim-1/ (html)	42467	10456
+  /analytics.js	6510	2983
+  /consent.js	2743	1227
+  /machines-table.js	2416	1021
+  /kim-1.js	7013	2906
+  /model-loader.js	1679	807
+  /table-sort.js	766	449
+  /_astro/kim-1.ufzgBkwp_ZO889l.webp	87100	87072
+  total	150694	106921
+loaded later, when the visitor reaches the model:
+  /models/kim-1.js	610415	155521
+  /models/kim-1-tracks.webp	293952	293996
+  total	904367	449517
+```
+
+On this branch:
+
+```
+/machines/kim-1/ when it opens: file, bytes, gzipped
+  /machines/kim-1/ (html)	57544	13336
+  /analytics.js	6510	2983
+  /consent.js	2743	1227
+  /machines-table.js	2416	1021
+  /kim-1.js	7013	2906
+  /model-loader.js	1679	807
+  /table-sort.js	766	449
+  /_astro/kim-1.ufzgBkwp_ZO889l.webp	87100	87072
+  total	165771	109801
+loaded when scrolled to (images marked loading="lazy"):
+  /_astro/kim-1-bolo-end.qV0CNCQu_D8tIa.webp	41266	41289
+  /_astro/kim-1-bolo-oblique.DcBK6OO4_FgKWi.webp	39648	39554
+  /_astro/kim-1-rev-b-front.1Hqc7X6F_MPpNt.webp	104202	104255
+  /_astro/kim-1-rev-b-back.BOPlcWx0_ZsUNu2.webp	116286	116344
+  total	301402	301442
+loaded later, when the visitor reaches the model:
+  /models/kim-1.js	637898	163048
+  /models/kim-1-tracks.webp	314614	314732
+  total	952512	477780
+```
+
+So the page's first load grew by 15,077 bytes of HTML (2,880 gzipped: the
+photographs section and the note under the model). The four new photographs
+cost 301,402 bytes, as fallbacks, and only when scrolled to; a browser takes
+the 360 or 720 pixel AVIF from the srcset, which is smaller. What the model
+loads grew by 48,145 bytes: 27,483 in the bundle (the parts list) and 20,662 in
+the track map, which now holds three channels. Both stay inside the budgets the
+tests hold: the bundle is 161,945 bytes gzipped by `gzip -9 -c | wc -c` against
+200,000, and the map 314,614 bytes against 400,000.
+
+### Tests
+
+`npm test` in `site/`: 193, from 188. New in `model.test.mjs`: the parts are the
+replica's and the heights the triangulated ones; the note says how the model
+was made, word for word what `made()` writes from the results file, and credits
+every photograph and drawing with what was taken from each; and the analysis's
+sources agree with the registry and its results file with its data. New in
+`registry.test.mjs`: drawings are credited like photographs, and every
+photograph's README section gives its author, its source and the SHA-256 of the
+file as committed, which must match. New in `machine-page.test.mjs`: the
+photographs section shows every photograph in the registry's order, lazily,
+and credits each. Changed: the track map test (three channels, not greyscale),
+the tracks' credit, every test that read the old `photo` field, and the
+figures test, which now allows the commit's first seven characters (below). Removed:
+the test of `make-board-tracks.mjs`, with the script. The floor in both
+workflows is 193.
+
+### The browser check
+
+`node scripts/browser-check.mjs`, as the `Validate` workflow's "The KIM-1 runs
+in a browser" step ran it on 2 October 2026 for this pull request (Actions run
+37043265765, at commit `f1c768c`), copied from the run's log:
+
+```
+browser 154.0.8037.57
+loaded in 1067 ms: Running. Press RS to start the monitor.
+step 1 ok   keys "[RS]" expected "xxxx xx" shown "0000 00" announced "Display 0000 00" (549 ms)
+step 2 ok   keys "[AD] 17FA [DA] 00 [+] 1C" expected "17FB 1C" shown "17FB 1C" announced "Display 17FB 1C" (1522 ms)
+step 3 ok   keys "[AD] 0200 [DA] AD [+] 10 [+] 02 [+] 18 [+] 6D [+] 11 [+] 02 [+] 8D [+] 12 [+] 02 [+] 4C [+] 0A [+] 02" expected "020C 02" shown "020C 02" announced "Display 020C 02" (3976 ms)
+step 4 ok   keys "[AD] 0210 [DA] 27 [+] 15" expected "0211 15" shown "0211 15" announced "Display 0211 15" (1259 ms)
+step 5 ok   keys "[AD] 0200 [GO]" expected "       " shown "       " announced "Display dark" (955 ms)
+step 6 ok   keys "[ST]" expected "020A 4C" shown "020A 4C" announced "Display 020A 4C" (466 ms)
+step 7 ok   keys "[AD] 0212" expected "0212 3C" shown "0212 3C" announced "Display 0212 3C" (844 ms)
+status line: "Running. Press RS to start the monitor.", then "Running. Type the program below, or your own."
+speed, once a second for 5 s: running 1.00 MHz, capacity 27.48 MHz; running 1.00 MHz, capacity 29.41 MHz; running 1.00 MHz, capacity 29.99 MHz; running 1.00 MHz, capacity 30.49 MHz; running 1.00 MHz, capacity 30.77 MHz
+page speed line: Running at the board's own 1 MHz. This browser could run it about 30 times as fast.
+photograph: loaded /_astro/kim-1.ufzgBkwp_1lGWCK.avif, 300x370 pixels, shown at 298x368
+model bundle requested before scrolling to it: no
+model: running in 1190 ms after scrolling to it, fetched /models/kim-1.js, /models/kim-1-tracks.webp; status "The model is running. Its digits show the machine's display."
+model canvas: 778x458, 39.2% of its pixels are not black
+digits match: page segments 63,91,6,91,79,57 (0212 3C), model segments 63,91,6,91,79,57 ("0212 3C")
+page key 1 clicked: model key down "1", presses 0 then 1
+model key 2 clicked at 801,559: model key down "2"; the machine showed "2121 02" after the page's 1 and "1212 12" after the model's 2
+controls: start view azimuth 0.000, polar 0.716, distance 35.795, target 0.000,-1.000,1.500; bounds -13.000,-2.000,-15.650,12.000,2.000,15.650; focused false
+hint on the model while unfocused: "Click the model, then scroll to zoom", shown true; touch-action pan-y pinch-zoom
+wheel over the unfocused model: scrollY 2695 to 2995; distance 35.795 to 35.795
+ctrl and the wheel over the unfocused model: distance 35.795 to 24.973; scrollY 2695 to 2695
+after a click on empty space: focused true, ring {"active":true,"outline":"solid","width":"2px"}, touch-action none
+wheel over the focused model, cursor on the 5 key at 766,531: distance 35.795 to 24.973; the key is now at 766,531, 0.2 px from the cursor; scrollY 2695 to 2695
+Escape: focused false, ring {"active":false,"outline":"none","width":"3px"}, touch-action pan-y pinch-zoom
+wheel after Escape: scrollY 2695 to 2995
+left-drag 233 px left and 46 px down: azimuth 0.000 to 3.196, polar 0.716 to 0.088; target unchanged true
+right-drag: target 0.000,-1.000,1.500 to 11.822,2.000,-2.048; azimuth unchanged true, distance unchanged true
+shift and left-drag: target 0.000,-1.000,1.500 to 11.838,2.000,-2.011; azimuth unchanged true
+nine right-drags, far and back and forth: target -13.000,2.000,0.970 within -13.000,-2.000,-15.650 to 12.000,2.000,15.650: true; it reached an edge: true
+under the board: polar 0.716 to 3.142 (pi/2 is 1.571, pi is 3.142); 51.6% of the canvas is not black, mean brightness 69 of 255 (from above: 39.7%, 83)
+dragged on to the stop: polar 3.142, never past pi (3.142)
+the wheel to its limits: closest 3.000 (77.3% of the canvas drawn), farthest 150.000 (2.7% drawn)
+double click on empty space: distance 150.000 to 35.795, polar 0.716, back at the start view: true
+keyboard: ArrowLeft azimuth 0.000 to -0.262; ArrowDown polar 0.716 to 0.978; Shift+ArrowLeft target x 0.000 to -2.864; Shift+ArrowUp target -2.864,-1.000,1.483 to -2.864,0.880,-0.677; + distance 35.795 to 30.425; then - twice to 40.238; Home back at the start: true
+reset button: back at the start view: true
+tracks at the start: {"tracksLoaded":true,"tracks":true,"underside":true,"partsVisible":true,"partsLevel":1}, buttons pressed true,false, section data-model-tracks "on"
+Show tracks, Enter: {"tracksLoaded":true,"tracks":false,"underside":false,"partsVisible":true,"partsLevel":1}, pressed false,false; status "The tracks are off: the board is plain."
+the board's left-hand bus, 48x67 px (3149 pixels): colour variance 1591.6 with the tracks, 8.6 without; copper-coloured pixels on the canvas 14.57% with, 4.24% without
+Show tracks only: {"tracksLoaded":true,"tracks":true,"underside":true,"partsVisible":false,"partsLevel":0}, pressed true,true, data-model-parts "hidden"; copper-coloured pixels 16.19% (parts shown: 14.57%); the bus's colour variance 1594.7
+a click where the hidden 5 key was: presses 2 then 2
+Show tracks with the parts hidden: {"tracksLoaded":true,"tracks":false,"underside":false,"partsVisible":true,"partsLevel":1}, pressed false,false
+under the board, polar 3.142, tracks on: the map's underside copper at 286 points is 109,97,37, its bare board at 255 points 18,63,20, 98.4 apart; the same points mirrored end to end 15.3 apart; with the tracks off 3.2 apart
+photographs section: 5 photographs; kim-1.webp loaded /_astro/kim-1.ufzgBkwp_1lGWCK.avif 300x370; kim-1-bolo-end.webp loaded /_astro/kim-1-bolo-end.qV0CNCQu_Z2te0wp.avif 300x200; kim-1-bolo-oblique.webp loaded /_astro/kim-1-bolo-oblique.DcBK6OO4_UG3Hn.avif 300x200; kim-1-rev-b-front.webp loaded /_astro/kim-1-rev-b-front.1Hqc7X6F_1I4Ioi.avif 300x400; kim-1-rev-b-back.webp loaded /_astro/kim-1-rev-b-back.BOPlcWx0_Z166GoH.avif 300x400
+phone, unfocused: touch-action "pan-y pinch-zoom", hint "Tap the model, then drag to turn and pinch to zoom", shown true
+phone, one finger swiped up on the unfocused model: scrollY 3241 to 3475; azimuth 0.000 to 0.000, polar 0.716 to 0.716
+phone, after a tap on the model: focused true, touch-action "none"
+phone, one finger dragged on the focused model: azimuth 0.000 to 2.199, polar 0.716 to 0.000; scrollY 3241 to 3241
+phone, two fingers spread on the focused model: distance 35.795 to 21.091; scrollY 3241 to 3241
+phone, after it loses focus: touch-action "pan-y pinch-zoom"
+no console errors, no failed requests, no CSP violations
+```
+
+The underside line is the new proof that the underside's sheet is laid the
+right way: from below, the 286 points the map calls copper and the 255 it calls
+bare are 98.4 apart in colour, the same points mirrored end to end only 15.3,
+and with the tracks off 3.2. The bus's colour variance with the tracks off is
+8.6 on its new, part-free stretch.
+
+### What is proven, and what is not
+
+Proven by the tests and the browser check (above): every figure on the page is
+the results file's, every photograph is credited and loads from this site, the
+underside's copper shows from below where the map puts it, and nothing new
+breaks the CSP. Seen, not measured: the before and after screenshots of the
+model and the overlays of the old and new maps on the rectified photograph,
+looked at while working. Not checked: a real GPU, any browser but Chrome, a
+screen reader on the new section and note.
+
+### Limitations that remain
+
+- **The underside is one photograph of a different board** from the one the
+  rest of the model follows, and only the replica checks it. A large tinned
+  pour on it, on the left about halfway down, is traced in patches, because its
+  wrinkled solder is lighter in some places than others.
+- **Under the chips, the display and the keypad the copper is the replica's**,
+  Rev D, not the photographed Rev B: 7.6% of the top face.
+- **The vote decides where the photographs disagree**, on 10.3% of what two or
+  more see, and the photograph outvoted may be right.
+- **One part of each kind was measured for height**, and the rest of its kind
+  take that height; the other resistors, capacitors and diodes take their
+  footprints' sizes, and a chip's body thickness under its measured top is
+  typical.
+- **Resistors, capacitors and diodes are plain cylinders**, with no bands or
+  printing, and transistors are round, not flat on one side.
+- **The red wire** follows the path one photograph shows and is drawn lying just
+  above the board; its height was not measured.
+- **The map has 8 pixels to the millimetre**: close up a track's edge is soft.
+  More would cost more than the budget allows for a model that loads on demand.
+- **Parallax is not corrected** in the check on the chips' places, so that
+  check bounds the replica's places rather than measuring them.
+- **The board's outline and tabs are the replica's**, which may not match the
+  Musée Bolo's board to the tenth of a millimetre.
 

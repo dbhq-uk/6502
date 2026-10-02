@@ -38,7 +38,8 @@
   --deep: #737d72;
 
   /* the machines' 3D models, and only there: colours of the parts of a real
-     board (its green, topside and solder side, the copper tracks under the green, its gold contacts, tinned legs, red LEDs lit and unlit).
+     board (its green, topside and solder side, the copper tracks under the green, its gold contacts, tinned legs, red LEDs lit and unlit,
+     the white ceramic of two of its chips, its cream capacitors, its tan resistors and the red wire across the Musée Bolo's board).
      None is a text colour, and the page's own drawn display stays phosphor
      green: these are what the model of the board is made of. */
   --model-pcb: #2b4d25;
@@ -48,6 +49,10 @@
   --model-tin: #9ea6a2;
   --model-led: #ff3b1f;
   --model-led-off: #2b0f0b;
+  --model-ceramic: #e4dfd3;
+  --model-capacitor: #ddd29a;
+  --model-resistor: #b48f63;
+  --model-wire: #9c2a20;
 
   /* type */
   --font-head: "Inter Tight Variable", "Inter Tight", system-ui, sans-serif;

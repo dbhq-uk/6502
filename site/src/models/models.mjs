@@ -8,7 +8,9 @@
 //      mouse and touch handling, the reset button, the lazy render loop), and
 //      draws the machine itself. The
 //      board or case is that machine's own code: do not generalise it.
-//   2. Add an entry here, with the text alternative the page shows beside it.
+//   2. Add an entry here, with the text alternative the page shows beside it,
+//      and, if it was measured, `made`: a function of its measurements
+//      (src/data/<id>-model.json) giving the note on how it was made.
 //   3. scripts/build-models.mjs bundles every entry into public/models/<id>.js,
 //      and the machine page (src/pages/machines/[id].astro) shows the model
 //      section for any machine in this map. public/model-loader.js loads the
@@ -17,6 +19,7 @@
 // A machine with no entry here gets no model section. Its photograph is a
 // different matter: that is required of every running machine, in the registry.
 import { describe as describeKim1, TRACKS as KIM1_TRACKS } from './kim-1-layout.mjs';
+import { made as madeKim1 } from './kim-1-notes.mjs';
 
 /**
  * What the visitor is told about the controls, once, so the visible text under
@@ -50,6 +53,8 @@ export const MODELS = {
     about: describeKim1(),
     /** Where its track map is served from: scripts/build-models.mjs copies it there beside the bundle. */
     texture: KIM1_TRACKS.src,
+    /** How it was made, from its measurements (src/data/kim-1-model.json): the note under it. */
+    made: madeKim1,
   },
 };
 

@@ -1,0 +1,28 @@
+---
+// Every photograph of the original machine the page uses, main photograph first,
+// each credited and, for a machine with a 3D model, with what the model took
+// from it: the machine's `photos` list in machines/registry.json, in order. The
+// main one is also in the page's head; here it is in the company of the rest.
+// They load lazily, so the section adds nothing to the page's first load.
+import MachinePhoto from './MachinePhoto.astro';
+import type { Photo } from './MachinePhoto.astro';
+
+interface Props {
+  machine: { id: string; name: string; photos: Photo[] };
+  /** Whether the machine has a 3D model, so each photograph says what the model took from it. */
+  model: boolean;
+}
+const { machine, model } = Astro.props;
+const n = machine.photos.length;
+const WORDS = ['no', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten'];
+---
+
+<section class="photos" aria-labelledby="photos" data-photos={machine.id}>
+  <div class="wrap narrow">
+    <h2 id="photos">Photographs of the original</h2>
+    <p class="photos-intro">{n === 1 ? 'The photograph' : `The ${WORDS[n] ?? n} photographs`} of the original {machine.name} that this page uses, each credited as its source gives it.{model && ' Under each is what the 3D model above took from it.'}</p>
+    <div class="photo-grid">
+      {machine.photos.map((photo) => <MachinePhoto machine={machine} photo={photo} used={model} />)}
+    </div>
+  </div>
+</section>

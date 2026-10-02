@@ -22,6 +22,7 @@ bench/                      # the speed benchmarks (native, and the browser spee
 tools/                      # scripts that make test data and check assumptions
   Dbhq.Cpu6502.ChipTrace/   # records the core's bus cycles for the site's chip page
   probes/                   # scripts that check assumptions against test data
+  kim1-model/               # offline Python that measures the KIM-1's 3D model from photographs; its outputs are committed
 docs/superpowers/specs/     # the design; each stage gets its own spec here
 docs/superpowers/plans/     # the plan for each spec
 docs/journal/               # the record of how it was built; the site's source

@@ -1,17 +1,30 @@
 ---
-// A photograph of the original machine, with its credit, from the machine's
-// `photo` entry in machines/registry.json. Every running machine has one
-// (the registry check fails the build otherwise), and this is the one place a
-// machine page shows it, so the credit cannot be left off. It is a photograph,
-// never an illustration: the file is in src/assets/photos/, not imagery/.
+// One photograph of the original machine, with its credit, from an entry in the
+// machine's `photos` list in machines/registry.json. Every running machine has
+// at least one (the registry check fails the build otherwise), and this is the
+// only way a machine page shows one, so the credit cannot be left off. It is a
+// photograph, never an illustration: the file is in src/assets/photos/, not
+// imagery/.
+//
+// The page's head shows the first, eagerly, beside the machine's details; the
+// photographs section (MachinePhotos.astro) shows every one, lazily, each with
+// what the 3D model took from it. Both ask for the same widths, so the main
+// photograph is fetched once.
 import { Picture } from 'astro:assets';
+
+export interface Photo { file: string; author: string; sourceUrl: string; licence: string | null; licenceUrl?: string; date: string; alt: string; caption?: string; used?: string }
 
 interface Props {
   /** The machine's registry entry. */
-  machine: { id: string; name: string; photo: { file: string; author: string; sourceUrl: string; licence: string | null; licenceUrl?: string; date: string; alt: string; caption?: string } };
+  machine: { id: string; name: string };
+  /** One of its photographs. */
+  photo: Photo;
+  /** The main photograph, in the page's head: loaded at once, and marked for the tests. */
+  main?: boolean;
+  /** Say what the 3D model took from it. */
+  used?: boolean;
 }
-const { machine } = Astro.props;
-const { photo } = machine;
+const { machine, photo, main = false, used = false } = Astro.props;
 const files = import.meta.glob<{ default: ImageMetadata }>('../assets/photos/*.{webp,jpg,jpeg,png,avif}', { eager: true });
 const src = files[`../assets/photos/${photo.file}`]?.default;
 if (!src) throw new Error(`machine ${machine.id}: its photograph ${photo.file} is not in src/assets/photos/`);
@@ -24,10 +37,11 @@ const host = new URL(photo.sourceUrl).hostname;
 const caption = photo.caption ?? `an original ${machine.name}`;
 ---
 
-<figure class="photo" data-photo={machine.id}>
-  <Picture src={src} formats={['avif']} fallbackFormat="webp" width={720} widths={[360, 720, 1080]} sizes="(max-width: 760px) min(88vw, 360px), 300px" alt={photo.alt} loading="eager" data-photo-img />
+<figure class:list={['photo', { 'photo-item': !main }]} data-photo={main ? machine.id : undefined} data-photo-file={photo.file}>
+  <Picture src={src} formats={['avif']} fallbackFormat="webp" width={720} widths={[360, 720, 1080]} sizes="(max-width: 760px) min(88vw, 360px), 300px" alt={photo.alt} loading={main ? 'eager' : 'lazy'} data-photo-img={main ? '' : undefined} data-photo-item-img={main ? undefined : ''} />
   <figcaption class="figure-caption">
     <span class="photo-what">Photograph: {caption}, taken {taken}.</span>
     <span class="photo-credit" data-photo-credit>By {photo.author}. Source: <a href={photo.sourceUrl}>{host}</a>. Licence: {photo.licence === null ? 'no licence stated' : photo.licenceUrl ? <a href={photo.licenceUrl}>{photo.licence}</a> : photo.licence}.</span>
+    {used && photo.used && <span class="photo-used" data-photo-used>Used for the model: {photo.used}.</span>}
   </figcaption>
 </figure>
