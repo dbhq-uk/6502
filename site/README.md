@@ -13,9 +13,12 @@ npm run dev         # http://127.0.0.1:4333/
 npm test            # builds the site, then checks it
 npm run browser-check   # runs the KIM-1 page in headless Chrome, after npm test has built dist/
 node scripts/page-weight.mjs /machines/kim-1/   # what a page loads when it opens, after a build
-node scripts/measure-kim1-photo.mjs <photo>     # the KIM-1 board's scale and size, off its full-size photograph
-node scripts/make-board-tracks.mjs <photo>      # remakes the KIM-1 model's track map, off the same photograph
+node scripts/measure-kim1-photo.mjs <photo>     # the KIM-1 board's scale and size, off its main photograph's full-size original
 ```
+
+The KIM-1 model's measurements are made offline, in Python, by
+`tools/kim1-model/` at the repository root (its README says how to run them);
+their outputs are committed and the build never runs them.
 
 Needs Node 22.22 or later (`engines` in `package.json`). `dev` and `preview` serve
 on `127.0.0.1`. To reach them from another machine, set `SITE_HOST` to the address
@@ -37,7 +40,9 @@ stays inside the bounds, the distance limits hold, a double click on empty space
 resets the view, the keyboard works, the copper tracks are on to start with and
 show (a part-free stretch of the board has more colour variance with them than
 without), Show tracks and Show tracks only work from the mouse and the keyboard
-and hide the parts so a hidden key cannot be clicked, and in an emulated phone one finger scrolls
+and hide the parts so a hidden key cannot be clicked, from below the underside's copper shows where the
+track map puts it (and not where a mirrored map would), every photograph in the photographs
+section loads from this site, and in an emulated phone one finger scrolls
 the page until a tap focuses the model, then turns it, and two fingers pinch. It runs Chrome with SwiftShader, its software WebGL, so it needs no
 GPU.
 
@@ -63,8 +68,8 @@ Nothing on the site is typed twice. The repository is the source.
 | Tests passing, variants, suites | `src/data/results.json`, made from the test run |
 | The speed figures | `src/data/measurements.json`, made by `bench/collect-measurements.mjs` and committed as a dated record |
 | A running machine's page | `src/pages/machines/[id].astro` with the machine's panel (the KIM-1's is `src/components/Kim1Panel.astro`, driven by `public/kim-1.js`), its "try it" program from `machines/<id>/try-it.json`, which its acceptance test also runs, and its rights from the registry |
-| A machine's photograph | `src/assets/photos/<file>`, named with its author, source, licence (as the source states it, or `null` for none), date taken and alt text in the machine's `photo` entry in `machines/registry.json`; `src/components/MachinePhoto.astro` shows it in the page's head with a credit built from those fields. Required of every running machine: the build fails without one. Where each came from is in `src/assets/photos/README.md` |
-| A machine's 3D model | `src/models/<id>.js`, listed in `src/models/models.mjs` (which says how to add the next), on the stage every model shares (`src/models/stage.mjs`). The KIM-1's board is measured from its photograph (`scripts/measure-kim1-photo.mjs` for the scale and size) in `src/models/kim-1-layout.mjs`. Its copper tracks are a map traced from the same photograph by `scripts/make-board-tracks.mjs` and committed as `src/assets/tracks/kim-1.webp` (CC BY-SA, like the photograph: `src/assets/photos/README.md`); the build never runs that script. `scripts/build-models.mjs` bundles each model into `public/models/<id>.js`, and copies its track map to `public/models/<id>-tracks.webp` (both git-ignored), before every build, and `public/model-loader.js` loads the bundle, which fetches the map, only when its section nears the screen |
+| A machine's photographs | `src/assets/photos/<file>`, each named in the machine's `photos` list in `machines/registry.json` (main photograph first) with its author, source, licence (as the source states it, or `null` for none), date taken, the day it was fetched, alt text and what the 3D model took from it. `src/components/MachinePhoto.astro` shows the first in the page's head, and `src/components/MachinePhotos.astro` shows every one in a photographs section, each with a credit built from those fields. At least one is required of every running machine: the build fails without one. Where each came from, with its SHA-256, is in `src/assets/photos/README.md`, and a test checks the hashes. A drawing the model was measured from (a replica of the board's layout) is in the machine's `drawings` list and credited under the model |
+| A machine's 3D model | `src/models/<id>.js`, listed in `src/models/models.mjs` (which says how to add the next), on the stage every model shares (`src/models/stage.mjs`). The KIM-1's board is measured by `tools/kim1-model/` from five photographs of two real boards and a replica of its layout: the parts, places and heights it writes are `src/models/kim-1-parts.mjs`, shaped for the model by `src/models/kim-1-layout.mjs`; the copper of both faces is `src/assets/tracks/kim-1.webp` (its licences are in `src/assets/photos/README.md`); and the figures the note under the model quotes are `src/data/kim-1-model.json`, which `src/models/kim-1-notes.mjs` turns into words. The build never runs the analysis. `scripts/build-models.mjs` bundles each model into `public/models/<id>.js`, and copies its track map to `public/models/<id>-tracks.webp` (both git-ignored), before every build, and `public/model-loader.js` loads the bundle, which fetches the map, only when its section nears the screen |
 | A machine's WebAssembly and ROM | `public/machines/<id>/`, made by `scripts/build-machines.mjs` and never committed (the ROM it copies in is committed, under `roms/`) |
 
 **A machine counts as implemented only when it runs in the browser and passes an
@@ -82,9 +87,10 @@ class. Its page at `/machines/<id>/` is generated from the registry by
 no page to write for the text. What the page cannot have without work is the
 machine itself: a running machine needs a panel in `[id].astro` that runs it,
 and the build fails without one, because "running" means it runs in the browser.
-It also needs a photograph of the original: add the file to `src/assets/photos/`,
-its `photo` entry to the registry and its provenance to that folder's README, and
-the page shows it, credited. A 3D model is optional and per machine: see
+It also needs at least one photograph of the original: add the file to
+`src/assets/photos/`, an entry in its `photos` list in the registry and its
+provenance, with the SHA-256 of the file as committed, to that folder's README,
+and the page shows it, credited. A 3D model is optional and per machine: see
 `src/models/models.mjs`.
 
 ## The checks

@@ -3,6 +3,7 @@ import Base from '../../layouts/Base.astro';
 import Kim1Panel from '../../components/Kim1Panel.astro';
 import MachinePhoto from '../../components/MachinePhoto.astro';
 import MachineModel from '../../components/MachineModel.astro';
+import MachinePhotos from '../../components/MachinePhotos.astro';
 import { MODELS } from '../../models/models.mjs';
 import { registry, results } from '../../lib/data.mjs';
 import { fmt } from '../../lib/figures.mjs';
@@ -41,7 +42,7 @@ const roms = machine.id === 'kim-1' ? kim1Roms() : [];
         {machine.notes && <p>{machine.notes}</p>}
         <p>{acceptanceSummary(machine, results, fmt)}</p>
       </div>
-      <MachinePhoto machine={machine} />
+      <MachinePhoto machine={machine} photo={machine.photos[0]} main />
     </div>
   </section>
 
@@ -73,7 +74,9 @@ const roms = machine.id === 'kim-1' ? kim1Roms() : [];
     </section>
   )}
 
-  {hasModel && <MachineModel id={machine.id} photo={machine.photo} />}
+  {hasModel && <MachineModel id={machine.id} photos={machine.photos} drawings={machine.drawings} />}
+
+  <MachinePhotos machine={machine} model={hasModel} />
 
   <section aria-labelledby="rom">
     <div class="wrap narrow">

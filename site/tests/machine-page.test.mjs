@@ -159,14 +159,15 @@ const figure = (() => {
 })();
 const decode = (t) => t.replace(/&amp;/g, '&').replace(/&#39;/g, "'").replace(/&quot;/g, '"');
 
-test('the page shows the registry\'s photograph of the original, from this site, with its alt text and its size set', () => {
-  assert.ok(kim.photo, 'the KIM-1 has no photograph in the registry');
+test('the page\'s head shows the registry\'s main photograph of the original, from this site, with its alt text and its size set', () => {
+  assert.ok(kim.photos?.length >= 1, 'the KIM-1 has no photograph in the registry');
+  const main = kim.photos[0];
   assert.ok(figure, 'the page has no photograph');
   const img = /<img\b[^>]*>/.exec(figure)?.[0] ?? '';
-  const stem = kim.photo.file.replace(/\.[a-z]+$/, '');
+  const stem = main.file.replace(/\.[a-z]+$/, '');
   assert.match(img, new RegExp(`src="/_astro/${stem}\\.[\\w-]+\\.webp"`), 'the photograph is not served from this site');
   assert.match(figure, new RegExp(`<source srcset="/_astro/${stem}\\.[^"]+\\.avif 360w`), 'no AVIF copies in the srcset');
-  assert.equal(decode(/\balt="([^"]*)"/.exec(img)?.[1] ?? ''), kim.photo.alt);
+  assert.equal(decode(/\balt="([^"]*)"/.exec(img)?.[1] ?? ''), main.alt);
   // Its box is reserved before it loads: no layout shift.
   assert.match(img, /\bwidth="\d+"/);
   assert.match(img, /\bheight="\d+"/);
@@ -175,14 +176,56 @@ test('the page shows the registry\'s photograph of the original, from this site,
 });
 
 test('the photograph is credited on the page from the registry: its author, a link to its source and the licence as the source states it', () => {
+  const main = kim.photos[0];
   const caption = /<figcaption class="figure-caption">([\s\S]*?)<\/figcaption>/.exec(figure)?.[1] ?? '';
   // visibleText puts a space where a tag was; a link before a full stop leaves one there.
   const text = visibleText(caption).replace(/\s+([.,])/g, '$1');
   assert.match(text, /^Photograph: /, 'the caption does not call it a photograph');
   assert.doesNotMatch(text, /illustration/i);
-  assert.ok(text.includes(`By ${kim.photo.author}.`), 'the author is not credited');
-  assert.ok(caption.includes(`href="${kim.photo.sourceUrl}"`), 'the source is not linked');
-  assert.ok(text.includes(kim.photo.licence === null ? 'Licence: no licence stated.' : `Licence: ${kim.photo.licence}.`), 'the licence is not given as the source states it');
-  if (kim.photo.licenceUrl) assert.ok(caption.includes(`href="${kim.photo.licenceUrl}"`), 'the licence is not linked');
+  assert.ok(text.includes(`By ${main.author}.`), 'the author is not credited');
+  assert.ok(caption.includes(`href="${main.sourceUrl}"`), 'the source is not linked');
+  assert.ok(text.includes(main.licence === null ? 'Licence: no licence stated.' : `Licence: ${main.licence}.`), 'the licence is not given as the source states it');
+  if (main.licenceUrl) assert.ok(caption.includes(`href="${main.licenceUrl}"`), 'the licence is not linked');
   assert.match(text, /taken \d{1,2} \w+ \d{4}|taken \w+ \d{4}|taken \d{4}/, 'the caption does not say when it was taken');
+});
+
+// Every photograph the page uses, in the photographs section, each credited.
+const gallery = (() => {
+  const at = html.indexOf('<section class="photos"');
+  return at < 0 ? '' : html.slice(at, html.indexOf('</section>', at));
+})();
+
+test('the photographs section shows every photograph in the registry, main one first, each from this site, lazily, with its alt text and size set', () => {
+  assert.ok(gallery, 'the page has no photographs section');
+  assert.match(gallery, /<h2 id="photos">Photographs of the original<\/h2>/);
+  const figures = [...gallery.matchAll(/<figure class="photo photo-item"[^>]*data-photo-file="([^"]+)"[^>]*>([\s\S]*?)<\/figure>/g)];
+  assert.deepEqual(figures.map((f) => f[1]), kim.photos.map((p) => p.file), 'the section does not show the registry\'s photographs, in its order');
+  for (const [, file, body] of figures) {
+    const p = kim.photos.find((x) => x.file === file);
+    const img = /<img\b[^>]*>/.exec(body)?.[0] ?? '';
+    const stem = file.replace(/\.[a-z]+$/, '');
+    assert.match(img, new RegExp(`src="/_astro/${stem}\\.[\\w-]+\\.webp"`), `${file} is not served from this site`);
+    assert.match(img, /\bloading="lazy"/, `${file} is not loaded lazily`);
+    assert.match(img, /\bwidth="\d+"/);
+    assert.match(img, /\bheight="\d+"/);
+    assert.equal(decode(/\balt="([^"]*)"/.exec(img)?.[1] ?? ''), p.alt);
+  }
+});
+
+test('every photograph in the section is credited from the registry: its author, a link to its source, its licence as stated, and what the model took from it', () => {
+  const figures = [...gallery.matchAll(/data-photo-file="([^"]+)"[^>]*>([\s\S]*?)<\/figure>/g)];
+  assert.equal(figures.length, kim.photos.length);
+  for (const [, file, body] of figures) {
+    const p = kim.photos.find((x) => x.file === file);
+    const caption = /<figcaption class="figure-caption">([\s\S]*?)<\/figcaption>/.exec(body)?.[1] ?? '';
+    const text = visibleText(caption).replace(/\s+([.,:])/g, '$1');
+    assert.match(text, /^Photograph: /, `${file} is not captioned as a photograph`);
+    assert.ok(text.includes(`By ${p.author}.`), `${file}'s author is not credited`);
+    assert.ok(caption.includes(`href="${p.sourceUrl}"`), `${file}'s source is not linked`);
+    assert.ok(text.includes(p.licence === null ? 'Licence: no licence stated.' : `Licence: ${p.licence}.`), `${file}'s licence is not given as the source states it`);
+    if (p.licenceUrl) assert.ok(caption.includes(`href="${p.licenceUrl}"`), `${file}'s licence is not linked`);
+    assert.ok(text.includes(`Used for the model: ${p.used}.`), `${file} does not say what the model took from it`);
+  }
+  // A photograph with no licence stated says so in words, not by leaving the licence out.
+  assert.ok(kim.photos.some((p) => p.licence === null), 'no photograph here tests the "no licence stated" case');
 });

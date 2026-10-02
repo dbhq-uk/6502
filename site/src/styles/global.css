@@ -198,6 +198,10 @@ footer .linkbtn:hover { color: var(--white); }
 .photo { margin: 0; max-width: 360px; justify-self: center; }
 .photo img { width: 100%; height: auto; border: 1px solid var(--hairline); border-radius: var(--r-card); background: var(--iron); }
 .photo figcaption { display: grid; gap: 4px; padding: 10px 0 0; text-align: left; }
+/* Every photograph the page uses, main one first, each credited: a grid of the same figures. */
+.photos-intro { margin: 24px 0 20px; }
+.photo-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 28px 24px; align-items: start; }
+.photo-grid .photo { max-width: none; justify-self: stretch; }
 /* The 3D model: hidden in the markup, shown by public/model-loader.js. */
 .model-stage { position: relative; padding: 0; height: min(64vh, 560px); min-height: 340px; margin-top: 24px; background: var(--void); border: 1px solid var(--circuit); border-radius: var(--r-window); overflow: hidden; outline-offset: 3px; }
 /* Focus is what hands the wheel and a finger to the model, so a mouse click, which does not raise :focus-visible, shows the ring too. The script sets the canvas's touch-action: pan-y until the model has focus, none after. */
@@ -226,6 +230,9 @@ footer .linkbtn:hover { color: var(--white); }
 .model-help { color: var(--moss-80); font-size: 14px; margin: 0 0 12px; }
 [data-model]:not([data-state="running"]) .model-help { display: none; }
 .model-about { text-align: left; }
+/* How the model was made: its sources, its measured figures and its limits, under the caption. */
+.model-made { margin: 8px 0 0; }
+.model-made h3 { margin-top: 0; }
 .machine-run h2 + .kim1, .wrap > h2 + .prose { margin-top: 24px; }
 /* The chip page (/inside/): a 3D view beside a tour. The view's own colours are
    these same tokens, read by src/chip/main.js at run time. Without JavaScript

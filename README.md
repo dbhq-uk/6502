@@ -38,9 +38,15 @@ SingleStepTests, which record the bus activity of every opcode cycle by cycle.
 
 ## Licence
 
-MIT. See [`LICENSE`](LICENSE). Two kinds of file here are somebody else's
-and keep their own terms: the system ROMs in [`roms/`](roms/README.md), and the
-photographs of the original machines in
+MIT. See [`LICENSE`](LICENSE). Some files here are somebody else's, or made
+from somebody else's, and keep their own terms: the system ROMs in
+[`roms/`](roms/README.md); the photographs of the original machines in
 [`site/src/assets/photos/`](site/src/assets/photos/README.md), each under the
-licence its source gives it. No game and no third-party test program is
+licence its source gives it (CC BY-SA 2.0 fr, share-alike, for the Musée Bolo's,
+and none stated for the two from Hans Otten's site); the KIM-1 model's track
+map, `site/src/assets/tracks/kim-1.webp`, traced from those photographs and
+from a replica of the board's layout, whose channels carry those terms and
+CC BY-NC 4.0 (the photographs' README says which); and the files in
+[`tools/kim1-model/data/`](tools/kim1-model/data/README.md) drawn from that
+replica, which are CC BY-NC 4.0. No game and no third-party test program is
 committed; the tests download what they need, pinned by hash.

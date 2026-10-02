@@ -1,0 +1,311 @@
+{
+ "about": "Made by tools/kim1-model/results.py from the measurements in tools/kim1-model/data/. The KIM-1 page quotes these; nothing on it is typed by hand.",
+ "registration": {
+  "bolo-top": {
+   "heldOutMedianMm": 0.123,
+   "heldOutP90Mm": 0.225,
+   "blocks": 71,
+   "file": "kim-1.webp"
+  },
+  "rev-b-front": {
+   "heldOutMedianMm": 0.141,
+   "heldOutP90Mm": 0.288,
+   "blocks": 62,
+   "file": "kim-1-rev-b-front.webp"
+  },
+  "rev-b-back": {
+   "heldOutMedianMm": 0.207,
+   "heldOutP90Mm": 0.389,
+   "blocks": 150,
+   "file": "kim-1-rev-b-back.webp"
+  },
+  "bolo-end": {
+   "heldOutMedianMm": 0.1,
+   "heldOutP90Mm": 0.192,
+   "blocks": 74,
+   "file": "kim-1-bolo-end.webp"
+  },
+  "bolo-oblique": {
+   "heldOutMedianMm": 0.125,
+   "heldOutP90Mm": 0.468,
+   "blocks": 60,
+   "file": "kim-1-bolo-oblique.webp"
+  }
+ },
+ "tracks": {
+  "top": {
+   "seenShare": 0.6532,
+   "fromReplicaShare": 0.0762,
+   "disagreeShare": 0.1033,
+   "before": 0.4161,
+   "after": 0.5716,
+   "zones": {
+    "top left: the bus and the three 40-pin chips": {
+     "before": 0.5071,
+     "after": 0.6014
+    },
+    "top right: memory, crystal and name": {
+     "before": 0.4768,
+     "after": 0.555
+    },
+    "middle left: the bus between the connectors": {
+     "before": 0.4384,
+     "after": 0.659
+    },
+    "middle right: display drivers and display": {
+     "before": 0.4518,
+     "after": 0.5281
+    },
+    "bottom left: cassette, teletype and timer": {
+     "before": 0.2471,
+     "after": 0.4723
+    },
+    "bottom right: the keypad": {
+     "before": 0.144,
+     "after": 0.2072
+    }
+   }
+  },
+  "leaveOneOut": {
+   "kim-1.webp": {
+    "before": 0.4174,
+    "after": 0.8099
+   },
+   "kim-1-bolo-end.webp": {
+    "before": 0.4324,
+    "after": 0.8067
+   },
+   "kim-1-rev-b-front.webp": {
+    "before": 0.3829,
+    "after": 0.6604
+   }
+  },
+  "bottom": {
+   "seenShare": 0.8663,
+   "after": 0.5421
+  },
+  "order": [
+   "kim-1-bolo-end.webp",
+   "kim-1.webp",
+   "kim-1-rev-b-front.webp"
+  ],
+  "mapPxPerMm": 8
+ },
+ "heights": {
+  "checkMm": 0.14,
+  "checkRange": [
+   -0.21,
+   0.48
+  ],
+  "points": [
+   {
+    "name": "the keypad's circuit board, top face, the corner nearest the display",
+    "part": "keypad-board",
+    "height": 2.13,
+    "range": [
+     1.79,
+     2.48
+    ]
+   },
+   {
+    "name": "the keypad's bezel, top face, the corner nearest the display",
+    "part": "keypad-bezel",
+    "height": 9.05,
+    "range": [
+     8.7,
+     9.39
+    ]
+   },
+   {
+    "name": "the GO key, the middle of the hole in its O",
+    "part": "key",
+    "height": 7.19,
+    "range": [
+     6.85,
+     7.54
+    ]
+   },
+   {
+    "name": "the display's window, top face, the corner by U18",
+    "part": "display",
+    "height": 5.87,
+    "range": [
+     5.52,
+     6.21
+    ]
+   },
+   {
+    "name": "U2, the black 40-pin package, top face, the corner at its notched end by pin 1's row",
+    "part": "dip40-plastic",
+    "height": 8.76,
+    "range": [
+     8.44,
+     9.09
+    ]
+   },
+   {
+    "name": "U1, the white ceramic 40-pin package, top face, the corner at its pin 1 end",
+    "part": "dip40-ceramic",
+    "height": 2.45,
+    "range": [
+     2.12,
+     2.78
+    ]
+   },
+   {
+    "name": "U12, a 16-pin memory package, top face, the corner by its U12 label",
+    "part": "dip16",
+    "height": 2.85,
+    "range": [
+     2.5,
+     3.19
+    ]
+   },
+   {
+    "name": "U12, the same memory package, top face, the corner at its other end",
+    "part": "dip16",
+    "height": 2.49,
+    "range": [
+     2.14,
+     2.84
+    ]
+   },
+   {
+    "name": "the crystal's can, the middle of the BME stamped on its top",
+    "part": "crystal",
+    "height": 8.07,
+    "range": [
+     7.72,
+     8.43
+    ]
+   },
+   {
+    "name": "a transistor by the display, the end of the flat edge of its top",
+    "part": "to92",
+    "height": 8.19,
+    "range": [
+     7.84,
+     8.54
+    ]
+   },
+   {
+    "name": "the trimmer, the middle of the cross in its rotor",
+    "part": "trimmer",
+    "height": 3.32,
+    "range": [
+     3.0,
+     3.65
+    ]
+   },
+   {
+    "name": "the orange capacitor, a white fleck on its top",
+    "part": "capacitor-orange",
+    "height": 9.1,
+    "range": [
+     8.77,
+     9.44
+    ]
+   },
+   {
+    "name": "U13, a 14-pin logic package, the middle of the TI logo printed on its top",
+    "part": "dip14",
+    "height": 4.46,
+    "range": [
+     4.11,
+     4.81
+    ]
+   },
+   {
+    "name": "a cream capacitor beside the memory, the W of TAIWAN printed along its top",
+    "part": "capacitor-cream",
+    "height": 6.39,
+    "range": [
+     6.05,
+     6.73
+    ]
+   }
+  ],
+  "camera": {
+   "focalPx": 16911,
+   "principalPoint": [
+    2597,
+    2347
+   ],
+   "planeRmsPx": 1.32,
+   "centredFocalPx": 18121,
+   "centredPlaneRmsPx": 1.48
+  },
+  "before": {
+   "commit": "e0fd715",
+   "parts": [
+    {
+     "part": "dip40-ceramic",
+     "before": 4.6,
+     "measured": 2.45,
+     "off": 2.15
+    },
+    {
+     "part": "dip40-plastic",
+     "before": 4.6,
+     "measured": 8.76,
+     "off": 4.16
+    },
+    {
+     "part": "dip16",
+     "before": 4.6,
+     "measured": 2.67,
+     "off": 1.93
+    },
+    {
+     "part": "dip14",
+     "before": 4.6,
+     "measured": 4.46,
+     "off": 0.14
+    },
+    {
+     "part": "display",
+     "before": 4.5,
+     "measured": 5.87,
+     "off": 1.37
+    },
+    {
+     "part": "keypad-bezel",
+     "before": 5.5,
+     "measured": 9.05,
+     "off": 3.55
+    },
+    {
+     "part": "key",
+     "before": 9.5,
+     "measured": 7.19,
+     "off": 2.31
+    },
+    {
+     "part": "crystal",
+     "before": 5.0,
+     "measured": 8.07,
+     "off": 3.07
+    }
+   ],
+   "meanOffMm": 2.33,
+   "worst": {
+    "part": "dip40-plastic",
+    "before": 4.6,
+    "measured": 8.76,
+    "off": 4.16
+   }
+  }
+ },
+ "layout": {
+  "chipBodyOffsetMm": {
+   "n": 44,
+   "median": 0.844,
+   "p90": 1.381,
+   "max": 2.007
+  },
+  "keyGridResidualMm": {
+   "median": 0.264,
+   "max": 0.969
+  }
+ }
+}

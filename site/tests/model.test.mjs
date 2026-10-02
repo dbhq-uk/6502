@@ -7,7 +7,8 @@ import { page, visibleText, DIST } from './helpers.mjs';
 import { KIM1_KEYS } from '../src/lib/machines.mjs';
 import { REPO_ROOT } from '../src/lib/registry.mjs';
 import { MODELS, CONTROLS, CONTROLS_DESCRIPTION, TRACK_BUTTONS, modelSrc } from '../src/models/models.mjs';
-import { BOARD, TABS, CONTACTS_PER_TAB, PITCH, CHIPS, RAM, LOGIC, CRYSTAL, NAME, HOLES, DISPLAY, KEYPAD, KEY_ROWS, KEYS, SST, PHOTO, PX_PER_MM, TRACKS, decode, describe } from '../src/models/kim-1-layout.mjs';
+import { BOARD, TABS, CONTACTS_PER_TAB, PITCH, CHIPS, AXIAL, TRANSISTORS, TRIMMER, CRYSTAL, NAME, HOLES, KEYPAD_HOLES, WIRE, DISPLAY, KEYPAD, KEY_ROWS, KEYS, SST, HEIGHTS, TRACKS, decode, describe } from '../src/models/kim-1-layout.mjs';
+import { made } from '../src/models/kim-1-notes.mjs';
 import { registry } from '../src/lib/data.mjs';
 
 // sharp ships with Astro (its image service), so the track map can be measured without a new dependency.
@@ -21,8 +22,11 @@ const models = path.join(process.cwd(), 'src', 'models');
 const html = page('/machines/kim-1/')?.html ?? '';
 const section = (() => {
   const at = html.indexOf('<section class="model"');
-  return at < 0 ? '' : html.slice(at, html.indexOf('<section aria-labelledby="rom"', at));
+  return at < 0 ? '' : html.slice(at, html.indexOf('<section class="photos"', at));
 })();
+// What the model was measured from, and how well: the committed results of tools/kim1-model/.
+const figures = JSON.parse(fs.readFileSync(path.join(process.cwd(), 'src', 'data', 'kim-1-model.json'), 'utf8'));
+const kim = registry.machines.find((m) => m.id === 'kim-1');
 
 test('the model\'s keypad is the machine\'s: every key once, in the panel\'s rows, with the SST switch where the board has it', () => {
   assert.deepEqual(KEYS.map((k) => k.name).sort(), [...KIM1_KEYS].sort());
@@ -38,12 +42,15 @@ test('every part of the model lies on the board, and no two keys overlap', () =>
   const inside = ({ x, y }, halfW = 0, halfD = 0, what = '') => {
     assert.ok(x - halfW >= 0 && x + halfW <= BOARD.width && y - halfD >= 0 && y + halfD <= BOARD.depth, `${what} at ${x}, ${y} is off the board`);
   };
-  for (const c of CHIPS) inside(c, 26, 7, c.id);
-  for (const [i, c] of RAM.entries()) inside(c, 10, 3.2, `memory chip ${i + 1}`);
-  for (const [i, c] of LOGIC.entries()) inside(c, 3.2, 10, `logic chip ${i + 1}`);
+  const DIP = { 40: [26, 7], 16: [9.7, 3.2], 14: [9.5, 3.2], 8: [4.8, 3.2] };
+  for (const c of CHIPS) inside(c, ...(c.alongX ? DIP[c.pins] : [...DIP[c.pins]].reverse()), c.id);
+  for (const a of AXIAL) { inside({ x: a.x0, y: a.y0 }, 0, 0, a.ref); inside({ x: a.x1, y: a.y1 }, 0, 0, a.ref); }
+  for (const t of TRANSISTORS) inside(t, 2.4, 2.4, t.ref);
+  inside(TRIMMER, 5, 5, 'the trimmer');
   inside(CRYSTAL, CRYSTAL.width / 2, CRYSTAL.depth / 2, 'the crystal');
   inside(NAME, NAME.width / 2, NAME.depth / 2, 'the name');
-  for (const [x, y] of HOLES) inside({ x, y }, 1.6, 1.6, 'a hole');
+  for (const [x, y] of [...HOLES, ...KEYPAD_HOLES]) inside({ x, y }, 1.6, 1.6, 'a hole');
+  for (const [x, y] of WIRE) inside({ x, y }, 0, 0, 'the red wire');
   inside(DISPLAY, DISPLAY.width / 2, DISPLAY.depth / 2, 'the display');
   inside(KEYPAD, KEYPAD.width / 2, KEYPAD.depth / 2, 'the keypad');
   for (const k of KEYS) {
@@ -54,6 +61,29 @@ test('every part of the model lies on the board, and no two keys overlap', () =>
   assert.equal(DISPLAY.digits.length, 6);
 });
 
+test('the parts are the replica\'s and the heights are measured: the model draws every chip, resistor, capacitor, diode and transistor, and its heights are the triangulated ones', () => {
+  const parts = JSON.parse(fs.readFileSync(path.join(REPO_ROOT, 'tools', 'kim1-model', 'data', 'kicad-parts.json'), 'utf8')).parts;
+  const refs = (re) => parts.filter((p) => re.test(p.footprint)).map((p) => p.ref).sort();
+  assert.deepEqual(CHIPS.map((c) => c.ref).sort(), refs(/^DIP-/));
+  assert.deepEqual(AXIAL.map((a) => a.ref).sort(), refs(/^(R_|C_Axial|CP_Axial|D_DO)/));
+  assert.deepEqual(TRANSISTORS.map((t) => t.ref).sort(), refs(/^TO-92$/));
+  // Each height the model uses is a triangulated point in the analysis's results, not a typical value.
+  const measured = new Map(figures.heights.points.map((p) => [p.part, p.height]));
+  assert.equal(HEIGHTS.ceramic, measured.get('dip40-ceramic'));
+  assert.equal(HEIGHTS.socketed, measured.get('dip40-plastic'));
+  assert.equal(HEIGHTS.plastic, measured.get('dip14'));
+  assert.equal(HEIGHTS.transistor, measured.get('to92'));
+  assert.equal(HEIGHTS.trimmer, measured.get('trimmer'));
+  assert.equal(CRYSTAL.height, measured.get('crystal'));
+  assert.equal(DISPLAY.height, measured.get('display'));
+  assert.equal(KEYPAD.bezelHeight, measured.get('keypad-bezel'));
+  assert.equal(KEYPAD.keyHeight, measured.get('key'));
+  const memory = figures.heights.points.filter((p) => p.part === 'dip16').map((p) => p.height);
+  assert.ok(Math.abs(HEIGHTS.memory - memory.reduce((a, b) => a + b) / memory.length) < 0.006);
+  // The check point on the board itself comes out at the board, within its range.
+  assert.ok(figures.heights.checkRange[0] <= 0 && figures.heights.checkRange[1] >= 0, 'the check point on the board is not at height 0 within its range');
+});
+
 test('the edge contacts are the scale: 22 a tab at 0.156 inch, all of them on their tab', () => {
   assert.equal(CONTACTS_PER_TAB, 22);
   assert.ok(Math.abs(PITCH - 0.156 * 25.4) < 1e-9);
@@ -62,7 +92,9 @@ test('the edge contacts are the scale: 22 a tab at 0.156 inch, all of them on th
     assert.ok(t.first - 1.2 >= t.y0 && last + 1.2 <= t.y1, `the contacts from ${t.first} to ${last.toFixed(1)} do not fit the tab from ${t.y0} to ${t.y1}`);
   }
   // The 6502 and both 6530s are 40-pin packages, and the 6502 is the top one.
-  assert.deepEqual(CHIPS.map((c) => [c.label, c.pins]), [['6502', 40], ['6530', 40], ['6530', 40]]);
+  const labelled = CHIPS.filter((c) => c.label);
+  assert.deepEqual(labelled.map((c) => [c.label, c.pins]), [['6502', 40], ['6530', 40], ['6530', 40]]);
+  assert.ok(labelled[0].y < Math.min(...labelled.slice(1).map((c) => c.y)), 'the 6502 is not the top one');
 });
 
 test('the model reads the digits with the machine\'s own table, Kim1Display.Decode', () => {
@@ -273,28 +305,31 @@ test('the deploy checks that the model loader and every model bundle are serving
 const trackFile = path.join(process.cwd(), 'src', 'assets', 'tracks', 'kim-1.webp');
 const TRACK_BUDGET = 400_000;
 
-test('the track map is committed, greyscale, the size the model expects, inside its budget, and built beside the model\'s bundle', async () => {
+test('the track map is committed, the size the model expects, inside its budget, its three channels apart, and built beside the model\'s bundle', async () => {
   assert.ok(fs.existsSync(trackFile), 'src/assets/tracks/kim-1.webp is missing');
   const bytes = fs.readFileSync(trackFile);
   assert.ok(bytes.length <= TRACK_BUDGET, `the track map is ${bytes.length} bytes, over its ${TRACK_BUDGET} budget`);
-  const { data, info } = await sharp(bytes).removeAlpha().raw().toBuffer({ resolveWithObject: true });
-  assert.equal(info.format, 'raw');
-  assert.deepEqual([info.width, info.height], [TRACKS.width, TRACKS.height]);
   assert.equal((await sharp(bytes).metadata()).format, 'webp');
-  // Greyscale, white for copper: every pixel has its three channels equal, and
-  // copper covers a real share of the board, neither none nor most of it.
-  let grey = true;
-  let copper = 0;
+  const { data, info } = await sharp(bytes).removeAlpha().raw().toBuffer({ resolveWithObject: true });
+  // It covers the board's body edge to edge, at the resolution the analysis made it.
+  assert.deepEqual([info.width, info.height], [TRACKS.width, TRACKS.height]);
+  assert.deepEqual([TRACKS.width, TRACKS.height], [BOARD.width * figures.tracks.mapPxPerMm, BOARD.depth * figures.tracks.mapPxPerMm]);
+  // Red is the top face from the photographs, green the top face from the
+  // replica where no photograph shows the board, blue the underside. Red and
+  // green never both claim a pixel, and each face has a real share of copper.
+  let top = 0, fill = 0, both = 0, under = 0;
   for (let i = 0; i < data.length; i += info.channels) {
-    if (data[i] !== data[i + 1] || data[i] !== data[i + 2]) grey = false;
-    if (data[i] > 127) copper++;
+    const r = data[i] > 127, g = data[i + 1] > 127, b = data[i + 2] > 127;
+    if (r || g) top++;
+    if (g) fill++;
+    if (r && g) both++;
+    if (b) under++;
   }
-  assert.ok(grey, 'the track map is not greyscale');
-  const share = copper / (info.width * info.height);
-  assert.ok(share > 0.05 && share < 0.4, `copper covers ${(share * 100).toFixed(1)}% of the map`);
-  // It covers the board's body edge to edge, the same box the photograph maps to.
-  assert.ok(Math.abs((PHOTO.body[2] - PHOTO.body[0]) - BOARD.width * PX_PER_MM) < 1);
-  assert.ok(Math.abs((PHOTO.body[3] - PHOTO.body[1]) - BOARD.depth * PX_PER_MM) < 1);
+  const n = info.width * info.height;
+  assert.ok(top / n > 0.05 && top / n < 0.4, `copper covers ${(top / n * 100).toFixed(1)}% of the top face`);
+  assert.ok(under / n > 0.05 && under / n < 0.4, `copper covers ${(under / n * 100).toFixed(1)}% of the underside`);
+  assert.ok(fill > 0 && fill < top / 2, 'the replica fills more of the top face than the photographs do');
+  assert.ok(both / n < 0.001, `the photographs and the replica both claim ${(both / n * 100).toFixed(2)}% of the top face`);
   // Built into dist beside the bundle, byte for byte, where the model asks for it.
   assert.equal(MODELS['kim-1'].texture, TRACKS.src);
   assert.equal(TRACKS.src, '/models/kim-1-tracks.webp');
@@ -305,7 +340,7 @@ test('the track map is committed, greyscale, the size the model expects, inside 
 
 test('the track map is loaded with the model, never with the page, and the deploy checks it is serving', () => {
   const model = fs.readFileSync(path.join(models, 'kim-1.js'), 'utf8');
-  assert.match(model, /await trackMaps\(TRACKS\.src, token\('model-pcb'\), token\('model-copper'\)\)/);
+  assert.match(model, /await trackMaps\(TRACKS\.src, \{/);
   assert.match(model, /img\.src = src;\s*await img\.decode\(\);/, 'the map is not loaded as a same-origin image');
   assert.match(section, new RegExp(`data-model-texture="${TRACKS.src}"`));
   // Nothing on the page itself names it: no img, link or preload.
@@ -313,21 +348,23 @@ test('the track map is loaded with the model, never with the page, and the deplo
   const deploy = fs.readFileSync(path.join(REPO_ROOT, '.github', 'workflows', 'deploy-site.yml'), 'utf8');
   const listed = (/for f in ([^;]*); do/.exec(deploy)?.[1] ?? '').split(/\s+/);
   for (const m of Object.values(MODELS)) if (m.texture) assert.ok(listed.includes(m.texture.slice(1)), `deploy-site.yml does not check ${m.texture}`);
-  // The build copies it; nothing in the build or the tests makes it.
+  // The build copies it; nothing in the build or the tests makes it or runs the analysis.
   const pkg = fs.readFileSync(path.join(process.cwd(), 'package.json'), 'utf8');
-  assert.doesNotMatch(pkg, /make-board-tracks/);
+  assert.doesNotMatch(pkg, /kim1-model|make-board-tracks|python/);
   assert.match(fs.readFileSync(path.join(process.cwd(), 'scripts', 'build-models.mjs'), 'utf8'), /fs\.copyFileSync\(tracks, `public\$\{MODELS\[id\]\.texture\}`\)/);
 });
 
-test('the top face takes the tracks as colour, shine and relief, from tokens, with no glow, and the underside gets none', () => {
+test('both faces take their tracks as colour, shine and relief, from tokens, with no glow: the top from red or green, the underside from blue', () => {
   const model = fs.readFileSync(path.join(models, 'kim-1.js'), 'utf8');
   const tokens = fs.readFileSync(path.join(process.cwd(), 'src', 'styles', 'tokens.css'), 'utf8');
   assert.match(tokens, /--model-copper: #[0-9a-f]{6};/);
-  assert.match(model, /new MeshStandardMaterial\(\{ map: texture\(maps\.colour, true\), roughnessMap: surface, metalnessMap: surface, roughness: 1, metalness: 1, bumpMap: texture\(maps\.relief, false\), bumpScale: RELIEF \}\)/);
+  assert.match(model, /new MeshStandardMaterial\(\{ map: texture\(m\.colour, true\), roughnessMap: surface, metalnessMap: surface, roughness: 1, metalness: 1, bumpMap: texture\(m\.relief, false\), bumpScale: RELIEF \}\)/);
   assert.doesNotMatch(model, /emissive/, 'the tracks glow');
-  // The top face is the third of a box's six; the underside, the fourth, stays the plain solder side.
-  assert.match(model, /board\.material\[2\] = tracksOn \? top : M\.board;/);
-  assert.doesNotMatch(model, /material\[3\] =/);
+  assert.match(model, /top: \{ cover: \(d, i\) => Math\.max\(d\[i\], d\[i \+ 1\]\), mask: token\('model-pcb'\), copper: token\('model-copper'\), flip: false \}/);
+  assert.match(model, /bottom: \{ cover: \(d, i\) => d\[i \+ 2\], mask: token\('model-pcb-under'\), copper: token\('model-copper'\), flip: true \}/);
+  // A box's faces are +x, -x, +y, -y, +z, -z: the third is the top, the fourth the underside.
+  assert.match(model, /board\.material\[2\] = tracksOn \? top_ : M\.board;/);
+  assert.match(model, /board\.material\[3\] = tracksOn \? bottom_ : M\.under;/);
   // The tabs have their own list of faces, so the map goes on the board alone.
   assert.match(model, /BoxGeometry\(S\(t\.out\), H\.board, S\(t\.y1 - t\.y0\)\), \[\.\.\.faces\]\)/);
 });
@@ -354,31 +391,58 @@ test('Show tracks and Show tracks only are real toggle buttons, labelled, in a n
   assert.match(model, /parts\.visible = level > 0;/);
   assert.match(fs.readFileSync(path.join(models, 'stage.mjs'), 'utf8'), /\.find\(\(hit\) => shown\(hit\.object\)\)/);
   assert.match(model, /root\.modelLayers = \(\) => \(\{/);
-  assert.match(model, /root\.modelBoardPoint = \(x, y\) =>/);
+  assert.match(model, /root\.modelBoardPoint = \(x, y, below = false\) =>/);
 });
 
-test('the tracks are credited as traced from the photograph, under its licence, on the page and in the photographs\' README', () => {
-  const photo = registry.machines.find((m) => m.id === 'kim-1').photo;
-  const credit = /<p class="figure-caption model-credit" data-model-credit>([\s\S]*?)<\/p>/.exec(section)?.[1] ?? '';
-  assert.equal(visibleText(credit).replace(/\s+([.,:])/g, '$1'), `Tracks traced from the photograph above, by ${photo.author}, and shared under its licence: ${photo.licence}.`);
-  assert.ok(credit.includes(`<a href="${photo.licenceUrl}">`), 'the licence is not linked');
-  assert.match(describe(), /copper tracks of its top face traced from that photograph/);
-  assert.match(describe(), /underside, which the photograph does not show, is left plain/);
-  const readme = fs.readFileSync(path.join(process.cwd(), 'src', 'assets', 'photos', 'README.md'), 'utf8');
-  assert.match(readme, /## The track map, src\/assets\/tracks\/kim-1\.webp/);
-  assert.match(readme, /share-alike/i);
-  assert.match(readme, /node scripts\/make-board-tracks\.mjs/);
+test('the model says how it was made, with its figures read from the committed results, and credits every photograph and drawing with what it took from each', () => {
+  const note = /<div class="model-made prose" data-model-made>([\s\S]*?)<\/div>/.exec(section)?.[1] ?? '';
+  assert.ok(note, 'the model has no note on how it was made');
+  assert.match(note, /<h3 id="model-made">How the model was made<\/h3>/);
+  // The paragraphs and the limits are the ones made() writes from src/data/kim-1-model.json, word for word.
+  const { paragraphs, limits } = made(figures);
+  const text = visibleText(note).replace(/\s+/g, ' ');
+  for (const p of [...paragraphs, ...limits]) assert.ok(text.includes(p.replace(/\s+/g, ' ')), `the page does not say: ${p}`);
+  // The figures on the page are the results file's: the before and after of the tracks, and the heights.
+  const pc = (v) => `${Math.round(v * 100)}%`;
+  for (const v of [figures.tracks.top.before, figures.tracks.top.after, figures.tracks.bottom.after]) assert.ok(text.includes(pc(v)), `${pc(v)} is not on the page`);
+  assert.ok(Object.values(figures.tracks.leaveOneOut).every((e) => e.after > e.before), 'the fused tracks do not beat the old map against every photograph left out');
+  // Every photograph and drawing, in the registry's order, with what was taken from it, its author, its source and its licence.
+  const items = [...note.matchAll(/<li data-model-source>([\s\S]*?)<\/li>/g)].map((m) => m[1]);
+  const sources = [...kim.photos, ...(kim.drawings ?? [])];
+  assert.equal(items.length, sources.length);
+  sources.forEach((src, i) => {
+    const t = visibleText(items[i]).replace(/\s+([.,:])/g, '$1');
+    assert.ok(t.toLowerCase().startsWith(src.used.toLowerCase()), `credit ${i + 1} does not say what was taken: ${t}`);
+    assert.ok(t.includes(`by ${src.author}`), `credit ${i + 1} does not name ${src.author}`);
+    assert.ok(items[i].includes(`href="${src.sourceUrl}"`), `credit ${i + 1} does not link its source`);
+    assert.ok(t.endsWith(`${src.licence === null ? 'no licence stated' : src.licence}.`), `credit ${i + 1} does not give its licence as stated`);
+    if (src.licenceUrl) assert.ok(items[i].includes(`href="${src.licenceUrl}"`), `credit ${i + 1} does not link its licence`);
+  });
+  assert.match(describe(), /copper tracks of both faces traced from photographs/);
 });
 
-test('the script that traced the map clears every part the model draws, and the parts it lists by hand lie on the board', async () => {
-  const { HIDDEN, THRESHOLDS, modelled } = await import('../scripts/make-board-tracks.mjs');
-  const boxes = modelled();
-  // Three 40-pin chips, eight memory chips, the logic chips, the crystal, the display and the keypad.
-  assert.equal(boxes.length, CHIPS.length + RAM.length + LOGIC.length + 3);
-  for (const [x0, y0, x1, y1] of [...boxes, ...HIDDEN]) {
-    assert.ok(x0 < x1 && y0 < y1, `the box ${x0}, ${y0}, ${x1}, ${y1} is empty`);
-    assert.ok(x0 >= 0 && y0 >= 0 && x1 <= BOARD.width + 1e-9 && y1 <= BOARD.depth + 1e-9, `the box ${x0}, ${y0}, ${x1}, ${y1} is off the board`);
+test('the analysis behind the model is committed: its sources agree with the registry, and its results file is what the page reads', () => {
+  const tools = path.join(REPO_ROOT, 'tools', 'kim1-model');
+  const sources = JSON.parse(fs.readFileSync(path.join(tools, 'data', 'sources.json'), 'utf8')).sources;
+  const photos = sources.filter((s) => s.kind === 'photograph');
+  // Every photograph in the analysis is a photograph on the page, and the other way round.
+  assert.deepEqual(photos.map((s) => s.file).sort(), kim.photos.map((p) => p.file).sort());
+  for (const s of photos) {
+    const p = kim.photos.find((x) => x.file === s.file);
+    const original = s.original.url.split('/').pop();
+    assert.ok(fs.readFileSync(path.join(process.cwd(), 'src', 'assets', 'photos', 'README.md'), 'utf8').includes(s.original.sha256), `the photographs' README does not give ${original}'s SHA-256`);
+    assert.ok(p.sourceUrl, `${s.file} has no source in the registry`);
   }
-  // The tracks' hue band leaves out the parts' colours, as measured: cream capacitors at 85 to 89 degrees, resistors 50 to 65, gold 74.
-  assert.ok(THRESHOLDS.hue[0] > 89 && THRESHOLDS.weak.hue[0] > 89);
+  assert.equal(sources.filter((s) => s.kind === 'drawing').length, (kim.drawings ?? []).length);
+  // The results file is made from the analysis's own data, so the two agree.
+  const agreement = JSON.parse(fs.readFileSync(path.join(tools, 'data', 'agreement.json'), 'utf8'));
+  assert.equal(figures.tracks.top.after, agreement.top.after.replica);
+  assert.equal(figures.tracks.top.before, agreement.top.before.replica);
+  const registration = JSON.parse(fs.readFileSync(path.join(tools, 'data', 'registration.json'), 'utf8'));
+  for (const [id, r] of Object.entries(registration)) assert.equal(figures.registration[id].heldOutMedianMm, r.residualMm.correctedHeldOut.median);
+  // Each registration is good to well under a millimetre on blocks held out of its fit.
+  for (const [id, r] of Object.entries(figures.registration)) assert.ok(r.heldOutMedianMm < 0.5, `${id} is registered to ${r.heldOutMedianMm} mm`);
+  // The analysis runs offline, from the full-size originals; nothing in the build or the tests runs it.
+  assert.ok(fs.existsSync(path.join(tools, 'README.md')));
+  assert.doesNotMatch(fs.readFileSync(path.join(process.cwd(), 'package.json'), 'utf8'), /kim1-model/);
 });
