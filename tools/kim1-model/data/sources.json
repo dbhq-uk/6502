@@ -1,0 +1,90 @@
+{
+ "about": "Every photograph and drawing the KIM-1 model is measured from, with where it came from and how it is used. `corners` are the board body's four corners marked by hand on the original, in its pixels, in the order top left, top right, bottom right, bottom left as the component side has them; register.py refines them. The credits on the page come from machines/registry.json, which must agree with this file (a site test checks).",
+ "sources": [
+  {
+   "id": "bolo-top",
+   "kind": "photograph",
+   "file": "kim-1.webp",
+   "side": "top",
+   "board": "MOS Rev B, Musée Bolo",
+   "original": {
+    "url": "https://upload.wikimedia.org/wikipedia/commons/4/4f/MOS_KIM-1_IMG_4211_cropped.jpg",
+    "width": 3792,
+    "height": 4675,
+    "bytes": 2687798,
+    "sha256": "70aa1194749165ea9dc76718ee6ae607b47355c5d8f6c2373a43fc1d2887f7b9"
+   },
+   "corners": [[441, 248], [3471, 248], [3471, 4387], [441, 4387]]
+  },
+  {
+   "id": "rev-b-front",
+   "kind": "photograph",
+   "file": "kim-1-rev-b-front.webp",
+   "side": "top",
+   "board": "MOS Rev B, on Hans Otten's site",
+   "original": {
+    "url": "http://retro.hansotten.nl/wp-content/uploads/2022/03/20160317_143332_HDR-2.jpg",
+    "width": 2988,
+    "height": 3984,
+    "bytes": 8290855,
+    "sha256": "e666f4a30c44267b27f21cab5ee3d75047291903e920799e246fbd8210d292e7"
+   },
+   "corners": [[226, 156], [2849, 156], [2849, 3785], [226, 3785]]
+  },
+  {
+   "id": "rev-b-back",
+   "kind": "photograph",
+   "file": "kim-1-rev-b-back.webp",
+   "side": "bottom",
+   "board": "MOS Rev B, on Hans Otten's site, the same board as rev-b-front",
+   "original": {
+    "url": "http://retro.hansotten.nl/wp-content/uploads/2022/03/20160317_143341_HDR-2.jpg",
+    "width": 2988,
+    "height": 3984,
+    "bytes": 9104580,
+    "sha256": "5365993e8a8a42abb07a3c64c825f2dc2a74986cf8105e16bdceabd8f7e5876d"
+   },
+   "corners": [[2789, 206], [73, 206], [73, 3791], [2789, 3791]]
+  },
+  {
+   "id": "bolo-end",
+   "kind": "photograph",
+   "file": "kim-1-bolo-end.webp",
+   "side": "top",
+   "board": "MOS Rev B, Musée Bolo, the same board as bolo-top, from the other end",
+   "original": {
+    "url": "https://upload.wikimedia.org/wikipedia/commons/a/ac/MOS_KIM-1_IMG_4210.jpg",
+    "width": 5616,
+    "height": 3744,
+    "bytes": 3286622,
+    "sha256": "0192f1414ca5b9a2f40cf01e2c8b4b75b9025dc8f695de1f13a6000d0f60e38e"
+   },
+   "corners": [[4695, 646], [4717, 3437], [741, 3437], [764, 646]]
+  },
+  {
+   "id": "bolo-oblique",
+   "kind": "photograph",
+   "file": "kim-1-bolo-oblique.webp",
+   "side": "oblique",
+   "board": "MOS Rev B, Musée Bolo, the same board as bolo-top, from a low corner",
+   "original": {
+    "url": "https://upload.wikimedia.org/wikipedia/commons/d/d4/MOS_KIM-1_IMG_4209.jpg",
+    "width": 5616,
+    "height": 3744,
+    "bytes": 2774408,
+    "sha256": "1a8d86a420f1424f6e23b958c374b19c91deb5cbbc9f840d419bec29df901b7d"
+   },
+   "corners": [[732, 2460], [1460, 388], [4692, 1052], [4200, 3368]]
+  },
+  {
+   "id": "kicad-replica",
+   "kind": "drawing",
+   "board": "Rev D, redrawn in KiCad from photographs and scans of real boards",
+   "original": {
+    "url": "https://github.com/eduardocasino/kim-1/raw/7b356b6386422cc6f7154b3524b0a9011ce33bfb/kim-1.kicad_pcb",
+    "bytes": 6722319,
+    "sha256": "87a344d408ca812429797f928029473a4f5421e979326b784f0cebc2e8239f3e"
+   }
+  }
+ ]
+}

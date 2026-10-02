@@ -1,0 +1,4 @@
+{
+ "about": "Edges marked by hand on the rectified bolo-top photograph (rectify.py at 12 pixels to the millimetre), read off crops with a millimetre scale at 26.7 crop pixels to the millimetre: so in board millimetres, to about 0.1 mm, but still carrying the parallax of a part's top in a photograph from above. layout.py anchors them at a triangulated corner.",
+ "keypadBezel": {"left": 126.9, "top": 173.9, "right": 187.5, "bottom": 258.9}
+}

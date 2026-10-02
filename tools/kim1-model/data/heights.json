@@ -1,0 +1,225 @@
+{
+ "about": "Heights above the board's top face, in mm, by triangulation between bolo-oblique and bolo-end. The range covers the camera fitted with its principal point free and at the frame's centre, and every mark moved by 3 pixels. Made by heights.py from height-marks.json.",
+ "camera": {
+  "focalPx": 16911,
+  "principalPoint": [
+   2597,
+   2347
+  ],
+  "planeRmsPx": 1.32,
+  "centredFocalPx": 18121,
+  "centredPlaneRmsPx": 1.48
+ },
+ "points": [
+  {
+   "name": "check: the centre of the mounting hole beside the keypad, on the board",
+   "part": "check",
+   "xy": [
+    122.61,
+    173.01
+   ],
+   "height": 0.14,
+   "range": [
+    -0.21,
+    0.48
+   ],
+   "raysMissPx": 2.8
+  },
+  {
+   "name": "the keypad's circuit board, top face, the corner nearest the display",
+   "part": "keypad-board",
+   "xy": [
+    127.57,
+    165.78
+   ],
+   "height": 2.13,
+   "range": [
+    1.79,
+    2.48
+   ],
+   "raysMissPx": 0.5
+  },
+  {
+   "name": "the keypad's bezel, top face, the corner nearest the display",
+   "part": "keypad-bezel",
+   "xy": [
+    127.81,
+    173.68
+   ],
+   "height": 9.05,
+   "range": [
+    8.7,
+    9.39
+   ],
+   "raysMissPx": 3.7
+  },
+  {
+   "name": "the GO key, the middle of the hole in its O",
+   "part": "key",
+   "xy": [
+    139.8,
+    184.9
+   ],
+   "height": 7.19,
+   "range": [
+    6.85,
+    7.54
+   ],
+   "raysMissPx": 4.2
+  },
+  {
+   "name": "the display's window, top face, the corner by U18",
+   "part": "display",
+   "xy": [
+    121.98,
+    138.28
+   ],
+   "height": 5.87,
+   "range": [
+    5.52,
+    6.21
+   ],
+   "raysMissPx": 2.4
+  },
+  {
+   "name": "U2, the black 40-pin package, top face, the corner at its notched end by pin 1's row",
+   "part": "dip40-plastic",
+   "xy": [
+    27.4,
+    104.61
+   ],
+   "height": 8.76,
+   "range": [
+    8.44,
+    9.09
+   ],
+   "raysMissPx": 1.0
+  },
+  {
+   "name": "U1, the white ceramic 40-pin package, top face, the corner at its pin 1 end",
+   "part": "dip40-ceramic",
+   "xy": [
+    28.3,
+    36.05
+   ],
+   "height": 2.45,
+   "range": [
+    2.12,
+    2.78
+   ],
+   "raysMissPx": 1.1
+  },
+  {
+   "name": "U12, a 16-pin memory package, top face, the corner by its U12 label",
+   "part": "dip16",
+   "xy": [
+    102.11,
+    10.69
+   ],
+   "height": 2.85,
+   "range": [
+    2.5,
+    3.19
+   ],
+   "raysMissPx": 1.3
+  },
+  {
+   "name": "U12, the same memory package, top face, the corner at its other end",
+   "part": "dip16",
+   "xy": [
+    121.14,
+    16.28
+   ],
+   "height": 2.49,
+   "range": [
+    2.14,
+    2.84
+   ],
+   "raysMissPx": 2.2
+  },
+  {
+   "name": "the crystal's can, the middle of the BME stamped on its top",
+   "part": "crystal",
+   "xy": [
+    146.63,
+    17.48
+   ],
+   "height": 8.07,
+   "range": [
+    7.72,
+    8.43
+   ],
+   "raysMissPx": 0.7
+  },
+  {
+   "name": "a transistor by the display, the end of the flat edge of its top",
+   "part": "to92",
+   "xy": [
+    140.1,
+    130.22
+   ],
+   "height": 8.19,
+   "range": [
+    7.84,
+    8.54
+   ],
+   "raysMissPx": 1.1
+  },
+  {
+   "name": "the trimmer, the middle of the cross in its rotor",
+   "part": "trimmer",
+   "xy": [
+    62.2,
+    231.8
+   ],
+   "height": 3.32,
+   "range": [
+    3.0,
+    3.65
+   ],
+   "raysMissPx": 4.5
+  },
+  {
+   "name": "the orange capacitor, a white fleck on its top",
+   "part": "capacitor-orange",
+   "xy": [
+    88.44,
+    174.65
+   ],
+   "height": 9.1,
+   "range": [
+    8.77,
+    9.44
+   ],
+   "raysMissPx": 2.6
+  },
+  {
+   "name": "U13, a 14-pin logic package, the middle of the TI logo printed on its top",
+   "part": "dip14",
+   "xy": [
+    135.95,
+    70.12
+   ],
+   "height": 4.46,
+   "range": [
+    4.11,
+    4.81
+   ],
+   "raysMissPx": 2.4
+  },
+  {
+   "name": "a cream capacitor beside the memory, the W of TAIWAN printed along its top",
+   "part": "capacitor-cream",
+   "xy": [
+    93.17,
+    63.67
+   ],
+   "height": 6.39,
+   "range": [
+    6.05,
+    6.73
+   ],
+   "raysMissPx": 2.8
+  }
+ ]
+}

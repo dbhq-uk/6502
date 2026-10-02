@@ -1,0 +1,95 @@
+{
+ "about": "Points marked by hand on the two photographs, in the originals' pixels, for heights.py: bolo-oblique is MOS_KIM-1_IMG_4209.jpg, bolo-end is MOS_KIM-1_IMG_4210.jpg. Each was read off a crop of each photograph, 2 to 3.6 crop pixels to an original pixel, with a pixel scale along two edges. The first is a check: a point on the board itself, which must come out at a height of 0.",
+ "marks": [
+  {
+   "name": "check: the centre of the mounting hole beside the keypad, on the board",
+   "part": "check",
+   "bolo-oblique": [3281, 1612],
+   "bolo-end": [2191.5, 2332.5]
+  },
+  {
+   "name": "the keypad's circuit board, top face, the corner nearest the display",
+   "part": "keypad-board",
+   "bolo-oblique": [3208.5, 1527],
+   "bolo-end": [2301.5, 2397.5]
+  },
+  {
+   "name": "the keypad's bezel, top face, the corner nearest the display",
+   "part": "keypad-bezel",
+   "bolo-oblique": [3304.5, 1500.5],
+   "bolo-end": [2184, 2380]
+  },
+  {
+   "name": "the GO key, the middle of the hole in its O",
+   "part": "key",
+   "bolo-oblique": [3480.6, 1412.7],
+   "bolo-end": [2016.6, 2560.1]
+  },
+  {
+   "name": "the display's window, top face, the corner by U18",
+   "part": "display",
+   "bolo-oblique": [2847.5, 1490.6],
+   "bolo-end": [2707.4, 2306]
+  },
+  {
+   "name": "U2, the black 40-pin package, top face, the corner at its notched end by pin 1's row",
+   "part": "dip40-plastic",
+   "bolo-oblique": [2105.6, 2429.6],
+   "bolo-end": [3187.9, 953.1]
+  },
+  {
+   "name": "U1, the white ceramic 40-pin package, top face, the corner at its pin 1 end",
+   "part": "dip40-ceramic",
+   "bolo-oblique": [1257, 2265.7],
+   "bolo-end": [4167.5, 997.4]
+  },
+  {
+   "name": "U12, a 16-pin memory package, top face, the corner by its U12 label",
+   "part": "dip16",
+   "bolo-oblique": [1224.5, 1389.7],
+   "bolo-end": [4567.9, 2033.8]
+  },
+  {
+   "name": "U12, the same memory package, top face, the corner at its other end",
+   "part": "dip16",
+   "bolo-oblique": [1359.6, 1204.8],
+   "bolo-end": [4491.6, 2307.1]
+  },
+  {
+   "name": "the crystal's can, the middle of the BME stamped on its top",
+   "part": "crystal",
+   "bolo-oblique": [1462, 905.5],
+   "bolo-end": [4502, 2657.5]
+  },
+  {
+   "name": "a transistor by the display, the end of the flat edge of its top",
+   "part": "to92",
+   "bolo-oblique": [2806.9, 1260.7],
+   "bolo-end": [2832.9, 2561.6]
+  },
+  {
+   "name": "the trimmer, the middle of the cross in its rotor",
+   "part": "trimmer",
+   "bolo-oblique": [3839.5, 2423.4],
+   "bolo-end": [1326.2, 1456.9]
+  },
+  {
+   "name": "the orange capacitor, a white fleck on its top",
+   "part": "capacitor-orange",
+   "bolo-oblique": [3194.2, 1934.4],
+   "bolo-end": [2168.7, 1811.5]
+  },
+  {
+   "name": "U13, a 14-pin logic package, the middle of the TI logo printed on its top",
+   "part": "dip14",
+   "bolo-oblique": [2059.8, 1174],
+   "bolo-end": [3713.3, 2513.4]
+  },
+  {
+   "name": "a cream capacitor beside the memory, the W of TAIWAN printed along its top",
+   "part": "capacitor-cream",
+   "bolo-oblique": [1829, 1601.2],
+   "bolo-end": [3795.9, 1893.1]
+  }
+ ]
+}
