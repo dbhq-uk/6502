@@ -246,7 +246,7 @@ The banner is three strings in the ROM. File offset `$0303`, CPU `$C303` (bytes:
 - Default mode is 7. The OS reads eight keyboard-matrix "keys" 9-1 (row 0, columns 9 down to 1). Columns 2-9 are the DIP links and column 1 is CTRL. A set link reads bit 7 high. The start-up mode is the inverted links, bits 0-2 = columns 9, 8, 7. With all links open the mode is 7. [from ROM `$DA15-$DA3D`; S4 comments; "mode 7 by default" is also the known factory setting]
 - Rows: the first newline moves the cursor to row 1, so `BBC Computer 32K` is on **row 1** (second row), row 0 is blank. [inferring from the 0D lead byte and OSASCI; not run]
 
-Full screen after reset with these three ROMs and no disc, in text rows (0 = top) [inferring, not run]:
+Full screen after reset with these three ROMs, an 8271 fitted and no disc, in text rows (0 = top) [inferring, not run]:
 
 | Row | Text | Printed by |
 |---|---|---|
@@ -258,6 +258,8 @@ Full screen after reset with these three ROMs and no disc, in text rows (0 = top
 | 5 | `BASIC` | OS, OSBYTE 142 prints the ROM title string at `$8009` |
 | 6 | (blank) | two OSNEWL after the title |
 | 7 | `>` and cursor | BASIC, `LDA #$3E : JSR $BC02` at BASIC `$8B06` |
+
+**Corrected 2 Oct 2026, task 5, from running the ROMs: with no 8271 fitted the DFS prints nothing, so `BASIC` is on row 3 and `>` on row 5.** [from ROM `DFS-1.2.rom $B494-$B49A`, traced on the machine] Before it serves any service call, the DFS half of `DFS,NET` reads the 8271 status at `$FE80`, does `AND #$03` and returns untouched if the result is non-zero. An absent fast device reads `$FE` (section 1d), whose low bits are `10`, so the DFS takes the controller as missing; a fitted 8271 has status bits 0 and 1 unused and reading 0, which gives the table above. Rows 0, 1, 2 and 4 and the `BASIC` and `>` text were confirmed by running, with the 8271 absent; the `Acorn DFS` row stays [inferring] until the 8271 is modelled. The soft BREAK screen was also run: `BBC Computer` on row 1, then `BASIC` and `>` as above.
 
 - `Acorn DFS`: DFS `$B4EB` compares the call number with 3, scans the keyboard (OSBYTE `$7A`), and if no key is down jumps to `$B3AF`, which prints the string inline (`JSR $9FF7`, text, then `0D 0D`). [from ROM `DFS-1.2.rom $B4EB-$B505, $B3AF-$B3BD`] I did not trace the dispatch that reaches `$B4EB`; that it is the auto-boot service call (3) is [inferring]. The DFS ROM title is `DFS,NET`, but the printed text is `Acorn DFS`. `DFS 1.20` is printed by `*HELP`, not at boot.
 - The prompt is `>`, printed by BASIC before each line. Cursor after it. [from ROM]
@@ -291,7 +293,7 @@ Full screen after reset with these three ROMs and no disc, in text rows (0 = top
 4. **Power-on content of the ROM latch.** Not documented. The OS writes it before the first read of `$8000`.
 5. **Exact 8271 mirror pattern** `$FE88-$FE9F`. Taken from the B+ section of S2 plus S1's register table.
 6. **Which chips BREAK resets,** beyond "everything except the system VIA". S2 5.3 does not list them.
-7. **The rest of the boot screen was not run.** `Acorn DFS`, the blank rows, and the `BASIC` and `>` rows come from reading the ROMs. Not traced: whether DFS touches the 8271 at boot with no disc, and whether the Econet part of `DFS,NET` prints anything.
+7. **The rest of the boot screen was not run.** `Acorn DFS`, the blank rows, and the `BASIC` and `>` rows come from reading the ROMs. Not traced: whether DFS touches the 8271 at boot with no disc, and whether the Econet part of `DFS,NET` prints anything. *(2 Oct 2026, task 5: run with the 8271 absent; see the correction under section 4b. The DFS reads the 8271 status on every service call. The Econet half printed nothing.)*
 8. **How scanlines 8 and 9 are blanked in modes 3 and 6.** Not in the sources I read.
 9. **The mode 7 Model B `$3C00` addressing quirk** is from a jsbeeb comment only. The forum thread it cites was not opened.
 10. **BASIC and DFS slots.** S1 and S3 disagree on which socket is which number. The 15/14 choice is a recommendation backed by the OS's selection rule and jsbeeb's config.

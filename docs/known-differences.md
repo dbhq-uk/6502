@@ -223,3 +223,26 @@ test names it, and the BBC's own firmware uses none of it.
 see. The OS's own sequences (the link read, the key test at `$F02A`, the column
 test of the full scan and the CA2 interrupt) are driven through the bus as the
 ROM does them, and those are the checks that matter for the boot.
+
+## The BBC Micro: booting before the video and the disc exist
+
+**What.** From task 5 the real MOS 1.20 boots to the BASIC prompt, but three
+parts of the Model B are not there yet, and each shows in what the machine does:
+
+- **The 6845 CRTC is a set of registers.** It holds what the OS writes and reads
+  back R12 to R17 as the HD6845S does (`video.md` section 1.3), but it has no
+  counters, so it makes no picture and no vertical sync. CA1 on the system VIA
+  never moves, so the OS's 50 Hz vsync interrupt never comes. The boot does not
+  wait for it.
+- **The video ULA is a pair of registers** that take writes and draw nothing. A
+  read is Econet's INTON and answers as an absent fast device, `$FE`.
+- **No 8271 is fitted,** so `$FE80` reads `$FE`. The DFS reads that status
+  before it serves any call, sees bits 0 and 1 set, and stays silent, so the
+  `Acorn DFS` line a real Model B prints is missing from the boot screen
+  (`bus.md` section 4b, corrected in task 5).
+
+**How the tests treat it.** `BootTests` reads the screen as character codes from
+mode 7's screen memory, which needs no video chip, and expects the screen the
+ROMs print with no 8271: `BBC Computer 32K`, `BASIC` and `>` on rows 1, 3 and 5.
+Tasks 7 and 8 put a working CRTC and video ULA in place of the stand-ins, and
+the 8271 arrives in task 12, which brings the `Acorn DFS` row back.

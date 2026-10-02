@@ -150,6 +150,60 @@ public class BbcBusTests
         Assert.Equal(0x00, bus.Read(0xFEC0)); // a slow device
         Assert.Equal(0, bus.Read(0xFEE0) & 1); // the Tube probe: bit 0 clear means no Tube
         Assert.Equal(0, bus.Read(0xFEC0) & 0x40); // the ADC busy flag, which via.md s2.5 needs clear
+
+        // No 8271 yet: its status reads $FE, whose low two bits are set, so the DFS takes the
+        // controller as missing and serves no call (DFS $B495-$B49A), and prints no banner.
+        Assert.Equal(0xFE, bus.Read(0xFE80));
+    }
+
+    [Fact]
+    public void TheCrtcHoldsWhatIsWrittenAndReadsBackOnlyItsReadableRegisters()
+    {
+        // video.md s1.2 and s1.3: even address = the address register, odd = the data register,
+        // mirrored through $FE00-$FE07. R12 to R15 read back on the HD6845S, with the top two
+        // bits of the high byte reading 0; R16 and R17 have no light pen strobe, so read 0.
+        // Everything else is write only and reads as an absent slow device, $00 (bus.md s1d).
+        var bus = NewBus();
+
+        bus.Write(0xFE00, 12);
+        bus.Write(0xFE01, 0xE8);
+        bus.Write(0xFE06, 13); // a mirror of the address register
+        bus.Write(0xFE07, 0x34);
+        bus.Write(0xFE00, 14);
+        bus.Write(0xFE01, 0x7F);
+        bus.Write(0xFE00, 15);
+        bus.Write(0xFE01, 0x56);
+        bus.Write(0xFE00, 1);
+        bus.Write(0xFE01, 80);
+
+        bus.Write(0xFE00, 12);
+        Assert.Equal(0x28, bus.Read(0xFE01));
+        Assert.Equal(0x28, bus.Read(0xFE03)); // a mirror of the data register
+        bus.Write(0xFE00, 13);
+        Assert.Equal(0x34, bus.Read(0xFE01));
+        bus.Write(0xFE00, 14);
+        Assert.Equal(0x3F, bus.Read(0xFE01));
+        bus.Write(0xFE00, 15);
+        Assert.Equal(0x56, bus.Read(0xFE01));
+        bus.Write(0xFE00, 16);
+        Assert.Equal(0x00, bus.Read(0xFE01));
+        bus.Write(0xFE00, 1);
+        Assert.Equal(0x00, bus.Read(0xFE01)); // R1 is write only
+        Assert.Equal(0x00, bus.Read(0xFE00)); // so is the address register
+    }
+
+    [Fact]
+    public void TheVideoUlaTakesWritesAndReadsAsAnAbsentFastDevice()
+    {
+        // video.md s2.1: two write-only registers. A read of $FE20 is Econet's INTON, which is
+        // not fitted, so it reads as an absent fast device does, $FE (bus.md s1d, measured).
+        var bus = NewBus();
+        bus.Write(0xFE20, 0x4B);
+        bus.Write(0xFE21, 0x07);
+
+        Assert.Equal(0xFE, bus.Read(0xFE20));
+        Assert.Equal(0xFE, bus.Read(0xFE21));
+        Assert.Equal(0xFE, bus.Read(0xFE2F));
     }
 
     [Fact]

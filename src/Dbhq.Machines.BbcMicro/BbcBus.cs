@@ -46,6 +46,8 @@ public class BbcBus : IBus
     private readonly byte[] _os;
     private readonly byte[] _basic;
     private readonly byte[] _dfs;
+    private readonly Crtc6845Stub _crtc = new();
+    private readonly VideoUlaStub _videoUla = new();
 
     public BbcBus(BbcRoms roms, BbcOptions? options = null)
     {
@@ -249,6 +251,8 @@ public class BbcBus : IBus
     /// </summary>
     private byte ReadSheila(int offset) => offset switch
     {
+        <= 0x07 => _crtc.Read(offset & 1),
+
         // A4 is not decoded, so each VIA's sixteen registers repeat in the upper half of its
         // block (bus.md section 1c).
         >= 0x40 and <= 0x5F => SystemVia.Read(offset & 0x0F),
@@ -261,6 +265,12 @@ public class BbcBus : IBus
     {
         switch (offset)
         {
+            case <= 0x07:
+                _crtc.Write(offset & 1, value);
+                break;
+            case >= 0x20 and <= 0x2F:
+                _videoUla.Write(offset & 1, value);
+                break;
             case >= 0x30 and <= 0x3F:
                 // Write only, and the whole block of sixteen is the one latch (S1 s.17, s.21).
                 RomSlot = value & 0x0F;
@@ -277,6 +287,7 @@ public class BbcBus : IBus
     /// <summary>A read with no side effect. Reading SHEILA changes some chips, so each chip says what its peek is.</summary>
     private byte PeekSheila(int offset) => offset switch
     {
+        <= 0x07 => _crtc.Read(offset & 1),
         >= 0x40 and <= 0x5F => SystemVia.Peek(offset & 0x0F),
         >= 0x60 and <= 0x7F => UserVia.Peek(offset & 0x0F),
         _ => AbsentSheila(offset),
@@ -286,5 +297,64 @@ public class BbcBus : IBus
     {
         ushort address = (ushort)(0xFE00 | offset);
         return IsSlow(address) ? (byte)0x00 : (byte)0xFE;
+    }
+
+    /// <summary>
+    /// The 6845 CRTC's registers and nothing else: no counters, no sync, no vsync on CA1. It
+    /// holds what the OS writes so the boot can run before the video exists. Even addresses in
+    /// $FE00-$FE07 are the address register and odd ones the data register (video.md s1.2).
+    /// </summary>
+    /// <remarks>
+    /// Only R12 to R17 read back on the HD6845S (video.md s1.3); R12 and R14 are six bits, as
+    /// the 14-bit addresses they hold need. R16 and R17, the light pen, have no strobe and read
+    /// 0. Every other read is a write-only register, which reads as an absent slow device does,
+    /// $00 (bus.md s1d and s6 item 3; the OS never reads one).
+    /// </remarks>
+    private sealed class Crtc6845Stub
+    {
+        private readonly byte[] _registers = new byte[18];
+        private int _address;
+
+        public void Write(int rs, byte value)
+        {
+            if (rs == 0)
+            {
+                _address = value & 0x1F;
+            }
+            else if (_address < 16)
+            {
+                // R16 and R17 are read only, and 18 to 31 are not registers.
+                _registers[_address] = value;
+            }
+        }
+
+        public byte Read(int rs) => rs == 1 && _address is >= 12 and <= 17
+            ? (byte)(_registers[_address] & ((_address & 1) == 0 ? 0x3F : 0xFF))
+            : (byte)0x00;
+    }
+
+    /// <summary>
+    /// The video ULA's two write-only registers, control at $FE20 and palette at $FE21,
+    /// mirrored through $FE2F with A0 choosing (video.md s2.1 to s2.3). It holds what the OS
+    /// writes and draws nothing. A read is Econet's INTON, which is not fitted, so it reads as
+    /// an absent fast device does (bus.md s1c and s1d), and the bus answers it.
+    /// </summary>
+    private sealed class VideoUlaStub
+    {
+        private readonly byte[] _palette = new byte[16];
+
+        public byte Control { get; private set; }
+
+        public void Write(int a0, byte value)
+        {
+            if (a0 == 0)
+            {
+                Control = value;
+            }
+            else
+            {
+                _palette[value >> 4] = (byte)(value & 0x0F);
+            }
+        }
     }
 }

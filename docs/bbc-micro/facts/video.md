@@ -293,6 +293,7 @@ Order, from the disassembly [from S7 ch6 s2, ch5 s53 s59]:
    - **R8: if bit 7 of the table value is clear, writes table EOR `vduInterlaceValue`** (0 or 1). So modes 0-6 give R8 = 1 by default and R8 = 0 after `*TV x,1` (interlace off). Mode 7's &93 is written unchanged, so interlace cannot be turned off in mode 7.
    - R10 and others: direct.
 4. Palette defaults (VDU 20), windows, then R12/R13 = start address (3.1), cursor, clear screen.
+The current mode is kept at **`&0355`**: the mode-set code does `AND #&07` on the requested mode (after `ORA #&04` on a 16 KB machine) then `STX &0355` at `$CB3D`. [from ROM `$CB33-$CB3D`; added 2 Oct 2026 in task 5, and confirmed by booting with the links set for each of modes 0 to 7]
 `*TV` (OSBYTE 144) takes effect only at the next mode change. [from S14 quoting the AUG, "2.20 *TVx,y"]
 
 ---
