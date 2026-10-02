@@ -27,3 +27,30 @@ bought by Commodore in 1976. Who holds it now was not established, and no
 licence or permission from any holder was found. It is here because Dan decided
 on 1 October 2026 that a ROM is used when its position is documented, and this
 is that document. If a rights holder asks for it to be removed, it will be.
+
+## BBC Micro Model B ROMs
+
+| File | SHA-256 | What it is |
+|---|---|---|
+| `bbc-micro/os.rom` | `2d9fea69017864f6962704481829f95fee08446c8c3a13826d5d4e44000ac9de` | The Model B's operating system, MOS 1.20 (16 KB, at `$C000` to `$FFFF`) |
+| `bbc-micro/BASIC.ROM` | `45bd55dc0f6f0f8f1fe9e2481de7def206565eec8f600ba3068b849ca4132079` | BBC BASIC 2 (16 KB, paged ROM slot 15) |
+| `bbc-micro/DFS-1.2.rom` | `e745e34895225a6650b712c1dd0656cb0b0b15f072a8ae6d9ea8d1ac257eb3d6` | The Disc Filing System, DFS 1.20, which names itself "DFS,NET" in its header (16 KB, paged ROM slot 14) |
+
+**Where it came from.** jsbeeb's `public/roms/` folder, at commit
+`e27b20d4a33c2a7b17d2cf830f4695e961b6846e`, fetched with `curl` on 2 October
+2026:
+
+- `https://raw.githubusercontent.com/mattgodbolt/jsbeeb/e27b20d4a33c2a7b17d2cf830f4695e961b6846e/public/roms/os.rom`
+- `https://raw.githubusercontent.com/mattgodbolt/jsbeeb/e27b20d4a33c2a7b17d2cf830f4695e961b6846e/public/roms/BASIC.ROM`
+- `https://raw.githubusercontent.com/mattgodbolt/jsbeeb/e27b20d4a33c2a7b17d2cf830f4695e961b6846e/public/roms/b/DFS-1.2.rom`
+
+Only the ROM files are taken. jsbeeb is GPL and this repository is MIT, so none
+of its code is used.
+
+**Rights.** jsbeeb's `public/roms/README` says the ROMs are copyrighted and are
+not GPL, that it thinks publishing them is fair use provided you own them, and
+that it would remove them on request. The copyright is Acorn's, and who holds it
+now was not established. No licence or permission from any holder was found. The
+ROMs are here because Dan decided on 1 October 2026 that a ROM is used when its
+position is documented, and this is that document. If a rights holder asks for
+them to be removed, they will be.

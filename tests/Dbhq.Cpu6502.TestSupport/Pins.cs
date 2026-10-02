@@ -28,4 +28,17 @@ public static class Pins
     public const string Kim1Rom002Sha256 = "e9e5245854603cdbc0208235310db1bf6e6a75904960385baaddd38fe60ef750";
     public const string Kim1Rom003Path = "roms/kim-1/6530-003.bin";
     public const string Kim1Rom003Sha256 = "f112a707188a82b87de5be78b7ffa014e18240aa08825055c90d2e6626092fd7";
+
+    // The BBC Micro Model B's three 16 KB ROMs: the operating system (MOS 1.20),
+    // BBC BASIC 2 and the Disc Filing System (DFS 1.20). Acorn's work, taken from
+    // jsbeeb's public/roms/ at commit e27b20d4a33c2a7b17d2cf830f4695e961b6846e and
+    // committed under roms/bbc-micro/, with where they came from and what is known
+    // about their rights in roms/README.md (AGENTS.md rules 3 and 4). The paths
+    // are repository-relative and the hashes are checked every time a file is read.
+    public const string BbcOsPath = "roms/bbc-micro/os.rom";
+    public const string BbcOsSha256 = "2d9fea69017864f6962704481829f95fee08446c8c3a13826d5d4e44000ac9de";
+    public const string BbcBasicPath = "roms/bbc-micro/BASIC.ROM";
+    public const string BbcBasicSha256 = "45bd55dc0f6f0f8f1fe9e2481de7def206565eec8f600ba3068b849ca4132079";
+    public const string BbcDfsPath = "roms/bbc-micro/DFS-1.2.rom";
+    public const string BbcDfsSha256 = "e745e34895225a6650b712c1dd0656cb0b0b15f072a8ae6d9ea8d1ac257eb3d6";
 }
