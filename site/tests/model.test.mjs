@@ -6,7 +6,7 @@ import zlib from 'node:zlib';
 import { page, visibleText, DIST } from './helpers.mjs';
 import { KIM1_KEYS } from '../src/lib/machines.mjs';
 import { REPO_ROOT } from '../src/lib/registry.mjs';
-import { MODELS, modelSrc } from '../src/models/models.mjs';
+import { MODELS, CONTROLS, CONTROLS_DESCRIPTION, modelSrc } from '../src/models/models.mjs';
 import { BOARD, TABS, CONTACTS_PER_TAB, PITCH, CHIPS, RAM, LOGIC, CRYSTAL, NAME, HOLES, DISPLAY, KEYPAD, KEY_ROWS, KEYS, SST, decode, describe } from '../src/models/kim-1-layout.mjs';
 
 // The machines' 3D models: the KIM-1's board, the stage every model shares,
@@ -134,6 +134,97 @@ test('the model section is hidden without JavaScript, has an accessible name, a 
   assert.match(section, /<button type="button" class="btn small model-load" data-model-load>Load the 3D model<\/button>/);
   assert.match(section, /role="status" data-model-status/);
   assert.doesNotMatch(section, /class="[^"]*\bpill\b/, 'the model spends the page\'s lime');
+});
+
+// The controls. The behaviour is checked in a real browser by
+// scripts/browser-check.mjs; these hold the markup and the wiring it relies on.
+test('the controls are told to the visitor in real text, under the model and on it, and to a screen reader in its aria-description', () => {
+  const stage = /<section class="model-stage"[^>]*>/.exec(section)?.[0] ?? '';
+  // One set of sentences, so the visible text and the description cannot disagree.
+  const help = /<p class="model-help" id="model-help">([\s\S]*?)<\/p>/.exec(section)?.[1] ?? '';
+  assert.equal(visibleText(help), `${CONTROLS.pointer} ${CONTROLS.touch} ${CONTROLS.keys}`);
+  assert.ok(stage.includes(`aria-description="${CONTROLS_DESCRIPTION}"`), 'the model has no aria-description of its keys');
+  assert.ok(CONTROLS_DESCRIPTION.includes(CONTROLS.keys));
+  // Every key the model answers to is named in both places.
+  for (const word of ['arrow keys turn', 'Shift and the arrow keys pan', 'plus and minus zoom', 'Home resets the view', 'Escape lets go']) {
+    assert.ok(visibleText(help).includes(word), `the visible hint does not say "${word}"`);
+    assert.ok(CONTROLS_DESCRIPTION.includes(word), `the aria-description does not say "${word}"`);
+  }
+  for (const word of ['Drag to turn', 'right-drag or Shift-drag to pan', 'Click the model, then scroll to zoom', 'Double-click empty space to reset', 'tap the model first']) assert.ok(visibleText(help).includes(word), `the visible hint does not say "${word}"`);
+  // The hint on the canvas is text, not an image, and a label, so it has no full stop.
+  assert.match(section, /<span class="model-hint" aria-hidden="true"><span class="hint-pointer">Click the model, then scroll to zoom<\/span><span class="hint-touch">Tap the model, then drag to turn and pinch to zoom<\/span><\/span>/);
+  for (const label of [CONTROLS.hint, CONTROLS.hintTouch]) assert.doesNotMatch(label, /\.$/);
+  assert.doesNotMatch(section, /<img\b/, 'the model section holds an image');
+  // The accessible name is short; the controls are the description.
+  assert.ok(MODELS['kim-1'].label.length < 100);
+});
+
+test('focus decides who has the wheel and the finger: the wheel zooms only with focus or ctrl or cmd, touch-action is pan-y until a tap focuses the model, Escape lets go', () => {
+  const stage = fs.readFileSync(path.join(models, 'stage.mjs'), 'utf8');
+  // camera-controls' own wheel is off, ours checks focus first and only then stops the page scrolling.
+  assert.match(stage, /controls\.mouseButtons\.wheel = CameraControls\.ACTION\.NONE/);
+  assert.match(stage, /if \(document\.activeElement !== stage && !e\.ctrlKey && !e\.metaKey\) return;\s*e\.preventDefault\(\);/);
+  assert.match(stage, /addEventListener\('wheel'[\s\S]*?\{ passive: false \}/);
+  // The canvas scrolls the page until focused, and only then is touch-action none.
+  assert.match(stage, /canvas\.style\.touchAction = active \? 'none' : 'pan-y pinch-zoom'/);
+  assert.match(stage, /stage\.addEventListener\('focus', \(\) => setActive\(true\)\)/);
+  assert.match(stage, /stage\.addEventListener\('blur', \(\) => setActive\(false\)\)/);
+  assert.match(stage, /one: ACTION\.NONE, two: ACTION\.NONE, three: ACTION\.NONE/);
+  assert.match(stage, /one: ACTION\.TOUCH_ROTATE, two: ACTION\.TOUCH_DOLLY_TRUCK/);
+  // A finger takes the focus on a tap; the mouse on going down.
+  assert.match(stage, /if \(e\.pointerType !== 'mouse'\) stage\.focus\(/);
+  assert.match(stage, /Escape: \(\) => stage\.blur\(\)/);
+  assert.match(stage, /Home: \(\) => reset\(\)/);
+  assert.match(stage, /e\.shiftKey \? controls\.truck/);
+  // The stylesheet shows the ring while focused, and no longer pins the canvas to touch-action none.
+  const css = fs.readFileSync(path.join(process.cwd(), 'src', 'styles', 'global.css'), 'utf8');
+  assert.match(css, /\.model-stage\[data-active\] \{ outline: 2px solid var\(--lime\); \}/);
+  assert.doesNotMatch(css, /\.model-stage canvas \{[^}]*touch-action/);
+  // The hint goes once the model has focus.
+  assert.match(css, /\.model-stage\[data-active\] \.model-hint \{ display: none; \}/);
+});
+
+test('the camera goes all the way round, may get close to one chip and far from the whole board, and the target is held inside the board\'s bounds', () => {
+  const stage = fs.readFileSync(path.join(models, 'stage.mjs'), 'utf8');
+  const kim1 = fs.readFileSync(path.join(models, 'kim-1.js'), 'utf8');
+  assert.match(stage, /maxPolarAngle = Math\.PI \}/, 'the camera is clamped short of a full orbit');
+  assert.doesNotMatch(stage, /0\.48/);
+  assert.match(stage, /controls\.setBoundary\(new Box3\(/);
+  assert.match(stage, /minDistance = 3, maxDistance = 150/);
+  assert.match(kim1, /createStage\(root, \{ view: \[[^\]]*\], bounds, minDistance: 3, maxDistance: 150 \}\)/);
+  assert.match(kim1, /const bounds = \[X\(-Math\.max\(\.\.\.TABS\.map\(\(t\) => t\.out\)\)\) - margin, /);
+  // Close enough that a 40-pin chip (52 mm) is wider than the view, on a phone held upright: 36 degrees of view, 390 by 340.
+  const visibleWidth = (distance, aspect) => 2 * distance * Math.tan((36 / 2) * Math.PI / 180) * aspect;
+  assert.ok(visibleWidth(3, 390 / 340) < 5.2, 'at the closest, a chip does not fill the view');
+  // Far enough that the board (27.3 cm) is well inside it.
+  assert.ok(visibleWidth(150, 1) > 27.3 * 3, 'at the farthest, the board is not small');
+  // The camera's far plane reaches the board from the farthest the camera goes.
+  assert.match(stage, /new PerspectiveCamera\(36, 1, 0\.1, 400\)/);
+});
+
+test('the underside is lit and has its own material, so a view from below is not a black void', () => {
+  const stage = fs.readFileSync(path.join(models, 'stage.mjs'), 'utf8');
+  const kim1 = fs.readFileSync(path.join(models, 'kim-1.js'), 'utf8');
+  const tokens = fs.readFileSync(path.join(process.cwd(), 'src', 'styles', 'tokens.css'), 'utf8');
+  assert.match(stage, /new HemisphereLight\(/);
+  assert.match(stage, /under\.position\.set\([^)]*-\d+, /, 'the second fill is not below the board');
+  assert.match(tokens, /--model-pcb-under:/);
+  assert.match(kim1, /under: standard\('model-pcb-under'/);
+  // A box's faces are +x, -x, +y, -y, +z, -z: the fourth, the underside, takes the new material.
+  assert.match(kim1, /const faces = \[M\.board, M\.board, M\.board, M\.under, M\.board, M\.board\]/);
+  assert.match(kim1, /BoxGeometry\(S\(BOARD\.width\), H\.board, S\(BOARD\.depth\)\), faces\)/);
+  assert.match(kim1, /pads/, 'the legs end in no pads on the underside');
+});
+
+test('a double click or a double tap on empty space resets the view, and a click is still told from a drag', () => {
+  const stage = fs.readFileSync(path.join(models, 'stage.mjs'), 'utf8');
+  assert.match(stage, /if \(pick\(e, scene\.children\)\) \{ lastTap = null; return; \}/);
+  assert.match(stage, /now - lastTap\.at < 350/);
+  assert.match(stage, /\n      reset\(\);/);
+  // Pressing a key is still a click that moved under five pixels.
+  assert.match(stage, /Math\.hypot\(e\.clientX - down\[0\], e\.clientY - down\[1\]\) > 5/);
+  assert.match(fs.readFileSync(path.join(models, 'kim-1.js'), 'utf8'), /s\.onClick\(\(\) => pickable/);
+  assert.match(section, /<button type="button" class="btn small" data-model-reset>Reset the view<\/button>/);
 });
 
 test('the model\'s text alternative is its caption, says it is a model and not a photograph, and its figures come from the layout', () => {
