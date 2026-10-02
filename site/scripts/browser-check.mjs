@@ -100,6 +100,11 @@ const origin = `http://127.0.0.1:${server.address().port}`;
 
 const matches = (expected, shown) => expected.length === shown.length && [...expected].every((c, i) => (c === 'x' ? /[0-9A-F]/.test(shown[i]) : c === shown[i]));
 const asShown = (six) => `${six.slice(0, 4)} ${six.slice(4)}`;
+// A picture of the model's canvas, as the page shows it. A clip of the page,
+// not the element's own screenshot: that waits for the element to hold still
+// over two animation frames, and software WebGL on a busy machine can take
+// longer than its timeout to draw two.
+const canvasShot = async (p) => p.screenshot({ clip: await p.locator('[data-model-canvas]').boundingBox(), timeout: STEP_TIMEOUT_MS });
 
 const problems = [];
 let browser;
@@ -200,7 +205,7 @@ try {
 
   // Its canvas draws the board: count the pixels that are not the black canvas.
   await page.waitForTimeout(500);
-  const shot = await page.locator('[data-model-canvas]').screenshot();
+  const shot = await canvasShot(page);
   const { data, info } = await sharp(shot).removeAlpha().raw().toBuffer({ resolveWithObject: true });
   let lit = 0;
   for (let i = 0; i < data.length; i += info.channels) if (Math.max(data[i], data[i + 1], data[i + 2]) > 24) lit++;
@@ -425,7 +430,7 @@ try {
   await page.keyboard.press('Home');
   await settle();
   const measure = async () => {
-    const { data, info } = await sharp(await canvas.screenshot()).removeAlpha().raw().toBuffer({ resolveWithObject: true });
+    const { data, info } = await sharp(await canvasShot(page)).removeAlpha().raw().toBuffer({ resolveWithObject: true });
     let n = 0;
     let sum = 0;
     for (let i = 0; i < data.length; i += info.channels) {
@@ -542,7 +547,7 @@ try {
   // the gold contacts; the green mask (red about 0.15 of green) and the grey
   // and black parts are not.
   const surfaceOf = async () => {
-    const { data, info } = await sharp(await canvas.screenshot()).removeAlpha().raw().toBuffer({ resolveWithObject: true });
+    const { data, info } = await sharp(await canvasShot(page)).removeAlpha().raw().toBuffer({ resolveWithObject: true });
     let copper = 0;
     const sum = [0, 0, 0], sq = [0, 0, 0];
     let n = 0;
@@ -655,7 +660,7 @@ try {
     await page.waitForTimeout(300);
     const box = await rect();
     const screen = await model.evaluate((m, list) => list.map(([x, y]) => m.modelBoardPoint(x, y, true)), pts);
-    const { data, info } = await sharp(await canvas.screenshot()).removeAlpha().raw().toBuffer({ resolveWithObject: true });
+    const { data, info } = await sharp(await canvasShot(page)).removeAlpha().raw().toBuffer({ resolveWithObject: true });
     const sum = [0, 0, 0];
     let n = 0;
     for (const p of screen) {
