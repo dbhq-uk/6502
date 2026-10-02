@@ -618,7 +618,7 @@ try {
   // as the component side sees it. Seen from below, every point the map calls
   // copper must look different from every point it calls bare: the check
   // samples the canvas at 300 of each, where the map is solidly one or the
-  // other for a millimetre round, and compares the two mean colours. The same
+  // other round it, and compares the two mean colours. The same
   // points mirrored end to end are the control: if the underside's sheet were
   // laid the wrong way round, they would separate better than the true ones.
   // The stage must be on the screen to draw, and focused for Home to reach it.
@@ -637,8 +637,10 @@ try {
   const { width: MW, height: MH } = await sharp(path.join(dist, 'models', 'kim-1-tracks.webp')).metadata();
   const blue = (await sharp(path.join(dist, 'models', 'kim-1-tracks.webp')).extractChannel(2).raw().toBuffer());
   const pxPerMm = JSON.parse(fs.readFileSync(path.join(site, 'src', 'data', 'kim-1-model.json'), 'utf8')).tracks.mapPxPerMm;
+  // Copper is solid for 0.375 mm round the point (a pad or a wide track: a
+  // narrow track is under a pixel on the screen), bare board for a millimetre.
   const solid = (cx, cy, want) => {
-    const r = Math.round(pxPerMm);
+    const r = Math.round(pxPerMm * (want ? 0.375 : 1));
     for (let y = cy - r; y <= cy + r; y++) for (let x = cx - r; x <= cx + r; x++) {
       if (x < 0 || y < 0 || x >= MW || y >= MH) return false;
       if (want ? blue[y * MW + x] < 200 : blue[y * MW + x] > 30) return false;
