@@ -1,7 +1,7 @@
 ---
 title: "Planning the BBC Micro"
 date: 2026-10-02
-summary: "Before any code, four fact sheets were written for the BBC Micro's chips, and they changed the plan: the picture is interlaced, two fields to a frame, the disc controller must hand over data at the real byte rate, and the operating system needs particular answers from parts of the machine that are absent. The plan gives each task its tests but not its code, and the project, the three ROMs and their rights go in first."
+summary: "Before any code, four fact sheets were written for the BBC Micro's chips, and they changed the plan. The picture is interlaced, two fields to a frame. The disc software cannot cope with the controller presenting bytes too close together, so the controller needs the real byte rate. The operating system needs particular answers from parts of the machine that are absent. The plan gives each task its tests but not its code, and the project, the three ROMs and their rights go in first."
 order: 11
 ---
 
@@ -27,23 +27,28 @@ Five things in them changed what gets built.
 - **The picture is 625 interlaced lines, not 312.** The operating system turns
   on interlace in every mode, so a frame is a field of 312 lines and a field of
   313. Only with interlace off (`*TV x,1`, and never in mode 7) is a field 312
-  lines. Writing the video chip to a 312-line frame would have been wrong from
-  the first test.
+  lines. Writing the video chip to a 312-line frame would have been wrong.
 - **The video chip is a Hitachi HD6845S.** The operating system writes a
   programmable VSYNC width and skew bits that a plain 6845 does not have. The
   sheet says to build the HD6845S behaviour, not a generic 6845.
-- **The disc controller needs a byte every 128 CPU cycles.** The DFS ROM works
-  only if the 8271 hands over data at the real byte rate, and a trace showed it
-  fails if bytes come much closer than about 80 cycles. That was found by
-  running the ROM against a throwaway disc machine written from the Intel
-  datasheet, kept in `tools/probes/bbc-dfs-trace/`. It is evidence for the
-  sheet and nothing in `src/` is derived from it.
-- **The ROM needs particular values from parts of the machine that are not there.** An
-  absent device on the fast bus has to read `$FE`, because the DFS probes for
-  an Econet adapter and would switch Econet code on if it read `$00`. The
-  operating system tells power-on from BREAK by what the system VIA's interrupt
-  enable register holds. A machine that returns zeros for everything it does
-  not model would misboot.
+- **The disc controller must not present bytes too close together.** The DFS
+  data handler takes about 77 cycles per byte (71 to write, 77 to read, from
+  the NMI being taken to the return) and is not re-entrant. A byte that arrives
+  inside that time nests the interrupt and the ROM crashes. In the trace, bytes
+  80 to 128 cycles apart passed, and so did bytes 300 and 2000 cycles apart;
+  76 cycles and closer crashed. The real drive delivers one byte every 128 CPU
+  cycles, so that is the rate the model uses, and it is a choice of the model,
+  not something the ROM asks for. This was found by running the ROM against a
+  throwaway disc machine written from the Intel datasheet, kept in
+  `tools/probes/bbc-dfs-trace/`. It is evidence for the sheet and nothing in
+  `src/` is derived from it.
+- **The ROM needs particular values from parts of the machine that are not
+  there.** The DFS probes for an Econet adapter by reading two absent device
+  addresses, and it switches its Econet code on if both read zero. The value
+  measured on a real machine for an absent fast device is `$FE`, which keeps
+  Econet off. The operating system also tells power-on from BREAK by what the
+  system VIA's interrupt enable register holds. Where the sheet has a measured
+  value for something absent, the model returns it and not zero.
 - **The boot screen was derived, not run.** From the ROMs, the mode 7 screen
   should read: a blank row, `BBC Computer 32K`, a blank row, `Acorn DFS`, a
   blank row, `BASIC`, a blank row, then `>`. Nothing has run to check it. Task 5
