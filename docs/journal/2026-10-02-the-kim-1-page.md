@@ -1269,6 +1269,24 @@ README now says so, with the replica's extracted data in
   frames; with the load average over 30 on 8 cores (other work), software WebGL
   could not draw two in 30 seconds. The check now clips a page screenshot to the
   canvas's box, with the check's own two-minute step timeout.
+- **The underside check turned the model the wrong way on the CI runner.** It
+  dragged down to go under the board, and there a drag down turned the camera
+  up, to polar 0. The check before it already finds which way a drag goes, so
+  the underside check now uses that.
+- **Too few copper points on the underside.** It first asked for copper solid for
+  a millimetre all round, which only the pours are, and found 18. Pads and wide
+  tracks, solid for 0.375 mm, number in the hundreds.
+- **A test that a commit could fail.** The CI run on the pull request's merge
+  commit failed "every number on the home and status pages is a generated
+  figure": the status page shows the commit's first seven characters, which for
+  that merge commit were `1275329`, all digits, and the test allowed only the
+  numbers inside the full hash. It now allows the seven as well. Nothing in this
+  change caused it; the next merge commit would have passed by chance.
+- **The local browser check could not finish.** With the machine's load average
+  between 33 and 81 from other work, software WebGL took more than the check's
+  15 seconds to bring the camera to rest, at different steps on different runs.
+  The record below is from the CI runner, which runs the same script in
+  headless Chrome (154 there, 153 here).
 - **The replica was described from memory.** The first text said it was drawn
   "at true size from the board's 0.1 inch grid" and "traced from scans of a bare
   board". Its README says it was traced over a photograph scaled by the chips'
@@ -1344,13 +1362,81 @@ photograph's README section gives its author, its source and the SHA-256 of the
 file as committed, which must match. New in `machine-page.test.mjs`: the
 photographs section shows every photograph in the registry's order, lazily,
 and credits each. Changed: the track map test (three channels, not greyscale),
-the tracks' credit, and every test that read the old `photo` field. Removed:
+the tracks' credit, every test that read the old `photo` field, and the
+figures test, which now allows the commit's first seven characters (below). Removed:
 the test of `make-board-tracks.mjs`, with the script. The floor in both
 workflows is 193.
 
+### The browser check
+
+`node scripts/browser-check.mjs`, as the `Validate` workflow's "The KIM-1 runs
+in a browser" step ran it on 2 October 2026 for this pull request (Actions run
+37043265765, at commit `f1c768c`), copied from the run's log:
+
+```
+browser 154.0.8037.57
+loaded in 1067 ms: Running. Press RS to start the monitor.
+step 1 ok   keys "[RS]" expected "xxxx xx" shown "0000 00" announced "Display 0000 00" (549 ms)
+step 2 ok   keys "[AD] 17FA [DA] 00 [+] 1C" expected "17FB 1C" shown "17FB 1C" announced "Display 17FB 1C" (1522 ms)
+step 3 ok   keys "[AD] 0200 [DA] AD [+] 10 [+] 02 [+] 18 [+] 6D [+] 11 [+] 02 [+] 8D [+] 12 [+] 02 [+] 4C [+] 0A [+] 02" expected "020C 02" shown "020C 02" announced "Display 020C 02" (3976 ms)
+step 4 ok   keys "[AD] 0210 [DA] 27 [+] 15" expected "0211 15" shown "0211 15" announced "Display 0211 15" (1259 ms)
+step 5 ok   keys "[AD] 0200 [GO]" expected "       " shown "       " announced "Display dark" (955 ms)
+step 6 ok   keys "[ST]" expected "020A 4C" shown "020A 4C" announced "Display 020A 4C" (466 ms)
+step 7 ok   keys "[AD] 0212" expected "0212 3C" shown "0212 3C" announced "Display 0212 3C" (844 ms)
+status line: "Running. Press RS to start the monitor.", then "Running. Type the program below, or your own."
+speed, once a second for 5 s: running 1.00 MHz, capacity 27.48 MHz; running 1.00 MHz, capacity 29.41 MHz; running 1.00 MHz, capacity 29.99 MHz; running 1.00 MHz, capacity 30.49 MHz; running 1.00 MHz, capacity 30.77 MHz
+page speed line: Running at the board's own 1 MHz. This browser could run it about 30 times as fast.
+photograph: loaded /_astro/kim-1.ufzgBkwp_1lGWCK.avif, 300x370 pixels, shown at 298x368
+model bundle requested before scrolling to it: no
+model: running in 1190 ms after scrolling to it, fetched /models/kim-1.js, /models/kim-1-tracks.webp; status "The model is running. Its digits show the machine's display."
+model canvas: 778x458, 39.2% of its pixels are not black
+digits match: page segments 63,91,6,91,79,57 (0212 3C), model segments 63,91,6,91,79,57 ("0212 3C")
+page key 1 clicked: model key down "1", presses 0 then 1
+model key 2 clicked at 801,559: model key down "2"; the machine showed "2121 02" after the page's 1 and "1212 12" after the model's 2
+controls: start view azimuth 0.000, polar 0.716, distance 35.795, target 0.000,-1.000,1.500; bounds -13.000,-2.000,-15.650,12.000,2.000,15.650; focused false
+hint on the model while unfocused: "Click the model, then scroll to zoom", shown true; touch-action pan-y pinch-zoom
+wheel over the unfocused model: scrollY 2695 to 2995; distance 35.795 to 35.795
+ctrl and the wheel over the unfocused model: distance 35.795 to 24.973; scrollY 2695 to 2695
+after a click on empty space: focused true, ring {"active":true,"outline":"solid","width":"2px"}, touch-action none
+wheel over the focused model, cursor on the 5 key at 766,531: distance 35.795 to 24.973; the key is now at 766,531, 0.2 px from the cursor; scrollY 2695 to 2695
+Escape: focused false, ring {"active":false,"outline":"none","width":"3px"}, touch-action pan-y pinch-zoom
+wheel after Escape: scrollY 2695 to 2995
+left-drag 233 px left and 46 px down: azimuth 0.000 to 3.196, polar 0.716 to 0.088; target unchanged true
+right-drag: target 0.000,-1.000,1.500 to 11.822,2.000,-2.048; azimuth unchanged true, distance unchanged true
+shift and left-drag: target 0.000,-1.000,1.500 to 11.838,2.000,-2.011; azimuth unchanged true
+nine right-drags, far and back and forth: target -13.000,2.000,0.970 within -13.000,-2.000,-15.650 to 12.000,2.000,15.650: true; it reached an edge: true
+under the board: polar 0.716 to 3.142 (pi/2 is 1.571, pi is 3.142); 51.6% of the canvas is not black, mean brightness 69 of 255 (from above: 39.7%, 83)
+dragged on to the stop: polar 3.142, never past pi (3.142)
+the wheel to its limits: closest 3.000 (77.3% of the canvas drawn), farthest 150.000 (2.7% drawn)
+double click on empty space: distance 150.000 to 35.795, polar 0.716, back at the start view: true
+keyboard: ArrowLeft azimuth 0.000 to -0.262; ArrowDown polar 0.716 to 0.978; Shift+ArrowLeft target x 0.000 to -2.864; Shift+ArrowUp target -2.864,-1.000,1.483 to -2.864,0.880,-0.677; + distance 35.795 to 30.425; then - twice to 40.238; Home back at the start: true
+reset button: back at the start view: true
+tracks at the start: {"tracksLoaded":true,"tracks":true,"underside":true,"partsVisible":true,"partsLevel":1}, buttons pressed true,false, section data-model-tracks "on"
+Show tracks, Enter: {"tracksLoaded":true,"tracks":false,"underside":false,"partsVisible":true,"partsLevel":1}, pressed false,false; status "The tracks are off: the board is plain."
+the board's left-hand bus, 48x67 px (3149 pixels): colour variance 1591.6 with the tracks, 8.6 without; copper-coloured pixels on the canvas 14.57% with, 4.24% without
+Show tracks only: {"tracksLoaded":true,"tracks":true,"underside":true,"partsVisible":false,"partsLevel":0}, pressed true,true, data-model-parts "hidden"; copper-coloured pixels 16.19% (parts shown: 14.57%); the bus's colour variance 1594.7
+a click where the hidden 5 key was: presses 2 then 2
+Show tracks with the parts hidden: {"tracksLoaded":true,"tracks":false,"underside":false,"partsVisible":true,"partsLevel":1}, pressed false,false
+under the board, polar 3.142, tracks on: the map's underside copper at 286 points is 109,97,37, its bare board at 255 points 18,63,20, 98.4 apart; the same points mirrored end to end 15.3 apart; with the tracks off 3.2 apart
+photographs section: 5 photographs; kim-1.webp loaded /_astro/kim-1.ufzgBkwp_1lGWCK.avif 300x370; kim-1-bolo-end.webp loaded /_astro/kim-1-bolo-end.qV0CNCQu_Z2te0wp.avif 300x200; kim-1-bolo-oblique.webp loaded /_astro/kim-1-bolo-oblique.DcBK6OO4_UG3Hn.avif 300x200; kim-1-rev-b-front.webp loaded /_astro/kim-1-rev-b-front.1Hqc7X6F_1I4Ioi.avif 300x400; kim-1-rev-b-back.webp loaded /_astro/kim-1-rev-b-back.BOPlcWx0_Z166GoH.avif 300x400
+phone, unfocused: touch-action "pan-y pinch-zoom", hint "Tap the model, then drag to turn and pinch to zoom", shown true
+phone, one finger swiped up on the unfocused model: scrollY 3241 to 3475; azimuth 0.000 to 0.000, polar 0.716 to 0.716
+phone, after a tap on the model: focused true, touch-action "none"
+phone, one finger dragged on the focused model: azimuth 0.000 to 2.199, polar 0.716 to 0.000; scrollY 3241 to 3241
+phone, two fingers spread on the focused model: distance 35.795 to 21.091; scrollY 3241 to 3241
+phone, after it loses focus: touch-action "pan-y pinch-zoom"
+no console errors, no failed requests, no CSP violations
+```
+
+The underside line is the new proof that the underside's sheet is laid the
+right way: from below, the 286 points the map calls copper and the 255 it calls
+bare are 98.4 apart in colour, the same points mirrored end to end only 15.3,
+and with the tracks off 3.2. The bus's colour variance with the tracks off is
+8.6 on its new, part-free stretch.
+
 ### What is proven, and what is not
 
-Proven by the tests and the browser check (below): every figure on the page is
+Proven by the tests and the browser check (above): every figure on the page is
 the results file's, every photograph is credited and loads from this site, the
 underside's copper shows from below where the map puts it, and nothing new
 breaks the CSP. Seen, not measured: the before and after screenshots of the
