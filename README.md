@@ -38,6 +38,9 @@ SingleStepTests, which record the bus activity of every opcode cycle by cycle.
 
 ## Licence
 
-MIT. See [`LICENSE`](LICENSE). No ROM, no game and no third-party test program
-is committed to this repository; the tests download what they need, pinned by
-hash.
+MIT. See [`LICENSE`](LICENSE). Two kinds of file here are somebody else's
+and keep their own terms: the system ROMs in [`roms/`](roms/README.md), and the
+photographs of the original machines in
+[`site/src/assets/photos/`](site/src/assets/photos/README.md), each under the
+licence its source gives it. No game and no third-party test program is
+committed; the tests download what they need, pinned by hash.

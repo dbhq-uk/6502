@@ -1,6 +1,9 @@
 ---
 import Base from '../../layouts/Base.astro';
 import Kim1Panel from '../../components/Kim1Panel.astro';
+import MachinePhoto from '../../components/MachinePhoto.astro';
+import MachineModel from '../../components/MachineModel.astro';
+import { MODELS } from '../../models/models.mjs';
 import { registry, results } from '../../lib/data.mjs';
 import { fmt } from '../../lib/figures.mjs';
 import { acceptanceSummary, loadTryIt, parseKeys, runningMachines } from '../../lib/machines.mjs';
@@ -15,7 +18,12 @@ export function getStaticPaths() {
 const { machine } = Astro.props;
 const Panel = { 'kim-1': Kim1Panel }[machine.id];
 if (!Panel) throw new Error(`machine ${machine.id} is running but has no panel in src/pages/machines/[id].astro, so its page could not run it`);
-const scripts = { 'kim-1': ['/kim-1.js'] }[machine.id] ?? [];
+// The photograph is required of every running machine (the registry check
+// stops the build without one). The 3D model is shown for a machine in
+// src/models/models.mjs, which says how to add the next; its loader is tiny,
+// and the model itself is loaded only when the visitor gets near it.
+const hasModel = machine.id in MODELS;
+const scripts = [...({ 'kim-1': ['/kim-1.js'] }[machine.id] ?? []), ...(hasModel ? ['/model-loader.js'] : [])];
 const base = `/machines/${machine.id}/`;
 const clockMhz = Number(/([\d.]+) MHz/.exec(machine.cpu ?? '')?.[1]);
 if (!(clockMhz > 0)) throw new Error(`machine ${machine.id}: its cpu field names no clock in MHz, and the page runs it at that clock`);
@@ -25,12 +33,15 @@ const roms = machine.id === 'kim-1' ? kim1Roms() : [];
 
 <Base title={machine.name} description={`${machine.name}, running on the 6502 core in the browser, with its own ROM. Type a program in on its keypad and run it.`} scripts={scripts}>
   <section class="machine-head">
-    <div class="wrap narrow">
-      <p class="meta"><a href="/machines/">All machines</a></p>
-      <h1>{machine.name}</h1>
-      <p>{machine.year}, {machine.maker}, {machine.cpu}.</p>
-      {machine.notes && <p>{machine.notes}</p>}
-      <p>{acceptanceSummary(machine, results, fmt)}</p>
+    <div class="wrap narrow machine-intro">
+      <div>
+        <p class="meta"><a href="/machines/">All machines</a></p>
+        <h1>{machine.name}</h1>
+        <p>{machine.year}, {machine.maker}, {machine.cpu}.</p>
+        {machine.notes && <p>{machine.notes}</p>}
+        <p>{acceptanceSummary(machine, results, fmt)}</p>
+      </div>
+      <MachinePhoto machine={machine} />
     </div>
   </section>
 
@@ -61,6 +72,8 @@ const roms = machine.id === 'kim-1' ? kim1Roms() : [];
       </div>
     </section>
   )}
+
+  {hasModel && <MachineModel id={machine.id} />}
 
   <section aria-labelledby="rom">
     <div class="wrap narrow">

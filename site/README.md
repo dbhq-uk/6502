@@ -12,6 +12,8 @@ npm run machines    # builds the machines' WebAssembly and fetches their ROMs in
 npm run dev         # http://127.0.0.1:4333/
 npm test            # builds the site, then checks it
 npm run browser-check   # runs the KIM-1 page in headless Chrome, after npm test has built dist/
+node scripts/page-weight.mjs /machines/kim-1/   # what a page loads when it opens, after a build
+node scripts/measure-kim1-photo.mjs <photo>     # the KIM-1 board's scale and size, off its full-size photograph
 ```
 
 Needs Node 22.22 or later (`engines` in `package.json`). `dev` and `preview` serve
@@ -22,6 +24,13 @@ network, and no private address is committed.
 `npm run results` takes a few minutes and downloads about 5 GB of test data the
 first time. `src/data/results.json` is generated and never committed. CI
 produces it from the same test run that gates the merge.
+
+`npm run browser-check` also checks the photograph and the 3D model: the
+photograph loads, the model's bundle is not fetched until the page is scrolled
+to it, its canvas draws, its digits match the page's after the program, the
+page's 1 key puts the model's 1 down, and a click on the model's 2 presses 2 on
+the machine. It runs Chrome with SwiftShader, its software WebGL, so it needs no
+GPU.
 
 `npm run machines` needs the .NET 10 SDK with the `wasm-tools` workload
 (`dotnet workload install wasm-tools`), because the machines are compiled ahead
@@ -45,6 +54,8 @@ Nothing on the site is typed twice. The repository is the source.
 | Tests passing, variants, suites | `src/data/results.json`, made from the test run |
 | The speed figures | `src/data/measurements.json`, made by `bench/collect-measurements.mjs` and committed as a dated record |
 | A running machine's page | `src/pages/machines/[id].astro` with the machine's panel (the KIM-1's is `src/components/Kim1Panel.astro`, driven by `public/kim-1.js`), its "try it" program from `machines/<id>/try-it.json`, which its acceptance test also runs, and its rights from the registry |
+| A machine's photograph | `src/assets/photos/<file>`, named with its author, source, licence (as the source states it, or `null` for none), date taken and alt text in the machine's `photo` entry in `machines/registry.json`; `src/components/MachinePhoto.astro` shows it in the page's head with a credit built from those fields. Required of every running machine: the build fails without one. Where each came from is in `src/assets/photos/README.md` |
+| A machine's 3D model | `src/models/<id>.js`, listed in `src/models/models.mjs` (which says how to add the next), on the stage every model shares (`src/models/stage.mjs`). The KIM-1's board is measured from its photograph (`scripts/measure-kim1-photo.mjs` for the scale and size) in `src/models/kim-1-layout.mjs`. `scripts/build-models.mjs` bundles each into `public/models/<id>.js` (git-ignored) before every build, and `public/model-loader.js` loads it only when its section nears the screen |
 | A machine's WebAssembly and ROM | `public/machines/<id>/`, made by `scripts/build-machines.mjs` and never committed (the ROM it copies in is committed, under `roms/`) |
 
 **A machine counts as implemented only when it runs in the browser and passes an
@@ -62,6 +73,10 @@ class. Its page at `/machines/<id>/` is generated from the registry by
 no page to write for the text. What the page cannot have without work is the
 machine itself: a running machine needs a panel in `[id].astro` that runs it,
 and the build fails without one, because "running" means it runs in the browser.
+It also needs a photograph of the original: add the file to `src/assets/photos/`,
+its `photo` entry to the registry and its provenance to that folder's README, and
+the page shows it, credited. A 3D model is optional and per machine: see
+`src/models/models.mjs`.
 
 ## The checks
 
@@ -69,7 +84,7 @@ and the build fails without one, because "running" means it runs in the browser.
 
 | File | Holds |
 |---|---|
-| `registry.test.mjs` | The registry is valid, agrees with the family document, and a running machine has a passing acceptance test |
+| `registry.test.mjs` | The registry is valid, agrees with the family document, and a running machine has a passing acceptance test and a photograph that names its author and links its source; a photograph's file, licence, date and alt text are checked, every photograph on disk belongs to a machine and is written up in its folder's README |
 | `results.test.mjs` | The test results are read correctly, are publishable, and the real results file passes |
 | `measurements.test.mjs` | The benchmark output is parsed correctly, and a machine is called physical only when `systemd-detect-virt` ran and said `none` (a missing tool is "a machine of unknown type") |
 | `figures.test.mjs` | The figures are computed from the registry, the results and the measurements, a missing suite (or no Harte suite) stops the build instead of publishing 0, and the target verdict never rounds up |
@@ -77,9 +92,10 @@ and the build fails without one, because "running" means it runs in the browser.
 | `honest-pages.test.mjs` | The pages claim nothing they cannot back up: the home page names exactly the machines that run, from the registry, no page says the reference data came from a real chip, no test cadence is asserted, every generated image used as a background is captioned |
 | `machines.test.mjs` | The machines and chips tables match the registry; only a running machine is linked (rules tested on a made-up registry as well as the real one); the filters are hidden until the script runs; the sort comparison puts blanks last; the family page renders the repository document |
 | `mirrors.test.mjs` | Every file the tests and the build fetch comes from a `dbhq-uk` repository, and every pin is a full commit (AGENTS.md rule 3) |
-| `machine-page.test.mjs` | The KIM-1's page, built against the real registry: it is linked, its WebAssembly and both ROM halves were built in and the ROM matches its pins, the keypad has every key once in the board's layout, it degrades without JavaScript, the digits have a polite live summary, the program on the page is the acceptance test's own, it states the registry's rights text and the pinned sources, and both workflows build the machine before the site |
+| `machine-page.test.mjs` | The KIM-1's page, built against the real registry: it is linked, its WebAssembly and both ROM halves were built in and the ROM matches its pins, the keypad has every key once in the board's layout, it degrades without JavaScript, the digits have a polite live summary, the program on the page is the acceptance test's own, it states the registry's rights text and the pinned sources, both workflows build the machine before the site, and it shows the registry's photograph from this site, alt-texted, sized and credited (author, linked source, licence as stated) |
+| `model.test.mjs` | The 3D models: the KIM-1 model's keypad is the machine's and the panel's, every part is on the board, the contacts set the scale, it decodes digits with the machine's own table, it holds no colour that is not a token, every model in the map has a module and a bundle inside its budget, the page loads only the small loader and never the model, the section is hidden without JavaScript and has its name, reset button, label and text alternative, the driver exposes the machine and announces every tap, the model never turns by itself, and the deploy checks the bundles |
 | `journal.test.mjs` | Every journal entry has its front matter, is built once with its own title, and is listed newest first; a link to another entry is a site link and a link to any other file goes to GitHub |
-| `site.test.mjs` | Every page has a title, description and canonical link (the 404 has none and is `noindex`), no mention of the dropped port goal, one `h1` and its landmarks; no dashes or forbidden names; British English; no inline script; every internal link resolves; every image in `src/assets/imagery/` is captioned and alt-texted as an illustration; the lime fills one element and its other uses are named |
+| `site.test.mjs` | Every page has a title, description and canonical link (the 404 has none and is `noindex`), no mention of the dropped port goal, one `h1` and its landmarks; no dashes or forbidden names; British English; no inline script; every internal link resolves; every image in `src/assets/imagery/` is captioned and alt-texted as an illustration, and every photograph in `src/assets/photos/` is captioned as a photograph and credited, never as an illustration; the lime fills one element and its other uses are named |
 | `analytics.test.mjs` | `analytics.js` and `consent.js` are run in a sandbox with a fake browser: GA4 uses the estate's one ID, is analytics-only, loads only on the live host and for no likely bot, is never loaded for a visitor who opted out, and an old refusal is carried over; the notice shows once, Cookie settings reopens it, and OK and Opt out are the same weight; the CSP allows only what it needs |
 | `design.test.mjs` | Contrast from the real tokens, on the black canvas, the cards and the worst pixel of the traces texture; no raw colours in the stylesheet; no shadows but the navigation bar's |
 | `chip.test.mjs` | The chip page: 40 pins and every bus line has a pad and a wire; every frame is exactly what the core recorded, and registers change on an instruction's last cycle; the page calls itself a diagram and not the die, its figures are the trace's, and its script holds no colour of its own; the bundle is built and carries its licences |

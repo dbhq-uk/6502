@@ -98,6 +98,32 @@ test('an image marked data-generated is one of the generated images, so the mark
   }
 });
 
+// The photographs are the other side of that rule: a photograph of an original
+// machine is evidence, so it is captioned as a photograph and credited, and the
+// "Illustration" caption is kept for the generated images above.
+const PHOTOS = path.join(process.cwd(), 'src', 'assets', 'photos');
+const photos = fs.readdirSync(PHOTOS).filter((f) => /\.(webp|jpe?g|png|avif)$/.test(f)).map((f) => f.replace(/\.[a-z0-9]+$/, ''));
+
+test('every photograph is captioned as a photograph, never an illustration, and credited with its source, wherever it is shown', () => {
+  assert.ok(photos.length >= 1, 'no photographs in src/assets/photos/');
+  for (const name of photos) {
+    let shown = 0;
+    for (const p of all) {
+      for (const m of p.html.matchAll(/<img\b[^>]*>/g)) {
+        if (!new RegExp(`/${name}\\.[\\w-]+\\.(?:webp|png|jpe?g|avif)`).test(m[0])) continue;
+        shown++;
+        assert.doesNotMatch(m[0], /\balt="Illustration/, `${p.url}: the photograph ${name} has alt text calling it an illustration`);
+        const fig = p.html.slice(p.html.lastIndexOf('<figure', m.index), p.html.indexOf('</figure>', m.index));
+        const caption = visibleText(/<figcaption[^>]*>([\s\S]*?)<\/figcaption>/.exec(fig)?.[1] ?? '').replace(/\s+([.,])/g, '$1');
+        assert.match(caption, /^Photograph: /, `${p.url}: the photograph ${name} is not captioned as a photograph`);
+        assert.doesNotMatch(caption, /illustration/i, `${p.url}: the photograph ${name} is captioned as an illustration`);
+        assert.match(caption, /\bBy .+\. Source: .+\. Licence: .+\./, `${p.url}: the photograph ${name} is not credited`);
+      }
+    }
+    assert.ok(shown > 0, `the photograph ${name} is in src/assets/photos/ but no page shows it`);
+  }
+});
+
 test('there is no inline script: the CSP allows none', () => {
   for (const p of all) {
     for (const m of p.html.matchAll(/<script\b([^>]*)>/g)) {

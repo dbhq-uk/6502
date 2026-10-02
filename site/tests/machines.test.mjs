@@ -91,7 +91,8 @@ test('a blank value sorts last in both directions, so sorting by year never puts
 });
 
 // The registry and results below are made up. Nothing here reads or writes machines/registry.json.
-const machine = (over = {}) => ({ id: 'kim-1', name: 'KIM-1', year: 1976, category: 'single-board', cpu: '6502', core: 'nmos', status: 'running', acceptance: 'Kim1AcceptanceTests', ...over });
+const photo = { file: 'kim-1.webp', author: 'A. Photographer', sourceUrl: 'https://example.org/kim-1', licence: null, date: '1977', alt: 'A single-board computer seen from above, keypad at the bottom right.' };
+const machine = (over = {}) => ({ id: 'kim-1', name: 'KIM-1', year: 1976, category: 'single-board', cpu: '6502', core: 'nmos', status: 'running', acceptance: 'Kim1AcceptanceTests', photo, ...over });
 const planned = machine({ id: 'bbc-micro', name: 'BBC Micro', year: 1981, category: 'computer', status: 'planned', acceptance: null });
 const registryOf = (...machines) => ({ machines, chips: [] });
 const suite = (over = {}) => ({ passed: 3, failed: 0, skipped: 0, ...over });

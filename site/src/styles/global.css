@@ -192,6 +192,22 @@ footer .linkbtn:hover { color: var(--white); }
 .steps .shows code { white-space: pre; }
 .roms code { overflow-wrap: anywhere; }
 .machine-head p { margin-top: 12px; }
+/* The head: the machine's details, and beside them a photograph of the original. */
+.machine-intro { display: grid; grid-template-columns: minmax(0, 1fr) 300px; gap: clamp(24px, 4vw, 48px); align-items: start; }
+@media (max-width: 760px) { .machine-intro { grid-template-columns: 1fr; } }
+.photo { margin: 0; max-width: 360px; justify-self: center; }
+.photo img { width: 100%; height: auto; border: 1px solid var(--hairline); border-radius: var(--r-card); background: var(--iron); }
+.photo figcaption { display: grid; gap: 4px; padding: 10px 0 0; text-align: left; }
+/* The 3D model: hidden in the markup, shown by public/model-loader.js. */
+.model-stage { position: relative; padding: 0; height: min(64vh, 560px); min-height: 340px; margin-top: 24px; background: var(--void); border: 1px solid var(--circuit); border-radius: var(--r-window); overflow: hidden; outline-offset: 3px; }
+.model-stage canvas { display: block; width: 100%; height: 100%; touch-action: none; }
+.model-tag { position: absolute; top: 12px; left: 12px; font-family: var(--font-mono); font-size: 11px; letter-spacing: 0; color: var(--white); background: var(--iron); border: 1px solid var(--circuit); border-radius: 4px; padding: 2px 8px; pointer-events: none; }
+.model-load { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); }
+[data-model]:not([data-state="idle"]) .model-load { display: none; }
+[data-model]:not([data-state="running"]) [data-model-reset] { display: none; }
+.model-controls { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 20px; margin: 16px 0 12px; }
+.model-status { color: var(--moss-80); font-size: 14px; }
+.model-about { text-align: left; }
 .machine-run h2 + .kim1, .wrap > h2 + .prose { margin-top: 24px; }
 /* The chip page (/inside/): a 3D view beside a tour. The view's own colours are
    these same tokens, read by src/chip/main.js at run time. Without JavaScript

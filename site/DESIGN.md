@@ -77,8 +77,9 @@ are not in git; the site ships the WebP versions in `src/assets/imagery/`.
 The prompt asked for a 6502 die, but a model draws a plausible die and not the
 chip's real layout, so it is not a photograph or a drawing of the 6502, and a test fails the
 build if a generated image is shown without an "Illustration" caption. The KIM-1
-page uses no image at all: its digits and keypad are drawn, and driven by the
-emulator.
+page's machine uses no image: its digits and keypad are drawn, and driven by the
+emulator. The page does show a photograph of the original board, which is a
+different kind of image with a different rule (below).
 
 ### hero-die
 
@@ -108,6 +109,61 @@ Not used.
 - Draft: `1536x864`, quality low. Prompt: "A dark 1970s single-board computer seen from above at a slight angle: six red-orange seven-segment LED digits glowing in a row above a hex keypad of small square keys, black background, soft phosphor-green edge light (#ddffdc), one lime (#7fee64) glint, macro photography, shallow depth of field, no text, no logos, no letters on the keys"
 - Final: not made, dropped: it is not a KIM-1 (twelve keys where the board has twenty-four) and reads as one
 
+## The photographs
+
+Every machine page shows a photograph of the original device in its head,
+beside the machine's details, and credits it underneath (issue 28; Dan,
+2 October 2026). Rights are not a gate; the credit is. The photographs live in
+`src/assets/photos/`, apart from the generated imagery, and the two folders
+never share a file.
+
+- **A photograph is evidence and is captioned as one.** The caption starts
+  "Photograph:", says what and where it is and when it was taken, then credits
+  the author, links the source and gives the licence as the source states it,
+  or "no licence stated". All of it comes from the machine's `photo` entry in
+  `machines/registry.json`, so it cannot be left off. A test fails if a
+  photograph is captioned or alt-texted as an illustration, and the
+  "Illustration" rule above still binds every generated image.
+- **Its alt text describes the board**, not the fact of a photograph: what is
+  where, so the picture is readable without being seen.
+- **It is served from this site**, never hot-linked: AVIF at three widths with a
+  WebP fallback, built by `astro:assets` from a 1600 pixel master. The img
+  carries its width and height, so the page does not shift when it arrives.
+- **A hairline frame and the iron surface behind it,** like every other panel:
+  no shadow. The photograph sits on black because the source does, which suits
+  the canvas.
+- Below 760 pixels it drops under the details, no wider than 360 pixels.
+
+## The KIM-1's 3D model
+
+A model of the board, below the program on the KIM-1's page, in three.js on the
+same black canvas, using the stage every machine's model shares
+(`src/models/stage.mjs`).
+
+- **It is labelled a model, twice.** A tag in the corner of the canvas says
+  "Model, not a photograph", and the caption, which is also the text
+  alternative, starts with the same words and says what was measured and what
+  was not.
+- **Its colours are the board's, not the site's.** The page's own drawn display
+  stays phosphor green, because it is a drawing of what the machine shows. The
+  model is a model of a thing, so its board is green fibreglass, its contacts
+  gold, its legs tinned and its LEDs red. Those five colours are tokens
+  (`--model-pcb`, `--model-gold`, `--model-tin`, `--model-led`,
+  `--model-led-off`), used by the model's scene and nowhere else, and none is a
+  text colour. The chips, keypad, keys and printing use the site's own iron,
+  black, white and moss.
+- **No lime.** The model spends none of it; the focus ring on the model is the
+  lime, as everywhere.
+- **Its two text colours,** the corner tag (`--white` on iron) and the status
+  line (`--moss-80` on black), are in the contrast table in
+  `tests/design.test.mjs`.
+- **It never moves by itself.** No auto-rotation, and with reduced motion the
+  camera and the keys move at once instead of easing.
+- **It loads late.** The section is hidden in the markup and shown by a small
+  loader, which fetches the model and three.js only when the section nears the
+  screen or the visitor presses "Load the 3D model". Without JavaScript the
+  section never appears, and the photograph and the drawn keypad are the page.
+
 ## The chip page
 
 `/inside/` is a 3D diagram of the chip, drawn in three.js, on the same black canvas.
@@ -125,6 +181,8 @@ floorplan in outline. See the journal entry for 1 October 2026.
 `npm test` builds the site and then checks it. The checks that guard this design
 are in `tests/design.test.mjs` (contrast, the lime, shadows, raw colours) and
 `tests/site.test.mjs` (captions and alt text for every file in
-`src/assets/imagery/`, the dash and British English rules) and
+`src/assets/imagery/` and every photograph in `src/assets/photos/`, the dash and
+British English rules), `tests/model.test.mjs` (the model's colours are tokens,
+its label, its lazy loading) and
 `tests/honest-pages.test.mjs` (the backgrounds' captions). The rest of the suite is about the figures and the
 content.

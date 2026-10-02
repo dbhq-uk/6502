@@ -7,9 +7,9 @@
     "node": ">=22.22"
   },
   "scripts": {
-    "predev": "node scripts/build-chip.mjs",
+    "predev": "node scripts/build-chip.mjs && node scripts/build-models.mjs",
     "dev": "astro dev --host \"${SITE_HOST:-127.0.0.1}\" --port 4333",
-    "prebuild": "node scripts/build-chip.mjs",
+    "prebuild": "node scripts/build-chip.mjs && node scripts/build-models.mjs",
     "build": "astro build",
     "pretest": "npm run build",
     "test": "node --test tests/*.test.mjs",
