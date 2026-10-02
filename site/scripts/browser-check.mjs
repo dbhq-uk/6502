@@ -629,7 +629,8 @@ try {
   for (let i = 0; i < 6; i++) {
     const v = await view();
     if (v.polar > Math.PI - 0.02) break;
-    await drag(await at(0.9, 0.1), await at(0.9, 0.9));
+    // The same way the drag under the board went above: which way turns it under depends on the browser.
+    await drag(await at(0.9, sign === 'down' ? 0.1 : 0.9), await at(0.9, sign === 'down' ? 0.9 : 0.1));
     await settle();
   }
   const fromBelow = await settle();
