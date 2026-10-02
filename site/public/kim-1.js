@@ -20,6 +20,14 @@
 // each held 40 ms and rested 40 ms in machine time, so a click is never too
 // short for the monitor to see, and clicks faster than it reads are kept in
 // order (src/Dbhq.Machines.Kim1/Kim1Keystrokes.cs).
+//
+// The 3D model. Once the machine is running, the panel carries `panel.kim1`:
+// `tap(key)` presses a key exactly as a click on the keypad does, and
+// `segments(digit)` is what this file last drew for that digit, so the model
+// lights the same segments as the drawn display. Every tap, from a click, a
+// keyboard or the model, is announced on the panel as a `kim1:key` event, so the
+// model's key goes down whichever way it was pressed. The panel says
+// `kim1:ready` when the machine has started.
 
 const MAX_FRAME_MS = 100;
 const SETTLE_MS = 400;
@@ -58,9 +66,15 @@ async function start(panel) {
     return;
   }
 
+  const shown = digits.map(() => -1);
+  const tap = (key) => {
+    kim.Tap(key);
+    panel.dispatchEvent(new CustomEvent('kim1:key', { detail: { key } }));
+  };
+
   for (const key of keys) {
     key.disabled = false;
-    key.addEventListener('click', () => kim.Tap(key.dataset.key));
+    key.addEventListener('click', () => tap(key.dataset.key));
   }
   sst.disabled = false;
   sst.addEventListener('change', () => kim.SetSingleStep(sst.checked));
@@ -71,12 +85,13 @@ async function start(panel) {
     if (event.ctrlKey || event.metaKey || event.altKey || event.repeat) return;
     if (!/^[0-9a-f]$/i.test(event.key) || event.target === sst) return;
     event.preventDefault();
-    kim.Tap(event.key.toUpperCase());
+    tap(event.key.toUpperCase());
   });
 
+  panel.kim1 = { tap, segments: (digit) => shown[digit] };
+  panel.dispatchEvent(new CustomEvent('kim1:ready'));
   say('Running. Press RS to start the monitor.', 'running');
 
-  const shown = digits.map(() => -1);
   let last = performance.now();
   let cycles = kim.Cycles();
   let busyMs = 0;

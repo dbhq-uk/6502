@@ -7,6 +7,9 @@
 // then AD, DA, PC and +, then the hex keys from C D E F down to 0 1 2 3.
 // The segments are drawn, not pictures: bit 0 of what the machine reports
 // is segment a (the top bar), round to bit 6, segment g (the middle bar).
+// The rows are shared with the 3D model, so the two keypads cannot differ.
+import { KEY_ROWS as rows } from '../models/kim-1-layout.mjs';
+
 interface Props {
   /** Where the machine's files are served from, for example /machines/kim-1/. */
   base: string;
@@ -14,15 +17,6 @@ interface Props {
   clockMhz: number;
 }
 const { base, clockMhz } = Astro.props;
-
-const rows = [
-  ['GO', 'ST', 'RS', 'SST'],
-  ['AD', 'DA', 'PC', '+'],
-  ['C', 'D', 'E', 'F'],
-  ['8', '9', 'A', 'B'],
-  ['4', '5', '6', '7'],
-  ['0', '1', '2', '3'],
-];
 const labels: Record<string, string> = {
   GO: 'GO, run from the address shown',
   ST: 'ST, stop the program',

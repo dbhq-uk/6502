@@ -1,0 +1,33 @@
+---
+// A photograph of the original machine, with its credit, from the machine's
+// `photo` entry in machines/registry.json. Every running machine has one
+// (the registry check fails the build otherwise), and this is the one place a
+// machine page shows it, so the credit cannot be left off. It is a photograph,
+// never an illustration: the file is in src/assets/photos/, not imagery/.
+import { Picture } from 'astro:assets';
+
+interface Props {
+  /** The machine's registry entry. */
+  machine: { id: string; name: string; photo: { file: string; author: string; sourceUrl: string; licence: string | null; licenceUrl?: string; date: string; alt: string; caption?: string } };
+}
+const { machine } = Astro.props;
+const { photo } = machine;
+const files = import.meta.glob<{ default: ImageMetadata }>('../assets/photos/*.{webp,jpg,jpeg,png,avif}', { eager: true });
+const src = files[`../assets/photos/${photo.file}`]?.default;
+if (!src) throw new Error(`machine ${machine.id}: its photograph ${photo.file} is not in src/assets/photos/`);
+
+const [y, m, d] = photo.date.split('-').map(Number);
+const taken = d ? new Date(Date.UTC(y, m - 1, d)).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' })
+  : m ? new Date(Date.UTC(y, m - 1, 1)).toLocaleDateString('en-GB', { month: 'long', year: 'numeric', timeZone: 'UTC' })
+  : String(y);
+const host = new URL(photo.sourceUrl).hostname;
+const caption = photo.caption ?? `an original ${machine.name}`;
+---
+
+<figure class="photo" data-photo={machine.id}>
+  <Picture src={src} formats={['avif']} fallbackFormat="webp" width={720} widths={[360, 720, 1080]} sizes="(max-width: 760px) min(88vw, 360px), 300px" alt={photo.alt} loading="eager" data-photo-img />
+  <figcaption class="figure-caption">
+    <span class="photo-what">Photograph: {caption}, taken {taken}.</span>
+    <span class="photo-credit" data-photo-credit>By {photo.author}. Source: <a href={photo.sourceUrl}>{host}</a>. Licence: {photo.licence === null ? 'no licence stated' : photo.licenceUrl ? <a href={photo.licenceUrl}>{photo.licence}</a> : photo.licence}.</span>
+  </figcaption>
+</figure>

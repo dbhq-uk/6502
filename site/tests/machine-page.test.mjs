@@ -94,7 +94,10 @@ test('the digits are drawn, hidden from screen readers, and summarised in a poli
   for (const d of digits) assert.equal((d[2].match(/<polygon data-seg=/g) ?? []).length, 7, 'a digit needs seven segments');
   assert.match(html, /<div class="kim1-display" aria-hidden="true">/);
   assert.match(html, /<p class="sr-only" aria-live="polite" data-kim1-said><\/p>/);
-  assert.doesNotMatch(html, /<img\b[^>]*kim/i, 'the machine must be drawn, not a picture');
+  // The page has a photograph of the board, but the machine itself is drawn, not a picture.
+  const panel = html.slice(html.indexOf('data-kim1 '), html.indexOf('data-kim1-speed'));
+  assert.ok(panel.length > 0, 'the panel was not found');
+  assert.doesNotMatch(panel, /<img\b|<picture\b/, 'the machine must be drawn, not a picture');
 });
 
 test('the program on the page is the acceptance test\'s program, step by step, from the same file', () => {
@@ -147,4 +150,39 @@ test('both workflows build the machines before the site, with the wasm-tools wor
 test('the deploy checks every file under machines/ is served, and .wasm as application/wasm', () => {
   assert.match(deploy, /find machines -type f/, 'the deploy does not derive the machine files from the build');
   assert.match(deploy, /application\/wasm/);
+});
+
+// The photograph of the original board, and its credit, from the registry.
+const figure = (() => {
+  const at = html.indexOf('<figure class="photo"');
+  return at < 0 ? '' : html.slice(at, html.indexOf('</figure>', at) + '</figure>'.length);
+})();
+const decode = (t) => t.replace(/&amp;/g, '&').replace(/&#39;/g, "'").replace(/&quot;/g, '"');
+
+test('the page shows the registry\'s photograph of the original, from this site, with its alt text and its size set', () => {
+  assert.ok(kim.photo, 'the KIM-1 has no photograph in the registry');
+  assert.ok(figure, 'the page has no photograph');
+  const img = /<img\b[^>]*>/.exec(figure)?.[0] ?? '';
+  const stem = kim.photo.file.replace(/\.[a-z]+$/, '');
+  assert.match(img, new RegExp(`src="/_astro/${stem}\\.[\\w-]+\\.webp"`), 'the photograph is not served from this site');
+  assert.match(figure, new RegExp(`<source srcset="/_astro/${stem}\\.[^"]+\\.avif 360w`), 'no AVIF copies in the srcset');
+  assert.equal(decode(/\balt="([^"]*)"/.exec(img)?.[1] ?? ''), kim.photo.alt);
+  // Its box is reserved before it loads: no layout shift.
+  assert.match(img, /\bwidth="\d+"/);
+  assert.match(img, /\bheight="\d+"/);
+  assert.doesNotMatch(img, /data-generated/, 'a photograph is not a generated image');
+  assert.doesNotMatch(figure, /src="https?:/, 'the photograph is hot-linked');
+});
+
+test('the photograph is credited on the page from the registry: its author, a link to its source and the licence as the source states it', () => {
+  const caption = /<figcaption class="figure-caption">([\s\S]*?)<\/figcaption>/.exec(figure)?.[1] ?? '';
+  // visibleText puts a space where a tag was; a link before a full stop leaves one there.
+  const text = visibleText(caption).replace(/\s+([.,])/g, '$1');
+  assert.match(text, /^Photograph: /, 'the caption does not call it a photograph');
+  assert.doesNotMatch(text, /illustration/i);
+  assert.ok(text.includes(`By ${kim.photo.author}.`), 'the author is not credited');
+  assert.ok(caption.includes(`href="${kim.photo.sourceUrl}"`), 'the source is not linked');
+  assert.ok(text.includes(kim.photo.licence === null ? 'Licence: no licence stated.' : `Licence: ${kim.photo.licence}.`), 'the licence is not given as the source states it');
+  if (kim.photo.licenceUrl) assert.ok(caption.includes(`href="${kim.photo.licenceUrl}"`), 'the licence is not linked');
+  assert.match(text, /taken \d{1,2} \w+ \d{4}|taken \w+ \d{4}|taken \d{4}/, 'the caption does not say when it was taken');
 });

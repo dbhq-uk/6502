@@ -133,6 +133,10 @@ const ON = {
   '.kim1-status': ['iron'],
   '.kim1-speed': ['iron'],
   '.steps kbd': ['iron'],
+  // The machine page's 3D model: its label sits on an iron tag over the canvas,
+  // and its status line on the black canvas.
+  '.model-tag': ['iron'],
+  '.model-status': ['void'],
 };
 
 test('every text colour rule is placed on a surface, and reaches AA on each one it is set on', () => {

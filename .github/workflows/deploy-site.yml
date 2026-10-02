@@ -152,10 +152,10 @@ jobs:
           PASS=$(count pass); FAILED=$(count fail)
           echo "pass=${PASS:-unread} fail=${FAILED:-unread}"
           [ "${FAILED:-1}" = "0" ]
-          # 158 tests as at 2 Oct 2026. Adding tests is expected; losing them is
+          # 177 tests as at 2 Oct 2026. Adding tests is expected; losing them is
           # the failure this floor catches. Raise the number when the suite grows,
           # here and in the same step of validate.yml, which must hold the same number.
-          [ "${PASS:-0}" -ge 158 ]
+          [ "${PASS:-0}" -ge 177 ]
 
       - name: Deploy to Cloudflare Pages
         working-directory: site
@@ -214,10 +214,13 @@ jobs:
       # analytics.js means no analytics and nothing to opt out of. A 404 on
       # consent.js is worse: the notice never shows and Cookie settings stays
       # hidden, so a visitor who is being counted has no way to say no.
+      # models/kim-1.js is loaded by model-loader.js only when a visitor reaches
+      # the model, so no page names it; site/tests/model.test.mjs requires every
+      # model in src/models/models.mjs to be in this list.
       - name: The machine-readable files must be serving
         run: |
           set -euo pipefail
-          for f in sitemap-index.xml sitemap-0.xml robots.txt analytics.js consent.js machines-table.js table-sort.js chip.js kim-1.js; do
+          for f in sitemap-index.xml sitemap-0.xml robots.txt analytics.js consent.js machines-table.js table-sort.js chip.js kim-1.js model-loader.js models/kim-1.js; do
             CODE=$(curl -s --max-time 20 --retry 3 --retry-delay 5 -o /dev/null -w "%{http_code}" "https://6502.dbhq.uk/${f}?cb=${GITHUB_SHA}")
             echo "${f} -> ${CODE}"
             [ "$CODE" = "200" ]
