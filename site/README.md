@@ -45,7 +45,7 @@ Nothing on the site is typed twice. The repository is the source.
 | Tests passing, variants, suites | `src/data/results.json`, made from the test run |
 | The speed figures | `src/data/measurements.json`, made by `bench/collect-measurements.mjs` and committed as a dated record |
 | A running machine's page | `src/pages/machines/[id].astro` with the machine's panel (the KIM-1's is `src/components/Kim1Panel.astro`, driven by `public/kim-1.js`), its "try it" program from `machines/<id>/try-it.json`, which its acceptance test also runs, and its rights from the registry |
-| A machine's WebAssembly and ROM | `public/machines/<id>/`, made by `scripts/build-machines.mjs` and never committed |
+| A machine's WebAssembly and ROM | `public/machines/<id>/`, made by `scripts/build-machines.mjs` and never committed (the ROM it copies in is committed, under `roms/`) |
 
 **A machine counts as implemented only when it runs in the browser and passes an
 automated test in CI.** In the registry that is `status: "running"` with an

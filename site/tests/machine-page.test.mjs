@@ -44,7 +44,7 @@ test('the WebAssembly the page loads was built into the site: the loader, the ru
   }
 });
 
-test("the monitor ROM was fetched into the site, and each half's SHA-256 is the pinned one", () => {
+test("the monitor ROM was copied into the site from roms/, and each half's SHA-256 is the pinned one", () => {
   for (const rom of kim1Roms()) {
     const file = path.join(files, rom.file);
     assert.ok(fs.existsSync(file), `${rom.file} was not built into the site`);

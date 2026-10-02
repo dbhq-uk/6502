@@ -44,26 +44,26 @@ bug.
 BBC Micro, the NES or any other machine. Machine behaviour, including stalls
 and slow devices, lives in that machine's bus.
 
-**3. Nothing third-party is committed here, and nothing depends on a third
-party's server.** No ROM, no game, no test data and no third-party test program
-is committed to this repository (some of it is GPL and this repository is MIT).
-Tests and the build download what they need from a pinned commit and check it
-against a recorded hash, **and the source of every download is a repository in
-the `dbhq-uk` organisation**: a fork of the original (Harte's SingleStepTests,
-Dormann's tests, `nestest`, `perfect6502`) or a mirror we keep (`dbhq-uk/6502-roms`,
-which records where each ROM came from and what is known of its rights). Dan, 2
-October 2026: CI must not depend on external sources. A new input is forked or
-mirrored first, then pinned. `site/tests/mirrors.test.mjs` fails on any fetch from
-another host. This covers data inputs; package registries and GitHub Actions are
-a separate question, pinned and locked as before.
+**3. Nothing depends on a third party's server, and what is too big or too
+restricted to commit is forked.** Dan, 2 October 2026: CI must not depend on
+external sources. System ROMs are committed under `roms/`, with where each came
+from and what is known of its rights in `roms/README.md` (rule 4). Test data and
+programs that are large, or GPL (this repository is MIT), are not committed: the
+tests download them from a pinned commit, check a recorded hash, and the source is
+**a repository in the `dbhq-uk` organisation**, a fork of the original (Harte's
+SingleStepTests, Dormann's tests, `nestest`, `perfect6502`). A new input is
+committed or forked first, then pinned. `site/tests/mirrors.test.mjs` fails on any
+fetch from another host. Games and commercial software are never committed. This
+covers data inputs; package registries and GitHub Actions are a separate question,
+pinned and locked as before.
 
 **4. A machine's system ROM is used when its rights are documented.** Dan, 1 October 2026:
 "if it's documented we do it", for every machine. The documentation is the
 machine's `rights` field in `machines/registry.json` and a section in its
-journal entry: who holds the ROM, where our copy comes from (a pinned URL and a
+journal entry: who holds the ROM, where our copy comes from (the original URL and a
 sha256), and what is known about permission, including when nothing could be
-found. The ROM is fetched at test and build time from that pinned source and
-checked against the hash, not committed to this repository. **Commercial games and application
+found. The ROM is committed under `roms/` and checked against its hash every time
+it is read. **Commercial games and application
 software are still not bundled; they are load-your-own.** The site says plainly,
 on each machine's page, whose ROM it runs.
 

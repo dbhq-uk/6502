@@ -1,5 +1,5 @@
 // The KIM-1 monitor ROM's pins, read from the one place they are written:
-// tests/Dbhq.Cpu6502.TestSupport/Pins.cs, which the tests fetch them by. The
+// tests/Dbhq.Cpu6502.TestSupport/Pins.cs, which the tests read them by. The
 // build script and the site's tests read them here, so a pin changed there is
 // changed everywhere and is never typed a second time.
 import fs from 'node:fs';
@@ -15,12 +15,13 @@ export function pin(name, source = fs.readFileSync(PINS_FILE, 'utf8')) {
   return m[1];
 }
 
-/** The two monitor ROM files the KIM-1 page loads: their file names, pinned URLs and SHA-256 hashes. */
+/** The two monitor ROM files the KIM-1 page loads: their file names, repository paths, GitHub links and SHA-256 hashes. */
 export function kim1Roms(source = fs.readFileSync(PINS_FILE, 'utf8')) {
   return ['002', '003'].map((chip) => ({
     chip: `6530-${chip}`,
     file: `6530-${chip}.bin`,
-    url: pin(`Kim1Rom${chip}Url`, source),
+    path: pin(`Kim1Rom${chip}Path`, source),
+    url: `https://github.com/dbhq-uk/6502/blob/main/${pin(`Kim1Rom${chip}Path`, source)}`,
     sha256: pin(`Kim1Rom${chip}Sha256`, source),
   }));
 }

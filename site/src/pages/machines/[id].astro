@@ -69,10 +69,10 @@ const roms = machine.id === 'kim-1' ? kim1Roms() : [];
       <p>{machine.rights}</p>
       {roms.length > 0 && (
         <ul class="roms">
-          {roms.map((r) => <li>{r.chip}: <a href={r.url}>the pinned copy</a>, SHA-256 <code>{r.sha256}</code></li>)}
+          {roms.map((r) => <li>{r.chip}: <a href={r.url}>the copy in the repository</a>, SHA-256 <code>{r.sha256}</code></li>)}
         </ul>
       )}
-      <p>The ROM is not in the repository. It is fetched from that address when the site is built, checked against its hash, and served from this site beside the emulator.</p>
+      <p>The ROM is kept in the repository, in <code>roms/</code>, with where it came from. It is checked against its hash when the site is built, and served from this site beside the emulator.</p>
       </div>
     </div>
   </section>
