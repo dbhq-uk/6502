@@ -148,7 +148,6 @@ public class BbcBusTests
         Assert.Equal(0xFE, bus.Read(0xFEA0)); // a fast device: the high byte of the address
         Assert.Equal(0xFE, bus.Read(0xFE20));
         Assert.Equal(0x00, bus.Read(0xFEC0)); // a slow device
-        Assert.Equal(0x00, bus.Read(0xFE6C)); // the user VIA, not yet fitted
         Assert.Equal(0, bus.Read(0xFEE0) & 1); // the Tube probe: bit 0 clear means no Tube
         Assert.Equal(0, bus.Read(0xFEC0) & 0x40); // the ADC busy flag, which via.md s2.5 needs clear
     }
@@ -307,5 +306,60 @@ public class BbcBusTests
         bus.Write(0xFE48, 0x00);
 
         Assert.Equal(6, bus.Cycles - start);
+    }
+
+    [Fact]
+    public void ReadModifyWriteOnASlowAddressFromAnOddCountCostsSeven()
+    {
+        // ROL $FE48 from an odd count: the read waits two and costs 3, which leaves the count
+        // even, so each write then costs 2 (bus.md section 2b).
+        var bus = NewBus();
+        AlignTo(bus, 1);
+
+        Assert.Equal(3, Cost(bus, () => bus.Read(0xFE48)));
+        Assert.Equal(2, Cost(bus, () => bus.Write(0xFE48, 0x00)));
+        Assert.Equal(2, Cost(bus, () => bus.Write(0xFE48, 0x00)));
+    }
+
+    /// <summary>A bus that records, at the start of every cycle, what the chips can see.</summary>
+    private sealed class WatchingBus() : BbcBus(new BbcRoms(Os, Basic, Dfs))
+    {
+        public List<int> SlotsSeen { get; } = [];
+
+        public List<byte> SystemIerSeen { get; } = [];
+
+        protected override void Tick()
+        {
+            SlotsSeen.Add(RomSlot);
+            SystemIerSeen.Add(SystemVia.Peek(0xE));
+            base.Tick();
+        }
+    }
+
+    [Fact]
+    public void TheChipsTickBeforeTheAccessOfTheirCycleSoTheySeeTheOldValue()
+    {
+        var bus = new WatchingBus();
+
+        bus.Write(0xFE30, 0x0F);
+        Assert.Equal([0], bus.SlotsSeen);
+        Assert.Equal(15, bus.RomSlot);
+
+        bus.SlotsSeen.Clear();
+        bus.Write(0xFE30, 0x0E);
+        Assert.Equal([15], bus.SlotsSeen);
+
+        while ((bus.Cycles & 1) != 1)
+        {
+            bus.Read(0x0000);
+        }
+        bus.SystemIerSeen.Clear();
+        bus.Write(0xFE4E, 0xF2); // three cycles from an odd count, all of them before the write
+        Assert.Equal([0x80, 0x80, 0x80], bus.SystemIerSeen);
+        Assert.Equal(0xF2, bus.SystemVia.Peek(0xE));
+
+        bus.SystemIerSeen.Clear();
+        bus.Read(0x0000);
+        Assert.Equal([0xF2], bus.SystemIerSeen);
     }
 }

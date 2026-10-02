@@ -31,9 +31,13 @@ namespace Dbhq.Machines.BbcMicro;
 /// (section 6), so the count begins at zero, which is even.
 /// </para>
 /// <para>
-/// Nothing yet ticks: the chips arrive task by task and each is called from
-/// <see cref="Tick"/> and from the decode in <see cref="ReadSheila"/> and
-/// <see cref="WriteSheila"/>.
+/// The chips arrive task by task and each is called from <see cref="Tick"/> and from
+/// the decode in <see cref="ReadSheila"/> and <see cref="WriteSheila"/>. The two VIAs
+/// run on the 1 MHz clock, so they tick on even values of <see cref="Cycles"/>; a
+/// stretched access always ends on one, so every VIA access has a tick before it in
+/// the same 1 MHz cycle. Their IRQ outputs share the 6502's IRQ line (via.md section
+/// 1.11), and the line is set from them at the end of each bus cycle, after its
+/// access, never between a tick and the access that follows it.
 /// </para>
 /// </remarks>
 public class BbcBus : IBus
@@ -43,13 +47,31 @@ public class BbcBus : IBus
     private readonly byte[] _basic;
     private readonly byte[] _dfs;
 
-    public BbcBus(BbcRoms roms)
+    public BbcBus(BbcRoms roms, BbcOptions? options = null)
     {
         ArgumentNullException.ThrowIfNull(roms);
         _os = roms.Os;
         _basic = roms.Basic;
         _dfs = roms.Dfs;
+        Keyboard = new BbcKeyboard((options ?? new BbcOptions()).StartupMode);
+        SystemVia = new SystemVia(Keyboard);
+        UserVia = new UserVia();
     }
+
+    /// <summary>The keyboard, with its start-up links set from the options.</summary>
+    public BbcKeyboard Keyboard { get; }
+
+    /// <summary>The system VIA at $FE40-$FE5F.</summary>
+    public SystemVia SystemVia { get; }
+
+    /// <summary>The user VIA at $FE60-$FE7F.</summary>
+    public UserVia UserVia { get; }
+
+    /// <summary>The CPU whose IRQ line the VIAs drive.</summary>
+    public Cpu? Cpu { get; set; }
+
+    /// <summary>The 6502's IRQ line as the chips drive it: the OR of both VIAs. The ACIA is absent.</summary>
+    public bool Irq => SystemVia.Irq || UserVia.Irq;
 
     /// <summary>2 MHz CPU cycles since power on, stretch cycles included.</summary>
     public long Cycles { get; private set; }
@@ -61,7 +83,9 @@ public class BbcBus : IBus
     {
         Stretch(address);
         Cycle();
-        return Decode(address, sideEffects: true);
+        byte value = Decode(address, sideEffects: true);
+        DriveIrq();
+        return value;
     }
 
     public void Write(ushort address, byte value)
@@ -80,6 +104,28 @@ public class BbcBus : IBus
 
         // $8000-$FBFF and $FF00-$FFFF are ROM, and FRED and JIM have nothing fitted:
         // a write goes nowhere.
+        DriveIrq();
+    }
+
+    /// <summary>
+    /// The power-on reset: both VIAs. The latch IC32 and the ROM latch are not reset
+    /// (via.md section 3(a), bus.md section 6 item 4).
+    /// </summary>
+    public void PowerOnReset()
+    {
+        SystemVia.Reset();
+        UserVia.Reset();
+        DriveIrq();
+    }
+
+    /// <summary>
+    /// What BREAK resets here: the user VIA, and not the system VIA, which only the power-on
+    /// circuit resets, so the OS can tell the two apart from its IER (bus.md section 5).
+    /// </summary>
+    public void BreakReset()
+    {
+        UserVia.Reset();
+        DriveIrq();
     }
 
     /// <summary>Reads memory without a bus cycle: for tests and debuggers, never for the CPU.</summary>
@@ -96,9 +142,26 @@ public class BbcBus : IBus
         _ram[address] = value;
     }
 
-    /// <summary>One CPU cycle for every chip but the CPU. Empty until the chips are added.</summary>
+    /// <summary>One CPU cycle for every chip but the CPU.</summary>
     protected internal virtual void Tick()
     {
+        if ((Cycles & 1) == 0)
+        {
+            SystemVia.Tick();
+            UserVia.Tick();
+        }
+    }
+
+    /// <summary>
+    /// Sets the CPU's IRQ line from the chips. Called once a cycle's access is over, because a
+    /// VIA's IRQ can rise in the tick that starts a cycle and fall at an acknowledge in it.
+    /// </summary>
+    private void DriveIrq()
+    {
+        if (Cpu is not null)
+        {
+            Cpu.Irq = Irq;
+        }
     }
 
     /// <summary>
@@ -186,6 +249,10 @@ public class BbcBus : IBus
     /// </summary>
     private byte ReadSheila(int offset) => offset switch
     {
+        // A4 is not decoded, so each VIA's sixteen registers repeat in the upper half of its
+        // block (bus.md section 1c).
+        >= 0x40 and <= 0x5F => SystemVia.Read(offset & 0x0F),
+        >= 0x60 and <= 0x7F => UserVia.Read(offset & 0x0F),
         _ => AbsentSheila(offset),
     };
 
@@ -198,12 +265,20 @@ public class BbcBus : IBus
                 // Write only, and the whole block of sixteen is the one latch (S1 s.17, s.21).
                 RomSlot = value & 0x0F;
                 break;
+            case >= 0x40 and <= 0x5F:
+                SystemVia.Write(offset & 0x0F, value);
+                break;
+            case >= 0x60 and <= 0x7F:
+                UserVia.Write(offset & 0x0F, value);
+                break;
         }
     }
 
     /// <summary>A read with no side effect. Reading SHEILA changes some chips, so each chip says what its peek is.</summary>
     private byte PeekSheila(int offset) => offset switch
     {
+        >= 0x40 and <= 0x5F => SystemVia.Peek(offset & 0x0F),
+        >= 0x60 and <= 0x7F => UserVia.Peek(offset & 0x0F),
         _ => AbsentSheila(offset),
     };
 

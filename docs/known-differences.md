@@ -195,3 +195,31 @@ with no cycle count to test against, and some measured quirks are not built:
 **How the tests treat it.** The coincident acknowledge for timer 1 is
 `Example09`, from the real-machine result. The rest is pinned only where a
 test names it, and the BBC's own firmware uses none of it.
+
+## The BBC Micro: the VIAs' wiring and the keyboard, where the sources stop
+
+**What.** `SystemVia`, `UserVia` and `BbcKeyboard` follow `via.md` sections 2 and
+3, and in five places the sources give no measurement:
+
+- **The latch is strobed on writes to ORB and DDRB only.** The real board's
+  flip-flop (IC31) strobes IC32 on every write to the system VIA. The two are
+  the same while PB0 to PB3 are outputs, which the OS sets at reset and never
+  changes (`via.md` section 2.2). A program that made PB0 to PB3 inputs and then
+  wrote some other register would, on a real machine, strobe whatever the
+  floating pins read into the latch; here nothing would change.
+- **What IC32 holds at power on** is not known; its /CLR is tied high, so no
+  reset clears it. It starts at `$00`.
+- **PA7 with the keyboard disabled** (latch bit 3 high) reads 0. Nothing drives
+  it then, and the sheet recommends 0 with no speech chip; nobody measured it.
+- **Autoscan** is a counter that walks columns 0 to 15, one a microsecond, and
+  CA2 is high while the counter's column has a key down in rows 1 to 7. That is
+  the schematic's design (a 74LS163 clocked at 1 MHz), so a held key gives one
+  edge per 16 microseconds; no source measured the edge's timing.
+- **Idle levels nothing measured:** the system VIA's PB6 reads 1, and the user
+  VIA's CB1 and CB2 idle high like the rest of the user port. CB1 and CB2 on the
+  system VIA (the ADC and the light pen, not fitted) never change.
+
+**How the tests treat it.** `SystemViaTests` pins each choice that a test can
+see. The OS's own sequences (the link read, the key test at `$F02A`, the column
+test of the full scan and the CA2 interrupt) are driven through the bus as the
+ROM does them, and those are the checks that matter for the boot.

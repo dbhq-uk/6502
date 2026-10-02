@@ -156,8 +156,12 @@ public class Via6522
         _ca2Pulse = _cb2Pulse = 0;
     }
 
-    /// <summary>One 1 MHz cycle. Call it at the start of the cycle, before that cycle's access.</summary>
-    public void Tick()
+    /// <summary>
+    /// One 1 MHz cycle. Call it at the start of the cycle, before that cycle's access. A
+    /// subclass that wires the chip into a machine adds what the outside does in the cycle, after
+    /// calling this.
+    /// </summary>
+    public virtual void Tick()
     {
         _justSet = 0;
         _collided = 0;
@@ -172,50 +176,52 @@ public class Via6522
     /// <summary>Reads register 0 to 15 in the current cycle, with its side effects.</summary>
     public byte Read(int register)
     {
+        byte value = Peek(register);
         switch (register & 0xF)
         {
             case 0x0:
                 ClearFlags((byte)(FlagCb1 | (Cb2Independent ? 0 : FlagCb2)));
-                return ReadPortB();
+                break;
             case 0x1:
                 ClearFlags((byte)(FlagCa1 | (Ca2Independent ? 0 : FlagCa2)));
                 StartCa2Handshake();
-                return ReadPortA();
-            case 0x2:
-                return _ddrb;
-            case 0x3:
-                return _ddra;
+                break;
             case 0x4:
                 ClearFlags(FlagT1);
-                return (byte)_t1Counter;
-            case 0x5:
-                return (byte)(_t1Counter >> 8);
-            case 0x6:
-                return (byte)_t1Latch;
-            case 0x7:
-                return (byte)(_t1Latch >> 8);
+                break;
             case 0x8:
                 ClearFlags(FlagT2);
-                return (byte)_t2Counter;
-            case 0x9:
-                return (byte)(_t2Counter >> 8);
+                break;
             case 0xA:
                 ClearFlags(FlagSr);
-                byte sr = _sr;
                 StartShift();
-                return sr;
-            case 0xB:
-                return _acr;
-            case 0xC:
-                return _pcr;
-            case 0xD:
-                return (byte)(_ifr | ((_ifr & _ier & 0x7F) != 0 ? 0x80 : 0));
-            case 0xE:
-                return (byte)(_ier | 0x80);
-            default:
-                return ReadPortA();
+                break;
         }
+        return value;
     }
+
+    /// <summary>
+    /// What a read of register 0 to 15 would return, with none of its side effects: for tests
+    /// and debuggers, never for the CPU.
+    /// </summary>
+    public byte Peek(int register) => (register & 0xF) switch
+    {
+        0x0 => ReadPortB(),
+        0x2 => _ddrb,
+        0x3 => _ddra,
+        0x4 => (byte)_t1Counter,
+        0x5 => (byte)(_t1Counter >> 8),
+        0x6 => (byte)_t1Latch,
+        0x7 => (byte)(_t1Latch >> 8),
+        0x8 => (byte)_t2Counter,
+        0x9 => (byte)(_t2Counter >> 8),
+        0xA => _sr,
+        0xB => _acr,
+        0xC => _pcr,
+        0xD => (byte)(_ifr | ((_ifr & _ier & 0x7F) != 0 ? 0x80 : 0)),
+        0xE => (byte)(_ier | 0x80),
+        _ => ReadPortA(), // registers 1 and F
+    };
 
     /// <summary>Writes register 0 to 15 in the current cycle, with its side effects.</summary>
     public void Write(int register, byte value)
