@@ -15,7 +15,7 @@ work="$root/.testdata/perfect6502"
 out="$root/tests/Dbhq.Cpu6502.Tests/Interrupts/visual6502.txt"
 
 if [ ! -d "$work/.git" ]; then
-    git clone --quiet https://github.com/mist64/perfect6502.git "$work"
+    git clone --quiet https://github.com/dbhq-uk/perfect6502.git "$work"
 fi
 git -C "$work" fetch --quiet origin "$commit"
 git -C "$work" checkout --quiet "$commit"

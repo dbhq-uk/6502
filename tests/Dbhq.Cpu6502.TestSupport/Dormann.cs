@@ -16,7 +16,7 @@ public static partial class Dormann
     /// <param name="Success">The address of the "test passed" trap, from the listing. Null for the decimal test, which reports through its ERROR byte.</param>
     public sealed record Program(string Name, byte[] Memory, ushort Start, ushort? Success);
 
-    private const string Base = "https://raw.githubusercontent.com/Klaus2m5/6502_65C02_functional_tests/" + Pins.DormannCommit + "/";
+    private const string Base = "https://raw.githubusercontent.com/dbhq-uk/6502_65C02_functional_tests/" + Pins.DormannCommit + "/";
 
     /// <summary>The functional test: every documented instruction and mode. The 2A03 build leaves decimal mode out.</summary>
     public static Program Functional(CpuVariant variant) => Assemble(

@@ -15,7 +15,7 @@ import sys
 import urllib.request
 
 COMMIT = "2f6980a2d95757486c7bee24355c360e40e2a224"
-BASE = f"https://raw.githubusercontent.com/SingleStepTests/65x02/{COMMIT}"
+BASE = f"https://raw.githubusercontent.com/dbhq-uk/65x02/{COMMIT}"
 ROOT = os.path.join(os.path.dirname(__file__), "..", "..", ".testdata", "harte")
 CMOS = ("wdc65c02", "rockwell65c02", "synertek65c02")
 failures = 0

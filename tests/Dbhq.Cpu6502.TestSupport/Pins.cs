@@ -19,12 +19,15 @@ public static class Pins
     public const string NestestLogSha256 = "442c4dd5539c7e88b3fd73c7b732a7eadbd22b47c2cd9e58397ef147f64f6f8f";
 
     // The KIM-1 monitor ROM, MOS Technology's, as Hans Otten dumped it from
-    // real 6530-002 and 6530-003 chips, with their $00 filler bytes. The pin is
-    // the Internet Archive's copy of his files on 23 June 2025, fetched raw
-    // (id_), because his own site does not complete an HTTPS handshake. The
-    // rights position is in machines/registry.json and the KIM-1 journal entry.
-    public const string Kim1Rom002Url = "https://web.archive.org/web/20250623140338id_/http://retro.hansotten.nl/uploads/files/6530-002%20fillerbyte00.bin";
+    // real 6530-002 and 6530-003 chips, with their $00 filler bytes. It is read
+    // from our own repository, dbhq-uk/6502-roms, pinned to a commit, so the
+    // tests never depend on someone else's server (AGENTS.md rule 3). That
+    // repository records where the files came from and what is known about
+    // their rights; so do machines/registry.json and the KIM-1 journal entry.
+    // The URLs are plain literals because site/src/lib/pins.mjs reads them.
+    public const string RomsCommit = "2190204442d7e645e2c806c89ee1e043263cde44";
+    public const string Kim1Rom002Url = "https://raw.githubusercontent.com/dbhq-uk/6502-roms/2190204442d7e645e2c806c89ee1e043263cde44/kim-1/6530-002.bin";
     public const string Kim1Rom002Sha256 = "e9e5245854603cdbc0208235310db1bf6e6a75904960385baaddd38fe60ef750";
-    public const string Kim1Rom003Url = "https://web.archive.org/web/20250623140339id_/http://retro.hansotten.nl/uploads/files/6530-003%20fillerbyte00.bin";
+    public const string Kim1Rom003Url = "https://raw.githubusercontent.com/dbhq-uk/6502-roms/2190204442d7e645e2c806c89ee1e043263cde44/kim-1/6530-003.bin";
     public const string Kim1Rom003Sha256 = "f112a707188a82b87de5be78b7ffa014e18240aa08825055c90d2e6626092fd7";
 }

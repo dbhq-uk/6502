@@ -10,7 +10,7 @@ commit=2f6980a2d95757486c7bee24355c360e40e2a224
 root="$(cd "$(dirname "$0")/.." && pwd)"
 out="$root/tests/Dbhq.Cpu6502.Tests/Harte/harte.manifest"
 
-gh api "repos/SingleStepTests/65x02/git/trees/${commit}?recursive=1" --jq '
+gh api "repos/dbhq-uk/65x02/git/trees/${commit}?recursive=1" --jq '
   if .truncated then error("tree listing truncated") else . end
   | .tree[]
   | select(.type == "blob" and (.path | test("^(6502|nes6502|synertek65c02|rockwell65c02|wdc65c02)/v1/[0-9a-f]{2}\\.json$")))
