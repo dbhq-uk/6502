@@ -14,17 +14,29 @@ namespace Dbhq.Machines.BbcMicro;
 /// <b>How to drive it.</b> Call <see cref="Tick"/> at the start of every 1 MHz cycle, then
 /// make at most one <see cref="Read"/> or <see cref="Write"/> in that cycle. A read sees
 /// everything that <see cref="Tick"/> changed, which stands for the chip sampling a read at
-/// the end of the cycle (section 1.0).
+/// the end of the cycle (section 1.0). In a machine the chip is given the machine's clock
+/// instead, and the time comes from that: <see cref="BbcBus"/> never calls <see cref="Tick"/>.
+/// </para>
+/// <para>
+/// <b>Lazily, and exactly.</b> The chip does not do a cycle's work when the cycle happens. It
+/// counts the cycles owed and does them all when anything looks at it or changes it: a register
+/// access, a pin or line read, an input, a reset. Between those nothing reaches the chip from
+/// outside, so each of its parts runs on its own and can be worked out for any number of cycles
+/// at once: timer 1 counting down and going round its latch, timer 2, the shift register's count
+/// and the CA2 and CB2 pulses (<see cref="Advance"/>). <see cref="TickOnce"/> keeps the rules
+/// below one cycle at a time, for a subclass whose own part has to go a cycle at a time. The
+/// result is the same as ticking every cycle, and the test project holds the per-cycle original
+/// and compares the two cycle for cycle.
 /// </para>
 /// <para>
 /// <b>The visibility rule (section 1.9).</b> A timer or the shift register sets its flag
 /// in the middle of cycle E, so a read in E sees it set and a read in E-1 does not. Here
-/// the flag is set in the <see cref="Tick"/> that starts E, and <see cref="Irq"/> asserts
+/// the flag is set in the tick that starts E, and <see cref="Irq"/> asserts
 /// from E too. A clearing access in that same cycle E does not clear the flag, because on
 /// the real chip the set is held for the whole cycle; instead <see cref="Irq"/> asserts
 /// from the start of E+1. This is the coincident acknowledge that stardot measured on real
 /// Model Bs and Masters with Rockwell parts (section 1.9). The sheet gives it for timer 1;
-/// this class applies it to every flag set in <see cref="Tick"/> (both timers and the shift
+/// this class applies it to every flag set in <see cref="TickOnce"/> (both timers and the shift
 /// register), and not to the control lines, whose edges arrive between ticks.
 /// </para>
 /// <para>
@@ -80,8 +92,28 @@ public class Via6522
     private bool _ca2Handshake = true, _cb2Handshake = true;
     private int _ca2Pulse, _cb2Pulse;
 
+    // What the outside drives on the ports.
+    private byte _inputA = 0xFF, _inputB = 0xFF;
+
+    // The time. On its own the chip counts its Tick calls; in a machine it reads the machine's
+    // clock, which runs at 2 MHz, so its cycles are the clock's halved. _ticksDone is how many of
+    // them the state above has had.
+    private readonly BbcClock? _clock;
+    private long _ownTicks;
+    private long _ticksDone;
+    private bool _catchingUp;
+
+    /// <summary>A chip on its own, whose time is the calls to <see cref="Tick"/>.</summary>
     public Via6522()
+        : this(null)
     {
+    }
+
+    /// <summary>A chip in a machine, whose time is the machine's clock: one cycle for every two of the CPU's.</summary>
+    internal Via6522(BbcClock? clock)
+    {
+        _clock = clock;
+        _ticksDone = Now;
         Reset();
     }
 
@@ -95,13 +127,46 @@ public class Via6522
     /// What the outside drives on PA7..0. Inputs with nothing attached read 1 on a real
     /// Model B (section 1.2), so it starts at &amp;FF.
     /// </summary>
-    public byte PortAInput { get; set; } = 0xFF;
+    public byte PortAInput
+    {
+        get
+        {
+            Sync();
+            return _inputA;
+        }
+        set
+        {
+            Sync();
+            _inputA = value;
+            Wake();
+        }
+    }
 
     /// <summary>What the outside drives on PB7..0; starts at &amp;FF like port A.</summary>
-    public byte PortBInput { get; set; } = 0xFF;
+    public byte PortBInput
+    {
+        get
+        {
+            Sync();
+            return _inputB;
+        }
+        set
+        {
+            Sync();
+            _inputB = value;
+            Wake();
+        }
+    }
 
     /// <summary>The level on each port A pin: ORA where DDRA is 1, the outside where it is 0.</summary>
-    public byte PortAPins => (byte)((_ora & _ddra) | (PortAInput & ~_ddra));
+    public byte PortAPins
+    {
+        get
+        {
+            Sync();
+            return PinsA;
+        }
+    }
 
     /// <summary>
     /// The level on each port B pin, as port A; with ACR7 set PB7 is the timer 1 output,
@@ -111,8 +176,8 @@ public class Via6522
     {
         get
         {
-            byte pins = (byte)((_orb & _ddrb) | (PortBInput & ~_ddrb));
-            return TimerDrivesPb7 ? (byte)((pins & 0x7F) | (_pb7 ? 0x80 : 0)) : pins;
+            Sync();
+            return PinsB;
         }
     }
 
@@ -120,13 +185,75 @@ public class Via6522
     /// The IRQ_N line, true when asserted: some flag in IFR bits 0 to 6 is set and enabled in
     /// IER, except a flag a clearing access hit in the cycle it rose, which waits a cycle.
     /// </summary>
-    public bool Irq => (_ifr & ~_collided & _ier & 0x7F) != 0;
+    public bool Irq
+    {
+        get
+        {
+            Sync();
+            return (_ifr & ~_collided & _ier & 0x7F) != 0;
+        }
+    }
 
     /// <summary>The level CA2 drives when the PCR makes it an output; true when it is an input.</summary>
-    public bool Ca2Out => ControlOut((_pcr >> 1) & 7, _ca2Handshake);
+    public bool Ca2Out
+    {
+        get
+        {
+            Sync();
+            return ControlOut((_pcr >> 1) & 7, _ca2Handshake);
+        }
+    }
 
     /// <summary>The level CB2 drives when the PCR makes it an output; true when it is an input.</summary>
-    public bool Cb2Out => ControlOut((_pcr >> 5) & 7, _cb2Handshake);
+    public bool Cb2Out
+    {
+        get
+        {
+            Sync();
+            return ControlOut((_pcr >> 5) & 7, _cb2Handshake);
+        }
+    }
+
+    /// <summary>
+    /// The machine's CPU cycle at whose start this chip's IRQ line may next change by itself, or
+    /// <see cref="long.MaxValue"/> if it cannot until something reaches it from outside: the bus
+    /// need not look at the chip before then. The chip's cycle k is the CPU's cycle 2k.
+    /// </summary>
+    internal long NextEventCycle
+    {
+        get
+        {
+            Sync();
+            long cycles = CyclesUntilIrqMayChange();
+            return cycles == Never ? long.MaxValue : 2 * (_ticksDone + cycles);
+        }
+    }
+
+    /// <summary>The port A pins, without catching up: for the chip itself and a subclass's cycle.</summary>
+    protected byte PinsA => (byte)((_ora & _ddra) | (_inputA & ~_ddra));
+
+    /// <summary>The port B pins, without catching up.</summary>
+    protected byte PinsB
+    {
+        get
+        {
+            byte pins = (byte)((_orb & _ddrb) | (_inputB & ~_ddrb));
+            return TimerDrivesPb7 ? (byte)((pins & 0x7F) | (_pb7 ? 0x80 : 0)) : pins;
+        }
+    }
+
+    /// <summary>What the outside drives on port A, set without catching up: for a subclass's cycle.</summary>
+    protected byte InputA
+    {
+        get => _inputA;
+        set => _inputA = value;
+    }
+
+    /// <summary>The level on CA2 as the chip last saw it.</summary>
+    protected bool Ca2Level => _ca2;
+
+    /// <summary>The interrupt enable register, without catching up.</summary>
+    private protected byte Ier => _ier;
 
     private bool TimerDrivesPb7 => (_acr & 0x80) != 0;
 
@@ -148,20 +275,37 @@ public class Via6522
     /// </summary>
     public void Reset()
     {
+        Sync();
         _ora = _orb = _ddra = _ddrb = _acr = _pcr = _ifr = _ier = 0;
         _justSet = _collided = 0;
         _t1Armed = _t2Armed = false;
         _srCyclesLeft = 0;
         _ca2Handshake = _cb2Handshake = true;
         _ca2Pulse = _cb2Pulse = 0;
+        Wake();
     }
 
     /// <summary>
-    /// One 1 MHz cycle. Call it at the start of the cycle, before that cycle's access. A
-    /// subclass that wires the chip into a machine adds what the outside does in the cycle, after
-    /// calling this.
+    /// One 1 MHz cycle. Call it at the start of the cycle, before that cycle's access. Only for a
+    /// chip on its own: one in a machine takes its time from the machine's clock.
     /// </summary>
-    public virtual void Tick()
+    public void Tick()
+    {
+        if (_clock is not null)
+        {
+            throw new InvalidOperationException("This chip's time is the machine's clock.");
+        }
+
+        _ownTicks++;
+    }
+
+    /// <summary>
+    /// One cycle's work, as the chip does it at the start of the cycle: the rules from the fact
+    /// sheet, a cycle at a time. A subclass that wires the chip into a machine adds what the
+    /// outside does in the cycle, after calling this. It runs only while
+    /// <see cref="NeedsEveryCycle"/> says so; otherwise <see cref="Advance"/> does the same work.
+    /// </summary>
+    protected virtual void TickOnce()
     {
         _justSet = 0;
         _collided = 0;
@@ -176,7 +320,8 @@ public class Via6522
     /// <summary>Reads register 0 to 15 in the current cycle, with its side effects.</summary>
     public byte Read(int register)
     {
-        byte value = Peek(register);
+        Sync();
+        byte value = PeekNow(register);
         switch (register & 0xF)
         {
             case 0x0:
@@ -197,6 +342,8 @@ public class Via6522
                 StartShift();
                 break;
         }
+
+        Wake();
         return value;
     }
 
@@ -204,7 +351,13 @@ public class Via6522
     /// What a read of register 0 to 15 would return, with none of its side effects: for tests
     /// and debuggers, never for the CPU.
     /// </summary>
-    public byte Peek(int register) => (register & 0xF) switch
+    public byte Peek(int register)
+    {
+        Sync();
+        return PeekNow(register);
+    }
+
+    private byte PeekNow(int register) => (register & 0xF) switch
     {
         0x0 => ReadPortB(),
         0x2 => _ddrb,
@@ -226,6 +379,7 @@ public class Via6522
     /// <summary>Writes register 0 to 15 in the current cycle, with its side effects.</summary>
     public void Write(int register, byte value)
     {
+        Sync();
         switch (register & 0xF)
         {
             case 0x0:
@@ -310,10 +464,19 @@ public class Via6522
                 PortAWritten?.Invoke();
                 break;
         }
+
+        Wake();
     }
 
     /// <summary>The level on CA1. Sets IFR1 on the edge PCR bit 0 picks: 0 negative, 1 positive.</summary>
     public void SetCa1(bool level)
+    {
+        Sync();
+        ApplyCa1(level);
+        Wake();
+    }
+
+    private protected void ApplyCa1(bool level)
     {
         if (level == _ca1)
         {
@@ -328,7 +491,7 @@ public class Via6522
         SetFlag(FlagCa1);
         if ((_acr & 0x01) != 0)
         {
-            _latchedA = PortAPins;
+            _latchedA = PinsA;
         }
         if (Ca2Mode == 4)
         {
@@ -338,6 +501,13 @@ public class Via6522
 
     /// <summary>The level on CA2. In the input modes sets IFR0 on the edge PCR bits 3 to 1 pick.</summary>
     public void SetCa2(bool level)
+    {
+        Sync();
+        ApplyCa2(level);
+        Wake();
+    }
+
+    private protected void ApplyCa2(bool level)
     {
         if (level == _ca2)
         {
@@ -353,6 +523,13 @@ public class Via6522
     /// <summary>The level on CB1. Sets IFR4 on the edge PCR bit 4 picks: 0 negative, 1 positive.</summary>
     public void SetCb1(bool level)
     {
+        Sync();
+        ApplyCb1(level);
+        Wake();
+    }
+
+    private protected void ApplyCb1(bool level)
+    {
         if (level == _cb1)
         {
             return;
@@ -366,7 +543,7 @@ public class Via6522
         SetFlag(FlagCb1);
         if ((_acr & 0x02) != 0)
         {
-            _latchedB = PortBPins;
+            _latchedB = PinsB;
         }
         if (Cb2Mode == 4)
         {
@@ -376,6 +553,13 @@ public class Via6522
 
     /// <summary>The level on CB2. In the input modes sets IFR3 on the edge PCR bits 7 to 5 pick.</summary>
     public void SetCb2(bool level)
+    {
+        Sync();
+        ApplyCb2(level);
+        Wake();
+    }
+
+    private protected void ApplyCb2(bool level)
     {
         if (level == _cb2)
         {
@@ -410,7 +594,7 @@ public class Via6522
     /// <summary>
     /// IRA reads the pins (section 1.3), or what CA1's active edge latched when ACR0 is set.
     /// </summary>
-    private byte ReadPortA() => (_acr & 0x01) != 0 ? _latchedA : PortAPins;
+    private byte ReadPortA() => (_acr & 0x01) != 0 ? _latchedA : PinsA;
 
     /// <summary>
     /// IRB reads ORB for output bits and the pins for input bits (section 1.3), the pins as CB1
@@ -418,7 +602,7 @@ public class Via6522
     /// </summary>
     private byte ReadPortB()
     {
-        byte inputs = (_acr & 0x02) != 0 ? _latchedB : PortBPins;
+        byte inputs = (_acr & 0x02) != 0 ? _latchedB : PinsB;
         byte value = (byte)((_orb & _ddrb) | (inputs & ~_ddrb));
         return TimerDrivesPb7 ? (byte)((value & 0x7F) | (_pb7 ? 0x80 : 0)) : value;
     }
@@ -503,7 +687,7 @@ public class Via6522
             // Pulse counting (section 1.5, WDC 2.10): one count for each PB6 pulse that is low
             // at the start of a cycle, and IFR5 when the count reaches zero. Seeing a pulse as a
             // high-to-low change between two ticks is [inferring]; nothing on the BBC pulses PB6.
-            bool high = (PortBPins & 0x40) != 0;
+            bool high = (PinsB & 0x40) != 0;
             if (!high && _pb6WasHigh)
             {
                 _t2Counter--;
@@ -518,7 +702,7 @@ public class Via6522
             return;
         }
 
-        _pb6WasHigh = (PortBPins & 0x40) != 0;
+        _pb6WasHigh = (PinsB & 0x40) != 0;
         if (_t2Hold)
         {
             _t2Hold = false;
@@ -585,4 +769,315 @@ public class Via6522
         _collided |= (byte)(flags & _justSet);
         _ifr &= (byte)~(flags & ~_justSet);
     }
+
+    /// <summary>The chip's cycles so far: its own <see cref="Tick"/> calls, or the machine's clock halved.</summary>
+    private long Now => _clock is null ? _ownTicks : _clock.Cycles >> 1;
+
+    /// <summary>
+    /// Does the cycles owed, so the state is what per-cycle ticking would have made it. Every
+    /// member that shows or changes the chip calls this first, and the chip's own cycle work uses
+    /// only members that do not, so catching up never starts inside itself.
+    /// </summary>
+    private protected void Sync()
+    {
+        long now = Now;
+        if (now != _ticksDone)
+        {
+            CatchUp(now);
+        }
+    }
+
+    private void CatchUp(long now)
+    {
+        if (_catchingUp)
+        {
+            throw new InvalidOperationException("A cycle's work looked at the chip through a member that catches up.");
+        }
+
+        _catchingUp = true;
+        long due = now - _ticksDone;
+        if (NeedsEveryCycle)
+        {
+            for (; due > 0; due--)
+            {
+                TickOnce();
+            }
+        }
+        else
+        {
+            Advance(due);
+        }
+
+        _ticksDone = now;
+        _catchingUp = false;
+    }
+
+    /// <summary>
+    /// True while a subclass's own part of the cycle cannot be worked out for many cycles at once,
+    /// so catching up has to go through <see cref="TickOnce"/> a cycle at a time.
+    /// </summary>
+    protected virtual bool NeedsEveryCycle => false;
+
+    /// <summary>
+    /// Does <paramref name="cycles"/> cycles (one or more) at once: exactly what that many calls
+    /// of <see cref="TickOnce"/> would do, with nothing from outside in between. A flag set in the
+    /// last of them counts as just set, for the coincident acknowledge.
+    /// </summary>
+    protected virtual void Advance(long cycles)
+    {
+        _justSet = 0;
+        _collided = 0;
+        AdvanceTimer1(cycles);
+        AdvanceTimer2(cycles);
+        AdvanceShiftRegister(cycles);
+        _ca2Handshake = AdvancePulse(ref _ca2Pulse, _ca2Handshake, cycles);
+        _cb2Handshake = AdvancePulse(ref _cb2Pulse, _cb2Handshake, cycles);
+    }
+
+    /// <summary>
+    /// Timer 1 over n cycles. A hold cycle, then a reload cycle if one is due, then the counter
+    /// counts down to 0, and the cycle that finds it at 0 wraps it to &amp;FFFF (and flags, if it
+    /// is free-running or armed). From there it goes round and round its latch: a reload cycle,
+    /// the latch's worth of counting and a wrap, so latch + 2 cycles a turn.
+    /// </summary>
+    private void AdvanceTimer1(long cycles)
+    {
+        long left = cycles;
+        if (_t1Hold)
+        {
+            _t1Hold = false;
+            if (--left == 0)
+            {
+                return;
+            }
+        }
+
+        if (_t1Reload)
+        {
+            _t1Reload = false;
+            _t1Counter = _t1Latch;
+            if (--left == 0)
+            {
+                return;
+            }
+        }
+
+        if (left <= _t1Counter)
+        {
+            _t1Counter = (ushort)(_t1Counter - left);
+            return;
+        }
+
+        left -= _t1Counter + 1L;
+        WrapTimer1(lastCycle: left == 0);
+        if (left == 0)
+        {
+            return;
+        }
+
+        long turn = _t1Latch + 2L;
+        long wraps = left / turn;
+        long rest = left % turn;
+        if (wraps > 0 && Timer1FreeRuns)
+        {
+            // A one-shot timer is not armed after its first wrap, so later ones flag nothing and
+            // leave PB7 alone; free-running, each toggles PB7 and flags.
+            if ((wraps & 1) != 0)
+            {
+                _pb7 = !_pb7;
+            }
+            SetFlagAt(FlagT1, lastCycle: rest == 0);
+        }
+
+        if (rest > 0)
+        {
+            _t1Reload = false;
+            _t1Counter = (ushort)(_t1Latch - (rest - 1));
+        }
+    }
+
+    /// <summary>The cycle that finds timer 1 at 0, as <see cref="TickTimer1"/> does it.</summary>
+    private void WrapTimer1(bool lastCycle)
+    {
+        _t1Counter = 0xFFFF;
+        _t1Reload = true;
+        if (Timer1FreeRuns)
+        {
+            _pb7 = !_pb7;
+            SetFlagAt(FlagT1, lastCycle);
+        }
+        else if (_t1Armed)
+        {
+            _pb7 = true;
+            SetFlagAt(FlagT1, lastCycle);
+        }
+        _t1Armed = false;
+    }
+
+    /// <summary>
+    /// Timer 2 over n cycles. Counting pulses, only the first cycle can count, because PB6 does
+    /// not move between accesses. Timed, a hold cycle, then the count down to 0, the wrap to
+    /// &amp;FFFF (which flags if armed), and on round from &amp;FFFF without a reload.
+    /// </summary>
+    private void AdvanceTimer2(long cycles)
+    {
+        bool high = (PinsB & 0x40) != 0;
+        if (Timer2CountsPulses)
+        {
+            if (!high && _pb6WasHigh)
+            {
+                _t2Counter--;
+                if (_t2Counter == 0 && _t2Armed)
+                {
+                    _t2Armed = false;
+                    SetFlagAt(FlagT2, lastCycle: cycles == 1);
+                }
+            }
+            _pb6WasHigh = high;
+            _t2Hold = false;
+            return;
+        }
+
+        _pb6WasHigh = high;
+        long left = cycles;
+        if (_t2Hold)
+        {
+            _t2Hold = false;
+            if (--left == 0)
+            {
+                return;
+            }
+        }
+
+        if (left <= _t2Counter)
+        {
+            _t2Counter = (ushort)(_t2Counter - left);
+            return;
+        }
+
+        left -= _t2Counter + 1L;
+        if (_t2Armed)
+        {
+            _t2Armed = false;
+            SetFlagAt(FlagT2, lastCycle: left == 0);
+        }
+        _t2Counter = (ushort)(0xFFFF - left);
+    }
+
+    /// <summary>The shift register's count over n cycles: the eight bits and the flag come in the cycle it reaches 0.</summary>
+    private void AdvanceShiftRegister(long cycles)
+    {
+        if (_srCyclesLeft == 0)
+        {
+            return;
+        }
+
+        if (cycles < _srCyclesLeft)
+        {
+            _srCyclesLeft -= (int)cycles;
+            return;
+        }
+
+        bool last = cycles == _srCyclesLeft;
+        _srCyclesLeft = 0;
+        for (int bit = 0; bit < 8; bit++)
+        {
+            _sr = (byte)((_sr << 1) | (_cb2 ? 1 : 0));
+        }
+        SetFlagAt(FlagSr, last);
+    }
+
+    /// <summary>A CA2 or CB2 pulse over n cycles: the line comes back high in the cycle the count reaches 0.</summary>
+    private static bool AdvancePulse(ref int pulse, bool level, long cycles)
+    {
+        if (pulse == 0)
+        {
+            return level;
+        }
+
+        if (cycles >= pulse)
+        {
+            pulse = 0;
+            return true;
+        }
+
+        pulse -= (int)cycles;
+        return level;
+    }
+
+    private void SetFlagAt(byte flag, bool lastCycle)
+    {
+        _ifr |= flag;
+        if (lastCycle)
+        {
+            _justSet |= flag;
+        }
+    }
+
+    /// <summary>Stands for "not until something reaches the chip from outside".</summary>
+    private protected const long Never = long.MaxValue;
+
+    /// <summary>
+    /// How many cycles from now until the IRQ line may change by itself: the cycle whose start
+    /// may change it, counting the next cycle as 1, or <see cref="Never"/>. A raised line stays
+    /// up until an access clears a flag, because only an access clears one. A low line can rise
+    /// when a coincident acknowledge's wait ends, or in the cycle an enabled flag is set.
+    /// </summary>
+    private long CyclesUntilIrqMayChange()
+    {
+        if (_collided != 0)
+        {
+            return 1;
+        }
+
+        if ((_ifr & _ier & 0x7F) != 0)
+        {
+            return Never;
+        }
+
+        return CyclesUntilEnabledFlag();
+    }
+
+    /// <summary>
+    /// The first cycle from now in which a flag enabled in IER may be set, or <see cref="Never"/>.
+    /// A subclass adds the flags its own part sets.
+    /// </summary>
+    private protected virtual long CyclesUntilEnabledFlag()
+    {
+        long cycles = Never;
+        if ((_ier & FlagT1) != 0 && (Timer1FreeRuns || _t1Armed))
+        {
+            long count = _t1Reload ? 1L + _t1Latch : _t1Counter;
+            cycles = (_t1Hold ? 1 : 0) + count + 1;
+        }
+
+        if ((_ier & FlagT2) != 0)
+        {
+            if (Timer2CountsPulses)
+            {
+                if (_pb6WasHigh && (PinsB & 0x40) == 0)
+                {
+                    cycles = 1;
+                }
+            }
+            else if (_t2Armed)
+            {
+                cycles = Math.Min(cycles, (_t2Hold ? 1 : 0) + _t2Counter + 1L);
+            }
+        }
+
+        if ((_ier & FlagSr) != 0 && _srCyclesLeft != 0)
+        {
+            cycles = Math.Min(cycles, _srCyclesLeft);
+        }
+
+        return cycles;
+    }
+
+    /// <summary>
+    /// Tells the machine to look at the chips again at the end of its next cycle: something from
+    /// outside the chip's own counting changed it, so its IRQ line or its next event may have
+    /// moved. On its own the chip has nobody to tell.
+    /// </summary>
+    private protected void Wake() => _clock?.WakeAt(_clock.Cycles + 1);
 }

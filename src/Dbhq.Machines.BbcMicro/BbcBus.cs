@@ -31,13 +31,24 @@ namespace Dbhq.Machines.BbcMicro;
 /// (section 6), so the count begins at zero, which is even.
 /// </para>
 /// <para>
-/// The chips arrive task by task and each is called from <see cref="Tick"/> and from
-/// the decode in <see cref="ReadSheila"/> and <see cref="WriteSheila"/>. The two VIAs
-/// run on the 1 MHz clock, so they tick on even values of <see cref="Cycles"/>; a
-/// stretched access always ends on one, so every VIA access has a tick before it in
-/// the same 1 MHz cycle. Their IRQ outputs share the 6502's IRQ line (via.md section
-/// 1.11), and the line is set from them at the end of each bus cycle, after its
-/// access, never between a tick and the access that follows it.
+/// The chips arrive task by task and each is reached from the decode in
+/// <see cref="ReadSheila"/> and <see cref="WriteSheila"/>. The two VIAs run on the 1 MHz
+/// clock, so they tick on even values of <see cref="Cycles"/>; a stretched access always ends
+/// on one, so every VIA access has a tick before it in the same 1 MHz cycle. Their IRQ outputs
+/// share the 6502's IRQ line (via.md section 1.11), and the line is set from them at the end of
+/// a bus cycle, after its access, never between a tick and the access that follows it.
+/// </para>
+/// <para>
+/// <b>The chips run lazily, and the bus does no work for them on most cycles</b> (task 6b).
+/// Each chip reads the time from the machine's clock and does the cycles it owes when anything
+/// looks at it, so a VIA access sees exactly the ticks before it, as if every cycle had ticked
+/// it. The CPU's IRQ line can only change when a chip is accessed, when it is changed from
+/// outside, or on a cycle the chip itself names in advance (a timer running out, a flag, a key):
+/// that is the event horizon, <see cref="BbcClock.NextEvent"/>. After each access the bus
+/// compares the cycle count with it, and only when it is reached, or a chip was accessed, does
+/// it bring the chips up to date, set the IRQ line and ask each chip for its next event
+/// (<see cref="Service"/>). A chip added later joins in the same three places: the decode, the
+/// minimum in <see cref="Service"/>, and the resets.
 /// </para>
 /// </remarks>
 public class BbcBus : IBus
@@ -48,6 +59,8 @@ public class BbcBus : IBus
     private readonly byte[] _dfs;
     private readonly Crtc6845Stub _crtc = new();
     private readonly VideoUlaStub _videoUla = new();
+    private readonly BbcClock _clock = new();
+    private Cpu? _cpu;
 
     public BbcBus(BbcRoms roms, BbcOptions? options = null)
     {
@@ -56,8 +69,8 @@ public class BbcBus : IBus
         _basic = roms.Basic;
         _dfs = roms.Dfs;
         Keyboard = new BbcKeyboard((options ?? new BbcOptions()).StartupMode);
-        SystemVia = new SystemVia(Keyboard);
-        UserVia = new UserVia();
+        SystemVia = new SystemVia(Keyboard, _clock);
+        UserVia = new UserVia(_clock);
     }
 
     /// <summary>The keyboard, with its start-up links set from the options.</summary>
@@ -69,14 +82,22 @@ public class BbcBus : IBus
     /// <summary>The user VIA at $FE60-$FE7F.</summary>
     public UserVia UserVia { get; }
 
-    /// <summary>The CPU whose IRQ line the VIAs drive.</summary>
-    public Cpu? Cpu { get; set; }
+    /// <summary>The CPU whose IRQ line the VIAs drive. The line is set at the end of the next access.</summary>
+    public Cpu? Cpu
+    {
+        get => _cpu;
+        set
+        {
+            _cpu = value;
+            _clock.WakeAt(_clock.Cycles + 1);
+        }
+    }
 
     /// <summary>The 6502's IRQ line as the chips drive it: the OR of both VIAs. The ACIA is absent.</summary>
     public bool Irq => SystemVia.Irq || UserVia.Irq;
 
     /// <summary>2 MHz CPU cycles since power on, stretch cycles included.</summary>
-    public long Cycles { get; private set; }
+    public long Cycles => _clock.Cycles;
 
     /// <summary>The paged ROM latch, 0 to 15. Slot 15 is BASIC and slot 14 the DFS.</summary>
     public int RomSlot { get; private set; }
@@ -84,16 +105,19 @@ public class BbcBus : IBus
     public byte Read(ushort address)
     {
         Stretch(address);
-        Cycle();
+        _clock.Cycles++;
         byte value = Decode(address, sideEffects: true);
-        DriveIrq();
+        if (_clock.Cycles >= _clock.NextEvent)
+        {
+            Service();
+        }
         return value;
     }
 
     public void Write(ushort address, byte value)
     {
         Stretch(address);
-        Cycle();
+        _clock.Cycles++;
         switch (address >> 12)
         {
             case < 8:
@@ -106,7 +130,10 @@ public class BbcBus : IBus
 
         // $8000-$FBFF and $FF00-$FFFF are ROM, and FRED and JIM have nothing fitted:
         // a write goes nowhere.
-        DriveIrq();
+        if (_clock.Cycles >= _clock.NextEvent)
+        {
+            Service();
+        }
     }
 
     /// <summary>
@@ -117,7 +144,7 @@ public class BbcBus : IBus
     {
         SystemVia.Reset();
         UserVia.Reset();
-        DriveIrq();
+        Service();
     }
 
     /// <summary>
@@ -127,7 +154,7 @@ public class BbcBus : IBus
     public void BreakReset()
     {
         UserVia.Reset();
-        DriveIrq();
+        Service();
     }
 
     /// <summary>Reads memory without a bus cycle: for tests and debuggers, never for the CPU.</summary>
@@ -144,37 +171,21 @@ public class BbcBus : IBus
         _ram[address] = value;
     }
 
-    /// <summary>One CPU cycle for every chip but the CPU.</summary>
-    protected internal virtual void Tick()
+    /// <summary>
+    /// The event horizon reached, or a chip accessed: every chip catches up to now, the CPU's IRQ
+    /// line is set from them, and the next look is put at the earliest cycle any chip names.
+    /// </summary>
+    private void Service()
     {
-        if ((Cycles & 1) == 0)
+        _clock.NextEvent = Math.Min(SystemVia.NextEventCycle, UserVia.NextEventCycle);
+        if (_cpu is not null)
         {
-            SystemVia.Tick();
-            UserVia.Tick();
+            _cpu.Irq = SystemVia.Irq || UserVia.Irq;
         }
     }
 
-    /// <summary>
-    /// Sets the CPU's IRQ line from the chips. Called once a cycle's access is over, because a
-    /// VIA's IRQ can rise in the tick that starts a cycle and fall at an acknowledge in it.
-    /// </summary>
-    private void DriveIrq()
-    {
-        if (Cpu is not null)
-        {
-            Cpu.Irq = Irq;
-        }
-    }
-
-    /// <summary>
-    /// The one place a cycle is counted and the other chips are clocked, so no
-    /// cycle exists without an access and no access without a cycle.
-    /// </summary>
-    private void Cycle()
-    {
-        Cycles++;
-        Tick();
-    }
+    /// <summary>A chip was accessed in this cycle, so the bus looks at the chips at its end.</summary>
+    private void ChipAccessed() => _clock.WakeAt(_clock.Cycles);
 
     private void Stretch(ushort address)
     {
@@ -183,11 +194,8 @@ public class BbcBus : IBus
             return;
         }
 
-        int wait = 1 + (int)(Cycles & 1);
-        for (int i = 0; i < wait; i++)
-        {
-            Cycle();
-        }
+        // The chips' ticks in these cycles are done when the chips are next looked at.
+        _clock.Cycles += 1 + (_clock.Cycles & 1);
     }
 
     /// <summary>
@@ -255,10 +263,17 @@ public class BbcBus : IBus
 
         // A4 is not decoded, so each VIA's sixteen registers repeat in the upper half of its
         // block (bus.md section 1c).
-        >= 0x40 and <= 0x5F => SystemVia.Read(offset & 0x0F),
-        >= 0x60 and <= 0x7F => UserVia.Read(offset & 0x0F),
+        >= 0x40 and <= 0x5F => ReadVia(SystemVia, offset),
+        >= 0x60 and <= 0x7F => ReadVia(UserVia, offset),
         _ => AbsentSheila(offset),
     };
+
+    private byte ReadVia(Via6522 via, int offset)
+    {
+        byte value = via.Read(offset & 0x0F);
+        ChipAccessed();
+        return value;
+    }
 
     /// <summary>A write to SHEILA by offset. Each chip adds a case; the ROM latch is the first.</summary>
     private void WriteSheila(int offset, byte value)
@@ -277,9 +292,11 @@ public class BbcBus : IBus
                 break;
             case >= 0x40 and <= 0x5F:
                 SystemVia.Write(offset & 0x0F, value);
+                ChipAccessed();
                 break;
             case >= 0x60 and <= 0x7F:
                 UserVia.Write(offset & 0x0F, value);
+                ChipAccessed();
                 break;
         }
     }

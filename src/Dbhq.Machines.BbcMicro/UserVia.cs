@@ -15,7 +15,14 @@ namespace Dbhq.Machines.BbcMicro;
 /// </remarks>
 public sealed class UserVia : Via6522
 {
+    /// <summary>A user VIA on its own, whose time is the calls to <see cref="Via6522.Tick"/>.</summary>
     public UserVia()
+        : this(null)
+    {
+    }
+
+    internal UserVia(BbcClock? clock)
+        : base(clock)
     {
         PortAInput = 0xFF;
         PortBInput = 0xFF;

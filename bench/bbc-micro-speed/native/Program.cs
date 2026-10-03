@@ -269,16 +269,18 @@ internal static class Fingerprint
 }
 
 /// <summary>
-/// Where a cycle's time goes, by taking things away: the same booted machine run with its
-/// chips' ticks removed, with only one VIA ticking, and as a bare CPU on a flat 64 KB copy of
-/// its memory with no bus logic at all. Removing a chip changes what the OS does (no ticks, no
-/// interrupts), so each difference is an estimate of that part's cost, not a measurement of it.
+/// Where a cycle's time goes: the booted machine against a bare CPU running the same code on a
+/// flat 64 KB copy of its memory, with no bus logic and no chips. The difference is what the
+/// bus and its chips cost. The same program at commit 54a6630, before task 6b, also ran the
+/// machine with its chips' per-cycle ticks removed and with one VIA at a time; those variants
+/// overrode the bus's per-cycle tick, which task 6b took away, and their figures are in the
+/// journal for the second of October's speed entry.
 /// </summary>
 internal static class Profile
 {
     private const long Cycles = 20_000_000;
 
-    private enum Variant { Full, NoTicks, UserViaOnly, SystemViaOnly, FlatBus }
+    private enum Variant { Full, FlatBus }
 
     public static void Run(BbcRoms roms, int rounds)
     {
@@ -310,25 +312,19 @@ internal static class Profile
 
     private static double NanosecondsPerCycle(BbcRoms roms, Variant variant)
     {
-        var bus = new ProfileBus(roms, variant);
-        var cpu = new Dbhq.Cpu6502.Cpu(bus, Dbhq.Cpu6502.CpuVariant.Nmos6502);
-        bus.Cpu = cpu;
-        bus.PowerOnReset();
-        cpu.Reset();
-        while (bus.Cycles < 6_000_000)
-        {
-            cpu.Step();
-        }
+        var machine = new BbcMachine(roms);
+        machine.PowerOn();
+        machine.Run(6_000_000);
+        var cpu = machine.Cpu;
 
         if (variant == Variant.FlatBus)
         {
             var memory = new byte[0x10000];
             for (int a = 0; a < 0x10000; a++)
             {
-                memory[a] = bus.Peek((ushort)a);
+                memory[a] = machine.Bus.Peek((ushort)a);
             }
-            var flat = new FlatBus(memory);
-            var bare = new Dbhq.Cpu6502.Cpu(flat, Dbhq.Cpu6502.CpuVariant.Nmos6502)
+            var bare = new Dbhq.Cpu6502.Cpu(new FlatBus(memory), Dbhq.Cpu6502.CpuVariant.Nmos6502)
             {
                 PC = cpu.PC, A = cpu.A, X = cpu.X, Y = cpu.Y, S = cpu.S, P = cpu.P,
             };
@@ -341,40 +337,10 @@ internal static class Profile
             return clock.Elapsed.TotalNanoseconds / done;
         }
 
-        long start = bus.Cycles;
+        long start = machine.Cycles;
         var timer = Stopwatch.StartNew();
-        while (bus.Cycles - start < Cycles)
-        {
-            cpu.Step();
-        }
-        return timer.Elapsed.TotalNanoseconds / (bus.Cycles - start);
-    }
-
-    private sealed class ProfileBus(BbcRoms roms, Variant variant) : BbcBus(roms)
-    {
-        protected override void Tick()
-        {
-            switch (variant)
-            {
-                case Variant.NoTicks:
-                    break;
-                case Variant.UserViaOnly:
-                    if ((Cycles & 1) == 0)
-                    {
-                        UserVia.Tick();
-                    }
-                    break;
-                case Variant.SystemViaOnly:
-                    if ((Cycles & 1) == 0)
-                    {
-                        SystemVia.Tick();
-                    }
-                    break;
-                default:
-                    base.Tick();
-                    break;
-            }
-        }
+        machine.Run(Cycles);
+        return timer.Elapsed.TotalNanoseconds / (machine.Cycles - start);
     }
 
     /// <summary>64 KB and nothing else: every access is one array read or write.</summary>

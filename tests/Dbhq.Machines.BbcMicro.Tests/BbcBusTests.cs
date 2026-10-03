@@ -9,33 +9,44 @@ public class BbcBusTests
     private static readonly byte[] Basic = RepoPaths.ReadChecked(Pins.BbcBasicPath, Pins.BbcBasicSha256);
     private static readonly byte[] Dfs = RepoPaths.ReadChecked(Pins.BbcDfsPath, Pins.BbcDfsSha256);
 
-    /// <summary>A bus that counts the cycles it gives to the other chips.</summary>
-    private sealed class CountingBus() : BbcBus(new BbcRoms(Os, Basic, Dfs))
-    {
-        public int Ticks { get; private set; }
+    private static BbcBus NewBus() => new(new BbcRoms(Os, Basic, Dfs));
 
-        protected override void Tick()
-        {
-            Ticks++;
-            base.Tick();
-        }
+    /// <summary>
+    /// A bus whose user VIA's timer 1 counts down by one in every 1 MHz cycle the bus gives the
+    /// VIAs, so the cycles the chips have had can be read off a chip. A T1C-H write loads the
+    /// counter and holds it through the next cycle (via.md s1.4), so two RAM reads spend the hold.
+    /// </summary>
+    private static BbcBus NewTimedBus()
+    {
+        var bus = NewBus();
+        bus.UserVia.Write(0x6, 0xFF);
+        bus.UserVia.Write(0x5, 0xFF);
+        bus.Read(0x0000);
+        bus.Read(0x0000);
+        return bus;
     }
 
-    private static CountingBus NewBus() => new();
+    private static int UserTimer1(BbcBus bus) => bus.UserVia.Peek(0x4) | (bus.UserVia.Peek(0x5) << 8);
 
     /// <summary>Runs one bus cycle and says how many CPU cycles it took, stretch included.</summary>
-    private static long Cost(CountingBus bus, Action cycle)
+    /// <remarks>
+    /// It also checks that the cycles reached the chips: the VIAs run on the even CPU cycles, so
+    /// their timer counts down once for each even cycle count the access passed. This used to be
+    /// a count of calls to the bus's per-cycle tick, which task 6b removed when the chips started
+    /// to run lazily; the timer is the same check made on the chip.
+    /// </remarks>
+    private static long Cost(BbcBus bus, Action cycle)
     {
         long before = bus.Cycles;
-        int ticksBefore = bus.Ticks;
+        int timerBefore = UserTimer1(bus);
         cycle();
         long cost = bus.Cycles - before;
-        Assert.Equal(cost, bus.Ticks - ticksBefore); // every cycle ticks the other chips exactly once
+        Assert.Equal((bus.Cycles >> 1) - (before >> 1), timerBefore - UserTimer1(bus));
         return cost;
     }
 
     /// <summary>Moves Cycles to the wanted parity with RAM reads, which cost one cycle each.</summary>
-    private static void AlignTo(CountingBus bus, int parity)
+    private static void AlignTo(BbcBus bus, int parity)
     {
         while ((bus.Cycles & 1) != parity)
         {
@@ -215,14 +226,23 @@ public class BbcBusTests
         bus.Peek(0x8000);
 
         Assert.Equal(0, bus.Cycles);
-        Assert.Equal(0, bus.Ticks);
         Assert.Equal(0xFF, bus.Peek(0xFD00));
+
+        // Nor does it give the chips a cycle: the timer stands still.
+        var timed = NewTimedBus();
+        long cycles = timed.Cycles;
+        int timer = UserTimer1(timed);
+        timed.Peek(0xFE40);
+        timed.Peek(0xFE64);
+        timed.Peek(0xFC00);
+        Assert.Equal(cycles, timed.Cycles);
+        Assert.Equal(timer, UserTimer1(timed));
     }
 
     [Fact]
     public void ASlowReadCostsTwoCyclesFromAnEvenCountAndThreeFromAnOddOne()
     {
-        var bus = NewBus();
+        var bus = NewTimedBus();
         AlignTo(bus, 0);
         Assert.Equal(2, Cost(bus, () => bus.Read(0xFE40)));
 
@@ -233,7 +253,7 @@ public class BbcBusTests
     [Fact]
     public void BackToBackSlowAccessesCostTwoEachFromAnEvenCount()
     {
-        var bus = NewBus();
+        var bus = NewTimedBus();
         AlignTo(bus, 0);
 
         Assert.Equal(2, Cost(bus, () => bus.Read(0xFE40)));
@@ -244,7 +264,7 @@ public class BbcBusTests
     [Fact]
     public void AnOddStartCostsThreeAndTheNextSlowAccessCostsTwo()
     {
-        var bus = NewBus();
+        var bus = NewTimedBus();
         AlignTo(bus, 1);
 
         Assert.Equal(3, Cost(bus, () => bus.Read(0xFE60)));
@@ -254,7 +274,7 @@ public class BbcBusTests
     [Fact]
     public void FastAccessesCostOneCycle()
     {
-        var bus = NewBus();
+        var bus = NewTimedBus();
         foreach (int parity in new[] { 0, 1 })
         {
             AlignTo(bus, parity);
@@ -293,7 +313,7 @@ public class BbcBusTests
     [InlineData(0xFEDF)] // ADC mirror
     public void EverySlowRangeStretchesAndEveryFastRangeDoesNot(int address)
     {
-        var bus = NewBus();
+        var bus = NewTimedBus();
         AlignTo(bus, 0);
         Assert.Equal(2, Cost(bus, () => bus.Read((ushort)address)));
     }
@@ -309,7 +329,7 @@ public class BbcBusTests
     [InlineData(0xFF00, 1)] // OS ROM just above it
     public void TheEdgesOfTheSlowRangesAreWhereTheFactSheetPutsThem(int address, int expected)
     {
-        var bus = NewBus();
+        var bus = NewTimedBus();
         AlignTo(bus, 0);
         Assert.Equal(expected, Cost(bus, () => bus.Read((ushort)address)));
     }
@@ -317,7 +337,7 @@ public class BbcBusTests
     [Fact]
     public void AWriteToASlowAddressCostsTheSameAsARead()
     {
-        var bus = NewBus();
+        var bus = NewTimedBus();
         AlignTo(bus, 0);
         Assert.Equal(2, Cost(bus, () => bus.Write(0xFE40, 0x00)));
 
@@ -330,7 +350,7 @@ public class BbcBusTests
     {
         // STA $FBF0,X with X=$50: the dummy read is at the unfixed $FB40 (OS ROM, fast),
         // the write is at $FC40 (FRED, slow). Even start: 1, which leaves the count odd, then 3.
-        var bus = NewBus();
+        var bus = NewTimedBus();
         AlignTo(bus, 0);
         Assert.Equal(1, Cost(bus, () => bus.Read(0xFB40)));
         Assert.Equal(3, Cost(bus, () => bus.Write(0xFC40, 0x00))); // odd after one cycle: 3
@@ -367,7 +387,7 @@ public class BbcBusTests
     {
         // ROL $FE48 from an odd count: the read waits two and costs 3, which leaves the count
         // even, so each write then costs 2 (bus.md section 2b).
-        var bus = NewBus();
+        var bus = NewTimedBus();
         AlignTo(bus, 1);
 
         Assert.Equal(3, Cost(bus, () => bus.Read(0xFE48)));
@@ -375,45 +395,26 @@ public class BbcBusTests
         Assert.Equal(2, Cost(bus, () => bus.Write(0xFE48, 0x00)));
     }
 
-    /// <summary>A bus that records, at the start of every cycle, what the chips can see.</summary>
-    private sealed class WatchingBus() : BbcBus(new BbcRoms(Os, Basic, Dfs))
-    {
-        public List<int> SlotsSeen { get; } = [];
-
-        public List<byte> SystemIerSeen { get; } = [];
-
-        protected override void Tick()
-        {
-            SlotsSeen.Add(RomSlot);
-            SystemIerSeen.Add(SystemVia.Peek(0xE));
-            base.Tick();
-        }
-    }
-
     [Fact]
     public void TheChipsTickBeforeTheAccessOfTheirCycleSoTheySeeTheOldValue()
     {
-        var bus = new WatchingBus();
+        // A T1C-H write in cycle W loads N, which the counter holds through W+1 and has counted
+        // down to N-1 in W+2 (via.md s1.4). The write here comes from an odd count, so it takes
+        // three cycles, and every tick in them must come before it lands. Were the write before
+        // the tick of its own cycle, that tick would spend the hold and W+1 would read N-1.
+        //
+        // This used to watch, from the bus's per-cycle tick, the ROM latch and the system VIA's
+        // IER at the start of every cycle. Task 6b removed that tick when the chips started to run
+        // lazily; no chip reads the latch, and the timer shows the same order on a chip.
+        var bus = NewBus();
+        bus.Write(0xFE66, 0x34);               // T1L-L
+        AlignTo(bus, 1);
+        long start = bus.Cycles;
+        bus.Write(0xFE65, 0x12);               // T1C-H: N = $1234, in cycle W
+        Assert.Equal(3, bus.Cycles - start);
 
-        bus.Write(0xFE30, 0x0F);
-        Assert.Equal([0], bus.SlotsSeen);
-        Assert.Equal(15, bus.RomSlot);
-
-        bus.SlotsSeen.Clear();
-        bus.Write(0xFE30, 0x0E);
-        Assert.Equal([15], bus.SlotsSeen);
-
-        while ((bus.Cycles & 1) != 1)
-        {
-            bus.Read(0x0000);
-        }
-        bus.SystemIerSeen.Clear();
-        bus.Write(0xFE4E, 0xF2); // three cycles from an odd count, all of them before the write
-        Assert.Equal([0x80, 0x80, 0x80], bus.SystemIerSeen);
-        Assert.Equal(0xF2, bus.SystemVia.Peek(0xE));
-
-        bus.SystemIerSeen.Clear();
-        bus.Read(0x0000);
-        Assert.Equal([0xF2], bus.SystemIerSeen);
+        Assert.Equal(0x34, bus.Read(0xFE64));  // W+1: two cycles from the even count, still N
+        Assert.Equal(0x33, bus.Read(0xFE64));  // W+2: N-1
+        Assert.Equal(0x12, bus.Peek(0xFE65));
     }
 }

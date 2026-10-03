@@ -24,8 +24,10 @@ namespace Dbhq.Machines.BbcMicro;
 /// counter free-runs over 0 to 15 at 1 MHz and the 74LS251 that drives PA7 is off; nothing
 /// else drives PA7, so it reads 0 [guessing - verify: the sheet's recommendation]. Either way
 /// CA2 is high while a key in rows 1 to 7 of the counter's column is down, so autoscan gives
-/// one rising edge per 16 microsecond sweep while a key is held. The counter and PA7 change in
-/// <see cref="Tick"/>, at the start of a cycle, so an access in the same cycle sees them.
+/// one rising edge per 16 microsecond sweep while a key is held. The counter and PA7 change at
+/// the start of a cycle, so an access in the same cycle sees them. Like the rest of the chip
+/// this part runs lazily: with no key down in rows 1 to 7 and nothing to settle, a cycle only
+/// moves the autoscan counter on by one, which is done for many cycles in one addition.
 /// </para>
 /// <para>
 /// <b>Control lines.</b> CA1 is the 6845's vsync, idle low, so the OS's PCR of <c>$04</c> sets
@@ -43,7 +45,14 @@ public sealed class SystemVia : Via6522
     private readonly BbcKeyboard _keyboard;
     private int _column;
 
+    /// <summary>A system VIA on its own, whose time is the calls to <see cref="Via6522.Tick"/>.</summary>
     public SystemVia(BbcKeyboard keyboard)
+        : this(keyboard, null)
+    {
+    }
+
+    internal SystemVia(BbcKeyboard keyboard, BbcClock? clock)
+        : base(clock)
     {
         ArgumentNullException.ThrowIfNull(keyboard);
         _keyboard = keyboard;
@@ -57,6 +66,9 @@ public sealed class SystemVia : Via6522
         SetCa2(false);
 
         PortBWritten += StrobeLatch;
+
+        // A key changes what the next cycle does, so the cycles before it are done first.
+        keyboard.Changing += KeyboardChanging;
     }
 
     /// <summary>IC32, the eight-bit addressable latch (section 2.2).</summary>
@@ -82,13 +94,13 @@ public sealed class SystemVia : Via6522
     }
 
     /// <summary>One 1 MHz cycle: the chip, then the keyboard's counter, PA7 and CA2.</summary>
-    public override void Tick()
+    protected override void TickOnce()
     {
-        base.Tick();
+        base.TickOnce();
 
         if (KeyboardEnabled)
         {
-            _column = PortAPins & 0x0F;
+            _column = PinsA & 0x0F;
         }
         else
         {
@@ -96,7 +108,65 @@ public sealed class SystemVia : Via6522
         }
 
         UpdatePortAInput();
-        SetCa2(_keyboard.AnyKeyDown(_column));
+        ApplyCa2(_keyboard.AnyKeyDown(_column));
+    }
+
+    /// <summary>
+    /// In autoscan with a key down in rows 1 to 7, CA2 rises and falls as the counter passes that
+    /// key's column, so the keyboard's part goes a cycle at a time. Otherwise it is worked out at
+    /// once (<see cref="Advance"/>).
+    /// </summary>
+    protected override bool NeedsEveryCycle => !KeyboardEnabled && _keyboard.AnyKeyInRowsOneToSevenDown;
+
+    /// <summary>
+    /// The chip's cycles, then the keyboard's, at once. Enabled, the keyboard's cycle sets PA0 to
+    /// PA6 of the input to 1 and PA7 to the key; after that first cycle the column and row it reads
+    /// cannot move, so the second cycle settles it and every later one repeats the second. In
+    /// autoscan with no key down in rows 1 to 7 the counter moves on one a cycle, PA7 reads 0 and
+    /// CA2 is low throughout.
+    /// </summary>
+    protected override void Advance(long cycles)
+    {
+        base.Advance(cycles);
+        if (KeyboardEnabled)
+        {
+            KeyboardCycle();
+            if (cycles > 1)
+            {
+                KeyboardCycle();
+            }
+            return;
+        }
+
+        _column = (int)((_column + cycles) & 0x0F);
+        UpdatePortAInput();
+        ApplyCa2(_keyboard.AnyKeyDown(_column));
+    }
+
+    /// <summary>The keyboard's part of a cycle with the keyboard enabled.</summary>
+    private void KeyboardCycle()
+    {
+        _column = PinsA & 0x0F;
+        UpdatePortAInput();
+        ApplyCa2(_keyboard.AnyKeyDown(_column));
+    }
+
+    /// <summary>
+    /// The chip's own flags, and CA2's from the keyboard when IER enables it: in the next cycle if
+    /// that cycle may move CA2, otherwise never until a key or a register changes.
+    /// </summary>
+    private protected override long CyclesUntilEnabledFlag()
+    {
+        long cycles = base.CyclesUntilEnabledFlag();
+        if ((Ier & 0x01) == 0 || cycles == 1)
+        {
+            return cycles;
+        }
+
+        bool settled = KeyboardEnabled
+            ? (PinsA & 0x0F) == _column && InputA == PortAInputFor(_column) && Ca2Level == _keyboard.AnyKeyDown(_column)
+            : !_keyboard.AnyKeyInRowsOneToSevenDown && !Ca2Level;
+        return settled ? cycles : 1;
     }
 
     /// <summary>Latch bit 3 low: the OS's "stop auto scanning", PA selects a key.</summary>
@@ -106,16 +176,24 @@ public sealed class SystemVia : Via6522
     /// What the outside drives on port A. PA0 to PA6 are outputs whenever the OS reads the
     /// keyboard; as inputs nothing drives them and they read 1. PA7 is the key.
     /// </summary>
-    private void UpdatePortAInput()
+    private void UpdatePortAInput() => InputA = PortAInputFor(_column);
+
+    private byte PortAInputFor(int column)
     {
-        int row = (PortAPins >> 4) & 7;
-        bool key = KeyboardEnabled && _keyboard.Read(_column, row);
-        PortAInput = (byte)(0x7F | (key ? 0x80 : 0));
+        int row = (PinsA >> 4) & 7;
+        bool key = KeyboardEnabled && _keyboard.Read(column, row);
+        return (byte)(0x7F | (key ? 0x80 : 0));
+    }
+
+    private void KeyboardChanging()
+    {
+        Sync();
+        Wake();
     }
 
     private void StrobeLatch()
     {
-        int pins = PortBPins;
+        int pins = PinsB;
         int bit = pins & 7;
         bool high = (pins & 0x08) != 0;
         bool soundWasHigh = (Latch & 0x01) != 0;
@@ -124,7 +202,7 @@ public sealed class SystemVia : Via6522
 
         if (bit == 0 && soundWasHigh && !high)
         {
-            SoundWrite?.Invoke(PortAPins);
+            SoundWrite?.Invoke(PinsA);
         }
     }
 }

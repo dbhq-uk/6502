@@ -39,9 +39,12 @@ public sealed class BbcKeyboard
         }
     }
 
-    public void Press(BbcKey key) => _cells[Cell(key)] = true;
+    // Bit n set while a key in rows 1 to 7 of column n is down: what drives CA2.
+    private int _columnsDown;
 
-    public void Release(BbcKey key) => _cells[Cell(key)] = false;
+    public void Press(BbcKey key) => Set(key, true);
+
+    public void Release(BbcKey key) => Set(key, false);
 
     public bool IsDown(BbcKey key) => _cells[Cell(key)];
 
@@ -59,22 +62,36 @@ public sealed class BbcKeyboard
     /// The line that drives CA2: true when a key in rows 1 to 7 of the column is down. Row 0,
     /// with SHIFT, CTRL and the links, is not wired to the 74LS30 that makes it (section 3(a)).
     /// </summary>
-    public bool AnyKeyDown(int column)
-    {
-        column &= 0xF;
-        if (column > 9)
-        {
-            return false;
-        }
+    public bool AnyKeyDown(int column) => (_columnsDown & (1 << (column & 0xF))) != 0;
 
-        for (int row = 1; row < Rows; row++)
+    /// <summary>True while any key in rows 1 to 7 is down, in any column.</summary>
+    internal bool AnyKeyInRowsOneToSevenDown => _columnsDown != 0;
+
+    /// <summary>
+    /// Raised before a key changes, so the system VIA can do the cycles it owes with the
+    /// keyboard as it was.
+    /// </summary>
+    internal event Action? Changing;
+
+    private void Set(BbcKey key, bool down)
+    {
+        int cell = Cell(key);
+        Changing?.Invoke();
+        _cells[cell] = down;
+
+        // Columns 10 to 15 hold no key, so they never drive CA2.
+        _columnsDown = 0;
+        for (int column = 0; column <= 9; column++)
         {
-            if (_cells[column + 16 * row])
+            for (int row = 1; row < Rows; row++)
             {
-                return true;
+                if (_cells[column + 16 * row])
+                {
+                    _columnsDown |= 1 << column;
+                    break;
+                }
             }
         }
-        return false;
     }
 
     private static int Cell(BbcKey key)

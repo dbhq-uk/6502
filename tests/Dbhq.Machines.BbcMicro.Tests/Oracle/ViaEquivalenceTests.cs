@@ -142,6 +142,43 @@ public class ViaEquivalenceTests
         Assert.NotEmpty(sounds[0]);
     }
 
+    [Theory]
+    [InlineData(1)]
+    [InlineData(2)]
+    [InlineData(3)]
+    public void TimerTwoCountingPulsesFlagsInTheCycleOfTheEdgeEvenWhenNobodyLooksUntilLater(int cyclesUntilRead)
+    {
+        // A corner the random runs reach rarely: timer 2 counting PB6 pulses, armed, at a count of
+        // 1. PB6 falls, the chip is not looked at for some cycles, then T2C-L is read, which
+        // acknowledges the flag. The flag rose in the first of those cycles, so only when that is
+        // the read's own cycle does the coincident acknowledge keep it (via.md s1.9).
+        var oracle = new ReferenceVia6522();
+        var via = new Via6522();
+        foreach (var (register, value) in new[] { (0xB, 0x20), (0x8, 0x01), (0x9, 0x00), (0xE, 0xA0) })
+        {
+            oracle.Tick();
+            via.Tick();
+            oracle.Write(register, (byte)value);
+            via.Write(register, (byte)value);
+        }
+
+        oracle.Tick();
+        via.Tick();
+        oracle.PortBInput = 0xBF;
+        via.PortBInput = 0xBF;
+        for (int i = 0; i < cyclesUntilRead; i++)
+        {
+            oracle.Tick();
+            via.Tick();
+        }
+
+        Assert.Equal(oracle.Read(0x8), via.Read(0x8));
+        Assert.Equal(State.Of(oracle), State.Of(via));
+        oracle.Tick();
+        via.Tick();
+        Assert.Equal(State.Of(oracle), State.Of(via));
+    }
+
     /// <summary>One random read, write, peek, input change or reset, on all three chips at once.</summary>
     private static void RandomAccess(Random random, ReferenceVia6522 oracle, Via6522 watched, Via6522 unwatched)
     {
@@ -219,7 +256,7 @@ public class ViaEquivalenceTests
     {
         // High bytes of the timers mostly 0, so a timer runs out within a few dozen cycles.
         5 or 7 or 9 => random.Next(4) == 0 ? (byte)random.Next(256) : (byte)0,
-        4 or 6 or 8 => random.Next(4) == 0 ? (byte)random.Next(256) : (byte)random.Next(40),
+        4 or 6 or 8 => random.Next(4) == 0 ? (byte)random.Next(256) : (byte)random.Next(random.Next(2) == 0 ? 4 : 40),
 
         // Shift mode 010 half the time, so the shift register's count is exercised.
         0xB => random.Next(2) == 0 ? (byte)((random.Next(256) & ~0x1C) | 0x08) : (byte)random.Next(256),
