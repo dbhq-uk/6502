@@ -299,6 +299,8 @@ cycles a second, with multiples of 2 MHz:
 | Browser AOT, old first, 22:14 | 17.04 to 15.85 | 18.034 (9.02 times) | 15.886 (7.94 times) |
 | Browser AOT, old first, 22:35 | 1.60 to 1.29 | 15.835 (7.92 times) | 15.408 (7.70 times) |
 | Browser AOT, new first, 22:36 | 1.29 to 0.78 | 13.850 (6.92 times) | 18.886 (9.44 times) |
+| Browser AOT, old first, 22:46 | 2.98 to 7.11 | 12.392 (6.20 times) | 17.841 (8.92 times) |
+| Browser AOT, new first, 22:46 | 7.11 to 9.52 | 13.680 (6.84 times) | 22.222 (11.11 times) |
 | Native, old first, 22:11 | 6.33 to 4.81 | 24.450 | 24.981 |
 | Native, old first, 22:37 | 0.58 to 0.57 | 26.605 | 25.724 |
 | Native, new first, 22:37 | 0.57 to 3.27 | 27.370 | 28.561 |
@@ -314,6 +316,10 @@ journal measured 10.49 to 11.04 on the same virtual machine in the morning; and
 the native timed runs above were bimodal, best runs about 65 MHz in every set
 and medians about 26. The host behind the virtual machine was giving it about
 half the speed it had in the morning, which the guest's load average cannot see.
+The last two browser sets, after the commit, were taken when a profile at 22:46
+(load 2.40) put the bare CPU at 12.26 to 23.58 ns a cycle; one straight after
+them (load about 9) gave 19.16 to 26.32. The ten-times question for this task is
+therefore not settled by these figures; it wants a set in a quiet hour.
 
 **What the sound itself costs,** measured so that the load matters less: a
 throwaway probe (`/tmp/t11probe`, not committed) timed one second of machine
