@@ -32,6 +32,26 @@ public sealed class ReferenceCrtc6845
 
     public int LineStartAddress => _lineStart;
 
+    /// <summary>The same report as <see cref="Crtc6845.StateAt"/>, for the character the oracle stands at now.</summary>
+    public CrtcState State(long cycle, int cyclesPerCharacter)
+    {
+        int displaySkew = (_r[8] >> 4) & 3;
+        int cursorSkew = (_r[8] >> 6) & 3;
+        bool blinkOn = ((_r[10] >> 5) & 3) switch
+        {
+            0 => true,
+            1 => false,
+            2 => (_fields & 8) == 0,
+            _ => (_fields & 16) == 0,
+        };
+        bool cursorOnLine = VerticalDisplay && blinkOn
+            && RasterAddress >= (_r[10] & 0x1F) && RasterAddress <= _r[11];
+        return new CrtcState(
+            cycle, _c0, MemoryAddress, _lineStart, RasterAddress, VerticalDisplay, DisplayEnable, Cursor,
+            HSync, VSync, _r[1], displaySkew, cursorSkew, ((_r[14] << 8) | _r[15]) & 0x3FFF,
+            cursorOnLine, cyclesPerCharacter);
+    }
+
     public bool VerticalDisplay => _vDisplay && !_firstField;
 
     public int RasterAddress => SyncAndVideo ? ((_c9 << 1) | (_parityOdd ? 1 : 0)) & 0x1F : _c9;

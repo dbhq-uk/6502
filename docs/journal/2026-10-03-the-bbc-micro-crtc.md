@@ -245,38 +245,62 @@ slower, which is what led to the second.
 
 ## For task 8
 
-*Corrected in review, the same day: this section first said the seam for the
-video ULA was ready, because `Advance` walks a line in spans and a sink there
-could hand the ULA a span at a time. That is wrong for the path the machine
-takes. Almost all of the CRTC's progress is the jump to the state it worked out
-ahead, which never calls `Advance`; a sink there would see nothing when the
-machine catches up, and would fire during the prediction instead, ahead of
-time, before later writes to screen memory or the palette. And the public
-outputs are point getters that each catch the chip up, so asking one every
-character would be about two million calls a second, which the browser cannot
-afford.*
+*Corrected twice in review, the same day.* The first version of this section
+said the seam for the video ULA was ready, because `Advance` walks a line in
+spans and a sink there could hand the ULA a span at a time. That is wrong for
+the path the machine takes. While nothing else looks at the CRTC, its progress
+is a jump to the state it worked out ahead, which never calls `Advance`; and the
+working-out happens early, so a sink fed then would emit spans before later
+writes to screen memory or the palette. Worse, a write to R0 or R3 to R9 throws
+the prediction away, so such a sink would have emitted spans that never happen.
+The second version said a consumer could "bring the CRTC to each event's cycle
+and read the state there". That could not work either: every getter catches the
+chip up to now before it answers, so after bringing it to a past cycle the next
+getter moved it on, and bringing it to a cycle already passed did nothing.
 
-What a consumer of the CRTC's output has to do is now step 6 of "How a new chip
-plugs in" in [the bus speed entry](2026-10-03-the-bbc-micro-bus-speed.md): be
-driven by its own events, bring the CRTC to each event's cycle and read the
-state there, and bring itself and the CRTC up to date before any write that
-changes what it draws.
+**What was added: `StateAt(cycle)`.** It returns a `CrtcState`, a value with no
+allocation: the cycle, C0, MA, the line's start address, RA, whether the line is
+inside the vertical display, DISPTMG and CUDISP for that character with their
+skews applied, HSYNC, VSYNC, R1 in force, both skews as numbers, the cursor
+address, whether the cursor shows on this line, and the CPU cycles a character
+takes. `StateCycle` says the earliest cycle it can answer for; the latest is now.
 
-After a catch-up the CRTC exposes, for the character it stands at: `MemoryAddress`
-(MA), `RasterAddress` (RA), `DisplayEnable` (DISPTMG with the skew), `HSync`,
-`VSync`, `Cursor` (CUDISP with the skew), and, added in review because a
-consumer drawing a line at a time needs them at the line's start,
-`LineStartAddress` (MA at C0 = 0, the same on every line of a row) and
-`VerticalDisplay` (whether the line is inside rows 0 to R6 - 1, and not in the
-first field after a reset). Both are tested against the section 5 numbers and
-compared with the plain model in both equivalence runs.
+**Decision: bring the chip to the cycle, rather than keep a history.** `StateAt`
+does `SyncTo(cycle)`, raising any events on the way, then reads the chip's own
+state. The answer is exactly right because registers can only change at a
+write, and a write brings the chip up to the write's cycle first, so between
+the chip's state and now the registers are the ones in force. Chosen over a
+small ring of line-start snapshots, which would cost something every line
+whether or not anyone reads them, and which could only answer at line starts;
+and over running a copy of the state forward from where the chip stands, which
+costs a whole frame's worth of lines again for each line asked about. With
+`StateAt` the chip moves forward once, a line at a time, and a consumer that
+asks every line makes it step through `Run` and `Advance` at one or two steps a
+line, about the 15,700 steps a second measured above, instead of jumping.
 
-What it does not expose yet, and a line-at-a-time ULA would want: an event at
-each line start (the bus looks only at VSYNC edges and frame starts today, so
-task 8 has to add one, or draw a frame's lines from a frame event); the
-horizontal display width for the line as the chip will apply it (R1, which a
-mid-line write can change); the line's cursor position and whether the blink
-shows it; and the skews from R8 as numbers rather than applied to the current
-character. Task 8 should add these as it needs them, each with a test against
-the plain model, and keep the per-cycle cost at nothing: the point getters are
-for once a line or less, never once a character.
+**It is tested against the plain model at past cycles.** In
+`CrtcEquivalenceTests` and, through the bus at 1 and 2 MHz with CA1's interrupt
+on, in `BusEquivalenceTests`. The plain model's state is recorded every
+character, the lazy chip is asked about random cycles in order, from a few
+characters to thousands apart, and register writes come at random characters,
+each after a look up to its cycle. Three planted mistakes in `StateAt`
+(bringing the chip to now, a row's start for the line's, the cursor line
+without the blink) each fail both tests.
+
+**The contract for a consumer**, which step 6 of "How a new chip plugs in" in
+[the bus speed entry](2026-10-03-the-bbc-micro-bus-speed.md) states for any
+consumer:
+
+- It is driven by its own event in the bus's minimum (a line start, or a frame),
+  and at each event it asks `StateAt(cycle)`, not the point getters.
+- Before any write that changes what it reads (a CRTC register, the ULA's
+  registers and palette), it must be brought up to that write's cycle first; the
+  write then moves the CRTC on, and no earlier cycle can be asked about.
+- Its events must be handled before anything else brings the CRTC up to now,
+  such as the bus's `SyncIfDue` in `Service()`, or a CRTC write.
+- Asking about a cycle the chip has passed throws. `SyncTo` to a cycle already
+  passed does nothing.
+
+Still not provided, for task 8 to add as it needs them: an event at each line
+start (the bus looks only at VSYNC edges and frame starts today), and anything
+about screen memory the CPU writes in the middle of a line.

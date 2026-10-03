@@ -199,6 +199,64 @@ public sealed class Crtc6845
         }
     }
 
+    /// <summary>
+    /// The time the chip's state stands at: a CPU cycle in a machine, a count of
+    /// <see cref="Tick"/> calls on its own. <see cref="StateAt"/> answers for any time from here
+    /// to now. Every getter, a register write and the bus's looks move it on to now.
+    /// </summary>
+    public long StateCycle => _doneTime;
+
+    /// <summary>
+    /// The chip's state at <paramref name="cycle"/>, a time from <see cref="StateCycle"/> to now:
+    /// what a consumer drawing a line at a time reads. The chip is brought up to that cycle and no
+    /// further (its events up to it are raised on the way), so the answer reflects the registers in
+    /// force then, and a later call can ask about any later cycle. Returns a value; nothing is
+    /// allocated.
+    /// </summary>
+    /// <remarks>
+    /// The contract: a write that changes what the consumer reads (a CRTC register, the ULA's)
+    /// brings the chip up to that write's cycle first, after which no earlier cycle can be asked
+    /// about. So a consumer must take every state it needs, up to a write's cycle, before the
+    /// write; and it must take its events before anything else brings the chip up to now. Asking
+    /// for a cycle the chip has already passed throws, rather than answering with a later state.
+    /// Inside one of the chip's own events, only the event's cycle can be asked about.
+    /// </remarks>
+    public CrtcState StateAt(long cycle)
+    {
+        if (cycle > Now)
+        {
+            throw new ArgumentOutOfRangeException(nameof(cycle), cycle, "That cycle has not happened yet.");
+        }
+
+        SyncTo(cycle);
+        if (cycle != _doneTime)
+        {
+            throw new InvalidOperationException(
+                $"The CRTC's state stands at {_doneTime}, so it cannot say what it was at {cycle}.");
+        }
+
+        int displaySkew = (_r[8] >> 4) & 3;
+        int cursorSkew = (_r[8] >> 6) & 3;
+        bool vertical = _s.VDisp && !_s.FirstField;
+        return new CrtcState(
+            cycle,
+            _s.C0,
+            (_s.LineStart + _s.C0) & 0x3FFF,
+            _s.LineStart,
+            Raster(in _s),
+            vertical,
+            displaySkew != 3 && ((_s.DispHistory >> displaySkew) & 1) != 0,
+            cursorSkew != 3 && ((_s.CursorHistory >> cursorSkew) & 1) != 0,
+            _s.HsActive,
+            _s.VsOut,
+            _r[1],
+            displaySkew,
+            cursorSkew,
+            CursorAddress,
+            vertical && CursorShows(in _s),
+            _clock is not null && !_fast ? 2 : 1);
+    }
+
     /// <summary>HSYNC.</summary>
     public bool HSync
     {
@@ -358,8 +416,9 @@ public sealed class Crtc6845
     internal void Sync() => SyncTo(Now);
 
     /// <summary>
-    /// Does the characters owed up to <paramref name="time"/>, which is not after now. Inside one
-    /// of its own events the chip stands still, so a handler sees the state at the event.
+    /// Does the characters owed up to <paramref name="time"/>, which is not after now. A time the
+    /// chip has already passed does nothing: it cannot go back. Inside one of its own events the
+    /// chip stands still, so a handler sees the state at the event.
     /// </summary>
     internal void SyncTo(long time)
     {
@@ -838,3 +897,41 @@ public sealed class Crtc6845
         public int DispHistory, CursorHistory;
     }
 }
+
+/// <summary>
+/// What <see cref="Crtc6845.StateAt"/> reports: the CRTC's state at one cycle, for a consumer that
+/// draws a line at a time.
+/// </summary>
+/// <param name="Cycle">The cycle asked about.</param>
+/// <param name="Character">C0, the character of the line being output.</param>
+/// <param name="MemoryAddress">MA, 14 bits: <paramref name="LineStartAddress"/> plus C0.</param>
+/// <param name="LineStartAddress">MA at C0 = 0 of this line, the same on every line of a row.</param>
+/// <param name="RasterAddress">RA.</param>
+/// <param name="VerticalDisplay">The line is inside rows 0 to R6 - 1, and not in the first field after a reset.</param>
+/// <param name="DisplayEnable">DISPTMG for this character, with the skew.</param>
+/// <param name="Cursor">CUDISP for this character, with the skew.</param>
+/// <param name="HSync">HSYNC.</param>
+/// <param name="VSync">VSYNC.</param>
+/// <param name="HorizontalDisplayed">R1 in force: on a displayed line, characters 0 to R1 - 1 are displayed before the skew.</param>
+/// <param name="DisplaySkew">R8 bits 5 and 4: DISPTMG is late by this many characters; 3 means it never comes.</param>
+/// <param name="CursorSkew">R8 bits 7 and 6: CUDISP is late by this many characters; 3 means it never comes.</param>
+/// <param name="CursorAddress">R14 and R15, 14 bits.</param>
+/// <param name="CursorOnLine">The cursor shows on this line: inside the vertical display, RA from R10 to R11, and the blink on. It is then at the character where MA equals <paramref name="CursorAddress"/>, if that is displayed.</param>
+/// <param name="CyclesPerCharacter">CPU cycles a character: 1 at 2 MHz (and on its own), 2 at 1 MHz.</param>
+public readonly record struct CrtcState(
+    long Cycle,
+    int Character,
+    int MemoryAddress,
+    int LineStartAddress,
+    int RasterAddress,
+    bool VerticalDisplay,
+    bool DisplayEnable,
+    bool Cursor,
+    bool HSync,
+    bool VSync,
+    int HorizontalDisplayed,
+    int DisplaySkew,
+    int CursorSkew,
+    int CursorAddress,
+    bool CursorOnLine,
+    int CyclesPerCharacter);

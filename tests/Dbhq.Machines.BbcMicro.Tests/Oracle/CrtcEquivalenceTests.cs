@@ -76,39 +76,7 @@ public class CrtcEquivalenceTests
 
         while (ticks < 10_000_000)
         {
-            // A program: the OS's, changed a little, or a small random one.
-            if (random.Next(3) == 0)
-            {
-                byte[] set = OsSets[random.Next(OsSets.Length)];
-                for (int r = 11; r >= 0; r--)
-                {
-                    Write(r, set[r]);
-                }
-                Write(12, set[12]);
-                Write(13, set[13]);
-                for (int n = random.Next(3); n > 0; n--)
-                {
-                    int r = random.Next(16);
-                    Write(r, (byte)(set[Math.Min(r, 13)] + random.Next(-2, 3)));
-                }
-            }
-            else
-            {
-                Write(0, (byte)random.Next(random.Next(4) == 0 ? 4 : 40));
-                Write(1, (byte)random.Next(24));
-                Write(2, (byte)random.Next(24));
-                Write(3, (byte)random.Next(256));
-                int rows = random.Next(5);
-                Write(4, (byte)rows);
-                Write(5, (byte)random.Next(4));
-                Write(6, (byte)random.Next(rows + 2));
-                Write(7, (byte)random.Next(rows + 2));
-                Write(8, (byte)random.Next(256));
-                Write(9, (byte)random.Next(random.Next(5) == 0 ? 32 : 6));
-                Write(10, (byte)random.Next(128));
-                Write(11, (byte)random.Next(8));
-            }
-
+            RandomProgram(random, Write);
             Write(14, (byte)random.Next(64));
             Write(15, (byte)random.Next(256));
             if (random.Next(4) == 0)
@@ -146,5 +114,126 @@ public class CrtcEquivalenceTests
         Assert.True(counts[0] > 5_000, $"only {counts[0]} VSYNC falls");
         Assert.True(counts[1] > 5_000, $"only {counts[1]} frames");
         Assert.True(looks > 2_000, $"only {looks} looks at the unwatched chip");
+    }
+
+    /// <summary>
+    /// Asks the lazy chip for its state at random cycles from where it stands to now, in order, and
+    /// compares each with what the plain model was at that cycle. The plain model's states are
+    /// recorded every character, so any past cycle can be checked; a register write is made only
+    /// after the consumer has looked up to its cycle, as the contract in <see cref="Crtc6845.StateAt"/>
+    /// asks, and the record starts again after it.
+    /// </summary>
+    [Fact]
+    public void StateAtMatchesThePerCharacterOracleAtPastCycles()
+    {
+        var oracle = new ReferenceCrtc6845();
+        var chip = new Crtc6845();
+        var random = new Random(6845 + 1);
+        var record = new List<CrtcState>();
+        long now = 0, checks = 0, writes = 0;
+
+        void Look()
+        {
+            if (record.Count == 0)
+            {
+                return;
+            }
+
+            long from = Math.Max(chip.StateCycle, record.Count == 0 ? now : record[0].Cycle);
+            for (long t = from; t <= now; t += 1 + random.Next(random.Next(3) == 0 ? 3_000 : 70))
+            {
+                CrtcState expected = record[(int)(t - record[0].Cycle)];
+                CrtcState actual = chip.StateAt(t);
+                if (expected != actual)
+                {
+                    Assert.Fail($"at character {t} after {writes} writes: expected {expected}, was {actual}");
+                }
+                checks++;
+            }
+        }
+
+        void Write(int register, byte value)
+        {
+            Look();
+            oracle.WriteAddress((byte)register);
+            chip.WriteAddress((byte)register);
+            oracle.WriteData(value);
+            chip.WriteData(value);
+            record.Clear();
+            writes++;
+        }
+
+        while (now < 4_000_000)
+        {
+            RandomProgram(random, Write);
+            Write(14, (byte)random.Next(64));
+            Write(15, (byte)random.Next(256));
+            if (random.Next(4) == 0)
+            {
+                Look();
+                oracle.Reset();
+                chip.Reset();
+                record.Clear();
+            }
+
+            long span = random.Next(4) == 0 ? random.Next(100_000) : random.Next(5_000);
+            for (long i = 0; i < span; i++)
+            {
+                oracle.Tick();
+                chip.Tick();
+                now++;
+                record.Add(oracle.State(now, 1));
+                if (random.Next(300) == 0)
+                {
+                    Look();
+                }
+                if (random.Next(3_000) == 0)
+                {
+                    Write(random.Next(16), (byte)random.Next(40));
+                }
+            }
+        }
+
+        // A cycle the chip has passed, or one still to come, is refused.
+        Look();
+        Assert.Throws<InvalidOperationException>(() => chip.StateAt(chip.StateCycle - 1));
+        Assert.Throws<ArgumentOutOfRangeException>(() => chip.StateAt(now + 1));
+        Assert.True(checks > 50_000, $"only {checks} checks");
+    }
+
+    private static void RandomProgram(Random random, Action<int, byte> write)
+    {
+        // A program: the OS's, changed a little, or a small random one.
+        if (random.Next(3) == 0)
+        {
+            byte[] set = OsSets[random.Next(OsSets.Length)];
+            for (int r = 11; r >= 0; r--)
+            {
+                write(r, set[r]);
+            }
+            write(12, set[12]);
+            write(13, set[13]);
+            for (int n = random.Next(3); n > 0; n--)
+            {
+                int r = random.Next(16);
+                write(r, (byte)(set[Math.Min(r, 13)] + random.Next(-2, 3)));
+            }
+        }
+        else
+        {
+            write(0, (byte)random.Next(random.Next(4) == 0 ? 4 : 40));
+            write(1, (byte)random.Next(24));
+            write(2, (byte)random.Next(24));
+            write(3, (byte)random.Next(256));
+            int rows = random.Next(5);
+            write(4, (byte)rows);
+            write(5, (byte)random.Next(4));
+            write(6, (byte)random.Next(rows + 2));
+            write(7, (byte)random.Next(rows + 2));
+            write(8, (byte)random.Next(256));
+            write(9, (byte)random.Next(random.Next(5) == 0 ? 32 : 6));
+            write(10, (byte)random.Next(128));
+            write(11, (byte)random.Next(8));
+        }
     }
 }

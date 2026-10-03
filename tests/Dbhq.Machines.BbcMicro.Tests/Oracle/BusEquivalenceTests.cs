@@ -313,6 +313,92 @@ public class BusEquivalenceTests
         Assert.True(changes > 0, "the IRQ never rose");
     }
 
+    /// <summary>
+    /// <see cref="Crtc6845.StateAt"/> in the machine: the CRTC on the bus's clock at 1 MHz and
+    /// 2 MHz, with CA1's interrupt on so the bus looks at it at its events, asked about random past
+    /// cycles in order and compared with the oracle bus's CRTC as it was in that cycle. Every CRTC
+    /// or ULA write is made after a look up to its cycle, as the contract says.
+    /// </summary>
+    [Fact]
+    public void StateAtInTheMachineMatchesTheOracleAtPastCycles()
+    {
+        var bus = new BbcBus(BbcSession.Roms);
+        var oracle = new ReferenceBbcBus(BbcSession.Roms);
+        var cpu = new Cpu(bus, CpuVariant.Nmos6502);
+        var oracleCpu = new Cpu(oracle, CpuVariant.Nmos6502);
+        bus.Cpu = cpu;
+        oracle.Cpu = oracleCpu;
+        bus.PowerOnReset();
+        oracle.PowerOnReset();
+
+        var random = new Random(6845 + 2);
+        var record = new List<CrtcState>();
+        int cyclesPerCharacter = 2;
+        long checks = 0;
+
+        void Look()
+        {
+            if (record.Count == 0)
+            {
+                return;
+            }
+
+            long from = Math.Max(bus.Crtc.StateCycle, record[0].Cycle);
+            for (long t = from; t <= bus.Cycles; t += 1 + random.Next(random.Next(3) == 0 ? 3_000 : 70))
+            {
+                CrtcState expected = record[(int)(t - record[0].Cycle)];
+                CrtcState actual = bus.Crtc.StateAt(t);
+                if (expected != actual)
+                {
+                    Assert.Fail($"at cycle {t}: expected {expected}, was {actual}");
+                }
+                checks++;
+            }
+        }
+
+        void Write(ushort address, byte value)
+        {
+            Look();
+            oracle.Write(address, value);
+            bus.Write(address, value);
+            record.Clear();
+        }
+
+        Write(0xFE4C, 0x04);
+        Write(0xFE4E, 0x82);
+        for (int program = 0; program < 400; program++)
+        {
+            if (random.Next(3) == 0)
+            {
+                byte control = random.Next(2) == 0 ? (byte)0x9C : (byte)0x88;
+                Write(0xFE20, control);
+                cyclesPerCharacter = (control & 0x10) != 0 ? 1 : 2;
+            }
+
+            for (int n = random.Next(1, 6); n > 0; n--)
+            {
+                int register = random.Next(16);
+                Write(0xFE00, (byte)register);
+                Write(0xFE01, (byte)random.Next(register is 0 ? 70 : register is 3 or 8 ? 256 : 12));
+            }
+            Write(0xFE4D, 0x7F);
+
+            int span = random.Next(4) == 0 ? random.Next(60_000) : random.Next(3_000);
+            for (int i = 0; i < span; i++)
+            {
+                Assert.Equal(oracle.Read(0x0000), bus.Read(0x0000));
+                record.Add(oracle.Crtc.State(oracle.Cycles, cyclesPerCharacter));
+                if (random.Next(400) == 0)
+                {
+                    Look();
+                }
+            }
+        }
+
+        Look();
+        Assert.True(checks > 20_000, $"only {checks} checks");
+    }
+
     private readonly record struct Access(ushort Address, byte Value, bool Write, long Cycles, bool Irq);
 
     /// <summary>An IBus between a CPU and a bus that writes down every access.</summary>
