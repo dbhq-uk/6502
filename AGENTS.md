@@ -20,7 +20,7 @@ src/Dbhq.Machines.BbcMicro.Wasm/  # the BBC Micro as .NET WebAssembly; the ROMs 
 machines/                   # registry.json, and per machine its "try it" program, which the page shows and the acceptance test runs
 site/                       # 6502.dbhq.uk: the Astro site, its tests, and the scripts that build the machines into it
 tests/                      # the tests and the library they share, one project per machine
-bench/                      # the speed benchmarks (native, and the browser speed check), run locally, neither built nor run in CI
+bench/                      # the speed benchmarks (native, and the browser speed checks), run locally and never in CI; the .NET ones are in the solution, so CI builds them
 tools/                      # scripts that make test data and check assumptions
   Dbhq.Cpu6502.ChipTrace/   # records the core's bus cycles for the site's chip page
   probes/                   # scripts that check assumptions against test data

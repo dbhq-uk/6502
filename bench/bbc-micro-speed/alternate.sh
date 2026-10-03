@@ -1,0 +1,49 @@
+#!/usr/bin/env bash
+# Runs two or more builds of the BBC Micro speed check in turn, a launch of each at a time,
+# so drift in the shared machine's load falls on all of them, then prints each build's median.
+# Prints the load average and the time before and after, and every timed line.
+#
+#   ./alternate.sh browser <launches> <published-folder>...
+#       one headless Chrome launch of five timed runs per build, in turn (run-in-browser.mjs)
+#   ./alternate.sh native <launches> <native-build-folder>...
+#       one launch of twelve timed runs per build, in turn, keeping the last ten
+#       (a folder holding a build of native/, Dbhq.Machines.BbcMicro.SpeedNative.dll)
+#
+# Run from this folder. Folders are relative to it; a native build must sit inside the
+# repository, because the bench finds the ROMs by looking for 6502.slnx above itself.
+set -euo pipefail
+cd "$(dirname "$0")"
+
+mode=$1
+launches=$2
+shift 2
+lines=$(mktemp)
+trap 'rm -f "$lines"' EXIT
+
+echo "load before: $(cut -d' ' -f1-3 /proc/loadavg)  $(date -u +%H:%M:%S) UTC"
+for ((i = 1; i <= launches; i++)); do
+  for build in "$@"; do
+    if [[ $mode == browser ]]; then
+      output=$(node run-in-browser.mjs "$build" 1)
+      grep -q '^launch 1 prompt yes' <<<"$output" || { echo "no prompt from $build" >&2; echo "$output" >&2; exit 1; }
+      grep ' timed ' <<<"$output" | sed "s|^|$build |" | tee -a "$lines"
+    else
+      output=$(dotnet "$build/Dbhq.Machines.BbcMicro.SpeedNative.dll" 12)
+      grep -q '^prompt yes' <<<"$output" || { echo "no prompt from $build" >&2; echo "$output" >&2; exit 1; }
+      grep '^timed ' <<<"$output" | tail -n 10 | sed "s|^|$build |" | tee -a "$lines"
+    fi
+  done
+done
+echo "load after: $(cut -d' ' -f1-3 /proc/loadavg)  $(date -u +%H:%M:%S) UTC"
+
+python3 - "$lines" <<'PY'
+import collections, re, statistics, sys
+runs = collections.defaultdict(list)
+for line in open(sys.argv[1]):
+    runs[line.split()[0]].append(float(re.search(r"mhz=([\d.]+)", line).group(1)))
+for build, mhz in runs.items():
+    mhz.sort()
+    median = statistics.median(mhz)
+    print(f"{build}: runs={len(mhz)} median={median:.3f} MHz ({median / 2:.2f} times 2 MHz) "
+          f"best={mhz[-1]:.3f} slowest={mhz[0]:.3f}")
+PY
