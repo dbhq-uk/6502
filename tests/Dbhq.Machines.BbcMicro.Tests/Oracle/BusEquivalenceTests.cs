@@ -98,8 +98,8 @@ public class BusEquivalenceTests
 
         void SameCrtc()
         {
-            var expected = (oracle.Crtc.MemoryAddress, oracle.Crtc.RasterAddress, oracle.Crtc.DisplayEnable, oracle.Crtc.HSync, oracle.Crtc.VSync, oracle.Crtc.Cursor);
-            var actual = (bus.Crtc.MemoryAddress, bus.Crtc.RasterAddress, bus.Crtc.DisplayEnable, bus.Crtc.HSync, bus.Crtc.VSync, bus.Crtc.Cursor);
+            var expected = (oracle.Crtc.MemoryAddress, oracle.Crtc.RasterAddress, oracle.Crtc.DisplayEnable, oracle.Crtc.HSync, oracle.Crtc.VSync, oracle.Crtc.Cursor, oracle.Crtc.LineStartAddress, oracle.Crtc.VerticalDisplay);
+            var actual = (bus.Crtc.MemoryAddress, bus.Crtc.RasterAddress, bus.Crtc.DisplayEnable, bus.Crtc.HSync, bus.Crtc.VSync, bus.Crtc.Cursor, bus.Crtc.LineStartAddress, bus.Crtc.VerticalDisplay);
             if (expected != actual)
             {
                 Assert.Fail($"after access {accesses} at cycle {oracle.Cycles}: expected CRTC {expected}, was {actual}");

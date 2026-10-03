@@ -69,10 +69,10 @@ namespace Dbhq.Machines.BbcMicro;
 /// <b>Lazily, and exactly.</b> In a machine the chip reads the time from the machine's clock and
 /// does nothing when a cycle happens. Its character clock is every CPU cycle at 2 MHz and every
 /// even one at 1 MHz (the video ULA's control bit 4 chooses, <see cref="SetCharacterClock"/>).
-/// When anything looks at it, it works out the cycles owed: it steps the counters in whole runs
-/// of characters between the points of a line where something can happen (C0 = 0, 1, 2, R1,
-/// R2, the end of HSYNC, the middle of the line and the cursor), so a line costs a handful of
-/// steps, not a step a character. It also works out ahead when its next event is, a VSYNC edge
+/// When anything looks at it, it works out the cycles owed: the character that ends a line, and
+/// the middle of a line during a half-line VSYNC, are stepped one at a time (they are the only
+/// characters that can make an event), and every run of characters between them is worked out
+/// at once, so a line costs one or two steps, not a step a character. It also works out ahead when its next event is, a VSYNC edge
 /// or a frame start, and keeps the state it will have then, so the bus can look at it only at
 /// those cycles (<see cref="NextEventCycle"/>) and a look then costs nothing more. The test
 /// project holds a per-character model of the same rules and compares the two.
@@ -85,8 +85,8 @@ public sealed class Crtc6845
 
     // How far ahead a prediction looks, in steps (a step is a line's last character, or the
     // middle of a line in a half-line VSYNC, so about a line). Just after a register write the chip
-    // may be written again soon, so it looks only a few lines ahead; once things are quiet, about
-    // three fields.
+    // may be written again soon, so it looks only a few lines ahead; once things are quiet, 1,024
+    // lines, about three and a third fields.
     private const int QuickSteps = 4;
     private const int DeepSteps = 1024;
 
@@ -172,6 +172,33 @@ public sealed class Crtc6845
         }
     }
 
+    /// <summary>
+    /// MA at the start of the current line (C0 = 0): the address of the line's first character,
+    /// the same on every line of a character row. <see cref="MemoryAddress"/> is this plus C0.
+    /// </summary>
+    public int LineStartAddress
+    {
+        get
+        {
+            Sync();
+            return _s.LineStart;
+        }
+    }
+
+    /// <summary>
+    /// Whether the current line is inside the vertical display window: from a frame start to the
+    /// start of row R6, and never in the first field after a reset. DISPTMG is this and the
+    /// horizontal display (C0 below R1), delayed by the R8 skew.
+    /// </summary>
+    public bool VerticalDisplay
+    {
+        get
+        {
+            Sync();
+            return _s.VDisp && !_s.FirstField;
+        }
+    }
+
     /// <summary>HSYNC.</summary>
     public bool HSync
     {
@@ -205,8 +232,8 @@ public sealed class Crtc6845
 
     /// <summary>
     /// The machine's CPU cycle of this chip's next event (a VSYNC edge or a frame start), or a
-    /// later cycle at which to look again if none comes within about two fields. The bus need not
-    /// look at the chip before then.
+    /// later cycle at which to look again if none comes within 1,024 lines, about three and a third
+    /// fields. The bus need not look at the chip before then.
     /// </summary>
     internal long NextEventCycle
     {

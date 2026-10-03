@@ -306,6 +306,21 @@ they are now built.*
    video ULA has to draw pixels; it can draw the cycles owed in one tight loop when
    it is looked at, or when a frame ends, rather than being called on every
    access.
+6. **A chip that consumes another chip's output is driven by its own events.**
+   *Added in task 7's review.* The video ULA reads the CRTC's MA, RA, display
+   and cursor; that is the other way round from step 4, and it has three rules.
+   (a) It must not rely on the producer's inner stepping: the CRTC's progress
+   is nearly always a jump to the state it worked out ahead, which skips
+   `Advance` entirely, and its working-out happens early, before later writes.
+   So the consumer names its own events in the bus's minimum (a line start, or
+   a frame), and at each one brings the CRTC to that cycle (`SyncTo`) and reads
+   the point state it needs. (b) It must bring itself, and the producer, up to
+   date before any write that changes what it consumes: a CRTC register write
+   (R1, R12 and R13, the cursor) and the ULA's own registers. Screen memory the
+   CPU writes in the middle of a line is a question task 8 has to settle,
+   because catching up on every RAM write would put a cost on every write.
+   (c) It reads the point getters at most once a line;
+   one call a character is millions a second, more than the browser can spend.
 
 ### The final figures
 

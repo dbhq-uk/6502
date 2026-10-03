@@ -30,6 +30,10 @@ public sealed class ReferenceCrtc6845
 
     public int MemoryAddress => (_lineStart + _c0) & 0x3FFF;
 
+    public int LineStartAddress => _lineStart;
+
+    public bool VerticalDisplay => _vDisplay && !_firstField;
+
     public int RasterAddress => SyncAndVideo ? ((_c9 << 1) | (_parityOdd ? 1 : 0)) & 0x1F : _c9;
 
     public bool DisplayEnable

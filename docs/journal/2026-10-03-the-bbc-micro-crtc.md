@@ -180,6 +180,10 @@ real vsync interrupts, and passed on the first run. Three comparisons:
 - a fixed case: a write that brings the next VSYNC fall forward (R3 cut to one
   line, or the clock doubled) while the bus has already chosen its next look.
 
+The chip was written before these tests were first run, so the tests never
+failed against a missing chip the way the method asks (the brief's step 2).
+The planted mistakes below are the evidence that they can fail.
+
 **Planting mistakes.** Twenty-six deliberate one-line mistakes in the first
 version, each run against the whole BBC test project (`python3 /tmp/mut/run.py`,
 a scratch script, not committed). Twenty-two were caught, two of them only after
@@ -241,9 +245,38 @@ slower, which is what led to the second.
 
 ## For task 8
 
-The video ULA needs MA, RA, DISPTMG and CUDISP for every character it draws.
-The seam is ready for it in two ways: `SyncTo(cycle)` brings the CRTC to any
-past cycle, and `Advance` already walks a line in runs where MA counts up by
-one and RA, the display and the cursor are known at each end, so a sink there
-can hand the ULA one span at a time rather than one character. Frame starts are
-events the bus already looks at, so a frame-at-a-time ULA can draw there.
+*Corrected in review, the same day: this section first said the seam for the
+video ULA was ready, because `Advance` walks a line in spans and a sink there
+could hand the ULA a span at a time. That is wrong for the path the machine
+takes. Almost all of the CRTC's progress is the jump to the state it worked out
+ahead, which never calls `Advance`; a sink there would see nothing when the
+machine catches up, and would fire during the prediction instead, ahead of
+time, before later writes to screen memory or the palette. And the public
+outputs are point getters that each catch the chip up, so asking one every
+character would be about two million calls a second, which the browser cannot
+afford.*
+
+What a consumer of the CRTC's output has to do is now step 6 of "How a new chip
+plugs in" in [the bus speed entry](2026-10-03-the-bbc-micro-bus-speed.md): be
+driven by its own events, bring the CRTC to each event's cycle and read the
+state there, and bring itself and the CRTC up to date before any write that
+changes what it draws.
+
+After a catch-up the CRTC exposes, for the character it stands at: `MemoryAddress`
+(MA), `RasterAddress` (RA), `DisplayEnable` (DISPTMG with the skew), `HSync`,
+`VSync`, `Cursor` (CUDISP with the skew), and, added in review because a
+consumer drawing a line at a time needs them at the line's start,
+`LineStartAddress` (MA at C0 = 0, the same on every line of a row) and
+`VerticalDisplay` (whether the line is inside rows 0 to R6 - 1, and not in the
+first field after a reset). Both are tested against the section 5 numbers and
+compared with the plain model in both equivalence runs.
+
+What it does not expose yet, and a line-at-a-time ULA would want: an event at
+each line start (the bus looks only at VSYNC edges and frame starts today, so
+task 8 has to add one, or draw a frame's lines from a frame event); the
+horizontal display width for the line as the chip will apply it (R1, which a
+mid-line write can change); the line's cursor position and whether the blink
+shows it; and the skews from R8 as numbers rather than applied to the current
+character. Task 8 should add these as it needs them, each with a test against
+the plain model, and keep the per-cycle cost at nothing: the point getters are
+for once a line or less, never once a character.

@@ -277,6 +277,57 @@ public class Crtc6845Tests
         Assert.Equal(displayedLines, lit);
     }
 
+    [Theory]
+    [InlineData(0, 8, 256)]
+    [InlineData(7, 10, 250)]
+    public void TheLineStartAndTheVerticalDisplayAreWhatAScanlineNeeds(int mode, int linesPerRow, int displayedLines)
+    {
+        // What a consumer drawing a line at a time reads at the line's start: MA there, which
+        // holds for the whole line while MemoryAddress counts on, and whether the line is inside
+        // rows 0 to R6 - 1 (video.md s5: 256 lines in mode 0, 250 in mode 7).
+        Crtc6845 crtc = Programmed(mode);
+        RunToFrameStart(crtc);
+        int start = mode == 7 ? 0x2800 : 0x0600;
+        int r1 = mode == 7 ? 40 : 80;
+        int lineLength = mode == 7 ? 64 : 128;
+
+        int inside = 0;
+        for (int line = 0; line < 312; line++)
+        {
+            int lineStart = crtc.LineStartAddress;
+            bool vertical = crtc.VerticalDisplay;
+            Assert.Equal(lineStart, crtc.MemoryAddress);
+            if (line < displayedLines)
+            {
+                Assert.Equal((start + (line / linesPerRow * r1)) & 0x3FFF, lineStart);
+                Assert.True(vertical, $"line {line} is displayed");
+                inside++;
+            }
+            else
+            {
+                Assert.False(vertical, $"line {line} is not displayed");
+            }
+
+            Run(crtc, lineLength / 2);
+            Assert.Equal(lineStart, crtc.LineStartAddress);
+            Assert.Equal((lineStart + (lineLength / 2)) & 0x3FFF, crtc.MemoryAddress);
+            Run(crtc, lineLength / 2);
+        }
+
+        Assert.Equal(displayedLines, inside);
+    }
+
+    [Fact]
+    public void TheVerticalDisplayIsOffInTheFirstFieldAfterReset()
+    {
+        Crtc6845 crtc = Programmed(0);
+        Assert.False(crtc.VerticalDisplay);
+        Run(crtc, 100 * 128);
+        Assert.False(crtc.VerticalDisplay);
+        RunToFrameStart(crtc);
+        Assert.True(crtc.VerticalDisplay);
+    }
+
     [Fact]
     public void TheCursorIsOnLinesR10ToR11OfItsRowAtItsAddress()
     {

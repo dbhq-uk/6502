@@ -65,9 +65,9 @@ public class CrtcEquivalenceTests
         // The chip's outputs are read first: looking is what makes it catch up and raise its events.
         void Compare(Crtc6845 chip, int countsAt, string which)
         {
-            var expected = (oracle.MemoryAddress, oracle.RasterAddress, oracle.DisplayEnable, oracle.HSync, oracle.VSync, oracle.Cursor, counts[0], counts[1]);
-            var outputs = (chip.MemoryAddress, chip.RasterAddress, chip.DisplayEnable, chip.HSync, chip.VSync, chip.Cursor);
-            var actual = (outputs.Item1, outputs.Item2, outputs.Item3, outputs.Item4, outputs.Item5, outputs.Item6, counts[countsAt], counts[countsAt + 1]);
+            var expected = (oracle.MemoryAddress, oracle.RasterAddress, oracle.DisplayEnable, oracle.HSync, oracle.VSync, oracle.Cursor, oracle.LineStartAddress, oracle.VerticalDisplay, counts[0], counts[1]);
+            var outputs = (chip.MemoryAddress, chip.RasterAddress, chip.DisplayEnable, chip.HSync, chip.VSync, chip.Cursor, chip.LineStartAddress, chip.VerticalDisplay);
+            var actual = (outputs.Item1, outputs.Item2, outputs.Item3, outputs.Item4, outputs.Item5, outputs.Item6, outputs.Item7, outputs.Item8, counts[countsAt], counts[countsAt + 1]);
             if (expected != actual)
             {
                 Assert.Fail($"{which} at character {ticks} after {writes} writes: expected {expected}, was {actual}");
