@@ -42,34 +42,56 @@ public class SoundTests
         Assert.Equal(new byte[] { 0x90, 0x9F }, strobes);
     }
 
-    [Fact]
-    public void AWriteLandsAfterTheChipClockOfItsCpuCycle()
+    [Theory]
+    [InlineData(0, 0)]
+    [InlineData(0, 6)]
+    [InlineData(3, 0)]
+    [InlineData(3, 6)]
+    [InlineData(7, 0)]
+    [InlineData(7, 6)]
+    public void AWriteLandsAfterTheChipClockOfItsCpuCycle(int clockInSample, int cycleInClock)
     {
-        // 31,250 samples a second is eight chip clocks, 64 CPU cycles, a sample. Tone 1 at period 1
-        // toggles every clock, so a sample wholly after the write is half of a channel's share.
+        // The facts: a chip clock is 4 MHz / 16 against the CPU's 2 MHz, so every eighth CPU cycle,
+        // and a write in CPU cycle C lands after clock floor(C / 8) (s4.3, and the model's phase in
+        // known-differences.md). At 31,250 samples a second a sample is eight clocks: sample j is
+        // clocks 8j + 1 to 8j + 8. Periodic noise at rate 0 from its seed holds bit 0 low for 14
+        // shifts and then high for one shift, 32 clocks (s4.4, s4.2): a level that cannot move.
+        // Sounding the noise at full volume in clock K of that window sounds clocks K + 1 to 8j + 8 of
+        // its sample, 8 - (K mod 8) of them, each a quarter of the mix.
         var machine = new BbcMachine(BbcSession.Roms, new BbcOptions { SampleRate = 31_250 });
         BbcBus bus = machine.Bus;
         bus.PowerOnReset();
         bus.Write(0xFE42, 0x0F);
         bus.Write(0xFE43, 0xFF);
         bus.Write(0xFE40, 0x08);
-        foreach (byte value in new byte[] { 0x81, 0x00 })
-        {
-            bus.Write(0xFE4F, value);
-            bus.Write(0xFE40, 0x00);
-            bus.Write(0xFE40, 0x08);
-        }
+        bus.Write(0xFE4F, 0xE0); // periodic noise, rate 0: the shift register to its seed
+        bus.Write(0xFE40, 0x00);
+        bus.Write(0xFE40, 0x08);
 
-        // Past the count from power on (up to 1024 clocks), so the tone is toggling every clock.
-        bus.Write(0xFE4F, 0x90);
-        for (int i = 0; i < 10_000; i++)
+        // Wait for the window: bit 0 goes high at the fifteenth shift.
+        while (!bus.SoundChip.ChannelHigh(3))
+        {
+            bus.Read(0x0000);
+            Assert.True(bus.Cycles < 100_000, "the noise never went high");
+        }
+        long rise = bus.Cycles / 8;
+        bus.Write(0xFE4F, 0xF0); // noise attenuation 0 on PA; latch bit 0 is still high
+
+        // The clock to write in: after the rise, at the chosen place in its sample, and the write in
+        // the first or the last even CPU cycle of that clock. The write to ORB is held for the 1 MHz
+        // edge, one cycle from an even count and two from an odd one, then takes its own cycle
+        // (bus.md s2b), so it ends in cycle C + 2 + (C and 1), which is always even.
+        long clock = rise + 1;
+        while (clock % 8 != clockInSample)
+        {
+            clock++;
+        }
+        while (bus.Cycles + 2 + (bus.Cycles & 1) < (clock * 8) + cycleInClock)
         {
             bus.Read(0x0000);
         }
-
-        bus.Write(0xFE40, 0x00); // the strobe: tone 1 at full volume from this cycle's clock on
-        long cycle = bus.Cycles;
-        Assert.Equal(cycle / 8, bus.SoundChip.Clocks);
+        bus.Write(0xFE40, 0x00);
+        Assert.Equal((clock * 8) + cycleInClock, bus.Cycles);
         for (int i = 0; i < 1000; i++)
         {
             bus.Read(0x0000);
@@ -77,13 +99,23 @@ public class SoundTests
 
         var samples = new float[machine.Sound.Count];
         machine.Sound.Read(samples);
-        // Sample j is clocks 8j + 1 to 8j + 8: the one holding the write's clock is partly sounded,
-        // the one before is silent and the one after is wholly sounded.
-        int sample = (int)(cycle / 8 / 8);
-        Assert.Equal(0f, samples[sample - 1]);
-        Assert.InRange(samples[sample], 0f, 0.125f);
-        Assert.Equal(0.125f, samples[sample + 1]);
+        int sample = (int)(clock / 8);
         Assert.All(samples.Take(sample), s => Assert.Equal(0f, s));
+        Assert.Equal((8 - clockInSample) / 32f, samples[sample]);
+        Assert.Equal(0.25f, samples[sample + 1]);
+    }
+
+    [Fact]
+    public void OverrunsIsUpToDateWithoutARead()
+    {
+        // Three seconds of machine time into a buffer of one: two seconds' samples were dropped, and
+        // the count says so before anything reads the buffer.
+        var machine = new BbcMachine(BbcSession.Roms);
+        machine.PowerOn();
+        machine.Run(6_000_000);
+        long clocks = machine.Cycles / Sn76489.CpuCyclesPerClock;
+        long made = ((clocks + 1) * 48_000 - 1) / Sn76489.ClockRate;
+        Assert.Equal(made - 48_000, machine.Sound.Overruns);
     }
 
     [Fact]

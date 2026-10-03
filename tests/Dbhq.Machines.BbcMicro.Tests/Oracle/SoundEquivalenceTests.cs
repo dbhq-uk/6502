@@ -157,6 +157,112 @@ public class SoundEquivalenceTests
         Assert.True(heard > 50_000, $"only {heard} of {compared} samples were sounded");
     }
 
+    /// <summary>
+    /// The one shortcut the lazy chip takes: while the noise is silent only its state matters, so
+    /// the shifts in a span are first reduced by the register's own period, 32767 for white noise
+    /// and 15 for periodic. Spans of more than a whole period of shifts, at every rate, with the noise
+    /// silent and either everything else off (the run of silent samples) or the tones sounding and
+    /// the span longer than the buffer (the samples it would drop), and on a chip with no buffer.
+    /// </summary>
+    [Theory]
+    [InlineData(0xE4)]
+    [InlineData(0xE5)]
+    [InlineData(0xE6)]
+    [InlineData(0xE7)]
+    [InlineData(0xE0)]
+    [InlineData(0xE1)]
+    [InlineData(0xE2)]
+    [InlineData(0xE3)]
+    public void LongSilentNoiseSpansMatchTheOracle(int control)
+    {
+        const int rate = 48_000;
+        bool white = (control & 4) != 0;
+        int period = white ? 32767 : 15;
+        var random = new Random(control);
+        var buffer = new SoundBuffer(rate);
+        var chip = new Sn76489(buffer);
+        var bare = new Sn76489();
+        var reference = new ReferenceSn76489(rate);
+        var ring = new RingModel(rate);
+        long mostShifts = 0;
+        bool notWhole = false;
+
+        void Write(byte value)
+        {
+            chip.Write(value);
+            bare.Write(value);
+            reference.Write(value);
+        }
+
+        for (int round = 0; round < 6; round++)
+        {
+            // Tone 3 short, so rate 3 shifts often; the noise silent; the tones off or sounding.
+            int tone3 = random.Next(1, 40);
+            Write((byte)(0xC0 | (tone3 & 0x0F)));
+            Write((byte)(tone3 >> 4));
+            Write((byte)control);
+            Write(0xFF);
+            foreach (byte value in round % 2 == 0 ? new byte[] { 0x9F, 0xBF, 0xDF } : [0x90, 0xB4, 0xD8])
+            {
+                Write(value);
+            }
+
+            // A shift every 32, 64 or 128 clocks, or every two of tone 3's periods (s4.2, s4.8).
+            long clocksPerShift = (control & 3) switch
+            {
+                0 => 32,
+                1 => 64,
+                2 => 128,
+                _ => 2 * tone3,
+            };
+            // At least one whole period of shifts and not a whole number of them, and always longer
+            // than the buffer's second (250,000 clocks), so a span with the tones sounding drops samples.
+            long shifts = (period * (white ? 1 + random.Next(3) : random.Next(10_000, 40_000))) + random.Next(1, period);
+            while (shifts * clocksPerShift < 300_000)
+            {
+                shifts += period;
+            }
+            long span = (shifts * clocksPerShift) + random.Next((int)clocksPerShift);
+            long before = reference.Shifts;
+            chip.Run(span);
+            bare.Run(span);
+            reference.Run(span);
+            long done = reference.Shifts - before;
+            mostShifts = Math.Max(mostShifts, done);
+            notWhole |= done % period != 0;
+
+            Assert.Equal(reference.ShiftRegister, chip.ShiftRegister);
+            Assert.Equal(reference.ShiftRegister, bare.ShiftRegister);
+            for (int channel = 0; channel < 4; channel++)
+            {
+                Assert.Equal(reference.ChannelHigh(channel), chip.ChannelHigh(channel));
+                Assert.Equal(reference.ChannelHigh(channel), bare.ChannelHigh(channel));
+            }
+
+            ring.Take(reference.Samples);
+            var drained = new float[rate];
+            int count = buffer.Read(drained);
+            float[] expected = ring.Read(rate);
+            Assert.Equal(expected.Length, count);
+            for (int i = 0; i < count; i++)
+            {
+                Assert.True(expected[i] == drained[i], $"round {round}: sample {i} is {drained[i]}, the oracle {expected[i]}");
+            }
+            Assert.Equal(ring.Overruns, buffer.Overruns);
+
+            // The shift register sounded again for a moment, so its state is heard, not only compared.
+            Write(0xF0);
+            chip.Run(5_000);
+            bare.Run(5_000);
+            reference.Run(5_000);
+            Assert.Equal(reference.ShiftRegister, chip.ShiftRegister);
+        }
+
+        // Every span went round the register's whole period at least once, and not a whole number of times.
+        Assert.True(mostShifts >= period, $"the longest span made only {mostShifts} shifts");
+        Assert.True(notWhole, "every span made a whole number of periods of shifts");
+    }
+
     /// <summary>A byte the OS might write, and many it would not: every register, short periods, every noise mode.</summary>
     private static byte RandomByte(Random random) => random.Next(10) switch
     {

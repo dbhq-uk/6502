@@ -240,11 +240,15 @@ were caught at once. What caught each:
 | A span longer than the buffer keeping one sample too few | the chip equivalence test |
 | One sample a clock too long | the chip equivalence test |
 | The strobe taken when latch bit 0 rises | the write protocol test, the write's sample, the reset bytes |
-| The machine's chip clock rounded up from the CPU cycle | the write's sample, the machine equivalence test |
+| The machine's chip clock rounded up from the CPU cycle | the write's sample, the machine equivalence test (re-planted in the review round: the rewritten write-timing test, with writes in the last even cycle of a clock, and the machine equivalence test) |
 | A noise stretch a clock too long | both equivalence tests |
 | A write taken before the chip catches up | the write's sample, the beep, the machine equivalence test |
 | The noise flip-flop's level after a span the wrong way round | the noise rate tests, both equivalence tests |
 | Periodic noise reduced by 16 shifts in place of 15 | both equivalence tests |
+| White noise reduced by 32766 shifts in place of 32767 (review round) | the long silent noise test only |
+| White noise reduced by 32768 (review round) | the long silent noise test only |
+| Periodic noise reduced by 14 (review round) | the long silent noise test and both equivalence tests |
+| The machine's chip clock one CPU cycle behind (review round) | the rewritten write-timing test, the machine equivalence test |
 | The buffer's read not wrapping round the ring | the buffer's test, both equivalence tests |
 | The mix not divided by four | six, the samples of the `SOUND` command among them |
 
@@ -271,6 +275,58 @@ before it first ran.
 `dotnet test tests/Dbhq.Machines.BbcMicro.Tests -c Release`: 62 new test cases,
 853 in the project, all passing; `dotnet test -c Release` for the whole
 solution, all passing.
+
+### The review round
+
+The reviewer found the one gap that matters. **The chip's single shortcut was
+never tested.** While the noise is silent only its state matters, so the number
+of shifts in a span is reduced by the register's period before it is stepped
+(32767 for white noise, 15 for periodic). The reviewer changed 32767 to 32766
+and all eight runs of the random equivalence test still passed, while the
+reviewer's own adversarial test failed on all twelve of its seeds. The random
+test's longest span, 700,000 clocks, is at most 21,875 shifts at noise rates 0
+to 2, so a silent span never reached a whole period of white noise; and the
+spans that did at rate 3 were sounded, which steps every shift and never takes
+the shortcut. My mutation pass had planted 16 for the periodic modulus, which
+the random test caught, and never the white one. A new test,
+`LongSilentNoiseSpansMatchTheOracle`, runs every noise control (white and
+periodic, rates 0 to 3, tone 3 short for rate 3) with the noise silent, six
+spans each of more than a whole period of shifts and not a whole number of
+them, alternately with everything else off (the run of silent samples) and
+with the tones sounding over more than the buffer's second (the samples it
+drops), on a chip with a buffer and one without, against the oracle, which now
+counts its shifts. It asserts that some span made at least a whole period of
+shifts and that some span did not make a whole number of periods. With it the reviewer's mutant fails, and so do 32768 in place of 32767 and 14
+or 16 in place of 15, each planted in the scratch copy and reverted
+(`python3 /tmp/t11mut/mutate.py`, rows marked "review round" in the table
+above). The white ones are caught by the new test alone, which is the gap it
+closes.
+
+The smaller points, all taken:
+
+- The write-timing test asserted that the chip had done `cycle / 8` clocks
+  after the write, which could never fail, because reading the count catches
+  the chip up to now; and it allowed the write's own sample anything from 0 to
+  0.125, so a write a clock early or late in that sample got through. It is
+  rewritten: it waits for periodic noise at rate 0 to raise its output for one
+  shift, 32 clocks in which the level cannot move (s4.4, s4.2), then times the
+  strobe into clock 0, 3 and 7 of a sample, each with the write in the first
+  and in the last even CPU cycle of its clock, and expects exactly 8, 5 and 1
+  clocks of a quarter each, from the s4.3 clock and the sample rule. The first
+  version of the rewrite timed every write into the first cycle of its clock,
+  where rounding the CPU cycle up and rounding it down give the same clock, and
+  the rounded-up mutant got past it; the last-cycle cases catch it.
+- `SoundBuffer.Overruns` did not catch the chip up before answering, as `Count`
+  and `Read` do, so a page reading it first got an old figure. It does now, and
+  a test reads it with no read before it.
+- The sheet's s4.8 row for `&9F, &BF, &DF, &FF` still called them the OS reset
+  sequence; it now says all four channels off and points to s4.7.
+- The bench's `tone` load now stops with an error if any field's samples are all
+  silent, so a figure for it cannot come from a load the OS had quietly turned
+  off.
+
+`dotnet test tests/Dbhq.Machines.BbcMicro.Tests -c Release` after the round:
+867 test cases, all passing (14 more: eight for the long silent noise, five more write-timing cases, and the overruns test).
 
 ## The speed
 
@@ -305,8 +361,15 @@ cycles a second, with multiples of 2 MHz:
 | Native, old first, 22:37 | 0.58 to 0.57 | 26.605 | 25.724 |
 | Native, new first, 22:37 | 0.57 to 3.27 | 27.370 | 28.561 |
 
-The two builds are level within the spread of a set, which is what the code
-says they should be. **But both are under ten times in most sets, the old code
+The two builds are level within the noise, which is what the code says they
+should be. *Reworded in the review round: this said "within the spread of a set",
+which no figure here gives.* The new code's median over the old's, set by set in
+the order of the browser rows, is 0.78, 1.05, 0.97, 1.01, 0.88, 0.97, 1.36, 1.44
+and 1.62 (worked in Python from the medians above; the reviewer had 0.98 for the
+third, which is 0.9746 rounded the other way). The median of the old code's nine
+medians is 8.28 times 2 MHz and of the new code's 8.92, and the median ratio is
+1.01. The last two sets put the new code 44 and 62 per cent ahead, which is the
+host, not the code: nothing on the CPU's path changed. **But both are under ten times in most sets, the old code
 included, which the earlier tasks measured at twelve to fourteen.** The load
 average does not explain it: the 22:35 sets ran at a load of about one. The
 machine itself was slow. The bench's `--profile` mode, run on the old code at

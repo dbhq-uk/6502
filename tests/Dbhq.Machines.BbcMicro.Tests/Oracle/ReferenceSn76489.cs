@@ -48,6 +48,9 @@ internal sealed class ReferenceSn76489
 
     public int ShiftRegister => _shift;
 
+    /// <summary>Shifts of the noise register since power on.</summary>
+    public long Shifts { get; private set; }
+
     public int TonePeriod(int channel) => _period[channel];
 
     public int Attenuation(int channel) => _attenuation[channel];
@@ -123,6 +126,7 @@ internal sealed class ReferenceSn76489
             {
                 int feedback = (_noise & 4) != 0 ? (_shift ^ (_shift >> 1)) & 1 : _shift & 1;
                 _shift = (_shift >> 1) | (feedback << 14);
+                Shifts++;
             }
         }
 

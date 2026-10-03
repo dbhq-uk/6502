@@ -61,6 +61,7 @@ public static partial class BbcHost
     }
 
     private static readonly float[] Samples = new float[48_000];
+    private static bool _tone;
 
     /// <summary>
     /// For the speed check's sound load: <paramref name="kind"/> "tone" sets all four channels
@@ -80,11 +81,13 @@ public static partial class BbcHost
         {
             Machine.Bus.SoundChip.Write(value);
         }
+        _tone = kind == "tone";
     }
 
     /// <summary>
     /// As <see cref="Run"/>, reading the sound buffer every 40,000 cycles, a field, as a page reads
-    /// it every frame, and returns the cycles since power on.
+    /// it every frame, and returns the cycles since power on. After <see cref="SoundOn"/> with
+    /// "tone" it throws if a field's samples were all silent.
     /// </summary>
     [JSExport]
     public static double RunWithSound(int cycles)
@@ -93,7 +96,13 @@ public static partial class BbcHost
         while (Machine.Cycles < end)
         {
             Machine.Run(Math.Min(40_000, end - Machine.Cycles));
-            Machine.Sound.Read(Samples);
+            int read = Machine.Sound.Read(Samples);
+
+            // The OS can write the chip at any time; the load's figure means nothing if it fell silent.
+            if (_tone && !Samples.AsSpan(0, read).ContainsAnyExcept(0f))
+            {
+                throw new InvalidOperationException("the tone load went silent");
+            }
         }
         return Machine.Cycles;
     }

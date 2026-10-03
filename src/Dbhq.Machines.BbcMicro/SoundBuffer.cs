@@ -23,6 +23,7 @@ public sealed class SoundBuffer
     private readonly float[] _ring;
     private int _head;
     private int _count;
+    private long _overruns;
 
     /// <param name="sampleRate">Samples a second, 1 to 250,000: the chip clock, 250 kHz, is the most a sample can be cut to.</param>
     public SoundBuffer(int sampleRate)
@@ -49,8 +50,15 @@ public sealed class SoundBuffer
         }
     }
 
-    /// <summary>Samples dropped, oldest first, because the buffer was full.</summary>
-    public long Overruns { get; private set; }
+    /// <summary>Samples dropped, oldest first, because the buffer was full, brought up to now first.</summary>
+    public long Overruns
+    {
+        get
+        {
+            Filling?.Invoke();
+            return _overruns;
+        }
+    }
 
     /// <summary>The chip that fills this buffer, asked to catch up before the buffer is read; null for a buffer on its own.</summary>
     internal Action? Filling { get; set; }
@@ -62,7 +70,7 @@ public sealed class SoundBuffer
         {
             _head = _head + 1 == _ring.Length ? 0 : _head + 1;
             _count--;
-            Overruns++;
+            _overruns++;
         }
 
         int tail = _head + _count;
@@ -91,7 +99,7 @@ public sealed class SoundBuffer
     {
         if (samples >= _ring.Length)
         {
-            Overruns += _count + samples - _ring.Length;
+            _overruns += _count + samples - _ring.Length;
             Array.Clear(_ring);
             _head = 0;
             _count = _ring.Length;
@@ -104,7 +112,7 @@ public sealed class SoundBuffer
         {
             _head = (_head + drop) % _ring.Length;
             _count -= drop;
-            Overruns += drop;
+            _overruns += drop;
         }
 
         int tail = (_head + _count) % _ring.Length;
@@ -115,5 +123,5 @@ public sealed class SoundBuffer
     }
 
     /// <summary>Counts <paramref name="samples"/> that were made and dropped at once without being written, because newer ones would push them out.</summary>
-    internal void Drop(long samples) => Overruns += samples;
+    internal void Drop(long samples) => _overruns += samples;
 }

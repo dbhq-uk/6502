@@ -948,7 +948,7 @@ Register byte tests. All [from SMS and DS].
 | &8C then &8F (no data byte) | tone 1 low nibble goes &C then &F. The high 6 bits stay as they were. |
 | &90 | attenuation 1 = 0, full volume |
 | &9F | attenuation 1 = 15, off |
-| &9F, &BF, &DF, &FF | all four channels off (the OS reset sequence) |
+| &9F, &BF, &DF, &FF | all four channels off (the OS's own reset sequence writes these with pitch bytes between them: s4.7) |
 | &DF then &00 | attenuation of chip tone 3 set to 15, then updated to 0 by the data byte (data byte is not ignored) |
 | &E5 | noise: FB = 1 (white), NF = 01 (N/1024 = 3906.25 Hz). Resets the LFSR to &4000. |
 | &E4 | noise: white, NF = 00 (N/512 = 7812.5 Hz) |

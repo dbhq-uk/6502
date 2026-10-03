@@ -81,7 +81,7 @@ static void Speed(BbcRoms roms, int runs, int cycles, int mode, string screen, s
         }
         else
         {
-            SoundLoad.RunAndRead(machine, cycles);
+            SoundLoad.RunAndRead(machine, cycles, sound == "tone");
         }
         Report("timed " + i, machine.Cycles - start, clock.Elapsed.TotalMilliseconds);
     }
@@ -431,13 +431,20 @@ internal static class SoundLoad
         }
     }
 
-    public static void RunAndRead(BbcMachine machine, long cycles)
+    /// <summary>Runs in fields, reading the buffer after each; with <paramref name="tone"/>, stops if a field was silent.</summary>
+    public static void RunAndRead(BbcMachine machine, long cycles, bool tone)
     {
         long end = machine.Cycles + cycles;
         while (machine.Cycles < end)
         {
             machine.Run(Math.Min(40_000, end - machine.Cycles));
-            machine.Sound.Read(Samples);
+            int read = machine.Sound.Read(Samples);
+
+            // The OS can write the chip at any time; the load's figure means nothing if it fell silent.
+            if (tone && !Samples.AsSpan(0, read).ContainsAnyExcept(0f))
+            {
+                throw new InvalidOperationException("the tone load went silent");
+            }
         }
     }
 }
