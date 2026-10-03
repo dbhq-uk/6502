@@ -44,6 +44,7 @@ public sealed class Framebuffer
 
     private readonly uint[] _pixels = new uint[PixelsAcross * Rows];
     private long _frames;
+    private long _written;
 
     internal Framebuffer()
     {
@@ -76,6 +77,20 @@ public sealed class Framebuffer
         }
     }
 
+    /// <summary>
+    /// How many pixels the video ULA has written since the machine was made, black ones included:
+    /// a measure of the drawing's work, for tests and the speed bench. A black write over a row
+    /// already black is skipped and not counted.
+    /// </summary>
+    public long PixelsWritten
+    {
+        get
+        {
+            BeforeRead?.Invoke();
+            return _written;
+        }
+    }
+
     /// <summary>What a reader would see at (<paramref name="x"/>, <paramref name="y"/>).</summary>
     public uint Pixel(int x, int y)
     {
@@ -91,6 +106,9 @@ public sealed class Framebuffer
 
     /// <summary>The pixels, for the ULA to draw into, without bringing anything up to date.</summary>
     internal uint[] Buffer => _pixels;
+
+    /// <summary>Counts pixels written.</summary>
+    internal void Wrote(int pixels) => _written += pixels;
 
     /// <summary>Counts a completed frame.</summary>
     internal void FrameDone() => _frames++;

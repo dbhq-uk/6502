@@ -88,6 +88,12 @@ public sealed class SystemVia : Via6522
     public event Action<byte>? SoundWrite;
 
     /// <summary>
+    /// Latch bit 4 or 5, the screen start adder, is about to change: the video ULA draws up to now
+    /// with the old bits first. Raised from inside a write to the chip, before the latch changes.
+    /// </summary>
+    internal event Action? ScreenLatchChanging;
+
+    /// <summary>
     /// The 6845's VSYNC output, which drives CA1: for a system VIA on its own. In a machine the
     /// CRTC drives CA1 (<see cref="BbcBus.Crtc"/>), and a level set here is overwritten at its
     /// next edge.
@@ -218,7 +224,13 @@ public sealed class SystemVia : Via6522
         bool high = (pins & 0x08) != 0;
         bool soundWasHigh = (Latch & 0x01) != 0;
 
-        Latch = high ? (byte)(Latch | (1 << bit)) : (byte)(Latch & ~(1 << bit));
+        byte latch = high ? (byte)(Latch | (1 << bit)) : (byte)(Latch & ~(1 << bit));
+        if (((latch ^ Latch) & 0x30) != 0)
+        {
+            ScreenLatchChanging?.Invoke();
+        }
+
+        Latch = latch;
 
         if (bit == 0 && soundWasHigh && !high)
         {

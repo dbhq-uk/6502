@@ -313,14 +313,26 @@ or the model takes a shortcut, it chooses:
 - **Screen memory is read when a line is drawn, not in each byte's own
   cycle.** The ULA draws a line at its last character, or up to a register
   write that comes first, and reads that stretch's bytes then. A store to screen
-  memory in the middle of a line's scan is seen by the whole of that stretch,
-  where a real ULA fetching byte by byte would show the old bytes left of the
-  store and the new ones right of it. Register writes (palette, control, CRTC,
-  the latch) are exact to the character; screen memory writes are exact to the
-  line. Doing better would mean logging every store the CPU makes to RAM, which
-  is most of its writes, so every program would pay for the few that race the
-  beam. The equivalence tests change screen memory only where the two readings
-  agree, which is why they can be exact.
+  memory in the middle of a line's scan is seen by the whole of the stretch
+  drawn after it, where a real ULA fetching byte by byte would show the old
+  bytes left of the store and the new ones right of it. Doing better would mean
+  logging every store the CPU makes to RAM, which is most of its writes, so
+  every program would pay for the few that race the beam. The equivalence tests
+  change screen memory only where the two readings agree, which is why they can
+  be exact.
+- **Register writes are exact to the character, not the cycle.** Palette,
+  control, CRTC and latch writes are seen from the first character clocked after
+  the write's cycle. At 1 MHz (modes 4 to 6) a character lasts two CPU cycles,
+  and a write in the second of them is still applied from the next character,
+  half a character (8 of the framebuffer's pixels) after the write: the ULA's
+  pipeline delay is not known (next item), so placing a write inside a character
+  would be guesswork. `APaletteChangeInTheMiddleOfALineChangesTheColourFromTheNextCharacter`
+  pins both halves.
+- **Together these narrow Dan's choice** in the design of a cycle-accurate video
+  path rather than a scanline renderer: registers to the character, screen
+  memory to the line. The narrowing was the task 8 controller's, for speed, and
+  the journal entry for 3 October 2026 says exactly what is and is not
+  cycle-exact.
 - **The ULA's pipeline is taken to have no delay.** `video.md` s6 item 3: how
   many characters lie between the CRTC's fetch and the pixel is not documented,
   and nor is how DISEN and CURSOR line up with it. The model has none

@@ -62,8 +62,9 @@ namespace Dbhq.Machines.BbcMicro;
 /// <para>
 /// <b>What is not exact.</b> A line's bytes are read from RAM when the line is drawn, at its end
 /// or at the last write before it, not in each byte's own cycle, so a store to screen memory in
-/// the middle of a line's scan is seen by the whole of that line, or none of it, depending on
-/// where it fell. Logging every store to RAM to do better would cost every write the CPU makes.
+/// the middle of a line's scan is seen by the whole of the stretch drawn after it. At 1 MHz a
+/// register write in a character's second cycle is applied from the next character, half a
+/// character late, because the pipeline is not known well enough to place it inside one. Logging every store to RAM to do better would cost every write the CPU makes.
 /// The ULA's pipeline, from a byte's fetch to its pixels, is not documented (s6 item 3); the
 /// model has none (<see cref="PipelineDelayCharacters"/>). Both are in
 /// <c>docs/known-differences.md</c>.
@@ -121,8 +122,17 @@ public sealed class VideoUla : ICrtcConsumer
     private readonly int[] _patternStamps = new int[256];
     private int _stamp = 1;
 
-    // Rows known to be wholly black, so a line that draws nothing does not paint black over black.
+    // Rows known to be wholly black, and how many are not. A flag is cleared before anything but
+    // black is written to its row, so a set flag always means the row is black, and every black
+    // write over a flagged row is skipped: a line that draws nothing paints nothing, and a field
+    // that ends early clears only the rows that need it. Before the OS has programmed the CRTC its
+    // registers are zero and a frame is a line long, so this is what keeps power on cheap.
     private readonly bool[] _rowBlack = MakeAllTrue(Framebuffer.Rows);
+    private int _rowsNotBlack;
+
+    // Whether the line being drawn has written nothing but black, so its rows are black when it
+    // ends, however many pieces it was drawn in.
+    private bool _lineBlack;
 
     // In a machine: where the ULA reads from, and how far it has drawn. _done is the cycle its
     // drawing stands at; _c0 is the CRTC's C0 then; _hd and the histories are the CRTC's
@@ -170,6 +180,8 @@ public sealed class VideoUla : ICrtcConsumer
         _done = clock.Cycles;
         StartFromCrtc(crtc.StateAt(clock.Cycles));
         crtc.Consumer = this;
+        crtc.SetCharacterClock(TwoMhz);
+        systemVia.ScreenLatchChanging += SyncToNow;
         Screen.BeforeRead = SyncToNow;
     }
 
@@ -228,11 +240,15 @@ public sealed class VideoUla : ICrtcConsumer
         return address;
     }
 
-    /// <summary>Writes the control register, after drawing up to now with the old value.</summary>
+    /// <summary>
+    /// Writes the control register, after drawing up to now with the old value. In a machine bit 4
+    /// is the CRTC's clock, and the ULA sets it here, so a write by any path keeps the two agreeing.
+    /// </summary>
     public void WriteControl(byte value)
     {
         SyncToNow();
         Control = value;
+        _crtc?.SetCharacterClock((value & 0x10) != 0);
         int shape = (value >> 2) & 7;
         if (shape != _shape)
         {
@@ -491,6 +507,7 @@ public sealed class VideoUla : ICrtcConsumer
         int line = state.LineInFrame;
         _lineStart = lineStart;
         _x = 0;
+        _lineBlack = true;
         _fieldOdd = state.OddField;
         _fieldInterlace = state.Interlace;
         if (line >= 256)
@@ -515,36 +532,48 @@ public sealed class VideoUla : ICrtcConsumer
     /// <summary>The rest of the line the drawing stands in, past its last character, is black.</summary>
     private void FinishLine()
     {
-        if (_rowA < 0 || _x >= Width)
+        if (_rowA < 0)
         {
             return;
         }
 
-        uint[] pixels = Screen.Buffer;
-        pixels.AsSpan(_rowA + _x, Width - _x).Fill(Black);
-        if (_rowB >= 0)
+        if (_x < Width)
         {
-            pixels.AsSpan(_rowB + _x, Width - _x).Fill(Black);
+            if (!_rowBlack[_rowA / Width])
+            {
+                FillBlack(_rowA + _x, Width - _x);
+            }
+
+            if (_rowB >= 0 && !_rowBlack[_rowB / Width])
+            {
+                FillBlack(_rowB + _x, Width - _x);
+            }
+            _x = Width;
         }
-        _x = Width;
+
+        if (_lineBlack)
+        {
+            KnownBlack(_rowA);
+            if (_rowB >= 0)
+            {
+                KnownBlack(_rowB);
+            }
+        }
     }
 
     /// <summary>A field ends: the rows of the lines it did not reach are black, and a completed one is counted.</summary>
     private void EndField(bool completed)
     {
-        uint[] pixels = Screen.Buffer;
-        for (int line = _fieldLines; line < 256; line++)
+        for (int line = _fieldLines; line < 256 && _rowsNotBlack > 0; line++)
         {
             if (_fieldInterlace)
             {
-                int row = (2 * line) + (_fieldOdd ? 1 : 0);
-                pixels.AsSpan(row * Width, Width).Fill(Black);
-                _rowBlack[row] = true;
+                PaintBlack(((2 * line) + (_fieldOdd ? 1 : 0)) * Width);
             }
             else
             {
-                pixels.AsSpan(2 * line * Width, 2 * Width).Fill(Black);
-                _rowBlack[2 * line] = _rowBlack[(2 * line) + 1] = true;
+                PaintBlack(2 * line * Width);
+                PaintBlack(((2 * line) + 1) * Width);
             }
         }
 
@@ -573,9 +602,9 @@ public sealed class VideoUla : ICrtcConsumer
         int width = state.CyclesPerCharacter * 8;
         int x = (int)(firstCycle - _lineStart) * 8;
         int copyFrom = Math.Min(Math.Min(_x, x), Width);
-        if (rowA >= 0 && x > _x && _x < Width)
+        if (rowA >= 0 && x > _x && _x < Width && !_rowBlack[rowA / Width])
         {
-            pixels.AsSpan(rowA + _x, Math.Min(x, Width) - _x).Fill(Black);
+            FillBlack(rowA + _x, Math.Min(x, Width) - _x);
         }
 
         int r1 = state.HorizontalDisplayed;
@@ -612,9 +641,9 @@ public sealed class VideoUla : ICrtcConsumer
                     }
                     copyFrom = Width;
                 }
-                else
+                else if (!_rowBlack[rowA / Width])
                 {
-                    pixels.AsSpan(rowA + x, Math.Min(stop, Width) - x).Fill(Black);
+                    FillBlack(rowA + x, Math.Min(stop, Width) - x);
                 }
             }
             x = stop;
@@ -624,10 +653,10 @@ public sealed class VideoUla : ICrtcConsumer
         Span<uint> row = rowA >= 0 ? pixels.AsSpan(rowA, Width) : default;
         if (rowA >= 0 && c < end && x < Width)
         {
-            _rowBlack[rowA / Width] = false;
+            Drawn(rowA);
             if (rowB >= 0)
             {
-                _rowBlack[rowB / Width] = false;
+                Drawn(rowB);
             }
         }
 
@@ -696,6 +725,7 @@ public sealed class VideoUla : ICrtcConsumer
                     }
                 }
                 x += straight * width;
+                Screen.Wrote(straight * width);
 
                 // As the CRTC's histories would stand: the display on, no cursor.
                 dh = straight >= 3 ? 7 : ((dh << straight) | ((1 << straight) - 1)) & 7;
@@ -711,7 +741,7 @@ public sealed class VideoUla : ICrtcConsumer
                 int stop = x + ((end - c) * width);
                 if (rowA >= 0 && x < Width)
                 {
-                    pixels.AsSpan(rowA + x, Math.Min(stop, Width) - x).Fill(Black);
+                    FillBlack(rowA + x, Math.Min(stop, Width) - x);
                 }
                 x = stop;
                 break;
@@ -742,6 +772,7 @@ public sealed class VideoUla : ICrtcConsumer
 
             bool fits = x + width <= Width;
             Span<uint> into = fits ? row.Slice(x, width) : _scratch.AsSpan(0, width);
+            Screen.Wrote(fits ? width : Width - x);
             if (!blanked && displaySkew != 3 && ((dh >> displaySkew) & 1) != 0)
             {
                 DrawByte(ram[ScreenAddress(lineAddress + c, ra, latch)], into);
@@ -766,12 +797,14 @@ public sealed class VideoUla : ICrtcConsumer
         }
 
         _cursorAge = age;
-        if (rowA >= 0 && rowB >= 0)
+        if (rowA >= 0 && rowB >= 0 && !(_rowBlack[rowA / Width] && _rowBlack[rowB / Width]))
         {
+            // Both rows black already: nothing to copy.
             int copyTo = Math.Min(x, Width);
             if (copyTo > copyFrom)
             {
                 pixels.AsSpan(rowA + copyFrom, copyTo - copyFrom).CopyTo(pixels.AsSpan(rowB + copyFrom));
+                Screen.Wrote(copyTo - copyFrom);
             }
         }
         _x = x;
@@ -780,11 +813,39 @@ public sealed class VideoUla : ICrtcConsumer
     /// <summary>Makes the row starting at pixel <paramref name="row"/> black, unless it is known to be.</summary>
     private void PaintBlack(int row)
     {
+        if (!_rowBlack[row / Width])
+        {
+            FillBlack(row, Width);
+            KnownBlack(row);
+        }
+    }
+
+    /// <summary>The row starting at pixel <paramref name="row"/> is all black now.</summary>
+    private void KnownBlack(int row)
+    {
         int index = row / Width;
         if (!_rowBlack[index])
         {
-            Screen.Buffer.AsSpan(row, Width).Fill(Black);
             _rowBlack[index] = true;
+            _rowsNotBlack--;
         }
+    }
+
+    /// <summary>The row starting at pixel <paramref name="row"/> is about to get more than black.</summary>
+    private void Drawn(int row)
+    {
+        _lineBlack = false;
+        int index = row / Width;
+        if (_rowBlack[index])
+        {
+            _rowBlack[index] = false;
+            _rowsNotBlack++;
+        }
+    }
+
+    private void FillBlack(int from, int length)
+    {
+        Screen.Buffer.AsSpan(from, length).Fill(Black);
+        Screen.Wrote(length);
     }
 }

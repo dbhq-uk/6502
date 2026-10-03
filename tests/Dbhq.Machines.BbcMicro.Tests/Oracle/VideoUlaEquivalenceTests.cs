@@ -11,9 +11,8 @@ namespace Dbhq.Machines.BbcMicro.Tests.Oracle;
 /// </summary>
 /// <remarks>
 /// <para>
-/// Screen memory is changed only straight after a write that brings the lazy ULA up to its cycle
-/// (the CRTC's data register, the ULA's two registers, or the system VIA's ORB and DDRB), so both
-/// read it at the same point. That is the one thing the lazy ULA knowingly does differently: it
+/// Screen memory is changed only after the lazy ULA has been brought up to the cycle (reading the
+/// picture does that), so both read it at the same point. That is the one thing the lazy ULA knowingly does differently: it
 /// reads a line's bytes when it draws the line, not in each byte's own cycle
 /// (<c>docs/known-differences.md</c>), and a change made at any other moment would show that.
 /// </para>
@@ -66,6 +65,9 @@ public class VideoUlaEquivalenceTests
 
         void Poke(int count)
         {
+            // Reading the picture brings the lazy ULA up to now, so both have read screen memory
+            // as it stood before the poke.
+            _ = bus.Screen.Frames;
             for (int i = 0; i < count; i++)
             {
                 ushort address = (ushort)random.Next(0x3000, 0x8000);

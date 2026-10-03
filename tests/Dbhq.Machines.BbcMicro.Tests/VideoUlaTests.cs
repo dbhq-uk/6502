@@ -375,7 +375,7 @@ public class VideoUlaTests
         // right border". Mode 2's four-character cursor at the last displayed character, with
         // R1 cut to 70 so the border is in the picture and R8 = $81: interlace, the display not
         // delayed and CUDISP delayed two characters (s1.3). CUDISP comes at character 71, so
-        // characters 71 to 74 are inverted, the last two after the display has ended.
+        // characters 71 to 74 are inverted, all four in the border, after the display has ended.
         var rig = new Rig(2);
         rig.Crtc(1, 70);
         rig.Crtc(8, 0x81);
@@ -479,6 +479,72 @@ public class VideoUlaTests
             }
         }
         Assert.True(lit > 100, $"only {lit} white pixels on the banner's row");
+    }
+
+    [Fact]
+    public void BeforeTheOsProgramsTheCrtcNothingIsPaintedOverTheBlackScreen()
+    {
+        // At power on every CRTC register is 0, so a frame is a line of one character and a
+        // field ends every few cycles with almost every row unreached. Those rows are black
+        // already, and painting them black again in every such frame made the first moments of
+        // a boot run slower than a real BBC Micro (task 8's review). Counted, not timed: in a
+        // quarter of a million cycles of that, not one pixel may be written.
+        var bus = new BbcBus(BbcSession.Roms);
+        bus.PowerOnReset();
+        long frames = bus.Screen.Frames;
+        long written = bus.Screen.PixelsWritten;
+        for (int i = 0; i < 250_000; i++)
+        {
+            bus.Read(0x0000);
+        }
+
+        Assert.True(bus.Screen.Frames - frames > 10_000, $"only {bus.Screen.Frames - frames} frames");
+        Assert.Equal(written, bus.Screen.PixelsWritten);
+    }
+
+    [Fact]
+    public void AFieldWritesEachRowOfItsLinesOnceInAModeThatDrawsThem()
+    {
+        // Mode 1 interlaced, every byte $FF: a field of 256 displayed lines writes 256 rows of 640
+        // pixels and nothing more, so the drawing's work is the picture's size.
+        var rig = new Rig(1);
+        rig.Fill(0xFF);
+        rig.RunFrames(2);
+
+        // From one frame start to the next, a cycle at a time.
+        void ToFrameStart()
+        {
+            long frames = rig.Bus.Screen.Frames;
+            while (rig.Bus.Screen.Frames == frames)
+            {
+                rig.Bus.Read(0x0000);
+            }
+        }
+
+        ToFrameStart();
+        long written = rig.Bus.Screen.PixelsWritten;
+        ToFrameStart();
+        Assert.Equal(256 * 640, rig.Bus.Screen.PixelsWritten - written);
+    }
+
+    [Fact]
+    public void AFieldThatEndsEarlyBlanksTheRowsItDidNotReach()
+    {
+        // Mode 4, one white character on line 255, the last kept (row 31, line 7: $5800 + 31 *
+        // 320 + 7). Then frames of two rows that display nothing (R4 = 1, R6 = 0; C4 still reaches
+        // R6, so the parity still alternates): line 255 is never reached again, and each field
+        // must clear the rows it did not reach, down to the last one, which is the white one.
+        var rig = new Rig(4);
+        rig.Bus.PokeRam(0x5800 + (31 * 320) + 7, 0xFF);
+        rig.RunFrames(3);
+        Assert.Equal(W, rig.At(0, 510));
+        Assert.Equal(W, rig.At(0, 511));
+
+        rig.Crtc(4, 1);
+        rig.Crtc(6, 0);
+        rig.RunFrames(4);
+        Assert.Equal(K, rig.At(0, 510));
+        Assert.Equal(K, rig.At(0, 511));
     }
 
     [Fact]

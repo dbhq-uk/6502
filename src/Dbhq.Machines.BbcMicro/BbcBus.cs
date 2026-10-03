@@ -63,9 +63,10 @@ namespace Dbhq.Machines.BbcMicro;
 /// cycle is its event. Line ends come every 64 microseconds and can never move the IRQ line, so
 /// they are kept apart from the chips' events (<see cref="BbcClock.ChipEvent"/>): at a line end
 /// the bus has the ULA draw and does nothing else. Before any write that changes what the ULA
-/// draws (its own registers, a CRTC register, the system VIA's ORB and DDRB, which strobe the
-/// screen start latch bits) the ULA draws up to the write's cycle first, and the CRTC brings the
-/// ULA up to any cycle before moving there itself.
+/// draws the ULA draws up to the write's cycle first: its own registers do it themselves (and the
+/// control register sets the CRTC's clock), the system VIA reports a change to the latch's
+/// screen start bits before making it, and the CRTC brings the ULA up to any cycle before
+/// moving there itself, so a direct call to any of the chips keeps them agreeing.
 /// </para>
 /// </remarks>
 public sealed class BbcBus : IBus
@@ -234,7 +235,6 @@ public sealed class BbcBus : IBus
         UserVia.Reset();
         Crtc.Reset();
         VideoUla.PowerOn();
-        Crtc.SetCharacterClock(VideoUla.TwoMhz);
         ChipAccessed();
         Service();
     }
@@ -427,10 +427,8 @@ public sealed class BbcBus : IBus
                 // to this cycle with what it had before taking the write.
                 if ((offset & 1) == 0)
                 {
+                    // Control bit 4 is the CRTC's clock (video.md s2.2), which the ULA sets.
                     VideoUla.WriteControl(value);
-
-                    // Control bit 4 is the CRTC's clock: 1 for 2 MHz, 0 for 1 MHz (video.md s2.2).
-                    Crtc.SetCharacterClock((value & 0x10) != 0);
                     ChipAccessed();
                 }
                 else
@@ -444,12 +442,8 @@ public sealed class BbcBus : IBus
                 _paged = PagedRom(RomSlot);
                 break;
             case >= 0x40 and <= 0x5F:
-                if ((offset & 0x0D) == 0)
-                {
-                    // ORB or DDRB, which strobe the latch, whose bits 4 and 5 are the screen start
-                    // adder: the ULA draws up to this cycle with the bits it had.
-                    VideoUla.SyncToNow();
-                }
+                // ORB and DDRB strobe the latch; if its screen start bits change, the system VIA
+                // has the ULA draw up to this cycle with the bits it had first.
                 SystemVia.Write(offset & 0x0F, value);
                 ChipAccessed();
                 break;

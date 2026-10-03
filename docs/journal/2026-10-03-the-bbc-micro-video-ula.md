@@ -54,7 +54,9 @@ another chip's outputs ([the bus speed entry](2026-10-03-the-bbc-micro-bus-speed
   the bytes and draws.
 - **Before any write that changes what it draws, it draws up to that write's
   cycle with what it had.** Its own two registers, any CRTC register, and the
-  system VIA's ORB and DDRB, which strobe the latch. So a palette change in the
+  latch's screen start bits, which the system VIA reports before they change
+  (since the review round: at first the bus did it on every write to ORB and
+  DDRB, which a direct call to the system VIA bypassed). So a palette change in the
   middle of a line changes the line from the next character, which is what a
   game's raster bars need. A test writes the palette at character 30 of line
   100 and checks the line is white to the left of the next character and cyan
@@ -70,7 +72,12 @@ decision for this task, made for speed:
 - **Exact to the character:** every register that changes the picture: the
   palette, the control register (the flash, the pixel rate, the CRTC's clock,
   the cursor's segments), every CRTC register, and the latch's screen start
-  bits. A write is seen from the first character clocked after its cycle.
+  bits. A write is seen from the first character clocked after its cycle. At 1
+  MHz (modes 4 to 6) a character lasts two CPU cycles, and a write in the second
+  of them is still applied from the next character, half a character (8 of the
+  framebuffer's pixels) after the write: the ULA's pipeline delay is not known,
+  so placing a write inside a character would be guesswork. The mid-line
+  palette test pins both halves.
 - **Exact to the line, not the cycle: screen memory.** A line's bytes are read
   when the line is drawn, at its last character or at a register write that
   comes first. A store to screen memory while the beam is part way along a line
@@ -191,8 +198,10 @@ palette, control, CRTC and latch writes at random cycles, BREAKs, and random
 screen memory, and compares the whole framebuffer at the end of each frame,
 or of the first frame to end 4,000 cycles after the last comparison, so the
 small programs' frames of a few lines are not all compared.
-Screen memory changes only straight after one of the writes that make the ULA
-draw up to its cycle, the one place the two readings of RAM agree.
+Screen memory changes only after the ULA has been brought up to the cycle (at
+first, after one of the writes that make it draw; since the review round, by
+reading the picture, which does the same), the one place the two readings of RAM
+agree.
 
 The task 7 test that asks the CRTC about past cycles in the machine had to
 change: the ULA now takes the CRTC to every line end, so only a line's worth of
@@ -326,10 +335,12 @@ time: mode 1 at 13.10 times (the old code 14.61, 13:34 UTC, load 3.55 to 4.63),
 12.32 times (15.74, 13:39 UTC, load 2.94 to 3.06) and 9.58 times (15.59, 13:43
 UTC, load 1.78 to 6.31); mode 7 at 11.68 times (16.85, 13:32 UTC, load 6.21 to
 3.55) and 14.81 (15.22, 13:38 UTC, load 4.55 to 2.94); mode 4 at 11.82 times
-(16.24, 13:45 UTC, load 6.31 to 4.49). **The one set of the final code under
-ten times** is the 13:43 one in mode 1, during a jump in the load from 1.78 to
-6.31, whose slowest run of the old code was 7.651 MHz; across the eight sets of
-the final code in modes 1 and 4 the median is about 12.5 times. The final code
+(16.24, 13:45 UTC, load 6.31 to 4.49). **Two sets of the final code fell under
+ten times**, each during a load spike: mode 4 at 7.66 times in the 13:26 set
+(load 3.35 to 13.50, the old code 9.00 times in the same set) and mode 1 at 9.58
+times in the 13:43 set (load 1.78 to 6.31, the old code's slowest run 7.651
+MHz). Across the eight sets of the final code in modes 1 and 4 the median is
+12.4 times, (12.32 + 12.53) / 2. The final code
 runs at about four fifths of the old code's speed in modes 1 and 7 and about
 three quarters in mode 4, worked from the paired medians above.
 
@@ -400,6 +411,88 @@ for the same build, so it is not used.
 every instruction, and every 100,000 cycles all of RAM and every VIA register,
 through boot, a typed BASIC program and BREAK) prints the same lines from the
 old build and the final one: the ULA changes nothing the CPU can see.
+
+## The review round: a power on slower than a real BBC Micro
+
+The review found what my measurements had hidden. **From power on to the
+prompt took about 10 seconds natively, where it had taken under half a
+second.** Before the OS programs the CRTC every register is 0, so a frame is
+one line of one character and a field ends every few cycles with every other
+row unreached; `EndField` painted all of those rows black again each time,
+about 160,000 pixels every four cycles, though they were black already and
+known to be. The reviewer measured it with the speed bench in mode 7: boot
+9,577 ms for 6 million cycles at `3522066` against 480 ms at `fb7a0fb`, with
+almost 130,000 frames before the OS set a mode. My figures never showed it,
+because `alternate.sh` kept only the timed runs, which start at the prompt, and
+dropped the boot line. In the browser the page would have sat for ten seconds
+before the banner, and every test that boots paid for it.
+
+**The fix.** A row's flag in `_rowBlack` is cleared before anything but black
+is written to it (in the one guard before the straight and character-by-
+character paths, for both rows of a line), so a set flag always means the row
+is black. I checked that every non-black write is behind that guard. Every
+black write now looks at the flag and skips a row already black: the clearing
+at a field's end, the rest of a line at its end, a gap, and the copy of a line
+to its second row with interlace off. A count of rows not black lets a field's
+end skip its loop when there are none. And a line that has written nothing but
+black, in however many pieces it was drawn, marks its rows black when it ends;
+without that, a line drawn in two pieces left its rows flagged not black for
+good.
+
+**The test.** `Framebuffer.PixelsWritten` counts the pixels the ULA writes, so
+the work can be asserted rather than timed: on a bus at power on, with the CRTC
+still all zeros, a quarter of a million cycles (over ten thousand frames)
+write not one pixel, and in mode 1 one field writes exactly its 256 rows of 640
+pixels. A third test leaves one white character on line 255, shortens the
+frames to two rows that display nothing, and checks both its rows are cleared.
+That one came out of planting mistakes in the new code: a field end that stops
+clearing when one row is left survived the first two versions of the test,
+because other rows still counted as not black; the line-end marking above is
+what let a test reach the case. Of eight mistakes planted in the new code, seven
+are caught; the one that survives (a black line not marking its rows black)
+costs only work, never the picture.
+
+**The bench now times the boot.** `alternate.sh` keeps each launch's boot line
+and prints each build's median boot time beside its median speed, so a slow
+start shows in the summary. With `./alternate.sh native 3` and `browser 3`,
+modes 7 and 1, old code, reviewed code and fixed code alternating (14:43 to
+14:48 UTC, a load of 10 to 23 from other sessions, so the speeds of that set
+say nothing; the boots are three a build):
+
+| Boot, power on to the prompt | Old (`fb7a0fb`) | Reviewed (`3522066`) | Fixed |
+| --- | --- | --- | --- |
+| Native, mode 7 | 502 ms | 10,793 ms | 708 ms |
+| Native, mode 1 | 683 ms | 12,492 ms | 816 ms |
+| Browser AOT, mode 7 | 549 ms | 10,939 ms | 697 ms |
+| Browser AOT, mode 1 | 600 ms | 13,315 ms | 982 ms |
+
+At a lower load (14:58 to 14:59 UTC, 2.81 to 5.42), old against fixed: natively
+400 against 426 ms in mode 7 and 432 against 415 ms in mode 1; in the browser
+510 against 719 ms in mode 7 and 526 against 1,004 ms in mode 1. The boot draws
+the screen now and the old code drew nothing, so some cost is expected; what
+is gone is the slow start.
+
+**The fix costs the timed runs nothing that could be measured.** The machine's
+load went as high as 50 that afternoon, so absolute speeds from the review
+round mean little, but in one alternating browser set of old, reviewed and
+fixed code (`./alternate.sh browser 4`, four launches a build, 15:14 to 15:22
+UTC, load 4.93 to 50.55 to 6.33) the fixed code ran at 10.040 MHz in mode 1
+against the reviewed code's 9.562, and at 10.515 in mode 7 against 10.706, with
+the old code at 11.181 and 10.596. The boots in that set: old 989 and 779 ms,
+reviewed 20,401 and 19,272 ms, fixed 1,624 and 1,350 ms. The timed figures
+above, from the reviewed code at a lower load, stand for the fixed code too.
+
+**Two other changes from the review.** The hooks a direct call could bypass
+are now in the chips: `VideoUla.WriteControl` sets the CRTC's clock itself, so
+a write through `BbcBus.VideoUla` cannot leave the two disagreeing, and the
+system VIA reports a change to the latch's screen start bits before making it
+(`ScreenLatchChanging`), so a direct `SystemVia.Write` draws up to its cycle
+too. The bus no longer does either. The latch report fires only when bit 4 or
+5 changes, which means a latch write that leaves them alone no longer makes the
+ULA draw; the equivalence test relied on that to line up its pokes to screen
+memory, and now brings the ULA up to the cycle itself by reading the picture.
+The fingerprint (`--fingerprint`, boot, a typed BASIC program, BREAK) of the
+fixed build is the same 54 lines as the old build's.
 
 ## What this does not say
 

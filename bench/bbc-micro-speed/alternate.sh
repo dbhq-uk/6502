@@ -7,6 +7,9 @@
 #       one headless Chrome launch of five timed runs per build, in turn (run-in-browser.mjs)
 #   ./alternate.sh native <launches> <native-build-folder>...
 #       one launch of twelve timed runs per build, in turn, keeping the last ten
+#
+# Each launch also times its boot, power on to the prompt (6 million cycles), and the summary
+# gives each build's median boot time beside its median speed.
 #       (a folder holding a build of native/, Dbhq.Machines.BbcMicro.SpeedNative.dll)
 #
 # Run from this folder. Folders are relative to it; a native build must sit inside the
@@ -29,10 +32,11 @@ for ((i = 1; i <= launches; i++)); do
     if [[ $mode == browser ]]; then
       output=$(node run-in-browser.mjs "$build" 1 2000000 6000000 5 "$screen")
       grep -q '^launch 1 prompt yes' <<<"$output" || { echo "no prompt from $build" >&2; echo "$output" >&2; exit 1; }
-      grep ' timed ' <<<"$output" | sed "s|^|$build |" | tee -a "$lines"
+      grep -E ' (timed|boot) ' <<<"$output" | sed "s|^|$build |" | tee -a "$lines"
     else
       output=$(dotnet "$build/Dbhq.Machines.BbcMicro.SpeedNative.dll" 12 2000000 "$screen")
       grep -q '^prompt yes' <<<"$output" || { echo "no prompt from $build" >&2; echo "$output" >&2; exit 1; }
+      grep '^boot ' <<<"$output" | sed "s|^|$build |" | tee -a "$lines"
       grep '^timed ' <<<"$output" | tail -n 10 | sed "s|^|$build |" | tee -a "$lines"
     fi
   done
@@ -42,11 +46,21 @@ echo "load after: $(cut -d' ' -f1-3 /proc/loadavg)  $(date -u +%H:%M:%S) UTC"
 python3 - "$lines" <<'PY'
 import collections, re, statistics, sys
 runs = collections.defaultdict(list)
+boots = collections.defaultdict(list)
 for line in open(sys.argv[1]):
-    runs[line.split()[0]].append(float(re.search(r"mhz=([\d.]+)", line).group(1)))
+    build = line.split()[0]
+    if " boot " in line:
+        boots[build].append(float(re.search(r"ms=([\d.]+)", line).group(1)))
+    else:
+        runs[build].append(float(re.search(r"mhz=([\d.]+)", line).group(1)))
 for build, mhz in runs.items():
     mhz.sort()
     median = statistics.median(mhz)
     print(f"{build}: runs={len(mhz)} median={median:.3f} MHz ({median / 2:.2f} times 2 MHz) "
           f"best={mhz[-1]:.3f} slowest={mhz[0]:.3f}")
+# The boot, power on to the prompt, is timed on its own: a slow start (task 8's review found
+# one) would never show in the timed runs, which start at the prompt.
+for build, ms in boots.items():
+    ms.sort()
+    print(f"{build}: boots={len(ms)} boot median={statistics.median(ms):.1f} ms fastest={ms[0]:.1f} slowest={ms[-1]:.1f}")
 PY
