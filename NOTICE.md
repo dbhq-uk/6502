@@ -9,10 +9,12 @@ separately, in [`roms/README.md`](roms/README.md).
 **What.** The row data of `src/Dbhq.Machines.BbcMicro/TeletextGlyphs.cs`: the
 SAA5050's English character set, 96 glyphs of nine rows of five dots, which the
 BBC Micro's mode 7 draws. It is the data of Bedstead's `glyphs[]` table, the US
-ASCII (SAA5055) entries for codes `$20` to `$7F` with the twelve codes where the
-English set differs taken from the table's "Extra characters found in the
-English (SAA5050) character set" entries. Only the row data and which code each
-glyph belongs to were taken. None of Bedstead's code was.
+ASCII (SAA5055) entries for codes `$20` to `$7F`, with the twelve codes where
+the English set differs: eleven from the table's "Extra characters found in the
+English (SAA5050) character set" entries, and the hash at `$5F`, which is the US
+set's own number sign entry, moved from `$23`. What was taken is the row data,
+which code each glyph belongs to, and Bedstead's name for each glyph, kept as a
+comment beside its rows. None of Bedstead's code was.
 
 **Where it came from.** `bedstead.c`, Bedstead version 3.261, by Ben Harris,
 Simon Tatham, Marnanel Thurman and Neil Williamson

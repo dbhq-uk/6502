@@ -3,7 +3,7 @@
 // launch fresh so it starts from a cold runtime. Prints the lines the page prints, and
 // the browser version.
 //
-//   node run-in-browser.mjs <published-folder> [launches] [timed-cycles] [boot-cycles] [timed-runs] [mode]
+//   node run-in-browser.mjs <published-folder> [launches] [timed-cycles] [boot-cycles] [timed-runs] [mode] [screen]
 //
 // The three ROMs are read from roms/bbc-micro/ and checked against the SHA-256 pinned in
 // tests/Dbhq.Cpu6502.TestSupport/Pins.cs before the server starts; a ROM that does not
@@ -17,9 +17,9 @@ import crypto from 'node:crypto';
 import { fileURLToPath } from 'node:url';
 import { chromium } from 'playwright-core';
 
-const [dir, launchesArg = '1', cyclesArg = '2000000', bootArg = '6000000', runsArg = '5', modeArg = '7'] = process.argv.slice(2);
+const [dir, launchesArg = '1', cyclesArg = '2000000', bootArg = '6000000', runsArg = '5', modeArg = '7', screenArg = 'boot'] = process.argv.slice(2);
 if (!dir) {
-  console.error('usage: node run-in-browser.mjs <published-folder> [launches] [timed-cycles] [boot-cycles] [timed-runs] [mode]');
+  console.error('usage: node run-in-browser.mjs <published-folder> [launches] [timed-cycles] [boot-cycles] [timed-runs] [mode] [screen]');
   process.exit(2);
 }
 const here = path.dirname(fileURLToPath(import.meta.url));
@@ -92,7 +92,7 @@ try {
       if (response.status() >= 400) fail(new Error(`HTTP ${response.status()}: ${response.url()}`));
     });
     try {
-      await page.goto(`${base}?cycles=${cyclesArg}&boot=${bootArg}&runs=${runsArg}&mode=${modeArg}`);
+      await page.goto(`${base}?cycles=${cyclesArg}&boot=${bootArg}&runs=${runsArg}&mode=${modeArg}&screen=${screenArg}`);
       await Promise.race([
         page.waitForFunction(() => document.body.dataset.done === 'true', null, { timeout: 30 * 60 * 1000 }),
         failed,

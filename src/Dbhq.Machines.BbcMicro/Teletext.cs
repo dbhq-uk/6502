@@ -156,6 +156,11 @@ public sealed class Teletext
     /// the flash counter steps. The datasheet: DEW resets "the internal ROM row address counter prior
     /// to the display period" and is "used internally to derive the 'flash' period".
     /// </summary>
+    /// <remarks>
+    /// That the row state goes back to an upper row here, so a double height code on a field's
+    /// last row does not make the next field's first row a lower half, is an assumption: no source
+    /// says what resets the chip's height flip-flop (video.md s6 item 5).
+    /// </remarks>
     public void FieldStart()
     {
         _lineInRow = 0;
@@ -167,7 +172,8 @@ public sealed class Teletext
     /// <summary>
     /// A line has ended. If the chip had LOSE during it, its count moves on a line, and after the
     /// tenth a row: the new row is a lower half if the row just ended had a double height code and
-    /// was not a lower half itself.
+    /// was not a lower half itself. On which edge the chip moves its count is not established
+    /// (video.md s4.1, s6 item 5); the model takes the end of a line that had LOSE.
     /// </summary>
     public void LineEnd(bool hadDisplay)
     {
@@ -261,6 +267,18 @@ public sealed class Teletext
                 case 0x1D:
                     _background = _foreground;
                     break;
+                case 0x00 or 0x10:
+                    // NUL and DLE, ETSI's alpha black and graphics black. The datasheet's Table 1
+                    // marks them reserved, "normally displayed as spaces", so they do nothing but
+                    // show a space. An assumption: whether the BBC's chip really ignores them is
+                    // not established (video.md s6 item 5).
+                    break;
+                case 0x0A or 0x0B or 0x0E or 0x0F or 0x1B:
+                    // End box, start box, SO, SI and ESC do nothing but show a space. An
+                    // assumption: Table 1 marks SO, SI and ESC reserved, and the boxes depend on
+                    // the PO and DE pins, whose tie-offs on the board were not read (video.md s6
+                    // item 6).
+                    break;
             }
 
             if (_hold && _graphics && !heightChange)
@@ -298,9 +316,14 @@ public sealed class Teletext
                     _conceal = false;
                     break;
                 case 0x1E:
+                    // Hold acts from the next cell on the SAA5050 (video.md s4.3, the die-shot
+                    // description), not on its own cell as ETSI has it.
                     _hold = true;
                     break;
                 case 0x1F:
+                    // Release acts from the next cell. An assumption: the die-shot simulation
+                    // took two characters to clear hold, which its author doubts (video.md s6
+                    // item 11); the model takes one, as for the set-after codes.
                     _hold = false;
                     break;
             }
@@ -316,7 +339,9 @@ public sealed class Teletext
         else
         {
             // An alphanumeric, in alphanumerics mode or blasting through in graphics mode: the
-            // graphics register loads a space.
+            // graphics register loads a space. For a capital blasting through that is inferred
+            // from the die-shot description's "no alternate graphics" signal (video.md s4.3,
+            // S15); ETSI would leave the held block alone.
             _held = 0;
             mask = AlphaMasks[((c - 0x20) * 20) + (_double ? _doubleAlpha : _normalAlpha)];
         }
@@ -360,7 +385,10 @@ public sealed class Teletext
         _normalAlpha = (2 * line) + (roundFromRowBefore ? 0 : 1);
 
         // Double height: each row of the upper or lower half of the cell is two lines of the
-        // field, rounded from the row before on the first and the row after on the second.
+        // field, rounded from the row before on the first and the row after on the second. The
+        // model's own choice: the upper row shows cell lines 0 to 4 (the blank line and glyph rows
+        // 0 to 3), the lower row lines 5 to 9; the datasheet says only that the rounding alternates
+        // every line, and no source gives the mapping (video.md s4.3, s6 item 5).
         _doubleLine = (line + (lowerRow ? LinesPerRow : 0)) >> 1;
         _doubleAlpha = (2 * _doubleLine) + (line & 1);
     }
@@ -392,6 +420,8 @@ public sealed class Teletext
             for (int line = 0; line < LinesPerRow; line++)
             {
                 int current = rows[line];
+                // The rows above the cell's first line and below its last are taken as blank: the
+                // chip reads its ROM for one character, and no source says otherwise.
                 int before = line > 0 ? rows[line - 1] : 0;
                 int after = line < LinesPerRow - 1 ? rows[line + 1] : 0;
                 masks[((code - 0x20) * 20) + (2 * line)] = Rounded(current, before);

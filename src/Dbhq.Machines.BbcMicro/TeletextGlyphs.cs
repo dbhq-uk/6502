@@ -1,7 +1,9 @@
 // The glyph rows below are data taken from Bedstead's glyphs[] table (bedstead.c, version 3.261),
 // the English (SAA5050) set: the US ASCII (SAA5055) entries for codes $20 to $7F, with the twelve
-// codes where the English set differs taken from its "Extra characters found in the English
-// (SAA5050) character set" entries. Only the row data was taken, never Bedstead's code. Where it
+// codes where the English set differs: eleven from its "Extra characters found in the English
+// (SAA5050) character set" entries, and the hash at $5F, which is the US set's own number sign
+// entry moved from $23. Taken: the row data, which code each glyph belongs to, and Bedstead's
+// name for each glyph (the comment beside its rows); never Bedstead's code. Where it
 // came from, when, and the SHA-256 of the file read are in NOTICE.md at the repository root.
 // Bedstead's header, as it stands in that file:
 //

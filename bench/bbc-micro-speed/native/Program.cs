@@ -7,7 +7,10 @@ using Dbhq.Machines.BbcMicro;
 // ordinary .NET program, and a fingerprint of a scripted run, so a change to the bus or its
 // chips can be shown to change nothing the machine does.
 //
-//   dotnet run -c Release --project bench/bbc-micro-speed/native -- [timed runs] [cycles a run] [screen mode]
+//   dotnet run -c Release --project bench/bbc-micro-speed/native -- [timed runs] [cycles a run] [screen mode] [screen]
+//       screen: boot (default, the boot screen as the OS leaves it), dense (mode 7 screen memory
+//       filled with random bytes, every control code included) or text (random printable
+//       characters), filled after the prompt check, with a fixed seed so every build gets the same page
 //   dotnet run -c Release --project bench/bbc-micro-speed/native -- --fingerprint
 //   dotnet run -c Release --project bench/bbc-micro-speed/native -- --profile [rounds]
 var roms = new BbcRoms(
@@ -30,14 +33,15 @@ if (args.Length >= 1 && args[0] == "--profile")
 int runs = args.Length > 0 ? int.Parse(args[0]) : 5;
 int cycles = args.Length > 1 ? int.Parse(args[1]) : 2_000_000;
 int mode = args.Length > 2 ? int.Parse(args[2]) : 7;
-Speed(roms, runs, cycles, mode);
+string screen = args.Length > 3 ? args[3] : "boot";
+Speed(roms, runs, cycles, mode, screen);
 return;
 
 // The page's workload: boot for three seconds of machine time, check the prompt, then time
 // the runs. Prints the lines the page prints. Outside mode 7 the screen is pixels, so the
 // prompt check is the OS's own record, as on the page: the mode at &0355 and the text cursor
 // at &0318 and &0319, one column right of the > on row 5.
-static void Speed(BbcRoms roms, int runs, int cycles, int mode)
+static void Speed(BbcRoms roms, int runs, int cycles, int mode, string screen)
 {
     var machine = new BbcMachine(roms, new BbcOptions { StartupMode = mode });
     var clock = Stopwatch.StartNew();
@@ -51,6 +55,11 @@ static void Speed(BbcRoms roms, int runs, int cycles, int mode)
             && Row(machine, 5).StartsWith('>')
         : machine.Bus.Peek(0x0355) == mode && machine.Bus.Peek(0x0318) == 1 && machine.Bus.Peek(0x0319) == 5;
     Console.WriteLine("prompt " + (prompt ? "yes" : "no"));
+    if (screen != "boot")
+    {
+        DensePage.Fill(machine.Bus, screen);
+        Console.WriteLine("screen " + screen);
+    }
 
     for (int i = 1; i <= runs; i++)
     {
@@ -354,5 +363,29 @@ internal static class Profile
         public byte Read(ushort address) => memory[address];
 
         public void Write(ushort address, byte value) => memory[address] = value;
+    }
+}
+
+/// <summary>
+/// A mode 7 page that makes the teletext chip draw every cell: the 1,000 bytes of screen memory
+/// at &amp;7C00 filled with random bytes (<c>dense</c>, so every control code, double height,
+/// hold and flash come up) or random printable characters (<c>text</c>), from seed 1234. The same
+/// code is in the browser host (<c>BbcHost.FillScreen</c>), so the two runs time the same page.
+/// </summary>
+internal static class DensePage
+{
+    public static void Fill(BbcBus bus, string kind)
+    {
+        var random = new Random(1234);
+        for (int i = 0; i < 1000; i++)
+        {
+            int value = kind switch
+            {
+                "dense" => random.Next(256),
+                "text" => random.Next(0x20, 0x7F),
+                _ => throw new ArgumentException($"no screen called {kind}: boot, dense or text"),
+            };
+            bus.PokeRam((ushort)(0x7C00 + i), (byte)value);
+        }
     }
 }

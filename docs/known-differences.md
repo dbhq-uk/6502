@@ -408,10 +408,14 @@ sources stop, the model chooses:
   alone. **A height code that changes the height** stops hold on its own cell,
   `$8D` included, though `$8D` changes the height only from the next cell
   (`Teletext.HeightChangeStopsHoldOnItsOwnCell`).
-- **Double height maps rows as the sheet guessed** (s4.3, s6 item 5): the upper
-  row shows the cell's lines 0 to 4 and the lower row lines 5 to 9, each on two
+- **Double height maps rows the model's own way** (s4.3, s6 item 5): the upper
+  row shows the cell's lines 0 to 4 (its blank top line and glyph rows 0 to 3)
+  and the lower row lines 5 to 9 (glyph rows 4 to 8), each on two
   lines of the field, rounded against the line before on the first and the line
-  after on the second, the same in both fields. A new field starts with an
+  after on the second, the same in both fields. The sheet's guess was glyph
+  rows 0 to 4 for the upper half and 4 to 8 for the lower, repeating row 4; the
+  model instead splits the ten-line cell into two halves of five, so no row is
+  shown twice. A new field starts with an
   upper row (the row state is reset at DEW, which no source states), and the
   model sees a double height code only on lines drawn with the teletext select
   on.

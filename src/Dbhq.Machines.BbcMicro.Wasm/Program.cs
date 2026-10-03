@@ -38,6 +38,28 @@ public static partial class BbcHost
         _machine.PowerOn();
     }
 
+    /// <summary>
+    /// For the speed check's worst case: fills the 1,000 bytes of mode 7 screen memory at &amp;7C00
+    /// with random bytes (<paramref name="kind"/> "dense", every control code included) or random
+    /// printable characters ("text"), from seed 1234, as the native bench's <c>DensePage</c> does,
+    /// so the teletext chip draws every cell.
+    /// </summary>
+    [JSExport]
+    public static void FillScreen(string kind)
+    {
+        var random = new Random(1234);
+        for (int i = 0; i < 1000; i++)
+        {
+            int value = kind switch
+            {
+                "dense" => random.Next(256),
+                "text" => random.Next(0x20, 0x7F),
+                _ => throw new ArgumentException($"no screen called {kind}: dense or text"),
+            };
+            Machine.Bus.PokeRam((ushort)(0x7C00 + i), (byte)value);
+        }
+    }
+
     /// <summary>A byte of memory, read without a bus cycle.</summary>
     [JSExport]
     public static int Peek(int address) => Machine.Bus.Peek((ushort)address);

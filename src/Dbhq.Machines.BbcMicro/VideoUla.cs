@@ -189,6 +189,13 @@ public sealed class VideoUla : ICrtcConsumer
     private static readonly ushort[] HalfDotsTo16 = MakeHalfDotPixels(16);
     private static readonly ushort[] HalfDotsTo8 = MakeHalfDotPixels(8);
 
+    // For writing teletext cells four pixels at a time: for each pair of physical colours
+    // (foreground * 8 + background) and each pattern of four pixels (bit 0 the left one), the four
+    // pixels as two pairs, 32 ulongs a colour pair. The cursor's inversion maps a physical colour
+    // to another (c XOR 7), so the 64 pairs are every cell there can be, and the table is made
+    // once rather than again at each change of colour.
+    private static readonly ulong[] QuadsByColours = MakeQuads();
+
     // The teletext chip's pipeline: the bytes of the line's last four characters, the newest in
     // bits 0 to 7, and for the three before the newest whether LOSE came with it (DISPTMG after the
     // skew in the character after), the newest in bit 0; the first character of the line whose
@@ -200,10 +207,6 @@ public sealed class VideoUla : ICrtcConsumer
     private bool _ttxShowing;
     private bool _ttxDark;
 
-    // For writing teletext cells four pixels at a time: for each pattern of four (bit 0 the left
-    // pixel), the four pixels as two pairs, for the colours last used.
-    private readonly ulong[] _quads = new ulong[32];
-    private uint _quadForeground = 1, _quadBackground = 1;
 
     // For the chip's own count: DISPTMG after the skew was high in a character of this line; VSYNC
     // at the end of the last stretch drawn, and at the end of the line before.
@@ -283,7 +286,7 @@ public sealed class VideoUla : ICrtcConsumer
     {
         if ((memoryAddress & 0x2000) != 0)
         {
-            return ((memoryAddress & 0x0800) << 3) | 0x3C00 | (memoryAddress & 0x03FF);
+            return TeletextAddress(memoryAddress);
         }
 
         int address = ((memoryAddress & 0x0FFF) << 3) | (rasterAddress & 7);
@@ -294,6 +297,16 @@ public sealed class VideoUla : ICrtcConsumer
 
         return address;
     }
+
+    /// <summary>
+    /// The TTX VDU path of <see cref="ScreenAddress"/>, for an MA with MA13 high: RA is ignored,
+    /// DA14 is MA11, DA13 to DA10 are high and DA9 to DA0 are MA9 to MA0, so the byte is in
+    /// &amp;3C00 to &amp;3FFF or &amp;7C00 to &amp;7FFF (<c>video.md</c> s2.5). The one place the
+    /// formula is written; the mode 7 drawing calls it for every character.
+    /// </summary>
+    [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+    private static int TeletextAddress(int memoryAddress) =>
+        ((memoryAddress & 0x0800) << 3) | 0x3C00 | (memoryAddress & 0x03FF);
 
     /// <summary>
     /// Writes the control register, after drawing up to now with the old value. In a machine bit 4
@@ -965,7 +978,7 @@ public sealed class VideoUla : ICrtcConsumer
             for (int f = 0; f < r1; f++)
             {
                 int ma = (lineAddress + f) & 0x3FFF;
-                int address = (ma & 0x2000) != 0 ? ((ma & 0x0800) << 3) | 0x3C00 | (ma & 0x03FF) : ScreenAddress(ma, ra, latch);
+                int address = (ma & 0x2000) != 0 ? TeletextAddress(ma) : ScreenAddress(ma, ra, latch);
                 int packed = chip.Cell(ram[address]);
                 if (f >= shown)
                 {
@@ -978,7 +991,7 @@ public sealed class VideoUla : ICrtcConsumer
                 if (!(blackCell && rowKnownBlack))
                 {
                     int x = xc + (f * width);
-                    PutTeletextCell(pixels, rowA, rowB, x, Math.Min(width, Width - x), width, packed & 0xFFF, Physical[(packed >> 12) & 7], Physical[(packed >> 16) & 7]);
+                    PutTeletextCell(pixels, rowA, rowB, x, Math.Min(width, Width - x), width, packed & 0xFFF, (packed >> 12) & 7, (packed >> 16) & 7);
                     rowKnownBlack = _rowBlack[rowA / Width];
                 }
             }
@@ -1045,7 +1058,7 @@ public sealed class VideoUla : ICrtcConsumer
             bool display = displaySkew != 3 && ((dh >> displaySkew) & 1) != 0;
             loseSeen |= display;
             int ma = (lineAddress + c) & 0x3FFF;
-            int address = (ma & 0x2000) != 0 ? ((ma & 0x0800) << 3) | 0x3C00 | (ma & 0x03FF) : ScreenAddress(ma, ra, latch);
+            int address = (ma & 0x2000) != 0 ? TeletextAddress(ma) : ScreenAddress(ma, ra, latch);
             bytes = (bytes << 8) | ram[address];
             lose = ((lose << 1) | (display ? 1 : 0)) & 7;
 
@@ -1056,7 +1069,7 @@ public sealed class VideoUla : ICrtcConsumer
                 continue;
             }
 
-            uint foreground = Black, background = Black;
+            int foreground = 0, background = 0;
             int mask = 0;
             if ((lose & 4) != 0)
             {
@@ -1068,8 +1081,8 @@ public sealed class VideoUla : ICrtcConsumer
 
                 int packed = chip.Cell((int)(bytes >> 24));
                 mask = packed & 0xFFF;
-                foreground = Physical[(packed >> 12) & 7];
-                background = Physical[(packed >> 16) & 7];
+                foreground = (packed >> 12) & 7;
+                background = (packed >> 16) & 7;
             }
             else
             {
@@ -1078,8 +1091,9 @@ public sealed class VideoUla : ICrtcConsumer
 
             if (age < CursorIdle && (control & (age == 0 ? 0x80 : age == 1 ? 0x40 : 0x20)) != 0)
             {
-                foreground ^= Invert;
-                background ^= Invert;
+                // The cursor inverts the picture: physical colour c becomes c XOR 7.
+                foreground ^= 7;
+                background ^= 7;
             }
 
             int x = xc - (TeletextDelayCharacters * width);
@@ -1123,15 +1137,15 @@ public sealed class VideoUla : ICrtcConsumer
 
     /// <summary>
     /// One teletext cell's <paramref name="n"/> pixels (all <paramref name="width"/> but at the
-    /// picture's right edge) at <paramref name="x"/> on row A: the background, and the foreground
-    /// where the half-dot under a pixel is set. A black cell over a row known to be black paints
-    /// nothing; anything else marks the line's rows as drawn first. A whole cell is written four
-    /// pixels at a time from a table of the sixteen patterns of four for the colours in use, made
-    /// again only when the colours change.
+    /// picture's right edge) at <paramref name="x"/> on row A, in physical colours 0 to 7: the
+    /// background, and the foreground where the half-dot under a pixel is set. A black cell over a
+    /// row known to be black paints nothing; anything else marks the line's rows as drawn first,
+    /// once a line, since nothing marks them black again before the line ends. A whole cell is
+    /// written four pixels at a time from <see cref="QuadsByColours"/>.
     /// </summary>
-    private void PutTeletextCell(uint[] pixels, int rowA, int rowB, int x, int n, int width, int mask, uint foreground, uint background)
+    private void PutTeletextCell(uint[] pixels, int rowA, int rowB, int x, int n, int width, int mask, int foreground, int background)
     {
-        if (background == Black && (mask == 0 || foreground == Black))
+        if (background == 0 && (mask == 0 || foreground == 0))
         {
             if (!_rowBlack[rowA / Width])
             {
@@ -1141,10 +1155,13 @@ public sealed class VideoUla : ICrtcConsumer
             return;
         }
 
-        Drawn(rowA);
-        if (rowB >= 0)
+        if (_lineBlack)
         {
-            Drawn(rowB);
+            Drawn(rowA);
+            if (rowB >= 0)
+            {
+                Drawn(rowB);
+            }
         }
 
         int bits = (width == 16 ? HalfDotsTo16 : HalfDotsTo8)[mask];
@@ -1154,23 +1171,12 @@ public sealed class VideoUla : ICrtcConsumer
             Span<uint> part = pixels.AsSpan(rowA + x, n);
             for (int p = 0; p < part.Length; p++)
             {
-                part[p] = ((bits >> p) & 1) != 0 ? foreground : background;
+                part[p] = Physical[((bits >> p) & 1) != 0 ? foreground : background];
             }
             return;
         }
 
-        if (foreground != _quadForeground || background != _quadBackground)
-        {
-            _quadForeground = foreground;
-            _quadBackground = background;
-            for (int q = 0; q < 16; q++)
-            {
-                _quads[2 * q] = ((q & 1) != 0 ? foreground : background) | ((ulong)((q & 2) != 0 ? foreground : background) << 32);
-                _quads[(2 * q) + 1] = ((q & 4) != 0 ? foreground : background) | ((ulong)((q & 8) != 0 ? foreground : background) << 32);
-            }
-        }
-
-        ulong[] quads = _quads;
+        ReadOnlySpan<ulong> quads = QuadsByColours.AsSpan(((foreground * 8) + background) * 32, 32);
         Span<ulong> pairs = MemoryMarshal.Cast<uint, ulong>(pixels.AsSpan(rowA + x, width));
         if (width == 16)
         {
@@ -1194,6 +1200,21 @@ public sealed class VideoUla : ICrtcConsumer
             pairs[2] = quads[q1];
             pairs[3] = quads[q1 + 1];
         }
+    }
+
+    private static ulong[] MakeQuads()
+    {
+        var table = new ulong[64 * 32];
+        for (int pair = 0; pair < 64; pair++)
+        {
+            uint foreground = Physical[pair >> 3], background = Physical[pair & 7];
+            for (int q = 0; q < 16; q++)
+            {
+                table[(pair * 32) + (2 * q)] = ((q & 1) != 0 ? foreground : background) | ((ulong)((q & 2) != 0 ? foreground : background) << 32);
+                table[(pair * 32) + (2 * q) + 1] = ((q & 4) != 0 ? foreground : background) | ((ulong)((q & 8) != 0 ? foreground : background) << 32);
+            }
+        }
+        return table;
     }
 
     /// <summary>

@@ -7,11 +7,14 @@ import { dotnet } from './_framework/dotnet.js'
 // ?cycles=N cycles in each timed run (default 2 million, one second of machine time)
 // ?runs=N   timed runs (default 5)
 // ?mode=N   the screen mode the start-up links select (default 7, the teletext screen)
+// ?screen=S boot (default), or after the prompt check fill mode 7 screen memory with a page
+//           that makes every cell drawn: dense (random bytes) or text (random printable characters)
 const params = new URLSearchParams(location.search);
 const bootCycles = Number(params.get('boot') ?? 6_000_000);
 const cycles = Number(params.get('cycles') ?? 2_000_000);
 const runs = Number(params.get('runs') ?? 5);
 const mode = Number(params.get('mode') ?? 7);
+const screen = params.get('screen') ?? 'boot';
 const log = document.getElementById('log');
 
 const fetchBytes = async (name) => {
@@ -63,6 +66,10 @@ if (mode === 7) {
   prompt = os.mode === mode && os.x === 1 && os.y === 5;
 }
 lines.push('prompt ' + (prompt ? 'yes' : 'NO'));
+if (screen !== 'boot') {
+  bbc.FillScreen(screen);
+  lines.push('screen ' + screen);
+}
 
 for (let i = 1; i <= runs; i++) {
   t = performance.now();
