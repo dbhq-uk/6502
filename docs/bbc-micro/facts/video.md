@@ -304,6 +304,8 @@ Order, from the disassembly [from S7 ch6 s2, ch5 s53 s59]:
 The current mode is kept at **`&0355`**: the mode-set code does `AND #&07` on the requested mode (after `ORA #&04` on a 16 KB machine) then `STX &0355` at `$CB3D`. [from ROM `$CB33-$CB3D`; added 2 Oct 2026 in task 5, and confirmed by booting with the links set for each of modes 0 to 7]
 `*TV` (OSBYTE 144) takes effect only at the next mode change. [from S14 quoting the AUG, "2.20 *TVx,y"]
 
+**The text window and the text cursor** (added 3 Oct 2026, task 10). The mode change sets the window's right column at `$030A` from the columns - 1 table (`$C3EF`) and its bottom row at `$0309` from the rows - 1 table (`$C3E7`), indexed by the mode at `$0355` [from ROM `$C9C7-$C9D6`]; left `$0308` and top `$030B` are 0, and booting each of modes 0 to 7 gives the grids of 3.1 [confirmed by running]. The text cursor is column `$0318` and row `$0319`, absolute rather than window-relative: `$C66A-$C66D` compares the column with `$030A` itself [from ROM]; after the boot it stands at column 1 of the prompt's row [confirmed by running].
+
 ---
 
 ## 4. Mode 7 teletext (SAA5050)

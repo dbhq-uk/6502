@@ -35,14 +35,21 @@ public static class TeletextScreen
         return new string(text);
     }
 
-    public static char ReadCell(Framebuffer screen, int row, int column)
+    public static char ReadCell(Framebuffer screen, int row, int column) =>
+        ReadCell(screen.Pixel, row, column);
+
+    /// <summary>
+    /// The same, reading each pixel through <paramref name="pixel"/>, given x and y: so a caller
+    /// can read a copy of the picture, or one with a cell's cursor taken out (<see cref="ScreenText"/>).
+    /// </summary>
+    public static char ReadCell(Func<int, int, uint> pixel, int row, int column)
     {
         int left = 16 * column, top = 20 * row;
 
         // The blank top line, both fields, and the blank left column on every line.
         for (int x = 0; x < 16; x++)
         {
-            if (Lit(screen, left + x, top) || Lit(screen, left + x, top + 1))
+            if (Lit(pixel, left + x, top) || Lit(pixel, left + x, top + 1))
             {
                 return '?';
             }
@@ -51,7 +58,7 @@ public static class TeletextScreen
         {
             foreach (int x in PixelsOf(0).Concat(PixelsOf(1)))
             {
-                if (Lit(screen, left + x, top + y))
+                if (Lit(pixel, left + x, top + y))
                 {
                     return '?';
                 }
@@ -66,7 +73,7 @@ public static class TeletextScreen
                 bool on = true;
                 foreach (int x in PixelsOf(2 + (2 * d)).Concat(PixelsOf(3 + (2 * d))))
                 {
-                    on &= Lit(screen, left + x, top + (2 * (r + 1))) && Lit(screen, left + x, top + (2 * (r + 1)) + 1);
+                    on &= Lit(pixel, left + x, top + (2 * (r + 1))) && Lit(pixel, left + x, top + (2 * (r + 1)) + 1);
                 }
                 dots[r] = (dots[r] << 1) | (on ? 1 : 0);
             }
@@ -104,5 +111,5 @@ public static class TeletextScreen
         }
     }
 
-    private static bool Lit(Framebuffer screen, int x, int y) => screen.Pixel(x, y) != OpaqueBlack;
+    private static bool Lit(Func<int, int, uint> pixel, int x, int y) => pixel(x, y) != OpaqueBlack;
 }

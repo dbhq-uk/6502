@@ -21,7 +21,7 @@ namespace Dbhq.Machines.BbcMicro.Tests;
 /// no controller would. The row comes back when the 8271 does.
 /// </para>
 /// </remarks>
-public class BootTests
+public class BootTests(BootedModes booted) : IClassFixture<BootedModes>
 {
     [Fact]
     public void ColdBootPrintsTheBannerAndTheBasicPromptInMode7()
@@ -100,4 +100,117 @@ public class BootTests
         bus.Write(0xFE00, 13);
         Assert.Equal(0x00, bus.Peek(0xFE01));
     }
+
+    [Theory]
+    [InlineData(0)]
+    [InlineData(1)]
+    [InlineData(2)]
+    [InlineData(3)]
+    [InlineData(4)]
+    [InlineData(5)]
+    [InlineData(6)]
+    [InlineData(7)]
+    public void EachModeBootsToThePromptReadOffThePicture(int mode)
+    {
+        // The same rows in every mode: the banner is sixteen characters, so even a twenty-column
+        // mode does not wrap it. Rows below the prompt are blank.
+        string[] screen = booted.Screen(mode);
+        Assert.Equal(ScreenText.Grids[mode].Rows, screen.Length);
+        for (int row = 0; row < screen.Length; row++)
+        {
+            Assert.Equal(ScreenText.Grids[mode].Columns, screen[row].Length);
+            string expected = row < BootScreen.Rows.Count ? BootScreen.Rows[row] : "";
+            Assert.True(expected == screen[row].TrimEnd(), $"mode {mode}, row {row}: \"{screen[row].TrimEnd()}\"");
+        }
+    }
+
+    [Theory]
+    [InlineData(0)]
+    [InlineData(1)]
+    [InlineData(2)]
+    [InlineData(3)]
+    [InlineData(4)]
+    [InlineData(5)]
+    [InlineData(6)]
+    [InlineData(7)]
+    public void TheOsTextWindowIsTheModesGridAndTheCursorFollowsThePrompt(int mode)
+    {
+        // The decode cuts the picture by the grid of video.md s3.1; the OS's own text window says
+        // the same: left $0308, bottom $0309, right $030A, top $030B, set from the ROM's tables at
+        // $C9C7-$C9D6. And the text cursor the decode is told about, $0318 and $0319, stands just
+        // after the prompt.
+        BbcBus bus = booted.Session(mode).Machine.Bus;
+        (int columns, int rows) = ScreenText.Grids[mode];
+        Assert.Equal(0, bus.Peek(0x0308));
+        Assert.Equal(rows - 1, bus.Peek(0x0309));
+        Assert.Equal(columns - 1, bus.Peek(0x030A));
+        Assert.Equal(0, bus.Peek(0x030B));
+        Assert.Equal(1, bus.Peek(0x0318));
+        Assert.Equal(BootScreen.Rows.Count - 1, bus.Peek(0x0319));
+    }
+
+    [Fact]
+    public void TheBootScreenIsTheRomsText()
+    {
+        // The expected rows are read out of the ROMs, as bus.md s4b sets them out, not copied from
+        // what the machine printed: the banner from OS $C304 (to its zero) and $C317 (to its BEL),
+        // BASIC's title at $8009 (to its zero) and the prompt from BASIC's LDA #$3E at $8B06.
+        Assert.Equal("BBC Computer 32K", BootScreen.Banner);
+        Assert.Equal("BASIC", BootScreen.Language);
+        Assert.Equal(">", BootScreen.Prompt);
+        Assert.Equal(["", "BBC Computer 32K", "", "BASIC", "", ">"], BootScreen.Rows);
+    }
+}
+
+/// <summary>The boot screen, rows from 0, with each string taken from the ROMs.</summary>
+public static class BootScreen
+{
+    public static string Banner => Text(BbcSession.Roms.Os, 0x0304, 0x00) + Text(BbcSession.Roms.Os, 0x0317, 0x07);
+
+    public static string Language => Text(BbcSession.Roms.Basic, 0x0009, 0x00);
+
+    public static string Prompt => ((char)Opcode(BbcSession.Roms.Basic, 0x0B06, 0xA9)).ToString();
+
+    /// <summary>
+    /// Without the 8271 the DFS prints nothing at boot (bus.md s4b, task 5). When task 12 fits the
+    /// 8271, <c>Acorn DFS</c> and a blank row come after row 2: add <c>"Acorn DFS", "",</c> after
+    /// the second blank below, the one-line change that moves <c>BASIC</c> to row 5 and the prompt
+    /// to row 7 in every mode.
+    /// </summary>
+    public static IReadOnlyList<string> Rows => ["", Banner, "", Language, "", Prompt];
+
+    private static string Text(byte[] rom, int offset, byte end)
+    {
+        int stop = Array.IndexOf(rom, end, offset);
+        return System.Text.Encoding.ASCII.GetString(rom, offset, stop - offset);
+    }
+
+    // The operand of an immediate instruction, checking the opcode is the one expected.
+    private static byte Opcode(byte[] rom, int offset, byte opcode)
+    {
+        Assert.Equal(opcode, rom[offset]);
+        return rom[offset + 1];
+    }
+}
+
+/// <summary>
+/// One booted machine for each start-up mode, made the first time a test asks for it and shared by
+/// the read-only boot tests, so a mode is booted once rather than once a test. Nothing that types
+/// or changes the machine uses these.
+/// </summary>
+public sealed class BootedModes
+{
+    private readonly Lazy<BbcSession>[] _sessions =
+        Enumerable.Range(0, 8).Select(mode => new Lazy<BbcSession>(() => new BbcSession(mode).Boot())).ToArray();
+
+    private readonly Lazy<string[]>[] _screens;
+
+    public BootedModes()
+    {
+        _screens = Enumerable.Range(0, 8).Select(mode => new Lazy<string[]>(() => Session(mode).ScreenText())).ToArray();
+    }
+
+    public BbcSession Session(int mode) => _sessions[mode].Value;
+
+    public string[] Screen(int mode) => _screens[mode].Value;
 }
