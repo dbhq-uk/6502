@@ -4,7 +4,7 @@ namespace Dbhq.Machines.BbcMicro.Tests;
 
 /// <summary>
 /// The screen decode checked on pictures drawn here, by hand from the font, before it is trusted
-/// with the machine's: every glyph in every mode from 0 to 6, in two colour pairs, with the cursor
+/// with the machine's: every glyph in every mode from 0 to 6, in three colour pairs, with the cursor
 /// over it and without.
 /// </summary>
 public class ScreenTextTests
@@ -66,11 +66,16 @@ public class ScreenTextTests
                 }
             }
 
-            string[] text = ScreenText.Read(picture, mode, cursor: null, Os);
-            Assert.Equal(rows, text.Length);
+            ScreenText.Cell[][] cells = ScreenText.ReadCells(picture, mode, cursor: null, Os);
+            Assert.Equal(rows, cells.Length);
             for (int row = 0; row < rows; row++)
             {
-                Assert.Equal(new string(expected[row]), text[row]);
+                Assert.Equal(new string(expected[row]), new string(cells[row].Select(cell => cell.Text).ToArray()));
+                foreach (ScreenText.Cell cell in cells[row])
+                {
+                    Assert.Equal(bg, cell.Background);
+                    Assert.Equal(cell.Text == ' ' ? null : fg, cell.Foreground);
+                }
             }
         }
     }

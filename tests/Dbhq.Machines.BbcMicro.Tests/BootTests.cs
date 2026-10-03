@@ -23,17 +23,18 @@ namespace Dbhq.Machines.BbcMicro.Tests;
 /// </remarks>
 public class BootTests(BootedModes booted) : IClassFixture<BootedModes>
 {
+    private const uint Black = 0xFF000000, White = 0xFFFFFFFF;
+
     [Fact]
     public void ColdBootPrintsTheBannerAndTheBasicPromptInMode7()
     {
+        // The rows of BootScreen, then a blank row below the prompt (and its cursor).
         var s = new BbcSession(mode: 7).Boot();
-        Assert.Equal("", s.ScreenRowAsMemory(0).TrimEnd());
-        Assert.Equal("BBC Computer 32K", s.ScreenRowAsMemory(1).TrimEnd());
-        Assert.Equal("", s.ScreenRowAsMemory(2).TrimEnd());
-        Assert.Equal("BASIC", s.ScreenRowAsMemory(3).TrimEnd());
-        Assert.Equal("", s.ScreenRowAsMemory(4).TrimEnd());
-        Assert.Equal(">", s.ScreenRowAsMemory(5).TrimEnd()); // plus the cursor
-        Assert.Equal("", s.ScreenRowAsMemory(6).TrimEnd());
+        for (int row = 0; row < BootScreen.Rows.Count; row++)
+        {
+            Assert.Equal(BootScreen.Rows[row], s.ScreenRowAsMemory(row).TrimEnd());
+        }
+        Assert.Equal("", s.ScreenRowAsMemory(BootScreen.Rows.Count).TrimEnd());
     }
 
     [Fact]
@@ -47,9 +48,9 @@ public class BootTests(BootedModes booted) : IClassFixture<BootedModes>
         s.Machine.Run(6_000_000);
 
         Assert.Equal(0, s.Machine.Bus.Peek(0x028D)); // the last reset was a soft BREAK
-        Assert.Equal("BBC Computer", s.ScreenRowAsMemory(1).TrimEnd());
-        Assert.Equal("BASIC", s.ScreenRowAsMemory(3).TrimEnd());
-        Assert.Equal(">", s.ScreenRowAsMemory(5).TrimEnd());
+        Assert.Equal(BootScreen.BannerAfterBreak, s.ScreenRowAsMemory(1).TrimEnd());
+        Assert.Equal(BootScreen.Language, s.ScreenRowAsMemory(BootScreen.LanguageRow).TrimEnd());
+        Assert.Equal(BootScreen.Prompt, s.ScreenRowAsMemory(BootScreen.PromptRow).TrimEnd());
     }
 
     [Fact]
@@ -133,6 +134,48 @@ public class BootTests(BootedModes booted) : IClassFixture<BootedModes>
     [InlineData(5)]
     [InlineData(6)]
     [InlineData(7)]
+    public void EachModeBootsInWhiteOnBlack(int mode)
+    {
+        // The shapes alone do not say the colours are right: the decode takes either colour of a
+        // cell as the text, so a palette fault that drew mode 2 as cyan on red still read (task 10's
+        // review). The OS's default is white text on black in every mode: in its power-up palettes,
+        // which video.md s2.3 decodes, logical 0 is black and the text colour the OS picks is
+        // white (logical 1 of 2, 3 of 4, 7 of 16), and mode 7's rows start white on black (s4.2,
+        // the start-of-row defaults). The cursor only inverts
+        // black and white into each other. So the whole picture holds black and white and nothing
+        // else, and in every cell the decode reads, the text is white and the background black.
+        var colours = new HashSet<uint>();
+        foreach (uint pixel in booted.Session(mode).Machine.Screen.Pixels)
+        {
+            colours.Add(pixel);
+        }
+        Assert.Equal([Black, White], colours.Order());
+
+        ScreenText.Cell[][] cells = booted.Cells(mode);
+        int text = 0;
+        for (int row = 0; row < cells.Length; row++)
+        {
+            for (int column = 0; column < cells[row].Length; column++)
+            {
+                ScreenText.Cell cell = cells[row][column];
+                Assert.True(cell.Background == Black, $"mode {mode}, cell ({column}, {row}): background {cell.Background:X8}");
+                Assert.True(cell.Text == ' ' ? cell.Foreground is null : cell.Foreground == White,
+                    $"mode {mode}, cell ({column}, {row}) '{cell.Text}': text {cell.Foreground:X8}");
+                text += cell.Text == ' ' ? 0 : 1;
+            }
+        }
+        Assert.Equal(string.Concat(BootScreen.Rows).Count(c => c != ' '), text);
+    }
+
+    [Theory]
+    [InlineData(0)]
+    [InlineData(1)]
+    [InlineData(2)]
+    [InlineData(3)]
+    [InlineData(4)]
+    [InlineData(5)]
+    [InlineData(6)]
+    [InlineData(7)]
     public void TheOsTextWindowIsTheModesGridAndTheCursorFollowsThePrompt(int mode)
     {
         // The decode cuts the picture by the grid of video.md s3.1; the OS's own text window says
@@ -146,7 +189,7 @@ public class BootTests(BootedModes booted) : IClassFixture<BootedModes>
         Assert.Equal(columns - 1, bus.Peek(0x030A));
         Assert.Equal(0, bus.Peek(0x030B));
         Assert.Equal(1, bus.Peek(0x0318));
-        Assert.Equal(BootScreen.Rows.Count - 1, bus.Peek(0x0319));
+        Assert.Equal(BootScreen.PromptRow, bus.Peek(0x0319));
     }
 
     [Fact]
@@ -154,30 +197,53 @@ public class BootTests(BootedModes booted) : IClassFixture<BootedModes>
     {
         // The expected rows are read out of the ROMs, as bus.md s4b sets them out, not copied from
         // what the machine printed: the banner from OS $C304 (to its zero) and $C317 (to its BEL),
-        // BASIC's title at $8009 (to its zero) and the prompt from BASIC's LDA #$3E at $8B06.
+        // BASIC's title at $8009 (to its zero) and the prompt from BASIC's LDA #$3E at $8B06. The
+        // DFS's line, for task 12, is at DFS $B3B4 (to its carriage return).
         Assert.Equal("BBC Computer 32K", BootScreen.Banner);
+        Assert.Equal("BBC Computer", BootScreen.BannerAfterBreak);
         Assert.Equal("BASIC", BootScreen.Language);
         Assert.Equal(">", BootScreen.Prompt);
-        Assert.Equal(["", "BBC Computer 32K", "", "BASIC", "", ">"], BootScreen.Rows);
+        Assert.Equal("Acorn DFS", BootScreen.Dfs);
+
+        // The layout of bus.md s4b: a blank row, the banner, a blank; at the end the language, a
+        // blank and the prompt. Whatever task 12 puts between them, these hold.
+        Assert.Equal(["", BootScreen.Banner, ""], BootScreen.Rows.Take(3));
+        Assert.Equal([BootScreen.Language, "", BootScreen.Prompt], BootScreen.Rows.TakeLast(3));
+        Assert.Equal(BootScreen.Rows.Count - 3, BootScreen.LanguageRow);
     }
 }
 
 /// <summary>The boot screen, rows from 0, with each string taken from the ROMs.</summary>
 public static class BootScreen
 {
+    /// <summary>The banner after a power on: OS <c>$C304</c> and the memory size at <c>$C317</c>.</summary>
     public static string Banner => Text(BbcSession.Roms.Os, 0x0304, 0x00) + Text(BbcSession.Roms.Os, 0x0317, 0x07);
+
+    /// <summary>The banner after a soft BREAK, which skips the memory size: OS <c>$C304</c>, trailing space dropped.</summary>
+    public static string BannerAfterBreak => Text(BbcSession.Roms.Os, 0x0304, 0x00).TrimEnd();
 
     public static string Language => Text(BbcSession.Roms.Basic, 0x0009, 0x00);
 
     public static string Prompt => ((char)Opcode(BbcSession.Roms.Basic, 0x0B06, 0xA9)).ToString();
 
+    /// <summary>The line the DFS prints at boot once an 8271 is fitted: DFS ROM <c>$B3B4</c>, file offset <c>$33B4</c>, to its carriage return.</summary>
+    public static string Dfs => Text(BbcSession.Roms.Dfs, 0x33B4, 0x0D);
+
     /// <summary>
-    /// Without the 8271 the DFS prints nothing at boot (bus.md s4b, task 5). When task 12 fits the
-    /// 8271, <c>Acorn DFS</c> and a blank row come after row 2: add <c>"Acorn DFS", "",</c> after
-    /// the second blank below, the one-line change that moves <c>BASIC</c> to row 5 and the prompt
-    /// to row 7 in every mode.
+    /// The rows from 0. Without the 8271 the DFS prints nothing at boot (bus.md s4b, task 5). When
+    /// task 12 fits the 8271, <see cref="Dfs"/> and a blank row come after row 2: add
+    /// <c>Dfs, "",</c> after the second blank below. That is the whole change: every boot test,
+    /// memory and picture, and every BASIC test takes its rows from this list
+    /// (<see cref="LanguageRow"/>, <see cref="PromptRow"/>), so <c>BASIC</c> moves to row 5 and the
+    /// prompt to row 7 in all of them.
     /// </summary>
     public static IReadOnlyList<string> Rows => ["", Banner, "", Language, "", Prompt];
+
+    /// <summary>The language title's row.</summary>
+    public static int LanguageRow => Rows.Count - 3;
+
+    /// <summary>The prompt's row, where the cursor waits after the boot.</summary>
+    public static int PromptRow => Rows.Count - 1;
 
     private static string Text(byte[] rom, int offset, byte end)
     {
@@ -203,14 +269,16 @@ public sealed class BootedModes
     private readonly Lazy<BbcSession>[] _sessions =
         Enumerable.Range(0, 8).Select(mode => new Lazy<BbcSession>(() => new BbcSession(mode).Boot())).ToArray();
 
-    private readonly Lazy<string[]>[] _screens;
+    private readonly Lazy<ScreenText.Cell[][]>[] _cells;
 
     public BootedModes()
     {
-        _screens = Enumerable.Range(0, 8).Select(mode => new Lazy<string[]>(() => Session(mode).ScreenText())).ToArray();
+        _cells = Enumerable.Range(0, 8).Select(mode => new Lazy<ScreenText.Cell[][]>(() => Session(mode).ScreenCells())).ToArray();
     }
 
     public BbcSession Session(int mode) => _sessions[mode].Value;
 
-    public string[] Screen(int mode) => _screens[mode].Value;
+    public ScreenText.Cell[][] Cells(int mode) => _cells[mode].Value;
+
+    public string[] Screen(int mode) => Cells(mode).Select(row => new string(row.Select(cell => cell.Text).ToArray())).ToArray();
 }

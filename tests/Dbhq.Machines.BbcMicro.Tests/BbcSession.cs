@@ -9,7 +9,7 @@ public sealed class BbcSession
     /// How long <see cref="Type"/> holds each key down, in CPU cycles: 40 ms, four of the OS's
     /// 100 Hz ticks and two fields. The OS sees a key go down through the keyboard's CA2 interrupt
     /// and puts its character in the buffer at the next 100 Hz tick (OS <c>$F01F-$F026</c> sets the
-    /// countdown at <c>$E7</c> to 1, and <c>$EF55-$EF64</c> counts it down on the tick); four ticks
+    /// countdown at <c>$E7</c> to 1, and <c>$EF54-$EF66</c> counts it down on the tick); four ticks
     /// leave room for a tick that lands just before the press. It is well short of the
     /// auto-repeat delay, 50 cs from power on (OS default table <c>$D994</c> = <c>$32</c>, copied to
     /// <c>$0254</c> by <c>$DA5B-$DA62</c>), so no key repeats.
@@ -108,12 +108,16 @@ public sealed class BbcSession
     /// OS <c>$C66A-$C66D</c> compares the column with the window's right edge at <c>$030A</c>),
     /// which says which cell the cursor may be inverting.
     /// </summary>
-    public string[] ScreenText()
+    public string[] ScreenText() =>
+        ScreenCells().Select(row => new string(row.Select(cell => cell.Text).ToArray())).ToArray();
+
+    /// <summary><see cref="ScreenText"/> with each cell's colours as drawn.</summary>
+    public global::Dbhq.Machines.BbcMicro.Tests.ScreenText.Cell[][] ScreenCells()
     {
         BbcBus bus = Machine.Bus;
         int mode = bus.Peek(0x0355);
         (int, int) cursor = (bus.Peek(0x0318), bus.Peek(0x0319));
-        return global::Dbhq.Machines.BbcMicro.Tests.ScreenText.Read(Machine.Screen.Pixels, mode, cursor, Roms.Os);
+        return global::Dbhq.Machines.BbcMicro.Tests.ScreenText.ReadCells(Machine.Screen.Pixels, mode, cursor, Roms.Os);
     }
 
     /// <summary>

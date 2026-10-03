@@ -646,7 +646,7 @@ Rows 1-7 are scanned this way; row 0 is never found by the full scan, so SHIFT/C
 | Item | Fact | Tag |
 |---|---|---|
 | New key | On a new key the OS sets the countdown at `$E7` to 1 and copies the auto-repeat delay from `$0254` to `$02CA`. | [from ROM `$F01F-$F026`] |
-| Into the buffer | On each 100 Hz tick, while a key is down, the countdown at `$E7` is decremented; at zero the character goes in and the countdown is reloaded from `$02CA`, which then takes the repeat rate from `$0255`. So a new key's character is buffered at the first tick after it is seen, within 10 ms. | [from ROM `$EF55-$EF67`] |
+| Into the buffer | On each 100 Hz tick, while a key is down, the countdown at `$E7` is decremented; at zero the character goes in and the countdown is reloaded from `$02CA`, which then takes the repeat rate from `$0255`. So a new key's character is buffered at the first tick after it is seen, within 10 ms. | [from ROM `$EF54-$EF66`; the character goes into the buffer in the code that follows] |
 | Defaults | Auto-repeat delay `$0254` = `$32` (50 cs), repeat rate `$0255` = `$08` (8 cs) from power on: the reset code copies the OS's default table (`$D940` on) to `$0200` on (`$DA5B-$DA62`), and the bytes at `$D994`/`$D995` are `32 08`. `*FX12,0` sets the same two values (`$E98E-$E993`). | [from ROM] |
 | Keyboard status | `$025A` defaults to `$20` (`$D99A`), and capitals come from the letter keys without SHIFT: CAPS LOCK is on from power on. | [from ROM; the CAPS LOCK reading confirmed by running, task 10's typed BASIC] |
 | For an emulator's typing | A key held longer than one tick and shorter than the 50 cs delay types once. The test project holds 40 ms and rests 40 ms (`BbcSession.HoldCycles`, `RestCycles`). | [inferring from the rows above] |

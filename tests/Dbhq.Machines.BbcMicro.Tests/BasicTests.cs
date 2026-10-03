@@ -230,9 +230,12 @@ public class BasicTests
         int red = 0, cyan = 0;
         for (int field = 0; field < 100; field++)
         {
+            // A field is 39,936 cycles (video.md s5); a CRTC that stopped counting fields fails
+            // here rather than hanging the test.
             long frames = screen.Frames;
-            while (screen.Frames == frames)
+            for (int waited = 0; screen.Frames == frames; waited += 1_000)
             {
+                Assert.True(waited < 100_000, $"no field ended in {waited} cycles");
                 s.RunFor(1_000);
             }
 

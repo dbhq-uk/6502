@@ -32,6 +32,13 @@ namespace Dbhq.Machines.BbcMicro.Tests;
 /// <see cref="TeletextScreen"/>, as task 9's tests do.
 /// </para>
 /// <para>
+/// <b>Colours.</b> The match takes either colour of a cell as the text, so the shapes alone say
+/// nothing about colour: a palette fault that drew a mode cyan on red still reads (task 10's
+/// review). <see cref="ReadCells"/> therefore returns each cell's colours as well: in modes 0 to 6
+/// the text and background colours the match found, before any cursor; in mode 7 the one colour
+/// of the cell's lit pixels, the cursor's lines left out, on black.
+/// </para>
+/// <para>
 /// <b>The cursor.</b> The cursor inverts some lines of one cell, and it blinks. In a mode whose two
 /// colours are each other's inverse, such as white on black, a space under the cursor and an
 /// underscore with the cursor off draw the same pixels, so one picture cannot tell them apart. The
@@ -49,6 +56,14 @@ namespace Dbhq.Machines.BbcMicro.Tests;
 /// </remarks>
 public static class ScreenText
 {
+    /// <summary>A cell as read: its character, <c>?</c> if none, and its two colours as drawn.</summary>
+    /// <param name="Text">The character, or <c>?</c>.</param>
+    /// <param name="Foreground">The colour of the character's set bits; null for a space or an unread cell.</param>
+    /// <param name="Background">The colour of the rest of the cell; null for an unread cell. Mode 7's is black.</param>
+    public readonly record struct Cell(char Text, uint? Foreground, uint? Background);
+
+    private static readonly Cell Unknown = new('?', null, null);
+
     /// <summary>The cursor's inversion: physical colour c becomes c XOR 7.</summary>
     private const uint Invert = 0x00FFFFFF;
 
@@ -72,7 +87,14 @@ public static class ScreenText
     /// <param name="mode">The screen mode the OS set, 0 to 7.</param>
     /// <param name="cursor">The OS's text cursor, column and row, or null for none.</param>
     /// <param name="os">The OS ROM, for its font and its CRTC register table.</param>
-    public static string[] Read(ReadOnlySpan<uint> pixels, int mode, (int Column, int Row)? cursor, byte[] os)
+    public static string[] Read(ReadOnlySpan<uint> pixels, int mode, (int Column, int Row)? cursor, byte[] os) =>
+        ReadCells(pixels, mode, cursor, os).Select(row => new string(row.Select(cell => cell.Text).ToArray())).ToArray();
+
+    /// <summary>
+    /// <see cref="Read"/>, with each cell's colours as well as its character: so a test can ask
+    /// that the text is the colour the OS chose, not only the shape.
+    /// </summary>
+    public static Cell[][] ReadCells(ReadOnlySpan<uint> pixels, int mode, (int Column, int Row)? cursor, byte[] os)
     {
         ArgumentOutOfRangeException.ThrowIfLessThan(mode, 0);
         ArgumentOutOfRangeException.ThrowIfGreaterThan(mode, 7);
@@ -80,10 +102,10 @@ public static class ScreenText
         (int columns, int rows) = Grids[mode];
         (int cursorFirst, int cursorLast) = CursorLines(os, mode);
 
-        var text = new string[rows];
+        var text = new Cell[rows][];
         for (int row = 0; row < rows; row++)
         {
-            var line = new char[columns];
+            var line = new Cell[columns];
             for (int column = 0; column < columns; column++)
             {
                 bool hasCursor = cursor is { } at && at.Column == column && at.Row == row;
@@ -91,7 +113,7 @@ public static class ScreenText
                     ? ReadTeletextCell(picture, row, column, hasCursor, cursorFirst, cursorLast)
                     : ReadCell(picture, os, mode, row, column, hasCursor, cursorFirst, cursorLast);
             }
-            text[row] = new string(line);
+            text[row] = line;
         }
         return text;
     }
@@ -103,9 +125,9 @@ public static class ScreenText
     public static char ReadCell(uint[] picture, int mode, int row, int column, bool hasCursor, byte[] os)
     {
         (int first, int last) = CursorLines(os, mode);
-        return mode == 7
+        return (mode == 7
             ? ReadTeletextCell(picture, row, column, hasCursor, first, last)
-            : ReadCell(picture, os, mode, row, column, hasCursor, first, last);
+            : ReadCell(picture, os, mode, row, column, hasCursor, first, last)).Text;
     }
 
     /// <summary>The lines of a cell the cursor covers in a mode: R10's start line and R11, from the ROM's table.</summary>
@@ -128,7 +150,7 @@ public static class ScreenText
     /// <summary>The eight font bytes of a character, from <c>os.rom</c> at <c>$C000 + (code - $20) * 8</c>.</summary>
     public static ReadOnlySpan<byte> Glyph(byte[] os, int code) => os.AsSpan((code - 0x20) * 8, 8);
 
-    private static char ReadCell(uint[] picture, byte[] os, int mode, int row, int column, bool hasCursor, int cursorFirst, int cursorLast)
+    private static Cell ReadCell(uint[] picture, byte[] os, int mode, int row, int column, bool hasCursor, int cursorFirst, int cursorLast)
     {
         (int columns, _) = Grids[mode];
         int lines = (CrtcTable(os, mode)[9] & 0x1F) + 1;
@@ -155,7 +177,7 @@ public static class ScreenText
                     {
                         if (picture[(y * Width) + x0 + x] != colour)
                         {
-                            return '?';
+                            return Unknown;
                         }
                     }
                     fields[field][line, bit] = colour;
@@ -172,25 +194,68 @@ public static class ScreenText
                 {
                     if (fields[0][line, bit] != fields[1][line, bit])
                     {
-                        return '?';
+                        return Unknown;
                     }
                 }
             }
-            return Match(os, fields[0], lines, invertFrom: lines, invertTo: -1) ?? '?';
+            return Match(os, fields[0], lines, invertFrom: lines, invertTo: -1) ?? Unknown;
         }
 
         // The cursor's cell: each field read on its own, the cursor shown or not, and the two
         // fields must agree.
-        char even = Choose(
+        Cell even = Choose(
             Match(os, fields[0], lines, invertFrom: lines, invertTo: -1),
             Match(os, fields[0], lines, cursorFirst, Math.Min(cursorLast, lines - 1)));
-        char odd = Choose(
+        Cell odd = Choose(
             Match(os, fields[1], lines, invertFrom: lines, invertTo: -1),
             Match(os, fields[1], lines, cursorFirst, Math.Min(cursorLast, lines - 1)));
-        return even == odd ? even : '?';
+        if (even.Text != odd.Text)
+        {
+            return Unknown;
+        }
+
+        // An underscore in two colours that are not each other's inverse, with the cursor on one
+        // field, reads with different colours on each (Choose): its colours are then unknown.
+        return even == odd ? even : new Cell(even.Text, null, null);
     }
 
-    private static char ReadTeletextCell(uint[] picture, int row, int column, bool hasCursor, int cursorFirst, int cursorLast)
+    private static Cell ReadTeletextCell(uint[] picture, int row, int column, bool hasCursor, int cursorFirst, int cursorLast)
+    {
+        char text = TeletextText(picture, row, column, hasCursor, cursorFirst, cursorLast);
+        if (text == '?')
+        {
+            return Unknown;
+        }
+
+        // The shape is read as lit or not; the colour is read here. Every lit pixel of a cell, the
+        // cursor's lines left out in its cell, must be one colour, and the rest is black
+        // (TeletextScreen insists on that).
+        uint? foreground = null;
+        int left = 16 * column, top = 20 * row;
+        for (int y = 0; y < 20; y++)
+        {
+            if (hasCursor && y >= cursorFirst && y <= cursorLast)
+            {
+                continue;
+            }
+            for (int x = 0; x < 16; x++)
+            {
+                uint pixel = picture[((top + y) * Width) + left + x];
+                if (pixel == OpaqueBlack)
+                {
+                    continue;
+                }
+                if (foreground is not null && foreground != pixel)
+                {
+                    return Unknown;
+                }
+                foreground = pixel;
+            }
+        }
+        return new Cell(text, foreground, OpaqueBlack);
+    }
+
+    private static char TeletextText(uint[] picture, int row, int column, bool hasCursor, int cursorFirst, int cursorLast)
     {
         // A mode 7 cell is 20 framebuffer rows, the even field's lines and the odd field's woven,
         // so raster address RA is the cell's frame row RA (TeletextScreen's remarks), and the
@@ -232,24 +297,28 @@ public static class ScreenText
     /// The cursor's cell: the reading that fits, and where both fit and differ, a space, because a
     /// space under the cursor and an underscore draw the same pixels (the remarks).
     /// </summary>
-    private static char Choose(char? plain, char? underCursor)
+    private static Cell Choose(Cell? plain, Cell? underCursor)
     {
         if (plain is null)
         {
-            return underCursor ?? '?';
+            return underCursor ?? Unknown;
         }
-        if (underCursor is null || underCursor == plain)
+        if (underCursor is null || underCursor.Value.Text == plain.Value.Text)
         {
+            // The same character either way: only an underscore in a pair of colours that are not
+            // each other's inverse can do this, and then which colour is the text depends on
+            // whether the cursor is shown. The cell's colours are read as with it off.
             return plain.Value;
         }
-        return plain == ' ' || underCursor == ' ' ? ' ' : '?';
+        return plain.Value.Text == ' ' ? plain.Value : underCursor.Value.Text == ' ' ? underCursor.Value : Unknown;
     }
 
     /// <summary>
     /// The one character the cell's colours show, with lines <paramref name="invertFrom"/> to
-    /// <paramref name="invertTo"/> taken as inverted by the cursor; null if none or several.
+    /// <paramref name="invertTo"/> taken as inverted by the cursor, with its colours as they were
+    /// before the cursor; null if none or several.
     /// </summary>
-    private static char? Match(byte[] os, uint[,] colours, int lines, int invertFrom, int invertTo)
+    private static Cell? Match(byte[] os, uint[,] colours, int lines, int invertFrom, int invertTo)
     {
         uint Colour(int line, int bit)
         {
@@ -288,10 +357,10 @@ public static class ScreenText
 
         if (distinct.Count == 1)
         {
-            return ' ';
+            return new Cell(' ', null, distinct[0]);
         }
 
-        char? found = null;
+        Cell? found = null;
         foreach (uint foreground in distinct)
         {
             ulong bits = 0;
@@ -305,11 +374,11 @@ public static class ScreenText
 
             if (Font(os).TryGetValue(bits, out char glyph))
             {
-                if (found is not null && found != glyph)
+                if (found is not null)
                 {
                     return null;
                 }
-                found = glyph;
+                found = new Cell(glyph, foreground, distinct[0] == foreground ? distinct[1] : distinct[0]);
             }
         }
         return found;

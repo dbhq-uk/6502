@@ -100,7 +100,7 @@ because CAPS LOCK is on from power on (the keyboard status at `$025A` starts as
 
 **Decision: hold 40 ms, rest 40 ms** (80,000 CPU cycles each). From the ROM: a
 new key sets the countdown at `$E7` to 1 (`$F01F-$F026`), and each 100 Hz tick
-counts it down and buffers the character at zero (`$EF55-$EF67`), so a key is
+counts it down and buffers the character at zero (`$EF54-$EF66`, and the code after it), so a key is
 typed at the first tick after it is seen. Four ticks of hold leave room for a
 tick that lands just before the press, and stay far below the auto-repeat
 delay, which is 50 centiseconds from power on (`$D994` = `$32`, copied to
@@ -145,37 +145,83 @@ tests now wait two seconds of machine time.
 ## What the decode found
 
 **No fault in the chips.** The picture decode found none that the memory-level
-boot test had missed: the number this task was asked to record is nought. Every
-mode's picture read correctly at the first run, and every failure on the way
-was my own (above).
+boot test had missed: the number this task was asked to record is nought. The
+chips drew every mode correctly at the first run, and every failure on the way
+was my own (above), in the tests or the decoder.
 
 That is a statement about today's chips, so to see what the decode can see, I
-planted ten one-line faults in the chips, one at a time, and ran the
-memory-level boot tests (the four that read RAM and registers), the new picture
-tests, and the chip-level tests of the ULA, the teletext chip, the keyboard and
-the system VIA (`python3 /tmp/t10/mut.py`, a scratch script, not committed):
+planted one-line faults in the chips, one at a time, and ran the memory-level
+boot tests (the four that read RAM and registers), the new picture tests, and
+the chip-level tests of the ULA, the teletext chip, the keyboard and the system
+VIA (`python3 /tmp/t10/mut.py`, a scratch script, not committed). The table is
+the run after the review round below, with the colour check in place:
 
 | Planted fault | Memory-level boot | Picture tests | Chip tests |
 | --- | --- | --- | --- |
 | Palette index from bits 7, 3, 5, 1 | missed | caught | caught |
-| Screen wrap of modes 4 and 5 swapped with mode 6 | missed | caught (by the scroll test) | caught |
+| Screen wrap of modes 4 and 5 swapped with mode 6 | missed | caught (only by the scroll test) | caught |
 | RA3 blanking off in modes 3 and 6 | missed | caught | caught |
-| Red and blue swapped | missed | caught | caught |
-| The flash bit ignored | missed | caught | caught |
+| Red and blue swapped | missed | caught (only by the palette and flash tests) | caught |
+| The flash bit ignored | missed | caught (only by the flash test) | caught |
 | Palette entry from the low nibble | missed | caught | caught |
 | One row of the teletext `B` damaged | missed | caught | caught |
 | SHIFT never read from the matrix | missed | caught | caught |
 | The cursor never inverts | missed | missed | caught |
 | The shift register fills with 0s | missed | missed | caught |
+| Palette entry number with bit 0 flipped (the review's) | missed | caught (only by the colour check) | caught |
 
-The memory-level boot test missed all ten, because none of them changes what
-the OS writes to memory. The picture tests caught eight. The wrap fault was
-missed at first, because nothing scrolled; the scroll test was added for it and
-catches it. The two left are missed by design: the decode tolerates the cursor
-on or off, and a shift register filling with 0s shows only in eighty columns on
-the 1 MHz clock, which no OS mode sets. The chip tests caught all ten, which is
-what they are for; what the picture tests add is that the chips, the OS and
-BASIC agree end to end.
+The memory-level boot test missed all eleven, because none of them changes what
+the OS writes to memory. The picture tests caught nine. The wrap fault was
+missed at first, because nothing scrolled; the scroll test was added for it.
+The last fault was missed by every picture test until the review round, below.
+The two left are missed by design: the decode tolerates the cursor on or off,
+and a shift register filling with 0s shows only in eighty columns on the 1 MHz
+clock, which no OS mode sets. The chip tests caught all eleven, which is what
+they are for; what the picture tests add is that the chips, the OS and BASIC
+agree end to end.
+
+## The review round: the boot picture now checks colour
+
+The review found the gap the last row of the table shows. The decode takes
+either colour of a cell as the text, so it reads shapes, not colours, and the
+only tests that looked at colour were the palette and flash tests, in modes 4
+and 1. The reviewer flipped bit 0 of the palette entry number in the ULA's
+palette write. Modes 0, 4, 1 and 5 repeat their palette entries, so nothing
+changes there, but mode 2 booted as cyan text on a red background. Its rows
+still read correctly, and every boot and BASIC test passed. Mode 7 had the same
+blind spot, because `TeletextScreen` asks only whether a pixel is lit.
+
+**Decision: the boot picture checks its colours in every mode.**
+`EachModeBootsInWhiteOnBlack` asks two things. First, that the whole picture
+holds black and white and nothing else, which is the OS's default in every mode:
+logical 0 is black and the text colour white in the power-up palettes `video.md`
+s2.3 decodes, and mode 7's rows start white on black. Second, that in every
+cell the decode reads, the text is white and the background black. For that the
+decode now returns each cell's colours as well as its character
+(`ScreenText.ReadCells`). In modes 0 to 6 these are the two colours the match
+found, before any cursor. In mode 7 it is the one colour of the cell's lit
+pixels, the cursor's lines left out, on black. Asking only for the set of
+colours was not enough, because a picture with black text on white would pass
+it. I re-planted the review's fault and saw the new test fail in mode 2, then
+took the fault out. With the fault out, the rest of the table above is unchanged.
+
+So the boot tests now check colour in every mode, but only white on black:
+they would not see a fault that sends another colour to the wrong place. The
+palette and flash tests cover two modes beyond that, and the chip tests cover
+the palette entry by entry.
+
+Smaller fixes from the review:
+
+- Adding the DFS's row was not the one-line change I had claimed. The literal
+  list in `TheBootScreenIsTheRomsText` and the two memory-level boot tests used
+  absolute rows. Every boot test now takes its rows from `BootScreen.Rows`
+  (`LanguageRow`, `PromptRow`), so the change for task 12 is one line. The
+  DFS's text is read from its ROM (`$B3B4`, to its carriage return) rather than
+  typed.
+- The flash test's wait for the next field had no limit, so a fault that
+  stopped the frames would have hung it. It now fails after 100,000 cycles.
+- The keyboard tick code was cited one byte late. It is `$EF54-$EF66`, with the
+  buffering in the code after it.
 
 ## The time it takes
 
