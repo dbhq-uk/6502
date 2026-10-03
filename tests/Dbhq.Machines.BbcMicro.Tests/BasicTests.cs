@@ -9,8 +9,8 @@ namespace Dbhq.Machines.BbcMicro.Tests;
 /// <remarks>
 /// <para>
 /// Each test boots its own machine, because each types into it. After the boot the prompt is on
-/// row 5 in every mode (<see cref="BootScreen"/>), so what is typed is echoed there and the
-/// answer starts on row 6. BASIC prints a number right-aligned in a field ten wide by default, so
+/// the same row in every mode, the last of <see cref="BootScreen.Rows"/>, so what is typed is
+/// echoed there and the answer starts on the row after. BASIC prints a number right-aligned in a field ten wide by default, so
 /// the tests compare a number's row with its spaces trimmed. Booting takes three seconds of
 /// machine time and typing 160,000 cycles a key (<see cref="BbcSession.HoldCycles"/>,
 /// <see cref="BbcSession.RestCycles"/>), which natively is a few tenths of a second a test.
@@ -23,6 +23,12 @@ namespace Dbhq.Machines.BbcMicro.Tests;
 /// </remarks>
 public class BasicTests
 {
+    /// <summary>
+    /// The prompt's row after the boot, where what is typed is echoed: the last of the boot rows,
+    /// so the 8271's extra rows (task 12) move every test with them.
+    /// </summary>
+    private static readonly int Prompt = BootScreen.Rows.Count - 1;
+
     /// <summary>Time for a command to run and for the picture to show it in both fields: five fields.</summary>
     private const long Settle = 200_000;
 
@@ -61,9 +67,9 @@ public class BasicTests
     {
         string[] screen = Booted(mode).Type("PRINT 6*7\r").RunFor(Settle).ScreenText();
 
-        Assert.Equal(">PRINT 6*7", screen[5].TrimEnd());
-        Assert.Equal("42", screen[6].Trim());
-        Assert.Equal(">", screen[7].TrimEnd());
+        Assert.Equal(">PRINT 6*7", screen[Prompt].TrimEnd());
+        Assert.Equal("42", screen[Prompt + 1].Trim());
+        Assert.Equal(">", screen[Prompt + 2].TrimEnd());
     }
 
     [Theory]
@@ -73,11 +79,11 @@ public class BasicTests
     {
         string[] screen = Booted(mode).Type("FOR I=1 TO 3:PRINT I:NEXT\r").RunFor(Settle).ScreenText();
 
-        Assert.Equal(">FOR I=1 TO 3:PRINT I:NEXT", screen[5].TrimEnd());
-        Assert.Equal("1", screen[6].Trim());
-        Assert.Equal("2", screen[7].Trim());
-        Assert.Equal("3", screen[8].Trim());
-        Assert.Equal(">", screen[9].TrimEnd());
+        Assert.Equal(">FOR I=1 TO 3:PRINT I:NEXT", screen[Prompt].TrimEnd());
+        Assert.Equal("1", screen[Prompt + 1].Trim());
+        Assert.Equal("2", screen[Prompt + 2].Trim());
+        Assert.Equal("3", screen[Prompt + 3].Trim());
+        Assert.Equal(">", screen[Prompt + 4].TrimEnd());
     }
 
     [Theory]
@@ -87,10 +93,10 @@ public class BasicTests
     {
         string[] screen = Booted(mode).Type("10 PRINT \"HELLO\"\r").Type("RUN\r").RunFor(Settle).ScreenText();
 
-        Assert.Equal(">10 PRINT \"HELLO\"", screen[5].TrimEnd());
-        Assert.Equal(">RUN", screen[6].TrimEnd());
-        Assert.Equal("HELLO", screen[7].TrimEnd());
-        Assert.Equal(">", screen[8].TrimEnd());
+        Assert.Equal(">10 PRINT \"HELLO\"", screen[Prompt].TrimEnd());
+        Assert.Equal(">RUN", screen[Prompt + 1].TrimEnd());
+        Assert.Equal("HELLO", screen[Prompt + 2].TrimEnd());
+        Assert.Equal(">", screen[Prompt + 3].TrimEnd());
     }
 
     [Fact]
@@ -116,9 +122,9 @@ public class BasicTests
         // BASIC's abbreviations: P. is PRINT. The line is echoed as typed.
         string[] screen = Booted(7).Type("P.6*7\r").RunFor(Settle).ScreenText();
 
-        Assert.Equal(">P.6*7", screen[5].TrimEnd());
-        Assert.Equal("42", screen[6].Trim());
-        Assert.Equal(">", screen[7].TrimEnd());
+        Assert.Equal(">P.6*7", screen[Prompt].TrimEnd());
+        Assert.Equal("42", screen[Prompt + 1].Trim());
+        Assert.Equal(">", screen[Prompt + 2].TrimEnd());
     }
 
     [Fact]
@@ -129,9 +135,9 @@ public class BasicTests
         // carries on.
         string[] screen = Booted(7).Type("PRINT ?&FE40\r").RunFor(Settle).ScreenText();
 
-        Assert.Equal(">PRINT ?&FE40", screen[5].TrimEnd());
-        Assert.True(int.TryParse(screen[6].Trim(), out int value) && value is >= 0 and <= 255, $"row 6 reads \"{screen[6].Trim()}\"");
-        Assert.Equal(">", screen[7].TrimEnd());
+        Assert.Equal(">PRINT ?&FE40", screen[Prompt].TrimEnd());
+        Assert.True(int.TryParse(screen[Prompt + 1].Trim(), out int value) && value is >= 0 and <= 255, $"the row after the prompt reads \"{screen[Prompt + 1].Trim()}\"");
+        Assert.Equal(">", screen[Prompt + 2].TrimEnd());
     }
 
     [Theory]
@@ -150,7 +156,7 @@ public class BasicTests
         const string command = "FOR I=32 TO 126:VDU I:NEXT";
         string[] screen = Booted(mode).Type(command + "\r").RunFor(4_000_000).ScreenText();
         int columns = ScreenText.Grids[mode].Columns;
-        int first = 5 + (((1 + command.Length) + columns - 1) / columns);
+        int first = Prompt + (((1 + command.Length) + columns - 1) / columns);
 
         string all = string.Concat(Enumerable.Range(32, 95).Select(c => (char)c));
         for (int i = 0; i < all.Length; i += columns)
@@ -199,8 +205,8 @@ public class BasicTests
 
         string[] screen = s.Type("VDU 19,0,4,0,0,0\r").RunFor(Settle).ScreenText();
 
-        Assert.Equal(">VDU 19,0,4,0,0,0", screen[5].TrimEnd());
-        Assert.Equal(">", screen[6].TrimEnd());
+        Assert.Equal(">VDU 19,0,4,0,0,0", screen[Prompt].TrimEnd());
+        Assert.Equal(">", screen[Prompt + 1].TrimEnd());
         Assert.Equal(BootScreen.Banner, screen[1].TrimEnd());
         Assert.All(Row(s, 20), pixel => Assert.Equal(Blue, pixel));
         var colours = new HashSet<uint>();
