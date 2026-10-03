@@ -51,12 +51,19 @@ namespace Dbhq.Machines.BbcMicro;
 /// minimum in <see cref="Service"/>, and the resets.
 /// </para>
 /// </remarks>
-public class BbcBus : IBus
+public sealed class BbcBus : IBus
 {
     private readonly byte[] _ram = new byte[0x8000];
     private readonly byte[] _os;
     private readonly byte[] _basic;
     private readonly byte[] _dfs;
+
+    // What an empty paged ROM slot reads: the high byte of each address, so a read of the slot is
+    // the same array lookup as a fitted ROM. See ReadPagedRom for why.
+    private static readonly byte[] EmptySlot = MakeEmptySlot();
+
+    // The paged ROM the latch chose: BASIC, the DFS or EmptySlot. Set only when the latch is.
+    private byte[] _paged = EmptySlot;
     private readonly Crtc6845Stub _crtc = new();
     private readonly VideoUlaStub _videoUla = new();
     private readonly BbcClock _clock = new();
@@ -104,10 +111,35 @@ public class BbcBus : IBus
 
     public byte Read(ushort address)
     {
-        Stretch(address);
-        _clock.Cycles++;
-        byte value = Decode(address, sideEffects: true);
-        if (_clock.Cycles >= _clock.NextEvent)
+        // Memory first, which is nearly every access: one cycle, never stretched, and no chip
+        // sees it, so the only other work is the look at the event horizon.
+        BbcClock clock = _clock;
+        byte value;
+        if (address < 0x8000)
+        {
+            value = _ram[address];
+        }
+        else if (address < 0xC000)
+        {
+            value = _paged[address - 0x8000];
+        }
+        else if (address < 0xFC00 || address >= 0xFF00)
+        {
+            value = _os[address - 0xC000];
+        }
+        else
+        {
+            Stretch(address);
+            clock.Cycles++;
+            value = address < 0xFE00 ? (byte)0xFF : ReadSheila(address & 0xFF);
+            if (clock.Cycles >= clock.NextEvent)
+            {
+                Service();
+            }
+            return value;
+        }
+
+        if (++clock.Cycles >= clock.NextEvent)
         {
             Service();
         }
@@ -116,21 +148,29 @@ public class BbcBus : IBus
 
     public void Write(ushort address, byte value)
     {
-        Stretch(address);
-        _clock.Cycles++;
-        switch (address >> 12)
+        BbcClock clock = _clock;
+        if (address < 0x8000)
         {
-            case < 8:
-                _ram[address] = value;
-                break;
-            case 0xF when address >= 0xFE00 && address < 0xFF00:
+            _ram[address] = value;
+        }
+        else if (address >= 0xFC00 && address < 0xFF00)
+        {
+            Stretch(address);
+            if (address >= 0xFE00)
+            {
+                clock.Cycles++;
                 WriteSheila(address & 0xFF, value);
-                break;
+                if (clock.Cycles >= clock.NextEvent)
+                {
+                    Service();
+                }
+                return;
+            }
         }
 
         // $8000-$FBFF and $FF00-$FFFF are ROM, and FRED and JIM have nothing fitted:
         // a write goes nowhere.
-        if (_clock.Cycles >= _clock.NextEvent)
+        if (++clock.Cycles >= clock.NextEvent)
         {
             Service();
         }
@@ -240,16 +280,29 @@ public class BbcBus : IBus
         return _os[address - 0xC000];
     }
 
-    private byte ReadPagedRom(ushort address) => RomSlot switch
+    private byte ReadPagedRom(ushort address) => _paged[address - 0x8000];
+
+    /// <summary>The ROM in the slot the latch chose.</summary>
+    private byte[] PagedRom(int slot) => slot switch
     {
-        15 => _basic[address - 0x8000],
-        14 => _dfs[address - 0x8000],
+        15 => _basic,
+        14 => _dfs,
 
         // An empty slot: the last value on the bus, which is the high byte of the
         // address just fetched. One poster on one machine measured the same for an
         // absent fast device; for an empty ROM slot it is an assumption (bus.md s6, item 3).
-        _ => (byte)(address >> 8),
+        _ => EmptySlot,
     };
+
+    private static byte[] MakeEmptySlot()
+    {
+        var slot = new byte[BbcRoms.RomSize];
+        for (int i = 0; i < slot.Length; i++)
+        {
+            slot[i] = (byte)((0x8000 + i) >> 8);
+        }
+        return slot;
+    }
 
     /// <summary>
     /// A read from SHEILA, $FE00-$FEFF, by offset. Each chip adds a case. A device
@@ -289,6 +342,7 @@ public class BbcBus : IBus
             case >= 0x30 and <= 0x3F:
                 // Write only, and the whole block of sixteen is the one latch (S1 s.17, s.21).
                 RomSlot = value & 0x0F;
+                _paged = PagedRom(RomSlot);
                 break;
             case >= 0x40 and <= 0x5F:
                 SystemVia.Write(offset & 0x0F, value);
