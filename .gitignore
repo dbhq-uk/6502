@@ -30,3 +30,6 @@ infra/.terraform/
 # The KIM-1 model analysis's working images, remade by its scripts, and Python's caches.
 tools/kim1-model/out/
 __pycache__/
+
+# Published output of the BBC Micro browser speed check, made locally.
+bench/bbc-micro-speed/publish/

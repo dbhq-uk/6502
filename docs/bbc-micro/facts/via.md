@@ -195,6 +195,7 @@ Sources: register map and read/write behaviour [from WDC Tables 2-1, 2-6 to 2-9,
 | bit 5 | System: 1 (T2 counts PB6 pulses) [from ROM DA8C] |
 
 - **Shift mode 010 timing.** WDC Fig 2-7 (p.21, read at 260 dpi): the read of SR is followed, after about two phi2 cycles, by 8 CB1 clock pulses each lasting two phi2 cycles; IFR2 and IRQ_N fall about two phi2 cycles after the last pulse ends. Pixel-measured total: **about 19 phi2 cycles from the end of the SR read cycle to IFR2 = 1** [inferring from a drawing, marked [guessing - verify]; WDC part, not NMOS]. CB2 data is sampled on the trailing edge of phi2. hoglet notes known bugs in the NMOS MOS 6522 shift register [from SD-16251].
+- **What starts a mode 010 shift.** Added 2 October 2026 with the VIA code (plan task 3): the table in 1.1 says an SR read starts a shift in the in-modes, but for mode 010 the MOS sheet says "the shifting operation is triggered by reading or writing the Shift Register" [from MOS, Mode 010], so a write starts it too. The DFS starts it with a read (`BIT &FE4A`), so the boot path is the same either way. The DFS's test of the flag at &963C is `LDA #&04 / BIT &FE4D / BNE`, returning 5 when IFR2 is clear [from ROM DFS-1.2.rom &963C-&9645]: it needs the flag to have appeared, and counts no cycles of its own.
 - **Other SR modes** (000, 001, 011, 100-111) are not used by anything on the Model B boot path. Their behaviour is in WDC pp.19-24 and AUG ch.22.2.10 pp.408-413 [not needed for first light].
 
 ## 1.9 Exactly when an expiry is visible, and when IRQ_N goes low

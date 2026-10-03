@@ -23,7 +23,9 @@ design lists. `dotnet test` is the proof; the numbers live in its output.
 The KIM-1, the first machine, runs its original monitor ROM, passes its
 acceptance test, and runs in the browser at
 [6502.dbhq.uk/machines/kim-1/](https://6502.dbhq.uk/machines/kim-1/), so it
-counts as implemented. The programme's design is in
+counts as implemented. The BBC Micro Model B is next: its plan, fact sheets
+and ROMs are in the repository, and it is built task by task. The programme's
+design is in
 [`docs/superpowers/specs/2026-09-30-machines-and-site-design.md`](docs/superpowers/specs/2026-09-30-machines-and-site-design.md).
 
 ## What "cycle-accurate" means here
