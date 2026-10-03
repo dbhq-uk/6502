@@ -6,10 +6,12 @@ import { dotnet } from './_framework/dotnet.js'
 // ?boot=N   cycles of machine time to run before the prompt is checked (default 6 million, three seconds)
 // ?cycles=N cycles in each timed run (default 2 million, one second of machine time)
 // ?runs=N   timed runs (default 5)
+// ?mode=N   the screen mode the start-up links select (default 7, the teletext screen)
 const params = new URLSearchParams(location.search);
 const bootCycles = Number(params.get('boot') ?? 6_000_000);
 const cycles = Number(params.get('cycles') ?? 2_000_000);
 const runs = Number(params.get('runs') ?? 5);
+const mode = Number(params.get('mode') ?? 7);
 const log = document.getElementById('log');
 
 const fetchBytes = async (name) => {
@@ -33,7 +35,11 @@ const lines = [];
 
 // The boot: power on and run the real OS to the prompt. Timed, and the first
 // thing the runtime executes, so it includes the runtime warming up.
-bbc.Load(os, basic, dfs);
+if (mode === 7) {
+  bbc.Load(os, basic, dfs);
+} else {
+  bbc.LoadInMode(os, basic, dfs, mode);
+}
 let t = performance.now();
 let before = bbc.Cycles();
 bbc.Run(bootCycles);
@@ -42,10 +48,20 @@ lines.push(line('boot', bbc.Cycles() - before, ms));
 
 // The prompt must be on the screen, or the timed runs would measure something else.
 // Without the 8271 (task 12) the screen is: blank, BBC Computer 32K, blank, BASIC, blank, >.
-const rows = [];
-for (let r = 0; r < 8; r++) rows.push(bbc.ScreenRow(r).trimEnd());
-lines.push('screen ' + JSON.stringify(rows));
-const prompt = rows[5] === '>' && rows[1] === 'BBC Computer 32K' && rows[3] === 'BASIC';
+// In mode 7 that is read as text from screen memory. In another mode the screen is pixels, so
+// the check is the OS's own record: the mode at &0355, and the text cursor at &0318 and &0319
+// one column right of the > on row 5.
+let prompt;
+if (mode === 7) {
+  const rows = [];
+  for (let r = 0; r < 8; r++) rows.push(bbc.ScreenRow(r).trimEnd());
+  lines.push('screen ' + JSON.stringify(rows));
+  prompt = rows[5] === '>' && rows[1] === 'BBC Computer 32K' && rows[3] === 'BASIC';
+} else {
+  const os = { mode: bbc.Peek(0x355), x: bbc.Peek(0x318), y: bbc.Peek(0x319) };
+  lines.push('os ' + JSON.stringify(os));
+  prompt = os.mode === mode && os.x === 1 && os.y === 5;
+}
 lines.push('prompt ' + (prompt ? 'yes' : 'NO'));
 
 for (let i = 1; i <= runs; i++) {

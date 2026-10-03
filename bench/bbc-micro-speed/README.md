@@ -13,7 +13,7 @@ This file is how to run it again.
 
 | Path | What it is |
 | --- | --- |
-| `../../src/Dbhq.Machines.BbcMicro.Wasm/` | The machine as a WebAssembly app: `Load`, `Run`, `Cycles`, `ScreenRow`. It holds no ROMs. |
+| `../../src/Dbhq.Machines.BbcMicro.Wasm/` | The machine as a WebAssembly app: `Load`, `LoadInMode`, `Run`, `Cycles`, `ScreenRow`, `Peek`. It holds no ROMs. |
 | `index.html`, `main.js` | The page. It fetches the three ROMs, boots the OS, checks the prompt is on the screen, then times the runs. |
 | `run-in-browser.mjs`, `package.json` | Reads the three ROMs from `roms/bbc-micro/`, checks each against its SHA-256 in `Pins.cs`, serves them with the page and a published copy of the app on `127.0.0.1`, and runs it in a headless Chrome, a fresh launch each time. |
 | `native/` | The same workload as a console program, in the solution so CI builds it. `--fingerprint` runs a scripted session (boot, a typed BASIC program that drives the user VIA, BREAK) and hashes every instruction and, every 100,000 cycles, all of RAM and every VIA register, so two builds can be shown to do the same thing. `--profile` compares the machine with the bare CPU on a flat copy of its memory. |
@@ -27,6 +27,16 @@ of machine time) to the prompt, check the screen reads `BBC Computer 32K`,
 second of machine time, so the multiple of a real machine is the figure in MHz
 divided by two. The machine sits at the prompt, waiting for a key, while it is
 timed: that is the OS's idle loop and its 100 Hz interrupts, not a program.
+
+The default is mode 7, the start-up links' default. Since task 8 the video ULA
+draws modes 0 to 6 and mode 7 is black until the teletext chip exists, so the
+cost of drawing shows only in another mode: give one with `?mode=N` on the
+page, the sixth argument of `run-in-browser.mjs`, the third of the native
+program, or `MODE=N` for `alternate.sh`. Outside mode 7 the screen is pixels, so
+the prompt check reads the OS's own record instead: the mode at `&0355` and the
+text cursor at `&0318` and `&0319`, one column right of the `>` on row 5. A
+build from before task 8 has no `LoadInMode`; to compare in another mode,
+publish the old code with this page's `Program.cs` and `native/Program.cs`.
 
 ## How to run it
 
@@ -70,6 +80,7 @@ Dated, with the command that made them; each journal entry has the full output.
 | 2 October 2026 | `2876852`, the bus and VIAs ticking every cycle | 7.13 times 2 MHz | 0.64 times | [the speed entry](../../docs/journal/2026-10-02-the-bbc-micro-speed.md) |
 | 3 October 2026 | `98fe9d5`, the VIAs lazy, the bus looking only at events | 16.98 times 2 MHz (the old code 6.81 in the same session) | 2.11 times (the old code 0.60) | [the bus speed entry](../../docs/journal/2026-10-03-the-bbc-micro-bus-speed.md) |
 | 3 October 2026 | task 7, the CRTC added, lazily | 17.95 and 18.83 times 2 MHz in two sets (the old code 17.64 and 18.55 in the same sets) | not measured | [the CRTC entry](../../docs/journal/2026-10-03-the-bbc-micro-crtc.md) |
+| 3 October 2026 | task 8, the video ULA drawing modes 0 to 6 | mode 7: 14.56 and 14.51 times 2 MHz (the old code 18.52 and 17.51); mode 1: 12.58 and 13.37 (15.53 and 16.89), in sets under a load of up to 10 | not measured | [the video ULA entry](../../docs/journal/2026-10-03-the-bbc-micro-video-ula.md) |
 
 Both were taken on a shared virtual machine with other work running; the
 entries give the load average for each set. The 3 October interpreter set ran

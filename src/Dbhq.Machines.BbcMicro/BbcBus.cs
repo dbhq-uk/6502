@@ -55,8 +55,17 @@ namespace Dbhq.Machines.BbcMicro;
 /// cycle or every even one, as the video ULA's control bit 4 says, and it names as its events
 /// each VSYNC edge and each frame start. VSYNC is the system VIA's CA1: the CRTC hands each edge
 /// to the VIA with the cycle it happened in, and the VIA brings the CRTC up to date before it
-/// catches up itself, so it never passes a cycle with an edge still to come. The video ULA is
-/// still a stand-in that keeps its two registers.
+/// catches up itself, so it never passes a cycle with an edge still to come.
+/// </para>
+/// <para>
+/// <b>The video ULA</b> (task 8) reads the CRTC's outputs rather than driving its inputs, so it
+/// joins the other way round: it draws a line at a time, at each line's last character, and that
+/// cycle is its event. Line ends come every 64 microseconds and can never move the IRQ line, so
+/// they are kept apart from the chips' events (<see cref="BbcClock.ChipEvent"/>): at a line end
+/// the bus has the ULA draw and does nothing else. Before any write that changes what the ULA
+/// draws (its own registers, a CRTC register, the system VIA's ORB and DDRB, which strobe the
+/// screen start latch bits) the ULA draws up to the write's cycle first, and the CRTC brings the
+/// ULA up to any cycle before moving there itself.
 /// </para>
 /// </remarks>
 public sealed class BbcBus : IBus
@@ -72,9 +81,12 @@ public sealed class BbcBus : IBus
 
     // The paged ROM the latch chose: BASIC, the DFS or EmptySlot. Set only when the latch is.
     private byte[] _paged = EmptySlot;
-    private readonly VideoUlaStub _videoUla = new();
     private readonly BbcClock _clock = new();
     private Cpu? _cpu;
+
+    // The video ULA's next line end, as it was when the bus last looked: a write that moves it (a
+    // CRTC register, the ULA's clock bit) is a chip access, so the bus looks again at its end.
+    private long _lineEnd;
 
     public BbcBus(BbcRoms roms, BbcOptions? options = null)
     {
@@ -91,6 +103,10 @@ public sealed class BbcBus : IBus
         Crtc = new Crtc6845(_clock);
         Crtc.VsyncDriven += SystemVia.SetVsyncAt;
         SystemVia.VsyncSource = Crtc;
+
+        // The video ULA reads the CRTC's outputs, screen memory and the system VIA's two screen
+        // start latch bits, and draws a line at a time.
+        VideoUla = new VideoUla(_clock, Crtc, _ram, SystemVia);
     }
 
     /// <summary>The keyboard, with its start-up links set from the options.</summary>
@@ -107,6 +123,12 @@ public sealed class BbcBus : IBus
     /// control bit 4 says, and its VSYNC drives the system VIA's CA1.
     /// </summary>
     public Crtc6845 Crtc { get; }
+
+    /// <summary>The video ULA at $FE20-$FE2F, which draws the picture.</summary>
+    public VideoUla VideoUla { get; }
+
+    /// <summary>The picture, drawn up to now when it is read.</summary>
+    public Framebuffer Screen => VideoUla.Screen;
 
     /// <summary>The CPU whose IRQ line the VIAs drive. The line is set at the end of the next access.</summary>
     public Cpu? Cpu
@@ -196,30 +218,38 @@ public sealed class BbcBus : IBus
     }
 
     /// <summary>
-    /// The power-on reset: both VIAs and the CRTC. The latch IC32 and the ROM latch are not reset
-    /// (via.md section 3(a), bus.md section 6 item 4), nor the video ULA, which has no reset.
+    /// The power-on reset: both VIAs and the CRTC, and the video ULA's registers to zero. The latch
+    /// IC32 and the ROM latch are not reset (via.md section 3(a), bus.md section 6 item 4).
     /// </summary>
     /// <remarks>
     /// The CRTC's /RES is taken to be on RST, the reset that power on and BREAK both make and
     /// that the hardware guide says goes to all the circuitry but the system VIA (S9 s3.14);
-    /// no schematic was read for IC2's pin. A reset keeps its registers and drops VSYNC.
+    /// no schematic was read for IC2's pin. A reset keeps its registers and drops VSYNC. The video
+    /// ULA has no reset pin (video.md s2.1), and what its registers hold at power on is not known:
+    /// the model takes zero, which also puts the CRTC on the 1 MHz clock.
     /// </remarks>
     public void PowerOnReset()
     {
         SystemVia.Reset();
         UserVia.Reset();
         Crtc.Reset();
+        VideoUla.PowerOn();
+        Crtc.SetCharacterClock(VideoUla.TwoMhz);
+        ChipAccessed();
         Service();
     }
 
     /// <summary>
     /// What BREAK resets here: the user VIA and the CRTC, and not the system VIA, which only the
     /// power-on circuit resets, so the OS can tell the two apart from its IER (bus.md section 5).
+    /// Nor the video ULA, which has no reset pin; the OS writes both its registers again in the mode
+    /// change every BREAK makes.
     /// </summary>
     public void BreakReset()
     {
         UserVia.Reset();
         Crtc.Reset();
+        ChipAccessed();
         Service();
     }
 
@@ -249,12 +279,26 @@ public sealed class BbcBus : IBus
     /// </remarks>
     private void Service()
     {
-        Crtc.SyncIfDue();
-        _clock.NextEvent = Math.Min(Math.Min(SystemVia.NextEventCycle, UserVia.NextEventCycle), Crtc.NextEventCycle);
-        if (_cpu is not null)
+        BbcClock clock = _clock;
+        long now = clock.Cycles;
+        if (now >= clock.ChipEvent)
         {
-            _cpu.Irq = SystemVia.Irq || UserVia.Irq;
+            // The ULA's lines first: Crtc.SyncIfDue may take the CRTC to now, and the ULA must
+            // have asked about every line end before then. A write may have moved the line end.
+            _lineEnd = VideoUla.RenderLinesTo(now);
+            Crtc.SyncIfDue();
+            clock.ChipEvent = Math.Min(Math.Min(SystemVia.NextEventCycle, UserVia.NextEventCycle), Crtc.NextEventCycle);
+            if (_cpu is not null)
+            {
+                _cpu.Irq = SystemVia.Irq || UserVia.Irq;
+            }
         }
+        else if (now >= _lineEnd)
+        {
+            _lineEnd = VideoUla.RenderLinesTo(now);
+        }
+
+        clock.NextEvent = Math.Min(clock.ChipEvent, _lineEnd);
     }
 
     /// <summary>A chip was accessed in this cycle, so the bus looks at the chips at its end.</summary>
@@ -379,12 +423,19 @@ public sealed class BbcBus : IBus
                 }
                 break;
             case >= 0x20 and <= 0x2F:
-                _videoUla.Write(offset & 1, value);
+                // A0 chooses the control register or the palette (video.md s2.1). The ULA draws up
+                // to this cycle with what it had before taking the write.
                 if ((offset & 1) == 0)
                 {
+                    VideoUla.WriteControl(value);
+
                     // Control bit 4 is the CRTC's clock: 1 for 2 MHz, 0 for 1 MHz (video.md s2.2).
                     Crtc.SetCharacterClock((value & 0x10) != 0);
                     ChipAccessed();
+                }
+                else
+                {
+                    VideoUla.WritePalette(value);
                 }
                 break;
             case >= 0x30 and <= 0x3F:
@@ -393,6 +444,12 @@ public sealed class BbcBus : IBus
                 _paged = PagedRom(RomSlot);
                 break;
             case >= 0x40 and <= 0x5F:
+                if ((offset & 0x0D) == 0)
+                {
+                    // ORB or DDRB, which strobe the latch, whose bits 4 and 5 are the screen start
+                    // adder: the ULA draws up to this cycle with the bits it had.
+                    VideoUla.SyncToNow();
+                }
                 SystemVia.Write(offset & 0x0F, value);
                 ChipAccessed();
                 break;
@@ -423,29 +480,4 @@ public sealed class BbcBus : IBus
     /// write-only address register at even ones, which reads $00 (video.md s1.2, s1.3).
     /// </summary>
     private byte ReadCrtc(int offset) => (offset & 1) == 0 ? (byte)0x00 : Crtc.ReadData();
-
-    /// <summary>
-    /// The video ULA's two write-only registers, control at $FE20 and palette at $FE21,
-    /// mirrored through $FE2F with A0 choosing (video.md s2.1 to s2.3). It holds what the OS
-    /// writes and draws nothing. A read is Econet's INTON, which is not fitted, so it reads as
-    /// an absent fast device does (bus.md s1c and s1d), and the bus answers it.
-    /// </summary>
-    private sealed class VideoUlaStub
-    {
-        private readonly byte[] _palette = new byte[16];
-
-        public byte Control { get; private set; }
-
-        public void Write(int a0, byte value)
-        {
-            if (a0 == 0)
-            {
-                Control = value;
-            }
-            else
-            {
-                _palette[value >> 4] = (byte)(value & 0x0F);
-            }
-        }
-    }
 }

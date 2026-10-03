@@ -233,8 +233,10 @@ parts of the Model B are not there yet, and each shows in what the machine does:
   no vertical sync, so the OS's 50 Hz vsync interrupt never came. Since task 7
   it is the counter model in the next section, its VSYNC drives CA1, and the OS
   takes a vsync interrupt every field.
-- **The video ULA is a pair of registers** that take writes and draw nothing. A
-  read is Econet's INTON and answers as an absent fast device, `$FE`.
+- **The video ULA was a pair of registers** that took writes and drew nothing
+  until task 8. Since then it draws modes 0 to 6 (the next section but one);
+  mode 7's picture waits for the teletext chip, task 9. A read is Econet's
+  INTON and answers as an absent fast device, `$FE`.
 - **No 8271 is fitted,** so `$FE80` reads `$FE`. The DFS reads that status
   before it serves any call, sees bits 0 and 1 set, and stays silent, so the
   `Acorn DFS` line a real Model B prints is missing from the boot screen
@@ -297,3 +299,67 @@ displayed lines, plus the two quirks. `CrtcEquivalenceTests` and the bus
 tests compare the lazy chip with a per-character model of the same rules
 (`Oracle/ReferenceCrtc6845.cs`), so they pin the model, not the hardware where
 the list above says the model guessed.
+
+## The BBC Micro: the video ULA, where the model stops
+
+**What.** `VideoUla` is the ULA of `video.md` section 2: the control register,
+the palette with its XOR 7 and flash, the shift register read at bits 7, 5, 3
+and 1 and filled with 1s, DISEN as DISPTMG and not RA3, the cursor's three
+segments, and the address translation with the hardware wrap. It draws a line
+at a time from the CRTC's state at the line's end, and before any write that
+changes what it draws it draws up to that write's cycle. Where the sources stop
+or the model takes a shortcut, it chooses:
+
+- **Screen memory is read when a line is drawn, not in each byte's own
+  cycle.** The ULA draws a line at its last character, or up to a register
+  write that comes first, and reads that stretch's bytes then. A store to screen
+  memory in the middle of a line's scan is seen by the whole of that stretch,
+  where a real ULA fetching byte by byte would show the old bytes left of the
+  store and the new ones right of it. Register writes (palette, control, CRTC,
+  the latch) are exact to the character; screen memory writes are exact to the
+  line. Doing better would mean logging every store the CPU makes to RAM, which
+  is most of its writes, so every program would pay for the few that race the
+  beam. The equivalence tests change screen memory only where the two readings
+  agree, which is why they can be exact.
+- **The ULA's pipeline is taken to have no delay.** `video.md` s6 item 3: how
+  many characters lie between the CRTC's fetch and the pixel is not documented,
+  and nor is how DISEN and CURSOR line up with it. The model has none
+  (`VideoUla.PipelineDelayCharacters` is 0): a character's pixels start in the
+  cycle of its own character clock, and a register write in cycle `t` is seen
+  from the first character clocked after `t`. So a palette change in the middle
+  of a line changes the colour from the next character, where the sheet's
+  guess was "from the next pixel"; a real machine may change it a character or
+  two later, or part way through a character.
+- **The RA3 gate is taken to be off while the teletext select is on.** Mode 7
+  runs RA 0 to 19 and is not blanked, so something must switch the gate off;
+  `video.md` s6 item 4 says no source describes it. Task 9 meets it properly.
+- **Mode 7 is black.** With the teletext select on, the ULA passes the SAA5050's
+  picture through, and the SAA5050 arrives in task 9. Until then that picture is
+  black; the ULA's own cursor is still drawn over it.
+- **What the registers hold at power on is not known,** and the model takes
+  zero, which also starts the CRTC on the 1 MHz clock. The ULA has no reset pin
+  (the pin list in the sheet's S8), so BREAK leaves both registers; the OS
+  writes them again in the mode change every BREAK makes, so nothing the OS does
+  depends on it.
+- **The shift register fills with 1s.** BeebWiki says "or random values on some
+  machines". It shows only where a character outlasts its byte, 80 columns on
+  the 1 MHz clock, which no OS mode uses.
+- **Not modelled:** the INVERT pin on link S26, so the picture is always normal
+  video; any analogue behaviour of the RGB outputs.
+- **Where the picture lands is the model's, not a television's.** The
+  framebuffer measures across from the CRTC's character 0 and down from its
+  frame start (`Framebuffer`'s remarks), so moving HSYNC with R2 or VSYNC with
+  R7 does not move the picture as it would on a screen, and only the first 256
+  lines of a CRTC frame are kept. With the OS's registers every mode lands in
+  the same place.
+
+**How the tests treat it.** `VideoUlaTests` asserts the sheet's numbers: the
+eight control bytes, the palette protocol and its flash pairs, one byte per
+mode turned into pixels by hand, the address for MA and RA with the wrap for
+each mode and the ROM's latch bits, RA3 blanking in modes 3 and 6, a scroll by
+R12 and R13, the cursor's width per mode, the flash select on the screen, a
+palette change in the middle of a line, and mode 1 booting with its banner
+drawn. `VideoUlaEquivalenceTests` compares the whole framebuffer at the end of
+each frame (at most one every 4,000 cycles) with a plain model that draws every character in its own cycle
+(`Oracle/ReferenceVideoUla.cs`), so it pins the model, including the choices
+above that both share, not the hardware.

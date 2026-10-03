@@ -27,6 +27,21 @@ public static partial class BbcHost
         _machine.PowerOn();
     }
 
+    /// <summary>
+    /// As <see cref="Load"/>, with the start-up links set for screen mode <paramref name="mode"/>
+    /// (0 to 7), so the speed check can be run in a mode the video ULA draws pixels in.
+    /// </summary>
+    [JSExport]
+    public static void LoadInMode(byte[] os, byte[] basic, byte[] dfs, int mode)
+    {
+        _machine = new BbcMachine(new BbcRoms(os, basic, dfs), new BbcOptions { StartupMode = mode });
+        _machine.PowerOn();
+    }
+
+    /// <summary>A byte of memory, read without a bus cycle.</summary>
+    [JSExport]
+    public static int Peek(int address) => Machine.Bus.Peek((ushort)address);
+
     /// <summary>2 MHz cycles since power on, stretch cycles included.</summary>
     [JSExport]
     public static double Cycles() => Machine.Cycles;

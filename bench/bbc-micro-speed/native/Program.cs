@@ -7,7 +7,7 @@ using Dbhq.Machines.BbcMicro;
 // ordinary .NET program, and a fingerprint of a scripted run, so a change to the bus or its
 // chips can be shown to change nothing the machine does.
 //
-//   dotnet run -c Release --project bench/bbc-micro-speed/native -- [timed runs] [cycles a run]
+//   dotnet run -c Release --project bench/bbc-micro-speed/native -- [timed runs] [cycles a run] [screen mode]
 //   dotnet run -c Release --project bench/bbc-micro-speed/native -- --fingerprint
 //   dotnet run -c Release --project bench/bbc-micro-speed/native -- --profile [rounds]
 var roms = new BbcRoms(
@@ -29,22 +29,27 @@ if (args.Length >= 1 && args[0] == "--profile")
 
 int runs = args.Length > 0 ? int.Parse(args[0]) : 5;
 int cycles = args.Length > 1 ? int.Parse(args[1]) : 2_000_000;
-Speed(roms, runs, cycles);
+int mode = args.Length > 2 ? int.Parse(args[2]) : 7;
+Speed(roms, runs, cycles, mode);
 return;
 
 // The page's workload: boot for three seconds of machine time, check the prompt, then time
-// the runs. Prints the lines the page prints.
-static void Speed(BbcRoms roms, int runs, int cycles)
+// the runs. Prints the lines the page prints. Outside mode 7 the screen is pixels, so the
+// prompt check is the OS's own record, as on the page: the mode at &0355 and the text cursor
+// at &0318 and &0319, one column right of the > on row 5.
+static void Speed(BbcRoms roms, int runs, int cycles, int mode)
 {
-    var machine = new BbcMachine(roms);
+    var machine = new BbcMachine(roms, new BbcOptions { StartupMode = mode });
     var clock = Stopwatch.StartNew();
     machine.PowerOn();
     machine.Run(6_000_000);
     Report("boot", machine.Cycles, clock.Elapsed.TotalMilliseconds);
 
-    bool prompt = Row(machine, 1).StartsWith("BBC Computer 32K", StringComparison.Ordinal)
-        && Row(machine, 3).StartsWith("BASIC", StringComparison.Ordinal)
-        && Row(machine, 5).StartsWith('>');
+    bool prompt = mode == 7
+        ? Row(machine, 1).StartsWith("BBC Computer 32K", StringComparison.Ordinal)
+            && Row(machine, 3).StartsWith("BASIC", StringComparison.Ordinal)
+            && Row(machine, 5).StartsWith('>')
+        : machine.Bus.Peek(0x0355) == mode && machine.Bus.Peek(0x0318) == 1 && machine.Bus.Peek(0x0319) == 5;
     Console.WriteLine("prompt " + (prompt ? "yes" : "no"));
 
     for (int i = 1; i <= runs; i++)

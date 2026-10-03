@@ -19,6 +19,7 @@ public sealed class ReferenceCrtc6845
     private int _vsyncCount;
     private bool _parityOdd, _parityR6;
     private int _fields;
+    private int _line;
     private readonly bool[] _display = new bool[3];
     private readonly bool[] _cursor = new bool[3];
 
@@ -31,6 +32,18 @@ public sealed class ReferenceCrtc6845
     public int MemoryAddress => (_lineStart + _c0) & 0x3FFF;
 
     public int LineStartAddress => _lineStart;
+
+    /// <summary>Lines since the frame started: 0 on its first line, and after a reset.</summary>
+    public int Line => _line;
+
+    /// <summary>Whether the last <see cref="Tick"/> ended a line: C0 went back to 0.</summary>
+    public bool LineStarted { get; private set; }
+
+    /// <summary>The field's parity, copied at each frame start.</summary>
+    public bool OddField => _parityOdd;
+
+    /// <summary>R8 bit 0.</summary>
+    public bool InterlaceOn => Interlace;
 
     /// <summary>The same report as <see cref="Crtc6845.StateAt"/>, for the character the oracle stands at now.</summary>
     public CrtcState State(long cycle, int cyclesPerCharacter)
@@ -49,7 +62,9 @@ public sealed class ReferenceCrtc6845
         return new CrtcState(
             cycle, _c0, MemoryAddress, _lineStart, RasterAddress, VerticalDisplay, DisplayEnable, Cursor,
             HSync, VSync, _r[1], displaySkew, cursorSkew, ((_r[14] << 8) | _r[15]) & 0x3FFF,
-            cursorOnLine, cyclesPerCharacter);
+            cursorOnLine, cyclesPerCharacter, _line, _parityOdd, Interlace, _hDisplay,
+            (_display[0] ? 1 : 0) | (_display[1] ? 2 : 0) | (_display[2] ? 4 : 0),
+            (_cursor[0] ? 1 : 0) | (_cursor[1] ? 2 : 0) | (_cursor[2] ? 4 : 0));
     }
 
     public bool VerticalDisplay => _vDisplay && !_firstField;
@@ -120,6 +135,8 @@ public sealed class ReferenceCrtc6845
         _vsyncCount = 0;
         _parityOdd = _parityR6 = false;
         _fields = 0;
+        _line = 0;
+        LineStarted = false;
         Array.Clear(_display);
         Array.Clear(_cursor);
         VSync = false;
@@ -133,11 +150,14 @@ public sealed class ReferenceCrtc6845
     {
         bool vsyncBefore = VSync;
         bool frameStarted = false;
+        LineStarted = false;
 
         // C0, and at the end of a line everything vertical.
         if (_c0 == _r[0] || _c0 == 255)
         {
             _c0 = 0;
+            LineStarted = true;
+            _line++;
             bool rowStarted = false;
             if (_inAdjust)
             {
@@ -292,6 +312,7 @@ public sealed class ReferenceCrtc6845
 
     private void StartFrame()
     {
+        _line = 0;
         _c4 = 0;
         _c9 = 0;
         _inAdjust = false;

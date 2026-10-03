@@ -388,7 +388,10 @@ public class BusEquivalenceTests
             {
                 Assert.Equal(oracle.Read(0x0000), bus.Read(0x0000));
                 record.Add(oracle.Crtc.State(oracle.Cycles, cyclesPerCharacter));
-                if (random.Next(400) == 0)
+
+                // Since task 8 the video ULA brings the CRTC to the end of every line, so the past
+                // cycles left to ask about are at most a line's worth: look often.
+                if (random.Next(100) == 0)
                 {
                     Look();
                 }

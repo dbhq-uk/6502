@@ -130,6 +130,7 @@ All from the real-hardware work in S19 and the ACCC (S2). Not needed for standar
 | MOS keeps RAM copies: control at `&248`, palette at `&249`. Use OSBYTE 154 / 155 | [from S4] |
 | It also divides the 16 MHz master clock into 8, 4, 2, 1 MHz | [from S4 "Clock division"; S9 s3.3] |
 | It is on the 4 MHz DRAM data bus. CPU and video each get a 2 MHz slot, interleaved, so no RAM contention | [from S4 "Video serialisation"; S9 s3.5 "alternately switched every 250ns"] |
+| No reset input: S8's pin list (25 of the 28 pins, the other three supplies) has A0, nCS, the data bus, CURSOR, DISEN, INV, the four clock outputs, CRTC_CLK and RGB in and out, and nothing that resets the registers. So BREAK leaves the control register and the palette as they were. Added 3 Oct 2026 (task 8) | [from S8 "Pin Layout"] |
 
 ### 2.2 Control register `&FE20` (write only)
 
@@ -176,6 +177,8 @@ Per-mode control bytes, **read from ROM at `$C3F7` (file offset 0x03F7)** and ma
 I decoded all three by hand and they give: modes 0/3/4/6 logical 0 = black, 1 = white; modes 1/5 0 = black, 1 = red, 2 = yellow, 3 = white; mode 2 logical n = physical n for 0-7 and flashing (n-8) for 8-15. [inferring from S4 write lists; consistent with the OS defaults in S7]
 
 Palette writes mid-line change the colour from the next pixel. [guessing - verify exact pixel latency]
+
+*Added 3 Oct 2026 (task 8):* the model changes it from the next CRTC character, not the next pixel: with no pipeline delay assumed (s6 item 3), a write in a cycle is seen from the first character clocked after it. The choice and its reason are in `docs/known-differences.md`.
 
 ### 2.4 Turning bytes into pixels
 
@@ -466,8 +469,8 @@ All from the ROM table values (3.1), with R7 = table + 1 and default `*TV 0,0`. 
 
 1. **Primary-source chip part for Model B IC2.** Only owner reports and the OS's use of VSYNC width and skew. No Acorn service manual or parts list was reachable.
 2. **Exact HD6845S cycle behaviour** beyond the CAST/ACCC model (task 7's choices for each are in `docs/known-differences.md`): the char-clock at which each counter updates relative to the CPU write, MA during horizontal blanking, behaviour when R-values change mid-line, the exact VSYNC falling edge inside its last line, and which field gets the extra line. ACCC (S2) has CPC-specific detail per CRTC type (chapters 10-13, 19) and S19 lists real-hardware quirks. A logic-analyser trace or the HD6845S die-shot work (lanceewing/hd6845sp, unlicensed, facts only) would settle it.
-3. **Video ULA pipeline latency.** How many chars or half-chars between the CRTC fetch and the pixel on screen, and how DISEN, CURSOR and the latch line up. Only the observable offsets (mode 7 one char right) are documented.
-4. **How RA3 gating is switched off in mode 7.** It must be (see 1.5), but no source describes the gate.
+3. **Video ULA pipeline latency.** How many chars or half-chars between the CRTC fetch and the pixel on screen, and how DISEN, CURSOR and the latch line up. Only the observable offsets (mode 7 one char right) are documented. Task 8 assumes none (`VideoUla.PipelineDelayCharacters`), recorded in `docs/known-differences.md`.
+4. **How RA3 gating is switched off in mode 7.** It must be (see 1.5), but no source describes the gate. Task 8 takes it to be off while the ULA's teletext select (control bit 1) is on.
 5. **SAA5050 internals to cycle level:** exactly when the line counter increments, the double-height glyph row mapping (4.3), exact separated-graphics pixel positions, what a ULA-latched LOSE does at the start and end of the display window, and whether the black foreground codes (&80, &90) are truly no-ops on the BBC chip. The die-shot work (lanceewing/saa5050, no licence) and the beebjit teletext test disc referred to in S15 (not fetched, not checked for licence) are the places to look.
 6. **Box codes and PO/DE tie-offs** on the BBC board.
 7. **AUG pages not read.** The New Advanced User Guide tables (p187-190) and the BBC User Guide memory layout pages were not reachable, so section 3 is checked against the ROM, an annotated disassembly (S7, derived from the same ROM), Wikipedia, BeebWiki and the Bitshifters slides, not against the AUG.

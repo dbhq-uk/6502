@@ -30,6 +30,9 @@ public sealed class BbcMachine
     /// <summary>2 MHz CPU cycles since power on, stretch cycles included.</summary>
     public long Cycles => Bus.Cycles;
 
+    /// <summary>The picture the video ULA has drawn, brought up to now when it is read.</summary>
+    public Framebuffer Screen => Bus.Screen;
+
     /// <summary>
     /// Switches on: the power-on reset clears both VIAs, then the 6502 runs its reset sequence
     /// and starts at the vector in the OS ROM, <c>$D9CD</c> (fact sheet <c>bus.md</c> section 5).

@@ -77,6 +77,15 @@ namespace Dbhq.Machines.BbcMicro;
 /// those cycles (<see cref="NextEventCycle"/>) and a look then costs nothing more. The test
 /// project holds a per-character model of the same rules and compares the two.
 /// </para>
+/// <para>
+/// <b>Its consumer.</b> The video ULA reads this chip's state a line at a time with
+/// <see cref="StateAt"/>, so it must never find the chip past a cycle it still has to ask about.
+/// So before the chip moves on to any cycle, for any reason (a register write, the bus's look at
+/// an event, the system VIA's catching up, a getter), it first has its <see cref="Consumer"/>
+/// draw up to that cycle, and it tells the consumer of a reset. Once the ULA is attached it asks
+/// about every line end, so the chip steps a line at a time, one or two steps a line, as well as
+/// working its next event out ahead for the bus.
+/// </para>
 /// </remarks>
 public sealed class Crtc6845
 {
@@ -113,6 +122,10 @@ public sealed class Crtc6845
     private int _predictedEvent;
     private State _predicted;
 
+    // The chip that reads this one's outputs a line at a time (the video ULA), and whether it is
+    // catching up now, so the chip does not call it again from inside its own catch-up.
+    private bool _consumerRunning;
+
     /// <summary>A chip on its own, whose time is the calls to <see cref="Tick"/>.</summary>
     public Crtc6845()
     {
@@ -140,6 +153,17 @@ public sealed class Crtc6845
 
     /// <summary>The bus's wire to CA1: each VSYNC edge, with the CPU cycle it happened in and the new level.</summary>
     internal event Action<long, bool>? VsyncDriven;
+
+    /// <summary>
+    /// The chip that draws from this one's outputs, the video ULA. Before this chip moves on to any
+    /// cycle, for whatever reason, the consumer is brought up to that cycle first, so it never finds
+    /// the chip past a cycle it still has to ask about (<see cref="StateAt"/>). A reset is passed
+    /// on to it once done.
+    /// </summary>
+    internal ICrtcConsumer? Consumer { get; set; }
+
+    /// <summary>R0, the horizontal total: the last C0 of a line, unless C0 has run past it.</summary>
+    internal int HorizontalTotal => _r[0];
 
     /// <summary>MA, the 14-bit memory address of the character being output.</summary>
     public int MemoryAddress
@@ -214,12 +238,15 @@ public sealed class Crtc6845
     /// allocated.
     /// </summary>
     /// <remarks>
-    /// The contract: a write that changes what the consumer reads (a CRTC register, the ULA's)
-    /// brings the chip up to that write's cycle first, after which no earlier cycle can be asked
-    /// about. So a consumer must take every state it needs, up to a write's cycle, before the
-    /// write; and it must take its events before anything else brings the chip up to now. Asking
-    /// for a cycle the chip has already passed throws, rather than answering with a later state.
-    /// Inside one of the chip's own events, only the event's cycle can be asked about.
+    /// The contract: a CRTC register write brings the chip up to that write's cycle first, after
+    /// which no earlier cycle can be asked about; so does a write to the ULA's registers in a
+    /// machine, because the ULA draws up to the write's cycle with this method before taking it.
+    /// A consumer must take every state it needs, up to a write's cycle, before the write, and it
+    /// must take its events before anything else brings the chip up to now. The chip makes sure
+    /// of the second for the <see cref="Consumer"/> it has: before moving on for any reason, it
+    /// has the consumer draw up to the cycle first. Asking for a cycle the chip has already passed
+    /// throws, rather than answering with a later state. Inside one of the chip's own events, only
+    /// the event's cycle can be asked about.
     /// </remarks>
     public CrtcState StateAt(long cycle)
     {
@@ -254,7 +281,31 @@ public sealed class Crtc6845
             cursorSkew,
             CursorAddress,
             vertical && CursorShows(in _s),
-            _clock is not null && !_fast ? 2 : 1);
+            _clock is not null && !_fast ? 2 : 1,
+            _s.Line,
+            _s.ParityOdd,
+            Interlace,
+            _s.HDisp,
+            _s.DispHistory,
+            _s.CursorHistory);
+    }
+
+    /// <summary>
+    /// <see cref="StateAt"/> for the consumer itself, which is already drawing up to
+    /// <paramref name="cycle"/>, so the chip does not call it back first.
+    /// </summary>
+    internal CrtcState StateForConsumer(long cycle)
+    {
+        bool running = _consumerRunning;
+        _consumerRunning = true;
+        try
+        {
+            return StateAt(cycle);
+        }
+        finally
+        {
+            _consumerRunning = running;
+        }
     }
 
     /// <summary>HSYNC.</summary>
@@ -382,6 +433,8 @@ public sealed class Crtc6845
         {
             Raise(EventVsync);
         }
+
+        Consumer?.CrtcReset();
     }
 
     /// <summary>
@@ -425,6 +478,25 @@ public sealed class Crtc6845
         if (_catchingUp || time <= _doneTime)
         {
             return;
+        }
+
+        if (Consumer is not null && !_consumerRunning)
+        {
+            // The consumer draws up to the cycle first, asking this chip about each line on the way.
+            _consumerRunning = true;
+            try
+            {
+                Consumer.CatchUpTo(time);
+            }
+            finally
+            {
+                _consumerRunning = false;
+            }
+
+            if (time <= _doneTime)
+            {
+                return;
+            }
         }
 
         _catchingUp = true;
@@ -489,6 +561,12 @@ public sealed class Crtc6845
         _eventTimeValid = _snapshotValid = false;
         _quick = true;
     }
+
+    /// <summary>The time of the <paramref name="characters"/>-th character clock after <paramref name="from"/>.</summary>
+    internal long TimeAfterCharacters(long from, long characters) => TimeAfter(from, characters);
+
+    /// <summary>The character clocks after <paramref name="from"/> up to and including <paramref name="to"/>.</summary>
+    internal long CharactersBetween(long from, long to) => TicksBetween(from, to);
 
     /// <summary>Character clocks between two times: every cycle at 2 MHz (or on its own), every even cycle at 1 MHz.</summary>
     private long TicksBetween(long from, long to) =>
@@ -763,6 +841,7 @@ public sealed class Crtc6845
     {
         int events = 0;
         bool rowStarted = false;
+        s.Line++;
         if (s.InAdjust)
         {
             int total = AdjustLines(in s);
@@ -846,6 +925,7 @@ public sealed class Crtc6845
 
     private void NewFrame(ref State s)
     {
+        s.Line = 0;
         s.C4 = 0;
         s.C9 = 0;
         s.InAdjust = false;
@@ -895,6 +975,9 @@ public sealed class Crtc6845
         public bool ParityOdd, ParityR6;
         public int Fields;
         public int DispHistory, CursorHistory;
+
+        // Lines since the frame started: 0 on its first line.
+        public int Line;
     }
 }
 
@@ -918,6 +1001,12 @@ public sealed class Crtc6845
 /// <param name="CursorAddress">R14 and R15, 14 bits.</param>
 /// <param name="CursorOnLine">The cursor shows on this line: inside the vertical display, RA from R10 to R11, and the blink on. It is then at the character where MA equals <paramref name="CursorAddress"/>, if that is displayed.</param>
 /// <param name="CyclesPerCharacter">CPU cycles a character: 1 at 2 MHz (and on its own), 2 at 1 MHz.</param>
+/// <param name="LineInFrame">Lines since the frame started (C4 and C9 last went to 0): 0 on its first line, and 0 after a reset.</param>
+/// <param name="OddField">The field's parity, copied at each frame start (ACCC 19.6.1): an even field is the one with the half-line VSYNC and the extra line.</param>
+/// <param name="Interlace">R8 bit 0: interlace sync, or sync and video.</param>
+/// <param name="HorizontalDisplay">The horizontal display after this character, before the skew: on from C0 = 0 until C0 = R1.</param>
+/// <param name="DisplayHistory">DISPTMG before the skew for this character (bit 0) and the two before it (bits 1 and 2).</param>
+/// <param name="CursorHistory">CUDISP before the skew, the same way.</param>
 public readonly record struct CrtcState(
     long Cycle,
     int Character,
@@ -934,4 +1023,23 @@ public readonly record struct CrtcState(
     int CursorSkew,
     int CursorAddress,
     bool CursorOnLine,
-    int CyclesPerCharacter);
+    int CyclesPerCharacter,
+    int LineInFrame,
+    bool OddField,
+    bool Interlace,
+    bool HorizontalDisplay,
+    int DisplayHistory,
+    int CursorHistory);
+
+/// <summary>
+/// A chip that reads the CRTC's outputs a line at a time, the video ULA: the CRTC brings it up to a
+/// cycle before moving on to that cycle, and tells it of a reset.
+/// </summary>
+internal interface ICrtcConsumer
+{
+    /// <summary>Draws everything up to <paramref name="cycle"/>, asking the CRTC with <see cref="Crtc6845.StateAt"/>.</summary>
+    void CatchUpTo(long cycle);
+
+    /// <summary>The CRTC's counters have just been reset, at the cycle it stands at.</summary>
+    void CrtcReset();
+}

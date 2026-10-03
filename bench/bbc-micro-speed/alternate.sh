@@ -11,24 +11,27 @@
 #
 # Run from this folder. Folders are relative to it; a native build must sit inside the
 # repository, because the bench finds the ROMs by looking for 6502.slnx above itself.
+# MODE=n in the environment boots every build in screen mode n (default 7); a build from
+# before task 8 has no mode, so give it MODE only when it was published with one.
 set -euo pipefail
 cd "$(dirname "$0")"
 
 mode=$1
+screen=${MODE:-7}
 launches=$2
 shift 2
 lines=$(mktemp)
 trap 'rm -f "$lines"' EXIT
 
-echo "load before: $(cut -d' ' -f1-3 /proc/loadavg)  $(date -u +%H:%M:%S) UTC"
+echo "load before: $(cut -d' ' -f1-3 /proc/loadavg)  $(date -u +%H:%M:%S) UTC  screen mode $screen"
 for ((i = 1; i <= launches; i++)); do
   for build in "$@"; do
     if [[ $mode == browser ]]; then
-      output=$(node run-in-browser.mjs "$build" 1)
+      output=$(node run-in-browser.mjs "$build" 1 2000000 6000000 5 "$screen")
       grep -q '^launch 1 prompt yes' <<<"$output" || { echo "no prompt from $build" >&2; echo "$output" >&2; exit 1; }
       grep ' timed ' <<<"$output" | sed "s|^|$build |" | tee -a "$lines"
     else
-      output=$(dotnet "$build/Dbhq.Machines.BbcMicro.SpeedNative.dll" 12)
+      output=$(dotnet "$build/Dbhq.Machines.BbcMicro.SpeedNative.dll" 12 2000000 "$screen")
       grep -q '^prompt yes' <<<"$output" || { echo "no prompt from $build" >&2; echo "$output" >&2; exit 1; }
       grep '^timed ' <<<"$output" | tail -n 10 | sed "s|^|$build |" | tee -a "$lines"
     fi

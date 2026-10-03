@@ -23,12 +23,25 @@ internal sealed class BbcClock
     /// <summary>2 MHz CPU cycles since power on, stretch cycles included.</summary>
     public long Cycles;
 
-    /// <summary>The cycle at whose end the bus next brings the chips up to date.</summary>
+    /// <summary>The cycle at whose end the bus next looks: the earlier of <see cref="ChipEvent"/> and the video ULA's next line end.</summary>
     public long NextEvent;
 
-    /// <summary>Brings <see cref="NextEvent"/> forward to <paramref name="cycle"/> if it is later.</summary>
+    /// <summary>
+    /// The cycle at whose end the bus next brings the chips that can move the IRQ line up to date
+    /// and asks them for their next event. The video ULA's line ends, which come every 64
+    /// microseconds and cannot move the IRQ line, are kept apart from it, so a line end costs the
+    /// bus the ULA's drawing and nothing else.
+    /// </summary>
+    public long ChipEvent;
+
+    /// <summary>Brings <see cref="ChipEvent"/> and <see cref="NextEvent"/> forward to <paramref name="cycle"/> if they are later.</summary>
     public void WakeAt(long cycle)
     {
+        if (cycle < ChipEvent)
+        {
+            ChipEvent = cycle;
+        }
+
         if (cycle < NextEvent)
         {
             NextEvent = cycle;

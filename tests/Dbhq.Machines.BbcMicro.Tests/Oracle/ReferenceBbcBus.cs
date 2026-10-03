@@ -2,7 +2,9 @@
 // made the machine's chips run lazily. Kept unchanged apart from its names, and never used by
 // the machine; the equivalence tests run it side by side with the real one and compare them.
 // Task 7 added the one change: the per-character ReferenceCrtc6845 in place of the CRTC stub,
-// ticked in every cycle its clock is due, with its VSYNC on the system VIA's CA1.
+// ticked in every cycle its clock is due, with its VSYNC on the system VIA's CA1. Task 8 added
+// the per-character ReferenceVideoUla in place of the ULA stub, fed in every character clock
+// with the byte the CRTC's address fetches from RAM in that cycle.
 using Dbhq.Cpu6502;
 
 namespace Dbhq.Machines.BbcMicro.Tests.Oracle;
@@ -51,7 +53,6 @@ public sealed class ReferenceBbcBus : IBus
     private readonly byte[] _os;
     private readonly byte[] _basic;
     private readonly byte[] _dfs;
-    private readonly VideoUlaStub _videoUla = new();
 
     public ReferenceBbcBus(BbcRoms roms, BbcOptions? options = null)
     {
@@ -75,6 +76,9 @@ public sealed class ReferenceBbcBus : IBus
 
     /// <summary>The CRTC at $FE00-$FE07, one character at a time.</summary>
     public ReferenceCrtc6845 Crtc { get; } = new();
+
+    /// <summary>The video ULA at $FE20-$FE2F, one character at a time.</summary>
+    public ReferenceVideoUla VideoUla { get; } = new();
 
     /// <summary>The CPU whose IRQ line the VIAs drive.</summary>
     public Cpu? Cpu { get; set; }
@@ -125,6 +129,7 @@ public sealed class ReferenceBbcBus : IBus
         SystemVia.Reset();
         UserVia.Reset();
         ResetCrtc();
+        VideoUla.PowerOn();
         DriveIrq();
     }
 
@@ -147,6 +152,8 @@ public sealed class ReferenceBbcBus : IBus
         {
             SystemVia.VsyncInput = Crtc.VSync;
         }
+
+        VideoUla.CrtcReset(Cycles, Crtc.OddField, Crtc.InterlaceOn);
     }
 
     /// <summary>Reads memory without a bus cycle: for tests and debuggers, never for the CPU.</summary>
@@ -174,7 +181,7 @@ public sealed class ReferenceBbcBus : IBus
 
         // The CRTC's character clock: every cycle at 2 MHz, every even one at 1 MHz, as the video
         // ULA's control bit 4 says. A VSYNC edge reaches CA1 in the same cycle, after the VIA's tick.
-        if ((_videoUla.Control & 0x10) != 0 || (Cycles & 1) == 0)
+        if ((VideoUla.Control & 0x10) != 0 || (Cycles & 1) == 0)
         {
             bool before = Crtc.VSync;
             Crtc.Tick();
@@ -182,6 +189,10 @@ public sealed class ReferenceBbcBus : IBus
             {
                 SystemVia.VsyncInput = Crtc.VSync;
             }
+
+            int ra = Crtc.RasterAddress;
+            byte fetched = _ram[ReferenceVideoUla.ScreenAddress(Crtc.MemoryAddress, ra, SystemVia.ScreenStartLatch)];
+            VideoUla.Clock(Cycles, Crtc.LineStarted, Crtc.Line, Crtc.OddField, Crtc.InterlaceOn, fetched, Crtc.DisplayEnable, Crtc.Cursor, ra);
         }
     }
 
@@ -302,8 +313,11 @@ public sealed class ReferenceBbcBus : IBus
             case <= 0x07:
                 Crtc.WriteData(value);
                 break;
+            case >= 0x20 and <= 0x2F when (offset & 1) == 0:
+                VideoUla.WriteControl(value);
+                break;
             case >= 0x20 and <= 0x2F:
-                _videoUla.Write(offset & 1, value);
+                VideoUla.WritePalette(value);
                 break;
             case >= 0x30 and <= 0x3F:
                 // Write only, and the whole block of sixteen is the one latch (S1 s.17, s.21).
@@ -331,30 +345,5 @@ public sealed class ReferenceBbcBus : IBus
     {
         ushort address = (ushort)(0xFE00 | offset);
         return IsSlow(address) ? (byte)0x00 : (byte)0xFE;
-    }
-
-    /// <summary>
-    /// The video ULA's two write-only registers, control at $FE20 and palette at $FE21,
-    /// mirrored through $FE2F with A0 choosing (video.md s2.1 to s2.3). It holds what the OS
-    /// writes and draws nothing. A read is Econet's INTON, which is not fitted, so it reads as
-    /// an absent fast device does (bus.md s1c and s1d), and the bus answers it.
-    /// </summary>
-    private sealed class VideoUlaStub
-    {
-        private readonly byte[] _palette = new byte[16];
-
-        public byte Control { get; private set; }
-
-        public void Write(int a0, byte value)
-        {
-            if (a0 == 0)
-            {
-                Control = value;
-            }
-            else
-            {
-                _palette[value >> 4] = (byte)(value & 0x0F);
-            }
-        }
     }
 }
