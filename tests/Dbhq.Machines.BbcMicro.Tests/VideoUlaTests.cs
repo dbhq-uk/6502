@@ -163,9 +163,10 @@ public class VideoUlaTests
     }
 
     [Fact]
-    public void Mode7DrawsNothingUntilTheTeletextChipExists()
+    public void DrawGivesBlackForATeletextByteOnItsOwn()
     {
-        // Task 9 adds the SAA5050. Until then the teletext input is black.
+        // With the teletext select on the picture is the SAA5050's, and a cell depends on the codes
+        // before it on its row, so Draw, which has one byte, gives black. TeletextTests has mode 7.
         var ula = new VideoUla();
         ula.WriteControl(ControlByMode[7]);
         Assert.Equal(new string('K', 16), Letters(ula, 0xFF));

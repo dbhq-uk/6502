@@ -47,7 +47,7 @@ public class VideoUlaEquivalenceTests
         oracle.PowerOnReset();
 
         var random = new Random(5094);
-        long compares = 0, writes = 0, lastCompare = 0, oracleFrames = 0;
+        long compares = 0, teletextCompares = 0, writes = 0, lastCompare = 0, oracleFrames = 0;
 
         void Write(ushort address, byte value)
         {
@@ -92,6 +92,7 @@ public class VideoUlaEquivalenceTests
             }
             Assert.Equal(oracle.VideoUla.Frames, bus.Screen.Frames);
             compares++;
+            teletextCompares += bus.VideoUla.Teletext ? 1 : 0;
             lastCompare = bus.Cycles;
         }
 
@@ -163,6 +164,7 @@ public class VideoUlaEquivalenceTests
 
         Compare();
         Assert.True(compares > 300, $"only {compares} frames compared");
+        Assert.True(teletextCompares > 30, $"only {teletextCompares} frames compared in teletext");
         Assert.True(writes > 20_000, $"only {writes} writes");
     }
 

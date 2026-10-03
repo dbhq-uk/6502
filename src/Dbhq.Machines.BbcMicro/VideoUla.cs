@@ -74,6 +74,21 @@ namespace Dbhq.Machines.BbcMicro;
 /// both registers; the OS writes them again in the mode change every BREAK makes. At power on what
 /// they hold is not known, and the model takes zero.
 /// </para>
+/// <para>
+/// <b>Mode 7 (s4).</b> With the teletext select on, the picture is the SAA5050's
+/// (<see cref="TeletextChip"/>), passed through without the palette. The chip latches each byte
+/// the CRTC fetches, with LOSE, which is DISPTMG after the R8 skew, one character later: so the
+/// byte fetched in character <c>c</c> is shown if DISPTMG is high in character <c>c + 1</c>, which
+/// is what the one-character display skew of mode 7's R8 (&amp;93) lines up. The chip's output
+/// then leaves <see cref="TeletextDelayCharacters"/> characters after the fetch, which is what the
+/// two-character cursor skew and the ULA's cursor segment 1 line up, so the cursor is drawn over
+/// the cell at its address. The framebuffer puts each cell where its byte was fetched, so mode 7
+/// fills the same 640 pixels as the other modes: a cell is drawn as its character's output
+/// arrives, three characters back. The three cells in the chip when the select changes in the
+/// middle of a line are black, and the RA3 gate is off. The chip's own line, row, double height
+/// and flash state moves on at every line end in every mode: DEW is VSYNC's rise as seen at a
+/// line's end, and a line counts if DISPTMG after the skew was high in any of its characters.
+/// </para>
 /// </remarks>
 public sealed class VideoUla : ICrtcConsumer
 {
@@ -86,6 +101,17 @@ public sealed class VideoUla : ICrtcConsumer
     /// held back past a write.
     /// </summary>
     public const int PipelineDelayCharacters = 0;
+
+    /// <summary>
+    /// The characters from the CRTC's fetch of a mode 7 byte to the SAA5050's picture of it
+    /// leaving the chip: three. The datasheet gives about 2.6 us for graphics and 2.77 us for
+    /// alphanumerics from the chip's input, a character being 1 us (<c>video.md</c> s4.1); the R8
+    /// skews the OS writes for mode 7 (CUDISP two characters, then the ULA's cursor segment 1, one
+    /// more) line the cursor up three characters after the fetch; and mode 7 is said to sit one
+    /// character right of mode 6 with its HSYNC two characters later, which is three again. No
+    /// source gives the figure itself (s6 item 5).
+    /// </summary>
+    public const int TeletextDelayCharacters = 3;
 
     private const uint Black = Framebuffer.Black;
     private const uint Invert = 0x00FFFFFF;
@@ -158,6 +184,32 @@ public sealed class VideoUla : ICrtcConsumer
     private int _fieldLines;
     private bool _fieldOdd, _fieldInterlace;
 
+    // For each 12-bit half-dot mask from the teletext chip, which of a cell's 16 pixels (1 MHz) or
+    // 8 (2 MHz) are foreground: a pixel shows the half-dot under its centre.
+    private static readonly ushort[] HalfDotsTo16 = MakeHalfDotPixels(16);
+    private static readonly ushort[] HalfDotsTo8 = MakeHalfDotPixels(8);
+
+    // The teletext chip's pipeline: the bytes of the line's last four characters, the newest in
+    // bits 0 to 7, and for the three before the newest whether LOSE came with it (DISPTMG after the
+    // skew in the character after), the newest in bit 0; the first character of the line whose
+    // byte the chip took while the teletext select was on, in an unbroken stretch, or -1; whether
+    // the last cell drawn had LOSE; and whether nothing more on this line can be shown.
+    private uint _ttxByteRing;
+    private int _ttxLoseRing;
+    private int _ttxFirst = -1;
+    private bool _ttxShowing;
+    private bool _ttxDark;
+
+    // For writing teletext cells four pixels at a time: for each pattern of four (bit 0 the left
+    // pixel), the four pixels as two pairs, for the colours last used.
+    private readonly ulong[] _quads = new ulong[32];
+    private uint _quadForeground = 1, _quadBackground = 1;
+
+    // For the chip's own count: DISPTMG after the skew was high in a character of this line; VSYNC
+    // at the end of the last stretch drawn, and at the end of the line before.
+    private bool _loseSeen;
+    private bool _vsyncNow, _vsyncAtLastLineEnd;
+
     /// <summary>A ULA on its own: registers and <see cref="Draw"/>, and a picture that is never drawn.</summary>
     public VideoUla()
     {
@@ -187,6 +239,9 @@ public sealed class VideoUla : ICrtcConsumer
 
     /// <summary>The picture.</summary>
     public Framebuffer Screen { get; } = new();
+
+    /// <summary>The SAA5050 teletext chip, whose picture the ULA shows with the teletext select on.</summary>
+    public Teletext TeletextChip { get; } = new();
 
     /// <summary>The control register, as last written.</summary>
     public byte Control { get; private set; }
@@ -280,7 +335,9 @@ public sealed class VideoUla : ICrtcConsumer
     /// The pixels one character makes from <paramref name="screenByte"/> with the registers as they
     /// are now, displayed and with no cursor, into <paramref name="pixels"/> in the framebuffer's
     /// 16 MHz pixels: 8 on the 2 MHz clock, 16 on 1 MHz. Returns how many. With the teletext select
-    /// on, the picture is the teletext chip's, which is not built yet (task 9): black.
+    /// on, the picture is the teletext chip's, and a teletext cell depends on the codes before it
+    /// on its row, so one byte on its own draws black here; the machine draws mode 7 through
+    /// <see cref="TeletextChip"/>.
     /// </summary>
     public int Draw(byte screenByte, Span<uint> pixels)
     {
@@ -319,12 +376,13 @@ public sealed class VideoUla : ICrtcConsumer
         }
     }
 
-    /// <summary>Power on: both registers to zero, drawn up to now first.</summary>
+    /// <summary>Power on: both registers to zero, drawn up to now first, and the teletext chip's counts to zero.</summary>
     internal void PowerOn()
     {
         SyncToNow();
         Array.Clear(_palette);
         WriteControl(0);
+        TeletextChip.PowerOn();
     }
 
     void ICrtcConsumer.CatchUpTo(long cycle) => DrawTo(cycle);
@@ -439,6 +497,7 @@ public sealed class VideoUla : ICrtcConsumer
         _hd = state.HorizontalDisplay;
         _displayHistory = state.DisplayHistory;
         _cursorHistory = state.CursorHistory;
+        _vsyncNow = state.VSync;
         StartLine(in state, state.Cycle);
     }
 
@@ -493,6 +552,7 @@ public sealed class VideoUla : ICrtcConsumer
                 _hd = state.HorizontalDisplay;
                 _displayHistory = state.DisplayHistory;
                 _cursorHistory = state.CursorHistory;
+                _vsyncNow = state.VSync;
             }
         }
         finally
@@ -508,6 +568,15 @@ public sealed class VideoUla : ICrtcConsumer
         _lineStart = lineStart;
         _x = 0;
         _lineBlack = true;
+
+        // The teletext chip's line: CRS is RA0 inverted (s1.5), and its pipeline starts empty.
+        TeletextChip.BeginLine((state.RasterAddress & 1) == 0);
+        _ttxFirst = -1;
+        _ttxShowing = false;
+        _ttxDark = false;
+        _ttxByteRing = 0;
+        _ttxLoseRing = 0;
+        _loseSeen = false;
         _fieldOdd = state.OddField;
         _fieldInterlace = state.Interlace;
         if (line >= 256)
@@ -529,9 +598,25 @@ public sealed class VideoUla : ICrtcConsumer
         }
     }
 
-    /// <summary>The rest of the line the drawing stands in, past its last character, is black.</summary>
+    /// <summary>
+    /// The line the drawing stands in has ended: the teletext chip counts it, and the rest of the
+    /// line past its last character is black.
+    /// </summary>
     private void FinishLine()
     {
+        // DEW is VSYNC; the model sees it at line ends, which every VSYNC pulse, a line or more
+        // long, spans. A field start takes the place of the line count.
+        bool fieldStart = _vsyncNow && !_vsyncAtLastLineEnd;
+        _vsyncAtLastLineEnd = _vsyncNow;
+        if (fieldStart)
+        {
+            TeletextChip.FieldStart();
+        }
+        else
+        {
+            TeletextChip.LineEnd(_loseSeen);
+        }
+
         if (_rowA < 0)
         {
             return;
@@ -596,6 +681,18 @@ public sealed class VideoUla : ICrtcConsumer
     /// </remarks>
     private void DrawRun(in CrtcState state, int c, int count, long firstCycle)
     {
+        if (Teletext)
+        {
+            DrawTeletextRun(in state, c, count, firstCycle);
+            return;
+        }
+
+        // The ULA's own picture: the cells in the teletext chip's pipeline are not shown, and the
+        // chip's line count still needs to know whether LOSE came on this line.
+        _ttxFirst = -1;
+        _ttxShowing = false;
+        _loseSeen = _loseSeen || AnyDisplayIn(c, count, state.DisplaySkew, _displayHistory, c == 0 || _hd, state.VerticalDisplay, state.HorizontalDisplayed);
+
         uint[] pixels = Screen.Buffer;
         int rowA = _rowA;
         int rowB = _rowB;
@@ -615,7 +712,7 @@ public sealed class VideoUla : ICrtcConsumer
         int ra = state.RasterAddress;
         int displaySkew = state.DisplaySkew;
         int cursorSkew = state.CursorSkew;
-        bool blanked = Teletext || (ra & 8) != 0;
+        bool blanked = (ra & 8) != 0;
         int latch = _systemVia!.ScreenStartLatch;
         byte[] ram = _ram;
         int control = Control;
@@ -627,8 +724,8 @@ public sealed class VideoUla : ICrtcConsumer
         if ((blanked || (!vertical && dh == 0)) && !cursorLine && ch == 0 && age >= CursorIdle)
         {
             // Nothing in the run can show, and no cursor can start or be under way: it is all
-            // black. Mode 7 until the teletext chip exists, the lines RA3 blanks, and the lines
-            // outside the vertical display. A whole line over a row already black paints nothing.
+            // black. The lines RA3 blanks, and the lines outside the vertical display. A whole
+            // line over a row already black paints nothing.
             int stop = x + (count * width);
             if (rowA >= 0 && x < Width)
             {
@@ -808,6 +905,382 @@ public sealed class VideoUla : ICrtcConsumer
             }
         }
         _x = x;
+    }
+
+    /// <summary>
+    /// Mode 7: <paramref name="count"/> characters of the current line from C0 = <paramref name="c"/>,
+    /// as the teletext chip sees them, and the cells whose output leaves the chip in them.
+    /// </summary>
+    /// <remarks>
+    /// Each character the chip takes its byte, and the byte before it takes LOSE, DISPTMG after the
+    /// skew in this character. The cell fetched <see cref="TeletextDelayCharacters"/> characters
+    /// ago leaves the chip now: the chip gives its colours if it had LOSE (the row's defaults come
+    /// back when LOSE rises), black if not, the ULA's cursor inverts it as it does in every mode,
+    /// and it is drawn where it was fetched. DISPTMG, CUDISP and the cursor's segments are worked
+    /// out each character the way <see cref="DrawRun"/> does. Once neither the display nor the
+    /// cursor can come on again in the line and no cell with LOSE is left in the chip, every cell
+    /// left in the line is black: from then on a run paints the black its cells cover in one go
+    /// (<see cref="PaintDarkCells"/>) instead of working each character out.
+    /// </remarks>
+    private void DrawTeletextRun(in CrtcState state, int c, int count, long firstCycle)
+    {
+        int width = state.CyclesPerCharacter * 8;
+        int xc = (int)(firstCycle - _lineStart) * 8;
+        if (_ttxDark)
+        {
+            PaintDarkCells(c, c + count, xc, width);
+            return;
+        }
+
+        uint[] pixels = Screen.Buffer;
+        int rowA = _rowA;
+        int rowB = _rowB;
+        int r1 = state.HorizontalDisplayed;
+        bool vertical = state.VerticalDisplay;
+        bool cursorLine = state.CursorOnLine;
+        int cursorAt = state.CursorAddress;
+        int lineAddress = state.LineStartAddress;
+        int ra = state.RasterAddress;
+        int displaySkew = state.DisplaySkew;
+        int cursorSkew = state.CursorSkew;
+        int latch = _systemVia!.ScreenStartLatch;
+        byte[] ram = _ram;
+        int control = Control;
+        Teletext chip = TeletextChip;
+
+        if (c == 0 && vertical && displaySkew == 1 && r1 >= 1 && r1 + TeletextDelayCharacters < count
+            && _cursorHistory == 0 && _cursorAge >= CursorIdle
+            && (cursorSkew == 3 || !cursorLine || ((cursorAt - lineAddress) & 0x3FFF) >= r1))
+        {
+            // The straight path, which is every line of the OS's mode 7 but the cursor's: the run
+            // starts the line, DISPTMG is skewed one character as mode 7's R8 has it, no cursor is
+            // under way or can start, and the run reaches past the display. Then what the steps
+            // below work out is fixed: the byte of character f has LOSE exactly when f is below R1,
+            // so cells 0 to R1 - 1 are shown, from the row's defaults, each where it was fetched;
+            // LOSE came in the line; and the line goes dark at character R1 + 3.
+            _ttxFirst = 0;
+            chip.StartDisplay();
+            int shown = Math.Min(r1, rowA < 0 ? 0 : (Width - xc + width - 1) / width);
+            bool rowKnownBlack = rowA >= 0 && _rowBlack[rowA / Width];
+            for (int f = 0; f < r1; f++)
+            {
+                int ma = (lineAddress + f) & 0x3FFF;
+                int address = (ma & 0x2000) != 0 ? ((ma & 0x0800) << 3) | 0x3C00 | (ma & 0x03FF) : ScreenAddress(ma, ra, latch);
+                int packed = chip.Cell(ram[address]);
+                if (f >= shown)
+                {
+                    continue;
+                }
+
+                // A cell that is all black, black on black or a blank on black, over a row known
+                // to be black paints nothing; any other cell is PutTeletextCell's.
+                bool blackCell = (packed & 0x70000) == 0 && ((packed & 0xFFF) == 0 || (packed & 0x7000) == 0);
+                if (!(blackCell && rowKnownBlack))
+                {
+                    int x = xc + (f * width);
+                    PutTeletextCell(pixels, rowA, rowB, x, Math.Min(width, Width - x), width, packed & 0xFFF, Physical[(packed >> 12) & 7], Physical[(packed >> 16) & 7]);
+                    rowKnownBlack = _rowBlack[rowA / Width];
+                }
+            }
+
+            int drawnTo = Math.Min(xc + (shown * width), Width);
+            if (rowA >= 0 && rowB >= 0 && drawnTo > xc && !(_rowBlack[rowA / Width] && _rowBlack[rowB / Width]))
+            {
+                pixels.AsSpan(rowA + xc, drawnTo - xc).CopyTo(pixels.AsSpan(rowB + xc));
+                Screen.Wrote(drawnTo - xc);
+            }
+            _x = Math.Max(_x, drawnTo);
+            _loseSeen = true;
+            _ttxShowing = false;
+            _ttxDark = true;
+            int darkFrom = r1 + TeletextDelayCharacters;
+            PaintDarkCells(darkFrom, count, xc + (darkFrom * width), width);
+            return;
+        }
+
+        bool hd = c == 0 || _hd;
+        int dh = _displayHistory, ch = _cursorHistory;
+        int age = _cursorAge;
+        bool loseSeen = _loseSeen;
+        bool showing = _ttxShowing;
+        uint bytes = _ttxByteRing;
+        int lose = _ttxLoseRing;
+        if (_ttxFirst < 0)
+        {
+            _ttxFirst = c;
+        }
+        int first = _ttxFirst;
+        int lo = Width, hi = 0;
+        int end = c + count;
+        for (; c < end; c++, xc += width)
+        {
+            if ((!vertical || !hd || c == r1) && (dh | ch | (lose & 3)) == 0 && age >= CursorIdle)
+            {
+                // Nothing on the rest of this line can have LOSE or a cursor, and the chip holds no
+                // cell with LOSE: every cell from here to the line's end is black.
+                _ttxDark = true;
+                showing = false;
+                break;
+            }
+
+            if (c == r1)
+            {
+                hd = false;
+            }
+
+            bool on = vertical && hd;
+            bool cursor = on && cursorLine && ((lineAddress + c) & 0x3FFF) == cursorAt;
+            dh = ((dh << 1) | (on ? 1 : 0)) & 7;
+            ch = ((ch << 1) | (cursor ? 1 : 0)) & 7;
+            if (cursorSkew != 3 && ((ch >> cursorSkew) & 1) != 0)
+            {
+                age = 0;
+            }
+            else if (age < CursorIdle)
+            {
+                age++;
+            }
+
+            // This character's byte goes into the chip, and the byte before takes its LOSE.
+            bool display = displaySkew != 3 && ((dh >> displaySkew) & 1) != 0;
+            loseSeen |= display;
+            int ma = (lineAddress + c) & 0x3FFF;
+            int address = (ma & 0x2000) != 0 ? ((ma & 0x0800) << 3) | 0x3C00 | (ma & 0x03FF) : ScreenAddress(ma, ra, latch);
+            bytes = (bytes << 8) | ram[address];
+            lose = ((lose << 1) | (display ? 1 : 0)) & 7;
+
+            // The cell fetched three characters ago leaves the chip: its byte is bits 24 to 31 of
+            // the ring and its LOSE bit 2.
+            if (c - TeletextDelayCharacters < first)
+            {
+                continue;
+            }
+
+            uint foreground = Black, background = Black;
+            int mask = 0;
+            if ((lose & 4) != 0)
+            {
+                if (!showing)
+                {
+                    chip.StartDisplay();
+                    showing = true;
+                }
+
+                int packed = chip.Cell((int)(bytes >> 24));
+                mask = packed & 0xFFF;
+                foreground = Physical[(packed >> 12) & 7];
+                background = Physical[(packed >> 16) & 7];
+            }
+            else
+            {
+                showing = false;
+            }
+
+            if (age < CursorIdle && (control & (age == 0 ? 0x80 : age == 1 ? 0x40 : 0x20)) != 0)
+            {
+                foreground ^= Invert;
+                background ^= Invert;
+            }
+
+            int x = xc - (TeletextDelayCharacters * width);
+            if (rowA < 0 || x < 0 || x >= Width)
+            {
+                continue;
+            }
+
+            if (x > _x)
+            {
+                if (!_rowBlack[rowA / Width])
+                {
+                    FillBlack(rowA + _x, x - _x);
+                }
+                lo = Math.Min(lo, _x);
+            }
+
+            int n = Math.Min(width, Width - x);
+            PutTeletextCell(pixels, rowA, rowB, x, n, width, mask, foreground, background);
+            lo = Math.Min(lo, x);
+            hi = Math.Max(hi, x + n);
+            _x = Math.Max(_x, x + n);
+        }
+
+        _cursorAge = age;
+        _loseSeen = loseSeen;
+        _ttxShowing = showing;
+        _ttxByteRing = bytes;
+        _ttxLoseRing = lose;
+        if (rowA >= 0 && rowB >= 0 && hi > lo && !(_rowBlack[rowA / Width] && _rowBlack[rowB / Width]))
+        {
+            pixels.AsSpan(rowA + lo, hi - lo).CopyTo(pixels.AsSpan(rowB + lo));
+            Screen.Wrote(hi - lo);
+        }
+
+        if (c < end)
+        {
+            PaintDarkCells(c, end, xc, width);
+        }
+    }
+
+    /// <summary>
+    /// One teletext cell's <paramref name="n"/> pixels (all <paramref name="width"/> but at the
+    /// picture's right edge) at <paramref name="x"/> on row A: the background, and the foreground
+    /// where the half-dot under a pixel is set. A black cell over a row known to be black paints
+    /// nothing; anything else marks the line's rows as drawn first. A whole cell is written four
+    /// pixels at a time from a table of the sixteen patterns of four for the colours in use, made
+    /// again only when the colours change.
+    /// </summary>
+    private void PutTeletextCell(uint[] pixels, int rowA, int rowB, int x, int n, int width, int mask, uint foreground, uint background)
+    {
+        if (background == Black && (mask == 0 || foreground == Black))
+        {
+            if (!_rowBlack[rowA / Width])
+            {
+                pixels.AsSpan(rowA + x, n).Fill(Black);
+                Screen.Wrote(n);
+            }
+            return;
+        }
+
+        Drawn(rowA);
+        if (rowB >= 0)
+        {
+            Drawn(rowB);
+        }
+
+        int bits = (width == 16 ? HalfDotsTo16 : HalfDotsTo8)[mask];
+        Screen.Wrote(n);
+        if (n != width)
+        {
+            Span<uint> part = pixels.AsSpan(rowA + x, n);
+            for (int p = 0; p < part.Length; p++)
+            {
+                part[p] = ((bits >> p) & 1) != 0 ? foreground : background;
+            }
+            return;
+        }
+
+        if (foreground != _quadForeground || background != _quadBackground)
+        {
+            _quadForeground = foreground;
+            _quadBackground = background;
+            for (int q = 0; q < 16; q++)
+            {
+                _quads[2 * q] = ((q & 1) != 0 ? foreground : background) | ((ulong)((q & 2) != 0 ? foreground : background) << 32);
+                _quads[(2 * q) + 1] = ((q & 4) != 0 ? foreground : background) | ((ulong)((q & 8) != 0 ? foreground : background) << 32);
+            }
+        }
+
+        ulong[] quads = _quads;
+        Span<ulong> pairs = MemoryMarshal.Cast<uint, ulong>(pixels.AsSpan(rowA + x, width));
+        if (width == 16)
+        {
+            pairs = pairs[..8];
+            int q0 = (bits & 15) * 2, q1 = ((bits >> 4) & 15) * 2, q2 = ((bits >> 8) & 15) * 2, q3 = ((bits >> 12) & 15) * 2;
+            pairs[0] = quads[q0];
+            pairs[1] = quads[q0 + 1];
+            pairs[2] = quads[q1];
+            pairs[3] = quads[q1 + 1];
+            pairs[4] = quads[q2];
+            pairs[5] = quads[q2 + 1];
+            pairs[6] = quads[q3];
+            pairs[7] = quads[q3 + 1];
+        }
+        else
+        {
+            pairs = pairs[..4];
+            int q0 = (bits & 15) * 2, q1 = ((bits >> 4) & 15) * 2;
+            pairs[0] = quads[q0];
+            pairs[1] = quads[q0 + 1];
+            pairs[2] = quads[q1];
+            pairs[3] = quads[q1 + 1];
+        }
+    }
+
+    /// <summary>
+    /// After the line has gone dark: what drawing characters <paramref name="from"/> to
+    /// <paramref name="to"/> (the first at <paramref name="xc"/>) one at a time would paint, every
+    /// cell black. A cell is drawn <see cref="TeletextDelayCharacters"/> characters back from its
+    /// character, so at a slower clock than the cells before it it can land on them, which is why
+    /// the rest of the line cannot simply be left to the line's end. Cells fetched before the
+    /// chip's stretch began, or off either side of the picture, are not drawn, and a gap before the
+    /// first is painted black, as in <see cref="DrawTeletextRun"/>.
+    /// </summary>
+    private void PaintDarkCells(int from, int to, int xc, int width)
+    {
+        int rowA = _rowA;
+        int delay = TeletextDelayCharacters * width;
+        int start = Math.Max(from, _ttxFirst + TeletextDelayCharacters);
+        int x = xc + ((start - from) * width) - delay;
+        if (x < 0)
+        {
+            int skip = (-x + width - 1) / width;
+            start += skip;
+            x += skip * width;
+        }
+
+        if (rowA < 0 || start >= to || x >= Width)
+        {
+            return;
+        }
+
+        int endX = Math.Min(xc + ((to - from) * width) - delay, Width);
+        int paintFrom = Math.Min(_x, x);
+        if (!_rowBlack[rowA / Width])
+        {
+            FillBlack(rowA + paintFrom, endX - paintFrom);
+        }
+
+        int rowB = _rowB;
+        if (rowB >= 0 && !_rowBlack[rowB / Width])
+        {
+            FillBlack(rowB + paintFrom, endX - paintFrom);
+        }
+        _x = Math.Max(_x, endX);
+    }
+
+    /// <summary>
+    /// Whether DISPTMG after the skew is high in any of <paramref name="count"/> characters from
+    /// C0 = <paramref name="c"/>, worked out at once from the rules <see cref="DrawRun"/> steps:
+    /// character <c>t</c> shows DISPTMG before the skew of character <c>t - skew</c>, which is in
+    /// <paramref name="history"/> (bit 0 the character before <paramref name="c"/>) when it comes
+    /// before the run, and otherwise is on from <paramref name="c"/> while the vertical and the
+    /// horizontal display are, the horizontal going off at R1.
+    /// </summary>
+    private static bool AnyDisplayIn(int c, int count, int skew, int history, bool horizontal, bool vertical, int r1)
+    {
+        if (skew == 3)
+        {
+            return false;
+        }
+
+        for (int back = 1; back <= skew; back++)
+        {
+            if (skew - back < count && ((history >> (back - 1)) & 1) != 0)
+            {
+                return true;
+            }
+        }
+
+        return count > skew && vertical && horizontal && r1 != c;
+    }
+
+    private static ushort[] MakeHalfDotPixels(int pixels)
+    {
+        var table = new ushort[1 << BbcMicro.Teletext.CellWidth];
+        for (int mask = 0; mask < table.Length; mask++)
+        {
+            int bits = 0;
+            for (int p = 0; p < pixels; p++)
+            {
+                int halfDot = ((2 * p) + 1) * BbcMicro.Teletext.CellWidth / (2 * pixels);
+                if (((mask >> halfDot) & 1) != 0)
+                {
+                    bits |= 1 << p;
+                }
+            }
+            table[mask] = (ushort)bits;
+        }
+        return table;
     }
 
     /// <summary>Makes the row starting at pixel <paramref name="row"/> black, unless it is known to be.</summary>

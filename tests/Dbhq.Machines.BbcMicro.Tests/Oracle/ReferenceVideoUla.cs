@@ -2,6 +2,9 @@
 // section 2, and Framebuffer's), made as plainly as possible, one CRTC character at a time, with
 // the byte read from RAM in the character's own cycle and the shift register stepped one pixel
 // clock at a time. Never used by the machine; the equivalence tests run it beside the lazy chip.
+// Task 9 added mode 7: the teletext chip's pipeline kept character by character, each byte with
+// the LOSE that comes one character after it, each cell drawn three characters after its fetch
+// where it was fetched, from ReferenceTeletext, which works out each half-dot directly.
 namespace Dbhq.Machines.BbcMicro.Tests.Oracle;
 
 /// <summary>A video ULA fed every character clock with the CRTC's outputs and the byte fetched.</summary>
@@ -18,10 +21,22 @@ public sealed class ReferenceVideoUla
     private bool _fieldOdd, _fieldInterlace;
     private int _cursorAge = 4;
 
+    // Mode 7: the line's characters so far, each byte and the LOSE that came with it; the first
+    // character of an unbroken stretch with the teletext select on, or -1; whether the last cell
+    // had LOSE; whether any character of the line had DISPTMG; VSYNC after the last character and
+    // at the end of the line before.
+    private readonly int[] _lineBytes = new int[260];
+    private readonly bool[] _lineLose = new bool[260];
+    private int _character;
+    private int _ttxFirst = -1;
+    private bool _ttxShowing;
+    private bool _loseSeen;
+    private bool _vsyncLast, _vsyncAtLastLineEnd;
+
     public ReferenceVideoUla()
     {
         Array.Fill(Pixels, Black);
-        BeginLine(0, 0, false, false);
+        BeginLine(0, 0, false, false, 0);
     }
 
     public byte Control { get; private set; }
@@ -29,6 +44,8 @@ public sealed class ReferenceVideoUla
     public uint[] Pixels { get; } = new uint[Width * 512];
 
     public long Frames { get; private set; }
+
+    public ReferenceTeletext Teletext { get; } = new();
 
     public void WriteControl(byte value) => Control = value;
 
@@ -39,6 +56,7 @@ public sealed class ReferenceVideoUla
     {
         Control = 0;
         Array.Clear(_palette);
+        Teletext.PowerOn();
     }
 
     /// <summary>The address the ULA's fetch reads, from video.md s2.5, written as the hardware's adder on MA11 to MA8.</summary>
@@ -74,7 +92,7 @@ public sealed class ReferenceVideoUla
     /// </summary>
     public void Clock(
         long cycle, bool lineStarted, int line, bool oddField, bool interlace,
-        byte screenByte, bool displayEnable, bool cursor, int rasterAddress)
+        byte screenByte, bool displayEnable, bool cursor, int rasterAddress, bool vsync)
     {
         if (lineStarted)
         {
@@ -83,8 +101,11 @@ public sealed class ReferenceVideoUla
             {
                 EndField(completed: true);
             }
-            BeginLine(cycle, line, oddField, interlace);
+            BeginLine(cycle, line, oddField, interlace, rasterAddress);
         }
+
+        int t = _character++;
+        _loseSeen |= displayEnable;
 
         // The cursor: CUDISP starts it, then segments 0, 1 and 2 (two characters) in turn,
         // each drawn if its control bit (7, 6, 5) is set.
@@ -101,6 +122,16 @@ public sealed class ReferenceVideoUla
 
         int width = (Control & 0x10) != 0 ? 8 : 16;
         int x = (int)(cycle - _lineStart) * 8;
+        if ((Control & 0x02) != 0)
+        {
+            TeletextClock(t, x, width, screenByte, displayEnable, invert);
+            _vsyncLast = vsync;
+            return;
+        }
+
+        _ttxFirst = -1;
+        _ttxShowing = false;
+        _vsyncLast = vsync;
         if (_rowA >= 0)
         {
             for (int p = _x; p < Math.Min(x, Width); p++)
@@ -108,8 +139,7 @@ public sealed class ReferenceVideoUla
                 Put(p, Black);
             }
 
-            bool teletext = (Control & 0x02) != 0;
-            bool shown = displayEnable && !teletext && (rasterAddress & 8) == 0;
+            bool shown = displayEnable && (rasterAddress & 8) == 0;
             int pixelRate = 2 << ((Control >> 2) & 3); // MHz: 2, 4, 8, 16
             int pixelWidth = 16 / pixelRate;
             for (int i = 0; i < width && x + i < Width; i++)
@@ -142,11 +172,73 @@ public sealed class ReferenceVideoUla
     }
 
     /// <summary>The CRTC has just been reset in CPU cycle <paramref name="cycle"/>: a new field and a new line start there.</summary>
-    public void CrtcReset(long cycle, bool oddField, bool interlace)
+    public void CrtcReset(long cycle, bool oddField, bool interlace, int rasterAddress, bool vsync)
     {
         FinishLine();
         EndField(completed: false);
-        BeginLine(cycle, 0, oddField, interlace);
+        BeginLine(cycle, 0, oddField, interlace, rasterAddress);
+        _vsyncLast = vsync;
+    }
+
+    /// <summary>
+    /// Character <paramref name="t"/> of the line with the teletext select on: the chip takes its
+    /// byte, the byte before takes this character's DISPTMG as LOSE, and the cell fetched three
+    /// characters ago is drawn where it was fetched, inverted if the ULA's cursor is on now.
+    /// </summary>
+    private void TeletextClock(int t, int x, int width, byte screenByte, bool displayEnable, bool invert)
+    {
+        if (_ttxFirst < 0)
+        {
+            _ttxFirst = t;
+        }
+
+        _lineBytes[t] = screenByte;
+        if (t >= 1)
+        {
+            _lineLose[t - 1] = displayEnable;
+        }
+
+        int cell = t - 3;
+        if (cell < _ttxFirst)
+        {
+            return;
+        }
+
+        int[] colours;
+        if (_lineLose[cell])
+        {
+            if (!_ttxShowing)
+            {
+                Teletext.StartDisplay();
+                _ttxShowing = true;
+            }
+            colours = Teletext.Cell(_lineBytes[cell]);
+        }
+        else
+        {
+            _ttxShowing = false;
+            colours = new int[12];
+        }
+
+        int at = x - (3 * width);
+        if (_rowA < 0 || at < 0 || at >= Width)
+        {
+            return;
+        }
+
+        for (int p = _x; p < at; p++)
+        {
+            Put(p, Black);
+        }
+
+        for (int i = 0; i < width && at + i < Width; i++)
+        {
+            // The half-dot under the pixel's centre: the cell is twelve half-dots across.
+            int physical = colours[((2 * i) + 1) * 12 / (2 * width)];
+            Put(at + i, Rgba(invert ? physical ^ 7 : physical));
+        }
+
+        _x = Math.Max(_x, at + width);
     }
 
     private static uint Rgba(int physical) =>
@@ -161,8 +253,13 @@ public sealed class ReferenceVideoUla
         }
     }
 
-    private void BeginLine(long cycle, int line, bool oddField, bool interlace)
+    private void BeginLine(long cycle, int line, bool oddField, bool interlace, int rasterAddress)
     {
+        Teletext.BeginLine(rasterAddress);
+        _character = 0;
+        _ttxFirst = -1;
+        _ttxShowing = false;
+        _loseSeen = false;
         _lineStart = cycle;
         _x = 0;
         _fieldOdd = oddField;
@@ -188,6 +285,17 @@ public sealed class ReferenceVideoUla
 
     private void FinishLine()
     {
+        // The teletext chip's DEW, VSYNC rising as seen at a line's end, or its line count.
+        if (_vsyncLast && !_vsyncAtLastLineEnd)
+        {
+            Teletext.FieldStart();
+        }
+        else
+        {
+            Teletext.LineEnd(_loseSeen);
+        }
+        _vsyncAtLastLineEnd = _vsyncLast;
+
         if (_rowA < 0)
         {
             return;

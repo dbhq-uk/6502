@@ -29,8 +29,8 @@ divided by two. The machine sits at the prompt, waiting for a key, while it is
 timed: that is the OS's idle loop and its 100 Hz interrupts, not a program.
 
 The default is mode 7, the start-up links' default. Since task 8 the video ULA
-draws modes 0 to 6 and mode 7 is black until the teletext chip exists, so the
-cost of drawing shows only in another mode: give one with `?mode=N` on the
+draws modes 0 to 6, and since task 9 mode 7 through the teletext chip, so every
+mode pays for its drawing. To time another mode give it with `?mode=N` on the
 page, the sixth argument of `run-in-browser.mjs`, the third of the native
 program, or `MODE=N` for `alternate.sh`. Outside mode 7 the screen is pixels, so
 the prompt check reads the OS's own record instead: the mode at `&0355` and the
@@ -85,6 +85,7 @@ shows, and the timed runs, which start at the prompt, cannot show it.
 | 3 October 2026 | task 7, the CRTC added, lazily | 17.95 and 18.83 times 2 MHz in two sets (the old code 17.64 and 18.55 in the same sets) | not measured | [the CRTC entry](../../docs/journal/2026-10-03-the-bbc-micro-crtc.md) |
 | 3 October 2026 | task 8, the video ULA drawing modes 0 to 6 (`3522066`) | mode 7: 14.56 and 14.51 times 2 MHz (the old code 18.52 and 17.51); mode 1: 12.58 and 13.37 (15.53 and 16.89); mode 4: 12.53 (16.86), in sets under a load of up to 10. Two sets fell under ten times during load spikes, mode 4 at 7.66 (the old code 9.00) and mode 1 at 9.58 (15.59). Its boot, not then measured, was about 10 seconds: see the next row | not measured | [the video ULA entry](../../docs/journal/2026-10-03-the-bbc-micro-video-ula.md) |
 | 3 October 2026 | task 8's review fix, the boot made cheap again | boot, power on to the prompt: natively 426 ms in mode 7 and 415 in mode 1 (the old code 400 and 432; `3522066` 10,793 and 12,492 in an earlier set); in the browser 719 and 1,004 ms (510 and 526). Timed runs as `3522066`'s within the noise of a set at a load of up to 50 | not measured | [the video ULA entry](../../docs/journal/2026-10-03-the-bbc-micro-video-ula.md), "The review round" |
+| 3 October 2026 | task 9, the teletext chip drawing mode 7 | mode 7: 12.39 and 13.87 times 2 MHz (the old code 14.33 and 14.58); mode 1: 12.20 (11.92), at a load of about 5 | not measured | [the teletext entry](../../docs/journal/2026-10-03-the-bbc-micro-teletext.md) |
 
 Both were taken on a shared virtual machine with other work running; the
 entries give the load average for each set. The 3 October interpreter set ran

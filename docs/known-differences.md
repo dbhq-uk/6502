@@ -344,10 +344,11 @@ or the model takes a shortcut, it chooses:
   two later, or part way through a character.
 - **The RA3 gate is taken to be off while the teletext select is on.** Mode 7
   runs RA 0 to 19 and is not blanked, so something must switch the gate off;
-  `video.md` s6 item 4 says no source describes it. Task 9 meets it properly.
-- **Mode 7 is black.** With the teletext select on, the ULA passes the SAA5050's
-  picture through, and the SAA5050 arrives in task 9. Until then that picture is
-  black; the ULA's own cursor is still drawn over it.
+  `video.md` s6 item 4 says no source describes it. Task 9 kept this choice: the
+  teletext path never looks at RA3, and a test shows a descender on the row's
+  last two lines. How the board does it is still not known.
+- **Mode 7 is the SAA5050's picture,** with the ULA's cursor drawn over it; the
+  next section says where that model stops.
 - **What the registers hold at power on is not known,** and the model takes
   zero, which also starts the CRTC on the 1 MHz clock. The ULA has no reset pin
   (the pin list in the sheet's S8), so BREAK leaves both registers; the OS
@@ -375,3 +376,97 @@ drawn. `VideoUlaEquivalenceTests` compares the whole framebuffer at the end of
 each frame (at most one every 4,000 cycles) with a plain model that draws every character in its own cycle
 (`Oracle/ReferenceVideoUla.cs`), so it pins the model, including the choices
 above that both share, not the hardware.
+
+## The BBC Micro: the SAA5050 teletext chip, where the model stops
+
+**What.** `Teletext` is the SAA5050 of `video.md` section 4 and the Signetics
+datasheet: the English character set (Bedstead's CC0 table, checked against all
+96 glyphs of the datasheet's Figure 11), character rounding as the datasheet
+describes it, the block graphics of Figures 9 and 10, the control codes of
+Table 1, double height, hold graphics, conceal and flash, and the chip's own
+count of lines and rows. `VideoUla` feeds it and draws its cells. Where the
+sources stop, the model chooses:
+
+- **`$80` and `$90` do nothing.** Table 1 marks codes `0/0` and `1/0` (NUL and
+  DLE) reserved, "normally displayed as spaces"; ETSI's alpha and graphics black
+  are not on this chip. Whether the BBC's chip really ignores them is `video.md`
+  s6 item 5. The box codes (`$8A`, `$8B`), SO and SI (`$8E`, `$8F`) and ESC
+  (`$9B`) also do nothing but show a space: the PO and DE tie-offs that decide
+  the boxes on the board were not read (s6 item 6).
+- **Hold graphics is the die-shot description's shift register** (`video.md`
+  s4.3, its S15), not ETSI's rule. The chip loads a register with each cell's
+  block, a space for anything else, and under hold shows the register on a
+  control cell in graphics mode instead of loading it. Hold takes effect from
+  the cell after `$9E`, so the hold code's own cell loads a space, which is why
+  the SAA5050 holds only blocks drawn after the hold code. The sheet's table in
+  s4.2 calls `$9E` set-at, as ETSI does; this model follows s4.3.
+  **Release** (`$9F`) is taken to act from the next cell; the die-shot
+  simulation's two characters is doubted by its own author (s6 item 11).
+  **Capitals in graphics mode** (`$40` to `$5F`, which blast through) are taken
+  to load a space into the register, inferred from the description of the
+  "no alternative graphics" signal; ETSI would have them leave the held block
+  alone. **A height code that changes the height** stops hold on its own cell,
+  `$8D` included, though `$8D` changes the height only from the next cell
+  (`Teletext.HeightChangeStopsHoldOnItsOwnCell`).
+- **Double height maps rows as the sheet guessed** (s4.3, s6 item 5): the upper
+  row shows the cell's lines 0 to 4 and the lower row lines 5 to 9, each on two
+  lines of the field, rounded against the line before on the first and the line
+  after on the second, the same in both fields. A new field starts with an
+  upper row (the row state is reset at DEW, which no source states), and the
+  model sees a double height code only on lines drawn with the teletext select
+  on.
+- **Separated graphics leave the left two half-dots and the last line of each
+  block as background** (`Teletext.SeparatedGap`): no source gives the positions
+  (s6 item 5). Figure 10, drawn to scale, shows each block flush with the top
+  and right of its place, with gaps left and below of about two of the cell's
+  twelve half-dots and two of its twenty frame lines.
+- **The chip counts its own lines.** It is taken to step its line count at the
+  end of every line during which DISPTMG after the skew (LOSE) was high, and to
+  reset it, with an upper row, at DEW, which the model sees as VSYNC having
+  risen by the end of a line. The datasheet and the sheet say DEW resets the
+  count and GLR and LOSE move it, not on which edge (s4.1). So a program that
+  changes R9 in mode 7 does not move the rows, as the sheet's MODE 7/75 note
+  says real hardware does not.
+- **The pipeline is three characters, and lined up by the R8 skews.** The cell
+  for the byte fetched in character `c` is shown if DISPTMG after the skew is
+  high in character `c + 1` (the chip latches the byte with LOSE a character
+  after the fetch), and its picture leaves the chip three characters after the
+  fetch (`VideoUla.TeletextDelayCharacters`), when the ULA's cursor inverts it.
+  No source gives either figure; three is what the datasheet's 2.6 to 2.77 us
+  and the OS's two-character cursor skew plus segment 1 both give. The datasheet
+  puts graphics out about a sixth of a microsecond (one dot) earlier than
+  alphanumerics; the model draws both in the same cell.
+- **Cells are drawn where their bytes were fetched,** three characters left of
+  when they leave the chip, so mode 7 fills the same 640 pixels as the other
+  modes. A pixel shows the half-dot under its centre: 16 pixels for 12 half-dots
+  at 1 MHz, 8 at 2 MHz.
+- **The ULA's display enable does not blank the teletext picture;** the chip's
+  own LOSE does. Inferred: DISEN is a character ahead of the chip's output, and
+  if it gated the picture the last cells of each row would be cut.
+- **Changing the teletext select in the middle of a line** shows the three cells
+  already in the chip as black, and the model does not run the chip's decoding
+  on the stretches drawn with the select off, so its colours and attributes
+  start again from the row's defaults when the select comes back on that line.
+- **Flash** is off for 16 fields and on for 48 of every 64, the die-shot figure
+  (s4.3), not the datasheet's 0.75 Hz at 3 to 1. The counter is 0 at power on.
+- **At power on** the chip's counts are taken to be 0, an upper row; the chip
+  has no reset pin, so BREAK leaves it.
+- **Character rounding** is the datasheet's description: compare each row with
+  the row before (even field) or after (odd field), and give an off dot the half
+  next to an on dot where the two rows cross diagonally. The rows above the
+  cell's first line and below its last are taken as blank.
+- **Screen memory** is read when the line is drawn, as in the other modes.
+
+**How the tests treat it.** `TeletextGlyphsTests` checks every glyph against the
+grids typed from Figure 11. `TeletextTests` asserts, half-dot by half-dot and
+worked by hand, the colour codes, flash and steady, the backgrounds, conceal,
+the blocks of Figures 9 and 10, blast-through capitals, rounding in both fields
+and in double height, the double height halves and the lower row's background,
+hold and release with the SAA5050's late start, the held block's own form,
+height change and conceal against hold, the flash's 16 and 48 fields, the
+chip's line and row count, and on the machine the text, colours, descenders and
+cursor of mode 7 and the boot banner. `VideoUlaEquivalenceTests` compares the
+lazy ULA's mode 7 frames with the per-character oracle, whose teletext chip
+(`Oracle/ReferenceTeletext.cs`) is written separately and works out each
+half-dot directly; it pins the model, including the choices above, not the
+hardware.

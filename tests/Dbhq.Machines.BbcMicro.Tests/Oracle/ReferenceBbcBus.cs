@@ -153,7 +153,7 @@ public sealed class ReferenceBbcBus : IBus
             SystemVia.VsyncInput = Crtc.VSync;
         }
 
-        VideoUla.CrtcReset(Cycles, Crtc.OddField, Crtc.InterlaceOn);
+        VideoUla.CrtcReset(Cycles, Crtc.OddField, Crtc.InterlaceOn, Crtc.RasterAddress, Crtc.VSync);
     }
 
     /// <summary>Reads memory without a bus cycle: for tests and debuggers, never for the CPU.</summary>
@@ -192,7 +192,7 @@ public sealed class ReferenceBbcBus : IBus
 
             int ra = Crtc.RasterAddress;
             byte fetched = _ram[ReferenceVideoUla.ScreenAddress(Crtc.MemoryAddress, ra, SystemVia.ScreenStartLatch)];
-            VideoUla.Clock(Cycles, Crtc.LineStarted, Crtc.Line, Crtc.OddField, Crtc.InterlaceOn, fetched, Crtc.DisplayEnable, Crtc.Cursor, ra);
+            VideoUla.Clock(Cycles, Crtc.LineStarted, Crtc.Line, Crtc.OddField, Crtc.InterlaceOn, fetched, Crtc.DisplayEnable, Crtc.Cursor, ra, Crtc.VSync);
         }
     }
 

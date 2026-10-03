@@ -26,6 +26,7 @@ tools/                      # scripts that make test data and check assumptions
   probes/                   # scripts that check assumptions against test data
   kim1-model/               # offline Python that measures the KIM-1's 3D model from photographs; its outputs are committed
 roms/                       # system ROMs with their provenance and rights in roms/README.md: kim-1/, bbc-micro/
+NOTICE.md                   # anything else taken from outside under other terms: the teletext glyph table (CC0)
 docs/bbc-micro/facts/       # the BBC Micro's fact sheets, written before its code
 docs/superpowers/specs/     # the design; each stage gets its own spec here
 docs/superpowers/plans/     # the plan for each spec
