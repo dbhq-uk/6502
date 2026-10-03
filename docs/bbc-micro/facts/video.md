@@ -72,7 +72,7 @@ Idealised model, from the CAST/ACCC description. Quirks follow in 1.6.
 | HD6845S adjust detail | There is no separate C5. C9 is reused and compared with R5 instead of R9 during the adjust period | [from S2 11.2.2] |
 | Vertical display | On while C4 < R6 | [from S2 6.1.3] |
 | VSYNC start | When C4 reaches R7, at C0 = 0 and C9 = 0 | [from S2 7.2] |
-| VSYNC length | R3[7:4] lines (0 = 16). The count advances with HSYNC; ACCC says a shortened VSYNC "stops at the end of the HSYNC of this line" | [from S2 14.2]. Exact falling-edge position inside the last line: [inferring from S2 14.2; verify on hardware] |
+| VSYNC length | R3[7:4] lines (0 = 16). ACCC says a shortened VSYNC "stops at the end of the HSYNC of this line", which suggests HSYNC drives the count | [from S2 14.2]. Exact falling-edge position inside the last line: not established. **Corrected 3 Oct 2026 (task 7):** this sheet first said "the count advances with HSYNC". Counted that way, the even field's late pulse would end at the same point of a line as the odd field's, and the vsync interrupts (on the fall) would alternate 39,936 and 40,064 cycles; S14 timed them on real hardware at about 40,000 in both fields. So the fall moves with the rise, and the model counts whole lines from the pulse's start [inferring from S14] |
 | DISPTMG | Horizontal AND vertical display, delayed by R8[5:4] chars | [from S1 R8 text] |
 | CUDISP | Cursor output, delayed by R8[7:6] chars. Inhibited while DISPTMG is low. Active on lines R10[4:0]..R11 of the char row where MA == R14/R15, when the blink phase allows | [from S1 "Cursor Control"] + [inferring line comparison] |
 | Cursor blink | 16 or 32 field periods, from a frame counter | [from S1 Table 7]; "frame counter" [from S19 post by dreamseal] |
@@ -81,6 +81,11 @@ Idealised model, from the CAST/ACCC description. Quirks follow in 1.6.
 | First field after /RES | DISPTMG and CUDISP stay low, MA and RA start at 0, R12/R13 ignored | [from S1 "Display sequence after /RES release"] |
 
 **Interlace (both modes).** Total lines per frame are odd. The VSYNC pulse is delayed half a line (to C0 = R0/2) on even fields, and the even field gets one extra line after its R5 lines. VSYNC to VSYNC is then a constant 312.5 lines. [from S2 19.3.1, 19.3.2.1 and 11.9] + [inferring the constant 312.5 from the half-line delay plus one extra line]. Which BBC field is "even": [guessing - verify].
+
+*Added 3 Oct 2026 (task 7), from the sources already listed:*
+- **The half line, to the character.** S2 gives the delayed VSYNC as starting "when C0 reaches R0/2", and for R0 = 63 says C0 = 31 (19.3.1, 19.7.1). For the BBC's odd R0 (127, 63) that is one character short of half a line, and VSYNC to VSYNC would alternate 312.5 lines minus and plus a character: 39,999 and 40,001 CPU cycles in modes 0 to 3, 39,998 and 40,002 in modes 4 to 7. S14, on a real Model B: "the VSYNC pulse for the odd frame is actually delayed exactly by half a line (32us)" (hoglet, with a scope), and a program timing the vsync interrupts read "around 40000 (312.5*128) with interlace on" for both fields (hexwab, real hardware, b-em and jsbeeb). The model takes the BBC measurement: the delay is (R0 + 1) / 2 characters, exactly half a line for an odd R0. A one-character difference is below what either source resolves [from S14; S2 19.3.1, 19.7.1].
+- **Which field.** S2 calls the field with the half-line VSYNC and the extra line "even" (ParityFrame even, 19.6.1, 19.7.2); hoglet in S14 calls the delayed one "the odd frame". Same field, two names. The model uses S2's.
+- **How the parity flips (S2 19.5.2, 19.6.1).** At each frame start the field's parity is copied from a second state, which flips when C4 reaches R6. If C4 never reaches R6 (R6 > R4), the parity stops alternating and the extra line comes every frame or never. The BBC's R6 is always below R4.
 
 **Interlace sync and video (mode 7).** Per-field char row is R9+2 total lines / 2 = 10 lines for R9 = 18. R4, R6, R7 count rows of 10 lines. R5 is still a plain line count. [from S1 R9 note and Table 9] + [from S2 19.3.3, 19.4.1: "R9 = N-2 ... R4, R6 and R7 ... characters contain twice less lines"].
 
@@ -446,7 +451,7 @@ All from the ROM table values (3.1), with R7 = table + 1 and default `*TV 0,0`. 
 - 625 lines per frame at 64 us = 40 ms, 25 Hz frames, 50 Hz fields. [from S2 19.3.1; S14 AUG quote: "All BBC microcomputer screen modes are interlaced sync only except for mode 7 which is interlaced sync and video"]
 - Default is interlace ON for every mode: R8 = 1 in modes 0-6, &93 in mode 7. `*TV x,1` gives R8 = 0 in modes 0-6 only. [from ROM] + [from S14] + [from S7 ch5 s53]
 - The 39,936-cycle frame applies only after `*TV 0,1`, which many games issue. The OS default is the 625-line interlaced-sync timing. [inferring from the lines above]
-- VSYNC IRQ: CA1 on the VSYNC falling edge, interval 40,000 cycles (default) or 39,936 (no interlace). [from S7 ch10 + inference from S2 14.2]
+- VSYNC IRQ: CA1 on the VSYNC falling edge, interval 40,000 cycles (default) or 39,936 (no interlace). [from S7 ch10 + inference from S2 14.2]; the 40,000 in both fields measured on real hardware in S14 (see the 3 Oct note in 1.4), which also fixes the half line at (R0 + 1) / 2 characters rather than S2's R0/2.
 - System VIA IFR bit 1 = vertical sync. IER default enables it. [from S7 ch3 s19, s20; ch10 s13]
 - Frame counts the OS keeps: flash counters decrement on the VSYNC IRQ, 25 + 25. [from S7 ch11]
 - Memory per mode, bytes: 20,480 / 20,480 / 20,480 / 16,384 / 10,240 / 10,240 / 8,192 / 1,024. [from ROM $C459]
@@ -460,13 +465,14 @@ All from the ROM table values (3.1), with R7 = table + 1 and default `*TV 0,0`. 
 ## 6. What I could NOT establish
 
 1. **Primary-source chip part for Model B IC2.** Only owner reports and the OS's use of VSYNC width and skew. No Acorn service manual or parts list was reachable.
-2. **Exact HD6845S cycle behaviour** beyond the CAST/ACCC model: the char-clock at which each counter updates relative to the CPU write, MA during horizontal blanking, behaviour when R-values change mid-line, the exact VSYNC falling edge inside its last line, and which field gets the extra line. ACCC (S2) has CPC-specific detail per CRTC type (chapters 10-13, 19) and S19 lists real-hardware quirks. A logic-analyser trace or the HD6845S die-shot work (lanceewing/hd6845sp, unlicensed, facts only) would settle it.
+2. **Exact HD6845S cycle behaviour** beyond the CAST/ACCC model (task 7's choices for each are in `docs/known-differences.md`): the char-clock at which each counter updates relative to the CPU write, MA during horizontal blanking, behaviour when R-values change mid-line, the exact VSYNC falling edge inside its last line, and which field gets the extra line. ACCC (S2) has CPC-specific detail per CRTC type (chapters 10-13, 19) and S19 lists real-hardware quirks. A logic-analyser trace or the HD6845S die-shot work (lanceewing/hd6845sp, unlicensed, facts only) would settle it.
 3. **Video ULA pipeline latency.** How many chars or half-chars between the CRTC fetch and the pixel on screen, and how DISEN, CURSOR and the latch line up. Only the observable offsets (mode 7 one char right) are documented.
 4. **How RA3 gating is switched off in mode 7.** It must be (see 1.5), but no source describes the gate.
 5. **SAA5050 internals to cycle level:** exactly when the line counter increments, the double-height glyph row mapping (4.3), exact separated-graphics pixel positions, what a ULA-latched LOSE does at the start and end of the display window, and whether the black foreground codes (&80, &90) are truly no-ops on the BBC chip. The die-shot work (lanceewing/saa5050, no licence) and the beebjit teletext test disc referred to in S15 (not fetched, not checked for licence) are the places to look.
 6. **Box codes and PO/DE tie-offs** on the BBC board.
 7. **AUG pages not read.** The New Advanced User Guide tables (p187-190) and the BBC User Guide memory layout pages were not reachable, so section 3 is checked against the ROM, an annotated disassembly (S7, derived from the same ROM), Wikipedia, BeebWiki and the Bitshifters slides, not against the AUG.
 8. **Reading write-only CRTC registers** on the real machine.
+8a. **What drives the CRTC's /RES on the Model B.** S9 s3.14 says RST, from power on and BREAK, "is a general reset signal which is used throughout the remaining circuitry" (all but the system VIA), but no schematic of IC2's pin was read. Task 7 resets the CRTC's counters on both. (Added 3 Oct 2026.)
 9. **HSYNC width 0** (R3[3:0] = 0). The datasheet says "can't be programmed". Variants differ (S2 14.1). No BBC mode uses it.
 10. **Conventional factory DIP switch setting.** Mode 7 is likely but I read no source.
 11. **Which stardot claims hold on real hardware:** the Hold Graphics release timing (2 cycles) is described by its author as possibly a simulation artefact.

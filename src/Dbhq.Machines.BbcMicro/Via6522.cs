@@ -780,10 +780,39 @@ public class Via6522
     /// </summary>
     private protected void Sync()
     {
+        SyncInputs();
         long now = Now;
         if (now != _ticksDone)
         {
             CatchUp(now);
+        }
+    }
+
+    /// <summary>
+    /// Called before the chip catches up: a chip whose input another lazy chip drives brings that
+    /// chip up to date first, so every edge it delivers lands before the cycles it belongs to are
+    /// done (the system VIA's CA1, from the CRTC).
+    /// </summary>
+    private protected virtual void SyncInputs()
+    {
+    }
+
+    /// <summary>
+    /// Catches up to the machine's CPU cycle <paramref name="cycle"/>, not to now: the cycles up to
+    /// and including it are done, so an input then set lands in that cycle, after its tick. For a
+    /// driving chip delivering an edge from the past; it never calls <see cref="SyncInputs"/>.
+    /// </summary>
+    private protected void SyncTo(long cycle)
+    {
+        long ticks = cycle >> 1;
+        if (ticks < _ticksDone)
+        {
+            throw new InvalidOperationException("An input arrived for a cycle the chip has already done.");
+        }
+
+        if (ticks != _ticksDone)
+        {
+            CatchUp(ticks);
         }
     }
 

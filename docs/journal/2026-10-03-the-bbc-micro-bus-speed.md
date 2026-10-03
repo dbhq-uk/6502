@@ -265,7 +265,11 @@ should be built on this before anything else is tuned.
 ### How a new chip plugs in
 
 The CRTC, the video ULA, the sound chip and the 8271 (tasks 7, 8, 11 and 12)
-each join the same way:
+each join the same way. *This section was corrected in task 7, when the CRTC
+became the first chip to join: step 4 said what had to happen but not how,
+because the VIA had no way to catch up to a cycle in the past, and step 3 did
+not say that the order of the terms in `Service()` matters. Both are below as
+they are now built.*
 
 1. **It takes the clock.** An internal constructor takes the `BbcClock`; the chip
    keeps how far it has got and has a `Sync()` that does the cycles owed. Every
@@ -275,18 +279,29 @@ each join the same way:
    tests, as the VIA does.
 2. **It says when it next needs to be seen.** An internal `NextEventCycle`: the
    earliest CPU cycle at which something it does by itself must be visible outside
-   it. For the VIAs that is an IRQ line changing. For the CRTC it will be each edge
-   of vsync, because that drives the system VIA's CA1, and the system VIA must
-   receive the edge in the right cycle. A chip changed from outside calls the
-   clock's `WakeAt` so the bus looks at the end of the next cycle.
+   it. For the VIAs that is an IRQ line changing. For the CRTC it is each edge of
+   VSYNC, because VSYNC is the system VIA's CA1, and each frame start; it works
+   these out ahead and keeps the answer until a register write makes it stale. A
+   chip changed from outside calls the clock's `WakeAt` so the bus looks at the end
+   of the next cycle.
 3. **The bus has three places for it:** a case in the SHEILA decode
    (`ReadSheila`, `WriteSheila`, `PeekSheila`) followed by `ChipAccessed()`; a term
-   in the minimum in `Service()`; and a line in the resets.
-4. **A chip that drives another chip's input syncs first.** Before the system VIA
-   is read, the CRTC must have caught up, or the VIA would not yet have seen a vsync
-   edge from a cycle that has already happened. When a chip reaches its event and
-   is caught up, it sets the other chip's input then, and the other chip catches up
-   to that cycle before taking it.
+   in the minimum in `Service()`; and a line in the resets. **The order in
+   `Service()` matters:** a chip that drives another chip's input is brought up to
+   date first (`Crtc.SyncIfDue()`), before the driven chip's `NextEventCycle` and
+   `Irq` are read, or the driven chip would report its line and its next event
+   without an edge that has already happened.
+4. **A chip that drives another chip's input delivers each edge with its cycle.**
+   The driven chip's `Sync()` first calls `SyncInputs()`, which the system VIA
+   uses to bring the CRTC up to date if one of its events may be due by now
+   (`SyncIfDue`: one comparison when none is). The CRTC, catching up, hands each
+   VSYNC edge to the system VIA with the CPU cycle it happened in
+   (`SetVsyncAt(cycle, level)`), and the VIA catches up to that cycle, not to
+   now (`SyncTo(cycle)`), then takes the edge, so the edge lands after that
+   cycle's tick and before the next, exactly as a chip ticked every cycle would
+   see it. `SyncTo` throws if the VIA has already done that cycle, so an edge can
+   never land late without a test noticing. `SyncTo` does not call `SyncInputs`,
+   so a delivery cannot start another.
 5. **Work that cannot be worked out at once is done in a loop at catch-up.** The
    video ULA has to draw pixels; it can draw the cycles owed in one tight loop when
    it is looked at, or when a frame ends, rather than being called on every

@@ -1,6 +1,8 @@
 // The test oracle: the per-cycle implementation as it stood at commit 2876852, before task 6b
 // made the machine's chips run lazily. Kept unchanged apart from its names, and never used by
 // the machine; the equivalence tests run it side by side with the real one and compare them.
+// Task 7 added the one change: the per-character ReferenceCrtc6845 in place of the CRTC stub,
+// ticked in every cycle its clock is due, with its VSYNC on the system VIA's CA1.
 using Dbhq.Cpu6502;
 
 namespace Dbhq.Machines.BbcMicro.Tests.Oracle;
@@ -49,7 +51,6 @@ public sealed class ReferenceBbcBus : IBus
     private readonly byte[] _os;
     private readonly byte[] _basic;
     private readonly byte[] _dfs;
-    private readonly Crtc6845Stub _crtc = new();
     private readonly VideoUlaStub _videoUla = new();
 
     public ReferenceBbcBus(BbcRoms roms, BbcOptions? options = null)
@@ -71,6 +72,9 @@ public sealed class ReferenceBbcBus : IBus
 
     /// <summary>The user VIA at $FE60-$FE7F.</summary>
     public ReferenceUserVia UserVia { get; }
+
+    /// <summary>The CRTC at $FE00-$FE07, one character at a time.</summary>
+    public ReferenceCrtc6845 Crtc { get; } = new();
 
     /// <summary>The CPU whose IRQ line the VIAs drive.</summary>
     public Cpu? Cpu { get; set; }
@@ -120,6 +124,7 @@ public sealed class ReferenceBbcBus : IBus
     {
         SystemVia.Reset();
         UserVia.Reset();
+        ResetCrtc();
         DriveIrq();
     }
 
@@ -130,7 +135,18 @@ public sealed class ReferenceBbcBus : IBus
     public void BreakReset()
     {
         UserVia.Reset();
+        ResetCrtc();
         DriveIrq();
+    }
+
+    private void ResetCrtc()
+    {
+        bool before = Crtc.VSync;
+        Crtc.Reset();
+        if (Crtc.VSync != before)
+        {
+            SystemVia.VsyncInput = Crtc.VSync;
+        }
     }
 
     /// <summary>Reads memory without a bus cycle: for tests and debuggers, never for the CPU.</summary>
@@ -154,6 +170,18 @@ public sealed class ReferenceBbcBus : IBus
         {
             SystemVia.Tick();
             UserVia.Tick();
+        }
+
+        // The CRTC's character clock: every cycle at 2 MHz, every even one at 1 MHz, as the video
+        // ULA's control bit 4 says. A VSYNC edge reaches CA1 in the same cycle, after the VIA's tick.
+        if ((_videoUla.Control & 0x10) != 0 || (Cycles & 1) == 0)
+        {
+            bool before = Crtc.VSync;
+            Crtc.Tick();
+            if (Crtc.VSync != before)
+            {
+                SystemVia.VsyncInput = Crtc.VSync;
+            }
         }
     }
 
@@ -254,7 +282,7 @@ public sealed class ReferenceBbcBus : IBus
     /// </summary>
     private byte ReadSheila(int offset) => offset switch
     {
-        <= 0x07 => _crtc.Read(offset & 1),
+        <= 0x07 => (offset & 1) == 0 ? (byte)0 : Crtc.ReadData(),
 
         // A4 is not decoded, so each VIA's sixteen registers repeat in the upper half of its
         // block (bus.md section 1c).
@@ -268,8 +296,11 @@ public sealed class ReferenceBbcBus : IBus
     {
         switch (offset)
         {
+            case <= 0x07 when (offset & 1) == 0:
+                Crtc.WriteAddress(value);
+                break;
             case <= 0x07:
-                _crtc.Write(offset & 1, value);
+                Crtc.WriteData(value);
                 break;
             case >= 0x20 and <= 0x2F:
                 _videoUla.Write(offset & 1, value);
@@ -290,7 +321,7 @@ public sealed class ReferenceBbcBus : IBus
     /// <summary>A read with no side effect. Reading SHEILA changes some chips, so each chip says what its peek is.</summary>
     private byte PeekSheila(int offset) => offset switch
     {
-        <= 0x07 => _crtc.Read(offset & 1),
+        <= 0x07 => (offset & 1) == 0 ? (byte)0 : Crtc.ReadData(),
         >= 0x40 and <= 0x5F => SystemVia.Peek(offset & 0x0F),
         >= 0x60 and <= 0x7F => UserVia.Peek(offset & 0x0F),
         _ => AbsentSheila(offset),
@@ -300,40 +331,6 @@ public sealed class ReferenceBbcBus : IBus
     {
         ushort address = (ushort)(0xFE00 | offset);
         return IsSlow(address) ? (byte)0x00 : (byte)0xFE;
-    }
-
-    /// <summary>
-    /// The 6845 CRTC's registers and nothing else: no counters, no sync, no vsync on CA1. It
-    /// holds what the OS writes so the boot can run before the video exists. Even addresses in
-    /// $FE00-$FE07 are the address register and odd ones the data register (video.md s1.2).
-    /// </summary>
-    /// <remarks>
-    /// Only R12 to R17 read back on the HD6845S (video.md s1.3); R12 and R14 are six bits, as
-    /// the 14-bit addresses they hold need. R16 and R17, the light pen, have no strobe and read
-    /// 0. Every other read is a write-only register, which reads as an absent slow device does,
-    /// $00 (bus.md s1d and s6 item 3; the OS never reads one).
-    /// </remarks>
-    private sealed class Crtc6845Stub
-    {
-        private readonly byte[] _registers = new byte[18];
-        private int _address;
-
-        public void Write(int rs, byte value)
-        {
-            if (rs == 0)
-            {
-                _address = value & 0x1F;
-            }
-            else if (_address < 16)
-            {
-                // R16 and R17 are read only, and 18 to 31 are not registers.
-                _registers[_address] = value;
-            }
-        }
-
-        public byte Read(int rs) => rs == 1 && _address is >= 12 and <= 17
-            ? (byte)(_registers[_address] & ((_address & 1) == 0 ? 0x3F : 0xFF))
-            : (byte)0x00;
     }
 
     /// <summary>

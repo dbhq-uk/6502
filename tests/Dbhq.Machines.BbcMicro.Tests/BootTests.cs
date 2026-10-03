@@ -52,6 +52,20 @@ public class BootTests
         Assert.Equal(">", s.ScreenRowAsMemory(5).TrimEnd());
     }
 
+    [Fact]
+    public void TheOsCountsFiftyVsyncsASecond()
+    {
+        // The vsync interrupt (CA1, IFR bit 1) decrements the OS's counter at $0240 (OSBYTE 176),
+        // once a field, and a field is 40,000 cycles in mode 7 (video.md s5), so a second of
+        // machine time is fifty.
+        var s = new BbcSession(mode: 7).Boot();
+        byte before = s.Machine.Bus.Peek(0x0240);
+        s.Machine.Run(2_000_000);
+        byte after = s.Machine.Bus.Peek(0x0240);
+
+        Assert.Equal(50, (before - after) & 0xFF);
+    }
+
     [Theory]
     [InlineData(0, 0x3000, 0x06)]
     [InlineData(1, 0x3000, 0x06)]

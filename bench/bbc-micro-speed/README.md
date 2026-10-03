@@ -69,6 +69,7 @@ Dated, with the command that made them; each journal entry has the full output.
 | --- | --- | --- | --- | --- |
 | 2 October 2026 | `2876852`, the bus and VIAs ticking every cycle | 7.13 times 2 MHz | 0.64 times | [the speed entry](../../docs/journal/2026-10-02-the-bbc-micro-speed.md) |
 | 3 October 2026 | `98fe9d5`, the VIAs lazy, the bus looking only at events | 16.98 times 2 MHz (the old code 6.81 in the same session) | 2.11 times (the old code 0.60) | [the bus speed entry](../../docs/journal/2026-10-03-the-bbc-micro-bus-speed.md) |
+| 3 October 2026 | task 7, the CRTC added, lazily | 17.95 and 18.83 times 2 MHz in two sets (the old code 17.64 and 18.55 in the same sets) | not measured | [the CRTC entry](../../docs/journal/2026-10-03-the-bbc-micro-crtc.md) |
 
 Both were taken on a shared virtual machine with other work running; the
 entries give the load average for each set. The 3 October interpreter set ran

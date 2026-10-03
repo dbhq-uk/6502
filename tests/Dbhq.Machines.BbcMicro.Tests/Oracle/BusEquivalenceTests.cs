@@ -10,7 +10,8 @@ namespace Dbhq.Machines.BbcMicro.Tests.Oracle;
 /// and the CPU's IRQ line after it.
 /// </summary>
 /// <remarks>
-/// The script boots, types a BASIC program that drives the user VIA's timers, shift register,
+/// The OS runs with real vertical sync interrupts: the CRTC's VSYNC drives the system VIA's CA1
+/// on both buses. The script boots, types a BASIC program that drives the user VIA's timers, shift register,
 /// pulse counting and handshake modes and prints what it reads back, runs it, presses BREAK and
 /// boots again. A single access that lands a cycle early or late, or an IRQ that rises a cycle
 /// late, fails it at that access.
@@ -47,14 +48,18 @@ public class BusEquivalenceTests
         pair.Run(4_000_000);
 
         Assert.True(pair.IrqAccesses > 10_000, $"the IRQ line was high on only {pair.IrqAccesses} accesses");
+        Assert.True(pair.VsyncFalls > 300, $"VSYNC fell only {pair.VsyncFalls} times");
         Assert.True(pair.ViaAccesses > 10_000, $"only {pair.ViaAccesses} accesses reached a VIA");
     }
 
     /// <summary>
-    /// The bus alone, driven through the VIAs' addresses with random accesses, keys, lines and
-    /// resets, and long gaps of RAM reads, against the oracle bus. After every access the cycle
-    /// count, the value read and the CPU's IRQ line must match, so an IRQ the bus sets a cycle
-    /// late, or a stretch counted wrongly, fails at once.
+    /// The bus alone, driven through the VIAs' and the CRTC's addresses with random accesses,
+    /// CRTC programs, video ULA clock changes, keys, lines and resets, and long gaps of RAM reads,
+    /// against the oracle bus. After every access the cycle count, the value read and the CPU's IRQ
+    /// line must match, so an IRQ the bus sets a cycle late, a VSYNC edge that reaches CA1 a cycle
+    /// early or late, or a stretch counted wrongly, fails at once. The CRTC's outputs are compared
+    /// only now and then, so between those it catches up lazily, and the bus looks at it only at
+    /// the events it works out ahead.
     /// </summary>
     /// <remarks>
     /// The real OS rarely acknowledges a flag in the very cycle it rises with that interrupt
@@ -74,6 +79,9 @@ public class BusEquivalenceTests
         bus.PowerOnReset();
         oracle.PowerOnReset();
 
+        long vsyncFalls = 0;
+        oracle.Crtc.VSyncFell += () => vsyncFalls++;
+
         BbcKey[] keys = Enum.GetValues<BbcKey>();
         var random = new Random(6522 + 2);
         long accesses = 0, irqHigh = 0;
@@ -88,8 +96,23 @@ public class BusEquivalenceTests
             irqHigh += cpu.Irq ? 1 : 0;
         }
 
+        void SameCrtc()
+        {
+            var expected = (oracle.Crtc.MemoryAddress, oracle.Crtc.RasterAddress, oracle.Crtc.DisplayEnable, oracle.Crtc.HSync, oracle.Crtc.VSync, oracle.Crtc.Cursor);
+            var actual = (bus.Crtc.MemoryAddress, bus.Crtc.RasterAddress, bus.Crtc.DisplayEnable, bus.Crtc.HSync, bus.Crtc.VSync, bus.Crtc.Cursor);
+            if (expected != actual)
+            {
+                Assert.Fail($"after access {accesses} at cycle {oracle.Cycles}: expected CRTC {expected}, was {actual}");
+            }
+        }
+
         while (accesses < 250_000)
         {
+            if (random.Next(50) == 0)
+            {
+                SameCrtc();
+            }
+
             if (random.Next(100) == 0)
             {
                 // A gap: the timers run out, flag, wrap and reload with nobody looking.
@@ -159,9 +182,33 @@ public class BusEquivalenceTests
             }
             else if (kind < 96)
             {
-                bool level = random.Next(2) == 0;
-                oracle.SystemVia.VsyncInput = level;
-                bus.SystemVia.VsyncInput = level;
+                // A CRTC register, mostly small values, so VSYNC edges and frames come every few
+                // hundred cycles; or the video ULA's control register, whose bit 4 is the CRTC's clock.
+                if (random.Next(8) == 0)
+                {
+                    byte control = (byte)(random.Next(256));
+                    oracle.Write(0xFE20, control);
+                    bus.Write(0xFE20, control);
+                }
+                else
+                {
+                    int crtcRegister = random.Next(16);
+                    byte value = crtcRegister switch
+                    {
+                        0 => (byte)random.Next(random.Next(4) == 0 ? 4 : 30),
+                        3 => (byte)random.Next(256),
+                        8 => (byte)random.Next(256),
+                        9 => (byte)random.Next(random.Next(4) == 0 ? 32 : 5),
+                        _ => (byte)random.Next(random.Next(6) == 0 ? 256 : 8),
+                    };
+                    ushort select = (ushort)(0xFE00 + (2 * random.Next(4)));
+                    oracle.Write(select, (byte)crtcRegister);
+                    bus.Write(select, (byte)crtcRegister);
+                    oracle.Write((ushort)(select + 1), value);
+                    bus.Write((ushort)(select + 1), value);
+                    Same(oracle.Read((ushort)(select + 1)), bus.Read((ushort)(select + 1)));
+                }
+                Same(0, 0);
             }
             else if (kind < 99)
             {
@@ -183,7 +230,87 @@ public class BusEquivalenceTests
             Assert.Equal(oracle.UserVia.Peek(register), bus.UserVia.Peek(register));
         }
 
+        SameCrtc();
         Assert.True(irqHigh > 10_000, $"the IRQ line was high after only {irqHigh} accesses");
+        Assert.True(vsyncFalls > 10_000, $"VSYNC fell only {vsyncFalls} times");
+    }
+
+    /// <summary>
+    /// A write that brings the CRTC's next VSYNC fall forward, made while VSYNC is high and the bus
+    /// has already put its next look at the old fall: VSYNC cut to one line (R3), or the CRTC's
+    /// clock doubled by the video ULA. With CA1's interrupt enabled, the IRQ must rise in the cycle
+    /// of the new fall, through nothing but RAM reads, so the bus must look again after the write.
+    /// </summary>
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void AWriteThatBringsVsyncsFallForwardRaisesTheIrqInItsCycle(bool doubleTheClock)
+    {
+        var bus = new BbcBus(BbcSession.Roms);
+        var oracle = new ReferenceBbcBus(BbcSession.Roms);
+        var cpu = new Cpu(bus, CpuVariant.Nmos6502);
+        var oracleCpu = new Cpu(oracle, CpuVariant.Nmos6502);
+        bus.Cpu = cpu;
+        oracle.Cpu = oracleCpu;
+        bus.PowerOnReset();
+        oracle.PowerOnReset();
+
+        void Write(ushort address, byte value)
+        {
+            bus.Write(address, value);
+            oracle.Write(address, value);
+        }
+
+        // Mode 4's registers (video.md s3.1, R7 + 1) on the 1 MHz clock, or mode 0's on 2 MHz.
+        byte[] registers = doubleTheClock
+            ? [0x3F, 0x28, 0x31, 0x24, 0x26, 0x00, 0x20, 0x23, 0x01, 0x07, 0x67, 0x08]
+            : [0x7F, 0x50, 0x62, 0x28, 0x26, 0x00, 0x20, 0x23, 0x01, 0x07, 0x67, 0x08];
+        Write(0xFE20, doubleTheClock ? (byte)0x88 : (byte)0x9C);
+        for (int r = 0; r < registers.Length; r++)
+        {
+            Write(0xFE00, (byte)r);
+            Write(0xFE01, registers[r]);
+        }
+        Write(0xFE4C, 0x04);
+        Write(0xFE4E, 0x82);
+        Write(0xFE4D, 0x7F);
+
+        int changes = 0;
+        for (int field = 0; field < 3; field++)
+        {
+            // To the start of a VSYNC pulse, looking only at the oracle, so the machine's bus
+            // keeps the next look it chose.
+            for (int n = 0; n < 100_000 && !oracle.Crtc.VSync; n++)
+            {
+                Assert.Equal(oracle.Read(0x0000), bus.Read(0x0000));
+            }
+            Assert.True(oracle.Crtc.VSync);
+
+            if (doubleTheClock)
+            {
+                Write(0xFE20, 0x9C);
+            }
+            else
+            {
+                Write(0xFE00, 3);
+                Write(0xFE01, 0x18);
+            }
+
+            for (int n = 0; n < 600; n++)
+            {
+                Assert.Equal(oracle.Read(0x0000), bus.Read(0x0000));
+                Assert.True(oracleCpu.Irq == cpu.Irq, $"field {field}, cycle {oracle.Cycles}: IRQ expected {oracleCpu.Irq}, was {cpu.Irq}");
+                changes += oracleCpu.Irq ? 1 : 0;
+            }
+
+            // Back as it was, and acknowledge.
+            Write(0xFE20, doubleTheClock ? (byte)0x88 : (byte)0x9C);
+            Write(0xFE00, 3);
+            Write(0xFE01, registers[3]);
+            Write(0xFE4D, 0x7F);
+        }
+
+        Assert.True(changes > 0, "the IRQ never rose");
     }
 
     private readonly record struct Access(ushort Address, byte Value, bool Write, long Cycles, bool Irq);
@@ -230,9 +357,12 @@ public class BusEquivalenceTests
             _oracleLog.Cpu = _oracleCpu;
             _bus.Cpu = _cpu;
             _oracle.Cpu = _oracleCpu;
+            _oracle.Crtc.VSyncFell += () => VsyncFalls++;
         }
 
         public long IrqAccesses { get; private set; }
+
+        public long VsyncFalls { get; private set; }
 
         public long ViaAccesses { get; private set; }
 

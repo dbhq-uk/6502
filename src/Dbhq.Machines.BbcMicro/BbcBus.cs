@@ -50,6 +50,14 @@ namespace Dbhq.Machines.BbcMicro;
 /// (<see cref="Service"/>). A chip added later joins in the same three places: the decode, the
 /// minimum in <see cref="Service"/>, and the resets.
 /// </para>
+/// <para>
+/// <b>The CRTC</b> (task 7) is the first chip to join that way. Its character clock is every CPU
+/// cycle or every even one, as the video ULA's control bit 4 says, and it names as its events
+/// each VSYNC edge and each frame start. VSYNC is the system VIA's CA1: the CRTC hands each edge
+/// to the VIA with the cycle it happened in, and the VIA brings the CRTC up to date before it
+/// catches up itself, so it never passes a cycle with an edge still to come. The video ULA is
+/// still a stand-in that keeps its two registers.
+/// </para>
 /// </remarks>
 public sealed class BbcBus : IBus
 {
@@ -64,7 +72,6 @@ public sealed class BbcBus : IBus
 
     // The paged ROM the latch chose: BASIC, the DFS or EmptySlot. Set only when the latch is.
     private byte[] _paged = EmptySlot;
-    private readonly Crtc6845Stub _crtc = new();
     private readonly VideoUlaStub _videoUla = new();
     private readonly BbcClock _clock = new();
     private Cpu? _cpu;
@@ -78,6 +85,12 @@ public sealed class BbcBus : IBus
         Keyboard = new BbcKeyboard((options ?? new BbcOptions()).StartupMode);
         SystemVia = new SystemVia(Keyboard, _clock);
         UserVia = new UserVia(_clock);
+
+        // The CRTC's VSYNC is the system VIA's CA1. The VIA brings the CRTC up to date before
+        // itself, and the CRTC hands it each edge with the cycle it happened in.
+        Crtc = new Crtc6845(_clock);
+        Crtc.VsyncDriven += SystemVia.SetVsyncAt;
+        SystemVia.VsyncSource = Crtc;
     }
 
     /// <summary>The keyboard, with its start-up links set from the options.</summary>
@@ -88,6 +101,12 @@ public sealed class BbcBus : IBus
 
     /// <summary>The user VIA at $FE60-$FE7F.</summary>
     public UserVia UserVia { get; }
+
+    /// <summary>
+    /// The 6845 CRTC at $FE00-$FE07. Its character clock is 2 MHz or 1 MHz as the video ULA's
+    /// control bit 4 says, and its VSYNC drives the system VIA's CA1.
+    /// </summary>
+    public Crtc6845 Crtc { get; }
 
     /// <summary>The CPU whose IRQ line the VIAs drive. The line is set at the end of the next access.</summary>
     public Cpu? Cpu
@@ -177,23 +196,30 @@ public sealed class BbcBus : IBus
     }
 
     /// <summary>
-    /// The power-on reset: both VIAs. The latch IC32 and the ROM latch are not reset
-    /// (via.md section 3(a), bus.md section 6 item 4).
+    /// The power-on reset: both VIAs and the CRTC. The latch IC32 and the ROM latch are not reset
+    /// (via.md section 3(a), bus.md section 6 item 4), nor the video ULA, which has no reset.
     /// </summary>
+    /// <remarks>
+    /// The CRTC's /RES is taken to be on RST, the reset that power on and BREAK both make and
+    /// that the hardware guide says goes to all the circuitry but the system VIA (S9 s3.14);
+    /// no schematic was read for IC2's pin. A reset keeps its registers and drops VSYNC.
+    /// </remarks>
     public void PowerOnReset()
     {
         SystemVia.Reset();
         UserVia.Reset();
+        Crtc.Reset();
         Service();
     }
 
     /// <summary>
-    /// What BREAK resets here: the user VIA, and not the system VIA, which only the power-on
-    /// circuit resets, so the OS can tell the two apart from its IER (bus.md section 5).
+    /// What BREAK resets here: the user VIA and the CRTC, and not the system VIA, which only the
+    /// power-on circuit resets, so the OS can tell the two apart from its IER (bus.md section 5).
     /// </summary>
     public void BreakReset()
     {
         UserVia.Reset();
+        Crtc.Reset();
         Service();
     }
 
@@ -215,9 +241,16 @@ public sealed class BbcBus : IBus
     /// The event horizon reached, or a chip accessed: every chip catches up to now, the CPU's IRQ
     /// line is set from them, and the next look is put at the earliest cycle any chip names.
     /// </summary>
+    /// <remarks>
+    /// The order matters. The CRTC goes first, because its VSYNC is the system VIA's CA1: an edge
+    /// that is due must reach the VIA, in its own cycle, before the VIA catches up past it and is
+    /// asked for its IRQ line and its next event. (The VIA would ask the CRTC itself, through its
+    /// <c>SyncInputs</c>, but the bus does not rely on that here.)
+    /// </remarks>
     private void Service()
     {
-        _clock.NextEvent = Math.Min(SystemVia.NextEventCycle, UserVia.NextEventCycle);
+        Crtc.SyncIfDue();
+        _clock.NextEvent = Math.Min(Math.Min(SystemVia.NextEventCycle, UserVia.NextEventCycle), Crtc.NextEventCycle);
         if (_cpu is not null)
         {
             _cpu.Irq = SystemVia.Irq || UserVia.Irq;
@@ -312,7 +345,7 @@ public sealed class BbcBus : IBus
     /// </summary>
     private byte ReadSheila(int offset) => offset switch
     {
-        <= 0x07 => _crtc.Read(offset & 1),
+        <= 0x07 => ReadCrtc(offset),
 
         // A4 is not decoded, so each VIA's sixteen registers repeat in the upper half of its
         // block (bus.md section 1c).
@@ -334,10 +367,25 @@ public sealed class BbcBus : IBus
         switch (offset)
         {
             case <= 0x07:
-                _crtc.Write(offset & 1, value);
+                // Even addresses are the address register and odd ones the data register (video.md s1.2).
+                if ((offset & 1) == 0)
+                {
+                    Crtc.WriteAddress(value);
+                }
+                else
+                {
+                    Crtc.WriteData(value);
+                    ChipAccessed();
+                }
                 break;
             case >= 0x20 and <= 0x2F:
                 _videoUla.Write(offset & 1, value);
+                if ((offset & 1) == 0)
+                {
+                    // Control bit 4 is the CRTC's clock: 1 for 2 MHz, 0 for 1 MHz (video.md s2.2).
+                    Crtc.SetCharacterClock((value & 0x10) != 0);
+                    ChipAccessed();
+                }
                 break;
             case >= 0x30 and <= 0x3F:
                 // Write only, and the whole block of sixteen is the one latch (S1 s.17, s.21).
@@ -358,7 +406,7 @@ public sealed class BbcBus : IBus
     /// <summary>A read with no side effect. Reading SHEILA changes some chips, so each chip says what its peek is.</summary>
     private byte PeekSheila(int offset) => offset switch
     {
-        <= 0x07 => _crtc.Read(offset & 1),
+        <= 0x07 => ReadCrtc(offset),
         >= 0x40 and <= 0x5F => SystemVia.Peek(offset & 0x0F),
         >= 0x60 and <= 0x7F => UserVia.Peek(offset & 0x0F),
         _ => AbsentSheila(offset),
@@ -371,38 +419,10 @@ public sealed class BbcBus : IBus
     }
 
     /// <summary>
-    /// The 6845 CRTC's registers and nothing else: no counters, no sync, no vsync on CA1. It
-    /// holds what the OS writes so the boot can run before the video exists. Even addresses in
-    /// $FE00-$FE07 are the address register and odd ones the data register (video.md s1.2).
+    /// A CRTC read: the data register at odd addresses, which has no side effect, and the
+    /// write-only address register at even ones, which reads $00 (video.md s1.2, s1.3).
     /// </summary>
-    /// <remarks>
-    /// Only R12 to R17 read back on the HD6845S (video.md s1.3); R12 and R14 are six bits, as
-    /// the 14-bit addresses they hold need. R16 and R17, the light pen, have no strobe and read
-    /// 0. Every other read is a write-only register, which reads as an absent slow device does,
-    /// $00 (bus.md s1d and s6 item 3; the OS never reads one).
-    /// </remarks>
-    private sealed class Crtc6845Stub
-    {
-        private readonly byte[] _registers = new byte[18];
-        private int _address;
-
-        public void Write(int rs, byte value)
-        {
-            if (rs == 0)
-            {
-                _address = value & 0x1F;
-            }
-            else if (_address < 16)
-            {
-                // R16 and R17 are read only, and 18 to 31 are not registers.
-                _registers[_address] = value;
-            }
-        }
-
-        public byte Read(int rs) => rs == 1 && _address is >= 12 and <= 17
-            ? (byte)(_registers[_address] & ((_address & 1) == 0 ? 0x3F : 0xFF))
-            : (byte)0x00;
-    }
+    private byte ReadCrtc(int offset) => (offset & 1) == 0 ? (byte)0x00 : Crtc.ReadData();
 
     /// <summary>
     /// The video ULA's two write-only registers, control at $FE20 and palette at $FE21,

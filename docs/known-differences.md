@@ -229,11 +229,10 @@ ROM does them, and those are the checks that matter for the boot.
 **What.** From task 5 the real MOS 1.20 boots to the BASIC prompt, but three
 parts of the Model B are not there yet, and each shows in what the machine does:
 
-- **The 6845 CRTC is a set of registers.** It holds what the OS writes and reads
-  back R12 to R17 as the HD6845S does (`video.md` section 1.3), but it has no
-  counters, so it makes no picture and no vertical sync. CA1 on the system VIA
-  never moves, so the OS's 50 Hz vsync interrupt never comes. The boot does not
-  wait for it.
+- **The 6845 CRTC was a set of registers** until task 7, with no counters and
+  no vertical sync, so the OS's 50 Hz vsync interrupt never came. Since task 7
+  it is the counter model in the next section, its VSYNC drives CA1, and the OS
+  takes a vsync interrupt every field.
 - **The video ULA is a pair of registers** that take writes and draw nothing. A
   read is Econet's INTON and answers as an absent fast device, `$FE`.
 - **No 8271 is fitted,** so `$FE80` reads `$FE`. The DFS reads that status
@@ -246,3 +245,55 @@ mode 7's screen memory, which needs no video chip, and expects the screen the
 ROMs print with no 8271: `BBC Computer 32K`, `BASIC` and `>` on rows 1, 3 and 5.
 Tasks 7 and 8 put a working CRTC and video ULA in place of the stand-ins, and
 the 8271 arrives in task 12, which brings the `Acorn DFS` row back.
+
+## The BBC Micro: the 6845 CRTC, where the model stops
+
+**What.** `Crtc6845` is the HD6845S counter model of `video.md` section 1.4, from
+the Amstrad CPC CRTC Compendium's "CRTC 0" chapters and the Hitachi datasheet,
+with the two quirks section 1.6 asks for: the end of the frame decided while C0
+is 0 or 1, and a line of two characters (R0 = 1) never disarming the vertical
+adjust. Where the sources disagree or stop, it chooses:
+
+- **The half-line VSYNC is `(R0 + 1) / 2` characters late, not `R0 / 2`.** The
+  Compendium puts it at C0 = R0/2, which for the BBC's odd R0 (127 and 63) is a
+  character short of half a line, and would make the vsync interrupts 39,999 and
+  40,001 cycles apart (39,998 and 40,002 at 1 MHz). On a real Model B a scope
+  showed "exactly half a line (32us)" and interrupts were timed at about 40,000
+  cycles in both fields (`video.md` s1.4, S14). The model takes the BBC
+  measurement; a one-character difference was not resolved by either.
+- **The VSYNC width is counted in whole lines from the pulse's start,** so in an
+  even field the pulse's fall is half a line late too. The Compendium says a
+  shortened VSYNC "stops at the end of the HSYNC of this line", which suggests
+  HSYNC drives the count; counted that way, both fields' falls would land at the
+  same point of a line and the interrupts would alternate 39,936 and 40,064
+  cycles, which the S14 timing rules out.
+- **Not modelled:** R0 = 0 freezing C9 and C4 (Compendium 13.2.6; here every
+  character is a line end); a VSYNC started by writing R7 to equal C4 in the
+  middle of a row, and the Compendium's blocking of the VSYNC when R7 is written
+  while C0 is below 2 (here VSYNC starts only at the start of row R7); the
+  vertical display switched by an R6 write in the middle of a row; the
+  balancing of an odd R9 in interlace sync and video between rows of even and
+  odd lines, and the VSYNC a line late on odd rows that comes with it (here a
+  field's rows have R9 / 2 + 1 lines; the datasheet asks for an even R9 and the
+  BBC uses 18); the parity rules when R8 changes in the middle of a frame; R9
+  written exactly at C0 = R0 changing C4 and C9 together; the light pen.
+- **Choices nobody measured:** a register write takes effect from the next
+  character after the cycle it is written in, and the CRTC's 1 MHz character
+  clock ticks on the same even cycles as the VIAs; R3's HSYNC width 0 gives no
+  HSYNC (section 6, item 9); the cursor is on when RA is between R10 and R11,
+  so R10 above R11 gives none; the cursor blinks with a 50 per cent duty,
+  counted from the reset; C0 running past R0 to 255 ends the line there; the
+  field after a reset is an even one; R0 to R11 read `$00`.
+- **What resets it.** Power on and BREAK both reset the CRTC's counters and keep
+  its registers. Its /RES is taken to be on RST, which the hardware guide says
+  goes to all the circuitry but the system VIA (S9 s3.14); IC2's pin was not
+  read on a schematic. A reset that drops a high VSYNC is an edge on CA1.
+
+**How the tests treat it.** `Crtc6845Tests` asserts the sheet's section 5
+numbers for each mode set: 40,000 cycles between vsync falls, 39,936 with
+interlace off, 625 lines a frame with VSYNC at line 280, ten rasters a field
+row in mode 7, 40 characters and HSYNC at 49 for 4 in mode 4, and 256 or 250
+displayed lines, plus the two quirks. `CrtcEquivalenceTests` and the bus
+tests compare the lazy chip with a per-character model of the same rules
+(`Oracle/ReferenceCrtc6845.cs`), so they pin the model, not the hardware where
+the list above says the model guessed.

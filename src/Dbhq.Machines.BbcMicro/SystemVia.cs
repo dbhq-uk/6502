@@ -87,11 +87,31 @@ public sealed class SystemVia : Via6522
     /// </summary>
     public event Action<byte>? SoundWrite;
 
-    /// <summary>The 6845's VSYNC output, which drives CA1.</summary>
+    /// <summary>
+    /// The 6845's VSYNC output, which drives CA1: for a system VIA on its own. In a machine the
+    /// CRTC drives CA1 (<see cref="BbcBus.Crtc"/>), and a level set here is overwritten at its
+    /// next edge.
+    /// </summary>
     public bool VsyncInput
     {
         set => SetCa1(value);
     }
+
+    /// <summary>The CRTC whose VSYNC drives CA1 in a machine; it is brought up to date before this chip is.</summary>
+    internal Crtc6845? VsyncSource { get; set; }
+
+    /// <summary>
+    /// A VSYNC edge from the CRTC, in CPU cycle <paramref name="cycle"/>, which is not after now:
+    /// the chip does the cycles up to it, takes the edge, and does the rest when next looked at.
+    /// </summary>
+    internal void SetVsyncAt(long cycle, bool level)
+    {
+        SyncTo(cycle);
+        ApplyCa1(level);
+        Wake();
+    }
+
+    private protected override void SyncInputs() => VsyncSource?.SyncIfDue();
 
     /// <summary>One 1 MHz cycle: the chip, then the keyboard's counter, PA7 and CA2.</summary>
     protected override void TickOnce()
