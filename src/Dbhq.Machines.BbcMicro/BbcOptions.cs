@@ -9,4 +9,10 @@ public sealed class BbcOptions
     /// teletext screen.
     /// </summary>
     public int StartupMode { get; init; } = 7;
+
+    /// <summary>
+    /// Samples a second in <see cref="BbcMachine.Sound"/>, 1 to 250,000. The default is 48,000; a
+    /// page sets its audio context's rate, so the browser does not resample a second time.
+    /// </summary>
+    public int SampleRate { get; init; } = 48_000;
 }

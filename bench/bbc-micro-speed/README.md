@@ -50,6 +50,16 @@ text cursor at `&0318` and `&0319`, one column right of the `>` on row 5. A
 build from before task 8 has no `LoadInMode`; to compare in another mode,
 publish the old code with this page's `Program.cs` and `native/Program.cs`.
 
+Since task 11 the machine has a sound chip, which makes its samples when its
+buffer is read. The workload above never reads it, so the chip costs only the
+writes the OS makes. A page reads it every frame: `sound=silent` reads it every
+40,000 cycles (a field) through the timed runs with nothing playing, and
+`sound=tone` does the same with all four channels sounding, three tones and
+white noise written straight to the chip after the prompt check. Give it with
+`?sound=tone` on the page, the eighth argument of `run-in-browser.mjs`, the
+fifth of the native program, or `SOUND=tone` for `alternate.sh`. A build from
+before task 11 has no sound and can only be timed with the default, `none`.
+
 ## How to run it
 
 From the repository root. Needs the .NET 10 SDK with the `wasm-tools` workload,
@@ -99,6 +109,7 @@ shows, and the timed runs, which start at the prompt, cannot show it.
 | 3 October 2026 | task 8's review fix, the boot made cheap again | boot, power on to the prompt: natively 426 ms in mode 7 and 415 in mode 1 (the old code 400 and 432; `3522066` 10,793 and 12,492 in an earlier set); in the browser 719 and 1,004 ms (510 and 526). Timed runs as `3522066`'s within the noise of a set at a load of up to 50 | not measured | [the video ULA entry](../../docs/journal/2026-10-03-the-bbc-micro-video-ula.md), "The review round" |
 | 3 October 2026 | task 9, the teletext chip drawing mode 7 | mode 7: 12.39 and 13.87 times 2 MHz (the old code 14.33 and 14.58); mode 1: 12.20 (11.92), at a load of about 5 | not measured | [the teletext entry](../../docs/journal/2026-10-03-the-bbc-micro-teletext.md) |
 | 3 October 2026 | task 9's review round, the worst case: every cell of a mode 7 page drawn | dense page (random bytes): 11.86 and 10.88 times 2 MHz (the old code 14.77 and 15.17, which draws nothing in mode 7); text page: 12.02 (15.13); at a load of about 5 with the CPUs half busy | not measured | [the teletext entry](../../docs/journal/2026-10-03-the-bbc-micro-teletext.md), "The review round" |
+| 3 October 2026 | task 11, the sound chip, never ticked (the standard workload never reads its buffer) | at an evening hour when the virtual machine ran at about half its morning speed (the bare CPU 15.5 to 24.5 ns a cycle against 10.5 to 11.0): 6.92 to 11.32 times 2 MHz for the old code and 7.32 to 11.04 for the new in seven alternating sets, level set by set | not measured | [the sound entry](../../docs/journal/2026-10-03-the-bbc-micro-sound.md) |
 
 Both were taken on a shared virtual machine with other work running; the
 entries give the load average for each set. The 3 October interpreter set ran

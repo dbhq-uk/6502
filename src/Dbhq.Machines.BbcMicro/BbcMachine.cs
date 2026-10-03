@@ -34,6 +34,13 @@ public sealed class BbcMachine
     public Framebuffer Screen => Bus.Screen;
 
     /// <summary>
+    /// The sound, as samples from 0 to 1 at <see cref="BbcOptions.SampleRate"/>: one sample for
+    /// each 250,000 / rate chip clocks, a chip clock being eight CPU cycles, made up to now when it
+    /// is read (<see cref="Sn76489"/>).
+    /// </summary>
+    public SoundBuffer Sound => Bus.Sound;
+
+    /// <summary>
     /// Switches on: the power-on reset clears both VIAs, then the 6502 runs its reset sequence
     /// and starts at the vector in the OS ROM, <c>$D9CD</c> (fact sheet <c>bus.md</c> section 5).
     /// </summary>

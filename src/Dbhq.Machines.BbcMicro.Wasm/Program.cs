@@ -60,6 +60,44 @@ public static partial class BbcHost
         }
     }
 
+    private static readonly float[] Samples = new float[48_000];
+
+    /// <summary>
+    /// For the speed check's sound load: <paramref name="kind"/> "tone" sets all four channels
+    /// sounding, three tones and white noise, written straight to the chip; "silent" leaves the
+    /// chip as the OS left it. The native bench's <c>SoundLoad</c> does the same.
+    /// </summary>
+    [JSExport]
+    public static void SoundOn(string kind)
+    {
+        byte[] bytes = kind switch
+        {
+            "silent" => [],
+            "tone" => [0x8D, 0x0E, 0x90, 0xA5, 0x13, 0xB2, 0xC3, 0x1A, 0xD4, 0xE4, 0xF6],
+            _ => throw new ArgumentException($"no sound called {kind}: silent or tone"),
+        };
+        foreach (byte value in bytes)
+        {
+            Machine.Bus.SoundChip.Write(value);
+        }
+    }
+
+    /// <summary>
+    /// As <see cref="Run"/>, reading the sound buffer every 40,000 cycles, a field, as a page reads
+    /// it every frame, and returns the cycles since power on.
+    /// </summary>
+    [JSExport]
+    public static double RunWithSound(int cycles)
+    {
+        long end = Machine.Cycles + cycles;
+        while (Machine.Cycles < end)
+        {
+            Machine.Run(Math.Min(40_000, end - Machine.Cycles));
+            Machine.Sound.Read(Samples);
+        }
+        return Machine.Cycles;
+    }
+
     /// <summary>A byte of memory, read without a bus cycle.</summary>
     [JSExport]
     public static int Peek(int address) => Machine.Bus.Peek((ushort)address);

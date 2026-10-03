@@ -474,3 +474,55 @@ lazy ULA's mode 7 frames with the per-character oracle, whose teletext chip
 (`Oracle/ReferenceTeletext.cs`) is written separately and works out each
 half-dot directly; it pins the model, including the choices above, not the
 hardware.
+
+## The BBC Micro: the SN76489 sound chip, where the model stops
+
+**What.** `Sn76489` is the chip of `via.md` section 4: three tone counters, a
+noise counter and a 15-bit shift register (seed `&4000`, taps 0 and 1, white or
+periodic), the 2 dB attenuators, and a unipolar mix of the four, 0 to 1. Where
+the sources stop, the model chooses:
+
+- **A tone period of 0 counts as 1024.** No source establishes it for a real
+  chip (s4.3): SMS Power treats 0 like 1, a constant level, and jsbeeb (a
+  cross-check only) like 1024. The sheet recommends 1024, because a 10-bit
+  counter loaded with 0 would pass 1023 before it reached zero, and the model
+  takes that. The same holds for the noise at rate 3 when tone 3's period is 0.
+  The OS never writes a period of 0: its tables give 25 at the least.
+- **A write lands at once, when latch bit 0 falls,** after the chip clock of
+  that CPU cycle. The real chip takes about 32 of its clocks to load and was
+  measured responding 3.7 to 8 microseconds after write enable fell (s4.1); the
+  OS holds write enable low for 17 cycles and pads 21 more, so it never writes
+  inside that window, and taking the byte at once changes nothing it does.
+  Holding write enable low does not take the byte again every 16 microseconds
+  as the real chip does, so sample-playing code that relies on that re-latch
+  (and the noise reset each re-latch makes) is not modelled.
+- **The chip clock is every eighth CPU cycle, from cycle 0.** The chip runs on
+  the video ULA's 4 MHz divided by 16; its phase against the CPU's 2 MHz is not
+  documented, so a chip clock is taken to fall at the end of every CPU cycle
+  that is a multiple of eight.
+- **Power on is silent,** with every period and the noise control 0, the tone
+  counters at 1024, the noise counter at 16, every flip-flop low and the shift
+  register at `&4000`. A real chip starts in an unknown state (s4, "Could NOT
+  establish"); the OS silences it at reset within about a quarter of a second.
+- **Rate 3 noise has its own counter, reloaded with tone 3's period,** as SMS
+  Power describes it, rather than shifting on tone 3's own output edges, which
+  the datasheet's "tone generator 3 output" might mean. The rate is the same;
+  the noise's phase against tone 3 may differ.
+- **A write to the noise control does not reset the noise counter or its
+  flip-flop,** only the shift register; no source says either way.
+- **A sample is the mean of its chip clocks** (box averaging), not the output
+  of an analogue chain. A real BBC's filters smooth a period-1 tone's 125 kHz
+  into a steady half level; the box average gives a sample of five or six
+  clocks (at 48 kHz) a level within a tenth of the channel's amplitude of that,
+  so period-1 sample playback carries a little noise the real machine filters
+  away. No DC is removed and the output is not inverted (s4.6: neither is
+  audible).
+
+**How the tests treat it.** `Sn76489Tests` asserts the sheet's worked examples
+(s4.8), the noise vectors (s4.4), the volume table (s4.5) and the noise rates,
+and pins the period-0 choice. `SoundTests` checks the write protocol through the
+system VIA, the cycle a write lands in, and on the real OS the reset writes, the
+start-up beep, the pitch table and a `SOUND` command's tone in the samples.
+`SoundEquivalenceTests` compares the lazy chip with a clock-by-clock oracle
+(`Oracle/ReferenceSn76489.cs`), written separately from the same model; it pins
+the model, including the choices above, not the hardware.

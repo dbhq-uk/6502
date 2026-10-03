@@ -68,6 +68,12 @@ namespace Dbhq.Machines.BbcMicro;
 /// screen start bits before making it, and the CRTC brings the ULA up to any cycle before
 /// moving there itself, so a direct call to any of the chips keeps them agreeing.
 /// </para>
+/// <para>
+/// <b>The sound chip</b> (task 11) joins in none of the three places. Its READY line is not
+/// wired (via.md s4.1), so nothing it does can reach the CPU and it names no event; it is not
+/// ticked either. The system VIA hands it each byte when latch bit 0 falls, and it catches up to
+/// that cycle before taking it; its buffer catches it up to now whenever the buffer is read.
+/// </para>
 /// </remarks>
 public sealed class BbcBus : IBus
 {
@@ -95,7 +101,8 @@ public sealed class BbcBus : IBus
         _os = roms.Os;
         _basic = roms.Basic;
         _dfs = roms.Dfs;
-        Keyboard = new BbcKeyboard((options ?? new BbcOptions()).StartupMode);
+        options ??= new BbcOptions();
+        Keyboard = new BbcKeyboard(options.StartupMode);
         SystemVia = new SystemVia(Keyboard, _clock);
         UserVia = new UserVia(_clock);
 
@@ -108,6 +115,12 @@ public sealed class BbcBus : IBus
         // The video ULA reads the CRTC's outputs, screen memory and the system VIA's two screen
         // start latch bits, and draws a line at a time.
         VideoUla = new VideoUla(_clock, Crtc, _ram, SystemVia);
+
+        // The sound chip takes the byte on port A when latch bit 0 falls. It runs lazily and is
+        // never ticked: nothing it does can reach the CPU, so it has no place in Service().
+        Sound = new SoundBuffer(options.SampleRate);
+        SoundChip = new Sn76489(_clock, Sound);
+        SystemVia.SoundWrite += SoundChip.Write;
     }
 
     /// <summary>The keyboard, with its start-up links set from the options.</summary>
@@ -130,6 +143,12 @@ public sealed class BbcBus : IBus
 
     /// <summary>The picture, drawn up to now when it is read.</summary>
     public Framebuffer Screen => VideoUla.Screen;
+
+    /// <summary>The SN76489, written through the system VIA (via.md s4.1).</summary>
+    public Sn76489 SoundChip { get; }
+
+    /// <summary>The sound chip's samples, made up to now when they are read.</summary>
+    public SoundBuffer Sound { get; }
 
     /// <summary>The CPU whose IRQ line the VIAs drive. The line is set at the end of the next access.</summary>
     public Cpu? Cpu
@@ -219,8 +238,9 @@ public sealed class BbcBus : IBus
     }
 
     /// <summary>
-    /// The power-on reset: both VIAs and the CRTC, and the video ULA's registers to zero. The latch
-    /// IC32 and the ROM latch are not reset (via.md section 3(a), bus.md section 6 item 4).
+    /// The power-on reset: both VIAs and the CRTC, the video ULA's registers to zero and the sound
+    /// chip to its power-on state. The latch IC32 and the ROM latch are not reset (via.md section
+    /// 3(a), bus.md section 6 item 4).
     /// </summary>
     /// <remarks>
     /// The CRTC's /RES is taken to be on RST, the reset that power on and BREAK both make and
@@ -235,6 +255,7 @@ public sealed class BbcBus : IBus
         UserVia.Reset();
         Crtc.Reset();
         VideoUla.PowerOn();
+        SoundChip.PowerOn();
         ChipAccessed();
         Service();
     }
@@ -243,7 +264,8 @@ public sealed class BbcBus : IBus
     /// What BREAK resets here: the user VIA and the CRTC, and not the system VIA, which only the
     /// power-on circuit resets, so the OS can tell the two apart from its IER (bus.md section 5).
     /// Nor the video ULA, which has no reset pin; the OS writes both its registers again in the mode
-    /// change every BREAK makes.
+    /// change every BREAK makes. Nor the sound chip, which has none either; the OS silences it at
+    /// every reset (via.md s4.7).
     /// </summary>
     public void BreakReset()
     {

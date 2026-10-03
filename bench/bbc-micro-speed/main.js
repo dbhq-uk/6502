@@ -9,12 +9,15 @@ import { dotnet } from './_framework/dotnet.js'
 // ?mode=N   the screen mode the start-up links select (default 7, the teletext screen)
 // ?screen=S boot (default), or after the prompt check fill mode 7 screen memory with a page
 //           that makes every cell drawn: dense (random bytes) or text (random printable characters)
+// ?sound=S  none (default, the sound buffer never read), or after the prompt check read it every
+//           field as a page does: silent (nothing playing) or tone (all four channels sounding)
 const params = new URLSearchParams(location.search);
 const bootCycles = Number(params.get('boot') ?? 6_000_000);
 const cycles = Number(params.get('cycles') ?? 2_000_000);
 const runs = Number(params.get('runs') ?? 5);
 const mode = Number(params.get('mode') ?? 7);
 const screen = params.get('screen') ?? 'boot';
+const sound = params.get('sound') ?? 'none';
 const log = document.getElementById('log');
 
 const fetchBytes = async (name) => {
@@ -70,11 +73,19 @@ if (screen !== 'boot') {
   bbc.FillScreen(screen);
   lines.push('screen ' + screen);
 }
+if (sound !== 'none') {
+  bbc.SoundOn(sound);
+  lines.push('sound ' + sound);
+}
 
 for (let i = 1; i <= runs; i++) {
   t = performance.now();
   before = bbc.Cycles();
-  bbc.Run(cycles);
+  if (sound === 'none') {
+    bbc.Run(cycles);
+  } else {
+    bbc.RunWithSound(cycles);
+  }
   ms = performance.now() - t;
   lines.push(line(`timed ${i}`, bbc.Cycles() - before, ms));
 }

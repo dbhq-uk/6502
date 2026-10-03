@@ -7,10 +7,13 @@ using Dbhq.Machines.BbcMicro;
 // ordinary .NET program, and a fingerprint of a scripted run, so a change to the bus or its
 // chips can be shown to change nothing the machine does.
 //
-//   dotnet run -c Release --project bench/bbc-micro-speed/native -- [timed runs] [cycles a run] [screen mode] [screen]
+//   dotnet run -c Release --project bench/bbc-micro-speed/native -- [timed runs] [cycles a run] [screen mode] [screen] [sound]
 //       screen: boot (default, the boot screen as the OS leaves it), dense (mode 7 screen memory
 //       filled with random bytes, every control code included) or text (random printable
 //       characters), filled after the prompt check, with a fixed seed so every build gets the same page
+//       sound: none (default, the sound buffer never read), silent (read every 40,000 cycles, a
+//       field, as a page does, with nothing playing) or tone (read every field with all four
+//       channels sounding, written straight to the chip after the prompt check)
 //   dotnet run -c Release --project bench/bbc-micro-speed/native -- --fingerprint
 //   dotnet run -c Release --project bench/bbc-micro-speed/native -- --profile [rounds]
 var roms = new BbcRoms(
@@ -34,14 +37,15 @@ int runs = args.Length > 0 ? int.Parse(args[0]) : 5;
 int cycles = args.Length > 1 ? int.Parse(args[1]) : 2_000_000;
 int mode = args.Length > 2 ? int.Parse(args[2]) : 7;
 string screen = args.Length > 3 ? args[3] : "boot";
-Speed(roms, runs, cycles, mode, screen);
+string sound = args.Length > 4 ? args[4] : "none";
+Speed(roms, runs, cycles, mode, screen, sound);
 return;
 
 // The page's workload: boot for three seconds of machine time, check the prompt, then time
 // the runs. Prints the lines the page prints. Outside mode 7 the screen is pixels, so the
 // prompt check is the OS's own record, as on the page: the mode at &0355 and the text cursor
 // at &0318 and &0319, one column right of the > on row 5.
-static void Speed(BbcRoms roms, int runs, int cycles, int mode, string screen)
+static void Speed(BbcRoms roms, int runs, int cycles, int mode, string screen, string sound)
 {
     var machine = new BbcMachine(roms, new BbcOptions { StartupMode = mode });
     var clock = Stopwatch.StartNew();
@@ -61,11 +65,24 @@ static void Speed(BbcRoms roms, int runs, int cycles, int mode, string screen)
         Console.WriteLine("screen " + screen);
     }
 
+    if (sound != "none")
+    {
+        SoundLoad.Start(machine.Bus, sound);
+        Console.WriteLine("sound " + sound);
+    }
+
     for (int i = 1; i <= runs; i++)
     {
         long start = machine.Cycles;
         clock.Restart();
-        machine.Run(cycles);
+        if (sound == "none")
+        {
+            machine.Run(cycles);
+        }
+        else
+        {
+            SoundLoad.RunAndRead(machine, cycles);
+        }
         Report("timed " + i, machine.Cycles - start, clock.Elapsed.TotalMilliseconds);
     }
 }
@@ -386,6 +403,41 @@ internal static class DensePage
                 _ => throw new ArgumentException($"no screen called {kind}: boot, dense or text"),
             };
             bus.PokeRam((ushort)(0x7C00 + i), (byte)value);
+        }
+    }
+}
+
+/// <summary>
+/// The sound chip's share of a page's work: the buffer read every field, 40,000 cycles, as the
+/// page reads it every frame, with nothing playing (<c>silent</c>) or all four channels sounding
+/// (<c>tone</c>: three tones and white noise, written straight to the chip). The same code is in
+/// the browser host (<c>BbcHost.SoundOn</c> and <c>BbcHost.RunWithSound</c>).
+/// </summary>
+internal static class SoundLoad
+{
+    private static readonly float[] Samples = new float[48_000];
+
+    public static void Start(BbcBus bus, string kind)
+    {
+        byte[] bytes = kind switch
+        {
+            "silent" => [],
+            "tone" => [0x8D, 0x0E, 0x90, 0xA5, 0x13, 0xB2, 0xC3, 0x1A, 0xD4, 0xE4, 0xF6],
+            _ => throw new ArgumentException($"no sound called {kind}: none, silent or tone"),
+        };
+        foreach (byte value in bytes)
+        {
+            bus.SoundChip.Write(value);
+        }
+    }
+
+    public static void RunAndRead(BbcMachine machine, long cycles)
+    {
+        long end = machine.Cycles + cycles;
+        while (machine.Cycles < end)
+        {
+            machine.Run(Math.Min(40_000, end - machine.Cycles));
+            machine.Sound.Read(Samples);
         }
     }
 }

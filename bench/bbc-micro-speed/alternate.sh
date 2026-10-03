@@ -18,30 +18,34 @@
 # before task 8 has no mode, so give it MODE only when it was published with one. SCREEN=dense
 # or SCREEN=text fills mode 7 screen memory after the prompt check with a page that makes the
 # teletext chip draw every cell (the worst case); a build needs the bench of task 9's review
-# round or later for it.
+# round or later for it. SOUND=silent or SOUND=tone reads the sound buffer every field, as a
+# page does, with nothing playing or all four channels sounding; a build needs task 11 or later.
 set -euo pipefail
 cd "$(dirname "$0")"
 
 mode=$1
 screen=${MODE:-7}
 page=${SCREEN:-boot}
+sound=${SOUND:-none}
 launches=$2
 shift 2
 lines=$(mktemp)
 trap 'rm -f "$lines"' EXIT
 
-echo "load before: $(cut -d' ' -f1-3 /proc/loadavg)  $(date -u +%H:%M:%S) UTC  screen mode $screen, page $page"
+echo "load before: $(cut -d' ' -f1-3 /proc/loadavg)  $(date -u +%H:%M:%S) UTC  screen mode $screen, page $page, sound $sound"
 for ((i = 1; i <= launches; i++)); do
   for build in "$@"; do
     if [[ $mode == browser ]]; then
-      output=$(node run-in-browser.mjs "$build" 1 2000000 6000000 5 "$screen" "$page")
+      output=$(node run-in-browser.mjs "$build" 1 2000000 6000000 5 "$screen" "$page" "$sound")
       grep -q '^launch 1 prompt yes' <<<"$output" || { echo "no prompt from $build" >&2; echo "$output" >&2; exit 1; }
       [[ $page == boot ]] || grep -q "^launch 1 screen $page\$" <<<"$output" || { echo "$build did not fill the $page page" >&2; exit 1; }
+      [[ $sound == none ]] || grep -q "^launch 1 sound $sound\$" <<<"$output" || { echo "$build did not start the $sound sound" >&2; exit 1; }
       grep -E ' (timed|boot) ' <<<"$output" | sed "s|^|$build |" | tee -a "$lines"
     else
-      output=$(dotnet "$build/Dbhq.Machines.BbcMicro.SpeedNative.dll" 12 2000000 "$screen" "$page")
+      output=$(dotnet "$build/Dbhq.Machines.BbcMicro.SpeedNative.dll" 12 2000000 "$screen" "$page" "$sound")
       grep -q '^prompt yes' <<<"$output" || { echo "no prompt from $build" >&2; echo "$output" >&2; exit 1; }
       [[ $page == boot ]] || grep -q "^screen $page\$" <<<"$output" || { echo "$build did not fill the $page page" >&2; exit 1; }
+      [[ $sound == none ]] || grep -q "^sound $sound\$" <<<"$output" || { echo "$build did not start the $sound sound" >&2; exit 1; }
       grep '^boot ' <<<"$output" | sed "s|^|$build |" | tee -a "$lines"
       grep '^timed ' <<<"$output" | tail -n 10 | sed "s|^|$build |" | tee -a "$lines"
     fi
