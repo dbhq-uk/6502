@@ -192,3 +192,41 @@ def test_refine_moves_a_mark_to_the_pad_only_within_the_limit():
     assert abs(x - 100) < 0.3 and abs(y - 100) < 0.3
     assert abs(moved - 5 / 15.7) < 0.03
     assert common.refine_to_pad(img, 112.0, 100.0, 15.7) is None      # 12 px is 0.76 mm, over 0.6
+
+
+# --- the KiCad keyboard ---------------------------------------------------------
+
+KICAD = '''(kicad_pcb (version 20211014) (generator pcbnew)
+  (footprint "Switch_Keyboard_Cherry_MX:SW_Cherry_MX_PCB_1.00u" (layer "F.Cu")
+    (at 100 50 90)
+    (fp_text reference "SW1" (at 0 0) (layer "F.SilkS"))
+    (fp_text value "Q" (at 0 0) (layer "F.Fab"))
+    (pad "" np_thru_hole circle (at 2 0) (size 4 4) (drill 4) (layers *.Cu *.Mask))
+    (pad "" np_thru_hole circle (at 7.08 0) (size 1.75 1.75) (drill 1.75) (layers *.Cu *.Mask))
+    (pad "1" thru_hole circle (at -3.81 -2.54) (size 2.5 2.5) (drill 1.5) (layers *.Cu *.Mask))
+  )
+  (footprint "Switch_Keyboard_Cherry_MX:SW_Cherry_MX_PCB_1.50u" (layer "F.Cu")
+    (at 20 30 180)
+    (property "Reference" "SW2")
+    (property "Value" "tab")
+    (pad "" np_thru_hole circle (at 1 3) (size 4 4) (drill 4) (layers *.Cu *.Mask))
+  )
+  (footprint "Diode_THT:D_DO-34" (layer "F.Cu") (at 0 0)
+    (fp_text reference "D1" (at 0 0) (layer "F.SilkS"))
+  )
+)
+'''
+
+
+def test_switch_centres_reads_the_hole_through_the_footprints_rotation(tmp_path):
+    # KiCad turns a footprint anticlockwise as seen on screen, with y down: at
+    # 90 degrees a hole 2 mm to the right of the origin ends up 2 mm above it,
+    # and at 180 degrees (1, 3) ends up at (-1, -3). Task 8 reads every key this way.
+    path = tmp_path / 'k.kicad_pcb'
+    path.write_text(KICAD)
+    k = common.switch_centres(path)
+    assert set(k) == {'SW1', 'SW2'}                      # the diode is not a switch
+    assert k['SW1']['value'] == 'Q' and k['SW2']['value'] == 'tab'
+    assert np.allclose(k['SW1']['centre'], (100.0, 48.0))
+    assert np.allclose(k['SW2']['centre'], (19.0, 27.0))
+    assert k['SW2']['footprint'] == 'SW_Cherry_MX_PCB_1.50u'

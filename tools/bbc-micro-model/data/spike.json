@@ -17,6 +17,23 @@
   "model": "homography",
   "n": 50,
   "over3mm": 0,
+  "parallax": {
+   "fPx": 2470.914,
+   "hMm": 535.6402,
+   "jackknife": {
+    "fPxSe": 1670.6614,
+    "hMmSe": 354.8941,
+    "n": 50
+   },
+   "rawWidthSeMm": 0.8475,
+   "what": "Camera from the key fit alone (square pixels, principal point at the centre, f from the right-angle constraint), with a jackknife over the keys; the edge depths are assumed",
+   "widthIfDepthAssumedMm": {
+    "10": 410.9985,
+    "15": 414.7647,
+    "20": 418.5309,
+    "25": 422.2972
+   }
+  },
   "repeatMm": {
    "max": 0.7578,
    "median": 0.5524,
@@ -88,7 +105,7 @@
    ]
   ]
  },
- "revision": "The front edge verdict is kept as measured: it crossed the plan's 2.5 per cent stop. On 4 October 2026 the plan was revised (docs/superpowers/plans/2026-10-04-bbc-micro-models.md, Global Constraints and the Task 0 outcome): the edge is not in the key plane, so its raw width on the key-plane registration is recorded only, and task 8 judges the width after a parallax correction against the same 1.5 and 2.5 per cent.",
+ "revision": "The front edge verdict is kept as measured: it crossed the plan's 2.5 per cent stop. On 4 October 2026 the plan was revised (docs/superpowers/plans/2026-10-04-bbc-micro-models.md, Global Constraints and the Task 0 outcome): the edge is not in the key plane, so its raw width on the key-plane registration is recorded only, and task 8 judges the width after a parallax correction against the same 1.5 and 2.5 per cent, judged on its interval, with h measured independently of the 415 mm. The solder side's verdict is also kept as measured; the same revision made its largest error recorded, not a pass criterion, with an outlier rule fixed in advance.",
  "scale": {
   "footprints": 16,
   "heldOut": {

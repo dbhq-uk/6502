@@ -1,7 +1,7 @@
 ---
 title: "The BBC Micro's models: the inputs, and what they rest on"
 date: 2026-10-04
-summary: "Before any of the BBC Micro's two models is built, a day's spike measures what both rest on: the scale of a flatbed scan of the bare board, how well the solder side lies on the component side, and how well a photograph of the keyboard fits an open keyboard layout. Two of the three hold. The third does not: the case's front edge, measured through the keys, comes out short of Acorn's published width by more than the plan allows, so the plan stops here to be reconsidered."
+summary: "Before any of the BBC Micro's two models is built, a day's spike measures what both rest on: the scale of a flatbed scan of the bare board, how well the solder side lies on the component side, and how well a photograph of the keyboard fits an open keyboard layout. The scale and the keys hold, and the solder side holds except for a few holes. A further check, the case's front edge measured on the plane of the keys, fails, because the edge is not in that plane. The plan was revised the same day so that a later task judges the edge's width after correcting for that."
 order: 28
 ---
 
@@ -222,7 +222,12 @@ between rows. One offset per row explains 32 per cent of the squared error
 left by the fit to every key; the row offsets are at most 0.38 mm (the row
 from TAB to DOWN, across the board). Marking is the larger part: five keys
 marked a second time on crops placed differently land 0.55 mm from their
-first mark at the median, 0.76 at most.
+first mark at the median, 0.76 at most. (Reworded after review, the same
+day.) A difference between two marks carries the noise of both, so one mark's
+noise is about 0.55 / 1.41, or 0.39 mm: the held-out median of 0.395 mm
+equals one mark's noise. The fit is at its floor, so it cannot resolve
+differences between K1 and the keyboard in O1 under about 0.4 mm, and the
+repeat sample is only five keys, so that floor is itself a weak estimate.
 
 **The case's front edge: STOP.** Mapped through the homography fitted to all
 50 keys, the line between O1's two front corners is 403.5 mm long, 2.78 per
@@ -239,10 +244,19 @@ the key tops, and a point below the plane, seen through it, lands closer to
 the point under the camera, so a width there reads short. A rough camera can
 be had from the homography alone (square pixels, the centre of the picture as
 the principal point, the focal length chosen so the plane's two axes come out
-at right angles): about 2470 pixels, from about 540 mm above the keys. From
-there a front edge 15 mm below the key tops reads 403.7 mm. The keyboard
-covers too little of the picture for that camera to be trusted far, so this
-is a likely cause, not a measured one. The Science Museum's 410 mm would
+at right angles). `spike.py` computes it, with a jackknife over the keys (the
+same command as above; the figures are `keys.parallax` in `spike.json`): a
+focal length of 2471 pixels and a height of 536 mm above the key plane, with
+jackknife standard errors of 1671 pixels and 355 mm. From there a front edge
+15 mm below the key plane would read 403.7 mm, or, the other way round, the
+measured 403.5 mm corrected for 15 mm comes to 414.8. **The 15 mm is assumed,
+not measured**, so the figure is consistent with the cause, not confirmed by
+it; and with the camera's height that loose, almost any depth from about 10 to
+25 mm could be made to fit. The reviewer, working independently, got a focal
+length of 2545 pixels and a height of 543 mm, and the same jackknife spread
+(540 plus or minus 343 mm); the small difference comes from fitting the
+homography another way. The keyboard covers too little of the picture for
+that camera to be trusted far, so this is a likely cause, not a measured one. The Science Museum's 410 mm would
 still be 1.6 per cent off. The research's estimate of about 412 mm came from
 the key pitch in pixels, not from a registration, and `models.md` now has a
 note saying so.
@@ -297,8 +311,9 @@ What the review found wrong was the check, not the board or the photograph.
 The case's front edge is not in the plane of the key tops, so a homography
 fitted on that plane cannot give the edge's width; the check judged the wrong
 quantity. The parallax estimate above (403.7 mm predicted for an edge 15 mm
-below the key tops, against 403.5 measured) fits, but it is an inference, so
-the revision asks task 8 to measure the edge's height rather than assume it.
+below the key tops, against 403.5 measured) is consistent with that, but the
+15 mm was assumed, not measured, so it does not confirm it, and the revision
+asks task 8 to measure the edge's depth rather than assume it.
 
 The revision, in the plan's thresholds table and its Task 0 outcome:
 
@@ -329,3 +344,56 @@ The site test that was a to-do now binds to the revised rule: the scale and
 the keys pass, nothing judged is a stop, the solder side's median and 90th
 percentile pass (its full row, the largest error too, is task 3's test), and
 the front edge's raw width is recorded with the verdict it got, not judged.
+
+## The review, and a second revision of the plan
+
+A reviewer reran every figure from the committed code and the inputs and
+reproduced each one, and found the stop honest. Four things in the revision
+above were too loose, and were fixed the same day.
+
+**The corrected front edge could not fail.** The corrected width needs h, the
+camera's height above the key plane, and the revision never said where h
+comes from. From the key fit alone it is 536 mm with a jackknife standard
+error of 355 mm (above), and for an edge 15 mm down the corrected width passes
+for any h from about 340 to 1140 mm: a check that passes whatever the camera
+did is not a check. Now h must come from a measurement independent of the
+415 mm, with its uncertainty, and d from O4 and O5 against the same fitted key
+plane, both recorded before the corrected width is computed. The width's
+interval is judged: pass only if all of it is within 1.5 per cent of 415 mm,
+stop only if all of it is outside 2.5, and anything between is inconclusive,
+which is not a pass and goes back to the plan. If no independent h can be had,
+the check is dropped as not measurable rather than fitted, and the case's size
+rests on the Service Manual, as the design already takes it. Chosen over
+fitting h from the key fit: that is the circle the reviewer found.
+
+**The solder side's largest error had been pushed to task 3 with no rule
+for outliers**, and task 3's data file had an `outliers` field with nothing
+saying how a hole gets into it: an open door to a rule written after seeing
+the residuals. Now the largest error is recorded, not a pass criterion (a few
+scattered ragged pads, 9 of 2092 over 0.6 mm), the median and 90th percentile
+stay the pass, the stops are unchanged, and the outlier rule is fixed before
+task 3 runs and never looks at a residual: a hole may be left out of the
+scoring only if its pad fails a roundness test on either face (an axis ratio
+over 1.25 from the blob's second moments, or an area outside 0.6 to 1.6 times
+that face's median), and the figures are reported with and without it.
+
+**Nothing held the board's x scale to the 0.1 mm level.** All five 40-pin
+footprints lie down the board, so the scale's pass row tests only y. Task 2
+now holds out each row of connector pins from the x fit in turn and judges its
+length the way y is judged (0.10 mm median and 0.25 largest to pass, 0.20 and
+0.50 to stop, scaled to a 48.26 mm row). This check was added after task 0's
+figures had been seen, so it is a stricter check, not a convenient one: the
+connector rows already agree with each other to about 0.3 per cent, and the
+check exists to hold that.
+
+**The summary at the top of this entry was wrong**, and it is on the site's
+home page: it said two of three measures held and the third did not, but the
+front edge is a fourth check, not one of the three, and it said the plan stops
+here, though the plan was revised the same day. It was rewritten.
+
+Smaller fixes: the camera figures now come from `spike.py` with their
+jackknife, where before they came from a calculation in a scratch session; the
+wording on the marking noise and on the 15 mm says what is and is not shown;
+a test now holds the KiCad reader to a turned footprint whose hole is off its
+origin, since task 8 reuses it; and the site test that no original input is
+committed now also hashes everything under `site/public/` and `docs/`.

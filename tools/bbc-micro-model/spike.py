@@ -246,7 +246,64 @@ def keys():
         'rowOffsetsMm': {f'{y:g}': means[y].tolist() for y in rows},
         'rowOffsetsExplain': 1 - within / total,
         'repeatMm': {'n': len(rep), 'median': float(np.median(rep)), 'max': float(max(rep))},
+        'parallax': parallax(src, dst, [m['frontEdge']['left'], m['frontEdge']['right']], width, (common.source('O1')['width'], common.source('O1')['height'])),
     }, r
+
+
+def camera(H, size):
+    """A camera from a plane's homography alone: square pixels, the principal
+    point at the picture's centre, and the focal length f that makes the
+    plane's two axes come out at right angles (closed form). H takes picture
+    pixels to plane millimetres. Returns (f in pixels, the camera's height above
+    the plane in millimetres), or None when no real f exists."""
+    G = np.linalg.inv(np.array(H, float))
+    cx, cy = size[0] / 2, size[1] / 2
+    a = G[0, :2] - cx * G[2, :2]
+    b = G[1, :2] - cy * G[2, :2]
+    z = G[2, :2]
+    f2 = -(a[0] * a[1] + b[0] * b[1]) / (z[0] * z[1])
+    if not f2 > 0:
+        return None
+    f = math.sqrt(f2)
+    K = np.array([[f, 0, cx], [0, f, cy], [0, 0, 1.0]])
+    M = np.linalg.inv(K) @ G
+    lam = 1 / math.sqrt(np.linalg.norm(M[:, 0]) * np.linalg.norm(M[:, 1]))
+    r1, r2, t = M[:, 0] * lam, M[:, 1] * lam, M[:, 2] * lam
+    R = np.c_[r1, r2, np.cross(r1, r2)]
+    return f, float(abs((-R.T @ t)[2]))
+
+
+def parallax(src, dst, corners, width, size):
+    """How far the key fit alone pins the camera, and what a front edge d mm
+    below the key plane would measure if the camera were right: the width
+    scales about the point under the camera by (h + d) / h. The camera's
+    uncertainty, and the raw width's, is a jackknife over the keys (each left
+    out in turn). The depths d are ASSUMED, not measured: this is an estimate
+    of a likely cause, not a correction, and with h this loose it could not be
+    one."""
+    names = list(src)
+    S = np.array([src[n] for n in names], float)
+    D = np.array([dst[n] for n in names], float)
+    f, h = camera(common._fit('homography', S, D)['H'], size)
+    jack, widths = [], []
+    for i in range(len(names)):
+        keep = np.arange(len(names)) != i
+        H = common._fit('homography', S[keep], D[keep])['H']
+        e = common.transform('homography', {'H': H}, corners)
+        widths.append(float(np.hypot(*(e[1] - e[0]))))
+        c = camera(H, size)
+        if c is not None:
+            jack.append(c)
+    def se(v):
+        n = len(v)
+        return float(math.sqrt((n - 1) / n * ((np.array(v) - np.mean(v)) ** 2).sum()))
+    return {
+        'what': 'Camera from the key fit alone (square pixels, principal point at the centre, f from the right-angle constraint), with a jackknife over the keys; the edge depths are assumed',
+        'fPx': f, 'hMm': h,
+        'jackknife': {'n': len(jack), 'fPxSe': se([c[0] for c in jack]), 'hMmSe': se([c[1] for c in jack])},
+        'widthIfDepthAssumedMm': {f'{d}': width * (h + d) / h for d in (10, 15, 20, 25)},
+        'rawWidthSeMm': se(widths),
+    }
 
 
 # --- judging -----------------------------------------------------------------------
@@ -312,7 +369,9 @@ def main():
     s['revision'] = ('The front edge verdict is kept as measured: it crossed the plan\'s 2.5 per cent stop. On 4 October 2026 the plan '
                      'was revised (docs/superpowers/plans/2026-10-04-bbc-micro-models.md, Global Constraints and the Task 0 outcome): the edge '
                      'is not in the key plane, so its raw width on the key-plane registration is recorded only, and task 8 judges the width '
-                     'after a parallax correction against the same 1.5 and 2.5 per cent.')
+                     'after a parallax correction against the same 1.5 and 2.5 per cent, judged on its interval, with h measured independently of the 415 mm. '
+                     'The solder side\'s verdict is also kept as measured; the same revision made its largest error recorded, not a pass criterion, '
+                     'with an outlier rule fixed in advance.')
     s['about'] = 'Task 0 of the BBC Micro models plan: the scan scale, the solder side registration and the keys, each on data held out of its fit. Written by spike.py; every figure here is a measurement made on the date of the journal entry that quotes it.'
     common.write_data('spike.json', s)
     overlays(i1, i2m, s, solder_data)

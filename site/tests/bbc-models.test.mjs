@@ -57,7 +57,9 @@ test('the inputs\' hashes are the ones the research recorded in models.md', () =
   }
 });
 
-test('no original input is committed, under tools/ or site/src/assets/', () => {
+// Hashes every file under tools/, site/src/assets/, site/public/ and docs/ (a few
+// tens of megabytes): an original copied anywhere a page or a tool could ship it fails.
+test('no original input is committed, under tools/, site/src/assets/, site/public/ or docs/', () => {
   const originals = new Map(sources.map((s) => [s.sha256, s.id]));
   const skip = new Set(['node_modules', 'bin', 'obj', '__pycache__', '.pytest_cache']);
   let hashed = 0;
@@ -75,6 +77,8 @@ test('no original input is committed, under tools/ or site/src/assets/', () => {
   };
   walk(path.join(REPO_ROOT, 'tools'));
   walk(path.join(process.cwd(), 'src', 'assets'));
+  walk(path.join(process.cwd(), 'public'));
+  walk(path.join(REPO_ROOT, 'docs'));
   assert.ok(hashed > 20, `only ${hashed} files hashed: the walk is looking in the wrong place`);
 });
 
@@ -110,7 +114,9 @@ test('spike.json records the verdicts its figures give against the plan\'s thres
 // recorded as measured. The plan was revised the same day, not the threshold:
 // the edge is not in the key plane, so its raw width is recorded only, and task 8
 // judges the width after a parallax correction against the same 1.5 and 2.5 per
-// cent. The solder side's full row (its largest error too) is task 3's test.
+// cent, judged on its interval with the camera's height measured independently
+// of the 415 mm. The same revision made the solder side's largest error recorded,
+// not a pass criterion, with an outlier rule fixed in advance (task 3).
 test('spike.json passes the plan\'s rows as revised on 4 October 2026, and records the front edge raw', () => {
   const [scale, ratio, solder, keys, edge] = verdicts(spike);
   assert.equal(scale, 'pass', 'the scale, 40-pin rows held out');
@@ -126,7 +132,10 @@ test('spike.json passes the plan\'s rows as revised on 4 October 2026, and recor
   assert.match(spike.revision, /2026-10-04-bbc-micro-models\.md/);
   const plan = fs.readFileSync(path.join(REPO_ROOT, 'docs', 'superpowers', 'plans', '2026-10-04-bbc-micro-models.md'), 'utf8');
   assert.match(plan, /O1's case front edge, raw, on the key-plane registration \(task 0\) \| recorded, not a stop/);
-  assert.match(plan, /after correcting for parallax[^\n]*\| within 1\.5 per cent of 415 mm \| outside 2\.5 per cent of 415 mm \|/);
+  assert.match(plan, /after correcting for parallax[^\n]*independent of the 415 mm[^\n]*\| the whole interval within 1\.5 per cent of 415 mm \| the whole interval outside 2\.5 per cent of 415 mm\. Otherwise inconclusive, which counts as not passed/);
+  assert.match(plan, /the max is recorded, not a pass criterion/);
+  // The key fit alone cannot give the camera's height: its jackknife error is recorded, and is large.
+  assert.ok(spike.keys.parallax.jackknife.hMmSe > 0.25 * spike.keys.parallax.hMm);
 });
 
 test('the build and the tests never run the BBC model tools', () => {
