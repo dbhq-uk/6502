@@ -1,8 +1,9 @@
 # Notices
 
-This repository is MIT (see `LICENSE`). One thing in it was taken from outside
-under different terms, and is recorded here. The system ROMs are recorded
-separately, in [`roms/README.md`](roms/README.md).
+This repository is MIT (see `LICENSE`). Two things in it were taken from
+outside under different terms, and are recorded here: the teletext glyph table,
+and the BBC Micro's preset discs. The system ROMs are recorded separately, in
+[`roms/README.md`](roms/README.md).
 
 ## The SAA5050 teletext glyph table, from Bedstead
 
@@ -84,3 +85,31 @@ SHA-256 of the copy read on 3 October 2026:
 `tests/Dbhq.Machines.BbcMicro.Tests/Figure11.cs`, and fails if the table differs
 from it. That transcription is of the same typeface's dots, so the position
 above covers it too. The datasheet itself is not in the repository.
+
+## The BBC Micro's preset discs
+
+**What.** The disc images in [`machines/bbc-micro/discs/`](machines/bbc-micro/discs/),
+which the BBC Micro's page offers as a library, and the files kept beside each
+one. They are homebrew and freely licensed programs by other people: games, a
+puzzle, demos and tools. **They are not under this repository's MIT licence.**
+Each is under its own author's licence, MIT, BSD, GPL, LGPL or the FSF
+all-permissive licence (Altirra BASIC, on the CP/M-65 disc), and is
+redistributed on those terms.
+
+**Where each one's terms are.** Every disc has a folder of its own,
+`machines/bbc-micro/discs/<slug>/`, holding:
+
+- `LICENSE`, the licence text as its author published it, byte for byte, with
+  any third-party licences the disc also needs beside it;
+- `README.md`, with the licence statement verbatim and where it was read, where
+  the image came from (address, the date it was fetched, its SHA-256) and what
+  was changed, which for every image but one is nothing (Blinkenlights was built
+  from its author's source, as its README says);
+- `source/`, for every disc under the GPL or LGPL, the source as its author
+  published it, so the source travels with the program.
+
+[`machines/bbc-micro/discs/manifest.json`](machines/bbc-micro/discs/manifest.json)
+lists them all with their authors, SPDX licence ids and hashes, and the page
+credits each one. Why each was chosen, and the titles that were not, are in
+[`docs/bbc-micro/facts/discs.md`](docs/bbc-micro/facts/discs.md). If an author
+asks for a disc to be removed, it will be.

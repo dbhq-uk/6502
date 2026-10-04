@@ -18,6 +18,7 @@ src/Dbhq.Machines.Kim1.Wasm/  # the KIM-1 as .NET WebAssembly, for its page on t
 src/Dbhq.Machines.BbcMicro/  # the BBC Micro Model B: its chips, keyboard, screen, sound and disc drive, on the core
 src/Dbhq.Machines.BbcMicro.Wasm/  # the BBC Micro as .NET WebAssembly; the ROMs are given to it as bytes
 machines/                   # registry.json, and per machine its "try it" program, which the page shows and the acceptance test runs
+  bbc-micro/discs/          # the BBC Micro page's preset discs: one folder each with its image, licence, README and (if copyleft) source; manifest.json lists them
 site/                       # 6502.dbhq.uk: the Astro site, its tests, and the scripts that build the machines into it
 tests/                      # the tests and the library they share, one project per machine
 bench/                      # the speed benchmarks (native, and the browser speed checks), run locally and never in CI; the .NET ones are in the solution, so CI builds them
@@ -59,7 +60,11 @@ tests download them from a pinned commit, check a recorded hash, and the source 
 **a repository in the `dbhq-uk` organisation**, a fork of the original (Harte's
 SingleStepTests, Dormann's tests, `nestest`, `perfect6502`). A new input is
 committed or forked first, then pinned. `site/tests/mirrors.test.mjs` fails on any
-fetch from another host. Games and commercial software are never committed. This
+fetch from another host. Commercial games and software are never committed. The
+one kind of program that is committed is a preset disc the site bundles under
+rule 4 (Dan, 4 October 2026: "put them in the repo"): it is small, the site serves
+it and the tests boot it, so it lives in `machines/<id>/discs/` with its licence
+and, under the GPL or LGPL, its source beside it. This
 covers data inputs; package registries and GitHub Actions are a separate question,
 pinned and locked as before.
 
@@ -72,6 +77,17 @@ found. The ROM is committed under `roms/` and checked against its hash every tim
 it is read. **Commercial games and application
 software are still not bundled; they are load-your-own.** The site says plainly,
 on each machine's page, whose ROM it runs.
+
+The site bundles homebrew and freely licensed software as preset discs only when
+its author or rights holder has written down that it may be shared. Hosting by
+an archive, "abandonware" and "preserved" are not a basis, and a non-commercial
+licence is not enough, because DBHQ is a company. Each bundled disc is kept in
+`machines/<id>/discs/<slug>/` with the licence text as its author published it, a
+README giving the statement verbatim, where the image came from (address, date,
+SHA-256) and what was changed, and its source when its licence asks for it; the
+manifest there names the licence as an SPDX id, and the machine's page credits
+every disc and links its licence. A disc that does not meet this is dropped, not
+argued for.
 
 **5. No figure is typed by hand.** A pass count, a percentage or a speed that
 describes the project as it stands comes from test output. A number that was
