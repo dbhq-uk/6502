@@ -65,7 +65,10 @@ jobs:
       # is restored rather than compiled again: AOT takes minutes. Each machine
       # has its own cache, keyed on the core, its own two projects and what the
       # build reads, so a change to one machine rebuilds that machine alone. The
-      # workload version is in the keys, so moving the pin rebuilds both.
+      # workload version is in the keys, so moving the pin rebuilds both. The
+      # BBC Micro's build also publishes its preset discs, so its key hashes
+      # machines/bbc-micro/discs/ too: a disc added or changed is never served
+      # from a stale cache.
       - name: Cache the KIM-1's browser build
         id: kim-1
         uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
@@ -77,7 +80,7 @@ jobs:
         uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
         with:
           path: site/public/machines/bbc-micro
-          key: machine-bbc-micro-sdk-10.0.400-wasm-tools-10.0.401-${{ hashFiles('src/Dbhq.Machines.BbcMicro/**', 'src/Dbhq.Machines.BbcMicro.Wasm/**', 'src/Dbhq.Cpu6502/**', 'Directory.Build.props', 'tests/Dbhq.Cpu6502.TestSupport/Pins.cs', 'site/scripts/build-machines.mjs', 'site/src/lib/pins.mjs', 'site/src/lib/machines.mjs') }}
+          key: machine-bbc-micro-sdk-10.0.400-wasm-tools-10.0.401-${{ hashFiles('src/Dbhq.Machines.BbcMicro/**', 'src/Dbhq.Machines.BbcMicro.Wasm/**', 'src/Dbhq.Cpu6502/**', 'Directory.Build.props', 'tests/Dbhq.Cpu6502.TestSupport/Pins.cs', 'site/scripts/build-machines.mjs', 'site/src/lib/pins.mjs', 'site/src/lib/machines.mjs', 'site/src/lib/bbc-discs.mjs', 'machines/bbc-micro/discs/**') }}
       # The machines whose cache missed, by registry id, for the build below.
       - name: Which machines to build
         id: which
@@ -176,23 +179,30 @@ jobs:
           PASS=$(count pass); FAILED=$(count fail)
           echo "pass=${PASS:-unread} fail=${FAILED:-unread}"
           [ "${FAILED:-1}" = "0" ]
-          # 261 tests as at 4 Oct 2026. Adding tests is expected; losing them is
+          # 273 tests as at 4 Oct 2026, with the BBC Micro's preset discs (261
+          # before them, the same day). Adding tests is expected; losing them is
           # the failure this floor catches.
           # Raise the number when the suite grows, here and in the same step of
           # validate.yml, which must hold the same number.
-          [ "${PASS:-0}" -ge 261 ]
+          [ "${PASS:-0}" -ge 273 ]
 
       # The same floor as "Every machine file must be serving" below, checked on
       # the build itself, so a build that is missing a machine fails here and
       # not after it has gone live. The check after the deploy stays: only the
       # edge shows the content types.
+      # The BBC Micro's preset discs are counted from the manifest, not typed:
+      # every one must be in the build, and the floor rises by one for each.
       - name: Both machines must be in the build
         working-directory: site
         run: |
           set -euo pipefail
+          DISCS=$(node -p "require('../machines/bbc-micro/discs/manifest.json').discs.length")
+          BUILT=$(find dist/machines/bbc-micro/discs -type f -name '*.ssd' | wc -l)
+          echo "preset discs: ${DISCS} in the manifest, ${BUILT} in the build"
+          [ "$BUILT" -eq "$DISCS" ] || { echo "the build has ${BUILT} of the ${DISCS} preset discs"; exit 1; }
           COUNT=$(find dist/machines -type f ! -name index.html | wc -l)
           echo "machine files in the build: ${COUNT}"
-          [ "$COUNT" -ge 21 ] || { echo "only $COUNT machine files in the build - a machine is missing"; exit 1; }
+          [ "$COUNT" -ge $((21 + DISCS)) ] || { echo "only $COUNT machine files in the build - a machine is missing"; exit 1; }
 
       - name: Deploy to Cloudflare Pages
         working-directory: site
@@ -313,8 +323,12 @@ jobs:
           # (dotnet.js, dotnet.native's .js and .wasm, dotnet.runtime.js),
           # CoreLib, the core, the machine and its host, which is 21. The KIM-1's
           # 13 alone cannot meet it, so a missing BBC Micro fails here. (It was
-          # 6, set for the KIM-1 alone.)
-          [ "$COUNT" -ge 21 ] || { echo "only $COUNT machine files found - the derivation is broken"; exit 1; }
+          # 6, set for the KIM-1 alone.) Since 4 Oct 2026 the BBC Micro also
+          # publishes its preset discs, one .ssd each, served as plain bytes;
+          # the floor adds one for each disc in the manifest, read here rather
+          # than typed, so a missing disc fails as a missing machine does.
+          DISCS=$(node -p "require('../../machines/bbc-micro/discs/manifest.json').discs.length")
+          [ "$COUNT" -ge $((21 + DISCS)) ] || { echo "only $COUNT machine files found, fewer than 21 and ${DISCS} discs - the derivation is broken"; exit 1; }
           [ "$FAIL" = "0" ]
 
       # Headers only apply at the Cloudflare edge, so they can only be checked

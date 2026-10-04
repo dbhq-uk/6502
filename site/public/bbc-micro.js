@@ -42,6 +42,15 @@
 // downloads the disc as it now stands. The file is read in this tab and never
 // sent anywhere.
 //
+// THE LIBRARY. A list of preset discs, each credited under it (the panel
+// renders one credit a disc and this shows the chosen one; the list works as
+// soon as the page does, so a visitor can read the credits before Start).
+// Once the machine runs, Insert in drive 0 fetches the chosen image from this
+// site, discs/<slug>.ssd beside the machine's files, and puts it in like a
+// file; Insert and run does that and then SHIFT and BREAK, through the host's
+// key queue (BbcHost.ShiftBreak), so the DFS runs the disc's !BOOT. A disc
+// from the library is then a disc like any other: Save disc downloads it.
+//
 // For the site's browser check, once running the panel carries `panel.bbc`:
 // `screenRow(n)` is mode 7 text row n read from screen memory, and `host` is
 // the machine.
@@ -65,6 +74,7 @@ function prepare(panel) {
     status.textContent = text;
     panel.dataset.state = state;
   };
+  library(panel);
   if (!panel.dataset.download) {
     say('This copy of the site was built without the BBC Micro\'s files, so it cannot run here.', 'missing');
     return;
@@ -162,7 +172,7 @@ async function run(panel, say) {
     });
   }
   sound.wire();
-  disc(panel, bbc);
+  disc(panel, bbc, { screen, letGo: keys.letGo });
 
   panel.bbc = { host: bbc, screenRow: (row) => bbc.ScreenRow(row) };
   panel.dispatchEvent(new CustomEvent('bbc:ready'));
@@ -332,7 +342,19 @@ function soundOutput(panel) {
 
 // ---- The disc drive ----
 
-function disc(panel, bbc) {
+// The library's list: the credit under it follows the disc chosen.
+function library(panel) {
+  const list = panel.querySelector('[data-bbc-preset]');
+  if (!list) return;
+  const show = () => {
+    for (const about of panel.querySelectorAll('[data-bbc-preset-disc]')) about.hidden = about.dataset.bbcPresetDisc !== list.value;
+  };
+  list.addEventListener('change', show);
+  list.disabled = false;
+  show();
+}
+
+function disc(panel, bbc, { screen, letGo }) {
   const insert = panel.querySelector('[data-bbc-insert]');
   const file = panel.querySelector('[data-bbc-file]');
   const blank = panel.querySelector('[data-bbc-blank]');
@@ -399,7 +421,37 @@ function disc(panel, bbc) {
     bbc.SetDiscReadOnly(DRIVE, protect.checked);
     if (name !== null) describe(`In drive 0: ${name}${protect.checked ? ', write-protected' : ', writable'}.`);
   });
-  for (const control of [insert, blank, protect]) control.disabled = false;
+  // The library: the chosen disc, fetched from this site when it is inserted.
+  const list = panel.querySelector('[data-bbc-preset]');
+  const run = panel.querySelector('[data-bbc-preset-run]');
+  const only = panel.querySelector('[data-bbc-preset-insert]');
+  const preset = async (andRun) => {
+    // The disc chosen when the button was pressed, even if the list changes while it is fetched.
+    const slug = list.value;
+    const { title, licence } = panel.querySelector(`[data-bbc-preset-disc="${slug}"]`).dataset;
+    run.disabled = only.disabled = true;
+    try {
+      const data = await bytes(`${panel.dataset.base}discs/${slug}.ssd`);
+      const tracks = bbc.InsertDisc(DRIVE, data, false, protect.checked);
+      name = `${slug}.ssd`;
+      const how = andRun ? 'started with SHIFT and BREAK.' : 'type *CAT to list it, or press Insert and run to start it.';
+      describe(`In drive 0: ${title} (${licence}), ${tracks} tracks, single sided${protect.checked ? ', write-protected' : ''}; ${how}`);
+      if (andRun) {
+        letGo();
+        bbc.ShiftBreak();
+        // The disc is for playing: the keyboard goes to the machine.
+        screen.focus({ preventScroll: true });
+      }
+    } catch (error) {
+      describe(`${title} could not be put in: ${error.message}`);
+    } finally {
+      run.disabled = only.disabled = false;
+    }
+  };
+  run.addEventListener('click', () => preset(true));
+  only.addEventListener('click', () => preset(false));
+
+  for (const control of [insert, blank, protect, run, only]) control.disabled = false;
   describe('Drive 0 is empty.');
 }
 

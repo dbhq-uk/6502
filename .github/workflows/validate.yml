@@ -73,7 +73,10 @@ jobs:
       # is restored rather than compiled again: AOT takes minutes. Each machine
       # has its own cache, keyed on the core, its own two projects and what the
       # build reads, so a change to one machine rebuilds that machine alone. The
-      # workload version is in the keys, so moving the pin rebuilds both.
+      # workload version is in the keys, so moving the pin rebuilds both. The
+      # BBC Micro's build also publishes its preset discs, so its key hashes
+      # machines/bbc-micro/discs/ too: a disc added or changed is never served
+      # from a stale cache.
       - name: Cache the KIM-1's browser build
         id: kim-1
         uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
@@ -85,7 +88,7 @@ jobs:
         uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
         with:
           path: site/public/machines/bbc-micro
-          key: machine-bbc-micro-sdk-10.0.400-wasm-tools-10.0.401-${{ hashFiles('src/Dbhq.Machines.BbcMicro/**', 'src/Dbhq.Machines.BbcMicro.Wasm/**', 'src/Dbhq.Cpu6502/**', 'Directory.Build.props', 'tests/Dbhq.Cpu6502.TestSupport/Pins.cs', 'site/scripts/build-machines.mjs', 'site/src/lib/pins.mjs', 'site/src/lib/machines.mjs') }}
+          key: machine-bbc-micro-sdk-10.0.400-wasm-tools-10.0.401-${{ hashFiles('src/Dbhq.Machines.BbcMicro/**', 'src/Dbhq.Machines.BbcMicro.Wasm/**', 'src/Dbhq.Cpu6502/**', 'Directory.Build.props', 'tests/Dbhq.Cpu6502.TestSupport/Pins.cs', 'site/scripts/build-machines.mjs', 'site/src/lib/pins.mjs', 'site/src/lib/machines.mjs', 'site/src/lib/bbc-discs.mjs', 'machines/bbc-micro/discs/**') }}
       # The machines whose cache missed, by registry id, for the build below.
       - name: Which machines to build
         id: which
@@ -162,11 +165,12 @@ jobs:
           PASS=$(count pass); FAILED=$(count fail)
           echo "pass=${PASS:-unread} fail=${FAILED:-unread}"
           [ "${FAILED:-1}" = "0" ]
-          # 261 tests as at 4 Oct 2026. Adding tests is expected; losing them is
+          # 273 tests as at 4 Oct 2026, with the BBC Micro's preset discs (261
+          # before them, the same day). Adding tests is expected; losing them is
           # the failure this floor catches.
           # Raise the number when the suite grows, here and in the same step of
           # deploy-site.yml, which must hold the same number.
-          [ "${PASS:-0}" -ge 261 ]
+          [ "${PASS:-0}" -ge 273 ]
       # The KIM-1 page in a real browser: the built site served on 127.0.0.1
       # with its own CSP, the try-it program clicked in through the page's own
       # keypad, and the digits read back. Then the page's photograph loads, and
@@ -176,8 +180,9 @@ jobs:
       # runner has no GPU). The runner image ships Google Chrome.
       # Then the BBC Micro's page, on the same build: Start downloads it, it boots
       # to BASIC, PRINT 6*7 typed through the page's keys shows 42, the sound
-      # turns on and off, a disc lists with *CAT and saves, and Break restarts
-      # it (scripts/browser-check-bbc.mjs).
+      # turns on and off, a disc lists with *CAT and saves, Break restarts it,
+      # and a preset disc from the library starts with Insert and run while the
+      # visitor's own file still goes in after it (scripts/browser-check-bbc.mjs).
       - name: The KIM-1 and the BBC Micro run in a browser
         working-directory: site
         run: node scripts/browser-check.mjs
