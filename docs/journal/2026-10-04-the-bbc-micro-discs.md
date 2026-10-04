@@ -2,7 +2,7 @@
 title: "A library of discs for the BBC Micro"
 date: 2026-10-04
 summary: "The BBC Micro's page gets a library of homebrew and freely licensed discs, each kept in the repository with its author's licence and, where the licence asks for it, its source. One click puts a disc in and starts it the way the machine does, with SHIFT held through BREAK, and a test starts every one of them that way. A disc of your own still goes in as before."
-order: 29
+order: 30
 ---
 
 # 4 October 2026: a library of discs for the BBC Micro

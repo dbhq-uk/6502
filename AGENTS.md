@@ -6,7 +6,7 @@ Guidance for AI agents (and people) working in this repository.
 
 A cycle-accurate 6502 core in C# on .NET 10, covering the NMOS 6502 and the
 CMOS 65C02, and the machines built on it: the KIM-1 first, then the BBC Micro,
-then the NES. Built in public, with the journey written up at 6502.dbhq.uk.
+then the Acorn Electron, the Atari 2600, the NES and the Commodore 64. Built in public, with the journey written up at 6502.dbhq.uk.
 
 ## Layout
 

@@ -2,8 +2,8 @@
 
 A cycle-accurate 6502 core in C#, covering the original NMOS 6502 and the CMOS
 65C02, and the aim of implementing as many 6502-family machines as possible on
-it, each one proven: the KIM-1 first, then the BBC Micro, then the NES, and
-more.
+it, each one proven: the KIM-1 first, then the BBC Micro, then the Acorn
+Electron, the Atari 2600, the NES and the Commodore 64, and more.
 
 This is built in public. The design, the plan and every step of the work are
 in this repository, and the journey is written up at
@@ -12,8 +12,8 @@ in this repository, and the journey is written up at
 ## Where this is going
 
 As many 6502-family machines as possible, each one running in the browser and
-proven by an automated test. The core comes first, then the KIM-1, the BBC Micro
-and the NES. The design is in
+proven by an automated test. The core comes first, then the KIM-1, the BBC Micro,
+the Acorn Electron, the Atari 2600, the NES and the Commodore 64. The design is in
 [`docs/superpowers/specs/2026-09-29-6502-design.md`](docs/superpowers/specs/2026-09-29-6502-design.md).
 
 ## Where it stands
@@ -31,9 +31,9 @@ with its keyboard, sound and a disc drive, so it counts too. Its page offers a
 library of homebrew and freely licensed discs to start with one click, each
 kept in [`machines/bbc-micro/discs/`](machines/bbc-micro/discs/) with its
 author's licence and, where the licence asks for it, its source; a disc image
-of your own goes in as before. The NES is the
-next of the three. The programme's
-design is in
+of your own goes in as before. The Acorn
+Electron is next, then the Atari 2600, the NES and the Commodore 64, one at a
+time and smallest first. The programme's design is in
 [`docs/superpowers/specs/2026-09-30-machines-and-site-design.md`](docs/superpowers/specs/2026-09-30-machines-and-site-design.md).
 
 ## What "cycle-accurate" means here
