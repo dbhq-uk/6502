@@ -66,7 +66,8 @@ cd tools/bbc-micro-model && /tmp/bbcvenv/bin/python spike.py      # writes data/
 `verify.py` says, for each input, present, missing or hash differs. It exits
 non-zero when a hash differs, or when an input it was asked for by name is
 missing; an input not fetched yet is only reported. `spike.py` exits 3 when a
-figure crosses one of the plan's STOP thresholds. `out/` is git-ignored.
+figure crosses one of the STOP thresholds as task 0 set them (it does: the
+case's front edge, which the plan has since revised; see `data/spike.json`). `out/` is git-ignored.
 
 The versions it was run with, and every figure it printed, are in the journal
 for 4 October 2026.

@@ -309,6 +309,10 @@ def main():
     k, _ = keys()
     s = {'scale': sc, 'solder': so, 'keys': k}
     s['verdicts'] = judge(s)
+    s['revision'] = ('The front edge verdict is kept as measured: it crossed the plan\'s 2.5 per cent stop. On 4 October 2026 the plan '
+                     'was revised (docs/superpowers/plans/2026-10-04-bbc-micro-models.md, Global Constraints and the Task 0 outcome): the edge '
+                     'is not in the key plane, so its raw width on the key-plane registration is recorded only, and task 8 judges the width '
+                     'after a parallax correction against the same 1.5 and 2.5 per cent.')
     s['about'] = 'Task 0 of the BBC Micro models plan: the scan scale, the solder side registration and the keys, each on data held out of its fit. Written by spike.py; every figure here is a measurement made on the date of the journal entry that quotes it.'
     common.write_data('spike.json', s)
     overlays(i1, i2m, s, solder_data)

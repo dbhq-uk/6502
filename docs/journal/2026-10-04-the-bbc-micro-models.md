@@ -288,3 +288,44 @@ column is written as the plan states it and marked as a to-do naming this
 entry, so the suite stays green and reports it; it binds once the plan is
 revised. The test that the recorded verdicts are what the figures give binds
 now.
+
+## The plan revised, later the same day
+
+The stop was real, and it stays recorded as crossed: `spike.json` keeps the
+front edge's verdict as measured, with a `revision` note pointing at the plan.
+What the review found wrong was the check, not the board or the photograph.
+The case's front edge is not in the plane of the key tops, so a homography
+fitted on that plane cannot give the edge's width; the check judged the wrong
+quantity. The parallax estimate above (403.7 mm predicted for an edge 15 mm
+below the key tops, against 403.5 measured) fits, but it is an inference, so
+the revision asks task 8 to measure the edge's height rather than assume it.
+
+The revision, in the plan's thresholds table and its Task 0 outcome:
+
+- O1's raw front edge on the key-plane registration is now recorded, not a
+  stop, with task 0's 403.5 mm and the old stop it crossed written beside it.
+- A new row for task 8: the front edge's width after correcting for parallax,
+  with the edge's height measured from O4 and O5 (or a camera model fitted to
+  the key fit and the edge's measured height), judged against the same
+  numbers: pass within 1.5 per cent of 415 mm, stop outside 2.5.
+- A new recorded row for task 8: the case top's plan size from the published
+  dimensions against O1 registered on the case top's own four corners.
+
+Chosen over **dropping the check**: it is the only independent check of the
+registration's scale out at the case, so without it nothing tests whether the
+keys' fit puts the case the right size. Chosen over **relaxing the number**:
+moving the stop after the measurement crossed it would be tuning, which the
+plan rules out.
+
+Two smaller revisions went in with it. Task 2 now takes the board's x scale
+from pin pitch along rows that run across the board (the connector rows), not
+from DIP row spacing, which task 0 found reads about 1 per cent wide (15.9283
+pixels per millimetre from row spacing, 15.745 to 15.799 from connector pitch);
+the 1.5 per cent stop on x against y stays. And the hygiene check for private
+project names no longer carries the alternatives from the port goal dropped on
+1 October, which matched historic plans and the site test that bans them.
+
+The site test that was a to-do now binds to the revised rule: the scale and
+the keys pass, nothing judged is a stop, the solder side's median and 90th
+percentile pass (its full row, the largest error too, is task 3's test), and
+the front edge's raw width is recorded with the verdict it got, not judged.
