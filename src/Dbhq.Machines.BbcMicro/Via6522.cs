@@ -54,8 +54,8 @@ public class Via6522
     /// IFR2 rises: a read that many cycles after the starting one sees the flag.
     /// </summary>
     /// <remarks>
-    /// <c>via.md</c> section 1.8 measured "about 19" off the WDC datasheet's Figure 2-7 with a
-    /// ruler, and marks it [guessing - verify]: it is a drawing of the CMOS part, not a
+    /// <c>via.md</c> section 1.8 measured "about 19" by counting pixels on the WDC datasheet's
+    /// Figure 2-7 (page 21, rendered at 260 dpi), and marks it [guessing - verify]: it is a drawing of the CMOS part, not a
     /// measurement of the NMOS one. Its only user on the BBC is DFS 1.20, which polls IFR2,
     /// so all it needs is for the flag to appear; the number decides how long it waits.
     /// </remarks>
@@ -230,10 +230,10 @@ public class Via6522
     }
 
     /// <summary>The port A pins, without catching up: for the chip itself and a subclass's cycle.</summary>
-    protected byte PinsA => (byte)((_ora & _ddra) | (_inputA & ~_ddra));
+    private protected byte PinsA => (byte)((_ora & _ddra) | (_inputA & ~_ddra));
 
     /// <summary>The port B pins, without catching up.</summary>
-    protected byte PinsB
+    private protected byte PinsB
     {
         get
         {
@@ -243,14 +243,14 @@ public class Via6522
     }
 
     /// <summary>What the outside drives on port A, set without catching up: for a subclass's cycle.</summary>
-    protected byte InputA
+    private protected byte InputA
     {
         get => _inputA;
         set => _inputA = value;
     }
 
     /// <summary>The level on CA2 as the chip last saw it.</summary>
-    protected bool Ca2Level => _ca2;
+    private protected bool Ca2Level => _ca2;
 
     /// <summary>The interrupt enable register, without catching up.</summary>
     private protected byte Ier => _ier;
@@ -305,7 +305,7 @@ public class Via6522
     /// outside does in the cycle, after calling this. It runs only while
     /// <see cref="NeedsEveryCycle"/> says so; otherwise <see cref="Advance"/> does the same work.
     /// </summary>
-    protected virtual void TickOnce()
+    private protected virtual void TickOnce()
     {
         _justSet = 0;
         _collided = 0;
@@ -845,14 +845,14 @@ public class Via6522
     /// True while a subclass's own part of the cycle cannot be worked out for many cycles at once,
     /// so catching up has to go through <see cref="TickOnce"/> a cycle at a time.
     /// </summary>
-    protected virtual bool NeedsEveryCycle => false;
+    private protected virtual bool NeedsEveryCycle => false;
 
     /// <summary>
     /// Does <paramref name="cycles"/> cycles (one or more) at once: exactly what that many calls
     /// of <see cref="TickOnce"/> would do, with nothing from outside in between. A flag set in the
     /// last of them counts as just set, for the coincident acknowledge.
     /// </summary>
-    protected virtual void Advance(long cycles)
+    private protected virtual void Advance(long cycles)
     {
         _justSet = 0;
         _collided = 0;

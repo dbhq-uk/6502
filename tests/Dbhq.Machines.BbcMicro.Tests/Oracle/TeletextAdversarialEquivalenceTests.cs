@@ -3,30 +3,21 @@ using Xunit;
 namespace Dbhq.Machines.BbcMicro.Tests.Oracle;
 
 /// <summary>
-/// The lazy video ULA, which draws a line at a time from the CRTC's state at the line's end,
-/// against the per-character oracle, which draws every character in its own cycle from the CRTC
-/// ticked every character and the byte fetched from RAM in that cycle. Both buses get the same
-/// random register programs, palette and control writes and latch changes at random cycles, and
-/// random screen memory, and the whole framebuffer must match at the end of each frame.
+/// <see cref="VideoUlaEquivalenceTests"/> leaning on mode 7: the lazy video ULA and its teletext
+/// chip against the per-character oracle, with programs that are mostly mode 7, screen memory
+/// poked mostly at <c>$7C00</c> and <c>$3C00</c> with control codes (<c>$80</c> to <c>$9F</c>),
+/// and control register writes that turn the teletext select and the 2 MHz clock on and off
+/// seven times as often. The whole framebuffer must match at the end of each frame.
 /// </summary>
 /// <remarks>
-/// <para>
-/// Screen memory is changed only after the lazy ULA has been brought up to the cycle (reading the
-/// picture does that), so both read it at the same point. That is the one thing the lazy ULA
-/// knowingly does differently: it
-/// reads a line's bytes when it draws the line, not in each byte's own cycle
+/// Written by task 9's reviewer as a scratch check and kept (task 15) with four of its twelve
+/// seeds, so it runs in seconds. As in <see cref="VideoUlaEquivalenceTests"/>, screen memory is changed only
+/// after the lazy ULA has been brought up to the cycle (reading the picture does that), because
+/// the lazy ULA reads a line's bytes when it draws the line, not in each byte's own cycle
 /// (<c>docs/known-differences.md</c>), and a change made at any other moment would show that.
-/// </para>
-/// <para>
-/// A program is the OS's registers for a mode with a few values changed (the display width, the
-/// skews, the start address so the hardware wrap and the teletext path come up, the cursor), or a
-/// small random one whose frames are a few lines long, so lines and frames end every few hundred
-/// cycles and the rows a short field does not reach are cleared. The frame comparison is made at
-/// most every 4,000 cycles, so the small programs do not compare 320,000 pixels every few hundred
-/// cycles.
-/// </para>
+/// It pins the model, including the choices both share, not the hardware.
 /// </remarks>
-public class VideoUlaEquivalenceTests
+public class TeletextAdversarialEquivalenceTests
 {
     private static readonly byte[][] CrtcSets =
     [
@@ -39,15 +30,19 @@ public class VideoUlaEquivalenceTests
 
     private static readonly byte[] Controls = [0x9C, 0xD8, 0xF4, 0x9C, 0x88, 0xC4, 0x88, 0x4B];
 
-    [Fact]
-    public void TheLazyUlaDrawsWhatThePerCharacterOracleDraws()
+    [Theory]
+    [InlineData(1)]
+    [InlineData(2)]
+    [InlineData(3)]
+    [InlineData(4)]
+    public void TheLazyUlaMatchesTheOracleThroughMode7HeavyPrograms(int seed)
     {
         var bus = new BbcBus(BbcSession.Roms);
         var oracle = new ReferenceBbcBus(BbcSession.Roms);
         bus.PowerOnReset();
         oracle.PowerOnReset();
 
-        var random = new Random(5094);
+        var random = new Random(seed * 7919 + 11);
         long compares = 0, teletextCompares = 0, writes = 0, lastCompare = 0, oracleFrames = 0;
 
         void Write(ushort address, byte value)
@@ -71,8 +66,10 @@ public class VideoUlaEquivalenceTests
             _ = bus.Screen.Frames;
             for (int i = 0; i < count; i++)
             {
-                ushort address = (ushort)random.Next(0x3000, 0x8000);
-                byte value = (byte)random.Next(256);
+                ushort address = random.Next(2) == 0
+                    ? (ushort)((random.Next(2) == 0 ? 0x7C00 : 0x3C00) + random.Next(0x400))
+                    : (ushort)random.Next(0x3000, 0x8000);
+                byte value = random.Next(2) == 0 ? (byte)(0x80 + random.Next(32)) : (byte)random.Next(256);
                 bus.PokeRam(address, value);
                 oracle.PokeRam(address, value);
             }
@@ -105,7 +102,7 @@ public class VideoUlaEquivalenceTests
             oracle.PokeRam((ushort)a, value);
         }
 
-        while (bus.Cycles < 7_000_000)
+        while (bus.Cycles < 5_000_000)
         {
             Program(random, Crtc, Write);
             Poke(random.Next(200));
@@ -129,12 +126,16 @@ public class VideoUlaEquivalenceTests
                     Write(0xFE21, (byte)random.Next(256));
                     Poke(random.Next(3) * random.Next(40));
                 }
-                else if (kind < 5)
+                else if (kind < 12)
                 {
-                    Write(0xFE20, random.Next(3) == 0 ? (byte)random.Next(256) : (byte)(Controls[random.Next(8)] ^ random.Next(2)));
+                    // Mode 7's control byte with the teletext select, the clock and the shape flipped at random.
+                    byte control = random.Next(3) == 0
+                        ? (byte)random.Next(256)
+                        : (byte)(0x4B ^ (random.Next(2) << 1) ^ (random.Next(2) << 4) ^ (random.Next(8) << 5));
+                    Write(0xFE20, control);
                     Poke(random.Next(3) * random.Next(40));
                 }
-                else if (kind < 7)
+                else if (kind < 14)
                 {
                     int register = new[] { 1, 8, 10, 11, 12, 13, 14, 15, 0, 9, 2, 3 }[random.Next(random.Next(4) == 0 ? 12 : 8)];
                     byte value = register switch
@@ -149,13 +150,13 @@ public class VideoUlaEquivalenceTests
                     Crtc(register, value);
                     Poke(random.Next(3) * random.Next(40));
                 }
-                else if (kind < 8)
+                else if (kind < 15)
                 {
                     // Latch bit 4 or 5, the screen start adder.
                     Write(0xFE40, (byte)((random.Next(2) << 3) | (4 + random.Next(2))));
                     Poke(random.Next(3) * random.Next(40));
                 }
-                else if (kind == 8 && random.Next(40) == 0)
+                else if (kind == 15 && random.Next(40) == 0)
                 {
                     bus.BreakReset();
                     oracle.BreakReset();
@@ -164,8 +165,8 @@ public class VideoUlaEquivalenceTests
         }
 
         Compare();
-        Assert.True(compares > 300, $"only {compares} frames compared");
-        Assert.True(teletextCompares > 30, $"only {teletextCompares} frames compared in teletext");
+        Assert.True(compares > 100, $"only {compares} frames compared");
+        Assert.True(teletextCompares > 60, $"only {teletextCompares} frames compared in teletext");
         Assert.True(writes > 20_000, $"only {writes} writes");
     }
 
@@ -174,7 +175,7 @@ public class VideoUlaEquivalenceTests
         if (random.Next(4) != 0)
         {
             // An OS mode, changed a little.
-            int mode = random.Next(8);
+            int mode = random.Next(3) == 0 ? random.Next(8) : 7;
             byte[] set = CrtcSets[mode switch { 0 or 1 or 2 => 0, 3 => 1, 4 or 5 => 2, 6 => 3, _ => 4 }];
             write(0xFE20, Controls[mode]);
             int[] latch = mode switch { 0 or 1 or 2 => [0, 1], 3 => [0, 0], 4 or 5 => [1, 1], _ => [1, 0] };

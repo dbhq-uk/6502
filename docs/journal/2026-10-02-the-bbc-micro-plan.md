@@ -48,7 +48,8 @@ Five things in them changed what gets built.
   measured on a real machine for an absent fast device is `$FE`, which keeps
   Econet off. The operating system also tells power-on from BREAK by what the
   system VIA's interrupt enable register holds. Where the sheet has a measured
-  value for something absent, the model returns it and not zero.
+  value for something absent, the model returns that value: `$FE` for an absent
+  fast device and `$00` for an absent slow one, both measured.
 - **The boot screen was derived, not run.** From the ROMs, the mode 7 screen
   should read: a blank row, `BBC Computer 32K`, a blank row, `Acorn DFS`, a
   blank row, `BASIC`, a blank row, then `>`. Nothing has run to check it. Task 5
@@ -142,9 +143,11 @@ fixed at one cycle, four of them failed.
 
 **The empty ROM slot is an assumption.** An empty slot reads the high byte of the
 address. The sheet measured that for an absent fast device, on one machine, not
-for an empty ROM socket (`bus.md` section 6, item 3). The operating system never
-reads an empty slot's body at boot, only the header bytes it tests, so nothing
-here depends on the choice yet.
+for an empty ROM socket (`bus.md` section 6, item 3). At boot the operating
+system reads an empty slot's header to decide whether a ROM is there, and with
+this value the slot fails that test, as an empty socket does on a real machine
+[inferring from the ROM scan in MOS 1.20, not traced], so the boot does not depend
+on the exact value.
 
 **`$FE18-$FE1F` is slow.** No source lists it. It is taken as slow, as one
 emulator treats it according to the sheet, and it only matters when Econet is

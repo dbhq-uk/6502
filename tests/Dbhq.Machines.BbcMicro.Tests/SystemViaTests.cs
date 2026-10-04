@@ -365,7 +365,9 @@ public class SystemViaTests
     public void EachViaIsMirroredInTheUpperHalfOfItsBlock(int register, int mirror)
     {
         var bus = NewBus();
-        bus.Write((ushort)(register + 2), 0xFF); // DDRB, so ORB reads back as written
+        // Two registers on: DDRB for the ORB rows, so ORB reads back as written; IER for the PCR
+        // rows, which the PCR does not depend on.
+        bus.Write((ushort)(register + 2), 0xFF);
         bus.Write((ushort)mirror, 0x5A);
 
         Assert.Equal(0x5A, bus.Read((ushort)register));

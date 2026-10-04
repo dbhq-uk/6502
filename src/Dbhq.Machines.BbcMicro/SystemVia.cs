@@ -13,7 +13,7 @@ namespace Dbhq.Machines.BbcMicro;
 /// strobes the latch on every write to the VIA; here it is strobed on writes to ORB and DDRB,
 /// which the sheet shows is the same while PB0 to PB3 are outputs, as the OS always has them
 /// [inferring, section 2.2]. The latch's /CLR is tied high, so no reset clears it; what it holds
-/// at power on is not known and is taken as 0. PB4 and PB5 are the joystick fire buttons and
+/// at power on is not known and is taken as 0 [guessing - verify]. PB4 and PB5 are the joystick fire buttons and
 /// read 1, not pressed; PB7 reads 1, which tells the OS no speech chip is fitted; PB6 has no OS
 /// dependency and reads 1 [guessing - verify] (sections 1.3, 2.1).
 /// </para>
@@ -120,7 +120,7 @@ public sealed class SystemVia : Via6522
     private protected override void SyncInputs() => VsyncSource?.SyncIfDue();
 
     /// <summary>One 1 MHz cycle: the chip, then the keyboard's counter, PA7 and CA2.</summary>
-    protected override void TickOnce()
+    private protected override void TickOnce()
     {
         base.TickOnce();
 
@@ -142,7 +142,7 @@ public sealed class SystemVia : Via6522
     /// key's column, so the keyboard's part goes a cycle at a time. Otherwise it is worked out at
     /// once (<see cref="Advance"/>).
     /// </summary>
-    protected override bool NeedsEveryCycle => !KeyboardEnabled && _keyboard.AnyKeyInRowsOneToSevenDown;
+    private protected override bool NeedsEveryCycle => !KeyboardEnabled && _keyboard.AnyKeyInRowsOneToSevenDown;
 
     /// <summary>
     /// The chip's cycles, then the keyboard's, at once. Enabled, the keyboard's cycle sets PA0 to
@@ -151,7 +151,7 @@ public sealed class SystemVia : Via6522
     /// autoscan with no key down in rows 1 to 7 the counter moves on one a cycle, PA7 reads 0 and
     /// CA2 is low throughout.
     /// </summary>
-    protected override void Advance(long cycles)
+    private protected override void Advance(long cycles)
     {
         base.Advance(cycles);
         if (KeyboardEnabled)

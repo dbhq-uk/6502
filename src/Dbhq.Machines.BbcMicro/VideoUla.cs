@@ -64,7 +64,8 @@ namespace Dbhq.Machines.BbcMicro;
 /// or at the last write before it, not in each byte's own cycle, so a store to screen memory in
 /// the middle of a line's scan is seen by the whole of the stretch drawn after it. At 1 MHz a
 /// register write in a character's second cycle is applied from the next character, half a
-/// character late, because the pipeline is not known well enough to place it inside one. Logging every store to RAM to do better would cost every write the CPU makes.
+/// character late, because the pipeline is not known well enough to place it inside one.
+/// Logging every store to RAM to do better would cost every write the CPU makes.
 /// The ULA's pipeline, from a byte's fetch to its pixels, is not documented (s6 item 3); the
 /// model has none (<see cref="PipelineDelayCharacters"/>). Both are in
 /// <c>docs/known-differences.md</c>.

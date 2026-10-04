@@ -236,6 +236,143 @@ public class BusEquivalenceTests
     }
 
     /// <summary>
+    /// The bus against the oracle with what the test above leaves out: the outside world changing
+    /// the VIAs' inputs (the user port's pins and CB1, CB2 and CA2, the system VIA's port A and
+    /// CA1), keys, a <see cref="BbcBus.Peek"/> between accesses, power-on resets in the middle of
+    /// a run, and gaps of up to 300,000 cycles with nobody looking. Every access compares the value,
+    /// the cycle count and the IRQ line, and a peek must change nothing either bus shows.
+    /// </summary>
+    /// <remarks>
+    /// Written by task 6b's reviewer as a scratch check, and kept (task 15) with two of its four
+    /// seeds at a fifth of its length so it runs in seconds, with the long gaps five times as likely so as many come up.
+    /// The CPU is attached only for its IRQ line; it never runs.
+    /// </remarks>
+    [Theory]
+    [InlineData(1)]
+    [InlineData(2)]
+    public void TheBusMatchesThePerCycleOracleWithInputsPeeksAndResets(int seed)
+    {
+        var bus = new BbcBus(BbcSession.Roms);
+        var oracle = new ReferenceBbcBus(BbcSession.Roms);
+        var cpu = new Cpu(bus, CpuVariant.Nmos6502);
+        var oracleCpu = new Cpu(oracle, CpuVariant.Nmos6502);
+        bus.Cpu = cpu;
+        oracle.Cpu = oracleCpu;
+        bus.PowerOnReset();
+        oracle.PowerOnReset();
+        BbcKey[] keys = Enum.GetValues<BbcKey>();
+        var random = new Random(seed);
+        long accesses = 0;
+
+        void Same(byte expected, byte actual)
+        {
+            accesses++;
+            if (expected != actual || oracle.Cycles != bus.Cycles || oracleCpu.Irq != cpu.Irq)
+            {
+                Assert.Fail($"access {accesses} at cycle {oracle.Cycles}: value {expected:X2}/{actual:X2}, IRQ {oracleCpu.Irq}/{cpu.Irq}, cycles {oracle.Cycles}/{bus.Cycles}");
+            }
+        }
+
+        for (int step = 0; step < 60_000; step++)
+        {
+            int kind = random.Next(100);
+            ushort via = random.Next(2) == 0 ? (ushort)0xFE40 : (ushort)0xFE60;
+            int register = random.Next(16);
+            if (kind < 30)
+            {
+                ushort address = (ushort)(via + register);
+                Same(oracle.Read(address), bus.Read(address));
+            }
+            else if (kind < 60)
+            {
+                // Small timer values and frequent IER writes, so flags rise and are acknowledged often.
+                byte value = register switch
+                {
+                    5 or 7 or 9 => random.Next(3) == 0 ? (byte)random.Next(256) : (byte)0,
+                    4 or 6 or 8 => (byte)random.Next(random.Next(4) == 0 ? 256 : 12),
+                    0xE => (byte)(random.Next(2) == 0 ? 0xFF : random.Next(256)),
+                    _ => (byte)random.Next(256),
+                };
+                ushort address = (ushort)(via + register);
+                oracle.Write(address, value);
+                bus.Write(address, value);
+                Same(0, 0);
+            }
+            else if (kind < 65)
+            {
+                byte pins = (byte)random.Next(256);
+                oracle.UserVia.PortBInput = pins;
+                bus.UserVia.PortBInput = pins;
+            }
+            else if (kind < 68)
+            {
+                byte pins = (byte)random.Next(256);
+                oracle.SystemVia.PortAInput = pins;
+                bus.SystemVia.PortAInput = pins;
+            }
+            else if (kind < 72)
+            {
+                bool level = random.Next(2) == 0;
+                switch (random.Next(4))
+                {
+                    case 0: oracle.UserVia.SetCb1(level); bus.UserVia.SetCb1(level); break;
+                    case 1: oracle.UserVia.SetCb2(level); bus.UserVia.SetCb2(level); break;
+                    case 2: oracle.UserVia.SetCa2(level); bus.UserVia.SetCa2(level); break;
+                    default: oracle.SystemVia.VsyncInput = level; bus.SystemVia.VsyncInput = level; break;
+                }
+            }
+            else if (kind < 76)
+            {
+                BbcKey key = keys[random.Next(keys.Length)];
+                if (random.Next(2) == 0)
+                {
+                    oracle.Keyboard.Press(key);
+                    bus.Keyboard.Press(key);
+                }
+                else
+                {
+                    oracle.Keyboard.Release(key);
+                    bus.Keyboard.Release(key);
+                }
+            }
+            else if (kind < 80)
+            {
+                ushort address = (ushort)(via + random.Next(16));
+                Assert.Equal(oracle.Peek(address), bus.Peek(address));
+                Assert.Equal(oracle.Irq, bus.Irq);
+            }
+            else if (kind == 80 && random.Next(50) == 0)
+            {
+                oracle.PowerOnReset();
+                bus.PowerOnReset();
+                Assert.Equal(oracleCpu.Irq, cpu.Irq);
+            }
+            else if (kind == 81 && random.Next(100) == 0)
+            {
+                int gap = random.Next(1, 300_000);
+                for (int i = 0; i < gap; i++)
+                {
+                    Same(oracle.Read(0x0000), bus.Read(0x0000));
+                }
+            }
+
+            // Fast and slow accesses that are not the VIAs', so the stretch's parity varies.
+            int after = random.Next(5);
+            for (int i = 0; i < after; i++)
+            {
+                ushort address = random.Next(6) == 0 ? (ushort)0xFC10 : (ushort)0x1234;
+                Same(oracle.Read(address), bus.Read(address));
+            }
+        }
+
+        for (int r = 0; r < 16; r++)
+        {
+            Assert.Equal(oracle.SystemVia.Peek(r), bus.SystemVia.Peek(r));
+            Assert.Equal(oracle.UserVia.Peek(r), bus.UserVia.Peek(r));
+        }
+    }
+
+    /// <summary>
     /// A write that brings the CRTC's next VSYNC fall forward, made while VSYNC is high and the bus
     /// has already put its next look at the old fall: VSYNC cut to one line (R3), or the CRTC's
     /// clock doubled by the video ULA. With CA1's interrupt enabled, the IRQ must rise in the cycle

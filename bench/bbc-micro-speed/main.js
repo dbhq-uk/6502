@@ -1,6 +1,6 @@
 import { dotnet } from './_framework/dotnet.js'
 
-// The machine is given its three ROMs as bytes: the server (run.mjs) has read each
+// The machine is given its three ROMs as bytes: the server (run-in-browser.mjs) has read each
 // from roms/bbc-micro/ and checked it against its pin in Pins.cs before serving it.
 //
 // ?boot=N   cycles of machine time to run before the prompt is checked (default 6 million, three seconds)

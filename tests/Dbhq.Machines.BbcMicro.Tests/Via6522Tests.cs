@@ -12,7 +12,9 @@ namespace Dbhq.Machines.BbcMicro.Tests;
 /// starts a new cycle (one <see cref="Via6522.Tick"/>) and writes in it; <see cref="Bench.ReadAt"/>
 /// moves on to cycle W+k and reads in it. A read that clears a flag changes what later
 /// reads see, so a test that needs a value at every cycle and also needs the flag
-/// untouched builds a fresh chip for each cycle.
+/// untouched builds a fresh chip for each cycle. Some tests read a second register in the same
+/// cycle as an access (IFR after a T1C-L read, say): that is a look at the chip's state after
+/// the access, not two bus accesses in one cycle, which a CPU cannot make.
 /// </remarks>
 public class Via6522Tests
 {
@@ -172,6 +174,7 @@ public class Via6522Tests
             {
                 rose.Add(k);
                 flags.To(k + 1);
+                Assert.Equal(0x40, flags.Via.Read(Ifr) & 0x40); // still set in the cycle after: nothing clears it but the write
                 flags.Via.Write(Ifr, 0x40);
                 k++;
             }
@@ -307,6 +310,48 @@ public class Via6522Tests
         Assert.Equal(0xC0, bench.Via.Read(Ifr));
 
         bench.Via.Read(T1CL);                      // a read in W+7 clears it
+        Assert.Equal(0x00, bench.Via.Read(Ifr));
+        Assert.False(bench.Via.Irq);
+    }
+
+    // Example 9 is a T1C-L read. The rule (section 1.9; the class remarks) is for any clearing
+    // access in the cycle a clocked flag rises, so the other ways of clearing timer 1's flag, and
+    // timer 2's, are held to it too. The sheet's measurement is for timer 1; for timer 2 this pins
+    // the model's choice, not the chip.
+
+    [Theory]
+    [InlineData("T1C-H write")]
+    [InlineData("IFR write")]
+    public void AnyClearingAccessToTimer1InTheCycleItsFlagRises_DoesNotClearItAndDelaysIrqOneCycle(string access)
+    {
+        var bench = StartTimer1(acr: 0x00, n: 4);
+        bench.To(6);
+        if (access == "T1C-H write")
+        {
+            bench.Via.Write(T1CH, 0x00);
+        }
+        else
+        {
+            bench.Via.Write(Ifr, 0x40);
+        }
+
+        Assert.Equal(0xC0, bench.Via.Read(Ifr));
+        Assert.False(bench.Via.Irq);
+        Assert.True(bench.IrqAt(7));
+        Assert.Equal(0xC0, bench.Via.Read(Ifr));
+    }
+
+    [Fact]
+    public void AT2CLReadInTheCycleTimer2sFlagRises_DoesNotClearItAndDelaysIrqOneCycle()
+    {
+        var bench = StartTimer2(acr: 0x00, n: 4);
+
+        Assert.Equal(0xFF, bench.ReadAt(6, T2CL)); // the read in W+6 that would acknowledge
+        Assert.Equal(0xA0, bench.Via.Read(Ifr));   // the flag is still set
+        Assert.False(bench.Via.Irq);
+
+        Assert.True(bench.IrqAt(7));
+        bench.Via.Read(T2CL);                      // a read in W+7 clears it
         Assert.Equal(0x00, bench.Via.Read(Ifr));
         Assert.False(bench.Via.Irq);
     }

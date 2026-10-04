@@ -96,8 +96,8 @@ on CA2 sets IFR0.
 Only mode 010, shift in under the system clock, is built, because only the DFS
 uses the shift register, and only in that mode. IFR2 rises `ShiftMode2Cycles`
 cycles after the SR access that starts it, and the constant is 19. That number
-was read with a ruler off the WDC datasheet's drawing of the CMOS part, and the
-sheet marks it `[guessing - verify]`.
+was read by counting pixels on the WDC datasheet's drawing of the CMOS part
+(Figure 2-7, rendered at 260 dpi), and the sheet marks it `[guessing - verify]`.
 
 It does not need to be right to the cycle. Disassembling the committed DFS ROM
 at `$963C` today, with the sheet's own throwaway disassembler, shows

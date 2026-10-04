@@ -14,8 +14,9 @@ namespace Dbhq.Machines.BbcMicro.Tests;
 /// <c>$DBF2</c>, and the prompt <c>&gt;</c> from BASIC <c>$8B06</c>.
 /// </para>
 /// <para>
-/// <c>Acorn DFS</c> is on the screen because the 8271 is fitted (task 12). Before it serves any
-/// call the DFS reads the 8271's status at <c>$FE80</c> and does nothing if either of its two
+/// <c>Acorn DFS</c> is on the screen because the 8271 is fitted (task 12). While bit 7 of the
+/// start-up options at <c>$028F</c> is set, as these links leave it (DFS <c>$80F7-$80FD</c>),
+/// before it serves any call the DFS reads the 8271's status at <c>$FE80</c> and does nothing if either of its two
 /// low bits is set (DFS <c>$B495-$B49A</c>). Until task 12 no 8271 was fitted, <c>$FE80</c> read
 /// as an absent fast device, <c>$FE</c>, and the DFS stayed silent, as a real Model B with the
 /// ROM and no controller would; an idle 8271 reads <c>$00</c> there. The drive is empty in these
@@ -53,6 +54,50 @@ public class BootTests(BootedModes booted) : IClassFixture<BootedModes>
         Assert.Equal(BootScreen.BannerAfterBreak, s.ScreenRowAsMemory(1).TrimEnd());
         Assert.Equal(BootScreen.Language, s.ScreenRowAsMemory(BootScreen.LanguageRow).TrimEnd());
         Assert.Equal(BootScreen.Prompt, s.ScreenRowAsMemory(BootScreen.PromptRow).TrimEnd());
+    }
+
+    [Fact]
+    public void ColdBootLeavesTheOsRecordsOfAWorkingMachine()
+    {
+        // What task 5's scratch tracer saw, pinned. $028D, the last reset type, is 1, a power on:
+        // the system VIA's IER read $80 at OS $D9D7. $028E, the top of RAM, is $80, so the banner
+        // says 32K. $0277 keeps its default of $FF: the user VIA passed the OS's PCR check at
+        // $DA94-$DA9F, which would have incremented it. Bit 7 of the start-up options at $028F is
+        // set (the links inverted, via.md "Startup options links"), which is what sends every
+        // service call to the DFS half of DFS,NET first (DFS $80F7-$80FD).
+        var s = new BbcSession(mode: 7).Boot();
+        BbcBus bus = s.Machine.Bus;
+
+        Assert.Equal(1, bus.Peek(0x028D));
+        Assert.Equal(0x80, bus.Peek(0x028E));
+        Assert.Equal(0xFF, bus.Peek(0x0277));
+        Assert.Equal(0x80, bus.Peek(0x028F) & 0x80);
+    }
+
+    [Fact]
+    public void TheOsClockCountsAHundredTicksASecond()
+    {
+        // Timer 1 of the system VIA interrupts every 10 ms, and each tick adds one to the OS's
+        // clock (OS $DDD1-$DDEA): two five-byte copies at $0292 and $0297, most significant byte
+        // first, the current one chosen by $0283 (5 or 10), so it ends at $0291 + $0283. A second
+        // of machine time is a hundred ticks.
+        var s = new BbcSession(mode: 7).Boot();
+        long before = Clock(s.Machine.Bus);
+        s.Machine.Run(2_000_000);
+        long after = Clock(s.Machine.Bus);
+
+        Assert.Equal(100, after - before);
+
+        static long Clock(BbcBus bus)
+        {
+            int last = 0x0291 + bus.Peek(0x0283);
+            long time = 0;
+            for (int address = last - 4; address <= last; address++)
+            {
+                time = (time << 8) | bus.Peek((ushort)address);
+            }
+            return time;
+        }
     }
 
     [Fact]

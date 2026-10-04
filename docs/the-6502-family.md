@@ -243,7 +243,7 @@ new machines around it.
 
 ## What this means for this project
 
-- The three machines planned, the KIM-1, the BBC Micro Model B and the NES,
+- The three machines in the plan, the KIM-1, the BBC Micro Model B and the NES,
   all use a CPU the core implements, the NES with decimal mode removed. Which
   are built is tracked in `machines/registry.json`.
 - Nearly every 6502 machine from 1976 to 1985 uses one too.

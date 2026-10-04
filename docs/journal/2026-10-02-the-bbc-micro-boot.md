@@ -79,8 +79,9 @@ The sheet's screen (`bus.md` section 4b, marked "inferring, not run") had
 `BASIC` on row 3 and `>` on row 5, with nothing from the DFS.
 
 The rows were not pasted in as the new expectation. The trace found the reason
-in the DFS ROM: the paged ROM is `DFS,NET`, and every service call goes first to
-the DFS half at `$B494`, which reads the 8271's status at `$FE80`, does
+in the DFS ROM: the paged ROM is `DFS,NET`, and while bit 7 of the start-up
+options at `$028F` is set, as this machine's links leave it, every service call
+goes first to the DFS half at `$B494` (the test is at DFS `$80F7-$80FD`), which reads the 8271's status at `$FE80`, does
 `AND #$03`, and returns at once if the answer is not zero. The 8271 is not
 modelled until task 12, so `$FE80` reads as an absent fast device does, `$FE`,
 whose low two bits are `10`. The DFS takes the controller as missing and serves

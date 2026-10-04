@@ -9,7 +9,7 @@ namespace Dbhq.Machines.BbcMicro;
 /// A real Model B with nothing attached reads <c>?&amp;FE60</c> = 255, so the port inputs are
 /// all 1 (section 1.2). CA1, the printer's ACK, is pulled up to +5 V through 4k7, so it idles
 /// high and the OS's PCR of <c>$0E</c> (a negative edge) never sees an edge. CB1 and CB2 are on
-/// the user port and taken to idle high like the port's other inputs [inferring]. CA2 is the
+/// the user port and taken to idle high like the port's other inputs [guessing - verify]. CA2 is the
 /// printer strobe, an output the OS drives through the PCR. BREAK resets this chip (section
 /// 1.2); <see cref="BbcBus"/> does the choosing.
 /// </remarks>

@@ -123,7 +123,8 @@ public static partial class BbcHost
             int read = Machine.Sound.Read(BenchSamples);
 
             // The OS can write the chip at any time; the load's figure means nothing if it fell silent.
-            if (_tone && !BenchSamples.AsSpan(0, read).ContainsAnyExcept(0f))
+            // A last short run can end before the chip's next sample, and no samples is not silence.
+            if (_tone && read > 0 && !BenchSamples.AsSpan(0, read).ContainsAnyExcept(0f))
             {
                 throw new InvalidOperationException("the tone load went silent");
             }

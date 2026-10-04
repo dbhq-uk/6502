@@ -138,9 +138,9 @@ seen.
 **What.** `Via6522` models one of the shift register's eight modes: 010, shift
 in under the system clock, because it is the only one the BBC's ROMs use (the
 DFS, `via.md` section 1.8). In that mode IFR2 rises `ShiftMode2Cycles` (19)
-cycles after the SR read or write that starts it. That number was measured
-with a ruler off the WDC datasheet's drawing of the CMOS part, and the sheet
-marks it `[guessing - verify]`. The eight bits are all taken from CB2 when the
+cycles after the SR read or write that starts it. That number was measured by
+counting pixels on the WDC datasheet's drawing of the CMOS part (Figure 2-7,
+rendered at 260 dpi), and the sheet marks it `[guessing - verify]`. The eight bits are all taken from CB2 when the
 flag rises, not one per shift pulse, and CB1 puts out no shift clock.
 
 **The other modes** (000, 001, 011, 100, 101, 110 and 111) are not modelled:

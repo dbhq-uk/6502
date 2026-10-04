@@ -33,7 +33,9 @@ the real OS compared side by side with the old code.
   instruction's cycle count, registers and IRQ line, and at every 100,000 cycles
   all of RAM and every VIA register, pin and line, through a script that types a
   BASIC program driving the user VIA's timers, shift register, pulse counting and
-  handshakes, runs it, presses BREAK and runs it again; and `--profile`.
+  handshakes, runs it, presses BREAK and types `RUN` again (which, after a soft
+  BREAK, finds no program: BASIC needs `OLD` first, so the last part covers the
+  BREAK and the restart rather than a second run); and `--profile`.
 - **Browser:** the task 6 page and script, unchanged. Each build was published
   once, and builds were compared by alternating single browser launches, five
   timed runs each, so drift in the machine's load falls on both.
@@ -231,7 +233,21 @@ every latch write, which makes a latch write cost a 16 KB copy, and over
 `Unsafe` reads to drop the bounds checks, which the code has never used.
 
 It made no difference natively, where the JIT had already done the work, and
-about 12 per cent in the browser, which is why the brief says to measure there.
+7 to 12 per cent in the browser in the two sets of the table below, which is why
+the brief says to measure there.
+
+The fingerprint was the same before the first round and after the second. The
+task's reviewer ran `dotnet run -c Release --project bench/bbc-micro-speed/native -- --fingerprint`
+on exported copies of `54a6630` and `85ce6c5` (3 October 2026, 08:44 UTC), and
+the two outputs were byte for byte the same. Its four state lines, the screen
+lines left out:
+
+```
+boot cycles=6000009 instructions=1680041 irq_steps=15799 steps=9D9B0B1D252B5BAD checkpoints=722A5F7579A5AC93
+program cycles=90320890 instructions=25125043 irq_steps=187424 steps=71D0FD33D8715431 checkpoints=B56E4359BF5FF22C
+break cycles=96320897 instructions=26786712 irq_steps=202855 steps=603B2208CCB04289 checkpoints=77873BEF7FF689F0
+rerun cycles=116960902 instructions=32501876 irq_steps=241772 steps=8A782065C0CE2E84 checkpoints=B1EC3D44F89C550F
+```
 
 ### Each change, measured
 

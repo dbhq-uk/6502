@@ -117,7 +117,9 @@ internal static class Fingerprint
     private const ulong Prime = 0x100000001B3;
 
     // Exercises the timers, the IFR, the shift register's mode, the sound chip's latch and the
-    // keyboard: a BASIC program typed in, run, then a BREAK and another run.
+    // keyboard: a BASIC program typed in and run, then a BREAK and RUN typed again. A soft BREAK
+    // leaves BASIC with no program (OLD would bring it back), so that RUN finds nothing to run;
+    // what it covers is the BREAK, the OS's restart and BASIC's answer to RUN.
     private static readonly string[] Lines =
     [
         "10 FOR I=1 TO 60",
@@ -442,7 +444,8 @@ internal static class SoundLoad
             int read = machine.Sound.Read(Samples);
 
             // The OS can write the chip at any time; the load's figure means nothing if it fell silent.
-            if (tone && !Samples.AsSpan(0, read).ContainsAnyExcept(0f))
+            // A last short run can end before the chip's next sample, and no samples is not silence.
+            if (tone && read > 0 && !Samples.AsSpan(0, read).ContainsAnyExcept(0f))
             {
                 throw new InvalidOperationException("the tone load went silent");
             }

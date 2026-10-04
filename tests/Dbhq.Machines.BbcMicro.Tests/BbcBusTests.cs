@@ -434,10 +434,12 @@ public class BbcBusTests
         // even, so each write then costs 2 (bus.md section 2b).
         var bus = NewTimedBus();
         AlignTo(bus, 1);
+        long start = bus.Cycles;
 
         Assert.Equal(3, Cost(bus, () => bus.Read(0xFE48)));
         Assert.Equal(2, Cost(bus, () => bus.Write(0xFE48, 0x00)));
         Assert.Equal(2, Cost(bus, () => bus.Write(0xFE48, 0x00)));
+        Assert.Equal(7, bus.Cycles - start);
     }
 
     [Fact]

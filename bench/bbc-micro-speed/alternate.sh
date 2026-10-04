@@ -7,10 +7,10 @@
 #       one headless Chrome launch of five timed runs per build, in turn (run-in-browser.mjs)
 #   ./alternate.sh native <launches> <native-build-folder>...
 #       one launch of twelve timed runs per build, in turn, keeping the last ten
+#       (a folder holding a build of native/, Dbhq.Machines.BbcMicro.SpeedNative.dll)
 #
 # Each launch also times its boot, power on to the prompt (6 million cycles), and the summary
 # gives each build's median boot time beside its median speed.
-#       (a folder holding a build of native/, Dbhq.Machines.BbcMicro.SpeedNative.dll)
 #
 # Run from this folder. Folders are relative to it; a native build must sit inside the
 # repository, because the bench finds the ROMs by looking for 6502.slnx above itself.
