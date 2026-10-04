@@ -13,6 +13,13 @@
       "acceptance": "Kim1AcceptanceTests",
       "rights": "The monitor ROM is MOS Technology's, copyright 1975, and MOS was bought by Commodore in 1976; who holds it now was not established, and no licence or permission from any holder was found. Our copy is Hans Otten's dump of real 6530-002 and 6530-003 chips, kept in this repository under roms/, with where it came from, and checked by SHA-256 each time it is read.",
       "notes": "The keypad, the six LED digits, the RS and ST keys, the SST switch and both 6530s, with the original monitor ROM. Not modelled: the teletype interface, the cassette interface and the expansion bus.",
+      "case": false,
+      "models": [
+        {
+          "view": "board",
+          "module": "kim-1"
+        }
+      ],
       "photos": [
         {
           "file": "kim-1.webp",

@@ -1,22 +1,31 @@
-// Every machine that has a 3D model, by machine id. This map is the one place to
-// add the next one.
+// Every 3D model, by module: the model's id, which is its machine's id or
+// starts with it and a hyphen (the KIM-1's board is `kim-1`). The registry says
+// which models a machine has (`models` in machines/registry.json, a list of
+// { view, module }); this map says what each one is, and the two must agree both
+// ways (tests/model.test.mjs). A machine has at most one model per view:
+// `board` for a machine with no case, `outside` and `inside` for one with a case.
 //
-// To add a machine's model (the BBC Micro is next):
-//   1. Write src/models/<id>.js, a browser module that exports
+// To add a model (the BBC Micro's two are next):
+//   1. Write src/models/<module>.js, a browser module that exports
 //      `mount(root)`. It builds the scene with createStage() from ./stage.mjs,
 //      which every model shares (renderer, camera controls and their keyboard,
 //      mouse and touch handling, the reset button, the lazy render loop), and
 //      draws the machine itself. The
 //      board or case is that machine's own code: do not generalise it.
-//   2. Add an entry here, with the text alternative the page shows beside it,
-//      and, if it was measured, `made`: a function of its measurements
-//      (src/data/<id>-model.json) giving the note on how it was made.
-//   3. scripts/build-models.mjs bundles every entry into public/models/<id>.js,
-//      and the machine page (src/pages/machines/[id].astro) shows the model
-//      section for any machine in this map. public/model-loader.js loads the
-//      bundle only when that section nears the screen, or on a button press.
+//   2. Add an entry here, naming its `machine` and its `view`, with the text
+//      alternative the page shows beside it and, if it was measured, `made`: a
+//      function of its measurements (src/data/<module>-model.json, which every
+//      claimed model must have) giving the note on how it was made.
+//   3. Claim it in the machine's registry entry. src/lib/registry.mjs refuses a
+//      claimed model whose module or results file is missing, and a machine
+//      with a case that claims one of its two models without the other.
+//   4. scripts/build-models.mjs bundles every entry into
+//      public/models/<module>.js, and the machine page
+//      (src/pages/machines/[id].astro) shows the model section for any machine
+//      that claims a model. public/model-loader.js loads the bundle only when
+//      that section nears the screen, or on a button press.
 //
-// A machine with no entry here gets no model section. Its photograph is a
+// A machine that claims no model gets no model section. Its photograph is a
 // different matter: that is required of every running machine, in the registry.
 import { describe as describeKim1, TRACKS as KIM1_TRACKS } from './kim-1-layout.mjs';
 import { made as madeKim1 } from './kim-1-notes.mjs';
@@ -47,6 +56,9 @@ export const CONTROLS_DESCRIPTION = `${CONTROLS.keys} The wheel zooms only while
 
 export const MODELS = {
   'kim-1': {
+    /** The machine whose model this is, and which of its views: the registry's claim, word for word. */
+    machine: 'kim-1',
+    view: 'board',
     /** The model section's accessible name. */
     label: '3D model of the KIM-1 board. Click a key on the model to press it.',
     /** The text alternative, shown as the caption and read as the description. */
@@ -59,4 +71,7 @@ export const MODELS = {
 };
 
 /** Where a model's bundle is served from. */
-export const modelSrc = (id) => `/models/${id}.js`;
+export const modelSrc = (module) => `/models/${module}.js`;
+
+/** The models a machine claims in the registry, in the order its page offers them: none when it claims none. */
+export const modelsOf = (machine) => machine.models ?? [];

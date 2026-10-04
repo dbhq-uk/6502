@@ -5,7 +5,7 @@ import BbcPanel from '../../components/BbcPanel.astro';
 import MachinePhoto from '../../components/MachinePhoto.astro';
 import MachineModel from '../../components/MachineModel.astro';
 import MachinePhotos from '../../components/MachinePhotos.astro';
-import { MODELS } from '../../models/models.mjs';
+import { modelsOf } from '../../models/models.mjs';
 import { registry, results } from '../../lib/data.mjs';
 import { fmt } from '../../lib/figures.mjs';
 import { acceptanceSummary, loadTryIt, parseKeys, runningMachines } from '../../lib/machines.mjs';
@@ -23,11 +23,18 @@ const { machine } = Astro.props;
 const Panel = { 'kim-1': Kim1Panel, 'bbc-micro': BbcPanel }[machine.id];
 if (!Panel) throw new Error(`machine ${machine.id} is running but has no panel in src/pages/machines/[id].astro, so its page could not run it`);
 // The photograph is required of every running machine (the registry check
-// stops the build without one). The 3D model is shown for a machine in
-// src/models/models.mjs, which says how to add the next; its loader is tiny,
-// and the model itself is loaded only when the visitor gets near it.
-const hasModel = machine.id in MODELS;
-const scripts = [...({ 'kim-1': ['/kim-1.js'], 'bbc-micro': ['/bbc-micro.js'] }[machine.id] ?? []), ...(hasModel ? ['/model-loader.js'] : [])];
+// stops the build without one). The 3D model is shown for a machine that claims
+// one in the registry (`models`, read through modelsOf); the registry check has
+// already refused a claimed model that is not built, and src/models/models.mjs
+// says how to add the next. Its loader is tiny, and the model itself is loaded
+// only when the visitor gets near it.
+const models = modelsOf(machine);
+const hasModels = models.length > 0;
+// One model is one section. A machine with a case offers two as tabs, and those
+// come with the outside model (plan task 9): until then a page with two would
+// show one and drop the other without saying so, so the build stops instead.
+if (models.length > 1) throw new Error(`machine ${machine.id} claims ${models.length} models, and the page offers one until the two views land as tabs`);
+const scripts = [...({ 'kim-1': ['/kim-1.js'], 'bbc-micro': ['/bbc-micro.js'] }[machine.id] ?? []), ...(hasModels ? ['/model-loader.js'] : [])];
 const base = `/machines/${machine.id}/`;
 const clockMhz = Number(/([\d.]+) MHz/.exec(machine.cpu ?? '')?.[1]);
 if (!(clockMhz > 0)) throw new Error(`machine ${machine.id}: its cpu field names no clock in MHz, and the page runs it at that clock`);
@@ -140,9 +147,9 @@ const notOnAPc = Object.entries(NOT_ON_A_PC).reduce((groups, [key, why]) => grou
     </section>
   )}
 
-  {hasModel && <MachineModel id={machine.id} photos={machine.photos} drawings={machine.drawings} />}
+  {models.map((m) => <MachineModel module={m.module} photos={machine.photos} drawings={machine.drawings} references={machine.references} />)}
 
-  <MachinePhotos machine={machine} model={hasModel} />
+  <MachinePhotos machine={machine} model={hasModels} />
 
   <section aria-labelledby="rom">
     <div class="wrap narrow">

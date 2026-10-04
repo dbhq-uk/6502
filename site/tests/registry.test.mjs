@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
-import { loadRegistry, validateRegistry, counts, REPO_ROOT, PHOTOS_DIR } from '../src/lib/registry.mjs';
+import { loadRegistry, validateRegistry, modelProblems, referenceProblems, counts, REPO_ROOT, PHOTOS_DIR, VIEWS, MODELS_DIR, DATA_DIR } from '../src/lib/registry.mjs';
 import { parseFamilyDoc } from './family-doc.mjs';
 
 const machine = (over = {}) => ({ id: 'kim-1', name: 'KIM-1', year: 1976, category: 'single-board', cpu: '6502', core: 'nmos', status: 'planned', acceptance: null, ...over });
@@ -145,4 +145,113 @@ test('every photograph in the folder is written up in its README: its author, it
     const sha = crypto.createHash('sha256').update(fs.readFileSync(path.join(PHOTOS_DIR, p.file))).digest('hex');
     assert.match(section, new RegExp(`This copy\\b[^\\n]*SHA-256 \`${sha}\``), `the README's SHA-256 for ${p.file} is not the committed file's (${sha})`);
   }
+});
+
+// The models a machine has: `case` and `models`, both optional (design, "The
+// registry's models field"). A made-up module is present or absent through an
+// injected modelFiles, as a photograph is through photoExists.
+const built = (over = {}) => ({ modelFiles: () => ({ module: true, exportsMount: true, results: true, ...over }), ...onDisk });
+const claims = (models, over = {}) => registry(machine({ models, ...over }));
+const check = (reg, files = built()) => validateRegistry(reg, null, files).join('\n');
+
+test('a machine with no models and no case is valid, running or not: models never hold up a machine counting', () => {
+  // The BBC Micro today: running, cased, and claiming no model.
+  const bbc = machine({ id: 'bbc-micro', category: 'computer', status: 'running', acceptance: 'BbcAcceptanceTests', photos: [photo()] });
+  assert.deepEqual(validateRegistry(registry(bbc), results({ BbcAcceptanceTests: { passed: 1, failed: 0, skipped: 0 } }), built()), []);
+  assert.equal(check(registry(machine())), '');
+  // A cased machine may state its case before it claims a model.
+  assert.equal(check(registry(machine({ case: true }))), '');
+  assert.equal(check(registry(machine({ case: false }))), '');
+});
+
+test('the real registry: the KIM-1 has no case and one model, its board, and the BBC Micro claims none yet', () => {
+  const reg = loadRegistry();
+  const kim = reg.machines.find((m) => m.id === 'kim-1');
+  const bbc = reg.machines.find((m) => m.id === 'bbc-micro');
+  assert.equal(kim.case, false);
+  assert.deepEqual(kim.models, [{ view: 'board', module: 'kim-1' }]);
+  assert.equal(bbc.models, undefined);
+  assert.equal(bbc.case, undefined);
+  // Read from the disk, as the build reads it: the KIM-1's module and results file are there.
+  assert.deepEqual(modelProblems(kim, 'machine kim-1'), []);
+  assert.deepEqual(VIEWS, ['board', 'outside', 'inside']);
+  assert.equal(MODELS_DIR, path.join(process.cwd(), 'src', 'models'));
+  assert.equal(DATA_DIR, path.join(process.cwd(), 'src', 'data'));
+});
+
+test('models, when given, is a non-empty list of views and modules', () => {
+  assert.match(check(claims([])), /models, when given, must be a non-empty list/);
+  assert.match(check(claims({ view: 'board', module: 'kim-1' })), /models, when given, must be a non-empty list/);
+  assert.match(check(claims(['kim-1'])), /models\[0\]: a model must be an object/);
+  assert.equal(check(claims([{ view: 'board', module: 'kim-1' }])), '');
+});
+
+test('a model\'s view is one of board, outside and inside', () => {
+  assert.match(check(claims([{ view: 'top', module: 'kim-1' }])), /models\[0\]: view "top" is not one of board, outside, inside/);
+  assert.match(check(claims([{ module: 'kim-1' }])), /models\[0\]: view "undefined" is not one of/);
+});
+
+test('a machine claims each view once', () => {
+  assert.match(check(claims([{ view: 'board', module: 'kim-1' }, { view: 'board', module: 'kim-1-other' }])), /the view board is claimed twice/);
+});
+
+test('a module is claimed once in the whole registry', () => {
+  const two = registry(machine({ models: [{ view: 'board', module: 'kim-1' }] }), machine({ id: 'kim-1', name: 'KIM-1 again', models: [{ view: 'board', module: 'kim-1' }] }));
+  assert.match(check(two), /module kim-1 is claimed twice in the registry/);
+  assert.match(check(claims([{ view: 'outside', module: 'kim-1' }, { view: 'inside', module: 'kim-1' }], { case: true })), /module kim-1 is claimed twice in the registry/);
+});
+
+test('a module is named for its machine: the machine\'s id, or the id and a hyphen', () => {
+  assert.match(check(claims([{ view: 'board', module: 'aim-65' }])), /models\[0\]: module "aim-65" must be the machine's id, kim-1, or start with kim-1-/);
+  assert.match(check(claims([{ view: 'board', module: 'kim-10' }])), /module "kim-10" must be the machine's id/);
+  assert.match(check(claims([{ view: 'board', module: '../kim-1' }])), /module "\.\.\/kim-1" must be the machine's id/);
+  assert.match(check(claims([{ view: 'board' }])), /module "undefined" must be the machine's id/);
+  assert.equal(check(claims([{ view: 'board', module: 'kim-1-board' }])), '');
+});
+
+test('a claimed model must be built: its module is there and exports mount(root), and its results file is there', () => {
+  const one = claims([{ view: 'board', module: 'kim-1' }]);
+  assert.match(check(one, built({ module: false, exportsMount: false })), /models\[0\]: site\/src\/models\/kim-1\.js is missing/);
+  assert.match(check(one, built({ exportsMount: false })), /models\[0\]: site\/src\/models\/kim-1\.js does not export mount\(root\)/);
+  assert.match(check(one, built({ results: false })), /models\[0\]: site\/src\/data\/kim-1-model\.json is missing: a model's results file says how it was made/);
+  // The default reads the disk: a made-up module is not there.
+  assert.match(validateRegistry(claims([{ view: 'board', module: 'kim-1-nothing' }]), null, onDisk).join('\n'), /site\/src\/models\/kim-1-nothing\.js is missing/);
+});
+
+test('case, when given, is true or false', () => {
+  assert.match(check(registry(machine({ case: 'yes' }))), /case, when given, must be true or false/);
+  assert.match(check(registry(machine({ case: null }))), /case, when given, must be true or false/);
+});
+
+test('a machine with no case has no outside or inside, and a machine with a case has no bare board', () => {
+  assert.match(check(claims([{ view: 'outside', module: 'kim-1-case' }], { case: false })), /has no case, so it cannot claim the outside view/);
+  assert.match(check(claims([{ view: 'inside', module: 'kim-1-board' }], { case: false })), /has no case, so it cannot claim the inside view/);
+  assert.match(check(claims([{ view: 'board', module: 'kim-1' }], { case: true })), /has a case, so it claims outside and inside, not board/);
+  assert.equal(check(claims([{ view: 'board', module: 'kim-1' }], { case: false })), '');
+});
+
+test('a machine with a case that claims a model claims both, the outside and the inside', () => {
+  const both = [{ view: 'outside', module: 'kim-1-case' }, { view: 'inside', module: 'kim-1-board' }];
+  assert.equal(check(claims(both, { case: true })), '');
+  assert.match(check(claims([both[1]], { case: true })), /has a case and claims a model, so it must claim both outside and inside/);
+  assert.match(check(claims([both[0]], { case: true })), /must claim both outside and inside/);
+  // The rule fires only when case is stated: until task 9 a machine may claim the inside alone with no case.
+  assert.equal(check(claims([both[1]])), '');
+});
+
+test('a reference the model was measured from, kept out of the repository, is credited like a drawing and names the SHA-256 of what was measured', () => {
+  const reference = (over = {}) => ({ title: 'a flatbed scan of the bare board, component side', author: 'A. Scanner', sourceUrl: 'https://example.org/scan', licence: null, fetched: '2026-10-04', sha256: 'a'.repeat(64), used: 'the places of the holes and the copper', ...over });
+  const one = (over) => check(registry(machine({ references: [reference(over)] })));
+  assert.equal(one({}), '');
+  assert.match(one({ title: ' ' }), /references\[0\]: must say what it is/);
+  assert.match(one({ author: undefined }), /references\[0\]: must name its author/);
+  assert.match(one({ sourceUrl: 'example.org' }), /references\[0\]: must link its source/);
+  assert.match(one({ fetched: 'today' }), /references\[0\]: fetched must be/);
+  assert.match(one({ used: '' }), /references\[0\]: used must say/);
+  assert.match(one({ sha256: undefined }), /references\[0\]: sha256 must be the SHA-256 of the original, 64 hex digits/);
+  assert.match(one({ sha256: 'A'.repeat(64) }), /references\[0\]: sha256 must be/);
+  assert.match(one({ sha256: 'a'.repeat(63) }), /references\[0\]: sha256 must be/);
+  assert.match(check(registry(machine({ references: {} }))), /references must be a list/);
+  assert.match(check(registry(machine({ references: ['a scan'] }))), /references\[0\]: a reference must be an object/);
+  assert.deepEqual(referenceProblems(reference(), 'r'), []);
 });

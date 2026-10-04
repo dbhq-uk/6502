@@ -397,3 +397,112 @@ wording on the marking noise and on the 15 mm says what is and is not shown;
 a test now holds the KiCad reader to a turned footprint whose hole is off its
 origin, since task 8 reuses it; and the site test that no original input is
 committed now also hashes everything under `site/public/` and `docs/`.
+
+## Task 1: the registry says which models a machine has
+
+Plumbing only, no measuring. A machine record may now carry `case` (a
+boolean: whether the machine has a case) and `models`, a list of
+`{ "view", "module" }`, where `view` is `board`, `outside` or `inside`
+(`VIEWS` in `site/src/lib/registry.mjs`) and `module` names
+`site/src/models/<module>.js`. Both are optional. The KIM-1 now says
+`"case": false` and claims one model, `{ "view": "board", "module": "kim-1" }`.
+The BBC Micro is unchanged: no `case` and no `models`, and valid, because a
+running machine is never required to claim a model (Dan, 2 October 2026). A
+third optional list, `references`, holds the sources a model was measured from
+that are never committed (the scans, the photographs with no stated licence):
+each is credited like a drawing (title, author, source, licence as stated,
+fetched, used) and names the SHA-256 of the original, 64 lower-case hex
+digits, so the credit says which file was measured. Nothing uses it yet.
+
+`src/models/models.mjs` is now keyed by module, and each entry names its
+`machine` and its `view`; `modelsOf(machine)` is the registry's list, or none.
+The machine page shows a model section for each module its machine claims,
+where before it showed one for any machine id in the map. The credit under a
+model reads `references` after `drawings`, in the same sentence.
+
+**Each rule, and the made-up registry that fails it**
+(`site/tests/registry.test.mjs`, with `modelFiles` injected so a made-up
+module can be present or absent, as `photoExists` does for photographs):
+
+| Rule | Fails on |
+|---|---|
+| `models`, when given, is a non-empty list | `[]`, and an object in place of a list |
+| each entry is an object | a bare string |
+| a view is one of the three | `top`, and an entry with no view |
+| a machine claims each view once | two `board` entries |
+| a module is claimed once in the whole registry | the same module on two machines, and twice on one |
+| a module is named for its machine | `aim-65` and `kim-10` on the KIM-1, `../kim-1`, and no module at all |
+| the module's file is there and exports `mount(root)` | `modelFiles` saying no file, and a file with no `mount(root)` |
+| the results file is there | `modelFiles` saying no `<module>-model.json` |
+| `case`, when given, is a boolean | `"yes"` and `null` |
+| no case, no outside or inside | `"case": false` with `outside`, and with `inside` |
+| a case, no bare board | `"case": true` with `board` |
+| a cased machine that claims a model claims both | `"case": true` with only `inside`, and with only `outside` |
+| `references` is a list of credited references | an object, a string entry, and each missing or malformed field, the SHA-256 in capitals and one digit short |
+
+The last rule fires only when `case` is stated: a machine with no `case` may
+claim `inside` alone, which is what the BBC Micro will do in task 7. The rule
+that closes that gap, "a machine that claims a model states `case`", is task
+9's, as the plan says, and is not here. A test also holds that a running cased
+machine with no models and no case is valid (the BBC Micro today), and that
+`"case": true` or `false` with no models is valid too.
+
+`site/tests/model.test.mjs` holds the other half of "built", both ways: every
+entry in `MODELS` is claimed by exactly one machine with the same view, every
+claimed module is in `MODELS` with that machine and view, and each running
+machine's built page has a model section for exactly the modules it claims
+(the KIM-1 one, the BBC Micro none) and loads the model loader exactly then.
+
+**Why `case` is stated and not read from `category`.** The categories are
+`single-board`, `computer`, `console` and so on, and none of them says whether
+the machine has a case: a single-board machine may be sold in one, and a
+console's board is never the whole of it. The design's
+decisions table chose an explicit field over inferring it, and a wrong
+inference here would silently allow the half-claimed record the rule exists to
+refuse.
+
+**Decisions taken while building it.**
+
+- A module whose name is not its machine's is reported and never looked for
+  on disk, so a name like `../kim-1` cannot make the check read outside
+  `src/models/`. Chosen over checking the file regardless: the name error is
+  the one that matters, and a second error about a missing file would be noise.
+- "A module claimed twice" is checked in `validateRegistry`, which sees every
+  machine, not in `modelProblems`, which sees one; a module twice on one
+  machine is caught by the same check.
+- The page now throws at build time if a machine claims more than one model,
+  saying the page offers one until the two views land as tabs (task 9). Chosen
+  over rendering every claimed module as its own section, which would put two
+  elements with the same ids on one page, and over rendering the first only,
+  which would drop the second without saying so. No machine claims two yet;
+  task 9 replaces the throw with the tabs.
+- `model.test.mjs` takes `modelsOf` on an import line of its own rather than
+  by editing the existing import, so that no line of the KIM-1's existing
+  tests changed (the plan allows no edits to them in this task, and none were
+  needed).
+
+**The KIM-1 shown unchanged** (4 October 2026). Task 0's last commit,
+`a14732e`, was exported with `git archive a14732e` into a scratch folder
+outside the repository, given this checkout's `node_modules`, the built
+machines in `site/public/machines/` and `site/src/data/results.json`, and
+built with `npm run build`; this task's tree was built here with
+`npm run build`. `cmp` of the two `dist/machines/kim-1/index.html` printed
+nothing (both SHA-256 `177e8c64...48fa5e`), and `diff -rq` of the two whole
+`dist/` folders, built before this entry was written, printed nothing either:
+every page of the site, the BBC Micro's included, was byte for byte what it
+was. After it, the one page that differs is this journal entry's. The KIM-1 has no references,
+and its section is rendered from the same entry.
+
+`node scripts/browser-check.mjs`, unedited, was run twice here on a shared
+host with a load average between 20 and 50 on 8 cores. The first run failed
+two timing checks: a finger on the focused KIM-1 model scrolled the page by
+19 pixels, and the BBC Micro drew 15 fields in a second where the check wants
+more than 20. The second run passed every KIM-1 check and failed the BBC one
+again, again at 15 fields. Neither can come from this task: the site it
+served is byte for byte the one task 0 built, and `Validate`, browser check
+included, passed in CI on `a14732e`. The browser check on this task's commit
+is CI's.
+
+**Tests.** `cd site && npm test`: 267 passed before this task and 282 after
+(12 in `registry.test.mjs`, 3 in `model.test.mjs`), none failed. Both
+workflows' floors were raised from 267 to 282.
