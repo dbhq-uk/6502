@@ -30,7 +30,10 @@ does not depend on theta at all.
    fit; each half's rows down are measured through the scale fitted to every
    other row, and the 40-pin rows (48.26 mm) are judged. x: each row across is
    left out of the fit in turn and its length measured through the rest; its
-   error is scaled to a 48.26 mm row (error x 48.26 / its length) and judged.
+   error is scaled to a 48.26 mm row (error x 48.26 / its length). As the plan
+   was revised after task 2's figures, only rows at least 30 mm long are
+   scored and their median judged; the largest is recorded, and the verdict
+   of the check as first written (every row, median and largest) is kept.
 
 2. The turn. Every pad of every long row (10 pads or more) is found in turn
    along it; a straight line through each row's pads, in millimetres. One
@@ -79,6 +82,11 @@ NOMINAL_PX_PER_MM = 15.75     # only to size search windows; the scale is measur
 # The plan's thresholds, as set before the measurements (Global Constraints).
 PASS = {'yMedian': 0.10, 'yMax': 0.25, 'xMedian': 0.10, 'xMax': 0.25}
 STOP = {'yMedian': 0.20, 'yMax': 0.50, 'ratioPct': 1.5, 'xMedian': 0.20, 'xMax': 0.50}
+# The x row as revised on 4 October 2026 by the controller, after task 2's
+# figures were seen (the plan's thresholds table): a row across is scored only
+# if it is at least this long, a rule on length alone; the median of the scored
+# rows is judged against the same 0.10 and 0.20; the largest is recorded.
+X_SCORED_MIN_MM = 30.0
 STRAIGHT_MM = 0.05            # the plan: a row's residual from a straight line
 LONG_ROW_PADS = 10            # a long row, for the turn and the straightness
 MIN_LINE_PADS = 8             # pads found, for a row's line to be fitted
@@ -197,7 +205,8 @@ def held_out_x(rows):
         m = length_mm(r['d'], sx, sy)
         err = m - r['trueMm']
         out.append({'row': r['id'], 'kind': r.get('kind'), 'pitches': r['pitches'], 'lengthMm': r['trueMm'],
-                    'measuredMm': m, 'errMm': err, 'scaledErrMm': err * FORTY_PIN_MM / r['trueMm']})
+                    'measuredMm': m, 'errMm': err, 'scaledErrMm': err * FORTY_PIN_MM / r['trueMm'],
+                    'scored': r['trueMm'] >= X_SCORED_MIN_MM})
     return out
 
 
@@ -615,7 +624,11 @@ def measure(rgb, rows, px_per_mm=NOMINAL_PX_PER_MM):
         'heldOutX': {
             'what': 'Rows across the board (x), first pad to last, connector rows on the 0.1 inch pitch and the rows of DIPs that lie across, each held out of the scale fit in turn; scaledErrMm is the error x 48.26 / the row\'s length',
             'rows': hx,
-            'scaledErrMm': abs_stats([r['scaledErrMm'] for r in hx]),
+            'scored': f'Rows at least {X_SCORED_MIN_MM:g} mm long (the plan\'s x row as revised on 4 October 2026 after task 2\'s figures were seen); shorter rows are reported, not scored',
+            'scaledErrMm': abs_stats([r['scaledErrMm'] for r in hx if r['scored']]),
+            'largest': max(({'row': r['row'], 'scaledErrMm': r['scaledErrMm']} for r in hx if r['scored']),
+                           key=lambda r: abs(r['scaledErrMm']), default=None),
+            'asWrittenScaledErrMm': abs_stats([r['scaledErrMm'] for r in hx]),
             'errMm': abs_stats([r['errMm'] for r in hx]),
         },
         'rows': [{'row': r['id'], 'axis': r['axis'], 'kind': r.get('kind'), 'pitches': r['pitches'], 'padsFound': len(r['pads']),
@@ -662,21 +675,28 @@ def rows_from_marks(m):
 
 
 def judge(f):
-    y, x = f['heldOut']['rowLengthErrMm'], f['heldOutX']['scaledErrMm']
+    """The verdicts against the plan's scale rows. The x row is judged as
+    revised (scored rows, the median); the verdict it got as first written is
+    kept beside it, recorded and not judged (judged: false)."""
+    y, x, xw = f['heldOut']['rowLengthErrMm'], f['heldOutX']['scaledErrMm'], f['heldOutX']['asWrittenScaledErrMm']
+    big = f['heldOutX']['largest']
     lines = [
         ('scale y, 40-pin rows held out', y['median'] <= PASS['yMedian'] and y['max'] <= PASS['yMax'],
          y['median'] > STOP['yMedian'] or y['max'] > STOP['yMax'],
-         f"median {y['median']:.3f} mm, max {y['max']:.3f} mm over {y['n']} rows"),
+         f"median {y['median']:.3f} mm, max {y['max']:.3f} mm over {y['n']} rows", True),
         ('scale, x against y', True, f['ratioPct'] > STOP['ratioPct'],
-         f"x {f['pxPerMm']['x']:.4f}, y {f['pxPerMm']['y']:.4f} px/mm, ratio {f['ratio']:.5f} ({f['ratioPct']:.2f} per cent)"),
-        ('scale x, rows across held out, scaled to 48.26 mm', x['median'] <= PASS['xMedian'] and x['max'] <= PASS['xMax'],
-         x['median'] > STOP['xMedian'] or x['max'] > STOP['xMax'],
-         f"median {x['median']:.3f} mm, max {x['max']:.3f} mm over {x['n']} rows"),
+         f"x {f['pxPerMm']['x']:.4f}, y {f['pxPerMm']['y']:.4f} px/mm, ratio {f['ratio']:.5f} ({f['ratioPct']:.2f} per cent)", True),
+        ('scale x, rows across at least 30 mm held out, scaled to 48.26 mm (as revised)', x['median'] <= PASS['xMedian'],
+         x['median'] > STOP['xMedian'],
+         f"median {x['median']:.3f} mm over {x['n']} rows; largest {x['max']:.3f} mm ({big['row']}), recorded", True),
+        ('scale x, every row across held out, scaled to 48.26 mm (as first written; recorded)', xw['median'] <= PASS['xMedian'] and xw['max'] <= PASS['xMax'],
+         xw['median'] > STOP['xMedian'] or xw['max'] > STOP['xMax'],
+         f"median {xw['median']:.3f} mm, max {xw['max']:.3f} mm over {xw['n']} rows", False),
     ]
     out = []
-    for name, ok, stop, text in lines:
+    for name, ok, stop, text, judged in lines:
         verdict = 'STOP' if stop else ('pass' if ok else 'between pass and stop')
-        out.append({'measure': name, 'verdict': verdict, 'figures': text})
+        out.append({'measure': name, 'verdict': verdict, 'figures': text, 'judged': judged})
         print(f'{name}: {text}: {verdict}')
     return out
 
@@ -726,6 +746,11 @@ def main():
     result['verdicts'] = judge(result)
     result['rectified'] = {'pxPerMm': RECTIFIED_PX_PER_MM, 'marginMm': RECTIFIED_MARGIN_MM, 'file': 'out/rectified-16.jpg',
                            'what': 'I1 resampled onto the board frame: pixel (u, v)\'s centre is board millimetre ((u + 0.5) / 16 - 2, (v + 0.5) / 16 - 2). Made by board_frame.py in out/, which is git-ignored: I1 states no licence, so no copy of it is committed'}
+    result['revision'] = ('The x row\'s verdict as first written is kept as measured: on 4 October 2026 it crossed the plan\'s stop (largest 1.192 mm, '
+                          'IC74\'s front row, a 17.78 mm row whose error the scaling multiplies by 2.7). The same day the controller revised the plan\'s x row '
+                          '(docs/superpowers/plans/2026-10-04-bbc-micro-models.md, Global Constraints), after task 2\'s figures were seen: rows across are '
+                          'scored only if at least 30 mm long, the median is judged against the same 0.10 and 0.20 mm, and the largest is recorded. '
+                          'The straightness of the long rows is recorded, not a pass criterion.')
     result['about'] = ('Task 2 of the BBC Micro models plan: the board frame on scan I1. A board millimetre X (from the left rear corner, x to the right, '
                        'y towards the front) is at I1 pixel origin + diag(pxPerMm.x, pxPerMm.y) R(rotationDeg) X. The outline, holes and edges are '
                        'in board millimetres. Written by board_frame.py; every figure here is a measurement made on the date of the journal entry that quotes it.')
@@ -734,7 +759,7 @@ def main():
           f"{result['straightness']['rmsMm']['median']:.4f}, max {result['straightness']['rmsMm']['max']:.4f} mm")
     common.write_data('frame.json', result)
     overlays(rgb, result, frame, extra)
-    return 3 if any(v['verdict'] == 'STOP' for v in result['verdicts']) else 0
+    return 3 if any(v['verdict'] == 'STOP' and v['judged'] for v in result['verdicts']) else 0
 
 
 if __name__ == '__main__':

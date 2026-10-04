@@ -1,7 +1,7 @@
 ---
 title: "The BBC Micro's models: the inputs, and what they rest on"
 date: 2026-10-04
-summary: "Before any of the BBC Micro's two models is built, a day's spike measures what both rest on: the scale of a flatbed scan of the bare board, how well the solder side lies on the component side, and how well a photograph of the keyboard fits an open keyboard layout. The scale and the keys hold, and the solder side holds except for a few holes. A further check, the case's front edge measured on the plane of the keys, fails, because the edge is not in that plane. The plan was revised the same day so that a later task judges the edge's width after correcting for that."
+summary: "Before the BBC Micro's two models are built, the work measures what both rest on: the scale of a flatbed scan of the bare board, how well the solder side lies on the component side, and how well a photograph of the keyboard fits an open keyboard layout. The scale, the keys, and the board's size and outline hold, and the solder side holds except for a few holes. Two checks failed and were revised the same day, each kept on record as it failed: the case's front edge, measured on the plane of the keys, which it does not lie in, and a row by row check of the board's width scale, which magnified the noise of short rows of pads."
 order: 28
 ---
 
@@ -711,7 +711,60 @@ board and the rectified copy stays in `out/`. The fifth, that `frame.json`
 passes all three scale rows, is written as the plan states it and marked as a
 to-do naming this entry, as task 0's was, so the suite stays green and
 reports it. `cd site && npm test`: 282 passed before this task, 285 after,
-one to-do, none failed; both workflows' floors were raised to 285.
+one to-do, none failed; both workflows' floors were raised to 285 (and to 286 after the revision below, with one to-do).
 
 Task 2 ends BLOCKED on the x row, with the figures above, and the plan is
 reconsidered before task 3.
+
+## Task 2's x check revised, after its figures were seen
+
+The controller ruled on the stop the same day. The stop was real, and it stays
+recorded: `frame.json` keeps the verdict the x check got as first written (a
+STOP, largest 1.192 mm) beside a `revision` note, as `spike.json` does for the
+front edge.
+
+What changed is the plan's x row, and the order matters. It was added after
+task 0's figures were seen, as a stricter check than anything that held x
+before; it was then **revised after task 2's figures were seen, by the
+controller**, so this is a revision made knowing the result, not a rule set
+in advance. The reason: scaling a row's length error up to a 48.26 mm row
+multiplies the noise in its end pads' centres (solder spread) by up to 2.7
+for a 17.78 mm row, so it is a poor measure of the scale on short rows; the
+scale's other evidence is strong (x and y 0.17 per cent apart, the board's
+size within the sanity bound). It is not made to pass: the median is judged
+against the same numbers as before, and the revised check could still have
+stopped.
+
+The revised row (the plan's Global Constraints table and Task 2): a row
+across is scored only if it is at least 30 mm long, a rule on length alone,
+never on a residual; shorter rows are reported, not scored; the median of the
+scored rows' scaled errors passes at 0.10 mm or less and stops over 0.20, and
+between is recorded as between pass and stop, as the solder side; the largest
+is recorded, with its row named, not judged. Applied to the same 11 rows, with
+no mark added or removed and no row picked again.
+
+Measured on 4 October 2026 with the same command as above (now exiting 0):
+7 rows scored (PL8 and PL9, both rows each, PL11, PL12 and PL13; PL10, PL14
+and the two DIP rows are under 30 mm). **Median 0.136 mm: between pass and
+stop.** The largest is 0.502 mm, PL11, recorded. The y scale and the x
+against y check are unchanged and pass. No judged figure is a stop.
+
+Three more things from the same ruling:
+
+- **Straightness is recorded, not a pass criterion**, and the plan now says
+  so. The figures stand as above: 12 of the 30 long rows at or over 0.05 mm,
+  their bows both ways. `frame.json` names the rows over it.
+- **Holes.** Fitting each hole's outer edge, the rim outside the grey
+  crescent, was tried on radial profiles of three holes and is not cheap:
+  colour rises gradually through the crescent, the ring some holes have and
+  the lacquer, with no single crossing to fit. So `frame.json`'s holes are
+  unchanged, with their bias described, and the plan's Task 3 now says it fits
+  holes and drills on the outer edge and records the difference from task 2's
+  centres.
+- The summary at the top of this entry, which the home page shows, described
+  task 0 only. It was rewritten to cover tasks 0 to 2.
+
+Tests: the site test that bound the check as first written is now the plan's
+row as revised (nothing judged is a stop, y passes, x's median is judged, and
+the verdict as first written is recorded); a strict pass of x's median stays a
+to-do naming this entry, since it is between pass and stop.

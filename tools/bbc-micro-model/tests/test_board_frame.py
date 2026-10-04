@@ -182,6 +182,10 @@ def test_the_held_out_rows_are_scored(measured):
     result = measured[0]
     assert result['heldOutX']['scaledErrMm']['max'] < 0.05
     assert {r['row'] for r in result['heldOutX']['rows']} == {'CONA', 'CONB', 'ICX.a'}
+    # rows under 30 mm are reported, not scored (the plan's x row as revised)
+    assert {r['row'] for r in result['heldOutX']['rows'] if r['scored']} == {'CONA', 'CONB'}
+    assert result['heldOutX']['scaledErrMm']['n'] == 2
+    assert result['heldOutX']['asWrittenScaledErrMm']['n'] == 3
     assert result['heldOut']['rowLengthErrMm']['max'] < 0.05
     assert result['heldOut']['rowLengthErrMm']['n'] == 4
     assert result['heldOut']['footprints'] == 2

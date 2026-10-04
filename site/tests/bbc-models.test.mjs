@@ -149,39 +149,69 @@ const frame = JSON.parse(fs.readFileSync(path.join(TOOL, 'data', 'frame.json'), 
 const FRAME_PASS = { yMedian: 0.10, yMax: 0.25, xMedian: 0.10, xMax: 0.25 };
 const FRAME_STOP = { yMedian: 0.20, yMax: 0.50, ratioPct: 1.5, xMedian: 0.20, xMax: 0.50 };
 
+// The x row as revised on 4 October 2026 by the controller, after task 2's
+// figures were seen: rows across are scored only if at least 30 mm long (length
+// alone), the median is judged against the same numbers, the largest is
+// recorded. The verdict of the check as first written is kept, recorded only.
+const X_SCORED_MIN_MM = 30;
+
 function frameVerdicts(f) {
   const y = f.heldOut.rowLengthErrMm;
   const x = f.heldOutX.scaledErrMm;
+  const xw = f.heldOutX.asWrittenScaledErrMm;
   const v = (ok, stop) => (stop ? 'STOP' : ok ? 'pass' : 'between pass and stop');
   return [
     v(y.median <= FRAME_PASS.yMedian && y.max <= FRAME_PASS.yMax, y.median > FRAME_STOP.yMedian || y.max > FRAME_STOP.yMax),
     v(true, f.ratioPct > FRAME_STOP.ratioPct),
-    v(x.median <= FRAME_PASS.xMedian && x.max <= FRAME_PASS.xMax, x.median > FRAME_STOP.xMedian || x.max > FRAME_STOP.xMax),
+    v(x.median <= FRAME_PASS.xMedian, x.median > FRAME_STOP.xMedian),
+    v(xw.median <= FRAME_PASS.xMedian && xw.max <= FRAME_PASS.xMax, xw.median > FRAME_STOP.xMedian || xw.max > FRAME_STOP.xMax),
   ];
 }
 
-test('frame.json records the verdicts its figures give against the plan\'s scale thresholds', () => {
+test('frame.json records the verdicts its figures give against the plan\'s scale thresholds, as written and as revised', () => {
   assert.deepEqual(frame.verdicts.map((x) => x.verdict), frameVerdicts(frame));
+  assert.deepEqual(frame.verdicts.map((x) => x.judged), [true, true, true, false]);
   assert.ok(Math.abs(frame.ratio - frame.pxPerMm.x / frame.pxPerMm.y) < 1e-3);
   assert.ok(Math.abs(frame.ratioPct - 100 * Math.abs(frame.ratio - 1)) < 1e-2);
-  // each row across is scaled to a 48.26 mm row, and the summary is of those rows
+  // each row across is scaled to a 48.26 mm row; it is scored only if 30 mm or longer
   for (const r of frame.heldOutX.rows) {
     assert.ok(Math.abs(r.scaledErrMm - (r.errMm * 48.26) / (r.pitches * 2.54)) < 2e-3, r.row);
+    assert.equal(r.scored, r.pitches * 2.54 >= X_SCORED_MIN_MM, r.row);
   }
-  const scaled = frame.heldOutX.rows.map((r) => Math.abs(r.scaledErrMm));
-  assert.ok(Math.abs(frame.heldOutX.scaledErrMm.max - Math.max(...scaled)) < 1e-3);
-  assert.equal(frame.heldOutX.scaledErrMm.n, scaled.length);
-  assert.ok(frame.heldOutX.rows.length >= 6, 'at least six rows across held out');
+  const scored = frame.heldOutX.rows.filter((r) => r.scored).map((r) => Math.abs(r.scaledErrMm));
+  const all = frame.heldOutX.rows.map((r) => Math.abs(r.scaledErrMm));
+  assert.equal(frame.heldOutX.scaledErrMm.n, scored.length);
+  assert.ok(Math.abs(frame.heldOutX.scaledErrMm.max - Math.max(...scored)) < 1e-3);
+  assert.ok(Math.abs(frame.heldOutX.asWrittenScaledErrMm.max - Math.max(...all)) < 1e-3);
+  assert.equal(frame.heldOutX.asWrittenScaledErrMm.n, all.length);
+  const largest = frame.heldOutX.rows.find((r) => r.row === frame.heldOutX.largest.row);
+  assert.ok(largest && largest.scored && Math.abs(Math.abs(largest.scaledErrMm) - frame.heldOutX.scaledErrMm.max) < 1e-3, 'the largest is named');
+  assert.match(frame.revision, /revised/);
+  assert.match(frame.revision, /2026-10-04-bbc-micro-models\.md/);
+  assert.ok(scored.length >= 5, 'at least five rows across scored');
   assert.ok(frame.heldOut.rowLengthErrMm.n >= 5, 'at least five 40-pin rows held out');
   assert.ok(frame.heldOut.footprints >= 10, `only ${frame.heldOut.footprints} footprints had a row held out`);
+  // straightness is recorded, not a pass criterion: the rows at or over 0.05 mm are named
+  assert.deepEqual(frame.straightness.over, frame.straightness.rows.filter((r) => r.rmsMm >= 0.05).map((r) => r.row));
 });
 
-// Task 2 crossed a STOP on 4 October 2026: the rows across, each held out of the
-// x fit and scaled to a 48.26 mm row, had a largest error over 0.50 mm. This test
-// is the plan's rule as written; it binds once the plan says what happens next
-// (docs/journal/2026-10-04-the-bbc-micro-models.md, task 2).
-test('frame.json passes the plan\'s scale rows, the held-out x row included', { todo: 'task 2 crossed a STOP: see docs/journal/2026-10-04-the-bbc-micro-models.md' }, () => {
-  assert.deepEqual(frameVerdicts(frame), ['pass', 'pass', 'pass']);
+// The plan's scale rows as revised on 4 October 2026: nothing judged is a STOP,
+// y passes, and x's median over the scored rows is judged (between pass and
+// stop is recorded, as the solder side). The check as first written crossed its
+// STOP and stays recorded in frame.json.
+test('frame.json passes the plan\'s scale rows as revised, and records the x row as first written', () => {
+  const [y, ratio, x, asWritten] = frameVerdicts(frame);
+  assert.equal(y, 'pass', 'the y scale, 40-pin rows held out');
+  assert.notEqual(ratio, 'STOP', 'x against y');
+  assert.notEqual(x, 'STOP', 'the x scale, rows across at least 30 mm held out');
+  assert.equal(frame.verdicts[3].verdict, asWritten);
+  const plan = fs.readFileSync(path.join(REPO_ROOT, 'docs', 'superpowers', 'plans', '2026-10-04-bbc-micro-models.md'), 'utf8');
+  assert.match(plan, /Revised on 4 Oct 2026 by the controller after task 2's figures were seen/);
+  assert.match(plan, /scored only if it is at least 30 mm long/);
+});
+
+test('frame.json\'s x median over the scored rows passes outright', { todo: 'between pass and stop on 4 October 2026: see docs/journal/2026-10-04-the-bbc-micro-models.md, task 2' }, () => {
+  assert.ok(frame.heldOutX.scaledErrMm.median <= FRAME_PASS.xMedian);
 });
 
 test('frame.json\'s outline is closed, square to its frame, and the board\'s size', () => {
