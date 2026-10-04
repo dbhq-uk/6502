@@ -31,8 +31,8 @@ The inside is built first: it gives the outside the x positions of its ports.
 
 ## The registry's `models` field
 
-Each machine record gains `case` (a boolean, required of a running machine) and,
-when it has models, `models`: a list of `{ "view": ..., "module": ... }`.
+A machine record may carry `case` (a boolean: whether the machine has a case)
+and `models`, a list of `{ "view": ..., "module": ... }`. Both are optional.
 
 | Field | Values |
 |---|---|
@@ -40,7 +40,7 @@ when it has models, `models`: a list of `{ "view": ..., "module": ... }`.
 | `module` | the model's id: `site/src/models/<module>.js`, served as `/models/<module>.js`; it is the machine's id or starts with it and a hyphen |
 
 The KIM-1 becomes `"case": false, "models": [{ "view": "board", "module": "kim-1" }]`.
-The BBC Micro becomes `"case": true` with `outside` / `bbc-micro-case` and
+When both its models are built the BBC Micro has `"case": true` with `outside` / `bbc-micro-case` and
 `inside` / `bbc-micro-board`, in that order (the first is the view shown first).
 
 **A model is built** when all four hold, and a test fails on each separately:
@@ -59,19 +59,26 @@ The BBC Micro becomes `"case": true` with `outside` / `bbc-micro-case` and
    entry names one (`model.test.mjs`).
 
 **The rules `validateRegistry` adds**, each with a made-up registry that must
-fail in `site/tests/registry.test.mjs`: `models` is a non-empty list; a view
-outside the three; a view claimed twice; a module claimed twice anywhere in the
-registry; a module not named for its machine; a module whose file is missing
-(rule 1); a module with no results file (rule 3); a machine with no case
-claiming `outside` or `inside`; a cased machine claiming `board`; a running
-machine with no `case`; and **a running machine with a case that does not claim
-both `outside` and `inside`**. The KIM-1 claims one model and passes.
+fail in `site/tests/registry.test.mjs`: `models`, when present, is a non-empty
+list; a view outside the three; a view claimed twice; a module claimed twice
+anywhere in the registry; a module not named for its machine; a module whose
+file is missing (rule 1); a module with no results file (rule 3); `case`, when
+present, not a boolean; a machine with `"case": false` claiming `outside` or
+`inside`; a machine with `"case": true` claiming `board`; **a machine with
+`"case": true` that claims a model and does not claim both `outside` and
+`inside`**; and a machine that claims a model without stating `case`. The KIM-1
+claims one model and passes.
 
-This last rule makes the models a condition of a cased machine counting. The
-2 October design read issue 28 as a rule for the page, not a gate on the count,
-so the BBC Micro counted before its models. From here a cased machine (the NES
-next) cannot be marked running until both its models are built. If that is not
-wanted, the rule narrows to "a cased machine that claims a model claims both".
+**Models never hold up a machine counting** (Dan, 2 October 2026). A running
+machine is never required to claim a model, so a cased machine (the NES next)
+can count before its models exist; what it may not do is claim half of them.
+
+**One rule lands last.** "A machine that claims a model states `case`" comes in
+with the outside model (plan task 9). Before then the BBC Micro claims only
+`inside` and states no `case` (plan task 7), so the inside model goes through
+the real page and browser check on its own without a half-claimed cased record
+and with no preview mechanism; task 9 adds `"case": true`, the outside, and this
+rule together, which closes the gap.
 
 ## How the page offers the two views
 
@@ -212,7 +219,8 @@ a shared three.js chunk between the two bundles; other machines' models.
 | Copper traced on the inside | A plain board | A track source exists (choice 5) |
 | Inside first | Outside first | It gives the outside its port positions (`models.md`, order) |
 | `case` and `models` in the registry, with views `board`, `outside`, `inside` | Inferring the case from `category`; one `model` field | A category does not say whether a machine has a case; one field cannot hold two models |
-| A cased running machine must claim both models | Models optional, as on 2 October | Asked for in this design; it reverses the 2 October reading for future machines (see above) |
+| A cased machine that claims a model claims both; no machine is required to claim one | A running cased machine must claim both models | That would contradict Dan's 2 October ruling that models never hold up a machine counting, and it would fail validation today for the live BBC Micro (decided 4 October, at the controller's review of this design) |
+| The BBC Micro claims `inside` with no `case` in task 7, and `case` with both views in task 9, where "a machine that claims a model states `case`" lands | Claiming nothing until task 9; a preview page or flag that does not ship | The inside goes through the real page and browser check in its own task, with no half-claimed cased record and no preview mechanism to delete later |
 | Tabs in one section | Two stacked sections; one canvas swapping scenes; a toggle button | Two views of one machine, each loaded only when chosen; tabs are the pattern for switching views; one canvas would need one bundle for both |
 | One bundle per model, three.js in each | Code splitting a shared chunk | A hashed chunk breaks the deploy's fixed serving list and changes the KIM-1's build; the cost is about one more three.js download for a visitor who opens both, measured |
 | Inside shows chip accesses per quarter second, and the paged ROM | Static; a per-cycle trace | Honest, cheap (SHEILA accesses and one strobe), and visible: the 8271 during a disc command, the CRTC as text scrolls |
