@@ -6,9 +6,10 @@ namespace Dbhq.Cpu6502.Tests.Interrupts;
 /// <summary>
 /// One run of the transistor-level model, as tools/perfect6502/generate.sh
 /// writes it: the program, when the interrupt lines change, the registers at
-/// the first opcode fetch, and every bus cycle.
+/// the first opcode fetch, and every bus cycle. An off cycle of -1 holds the
+/// line to the end; a run may pulse NMI a second time (Nmi2On to Nmi2Off).
 /// </summary>
-public sealed record TransistorModelRun(string Name, byte[] Code, int IrqOn, int IrqOff, int NmiOn, int NmiOff, byte A, byte X, byte Y, byte S, byte P, BusAccess[] Cycles)
+public sealed record TransistorModelRun(string Name, byte[] Code, int IrqOn, int IrqOff, int NmiOn, int NmiOff, int Nmi2On, int Nmi2Off, byte A, byte X, byte Y, byte S, byte P, BusAccess[] Cycles)
 {
     public override string ToString() => Name;
 
@@ -24,6 +25,9 @@ public sealed record TransistorModelRun(string Name, byte[] Code, int IrqOn, int
             byte[] code = lines[i++].Split(' ')[1..].Select(Hex).ToArray();
             int[] irq = lines[i++].Split(' ')[1..].Select(int.Parse).ToArray();
             int[] nmi = lines[i++].Split(' ')[1..].Select(int.Parse).ToArray();
+            int[] nmi2 = lines[i].StartsWith("nmi2 ", StringComparison.Ordinal)
+                ? lines[i++].Split(' ')[1..].Select(int.Parse).ToArray()
+                : [-1, -1];
             byte[] state = lines[i++].Split(' ')[1..].Select(pair => Hex(pair[2..])).ToArray();
             var cycles = new List<BusAccess>();
             while (i < lines.Length && !lines[i].StartsWith("## ", StringComparison.Ordinal))
@@ -32,7 +36,7 @@ public sealed record TransistorModelRun(string Name, byte[] Code, int IrqOn, int
                 cycles.Add(new BusAccess(ushort.Parse(parts[1], NumberStyles.HexNumber), Hex(parts[2]), parts[3] == "W"));
             }
 
-            runs.Add(new TransistorModelRun(name, code, irq[0], irq[1], nmi[0], nmi[1], state[0], state[1], state[2], state[3], state[4], cycles.ToArray()));
+            runs.Add(new TransistorModelRun(name, code, irq[0], irq[1], nmi[0], nmi[1], nmi2[0], nmi2[1], state[0], state[1], state[2], state[3], state[4], cycles.ToArray()));
         }
 
         return runs;
@@ -88,6 +92,16 @@ public sealed class ScheduledBus(TransistorModelRun run) : IBus
         }
 
         if (cycle == run.NmiOff)
+        {
+            Cpu!.Nmi = false;
+        }
+
+        if (cycle == run.Nmi2On)
+        {
+            Cpu!.Nmi = true;
+        }
+
+        if (cycle == run.Nmi2Off)
         {
             Cpu!.Nmi = false;
         }
