@@ -15,7 +15,7 @@ This is other people's software, redistributed here under its own licence, not u
 
 Seen on 2026-10-04, in LICENSE in the repository (https://github.com/mattgodbolt/onslaught/blob/111bd22706cb2a49eb596e360ae7d5168ce657f8/LICENSE), verbatim with its line breaks joined:
 
-> Copyright 1993 Matthew Godbolt & Richard Talbot-Watkins Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software
+> Copyright 1993 Matthew Godbolt & Richard Talbot-Watkins Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software ...
 
 ## Files
 

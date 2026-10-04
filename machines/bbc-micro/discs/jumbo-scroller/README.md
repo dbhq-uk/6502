@@ -15,7 +15,7 @@ This is other people's software, redistributed here under its own licence, not u
 
 Seen on 2026-10-04, in LICENSE in the repository (https://github.com/jprayner/bbc-jumbo/blob/e35f2ec9343fdda67eeddfc3fd1464c7f7ed9ca0/LICENSE), verbatim with its line breaks joined:
 
-> MIT License Copyright (c) 2022 James Rayner
+> MIT License Copyright (c) 2022 James Rayner ...
 
 ## Files
 

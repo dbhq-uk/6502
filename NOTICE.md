@@ -92,7 +92,8 @@ above covers it too. The datasheet itself is not in the repository.
 which the BBC Micro's page offers as a library, and the files kept beside each
 one. They are homebrew and freely licensed programs by other people: games, a
 puzzle, demos and tools. **They are not under this repository's MIT licence.**
-Each is under its own author's licence, MIT, BSD, GPL or LGPL, and is
+Each is under its own author's licence, MIT, BSD, GPL, LGPL or the FSF
+all-permissive licence (Altirra BASIC, on the CP/M-65 disc), and is
 redistributed on those terms.
 
 **Where each one's terms are.** Every disc has a folder of its own,

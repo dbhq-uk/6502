@@ -106,7 +106,7 @@ says so.
 
 ## How the GPL source is handled
 
-Eleven of the seventeen are GPL or LGPL. Each of those folders has `source/`,
+Ten of the seventeen are GPL or LGPL. Each of those folders has `source/`,
 holding the source exactly as its author published it: the author's source
 archive for the Retro Software games, a tarball of the repository at the
 release's commit for Beat the Bull and Beeb 6502 test, and `demo.6502` for the
@@ -184,3 +184,45 @@ to.
   "one-line" section of the fact sheet, which does not exist. They were written
   here from each author's own page and README instead, and each is in the
   manifest.
+
+## The review, and what it changed
+
+Two reviews read the pull request the same evening: one re-fetched every image,
+licence and source archive from its author and rebuilt the two discs that can be
+built (the BeebAsm demo and Blinkenlights, both byte for byte the same), and one
+used the page at desktop and phone sizes. No disc was dropped: every one has a
+written licence that matches its README. What they found, and what was done:
+
+- **A licence notice was missing.** CP/M-65's `OBJDUMP.COM` is built from
+  `apps/objdump.c`, which includes lib6502's opcode tables, Ian Piumarta's MIT
+  code, whose notice must go with every copy. Reading the build files had found
+  the third-party programs on the disc but not a header compiled into one of
+  David Given's own. Its `COPYING.lib6502` is now kept beside the others. The
+  same care brought in Kieran Connell's MIT notice for Blinkenlights, whose
+  interrupt code its README says is based on his tutorial.
+- **A count was wrong.** "Eleven of the seventeen are GPL or LGPL" was written
+  from memory; counting the manifest gives ten (six GPL-3.0-or-later, three
+  GPL-3.0-only, one LGPL-3.0-only). Corrected here and in the fact sheet.
+- **The game started off screen.** Insert and run focused the screen without
+  scrolling, which is right for Start but wrong here: the button sits below the
+  screen, so at a desktop size the canvas was hundreds of pixels above the
+  window and the visitor typed into a game they could not see. The screen now
+  scrolls into view, only as far as needed and at the page's own scroll speed,
+  which is instant for a visitor who asks for reduced motion. The browser check
+  scrolls the screen away first and fails if it is not back in view.
+- **A race.** While a library disc downloaded, the visitor's own controls stayed
+  usable, and a file picked in that moment was replaced when the download
+  finished. Each insert now takes a ticket, and one that finishes after a later
+  insert has started is dropped. Unit tests drive the drive's code with a fake
+  page and a download held open, and fail without the ticket.
+- **Smaller corrections.** Quotes cut short now end in "...". Sparse Invaders
+  quotes the source's "version 3 ... or any later version" notice, which every
+  source file carries, with the older "not for profit" diary note quoted in full
+  in its README. Hard Hat Harry 2's README says why its year is 2012 though its
+  title screen shows 2011. Blinkenlights' README no longer says nothing was
+  changed, since `make.sh` was run with `python3`. The edge now names the disc
+  images as plain bytes in `_headers`. The test of titles to avoid also refuses
+  a disc whose image or licence comes from a mirror, and a new test fails on any
+  file in a disc's folder that its README does not list with its SHA-256.
+- The branch was merged with main, which had moved on, and this entry's order
+  moved past the new entries there.

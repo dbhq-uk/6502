@@ -13,7 +13,7 @@ This is other people's software, redistributed here under its own licence, not u
 
 ## The licence, as its author states it
 
-Seen on 2026-10-04, in the Retro Software page; the disc itself carries the licence as $.COPYING (https://www.retrosoftware.co.uk/wiki/index.php?title=Farmyard_Fun), verbatim with its line breaks joined:
+Seen on 2026-10-04, in its Retro Software page (https://www.retrosoftware.co.uk/wiki/index.php?title=Farmyard_Fun), verbatim with its line breaks joined:
 
 > Farmyard Fun by Mark W Licence GNU GPLv3 license
 

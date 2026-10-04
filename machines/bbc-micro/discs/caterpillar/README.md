@@ -15,7 +15,7 @@ This is other people's software, redistributed here under its own licence, not u
 
 Seen on 2026-10-04, in LICENSE in the repository (https://github.com/newell-paul/caterpillar-assembler/blob/24a99039d428a00322b410b8393a4414c62515f2/LICENSE), verbatim with its line breaks joined:
 
-> MIT License Copyright (c) 1983, 2026 Paul Newell
+> MIT License Copyright (c) 1983, 2026 Paul Newell ...
 
 ## Files
 

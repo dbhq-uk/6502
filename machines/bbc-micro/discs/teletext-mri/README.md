@@ -15,7 +15,7 @@ This is other people's software, redistributed here under its own licence, not u
 
 Seen on 2026-10-04, in LICENSE in the repository (https://github.com/picosonic/teletext_mri/blob/25da3272a3abc1a2878740a58d58b7bd1c3795a9/LICENSE), verbatim with its line breaks joined:
 
-> MIT License Copyright (c) 2020 Jasper Renow-Clarke
+> MIT License Copyright (c) 2020 Jasper Renow-Clarke ...
 
 ## Files
 

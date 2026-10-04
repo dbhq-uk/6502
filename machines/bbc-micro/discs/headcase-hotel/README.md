@@ -15,7 +15,7 @@ This is other people's software, redistributed here under its own licence, not u
 
 Seen on 2026-10-04, in LICENSE in the repository (https://github.com/sassquad/headcasehotel/blob/377478c56232da8855457201f346364b126e2306/LICENSE), verbatim with its line breaks joined:
 
-> The MIT License (MIT) Copyright (c) 1995, 2016, 2021 Stephen Scott Permission is hereby granted, free of charge, to any person obtaining a copy
+> The MIT License (MIT) Copyright (c) 1995, 2016, 2021 Stephen Scott Permission is hereby granted, free of charge, to any person obtaining a copy ...
 
 ## Files
 

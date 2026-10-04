@@ -35,7 +35,7 @@ Nothing. The image is byte for byte the file at the address above, taken out of 
 
 ## Caveats
 
-The title screen credits the author under an earlier name; the Retro Software page credits Sarah Walker today, and so does this site.
+The title screen credits the author under an earlier name; the Retro Software page credits Sarah Walker today, and so does this site. The year is 2012, though the title screen shows (C) 2011: the source says "Copyright 2012", the image inside the download is dated 31 January 2012, and the Retro Software page's design notes have 2011 struck through and 2012 written after it.
 
 ## How it runs on the site
 

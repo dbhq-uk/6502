@@ -13,9 +13,9 @@ This is other people's software, redistributed here under its own licence, not u
 
 ## The licence, as its author states it
 
-Seen on 2026-10-04, in README in the source archive; each source file says "either version 3 of the License, or (at your option) any later version" (https://www.retrosoftware.co.uk/wiki/images/f/fd/SparseInvaders_1_1_source.zip), verbatim with its line breaks joined:
+Seen on 2026-10-04, in Main.txt in the source archive (all fifteen source files carry the same notice) (https://www.retrosoftware.co.uk/wiki/images/f/fd/SparseInvaders_1_1_source.zip), verbatim with its line breaks joined:
 
-> Copyright (C) 2008,2009 Neil Beresford. All rights reserved. With code contributions from Pitfall Jones, Steve O'Leary and Paul Davis. This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License. See the LICENSE file.
+> Sparse Invaders is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
 
 The author's Retro Software page (https://www.retrosoftware.co.uk/wiki/index.php?title=Sparse_Invaders, last edited on 21 March 2012) says, verbatim: "This software is licensed under the GNU GPLv3 license.".
 
@@ -35,7 +35,7 @@ Nothing. The image is byte for byte the file at the address above, taken out of 
 
 ## Caveats
 
-An earlier diary entry on the same Retro Software page, written before the source was released, says "I am going for a free licence, however the source is not to used for profit type ventures." The source was then released under the GPL, which allows any use, and the page's licence section says GPLv3; the later licence is taken as the author's decision [inferring]. This site sells nothing.
+The source archive's README says, verbatim with its line breaks joined: "Copyright (C) 2008,2009 Neil Beresford. All rights reserved. With code contributions from Pitfall Jones, Steve O'Leary and Paul Davis. This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License. See the LICENSE file." An earlier diary entry on the same Retro Software page, dated 17 Feb 2009, before the source was released, says in full: "A little request here, as I will be placing the source code on site soon, has anyone any licence text I can use for the source? I am going for a free licence, however the source is not to used for profit type ventures." The source was then released under the GPL, which allows any use, every source file says version 3 or any later version, and the page's licence section says GPLv3; the later licence is taken as the author's decision [inferring]. This site sells nothing. The released disc's game code is the source's, with a relocator in front; its BASIC loader, with the Retro Software loading screen, is the site's house loader and is not in the source archive.
 
 ## How it runs on the site
 
