@@ -48,8 +48,14 @@
 // Once the machine runs, Insert in drive 0 fetches the chosen image from this
 // site, discs/<slug>.ssd beside the machine's files, and puts it in like a
 // file; Insert and run does that and then SHIFT and BREAK, through the host's
-// key queue (BbcHost.ShiftBreak), so the DFS runs the disc's !BOOT. A disc
+// key queue (BbcHost.ShiftBreak), so the DFS runs the disc's !BOOT, and the
+// screen is brought into view, since the keyboard is now the game's. A disc
 // from the library is then a disc like any other: Save disc downloads it.
+//
+// LATEST WINS. Fetching a library disc, or reading a file, takes a moment, and
+// the other disc controls stay usable meanwhile. Each insert takes a ticket;
+// one that finishes after a later insert has started is dropped, so a file the
+// visitor picks while a library disc downloads is not then replaced by it.
 //
 // For the site's browser check, once running the panel carries `panel.bbc`:
 // `screenRow(n)` is mode 7 text row n read from screen memory, and `host` is
@@ -354,7 +360,8 @@ function library(panel) {
   show();
 }
 
-function disc(panel, bbc, { screen, letGo }) {
+// Exported for tests/bbc-micro.test.mjs, which drives it with a fake panel.
+export function disc(panel, bbc, { screen, letGo }) {
   const insert = panel.querySelector('[data-bbc-insert]');
   const file = panel.querySelector('[data-bbc-file]');
   const blank = panel.querySelector('[data-bbc-blank]');
@@ -363,6 +370,8 @@ function disc(panel, bbc, { screen, letGo }) {
   const protect = panel.querySelector('[data-bbc-protect]');
   const line = panel.querySelector('[data-bbc-drive]');
   let name = null;
+  // The ticket of the latest insert, eject or blank disc (LATEST WINS above).
+  let latest = 0;
 
   const describe = (text) => {
     line.textContent = text;
@@ -380,8 +389,12 @@ function disc(panel, bbc, { screen, letGo }) {
       describe(`${chosen.name} is ${chosen.size.toLocaleString('en-GB')} bytes, more than a disc holds (${MOST_BYTES.toLocaleString('en-GB')} bytes, 80 tracks on both sides), so it was not read.`);
       return;
     }
+    // A file refused above leaves any insert in progress alone; one that is read takes a ticket.
+    const ticket = ++latest;
     try {
-      const tracks = bbc.InsertDisc(DRIVE, new Uint8Array(await chosen.arrayBuffer()), kind === 'dsd', protect.checked);
+      const data = new Uint8Array(await chosen.arrayBuffer());
+      if (ticket !== latest) return;
+      const tracks = bbc.InsertDisc(DRIVE, data, kind === 'dsd', protect.checked);
       name = chosen.name;
       describe(`In drive 0: ${name}, ${tracks} tracks, ${kind === 'dsd' ? 'double' : 'single'} sided${protect.checked ? ', write-protected' : ''}.`);
     } catch (error) {
@@ -397,6 +410,7 @@ function disc(panel, bbc, { screen, letGo }) {
   // A file dropped anywhere on the page goes in the drive (prepare() listens).
   panel.putDisc = put;
   blank.addEventListener('click', () => {
+    latest++;
     bbc.BlankDisc(DRIVE, BLANK_TRACKS, false);
     bbc.SetDiscReadOnly(DRIVE, protect.checked);
     name = 'blank.ssd';
@@ -413,6 +427,7 @@ function disc(panel, bbc, { screen, letGo }) {
     setTimeout(() => URL.revokeObjectURL(url), 1000);
   });
   eject.addEventListener('click', () => {
+    latest++;
     bbc.EjectDisc(DRIVE);
     name = null;
     describe('Drive 0 is empty.');
@@ -429,9 +444,12 @@ function disc(panel, bbc, { screen, letGo }) {
     // The disc chosen when the button was pressed, even if the list changes while it is fetched.
     const slug = list.value;
     const { title, licence } = panel.querySelector(`[data-bbc-preset-disc="${slug}"]`).dataset;
+    const ticket = ++latest;
     run.disabled = only.disabled = true;
     try {
       const data = await bytes(`${panel.dataset.base}discs/${slug}.ssd`);
+      // Something else went in while this was fetched: that stays.
+      if (ticket !== latest) return;
       const tracks = bbc.InsertDisc(DRIVE, data, false, protect.checked);
       name = `${slug}.ssd`;
       const how = andRun ? 'started with SHIFT and BREAK.' : 'type *CAT to list it, or press Insert and run to start it.';
@@ -439,11 +457,16 @@ function disc(panel, bbc, { screen, letGo }) {
       if (andRun) {
         letGo();
         bbc.ShiftBreak();
-        // The disc is for playing: the keyboard goes to the machine.
+        // The disc is for playing: the keyboard goes to the machine, and the
+        // screen comes into view, so nobody types into a game they cannot see.
+        // 'nearest' leaves the page where it is when the screen is already in
+        // view, and 'auto' follows the page's own scroll-behavior, which is
+        // instant for a visitor who asks for reduced motion.
         screen.focus({ preventScroll: true });
+        screen.scrollIntoView({ block: 'nearest', behavior: 'auto' });
       }
     } catch (error) {
-      describe(`${title} could not be put in: ${error.message}`);
+      if (ticket === latest) describe(`${title} could not be put in: ${error.message}`);
     } finally {
       run.disabled = only.disabled = false;
     }

@@ -179,12 +179,12 @@ jobs:
           PASS=$(count pass); FAILED=$(count fail)
           echo "pass=${PASS:-unread} fail=${FAILED:-unread}"
           [ "${FAILED:-1}" = "0" ]
-          # 273 tests as at 4 Oct 2026, with the BBC Micro's preset discs (261
-          # before them, the same day). Adding tests is expected; losing them is
-          # the failure this floor catches.
+          # 280 tests as at 4 Oct 2026, after the review of the BBC Micro's
+          # preset discs (273 with the discs, 261 before them, the same day).
+          # Adding tests is expected; losing them is the failure this floor catches.
           # Raise the number when the suite grows, here and in the same step of
           # validate.yml, which must hold the same number.
-          [ "${PASS:-0}" -ge 273 ]
+          [ "${PASS:-0}" -ge 280 ]
 
       # The same floor as "Every machine file must be serving" below, checked on
       # the build itself, so a build that is missing a machine fails here and
@@ -317,7 +317,9 @@ jobs:
             esac
             COUNT=$((COUNT + 1))
           done
-          # 26 files as at 4 Oct 2026, 13 for each machine. The floor is what the
+          # 43 files as at 4 Oct 2026, with the preset discs: the KIM-1's 13 and
+          # the BBC Micro's 30 (three ROMs, ten framework files and 17 discs);
+          # 26 before the discs, 13 for each machine. The floor is what the
           # two must publish at the least: their ROMs (two halves for the KIM-1,
           # three for the BBC Micro) and, for each, the four runtime files
           # (dotnet.js, dotnet.native's .js and .wasm, dotnet.runtime.js),

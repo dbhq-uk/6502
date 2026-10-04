@@ -17,8 +17,9 @@
 // downloads the same bytes; and Break restarts the machine.
 //
 // Then the library of preset discs: Start fetched none of them; the default's
-// credit shows under the list; Insert and run fetches it from this site, puts it
-// in drive 0 and starts it with SHIFT and BREAK, and the machine leaves BASIC's
+// credit shows under the list; with the page scrolled so the screen is out of
+// view, Insert and run fetches it from this site, puts it in drive 0, starts it
+// with SHIFT and BREAK and brings the screen into view, and the machine leaves BASIC's
 // mode 7 for the disc's own screen, in colour; choosing another disc shows its
 // credit instead; Insert in drive 0 puts a disc in without starting it, and
 // *CAT lists it; Insert and run starts a second disc over the first and its
@@ -251,8 +252,28 @@ export async function checkBbcMicro({ browser, watch, problems, origin }) {
   };
   const inDrive = (name) => page.waitForFunction((n) => document.querySelector('[data-bbc]').dataset.disc === n, name, { timeout: 30_000 }).then(() => true, () => false);
 
+  // The page scrolled down to the disc drive, so the screen is out of view above: Insert and
+  // run must bring it back, or the visitor types into a game they cannot see.
+  const canvasBox = () => page.evaluate(() => {
+    const r = document.querySelector('[data-bbc-canvas]').getBoundingClientRect();
+    return { top: Math.round(r.top), bottom: Math.round(r.bottom), height: innerHeight };
+  });
+  await page.evaluate(() => {
+    const button = document.querySelector('[data-bbc-preset-run]');
+    window.scrollTo({ top: button.getBoundingClientRect().top + scrollY - 120, behavior: 'instant' });
+  });
+  const away = await canvasBox();
+  if (!(away.bottom < 0)) problems.push(`bbc: the check could not scroll the screen out of view (${JSON.stringify(away)})`);
   const t2 = Date.now();
   await page.locator('[data-bbc-preset-run]').click();
+  let seen = await canvasBox();
+  const inView = (b) => b.top >= 0 && b.bottom <= b.height;
+  for (let i = 0; i < 20 && !inView(seen); i++) {
+    await page.waitForTimeout(150);
+    seen = await canvasBox();
+  }
+  console.log(`bbc: the screen before Insert and run ${JSON.stringify(away)}, after ${JSON.stringify(seen)}: ${inView(seen) ? 'in view' : 'NOT IN VIEW'}`);
+  if (!inView(seen)) problems.push(`bbc: after Insert and run the screen is not in view (${JSON.stringify(seen)})`);
   if (!(await inDrive(`${first}.ssd`))) problems.push(`bbc: Insert and run did not put ${first} in drive 0`);
   console.log(`bbc: Insert and run: "${await page.locator('[data-bbc-drive]').innerText()}"; the screen has focus: ${await page.evaluate(() => document.activeElement?.hasAttribute('data-bbc-screen') ?? false)}`);
   if (await waitFor(async () => (await mode()) !== 7 && (await colours()) > 2, `${first} did not leave BASIC's mode 7 for a screen of its own`)) {

@@ -35,7 +35,7 @@ const section = (id) => {
 // The titles docs/bbc-micro/facts/discs.md says to avoid: commercial, non-commercial,
 // no rights-holder statement, someone else's content, or hosted only by a mirror.
 const AVOID = [
-  'Hyper Viper', 'Cross Chase', 'Nursery Rhyme', 'Nyan', 'Arcade Adventure Design Kit', 'Repton', 'Zap', 'Usborne', 'Acornsoft', 'Welcome',
+  'Hyper Viper', 'Cross-Lib', 'Cross Chase', 'Nursery Rhyme', 'Nyan', 'Arcade Adventure Design Kit', 'Repton', 'Zap', 'Usborne', 'Acornsoft', 'Welcome',
   'Chuckie Egg', 'Exile', 'Galaforce', 'NICCC', 'Bad Apple', 'Karateka', 'Bomberman', 'Alan Partridge', 'BCP', 'Elite', 'Level 9',
   'Vertigo', 'Bird Strike', 'b-tracker', 'jBiplane', 'Wobble Colours', 'Free Fall', 'Reversi', 'Krystal Connection', 'Mountain Panic',
   'White Light', 'Beebout', 'Polymer Picker', 'Androidz', 'HEX survivors', 'one-liners',
@@ -93,6 +93,25 @@ test('every disc is kept with its licence text and a README, and a copyleft one 
   assert.ok(!DISC_LICENCES.some((id) => /NC|ND|proprietary|unknown/i.test(id)), 'a non-free licence is allowed');
 });
 
+test('every file in a disc\'s folder is listed in its README with its SHA-256, so nothing is there unaccounted for', () => {
+  for (const d of discs) {
+    const folder = path.join(REPO_ROOT, DISCS_DIR, d.slug);
+    const readme = fs.readFileSync(path.join(folder, 'README.md'), 'utf8');
+    const files = fs.readdirSync(folder, { recursive: true }).map(String).filter((f) => fs.statSync(path.join(folder, f)).isFile() && f !== 'README.md');
+    for (const f of files) {
+      // A file taken out of a disc image has a .inf beside it, listed with the file.
+      const listed = f.endsWith('.inf') ? f.slice(0, -4) : f;
+      const row = readme.split('\n').find((line) => line.startsWith(`| \`${listed.replaceAll(path.sep, '/')}\` |`));
+      assert.ok(row, `${d.slug}: ${f} is not in its README`);
+      if (!f.endsWith('.inf')) assert.ok(row.includes(sha256(fs.readFileSync(path.join(folder, f)))), `${d.slug}: ${f}'s SHA-256 in the README is not the file's`);
+    }
+  }
+  // CP/M-65 keeps the notice of every third-party part on its disc, lib6502's included.
+  for (const f of ['LICENSE', 'LICENSE.altirra-basic', 'LICENSE.pascal-m', 'LICENSE.lib6502']) assert.ok(fs.existsSync(path.join(REPO_ROOT, DISCS_DIR, 'cpm65', f)), `cpm65 has no ${f}`);
+  assert.match(fs.readFileSync(path.join(REPO_ROOT, DISCS_DIR, 'cpm65', 'LICENSE.lib6502'), 'utf8'), /Copyright \(c\) 2005 Ian Piumarta/);
+  assert.match(fs.readFileSync(path.join(REPO_ROOT, DISCS_DIR, 'blinkenlights', 'LICENSE.intro-to-interrupts'), 'utf8'), /Copyright \(c\) 2020 Kieran Connell/);
+});
+
 test('a manifest that breaks a rule is refused, with a sentence for each problem', () => {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), 'discs-'));
   try {
@@ -122,7 +141,28 @@ test('none of the titles the research said to avoid is bundled', () => {
     for (const d of discs) assert.ok(!`${d.title} ${d.slug}`.toLowerCase().includes(title.toLowerCase()), `${d.title} looks like ${title}, which is not to be bundled`);
   }
   // The avoid list here follows the fact sheet's.
-  for (const title of ['Hyper Viper', 'Elite', 'Level 9', 'Repton', 'Chuckie Egg', 'Usborne']) assert.ok(facts.includes(title), `discs.md no longer names ${title}`);
+  for (const title of ['Hyper Viper', 'Cross-Lib', 'Elite', 'Level 9', 'Repton', 'Chuckie Egg', 'Usborne']) assert.ok(facts.includes(title), `discs.md no longer names ${title}`);
+});
+
+// Hosting by an archive is not permission (AGENTS.md rule 4): the image and the licence must
+// come from the author's own site or repository, never from a mirror alone.
+const MIRRORS = /\b(bbcmicro\.co\.uk|stairwaytohell\.com|8bs\.com|archive\.org|mdfs\.net)\b/i;
+
+test('no disc\'s image or licence was taken from a mirror', () => {
+  for (const d of discs) {
+    for (const field of ['imageFrom', 'licenceUrl', 'sourceUrl']) assert.doesNotMatch(d[field], MIRRORS, `${d.slug}: ${field} is a mirror, ${d[field]}`);
+  }
+  assert.match('https://www.bbcmicro.co.uk/game.php?id=1', MIRRORS);
+  assert.match('http://www.stairwaytohell.com/x.ssd', MIRRORS);
+  assert.match('https://8bs.com/catalogue/tbi.htm', MIRRORS);
+});
+
+test('the edge serves the disc images as plain bytes: a rule in _headers for /machines/*/discs/*', () => {
+  const headers = fs.readFileSync(path.join(process.cwd(), 'public', '_headers'), 'utf8');
+  assert.match(headers, /^\/machines\/\*\/discs\/\*\n  Content-Type: application\/octet-stream$/m);
+  // The built site carries the same file, and the images are where the rule points.
+  assert.equal(fs.readFileSync(path.join(DIST, '_headers'), 'utf8'), headers);
+  for (const d of discs) assert.ok(fs.existsSync(path.join(DIST, 'machines', 'bbc-micro', DISCS_FOLDER, `${d.slug}.ssd`)));
 });
 
 test('no disc image is committed outside machines/bbc-micro/discs/', () => {
