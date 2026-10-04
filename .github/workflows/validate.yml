@@ -77,7 +77,7 @@ jobs:
         uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
         with:
           path: site/public/machines
-          key: machines-sdk-10.0.400-wasm-tools-10.0.401-${{ hashFiles('src/**', 'Directory.Build.props', 'tests/Dbhq.Cpu6502.TestSupport/Pins.cs', 'site/scripts/build-machines.mjs', 'site/src/lib/pins.mjs') }}
+          key: machines-sdk-10.0.400-wasm-tools-10.0.401-${{ hashFiles('src/**', 'Directory.Build.props', 'tests/Dbhq.Cpu6502.TestSupport/Pins.cs', 'site/scripts/build-machines.mjs', 'site/src/lib/pins.mjs', 'site/src/lib/machines.mjs') }}
       # The SDK is pinned here, not left at 10.0.x, because a workload version
       # belongs to one SDK feature band: 10.0.401 is a 10.0.400 band set.
       - if: steps.cache.outputs.cache-hit != 'true'
@@ -91,10 +91,11 @@ jobs:
         uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
           node-version: '22.22'
+      # The KIM-1 only, for now: the BBC Micro is published here once its page exists.
       - if: steps.cache.outputs.cache-hit != 'true'
         name: Build the machines and fetch their ROMs
         working-directory: site
-        run: node scripts/build-machines.mjs
+        run: node scripts/build-machines.mjs kim-1
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: machines
@@ -138,10 +139,11 @@ jobs:
           PASS=$(count pass); FAILED=$(count fail)
           echo "pass=${PASS:-unread} fail=${FAILED:-unread}"
           [ "${FAILED:-1}" = "0" ]
-          # 193 tests as at 2 Oct 2026. Adding tests is expected; losing them is
+          # 215 tests as at 4 Oct 2026 (193 on 2 Oct, then the shared machine
+          # host's tests and the build script's). Adding tests is expected; losing them is
           # the failure this floor catches. Raise the number when the suite grows,
           # here and in the same step of deploy-site.yml, which must hold the same number.
-          [ "${PASS:-0}" -ge 193 ]
+          [ "${PASS:-0}" -ge 215 ]
       # The KIM-1 page in a real browser: the built site served on 127.0.0.1
       # with its own CSP, the try-it program clicked in through the page's own
       # keypad, and the digits read back. Then the page's photograph loads, and

@@ -32,7 +32,7 @@ test('the KIM-1 is running in the real registry, its page is built, and the mach
 test('the WebAssembly the page loads was built into the site: the loader, the runtime and the assemblies', () => {
   assert.ok(fs.existsSync(framework), 'dist/machines/kim-1/_framework is missing: run `npm run machines` before the build');
   const names = fs.readdirSync(framework);
-  assert.ok(names.includes('dotnet.js'), 'no dotnet.js, the loader kim-1.js imports');
+  assert.ok(names.includes('dotnet.js'), 'no dotnet.js, the loader machine-host.js imports');
   for (const pattern of [/^dotnet\.native\.\w+\.wasm$/, /^dotnet\.native\.\w+\.js$/, /^dotnet\.runtime\.\w+\.js$/, /^Dbhq\.Machines\.Kim1\.Wasm\.\w+\.wasm$/, /^Dbhq\.Machines\.Kim1\.\w+\.wasm$/, /^Dbhq\.Cpu6502\.\w+\.wasm$/]) {
     assert.ok(names.some((n) => pattern.test(n)), `no file matching ${pattern}`);
   }
@@ -62,9 +62,16 @@ test('the page loads its driver, which loads the machine from the folder the pag
   assert.match(html, /<script type="module" src="\/kim-1\.js"><\/script>/);
   assert.match(html, /data-base="\/machines\/kim-1\/"/);
   const driver = fs.readFileSync(path.join(process.cwd(), 'public', 'kim-1.js'), 'utf8');
-  assert.match(driver, /import\(`\$\{base\}_framework\/dotnet\.js`\)/);
+  // The runtime is loaded by the shared host, machine-host.js, which the driver
+  // imports and hands the base and the assembly to (moved there in task 13 of
+  // the BBC Micro plan; the same two checks, on the file that now does each).
+  const host = fs.readFileSync(path.join(process.cwd(), 'public', 'machine-host.js'), 'utf8');
+  assert.match(driver, /^import \{ startMachine \} from '\/machine-host\.js';$/m);
+  assert.match(driver, /startMachine\(\{\s*panel,\s*base,/);
+  assert.match(host, /import\(`\$\{base\}_framework\/dotnet\.js`\)/);
   for (const rom of kim1Roms()) assert.ok(driver.includes(`\${base}${rom.file}`), `kim-1.js does not load ${rom.file}`);
-  assert.match(driver, /getAssemblyExports\('Dbhq\.Machines\.Kim1\.Wasm'\)/);
+  assert.match(driver, /assembly: 'Dbhq\.Machines\.Kim1\.Wasm',\s*hostClass: 'Kim1Host',/);
+  assert.match(host, /getAssemblyExports\(assembly\)/);
 });
 
 test('the page runs the machine at the clock in its registry entry, never a typed one', () => {
