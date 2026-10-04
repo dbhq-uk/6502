@@ -62,13 +62,50 @@ and run in a scratch folder:
 - the same loop with one page that never answers 200 failed after eighteen
   tries.
 
-What those runs do not show is the step against the real edge. That is shown by
-the next real deploy, and this entry will say what it did.
+What those runs do not show is the step against the real edge. The next real
+deploy showed it, and it showed a gap.
+
+## The next deploy: the same race, in the step that was not hardened
+
+The preset discs merged that evening and the deploy ran with the new checks. The
+page check, now patient, passed, and so did the new count of the build's machine
+files. Then "Every machine file must be serving" failed: two of the new
+WebAssembly files and three of the new discs answered 404 at the moment of
+checking, while the other thirty-eight files, which already existed or had
+arrived, answered 200. A run of the same commands by hand against the live site
+a few minutes later found all seventeen discs at the right size, both
+WebAssembly files served as `application/wasm`, the disc images served as
+`application/octet-stream`, and a browser check of the preset flow on the live
+page passed with no console errors or failed requests. So the site was right and
+the check was early again.
+
+The first fix covered one step, the page check. The race belongs to every check
+that runs after the deploy and looks for something new, so it was wrong to patch
+the one that had failed. The machine-readable files, the machine files and the
+response headers now wait the same ninety seconds, each try with its own
+cache-buster, and a machine file is retried until it answers 200 **with the
+right content type**, so a late file cannot pass on the wrong type. They were
+tested the same way as the page check on 4 October 2026: a local server that
+answered 404 to the first three tries of each file passed with each retry
+printed; a file that never arrives failed after eighteen tries; and the headers
+step passed once the server began sending its three headers on the fourth try.
+
+## What was chosen over
+
+- **A longer fixed wait after the deploy step** was rejected again: it costs the
+  same time on every deploy and is still wrong on a bad day.
+- **Waiting on Cloudflare's API for the deployment to be live** was rejected
+  again: it adds a dependency inside a step that holds the token, to avoid
+  sending a few more requests.
 
 ## Mistakes
 
 - **The first deploy of a large change was treated as a pass for the site and a
   failure for the workflow, and it took a manual run of the check's commands to
-  tell them apart.** A red run that skips the four checks after it says less than
-  it looks. The retry makes a late page a delay, so a red run now means a page
-  did not arrive.
+  tell them apart.** A red run that skips the checks after it says less than it
+  looks. The retry makes a late page a delay, so a red run now means a page did
+  not arrive.
+- **The first fix was one step wide.** It was written for the check that had
+  failed, and the next deploy failed in the neighbouring one for the same reason.
+  When a failure has a cause, the fix belongs to everything that shares the
+  cause.
