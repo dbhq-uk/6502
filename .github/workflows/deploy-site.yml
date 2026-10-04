@@ -289,8 +289,21 @@ jobs:
       - name: The machine-readable files must be serving
         run: |
           set -euo pipefail
+          # A file that is not 200 is tried again for about 90 seconds first: the
+          # deploy step returns before the new version has reached the edge, and
+          # a file new in this deploy can answer 404 for a few seconds (the BBC
+          # Micro's two merges on 4 Oct 2026 both met it). Each try has its own
+          # cache-buster. A file that never reaches 200 still fails.
           for f in sitemap-index.xml sitemap-0.xml robots.txt analytics.js consent.js machines-table.js table-sort.js chip.js kim-1.js machine-host.js bbc-micro.js bbc-keys.js bbc-audio.js model-loader.js models/kim-1.js models/kim-1-tracks.webp; do
-            CODE=$(curl -s --max-time 20 --retry 3 --retry-delay 5 -o /dev/null -w "%{http_code}" "https://6502.dbhq.uk/${f}?cb=${GITHUB_SHA}")
+            TRY=0
+            while :; do
+              CODE=$(curl -s --max-time 20 --retry 3 --retry-delay 5 -o /dev/null -w "%{http_code}" "https://6502.dbhq.uk/${f}?cb=${GITHUB_SHA}-${TRY}")
+              [ "$CODE" = "200" ] && break
+              TRY=$((TRY + 1))
+              [ "$TRY" -le 18 ] || break
+              echo "${f} -> ${CODE}, trying again in 5 seconds (${TRY} of 18)"
+              sleep 5
+            done
             echo "${f} -> ${CODE}"
             [ "$CODE" = "200" ]
           done
@@ -306,11 +319,29 @@ jobs:
           FILES=$(find machines -type f ! -name index.html | sort)
           COUNT=0
           FAIL=0
+          # A file is tried again for about 90 seconds until it answers 200 with
+          # the right content type (see "The machine-readable files" above for
+          # why); each try has its own cache-buster. A file that never gets
+          # there still fails, exactly as before.
           for f in $FILES; do
-            OUT=$(curl -s --max-time 20 --retry 3 --retry-delay 5 -o /dev/null -w "%{http_code} %{content_type}" "https://6502.dbhq.uk/${f}?cb=${GITHUB_SHA}")
+            TRY=0
+            while :; do
+              OUT=$(curl -s --max-time 20 --retry 3 --retry-delay 5 -o /dev/null -w "%{http_code} %{content_type}" "https://6502.dbhq.uk/${f}?cb=${GITHUB_SHA}-${TRY}")
+              CODE=${OUT%% *}
+              TYPE=${OUT#* }
+              GOOD=1
+              [ "$CODE" = "200" ] || GOOD=0
+              case "$f" in
+                *.wasm) [[ "$TYPE" == application/wasm* ]] || GOOD=0 ;;
+                *.js) [[ "$TYPE" == *javascript* ]] || GOOD=0 ;;
+              esac
+              [ "$GOOD" = "1" ] && break
+              TRY=$((TRY + 1))
+              [ "$TRY" -le 18 ] || break
+              echo "${f} -> ${OUT}, trying again in 5 seconds (${TRY} of 18)"
+              sleep 5
+            done
             echo "${f} -> ${OUT}"
-            CODE=${OUT%% *}
-            TYPE=${OUT#* }
             [ "$CODE" = "200" ] || FAIL=1
             case "$f" in
               *.wasm) [[ "$TYPE" == application/wasm* ]] || { echo "  ${f} is not served as application/wasm"; FAIL=1; } ;;
@@ -339,7 +370,17 @@ jobs:
       - name: The response headers must be applied at the edge
         run: |
           set -euo pipefail
-          H=$(curl -sI --max-time 20 --retry 3 --retry-delay 5 "https://6502.dbhq.uk/?cb=${GITHUB_SHA}" | tr -d '\r')
+          # Tried again for about 90 seconds until the three headers are there:
+          # the new version, and its _headers, may not be at the edge yet.
+          TRY=0
+          while :; do
+            H=$(curl -sI --max-time 20 --retry 3 --retry-delay 5 "https://6502.dbhq.uk/?cb=${GITHUB_SHA}-${TRY}" | tr -d '\r')
+            if grep -qi '^strict-transport-security:' <<<"$H" && grep -qi '^content-security-policy:' <<<"$H" && grep -qi '^x-content-type-options: nosniff' <<<"$H"; then break; fi
+            TRY=$((TRY + 1))
+            [ "$TRY" -le 18 ] || break
+            echo "headers not all there yet, trying again in 5 seconds (${TRY} of 18)"
+            sleep 5
+          done
           echo "$H"
           grep -qi '^strict-transport-security:' <<<"$H"
           grep -qi '^content-security-policy:' <<<"$H"
