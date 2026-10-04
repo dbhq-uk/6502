@@ -38,6 +38,10 @@ The 6502 does exactly one read or one write on its bus every clock cycle. The
 core reproduces every one of them, in order, including the reads whose result
 the chip throws away. The other chips in a machine run in step with it, one
 cycle at a time.
+Where a machine's model is deliberately coarser than a cycle (the BBC Micro's
+video path reads screen memory a line at a time and applies a register write
+from the next character clocked), [`docs/known-differences.md`](docs/known-differences.md)
+says exactly what is and is not cycle-exact.
 
 That is checked, not claimed: the core is tested against Tom Harte's
 SingleStepTests, which record the bus activity of every opcode cycle by cycle.

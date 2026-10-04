@@ -397,7 +397,7 @@ public sealed class Crtc6845
         }
     }
 
-    /// <summary>Reads the register the address register names: R12 to R17 read back, the rest read 0.</summary>
+    /// <summary>Reads the register the address register names: R12 to R15 read back, and the rest read 0, the light pen registers R16 and R17 included because the BBC Micro leaves LPSTB unused.</summary>
     public byte ReadData() => _address switch
     {
         >= 12 and <= 15 => _r[_address],
