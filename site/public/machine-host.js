@@ -1,13 +1,13 @@
 // The part of a machine page that every machine shares: it loads the machine
 // (.NET WebAssembly), runs it in step with real time, and says how fast this
-// browser runs it. Each machine's own file (kim-1.js) draws the machine, takes
-// its keys and calls startMachine. An external module because the site's CSP
+// browser runs it. Each machine's own file (kim-1.js, bbc-micro.js) draws the
+// machine, takes its keys and calls startMachine. An external module because the site's CSP
 // allows no inline script.
 //
 // THE CONTRACT
 //
 //   const started = await startMachine({ panel, base, name, assembly, hostClass,
-//     load, clockMhz, clockOf, onFrame, say, speedEl });
+//     load, clockMhz, clockOf, onFrame, onPause, onResume, say, speedEl });
 //
 //   panel      The machine's element. The host writes two figures on it, once a
 //              second: panel.dataset.capacityMhz, how fast this browser runs the
@@ -23,10 +23,13 @@
 //              'Kim1Host'. It must have Cycles(), the cycles since power on, and
 //              Run(cycles), which runs at least that many (cycles is an int)
 //              and returns the cycles since power on.
-//   load       Called with that class once the runtime is up, to give the
-//              machine its ROMs and switch it on. It may be async; its errors
-//              are the host's failed load. The machine does not run until it
-//              returns.
+//   load       Called as load(host, runtime) once the runtime is up, to give the
+//              machine its ROMs and switch it on: host is that class, and
+//              runtime the .NET runtime's API, for a machine that hands the
+//              page its picture or its sound through functions the page
+//              registers with runtime.setModuleImports (the BBC Micro's do).
+//              It may be async; its errors are the host's failed load. The
+//              machine does not run until it returns.
 //   clockMhz   The machine's CPU clock, which every budget is counted in: 1 for
 //              the KIM-1, 2 for the BBC Micro.
 //   clockOf    Whose clock the sentences name; "the board's" unless given.
@@ -35,6 +38,11 @@
 //              the budget by part of an instruction), so a machine can drain its
 //              picture and its sound for exactly that much time; now is the
 //              frame's time stamp. Optional.
+//   onPause    Called when the loop stops running the machine: the page was
+//              hidden, or stop() was called. onResume is called when a hidden
+//              page is shown again and the loop carries on. Neither is called
+//              when the machine first starts. A machine with sound stops and
+//              starts it here, so a hidden tab falls silent. Both optional.
 //   say        say(text, state): the page's status line. The host calls it only
 //              when the machine cannot start: "The <name> could not start: <the
 //              reason>", with state "failed".
@@ -64,7 +72,7 @@
 
 export const MAX_FRAME_MS = 100;
 
-export async function startMachine({ panel, base, name, assembly, hostClass, load, clockMhz, clockOf = "the board's", onFrame, say, speedEl }) {
+export async function startMachine({ panel, base, name, assembly, hostClass, load, clockMhz, clockOf = "the board's", onFrame, onPause, onResume, say, speedEl }) {
   let host;
   try {
     const { dotnet } = await import(`${base}_framework/dotnet.js`);
@@ -72,7 +80,7 @@ export async function startMachine({ panel, base, name, assembly, hostClass, loa
     const exports = await runtime.getAssemblyExports(assembly);
     host = exports?.[hostClass];
     if (!host) throw new Error(`${assembly} exports no ${hostClass}`);
-    await load(host);
+    await load(host, runtime);
   } catch (error) {
     say(`The ${name} could not start: ${error.message}`, 'failed');
     return null;
@@ -86,6 +94,8 @@ export async function startMachine({ panel, base, name, assembly, hostClass, loa
   let wallCycles = 0;
   let pending = null;
   let stopped = false;
+  // True once the loop has stopped running the machine, so onResume follows only an onPause.
+  let paused = false;
 
   const frame = (now) => {
     pending = null;
@@ -131,10 +141,18 @@ export async function startMachine({ panel, base, name, assembly, hostClass, loa
     last = performance.now();
     busyMs = busyCycles = wallMs = wallCycles = 0;
     if (pending === null) pending = requestAnimationFrame(frame);
+    if (paused) {
+      paused = false;
+      onResume?.();
+    }
   };
   const pause = () => {
     if (pending !== null) cancelAnimationFrame(pending);
     pending = null;
+    if (!paused) {
+      paused = true;
+      onPause?.();
+    }
   };
   const visibility = () => {
     if (stopped) return;

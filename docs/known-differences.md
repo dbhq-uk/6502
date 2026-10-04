@@ -583,3 +583,35 @@ disc swap. `FdcEquivalenceTests` compares the lazy chip with a cycle-by-cycle
 oracle (`Oracle/ReferenceFdc8271.cs`), written separately from the same model,
 on its own, on the bus and through DFS; it pins the model, including the choices
 above, not the hardware.
+
+## The BBC Micro: its page in the browser, where it is not the machine
+
+The page (`site/public/bbc-micro.js`, on the host `BbcHost` in
+`src/Dbhq.Machines.BbcMicro.Wasm/`) puts a PC's keyboard, screen and speakers in
+front of the model. Where that differs from sitting at a Model B:
+
+- **Every key is held for at least 40 ms and rested 40 ms before the same key
+  goes down again** (`BbcKeyPresses`, 80,000 CPU cycles each). A browser can
+  report a key down and up in the same frame, with no machine time between, and
+  the OS, which reads the keyboard on its 100 Hz tick, would never see it. On a
+  real keyboard a tap that short is missed; here it counts. A key held longer is
+  held as long as it is held, so the OS's own auto-repeat is unchanged. Keys are
+  played in the order they came, so a key may still wait behind the hold of the
+  one before.
+- **Keys are mapped by where they are on a PC keyboard** (`site/public/bbc-keys.js`),
+  so some BBC keys have no PC key here: TAB (Tab moves the focus, so the page
+  never keeps the keyboard), SHIFT LOCK, and the red function keys f0 to f9 (the
+  browser keeps its function keys). CAPS LOCK is one press for each time the PC
+  key goes down, whatever the PC does with its own light.
+- **The picture is the framebuffer, shown four wide by three high,** with no
+  model of a television: no scan lines, no blur between lines, no glow, no
+  overscan and no curve. The framebuffer starts at the CRTC's first displayed
+  character, not at a fixed distance from sync, so the picture does not move when
+  a program moves the sync, as it would on a television (`Framebuffer`).
+- **The sound has its steady level taken off** by a high-pass filter in the
+  worklet (`site/public/bbc-audio.js`), standing in for the coupling capacitor on
+  the machine's output, whose real value is not modelled. It plays through a
+  short queue that is cut back when it grows past 0.15 s, so a long stall drops
+  sound rather than playing it late.
+- **One drive.** The model has both of the 8271's drives; the page offers drive 0
+  only.

@@ -1,0 +1,16 @@
+{
+  "about": "The program a visitor types into the BBC Micro on its page at 6502.dbhq.uk. The page shows these lines and what the screen shows after them, and BbcAcceptanceTests types the same lines into the machine and reads the screen back off its picture. Each line is typed as written and followed by RETURN. A number printed after a semicolon has no padding (BBC Microcomputer User Guide, PRINT), so the count follows the space in the string directly.",
+  "lines": [
+    "10 FOR I=1 TO 5",
+    "20 PRINT \"HELLO \";I",
+    "30 NEXT I",
+    "RUN"
+  ],
+  "shows": [
+    "HELLO 1",
+    "HELLO 2",
+    "HELLO 3",
+    "HELLO 4",
+    "HELLO 5"
+  ]
+}

@@ -42,7 +42,8 @@ const lines = [];
 // The boot: power on and run the real OS to the prompt. Timed, and the first
 // thing the runtime executes, so it includes the runtime warming up.
 if (mode === 7) {
-  bbc.Load(os, basic, dfs);
+  // The mode and the sample rate, the machine's defaults; an older build that takes three arguments ignores the rest.
+  bbc.Load(os, basic, dfs, 7, 48000);
 } else {
   bbc.LoadInMode(os, basic, dfs, mode);
 }

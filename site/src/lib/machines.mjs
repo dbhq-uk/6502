@@ -43,11 +43,25 @@ export function parseKeys(keys) {
   return names;
 }
 
-/** A machine's "try it" program, from machines/<id>/try-it.json, or null when it has none. */
+/**
+ * A machine's "try it" program, from machines/<id>/try-it.json, or null when it
+ * has none. The KIM-1's is steps of keypad keys, each checked here as
+ * Kim1Keystrokes.Parse reads them. The BBC Micro's is BASIC: `lines` to type,
+ * each followed by RETURN, and `shows`, what the screen shows after them, each
+ * line plain printable text.
+ */
 export function loadTryIt(id, root = REPO_ROOT) {
   const file = path.join(root, 'machines', id, 'try-it.json');
   if (!fs.existsSync(file)) return null;
   const program = JSON.parse(fs.readFileSync(file, 'utf8'));
+  if (id === 'bbc-micro') {
+    for (const name of ['lines', 'shows']) {
+      const list = program[name];
+      if (!Array.isArray(list) || list.length === 0) throw new Error(`machines/${id}/try-it.json: ${name} must be a list of lines`);
+      for (const line of list) if (typeof line !== 'string' || !/^[\x20-\x7e]+$/.test(line)) throw new Error(`machines/${id}/try-it.json: "${line}" in ${name} is not a line of plain printable text`);
+    }
+    return program;
+  }
   for (const step of program.steps) parseKeys(step.keys);
   return program;
 }

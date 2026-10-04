@@ -331,3 +331,45 @@ test('a page that starts hidden waits until it is shown', async (t) => {
   browser.frame(16);
   assert.deepEqual(machine.runs, [16_000]);
 });
+
+test('load is given the machine class and the .NET runtime, so a machine can register the functions it hands its picture and sound to', async (t) => {
+  const browser = fakeBrowser(t);
+  const machine = fakeMachine(browser, 5);
+  const given = [];
+  await start(browser, { exports: { FakeHost: machine }, load: (host, runtime) => given.push([host, runtime]) });
+  assert.equal(given.length, 1);
+  assert.equal(given[0][0], machine);
+  assert.equal(typeof given[0][1]?.getAssemblyExports, 'function', 'the second argument is not the runtime');
+});
+
+test('onPause is called when the page is hidden and onResume when it is shown again, once each, and neither when the machine first starts', async (t) => {
+  const browser = fakeBrowser(t);
+  const machine = fakeMachine(browser, 5);
+  const calls = [];
+  const { result } = await start(browser, { exports: { FakeHost: machine }, onPause: () => calls.push('pause'), onResume: () => calls.push('resume') });
+  browser.frame(16);
+  assert.deepEqual(calls, [], 'starting the machine is not a resume');
+  browser.hide();
+  browser.hide();
+  assert.deepEqual(calls, ['pause']);
+  browser.show();
+  browser.show();
+  assert.deepEqual(calls, ['pause', 'resume']);
+  // stop() pauses for good: one more pause, and showing the page again resumes nothing.
+  result.stop();
+  browser.hide();
+  browser.show();
+  assert.deepEqual(calls, ['pause', 'resume', 'pause']);
+});
+
+test('a page that starts hidden is not resumed when it is first shown: it was never paused', async (t) => {
+  const browser = fakeBrowser(t);
+  globalThis.document.hidden = true;
+  const machine = fakeMachine(browser, 5);
+  const calls = [];
+  await start(browser, { exports: { FakeHost: machine }, onPause: () => calls.push('pause'), onResume: () => calls.push('resume') });
+  browser.show();
+  browser.frame(16);
+  assert.deepEqual(calls, []);
+  assert.deepEqual(machine.runs, [16_000]);
+});

@@ -29,14 +29,17 @@ export function kim1Roms(source = fs.readFileSync(PINS_FILE, 'utf8')) {
 /**
  * The BBC Micro's three 16 KB ROMs, in the order BbcHost.Load takes them: the
  * operating system, BASIC and the Disc Filing System. Each with its name in the
- * Pins.cs constants (`rom`), the file name the page loads it by (the name it has
+ * Pins.cs constants (`rom`), what it is (`name`, as roms/README.md says), the
+ * file name the page loads it by (the name it has
  * in roms/bbc-micro/), its repository path, GitHub link and SHA-256.
  */
 export function bbcRoms(source = fs.readFileSync(PINS_FILE, 'utf8')) {
+  const names = { Os: 'MOS 1.20, the operating system', Basic: 'BBC BASIC 2', Dfs: 'DFS 1.20, the Disc Filing System' };
   return ['Os', 'Basic', 'Dfs'].map((rom) => {
     const relative = pin(`Bbc${rom}Path`, source);
     return {
       rom: rom.toLowerCase(),
+      name: names[rom],
       file: path.posix.basename(relative),
       path: relative,
       url: `https://github.com/dbhq-uk/6502/blob/main/${relative}`,

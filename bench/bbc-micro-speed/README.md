@@ -13,7 +13,7 @@ This file is how to run it again.
 
 | Path | What it is |
 | --- | --- |
-| `../../src/Dbhq.Machines.BbcMicro.Wasm/` | The machine as a WebAssembly app: `Load`, `LoadInMode`, `Run`, `Cycles`, `ScreenRow`, `Peek`. It holds no ROMs. |
+| `../../src/Dbhq.Machines.BbcMicro.Wasm/` | The machine as a WebAssembly app, the same one the BBC Micro's page runs: the bench calls `Load` (which takes the start-up mode and the sample rate as well as the ROMs), `LoadInMode`, `Run`, `Cycles`, `ScreenRow` and `Peek`. It holds no ROMs. |
 | `index.html`, `main.js` | The page. It fetches the three ROMs, boots the OS, checks the prompt is on the screen, then times the runs. |
 | `run-in-browser.mjs`, `package.json` | Reads the three ROMs from `roms/bbc-micro/`, checks each against its SHA-256 in `Pins.cs`, serves them with the page and a published copy of the app on `127.0.0.1`, and runs it in a headless Chrome, a fresh launch each time. |
 | `native/` | The same workload as a console program, in the solution so CI builds it. `--fingerprint` runs a scripted session (boot, a typed BASIC program that drives the user VIA, BREAK) and hashes every instruction and, every 100,000 cycles, all of RAM and every VIA register, so two builds can be shown to do the same thing. `--profile` compares the machine with the bare CPU on a flat copy of its memory. |

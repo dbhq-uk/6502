@@ -35,6 +35,11 @@
 // points mirrored. Then every photograph in the photographs section must load,
 // from this site.
 //
+// Then the BBC Micro, in the same browser and watched the same way:
+// scripts/browser-check-bbc.mjs says what it checks, on a build of the site with
+// the BBC Micro switched on in a preview of the registry, since the registry
+// itself still says planned.
+//
 //   node scripts/browser-check.mjs [--throttle N] [--measure seconds]
 //
 // --throttle N slows the browser's CPU N times (Chrome's own CPU throttling),
@@ -47,6 +52,7 @@ import { fileURLToPath } from 'node:url';
 import { chromium } from 'playwright-core';
 import sharp from 'sharp';
 import { loadTryIt, parseKeys } from '../src/lib/machines.mjs';
+import { checkBbcMicro } from './browser-check-bbc.mjs';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const site = path.resolve(here, '..');
@@ -84,17 +90,20 @@ const types = {
 };
 
 const headers = edgeHeaders();
-const server = http.createServer((req, res) => {
+// A built site served with the edge's headers: dist/ for the KIM-1, and the
+// BBC Micro's preview build for its section.
+const serve = (root) => http.createServer((req, res) => {
   const url = new URL(req.url, 'http://127.0.0.1');
-  let file = path.join(dist, path.normalize(decodeURIComponent(url.pathname)));
+  let file = path.join(root, path.normalize(decodeURIComponent(url.pathname)));
   if (fs.existsSync(file) && fs.statSync(file).isDirectory()) file = path.join(file, 'index.html');
-  if (!file.startsWith(dist) || !fs.existsSync(file)) {
+  if (!file.startsWith(root) || !fs.existsSync(file)) {
     res.writeHead(404).end();
     return;
   }
   res.writeHead(200, { ...headers, 'Content-Type': types[path.extname(file)] ?? 'application/octet-stream', 'Cache-Control': 'no-store' });
   fs.createReadStream(file).pipe(res);
 });
+const server = serve(dist);
 await new Promise((resolve) => server.listen(0, '127.0.0.1', resolve));
 const origin = `http://127.0.0.1:${server.address().port}`;
 
@@ -790,6 +799,9 @@ try {
   console.log(`phone, after it loses focus: touch-action "${await mtouch()}"`);
   if ((await mtouch()) !== 'pan-y pinch-zoom') problems.push('phone: touch-action was not restored when the model lost focus');
   await phone.close();
+
+  // ---- The BBC Micro ----
+  await checkBbcMicro({ browser, watch, problems, serve });
 } catch (error) {
   problems.push(error.message);
 } finally {

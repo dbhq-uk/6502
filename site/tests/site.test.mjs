@@ -138,10 +138,11 @@ test('there is no inline script: the CSP allows none', () => {
 // window's "Passed" labels (.win .k), which is a code colour and not a second
 // accent, and so does not count against the one fill. The focus rings are lime
 // too, as an interaction state: the model's is a rule of its own because focus
-// is what gives it the wheel, and a mouse click does not raise :focus-visible.
+// is what gives it the wheel, and a mouse click does not raise :focus-visible;
+// the BBC Micro's screen has one for the same reason, as focus gives it the keyboard.
 // Any other rule that takes the lime fails here,
 // so a third use has to be argued for in this test.
-const LIME_RULES = new Set(['.btn.pill', '.btn.pill:hover', '.win .k', ':focus-visible', '.data th button:focus-visible', '.model-stage[data-active]']);
+const LIME_RULES = new Set(['.btn.pill', '.btn.pill:hover', '.win .k', ':focus-visible', '.data th button:focus-visible', '.model-stage[data-active]', '.bbc-screen:focus']);
 
 test('the lime accent fills at most one element on any page, and its other uses are named', () => {
   for (const p of all) assert.ok((p.html.match(/class="[^"]*\bpill\b/g) ?? []).length <= 1, `${p.url} uses the lime more than once`);

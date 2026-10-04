@@ -8,11 +8,11 @@ Cloudflare Pages.
 cd site
 npm ci
 npm run results     # runs the whole test suite and writes src/data/results.json
-npm run machines    # builds the KIM-1's WebAssembly and copies in its ROM, into public/machines/
-node scripts/build-machines.mjs bbc-micro   # the same for any machine by id, or several: kim-1 bbc-micro
+npm run machines    # builds both machines' WebAssembly and copies in their ROMs, into public/machines/
+node scripts/build-machines.mjs bbc-micro   # the same for one machine by id, or several: kim-1 bbc-micro
 npm run dev         # http://127.0.0.1:4333/
 npm test            # builds the site, then checks it
-npm run browser-check   # runs the KIM-1 page in headless Chrome, after npm test has built dist/
+npm run browser-check   # runs the KIM-1's and the BBC Micro's pages in headless Chrome, after npm test has built dist/
 node scripts/page-weight.mjs /machines/kim-1/   # what a page loads when it opens, after a build
 node scripts/measure-kim1-photo.mjs <photo>     # the KIM-1 board's scale and size, off its main photograph's full-size original
 ```
@@ -53,10 +53,23 @@ of time; it takes a few minutes a machine. It writes `public/machines/<id>/`,
 which is git-ignored: the published WebAssembly and the machine's ROMs, read
 from `roms/` at the repository root and checked against the SHA-256 pinned in
 `tests/Dbhq.Cpu6502.TestSupport/Pins.cs`, every ROM before anything is
-published. `npm test` fails if the KIM-1's are missing. The machines it knows,
+published. `npm test` fails if either machine's are missing. The machines it knows,
 with their projects and ROMs, are `MACHINE_BUILDS` in `src/lib/machines.mjs`. `npm run browser-check` needs
 Google Chrome (`CHROME_PATH` to use another); it serves `dist/` on `127.0.0.1`
 with the site's own CSP and closes the server when it is done.
+
+**The BBC Micro's page before it counts.** The registry lists the BBC Micro as
+planned until its photograph is chosen, so the site that deploys has no page for
+it, though its files are published. Its page is built and checked through a
+preview: with `REGISTRY_PREVIEW=tests/fixtures/bbc-micro-running.json` set, the
+build reads the registry with that file's fields laid over the BBC Micro's record
+(`loadRegistry` in `src/lib/registry.mjs`). `tests/bbc-page.test.mjs` builds the
+site that way into a temporary folder, checks the page, and runs the whole suite
+against that build (`SITE_DIST` points the tests at it), and the browser check's
+BBC section (`scripts/browser-check-bbc.mjs`) builds and serves it the same way.
+No workflow sets the variable, and `bbc-page.test.mjs` fails if one does. When
+the registry says running, copy the fixture's fields across (not its stand-in
+photograph), delete the fixture, and point both at `dist/`.
 
 ## Where everything comes from
 
@@ -111,8 +124,10 @@ and the page shows it, credited. A 3D model is optional and per machine: see
 | `machines.test.mjs` | The machines and chips tables match the registry; only a running machine is linked (rules tested on a made-up registry as well as the real one); the filters are hidden until the script runs; the sort comparison puts blanks last; the family page renders the repository document |
 | `mirrors.test.mjs` | Every file the tests and the build fetch comes from a `dbhq-uk` repository, and every pin is a full commit (AGENTS.md rule 3) |
 | `machine-page.test.mjs` | The KIM-1's page, built against the real registry: it is linked, its WebAssembly and both ROM halves were built in and the ROM matches its pins, the keypad has every key once in the board's layout, it degrades without JavaScript, the digits have a polite live summary, the program on the page is the acceptance test's own, it states the registry's rights text and the pinned sources, both workflows build the machine before the site, and it shows the registry's photograph from this site, alt-texted, sized and credited (author, linked source, licence as stated) |
-| `machine-host.test.mjs` | `machine-host.js` is run against a fake .NET runtime and a fake machine, in a fake browser whose clock and frames the test turns: it loads the runtime from the page's base and the machine class from its assembly before running anything; each frame runs the real time since the last at the clock, capped at a tenth of a second at 1 MHz and at 2 MHz; `onFrame` gets the cycles the machine really ran; the capacity and actual speed land on the panel and the three headroom sentences are the KIM-1 page's; a failed load says the machine could not start and runs nothing; `stop()` ends the loop; a hidden page is paused and its time away neither run nor counted |
-| `build-machines.test.mjs` | `scripts/build-machines.mjs` builds the KIM-1 and the BBC Micro by registry id from their own projects; the BBC Micro's ROMs are its pins in `Pins.cs`, in `BbcHost.Load`'s order, and match the files in `roms/`; a ROM that is not its pin, or is missing, is refused; an unknown machine or option stops it before any publish; every ROM is read before the first publish; CI and `npm run machines` publish the KIM-1 alone |
+| `machine-host.test.mjs` | `machine-host.js` is run against a fake .NET runtime and a fake machine, in a fake browser whose clock and frames the test turns: it loads the runtime from the page's base and the machine class from its assembly before running anything; each frame runs the real time since the last at the clock, capped at a tenth of a second at 1 MHz and at 2 MHz; `onFrame` gets the cycles the machine really ran; the capacity and actual speed land on the panel and the three headroom sentences are the KIM-1 page's; a failed load says the machine could not start and runs nothing; `stop()` ends the loop; a hidden page is paused and its time away neither run nor counted; `load` is given the runtime as well as the machine, and `onPause` and `onResume` are called when a hidden page pauses and comes back, never at the first start |
+| `bbc-micro.test.mjs` | The BBC Micro page's parts without a browser: the key table is the machine's `BbcKey`, every BBC key is pressed by a PC key or listed with a reason, Tab, the function keys, Alt and the Command key are never taken; the characters come from the OS ROM's key table; the page script, played made-up key events, maps by `event.code`, leaves browser shortcuts alone, ignores repeats, holds a BBC key while either of two PC keys is down, lets go of everything on blur, and takes Pause as BREAK; the sound worklet waits to fill, plays round zero, fades to silence when it runs dry, cuts a long queue back and flushes; the left-out parts and their issues, the try-it file, and the registry preview |
+| `bbc-page.test.mjs` | The BBC Micro's page. The deployed build has none, because the registry says planned, and no workflow uses a preview. A second build, with the registry preview that switches it on, has the page: its driver and ROMs, its WebAssembly built in, Start disabled without JavaScript and saying the download size read from the build, a canvas shown four by three with a line saying it models the picture, sound off until asked, the disc drive, the six left-out parts linked to their issues, the rights text, the try-it program from the acceptance test's own file, the symbol table from the ROM; the KIM-1's page is unchanged by it; and the whole site suite passes on that build |
+| `build-machines.test.mjs` | `scripts/build-machines.mjs` builds the KIM-1 and the BBC Micro by registry id from their own projects; the BBC Micro's ROMs are its pins in `Pins.cs`, in `BbcHost.Load`'s order, and match the files in `roms/`; a ROM that is not its pin, or is missing, is refused; an unknown machine or option stops it before any publish; every ROM is read before the first publish; CI and `npm run machines` publish both machines, each with a CI cache of its own keyed on its own projects |
 | `model.test.mjs` | The 3D models: the KIM-1 model's keypad is the machine's and the panel's, every part is on the board, the contacts set the scale, it decodes digits with the machine's own table, it holds no colour that is not a token, every model in the map has a module and a bundle inside its budget, the page loads only the small loader and never the model, the section is hidden without JavaScript and has its name, reset button, label and text alternative, the controls are in real text and in the aria-description and the wiring that keeps them from trapping the page is in place (focus decides the wheel and touch-action, Escape lets go), the camera's range and bounds, the lit underside, the double-click reset, the driver exposes the machine and announces every tap, the model never turns by itself, and the deploy checks the bundles; the track map is committed, greyscale, 1536 by 2048, under 400 KB, built beside the bundle and loaded only with it, made into colour, shine and relief from tokens with no glow, on the top face alone; Show tracks and Show tracks only are labelled toggle buttons with `aria-pressed`, wired as described; the map is credited under the model with the photograph's licence and written up in the photographs' README; and the tracing script clears every part the model draws |
 | `journal.test.mjs` | Every journal entry has its front matter, is built once with its own title, and is listed newest first; a link to another entry is a site link and a link to any other file goes to GitHub |
 | `site.test.mjs` | Every page has a title, description and canonical link (the 404 has none and is `noindex`), no mention of the dropped port goal, one `h1` and its landmarks; no dashes or forbidden names; British English; no inline script; every internal link resolves; every image in `src/assets/imagery/` is captioned and alt-texted as an illustration, and every photograph in `src/assets/photos/` is captioned as a photograph and credited, never as an illustration; the lime fills one element and its other uses are named |

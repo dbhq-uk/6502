@@ -133,6 +133,19 @@ const ON = {
   '.kim1-status': ['iron'],
   '.kim1-speed': ['iron'],
   '.steps kbd': ['iron'],
+  // The BBC Micro's page. Its lines sit on the iron panel; a disabled button is
+  // iron too, before the machine loads. The symbol table's keys are on iron
+  // over the black canvas, like the KIM-1 program's.
+  '.bbc .btn:disabled': ['iron'],
+  '.bbc-status': ['iron'],
+  '.bbc-line': ['iron'],
+  '.bbc-note': ['iron'],
+  '.bbc-note kbd': ['iron'],
+  '.bbc-speed': ['iron'],
+  '.bbc-disc legend': ['iron'],
+  '.bbc-protect': ['iron'],
+  '.bbc-symbols caption': ['void'],
+  '.bbc-symbols kbd': ['iron'],
   // The machine page's 3D model: its label sits on an iron tag over the canvas,
   // and its status line on the black canvas.
   '.model-tag': ['iron'],

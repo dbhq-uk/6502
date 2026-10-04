@@ -18,8 +18,33 @@ export const CORES = ['nmos', '2a03', '65c02', 'none'];
 export const PHOTOS_DIR = path.join(SITE_ROOT, 'src', 'assets', 'photos');
 const photoOnDisk = (file) => fs.existsSync(path.join(PHOTOS_DIR, file));
 
-export function loadRegistry(file = path.join(REPO_ROOT, 'machines', 'registry.json')) {
-  return JSON.parse(fs.readFileSync(file, 'utf8'));
+const REGISTRY_FILE = path.join(REPO_ROOT, 'machines', 'registry.json');
+
+/**
+ * The registry. With no file named, it is machines/registry.json, and if the
+ * environment variable REGISTRY_PREVIEW names a preview file (a path from
+ * site/), the preview's fields replace the registry's for the machines it names
+ * (applyPreview). A preview lets a machine page be built and tested before the
+ * registry says the machine runs: tests/fixtures/bbc-micro-running.json is the
+ * BBC Micro's, used by tests/bbc-page.test.mjs and scripts/browser-check.mjs. No
+ * workflow sets it, so a deployed site is always the registry's, and
+ * tests/bbc-page.test.mjs fails if one does.
+ */
+export function loadRegistry(file = REGISTRY_FILE, preview = process.env.REGISTRY_PREVIEW) {
+  const registry = JSON.parse(fs.readFileSync(file, 'utf8'));
+  if (file !== REGISTRY_FILE || !preview) return registry;
+  return applyPreview(registry, JSON.parse(fs.readFileSync(path.resolve(SITE_ROOT, preview), 'utf8')));
+}
+
+/**
+ * A copy of the registry with a preview's fields laid over it: `preview.machines`
+ * maps a machine's id to the fields that replace its own. Throws on an id the
+ * registry does not have, so a preview cannot add a machine.
+ */
+export function applyPreview(registry, preview) {
+  const fields = preview.machines ?? {};
+  for (const id of Object.keys(fields)) if (!registry.machines.some((m) => m.id === id)) throw new Error(`the preview names ${id}, which is not in the registry`);
+  return { ...registry, machines: registry.machines.map((m) => (fields[m.id] ? { ...m, ...fields[m.id] } : m)) };
 }
 
 const text = (v) => typeof v === 'string' && v.trim() !== '';
