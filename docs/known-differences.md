@@ -237,16 +237,18 @@ parts of the Model B are not there yet, and each shows in what the machine does:
   until task 8. Since then it draws modes 0 to 6 (the next section but one);
   mode 7's picture waits for the teletext chip, task 9. A read is Econet's
   INTON and answers as an absent fast device, `$FE`.
-- **No 8271 is fitted,** so `$FE80` reads `$FE`. The DFS reads that status
-  before it serves any call, sees bits 0 and 1 set, and stays silent, so the
-  `Acorn DFS` line a real Model B prints is missing from the boot screen
-  (`bus.md` section 4b, corrected in task 5).
+- **No 8271 was fitted** until task 12, so `$FE80` read `$FE`. The DFS reads
+  that status before it serves any call, saw bits 0 and 1 set, and stayed
+  silent, so the `Acorn DFS` line a real Model B prints was missing from the
+  boot screen (`bus.md` section 4b, corrected in task 5). Since task 12 the
+  8271 is there, its idle status is `$00`, and the line is printed.
 
 **How the tests treat it.** `BootTests` reads the screen as character codes from
 mode 7's screen memory, which needs no video chip, and expects the screen the
-ROMs print with no 8271: `BBC Computer 32K`, `BASIC` and `>` on rows 1, 3 and 5.
+ROMs print: `BBC Computer 32K` on row 1 and, since task 12, `Acorn DFS`,
+`BASIC` and `>` on rows 3, 5 and 7 (rows 3 and 5 held `BASIC` and `>` before).
 Tasks 7 and 8 put a working CRTC and video ULA in place of the stand-ins, and
-the 8271 arrives in task 12, which brings the `Acorn DFS` row back.
+task 12 fitted the 8271.
 
 ## The BBC Micro: the 6845 CRTC, where the model stops
 
@@ -526,3 +528,61 @@ start-up beep, the pitch table and a `SOUND` command's tone in the samples.
 `SoundEquivalenceTests` compares the lazy chip with a clock-by-clock oracle
 (`Oracle/ReferenceSn76489.cs`), written separately from the same model; it pins
 the model, including the choices above, not the hardware.
+
+## The BBC Micro: the 8271 and its discs, where the model stops
+
+**What.** `Fdc8271` is the minimal controller of `disc.md` section 3, which the
+fact sheet's probe showed DFS 1.20 cannot tell from a real drive, and
+`DiscImage` holds `.ssd` and `.dsd` files. Where the sources stop, the model
+chooses:
+
+- **Time.** Seeks are instant, the head never needs to load or settle and the
+  disc never spins up. Every drive command reaches its first byte, or its result
+  if it moves none, a fixed 2,000 cycles after it starts, the sheet's guess at a
+  plausible figure; DFS passed with anything from 0 to 60,000 (s1h). Bytes come
+  every 128 cycles, a sector after another with no gap, and the result one byte
+  time after the last byte. A real drive would wait for the sector to come round.
+- **Late data.** A byte not taken in its 128 cycles is withdrawn, so INT falls,
+  and the command ends one cycle later with `$0A`, so INT rises again. No source
+  gives the gap. It is there because the 6502 loses an NMI edge that lands in the
+  cycle it reads the IRQ vector's low byte (the core follows the transistor-level
+  model there), and without a fresh edge for the result DFS would wait for ever
+  for a command that had already ended; with it, DFS reads `$0A` and tries again.
+- **A result NMI can still be lost.** The same 6502 rule applies to the INT
+  that announces a result. If it rises in the very cycle an IRQ entry reads its
+  vector's low byte, which at the prompt is about one cycle in 13,000 (about 150
+  IRQs a second), DFS never hears of the result and waits. No test has met it.
+- **Not ready** is latched by a drive command that finds no disc, and the next
+  Read Drive Status reports not ready once and clears it (D1's footnote: issue it
+  twice to clear it on a ready drive). Ready is "a disc, the drive selected and
+  the motor bit set" in the drive control port; the index-pulse timer that makes
+  it on a real BBC is not modelled.
+- **Not modelled:** Scan, Read ID and Format end after the start delay with
+  result `$00` and move no data; deleted-data marks (Read Data and Deleted reads
+  as Read Data, Write Deleted Data writes ordinary data); DMA mode (the mode
+  register is stored and ignored); bad-track registers; 128-byte and 512-byte
+  sectors (none exist on these images, so asking for one gives `$18`); the
+  index, fault and count lines (they read 0); holding the chip in reset (a 1
+  written to `$FE82` resets it at once); an opcode not in the datasheet ends at
+  once and does nothing. `$FE82` and `$FE83` read `$FE`, as nothing drives the
+  bus. The drive control input port (special register `$22`) reads like Read
+  Drive Status, a guess, since D1 gives no layout and DFS never reads it.
+- **Power on and BREAK.** At power on the chip is as after a reset, with every
+  special register 0. BREAK leaves it alone: no source read says its reset pin
+  is on the reset line, and the DFS resets it through `$FE82` itself.
+- **Images.** A `.dsd` is read track interleaved, the layout the sheet calls the
+  most common (s4); a sequential one reads wrongly. An image shorter than its disc
+  is extended with zeros, as the sheet recommends, which has never been tried
+  against a real drive because no real disc is short. 40 or 80 tracks is decided
+  by the length alone.
+
+**How the tests treat it.** `Fdc8271Tests` asserts the sheet's chip test (s3),
+the status values DFS saw (s1b), not ready, write protect, sector not found, side
+select, late data and the head unloading, on the chip alone. `DiscImageTests`
+checks the image layout and the blank catalogue, and `DiscTests` the real DFS
+through the machine: `*CAT`, `*SAVE`, `*LOAD`, `*RUN`, `*INFO`, `*ACCESS`,
+`*TITLE`, `*OPT 4`, `*DELETE`, the error messages, the empty-drive poll and the
+disc swap. `FdcEquivalenceTests` compares the lazy chip with a cycle-by-cycle
+oracle (`Oracle/ReferenceFdc8271.cs`), written separately from the same model,
+on its own, on the bus and through DFS; it pins the model, including the choices
+above, not the hardware.

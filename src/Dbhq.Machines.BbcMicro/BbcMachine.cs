@@ -40,6 +40,20 @@ public sealed class BbcMachine
     /// </summary>
     public SoundBuffer Sound => Bus.Sound;
 
+    /// <summary>The 8271 floppy disc controller and its two drives.</summary>
+    public Fdc8271 Fdc => Bus.Fdc;
+
+    /// <summary>
+    /// Puts a disc in drive 0 or 1, or empties it with null. DFS keeps the catalogue it last read
+    /// and reads it again only after its ready test fails, which happens once the head has unloaded,
+    /// about 2.4 seconds after the last disc command (disc.md s2b); so a disc changed sooner shows
+    /// the old catalogue, as on a real BBC.
+    /// </summary>
+    public void Insert(int drive, DiscImage? image) => Bus.Fdc.Insert(drive, image);
+
+    /// <summary>Takes the disc out of drive 0 or 1 and returns it, or null if there was none.</summary>
+    public DiscImage? Eject(int drive) => Bus.Fdc.Eject(drive);
+
     /// <summary>
     /// Switches on: the power-on reset clears both VIAs, then the 6502 runs its reset sequence
     /// and starts at the vector in the OS ROM, <c>$D9CD</c> (fact sheet <c>bus.md</c> section 5).

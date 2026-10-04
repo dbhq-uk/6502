@@ -44,7 +44,7 @@ return;
 // The page's workload: boot for three seconds of machine time, check the prompt, then time
 // the runs. Prints the lines the page prints. Outside mode 7 the screen is pixels, so the
 // prompt check is the OS's own record, as on the page: the mode at &0355 and the text cursor
-// at &0318 and &0319, one column right of the > on row 5.
+// at &0318 and &0319, one column right of the > on row 7, below the DFS's line (task 12).
 static void Speed(BbcRoms roms, int runs, int cycles, int mode, string screen, string sound)
 {
     var machine = new BbcMachine(roms, new BbcOptions { StartupMode = mode });
@@ -55,9 +55,10 @@ static void Speed(BbcRoms roms, int runs, int cycles, int mode, string screen, s
 
     bool prompt = mode == 7
         ? Row(machine, 1).StartsWith("BBC Computer 32K", StringComparison.Ordinal)
-            && Row(machine, 3).StartsWith("BASIC", StringComparison.Ordinal)
-            && Row(machine, 5).StartsWith('>')
-        : machine.Bus.Peek(0x0355) == mode && machine.Bus.Peek(0x0318) == 1 && machine.Bus.Peek(0x0319) == 5;
+            && Row(machine, 3).StartsWith("Acorn DFS", StringComparison.Ordinal)
+            && Row(machine, 5).StartsWith("BASIC", StringComparison.Ordinal)
+            && Row(machine, 7).StartsWith('>')
+        : machine.Bus.Peek(0x0355) == mode && machine.Bus.Peek(0x0318) == 1 && machine.Bus.Peek(0x0319) == 7;
     Console.WriteLine("prompt " + (prompt ? "yes" : "no"));
     if (screen != "boot")
     {

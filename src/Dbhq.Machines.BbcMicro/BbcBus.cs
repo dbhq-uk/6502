@@ -74,6 +74,15 @@ namespace Dbhq.Machines.BbcMicro;
 /// ticked either. The system VIA hands it each byte when latch bit 0 falls, and it catches up to
 /// that cycle before taking it; its buffer catches it up to now whenever the buffer is read.
 /// </para>
+/// <para>
+/// <b>The 8271</b> (task 12) joins like the VIAs, but on the NMI line. Its INT drives the CPU's NMI
+/// (disc.md s1g), set in <see cref="Service"/> with the IRQ line, after the whole access. It names
+/// as its event each step of a running command, a byte or a result, at most one every 128 cycles,
+/// and nothing when it is idle, so an idle controller costs the bus nothing. Its registers are a
+/// 2 MHz device at $FE80-$FE9F, never stretched (bus.md s2a), and the decode repeats every eight
+/// bytes: within each eight, A2 set is the data register and A2 clear the chip's registers by A1
+/// and A0 (disc.md s1a, bus.md s1c).
+/// </para>
 /// </remarks>
 public sealed class BbcBus : IBus
 {
@@ -121,6 +130,9 @@ public sealed class BbcBus : IBus
         Sound = new SoundBuffer(options.SampleRate);
         SoundChip = new Sn76489(_clock, Sound);
         SystemVia.SoundWrite += SoundChip.Write;
+
+        // The floppy disc controller, whose INT is the CPU's NMI.
+        Fdc = new Fdc8271(_clock);
     }
 
     /// <summary>The keyboard, with its start-up links set from the options.</summary>
@@ -150,7 +162,10 @@ public sealed class BbcBus : IBus
     /// <summary>The sound chip's samples, made up to now when they are read.</summary>
     public SoundBuffer Sound { get; }
 
-    /// <summary>The CPU whose IRQ line the VIAs drive. The line is set at the end of the next access.</summary>
+    /// <summary>The 8271 floppy disc controller at $FE80-$FE9F, with its two drives. Its INT is the CPU's NMI.</summary>
+    public Fdc8271 Fdc { get; }
+
+    /// <summary>The CPU whose IRQ line the VIAs drive, and whose NMI line the 8271 drives. The lines are set at the end of the next access.</summary>
     public Cpu? Cpu
     {
         get => _cpu;
@@ -238,9 +253,9 @@ public sealed class BbcBus : IBus
     }
 
     /// <summary>
-    /// The power-on reset: both VIAs and the CRTC, the video ULA's registers to zero and the sound
-    /// chip to its power-on state. The latch IC32 and the ROM latch are not reset (via.md section
-    /// 3(a), bus.md section 6 item 4).
+    /// The power-on reset: both VIAs and the CRTC, the video ULA's registers to zero, the sound
+    /// chip to its power-on state and the 8271 as after its reset. The latch IC32 and the ROM latch
+    /// are not reset (via.md section 3(a), bus.md section 6 item 4).
     /// </summary>
     /// <remarks>
     /// The CRTC's /RES is taken to be on RST, the reset that power on and BREAK both make and
@@ -256,6 +271,7 @@ public sealed class BbcBus : IBus
         Crtc.Reset();
         VideoUla.PowerOn();
         SoundChip.PowerOn();
+        Fdc.PowerOn();
         ChipAccessed();
         Service();
     }
@@ -265,7 +281,8 @@ public sealed class BbcBus : IBus
     /// power-on circuit resets, so the OS can tell the two apart from its IER (bus.md section 5).
     /// Nor the video ULA, which has no reset pin; the OS writes both its registers again in the mode
     /// change every BREAK makes. Nor the sound chip, which has none either; the OS silences it at
-    /// every reset (via.md s4.7).
+    /// every reset (via.md s4.7). Nor the 8271: no source read says its reset pin is on the reset
+    /// line, and the DFS resets it through $FE82 itself (disc.md s2) [guessing].
     /// </summary>
     public void BreakReset()
     {
@@ -309,10 +326,13 @@ public sealed class BbcBus : IBus
             // have asked about every line end before then. A write may have moved the line end.
             _lineEnd = VideoUla.RenderLinesTo(now);
             Crtc.SyncIfDue();
-            clock.ChipEvent = Math.Min(Math.Min(SystemVia.NextEventCycle, UserVia.NextEventCycle), Crtc.NextEventCycle);
+            clock.ChipEvent = Math.Min(
+                Math.Min(SystemVia.NextEventCycle, UserVia.NextEventCycle),
+                Math.Min(Crtc.NextEventCycle, Fdc.NextEventCycle));
             if (_cpu is not null)
             {
                 _cpu.Irq = SystemVia.Irq || UserVia.Irq;
+                _cpu.Nmi = Fdc.Interrupt;
             }
         }
         else if (now >= _lineEnd)
@@ -417,8 +437,56 @@ public sealed class BbcBus : IBus
         // block (bus.md section 1c).
         >= 0x40 and <= 0x5F => ReadVia(SystemVia, offset),
         >= 0x60 and <= 0x7F => ReadVia(UserVia, offset),
+        >= 0x80 and <= 0x9F => ReadFdc(offset),
         _ => AbsentSheila(offset),
     };
+
+    /// <summary>
+    /// An 8271 read: status, result, or the data register at A2 set. The reset register and the
+    /// unused fourth address drive nothing, so they read as the bus floats for a fast device, $FE
+    /// [guessing: D1 lists no read there]. A status read changes nothing, so only the result and
+    /// data reads count as an access to the chip.
+    /// </summary>
+    private byte ReadFdc(int offset)
+    {
+        switch (offset & 7)
+        {
+            case 0:
+                return Fdc.ReadStatus();
+            case 1:
+                byte result = Fdc.ReadResult();
+                ChipAccessed();
+                return result;
+            case 2 or 3:
+                return AbsentSheila(offset);
+            default:
+                byte data = Fdc.ReadData();
+                ChipAccessed();
+                return data;
+        }
+    }
+
+    private void WriteFdc(int offset, byte value)
+    {
+        switch (offset & 7)
+        {
+            case 0:
+                Fdc.WriteCommand(value);
+                break;
+            case 1:
+                Fdc.WriteParameter(value);
+                break;
+            case 2:
+                Fdc.WriteReset(value);
+                break;
+            case 3:
+                return;
+            default:
+                Fdc.WriteData(value);
+                break;
+        }
+        ChipAccessed();
+    }
 
     private byte ReadVia(Via6522 via, int offset)
     {
@@ -473,6 +541,9 @@ public sealed class BbcBus : IBus
                 UserVia.Write(offset & 0x0F, value);
                 ChipAccessed();
                 break;
+            case >= 0x80 and <= 0x9F:
+                WriteFdc(offset, value);
+                break;
         }
     }
 
@@ -482,6 +553,12 @@ public sealed class BbcBus : IBus
         <= 0x07 => ReadCrtc(offset),
         >= 0x40 and <= 0x5F => SystemVia.Peek(offset & 0x0F),
         >= 0x60 and <= 0x7F => UserVia.Peek(offset & 0x0F),
+        >= 0x80 and <= 0x9F => (offset & 7) switch
+        {
+            0 or 1 => Fdc.Peek(offset & 7),
+            2 or 3 => AbsentSheila(offset),
+            _ => Fdc.Peek(4),
+        },
         _ => AbsentSheila(offset),
     };
 

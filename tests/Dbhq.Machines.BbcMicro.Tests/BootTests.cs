@@ -14,11 +14,12 @@ namespace Dbhq.Machines.BbcMicro.Tests;
 /// <c>$DBF2</c>, and the prompt <c>&gt;</c> from BASIC <c>$8B06</c>.
 /// </para>
 /// <para>
-/// <c>Acorn DFS</c> is not on the screen yet, and that is the ROM's doing. Before it serves any
+/// <c>Acorn DFS</c> is on the screen because the 8271 is fitted (task 12). Before it serves any
 /// call the DFS reads the 8271's status at <c>$FE80</c> and does nothing if either of its two
-/// low bits is set (DFS <c>$B495-$B49A</c>). No 8271 is fitted, so <c>$FE80</c> reads as an
-/// absent fast device, <c>$FE</c>, and the DFS stays silent, as a real Model B with the ROM and
-/// no controller would. The row comes back when the 8271 does.
+/// low bits is set (DFS <c>$B495-$B49A</c>). Until task 12 no 8271 was fitted, <c>$FE80</c> read
+/// as an absent fast device, <c>$FE</c>, and the DFS stayed silent, as a real Model B with the
+/// ROM and no controller would; an idle 8271 reads <c>$00</c> there. The drive is empty in these
+/// tests, and the DFS boots without touching it.
 /// </para>
 /// </remarks>
 public class BootTests(BootedModes booted) : IClassFixture<BootedModes>
@@ -28,7 +29,8 @@ public class BootTests(BootedModes booted) : IClassFixture<BootedModes>
     [Fact]
     public void ColdBootPrintsTheBannerAndTheBasicPromptInMode7()
     {
-        // The rows of BootScreen, then a blank row below the prompt (and its cursor).
+        // The rows of BootScreen, the DFS's line among them, then a blank row below the prompt
+        // (and its cursor).
         var s = new BbcSession(mode: 7).Boot();
         for (int row = 0; row < BootScreen.Rows.Count; row++)
         {
@@ -198,18 +200,18 @@ public class BootTests(BootedModes booted) : IClassFixture<BootedModes>
         // The expected rows are read out of the ROMs, as bus.md s4b sets them out, not copied from
         // what the machine printed: the banner from OS $C304 (to its zero) and $C317 (to its BEL),
         // BASIC's title at $8009 (to its zero) and the prompt from BASIC's LDA #$3E at $8B06. The
-        // DFS's line, for task 12, is at DFS $B3B4 (to its carriage return).
+        // DFS's line is at DFS $B3B4 (to its carriage return).
         Assert.Equal("BBC Computer 32K", BootScreen.Banner);
         Assert.Equal("BBC Computer", BootScreen.BannerAfterBreak);
         Assert.Equal("BASIC", BootScreen.Language);
         Assert.Equal(">", BootScreen.Prompt);
         Assert.Equal("Acorn DFS", BootScreen.Dfs);
 
-        // The layout of bus.md s4b: a blank row, the banner, a blank; at the end the language, a
-        // blank and the prompt. Whatever task 12 puts between them, these hold.
-        Assert.Equal(["", BootScreen.Banner, ""], BootScreen.Rows.Take(3));
-        Assert.Equal([BootScreen.Language, "", BootScreen.Prompt], BootScreen.Rows.TakeLast(3));
-        Assert.Equal(BootScreen.Rows.Count - 3, BootScreen.LanguageRow);
+        // The layout of bus.md s4b: a blank row, the banner, a blank, the DFS's line and a blank,
+        // then the language, a blank and the prompt.
+        Assert.Equal(["", BootScreen.Banner, "", BootScreen.Dfs, "", BootScreen.Language, "", BootScreen.Prompt], BootScreen.Rows);
+        Assert.Equal(5, BootScreen.LanguageRow);
+        Assert.Equal(7, BootScreen.PromptRow);
     }
 }
 
@@ -230,14 +232,14 @@ public static class BootScreen
     public static string Dfs => Text(BbcSession.Roms.Dfs, 0x33B4, 0x0D);
 
     /// <summary>
-    /// The rows from 0. Without the 8271 the DFS prints nothing at boot (bus.md s4b, task 5). When
-    /// task 12 fits the 8271, <see cref="Dfs"/> and a blank row come after row 2: add
-    /// <c>Dfs, "",</c> after the second blank below. That is the whole change: every boot test,
-    /// memory and picture, and every BASIC test takes its rows from this list
-    /// (<see cref="LanguageRow"/>, <see cref="PromptRow"/>), so <c>BASIC</c> moves to row 5 and the
-    /// prompt to row 7 in all of them.
+    /// The rows from 0. With the 8271 fitted the DFS prints <see cref="Dfs"/> and a blank row after
+    /// row 2 (bus.md s4b; task 5 found it silent without the 8271, task 12 fitted it). Every boot
+    /// test, memory and picture, and every BASIC test takes its rows from this list
+    /// (<see cref="LanguageRow"/>, <see cref="PromptRow"/>), so <c>BASIC</c> is on row 5 and the
+    /// prompt on row 7 in all of them. <c>Acorn DFS</c> is nine characters, so it does not wrap in
+    /// the twenty-column modes.
     /// </summary>
-    public static IReadOnlyList<string> Rows => ["", Banner, "", Language, "", Prompt];
+    public static IReadOnlyList<string> Rows => ["", Banner, "", Dfs, "", Language, "", Prompt];
 
     /// <summary>The language title's row.</summary>
     public static int LanguageRow => Rows.Count - 3;

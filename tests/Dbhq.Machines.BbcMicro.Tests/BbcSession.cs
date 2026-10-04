@@ -31,15 +31,11 @@ public sealed class BbcSession
     private static readonly Lazy<IReadOnlyDictionary<char, (BbcKey Key, bool Shift)>> LazyKeys = new(MakeKeys);
 
     /// <param name="mode">The screen mode the start-up links select, 0 to 7.</param>
-    /// <param name="disc">A disc image for drive 0. No drive is fitted yet, so it must be null.</param>
-    public BbcSession(int mode = 7, byte[]? disc = null)
+    /// <param name="disc">A disc for drive 0, or null for an empty drive.</param>
+    public BbcSession(int mode = 7, DiscImage? disc = null)
     {
-        if (disc is not null)
-        {
-            throw new NotSupportedException("The disc drive is not modelled yet.");
-        }
-
         Machine = new BbcMachine(Roms, new BbcOptions { StartupMode = mode });
+        Machine.Insert(0, disc);
     }
 
     /// <summary>The three ROMs from <c>roms/bbc-micro</c>, each checked against its pinned SHA-256.</summary>

@@ -53,20 +53,24 @@ let ms = performance.now() - t;
 lines.push(line('boot', bbc.Cycles() - before, ms));
 
 // The prompt must be on the screen, or the timed runs would measure something else.
-// Without the 8271 (task 12) the screen is: blank, BBC Computer 32K, blank, BASIC, blank, >.
+// With the 8271 (task 12) the screen is: blank, BBC Computer 32K, blank, Acorn DFS, blank,
+// BASIC, blank, >. A build from before task 12 has no DFS line, so BASIC is on row 3 and the
+// prompt on row 5; both are accepted, so old and new builds can be timed with this page.
 // In mode 7 that is read as text from screen memory. In another mode the screen is pixels, so
 // the check is the OS's own record: the mode at &0355, and the text cursor at &0318 and &0319
-// one column right of the > on row 5.
+// one column right of the > on the prompt's row.
 let prompt;
 if (mode === 7) {
   const rows = [];
   for (let r = 0; r < 8; r++) rows.push(bbc.ScreenRow(r).trimEnd());
   lines.push('screen ' + JSON.stringify(rows));
-  prompt = rows[5] === '>' && rows[1] === 'BBC Computer 32K' && rows[3] === 'BASIC';
+  const dfs = rows[3] === 'Acorn DFS';
+  const base = dfs ? 2 : 0;
+  prompt = rows[1] === 'BBC Computer 32K' && rows[3 + base] === 'BASIC' && rows[5 + base] === '>';
 } else {
   const os = { mode: bbc.Peek(0x355), x: bbc.Peek(0x318), y: bbc.Peek(0x319) };
   lines.push('os ' + JSON.stringify(os));
-  prompt = os.mode === mode && os.x === 1 && os.y === 5;
+  prompt = os.mode === mode && os.x === 1 && (os.y === 5 || os.y === 7);
 }
 lines.push('prompt ' + (prompt ? 'yes' : 'NO'));
 if (screen !== 'boot') {

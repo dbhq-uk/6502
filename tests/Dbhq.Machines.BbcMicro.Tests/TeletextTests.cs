@@ -470,7 +470,8 @@ public class TeletextTests
     [Fact]
     public void Mode7BootsWithTheBannerInTeletext()
     {
-        // The boot screen in mode 7 (the plan's constraints, task 5): row 1 reads the banner.
+        // The boot screen in mode 7 (the plan's constraints, task 5): row 1 reads the banner, and
+        // BASIC's title is on its row of BootScreen (row 5 since the 8271 let the DFS print).
         var s = new BbcSession(mode: 7).Boot(3_000_000);
         Framebuffer screen = s.Machine.Screen;
         long frames = screen.Frames;
@@ -481,7 +482,8 @@ public class TeletextTests
 
         Assert.True(screen.Frames >= frames + 2, "two frames did not complete");
         Assert.StartsWith("BBC Computer 32K", TeletextScreen.ReadRow(screen, 1));
-        Assert.Equal("BASIC", TeletextScreen.ReadRow(screen, 3).TrimEnd());
+        Assert.Equal(BootScreen.Dfs, TeletextScreen.ReadRow(screen, 3).TrimEnd());
+        Assert.Equal("BASIC", TeletextScreen.ReadRow(screen, BootScreen.LanguageRow).TrimEnd());
     }
 
     private static void RunRow(Teletext chip, byte[] codes)

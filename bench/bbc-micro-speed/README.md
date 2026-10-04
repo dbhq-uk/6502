@@ -23,7 +23,7 @@ This file is how to run it again.
 
 Power on, run the real MOS 1.20 and BBC BASIC for 6 million cycles (three seconds
 of machine time) to the prompt, check the screen reads `BBC Computer 32K`,
-`BASIC` and `>`, then time `Run(2_000_000)` five times. Each timed run is one
+`Acorn DFS` (since task 12 fitted the 8271), `BASIC` and `>`, then time `Run(2_000_000)` five times. Each timed run is one
 second of machine time, so the multiple of a real machine is the figure in MHz
 divided by two. The machine sits at the prompt, waiting for a key, while it is
 timed: that is the OS's idle loop and its 100 Hz interrupts, not a program.
@@ -46,7 +46,9 @@ stops if a build does not confirm it filled the page (a build from before task
 code, publish it with this bench's two `Program.cs` files, as task 9's review
 round did for `76c2b2c`. Outside mode 7 the screen is pixels, so
 the prompt check reads the OS's own record instead: the mode at `&0355` and the
-text cursor at `&0318` and `&0319`, one column right of the `>` on row 5. A
+text cursor at `&0318` and `&0319`, one column right of the `>` on row 7 (row 5 for
+a build from before task 12, which has no DFS line; the page accepts either, the
+native program only its own build's). The drive is empty, so the 8271 sits idle. A
 build from before task 8 has no `LoadInMode`; to compare in another mode,
 publish the old code with this page's `Program.cs` and `native/Program.cs`.
 

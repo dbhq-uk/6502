@@ -162,9 +162,54 @@ public class BbcBusTests
         Assert.Equal(0, bus.Read(0xFEE0) & 1); // the Tube probe: bit 0 clear means no Tube
         Assert.Equal(0, bus.Read(0xFEC0) & 0x40); // the ADC busy flag, which via.md s2.5 needs clear
 
-        // No 8271 yet: its status reads $FE, whose low two bits are set, so the DFS takes the
-        // controller as missing and serves no call (DFS $B495-$B49A), and prints no banner.
-        Assert.Equal(0xFE, bus.Read(0xFE80));
+        // The 8271 is fitted (task 12): its idle status is $00, whose low two bits are clear, so
+        // the DFS takes the controller as present and serves its calls (DFS $B495-$B49A). Until
+        // then $FE80 read $FE, as an absent fast device, and the DFS stayed silent.
+        Assert.Equal(0x00, bus.Read(0xFE80));
+    }
+
+    [Fact]
+    public void The8271RepeatsEveryEightBytesWithTheDataRegisterAtA2()
+    {
+        // disc.md s1a, bus.md s1c: $FE80 status and command, $FE81 result and parameter, $FE82
+        // reset, $FE83 unused, $FE84-$FE87 data, and the eight repeat up to $FE9F. The reset
+        // register and $FE83 drive nothing on a read, so they read as the bus floats for a fast
+        // device, $FE [guessing]. The 8271 is never stretched (bus.md s2a).
+        var bus = NewBus();
+        DiscImage disc = DiscImage.Blank(40, false);
+        disc.Sector(0, 0, 0)[0] = 0x5C;
+        bus.Fdc.Insert(0, disc);
+
+        // Read Drive Status written through a mirror, its result read through another.
+        bus.Write(0xFE98, 0x6C);
+        Assert.Equal(0x10, bus.Read(0xFE88));
+        Assert.Equal(0x02, bus.Read(0xFE99));
+        Assert.Equal(0x00, bus.Read(0xFE90));
+        Assert.Equal(0xFE, bus.Read(0xFE82));
+        Assert.Equal(0xFE, bus.Read(0xFE9B));
+
+        // Read Special Register $06 after Write Special Register $06 = $5A, through mirrors.
+        bus.Write(0xFE80, 0x3A);
+        bus.Write(0xFE89, 0x06);
+        bus.Write(0xFE91, 0x5A);
+        bus.Write(0xFE88, 0x3D);
+        bus.Write(0xFE99, 0x06);
+        Assert.Equal(0x5A, bus.Read(0xFE81));
+
+        // A byte offered by Read Data is the same at every data address until it is taken.
+        bus.Write(0xFE80, 0x53);
+        foreach (byte parameter in new byte[] { 0x00, 0x00, 0x21 })
+        {
+            bus.Write(0xFE81, parameter);
+        }
+        while ((bus.Read(0xFE80) & 0x04) == 0)
+        {
+        }
+        Assert.Equal(0x5C, bus.Peek(0xFE9F));
+        Assert.Equal(0x5C, bus.Peek(0xFE85));
+        Assert.Equal(0x8C, bus.Read(0xFE80));
+        Assert.Equal(0x5C, bus.Read(0xFE87)); // taken
+        Assert.Equal(0x80, bus.Read(0xFE80));
     }
 
     [Fact]

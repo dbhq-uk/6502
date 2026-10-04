@@ -4,7 +4,8 @@
 // Task 7 added the one change: the per-character ReferenceCrtc6845 in place of the CRTC stub,
 // ticked in every cycle its clock is due, with its VSYNC on the system VIA's CA1. Task 8 added
 // the per-character ReferenceVideoUla in place of the ULA stub, fed in every character clock
-// with the byte the CRTC's address fetches from RAM in that cycle.
+// with the byte the CRTC's address fetches from RAM in that cycle. Task 12 added the per-cycle
+// ReferenceFdc8271 at $FE80-$FE9F, ticked in every cycle, with its INT on the CPU's NMI line.
 using Dbhq.Cpu6502;
 
 namespace Dbhq.Machines.BbcMicro.Tests.Oracle;
@@ -80,7 +81,10 @@ public sealed class ReferenceBbcBus : IBus
     /// <summary>The video ULA at $FE20-$FE2F, one character at a time.</summary>
     public ReferenceVideoUla VideoUla { get; } = new();
 
-    /// <summary>The CPU whose IRQ line the VIAs drive.</summary>
+    /// <summary>The 8271 at $FE80-$FE9F, one cycle at a time.</summary>
+    public ReferenceFdc8271 Fdc { get; } = new();
+
+    /// <summary>The CPU whose IRQ line the VIAs drive, and whose NMI line the 8271 drives.</summary>
     public Cpu? Cpu { get; set; }
 
     /// <summary>The 6502's IRQ line as the chips drive it: the OR of both VIAs. The ACIA is absent.</summary>
@@ -130,6 +134,7 @@ public sealed class ReferenceBbcBus : IBus
         UserVia.Reset();
         ResetCrtc();
         VideoUla.PowerOn();
+        Fdc.PowerOn();
         DriveIrq();
     }
 
@@ -173,6 +178,7 @@ public sealed class ReferenceBbcBus : IBus
     /// <summary>One CPU cycle for every chip but the CPU.</summary>
     private void Tick()
     {
+        Fdc.Tick();
         if ((Cycles & 1) == 0)
         {
             SystemVia.Tick();
@@ -205,6 +211,7 @@ public sealed class ReferenceBbcBus : IBus
         if (Cpu is not null)
         {
             Cpu.Irq = Irq;
+            Cpu.Nmi = Fdc.Interrupt;
         }
     }
 
@@ -299,6 +306,13 @@ public sealed class ReferenceBbcBus : IBus
         // block (bus.md section 1c).
         >= 0x40 and <= 0x5F => SystemVia.Read(offset & 0x0F),
         >= 0x60 and <= 0x7F => UserVia.Read(offset & 0x0F),
+        >= 0x80 and <= 0x9F => (offset & 7) switch
+        {
+            0 => Fdc.ReadStatus(),
+            1 => Fdc.ReadResult(),
+            2 or 3 => AbsentSheila(offset),
+            _ => Fdc.ReadData(),
+        },
         _ => AbsentSheila(offset),
     };
 
@@ -329,6 +343,18 @@ public sealed class ReferenceBbcBus : IBus
             case >= 0x60 and <= 0x7F:
                 UserVia.Write(offset & 0x0F, value);
                 break;
+            case >= 0x80 and <= 0x9F when (offset & 7) == 0:
+                Fdc.WriteCommand(value);
+                break;
+            case >= 0x80 and <= 0x9F when (offset & 7) == 1:
+                Fdc.WriteParameter(value);
+                break;
+            case >= 0x80 and <= 0x9F when (offset & 7) == 2:
+                Fdc.WriteReset(value);
+                break;
+            case >= 0x80 and <= 0x9F when (offset & 7) >= 4:
+                Fdc.WriteData(value);
+                break;
         }
     }
 
@@ -338,6 +364,12 @@ public sealed class ReferenceBbcBus : IBus
         <= 0x07 => (offset & 1) == 0 ? (byte)0 : Crtc.ReadData(),
         >= 0x40 and <= 0x5F => SystemVia.Peek(offset & 0x0F),
         >= 0x60 and <= 0x7F => UserVia.Peek(offset & 0x0F),
+        >= 0x80 and <= 0x9F => (offset & 7) switch
+        {
+            0 or 1 => Fdc.Peek(offset & 7),
+            2 or 3 => AbsentSheila(offset),
+            _ => Fdc.Peek(4),
+        },
         _ => AbsentSheila(offset),
     };
 
