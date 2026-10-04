@@ -27,6 +27,13 @@ namespace Dbhq.Machines.BbcMicro;
 /// A key held down for longer than the hold is simply held: it comes up when the page says it
 /// came up, and the OS's own auto-repeat works as it does on the machine.
 /// </para>
+/// <para>
+/// <b>SHIFT and BREAK.</b> <see cref="ShiftBreak"/> queues what a person does to start a disc:
+/// SHIFT down, BREAK pressed and let go, and SHIFT held for <see cref="ShiftBreakHoldCycles"/>
+/// more while the machine restarts, so the DFS sees it and runs the disc's <c>!BOOT</c>. The
+/// BREAK is an event in the queue like the keys, so it comes after everything queued before it
+/// and SHIFT is already in the matrix when the 6502 starts again.
+/// </para>
 /// </remarks>
 public sealed class BbcKeyPresses
 {
@@ -36,12 +43,31 @@ public sealed class BbcKeyPresses
     /// <summary>The least a key stays up before it goes down again: 40 ms at 2 MHz, as <c>BbcSession.RestCycles</c>.</summary>
     public const long RestCycles = 80_000;
 
-    private readonly BbcMachine _machine;
-    private readonly Queue<(BbcKey Key, bool Down)> _pending = new();
+    /// <summary>
+    /// How long <see cref="ShiftBreak"/> holds SHIFT after the BREAK: half a second at 2 MHz. The
+    /// OS reads SHIFT once, as it starts again after the reset, well inside this; and it is short
+    /// enough that a program the disc starts does not see SHIFT held for long. The preset discs
+    /// test (<c>DiscLibraryTests</c>) starts every bundled disc with it.
+    /// </summary>
+    public const long ShiftBreakHoldCycles = 1_000_000;
 
-    // The cycle each key last went down and last came up, by its internal number (0 to $79).
+    private readonly BbcMachine _machine;
+    private readonly Queue<Event> _pending = new();
+
+    // The cycle each key last went down and last came up, by its internal number (0 to $79), and
+    // the least time its present press is held.
     private readonly long[] _downAt = new long[0x80];
     private readonly long[] _upAt = new long[0x80];
+    private readonly long[] _holdFor = new long[0x80];
+
+    private enum Kind
+    {
+        Down,
+        Up,
+        Break,
+    }
+
+    private readonly record struct Event(BbcKey Key, Kind Kind, long Hold);
 
     public BbcKeyPresses(BbcMachine machine)
     {
@@ -54,10 +80,23 @@ public sealed class BbcKeyPresses
     public int Pending => _pending.Count;
 
     /// <summary>Queues <paramref name="key"/> going down.</summary>
-    public void Down(BbcKey key) => Enqueue(key, true);
+    public void Down(BbcKey key) => Enqueue(key, Kind.Down, HoldCycles);
 
     /// <summary>Queues <paramref name="key"/> coming up.</summary>
-    public void Up(BbcKey key) => Enqueue(key, false);
+    public void Up(BbcKey key) => Enqueue(key, Kind.Up, 0);
+
+    /// <summary>
+    /// Queues SHIFT and BREAK, the way a disc is started: SHIFT goes down, the machine is reset as
+    /// by its BREAK key (<see cref="BbcMachine.PressBreak"/>) on the same cycle, and SHIFT comes up
+    /// <see cref="ShiftBreakHoldCycles"/> later. With a disc in drive 0 whose boot option is set,
+    /// the DFS then runs its <c>!BOOT</c>.
+    /// </summary>
+    public void ShiftBreak()
+    {
+        Enqueue(BbcKey.Shift, Kind.Down, ShiftBreakHoldCycles);
+        Enqueue(BbcKey.Shift, Kind.Break, 0);
+        Enqueue(BbcKey.Shift, Kind.Up, 0);
+    }
 
     /// <summary>
     /// Runs the machine for at least <paramref name="cycles"/> more CPU cycles, playing each
@@ -80,35 +119,45 @@ public sealed class BbcKeyPresses
         }
     }
 
-    private void Enqueue(BbcKey key, bool down)
+    private void Enqueue(BbcKey key, Kind kind, long hold)
     {
         if (!Enum.IsDefined(key))
         {
             throw new ArgumentOutOfRangeException(nameof(key), key, "Not a key in the matrix.");
         }
 
-        _pending.Enqueue((key, down));
+        _pending.Enqueue(new Event(key, kind, hold));
     }
 
-    // The cycle an event may be played at: an up once its key has been held, a down once its key has rested.
-    private long Due((BbcKey Key, bool Down) e) =>
-        e.Down ? _upAt[(int)e.Key] + RestCycles : _downAt[(int)e.Key] + HoldCycles;
+    // The cycle an event may be played at: an up once its key has been held, a down once its key
+    // has rested, and a BREAK as soon as everything before it has been played.
+    private long Due(Event e) => e.Kind switch
+    {
+        Kind.Down => _upAt[(int)e.Key] + RestCycles,
+        Kind.Up => _downAt[(int)e.Key] + _holdFor[(int)e.Key],
+        _ => long.MinValue,
+    };
 
     private void Play()
     {
         long now = _machine.Cycles;
         while (_pending.Count > 0 && Due(_pending.Peek()) <= now)
         {
-            (BbcKey key, bool down) = _pending.Dequeue();
-            if (down)
+            Event e = _pending.Dequeue();
+            switch (e.Kind)
             {
-                _machine.Keyboard.Press(key);
-                _downAt[(int)key] = now;
-            }
-            else
-            {
-                _machine.Keyboard.Release(key);
-                _upAt[(int)key] = now;
+                case Kind.Down:
+                    _machine.Keyboard.Press(e.Key);
+                    _downAt[(int)e.Key] = now;
+                    _holdFor[(int)e.Key] = e.Hold;
+                    break;
+                case Kind.Up:
+                    _machine.Keyboard.Release(e.Key);
+                    _upAt[(int)e.Key] = now;
+                    break;
+                default:
+                    _machine.PressBreak();
+                    break;
             }
         }
     }

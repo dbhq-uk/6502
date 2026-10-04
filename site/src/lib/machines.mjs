@@ -82,10 +82,12 @@ export function runningSentence(registry) {
  * What scripts/build-machines.mjs publishes for each machine it knows, by the
  * machine's registry id: the WebAssembly project under src/, and the ROMs, in
  * the order the host's Load takes them, as their pins in Pins.cs give them.
+ * `discs` is true for a machine with preset discs: the BBC Micro's, listed in
+ * machines/bbc-micro/discs/manifest.json (src/lib/bbc-micro.mjs).
  */
 export const MACHINE_BUILDS = {
-  'kim-1': { project: 'Dbhq.Machines.Kim1.Wasm', roms: kim1Roms },
-  'bbc-micro': { project: 'Dbhq.Machines.BbcMicro.Wasm', roms: bbcRoms },
+  'kim-1': { project: 'Dbhq.Machines.Kim1.Wasm', roms: kim1Roms, discs: false },
+  'bbc-micro': { project: 'Dbhq.Machines.BbcMicro.Wasm', roms: bbcRoms, discs: true },
 };
 
 /** The build for each id named, in the order named. Throws on an id with no build, or on none at all. */

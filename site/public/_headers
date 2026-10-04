@@ -30,7 +30,8 @@
 # machine as WebAssembly, and a browser compiles WebAssembly only when the CSP
 # allows it. It permits WebAssembly compilation and nothing else: it does not
 # allow eval() or new Function() for JavaScript, and the .wasm files are
-# fetched from this site under connect-src 'self'. It applies site-wide rather
+# fetched from this site under connect-src 'self', as are the ROMs and the BBC
+# Micro's preset disc images. It applies site-wide rather
 # than to the machines' pages alone because Pages joins the headers of every rule
 # a path matches, and a second CSP on that path would narrow the first, not
 # widen it.
@@ -52,3 +53,13 @@
 
 /_astro/*
   Cache-Control: public, max-age=31536000, immutable
+
+# The BBC Micro's preset disc images (/machines/bbc-micro/discs/<slug>.ssd): raw
+# bytes the page fetches and hands to the machine. Named here so they are served
+# as plain bytes whatever the edge would guess from .ssd, and never sniffed
+# (nosniff is set for every route above). One splat only: Pages allows a single
+# * in a rule and skips, with only a build warning, any rule with two
+# (site/tests/bbc-discs.test.mjs checks every rule for that). The BBC Micro is
+# the only machine with discs, so its folder is named.
+/machines/bbc-micro/discs/*
+  Content-Type: application/octet-stream

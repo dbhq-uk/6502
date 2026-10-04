@@ -3,6 +3,7 @@ import path from 'node:path';
 import { SITE_ROOT } from './registry.mjs';
 import { bbcRoms } from './pins.mjs';
 import { readRom } from './machines.mjs';
+import { DISCS_FOLDER } from './bbc-discs.mjs';
 import { PC_LABELS, bbcCharacters, legend, pcKeysFor } from '../../public/bbc-keys.js';
 
 // What the BBC Micro's page says that is the BBC Micro's own, kept out of the
@@ -27,8 +28,10 @@ export const issueUrl = (n) => `https://github.com/dbhq-uk/6502/issues/${n}`;
 /**
  * How many bytes the Start button downloads: every file the build put in
  * public/machines/bbc-micro/, the WebAssembly and the ROMs, as built (the edge
- * may compress them on the way, so this is the most it can be). Null when the
- * machine was not built into this copy of the site, which the page says.
+ * may compress them on the way, so this is the most it can be). The preset
+ * discs in discs/ are not counted: Start fetches none of them, and each is
+ * fetched only when the visitor inserts it. Null when the machine was not
+ * built into this copy of the site, which the page says.
  */
 export function downloadBytes(root = SITE_ROOT) {
   const dir = path.join(root, 'public', 'machines', 'bbc-micro');
@@ -36,6 +39,7 @@ export function downloadBytes(root = SITE_ROOT) {
   let total = 0;
   const walk = (d) => {
     for (const e of fs.readdirSync(d, { withFileTypes: true })) {
+      if (d === dir && e.name === DISCS_FOLDER) continue;
       const full = path.join(d, e.name);
       if (e.isDirectory()) walk(full);
       else total += fs.statSync(full).size;

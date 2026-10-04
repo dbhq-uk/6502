@@ -16,7 +16,16 @@
 // Under the screen are the BBC Micro's keys as buttons, in its own layout
 // (ON_SCREEN_ROWS in public/bbc-keys.js), for touch and for anyone without the
 // keys on their own keyboard. SHIFT and CTRL latch for the next key.
+//
+// The disc drive has two ways in. The library: a list of preset discs
+// (machines/bbc-micro/discs/manifest.json), each credited under the list with
+// its author, licence and source, which Insert and run puts in drive 0 and
+// starts with SHIFT and BREAK; the image is fetched from this site only then.
+// And the visitor's own file: dropped on the page, or chosen with Insert a
+// disc, read in the tab and never sent anywhere. A disc from the library is a
+// disc like any other once it is in: Save disc downloads it as it stands.
 import { megabytes } from '../lib/bbc-micro.mjs';
+import { discLicenceUrl, discSourceUrl, needsSource } from '../lib/bbc-discs.mjs';
 import { ON_SCREEN_ROWS, STICKY, legend, spokenName } from '../../public/bbc-keys.js';
 
 interface Props {
@@ -28,8 +37,10 @@ interface Props {
   roms: string[];
   /** The bytes the Start button downloads, read from the build, or null when this build has no machine. */
   download: number | null;
+  /** The preset discs, from src/lib/bbc-discs.mjs: grouped by kind, and the default. */
+  library: { groups: { name: string; discs: any[] }[]; default: any };
 }
-const { base, clockMhz, roms, download } = Astro.props;
+const { base, clockMhz, roms, download, library } = Astro.props;
 ---
 
 <div class="bbc" data-bbc data-base={base} data-clock-mhz={clockMhz} data-roms={roms.join(' ')} data-download={download ?? undefined} data-state="static">
@@ -61,6 +72,30 @@ const { base, clockMhz, roms, download } = Astro.props;
   </div>
   <fieldset class="bbc-disc">
     <legend>The disc drive</legend>
+    <div class="bbc-presets" data-bbc-presets>
+      <label class="bbc-preset-label" for="bbc-preset">A disc from the library</label>
+      <select id="bbc-preset" data-bbc-preset aria-describedby="bbc-preset-about" disabled>
+        {library.groups.map((group) => (
+          <optgroup label={group.name}>
+            {group.discs.map((d) => <option value={d.slug} selected={d === library.default}>{d.title}</option>)}
+          </optgroup>
+        ))}
+      </select>
+      <div id="bbc-preset-about" class="bbc-preset-about">
+        {library.groups.flatMap((group) => group.discs).map((d) => (
+          <div class="bbc-preset-disc" data-bbc-preset-disc={d.slug} data-title={d.title} data-licence={d.licence} hidden={d !== library.default}>
+            {d.note && <p class="bbc-preset-note" role="note">{d.note}</p>}
+            <p><b>{d.title}</b>, {d.author}, {d.year}. {d.description}</p>
+            <p>Keys: {d.controls}.</p>
+            <p>Licence: <a href={discLicenceUrl(d)}>{d.licence}</a>. <a href={d.sourceUrl}>The author's page</a>{needsSource(d) && <>, and <a href={discSourceUrl(d)}>its source in the repository</a></>}.</p>
+          </div>
+        ))}
+      </div>
+      <div class="bbc-controls">
+        <button type="button" class="btn small" data-bbc-preset-run disabled>Insert and run</button>
+        <button type="button" class="btn small" data-bbc-preset-insert disabled>Insert in drive 0</button>
+      </div>
+    </div>
     <div class="bbc-controls">
       <button type="button" class="btn small" data-bbc-insert disabled>Insert a disc</button>
       <input type="file" accept=".ssd,.dsd" data-bbc-file hidden />
@@ -70,7 +105,8 @@ const { base, clockMhz, roms, download } = Astro.props;
       <label class="bbc-protect"><input type="checkbox" role="switch" data-bbc-protect disabled /> Write-protect</label>
     </div>
     <p class="bbc-line" data-bbc-drive aria-live="polite">Drive 0 is empty.</p>
-    <p class="bbc-note">Drop a .ssd or .dsd disc image on the page, or press Insert a disc. The file is read in this tab and is not uploaded anywhere; Save disc downloads the disc as it now stands, which is the only way to keep what was written to it. The page has drive 0 only: the controller and DFS have a second drive, and the page does not offer it.</p>
+    <p class="bbc-note">Insert and run puts the disc in drive 0 and starts it the way the BBC Micro does, with SHIFT held through BREAK; Insert in drive 0 only puts it in, for <kbd>*CAT</kbd> and <kbd>*RUN</kbd>. The image is fetched from this site when you insert it, not before. A disc from the library goes in writable unless Write-protect is on, so a game can keep its high scores on it: they last until the disc is changed or the page is left, and Save disc keeps them as a file.</p>
+    <p class="bbc-note">Or use a disc of your own: drop a .ssd or .dsd disc image on the page, or press Insert a disc. The file is read in this tab and is not uploaded anywhere; Save disc downloads the disc as it now stands, which is the only way to keep what was written to it. The page has drive 0 only: the controller and DFS have a second drive, and the page does not offer it.</p>
     <p class="bbc-note">DFS remembers the catalogue of the last disc it read until the drive stops, a moment after the last disc command, as it does on the real machine. So after changing discs, type <kbd>*CAT</kbd> first, or DFS may still list the old one.</p>
   </fieldset>
 </div>

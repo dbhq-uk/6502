@@ -1,2 +1,9 @@
 * text=auto eol=lf
 roms/** binary
+
+# The BBC Micro's preset discs are other people's files, kept byte for byte as
+# published (their hashes are in machines/bbc-micro/discs/manifest.json), so git
+# never converts their line endings. The READMEs and the manifest are ours.
+machines/bbc-micro/discs/** binary
+machines/bbc-micro/discs/*/README.md text eol=lf diff merge
+machines/bbc-micro/discs/manifest.json text eol=lf diff merge
