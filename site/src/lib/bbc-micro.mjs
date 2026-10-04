@@ -3,7 +3,7 @@ import path from 'node:path';
 import { SITE_ROOT } from './registry.mjs';
 import { bbcRoms } from './pins.mjs';
 import { readRom } from './machines.mjs';
-import { PC_LABELS, bbcCharacters, pcKeysFor } from '../../public/bbc-keys.js';
+import { PC_LABELS, bbcCharacters, legend, pcKeysFor } from '../../public/bbc-keys.js';
 
 // What the BBC Micro's page says that is the BBC Micro's own, kept out of the
 // template so the tests can read the same values.
@@ -48,12 +48,6 @@ export function downloadBytes(root = SITE_ROOT) {
 /** Megabytes, one decimal place, the British way: 12.3. */
 export const megabytes = (bytes) => (bytes / 1e6).toLocaleString('en-GB', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
 
-/** The BBC keyboard's legend for a key in BBC_KEYS, as the page names it. */
-const LEGENDS = {
-  Shift: 'SHIFT', Ctrl: 'CTRL', Minus: '-', Caret: '^', Underscore: '_', At: '@', Colon: ':', Semicolon: ';',
-  LeftBracket: '[', RightBracket: ']', Comma: ',', FullStop: '.', Slash: '/', Backslash: '\\',
-};
-export const legend = (key) => LEGENDS[key] ?? (/^D\d$/.test(key) ? key.slice(1) : key);
 
 /**
  * The page's table of where the symbols are: every character the BBC types

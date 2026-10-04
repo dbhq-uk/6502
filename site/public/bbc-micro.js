@@ -26,6 +26,12 @@
 // (BbcKeyPresses), so a key a test presses and releases at once still counts.
 // Focus leaving the screen lets go of every key held.
 //
+// THE ON-SCREEN KEYS are every key the machine has, as buttons, for touch and
+// for the keys a PC keyboard does not press here. A tap presses the key and
+// lets it go (the host holds it long enough to count). SHIFT and CTRL latch:
+// a tap holds them down for the next key tapped, then lets them go, so one
+// finger can type SHIFT and 2; a second tap lets go without typing.
+//
 // THE SOUND is off until the visitor turns it on, because browsers do not let a
 // page start sound by itself. Then each frame's samples go to bbc-audio.js, an
 // AudioWorklet, which plays them. Hiding the page suspends it and showing the
@@ -40,13 +46,15 @@
 // `screenRow(n)` is mode 7 text row n read from screen memory, and `host` is
 // the machine.
 import { startMachine } from '/machine-host.js';
-import { BBC_KEYS, PC_KEYS } from '/bbc-keys.js';
+import { BBC_KEYS, PC_KEYS, STICKY } from '/bbc-keys.js';
 
 // The sample rate the machine makes its sound at, and the rate the page asks
 // the browser to play it at, so it is not resampled twice. The machine's default.
 const SAMPLE_RATE = 48_000;
 const DRIVE = 0;
 const BLANK_TRACKS = 80;
+// The largest disc image the drive takes: 80 tracks of ten 256-byte sectors, both sides.
+const MOST_BYTES = 2 * 80 * 10 * 256;
 
 for (const panel of document.querySelectorAll('[data-bbc]')) prepare(panel);
 
@@ -63,6 +71,18 @@ function prepare(panel) {
   }
   start.disabled = false;
   say('Press Start to download the BBC Micro and run it.', 'ready');
+  // A file dropped on the page goes to the drive once there is one (disc()
+  // sets panel.putDisc). Before that it is refused here, rather than the browser
+  // leaving the page to show it.
+  document.addEventListener('dragover', (event) => {
+    if ([...(event.dataTransfer?.types ?? [])].includes('Files')) event.preventDefault();
+  });
+  document.addEventListener('drop', (event) => {
+    if (!event.dataTransfer?.files.length) return;
+    event.preventDefault();
+    if (panel.putDisc) panel.putDisc(event.dataTransfer.files[0]);
+    else say('Press Start first, then drop the disc on the page again.', panel.dataset.state);
+  });
   start.addEventListener('click', () => run(panel, say), { once: true });
 }
 
@@ -127,6 +147,7 @@ async function run(panel, say) {
   start.hidden = true;
 
   keyboard(screen, bbc, panel);
+  onScreenKeys(panel, bbc);
   for (const b of panel.querySelectorAll('[data-bbc-break]')) {
     b.disabled = false;
     b.addEventListener('click', () => bbc.Break());
@@ -196,6 +217,33 @@ export function keyboard(screen, bbc, panel) {
     letGo();
   });
   document.addEventListener('visibilitychange', () => { if (document.hidden) letGo(); });
+}
+
+// Exported for tests/bbc-micro.test.mjs.
+export function onScreenKeys(panel, bbc) {
+  const latched = new Set();
+  const buttons = [...panel.querySelectorAll('[data-bbc-key]')];
+  const show = () => {
+    for (const b of buttons) if (STICKY.includes(b.dataset.bbcKey)) b.setAttribute('aria-pressed', String(latched.has(b.dataset.bbcKey)));
+  };
+  for (const b of buttons) {
+    b.disabled = false;
+    b.addEventListener('click', () => {
+      const name = b.dataset.bbcKey;
+      if (STICKY.includes(name)) {
+        if (latched.has(name)) latched.delete(name);
+        else latched.add(name);
+      } else {
+        const held = [...latched];
+        for (const m of held) bbc.KeyDown(BBC_KEYS[m]);
+        bbc.KeyDown(BBC_KEYS[name]);
+        bbc.KeyUp(BBC_KEYS[name]);
+        for (const m of held.reverse()) bbc.KeyUp(BBC_KEYS[m]);
+        latched.clear();
+      }
+      show();
+    });
+  }
 }
 
 // ---- The sound ----
@@ -290,6 +338,11 @@ function disc(panel, bbc) {
       describe(`${chosen?.name ?? 'That'} is not a disc image this drive takes: it takes .ssd and .dsd files.`);
       return;
     }
+    // Refused before it is read: a disc this drive takes is never larger.
+    if (chosen.size > MOST_BYTES) {
+      describe(`${chosen.name} is ${chosen.size.toLocaleString('en-GB')} bytes, more than a disc holds (${MOST_BYTES.toLocaleString('en-GB')} bytes, 80 tracks on both sides), so it was not read.`);
+      return;
+    }
     try {
       const tracks = bbc.InsertDisc(DRIVE, new Uint8Array(await chosen.arrayBuffer()), kind === 'dsd', protect.checked);
       name = chosen.name;
@@ -304,16 +357,8 @@ function disc(panel, bbc) {
     if (file.files.length > 0) put(file.files[0]);
     file.value = '';
   });
-  // A file dropped anywhere on the page goes in the drive, rather than the
-  // browser leaving the page to show it.
-  document.addEventListener('dragover', (event) => {
-    if ([...(event.dataTransfer?.types ?? [])].includes('Files')) event.preventDefault();
-  });
-  document.addEventListener('drop', (event) => {
-    if (!event.dataTransfer?.files.length) return;
-    event.preventDefault();
-    put(event.dataTransfer.files[0]);
-  });
+  // A file dropped anywhere on the page goes in the drive (prepare() listens).
+  panel.putDisc = put;
   blank.addEventListener('click', () => {
     bbc.BlankDisc(DRIVE, BLANK_TRACKS, false);
     bbc.SetDiscReadOnly(DRIVE, protect.checked);

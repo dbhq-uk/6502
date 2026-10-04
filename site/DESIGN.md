@@ -92,8 +92,15 @@ disc drive in a hairline box of its own.
   this rule.
 - **The symbols table and the program** use the site's prose table and code
   window, and the symbol's key cap is the KIM-1 program's key cap.
-- **No on-screen keyboard yet.** A phone or tablet can start the machine and see
-  it, but not type into it; that is a follow-up.
+- **The machine's keys, under the screen,** every one as a button in the
+  machine's own rows, for a phone, a tablet or a mouse: the site's mono face on
+  `--veil` with a `--circuit` edge, like the KIM-1's keys but smaller, at least
+  44 pixels square, so a row wraps on a narrow screen rather than shrink. The
+  legends are the machine's (SHIFT LOCK, f0, arrows for the cursor keys), with
+  a name in words for a screen reader where a legend is a symbol. SHIFT and CTRL
+  latch for one key; latched, the key is filled `--card` with a `--white` edge, a
+  change of shape as well as colour, and says so with `aria-pressed`. No key
+  takes the lime.
 - The new text colours are in the contrast table in `tests/design.test.mjs`.
 
 ## The imagery

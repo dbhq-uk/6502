@@ -601,7 +601,9 @@ front of the model. Where that differs from sitting at a Model B:
 - **Keys are mapped by where they are on a PC keyboard** (`site/public/bbc-keys.js`),
   so some BBC keys have no PC key here: TAB (Tab moves the focus, so the page
   never keeps the keyboard), SHIFT LOCK, and the red function keys f0 to f9 (the
-  browser keeps its function keys). CAPS LOCK is one press for each time the PC
+  browser keeps its function keys). Those, and every other key, are on the
+  page's on-screen keys, where a tap is a press and a release and SHIFT and CTRL
+  latch for the next key rather than being held. CAPS LOCK is one press for each time the PC
   key goes down, whatever the PC does with its own light.
 - **The picture is the framebuffer, shown four wide by three high,** with no
   model of a television: no scan lines, no blur between lines, no glow, no

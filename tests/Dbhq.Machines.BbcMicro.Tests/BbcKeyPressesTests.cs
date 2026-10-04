@@ -86,17 +86,21 @@ public class BbcKeyPressesTests
         keys.Up(BbcKey.Colon);
         keys.Up(BbcKey.Shift);
 
-        // Sampled across the colon's hold: SHIFT is down every time the colon is.
+        // Sampled across the colon's hold: SHIFT is down every time the colon is, and the colon
+        // must have been seen down, or the loop would prove nothing.
         long start = machine.Cycles;
+        int seen = 0;
         while (machine.Cycles - start < BbcKeyPresses.HoldCycles + (4 * Slack))
         {
             keys.Run(1_000);
             if (machine.Keyboard.IsDown(BbcKey.Colon))
             {
+                seen++;
                 Assert.True(machine.Keyboard.IsDown(BbcKey.Shift), "SHIFT came up while the colon was still down");
             }
         }
 
+        Assert.True(seen > 0, "the colon was never seen down");
         Assert.False(machine.Keyboard.IsDown(BbcKey.Colon));
         Assert.False(machine.Keyboard.IsDown(BbcKey.Shift));
     }

@@ -10,7 +10,7 @@ import { loadRegistry, REPO_ROOT } from '../src/lib/registry.mjs';
 import { loadTryIt } from '../src/lib/machines.mjs';
 import { bbcRoms } from '../src/lib/pins.mjs';
 import { NOT_MODELLED, downloadBytes, issueUrl, megabytes, symbolTable } from '../src/lib/bbc-micro.mjs';
-import { NOT_ON_A_PC } from '../public/bbc-keys.js';
+import { NOT_ON_A_PC, ON_SCREEN_ROWS, legend } from '../public/bbc-keys.js';
 
 // The BBC Micro's page. The registry still lists the BBC Micro as planned, so
 // the site that deploys has no page for it, and that is checked first. The page
@@ -186,7 +186,26 @@ test('the keyboard section says where every symbol is, from the OS ROM and the k
   assert.deepEqual(rows, symbolTable().map((r) => [r.character, r.bbc, r.pc ?? 'not on a PC keyboard here']));
   const text = visibleText(keys);
   for (const why of new Set(Object.values(NOT_ON_A_PC))) assert.ok(text.includes(why), `the reason "${why}" is not given`);
-  assert.match(text, /An on-screen keyboard, for a phone or a tablet, is not here yet/);
+  // The keys are named by their legends, as the machine prints them.
+  for (const key of Object.keys(NOT_ON_A_PC)) assert.ok(decode(keys).includes(legend(key)), `${legend(key)} is not named`);
+  assert.doesNotMatch(text, /ShiftLock|\bF0\b|\bTab,/, 'a key is named by its code, not its legend');
+  assert.match(text, /which are on the on-screen keys only/);
+  assert.match(text, /Tap SHIFT or CTRL and it stays down for the next key you tap/);
+  assert.doesNotMatch(text, /is not here yet/);
+});
+
+test('the on-screen keys: every key once, in the machine\'s rows, real buttons disabled until it runs, SHIFT and CTRL as toggles, named in words where the legend is a symbol', () => {
+  const group = /<div class="bbc-keys" role="group" aria-label="The BBC Micro's keys">([\s\S]*?)<\/div>\s*<fieldset/.exec(panel)?.[1] ?? '';
+  const buttons = [...group.matchAll(/<button type="button" class="bbc-key[^"]*" data-bbc-key="([^"]+)"([^>]*)>([^<]*)<\/button>/g)];
+  assert.deepEqual(buttons.map((b) => b[1]), ON_SCREEN_ROWS.flat());
+  for (const [, key, attrs, label] of buttons) {
+    assert.match(attrs, /\bdisabled\b/, `${key} is enabled before the machine runs`);
+    assert.equal(decode(label), legend(key));
+    assert.equal(/aria-pressed="false"/.test(attrs), key === 'Shift' || key === 'Ctrl', `${key}'s aria-pressed`);
+    if (!/^[\w ]+$/.test(legend(key))) assert.match(attrs, /aria-label="[a-z ]+"/, `${key} has a symbol and no name in words`);
+  }
+  const css = fs.readFileSync(path.join(process.cwd(), 'src', 'styles', 'global.css'), 'utf8');
+  assert.match(css, /\.bbc-key \{[^}]*min-width: 44px; min-height: 44px;/, 'a key is under 44 pixels');
 });
 
 test('the KIM-1\'s page is the same, byte for byte, with the BBC Micro switched on', () => {

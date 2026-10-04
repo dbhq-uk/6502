@@ -123,3 +123,55 @@ export function bbcCharacters(os) {
   }
   return characters;
 }
+
+// ---- The keys on the page, for touch and for anyone ----
+//
+// LEGENDS is what the BBC Micro's own keyboard prints on each key (the names in
+// via.md section 3(b): SHIFT LOCK, f0, the cursor keys as arrows), so the page
+// names a key the way the machine does.
+export const LEGENDS = {
+  ...Object.fromEntries([...'ABCDEFGHIJKLMNOPQRSTUVWXYZ'].map((c) => [c, c])),
+  ...Object.fromEntries([...'0123456789'].map((d) => [`D${d}`, d])),
+  ...Object.fromEntries([...'0123456789'].map((d) => [`F${d}`, `f${d}`])),
+  Shift: 'SHIFT', Ctrl: 'CTRL', CapsLock: 'CAPS LOCK', ShiftLock: 'SHIFT LOCK', Tab: 'TAB', Escape: 'ESCAPE',
+  Return: 'RETURN', Delete: 'DELETE', Copy: 'COPY', Space: 'SPACE',
+  Left: '←', Right: '→', Up: '↑', Down: '↓',
+  Minus: '-', Caret: '^', Backslash: '\\', At: '@', LeftBracket: '[', Underscore: '_',
+  Semicolon: ';', Colon: ':', RightBracket: ']', Comma: ',', FullStop: '.', Slash: '/',
+};
+
+/** The legend on a BBC key, by its name in BBC_KEYS. */
+export const legend = (key) => LEGENDS[key];
+
+// A key's name in words, for a screen reader, where its legend is a symbol.
+const SPOKEN = {
+  Left: 'cursor left', Right: 'cursor right', Up: 'cursor up', Down: 'cursor down',
+  Minus: 'minus', Caret: 'caret', Backslash: 'backslash', At: 'at', LeftBracket: 'left bracket', Underscore: 'underscore',
+  Semicolon: 'semicolon', Colon: 'colon', RightBracket: 'right bracket', Comma: 'comma', FullStop: 'full stop', Slash: 'slash',
+};
+
+/** What a screen reader should call a key: its legend, or the symbol in words. */
+export const spokenName = (key) => SPOKEN[key] ?? LEGENDS[key];
+
+/**
+ * The on-screen keys, in the machine's own layout, row by row: the red
+ * function keys, then the four rows of the main keyboard and the space bar,
+ * then the block of cursor keys with COPY and DELETE that sits at the right on
+ * the machine. Every key in BBC_KEYS is here exactly once (a test holds it).
+ * BREAK is not a key in the matrix; it is the page's Break button.
+ */
+export const ON_SCREEN_ROWS = [
+  ['F0', 'F1', 'F2', 'F3', 'F4', 'F5', 'F6', 'F7', 'F8', 'F9'],
+  ['Escape', 'D1', 'D2', 'D3', 'D4', 'D5', 'D6', 'D7', 'D8', 'D9', 'D0', 'Minus', 'Caret', 'Backslash'],
+  ['Tab', 'Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P', 'At', 'LeftBracket', 'Underscore'],
+  ['CapsLock', 'Ctrl', 'A', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L', 'Semicolon', 'Colon', 'RightBracket', 'Return'],
+  ['ShiftLock', 'Shift', 'Z', 'X', 'C', 'V', 'B', 'N', 'M', 'Comma', 'FullStop', 'Slash'],
+  ['Space'],
+  ['Left', 'Up', 'Down', 'Right', 'Copy', 'Delete'],
+];
+
+/**
+ * SHIFT and CTRL on screen latch: a tap holds the key for the next key tapped,
+ * then lets go, so one finger can type SHIFT and 2. A second tap lets go.
+ */
+export const STICKY = ['Shift', 'Ctrl'];

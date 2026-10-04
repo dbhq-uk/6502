@@ -10,8 +10,8 @@ import { registry, results } from '../../lib/data.mjs';
 import { fmt } from '../../lib/figures.mjs';
 import { acceptanceSummary, loadTryIt, parseKeys, runningMachines } from '../../lib/machines.mjs';
 import { bbcRoms, kim1Roms } from '../../lib/pins.mjs';
-import { NOT_MODELLED, downloadBytes, issueUrl, legend, symbolTable } from '../../lib/bbc-micro.mjs';
-import { NOT_ON_A_PC } from '../../../public/bbc-keys.js';
+import { NOT_MODELLED, downloadBytes, issueUrl, symbolTable } from '../../lib/bbc-micro.mjs';
+import { NOT_ON_A_PC, legend } from '../../../public/bbc-keys.js';
 
 // One page for each machine that runs, and only those. "Running" means it runs
 // in the browser, so a running machine with no panel to run it in stops the
@@ -106,6 +106,7 @@ const notOnAPc = Object.entries(NOT_ON_A_PC).reduce((groups, [key, why]) => grou
       <div class="wrap narrow">
         <h2 id="keyboard">The keyboard</h2>
         <div class="prose">
+        <p>Every key the BBC Micro has is in the on-screen keys under the screen, in the machine's own layout, for a phone, a tablet or a mouse. Tap SHIFT or CTRL and it stays down for the next key you tap, then lets go, so SHIFT and then 2 types a double quote; tap it again to let go without typing.</p>
         <p>Each key on your keyboard presses the BBC Micro's key in the same place, so the symbols are where the BBC Micro has them, not where your keyboard prints them. A few PC keys stand in for keys of their own: Backspace and Delete for DELETE, Enter for RETURN, End for COPY, the arrow keys for the cursor keys, and Esc for ESCAPE. The Break button, or the Pause key, is BREAK.</p>
         <table class="bbc-symbols">
           <caption>Where the symbols are</caption>
@@ -116,11 +117,10 @@ const notOnAPc = Object.entries(NOT_ON_A_PC).reduce((groups, [key, why]) => grou
             ))}
           </tbody>
         </table>
-        <p>Keys a PC keyboard does not press here:</p>
+        <p>Your keyboard presses every key but these, which are on the on-screen keys only:</p>
         <ul>
           {[...notOnAPc].map(([why, keys]) => <li>{keys.join(', ')}: {why}.</li>)}
         </ul>
-        <p>An on-screen keyboard, for a phone or a tablet, is not here yet.</p>
         </div>
       </div>
     </section>

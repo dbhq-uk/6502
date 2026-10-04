@@ -10,7 +10,7 @@ import { loadTryIt } from '../src/lib/machines.mjs';
 import { readRom } from '../src/lib/machines.mjs';
 import { bbcRoms } from '../src/lib/pins.mjs';
 import { NOT_MODELLED, megabytes, symbolTable } from '../src/lib/bbc-micro.mjs';
-import { BBC_KEYS, PC_KEYS, NOT_ON_A_PC, bbcCharacters } from '../public/bbc-keys.js';
+import { BBC_KEYS, PC_KEYS, NOT_ON_A_PC, ON_SCREEN_ROWS, STICKY, LEGENDS, bbcCharacters, spokenName } from '../public/bbc-keys.js';
 
 // The BBC Micro page's own parts, without a browser: the key table against the
 // machine's, the page script's key handling played with made-up key events,
@@ -71,6 +71,20 @@ test('keys go by place, not by legend: the BBC\'s colon is where a PC has its ap
   assert.equal(PC_KEYS.Digit0, 'D0');
 });
 
+test('every key the machine has is on the on-screen keys exactly once, and has its legend', () => {
+  const onScreen = ON_SCREEN_ROWS.flat();
+  assert.deepEqual([...onScreen].sort(), Object.keys(enumKeys()).sort(), 'the on-screen keys are not BbcKey, each once');
+  assert.deepEqual(Object.keys(LEGENDS).sort(), Object.keys(enumKeys()).sort(), 'a key has no legend, or a legend has no key');
+  // The machine's legends, not the code's names (via.md section 3(b)).
+  assert.equal(LEGENDS.ShiftLock, 'SHIFT LOCK');
+  assert.equal(LEGENDS.Tab, 'TAB');
+  assert.equal(LEGENDS.F0, 'f0');
+  assert.equal(LEGENDS.D7, '7');
+  assert.equal(spokenName('Left'), 'cursor left');
+  assert.equal(spokenName('Q'), 'Q');
+  assert.deepEqual(STICKY, ['Shift', 'Ctrl']);
+});
+
 // ---- The characters, from the OS ROM ----
 
 const os = readRom(bbcRoms().find((r) => r.rom === 'os'));
@@ -107,7 +121,7 @@ test('the symbol table says where each symbol is on a PC keyboard, from the key 
 const savedDocument = Object.getOwnPropertyDescriptor(globalThis, 'document');
 const listeners = [];
 Object.defineProperty(globalThis, 'document', { configurable: true, writable: true, value: { querySelectorAll: () => [], hidden: false, addEventListener: (t, f) => listeners.push([t, f]) } });
-const { keyboard } = await import(pathToFileURL(path.join(PUBLIC, 'bbc-micro.js')).href);
+const { keyboard, onScreenKeys } = await import(pathToFileURL(path.join(PUBLIC, 'bbc-micro.js')).href);
 test.after(() => {
   if (savedDocument) Object.defineProperty(globalThis, 'document', savedDocument);
   else delete globalThis.document;
@@ -192,6 +206,50 @@ test('the Pause key is BREAK', () => {
   const { calls, fire } = wired();
   assert.equal(fire('keydown', 'Pause').prevented, true);
   assert.deepEqual(calls, [['break']]);
+});
+
+// ---- The on-screen keys ----
+
+/** The panel's on-screen keys as made-up buttons, a machine that records its keys, and a tap. */
+function onScreen() {
+  const buttons = ON_SCREEN_ROWS.flat().map((key) => {
+    const b = { dataset: { bbcKey: key }, disabled: true, attrs: {}, on: {} };
+    b.addEventListener = (type, fn) => { b.on[type] = fn; };
+    b.setAttribute = (name, value) => { b.attrs[name] = value; };
+    return b;
+  });
+  const panel = { querySelectorAll: () => buttons };
+  const calls = [];
+  const bbc = { KeyDown: (k) => calls.push(['down', k]), KeyUp: (k) => calls.push(['up', k]) };
+  onScreenKeys(panel, bbc);
+  const button = (key) => buttons.find((b) => b.dataset.bbcKey === key);
+  return { calls, button, tap: (key) => button(key).on.click(), buttons };
+}
+
+test('an on-screen key is a press and a release, and every key is enabled once the machine runs', () => {
+  const { calls, tap, buttons } = onScreen();
+  assert.ok(buttons.every((b) => !b.disabled));
+  tap('Tab');
+  tap('F0');
+  assert.deepEqual(calls, [['down', BBC_KEYS.Tab], ['up', BBC_KEYS.Tab], ['down', BBC_KEYS.F0], ['up', BBC_KEYS.F0]]);
+});
+
+test('SHIFT and CTRL latch for the next key, show it, then let go; a second tap lets go without typing', () => {
+  const { calls, tap, button } = onScreen();
+  tap('Shift');
+  assert.equal(button('Shift').attrs['aria-pressed'], 'true');
+  assert.deepEqual(calls, [], 'SHIFT alone pressed nothing yet');
+  tap('D2');
+  assert.deepEqual(calls, [['down', BBC_KEYS.Shift], ['down', BBC_KEYS.D2], ['up', BBC_KEYS.D2], ['up', BBC_KEYS.Shift]]);
+  assert.equal(button('Shift').attrs['aria-pressed'], 'false', 'SHIFT stayed latched after the key');
+  calls.length = 0;
+  tap('Ctrl');
+  tap('Shift');
+  tap('Ctrl');
+  assert.equal(button('Ctrl').attrs['aria-pressed'], 'false');
+  assert.equal(button('Shift').attrs['aria-pressed'], 'true');
+  tap('A');
+  assert.deepEqual(calls, [['down', BBC_KEYS.Shift], ['down', BBC_KEYS.A], ['up', BBC_KEYS.A], ['up', BBC_KEYS.Shift]]);
 });
 
 // ---- The sound worklet ----

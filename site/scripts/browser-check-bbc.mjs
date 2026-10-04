@@ -9,12 +9,14 @@
 // site's own headers. Nothing it builds is kept.
 //
 // Then, on /machines/bbc-micro/: nothing of the machine is fetched before
-// Start is pressed; Start downloads it and it boots to BASIC's prompt (read from
+// Start is pressed, and a disc dropped then is refused with a message rather
+// than the browser leaving the page; Start downloads it and it boots to BASIC's prompt (read from
 // screen memory through the page's test hook, and the canvas must be drawing);
 // PRINT 6*7 and Return, pressed as real key events through the page's own
 // keyboard handling, by where the keys are on the BBC (* is SHIFT and the key
-// where a PC has '), shows 42; the headroom line appears; Tab moves focus off
-// the machine; the sound button turns sound on and off without an error; a disc
+// where a PC has '), shows 42 and lights more of the canvas; the headroom line
+// appears; Tab moves focus off the machine; PRINT "A" tapped on the on-screen
+// keys alone, SHIFT latched for each quote, prints A; the sound button turns sound on and off without an error; a disc
 // image put in through the file input lists its catalogue with *CAT; Save disc
 // downloads the same bytes; and Break restarts the machine.
 import fs from 'node:fs';
@@ -89,6 +91,17 @@ async function run({ browser, watch, problems, origin }) {
   const ok = page.locator('[data-analytics-on]');
   if (await ok.isVisible().catch(() => false)) await ok.click();
 
+  // A disc dropped before Start: refused, and the page stays.
+  const dropped = await page.evaluate(() => {
+    const data = new DataTransfer();
+    data.items.add(new File([new Uint8Array(256)], 'early.ssd'));
+    const event = new DragEvent('drop', { dataTransfer: data, cancelable: true, bubbles: true });
+    document.body.dispatchEvent(event);
+    return { prevented: event.defaultPrevented, status: document.querySelector('[data-bbc-status]').textContent };
+  });
+  console.log(`bbc: a disc dropped before Start: default prevented ${dropped.prevented}, status "${dropped.status}"`);
+  if (!dropped.prevented || !/Press Start first/.test(dropped.status)) problems.push(`bbc: a disc dropped before Start gave ${JSON.stringify(dropped)}`);
+
   // Start: the download, then the boot to BASIC's prompt.
   const t0 = Date.now();
   await page.locator('[data-bbc-start]').click();
@@ -145,12 +158,20 @@ async function run({ browser, watch, problems, origin }) {
   console.log(`bbc: the screen has focus after Start: ${focused}; typing ${await panel.getAttribute('data-typing')}`);
   if (!focused) problems.push('bbc: Start did not give the screen the keyboard');
   const type = async (keys) => { for (const k of keys) await page.keyboard.press(k); };
+  const litBefore = (await drawn()).lit;
   await type(['KeyP', 'KeyR', 'KeyI', 'KeyN', 'KeyT', 'Space', 'Digit6', 'Shift+Quote', 'Digit7', 'Enter']);
   if (await waitRows((r) => r.indexOf('>PRINT 6*7') >= 0 && r[r.indexOf('>PRINT 6*7') + 1].trim() === '42', 'PRINT 6*7 did not show 42')) {
     const r = await rows();
     const i = r.indexOf('>PRINT 6*7');
     console.log(`bbc: typed PRINT 6*7 and Return: the screen shows "${r[i]}", then "${r[i + 1].trim()}", then "${r[i + 2]}"`);
   }
+  // The picture shows it too: the text added lights more of the canvas (the answer itself is
+  // read off the picture by BbcAcceptanceTests; here the screen memory is read, and the canvas
+  // must have changed with it).
+  await page.waitForTimeout(300);
+  const litAfter = (await drawn()).lit;
+  console.log(`bbc: lit pixels on the canvas ${litBefore} before typing, ${litAfter} after`);
+  if (!(litAfter > litBefore)) problems.push(`bbc: the canvas did not change when the text did (${litBefore} then ${litAfter} lit pixels)`);
 
   // The headroom line, once a second.
   await page.waitForFunction(() => document.querySelector('[data-bbc-speed]')?.textContent !== '', null, { timeout: 10_000 }).catch(() => {});
@@ -163,6 +184,25 @@ async function run({ browser, watch, problems, origin }) {
   const left = await page.evaluate(() => !(document.activeElement?.hasAttribute('data-bbc-screen') ?? false));
   console.log(`bbc: Tab moves focus off the screen: ${left}; typing ${await panel.getAttribute('data-typing')}`);
   if (!left) problems.push('bbc: Tab did not move focus off the screen');
+
+  // The on-screen keys alone: PRINT "A", SHIFT latched for each quote (SHIFT and 2 is ").
+  const tapKey = (key) => page.locator(`[data-bbc-key="${key}"]`).click();
+  for (const k of ['P', 'R', 'I', 'N', 'T', 'Space']) await tapKey(k);
+  await tapKey('Shift');
+  const latched = await page.locator('[data-bbc-key="Shift"]').getAttribute('aria-pressed');
+  await tapKey('D2');
+  const unlatched = await page.locator('[data-bbc-key="Shift"]').getAttribute('aria-pressed');
+  await tapKey('A');
+  await tapKey('Shift');
+  await tapKey('D2');
+  await tapKey('Return');
+  console.log(`bbc: on-screen SHIFT pressed "${latched}", after the next key "${unlatched}"`);
+  if (latched !== 'true' || unlatched !== 'false') problems.push(`bbc: the on-screen SHIFT did not latch for one key (${latched}, then ${unlatched})`);
+  if (await waitRows((r) => r.indexOf('>PRINT "A"') >= 0 && r[r.indexOf('>PRINT "A"') + 1].trim() === 'A', 'PRINT "A" on the on-screen keys did not print A')) {
+    const r = await rows();
+    const i = r.indexOf('>PRINT "A"');
+    console.log(`bbc: tapped PRINT "A" and RETURN on the on-screen keys: the screen shows "${r[i]}", then "${r[i + 1].trim()}"`);
+  }
 
   // Sound on, then off: headless Chrome may play nothing, but nothing may fail.
   const sound = page.locator('[data-bbc-sound]');

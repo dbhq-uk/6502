@@ -1,7 +1,7 @@
 ---
 title: "The BBC Micro's page"
 date: 2026-10-04
-summary: "The BBC Micro gets its page: a screen drawn from the machine's own picture, the keyboard by position, sound once asked for, a disc drive, and a Start button that says how much it downloads. It runs in a real browser and types BASIC through the page's own keys, but stays unlisted until its photograph is chosen and the registry says it runs."
+summary: "The BBC Micro gets its page: a screen drawn from the machine's own picture, the keyboard by position and the machine's own keys on screen for touch, sound once asked for, a disc drive, and a Start button that says how much it downloads. It runs in a real browser and types BASIC through the page's own keys, but stays unlisted until its photograph is chosen and the registry says it runs."
 order: 24
 ---
 
@@ -14,7 +14,10 @@ up. Until then the registry still says planned, so the site that deploys has no
 page for the BBC Micro and links none. What changes in production from this
 task alone is that the BBC Micro's WebAssembly, ROMs and three scripts are
 published, unlinked, and every page's inlined stylesheet carries the panel's
-rules (measured below).
+rules (measured below). Two pieces of text do describe the page before it is
+live: this entry, on the journal, and the new section of
+`docs/known-differences.md`, which the Status page renders. That matters only if
+this branch were merged before task 14b.
 
 ## What was built
 
@@ -106,16 +109,42 @@ defeats. A mutation that took the pacing out failed five of the nine new tests.
 **Tab leaves; Esc is ESCAPE.** The plan asked for Tab and Escape to behave as on
 the KIM-1's page and its 3D model, where Escape lets go. Here Esc is the key that
 stops a BASIC program, and a visitor reaches for it first, so it goes to the
-machine. The page never keeps the keyboard because Tab is never taken: it moves
-on, as on the KIM-1's page, and the BBC's own TAB key is left without a PC key.
-The function keys are left to the browser too (F5 reloads), so f0 to f9 have no
-PC key yet. With Ctrl the machine gets the key but the browser keeps its
+machine as ESCAPE, chosen over Escape letting go of the screen. The page never
+keeps the keyboard because Tab is never taken: it moves on, as on the KIM-1's
+page, the page says so under the screen, and the browser check presses Tab and
+checks the focus left. The review accepted this as a deviation from the plan, to
+be put to Dan. The BBC's own TAB key has no PC key, and the function keys are
+left to the browser (F5 reloads), so f0 to f9 have none either; all of them are
+on the on-screen keys. With Ctrl the machine gets the key but the browser keeps its
 shortcut, so Ctrl and R still reloads; with Alt or the Command key the machine
 gets nothing. Focus leaving the screen lets go of every key held. Start gives the
 screen focus, because pressing it was the visitor asking to use the machine.
 
+**The machine's keys on screen, for touch.** Every key the BBC Micro has is a
+button under the screen, in the machine's own rows: the red keys f0 to f9, the
+four rows of the keyboard with their legends as the machine prints them (`via.md`
+section 3(b)), the space bar, and the cursor keys with COPY and DELETE in a block
+of their own, as they sit at the right of the machine. A tap is a press and a
+release through the same queue as the PC's keys. SHIFT and CTRL latch: a tap
+holds them down for the next key tapped and then lets go, with `aria-pressed`
+and a filled key showing it, so one finger can type SHIFT and 2 for a double
+quote; a second tap lets go without typing. Chosen over keys that are held only
+while a finger is on them, which needs two fingers on a phone and cannot be
+done with a mouse, and over a separate shifted layer, which is not how the
+machine works. Every key is at least 44 pixels square, so a row wraps on a
+narrow screen rather than shrink its keys; no key takes the lime, because none
+matters more than another. They are real buttons, so they work from the keyboard
+too, and they take focus like any button and give it up the same way. A test
+derives the list from `BbcKey.cs` and requires every key on screen exactly once;
+the browser check types `PRINT "A"` on them alone and reads A back. This was the
+plan's from the start: the first version of this task left it out as a
+follow-up, and the review put it back.
+
 **The disc: drive 0, and a note about the catalogue.** A `.ssd` or `.dsd`
-dropped on the page or chosen with Insert a disc goes in drive 0; Make a blank
+dropped on the page or chosen with Insert a disc goes in drive 0 (a file larger
+than an 80-track double-sided disc is refused before it is read, and one dropped
+before Start is refused with "Press Start first" rather than the browser leaving
+the page to show it); Make a blank
 disc puts in an empty 80-track one; Save disc downloads the disc as it stands,
 through a Blob URL and a link with `download`, which is a download and not a
 fetch, so the CSP needs nothing for it. Nothing is uploaded. Task 12 found that
@@ -185,32 +214,70 @@ All on 4 October 2026, on this machine, with both machines built ahead of time.
   section alone took 14 s, its preview build included.
 - `node --test tests/*.test.mjs` in `site/`: 257 tests in 9 s, against 215 in 4 s
   before this task (the nested run of the whole suite on the preview build is most
-  of the difference).
+  of the difference). With the review's fixes, 261.
+- After the review's fixes, the browser check again passed both sections, in 242 s
+  on a busier host (the BBC Micro's capacity read 5.65 MHz, about twice its
+  clock). `PRINT "A"` tapped on the on-screen keys alone printed A, the latched
+  SHIFT showed pressed and let go after one key, the canvas went from 2,256 lit
+  pixels to 3,086 as `PRINT 6*7` and its answer appeared, and a disc dropped
+  before Start was refused with "Press Start first". Every on-screen key measured
+  at least 44 pixels square in a desktop window and a phone-sized one.
 - `dotnet test -c Release`: Kim1 39, BbcMicro 941, Cpu6502 1597, all passing.
 
-**What CI pays.** On a push that changes the BBC Micro, the machines job builds
-it ahead of time, about two minutes here; that job runs beside the tests, which
-take longer, so it should not lengthen the run. A push that changes neither
-machine restores both from cache. The site job gains the preview build and its
-nested suite, seconds, and the browser check gains its BBC section, about 15 s
-here.
+**What CI pays.** The first version of this entry said the BBC Micro's build
+"should not lengthen the run", because the machines job runs beside the tests.
+The review measured it on the first run with both caches cold (run 37171880262):
+the machines job took 2 m 45 s against the test job's 2 m 17 s, so the machines
+job is now the longer of the two; the site job took 3 m 13 s against 3 m 01 s
+before; and the whole run took 6 m 01 s against 5 m 17 s for the run before
+(37169538458). So a cold build does lengthen the run, by about three quarters of
+a minute. A push that changes neither machine restores both from cache, and one
+that changes one machine rebuilds that one alone.
+
+**The field count after a boot.** The browser check logs a field count of about
+130,000 a second after power on, then about fifty a second. That is the
+power-on behaviour task 8 found: until the OS programs the CRTC its registers
+are zero, so each frame is one line long and the count runs up fast. It is not a
+fault of the page.
 
 ## Deferred
 
-- **An on-screen keyboard,** for a phone or a tablet, which can start the machine
-  but not type into it; it would also give TAB, SHIFT LOCK and the function keys
-  a way in. The page says it is not there yet.
 - **Drive 1.**
+- **Keys held from the screen.** An on-screen key is a tap; there is no holding a
+  key down for the OS's auto-repeat, or for a game.
 - **The screen for a screen reader.** The canvas is a picture; in mode 7 the text
   could be read from screen memory into a live region, as the KIM-1's digits are
   summarised.
-- **Task 14b:** the photograph, the registry record (copied from the fixture, less
-  its stand-in photograph), the count, and then the preview can go.
+- **Task 14b, the checklist:**
+  - The photograph: simon.inns's `File:Acorn BBC Micro.jpg` on Wikimedia Commons,
+    CC BY 2.0, chosen in the research for 14b; it is not used here.
+  - Copy `status`, `acceptance`, `rights` and `notes` from
+    `site/tests/fixtures/bbc-micro-running.json` into `machines/registry.json`
+    (not its stand-in photograph), add the real photograph, and delete the
+    fixture.
+  - Point `site/tests/bbc-page.test.mjs` and `scripts/browser-check-bbc.mjs` at
+    `dist/` instead of a preview build.
+  - Write up the photograph in `site/src/assets/photos/README.md`, and update
+    `README.md` and `docs/the-6502-family.md`.
+  - Raise the machine-file count floor in `deploy-site.yml` (`COUNT -ge 6`, set
+    for the KIM-1 alone).
+  - Re-measure the site test count and set the floor in both workflows.
 - Not done from the task 13 review: the untested meter reset in `resume`, the
   build script tests spawning with a fake `dotnet`, and the floor comment style,
   which this task's floor change follows.
 
 ## Mistakes
+
+- I left the on-screen keys out as a follow-up when the plan asked for them. A
+  phone could start the machine and not type into it. The review caught it and
+  they are in now.
+- `BbcKeyPressesTests`' SHIFT test sampled the keys and asserted only when it saw
+  the colon down, so a queue that never pressed the colon passed it. It now
+  counts the samples with the colon down and requires at least one; with the
+  pacing taken out it fails.
+- The keyboard section named keys by their code (`Tab`, `ShiftLock`, `F0`), not by
+  the legends the machine prints (TAB, SHIFT LOCK, f0). The page uses the legends
+  everywhere now.
 
 - The queue tests were written straight after the queue rather than before it.
   They were then checked against a queue with its pacing taken out: five of the
