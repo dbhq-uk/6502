@@ -398,7 +398,7 @@ export function disc(panel, bbc, { screen, letGo }) {
       name = chosen.name;
       describe(`In drive 0: ${name}, ${tracks} tracks, ${kind === 'dsd' ? 'double' : 'single'} sided${protect.checked ? ', write-protected' : ''}.`);
     } catch (error) {
-      describe(`${chosen.name} was not taken: ${error.message}`);
+      if (ticket === latest) describe(`${chosen.name} was not taken: ${error.message}`);
     }
   };
 

@@ -460,3 +460,19 @@ test('a blank disc made while a library disc downloads stays in the drive, and a
   assert.deepEqual(inserted, ['blank', [5]]);
   assert.equal(panel.dataset.disc, 'onslaught.ssd');
 });
+
+test('a file read that fails after a later insert has started says nothing: the later disc keeps the status line', async () => {
+  const { els, inserted, file, settle, panel } = drive();
+  let fail;
+  const slow = { name: 'slow.ssd', size: 2, arrayBuffer: () => new Promise((_, reject) => { fail = reject; }) };
+  els['[data-bbc-file]'].files = [slow];
+  els['[data-bbc-file]'].on.change();
+  els['[data-bbc-file]'].files = [file('fast.ssd', [3, 3])];
+  els['[data-bbc-file]'].on.change();
+  await settle();
+  fail(new Error('the read failed'));
+  await settle();
+  assert.deepEqual(inserted, [[3, 3]]);
+  assert.equal(panel.dataset.disc, 'fast.ssd');
+  assert.match(els['[data-bbc-drive]'].textContent, /^In drive 0: fast\.ssd/);
+});

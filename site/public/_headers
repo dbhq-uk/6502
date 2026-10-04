@@ -57,6 +57,9 @@
 # The BBC Micro's preset disc images (/machines/bbc-micro/discs/<slug>.ssd): raw
 # bytes the page fetches and hands to the machine. Named here so they are served
 # as plain bytes whatever the edge would guess from .ssd, and never sniffed
-# (nosniff is set for every route above).
-/machines/*/discs/*
+# (nosniff is set for every route above). One splat only: Pages allows a single
+# * in a rule and skips, with only a build warning, any rule with two
+# (site/tests/bbc-discs.test.mjs checks every rule for that). The BBC Micro is
+# the only machine with discs, so its folder is named.
+/machines/bbc-micro/discs/*
   Content-Type: application/octet-stream

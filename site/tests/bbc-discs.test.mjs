@@ -157,12 +157,23 @@ test('no disc\'s image or licence was taken from a mirror', () => {
   assert.match('https://8bs.com/catalogue/tbi.htm', MIRRORS);
 });
 
-test('the edge serves the disc images as plain bytes: a rule in _headers for /machines/*/discs/*', () => {
+test('the edge serves the disc images as plain bytes: a rule in _headers for /machines/bbc-micro/discs/*, with one splat', () => {
   const headers = fs.readFileSync(path.join(process.cwd(), 'public', '_headers'), 'utf8');
-  assert.match(headers, /^\/machines\/\*\/discs\/\*\n  Content-Type: application\/octet-stream$/m);
+  assert.match(headers, /^\/machines\/bbc-micro\/discs\/\*\n  Content-Type: application\/octet-stream$/m);
   // The built site carries the same file, and the images are where the rule points.
   assert.equal(fs.readFileSync(path.join(DIST, '_headers'), 'utf8'), headers);
   for (const d of discs) assert.ok(fs.existsSync(path.join(DIST, 'machines', 'bbc-micro', DISCS_FOLDER, `${d.slug}.ssd`)));
+});
+
+// Cloudflare Pages allows a single splat in a rule's path and skips any rule with more, with
+// nothing but a warning at deploy: wrangler 4.145.0 says "Only one wildcard is allowed per
+// rule ... Skipping". A rule that is skipped silently looks exactly like one in force, so every
+// rule in the file is checked here, not only the discs'.
+test('every rule in _headers has at most one splat, so Pages skips none of them', () => {
+  const headers = fs.readFileSync(path.join(process.cwd(), 'public', '_headers'), 'utf8');
+  const rules = headers.split('\n').filter((line) => line.trim() !== '' && !line.startsWith('#') && !/^\s/.test(line));
+  assert.ok(rules.length >= 3, `only ${rules.length} rules found: the parse is wrong`);
+  for (const rule of rules) assert.ok((rule.match(/\*/g) ?? []).length <= 1, `${rule} has more than one *, and Pages would skip it`);
 });
 
 test('no disc image is committed outside machines/bbc-micro/discs/', () => {
