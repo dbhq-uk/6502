@@ -506,3 +506,212 @@ is CI's.
 **Tests.** `cd site && npm test`: 267 passed before this task and 282 after
 (12 in `registry.test.mjs`, 3 in `model.test.mjs`), none failed. Both
 workflows' floors were raised from 267 to 282.
+
+## Task 2: the board's frame, and a stop on the x scale
+
+`tools/bbc-micro-model/board_frame.py` puts a frame on the bare scan I1: a
+board millimetre X, from the left rear corner, is at pixel
+origin + diag(sx, sy) R(turn) X. The scanner's two scales act after the
+turn, because they belong to the scanner, so a row's length in millimetres
+does not depend on the turn at all. `data/frame.json` holds the result;
+`run-board.sh` runs it; a copy of I1 rectified to the frame at 16 pixels per
+millimetre goes to `out/`, which is git-ignored, and was looked at.
+
+**Task 2 crossed a STOP threshold.** The x scale, judged the way the plan's
+revision asked, row by row across the board, has a largest error over the
+stop. The y scale and the x against y check pass. The figures are below.
+
+### How it was measured
+
+- **Tests first.** `tests/test_board_frame.py` draws a made-up board four
+  times over size, mixed in linear light as a scanner's blur mixes it, with a
+  known x and y scale (15.80 and 15.72 pixels per millimetre), a 0.35 degree
+  turn and an offset; a notch and a slot in its front edge, four holes, two
+  connector rows and a DIP's row across, and two 40-pin footprints down. Run
+  before `board_frame.py` existed, it failed on the import. It now recovers
+  both scales to 0.005 per cent, every corner to 0.04 mm and every hole
+  centre to 0.02 mm (the plan's bounds: 0.05 per cent, 0.1 and 0.05 mm), and
+  a test holds that a row held out of the x fit is never in it (a row made
+  1 mm long reads exactly 1 mm long).
+- **The rows.** Down the board (y): task 0's DIP marks, pin 1 to pin N/2 of
+  each row, never the row spacing. Across (x): the rule, written into
+  `marks.json` before any row was fitted, was every connector row on the
+  0.1 inch pitch that runs across the board with at least eight pads, and the
+  rows of the two DIPs that lie across (IC74 and IC75), and nothing else.
+  That is PL8 and PL9 (two rows each), PL10, PL11, PL12, PL13 and PL14. A
+  search for chains of pads 40 pixels apart also found the rear socket SK6,
+  but it is a D socket on 2.77 mm, so the rear sockets are not used. The
+  first and last pad of each connector row were marked by hand on crops
+  enlarged four times with a 10 pixel grid, recorded in `marks.json` with the
+  crop; the pitch count is the pads counted on a 1:2 view and agrees with
+  each row's length at 2.54 mm.
+- **The scale.** Each end pad is moved to its solder blob's centroid
+  (`common.refine_to_pad`, refused beyond 0.6 mm, as in task 0). sx and sy
+  are fitted together so every row's length, first pad to last, is its
+  pitches x 2.54 mm, by least squares in millimetres; rows across set sx and
+  rows down set sy. Held out: y by the halves task 0 fixed, x one row at a
+  time.
+
+### The figures
+
+Measured on 4 October 2026 with `BBC_MODEL_INPUTS=~/dbhq-previews/bbc-model-research
+PYTHON=/tmp/bbcvenv/bin/python tools/bbc-micro-model/run-board.sh`, which
+exits 3 on a stop. It takes about a minute and a half on this host.
+
+**y: passes.** 15.7256 pixels per millimetre. The 40-pin rows held out,
+against 48.26 mm: median error 0.030 mm, largest 0.094, over 7 rows (the
+same three of ten lose an end pad to a refusal as in task 0). All 19 rows
+down held out: median 0.042, largest 0.362 (a 28-pin row).
+
+**x against y: passes.** x is 15.7524 pixels per millimetre, a ratio of
+1.0017, 0.17 per cent apart, against a stop at 1.5. Task 0's 1.27 per cent
+came from the row spacing; from pitch along the rows the two agree, as the
+revision expected.
+
+**x, rows across each held out: STOP.** 11 rows scored (the two rows of IC74
+and IC75 nearest the rear each lost an end pad to a refusal). Each error
+scaled to a 48.26 mm row: median 0.157 mm, largest 1.192. The plan passes at
+a median of 0.10 and a largest of 0.25, and stops at a median over 0.20 or a
+largest over 0.50. The median is between pass and stop; the largest is a
+stop. Two rows are over 0.50:
+
+| Row | Length | Error | Scaled to 48.26 mm |
+|---|---|---|---|
+| IC74, the row nearest the front | 17.78 mm | +0.439 mm | +1.192 mm |
+| PL11 | 40.64 mm | +0.423 mm | +0.502 mm |
+| PL12 | 48.26 mm | -0.307 mm | -0.307 mm |
+| PL10 | 22.86 mm | -0.092 mm | -0.194 mm |
+| PL8, front row | 40.64 mm | -0.153 mm | -0.182 mm |
+| IC75, the row nearest the front | 17.78 mm | -0.058 mm | -0.157 mm |
+| PL8, rear row | 40.64 mm | -0.115 mm | -0.136 mm |
+| PL9, rear row | 30.48 mm | -0.082 mm | -0.130 mm |
+| PL13 | 40.64 mm | +0.083 mm | +0.098 mm |
+| PL9, front row | 30.48 mm | +0.025 mm | +0.039 mm |
+| PL14 | 22.86 mm | +0.015 mm | +0.033 mm |
+
+Before calling it, I checked for my own mistakes rather than the board's,
+on crops with every pad's centroid drawn (`/tmp`, not kept): every pitch
+count is right, and every end pad was moved to its own pad, not a
+neighbour. What the crops show:
+
+- **IC74:** the solder on both end pads has spread outward, so their
+  centroids sit 1 to 3 pixels (up to 0.2 mm) outside the pitch of the six
+  pads between them, which are 40.2 pixels apart. On a 17.78 mm row the
+  scaling multiplies that by 2.7.
+- **PL11:** no pad looks wrong, and the row is long whichever way it is
+  measured: 0.42 mm end to end, and a line through all 17 pads gives
+  2.590 mm a pitch, 2 per cent long, with the left half of the row short of
+  the line and the right half long. [guessing - verify] The pads may not sit
+  on an exact 0.1 inch grid on this board's artwork, which was laid out in
+  1982; I1 cannot tell that from solder that misleads.
+- The rows across disagree with each other more than the rows down do: a
+  line through all of each row's pads gives 2.528 mm a pitch on PL10 and
+  2.590 on PL11, where task 0's six rows (PL8, PL9, PL13, PL14) spanned
+  0.34 per cent.
+
+That check was added on 4 October after task 0's figures were seen, as a
+stricter check: nothing else held x to this level, and the plan's revision
+said so. It is reported as crossed and not tuned: the rows, the rule that
+chose them and the thresholds are as they were set before the fit.
+
+### The turn and the straightness
+
+The frame's turn is 0.2305 degrees, one turn fitted to every long row's pads
+at once (30 rows of 10 pads or more, an offset each). The rows across and
+the rows down do not agree: the connector rows lie at 0.064 degrees on
+average (from -0.138 to 0.241), the DIP rows down at 0.286 (from 0.125 to
+0.601), a skew of 0.206 degrees. The board's own edges are square to the
+frame within 0.13 degrees (left edge 0.006, rear -0.011, the long front run
+-0.063), so the skew is in the pads, not the scan: [inferring] parts placed a
+little turned on the artwork, as a footprint at a time would be.
+
+**Straightness: not met, and the plan's words say the journal must say so.**
+Each long row's pads against a straight line through them, root mean square:
+median 0.043 mm, largest 0.137 (IC51), and 12 of the 30 rows are at 0.05 mm
+or more, where the plan wants every row under it. By that test the scan is not
+flat. What the residuals look like is pad scatter rather than a bend: the
+sagitta of a parabola through each row's residuals runs from -0.25 to +0.10 mm
+with both signs among neighbouring rows, where a bent scan would bow its rows
+one way; and the worst rows are the ones whose pads the refusal rule thins
+(IC1's right row keeps 13 of 20). [inferring] The 0.05 mm limit is below
+what centroids of ragged solder give on this scan.
+
+### The outline
+
+The lid is pale and grey and the board is green, yellow or dark, so the board
+is the largest region that is not lid, filled. Its edge, turned to the
+board's axes, is cut into runs across and down by the edge's direction over
+1 mm either side, a line is fitted to each run robustly with 0.8 mm left off
+each end (the corners are rounded), and the corners are where neighbouring
+lines meet. The edge is put where the light, the median of profiles across
+the run, is half way between the board's and the lid's.
+
+The board is 309.99 mm wide and 229.40 mm deep, between the edges' lines at
+the middle, against the researcher's estimate of about 309 by 229. The
+outline has 20 corners: the plain rear corners, a notch in the front edge
+15.3 mm wide and 13.5 mm deep between PL9 and PL10, and three slots about
+1.2 mm wide and 4.7 to 5.0 mm deep beside the front connectors. Two things in
+the scan to know about:
+
+- A pale band lies along some edges, outside the green. Where the light
+  crosses half way is 0.08 to 0.13 mm inside the board's last pixels on the
+  rear, left and front edges, but 0.55 mm inside on the right edge, where the
+  band is widest. Whether the band is the board's side seen at a slant or
+  bare laminate cannot be told from I1, so the right edge, and the width, are
+  uncertain by about half a millimetre.
+- The scanner's glass edge shows as a dark line beyond the board on the right
+  and at the top; the lid between keeps them apart, so they are not board.
+
+Two decisions changed on the way. The first version moved each edge's line
+half a pixel outward, the middle between the last board pixel and the first
+lid pixel; on the made-up board that put every edge 0.3 pixels out, because
+the lid test calls a pixel board at about a third board, so it was replaced by
+the half-light crossing, which is right whatever the threshold. And a
+crooked bit of the left edge 120 mm down made a corner pair 0.1 mm apart; a
+run under 2 mm between two runs on one line within 0.5 mm is now a jog and
+joins them, which cannot merge a slot, whose walls are a slot's width apart.
+An early look at a coarser mask had shown a fourth slot left of PL12; the
+crop shows a long pad there, not a slot.
+
+### The holes
+
+Nine holes, 3.2 to 3.9 mm across: four near the rear and left (3.2 to
+3.4 mm) and five larger (3.7 to 3.9 mm), four of them along the front. A
+hole shows the lid through the board: pale, grey and smooth. A tinned pad is
+pale and grey too, so smoothness decides: the spread of L over the region
+less 3 pixels all round is 0.017 to 0.027 on every hole and 0.057 or more on
+every tinned pad over 1.8 mm, read off I1's candidates before any hole was
+fitted, and the limit is 0.04. On the made-up board the first run called
+every pad a hole (125 of them), because drawn pads were smooth; they now
+have a grain, as solder has.
+
+A circle is fitted to where colour starts, along rays from the middle. On the
+made-up board that is the hole's edge. **On I1 it is not:** the overlay shows
+the circle on the edge of the lid seen through the hole, inside a grey crescent
+on each hole's rear side (the hole's wall, seen because the scanner looks at a
+slight slant) and, on some, a grey ring. So the diameters read small and a
+centre may sit towards the front by part of the crescent. It is recorded in
+`board_frame.py`'s docstring; the next task that uses a hole's place should
+fit the outer edge of the crescent instead.
+
+### Mistakes
+
+- The first `frame.json` listed every pale blob inside the board as a hole
+  candidate, over eight thousand; it now lists the 37 big enough to be one,
+  each with why it was kept or refused.
+
+### Tests, and where this leaves the plan
+
+`/tmp/bbcvenv/bin/python -m pytest tools/bbc-micro-model/tests -q`: 30
+passed. `site/tests/bbc-models.test.mjs` gains four tests: the verdicts in
+`frame.json` are the ones its figures give; the outline is closed, starts at
+the origin, runs across or down, and matches the board's width and depth
+within 0.5 mm, which are within 5 mm of 309 by 229; the holes are inside the
+board and the rectified copy stays in `out/`. The fifth, that `frame.json`
+passes all three scale rows, is written as the plan states it and marked as a
+to-do naming this entry, as task 0's was, so the suite stays green and
+reports it. `cd site && npm test`: 282 passed before this task, 285 after,
+one to-do, none failed; both workflows' floors were raised to 285.
+
+Task 2 ends BLOCKED on the x row, with the figures above, and the plan is
+reconsidered before task 3.

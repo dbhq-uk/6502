@@ -1,0 +1,1929 @@
+{
+ "about": "Task 2 of the BBC Micro models plan: the board frame on scan I1. A board millimetre X (from the left rear corner, x to the right, y towards the front) is at I1 pixel origin + diag(pxPerMm.x, pxPerMm.y) R(rotationDeg) X. The outline, holes and edges are in board millimetres. Written by board_frame.py; every figure here is a measurement made on the date of the journal entry that quotes it.",
+ "board": {
+  "depthMm": 229.4045,
+  "widthMm": 309.9945
+ },
+ "edges": [
+  {
+   "a": 0.0094,
+   "axis": "y",
+   "b": 0.0001,
+   "from": 0.1173,
+   "halfLightMm": -0.1201,
+   "meanAt": -0.1235,
+   "points": 3721,
+   "rmsMm": 0.0791,
+   "to": 229.3633,
+   "um": 117.2771
+  },
+  {
+   "a": 229.4535,
+   "axis": "x",
+   "b": -0.0022,
+   "from": 0.3153,
+   "halfLightMm": -0.0838,
+   "meanAt": 229.5386,
+   "points": 1767,
+   "rmsMm": 0.0471,
+   "to": 114.9639,
+   "um": 57.7041
+  },
+  {
+   "a": 115.5055,
+   "axis": "y",
+   "b": -0.0112,
+   "from": 216.1164,
+   "halfLightMm": -0.0263,
+   "meanAt": 115.5209,
+   "points": 171,
+   "rmsMm": 0.0343,
+   "to": 228.9652,
+   "um": 222.5404
+  },
+  {
+   "a": 215.8296,
+   "axis": "x",
+   "b": -0.0073,
+   "from": 115.6734,
+   "halfLightMm": -0.1339,
+   "meanAt": 215.9651,
+   "points": 209,
+   "rmsMm": 0.0318,
+   "to": 130.5285,
+   "um": 123.1006
+  },
+  {
+   "a": 130.9863,
+   "axis": "y",
+   "b": 0.0178,
+   "from": 216.1207,
+   "halfLightMm": -0.0166,
+   "meanAt": 130.9682,
+   "points": 188,
+   "rmsMm": 0.0783,
+   "to": 229.0272,
+   "um": 222.4244
+  },
+  {
+   "a": 229.2073,
+   "axis": "x",
+   "b": -0.0065,
+   "from": 131.2157,
+   "halfLightMm": -0.1105,
+   "meanAt": 229.2843,
+   "points": 50,
+   "rmsMm": 0.0285,
+   "to": 135.9766,
+   "um": 133.5973
+  },
+  {
+   "a": 136.5854,
+   "axis": "y",
+   "b": -0.0901,
+   "from": 224.8709,
+   "halfLightMm": -0.0241,
+   "meanAt": 136.5766,
+   "points": 39,
+   "rmsMm": 0.0281,
+   "to": 228.9442,
+   "um": 226.907
+  },
+  {
+   "a": 224.6095,
+   "axis": "x",
+   "b": -0.0037,
+   "from": 136.9117,
+   "halfLightMm": 0.0371,
+   "meanAt": 224.6825,
+   "points": 6,
+   "rmsMm": 0.03,
+   "to": 137.6743,
+   "um": 137.3237
+  },
+  {
+   "a": 137.9063,
+   "axis": "y",
+   "b": 0.0005,
+   "from": 224.995,
+   "halfLightMm": 0.0173,
+   "meanAt": 137.9176,
+   "points": 35,
+   "rmsMm": 0.0253,
+   "to": 228.9355,
+   "um": 226.9653
+  },
+  {
+   "a": 229.3478,
+   "axis": "x",
+   "b": -0.0002,
+   "from": 138.262,
+   "halfLightMm": -0.0267,
+   "meanAt": 229.3723,
+   "points": 645,
+   "rmsMm": 0.0583,
+   "to": 181.4942,
+   "um": 159.895
+  },
+  {
+   "a": 181.9492,
+   "axis": "y",
+   "b": -0.0841,
+   "from": 224.8157,
+   "halfLightMm": -0.0412,
+   "meanAt": 181.9767,
+   "points": 42,
+   "rmsMm": 0.0235,
+   "to": 229.079,
+   "um": 226.947
+  },
+  {
+   "a": 224.5109,
+   "axis": "x",
+   "b": -0.004,
+   "from": 182.302,
+   "halfLightMm": -0.1115,
+   "meanAt": 224.6508,
+   "points": 7,
+   "rmsMm": 0.0,
+   "to": 183.3812,
+   "um": 182.8729
+  },
+  {
+   "a": 183.4702,
+   "axis": "y",
+   "b": 0.0306,
+   "from": 224.8109,
+   "halfLightMm": 0.0157,
+   "meanAt": 183.5008,
+   "points": 41,
+   "rmsMm": 0.0246,
+   "to": 229.0065,
+   "um": 226.9092
+  },
+  {
+   "a": 229.3441,
+   "axis": "x",
+   "b": -0.0011,
+   "from": 183.7795,
+   "halfLightMm": 0.0121,
+   "meanAt": 229.3374,
+   "points": 1794,
+   "rmsMm": 0.0459,
+   "to": 303.445,
+   "um": 243.5733
+  },
+  {
+   "a": 304.1444,
+   "axis": "y",
+   "b": -0.1727,
+   "from": 225.0238,
+   "halfLightMm": 0.1005,
+   "meanAt": 304.022,
+   "points": 37,
+   "rmsMm": 0.0228,
+   "to": 228.97,
+   "um": 226.9965
+  },
+  {
+   "a": 224.2953,
+   "axis": "x",
+   "b": -0.004,
+   "from": 304.3806,
+   "halfLightMm": -0.6626,
+   "meanAt": 224.9439,
+   "points": 7,
+   "rmsMm": 0.0,
+   "to": 305.4598,
+   "um": 304.9519
+  },
+  {
+   "a": 305.5531,
+   "axis": "y",
+   "b": 0.014,
+   "from": 225.0192,
+   "halfLightMm": 0.0178,
+   "meanAt": 305.5556,
+   "points": 37,
+   "rmsMm": 0.03,
+   "to": 228.9608,
+   "um": 226.9903
+  },
+  {
+   "a": 229.2532,
+   "axis": "x",
+   "b": -0.031,
+   "from": 305.7936,
+   "halfLightMm": 0.0264,
+   "meanAt": 229.2064,
+   "points": 36,
+   "rmsMm": 0.0233,
+   "to": 309.6662,
+   "um": 307.7306
+  },
+  {
+   "a": 310.0037,
+   "axis": "y",
+   "b": -0.0002,
+   "from": -0.0465,
+   "halfLightMm": -0.5492,
+   "meanAt": 310.548,
+   "points": 3588,
+   "rmsMm": 0.1847,
+   "to": 228.9452,
+   "um": 114.7147
+  },
+  {
+   "a": -0.0245,
+   "axis": "x",
+   "b": -0.0002,
+   "from": 0.2812,
+   "halfLightMm": -0.1313,
+   "meanAt": -0.1565,
+   "points": 4882,
+   "rmsMm": 0.1683,
+   "to": 309.6964,
+   "um": 154.652
+  }
+ ],
+ "frontEdgeSpanMm": [
+  0.3153,
+  309.6662
+ ],
+ "heldOut": {
+  "allRowsErrMm": {
+   "max": 0.3619,
+   "median": 0.0415,
+   "n": 19,
+   "p90": 0.17
+  },
+  "footprints": 11,
+  "rowLengthErrMm": {
+   "max": 0.094,
+   "median": 0.0303,
+   "n": 7,
+   "p90": 0.0873
+  },
+  "rows": [
+   {
+    "errMm": 0.0774,
+    "fold": "A",
+    "footprint": "IC73",
+    "lengthMm": 33.02,
+    "measuredMm": 33.0974,
+    "pins": 28,
+    "row": "IC73.tl-bl"
+   },
+   {
+    "errMm": -0.0793,
+    "fold": "A",
+    "footprint": "IC73",
+    "lengthMm": 33.02,
+    "measuredMm": 32.9407,
+    "pins": 28,
+    "row": "IC73.tr-br"
+   },
+   {
+    "errMm": 0.0328,
+    "fold": "A",
+    "footprint": "IC93",
+    "lengthMm": 15.24,
+    "measuredMm": 15.2728,
+    "pins": 14,
+    "row": "IC93.tl-bl"
+   },
+   {
+    "errMm": 0.2535,
+    "fold": "A",
+    "footprint": "IC93",
+    "lengthMm": 15.24,
+    "measuredMm": 15.4935,
+    "pins": 14,
+    "row": "IC93.tr-br"
+   },
+   {
+    "errMm": -0.0099,
+    "fold": "A",
+    "footprint": "IC1",
+    "lengthMm": 48.26,
+    "measuredMm": 48.2501,
+    "pins": 40,
+    "row": "IC1.tl-bl"
+   },
+   {
+    "errMm": 0.0018,
+    "fold": "A",
+    "footprint": "IC1",
+    "lengthMm": 48.26,
+    "measuredMm": 48.2618,
+    "pins": 40,
+    "row": "IC1.tr-br"
+   },
+   {
+    "errMm": 0.0828,
+    "fold": "A",
+    "footprint": "IC3",
+    "lengthMm": 48.26,
+    "measuredMm": 48.3428,
+    "pins": 40,
+    "row": "IC3.tl-bl"
+   },
+   {
+    "errMm": 0.009,
+    "fold": "A",
+    "footprint": "IC51",
+    "lengthMm": 33.02,
+    "measuredMm": 33.029,
+    "pins": 28,
+    "row": "IC51.tl-bl"
+   },
+   {
+    "errMm": 0.1123,
+    "fold": "A",
+    "footprint": "IC51",
+    "lengthMm": 33.02,
+    "measuredMm": 33.1323,
+    "pins": 28,
+    "row": "IC51.tr-br"
+   },
+   {
+    "errMm": 0.1491,
+    "fold": "A",
+    "footprint": "IC64",
+    "lengthMm": 17.78,
+    "measuredMm": 17.9291,
+    "pins": 16,
+    "row": "IC64.tl-bl"
+   },
+   {
+    "errMm": -0.0456,
+    "fold": "B",
+    "footprint": "IC7",
+    "lengthMm": 33.02,
+    "measuredMm": 32.9744,
+    "pins": 28,
+    "row": "IC7.tl-bl"
+   },
+   {
+    "errMm": -0.3619,
+    "fold": "B",
+    "footprint": "IC7",
+    "lengthMm": 33.02,
+    "measuredMm": 32.6581,
+    "pins": 28,
+    "row": "IC7.tr-br"
+   },
+   {
+    "errMm": 0.0138,
+    "fold": "B",
+    "footprint": "L28",
+    "lengthMm": 33.02,
+    "measuredMm": 33.0338,
+    "pins": 28,
+    "row": "L28.tl-bl"
+   },
+   {
+    "errMm": 0.0373,
+    "fold": "B",
+    "footprint": "L28",
+    "lengthMm": 33.02,
+    "measuredMm": 33.0573,
+    "pins": 28,
+    "row": "L28.tr-br"
+   },
+   {
+    "errMm": -0.0303,
+    "fold": "B",
+    "footprint": "IC69",
+    "lengthMm": 48.26,
+    "measuredMm": 48.2297,
+    "pins": 40,
+    "row": "IC69.tl-bl"
+   },
+   {
+    "errMm": -0.094,
+    "fold": "B",
+    "footprint": "IC69",
+    "lengthMm": 48.26,
+    "measuredMm": 48.166,
+    "pins": 40,
+    "row": "IC69.tr-br"
+   },
+   {
+    "errMm": -0.0329,
+    "fold": "B",
+    "footprint": "IC78",
+    "lengthMm": 48.26,
+    "measuredMm": 48.2271,
+    "pins": 40,
+    "row": "IC78.tl-bl"
+   },
+   {
+    "errMm": 0.0006,
+    "fold": "B",
+    "footprint": "IC78",
+    "lengthMm": 48.26,
+    "measuredMm": 48.2606,
+    "pins": 40,
+    "row": "IC78.tr-br"
+   },
+   {
+    "errMm": 0.0415,
+    "fold": "B",
+    "footprint": "IC101",
+    "lengthMm": 33.02,
+    "measuredMm": 33.0615,
+    "pins": 28,
+    "row": "IC101.tl-bl"
+   }
+  ],
+  "what": "Rows down the board (y), pin 1 to pin N/2 of DIP footprints, a half of the footprints at a time held out of the scale fit; rowLengthErrMm is the 40-pin rows (48.26 mm), the ones the plan judges; allRowsErrMm is every row held out"
+ },
+ "heldOutX": {
+  "errMm": {
+   "max": 0.4393,
+   "median": 0.0917,
+   "n": 11,
+   "p90": 0.4227
+  },
+  "rows": [
+   {
+    "errMm": -0.0578,
+    "kind": "dip",
+    "lengthMm": 17.78,
+    "measuredMm": 17.7222,
+    "pitches": 7,
+    "row": "IC75.bl-br",
+    "scaledErrMm": -0.157
+   },
+   {
+    "errMm": 0.4393,
+    "kind": "dip",
+    "lengthMm": 17.78,
+    "measuredMm": 18.2193,
+    "pitches": 7,
+    "row": "IC74.bl-br",
+    "scaledErrMm": 1.1923
+   },
+   {
+    "errMm": -0.1145,
+    "kind": "connector",
+    "lengthMm": 40.64,
+    "measuredMm": 40.5255,
+    "pitches": 16,
+    "row": "PL8a",
+    "scaledErrMm": -0.136
+   },
+   {
+    "errMm": -0.1531,
+    "kind": "connector",
+    "lengthMm": 40.64,
+    "measuredMm": 40.4869,
+    "pitches": 16,
+    "row": "PL8b",
+    "scaledErrMm": -0.1818
+   },
+   {
+    "errMm": -0.0818,
+    "kind": "connector",
+    "lengthMm": 30.48,
+    "measuredMm": 30.3982,
+    "pitches": 12,
+    "row": "PL9a",
+    "scaledErrMm": -0.1295
+   },
+   {
+    "errMm": 0.0248,
+    "kind": "connector",
+    "lengthMm": 30.48,
+    "measuredMm": 30.5048,
+    "pitches": 12,
+    "row": "PL9b",
+    "scaledErrMm": 0.0393
+   },
+   {
+    "errMm": -0.0917,
+    "kind": "connector",
+    "lengthMm": 22.86,
+    "measuredMm": 22.7683,
+    "pitches": 9,
+    "row": "PL10",
+    "scaledErrMm": -0.1935
+   },
+   {
+    "errMm": 0.4227,
+    "kind": "connector",
+    "lengthMm": 40.64,
+    "measuredMm": 41.0627,
+    "pitches": 16,
+    "row": "PL11",
+    "scaledErrMm": 0.502
+   },
+   {
+    "errMm": -0.3073,
+    "kind": "connector",
+    "lengthMm": 48.26,
+    "measuredMm": 47.9527,
+    "pitches": 19,
+    "row": "PL12",
+    "scaledErrMm": -0.3073
+   },
+   {
+    "errMm": 0.0828,
+    "kind": "connector",
+    "lengthMm": 40.64,
+    "measuredMm": 40.7228,
+    "pitches": 16,
+    "row": "PL13",
+    "scaledErrMm": 0.0984
+   },
+   {
+    "errMm": 0.0154,
+    "kind": "connector",
+    "lengthMm": 22.86,
+    "measuredMm": 22.8754,
+    "pitches": 9,
+    "row": "PL14",
+    "scaledErrMm": 0.0325
+   }
+  ],
+  "scaledErrMm": {
+   "max": 1.1923,
+   "median": 0.157,
+   "n": 11,
+   "p90": 0.502
+  },
+  "what": "Rows across the board (x), first pad to last, connector rows on the 0.1 inch pitch and the rows of DIPs that lie across, each held out of the scale fit in turn; scaledErrMm is the error x 48.26 / the row's length"
+ },
+ "holeCandidates": [
+  {
+   "centroidPx": [
+    161.3264,
+    150.4995
+   ],
+   "d": 3.1968,
+   "dEqMm": 2.2202,
+   "refused": null,
+   "rimPoints": 120,
+   "rimRmsMm": 0.1594,
+   "texture": 0.0186,
+   "x": 10.2369,
+   "y": 9.2533
+  },
+  {
+   "centroidPx": [
+    3864.8257,
+    233.8023
+   ],
+   "dEqMm": 1.9881,
+   "refused": "not round"
+  },
+  {
+   "centroidPx": [
+    4042.0116,
+    231.1083
+   ],
+   "dEqMm": 2.2109,
+   "refused": "rough (solder)",
+   "texture": 0.1007
+  },
+  {
+   "centroidPx": [
+    1478.8502,
+    251.0194
+   ],
+   "d": 3.3717,
+   "dEqMm": 1.9251,
+   "refused": null,
+   "rimPoints": 93,
+   "rimRmsMm": 0.1557,
+   "texture": 0.0166,
+   "x": 93.9195,
+   "y": 15.1809
+  },
+  {
+   "centroidPx": [
+    2002.3874,
+    251.4483
+   ],
+   "d": 3.3516,
+   "dEqMm": 2.1734,
+   "refused": null,
+   "rimPoints": 120,
+   "rimRmsMm": 0.1842,
+   "texture": 0.0189,
+   "x": 127.048,
+   "y": 15.1645
+  },
+  {
+   "centroidPx": [
+    518.2993,
+    255.7736
+   ],
+   "dEqMm": 2.3441,
+   "refused": "rough (solder)",
+   "texture": 0.169
+  },
+  {
+   "centroidPx": [
+    756.2708,
+    260.142
+   ],
+   "dEqMm": 2.0667,
+   "refused": "rough (solder)",
+   "texture": 0.2109
+  },
+  {
+   "centroidPx": [
+    3341.9005,
+    270.1889
+   ],
+   "dEqMm": 2.3615,
+   "refused": "rough (solder)",
+   "texture": 0.1096
+  },
+  {
+   "centroidPx": [
+    3020.2318,
+    268.1567
+   ],
+   "dEqMm": 1.5476,
+   "refused": "rough (solder)",
+   "texture": 0.0936
+  },
+  {
+   "centroidPx": [
+    3583.3155,
+    274.4167
+   ],
+   "dEqMm": 1.8585,
+   "refused": "rough (solder)",
+   "texture": 0.1463
+  },
+  {
+   "centroidPx": [
+    4909.9681,
+    294.1771
+   ],
+   "dEqMm": 2.0865,
+   "refused": "not round"
+  },
+  {
+   "centroidPx": [
+    4311.2308,
+    292.3721
+   ],
+   "dEqMm": 1.5724,
+   "refused": "not round"
+  },
+  {
+   "centroidPx": [
+    717.9062,
+    293.7446
+   ],
+   "dEqMm": 1.945,
+   "refused": "rough (solder)",
+   "texture": 0.0728
+  },
+  {
+   "centroidPx": [
+    558.1284,
+    297.7368
+   ],
+   "dEqMm": 2.1828,
+   "refused": "rough (solder)",
+   "texture": 0.0723
+  },
+  {
+   "centroidPx": [
+    3219.2714,
+    304.7799
+   ],
+   "dEqMm": 1.551,
+   "refused": "not round"
+  },
+  {
+   "centroidPx": [
+    3378.8824,
+    311.6183
+   ],
+   "dEqMm": 2.0265,
+   "refused": "rough (solder)",
+   "texture": 0.0899
+  },
+  {
+   "centroidPx": [
+    3542.1878,
+    312.2474
+   ],
+   "dEqMm": 1.9712,
+   "refused": "rough (solder)",
+   "texture": 0.0622
+  },
+  {
+   "centroidPx": [
+    2701.5648,
+    347.561
+   ],
+   "dEqMm": 2.3484,
+   "refused": "rough (solder)",
+   "texture": 0.0572
+  },
+  {
+   "centroidPx": [
+    2859.4749,
+    349.2961
+   ],
+   "dEqMm": 2.3495,
+   "refused": "rough (solder)",
+   "texture": 0.0848
+  },
+  {
+   "centroidPx": [
+    3458.5646,
+    350.0166
+   ],
+   "dEqMm": 1.6691,
+   "refused": "rough (solder)",
+   "texture": 0.0666
+  },
+  {
+   "centroidPx": [
+    498.8172,
+    374.3194
+   ],
+   "dEqMm": 1.5276,
+   "refused": "not round"
+  },
+  {
+   "centroidPx": [
+    2741.5277,
+    382.219
+   ],
+   "dEqMm": 2.1556,
+   "refused": "rough (solder)",
+   "texture": 0.0879
+  },
+  {
+   "centroidPx": [
+    905.395,
+    378.106
+   ],
+   "dEqMm": 1.5724,
+   "refused": "not round"
+  },
+  {
+   "centroidPx": [
+    372.9837,
+    395.7239
+   ],
+   "dEqMm": 1.7736,
+   "refused": "not round"
+  },
+  {
+   "centroidPx": [
+    2900.5344,
+    384.8897
+   ],
+   "dEqMm": 1.8941,
+   "refused": "rough (solder)",
+   "texture": 0.0632
+  },
+  {
+   "centroidPx": [
+    903.1737,
+    417.0475
+   ],
+   "dEqMm": 1.6768,
+   "refused": "rough (solder)",
+   "texture": 0.0859
+  },
+  {
+   "centroidPx": [
+    176.6018,
+    525.5038
+   ],
+   "d": 3.3214,
+   "dEqMm": 2.4763,
+   "refused": null,
+   "rimPoints": 111,
+   "rimRmsMm": 0.203,
+   "texture": 0.018,
+   "x": 11.3883,
+   "y": 33.0875
+  },
+  {
+   "centroidPx": [
+    777.1111,
+    574.1692
+   ],
+   "dEqMm": 1.734,
+   "refused": "rough (solder)",
+   "texture": 0.0905
+  },
+  {
+   "centroidPx": [
+    4057.4463,
+    888.1827
+   ],
+   "dEqMm": 1.9197,
+   "refused": "rough (solder)",
+   "texture": 0.0668
+  },
+  {
+   "centroidPx": [
+    4635.9794,
+    951.6503
+   ],
+   "d": 3.7946,
+   "dEqMm": 3.0358,
+   "refused": null,
+   "rimPoints": 104,
+   "rimRmsMm": 0.0757,
+   "texture": 0.0269,
+   "x": 294.2799,
+   "y": 59.1621
+  },
+  {
+   "centroidPx": [
+    4889.2432,
+    1138.205
+   ],
+   "dEqMm": 1.5107,
+   "refused": "not round"
+  },
+  {
+   "centroidPx": [
+    325.9432,
+    3013.4364
+   ],
+   "dEqMm": 1.5039,
+   "refused": "rough (solder)",
+   "texture": 0.1884
+  },
+  {
+   "centroidPx": [
+    2488.6872,
+    3413.3723
+   ],
+   "d": 3.8623,
+   "dEqMm": 2.7403,
+   "refused": null,
+   "rimPoints": 120,
+   "rimRmsMm": 0.0968,
+   "texture": 0.0182,
+   "x": 158.7196,
+   "y": 216.6498
+  },
+  {
+   "centroidPx": [
+    1165.9352,
+    3448.5268
+   ],
+   "d": 3.7322,
+   "dEqMm": 2.6264,
+   "refused": null,
+   "rimPoints": 120,
+   "rimRmsMm": 0.1602,
+   "texture": 0.0183,
+   "x": 74.785,
+   "y": 219.3559
+  },
+  {
+   "centroidPx": [
+    3805.3612,
+    3455.6999
+   ],
+   "d": 3.8236,
+   "dEqMm": 2.7045,
+   "refused": null,
+   "rimPoints": 120,
+   "rimRmsMm": 0.0837,
+   "texture": 0.0206,
+   "x": 242.2959,
+   "y": 219.0562
+  },
+  {
+   "centroidPx": [
+    423.5477,
+    3551.4818
+   ],
+   "dEqMm": 1.5039,
+   "refused": "rough (solder)",
+   "texture": 0.054
+  },
+  {
+   "centroidPx": [
+    150.2674,
+    3590.4509
+   ],
+   "d": 3.7255,
+   "dEqMm": 2.8847,
+   "refused": null,
+   "rimPoints": 120,
+   "rimRmsMm": 0.0891,
+   "texture": 0.0197,
+   "x": 10.1682,
+   "y": 228.3664
+  }
+ ],
+ "holes": [
+  {
+   "d": 3.1968,
+   "rimPoints": 120,
+   "rimRmsMm": 0.1594,
+   "x": 5.1692,
+   "y": 5.2587
+  },
+  {
+   "d": 3.3717,
+   "rimPoints": 93,
+   "rimRmsMm": 0.1557,
+   "x": 88.8519,
+   "y": 11.1863
+  },
+  {
+   "d": 3.3516,
+   "rimPoints": 120,
+   "rimRmsMm": 0.1842,
+   "x": 121.9803,
+   "y": 11.1699
+  },
+  {
+   "d": 3.3214,
+   "rimPoints": 111,
+   "rimRmsMm": 0.203,
+   "x": 6.3207,
+   "y": 29.0929
+  },
+  {
+   "d": 3.7946,
+   "rimPoints": 104,
+   "rimRmsMm": 0.0757,
+   "x": 289.2123,
+   "y": 55.1675
+  },
+  {
+   "d": 3.8623,
+   "rimPoints": 120,
+   "rimRmsMm": 0.0968,
+   "x": 153.6519,
+   "y": 212.6551
+  },
+  {
+   "d": 3.7322,
+   "rimPoints": 120,
+   "rimRmsMm": 0.1602,
+   "x": 69.7173,
+   "y": 215.3613
+  },
+  {
+   "d": 3.8236,
+   "rimPoints": 120,
+   "rimRmsMm": 0.0837,
+   "x": 237.2282,
+   "y": 215.0616
+  },
+  {
+   "d": 3.7255,
+   "rimPoints": 120,
+   "rimRmsMm": 0.0891,
+   "x": 5.1006,
+   "y": 224.3718
+  }
+ ],
+ "origin": [
+  79.5735,
+  63.138
+ ],
+ "outline": [
+  [
+   0.0,
+   0.0
+  ],
+  [
+   0.0185,
+   229.5804
+  ],
+  [
+   115.4293,
+   229.3266
+  ],
+  [
+   115.5802,
+   215.8843
+  ],
+  [
+   130.8677,
+   215.773
+  ],
+  [
+   131.1075,
+   229.2235
+  ],
+  [
+   136.3797,
+   229.1891
+  ],
+  [
+   136.7923,
+   224.6115
+  ],
+  [
+   137.9051,
+   224.6074
+  ],
+  [
+   137.9075,
+   229.3521
+  ],
+  [
+   181.7476,
+   229.3436
+  ],
+  [
+   182.1539,
+   224.5138
+  ],
+  [
+   183.3967,
+   224.5088
+  ],
+  [
+   183.5469,
+   229.413
+  ],
+  [
+   303.751,
+   229.2749
+  ],
+  [
+   304.6106,
+   224.2967
+  ],
+  [
+   305.5154,
+   224.293
+  ],
+  [
+   305.5856,
+   229.3196
+  ],
+  [
+   309.9773,
+   229.1836
+  ],
+  [
+   310.0302,
+   -0.0492
+  ],
+  [
+   0.0,
+   0.0
+  ]
+ ],
+ "pxPerMm": {
+  "x": 15.7524,
+  "y": 15.7256
+ },
+ "ratio": 1.0017,
+ "ratioPct": 0.1704,
+ "rectified": {
+  "file": "out/rectified-16.jpg",
+  "marginMm": 2.0,
+  "pxPerMm": 16,
+  "what": "I1 resampled onto the board frame: pixel (u, v)'s centre is board millimetre ((u + 0.5) / 16 - 2, (v + 0.5) / 16 - 2). Made by board_frame.py in out/, which is git-ignored: I1 states no licence, so no copy of it is committed"
+ },
+ "rotationDeg": 0.2305,
+ "rows": [
+  {
+   "axis": "y",
+   "kind": "dip",
+   "padsFound": 13,
+   "pitches": 13,
+   "refusedPads": [
+    1
+   ],
+   "row": "IC73.tl-bl",
+   "scored": true
+  },
+  {
+   "axis": "y",
+   "kind": "dip",
+   "padsFound": 14,
+   "pitches": 13,
+   "refusedPads": [],
+   "row": "IC73.tr-br",
+   "scored": true
+  },
+  {
+   "axis": "y",
+   "kind": "dip",
+   "padsFound": 14,
+   "pitches": 13,
+   "refusedPads": [],
+   "row": "IC7.tl-bl",
+   "scored": true
+  },
+  {
+   "axis": "y",
+   "kind": "dip",
+   "padsFound": 12,
+   "pitches": 13,
+   "refusedPads": [
+    5,
+    12
+   ],
+   "row": "IC7.tr-br",
+   "scored": true
+  },
+  {
+   "axis": "y",
+   "kind": "dip",
+   "padsFound": 10,
+   "pitches": 11,
+   "refusedPads": [
+    0,
+    7
+   ],
+   "row": "IC4.tl-bl",
+   "scored": false
+  },
+  {
+   "axis": "y",
+   "kind": "dip",
+   "padsFound": 2,
+   "pitches": 11,
+   "refusedPads": [
+    0,
+    1,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10
+   ],
+   "row": "IC4.tr-br",
+   "scored": false
+  },
+  {
+   "axis": "y",
+   "kind": "dip",
+   "padsFound": 14,
+   "pitches": 13,
+   "refusedPads": [],
+   "row": "L28.tl-bl",
+   "scored": true
+  },
+  {
+   "axis": "y",
+   "kind": "dip",
+   "padsFound": 12,
+   "pitches": 13,
+   "refusedPads": [
+    4,
+    6
+   ],
+   "row": "L28.tr-br",
+   "scored": true
+  },
+  {
+   "axis": "y",
+   "kind": "dip",
+   "padsFound": 7,
+   "pitches": 6,
+   "refusedPads": [],
+   "row": "IC93.tl-bl",
+   "scored": true
+  },
+  {
+   "axis": "y",
+   "kind": "dip",
+   "padsFound": 7,
+   "pitches": 6,
+   "refusedPads": [],
+   "row": "IC93.tr-br",
+   "scored": true
+  },
+  {
+   "axis": "y",
+   "kind": "dip",
+   "padsFound": 16,
+   "pitches": 19,
+   "refusedPads": [
+    10,
+    16,
+    18,
+    19
+   ],
+   "row": "IC2.tl-bl",
+   "scored": false
+  },
+  {
+   "axis": "y",
+   "kind": "dip",
+   "padsFound": 16,
+   "pitches": 19,
+   "refusedPads": [
+    0,
+    6,
+    9,
+    14
+   ],
+   "row": "IC2.tr-br",
+   "scored": false
+  },
+  {
+   "axis": "y",
+   "kind": "dip",
+   "padsFound": 19,
+   "pitches": 19,
+   "refusedPads": [
+    17
+   ],
+   "row": "IC1.tl-bl",
+   "scored": true
+  },
+  {
+   "axis": "y",
+   "kind": "dip",
+   "padsFound": 13,
+   "pitches": 19,
+   "refusedPads": [
+    2,
+    6,
+    8,
+    9,
+    10,
+    15,
+    18
+   ],
+   "row": "IC1.tr-br",
+   "scored": true
+  },
+  {
+   "axis": "y",
+   "kind": "dip",
+   "padsFound": 17,
+   "pitches": 19,
+   "refusedPads": [
+    1,
+    4,
+    11
+   ],
+   "row": "IC69.tl-bl",
+   "scored": true
+  },
+  {
+   "axis": "y",
+   "kind": "dip",
+   "padsFound": 16,
+   "pitches": 19,
+   "refusedPads": [
+    11,
+    12,
+    17,
+    18
+   ],
+   "row": "IC69.tr-br",
+   "scored": true
+  },
+  {
+   "axis": "y",
+   "kind": "dip",
+   "padsFound": 20,
+   "pitches": 19,
+   "refusedPads": [],
+   "row": "IC3.tl-bl",
+   "scored": true
+  },
+  {
+   "axis": "y",
+   "kind": "dip",
+   "padsFound": 15,
+   "pitches": 19,
+   "refusedPads": [
+    9,
+    10,
+    17,
+    18,
+    19
+   ],
+   "row": "IC3.tr-br",
+   "scored": false
+  },
+  {
+   "axis": "y",
+   "kind": "dip",
+   "padsFound": 19,
+   "pitches": 19,
+   "refusedPads": [
+    3
+   ],
+   "row": "IC78.tl-bl",
+   "scored": true
+  },
+  {
+   "axis": "y",
+   "kind": "dip",
+   "padsFound": 19,
+   "pitches": 19,
+   "refusedPads": [
+    7
+   ],
+   "row": "IC78.tr-br",
+   "scored": true
+  },
+  {
+   "axis": "y",
+   "kind": "dip",
+   "padsFound": 14,
+   "pitches": 13,
+   "refusedPads": [],
+   "row": "IC51.tl-bl",
+   "scored": true
+  },
+  {
+   "axis": "y",
+   "kind": "dip",
+   "padsFound": 9,
+   "pitches": 13,
+   "refusedPads": [
+    3,
+    4,
+    5,
+    6,
+    7
+   ],
+   "row": "IC51.tr-br",
+   "scored": true
+  },
+  {
+   "axis": "y",
+   "kind": "dip",
+   "padsFound": 13,
+   "pitches": 13,
+   "refusedPads": [
+    3
+   ],
+   "row": "IC101.tl-bl",
+   "scored": true
+  },
+  {
+   "axis": "y",
+   "kind": "dip",
+   "padsFound": 11,
+   "pitches": 13,
+   "refusedPads": [
+    0,
+    5,
+    11
+   ],
+   "row": "IC101.tr-br",
+   "scored": false
+  },
+  {
+   "axis": "y",
+   "kind": "dip",
+   "padsFound": 8,
+   "pitches": 7,
+   "refusedPads": [],
+   "row": "IC64.tl-bl",
+   "scored": true
+  },
+  {
+   "axis": "y",
+   "kind": "dip",
+   "padsFound": 3,
+   "pitches": 7,
+   "refusedPads": [
+    2,
+    3,
+    4,
+    6,
+    7
+   ],
+   "row": "IC64.tr-br",
+   "scored": false
+  },
+  {
+   "axis": "y",
+   "kind": "dip",
+   "padsFound": 4,
+   "pitches": 6,
+   "refusedPads": [
+    0,
+    3,
+    4
+   ],
+   "row": "IC79.tl-bl",
+   "scored": false
+  },
+  {
+   "axis": "y",
+   "kind": "dip",
+   "padsFound": 4,
+   "pitches": 6,
+   "refusedPads": [
+    0,
+    1,
+    5
+   ],
+   "row": "IC79.tr-br",
+   "scored": false
+  },
+  {
+   "axis": "x",
+   "kind": "dip",
+   "padsFound": 4,
+   "pitches": 7,
+   "refusedPads": [
+    3,
+    4,
+    6,
+    7
+   ],
+   "row": "IC75.tl-tr",
+   "scored": false
+  },
+  {
+   "axis": "x",
+   "kind": "dip",
+   "padsFound": 6,
+   "pitches": 7,
+   "refusedPads": [
+    2,
+    4
+   ],
+   "row": "IC75.bl-br",
+   "scored": true
+  },
+  {
+   "axis": "x",
+   "kind": "dip",
+   "padsFound": 4,
+   "pitches": 7,
+   "refusedPads": [
+    3,
+    4,
+    5,
+    7
+   ],
+   "row": "IC74.tl-tr",
+   "scored": false
+  },
+  {
+   "axis": "x",
+   "kind": "dip",
+   "padsFound": 8,
+   "pitches": 7,
+   "refusedPads": [],
+   "row": "IC74.bl-br",
+   "scored": true
+  },
+  {
+   "axis": "x",
+   "kind": "connector",
+   "padsFound": 17,
+   "pitches": 16,
+   "refusedPads": [],
+   "row": "PL8a",
+   "scored": true
+  },
+  {
+   "axis": "x",
+   "kind": "connector",
+   "padsFound": 15,
+   "pitches": 16,
+   "refusedPads": [
+    1,
+    4
+   ],
+   "row": "PL8b",
+   "scored": true
+  },
+  {
+   "axis": "x",
+   "kind": "connector",
+   "padsFound": 13,
+   "pitches": 12,
+   "refusedPads": [],
+   "row": "PL9a",
+   "scored": true
+  },
+  {
+   "axis": "x",
+   "kind": "connector",
+   "padsFound": 13,
+   "pitches": 12,
+   "refusedPads": [],
+   "row": "PL9b",
+   "scored": true
+  },
+  {
+   "axis": "x",
+   "kind": "connector",
+   "padsFound": 9,
+   "pitches": 9,
+   "refusedPads": [
+    8
+   ],
+   "row": "PL10",
+   "scored": true
+  },
+  {
+   "axis": "x",
+   "kind": "connector",
+   "padsFound": 17,
+   "pitches": 16,
+   "refusedPads": [],
+   "row": "PL11",
+   "scored": true
+  },
+  {
+   "axis": "x",
+   "kind": "connector",
+   "padsFound": 19,
+   "pitches": 19,
+   "refusedPads": [
+    4
+   ],
+   "row": "PL12",
+   "scored": true
+  },
+  {
+   "axis": "x",
+   "kind": "connector",
+   "padsFound": 16,
+   "pitches": 16,
+   "refusedPads": [
+    5
+   ],
+   "row": "PL13",
+   "scored": true
+  },
+  {
+   "axis": "x",
+   "kind": "connector",
+   "padsFound": 10,
+   "pitches": 9,
+   "refusedPads": [],
+   "row": "PL14",
+   "scored": true
+  }
+ ],
+ "skewDeg": -0.206,
+ "straightness": {
+  "bowMm": {
+   "max": 0.253,
+   "median": 0.0384,
+   "n": 30,
+   "p90": 0.1114
+  },
+  "flat": false,
+  "limitMm": 0.05,
+  "over": [
+   "IC4.tl-bl",
+   "L28.tl-bl",
+   "L28.tr-br",
+   "IC2.tl-bl",
+   "IC1.tl-bl",
+   "IC1.tr-br",
+   "IC69.tl-bl",
+   "IC3.tl-bl",
+   "IC51.tl-bl",
+   "IC51.tr-br",
+   "PL13",
+   "PL14"
+  ],
+  "rmsMm": {
+   "max": 0.1368,
+   "median": 0.0434,
+   "n": 30,
+   "p90": 0.0961
+  },
+  "rows": [
+   {
+    "angleDeg": 0.2139,
+    "axis": "y",
+    "bowMm": 0.0074,
+    "maxMm": 0.1098,
+    "of": 14,
+    "pads": 13,
+    "rmsMm": 0.0399,
+    "row": "IC73.tl-bl"
+   },
+   {
+    "angleDeg": 0.3382,
+    "axis": "y",
+    "bowMm": 0.0022,
+    "maxMm": 0.0515,
+    "of": 14,
+    "pads": 14,
+    "rmsMm": 0.0204,
+    "row": "IC73.tr-br"
+   },
+   {
+    "angleDeg": 0.3786,
+    "axis": "y",
+    "bowMm": 0.0223,
+    "maxMm": 0.109,
+    "of": 14,
+    "pads": 14,
+    "rmsMm": 0.0352,
+    "row": "IC7.tl-bl"
+   },
+   {
+    "angleDeg": 0.232,
+    "axis": "y",
+    "bowMm": -0.0159,
+    "maxMm": 0.0873,
+    "of": 14,
+    "pads": 12,
+    "rmsMm": 0.0437,
+    "row": "IC7.tr-br"
+   },
+   {
+    "angleDeg": 0.299,
+    "axis": "y",
+    "bowMm": -0.0874,
+    "maxMm": 0.1186,
+    "of": 12,
+    "pads": 10,
+    "rmsMm": 0.0708,
+    "row": "IC4.tl-bl"
+   },
+   {
+    "angleDeg": 0.2119,
+    "axis": "y",
+    "bowMm": 0.0522,
+    "maxMm": 0.1216,
+    "of": 14,
+    "pads": 14,
+    "rmsMm": 0.0565,
+    "row": "L28.tl-bl"
+   },
+   {
+    "angleDeg": 0.1748,
+    "axis": "y",
+    "bowMm": -0.0774,
+    "maxMm": 0.2012,
+    "of": 14,
+    "pads": 12,
+    "rmsMm": 0.0934,
+    "row": "L28.tr-br"
+   },
+   {
+    "angleDeg": 0.5506,
+    "axis": "y",
+    "bowMm": -0.0012,
+    "maxMm": 0.1726,
+    "of": 20,
+    "pads": 16,
+    "rmsMm": 0.0854,
+    "row": "IC2.tl-bl"
+   },
+   {
+    "angleDeg": 0.287,
+    "axis": "y",
+    "bowMm": -0.0079,
+    "maxMm": 0.1167,
+    "of": 20,
+    "pads": 16,
+    "rmsMm": 0.0409,
+    "row": "IC2.tr-br"
+   },
+   {
+    "angleDeg": 0.2744,
+    "axis": "y",
+    "bowMm": 0.0417,
+    "maxMm": 0.193,
+    "of": 20,
+    "pads": 19,
+    "rmsMm": 0.073,
+    "row": "IC1.tl-bl"
+   },
+   {
+    "angleDeg": 0.1247,
+    "axis": "y",
+    "bowMm": -0.253,
+    "maxMm": 0.36,
+    "of": 20,
+    "pads": 13,
+    "rmsMm": 0.1205,
+    "row": "IC1.tr-br"
+   },
+   {
+    "angleDeg": 0.367,
+    "axis": "y",
+    "bowMm": -0.2022,
+    "maxMm": 0.3804,
+    "of": 20,
+    "pads": 17,
+    "rmsMm": 0.1206,
+    "row": "IC69.tl-bl"
+   },
+   {
+    "angleDeg": 0.1716,
+    "axis": "y",
+    "bowMm": -0.0143,
+    "maxMm": 0.0699,
+    "of": 20,
+    "pads": 16,
+    "rmsMm": 0.0283,
+    "row": "IC69.tr-br"
+   },
+   {
+    "angleDeg": 0.3058,
+    "axis": "y",
+    "bowMm": -0.0674,
+    "maxMm": 0.1354,
+    "of": 20,
+    "pads": 20,
+    "rmsMm": 0.0532,
+    "row": "IC3.tl-bl"
+   },
+   {
+    "angleDeg": 0.2726,
+    "axis": "y",
+    "bowMm": 0.0295,
+    "maxMm": 0.1071,
+    "of": 20,
+    "pads": 15,
+    "rmsMm": 0.0422,
+    "row": "IC3.tr-br"
+   },
+   {
+    "angleDeg": 0.2001,
+    "axis": "y",
+    "bowMm": 0.004,
+    "maxMm": 0.0762,
+    "of": 20,
+    "pads": 19,
+    "rmsMm": 0.0398,
+    "row": "IC78.tl-bl"
+   },
+   {
+    "angleDeg": 0.3311,
+    "axis": "y",
+    "bowMm": -0.03,
+    "maxMm": 0.1202,
+    "of": 20,
+    "pads": 19,
+    "rmsMm": 0.0415,
+    "row": "IC78.tr-br"
+   },
+   {
+    "angleDeg": 0.2015,
+    "axis": "y",
+    "bowMm": -0.0715,
+    "maxMm": 0.1591,
+    "of": 14,
+    "pads": 14,
+    "rmsMm": 0.0566,
+    "row": "IC51.tl-bl"
+   },
+   {
+    "angleDeg": 0.6012,
+    "axis": "y",
+    "bowMm": -0.188,
+    "maxMm": 0.3134,
+    "of": 14,
+    "pads": 9,
+    "rmsMm": 0.1368,
+    "row": "IC51.tr-br"
+   },
+   {
+    "angleDeg": 0.1561,
+    "axis": "y",
+    "bowMm": 0.0644,
+    "maxMm": 0.1263,
+    "of": 14,
+    "pads": 13,
+    "rmsMm": 0.0476,
+    "row": "IC101.tl-bl"
+   },
+   {
+    "angleDeg": 0.3235,
+    "axis": "y",
+    "bowMm": 0.0098,
+    "maxMm": 0.0441,
+    "of": 14,
+    "pads": 11,
+    "rmsMm": 0.0186,
+    "row": "IC101.tr-br"
+   },
+   {
+    "angleDeg": 0.069,
+    "axis": "x",
+    "bowMm": 0.0631,
+    "maxMm": 0.0895,
+    "of": 17,
+    "pads": 17,
+    "rmsMm": 0.0287,
+    "row": "PL8a"
+   },
+   {
+    "angleDeg": 0.0282,
+    "axis": "x",
+    "bowMm": 0.0108,
+    "maxMm": 0.0713,
+    "of": 17,
+    "pads": 15,
+    "rmsMm": 0.03,
+    "row": "PL8b"
+   },
+   {
+    "angleDeg": -0.0457,
+    "axis": "x",
+    "bowMm": 0.0398,
+    "maxMm": 0.0448,
+    "of": 13,
+    "pads": 13,
+    "rmsMm": 0.0194,
+    "row": "PL9a"
+   },
+   {
+    "angleDeg": 0.0625,
+    "axis": "x",
+    "bowMm": 0.0183,
+    "maxMm": 0.0487,
+    "of": 13,
+    "pads": 13,
+    "rmsMm": 0.019,
+    "row": "PL9b"
+   },
+   {
+    "angleDeg": 0.2414,
+    "axis": "x",
+    "bowMm": -0.004,
+    "maxMm": 0.0947,
+    "of": 10,
+    "pads": 9,
+    "rmsMm": 0.0376,
+    "row": "PL10"
+   },
+   {
+    "angleDeg": 0.1052,
+    "axis": "x",
+    "bowMm": -0.037,
+    "maxMm": 0.1141,
+    "of": 17,
+    "pads": 17,
+    "rmsMm": 0.0472,
+    "row": "PL11"
+   },
+   {
+    "angleDeg": 0.0896,
+    "axis": "x",
+    "bowMm": 0.0854,
+    "maxMm": 0.1056,
+    "of": 20,
+    "pads": 19,
+    "rmsMm": 0.043,
+    "row": "PL12"
+   },
+   {
+    "angleDeg": 0.1641,
+    "axis": "x",
+    "bowMm": 0.0759,
+    "maxMm": 0.1323,
+    "of": 17,
+    "pads": 16,
+    "rmsMm": 0.059,
+    "row": "PL13"
+   },
+   {
+    "angleDeg": -0.1383,
+    "axis": "x",
+    "bowMm": 0.1029,
+    "maxMm": 0.1371,
+    "of": 10,
+    "pads": 10,
+    "rmsMm": 0.0622,
+    "row": "PL14"
+   }
+  ],
+  "what": "Each long row's pads (10 or more) against a straight line through them, in millimetres; the plan wants every row under 0.05 mm"
+ },
+ "verdicts": [
+  {
+   "figures": "median 0.030 mm, max 0.094 mm over 7 rows",
+   "measure": "scale y, 40-pin rows held out",
+   "verdict": "pass"
+  },
+  {
+   "figures": "x 15.7524, y 15.7256 px/mm, ratio 1.00170 (0.17 per cent)",
+   "measure": "scale, x against y",
+   "verdict": "pass"
+  },
+  {
+   "figures": "median 0.157 mm, max 1.192 mm over 11 rows",
+   "measure": "scale x, rows across held out, scaled to 48.26 mm",
+   "verdict": "STOP"
+  }
+ ]
+}

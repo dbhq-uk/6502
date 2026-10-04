@@ -176,11 +176,11 @@ jobs:
           PASS=$(count pass); FAILED=$(count fail)
           echo "pass=${PASS:-unread} fail=${FAILED:-unread}"
           [ "${FAILED:-1}" = "0" ]
-          # 282 tests as at 4 Oct 2026 (with the registry's models rules).
+          # 285 tests as at 4 Oct 2026 (with the BBC Micro board frame's tests).
           # Adding tests is expected; losing them is the failure this floor catches.
           # Raise the number when the suite grows, here and in the same step of
           # validate.yml, which must hold the same number.
-          [ "${PASS:-0}" -ge 282 ]
+          [ "${PASS:-0}" -ge 285 ]
 
       # The same floor as "Every machine file must be serving" below, checked on
       # the build itself, so a build that is missing a machine fails here and

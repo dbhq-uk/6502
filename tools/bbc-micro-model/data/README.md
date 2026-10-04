@@ -3,7 +3,8 @@
 | File | What | Terms |
 |---|---|---|
 | `sources.json` | Every input: where it came from, its author and licence as stated, when it was fetched, its size and SHA-256, and what it is used for | MIT (ours): facts about the inputs, not copies of them |
-| `marks.json` | Points marked by hand on I1, I2 and O1, each with the crop it was read from | MIT (ours) |
+| `marks.json` | Points marked by hand on I1, I2 and O1, each with the crop it was read from (task 2 added the connector rows across I1) | MIT (ours) |
+| `frame.json` | Task 2's board frame on I1: the x and y scales with their held-out checks, the turn, each long row's straightness, the outline, the holes, and the verdict against each of the plan's scale thresholds | MIT (ours): numbers about the input, not a copy of it |
 | `spike.json` | Task 0's measurements: the scan's scale, the solder side's registration and the keys' registration, with the verdict against each of the plan's thresholds | MIT (ours): numbers about the inputs, not copies of them |
 
 No input is committed. The scans I1 and I2 (amb5l, posted to stardot) and the

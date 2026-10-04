@@ -16,14 +16,16 @@ outside the repository, and every script refuses an input whose SHA-256 is not
 the one in [`data/sources.json`](data/sources.json). The scans and the
 photographs with no stated licence are never committed, not even resized.
 
-So far (task 0) it holds:
+So far (tasks 0 and 2) it holds:
 
 | File | What it does |
 |---|---|
 | `common.py` | Where things are; the inputs and their hashes; finding the tinned pads on a scan; fitting one set of points to another (similarity, affine, homography, or a homography and a cubic correction) with the error measured on points held out of the fit; writing the data files |
 | `verify.py` | Checks every input against its SHA-256 |
 | `spike.py` | Task 0's three numbers: the scan's scale, the solder side's registration and the keys' registration, each judged against the plan's thresholds. Kept as a record; not part of the run |
-| `tests/test_common.py` | pytest, on made-up inputs |
+| `board_frame.py` | Task 2: the board frame on scan I1: x and y scales from rows of pads (held out and judged), the board's turn, its outline and its holes; writes `data/frame.json` and a rectified copy of I1 in `out/` |
+| `run-board.sh` | The inside model's scripts, in order (so far `verify.py I1` and `board_frame.py`) |
+| `tests/test_common.py`, `tests/test_board_frame.py` | pytest, on made-up inputs |
 | `data/` | See [`data/README.md`](data/README.md) |
 
 ## Fetching the inputs by hand
@@ -61,6 +63,7 @@ export BBC_MODEL_INPUTS=~/dbhq-previews/bbc-model-research
 /tmp/bbcvenv/bin/python tools/bbc-micro-model/verify.py          # every input; or name some: verify.py I1 I2
 /tmp/bbcvenv/bin/python -m pytest tools/bbc-micro-model/tests -q
 cd tools/bbc-micro-model && /tmp/bbcvenv/bin/python spike.py      # writes data/spike.json, and overlays in out/
+PYTHON=/tmp/bbcvenv/bin/python tools/bbc-micro-model/run-board.sh   # writes data/frame.json, and out/rectified-16.jpg
 ```
 
 `verify.py` says, for each input, present, missing or hash differs. It exits

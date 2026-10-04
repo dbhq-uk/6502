@@ -143,3 +143,80 @@ test('the build and the tests never run the BBC model tools', () => {
   assert.doesNotMatch(pkg, /bbc-micro-model/);
   assert.doesNotMatch(pkg, /python/);
 });
+
+// Task 2: the board's frame on the bare scan I1 (tools/bbc-micro-model/board_frame.py).
+const frame = JSON.parse(fs.readFileSync(path.join(TOOL, 'data', 'frame.json'), 'utf8'));
+const FRAME_PASS = { yMedian: 0.10, yMax: 0.25, xMedian: 0.10, xMax: 0.25 };
+const FRAME_STOP = { yMedian: 0.20, yMax: 0.50, ratioPct: 1.5, xMedian: 0.20, xMax: 0.50 };
+
+function frameVerdicts(f) {
+  const y = f.heldOut.rowLengthErrMm;
+  const x = f.heldOutX.scaledErrMm;
+  const v = (ok, stop) => (stop ? 'STOP' : ok ? 'pass' : 'between pass and stop');
+  return [
+    v(y.median <= FRAME_PASS.yMedian && y.max <= FRAME_PASS.yMax, y.median > FRAME_STOP.yMedian || y.max > FRAME_STOP.yMax),
+    v(true, f.ratioPct > FRAME_STOP.ratioPct),
+    v(x.median <= FRAME_PASS.xMedian && x.max <= FRAME_PASS.xMax, x.median > FRAME_STOP.xMedian || x.max > FRAME_STOP.xMax),
+  ];
+}
+
+test('frame.json records the verdicts its figures give against the plan\'s scale thresholds', () => {
+  assert.deepEqual(frame.verdicts.map((x) => x.verdict), frameVerdicts(frame));
+  assert.ok(Math.abs(frame.ratio - frame.pxPerMm.x / frame.pxPerMm.y) < 1e-3);
+  assert.ok(Math.abs(frame.ratioPct - 100 * Math.abs(frame.ratio - 1)) < 1e-2);
+  // each row across is scaled to a 48.26 mm row, and the summary is of those rows
+  for (const r of frame.heldOutX.rows) {
+    assert.ok(Math.abs(r.scaledErrMm - (r.errMm * 48.26) / (r.pitches * 2.54)) < 2e-3, r.row);
+  }
+  const scaled = frame.heldOutX.rows.map((r) => Math.abs(r.scaledErrMm));
+  assert.ok(Math.abs(frame.heldOutX.scaledErrMm.max - Math.max(...scaled)) < 1e-3);
+  assert.equal(frame.heldOutX.scaledErrMm.n, scaled.length);
+  assert.ok(frame.heldOutX.rows.length >= 6, 'at least six rows across held out');
+  assert.ok(frame.heldOut.rowLengthErrMm.n >= 5, 'at least five 40-pin rows held out');
+  assert.ok(frame.heldOut.footprints >= 10, `only ${frame.heldOut.footprints} footprints had a row held out`);
+});
+
+// Task 2 crossed a STOP on 4 October 2026: the rows across, each held out of the
+// x fit and scaled to a 48.26 mm row, had a largest error over 0.50 mm. This test
+// is the plan's rule as written; it binds once the plan says what happens next
+// (docs/journal/2026-10-04-the-bbc-micro-models.md, task 2).
+test('frame.json passes the plan\'s scale rows, the held-out x row included', { todo: 'task 2 crossed a STOP: see docs/journal/2026-10-04-the-bbc-micro-models.md' }, () => {
+  assert.deepEqual(frameVerdicts(frame), ['pass', 'pass', 'pass']);
+});
+
+test('frame.json\'s outline is closed, square to its frame, and the board\'s size', () => {
+  const o = frame.outline;
+  assert.ok(o.length >= 5);
+  assert.deepEqual(o[0], o[o.length - 1], 'the outline is closed');
+  assert.deepEqual(o[0], [0, 0], 'it starts at the left rear corner, the origin');
+  // Every edge runs across or down: the long ones square to the frame within
+  // half a degree, the short walls of the front edge's slots within 15 degrees
+  // (their ends are rounded, and a 5 mm wall fits a slant).
+  for (let i = 1; i < o.length; i += 1) {
+    const dx = Math.abs(o[i][0] - o[i - 1][0]);
+    const dy = Math.abs(o[i][1] - o[i - 1][1]);
+    const long = Math.max(dx, dy);
+    const slant = (Math.atan2(Math.min(dx, dy), long) * 180) / Math.PI;
+    assert.ok(slant < (long > 20 ? 0.5 : 15), `edge ${i} is ${slant.toFixed(2)} degrees off the frame`);
+  }
+  const xs = o.map((p) => p[0]);
+  const ys = o.map((p) => p[1]);
+  const w = Math.max(...xs) - Math.min(...xs);
+  const d = Math.max(...ys) - Math.min(...ys);
+  assert.ok(Math.abs(w - frame.board.widthMm) <= 0.5, `outline width ${w} against ${frame.board.widthMm}`);
+  assert.ok(Math.abs(d - frame.board.depthMm) <= 0.5, `outline depth ${d} against ${frame.board.depthMm}`);
+  // a sanity bound on the researcher's 309 by 229 mm, not a measurement
+  assert.ok(Math.abs(frame.board.widthMm - 309) <= 5 && Math.abs(frame.board.depthMm - 229) <= 5);
+});
+
+test('frame.json\'s holes are inside the board, and its rectified copy is never committed', () => {
+  assert.ok(frame.holes.length >= 4);
+  for (const h of frame.holes) {
+    assert.ok(h.x > 0 && h.x < frame.board.widthMm && h.y > 0 && h.y < frame.board.depthMm, JSON.stringify(h));
+    assert.ok(h.d > 1.5 && h.d < 6, JSON.stringify(h));
+  }
+  assert.equal(frame.rectified.pxPerMm, 16);
+  assert.ok(frame.rectified.file.startsWith('out/'));
+  const ignore = fs.readFileSync(path.join(REPO_ROOT, '.gitignore'), 'utf8');
+  assert.match(ignore, /^tools\/bbc-micro-model\/out\/$/m);
+});

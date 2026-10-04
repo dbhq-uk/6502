@@ -1,5 +1,308 @@
 {
  "about": "Points marked by hand: read by eye off crops of the original input, each a crop of the stated box (left, top, right, bottom, in the original's pixels) enlarged `zoom` times with a 10 px grid labelled in the original's pixels. Pixel coordinates are the original's, with (0, 0) the top left corner of the top left pixel's centre. Nothing here is moved after a fit; spike.py records what it does to each mark.",
+ "frame": {
+  "rowsAcross": [
+   {
+    "crops": {
+     "first": {
+      "box": [
+       196,
+       3524,
+       256,
+       3584
+      ],
+      "zoom": 4
+     },
+     "last": {
+      "box": [
+       834,
+       3525,
+       894,
+       3585
+      ],
+      "zoom": 4
+     }
+    },
+    "first": [
+     223,
+     3552
+    ],
+    "id": "PL8a",
+    "last": [
+     862,
+     3552
+    ],
+    "note": "the rear row of PL8",
+    "pitches": 16
+   },
+   {
+    "crops": {
+     "first": {
+      "box": [
+       196,
+       3563,
+       256,
+       3623
+      ],
+      "zoom": 4
+     },
+     "last": {
+      "box": [
+       836,
+       3563,
+       896,
+       3623
+      ],
+      "zoom": 4
+     }
+    },
+    "first": [
+     221,
+     3592
+    ],
+    "id": "PL8b",
+    "last": [
+     863,
+     3592
+    ],
+    "note": "the front row of PL8",
+    "pitches": 16
+   },
+   {
+    "crops": {
+     "first": {
+      "box": [
+       1194,
+       3525,
+       1254,
+       3585
+      ],
+      "zoom": 4
+     },
+     "last": {
+      "box": [
+       1675,
+       3525,
+       1735,
+       3585
+      ],
+      "zoom": 4
+     }
+    },
+    "first": [
+     1222,
+     3553
+    ],
+    "id": "PL9a",
+    "last": [
+     1703,
+     3553
+    ],
+    "note": "the rear row of PL9",
+    "pitches": 12
+   },
+   {
+    "crops": {
+     "first": {
+      "box": [
+       1195,
+       3564,
+       1255,
+       3624
+      ],
+      "zoom": 4
+     },
+     "last": {
+      "box": [
+       1675,
+       3564,
+       1735,
+       3624
+      ],
+      "zoom": 4
+     }
+    },
+    "first": [
+     1222,
+     3593
+    ],
+    "id": "PL9b",
+    "last": [
+     1703,
+     3593
+    ],
+    "note": "the front row of PL9",
+    "pitches": 12
+   },
+   {
+    "crops": {
+     "first": {
+      "box": [
+       2280,
+       3526,
+       2340,
+       3586
+      ],
+      "zoom": 4
+     },
+     "last": {
+      "box": [
+       2638,
+       3526,
+       2698,
+       3586
+      ],
+      "zoom": 4
+     }
+    },
+    "first": [
+     2308,
+     3554
+    ],
+    "id": "PL10",
+    "last": [
+     2662,
+     3555
+    ],
+    "note": "the row of round pads behind the long pads at the front edge",
+    "pitches": 9
+   },
+   {
+    "crops": {
+     "first": {
+      "box": [
+       2996,
+       3531,
+       3056,
+       3591
+      ],
+      "zoom": 4
+     },
+     "last": {
+      "box": [
+       3642,
+       3531,
+       3702,
+       3591
+      ],
+      "zoom": 4
+     }
+    },
+    "first": [
+     3025,
+     3559
+    ],
+    "id": "PL11",
+    "last": [
+     3668,
+     3561
+    ],
+    "note": "the row of round pads behind the long pads at the front edge",
+    "pitches": 16
+   },
+   {
+    "crops": {
+     "first": {
+      "box": [
+       4000,
+       3533,
+       4060,
+       3593
+      ],
+      "zoom": 4
+     },
+     "last": {
+      "box": [
+       4763,
+       3536,
+       4823,
+       3596
+      ],
+      "zoom": 4
+     }
+    },
+    "first": [
+     4028,
+     3561
+    ],
+    "id": "PL12",
+    "last": [
+     4788,
+     3565
+    ],
+    "note": "the row of round pads behind the long pads at the front edge",
+    "pitches": 19
+   },
+   {
+    "crops": {
+     "first": {
+      "box": [
+       1118,
+       2527,
+       1178,
+       2587
+      ],
+      "zoom": 4
+     },
+     "last": {
+      "box": [
+       1758,
+       2529,
+       1818,
+       2589
+      ],
+      "zoom": 4
+     }
+    },
+    "first": [
+     1147,
+     2552
+    ],
+    "id": "PL13",
+    "last": [
+     1790,
+     2560
+    ],
+    "note": "one row",
+    "pitches": 16
+   },
+   {
+    "crops": {
+     "first": {
+      "box": [
+       216,
+       2525,
+       276,
+       2585
+      ],
+      "zoom": 4
+     },
+     "last": {
+      "box": [
+       576,
+       2523,
+       636,
+       2583
+      ],
+      "zoom": 4
+     }
+    },
+    "first": [
+     245,
+     2555
+    ],
+    "id": "PL14",
+    "last": [
+     607,
+     2554
+    ],
+    "note": "one row",
+    "pitches": 9
+   }
+  ],
+  "source": "I1",
+  "what": "Task 2: the first and last pad of every connector row on the 0.1 inch pitch that runs across the board (x) with at least eight pads, marked on I1 for the board's x scale. The rule was set before any of them was fitted: every such row, and the rows of the DIPs that lie across (IC74 and IC75, from the scale section), and nothing else; the rear sockets (SK1 to SK7) are on their own pitches (SK6, a D socket, is on 2.77 mm) and are not used. The pitch count is the pads counted on a 1:2 view of each connector with a 20 px grid, and agrees with the row's length in pixels at 2.54 mm. board_frame.py moves each mark to the centroid of the solder blob nearest it (common.refine_to_pad), refusing a move over 0.6 mm, and finds every pad between them the same way."
+ },
  "keys": {
   "excluded": [
    {
