@@ -30,7 +30,11 @@ does not depend on theta at all.
    fit; each half's rows down are measured through the scale fitted to every
    other row, and the 40-pin rows (48.26 mm) are judged. x: each row across is
    left out of the fit in turn and its length measured through the rest; its
-   error is scaled to a 48.26 mm row (error x 48.26 / its length). As the plan
+   error is scaled to a 48.26 mm row (error x 48.26 / its length). x is held
+   out a row at a time where y is held out a half of the footprints at a time,
+   so a connector's other row (PL8's rear row when its front row is held out)
+   stays in the fit; holding out a whole connector moves the median of the
+   scored rows from 0.136 to 0.167 mm (4 October 2026), small. As the plan
    was revised after task 2's figures, only rows at least 30 mm long are
    scored and their median judged; the largest is recorded, and the verdict
    of the check as first written (every row, median and largest) is kept.
@@ -39,8 +43,8 @@ does not depend on theta at all.
    along it; a straight line through each row's pads, in millimetres. One
    turn for the whole board, fitted to every long row's pads at once with an
    offset per row (rows down turned a quarter turn first). Each row's
-   distance from its own straight line is recorded: under 0.05 mm, or the
-   scan is not flat.
+   distance from its own straight line is recorded, with the rows at or over
+   0.05 mm named: recorded, not a pass criterion (the plan as revised).
 
 3. The outline. The scanner lid is pale and grey; the board is green, or
    yellow print, or dark. The board is the largest region that is not lid,
@@ -569,10 +573,10 @@ def measure(rgb, rows, px_per_mm=NOMINAL_PX_PER_MM):
     """The frame from a scan and its marked rows. Returns (the result as
     frame.json holds it, the Frame, and what the overlays need)."""
     rows = measure_rows(rgb, rows, px_per_mm)
-    scored = [r for r in rows if r['d'] is not None]
-    sx, sy = fit_scale(scored)
-    hx = held_out_x(scored)
-    hy = held_out_y(scored)
+    usable = [r for r in rows if r['d'] is not None]      # both end pads found
+    sx, sy = fit_scale(usable)
+    hx = held_out_x(usable)
+    hy = held_out_y(usable)
     theta, turn = fit_turn(rows, sx, sy)
     L, C = lid_and_chroma(rgb)
     filled, lab, inside = board_mask(rgb, L, C)
@@ -632,9 +636,9 @@ def measure(rgb, rows, px_per_mm=NOMINAL_PX_PER_MM):
             'errMm': abs_stats([r['errMm'] for r in hx]),
         },
         'rows': [{'row': r['id'], 'axis': r['axis'], 'kind': r.get('kind'), 'pitches': r['pitches'], 'padsFound': len(r['pads']),
-                  'refusedPads': r['refused'], 'scored': r['d'] is not None} for r in rows],
+                  'refusedPads': r['refused'], 'usable': r['d'] is not None} for r in rows],
         'straightness': {
-            'what': 'Each long row\'s pads (10 or more) against a straight line through them, in millimetres; the plan wants every row under 0.05 mm',
+            'what': 'Each long row\'s pads (10 or more) against a straight line through them, in millimetres; recorded, not a pass criterion: the rows at or over 0.05 mm are named',
             'limitMm': STRAIGHT_MM,
             'rows': straight,
             'rmsMm': abs_stats([r['rmsMm'] for r in straight]),
@@ -750,6 +754,7 @@ def main():
                           'IC74\'s front row, a 17.78 mm row whose error the scaling multiplies by 2.7). The same day the controller revised the plan\'s x row '
                           '(docs/superpowers/plans/2026-10-04-bbc-micro-models.md, Global Constraints), after task 2\'s figures were seen: rows across are '
                           'scored only if at least 30 mm long, the median is judged against the same 0.10 and 0.20 mm, and the largest is recorded. '
+                          + "The revision had two parts. With the largest still judged, the 30 mm rule alone would still stop: PL11, a 40.64 mm row, reads 0.502 mm against the 0.50 stop. The largest was made recorded-only too, as for the solder side, because one row whose pitch disagrees with 2.54 mm (line fit 2.590) is not evidence about the scanner's scale: dropping PL11 moves sx by 0.14 per cent and leaves x and y 0.03 per cent apart. The cut did not pick the verdict: the median is 0.157 with no cut, 0.136 at 20 mm and at 30 mm, 0.182 at 40 mm and 0.110 without PL11: always between pass and stop." + ' '
                           'The straightness of the long rows is recorded, not a pass criterion.')
     result['about'] = ('Task 2 of the BBC Micro models plan: the board frame on scan I1. A board millimetre X (from the left rear corner, x to the right, '
                        'y towards the front) is at I1 pixel origin + diag(pxPerMm.x, pxPerMm.y) R(rotationDeg) X. The outline, holes and edges are '

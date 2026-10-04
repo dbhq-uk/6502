@@ -1,7 +1,7 @@
 ---
 title: "The BBC Micro's models: the inputs, and what they rest on"
 date: 2026-10-04
-summary: "Before the BBC Micro's two models are built, the work measures what both rest on: the scale of a flatbed scan of the bare board, how well the solder side lies on the component side, and how well a photograph of the keyboard fits an open keyboard layout. The scale, the keys, and the board's size and outline hold, and the solder side holds except for a few holes. Two checks failed and were revised the same day, each kept on record as it failed: the case's front edge, measured on the plane of the keys, which it does not lie in, and a row by row check of the board's width scale, which magnified the noise of short rows of pads."
+summary: "Before the BBC Micro's two models are built, the work measures what both rest on: the scale of a flatbed scan of the bare board, how well the solder side lies on the component side, and how well a photograph of the keyboard fits an open keyboard layout. The keys, the scan's scale down the board, and the board's size and outline hold, and the solder side holds except for a few holes. Two checks failed and were revised the same day, each kept on record as it failed: the case's front edge, measured on the plane of the keys, which it does not lie in; and a row by row check of the board's width scale, which magnified the noise of short rows and met one long row off the pitch, and as revised lands between pass and stop."
 order: 28
 ---
 
@@ -550,7 +550,12 @@ stop. The y scale and the x against y check pass. The figures are below.
   are fitted together so every row's length, first pad to last, is its
   pitches x 2.54 mm, by least squares in millimetres; rows across set sx and
   rows down set sy. Held out: y by the halves task 0 fixed, x one row at a
-  time.
+  time. The two differ: holding out one row leaves a connector's other row
+  (PL8's rear row when its front row is out) in the fit. Measured after the
+  review on 4 October 2026, holding out a whole connector at a time moves the
+  median of the rows scored under the revised rule below from 0.136 to
+  0.167 mm (largest unchanged, 0.502): small, and still between pass and
+  stop.
 
 ### The figures
 
@@ -658,7 +663,11 @@ the scan to know about:
   rear, left and front edges, but 0.55 mm inside on the right edge, where the
   band is widest. Whether the band is the board's side seen at a slant or
   bare laminate cannot be told from I1, so the right edge, and the width, are
-  uncertain by about half a millimetre.
+  uncertain by about half a millimetre. The x scale adds more: its standard
+  error, a jackknife over the rows across, is 0.197 per cent, about 0.6 mm
+  over the board's width, and leaving PL11 out of the fit alone moves the
+  width from 309.99 to about 310.42 mm (measured after the review, the same
+  day, from `measure_rows` and `fit_scale` on the same marks).
 - The scanner's glass edge shows as a dark line beyond the board on the right
   and at the top; the lid between keeps them apart, so they are not board.
 
@@ -703,11 +712,11 @@ fit the outer edge of the crescent instead.
 ### Tests, and where this leaves the plan
 
 `/tmp/bbcvenv/bin/python -m pytest tools/bbc-micro-model/tests -q`: 30
-passed. `site/tests/bbc-models.test.mjs` gains four tests: the verdicts in
+passed. `site/tests/bbc-models.test.mjs` gains three passing tests: the verdicts in
 `frame.json` are the ones its figures give; the outline is closed, starts at
 the origin, runs across or down, and matches the board's width and depth
 within 0.5 mm, which are within 5 mm of 309 by 229; the holes are inside the
-board and the rectified copy stays in `out/`. The fifth, that `frame.json`
+board and the rectified copy stays in `out/`. A fourth, that `frame.json`
 passes all three scale rows, is written as the plan states it and marked as a
 to-do naming this entry, as task 0's was, so the suite stays green and
 reports it. `cd site && npm test`: 282 passed before this task, 285 after,
@@ -748,6 +757,20 @@ Measured on 4 October 2026 with the same command as above (now exiting 0):
 and the two DIP rows are under 30 mm). **Median 0.136 mm: between pass and
 stop.** The largest is 0.502 mm, PL11, recorded. The y scale and the x
 against y check are unchanged and pass. No judged figure is a stop.
+
+**The revision had two parts, and the second is what ended the stop.** With
+the largest still judged, the 30 mm rule alone would still stop: PL11, a
+40.64 mm row, reads 0.502 mm against the 0.50 stop, and its scale factor is
+only 1.19, so the short-row reason does not cover it. The largest was made
+recorded-only too, as for the solder side, because one row whose pitch
+disagrees with 2.54 mm (a line through all its pads gives 2.590) is not
+evidence about the scanner's scale: dropping PL11 moves sx by 0.14 per cent
+and leaves x and y 0.03 per cent apart. The cut did not pick the verdict:
+the median is 0.157 with no cut, 0.136 at 20 mm and at 30 mm, 0.182 at
+40 mm, and 0.110 without PL11: always between pass and stop. These are the
+reviewer's figures, checked the same day with `measure_rows`, `fit_scale`
+and `held_out_x` from `board_frame.py` on the same marks, which gave the same
+numbers (sx without PL11 15.7305 against 15.7524).
 
 Three more things from the same ruling:
 

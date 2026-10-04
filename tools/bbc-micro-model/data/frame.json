@@ -1116,7 +1116,7 @@
   "pxPerMm": 16,
   "what": "I1 resampled onto the board frame: pixel (u, v)'s centre is board millimetre ((u + 0.5) / 16 - 2, (v + 0.5) / 16 - 2). Made by board_frame.py in out/, which is git-ignored: I1 states no licence, so no copy of it is committed"
  },
- "revision": "The x row's verdict as first written is kept as measured: on 4 October 2026 it crossed the plan's stop (largest 1.192 mm, IC74's front row, a 17.78 mm row whose error the scaling multiplies by 2.7). The same day the controller revised the plan's x row (docs/superpowers/plans/2026-10-04-bbc-micro-models.md, Global Constraints), after task 2's figures were seen: rows across are scored only if at least 30 mm long, the median is judged against the same 0.10 and 0.20 mm, and the largest is recorded. The straightness of the long rows is recorded, not a pass criterion.",
+ "revision": "The x row's verdict as first written is kept as measured: on 4 October 2026 it crossed the plan's stop (largest 1.192 mm, IC74's front row, a 17.78 mm row whose error the scaling multiplies by 2.7). The same day the controller revised the plan's x row (docs/superpowers/plans/2026-10-04-bbc-micro-models.md, Global Constraints), after task 2's figures were seen: rows across are scored only if at least 30 mm long, the median is judged against the same 0.10 and 0.20 mm, and the largest is recorded. The revision had two parts. With the largest still judged, the 30 mm rule alone would still stop: PL11, a 40.64 mm row, reads 0.502 mm against the 0.50 stop. The largest was made recorded-only too, as for the solder side, because one row whose pitch disagrees with 2.54 mm (line fit 2.590) is not evidence about the scanner's scale: dropping PL11 moves sx by 0.14 per cent and leaves x and y 0.03 per cent apart. The cut did not pick the verdict: the median is 0.157 with no cut, 0.136 at 20 mm and at 30 mm, 0.182 at 40 mm and 0.110 without PL11: always between pass and stop. The straightness of the long rows is recorded, not a pass criterion.",
  "rotationDeg": 0.2305,
  "rows": [
   {
@@ -1128,7 +1128,7 @@
     1
    ],
    "row": "IC73.tl-bl",
-   "scored": true
+   "usable": true
   },
   {
    "axis": "y",
@@ -1137,7 +1137,7 @@
    "pitches": 13,
    "refusedPads": [],
    "row": "IC73.tr-br",
-   "scored": true
+   "usable": true
   },
   {
    "axis": "y",
@@ -1146,7 +1146,7 @@
    "pitches": 13,
    "refusedPads": [],
    "row": "IC7.tl-bl",
-   "scored": true
+   "usable": true
   },
   {
    "axis": "y",
@@ -1158,7 +1158,7 @@
     12
    ],
    "row": "IC7.tr-br",
-   "scored": true
+   "usable": true
   },
   {
    "axis": "y",
@@ -1170,7 +1170,7 @@
     7
    ],
    "row": "IC4.tl-bl",
-   "scored": false
+   "usable": false
   },
   {
    "axis": "y",
@@ -1190,7 +1190,7 @@
     10
    ],
    "row": "IC4.tr-br",
-   "scored": false
+   "usable": false
   },
   {
    "axis": "y",
@@ -1199,7 +1199,7 @@
    "pitches": 13,
    "refusedPads": [],
    "row": "L28.tl-bl",
-   "scored": true
+   "usable": true
   },
   {
    "axis": "y",
@@ -1211,7 +1211,7 @@
     6
    ],
    "row": "L28.tr-br",
-   "scored": true
+   "usable": true
   },
   {
    "axis": "y",
@@ -1220,7 +1220,7 @@
    "pitches": 6,
    "refusedPads": [],
    "row": "IC93.tl-bl",
-   "scored": true
+   "usable": true
   },
   {
    "axis": "y",
@@ -1229,7 +1229,7 @@
    "pitches": 6,
    "refusedPads": [],
    "row": "IC93.tr-br",
-   "scored": true
+   "usable": true
   },
   {
    "axis": "y",
@@ -1243,7 +1243,7 @@
     19
    ],
    "row": "IC2.tl-bl",
-   "scored": false
+   "usable": false
   },
   {
    "axis": "y",
@@ -1257,7 +1257,7 @@
     14
    ],
    "row": "IC2.tr-br",
-   "scored": false
+   "usable": false
   },
   {
    "axis": "y",
@@ -1268,7 +1268,7 @@
     17
    ],
    "row": "IC1.tl-bl",
-   "scored": true
+   "usable": true
   },
   {
    "axis": "y",
@@ -1285,7 +1285,7 @@
     18
    ],
    "row": "IC1.tr-br",
-   "scored": true
+   "usable": true
   },
   {
    "axis": "y",
@@ -1298,7 +1298,7 @@
     11
    ],
    "row": "IC69.tl-bl",
-   "scored": true
+   "usable": true
   },
   {
    "axis": "y",
@@ -1312,7 +1312,7 @@
     18
    ],
    "row": "IC69.tr-br",
-   "scored": true
+   "usable": true
   },
   {
    "axis": "y",
@@ -1321,7 +1321,7 @@
    "pitches": 19,
    "refusedPads": [],
    "row": "IC3.tl-bl",
-   "scored": true
+   "usable": true
   },
   {
    "axis": "y",
@@ -1336,7 +1336,7 @@
     19
    ],
    "row": "IC3.tr-br",
-   "scored": false
+   "usable": false
   },
   {
    "axis": "y",
@@ -1347,7 +1347,7 @@
     3
    ],
    "row": "IC78.tl-bl",
-   "scored": true
+   "usable": true
   },
   {
    "axis": "y",
@@ -1358,7 +1358,7 @@
     7
    ],
    "row": "IC78.tr-br",
-   "scored": true
+   "usable": true
   },
   {
    "axis": "y",
@@ -1367,7 +1367,7 @@
    "pitches": 13,
    "refusedPads": [],
    "row": "IC51.tl-bl",
-   "scored": true
+   "usable": true
   },
   {
    "axis": "y",
@@ -1382,7 +1382,7 @@
     7
    ],
    "row": "IC51.tr-br",
-   "scored": true
+   "usable": true
   },
   {
    "axis": "y",
@@ -1393,7 +1393,7 @@
     3
    ],
    "row": "IC101.tl-bl",
-   "scored": true
+   "usable": true
   },
   {
    "axis": "y",
@@ -1406,7 +1406,7 @@
     11
    ],
    "row": "IC101.tr-br",
-   "scored": false
+   "usable": false
   },
   {
    "axis": "y",
@@ -1415,7 +1415,7 @@
    "pitches": 7,
    "refusedPads": [],
    "row": "IC64.tl-bl",
-   "scored": true
+   "usable": true
   },
   {
    "axis": "y",
@@ -1430,7 +1430,7 @@
     7
    ],
    "row": "IC64.tr-br",
-   "scored": false
+   "usable": false
   },
   {
    "axis": "y",
@@ -1443,7 +1443,7 @@
     4
    ],
    "row": "IC79.tl-bl",
-   "scored": false
+   "usable": false
   },
   {
    "axis": "y",
@@ -1456,7 +1456,7 @@
     5
    ],
    "row": "IC79.tr-br",
-   "scored": false
+   "usable": false
   },
   {
    "axis": "x",
@@ -1470,7 +1470,7 @@
     7
    ],
    "row": "IC75.tl-tr",
-   "scored": false
+   "usable": false
   },
   {
    "axis": "x",
@@ -1482,7 +1482,7 @@
     4
    ],
    "row": "IC75.bl-br",
-   "scored": true
+   "usable": true
   },
   {
    "axis": "x",
@@ -1496,7 +1496,7 @@
     7
    ],
    "row": "IC74.tl-tr",
-   "scored": false
+   "usable": false
   },
   {
    "axis": "x",
@@ -1505,7 +1505,7 @@
    "pitches": 7,
    "refusedPads": [],
    "row": "IC74.bl-br",
-   "scored": true
+   "usable": true
   },
   {
    "axis": "x",
@@ -1514,7 +1514,7 @@
    "pitches": 16,
    "refusedPads": [],
    "row": "PL8a",
-   "scored": true
+   "usable": true
   },
   {
    "axis": "x",
@@ -1526,7 +1526,7 @@
     4
    ],
    "row": "PL8b",
-   "scored": true
+   "usable": true
   },
   {
    "axis": "x",
@@ -1535,7 +1535,7 @@
    "pitches": 12,
    "refusedPads": [],
    "row": "PL9a",
-   "scored": true
+   "usable": true
   },
   {
    "axis": "x",
@@ -1544,7 +1544,7 @@
    "pitches": 12,
    "refusedPads": [],
    "row": "PL9b",
-   "scored": true
+   "usable": true
   },
   {
    "axis": "x",
@@ -1555,7 +1555,7 @@
     8
    ],
    "row": "PL10",
-   "scored": true
+   "usable": true
   },
   {
    "axis": "x",
@@ -1564,7 +1564,7 @@
    "pitches": 16,
    "refusedPads": [],
    "row": "PL11",
-   "scored": true
+   "usable": true
   },
   {
    "axis": "x",
@@ -1575,7 +1575,7 @@
     4
    ],
    "row": "PL12",
-   "scored": true
+   "usable": true
   },
   {
    "axis": "x",
@@ -1586,7 +1586,7 @@
     5
    ],
    "row": "PL13",
-   "scored": true
+   "usable": true
   },
   {
    "axis": "x",
@@ -1595,7 +1595,7 @@
    "pitches": 9,
    "refusedPads": [],
    "row": "PL14",
-   "scored": true
+   "usable": true
   }
  ],
  "skewDeg": -0.206,
@@ -1930,7 +1930,7 @@
     "row": "PL14"
    }
   ],
-  "what": "Each long row's pads (10 or more) against a straight line through them, in millimetres; the plan wants every row under 0.05 mm"
+  "what": "Each long row's pads (10 or more) against a straight line through them, in millimetres; recorded, not a pass criterion: the rows at or over 0.05 mm are named"
  },
  "verdicts": [
   {
