@@ -85,6 +85,18 @@ test('every key the machine has is on the on-screen keys exactly once, and has i
   assert.deepEqual(STICKY, ['Shift', 'Ctrl']);
 });
 
+test('the on-screen rows run left to right as the Model B\'s own keyboard does, as the page\'s photograph shows it', () => {
+  // Read off site/src/assets/photos/bbc-micro.webp, not off the table: a sort-order check above
+  // would pass with two keys swapped. The right SHIFT is left out (each key is on screen once),
+  // and the cursor keys, DELETE and COPY are kept together in the last row.
+  assert.deepEqual(ON_SCREEN_ROWS[0], ['F0', 'F1', 'F2', 'F3', 'F4', 'F5', 'F6', 'F7', 'F8', 'F9']);
+  assert.deepEqual(ON_SCREEN_ROWS[1], ['Escape', 'D1', 'D2', 'D3', 'D4', 'D5', 'D6', 'D7', 'D8', 'D9', 'D0', 'Minus', 'Caret', 'Backslash']);
+  assert.deepEqual(ON_SCREEN_ROWS[2], ['Tab', 'Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P', 'At', 'LeftBracket', 'Underscore']);
+  assert.deepEqual(ON_SCREEN_ROWS[3], ['CapsLock', 'Ctrl', 'A', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L', 'Semicolon', 'Colon', 'RightBracket', 'Return']);
+  assert.deepEqual(ON_SCREEN_ROWS[4], ['ShiftLock', 'Shift', 'Z', 'X', 'C', 'V', 'B', 'N', 'M', 'Comma', 'FullStop', 'Slash']);
+  assert.deepEqual(ON_SCREEN_ROWS[5], ['Space']);
+});
+
 // ---- The characters, from the OS ROM ----
 
 const os = readRom(bbcRoms().find((r) => r.rom === 'os'));
@@ -221,9 +233,9 @@ function onScreen() {
   const panel = { querySelectorAll: () => buttons };
   const calls = [];
   const bbc = { KeyDown: (k) => calls.push(['down', k]), KeyUp: (k) => calls.push(['up', k]) };
-  onScreenKeys(panel, bbc);
+  const keys = onScreenKeys(panel, bbc);
   const button = (key) => buttons.find((b) => b.dataset.bbcKey === key);
-  return { calls, button, tap: (key) => button(key).on.click(), buttons };
+  return { calls, button, tap: (key) => button(key).on.click(), buttons, keys };
 }
 
 test('an on-screen key is a press and a release, and every key is enabled once the machine runs', () => {
@@ -250,6 +262,18 @@ test('SHIFT and CTRL latch for the next key, show it, then let go; a second tap 
   assert.equal(button('Shift').attrs['aria-pressed'], 'true');
   tap('A');
   assert.deepEqual(calls, [['down', BBC_KEYS.Shift], ['down', BBC_KEYS.A], ['up', BBC_KEYS.A], ['up', BBC_KEYS.Shift]]);
+});
+
+test('a latched SHIFT or CTRL lets go without typing when the page lets go of it (the screen taking the keyboard, or BREAK)', () => {
+  const { calls, tap, button, keys } = onScreen();
+  tap('Shift');
+  tap('Ctrl');
+  keys.letGo();
+  assert.equal(button('Shift').attrs['aria-pressed'], 'false');
+  assert.equal(button('Ctrl').attrs['aria-pressed'], 'false');
+  assert.deepEqual(calls, [], 'letting go typed something');
+  tap('A');
+  assert.deepEqual(calls, [['down', BBC_KEYS.A], ['up', BBC_KEYS.A]], 'the latch was still held for the next key');
 });
 
 // ---- The sound worklet ----

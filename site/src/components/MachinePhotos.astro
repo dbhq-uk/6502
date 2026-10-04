@@ -20,7 +20,7 @@ const WORDS = ['no', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eig
 <section class="photos" aria-labelledby="photos" data-photos={machine.id}>
   <div class="wrap narrow">
     <h2 id="photos">Photographs of the original</h2>
-    <p class="photos-intro">{n === 1 ? 'The photograph' : `The ${WORDS[n] ?? n} photographs`} of the original {machine.name} that this page uses, each credited as its source gives it.{model && ' Under each is what the 3D model above took from it.'}</p>
+    <p class="photos-intro">{n === 1 ? 'The photograph' : `The ${WORDS[n] ?? n} photographs`} of the original {machine.name} that this page uses, {n === 1 ? 'credited' : 'each credited'} as its source gives it.{model && (n === 1 ? ' Under it is what the 3D model above took from it.' : ' Under each is what the 3D model above took from it.')}</p>
     <div class="photo-grid">
       {machine.photos.map((photo) => <MachinePhoto machine={machine} photo={photo} used={model} />)}
     </div>

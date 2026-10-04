@@ -81,7 +81,10 @@ function prepare(panel) {
     if (!event.dataTransfer?.files.length) return;
     event.preventDefault();
     if (panel.putDisc) panel.putDisc(event.dataTransfer.files[0]);
-    else say('Press Start first, then drop the disc on the page again.', panel.dataset.state);
+    // Before Start the visitor is told to press it; while the machine loads, to
+    // wait; once it has failed, the failure stays on the status line.
+    else if (panel.dataset.state === 'ready') say('Press Start first, then drop the disc on the page again.', 'ready');
+    else if (panel.dataset.state === 'loading') say('The BBC Micro is still loading. Drop the disc on the page again once it runs.', 'loading');
   });
   start.addEventListener('click', () => run(panel, say), { once: true });
 }
@@ -147,10 +150,16 @@ async function run(panel, say) {
   start.hidden = true;
 
   keyboard(screen, bbc, panel);
-  onScreenKeys(panel, bbc);
+  const keys = onScreenKeys(panel, bbc);
+  // A SHIFT or CTRL latched on screen lets go when the PC keyboard takes over,
+  // and at BREAK, so it never lands on a key typed long after.
+  screen.addEventListener('focus', keys.letGo);
   for (const b of panel.querySelectorAll('[data-bbc-break]')) {
     b.disabled = false;
-    b.addEventListener('click', () => bbc.Break());
+    b.addEventListener('click', () => {
+      keys.letGo();
+      bbc.Break();
+    });
   }
   sound.wire();
   disc(panel, bbc);
@@ -244,6 +253,12 @@ export function onScreenKeys(panel, bbc) {
       show();
     });
   }
+  // Lets go of a latched SHIFT or CTRL without typing anything.
+  const letGo = () => {
+    latched.clear();
+    show();
+  };
+  return { letGo };
 }
 
 // ---- The sound ----

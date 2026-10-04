@@ -93,7 +93,7 @@ shown and nothing is taken from it.
 
 | | |
 |---|---|
-| What | An original Acorn BBC Micro, seen from the front left and above on a blue cloth: the whole case, the red function keys, the badge strip and the three lights under the space bar. The main photograph |
+| What | An original Acorn BBC Micro, seen from the front left and above on a blue cloth: the whole case, the red function keys, the badge strip and the three lights below the bottom left of the keyboard, to the left of the space bar. The main photograph |
 | Source | Wikimedia Commons, [`File:Acorn_BBC_Micro.jpg`](https://commons.wikimedia.org/wiki/File:Acorn_BBC_Micro.jpg), from simon.inns's Flickr photograph [40334359291](https://www.flickr.com/photos/130561631@N03/40334359291/), whose licence Commons's FlickreviewR 2 bot checked |
 | Author | simon.inns, as the file page names him (Simon Inns, by his Flickr account) |
 | Licence | CC BY 2.0, as the file page states it ([deed](https://creativecommons.org/licenses/by/2.0)), with attribution required: the page credits the author, links the source and links the licence to its deed. It asks for no share-alike, unlike the KIM-1's |

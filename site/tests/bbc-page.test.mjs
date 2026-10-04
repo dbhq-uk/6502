@@ -46,7 +46,10 @@ test('the home page counts the BBC Micro with the KIM-1, from the registry, and 
   const { running: n, inScope } = counts(registry);
   assert.match(home, new RegExp(`>${n} of ${inScope}<`), 'the machines-implemented card is not the registry\'s count');
   assert.ok(text.includes(runningSentence(registry)), 'the home page does not say which machines run');
-  assert.match(runningSentence(registry), /KIM-1 and BBC Micro\.$/);
+  // Both names in the sentence, whatever else runs by then: not the sentence as it reads today.
+  for (const name of ['KIM-1', 'BBC Micro']) {
+    assert.ok(runningSentence(registry).includes(name), `the running sentence does not name the ${name}`);
+  }
   assert.match(home, /<h3><a href="\/machines\/bbc-micro\/">BBC Micro<\/a><\/h3>/);
 });
 

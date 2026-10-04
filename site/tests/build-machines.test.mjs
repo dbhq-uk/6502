@@ -14,7 +14,6 @@ import { REPO_ROOT } from '../src/lib/registry.mjs';
 // slow publish. The publish itself takes minutes and is run by CI before the
 // site is built; these checks are the parts that need no .NET.
 
-const script = fs.readFileSync(path.join(process.cwd(), 'scripts', 'build-machines.mjs'), 'utf8');
 const sha256 = (bytes) => crypto.createHash('sha256').update(bytes).digest('hex');
 
 test('the builds are the KIM-1 and the BBC Micro, each from its own WebAssembly project, by its registry id', () => {
@@ -63,21 +62,61 @@ test('the machines to build are named, each once, and a name with no build is re
   assert.throws(() => machineBuilds(['nes']), /no build for "nes"/);
 });
 
+/**
+ * A copy of the parts of the repository the script reads, in a temporary folder, with a fake
+ * `dotnet` first on the PATH that leaves a mark and fails, so no test can start a real publish.
+ * `spoil` may change the copy before the script runs.
+ */
+function scratchRepo(spoil = () => {}) {
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), 'build-machines-'));
+  for (const rel of ['site/scripts/build-machines.mjs', 'site/src/lib', 'tests/Dbhq.Cpu6502.TestSupport/Pins.cs', 'roms', 'machines']) {
+    fs.cpSync(path.join(REPO_ROOT, rel), path.join(root, rel), { recursive: true });
+  }
+  spoil(root);
+  const bin = path.join(root, 'fake-bin');
+  const mark = path.join(root, 'dotnet-ran');
+  fs.mkdirSync(bin);
+  fs.writeFileSync(path.join(bin, 'dotnet'), `#!/bin/sh\ntouch '${mark}'\nexit 1\n`, { mode: 0o755 });
+  const run = (args) => spawnSync(process.execPath, ['scripts/build-machines.mjs', ...args], {
+    cwd: path.join(root, 'site'),
+    encoding: 'utf8',
+    env: { ...process.env, PATH: `${bin}${path.delimiter}${process.env.PATH}` },
+  });
+  return { root, run, dotnetRan: () => fs.existsSync(mark) };
+}
+
 test('the script stops before publishing anything when the machine, or an option, is not one it knows', () => {
-  for (const args of [[], ['nes'], ['kim-1', '--aot']]) {
-    const run = spawnSync(process.execPath, ['scripts/build-machines.mjs', ...args], { encoding: 'utf8' });
-    assert.notEqual(run.status, 0, `build-machines.mjs ${args.join(' ')} succeeded`);
-    assert.doesNotMatch(run.stdout, /dotnet publish/);
+  const { root, run, dotnetRan } = scratchRepo();
+  try {
+    for (const args of [[], ['nes'], ['kim-1', '--aot']]) {
+      const result = run(args);
+      assert.notEqual(result.status, 0, `build-machines.mjs ${args.join(' ')} succeeded`);
+      assert.doesNotMatch(result.stdout, /dotnet publish/);
+      assert.ok(!dotnetRan(), `build-machines.mjs ${args.join(' ')} ran dotnet`);
+    }
+  } finally {
+    fs.rmSync(root, { recursive: true, force: true });
   }
 });
 
-test('every ROM of every machine named is read and checked before the first publish', () => {
-  const firstRead = script.indexOf('readRom(r, repo)');
-  const firstPublish = script.indexOf("['publish', project");
-  assert.ok(firstRead > 0 && firstPublish > 0);
-  assert.ok(firstRead < firstPublish, 'a ROM is read after the publish starts');
-  // The ROMs are read in a loop of their own over every build, which ends before the publishing loop starts.
-  assert.match(script, /for \(const build of builds\) \{\s*build\.roms = build\.roms\(\)\.map/);
+test('every ROM of every machine named is read and checked before the first publish: a ROM that fails its hash stops it before dotnet runs', () => {
+  // One bit of the BBC Micro's OS ROM changed, and the KIM-1 named first, so its publish would come first.
+  const { root, run, dotnetRan } = scratchRepo((r) => {
+    const file = path.join(r, 'roms', 'bbc-micro', 'os.rom');
+    const bytes = fs.readFileSync(file);
+    bytes[0] ^= 1;
+    fs.writeFileSync(file, bytes);
+  });
+  try {
+    const result = run(['kim-1', 'bbc-micro']);
+    assert.notEqual(result.status, 0);
+    assert.match(result.stderr, /roms\/bbc-micro\/os\.rom does not match its pinned hash/);
+    assert.match(result.stdout, /^kim-1 .*hash checked$/m, 'the KIM-1\'s ROMs were not read first');
+    assert.doesNotMatch(result.stdout, /dotnet publish/);
+    assert.ok(!dotnetRan(), 'dotnet ran before every ROM was checked');
+  } finally {
+    fs.rmSync(root, { recursive: true, force: true });
+  }
 });
 
 test('CI and npm run machines publish both machines, each cached on its own inputs, so a change to one rebuilds that one', () => {

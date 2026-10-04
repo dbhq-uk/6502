@@ -78,9 +78,10 @@ function fakeBrowser(t) {
   };
 }
 
-/** A fake machine running at `capacityMhz` in this browser. */
+/** A fake machine running at `capacityMhz` in this browser (a test may change `machine.capacityMhz`). */
 function fakeMachine(browser, capacityMhz) {
   const machine = {
+    capacityMhz,
     runs: [],
     loaded: 0,
     cycles: 0,
@@ -89,7 +90,7 @@ function fakeMachine(browser, capacityMhz) {
     Run(n) {
       machine.runs.push(n);
       const ran = n + OVERRUN;
-      browser.advance(ran / (capacityMhz * 1000));
+      browser.advance(ran / (machine.capacityMhz * 1000));
       machine.cycles += ran;
       return machine.cycles;
     },
@@ -317,6 +318,20 @@ test('a hidden page pauses the machine, and when it is shown again the machine c
   untilReport(browser, panel);
   assert.equal(panel.dataset.actualMhz, '1.00');
   assert.match(speedEl.textContent, /about 5 times as fast/);
+});
+
+test('the first reading after the page is shown again covers only the frames after it was shown', async (t) => {
+  const browser = fakeBrowser(t);
+  const machine = fakeMachine(browser, 0.5);
+  const { panel } = await start(browser, { exports: { FakeHost: machine } });
+  // A slow part of a second, never reported, then hidden; shown again on a browser ten times faster.
+  for (let i = 0; i < 3; i++) browser.frame(16);
+  assert.equal(panel.dataset.capacityMhz, undefined, 'the slow part was long enough to be reported');
+  browser.hide();
+  machine.capacityMhz = 5;
+  browser.show();
+  untilReport(browser, panel);
+  assert.equal(panel.dataset.capacityMhz, '5.00', 'the reading mixed in frames from before the page was hidden');
 });
 
 test('a page that starts hidden waits until it is shown', async (t) => {
