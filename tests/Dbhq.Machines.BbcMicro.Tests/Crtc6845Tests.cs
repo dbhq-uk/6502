@@ -548,12 +548,16 @@ public class Crtc6845Tests
         bus.Write(0xFE4C, 0x04);
         bus.Write(0xFE4D, 0x7F);
 
+        // And the flag comes with VSYNC's fall, not its rise: high before the read that first sees
+        // the flag, low after it. The gaps alone would not show an edge taken the wrong way up.
         var falls = new List<long>();
         for (int n = 0; n < 13 * 40_000 && falls.Count < 12; n++)
         {
+            bool before = bus.Crtc.VSync;
             bus.Read(0x0000);
             if ((bus.SystemVia.Peek(0xD) & 0x02) != 0)
             {
+                Assert.True(before && !bus.Crtc.VSync, $"IFR1 rose at cycle {bus.Cycles} with VSYNC {before} before and {bus.Crtc.VSync} after");
                 falls.Add(bus.Cycles);
                 bus.Write(0xFE4D, 0x02);
             }

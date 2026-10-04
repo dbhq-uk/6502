@@ -63,6 +63,32 @@ interrupts like the NMOS chip is assumed. The tests check the decimal flag
 and the pushed P, and the `WAI` and `STP` cycle counts, wake outcome and
 stop-until-reset; they hold no bus logs of a 65C02 taking an interrupt.
 
+## An NMI that comes while an interrupt reads its vector
+
+**What.** The NMOS core takes an NMI whose edge comes while `BRK` or an IRQ
+reads its vector if the line is still active in the cycle after the vector's
+high byte, after the handler's first instruction; a shorter pulse is lost. An
+NMI whose edge comes while an NMI reads its own vector is lost, held or not.
+Until 4 October 2026 the core lost every NMI whose edge came on the vector's low
+byte, a rule drawn in stage 1 from transistor-model runs that all released the
+line two cycles after it went active. The BBC Micro's 8271 holds its interrupt
+line, and with the old rule DFS lost the interrupt that announces a command's
+result often enough to hang: a scratch soak of disc commands stalled within 692
+commands in every seed (task 12's review), and none in 20,000 after the fix.
+
+**Why it is listed.** It is no longer a difference from the transistor-level
+model: the core was changed to match it (commit `e977cc9`). It is listed because
+a public claim of stage 1 changed with it (the 30 September journal entries
+carry dated corrections), and because the model is the reference, not a chip
+measured on a bench.
+
+**How the tests treat it.** `TransistorModelTests` compares the core with 266
+runs of the Visual6502 model, 116 of them added with the fix, holding NMI or
+pulsing it for one to four cycles around the vector reads of `BRK`, IRQ and NMI;
+13 of them fail on the old rule. `DiscTests`' `*TITLE` case fails on the old rule
+too. The 65C02 variants share the code; their own interrupt timing is the
+section above.
+
 ## JAM
 
 **What.** The NMOS `JAM` opcodes (for example `$02`) lock the chip up. Harte
@@ -132,6 +158,42 @@ model and on single step, and pass with the original monitor ROM doing what
 the User Manual says it does. The open-bus value and power-on RAM are pinned
 by tests of the memory map and the boot state, so a change to either is
 seen.
+
+## The BBC Micro: the bus and the memory map, where the sources stop
+
+**What.** `BbcBus` is the memory map and the 1 MHz stretch of `bus.md`. Where
+the sources stop, it chooses:
+
+- **The 1 MHz clock's phase at power on.** A slow access waits one cycle from
+  an even count of CPU cycles and two from an odd one. Which phase a real
+  machine starts in is not known (section 6), so the count starts at zero,
+  which is even. A program that times itself against the stretch could see the
+  other phase on a real machine.
+- **An empty ROM slot reads the high byte of the address,** the last value on
+  the bus. That was measured for an absent fast device, on one machine, not for
+  an empty ROM socket (section 6, item 3). The OS reads an empty slot's header
+  at boot to decide whether a ROM is there, and with this value the slot fails
+  that test as an empty socket does.
+- **What is not fitted answers as the bus does:** FRED and JIM read `$FF`, an
+  absent fast SHEILA device the high byte of its address (`$FE`), an absent slow
+  one `$00` (section 1d). Each was measured on one machine by one poster, and
+  the OS's Tube probe and the DFS's Econet probe depend on them.
+- **`$FE18-$FE1F`, the station ID, is taken as slow.** No source lists it
+  (section 6, item 2). It matters only with Econet, which is not modelled.
+- **At power on** the ROM latch selects slot 0, an empty slot, and RAM is all
+  zeros. Neither was measured (section 6, item 4): the OS writes the latch before
+  it reads `$8000`, and a real machine's RAM holds whatever its chips power up
+  with.
+
+**How the tests treat it.** `BbcBusTests` pins the stretch from both phases,
+every slow and fast range, the empty slot's value and the absent devices'
+values, so a change to any choice is seen; none is a check against a machine.
+Task 15's mutation pass found one change no test can see: in `Service()`, the
+bus brings the CRTC up to date before it asks the system VIA for its next
+event, and with that order reversed every test still passes, because the VIA
+brings the CRTC up to date itself whenever it is asked anything (its
+`SyncInputs`). The bus's order is a second guard on the same seam, so the
+mutant behaves the same; removing the VIA's own guard is caught.
 
 ## The BBC Micro: the 6522 VIA's shift register, mode 010 only
 
@@ -560,7 +622,9 @@ chooses:
   index, fault and count lines (they read 0); holding the chip in reset (a 1
   written to `$FE82` resets it at once); an opcode not in the datasheet ends at
   once and does nothing. `$FE82` and `$FE83` read `$FE`, as nothing drives the
-  bus. The drive control input port (special register `$22`) reads like Read
+  bus. `$FE88-$FE9F` repeat `$FE80-$FE87`, the block decoded by address bit 2
+  alone, which the sheet infers from the board's decode (s1a); nothing uses it,
+  and `BbcBusTests` pins it. The drive control input port (special register `$22`) reads like Read
   Drive Status, a guess, since D1 gives no layout and DFS never reads it.
 - **Power on and BREAK.** At power on the chip is as after a reset, with every
   special register 0. BREAK leaves it alone: no source read says its reset pin
@@ -617,3 +681,8 @@ front of the model. Where that differs from sitting at a Model B:
   sound rather than playing it late.
 - **One drive.** The model has both of the 8271's drives; the page offers drive 0
   only.
+- **A disc changed on the page is not seen by DFS at once,** as on a real BBC:
+  DFS keeps the catalogue it last read until the drive stops, a few seconds
+  after the last disc command, or until `*CAT`. The page says so, and does not
+  make DFS read the new disc when it goes in (`DiscTests` shows the old
+  catalogue until DFS reads it again).
