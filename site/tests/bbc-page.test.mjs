@@ -1,42 +1,21 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
-import os from 'node:os';
 import path from 'node:path';
 import crypto from 'node:crypto';
-import { spawnSync } from 'node:child_process';
 import { page, visibleText, DIST } from './helpers.mjs';
-import { loadRegistry, REPO_ROOT } from '../src/lib/registry.mjs';
-import { loadTryIt } from '../src/lib/machines.mjs';
+import { counts, loadRegistry, REPO_ROOT } from '../src/lib/registry.mjs';
+import { loadTryIt, runningMachines, runningSentence } from '../src/lib/machines.mjs';
 import { bbcRoms } from '../src/lib/pins.mjs';
 import { NOT_MODELLED, downloadBytes, issueUrl, megabytes, symbolTable } from '../src/lib/bbc-micro.mjs';
 import { NOT_ON_A_PC, ON_SCREEN_ROWS, legend } from '../public/bbc-keys.js';
 
-// The BBC Micro's page. The registry still lists the BBC Micro as planned, so
-// the site that deploys has no page for it, and that is checked first. The page
-// itself is checked on a second build, made here into a temporary folder with
-// REGISTRY_PREVIEW set to tests/fixtures/bbc-micro-running.json, which is the
-// registry as it will be once the machine is switched on (with a stand-in
-// photograph). Then the whole of the site's suite runs against that build, so
-// every rule the site makes about every page holds for this one too, and for
-// the home page and the machines table as they will be.
-//
-// When the registry itself says running, the preview changes nothing and this
-// file can read dist/ instead: drop the build below and the fixture with it.
+// The BBC Micro's page, as the site that deploys builds it: the registry says
+// the machine runs, so it has a page, linked from the machines table, with its
+// photograph credited, and the home page counts it.
 
-const PREVIEW = 'tests/fixtures/bbc-micro-running.json';
-const root = path.resolve(process.cwd(), '..');
-const out = fs.mkdtempSync(path.join(os.tmpdir(), 'bbc-preview-'));
-test.after(() => fs.rmSync(out, { recursive: true, force: true }));
-const env = { ...process.env, REGISTRY_PREVIEW: PREVIEW, SITE_DIST: out };
-const build = spawnSync(process.execPath, [path.join('node_modules', 'astro', 'bin', 'astro.mjs'), 'build', '--outDir', out], { env, encoding: 'utf8', timeout: 300_000 });
-
-const read = (url) => {
-  const file = path.join(out, url, 'index.html');
-  return fs.existsSync(file) ? fs.readFileSync(file, 'utf8') : '';
-};
-const html = read('/machines/bbc-micro/');
-const machine = loadRegistry(undefined, PREVIEW).machines.find((m) => m.id === 'bbc-micro');
+const html = page('/machines/bbc-micro/')?.html ?? '';
+const machine = loadRegistry().machines.find((m) => m.id === 'bbc-micro');
 const section = (id) => {
   const at = html.indexOf(`aria-labelledby="${id}"`);
   return at < 0 ? '' : html.slice(at, html.indexOf('</section>', at));
@@ -47,23 +26,40 @@ const panel = (() => {
 })();
 const decode = (t) => t.replace(/&amp;/g, '&').replace(/&#39;/g, "'").replace(/&quot;/g, '"').replace(/&lt;/g, '<').replace(/&gt;/g, '>');
 
-test('the deployed site has no BBC Micro page and links none: the registry still says planned', () => {
-  assert.equal(loadRegistry(undefined, '').machines.find((m) => m.id === 'bbc-micro').status, 'planned');
-  assert.equal(page('/machines/bbc-micro/'), undefined, 'dist has a BBC Micro page while the registry says planned');
-  for (const url of ['/', '/machines/']) assert.doesNotMatch(page(url).html, /href="\/machines\/bbc-micro\//, `${url} links the BBC Micro`);
+test('the registry says the BBC Micro runs, names its acceptance test, and has its photograph', () => {
+  assert.equal(machine.status, 'running');
+  assert.equal(machine.acceptance, 'BbcAcceptanceTests');
+  assert.equal(machine.photos?.[0]?.file, 'bbc-micro.webp');
 });
 
-test('no workflow builds or deploys with a preview: only this test and the browser check use one', () => {
-  for (const name of ['validate.yml', 'deploy-site.yml']) {
-    assert.doesNotMatch(fs.readFileSync(path.join(root, '.github', 'workflows', name), 'utf8'), /REGISTRY_PREVIEW|fixtures\/bbc-micro-running/, `${name} sets a preview`);
-  }
-  assert.doesNotMatch(fs.readFileSync(path.join(process.cwd(), 'package.json'), 'utf8'), /REGISTRY_PREVIEW/);
+test('the site has the BBC Micro\'s page, linked from the machines table', () => {
+  assert.ok(html, '/machines/bbc-micro/ was not built');
+  assert.match(page('/machines/').html, /<a href="\/machines\/bbc-micro\/">BBC Micro<\/a>/);
 });
 
-test('the preview builds, and has the BBC Micro\'s page, linked from the machines table', () => {
-  assert.equal(build.status, 0, `the preview build failed:\n${build.stdout?.slice(-2000)}\n${build.stderr?.slice(-2000)}`);
-  assert.ok(html, '/machines/bbc-micro/ was not built in the preview');
-  assert.match(read('/machines/'), /<a href="\/machines\/bbc-micro\/">BBC Micro<\/a>/);
+test('the home page counts the BBC Micro with the KIM-1, from the registry, and names both', () => {
+  const registry = loadRegistry();
+  const running = runningMachines(registry).map((m) => m.id);
+  assert.ok(running.includes('kim-1') && running.includes('bbc-micro'), `running: ${running.join(', ')}`);
+  const home = page('/').html;
+  const text = visibleText(home);
+  const { running: n, inScope } = counts(registry);
+  assert.match(home, new RegExp(`>${n} of ${inScope}<`), 'the machines-implemented card is not the registry\'s count');
+  assert.ok(text.includes(runningSentence(registry)), 'the home page does not say which machines run');
+  assert.match(runningSentence(registry), /KIM-1 and BBC Micro\.$/);
+  assert.match(home, /<h3><a href="\/machines\/bbc-micro\/">BBC Micro<\/a><\/h3>/);
+});
+
+test('the photograph is credited on the page as its source gives it: the author, the source, and the licence linked to its deed', () => {
+  const photo = machine.photos[0];
+  assert.equal(photo.licence, 'CC BY 2.0');
+  const credit = /<figure class="photo" data-photo="bbc-micro"[\s\S]*?<\/figure>/.exec(html)?.[0] ?? '';
+  assert.ok(credit, 'the page has no main photograph');
+  const text = visibleText(credit);
+  assert.match(text, /Photograph: an original Acorn BBC Micro Model B, taken 18 February 2018\./);
+  assert.ok(text.includes(`By ${photo.author}.`), 'the author is not credited');
+  assert.ok(credit.includes(`<a href="${photo.sourceUrl}">commons.wikimedia.org</a>`), 'the source is not linked');
+  assert.ok(credit.includes(`<a href="${photo.licenceUrl}">CC BY 2.0</a>`), 'the licence is not linked to its deed');
 });
 
 test('the page loads its driver, and tells it where the machine and its three ROMs are, and the clock from the registry', () => {
@@ -98,8 +94,8 @@ test('Start says how much it downloads, read from the built files, never typed, 
   // The figure on the button is the sum of the files in the build, as built.
   let total = 0;
   const walk = (d) => { for (const e of fs.readdirSync(d, { withFileTypes: true })) { const f = path.join(d, e.name); if (e.isDirectory()) walk(f); else total += fs.statSync(f).size; } };
-  walk(path.join(out, 'machines', 'bbc-micro', '_framework'));
-  for (const r of bbcRoms()) total += fs.statSync(path.join(out, 'machines', 'bbc-micro', r.file)).size;
+  walk(path.join(DIST, 'machines', 'bbc-micro', '_framework'));
+  for (const r of bbcRoms()) total += fs.statSync(path.join(DIST, 'machines', 'bbc-micro', r.file)).size;
   assert.equal(total, bytes);
   const button = /<button type="button" class="btn pill" data-bbc-start disabled>([^<]*)<\/button>/.exec(panel);
   assert.ok(button, 'no Start button, disabled until the script runs');
@@ -206,23 +202,4 @@ test('the on-screen keys: every key once, in the machine\'s rows, real buttons d
   }
   const css = fs.readFileSync(path.join(process.cwd(), 'src', 'styles', 'global.css'), 'utf8');
   assert.match(css, /\.bbc-key \{[^}]*min-width: 44px; min-height: 44px;/, 'a key is under 44 pixels');
-});
-
-test('the KIM-1\'s page is the same, byte for byte, with the BBC Micro switched on', () => {
-  assert.equal(read('/machines/kim-1/'), page('/machines/kim-1/').html);
-});
-
-test('the whole site suite passes on the build with the BBC Micro switched on', () => {
-  const files = fs.readdirSync('tests').filter((f) => f.endsWith('.test.mjs') && f !== 'bbc-page.test.mjs').map((f) => path.join('tests', f));
-  // Without NODE_TEST_CONTEXT, which this runner sets for the files it runs: with it, the
-  // inner runner reports to this one instead of running as a suite of its own.
-  const { NODE_TEST_CONTEXT, ...outer } = env;
-  const run = spawnSync(process.execPath, ['--test', ...files], { env: outer, encoding: 'utf8', timeout: 600_000 });
-  // A piped run reports in TAP: "# pass 250".
-  const count = (name) => Number(new RegExp(`^(?:#|ℹ) ${name} (\\d+)$`, 'm').exec(run.stdout)?.[1]);
-  const failures = [...run.stdout.matchAll(/^not ok \d+ - (.*)$/gm)].map((m) => m[1]);
-  assert.deepEqual(failures, [], 'tests fail on the preview build');
-  assert.equal(run.status, 0, run.stdout.slice(-3000));
-  assert.ok(count('pass') > 200, `only ${count('pass')} tests ran`);
-  assert.equal(count('fail'), 0);
 });

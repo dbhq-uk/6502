@@ -15,7 +15,7 @@ then the NES. Built in public, with the journey written up at 6502.dbhq.uk.
 src/Dbhq.Cpu6502/           # the core: one library, no dependencies
 src/Dbhq.Machines.Kim1/     # the KIM-1: its 6530s, keypad, display and bus, on the core
 src/Dbhq.Machines.Kim1.Wasm/  # the KIM-1 as .NET WebAssembly, for its page on the site
-src/Dbhq.Machines.BbcMicro/  # the BBC Micro Model B, on the core; its chips arrive task by task
+src/Dbhq.Machines.BbcMicro/  # the BBC Micro Model B: its chips, keyboard, screen, sound and disc drive, on the core
 src/Dbhq.Machines.BbcMicro.Wasm/  # the BBC Micro as .NET WebAssembly; the ROMs are given to it as bytes
 machines/                   # registry.json, and per machine its "try it" program, which the page shows and the acceptance test runs
 site/                       # 6502.dbhq.uk: the Astro site, its tests, and the scripts that build the machines into it

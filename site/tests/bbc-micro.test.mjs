@@ -5,7 +5,7 @@ import path from 'node:path';
 import vm from 'node:vm';
 import { register } from 'node:module';
 import { pathToFileURL } from 'node:url';
-import { REPO_ROOT, applyPreview, loadRegistry } from '../src/lib/registry.mjs';
+import { REPO_ROOT } from '../src/lib/registry.mjs';
 import { loadTryIt } from '../src/lib/machines.mjs';
 import { readRom } from '../src/lib/machines.mjs';
 import { bbcRoms } from '../src/lib/pins.mjs';
@@ -344,25 +344,4 @@ test('megabytes are one decimal place, the British way', () => {
   assert.equal(megabytes(12_345_678), '12.3');
   assert.equal(megabytes(1_000_000), '1.0');
   assert.equal(megabytes(1_234_567_890), '1,234.6');
-});
-
-test('a preview lays its fields over the registry\'s for the machines it names, and cannot add one', () => {
-  const registry = { machines: [{ id: 'a', status: 'planned', name: 'A' }, { id: 'b', status: 'planned' }], chips: [] };
-  const seen = applyPreview(registry, { machines: { a: { status: 'running', notes: 'n' } } });
-  assert.deepEqual(seen.machines[0], { id: 'a', status: 'running', name: 'A', notes: 'n' });
-  assert.equal(seen.machines[1], registry.machines[1]);
-  assert.equal(registry.machines[0].status, 'planned', 'the registry itself was changed');
-  assert.throws(() => applyPreview(registry, { machines: { c: {} } }), /not in the registry/);
-});
-
-test('the real registry is read as it is unless a preview is asked for, and the BBC Micro\'s preview only switches it on', () => {
-  const plain = loadRegistry(undefined, '');
-  assert.equal(plain.machines.find((m) => m.id === 'bbc-micro').status, 'planned');
-  const previewed = loadRegistry(undefined, 'tests/fixtures/bbc-micro-running.json');
-  const bbc = previewed.machines.find((m) => m.id === 'bbc-micro');
-  assert.equal(bbc.status, 'running');
-  assert.equal(bbc.acceptance, 'BbcAcceptanceTests');
-  assert.ok(fs.existsSync(path.join(REPO_ROOT, 'tests', 'Dbhq.Machines.BbcMicro.Tests', 'BbcAcceptanceTests.cs')));
-  // Every other machine is the registry's own.
-  assert.deepEqual(previewed.machines.filter((m) => m.id !== 'bbc-micro'), plain.machines.filter((m) => m.id !== 'bbc-micro'));
 });

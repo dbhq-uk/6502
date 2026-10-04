@@ -2,13 +2,9 @@
 // it after the KIM-1's, in the same browser, with the same watch for console
 // errors, failed requests and CSP violations).
 //
-// The registry still says the BBC Micro is planned, so the site in dist/ has no
-// page for it. This builds the site again into a temporary folder with
-// REGISTRY_PREVIEW set to tests/fixtures/bbc-micro-running.json, the registry
-// as it will be once the machine is switched on, and serves that build with the
-// site's own headers. Nothing it builds is kept.
+// It runs on the KIM-1's server, which serves dist/ with the site's own headers.
 //
-// Then, on /machines/bbc-micro/: nothing of the machine is fetched before
+// On /machines/bbc-micro/: nothing of the machine is fetched before
 // Start is pressed, and a disc dropped then is refused with a message rather
 // than the browser leaving the page; Start downloads it and it boots to BASIC's prompt (read from
 // screen memory through the page's test hook, and the canvas must be drawing);
@@ -20,14 +16,7 @@
 // image put in through the file input lists its catalogue with *CAT; Save disc
 // downloads the same bytes; and Break restarts the machine.
 import fs from 'node:fs';
-import os from 'node:os';
-import path from 'node:path';
-import { spawnSync } from 'node:child_process';
-import { fileURLToPath } from 'node:url';
 
-const here = path.dirname(fileURLToPath(import.meta.url));
-const site = path.resolve(here, '..');
-const PREVIEW = 'tests/fixtures/bbc-micro-running.json';
 const TIMEOUT = 120_000;
 
 /**
@@ -52,25 +41,7 @@ export function testDisc() {
   return disc;
 }
 
-export async function checkBbcMicro({ browser, watch, problems, serve }) {
-  const out = fs.mkdtempSync(path.join(os.tmpdir(), 'bbc-check-'));
-  const built = spawnSync(process.execPath, [path.join('node_modules', 'astro', 'bin', 'astro.mjs'), 'build', '--outDir', out], { cwd: site, env: { ...process.env, REGISTRY_PREVIEW: PREVIEW }, encoding: 'utf8' });
-  if (built.status !== 0) {
-    problems.push(`bbc: the preview build failed: ${built.stderr.slice(-500)}`);
-    return;
-  }
-  const server = serve(out);
-  await new Promise((resolve) => server.listen(0, '127.0.0.1', resolve));
-  const origin = `http://127.0.0.1:${server.address().port}`;
-  try {
-    await run({ browser, watch, problems, origin });
-  } finally {
-    server.close();
-    fs.rmSync(out, { recursive: true, force: true });
-  }
-}
-
-async function run({ browser, watch, problems, origin }) {
+export async function checkBbcMicro({ browser, watch, problems, origin }) {
   const page = await browser.newPage();
   await watch(page, 'bbc: ');
   const fetched = [];

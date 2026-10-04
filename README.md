@@ -23,8 +23,12 @@ design lists. `dotnet test` is the proof; the numbers live in its output.
 The KIM-1, the first machine, runs its original monitor ROM, passes its
 acceptance test, and runs in the browser at
 [6502.dbhq.uk/machines/kim-1/](https://6502.dbhq.uk/machines/kim-1/), so it
-counts as implemented. The BBC Micro Model B is next: its plan, fact sheets
-and ROMs are in the repository, and it is built task by task. The programme's
+counts as implemented. The BBC Micro Model B, the second, runs Acorn's own
+operating system, BBC BASIC and disc filing system, passes its acceptance test,
+and runs in the browser at
+[6502.dbhq.uk/machines/bbc-micro/](https://6502.dbhq.uk/machines/bbc-micro/),
+with its keyboard, sound and a disc drive, so it counts too. The NES is the
+next of the three. The programme's
 design is in
 [`docs/superpowers/specs/2026-09-30-machines-and-site-design.md`](docs/superpowers/specs/2026-09-30-machines-and-site-design.md).
 
@@ -44,8 +48,9 @@ MIT. See [`LICENSE`](LICENSE). Some files here are somebody else's, or made
 from somebody else's, and keep their own terms: the system ROMs in
 [`roms/`](roms/README.md); the photographs of the original machines in
 [`site/src/assets/photos/`](site/src/assets/photos/README.md), each under the
-licence its source gives it (CC BY-SA 2.0 fr, share-alike, for the Musée Bolo's,
-and none stated for the two from Hans Otten's site); the KIM-1 model's track
+licence its source gives it (CC BY-SA 2.0 fr, share-alike, for the Musée Bolo's
+KIM-1, none stated for the two from Hans Otten's site, and CC BY 2.0 for the
+BBC Micro); the KIM-1 model's track
 map, `site/src/assets/tracks/kim-1.webp`, traced from those photographs and
 from a replica of the board's layout, whose channels carry those terms and
 CC BY-NC 4.0 (the photographs' README says which); and the files in
