@@ -88,12 +88,24 @@ is a proposal until its own spec is written.
 
 1. **KIM-1**: settled. First light, and it sets the pattern.
 2. **BBC Micro Model B**: settled.
-3. **NES**: settled; it is also the reference for the later port.
-4. From the family document, in roughly this order of ease: the Atari 2600 (no
-   system ROM), the VIC-20 and Commodore 64 (open replacement ROMs exist), the
+3. **Acorn Electron**: settled 4 October 2026. The smallest step from the BBC
+   Micro: BBC BASIC is the same ROM, the operating system is another Acorn ROM
+   from the same holder, and one ULA does the work of the BBC's video and sound
+   chips.
+4. **Atari 2600**: settled 4 October 2026. No system ROM and two chips, and a
+   display drawn by the program in step with the beam, which needs exact cycle
+   timing more than any other machine here.
+5. **NES**: settled. It was third until 4 October 2026, partly as the reference
+   for the later port; that reason went with the port on 1 October.
+6. **Commodore 64**: settled 4 October 2026. Last of the four because the
+   VIC-II and the SID are the hardest chips in the list, and because the
+   KERNAL's rights need checking before its spec is written (open replacement
+   ROMs exist).
+7. From the family document, in roughly this order of ease: the VIC-20, the
    Apple I and II, the PET, the Atari 8-bit computers and the 5200, the Oric,
-   the Electron, the BBC Master (65C02), and then the arcade boards and the
-   rest.
+   the BBC Master (65C02), and then the arcade boards and the rest.
+
+They are built one at a time, each with its own spec, design and plan.
 
 The 65C02 machines run on the core already. Machines on a different CPU
 (65C816, HuC6280, 65CE02) need a new core and are out of scope for now.
@@ -282,6 +294,7 @@ never assumed:
 | A machine counts only if it runs in the browser and passes a CI test | Any machine that boots; headless only | Dan's call, and it keeps the headline as strict as the core's own claims |
 | A registry file is the source of the table and the count | Parsing the family document's tables | A data file is checkable; markdown tables are fragile |
 | The family document stays hand-written and a test checks it against the registry | Generating the document from the registry | The document is prose as well as tables |
+| The Electron, the Atari 2600, the NES and the Commodore 64 next, one at a time, smallest first | The NES first, keeping the published order; all four in parallel | Dan's call, 4 Oct. The count grows soonest and reviews come one at a time; four branches at once would all change the registry, the shared browser host and the site |
 | Shared browser parts are extracted after the second machine | A framework designed up front | Two machines make the shared part visible; one does not |
 | The look is a phosphor terminal, a fork of the brand | Paper like dbhq.uk; ink like skills.dbhq.uk | Dan's call, from the Modal reference; recorded in `site/DESIGN.md` |
 | Generated imagery, captioned as illustration, never as evidence | Photographs of real parts | The site's claim is that nothing is overstated |
