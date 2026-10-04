@@ -1,7 +1,7 @@
 ---
 title: "The next four machines"
 date: 2026-10-04
-summary: "After the BBC Micro, four machines one at a time and smallest first: the Acorn Electron, the Atari 2600, the NES and the Commodore 64. The NES gives up third place, because half of the reason it held it went with the port."
+summary: "After the BBC Micro, four more machines, one at a time and smallest first, starting with the Acorn Electron. The NES gives up third place, because half of the reason it held it went with the port."
 order: 29
 ---
 
