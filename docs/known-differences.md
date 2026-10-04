@@ -542,16 +542,11 @@ chooses:
   plausible figure; DFS passed with anything from 0 to 60,000 (s1h). Bytes come
   every 128 cycles, a sector after another with no gap, and the result one byte
   time after the last byte. A real drive would wait for the sector to come round.
-- **Late data.** A byte not taken in its 128 cycles is withdrawn, so INT falls,
-  and the command ends one cycle later with `$0A`, so INT rises again. No source
-  gives the gap. It is there because the 6502 loses an NMI edge that lands in the
-  cycle it reads the IRQ vector's low byte (the core follows the transistor-level
-  model there), and without a fresh edge for the result DFS would wait for ever
-  for a command that had already ended; with it, DFS reads `$0A` and tries again.
-- **A result NMI can still be lost.** The same 6502 rule applies to the INT
-  that announces a result. If it rises in the very cycle an IRQ entry reads its
-  vector's low byte, which at the prompt is about one cycle in 13,000 (about 150
-  IRQs a second), DFS never hears of the result and waits. No test has met it.
+- **Late data.** A byte not taken in its 128 cycles ends the command with
+  `$0A`, INT staying high from the byte to the result, as the sheet's design
+  has it (s3). *Corrected in task 12b: task 12 first let INT fall for a cycle
+  between them and listed a residual hang, both because the core lost an NMI
+  that a real 6502 takes; the core is fixed, see the 4 October journal entry.*
 - **Not ready** is latched by a drive command that finds no disc, and the next
   Read Drive Status reports not ready once and clears it (D1's footnote: issue it
   twice to clear it on a ready drive). Ready is "a disc, the drive selected and
@@ -574,7 +569,9 @@ chooses:
   most common (s4); a sequential one reads wrongly. An image shorter than its disc
   is extended with zeros, as the sheet recommends, which has never been tried
   against a real drive because no real disc is short. 40 or 80 tracks is decided
-  by the length alone.
+  by the length, except that an image short enough to be 40 tracks whose
+  catalogue says 800 sectors is taken as an 80-track disc trimmed to the part in
+  use (s4's second test).
 
 **How the tests treat it.** `Fdc8271Tests` asserts the sheet's chip test (s3),
 the status values DFS saw (s1b), not ready, write protect, sector not found, side

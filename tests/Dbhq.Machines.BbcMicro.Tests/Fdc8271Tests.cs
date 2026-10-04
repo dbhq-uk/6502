@@ -249,19 +249,16 @@ public class Fdc8271Tests
     [Fact]
     public void AByteNotTakenInItsTimeEndsTheCommandWithLateData()
     {
-        // s3, "Late data": a byte not taken within one byte time ends the command with $0A. The
-        // request is withdrawn when the next byte is due, so INT falls for a cycle, and the result
-        // raises it again: a fresh NMI edge, even if the CPU lost the byte's own.
+        // s3, "Late data": a byte not taken within one byte time ends the command with $0A. INT,
+        // high for the byte, stays high for the result, so there is no new NMI edge.
         var chip = new Chip(DiscImage.Blank(40, false));
         chip.Command(0x53, 0x00, 0x00, 0x21);
         chip.RunUntilInterrupt();
         long first = chip.Cycle;
         chip.Run(126);
         Assert.Equal(0x8C, chip.Status());
-        Assert.Equal(0x80, chip.Status());
-        Assert.Equal(first + 128, chip.Cycle);
-        Assert.False(chip.Fdc.Interrupt);
         Assert.Equal(0x18, chip.Status());
+        Assert.Equal(first + 128, chip.Cycle);
         Assert.True(chip.Fdc.Interrupt);
         Assert.Equal(0x0A, chip.Result());
     }

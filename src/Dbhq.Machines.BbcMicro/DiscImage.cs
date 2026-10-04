@@ -17,7 +17,9 @@ namespace Dbhq.Machines.BbcMicro;
 /// <para>
 /// <b>40 or 80 tracks</b> is decided by the length, as s4 says, with the caller saying whether the
 /// image is double sided (the file's extension): up to 40 tracks' worth of bytes is a 40-track
-/// image, up to 80 tracks' worth an 80-track one. <b>A short image is extended with zeros</b> to
+/// image, up to 80 tracks' worth an 80-track one. An image short enough to be 40 tracks whose
+/// catalogue says 800 sectors (s4's second test) is an 80-track disc trimmed to the part in use,
+/// as archives often keep them, and is taken as 80 tracks. <b>A short image is extended with zeros</b> to
 /// the whole disc, which is the sheet's recommendation and has never been tried against a real
 /// drive, because no real disc is short (<c>docs/known-differences.md</c>).
 /// </para>
@@ -55,7 +57,8 @@ public sealed class DiscImage
     /// <summary>
     /// An image from a file's bytes: <paramref name="doubleSided"/> for a <c>.dsd</c>, false for a
     /// <c>.ssd</c>. Up to 40 tracks' worth of bytes makes a 40-track disc and up to 80 an 80-track
-    /// one; anything shorter than the whole disc is extended with zeros. The array is copied.
+    /// one, unless the first side's catalogue says 800 sectors, which makes it 80 tracks; anything
+    /// shorter than the whole disc is extended with zeros. The array is copied.
     /// </summary>
     public static DiscImage FromBytes(byte[] data, bool doubleSided)
     {
@@ -64,6 +67,10 @@ public sealed class DiscImage
         int tracks = data.Length <= 40 * TrackSize * sides ? 40
             : data.Length <= 80 * TrackSize * sides ? 80
             : throw new ArgumentException($"{data.Length} bytes is more than an 80-track {(doubleSided ? "double" : "single")}-sided disc holds.", nameof(data));
+        if (tracks == 40 && data.Length >= SectorSize + 8 && (((data[SectorSize + 6] & 3) << 8) | data[SectorSize + 7]) == 800)
+        {
+            tracks = 80;
+        }
 
         var bytes = new byte[tracks * TrackSize * sides];
         data.CopyTo(bytes, 0);

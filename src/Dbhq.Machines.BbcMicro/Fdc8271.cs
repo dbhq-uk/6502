@@ -28,9 +28,9 @@ namespace Dbhq.Machines.BbcMicro;
 /// Data and Verify then move one byte every <see cref="ByteCycles"/>, which is the 64 microsecond
 /// byte of a mini-floppy's 8 microsecond bit cell (s1g): the request and INT rise together at
 /// each byte, and the data register access clears both, so each byte is a fresh NMI edge. A byte
-/// not taken by the time the next is due is withdrawn, so INT falls, and the command ends a cycle
-/// later with result <c>$0A</c>, late data (s3), so INT rises again: an edge the CPU can see even
-/// when it lost the byte's own NMI. Otherwise the result follows the last byte's time. A command reaches only sectors 0 to 9 of
+/// not taken by the time the next is due ends the command with result <c>$0A</c>, late data
+/// (s3), with INT held high from the byte to the result. Otherwise the result follows the last
+/// byte's time. A command reaches only sectors 0 to 9 of
 /// 256 bytes on the tracks and sides the image has; anything else is sector not found, <c>$18</c>.
 /// Scan, Read ID and Format are not modelled: they end after the start delay with result
 /// <c>$00</c> and move no data (no DFS 1.20 command uses them, s1c).
@@ -560,13 +560,10 @@ public sealed class Fdc8271
         bool moves = _kind is Kind.Read or Kind.Write;
         if (moves && step > 0 && _request)
         {
-            // The last byte was not taken in its time: late data (s3). The request is withdrawn,
-            // so INT falls, and the result comes a cycle later, so INT rises again and the CPU sees
-            // a fresh NMI edge for it; with INT held high from the request to the result, a byte
-            // whose NMI was lost would leave DFS waiting for a result it is never told of.
+            // The last byte was not taken in its time: late data (s3). INT, high for the byte,
+            // stays high for the result.
             _request = false;
-            _failure = 0x0A;
-            _nextStep = cycle + 1;
+            Finish(cycle, 0x0A);
             return;
         }
 

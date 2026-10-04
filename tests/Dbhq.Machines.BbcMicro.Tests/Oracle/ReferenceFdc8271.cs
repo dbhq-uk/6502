@@ -345,10 +345,9 @@ public sealed class ReferenceFdc8271
         bool transfers = IsRead(_opcode) || IsWrite(_opcode);
         if (transfers && _byteIndex > 0 && _request)
         {
-            // Late: the request goes, and the result comes in the next cycle.
+            // Late: the request goes and the result comes, INT staying high.
             _request = false;
-            _failWith = 0x0A;
-            _countdown = 1;
+            End(0x0A);
             return;
         }
 

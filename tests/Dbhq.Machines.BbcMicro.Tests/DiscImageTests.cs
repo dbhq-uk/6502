@@ -131,6 +131,25 @@ public class DiscImageTests
         Assert.All(bytes.AsSpan(length).ToArray(), b => Assert.Equal(0, b));
     }
 
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void ATrimmedEightyTrackImageIsEightyTracksByItsCatalogue(bool doubleSided)
+    {
+        // Archives often keep an image only as long as the part in use. A blank 80-track disc
+        // trimmed to three tracks is short enough to be a 40-track one by length, but its
+        // catalogue says 800 sectors, s4's second test, so it is 80 tracks; a 40-track catalogue
+        // in the same length stays 40.
+        byte[] eighty = DiscImage.Blank(80, doubleSided).ToBytes()[..(3 * 2560 * (doubleSided ? 2 : 1))];
+        DiscImage disc = DiscImage.FromBytes(eighty, doubleSided);
+        Assert.Equal(80, disc.Tracks);
+        Assert.Equal(80 * 2560 * (doubleSided ? 2 : 1), disc.ToBytes().Length);
+        Assert.True(disc.Contains(0, 79, 9));
+
+        byte[] forty = DiscImage.Blank(40, doubleSided).ToBytes()[..(3 * 2560 * (doubleSided ? 2 : 1))];
+        Assert.Equal(40, DiscImage.FromBytes(forty, doubleSided).Tracks);
+    }
+
     [Fact]
     public void AnImageLongerThanEightyTracksIsRefused()
     {

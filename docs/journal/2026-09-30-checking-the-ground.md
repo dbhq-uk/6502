@@ -212,6 +212,17 @@ families of runs were added to cover what the first set could not, a branch
 that crosses a page and an NMI around a branch, and the corrected code
 matches all 134.
 
+*Correction, 4 October 2026 (task 12b, commit `e977cc9`): the model runs
+behind this covered only NMI pulses released two cycles after they went
+active. Runs that hold the line, or pulse it for one to four cycles, show that
+an NMI whose edge comes while a BRK or IRQ reads its vector is taken, after
+the handler's first instruction, if the line is still active in the cycle
+after the vector's high byte, and lost only if it has gone by then; a second
+NMI whose edge comes while an NMI reads its own vector is lost, held or not.
+The core was fixed to match, and the harness now holds 266 runs. Found through
+the BBC Micro's disc controller, whose interrupt is a held line; see the 4
+October journal entry.*
+
 **Two references disagree about Synertek.** Dormann's extended test, set up
 to check the bit-instruction opcodes as no-ops, expects `$07` to be one byte
 long. Harte's data says two, and the core matches Harte on all 10,000 cases.

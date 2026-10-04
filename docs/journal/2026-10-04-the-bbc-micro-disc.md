@@ -1,7 +1,7 @@
 ---
 title: "The BBC Micro reads and writes a disc"
 date: 2026-10-04
-summary: "The floppy disc controller is in, with disc images, and the real DFS lists, saves, loads and runs files through it. It is never ticked: it works out each byte when it is looked at, and a copy ticked every cycle agrees with it on every access. Two surprises: the processor can lose a disc interrupt behind another interrupt, which changed how a late byte ends, and DFS throws its catalogue away after every listing."
+summary: "The floppy disc controller is in, with disc images, and the real DFS lists, saves, loads and runs files through it. It is never ticked: it works out each byte when it is looked at, and a copy ticked every cycle agrees with it on every access. The disc found a bug in the processor core: an interrupt held through the moment another one fetches its address was lost, where the real chip takes it. And DFS throws its catalogue away after every listing."
 order: 22
 ---
 
@@ -81,6 +81,14 @@ zeros, rather than as sectors that cannot be found (what the probe did, giving
 `Disk fault 18`); it has never been tried on hardware, because no real disc is
 short. Both are in `docs/known-differences.md`.
 
+*Added in task 12b, from the review:* 40 or 80 tracks by length alone turned a
+trimmed 80-track image, which archives often keep only as long as the part in
+use, into a 40-track disc if it was 102,400 bytes or less, and a write past
+track 39 then failed with `Disk fault 18`. An image short enough to be 40 tracks
+whose catalogue says 800 sectors is now taken as 80 tracks, the sheet's second
+test (s4); a test trims a blank 80-track disc, one and two sided, to three
+tracks.
+
 ### Decision: the registers repeat every eight bytes
 
 `$FE80-$FE9F` is the 8271's. Within each eight bytes, A2 set is the data
@@ -110,43 +118,91 @@ it. DFS polls Read Drive Status until it says ready, so it cannot tell.
 
 ## What the tests found
 
-### A lost NMI, and how a late byte ends
+### A bug in the core, found by the disc
 
-The first version ended a late byte the way the sheet's design table puts it: if
-a byte is not taken within its 128 cycles, end the command with `$0A`. INT was
-already high for the byte, and stayed high for the result. The disc tests then
-showed `*TITLE` leaving the catalogue's cycle number one short, and the trace
-showed why: its catalogue write never finished. A scratch test logging every
-8271 access and every NMI found the moment. The byte's INT rose in the very
+**How it showed.** The disc tests showed `*TITLE` leaving the catalogue's cycle
+number one short: its catalogue write never finished. A scratch test logging
+every 8271 access and every NMI found the moment. A byte's INT rose in the very
 cycle the CPU was reading the low byte of the IRQ vector, `&FFFE`, at the start
-of an IRQ, and the core, which follows the transistor-level model there, loses
-an NMI edge that lands on that cycle. So nothing took the byte; the 8271 ended
-the command with late data; INT, high from the byte to the result, made no new
-edge; and DFS's NMI handler never ran again to see the result. DFS waited, and
-the next command typed went on as if the write had happened.
+of an IRQ, and the core lost the NMI: nothing took the byte, the 8271 ended the
+command with late data, INT stayed high from the byte to the result so there was
+no new edge, and DFS's NMI handler never ran again. DFS waited, and the next
+command typed went on as if the write had happened.
 
-How likely: at the prompt the CPU read the IRQ vector 1,500 times in 20 million
-cycles, ten seconds, so 150 IRQ entries a second (measured at 00:29 UTC on 4
-October with a scratch test that counted reads of `&FFFE`, not committed; the
-OS's 100 Hz timer and the 50 Hz vertical sync). A transfer of two sectors, 65
-milliseconds, meets about ten of them, each with a one in 128 chance of landing
-on a byte. The probe never saw it; its 6502 has no such rule.
+At the prompt the CPU read the IRQ vector 1,500 times in 20 million cycles, ten
+seconds, so 150 IRQ entries a second (measured at 00:29 UTC on 4 October with a
+scratch test that counted reads of `&FFFE`, not committed; the OS's 100 Hz timer
+and the 50 Hz vertical sync). A transfer of two sectors, 65 milliseconds, meets
+about ten of them, each with a one in 128 chance of landing on a byte.
 
-**The fix:** a late byte's request is withdrawn at its deadline, so INT falls,
-and the command ends one cycle later, so INT rises again with the result. DFS's
-handler sees INT without a data request, reads `$0A`, and DFS tries the command
-again (it makes up to eleven attempts, s1d). Chosen over keeping INT high (the
-hang) and over ending the command later (no source gives a gap, and one cycle is
-the shortest that makes an edge). The sheet's s1g and s3 now carry a note.
+**The first diagnosis was wrong.** The core's rule, written in stage 1 from the
+transistor-level model, was that an NMI arriving while the vector's low byte is
+read is lost. I took that as the chip's behaviour and worked round it in the
+8271 (`3008e63`): a late byte's request was withdrawn, so INT fell, and the
+result came a cycle later, so INT rose again and DFS could retry. That left a
+residual hang, the same loss on the INT that announces a result, about one
+result in 13,000, which the first version of this entry put down to the CPU.
 
-**What is left:** the same rule applies to the INT that announces a result. If
-that one lands on the cycle an IRQ entry reads its vector's low byte, about one
-result in 13,000 at 150 IRQ entries a second (2,000,000 / 150), DFS never hears
-of it and waits.
-No test has met it. It is a consequence of a CPU rule the core takes from the
-transistor-level model, not of the 8271, and whether a real Model B meets it
-depends on the real 8271's timing, which no source gives. It is in
-`docs/known-differences.md`.
+**The review found the real cause.** Every stage 1 run that showed the loss
+released the NMI line two cycles after it went active: the `nmi`, `brk` and
+`irq-nmi` families in `tools/perfect6502/harness.c` all set it inactive at k + 2.
+The reviewer rebuilt the harness against the pinned perfect6502 with the line
+held, and with other pulse lengths: an NMI from the IRQ's vector-low cycle and
+still active two cycles later is not lost but taken after the handler's first
+instruction, like one that arrives a cycle later. The 8271's INT is a held level,
+active until the data or result register is touched, at least 18 cycles later in
+DFS's handler, so a real 6502 takes it: a real BBC neither goes late there nor
+hangs. The core's `EnterHandler` cleared the latched edge after the low-byte
+read, and the detector fires only on an edge, so a held line was lost for good.
+
+**Task 12b: the model data, then the fix.** The harness gained 116 runs, after
+the 150 it had, which are unchanged byte for byte: an NMI held from each cycle
+around an IRQ's vector reads (`irq-nmi-held`) and a BRK's (`brk-held`), pulses
+of one to four cycles at the same places (`irq-nmi-pulse1` to `4`,
+`brk-pulse1` to `4`), and a second NMI, held or pulsed, around the vector reads
+of a first one (`nmi-nmi-held`, `nmi-nmi-pulse1` to `4`). `generate.sh` printed
+`266 runs written`. Against the core as it was, 13 failed
+(`dotnet test tests/Dbhq.Cpu6502.Tests -c Release --filter
+"FullyQualifiedName~TransistorModel"`, on 4 October): the held and
+three- and four-cycle runs from the IRQ's and BRK's vector-low cycle (lost by
+the core, taken by the chip), the one-cycle pulse from their vector-high cycle
+(kept by the core, lost by the chip), and every NMI-on-NMI run from the first
+NMI's vector-high cycle (kept by the core, lost by the chip, held or not).
+
+What the model shows, as rules: on a BRK or IRQ, an NMI edge that comes while
+the vector is read is taken, after the handler's first instruction, if the line
+is still active in the cycle after the vector's high byte, and lost if not. On
+an NMI, a second edge that comes while its own vector is read is lost whatever
+the line does. The reviewer's sketch (drop the edge and forget the line's last
+level, so the next cycle latches it again if it is still active) gives the
+first; the second needed the high-byte edge dropped too on the NMI path, with
+the last level kept, so a held line makes no new edge. The fix is in
+`EnterHandler` only, which runs once an interrupt; nothing changed in the
+per-cycle path. All 266 runs pass, and the whole core suite, Harte's, Dormann's
+and nestest's included, 1,597 tests, at 00:58 to 01:00 UTC; the KIM-1's 39 too.
+
+**The 8271 went back to the sheet's rule:** a late byte ends the command with
+`$0A` and INT stays high from the byte to the result, and the class's remark that
+INT falls only at an access is true again. `*TITLE` finishes, and the BBC
+project's tests pass.
+
+**How often it would have bitten.** A scratch soak test (not committed) typed a
+BASIC loop into the machine that, for each I, saved a file, ran `*INFO *`,
+loaded the file and ran `*CAT`, four disc commands with a random pause of BASIC
+work between them, and watched the loop counter, on four seeds of `RND`. With
+the old core and the sheet's late-data rule every seed stalled for good, after
+56, 117, 171 and 173 iterations, 224 to 692 commands (01:09 to 01:10 UTC). With
+the fixed core all four ran their 1,250 iterations to the end, 20,000 disc
+commands, about 2.57 billion cycles each, with no stall (01:04 to 01:09 UTC).
+With the one-cycle gap of `3008e63` the review estimated a hang about once in
+2,000 to 4,500 disc commands, from the lost results alone.
+
+**The KIM-1 page runs this core too.** Its NMI is the ST key, held while it is
+down, and the single-step line (`Kim1Bus.cs`). The KIM-1 model wires no IRQ to
+the CPU, but a program's `BRK` reads its vector the same way, so an ST press
+whose edge landed on that cycle would have been lost where the real chip takes
+it. The rule was wrong for every machine on the core. Stage 1's
+journal entries and the design spec carry dated correction notes.
 
 ### DFS throws its catalogue away after a listing
 
@@ -245,7 +301,8 @@ machine equivalence tests fail.
   the motor and write protect; not ready latched until Read Drive Status; no
   drive selected; write protect; sector not found four ways, with the scan sector
   register DFS prints; a 128-byte command; side select; Write Data; Verify; late
-  data, with INT falling and rising; the head unloading in the very cycle, read
+  data, INT held from the byte to the result (in `3008e63` it fell and rose, see
+  above); the head unloading in the very cycle, read
   through `7D 23`, on two machines run the same way to the cycle before and the
   cycle of it; index count 15; reset.
 - `DfsCatalogueTests`: the helper that reads a catalogue, written from the
@@ -286,7 +343,7 @@ the model above rather than from the lazy code. Three comparisons:
   images equal at the end. Task 6b's whole-machine equivalence test, which boots
   with no disc, now runs the DFS against the reference 8271 too.
 
-**Planting mistakes.** Eighteen deliberate one-line mistakes, each built and run
+**Planting mistakes.** On `3008e63`, before the core fix, eighteen deliberate one-line mistakes, each built and run
 against the disc, bus and boot tests in place, the file restored after each
 (`python3 /tmp/t12/mutate.py`, a scratch script, not committed; run from 00:14 to
 00:29 UTC on 4 October). All eighteen were caught:
@@ -299,7 +356,7 @@ against the disc, bus and boot tests in place, the file restored after each
 | The bus looking at the 8271 a cycle late | the bus and machine equivalence tests |
 | Ready not following the motor | the head unload, ready, mirror and swap tests, three equivalence tests |
 | The head never unloading | the head unload and swap tests, the chip equivalence test |
-| A late byte keeping INT high to the result | the `*TITLE` disc test, the late data test, two equivalence tests |
+| A late byte keeping INT high to the result (the sheet's rule, which task 12b restored once the core was fixed) | the `*TITLE` disc test, the late data test, two equivalence tests |
 | A `.dsd` read side after side | the two image layout tests |
 | The not-ready latch never set | the not-ready test, the chip equivalence test |
 | Write protect ignored | the read-only disc and chip tests, two equivalence tests |
@@ -328,7 +385,45 @@ or a result waits.
 `dotnet test -c Release` from 00:40 to 00:44 UTC on 4 October: the BBC Micro's
 tests 930 passed, the core's 1,481 and the KIM-1's 39, none failed, with no
 warnings. The site's suite (`npm run build` then `npm test` in `site/`) at 00:41
-UTC: 193 passed.
+UTC: 193 passed. *After task 12b's fix,* `dotnet test -c Release` from 01:14 to
+01:18 UTC: the BBC Micro's tests 932 passed, the core's 1,597 and the KIM-1's
+39, none failed, with no warnings.
+
+### The fingerprint
+
+Task 6b's scripted run (`dotnet run -c Release --project
+bench/bbc-micro-speed/native -- --fingerprint`, which hashes every instruction
+and, every 100,000 cycles, all of RAM and every VIA register) was run on 4
+October on three exported copies: the base `b9a1335`, the task's commit
+`3008e63`, and the fix of task 12b. The base:
+
+```
+boot cycles=6000009 instructions=1680472 irq_steps=22963 steps=6D17BC233D03E54A checkpoints=AB4528B518EC3522
+program cycles=90320897 instructions=25132452 irq_steps=304378 steps=9B587FFDB4E18DB9 checkpoints=D6810809ABBAAC8C
+break cycles=96320907 instructions=26794569 irq_steps=327681 steps=2313FC39D4337E97 checkpoints=B0E5F0C371BA137D
+rerun cycles=116960920 instructions=32511256 irq_steps=393648 steps=8FC2DFE11EDE11DC checkpoints=93FBE6414BE5E9EE
+```
+
+`3008e63` and the fix, identical to each other:
+
+```
+boot cycles=6000010 instructions=1681181 irq_steps=29248 steps=18B3B71E06EFD0C9 checkpoints=A340322134C60133
+program cycles=90320900 instructions=25133349 irq_steps=310793 steps=75411C5A03B49E88 checkpoints=62013A8E040B4B1B
+break cycles=96320907 instructions=26796508 irq_steps=343669 steps=DA6C387E3E94C1FD checkpoints=DDCBBC531A5EDDA2
+rerun cycles=116960932 instructions=32513241 irq_steps=409496 steps=D7CE4E494E825F88 checkpoints=838DC94503540734
+```
+
+The boot changes, and it should: with the 8271 fitted the DFS serves its calls
+and prints `Acorn DFS`. A throwaway trace of every instruction of the first
+400,000 from power on, on the base and the fix (`/tmp/t12/trace-*`, not
+committed), first differs at the DFS's first read of the 8271's status, `LDA
+&FE80` at DFS `$B495`, in the instruction ending at cycle 530,114: the base reads
+`$FE`, an absent fast device, and the fix `$00`, an idle 8271. From there the
+DFS goes on to specify the controller and print its line, everything after runs
+at shifted cycles, and the values the script's program reads from the user VIA's
+timers differ with it; the screen after BREAK gains the `Acorn DFS` row. The core
+fix changes nothing in this run, which has no NMI. The CPU's own guard is its
+suites: Harte, Dormann, nestest and the transistor-model runs, all passing.
 
 ## The speed
 
