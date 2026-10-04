@@ -65,6 +65,44 @@ on the black canvas and the keypad below them.
 - The new text colours, the keys, the status and speed lines and the key caps
   in the program, are in the contrast table in `tests/design.test.mjs`.
 
+## The BBC Micro page
+
+The second machine page, built on 4 October 2026 and shown once the registry
+says the BBC Micro runs. The same iron panel with a hairline border as the
+KIM-1's, holding the screen on the black canvas, the controls below it, and the
+disc drive in a hairline box of its own.
+
+- **The screen is a canvas, and it is the machine's own picture,** 640 by 512
+  pixels as the video chips draw it, shown four wide by three high as the
+  television showed it. Nothing is added: no scan lines, glow or curve, and a
+  line under it says so. It is not recoloured into the phosphor green, unlike the
+  KIM-1's LEDs, because the BBC Micro's picture is the thing the page is showing,
+  colours included.
+- **Start is the page's one lime fill.** It is the one thing to do first, and the
+  only control that is enabled before the machine runs. It says how much it
+  downloads, read from the built files. Once pressed it goes, and the lime with
+  it.
+- **The other controls are the site's ordinary small buttons,** Break, the sound
+  and the disc drive's, side by side and wrapping. No key is more important than
+  another, so none takes the lime. Disabled, they have a dashed edge and a dimmer
+  label, as the KIM-1's keys do.
+- **Focus on the screen is the keyboard,** so the screen shows the lime focus
+  ring whenever it has focus, from a click as well as from the keyboard, as the
+  KIM-1's 3D model does for the wheel. The site test that rations the lime names
+  this rule.
+- **The symbols table and the program** use the site's prose table and code
+  window, and the symbol's key cap is the KIM-1 program's key cap.
+- **The machine's keys, under the screen,** every one as a button in the
+  machine's own rows, for a phone, a tablet or a mouse: the site's mono face on
+  `--veil` with a `--circuit` edge, like the KIM-1's keys but smaller, at least
+  44 pixels square, so a row wraps on a narrow screen rather than shrink. The
+  legends are the machine's (SHIFT LOCK, f0, arrows for the cursor keys), with
+  a name in words for a screen reader where a legend is a symbol. SHIFT and CTRL
+  latch for one key; latched, the key is filled `--card` with a `--white` edge, a
+  change of shape as well as colour, and says so with `aria-pressed`. No key
+  takes the lime.
+- The new text colours are in the contrast table in `tests/design.test.mjs`.
+
 ## The imagery
 
 Three generated images, made with the `imager` skill on 30 September 2026 with

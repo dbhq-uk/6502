@@ -195,6 +195,7 @@ Sources: register map and read/write behaviour [from WDC Tables 2-1, 2-6 to 2-9,
 | bit 5 | System: 1 (T2 counts PB6 pulses) [from ROM DA8C] |
 
 - **Shift mode 010 timing.** WDC Fig 2-7 (p.21, read at 260 dpi): the read of SR is followed, after about two phi2 cycles, by 8 CB1 clock pulses each lasting two phi2 cycles; IFR2 and IRQ_N fall about two phi2 cycles after the last pulse ends. Pixel-measured total: **about 19 phi2 cycles from the end of the SR read cycle to IFR2 = 1** [inferring from a drawing, marked [guessing - verify]; WDC part, not NMOS]. CB2 data is sampled on the trailing edge of phi2. hoglet notes known bugs in the NMOS MOS 6522 shift register [from SD-16251].
+- **What starts a mode 010 shift.** Added 2 October 2026 with the VIA code (plan task 3): the table in 1.1 says an SR read starts a shift in the in-modes, but for mode 010 the MOS sheet says "the shifting operation is triggered by reading or writing the Shift Register" [from MOS, Mode 010], so a write starts it too. The DFS starts it with a read (`BIT &FE4A`), so the boot path is the same either way. The DFS's test of the flag at &963C is `LDA #&04 / BIT &FE4D / BNE`, returning 5 when IFR2 is clear [from ROM DFS-1.2.rom &963C-&9645]: it needs the flag to have appeared, and counts no cycles of its own.
 - **Other SR modes** (000, 001, 011, 100-111) are not used by anything on the Model B boot path. Their behaviour is in WDC pp.19-24 and AUG ch.22.2.10 pp.408-413 [not needed for first light].
 
 ## 1.9 Exactly when an expiry is visible, and when IRQ_N goes low
@@ -640,6 +641,16 @@ Rows 1-7 are scanned this way; row 0 is never found by the full scan, so SHIFT/C
 - Row-0 cols 2-9 return the startup link bits (section c). Cols 10-15 return nothing.
 - The IRQ path runs a full scan on each key interrupt, so a held key keeps re-raising CA2 in auto mode until IER bit 0 is cleared by the handler. [S2 s13.11]
 
+### When a typed key reaches the buffer, and when it repeats (added 3 Oct 2026, task 10)
+
+| Item | Fact | Tag |
+|---|---|---|
+| New key | On a new key the OS sets the countdown at `$E7` to 1 and copies the auto-repeat delay from `$0254` to `$02CA`. | [from ROM `$F01F-$F026`] |
+| Into the buffer | On each 100 Hz tick, while a key is down, the countdown at `$E7` is decremented; at zero the character goes in and the countdown is reloaded from `$02CA`, which then takes the repeat rate from `$0255`. So a new key's character is buffered at the first tick after it is seen, within 10 ms. | [from ROM `$EF54-$EF66`; the character goes into the buffer in the code that follows] |
+| Defaults | Auto-repeat delay `$0254` = `$32` (50 cs), repeat rate `$0255` = `$08` (8 cs) from power on: the reset code copies the OS's default table (`$D940` on) to `$0200` on (`$DA5B-$DA62`), and the bytes at `$D994`/`$D995` are `32 08`. `*FX12,0` sets the same two values (`$E98E-$E993`). | [from ROM] |
+| Keyboard status | `$025A` defaults to `$20` (`$D99A`), and capitals come from the letter keys without SHIFT: CAPS LOCK is on from power on. | [from ROM; the CAPS LOCK reading confirmed by running, task 10's typed BASIC] |
+| For an emulator's typing | A key held longer than one tick and shorter than the 50 cs delay types once. The test project holds 40 ms and rests 40 ms (`BbcSession.HoldCycles`, `RestCycles`). | [inferring from the rows above] |
+
 ## Could NOT establish
 
 | Item | Why / what I recommend | Tag |
@@ -873,7 +884,8 @@ All values [computed from the formula in Python].
 
 | Fact | Detail | Source |
 |---|---|---|
-| Silence at reset | Reset code (vector &D9CD) calls `JSR &EC60` at `&DAAA`. `&EC60` loops X = 7 down to 4 and calls `&ECA2`, which calls `&EB03`. That builds each attenuation latch byte and calls `&EB21`. Bytes written, in order: **&9F, &BF, &DF, &FF**. This confirms attenuation = 15 on all four channels. | [from ROM DAAA, EC60-EC68, ECA2, EB03-EB1F] |
+| Silence at reset | Reset code (vector &D9CD) calls `JSR &EC60` at `&DAAA`. `&EC60` loops X = 7 down to 4 and calls `&ECA2`, which calls `&EB03`. That builds each attenuation latch byte and calls `&EB21`. Then `&ECA2` stores pitch 0 for the channel and always reaches `&ED06` (`BMI` at `&ECBA` with Y = &FF), which writes that pitch: period 1008 plus the channel's detune as a latch and a data byte, or for the noise (X = 4) the control byte &E0. Bytes written, in order: **&9F, &82, &3F, &BF, &A1, &3F, &DF, &C0, &3F, &FF, &E0**. This confirms attenuation = 15 on all four channels, tone periods 1010, 1009 and 1008 (chip tones 1, 2, 3), and periodic noise at rate 0. *Corrected 3 Oct 2026 (task 11): this row listed only the four attenuation bytes; the machine's strobes showed the pitch writes between them, and the disassembly of `&ECA2-&ECBA` and `&ED01-&ED13` confirmed them.* | [from ROM DAAA, EC60-EC68, ECA2-ECBA, EB03-EB1F, ED06-ED13] |
+| Pitch written only on a change | `&ED01` compares the new pitch with the channel's last (`&082C,X`) and skips the write when they are equal. So a SOUND at pitch 0 straight after a reset writes no period: the reset already wrote it. Found in task 11. | [from ROM ED01-ED04] |
 | How &EB03 builds the byte | A = &C0 (silent). `SEC; SBC #&40; LSR x3; EOR #&0F; ORA &EB3C,X; ORA #&10`. A = &C0 gives &1F, so the attenuation nibble is F. | [from ROM EB0D-EB1F] |
 | Channel base-byte table | `&EB40..&EB43` = &E0, &C0, &A0, &80, indexed by `&EB3C,X` with X = 4..7. So X=4 is the noise channel (&E0), X=5 is chip tone 3 (&C0), X=6 is chip tone 2 (&A0), X=7 is chip tone 1 (&80). | [from ROM EB40-EB43] |
 | BBC channel to chip channel | BBC channel 0 (noise) = X 4. BBC channels 1, 2, 3 = X 5, 6, 7 = chip tone 3, 2, 1. | [inferring from ROM ED09 `CPX #4` taking the noise path, plus EB40 table] |
@@ -936,7 +948,7 @@ Register byte tests. All [from SMS and DS].
 | &8C then &8F (no data byte) | tone 1 low nibble goes &C then &F. The high 6 bits stay as they were. |
 | &90 | attenuation 1 = 0, full volume |
 | &9F | attenuation 1 = 15, off |
-| &9F, &BF, &DF, &FF | all four channels off (the OS reset sequence) |
+| &9F, &BF, &DF, &FF | all four channels off (the OS's own reset sequence writes these with pitch bytes between them: s4.7) |
 | &DF then &00 | attenuation of chip tone 3 set to 15, then updated to 0 by the data byte (data byte is not ignored) |
 | &E5 | noise: FB = 1 (white), NF = 01 (N/1024 = 3906.25 Hz). Resets the LFSR to &4000. |
 | &E4 | noise: white, NF = 00 (N/512 = 7812.5 Hz) |

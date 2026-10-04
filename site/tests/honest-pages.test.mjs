@@ -88,5 +88,6 @@ test('the running sentence is true for none, one and several machines', () => {
   const m = (name, status) => ({ id: name.toLowerCase(), name, status });
   assert.equal(runningSentence({ machines: [m('KIM-1', 'in-progress'), m('NES', 'planned')] }), 'None runs in the browser yet.');
   assert.equal(runningSentence({ machines: [m('KIM-1', 'running'), m('NES', 'planned')] }), 'Running in the browser now: KIM-1.');
+  assert.equal(runningSentence({ machines: [m('KIM-1', 'running'), m('BBC Micro', 'running'), m('NES', 'planned')] }), 'Running in the browser now: KIM-1 and BBC Micro.');
   assert.equal(runningSentence({ machines: [m('KIM-1', 'running'), m('BBC Micro', 'running'), m('NES', 'running')] }), 'Running in the browser now: KIM-1, BBC Micro and NES.');
 });

@@ -63,10 +63,19 @@ public sealed partial class Cpu
 
     /// <summary>
     /// The end of BRK, IRQ and NMI alike, as the transistor-level model shows
-    /// it: an NMI seen by the time P is pushed takes the vector over; one that
-    /// arrives on the vector's low byte is lost; one that arrives on its high
-    /// byte waits until the handler's first instruction has run.
+    /// it. An NMI seen by the time P is pushed takes the vector over. One whose
+    /// edge comes while the BRK or IRQ vector is read is taken only if the line
+    /// is still active in the cycle after the vector's high byte, the handler's
+    /// first fetch, and then after the handler's first instruction; a shorter
+    /// pulse is lost. One whose edge comes while the NMI vector itself is read
+    /// is lost, held or not.
     /// </summary>
+    /// <remarks>
+    /// Until task 12b (4 October 2026) this said an NMI arriving on the low
+    /// byte is lost, from model runs that all released the line two cycles
+    /// after it went active. Runs that hold it, or pulse it for one to four
+    /// cycles, showed the rule above (tools/perfect6502/harness.c).
+    /// </remarks>
     private void EnterHandler()
     {
         bool nmi = _needNmi;
@@ -78,8 +87,21 @@ public sealed partial class Cpu
 
         ushort vector = nmi ? (ushort)0xFFFA : (ushort)0xFFFE;
         byte lo = Read(vector);
+        bool late = !nmi && _needNmi;
         _needNmi = false;
         byte hi = Read((ushort)(vector + 1));
+        if (late || _needNmi)
+        {
+            // An edge seen during the vector reads is dropped. On the BRK or
+            // IRQ vector the detector forgets the line, so the next cycle's
+            // end latches it again if it is still active.
+            _needNmi = false;
+            if (!nmi)
+            {
+                _nmiLineLastCycle = false;
+            }
+        }
+
         PC = (ushort)(lo | hi << 8);
         _pollSuppressed = true;
     }

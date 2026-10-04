@@ -32,10 +32,12 @@ static void load(const unsigned char *code, int length)
 
 /*
  * Cycle 0 is the first opcode fetch from START after reset. A line change
- * scheduled for cycle k is made before that cycle's two half-steps.
+ * scheduled for cycle k is made before that cycle's two half-steps. A line
+ * whose off cycle is -1 is held for the rest of the run. A second NMI pulse,
+ * nmi2On to nmi2Off, is printed as an "nmi2" line only when there is one.
  */
-static void run(const char *family, int k, const unsigned char *code, int length,
-                int irqOn, int irqOff, int nmiOn, int nmiOff, int cycles)
+static void run2(const char *family, int k, const unsigned char *code, int length,
+                 int irqOn, int irqOff, int nmiOn, int nmiOff, int nmi2On, int nmi2Off, int cycles)
 {
     load(code, length);
     void *state = initAndResetChip();
@@ -51,6 +53,8 @@ static void run(const char *family, int k, const unsigned char *code, int length
             if (index == irqOff) setNode(state, NODE_IRQ, 1);
             if (index == nmiOn) setNode(state, NODE_NMI, 0);
             if (index == nmiOff) setNode(state, NODE_NMI, 1);
+            if (index == nmi2On) setNode(state, NODE_NMI, 0);
+            if (index == nmi2Off) setNode(state, NODE_NMI, 1);
         }
         step(state);
         unsigned short address = readAddressBus(state);
@@ -61,6 +65,7 @@ static void run(const char *family, int k, const unsigned char *code, int length
             printf("code");
             for (int i = 0; i < length; i++) printf(" %02X", code[i]);
             printf("\nirq %d %d\nnmi %d %d\n", irqOn, irqOff, nmiOn, nmiOff);
+            if (nmi2On >= 0) printf("nmi2 %d %d\n", nmi2On, nmi2Off);
             printf("state A=%02X X=%02X Y=%02X S=%02X P=%02X\n",
                    readA(state), readX(state), readY(state), readSP(state), readP(state));
         }
@@ -71,6 +76,12 @@ static void run(const char *family, int k, const unsigned char *code, int length
         }
     }
     destroyChip(state);
+}
+
+static void run(const char *family, int k, const unsigned char *code, int length,
+                int irqOn, int irqOff, int nmiOn, int nmiOff, int cycles)
+{
+    run2(family, k, code, length, irqOn, irqOff, nmiOn, nmiOff, -1, -1, cycles);
 }
 
 int main(void)
@@ -106,5 +117,29 @@ int main(void)
     run("cli", 1, cli, sizeof cli, 1, 40, -1, -1, 40);
     for (int k = 1; k <= 12; k++) run("sei", k, sei, sizeof sei, k, k + 12, -1, -1, 40);
     for (int k = 1; k <= 16; k++) run("plp", k, plp, sizeof plp, k, k + 12, -1, -1, 48);
+
+    /*
+     * Added in task 12b (4 Oct 2026): the runs above release NMI two cycles
+     * after it goes active, and they alone said an NMI arriving on a vector
+     * read is lost. These hold the line, or pulse it for 1 to 4 cycles, around
+     * the vector reads of an IRQ (low byte at cycle 9 with the IRQ at 1), a
+     * BRK (low byte at 7) and an NMI (an NMI at 1, then a second one).
+     */
+    char name[32];
+    for (int k = 5; k <= 14; k++) run("irq-nmi-held", k, loop, sizeof loop, 1, 40, k, -1, 48);
+    for (int length = 1; length <= 4; length++) {
+        snprintf(name, sizeof name, "irq-nmi-pulse%d", length);
+        for (int k = 7; k <= 12; k++) run(name, k, loop, sizeof loop, 1, 40, k, k + length, 48);
+    }
+    for (int k = 4; k <= 11; k++) run("brk-held", k, brk, sizeof brk, -1, -1, k, -1, 40);
+    for (int length = 1; length <= 4; length++) {
+        snprintf(name, sizeof name, "brk-pulse%d", length);
+        for (int k = 5; k <= 10; k++) run(name, k, brk, sizeof brk, -1, -1, k, k + length, 40);
+    }
+    for (int k = 5; k <= 14; k++) run2("nmi-nmi-held", k, loop, sizeof loop, -1, -1, 1, 3, k, -1, 48);
+    for (int length = 1; length <= 4; length++) {
+        snprintf(name, sizeof name, "nmi-nmi-pulse%d", length);
+        for (int k = 5; k <= 14; k++) run2(name, k, loop, sizeof loop, -1, -1, 1, 3, k, k + length, 48);
+    }
     return 0;
 }

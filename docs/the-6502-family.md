@@ -104,7 +104,7 @@ The KIM-1 was MOS Technology's own board, sold to show engineers the 6502:
 timer), a keypad of 23 keys and a slide switch, and six seven-segment LED
 digits, for $245. *Microchess* by Peter Jennings, sold for it, is probably the
 first game for a microcomputer to be sold commercially. It is the first machine
-this project builds.
+this project built, and it runs in the browser.
 
 ### Apple
 
@@ -161,7 +161,7 @@ included, and the 8-inch drives for the PET had two.
 
 The BBC Micro's 6502 second processor, attached through Acorn's Tube
 interface, is a 65C02 at 3 MHz. The BBC Micro Model B is the second machine
-this project builds.
+this project built, and it runs in the browser.
 
 ### Others
 
@@ -243,7 +243,7 @@ new machines around it.
 
 ## What this means for this project
 
-- The three machines planned, the KIM-1, the BBC Micro Model B and the NES,
+- The three machines in the plan, the KIM-1, the BBC Micro Model B and the NES,
   all use a CPU the core implements, the NES with decimal mode removed. Which
   are built is tracked in `machines/registry.json`.
 - Nearly every 6502 machine from 1976 to 1985 uses one too.

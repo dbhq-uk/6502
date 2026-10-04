@@ -431,11 +431,25 @@
       "category": "computer",
       "cpu": "6502, 2 MHz",
       "core": "nmos",
-      "status": "planned",
+      "status": "running",
       "priority": 2,
-      "acceptance": null,
-      "rights": null,
-      "notes": null
+      "acceptance": "BbcAcceptanceTests",
+      "rights": "The three ROMs are Acorn's: the operating system, MOS 1.20, BBC BASIC 2 and the Disc Filing System, DFS 1.20. The operating system's own text says copyright 1981 Acorn Computers Ltd. and BASIC's copyright 1982 Acorn. Who holds that copyright now was not established, and no licence or permission from any holder was found. Our copies are from jsbeeb's ROM folder at a pinned commit, kept in this repository under roms/, with where they came from, and checked by SHA-256 each time they are read. The position is documented, not cleared: if a rights holder asks, the ROMs will be removed.",
+      "notes": "The keyboard, the picture in all eight screen modes, teletext included, the sound chip, and the disc drive with Acorn's DFS, on MOS 1.20 and BBC BASIC 2. Not modelled: the serial port, the analogue port, the Tube, the cassette interface, the printer port and the 1 MHz bus.",
+      "photos": [
+        {
+          "file": "bbc-micro.webp",
+          "author": "simon.inns",
+          "sourceUrl": "https://commons.wikimedia.org/wiki/File:Acorn_BBC_Micro.jpg",
+          "licence": "CC BY 2.0",
+          "licenceUrl": "https://creativecommons.org/licenses/by/2.0",
+          "date": "2018-02-18",
+          "caption": "an original Acorn BBC Micro Model B",
+          "alt": "An original Acorn BBC Micro Model B seen from the front left and slightly above on a blue cloth: a beige case with a black keyboard panel, a row of ten red function keys along the top, the \"British Broadcasting Corporation Microcomputer System\" badge above them, and three indicator lights for cassette motor, caps lock and shift lock below the bottom left of the keyboard, to the left of the space bar.",
+          "fetched": "2026-10-04",
+          "used": "the photograph of the machine at the head of its page; nothing is traced or measured from it, because the BBC Micro has no 3D model"
+        }
+      ]
     },
     {
       "id": "electron",

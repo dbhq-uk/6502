@@ -1,4 +1,4 @@
-// The KIM-1 monitor ROM's pins, read from the one place they are written:
+// The machines' ROM pins, read from the one place they are written:
 // tests/Dbhq.Cpu6502.TestSupport/Pins.cs, which the tests read them by. The
 // build script and the site's tests read them here, so a pin changed there is
 // changed everywhere and is never typed a second time.
@@ -24,4 +24,26 @@ export function kim1Roms(source = fs.readFileSync(PINS_FILE, 'utf8')) {
     url: `https://github.com/dbhq-uk/6502/blob/main/${pin(`Kim1Rom${chip}Path`, source)}`,
     sha256: pin(`Kim1Rom${chip}Sha256`, source),
   }));
+}
+
+/**
+ * The BBC Micro's three 16 KB ROMs, in the order BbcHost.Load takes them: the
+ * operating system, BASIC and the Disc Filing System. Each with its name in the
+ * Pins.cs constants (`rom`), what it is (`name`, as roms/README.md says), the
+ * file name the page loads it by (the name it has
+ * in roms/bbc-micro/), its repository path, GitHub link and SHA-256.
+ */
+export function bbcRoms(source = fs.readFileSync(PINS_FILE, 'utf8')) {
+  const names = { Os: 'MOS 1.20, the operating system', Basic: 'BBC BASIC 2', Dfs: 'DFS 1.20, the Disc Filing System' };
+  return ['Os', 'Basic', 'Dfs'].map((rom) => {
+    const relative = pin(`Bbc${rom}Path`, source);
+    return {
+      rom: rom.toLowerCase(),
+      name: names[rom],
+      file: path.posix.basename(relative),
+      path: relative,
+      url: `https://github.com/dbhq-uk/6502/blob/main/${relative}`,
+      sha256: pin(`Bbc${rom}Sha256`, source),
+    };
+  });
 }

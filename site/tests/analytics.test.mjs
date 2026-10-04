@@ -473,7 +473,7 @@ test('the headers comment says the site runs analytics by default and names both
   assert.match(comment, /GA RUNS BY DEFAULT/);
   assert.match(comment, /style-src needs 'unsafe-inline'/);
   assert.match(comment, /img-src allows data:/);
-  assert.match(comment, /'wasm-unsafe-eval' because the KIM-1's page runs the\n# machine as WebAssembly/);
+  assert.match(comment, /'wasm-unsafe-eval' because each machine's page runs the\n# machine as WebAssembly/);
   assert.doesNotMatch(comment, /CONSENT-GATED|nothing loads until a visitor accepts/i);
   assert.match(csp, /img-src [^;]*\bdata:/);
 });

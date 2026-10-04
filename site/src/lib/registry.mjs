@@ -18,7 +18,10 @@ export const CORES = ['nmos', '2a03', '65c02', 'none'];
 export const PHOTOS_DIR = path.join(SITE_ROOT, 'src', 'assets', 'photos');
 const photoOnDisk = (file) => fs.existsSync(path.join(PHOTOS_DIR, file));
 
-export function loadRegistry(file = path.join(REPO_ROOT, 'machines', 'registry.json')) {
+const REGISTRY_FILE = path.join(REPO_ROOT, 'machines', 'registry.json');
+
+/** The registry: machines/registry.json, or another file in its shape (the tests use made-up ones). */
+export function loadRegistry(file = REGISTRY_FILE) {
   return JSON.parse(fs.readFileSync(file, 'utf8'));
 }
 

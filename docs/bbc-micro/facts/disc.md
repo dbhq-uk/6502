@@ -171,7 +171,7 @@ Per D1 p8-124, when a new command selects different drive bits the chip clears b
 | Per byte | Chip raises NDRQ and INT. Handler reads or writes `$FE84`, which clears both. Next byte is one byte-time later. NMI is edge triggered, so INT must fall and rise again for every byte [inferring: the only way DFS can work; D1 only says "an interrupt is generated with each data byte" p8-128] |
 | Completion | After the last byte: INT with result full, busy clear. INT stays until `$FE81` is read |
 | Byte time | Bit cell 8 us, so **64 us per byte = 128 CPU cycles at 2 MHz** [from S2 5.5.1: "each bit interval is 8us"]. D1's "one byte every 32 us" is the 8-inch figure |
-| Late data | D1 p8-118: "not serviced within 31 us" gives result `$0A`. D1 says mini-floppy timings are doubled (p8-122/123, p8-141 note 3) so the BBC limit is about one byte time. [inferring]. Not reached by DFS in any run |
+| Late data | D1 p8-118: "not serviced within 31 us" gives result `$0A`. D1 says mini-floppy timings are doubled (p8-122/123, p8-141 note 3) so the BBC limit is about one byte time. [inferring]. Not reached by DFS in any run of the probe. *(4 Oct 2026, task 12, corrected in task 12b the same day: reached in the C# machine while its 6502 core lost an NMI whose edge came while an IRQ read its vector, which the transistor-level model shows a real 6502 takes when the line is held, as the 8271's INT is. With the core fixed, 20,000 DFS commands in a row ran with no stall, and the rule in this row stands as written.)* |
 
 ### 1h. Timing DFS actually depends on [TRACE; each row is a separate run of save, fresh machine, load, compare 512 bytes]
 
@@ -232,6 +232,8 @@ A command never crosses a track. The data NMI count equals 256 x sectors; the la
 
 DFS keeps the catalogue in RAM (`$0E00-$0FFF`) and re-reads it only when its ready test (`6C`, bit 2) says **not ready**, or when the drive number changed. It does not look at a changed image. Measured:
 
+*Corrected 4 Oct 2026, task 12, from the ROM and the C# machine: two more things make DFS read the catalogue again. **`*CAT`** sorts its listing inside the RAM copy (it clears the directory byte of each entry in the current directory, `$A3FB-$A417`) and then marks the copy invalid by setting `$1082`, the drive the copy came from, to `$FF` (`$A420`); and one entry of the DFS's error routine, `$9FB8` (used for `Locked`, `$B8AC`), does the same on its way (`$9FC0`), while the entry at `$9FC8` skips it (used for `Not found`, `$A18B`, and for the Escape from the ready poll, `$AB79`); which other errors go through `$9FB8` was not traced. The test is at `$AA5F-$AA69`: ready, and `$1082` equal to the drive, means the copy is kept. So a `*CAT`, or an error raised through `$9FB8`, followed by any command re-reads; the stale case below holds only while no `*CAT` or error comes between. The machine showed it: `*CAT` straight after `*SAVE` read nothing, a second `*CAT` read the catalogue, the `*INFO *` after it read it again, and a second `*INFO *` did not.*
+
 | Event | Catalogue read? |
 |---|---|
 | `*INFO *` twice, same disc | second one: no |
@@ -259,7 +261,7 @@ Evidence for every line is in 1h and 2b.
 | Ready | `disc present AND motor on`, motor = LOAD HEAD (port `$23` bit 3) of the selected drive; the 8271 sets LOAD HEAD itself when it runs a data command. **Spin-up may be instant** | DFS only polls; real 800 000 cycles also passes |
 | Head unload | `index count x 400 000` cycles after the last command (200 ms per revolution at 2 MHz), clear port bits 0-4 and 6-7, motor off. Count 15 = never | This is how DFS notices a disc swap (2b) |
 | Data transfer | after any start delay K (0 was fine; use about 2 000 cycles to look plausible [guessing]) present one byte every **128 cycles**: set NDRQ and INT (INT rises, NMI edge), clear both when `$FE84` is accessed. Sector gap: 0 passes, real-ish `16 x 64` passes | min safe spacing is about 80, real is 128 |
-| Late data | if a byte is not taken within one byte time (128 cycles) end the command with `$0A`. Optional: waiting forever also passes. **Never space bytes closer than about 80 cycles, and never nest** | rows 76 and 0 in 1h |
+| Late data | if a byte is not taken within one byte time (128 cycles) end the command with `$0A`. Optional: waiting forever also passes. **Never space bytes closer than about 80 cycles, and never nest**. *(4 Oct 2026: task 12 let INT fall for a cycle between the withdrawn request and the result, to work round an NMI the C# core lost; task 12b fixed the core instead, which was wrong about held NMI lines, and went back to this rule, INT held from the late byte to the result)* | rows 76 and 0 in 1h |
 | Completion | after the last byte: busy clear, result-full, INT high (NMI edge). Delay 0 to 60 000 passes | |
 | Not-ready latch | set on a data command with no ready drive: result `$10`, until Read Drive Status | |
 | Commands without a disc | with no image in the drive the ready bit is never set and DFS polls forever until Escape. That is real behaviour [TRACE], not a bug to fix | |
@@ -420,6 +422,8 @@ Load, exec, length are 6 hex digits, start sector 3 hex digits. Output order fol
 | Not enough free sectors (catalogue says 4 sectors, 2 KB saved) | `$C6` | `Disk full` |
 | Empty drive, `*CAT` | none | **No message**: DFS polls ready forever; Escape gives `$11` `Escape` |
 | 32nd file (31 already in the catalogue) | `$BE` | `Cat full` |
+
+On the screen at the BASIC prompt each message comes after a blank row: BASIC's default error handler (BASIC `$B433`) starts with REPORT, which calls `$BC25`, `JSR OSNEWL`, before the message (BASIC `$BFE4-$BFE7`) [from ROM; seen in task 12].
 
 `tt/ss` is track and sector in hex: `03/00` for the spill case. G1 lists `&C5 Drive fault` but this ROM raises `$C7` for both texts [TRACE]. There is **no "Not ready" text in this ROM** [from ROM, searched every string]; and no "Disc fault" either, the spelling is "Disk fault".
 

@@ -35,6 +35,9 @@
 // points mirrored. Then every photograph in the photographs section must load,
 // from this site.
 //
+// Then the BBC Micro, in the same browser, on the same server and watched the
+// same way: scripts/browser-check-bbc.mjs says what it checks.
+//
 //   node scripts/browser-check.mjs [--throttle N] [--measure seconds]
 //
 // --throttle N slows the browser's CPU N times (Chrome's own CPU throttling),
@@ -47,6 +50,7 @@ import { fileURLToPath } from 'node:url';
 import { chromium } from 'playwright-core';
 import sharp from 'sharp';
 import { loadTryIt, parseKeys } from '../src/lib/machines.mjs';
+import { checkBbcMicro } from './browser-check-bbc.mjs';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const site = path.resolve(here, '..');
@@ -790,6 +794,9 @@ try {
   console.log(`phone, after it loses focus: touch-action "${await mtouch()}"`);
   if ((await mtouch()) !== 'pan-y pinch-zoom') problems.push('phone: touch-action was not restored when the model lost focus');
   await phone.close();
+
+  // ---- The BBC Micro ----
+  await checkBbcMicro({ browser, watch, problems, origin });
 } catch (error) {
   problems.push(error.message);
 } finally {

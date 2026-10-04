@@ -58,10 +58,10 @@ jobs:
           path: site/src/data/results.json
           if-no-files-found: error
 
-  # The machines' browser builds, alongside the tests: the KIM-1 as .NET
-  # WebAssembly, compiled ahead of time, and its monitor ROM, fetched from the
-  # pin in Pins.cs and hash-checked. The site job below puts them where the
-  # Astro build copies them into dist. Nothing here is committed.
+  # The machines' browser builds, alongside the tests: the KIM-1 and the BBC
+  # Micro as .NET WebAssembly, compiled ahead of time, and their ROMs, read from
+  # roms/ and checked against the pins in Pins.cs. The site job below puts them
+  # where the Astro build copies them into dist. Nothing here is committed.
   machines:
     runs-on: ubuntu-latest
     timeout-minutes: 30
@@ -70,31 +70,55 @@ jobs:
         with:
           persist-credentials: false
       # The build is a pure function of these inputs, so an unchanged machine
-      # is restored rather than compiled again: AOT takes minutes. The workload
-      # version is in the key, so moving the pin rebuilds.
-      - name: Cache the machines' browser builds
-        id: cache
+      # is restored rather than compiled again: AOT takes minutes. Each machine
+      # has its own cache, keyed on the core, its own two projects and what the
+      # build reads, so a change to one machine rebuilds that machine alone. The
+      # workload version is in the keys, so moving the pin rebuilds both.
+      - name: Cache the KIM-1's browser build
+        id: kim-1
         uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
         with:
-          path: site/public/machines
-          key: machines-sdk-10.0.400-wasm-tools-10.0.401-${{ hashFiles('src/**', 'Directory.Build.props', 'tests/Dbhq.Cpu6502.TestSupport/Pins.cs', 'site/scripts/build-machines.mjs', 'site/src/lib/pins.mjs') }}
+          path: site/public/machines/kim-1
+          key: machine-kim-1-sdk-10.0.400-wasm-tools-10.0.401-${{ hashFiles('src/Dbhq.Machines.Kim1/**', 'src/Dbhq.Machines.Kim1.Wasm/**', 'src/Dbhq.Cpu6502/**', 'Directory.Build.props', 'tests/Dbhq.Cpu6502.TestSupport/Pins.cs', 'site/scripts/build-machines.mjs', 'site/src/lib/pins.mjs', 'site/src/lib/machines.mjs') }}
+      - name: Cache the BBC Micro's browser build
+        id: bbc-micro
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
+        with:
+          path: site/public/machines/bbc-micro
+          key: machine-bbc-micro-sdk-10.0.400-wasm-tools-10.0.401-${{ hashFiles('src/Dbhq.Machines.BbcMicro/**', 'src/Dbhq.Machines.BbcMicro.Wasm/**', 'src/Dbhq.Cpu6502/**', 'Directory.Build.props', 'tests/Dbhq.Cpu6502.TestSupport/Pins.cs', 'site/scripts/build-machines.mjs', 'site/src/lib/pins.mjs', 'site/src/lib/machines.mjs') }}
+      # The machines whose cache missed, by registry id, for the build below.
+      - name: Which machines to build
+        id: which
+        env:
+          KIM1_HIT: ${{ steps.kim-1.outputs.cache-hit }}
+          BBC_HIT: ${{ steps.bbc-micro.outputs.cache-hit }}
+        run: |
+          IDS=""
+          [ "$KIM1_HIT" = "true" ] || IDS="$IDS kim-1"
+          [ "$BBC_HIT" = "true" ] || IDS="$IDS bbc-micro"
+          echo "building:${IDS:- none, both restored}"
+          echo "ids=${IDS# }" >> "$GITHUB_OUTPUT"
       # The SDK is pinned here, not left at 10.0.x, because a workload version
       # belongs to one SDK feature band: 10.0.401 is a 10.0.400 band set.
-      - if: steps.cache.outputs.cache-hit != 'true'
+      - if: steps.which.outputs.ids != ''
         uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6
         with:
           dotnet-version: '10.0.400'
-      - if: steps.cache.outputs.cache-hit != 'true'
+      - if: steps.which.outputs.ids != ''
         name: The wasm-tools workload, pinned
         run: dotnet workload install wasm-tools --version 10.0.401
-      - if: steps.cache.outputs.cache-hit != 'true'
+      - if: steps.which.outputs.ids != ''
         uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
           node-version: '22.22'
-      - if: steps.cache.outputs.cache-hit != 'true'
+      # Both machines: the KIM-1, and the BBC Micro, whose files are published
+      # with the site but linked from no page until the registry says it runs.
+      - if: steps.which.outputs.ids != ''
         name: Build the machines and fetch their ROMs
+        env:
+          IDS: ${{ steps.which.outputs.ids }}
         working-directory: site
-        run: node scripts/build-machines.mjs
+        run: node scripts/build-machines.mjs $IDS
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: machines
@@ -138,10 +162,11 @@ jobs:
           PASS=$(count pass); FAILED=$(count fail)
           echo "pass=${PASS:-unread} fail=${FAILED:-unread}"
           [ "${FAILED:-1}" = "0" ]
-          # 193 tests as at 2 Oct 2026. Adding tests is expected; losing them is
-          # the failure this floor catches. Raise the number when the suite grows,
-          # here and in the same step of deploy-site.yml, which must hold the same number.
-          [ "${PASS:-0}" -ge 193 ]
+          # 261 tests as at 4 Oct 2026. Adding tests is expected; losing them is
+          # the failure this floor catches.
+          # Raise the number when the suite grows, here and in the same step of
+          # deploy-site.yml, which must hold the same number.
+          [ "${PASS:-0}" -ge 261 ]
       # The KIM-1 page in a real browser: the built site served on 127.0.0.1
       # with its own CSP, the try-it program clicked in through the page's own
       # keypad, and the digits read back. Then the page's photograph loads, and
@@ -149,7 +174,11 @@ jobs:
       # its underside's tracks show where the map puts them, and every photograph
       # in the photographs section loads (WebGL through Chrome's SwiftShader: the
       # runner has no GPU). The runner image ships Google Chrome.
-      - name: The KIM-1 runs in a browser
+      # Then the BBC Micro's page, on the same build: Start downloads it, it boots
+      # to BASIC, PRINT 6*7 typed through the page's keys shows 42, the sound
+      # turns on and off, a disc lists with *CAT and saves, and Break restarts
+      # it (scripts/browser-check-bbc.mjs).
+      - name: The KIM-1 and the BBC Micro run in a browser
         working-directory: site
         run: node scripts/browser-check.mjs
 

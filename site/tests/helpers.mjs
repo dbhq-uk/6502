@@ -2,7 +2,8 @@
 import fs from 'node:fs';
 import path from 'node:path';
 
-export const DIST = path.join(process.cwd(), 'dist');
+// The built site.
+export const DIST = path.resolve(process.cwd(), 'dist');
 
 /** Every built page as { url, file, html }, for example url "/status/". */
 export function pages() {

@@ -26,12 +26,12 @@
 # opt-in version already sent, unchanged: moving to opt-out changed when the
 # origins are used, not which ones.
 #
-# script-src carries 'wasm-unsafe-eval' because the KIM-1's page runs the
+# script-src carries 'wasm-unsafe-eval' because each machine's page runs the
 # machine as WebAssembly, and a browser compiles WebAssembly only when the CSP
 # allows it. It permits WebAssembly compilation and nothing else: it does not
 # allow eval() or new Function() for JavaScript, and the .wasm files are
 # fetched from this site under connect-src 'self'. It applies site-wide rather
-# than to /machines/kim-1/ alone because Pages joins the headers of every rule
+# than to the machines' pages alone because Pages joins the headers of every rule
 # a path matches, and a second CSP on that path would narrow the first, not
 # widen it.
 #

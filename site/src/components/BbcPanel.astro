@@ -1,0 +1,76 @@
+---
+// The BBC Micro: its screen, the controls a person at the machine has (BREAK,
+// the sound, the disc drive) and the line that says how fast this browser runs
+// it. public/bbc-micro.js brings it to life when the visitor presses Start, and
+// downloads nothing before then. Without JavaScript every control is disabled
+// and the status line says why.
+//
+// The canvas starts at the framebuffer's size, 640 by 512 (Framebuffer.Width
+// and Height), and the script sets it from the machine once it is loaded. The
+// stylesheet shows it in the television's shape, four wide by three high.
+//
+// The screen is where the keyboard goes: with focus on it, keys type into the
+// machine. The script makes it focusable once the machine runs; Tab is never
+// taken, so focus can always move on.
+//
+// Under the screen are the BBC Micro's keys as buttons, in its own layout
+// (ON_SCREEN_ROWS in public/bbc-keys.js), for touch and for anyone without the
+// keys on their own keyboard. SHIFT and CTRL latch for the next key.
+import { megabytes } from '../lib/bbc-micro.mjs';
+import { ON_SCREEN_ROWS, STICKY, legend, spokenName } from '../../public/bbc-keys.js';
+
+interface Props {
+  /** Where the machine's files are served from, /machines/bbc-micro/. */
+  base: string;
+  /** The machine's clock in MHz, from the registry. */
+  clockMhz: number;
+  /** The ROM files the page loads, in the order BbcHost.Load takes them. */
+  roms: string[];
+  /** The bytes the Start button downloads, read from the build, or null when this build has no machine. */
+  download: number | null;
+}
+const { base, clockMhz, roms, download } = Astro.props;
+---
+
+<div class="bbc" data-bbc data-base={base} data-clock-mhz={clockMhz} data-roms={roms.join(' ')} data-download={download ?? undefined} data-state="static">
+  <div class="bbc-screen" data-bbc-screen role="application" aria-label="The BBC Micro's screen" aria-describedby="bbc-typing">
+    <canvas data-bbc-canvas width="640" height="512"></canvas>
+  </div>
+  <p class="bbc-note">The picture is the machine's own, pixel for pixel, as its video chips draw it, shown in the television's shape. It models the picture, not a television: no scan lines, no glow and no curve.</p>
+  <p class="bbc-note" id="bbc-typing">With the screen focused, your keyboard types into the BBC Micro, key for key by where the keys are, and the machine's own keys further down type by a tap or a click. Tab moves on, so the page never keeps the keyboard.</p>
+  <div class="bbc-controls">
+    <button type="button" class="btn pill" data-bbc-start disabled>Start the BBC Micro{download !== null && `, a download of up to ${megabytes(download)} MB`}</button>
+    <button type="button" class="btn small" data-bbc-break disabled>Break</button>
+    <button type="button" class="btn small" data-bbc-sound disabled>Turn sound on</button>
+  </div>
+  <p class="bbc-status" role="status" data-bbc-status>The BBC Micro runs in your browser, and it needs JavaScript to do that. With JavaScript off, the page and the program below are shown, but nothing runs.</p>
+  <p class="bbc-line" data-bbc-sound-status aria-live="polite">Sound is off.</p>
+  <p class="bbc-speed" data-bbc-speed></p>
+  <div class="bbc-keys" role="group" aria-label="The BBC Micro's keys">
+    {ON_SCREEN_ROWS.map((row) => (
+      <div class={`bbc-keys-row${row.includes('Left') ? ' cursor' : ''}`}>
+        {row.map((key) => {
+          const words = legend(key).length > 2 && !/^f\d$/.test(legend(key));
+          const sticky = STICKY.includes(key);
+          return (
+            <button type="button" class={`bbc-key${words ? ' word' : ''}${key === 'Space' ? ' space' : ''}`} data-bbc-key={key} aria-label={spokenName(key) === legend(key) ? undefined : spokenName(key)} aria-pressed={sticky ? 'false' : undefined} disabled>{legend(key)}</button>
+          );
+        })}
+      </div>
+    ))}
+  </div>
+  <fieldset class="bbc-disc">
+    <legend>The disc drive</legend>
+    <div class="bbc-controls">
+      <button type="button" class="btn small" data-bbc-insert disabled>Insert a disc</button>
+      <input type="file" accept=".ssd,.dsd" data-bbc-file hidden />
+      <button type="button" class="btn small" data-bbc-blank disabled>Make a blank disc</button>
+      <button type="button" class="btn small" data-bbc-save disabled>Save disc</button>
+      <button type="button" class="btn small" data-bbc-eject disabled>Eject</button>
+      <label class="bbc-protect"><input type="checkbox" role="switch" data-bbc-protect disabled /> Write-protect</label>
+    </div>
+    <p class="bbc-line" data-bbc-drive aria-live="polite">Drive 0 is empty.</p>
+    <p class="bbc-note">Drop a .ssd or .dsd disc image on the page, or press Insert a disc. The file is read in this tab and is not uploaded anywhere; Save disc downloads the disc as it now stands, which is the only way to keep what was written to it. The page has drive 0 only: the controller and DFS have a second drive, and the page does not offer it.</p>
+    <p class="bbc-note">DFS remembers the catalogue of the last disc it read until the drive stops, a moment after the last disc command, as it does on the real machine. So after changing discs, type <kbd>*CAT</kbd> first, or DFS may still list the old one.</p>
+  </fieldset>
+</div>

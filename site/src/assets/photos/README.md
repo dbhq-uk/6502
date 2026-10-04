@@ -18,9 +18,11 @@ in for one: generated images live in `../imagery/`, are captioned
 below and on the page, or none, where the source states none. A file here is a
 resized copy of the source, which is a derivative under that licence.
 
-**What the 3D model takes from each** is in its section below and on the page.
-The analysis that does it is in `tools/kim1-model/` (its `README.md` says how
-to run it), and the journal for 2 October 2026 has every figure.
+**What the 3D model takes from each**, for a machine that has one (the KIM-1),
+is in its section below and on the page. The analysis that does it is in
+`tools/kim1-model/` (its `README.md` says how to run it), and the journal for 2
+October 2026 has every figure. The BBC Micro has no model, so its photograph is
+shown and nothing is taken from it.
 
 ## kim-1.webp
 
@@ -86,6 +88,20 @@ to run it), and the journal for 2 October 2026 has every figure.
 | Fetched | 2 October 2026, from `retro.hansotten.nl/wp-content/uploads/2022/03/20160317_143341_HDR-2.jpg`: 2988 by 3984 pixels, 9,104,580 bytes, SHA-256 `5365993e8a8a42abb07a3c64c825f2dc2a74986cf8105e16bdceabd8f7e5876d` |
 | This copy | `cwebp -q 82 -resize 1600 0 -metadata none`: 1600 by 2134 pixels, 507,520 bytes, SHA-256 `3e1d4161b19e5a624a97f0ab6b2f3c91444d62453e00f9cd14b44dfe4c1eb631`. The original is not committed, being over 1.5 MB |
 | Used for | The underside's tracks: the only photograph of the solder side used |
+
+## bbc-micro.webp
+
+| | |
+|---|---|
+| What | An original Acorn BBC Micro, seen from the front left and above on a blue cloth: the whole case, the red function keys, the badge strip and the three lights below the bottom left of the keyboard, to the left of the space bar. The main photograph |
+| Source | Wikimedia Commons, [`File:Acorn_BBC_Micro.jpg`](https://commons.wikimedia.org/wiki/File:Acorn_BBC_Micro.jpg), from simon.inns's Flickr photograph [40334359291](https://www.flickr.com/photos/130561631@N03/40334359291/), whose licence Commons's FlickreviewR 2 bot checked |
+| Author | simon.inns, as the file page names him (Simon Inns, by his Flickr account) |
+| Licence | CC BY 2.0, as the file page states it ([deed](https://creativecommons.org/licenses/by/2.0)), with attribution required: the page credits the author, links the source and links the licence to its deed. It asks for no share-alike, unlike the KIM-1's |
+| Which model | The file page describes it as "An Acorn BBC Micro Model B from 1982", and the page's caption says "an original Acorn BBC Micro Model B" on that word. The picture alone cannot tell a Model B from a Model A: the case, the keyboard and the badge are the same on both, and the difference is inside and at the back, which the photograph does not show. Nothing in it is a later machine's (no numeric keypad, no Master badge) |
+| Taken | 18 February 2018, 12:08 (`DateTimeOriginal`, as the file page gives it). Uploaded to Commons on 14 September 2021 |
+| Fetched | 4 October 2026, from `upload.wikimedia.org/wikipedia/commons/e/e7/Acorn_BBC_Micro.jpg`: 5195 by 3463 pixels, 2,257,642 bytes, SHA-1 `71f6dfdfee2a4a43d207936c310a57b30e0b4b39` (the SHA-1 Commons records for the file), SHA-256 `2329615eda5436b6836132a4f08ba46be18ea30df990866d3c9ac69d9006ca91` |
+| This copy | Cropped to the machine and a margin of 110 pixels of cloth on every side, then resized: `cwebp -q 82 -crop 152 60 4991 3342 -resize 1600 0 -metadata none`: 1600 by 1072 pixels, 88,150 bytes, SHA-256 `8796aa341c38d9399788f5d86b4a7e720c8334b331772405a0c093ee33416bfb`. Colours are the source's. The original is not committed, being over 1.5 MB; the line above is enough to fetch it again and check it |
+| Used for | The photograph of the machine at the head of its page. Nothing is traced or measured from it |
 
 The site builds AVIF and WebP copies of each file here at build time
 (`astro:assets`), so a page never loads a 1600 pixel master.

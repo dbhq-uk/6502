@@ -49,9 +49,9 @@ permissions:
 
 jobs:
   # The machines' browser builds, in a job of their own that holds no token:
-  # the KIM-1 as .NET WebAssembly, compiled ahead of time, and its monitor ROM,
-  # fetched from the pin in Pins.cs and hash-checked. The same job as
-  # validate.yml's. The deploy job puts its output where the Astro build copies
+  # the KIM-1 and the BBC Micro as .NET WebAssembly, compiled ahead of time, and
+  # their ROMs, read from roms/ and checked against the pins in Pins.cs. The
+  # same job as validate.yml's. The deploy job puts its output where the Astro build copies
   # it into dist.
   machines:
     if: vars.SITE_DEPLOY == 'true' && github.ref == 'refs/heads/main'
@@ -62,31 +62,55 @@ jobs:
         with:
           persist-credentials: false
       # The build is a pure function of these inputs, so an unchanged machine
-      # is restored rather than compiled again: AOT takes minutes. The workload
-      # version is in the key, so moving the pin rebuilds.
-      - name: Cache the machines' browser builds
-        id: cache
+      # is restored rather than compiled again: AOT takes minutes. Each machine
+      # has its own cache, keyed on the core, its own two projects and what the
+      # build reads, so a change to one machine rebuilds that machine alone. The
+      # workload version is in the keys, so moving the pin rebuilds both.
+      - name: Cache the KIM-1's browser build
+        id: kim-1
         uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
         with:
-          path: site/public/machines
-          key: machines-sdk-10.0.400-wasm-tools-10.0.401-${{ hashFiles('src/**', 'Directory.Build.props', 'tests/Dbhq.Cpu6502.TestSupport/Pins.cs', 'site/scripts/build-machines.mjs', 'site/src/lib/pins.mjs') }}
+          path: site/public/machines/kim-1
+          key: machine-kim-1-sdk-10.0.400-wasm-tools-10.0.401-${{ hashFiles('src/Dbhq.Machines.Kim1/**', 'src/Dbhq.Machines.Kim1.Wasm/**', 'src/Dbhq.Cpu6502/**', 'Directory.Build.props', 'tests/Dbhq.Cpu6502.TestSupport/Pins.cs', 'site/scripts/build-machines.mjs', 'site/src/lib/pins.mjs', 'site/src/lib/machines.mjs') }}
+      - name: Cache the BBC Micro's browser build
+        id: bbc-micro
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
+        with:
+          path: site/public/machines/bbc-micro
+          key: machine-bbc-micro-sdk-10.0.400-wasm-tools-10.0.401-${{ hashFiles('src/Dbhq.Machines.BbcMicro/**', 'src/Dbhq.Machines.BbcMicro.Wasm/**', 'src/Dbhq.Cpu6502/**', 'Directory.Build.props', 'tests/Dbhq.Cpu6502.TestSupport/Pins.cs', 'site/scripts/build-machines.mjs', 'site/src/lib/pins.mjs', 'site/src/lib/machines.mjs') }}
+      # The machines whose cache missed, by registry id, for the build below.
+      - name: Which machines to build
+        id: which
+        env:
+          KIM1_HIT: ${{ steps.kim-1.outputs.cache-hit }}
+          BBC_HIT: ${{ steps.bbc-micro.outputs.cache-hit }}
+        run: |
+          IDS=""
+          [ "$KIM1_HIT" = "true" ] || IDS="$IDS kim-1"
+          [ "$BBC_HIT" = "true" ] || IDS="$IDS bbc-micro"
+          echo "building:${IDS:- none, both restored}"
+          echo "ids=${IDS# }" >> "$GITHUB_OUTPUT"
       # The SDK is pinned here, not left at 10.0.x, because a workload version
       # belongs to one SDK feature band: 10.0.401 is a 10.0.400 band set.
-      - if: steps.cache.outputs.cache-hit != 'true'
+      - if: steps.which.outputs.ids != ''
         uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6
         with:
           dotnet-version: '10.0.400'
-      - if: steps.cache.outputs.cache-hit != 'true'
+      - if: steps.which.outputs.ids != ''
         name: The wasm-tools workload, pinned
         run: dotnet workload install wasm-tools --version 10.0.401
-      - if: steps.cache.outputs.cache-hit != 'true'
+      - if: steps.which.outputs.ids != ''
         uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
           node-version: '22.22'
-      - if: steps.cache.outputs.cache-hit != 'true'
+      # Both machines: the KIM-1, and the BBC Micro, whose files are published
+      # with the site but linked from no page until the registry says it runs.
+      - if: steps.which.outputs.ids != ''
         name: Build the machines and fetch their ROMs
+        env:
+          IDS: ${{ steps.which.outputs.ids }}
         working-directory: site
-        run: node scripts/build-machines.mjs
+        run: node scripts/build-machines.mjs $IDS
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: machines
@@ -152,10 +176,11 @@ jobs:
           PASS=$(count pass); FAILED=$(count fail)
           echo "pass=${PASS:-unread} fail=${FAILED:-unread}"
           [ "${FAILED:-1}" = "0" ]
-          # 193 tests as at 2 Oct 2026. Adding tests is expected; losing them is
-          # the failure this floor catches. Raise the number when the suite grows,
-          # here and in the same step of validate.yml, which must hold the same number.
-          [ "${PASS:-0}" -ge 193 ]
+          # 261 tests as at 4 Oct 2026. Adding tests is expected; losing them is
+          # the failure this floor catches.
+          # Raise the number when the suite grows, here and in the same step of
+          # validate.yml, which must hold the same number.
+          [ "${PASS:-0}" -ge 261 ]
 
       - name: Deploy to Cloudflare Pages
         working-directory: site
@@ -209,6 +234,11 @@ jobs:
 
       # table-sort.js is here because machines-table.js imports it: a 404 on it
       # breaks that whole module, and the filters and sorting quietly vanish.
+      # machine-host.js is here because kim-1.js imports it, for the same reason:
+      # a 404 on it and the machine never starts. bbc-micro.js, bbc-keys.js and
+      # bbc-audio.js are the BBC Micro's page: its driver, the key table the
+      # driver imports, and the sound worklet it loads with addModule, which no
+      # import names.
       # site/tests/build.test.mjs derives the required list from the built pages.
       # analytics.js and consent.js are in this list for a sharp reason. A 404 on
       # analytics.js means no analytics and nothing to opt out of. A 404 on
@@ -221,7 +251,7 @@ jobs:
       - name: The machine-readable files must be serving
         run: |
           set -euo pipefail
-          for f in sitemap-index.xml sitemap-0.xml robots.txt analytics.js consent.js machines-table.js table-sort.js chip.js kim-1.js model-loader.js models/kim-1.js models/kim-1-tracks.webp; do
+          for f in sitemap-index.xml sitemap-0.xml robots.txt analytics.js consent.js machines-table.js table-sort.js chip.js kim-1.js machine-host.js bbc-micro.js bbc-keys.js bbc-audio.js model-loader.js models/kim-1.js models/kim-1-tracks.webp; do
             CODE=$(curl -s --max-time 20 --retry 3 --retry-delay 5 -o /dev/null -w "%{http_code}" "https://6502.dbhq.uk/${f}?cb=${GITHUB_SHA}")
             echo "${f} -> ${CODE}"
             [ "$CODE" = "200" ]
@@ -250,8 +280,14 @@ jobs:
             esac
             COUNT=$((COUNT + 1))
           done
-          # The KIM-1 alone is two ROM halves, the loader and several .wasm files.
-          [ "$COUNT" -ge 6 ] || { echo "only $COUNT machine files found - the derivation is broken"; exit 1; }
+          # 26 files as at 4 Oct 2026, 13 for each machine. The floor is what the
+          # two must publish at the least: their ROMs (two halves for the KIM-1,
+          # three for the BBC Micro) and, for each, the four runtime files
+          # (dotnet.js, dotnet.native's .js and .wasm, dotnet.runtime.js),
+          # CoreLib, the core, the machine and its host, which is 21. The KIM-1's
+          # 13 alone cannot meet it, so a missing BBC Micro fails here. (It was
+          # 6, set for the KIM-1 alone.)
+          [ "$COUNT" -ge 21 ] || { echo "only $COUNT machine files found - the derivation is broken"; exit 1; }
           [ "$FAIL" = "0" ]
 
       # Headers only apply at the Cloudflare edge, so they can only be checked

@@ -16,7 +16,7 @@
     "check": "npm test",
     "preview": "astro preview --host \"${SITE_HOST:-127.0.0.1}\" --port 4333",
     "results": "node scripts/make-results.mjs",
-    "machines": "node scripts/build-machines.mjs",
+    "machines": "node scripts/build-machines.mjs kim-1 bbc-micro",
     "browser-check": "node scripts/browser-check.mjs"
   },
   "dependencies": {
