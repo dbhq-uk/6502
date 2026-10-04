@@ -1,0 +1,417 @@
+{
+ "about": "Task 0 of the BBC Micro models plan: the scan scale, the solder side registration and the keys, each on data held out of its fit. Written by spike.py; every figure here is a measurement made on the date of the journal entry that quotes it.",
+ "keys": {
+  "fitMm": {
+   "max": 0.9295,
+   "median": 0.3614,
+   "p90": 0.5444
+  },
+  "frontEdgeErrPct": -2.7792,
+  "frontEdgeMm": 403.4661,
+  "frontEdgeRepeatMm": 403.1661,
+  "heldOutMm": {
+   "max": 0.9892,
+   "median": 0.3951,
+   "p90": 0.6321
+  },
+  "model": "homography",
+  "n": 50,
+  "over3mm": 0,
+  "repeatMm": {
+   "max": 0.7578,
+   "median": 0.5524,
+   "n": 5
+  },
+  "rowOffsetsExplain": 0.3201,
+  "rowOffsetsMm": {
+   "120.65": [
+    -0.2116,
+    0.0975
+   ],
+   "139.7": [
+    0.0572,
+    -0.1448
+   ],
+   "158.75": [
+    0.3793,
+    -0.0215
+   ],
+   "177.8": [
+    0.0043,
+    0.0374
+   ],
+   "196.85": [
+    -0.2076,
+    0.0254
+   ]
+  },
+  "worst": [
+   [
+    "Q",
+    0.9892
+   ],
+   [
+    "RETURN",
+    0.8933
+   ],
+   [
+    "U",
+    0.8846
+   ],
+   [
+    "SHIFT (left)",
+    0.6872
+   ],
+   [
+    "BREAK",
+    0.6808
+   ],
+   [
+    "CAPS LOCK",
+    0.6267
+   ],
+   [
+    "DOWN",
+    0.615
+   ],
+   [
+    "f3",
+    0.5846
+   ],
+   [
+    "Z",
+    0.5845
+   ],
+   [
+    "DELETE",
+    0.5537
+   ]
+  ]
+ },
+ "scale": {
+  "footprints": 16,
+  "heldOut": {
+   "fortyPinRowErrMm": {
+    "max": 0.1067,
+    "median": 0.0433,
+    "n": 7
+   },
+   "rowLengthErrMm": {
+    "max": 0.3706,
+    "median": 0.0543
+   }
+  },
+  "marks": {
+   "movedMm": {
+    "max": 0.5428,
+    "median": 0.1237
+   },
+   "n": 64,
+   "refused": 11
+  },
+  "matrix": [
+   [
+    15.9281,
+    -0.0883
+   ],
+   [
+    0.0758,
+    15.7289
+   ]
+  ],
+  "pxPerMm": {
+   "x": 15.9283,
+   "y": 15.7292
+  },
+  "ratio": 1.0127,
+  "rotationDeg": 0.2725,
+  "rows": [
+   {
+    "errMm": -0.0543,
+    "footprint": "IC7",
+    "measuredMm": 32.9657,
+    "pins": 28,
+    "row": "tl-bl",
+    "trueMm": 33.02
+   },
+   {
+    "errMm": -0.3706,
+    "footprint": "IC7",
+    "measuredMm": 32.6494,
+    "pins": 28,
+    "row": "tr-br",
+    "trueMm": 33.02
+   },
+   {
+    "errMm": 0.0051,
+    "footprint": "L28",
+    "measuredMm": 33.0251,
+    "pins": 28,
+    "row": "tl-bl",
+    "trueMm": 33.02
+   },
+   {
+    "errMm": 0.0285,
+    "footprint": "L28",
+    "measuredMm": 33.0485,
+    "pins": 28,
+    "row": "tr-br",
+    "trueMm": 33.02
+   },
+   {
+    "errMm": -0.0433,
+    "footprint": "IC69",
+    "measuredMm": 48.2167,
+    "pins": 40,
+    "row": "tl-bl",
+    "trueMm": 48.26
+   },
+   {
+    "errMm": -0.1067,
+    "footprint": "IC69",
+    "measuredMm": 48.1533,
+    "pins": 40,
+    "row": "tr-br",
+    "trueMm": 48.26
+   },
+   {
+    "errMm": -0.0456,
+    "footprint": "IC78",
+    "measuredMm": 48.2144,
+    "pins": 40,
+    "row": "tl-bl",
+    "trueMm": 48.26
+   },
+   {
+    "errMm": -0.0124,
+    "footprint": "IC78",
+    "measuredMm": 48.2476,
+    "pins": 40,
+    "row": "tr-br",
+    "trueMm": 48.26
+   },
+   {
+    "errMm": 0.0329,
+    "footprint": "IC101",
+    "measuredMm": 33.0529,
+    "pins": 28,
+    "row": "tl-bl",
+    "trueMm": 33.02
+   },
+   {
+    "errMm": 0.1617,
+    "footprint": "IC74",
+    "measuredMm": 17.9417,
+    "pins": 16,
+    "row": "bl-br",
+    "trueMm": 17.78
+   },
+   {
+    "errMm": 0.0729,
+    "footprint": "IC73",
+    "measuredMm": 33.0929,
+    "pins": 28,
+    "row": "tl-bl",
+    "trueMm": 33.02
+   },
+   {
+    "errMm": -0.0838,
+    "footprint": "IC73",
+    "measuredMm": 32.9362,
+    "pins": 28,
+    "row": "tr-br",
+    "trueMm": 33.02
+   },
+   {
+    "errMm": 0.0307,
+    "footprint": "IC93",
+    "measuredMm": 15.2707,
+    "pins": 14,
+    "row": "tl-bl",
+    "trueMm": 15.24
+   },
+   {
+    "errMm": 0.2514,
+    "footprint": "IC93",
+    "measuredMm": 15.4914,
+    "pins": 14,
+    "row": "tr-br",
+    "trueMm": 15.24
+   },
+   {
+    "errMm": -0.0165,
+    "footprint": "IC1",
+    "measuredMm": 48.2435,
+    "pins": 40,
+    "row": "tl-bl",
+    "trueMm": 48.26
+   },
+   {
+    "errMm": -0.0048,
+    "footprint": "IC1",
+    "measuredMm": 48.2552,
+    "pins": 40,
+    "row": "tr-br",
+    "trueMm": 48.26
+   },
+   {
+    "errMm": 0.0762,
+    "footprint": "IC3",
+    "measuredMm": 48.3362,
+    "pins": 40,
+    "row": "tl-bl",
+    "trueMm": 48.26
+   },
+   {
+    "errMm": 0.0045,
+    "footprint": "IC51",
+    "measuredMm": 33.0245,
+    "pins": 28,
+    "row": "tl-bl",
+    "trueMm": 33.02
+   },
+   {
+    "errMm": 0.1077,
+    "footprint": "IC51",
+    "measuredMm": 33.1277,
+    "pins": 28,
+    "row": "tr-br",
+    "trueMm": 33.02
+   },
+   {
+    "errMm": 0.1467,
+    "footprint": "IC64",
+    "measuredMm": 17.9267,
+    "pins": 16,
+    "row": "tl-bl",
+    "trueMm": 17.78
+   },
+   {
+    "errMm": -0.2023,
+    "footprint": "IC75",
+    "measuredMm": 17.5777,
+    "pins": 16,
+    "row": "bl-br",
+    "trueMm": 17.78
+   }
+  ],
+  "rowsScored": 21,
+  "skewDeg": -0.0492,
+  "xFromConnectorPitch": {
+   "max": 15.7985,
+   "median": 15.7643,
+   "min": 15.7447,
+   "rows": [
+    {
+     "pads": 17,
+     "pitches": 16,
+     "pxPerMm": 15.7668,
+     "row": "PL8"
+    },
+    {
+     "pads": 12,
+     "pitches": 11,
+     "pxPerMm": 15.7867,
+     "row": "PL8"
+    },
+    {
+     "pads": 13,
+     "pitches": 12,
+     "pxPerMm": 15.7447,
+     "row": "PL9"
+    },
+    {
+     "pads": 13,
+     "pitches": 12,
+     "pxPerMm": 15.7985,
+     "row": "PL9"
+    },
+    {
+     "pads": 16,
+     "pitches": 16,
+     "pxPerMm": 15.7619,
+     "row": "PL13"
+    },
+    {
+     "pads": 10,
+     "pitches": 9,
+     "pxPerMm": 15.7597,
+     "row": "PL14"
+    }
+   ]
+  }
+ },
+ "solder": {
+  "blockMm": 20.0,
+  "fit": "cubic",
+  "fits": {
+   "affine": {
+    "fitMm": {
+     "max": 0.8765,
+     "median": 0.134,
+     "p90": 0.2952
+    },
+    "heldOutMm": {
+     "max": 0.8778,
+     "median": 0.1348,
+     "p90": 0.2931
+    }
+   },
+   "cubic": {
+    "fitMm": {
+     "max": 0.7425,
+     "median": 0.1192,
+     "p90": 0.2657
+    },
+    "heldOutMm": {
+     "max": 0.7565,
+     "median": 0.1198,
+     "p90": 0.2698
+    }
+   }
+  },
+  "gateMm": 1.0,
+  "heldOutMm": {
+   "max": 0.7565,
+   "median": 0.1198,
+   "p90": 0.2698
+  },
+  "holes": 2092,
+  "padsFound": {
+   "I1": 2289,
+   "I2": 2536
+  },
+  "seedFitPx": {
+   "max": 1.8948,
+   "median": 1.7194,
+   "p90": 1.8584
+  }
+ },
+ "verdicts": [
+  {
+   "figures": "median 0.043 mm, max 0.107 mm over 7 rows",
+   "measure": "scale, 40-pin rows held out",
+   "verdict": "pass"
+  },
+  {
+   "figures": "x 15.9283, y 15.7292 px/mm, ratio 1.01266 (1.27 per cent)",
+   "measure": "scale, x against y",
+   "verdict": "pass"
+  },
+  {
+   "figures": "cubic: median 0.120, p90 0.270, max 0.757 mm over 2092 holes",
+   "measure": "solder side, held out",
+   "verdict": "between pass and stop"
+  },
+  {
+   "figures": "median 0.395, p90 0.632, max 0.989 mm over 50 keys, 0 over 3 mm",
+   "measure": "keys, each held out",
+   "verdict": "pass"
+  },
+  {
+   "figures": "403.5 mm against 415, -2.78 per cent",
+   "measure": "O1's case front edge",
+   "verdict": "STOP"
+  }
+ ]
+}

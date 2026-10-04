@@ -90,3 +90,8 @@ SHA-256 of the files the research downloaded (kept at `~/dbhq-previews/bbc-model
 | `inside-1-bare-iss7-top-amb5l.jpg` | `5edc89d95872c9e70a1adb0b8d968fbccd3459816cacd64a630d95afd02e7b0e` |
 | `inside-2-populated-iss7-8bs.jpg` | `7ae4b57399e9576d46bcfe0d4e2b39ddb362d7bb33782c002a39adffab208263` |
 | `inside-supp-bare-iss7-bottom-amb5l.jpg` | `c9a36223ca7d3d28cbceb6cb25f625e3989655283e6bf4b4602c5199612b5bb6` |
+| `bbc-keyboard/KiCad/bbc-keyboard/bbc-keyboard.kicad_pcb` | `35b34ac3ef0a04fb311ee1971eb9fc32cb1c323877377c4d1a74986c709b0929` |
+
+The last row is K1's board file, fetched by task 0 of the models plan on 4 October 2026 (`git clone` of the repository above, then `git checkout` of the pinned commit); its hash is the one the research had recorded for the same file in its own checksum list. From then on every input here is listed, with its URL, author, licence as stated, size and fetch date, in `tools/bbc-micro-model/data/sources.json`, and checked against its hash before it is read.
+
+**A note added by task 0 (4 October 2026).** O1's row above infers a front edge of about 412 mm from the key pitch. Measured on a registration of 50 keys to K1, the front edge came out shorter, and outside the plan's stop threshold; the figures and the likely reason (the case's front edge is not in the plane of the key tops) are in the journal for that day, `docs/journal/2026-10-04-the-bbc-micro-models.md`.

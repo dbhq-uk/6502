@@ -1,0 +1,2162 @@
+{
+ "about": "Points marked by hand: read by eye off crops of the original input, each a crop of the stated box (left, top, right, bottom, in the original's pixels) enlarged `zoom` times with a 10 px grid labelled in the original's pixels. Pixel coordinates are the original's, with (0, 0) the top left corner of the top left pixel's centre. Nothing here is moved after a fit; spike.py records what it does to each mark.",
+ "keys": {
+  "excluded": [
+   {
+    "k1": "SW21",
+    "key": "SPACE",
+    "why": "In O1 the space bar is seen almost edge on, and its top face cannot be told from its front face; excluded before any fit"
+   }
+  ],
+  "frontEdge": {
+   "crop": {
+    "left": {
+     "box": [
+      215,
+      1615,
+      335,
+      1735
+     ],
+     "zoom": 3
+    },
+    "right": {
+     "box": [
+      2140,
+      1615,
+      2260,
+      1735
+     ],
+     "zoom": 3
+    }
+   },
+   "left": [
+    274,
+    1671
+   ],
+   "repeat": {
+    "crop": {
+     "left": {
+      "box": [
+       150,
+       1450,
+       450,
+       1750
+      ],
+      "zoom": 1.5
+     },
+     "right": {
+      "box": [
+       2030,
+       1450,
+       2330,
+       1750
+      ],
+      "zoom": 1.5
+     }
+    },
+    "left": [
+     274,
+     1670
+    ],
+    "right": [
+     2196.7,
+     1662
+    ],
+    "what": "Both corners read a second time on wider crops, after the first reading gave a STOP, to check the marks; not used for the figure judged"
+   },
+   "right": [
+    2198.3,
+    1665
+   ],
+   "what": "The two front corners of the case's top as O1 shows them: where the line of the side meets the line of the front, the corners being rounded"
+  },
+  "marks": [
+   {
+    "at": [
+     842.7,
+     1063
+    ],
+    "crop": {
+     "box": [
+      792,
+      1013,
+      892,
+      1113
+     ],
+     "zoom": 3
+    },
+    "k1": "SW3",
+    "key": "f0"
+   },
+   {
+    "at": [
+     928.3,
+     1063.6
+    ],
+    "crop": {
+     "box": [
+      880,
+      1013,
+      980,
+      1113
+     ],
+     "zoom": 3
+    },
+    "k1": "SW8",
+    "key": "f1"
+   },
+   {
+    "at": [
+     1020.3,
+     1063
+    ],
+    "crop": {
+     "box": [
+      968,
+      1013,
+      1068,
+      1113
+     ],
+     "zoom": 3
+    },
+    "k1": "SW15",
+    "key": "f2"
+   },
+   {
+    "at": [
+     1109.3,
+     1063
+    ],
+    "crop": {
+     "box": [
+      1056,
+      1013,
+      1156,
+      1113
+     ],
+     "zoom": 3
+    },
+    "k1": "SW22",
+    "key": "f3"
+   },
+   {
+    "at": [
+     1195.7,
+     1062.7
+    ],
+    "crop": {
+     "box": [
+      1145,
+      1013,
+      1245,
+      1113
+     ],
+     "zoom": 3
+    },
+    "k1": "SW30",
+    "key": "f4"
+   },
+   {
+    "at": [
+     1283.3,
+     1062.7
+    ],
+    "crop": {
+     "box": [
+      1233,
+      1013,
+      1333,
+      1113
+     ],
+     "zoom": 3
+    },
+    "k1": "SW29",
+    "key": "f5"
+   },
+   {
+    "at": [
+     1371.3,
+     1062.7
+    ],
+    "crop": {
+     "box": [
+      1321,
+      1013,
+      1421,
+      1113
+     ],
+     "zoom": 3
+    },
+    "k1": "SW36",
+    "key": "f6"
+   },
+   {
+    "at": [
+     1460.7,
+     1062.7
+    ],
+    "crop": {
+     "box": [
+      1410,
+      1013,
+      1510,
+      1113
+     ],
+     "zoom": 3
+    },
+    "k1": "SW44",
+    "key": "f7"
+   },
+   {
+    "at": [
+     1549.7,
+     1062.3
+    ],
+    "crop": {
+     "box": [
+      1498,
+      1013,
+      1598,
+      1113
+     ],
+     "zoom": 3
+    },
+    "k1": "SW43",
+    "key": "f8"
+   },
+   {
+    "at": [
+     1636.7,
+     1062.3
+    ],
+    "crop": {
+     "box": [
+      1586,
+      1013,
+      1686,
+      1113
+     ],
+     "zoom": 3
+    },
+    "k1": "SW50",
+    "key": "f9"
+   },
+   {
+    "at": [
+     1725.7,
+     1061.3
+    ],
+    "crop": {
+     "box": [
+      1675,
+      1013,
+      1775,
+      1113
+     ],
+     "zoom": 3
+    },
+    "k1": "SW75",
+    "key": "BREAK"
+   },
+   {
+    "at": [
+     640.7,
+     1150
+    ],
+    "crop": {
+     "box": [
+      590,
+      1105,
+      690,
+      1205
+     ],
+     "zoom": 3
+    },
+    "k1": "SW1",
+    "key": "ESCAPE"
+   },
+   {
+    "at": [
+     730,
+     1151.7
+    ],
+    "crop": {
+     "box": [
+      676,
+      1100,
+      776,
+      1200
+     ],
+     "zoom": 3
+    },
+    "k1": "SW4",
+    "key": "1"
+   },
+   {
+    "at": [
+     906.3,
+     1153.3
+    ],
+    "crop": {
+     "box": [
+      853,
+      1100,
+      953,
+      1200
+     ],
+     "zoom": 3
+    },
+    "k1": "SW9",
+    "key": "3"
+   },
+   {
+    "at": [
+     1083,
+     1151.7
+    ],
+    "crop": {
+     "box": [
+      1029,
+      1100,
+      1129,
+      1200
+     ],
+     "zoom": 3
+    },
+    "k1": "SW23",
+    "key": "5"
+   },
+   {
+    "at": [
+     1260,
+     1152.3
+    ],
+    "crop": {
+     "box": [
+      1206,
+      1100,
+      1306,
+      1200
+     ],
+     "zoom": 3
+    },
+    "k1": "SW31",
+    "key": "7"
+   },
+   {
+    "at": [
+     1437,
+     1151.7
+    ],
+    "crop": {
+     "box": [
+      1383,
+      1100,
+      1483,
+      1200
+     ],
+     "zoom": 3
+    },
+    "k1": "SW38",
+    "key": "9"
+   },
+   {
+    "at": [
+     1614,
+     1151.7
+    ],
+    "crop": {
+     "box": [
+      1559,
+      1100,
+      1659,
+      1200
+     ],
+     "zoom": 3
+    },
+    "k1": "SW51",
+    "key": "-"
+   },
+   {
+    "at": [
+     1791,
+     1150.7
+    ],
+    "crop": {
+     "box": [
+      1736,
+      1100,
+      1836,
+      1200
+     ],
+     "zoom": 3
+    },
+    "k1": "SW57",
+    "key": "\\"
+   },
+   {
+    "at": [
+     1880.7,
+     1150.7
+    ],
+    "crop": {
+     "box": [
+      1824,
+      1100,
+      1924,
+      1200
+     ],
+     "zoom": 3
+    },
+    "k1": "SW65",
+    "key": "LEFT"
+   },
+   {
+    "at": [
+     1968,
+     1149.3
+    ],
+    "crop": {
+     "box": [
+      1913,
+      1100,
+      2013,
+      1200
+     ],
+     "zoom": 3
+    },
+    "k1": "SW64",
+    "key": "RIGHT"
+   },
+   {
+    "at": [
+     658.5,
+     1240
+    ],
+    "crop": {
+     "box": [
+      600,
+      1162,
+      750,
+      1312
+     ],
+     "zoom": 2
+    },
+    "k1": "SW7",
+    "key": "TAB"
+   },
+   {
+    "at": [
+     766.7,
+     1239.7
+    ],
+    "crop": {
+     "box": [
+      716,
+      1187,
+      816,
+      1287
+     ],
+     "zoom": 3
+    },
+    "k1": "SW2",
+    "key": "Q"
+   },
+   {
+    "at": [
+     949.7,
+     1239.7
+    ],
+    "crop": {
+     "box": [
+      894,
+      1187,
+      994,
+      1287
+     ],
+     "zoom": 3
+    },
+    "k1": "SW17",
+    "key": "E"
+   },
+   {
+    "at": [
+     1127,
+     1238.7
+    ],
+    "crop": {
+     "box": [
+      1072,
+      1187,
+      1172,
+      1287
+     ],
+     "zoom": 3
+    },
+    "k1": "SW24",
+    "key": "T"
+   },
+   {
+    "at": [
+     1302.3,
+     1239
+    ],
+    "crop": {
+     "box": [
+      1250,
+      1187,
+      1350,
+      1287
+     ],
+     "zoom": 3
+    },
+    "k1": "SW39",
+    "key": "U"
+   },
+   {
+    "at": [
+     1482,
+     1239
+    ],
+    "crop": {
+     "box": [
+      1428,
+      1187,
+      1528,
+      1287
+     ],
+     "zoom": 3
+    },
+    "k1": "SW46",
+    "key": "O"
+   },
+   {
+    "at": [
+     1661,
+     1238.7
+    ],
+    "crop": {
+     "box": [
+      1606,
+      1187,
+      1706,
+      1287
+     ],
+     "zoom": 3
+    },
+    "k1": "SW54",
+    "key": "@"
+   },
+   {
+    "at": [
+     1837.3,
+     1237.7
+    ],
+    "crop": {
+     "box": [
+      1784,
+      1187,
+      1884,
+      1287
+     ],
+     "zoom": 3
+    },
+    "k1": "SW59",
+    "key": "_"
+   },
+   {
+    "at": [
+     1925.3,
+     1238.7
+    ],
+    "crop": {
+     "box": [
+      1873,
+      1187,
+      1973,
+      1287
+     ],
+     "zoom": 3
+    },
+    "k1": "SW67",
+    "key": "UP"
+   },
+   {
+    "at": [
+     2013,
+     1238.7
+    ],
+    "crop": {
+     "box": [
+      1963,
+      1187,
+      2063,
+      1287
+     ],
+     "zoom": 3
+    },
+    "k1": "SW66",
+    "key": "DOWN"
+   },
+   {
+    "at": [
+     609.3,
+     1329.3
+    ],
+    "crop": {
+     "box": [
+      562,
+      1277,
+      662,
+      1377
+     ],
+     "zoom": 3
+    },
+    "k1": "SW5",
+    "key": "CAPS LOCK"
+   },
+   {
+    "at": [
+     702.7,
+     1328.7
+    ],
+    "crop": {
+     "box": [
+      651,
+      1277,
+      751,
+      1377
+     ],
+     "zoom": 3
+    },
+    "k1": "SW73",
+    "key": "CTRL"
+   },
+   {
+    "at": [
+     792.3,
+     1328.7
+    ],
+    "crop": {
+     "box": [
+      740,
+      1277,
+      840,
+      1377
+     ],
+     "zoom": 3
+    },
+    "k1": "SW12",
+    "key": "A"
+   },
+   {
+    "at": [
+     970.3,
+     1329
+    ],
+    "crop": {
+     "box": [
+      918,
+      1277,
+      1018,
+      1377
+     ],
+     "zoom": 3
+    },
+    "k1": "SW18",
+    "key": "D"
+   },
+   {
+    "at": [
+     1149.3,
+     1328.7
+    ],
+    "crop": {
+     "box": [
+      1097,
+      1277,
+      1197,
+      1377
+     ],
+     "zoom": 3
+    },
+    "k1": "SW27",
+    "key": "G"
+   },
+   {
+    "at": [
+     1329,
+     1328.7
+    ],
+    "crop": {
+     "box": [
+      1275,
+      1277,
+      1375,
+      1377
+     ],
+     "zoom": 3
+    },
+    "k1": "SW40",
+    "key": "J"
+   },
+   {
+    "at": [
+     1508,
+     1329
+    ],
+    "crop": {
+     "box": [
+      1453,
+      1277,
+      1553,
+      1377
+     ],
+     "zoom": 3
+    },
+    "k1": "SW48",
+    "key": "L"
+   },
+   {
+    "at": [
+     1687,
+     1328.3
+    ],
+    "crop": {
+     "box": [
+      1632,
+      1277,
+      1732,
+      1377
+     ],
+     "zoom": 3
+    },
+    "k1": "SW61",
+    "key": ":"
+   },
+   {
+    "at": [
+     1908,
+     1323
+    ],
+    "crop": {
+     "box": [
+      1830,
+      1252,
+      1980,
+      1402
+     ],
+     "zoom": 2
+    },
+    "k1": "SW68",
+    "key": "RETURN"
+   },
+   {
+    "at": [
+     611,
+     1419.3
+    ],
+    "crop": {
+     "box": [
+      562,
+      1367,
+      662,
+      1467
+     ],
+     "zoom": 3
+    },
+    "k1": "SW6",
+    "key": "SHIFT LOCK"
+   },
+   {
+    "at": [
+     720.5,
+     1417
+    ],
+    "crop": {
+     "box": [
+      648,
+      1342,
+      798,
+      1492
+     ],
+     "zoom": 2
+    },
+    "k1": "SW72",
+    "key": "SHIFT (left)"
+   },
+   {
+    "at": [
+     837.3,
+     1419.3
+    ],
+    "crop": {
+     "box": [
+      785,
+      1367,
+      885,
+      1467
+     ],
+     "zoom": 3
+    },
+    "k1": "SW14",
+    "key": "Z"
+   },
+   {
+    "at": [
+     1017.3,
+     1419
+    ],
+    "crop": {
+     "box": [
+      964,
+      1367,
+      1064,
+      1467
+     ],
+     "zoom": 3
+    },
+    "k1": "SW20",
+    "key": "C"
+   },
+   {
+    "at": [
+     1196.3,
+     1419
+    ],
+    "crop": {
+     "box": [
+      1143,
+      1367,
+      1243,
+      1467
+     ],
+     "zoom": 3
+    },
+    "k1": "SW35",
+    "key": "B"
+   },
+   {
+    "at": [
+     1374.3,
+     1419.3
+    ],
+    "crop": {
+     "box": [
+      1321,
+      1367,
+      1421,
+      1467
+     ],
+     "zoom": 3
+    },
+    "k1": "SW42",
+    "key": "M"
+   },
+   {
+    "at": [
+     1554,
+     1419
+    ],
+    "crop": {
+     "box": [
+      1500,
+      1367,
+      1600,
+      1467
+     ],
+     "zoom": 3
+    },
+    "k1": "SW56",
+    "key": "."
+   },
+   {
+    "at": [
+     1754.5,
+     1414.5
+    ],
+    "crop": {
+     "box": [
+      1676,
+      1342,
+      1826,
+      1492
+     ],
+     "zoom": 2
+    },
+    "k1": "SW71",
+    "key": "SHIFT (right)"
+   },
+   {
+    "at": [
+     1868,
+     1417.7
+    ],
+    "crop": {
+     "box": [
+      1813,
+      1367,
+      1913,
+      1467
+     ],
+     "zoom": 3
+    },
+    "k1": "SW69",
+    "key": "DELETE"
+   },
+   {
+    "at": [
+     1956.5,
+     1414.5
+    ],
+    "crop": {
+     "box": [
+      1878,
+      1342,
+      2028,
+      1492
+     ],
+     "zoom": 2
+    },
+    "k1": "SW70",
+    "key": "COPY"
+   }
+  ],
+  "repeats": {
+   "marks": [
+    {
+     "at": [
+      770,
+      1238.3
+     ],
+     "crop": {
+      "box": [
+       730,
+       1175,
+       830,
+       1275
+      ],
+      "zoom": 3
+     },
+     "key": "Q"
+    },
+    {
+     "at": [
+      1084,
+      1150
+     ],
+     "crop": {
+      "box": [
+       1020,
+       1115,
+       1120,
+       1215
+      ],
+      "zoom": 3
+     },
+     "key": "5"
+    },
+    {
+     "at": [
+      1374,
+      1416.7
+     ],
+     "crop": {
+      "box": [
+       1335,
+       1355,
+       1435,
+       1455
+      ],
+      "zoom": 3
+     },
+     "key": "M"
+    },
+    {
+     "at": [
+      1369,
+      1064
+     ],
+     "crop": {
+      "box": [
+       1310,
+       1025,
+       1410,
+       1125
+      ],
+      "zoom": 3
+     },
+     "key": "f6"
+    },
+    {
+     "at": [
+      970,
+      1329
+     ],
+     "crop": {
+      "box": [
+       910,
+       1290,
+       1010,
+       1390
+      ],
+      "zoom": 3
+     },
+     "key": "D"
+    }
+   ],
+   "what": "Five keys marked a second time on crops placed differently, to show how well a mark repeats. Not used in any fit."
+  },
+  "source": "O1",
+  "what": "The centre of each keycap's top face (the dished face the legend is on), read as the middle of its outline left to right and between its rear edge and the highlight on its front edge. Not refined in code. `k1` is the switch in K1 under that key."
+ },
+ "scale": {
+  "folds": "Set before any fit: the footprints alternate A, B, A, B in the order listed here. The scale is fitted on one half and scored on the other, both ways round, so every footprint is held out once.",
+  "footprints": [
+   {
+    "corners": {
+     "bl": [
+      1636,
+      940
+     ],
+     "br": [
+      1882,
+      941
+     ],
+     "tl": [
+      1638.5,
+      421
+     ],
+     "tr": [
+      1881,
+      421
+     ]
+    },
+    "crops": {
+     "bl": {
+      "box": [
+       1591,
+       885,
+       1681,
+       975
+      ],
+      "zoom": 4
+     },
+     "br": {
+      "box": [
+       1841,
+       885,
+       1931,
+       975
+      ],
+      "zoom": 4
+     },
+     "tl": {
+      "box": [
+       1591,
+       365,
+       1681,
+       455
+      ],
+      "zoom": 4
+     },
+     "tr": {
+      "box": [
+       1841,
+       365,
+       1931,
+       455
+      ],
+      "zoom": 4
+     }
+    },
+    "fold": "A",
+    "id": "IC73",
+    "pins": 28,
+    "rowSpacingMm": 15.24,
+    "rows": "vertical"
+   },
+   {
+    "corners": {
+     "bl": [
+      2080,
+      800
+     ],
+     "br": [
+      2324,
+      800
+     ],
+     "tl": [
+      2080,
+      281
+     ],
+     "tr": [
+      2325,
+      283
+     ]
+    },
+    "crops": {
+     "bl": {
+      "box": [
+       2025,
+       755,
+       2115,
+       845
+      ],
+      "zoom": 4
+     },
+     "br": {
+      "box": [
+       2285,
+       755,
+       2375,
+       845
+      ],
+      "zoom": 4
+     },
+     "tl": {
+      "box": [
+       2025,
+       245,
+       2115,
+       335
+      ],
+      "zoom": 4
+     },
+     "tr": {
+      "box": [
+       2285,
+       245,
+       2375,
+       335
+      ],
+      "zoom": 4
+     }
+    },
+    "fold": "B",
+    "id": "IC7",
+    "pins": 28,
+    "rowSpacingMm": 15.24,
+    "rows": "vertical"
+   },
+   {
+    "corners": {
+     "bl": [
+      2074,
+      1439
+     ],
+     "br": [
+      2319,
+      1440
+     ],
+     "tl": [
+      2076,
+      999
+     ],
+     "tr": [
+      2322,
+      1000
+     ]
+    },
+    "crops": {
+     "bl": {
+      "box": [
+       2025,
+       1385,
+       2115,
+       1475
+      ],
+      "zoom": 4
+     },
+     "br": {
+      "box": [
+       2285,
+       1385,
+       2375,
+       1475
+      ],
+      "zoom": 4
+     },
+     "tl": {
+      "box": [
+       2025,
+       945,
+       2115,
+       1035
+      ],
+      "zoom": 4
+     },
+     "tr": {
+      "box": [
+       2285,
+       945,
+       2375,
+       1035
+      ],
+      "zoom": 4
+     }
+    },
+    "fold": "A",
+    "id": "IC4",
+    "pins": 24,
+    "rowSpacingMm": 15.24,
+    "rows": "vertical"
+   },
+   {
+    "corners": {
+     "bl": [
+      289,
+      1695
+     ],
+     "br": [
+      532,
+      1695
+     ],
+     "tl": [
+      291,
+      1171
+     ],
+     "tr": [
+      534,
+      1172
+     ]
+    },
+    "crops": {
+     "bl": {
+      "box": [
+       245,
+       1645,
+       335,
+       1735
+      ],
+      "zoom": 4
+     },
+     "br": {
+      "box": [
+       491,
+       1645,
+       581,
+       1735
+      ],
+      "zoom": 4
+     },
+     "tl": {
+      "box": [
+       245,
+       1125,
+       335,
+       1215
+      ],
+      "zoom": 4
+     },
+     "tr": {
+      "box": [
+       491,
+       1125,
+       581,
+       1215
+      ],
+      "zoom": 4
+     }
+    },
+    "fold": "B",
+    "id": "L28",
+    "note": "The 28-pin footprint at the board's left edge, below R173; the label printed beside it was not read with confidence, so it is named by its place",
+    "pins": 28,
+    "rowSpacingMm": 15.24,
+    "rows": "vertical"
+   },
+   {
+    "corners": {
+     "bl": [
+      272.5,
+      1032.5
+     ],
+     "br": [
+      394,
+      1032
+     ],
+     "tl": [
+      274,
+      794
+     ],
+     "tr": [
+      394,
+      793
+     ]
+    },
+    "crops": {
+     "bl": {
+      "box": [
+       235,
+       995,
+       325,
+       1085
+      ],
+      "zoom": 4
+     },
+     "br": {
+      "box": [
+       345,
+       995,
+       435,
+       1085
+      ],
+      "zoom": 4
+     },
+     "tl": {
+      "box": [
+       235,
+       745,
+       325,
+       835
+      ],
+      "zoom": 4
+     },
+     "tr": {
+      "box": [
+       345,
+       745,
+       435,
+       835
+      ],
+      "zoom": 4
+     }
+    },
+    "fold": "A",
+    "id": "IC93",
+    "pins": 14,
+    "rowSpacingMm": 7.62,
+    "rows": "vertical"
+   },
+   {
+    "corners": {
+     "bl": [
+      2595,
+      1442
+     ],
+     "br": [
+      2836,
+      1442
+     ],
+     "tl": [
+      2599,
+      682
+     ],
+     "tr": [
+      2840,
+      685
+     ]
+    },
+    "crops": {
+     "bl": {
+      "box": [
+       2555,
+       1405,
+       2645,
+       1495
+      ],
+      "zoom": 4
+     },
+     "br": {
+      "box": [
+       2785,
+       1405,
+       2875,
+       1495
+      ],
+      "zoom": 4
+     },
+     "tl": {
+      "box": [
+       2555,
+       635,
+       2645,
+       725
+      ],
+      "zoom": 4
+     },
+     "tr": {
+      "box": [
+       2785,
+       635,
+       2875,
+       725
+      ],
+      "zoom": 4
+     }
+    },
+    "fold": "B",
+    "id": "IC2",
+    "pins": 40,
+    "rowSpacingMm": 15.24,
+    "rows": "vertical"
+   },
+   {
+    "corners": {
+     "bl": [
+      2590,
+      2341
+     ],
+     "br": [
+      2834,
+      2342
+     ],
+     "tl": [
+      2594,
+      1584
+     ],
+     "tr": [
+      2836,
+      1585
+     ]
+    },
+    "crops": {
+     "bl": {
+      "box": [
+       2555,
+       2295,
+       2645,
+       2385
+      ],
+      "zoom": 4
+     },
+     "br": {
+      "box": [
+       2785,
+       2295,
+       2875,
+       2385
+      ],
+      "zoom": 4
+     },
+     "tl": {
+      "box": [
+       2555,
+       1515,
+       2645,
+       1605
+      ],
+      "zoom": 4
+     },
+     "tr": {
+      "box": [
+       2785,
+       1515,
+       2875,
+       1605
+      ],
+      "zoom": 4
+     }
+    },
+    "fold": "A",
+    "id": "IC1",
+    "pins": 40,
+    "rowSpacingMm": 15.24,
+    "rows": "vertical"
+   },
+   {
+    "corners": {
+     "bl": [
+      2589,
+      3200
+     ],
+     "br": [
+      2831,
+      3198
+     ],
+     "tl": [
+      2590,
+      2440
+     ],
+     "tr": [
+      2831,
+      2442
+     ]
+    },
+    "crops": {
+     "bl": {
+      "box": [
+       2555,
+       3153,
+       2645,
+       3243
+      ],
+      "zoom": 4
+     },
+     "br": {
+      "box": [
+       2785,
+       3153,
+       2875,
+       3243
+      ],
+      "zoom": 4
+     },
+     "tl": {
+      "box": [
+       2555,
+       2393,
+       2645,
+       2483
+      ],
+      "zoom": 4
+     },
+     "tr": {
+      "box": [
+       2785,
+       2393,
+       2875,
+       2483
+      ],
+      "zoom": 4
+     }
+    },
+    "fold": "B",
+    "id": "IC69",
+    "pins": 40,
+    "rowSpacingMm": 15.24,
+    "rows": "vertical"
+   },
+   {
+    "corners": {
+     "bl": [
+      1467,
+      2460
+     ],
+     "br": [
+      1715,
+      2460
+     ],
+     "tl": [
+      1471,
+      1699
+     ],
+     "tr": [
+      1717.5,
+      1700
+     ]
+    },
+    "crops": {
+     "bl": {
+      "box": [
+       1431,
+       2435,
+       1521,
+       2525
+      ],
+      "zoom": 4
+     },
+     "br": {
+      "box": [
+       1671,
+       2435,
+       1761,
+       2525
+      ],
+      "zoom": 4
+     },
+     "tl": {
+      "box": [
+       1431,
+       1640,
+       1521,
+       1730
+      ],
+      "zoom": 4
+     },
+     "tr": {
+      "box": [
+       1671,
+       1640,
+       1761,
+       1730
+      ],
+      "zoom": 4
+     }
+    },
+    "fold": "A",
+    "id": "IC3",
+    "pins": 40,
+    "rowSpacingMm": 15.24,
+    "rows": "vertical"
+   },
+   {
+    "corners": {
+     "bl": [
+      1007,
+      2456
+     ],
+     "br": [
+      1252.5,
+      2457.5
+     ],
+     "tl": [
+      1011,
+      1697.5
+     ],
+     "tr": [
+      1256,
+      1699
+     ]
+    },
+    "crops": {
+     "bl": {
+      "box": [
+       961,
+       2435,
+       1051,
+       2525
+      ],
+      "zoom": 4
+     },
+     "br": {
+      "box": [
+       1195,
+       2435,
+       1285,
+       2525
+      ],
+      "zoom": 4
+     },
+     "tl": {
+      "box": [
+       961,
+       1640,
+       1051,
+       1730
+      ],
+      "zoom": 4
+     },
+     "tr": {
+      "box": [
+       1195,
+       1640,
+       1285,
+       1730
+      ],
+      "zoom": 4
+     }
+    },
+    "fold": "B",
+    "id": "IC78",
+    "pins": 40,
+    "rowSpacingMm": 15.24,
+    "rows": "vertical"
+   },
+   {
+    "corners": {
+     "bl": [
+      3429,
+      3282
+     ],
+     "br": [
+      3670,
+      3283
+     ],
+     "tl": [
+      3429,
+      2762
+     ],
+     "tr": [
+      3673,
+      2762
+     ]
+    },
+    "crops": {
+     "bl": {
+      "box": [
+       3385,
+       3243,
+       3475,
+       3333
+      ],
+      "zoom": 4
+     },
+     "br": {
+      "box": [
+       3629,
+       3243,
+       3719,
+       3333
+      ],
+      "zoom": 4
+     },
+     "tl": {
+      "box": [
+       3385,
+       2713,
+       3475,
+       2803
+      ],
+      "zoom": 4
+     },
+     "tr": {
+      "box": [
+       3380,
+       2700,
+       3760,
+       2900
+      ],
+      "zoom": 3
+     }
+    },
+    "fold": "A",
+    "id": "IC51",
+    "pins": 28,
+    "rowSpacingMm": 15.24,
+    "rows": "vertical"
+   },
+   {
+    "corners": {
+     "bl": [
+      4630,
+      3285
+     ],
+     "br": [
+      4871,
+      3285
+     ],
+     "tl": [
+      4629,
+      2767
+     ],
+     "tr": [
+      4871,
+      2767
+     ]
+    },
+    "crops": {
+     "bl": {
+      "box": [
+       4589,
+       3243,
+       4679,
+       3333
+      ],
+      "zoom": 4
+     },
+     "br": {
+      "box": [
+       4835,
+       3243,
+       4925,
+       3333
+      ],
+      "zoom": 4
+     },
+     "tl": {
+      "box": [
+       4589,
+       2713,
+       4679,
+       2803
+      ],
+      "zoom": 4
+     },
+     "tr": {
+      "box": [
+       4835,
+       2713,
+       4925,
+       2803
+      ],
+      "zoom": 4
+     }
+    },
+    "fold": "B",
+    "id": "IC101",
+    "pins": 28,
+    "rowSpacingMm": 15.24,
+    "rows": "vertical"
+   },
+   {
+    "corners": {
+     "bl": [
+      4757.5,
+      1750
+     ],
+     "br": [
+      4877.5,
+      1747.5
+     ],
+     "tl": [
+      4757.5,
+      1466
+     ],
+     "tr": [
+      4882,
+      1465
+     ]
+    },
+    "crops": {
+     "bl": {
+      "box": [
+       4715,
+       1715,
+       4805,
+       1805
+      ],
+      "zoom": 4
+     },
+     "br": {
+      "box": [
+       4845,
+       1715,
+       4935,
+       1805
+      ],
+      "zoom": 4
+     },
+     "tl": {
+      "box": [
+       4715,
+       1405,
+       4805,
+       1495
+      ],
+      "zoom": 4
+     },
+     "tr": {
+      "box": [
+       4845,
+       1405,
+       4935,
+       1495
+      ],
+      "zoom": 4
+     }
+    },
+    "fold": "A",
+    "id": "IC64",
+    "pins": 16,
+    "rowSpacingMm": 7.62,
+    "rows": "vertical"
+   },
+   {
+    "corners": {
+     "bl": [
+      722.5,
+      2914
+     ],
+     "br": [
+      848.75,
+      2914
+     ],
+     "tl": [
+      725,
+      2675.5
+     ],
+     "tr": [
+      847.5,
+      2677
+     ]
+    },
+    "crops": {
+     "bl": {
+      "box": [
+       685,
+       2883,
+       775,
+       2973
+      ],
+      "zoom": 4
+     },
+     "br": {
+      "box": [
+       795,
+       2883,
+       885,
+       2973
+      ],
+      "zoom": 4
+     },
+     "tl": {
+      "box": [
+       685,
+       2613,
+       775,
+       2703
+      ],
+      "zoom": 4
+     },
+     "tr": {
+      "box": [
+       795,
+       2613,
+       885,
+       2703
+      ],
+      "zoom": 4
+     }
+    },
+    "fold": "B",
+    "id": "IC79",
+    "pins": 14,
+    "rowSpacingMm": 7.62,
+    "rows": "vertical"
+   },
+   {
+    "corners": {
+     "bl": [
+      3360,
+      547.5
+     ],
+     "br": [
+      3641,
+      547.5
+     ],
+     "tl": [
+      3361,
+      427.5
+     ],
+     "tr": [
+      3642.5,
+      427.5
+     ]
+    },
+    "crops": {
+     "bl": {
+      "box": [
+       3305,
+       485,
+       3395,
+       575
+      ],
+      "zoom": 4
+     },
+     "br": {
+      "box": [
+       3615,
+       485,
+       3705,
+       575
+      ],
+      "zoom": 4
+     },
+     "tl": {
+      "box": [
+       3305,
+       375,
+       3395,
+       465
+      ],
+      "zoom": 4
+     },
+     "tr": {
+      "box": [
+       3615,
+       375,
+       3705,
+       465
+      ],
+      "zoom": 4
+     }
+    },
+    "fold": "A",
+    "id": "IC75",
+    "pins": 16,
+    "rowSpacingMm": 7.62,
+    "rows": "horizontal"
+   },
+   {
+    "corners": {
+     "bl": [
+      2977.5,
+      547.5
+     ],
+     "br": [
+      3261,
+      547.5
+     ],
+     "tl": [
+      2982.5,
+      426
+     ],
+     "tr": [
+      3259,
+      427.5
+     ]
+    },
+    "crops": {
+     "bl": {
+      "box": [
+       2925,
+       485,
+       3015,
+       575
+      ],
+      "zoom": 4
+     },
+     "br": {
+      "box": [
+       3235,
+       485,
+       3325,
+       575
+      ],
+      "zoom": 4
+     },
+     "tl": {
+      "box": [
+       2925,
+       375,
+       3015,
+       465
+      ],
+      "zoom": 4
+     },
+     "tr": {
+      "box": [
+       3235,
+       375,
+       3325,
+       465
+      ],
+      "zoom": 4
+     }
+    },
+    "fold": "B",
+    "id": "IC74",
+    "pins": 16,
+    "rowSpacingMm": 7.62,
+    "rows": "horizontal"
+   }
+  ],
+  "source": "I1",
+  "what": "The centres of the four corner pins of each DIP footprint: pins 1, N/2, N/2 + 1 and N in some order, named by where they lie in the scan (tl, tr, bl, br: top left, top right, bottom left, bottom right). Which corner is pin 1 does not matter to the scale. The pin count is the one a row's length in pixels allows at the 2.54 mm pitch (the next count up or down is 2.54 mm, about 40 px, away). spike.py moves each mark to the centroid of the solder blob nearest it (common.refine_to_pad), and refuses the move when that centroid is over 0.6 mm from the mark."
+ },
+ "solderSeeds": {
+  "holes": [
+   {
+    "I1": [
+     274,
+     794
+    ],
+    "I2mirrored": [
+     236.75,
+     773.5
+    ],
+    "crop": {
+     "I1": {
+      "box": [
+       235,
+       745,
+       325,
+       835
+      ],
+      "zoom": 4
+     },
+     "I2mirrored": {
+      "box": [
+       193,
+       731,
+       283,
+       821
+      ],
+      "zoom": 4
+     }
+    },
+    "id": "IC93 tl"
+   },
+   {
+    "I1": [
+     4757.5,
+     1466
+    ],
+    "I2mirrored": [
+     4722.25,
+     1441.75
+    ],
+    "crop": {
+     "I1": {
+      "box": [
+       4715,
+       1405,
+       4805,
+       1495
+      ],
+      "zoom": 4
+     },
+     "I2mirrored": {
+      "box": [
+       4676,
+       1403,
+       4766,
+       1493
+      ],
+      "zoom": 4
+     }
+    },
+    "id": "IC64 tl"
+   },
+   {
+    "I1": [
+     722.5,
+     2914
+    ],
+    "I2mirrored": [
+     697.25,
+     2894.75
+    ],
+    "crop": {
+     "I1": {
+      "box": [
+       685,
+       2883,
+       775,
+       2973
+      ],
+      "zoom": 4
+     },
+     "I2mirrored": {
+      "box": [
+       641,
+       2851,
+       731,
+       2941
+      ],
+      "zoom": 4
+     }
+    },
+    "id": "IC79 bl"
+   },
+   {
+    "I1": [
+     4871,
+     3285
+    ],
+    "I2mirrored": [
+     4840,
+     3263.25
+    ],
+    "crop": {
+     "I1": {
+      "box": [
+       4835,
+       3243,
+       4925,
+       3333
+      ],
+      "zoom": 4
+     },
+     "I2mirrored": {
+      "box": [
+       4790,
+       3222,
+       4880,
+       3312
+      ],
+      "zoom": 4
+     }
+    },
+    "id": "IC101 br"
+   }
+  ],
+  "sources": [
+   "I1",
+   "I2"
+  ],
+  "what": "Four pads marked on I1 and on I2 mirrored (I2 flipped left to right, x' = 5013 - x, so that it lies as the component side does), to seed the solder side's first affine fit. They are corners of four footprints far apart."
+ }
+}
