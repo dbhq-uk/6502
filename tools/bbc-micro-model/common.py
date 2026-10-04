@@ -362,14 +362,14 @@ def fit_held_out(src, dst, model: str, folds) -> dict:
 
 # --- data files ---------------------------------------------------------------
 
-def plain(obj):
+def plain(obj, places=4):
     """obj as plain Python: dicts, lists, str, bool, None, int and floats
-    rounded to 4 places. numpy numbers become Python numbers; NaN and
+    rounded to `places` places. numpy numbers become Python numbers; NaN and
     infinity are refused (ValueError), and so is anything else (TypeError)."""
     if isinstance(obj, dict):
-        return {str(k): plain(v) for k, v in obj.items()}
+        return {str(k): plain(v, places) for k, v in obj.items()}
     if isinstance(obj, (list, tuple, np.ndarray)):
-        return [plain(v) for v in obj]
+        return [plain(v, places) for v in obj]
     if obj is None or isinstance(obj, (str, bool, np.bool_)):
         return bool(obj) if isinstance(obj, np.bool_) else obj
     if isinstance(obj, (int, np.integer)):
@@ -377,13 +377,34 @@ def plain(obj):
     if isinstance(obj, (float, np.floating)):
         if not math.isfinite(obj):
             raise ValueError(f'{obj} is not a finite number')
-        r = round(float(obj), 4)
+        r = round(float(obj), places)
         return 0.0 if r == 0 else r
     raise TypeError(f'{type(obj).__name__} is not plain data')
 
 
-def write_data(name: str, obj) -> None:
-    """data/<name>: keys sorted, floats to 4 places, plain Python numbers only."""
+def _rows_per_line(obj, depth=0):
+    """JSON with dicts indented, and a list of dicts or lists one element to a
+    line (a long table stays readable, and small)."""
+    pad = ' ' * (depth + 1)
+    if isinstance(obj, dict) and obj:
+        items = [f'{pad}{json.dumps(k)}: {_rows_per_line(v, depth + 1)}' for k, v in sorted(obj.items())]
+        return '{\n' + ',\n'.join(items) + '\n' + ' ' * depth + '}'
+    if isinstance(obj, list) and obj and all(isinstance(v, (dict, list)) for v in obj):
+        rows = [pad + json.dumps(v, sort_keys=True, ensure_ascii=False, separators=(',', ':')) for v in obj]
+        return '[\n' + ',\n'.join(rows) + '\n' + ' ' * depth + ']'
+    return json.dumps(obj, sort_keys=True, ensure_ascii=False, separators=(', ', ': '))
+
+
+def write_data(name: str, obj, places=4, rows_per_line=False) -> None:
+    """data/<name>: keys sorted, floats to `places` places (4 unless said),
+    plain Python numbers only. rows_per_line writes a list of records one to
+    a line, for a file with long tables."""
+    if rows_per_line:
+        text = _rows_per_line(plain(obj, places))
+        json.loads(text)
+        Path(DATA).mkdir(parents=True, exist_ok=True)
+        (Path(DATA) / name).write_text(text + '\n', encoding='utf8')
+        return
     text = json.dumps(plain(obj), indent=1, sort_keys=True, ensure_ascii=False)
     Path(DATA).mkdir(parents=True, exist_ok=True)
     (Path(DATA) / name).write_text(text + '\n', encoding='utf8')

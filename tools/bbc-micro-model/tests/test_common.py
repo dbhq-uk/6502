@@ -230,3 +230,15 @@ def test_switch_centres_reads_the_hole_through_the_footprints_rotation(tmp_path)
     assert np.allclose(k['SW1']['centre'], (100.0, 48.0))
     assert np.allclose(k['SW2']['centre'], (19.0, 27.0))
     assert k['SW2']['footprint'] == 'SW_Cherry_MX_PCB_1.50u'
+
+
+def test_write_data_can_put_one_record_to_a_line(tmp_path, monkeypatch):
+    import json
+    monkeypatch.setattr(common, 'DATA', tmp_path)
+    obj = {'b': [{'y': 1.23456, 'x': 2}, {'y': 3, 'x': 4}], 'a': {'n': 5, 'rows': [[1.0001, 2], [3, 4]]}, 'c': [1, 2]}
+    common.write_data('r.json', obj, places=3, rows_per_line=True)
+    text = (tmp_path / 'r.json').read_text()
+    assert json.loads(text) == {'a': {'n': 5, 'rows': [[1.0, 2], [3, 4]]}, 'b': [{'x': 2, 'y': 1.235}, {'x': 4, 'y': 3}], 'c': [1, 2]}
+    lines = text.splitlines()
+    assert '  {"x":2,"y":1.235},' in lines and '  {"x":4,"y":3}' in lines
+    assert '   [1.0,2],' in lines

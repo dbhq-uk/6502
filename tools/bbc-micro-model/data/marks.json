@@ -2461,5 +2461,262 @@
    "I2"
   ],
   "what": "Four pads marked on I1 and on I2 mirrored (I2 flipped left to right, x' = 5013 - x, so that it lies as the component side does), to seed the solder side's first affine fit. They are corners of four footprints far apart."
+ },
+ "footprints": {
+  "what": "Footprints' references, read from I1's print by hand because nothing in board_register.py reads text: each mark is a point in I1 pixels inside the footprint it names, with the crop (I1 pixels, enlarged by zoom, a grid every 100 pixels) the label was read on. A mark with pin1 also names pin 1, for a footprint whose print chamfer the code could not find. The references are the footprints the plan requires (task 3: IC1 to IC7, IC51, IC52, IC69, IC78) and IC21; task 5 names the rest. A mark with kind says the grouping took something for a DIP that is not one, and why; a mark with ref null names no reference.",
+  "source": "I1",
+  "marks": [
+   {
+    "ref": "IC1",
+    "at": [
+     2713.5,
+     1963.0
+    ],
+    "crop": {
+     "box": [
+      2500,
+      1544,
+      2926,
+      2382
+     ],
+     "zoom": 1
+    },
+    "reason": "The label IC1 is printed beside the outline (read on the crop); the mark is the middle of the four corner pins task 0 marked on this footprint (scale.footprints)"
+   },
+   {
+    "ref": "IC2",
+    "at": [
+     2717.5,
+     1062.8
+    ],
+    "crop": {
+     "box": [
+      2505,
+      642,
+      2930,
+      1482
+     ],
+     "zoom": 1
+    },
+    "reason": "The label IC2 is printed beside the outline (read on the crop); the mark is the middle of the four corner pins task 0 marked on this footprint (scale.footprints)"
+   },
+   {
+    "ref": "IC3",
+    "at": [
+     1592.6,
+     2079.8
+    ],
+    "crop": {
+     "box": [
+      1377,
+      1659,
+      1807,
+      2500
+     ],
+     "zoom": 1
+    },
+    "reason": "The label IC3 is printed beside the outline (read on the crop); the mark is the middle of the four corner pins task 0 marked on this footprint (scale.footprints)"
+   },
+   {
+    "ref": "IC4",
+    "at": [
+     2197.8,
+     1219.5
+    ],
+    "crop": {
+     "box": [
+      1984,
+      959,
+      2412,
+      1480
+     ],
+     "zoom": 1
+    },
+    "reason": "The label IC4 is printed beside the outline (read on the crop); the mark is the middle of the four corner pins task 0 marked on this footprint (scale.footprints)"
+   },
+   {
+    "ref": "IC5",
+    "at": [
+     3125,
+     1785
+    ],
+    "crop": {
+     "box": [
+      2950,
+      1450,
+      3330,
+      2060
+     ],
+     "zoom": 1
+    },
+    "reason": "The label IC5 is printed left of its outline, beside the left row (read on the crop); the mark is the footprint's middle, read off the crop"
+   },
+   {
+    "ref": "IC6",
+    "at": [
+     3535,
+     2300
+    ],
+    "crop": {
+     "box": [
+      3360,
+      1950,
+      3760,
+      2620
+     ],
+     "zoom": 1
+    },
+    "reason": "The label IC6 is printed left of its outline, beside the left row (read on the crop); the mark is the footprint's middle, read off the crop"
+   },
+   {
+    "ref": "IC7",
+    "at": [
+     2202.2,
+     541.0
+    ],
+    "crop": {
+     "box": [
+      1990,
+      241,
+      2415,
+      840
+     ],
+     "zoom": 1
+    },
+    "reason": "The label IC7 is printed beside the outline (read on the crop); the mark is the middle of the four corner pins task 0 marked on this footprint (scale.footprints)"
+   },
+   {
+    "ref": "IC51",
+    "at": [
+     3550.2,
+     3022.2
+    ],
+    "crop": {
+     "box": [
+      3339,
+      2722,
+      3763,
+      3323
+     ],
+     "zoom": 1
+    },
+    "reason": "The label IC51 is printed beside the outline (read on the crop); the mark is the middle of the four corner pins task 0 marked on this footprint (scale.footprints)"
+   },
+   {
+    "ref": "IC52",
+    "at": [
+     3825,
+     3030
+    ],
+    "crop": {
+     "box": [
+      3660,
+      2700,
+      4040,
+      3330
+     ],
+     "zoom": 1
+    },
+    "reason": "The label IC52 is printed between the left row and the outline; IC88 is printed on the far side of the right row, and belongs to the next footprint (read on the crop); the mark is the footprint's middle, read off the crop"
+   },
+   {
+    "ref": "IC69",
+    "at": [
+     2710.2,
+     2820.0
+    ],
+    "crop": {
+     "box": [
+      2499,
+      2400,
+      2921,
+      3240
+     ],
+     "zoom": 1
+    },
+    "reason": "The label IC69 is printed beside the outline (read on the crop); the mark is the middle of the four corner pins task 0 marked on this footprint (scale.footprints). Pin 1 is the top left pad (task 0's corner tl): the print's chamfer there is larger than the box the code looks in, seen on crop I1 (2550, 2390, 2880, 2480) at zoom 3",
+    "pin1": [
+     2590,
+     2440
+    ]
+   },
+   {
+    "ref": "IC78",
+    "at": [
+     1131.6,
+     2077.5
+    ],
+    "crop": {
+     "box": [
+      917,
+      1657,
+      1346,
+      2497
+     ],
+     "zoom": 1
+    },
+    "reason": "The label IC78 is printed beside the outline (read on the crop); the mark is the middle of the four corner pins task 0 marked on this footprint (scale.footprints)"
+   },
+   {
+    "ref": "IC21",
+    "at": [
+     2005,
+     2660
+    ],
+    "pin1": [
+     1940,
+     2540
+    ],
+    "crop": {
+     "box": [
+      1900,
+      2500,
+      2130,
+      2830
+     ],
+     "zoom": 2
+    },
+    "reason": "The label IC21 is printed left of the left row; pin 1 is the top left pad, at the print's chamfer, which is larger than the box the code looks in"
+   },
+   {
+    "ref": null,
+    "at": [
+     412,
+     1435
+    ],
+    "pin1": [
+     291,
+     1171
+    ],
+    "crop": {
+     "box": [
+      250,
+      1120,
+      580,
+      1210
+     ],
+     "zoom": 3
+    },
+    "reason": "The 28-pin footprint at the left edge (task 0's L28, its label not read with confidence): pin 1 is the top left pad, at the print's chamfer; the bottom end (crop 250, 1660, 580, 1750) has a plain corner"
+   },
+   {
+    "ref": null,
+    "at": [
+     2497,
+     327
+    ],
+    "kind": "other",
+    "crop": {
+     "box": [
+      2480,
+      120,
+      2700,
+      540
+     ],
+     "zoom": 2
+    },
+    "reason": "two columns of resistor and capacitor pads (R85 to R87, C32, C33 printed between them), not a DIP: the print beside the rows is their labels, not an outline"
+   }
+  ]
  }
 }

@@ -1,7 +1,7 @@
 ---
 title: "The BBC Micro's models: the inputs, and what they rest on"
 date: 2026-10-04
-summary: "Before the BBC Micro's two models are built, the work measures what both rest on: the scale of a flatbed scan of the bare board, how well the solder side lies on the component side, and how well a photograph of the keyboard fits an open keyboard layout. The keys, the scan's scale down the board, and the board's size and outline hold, and the solder side holds except for a few holes. Two checks failed and were revised the same day, each kept on record as it failed: the case's front edge, measured on the plane of the keys, which it does not lie in; and a row by row check of the board's width scale, which magnified the noise of short rows and met one long row off the pitch, and as revised lands between pass and stop."
+summary: "Before the BBC Micro's two models are built, the work measures what both rest on: the scale of a flatbed scan of the bare board, how well the solder side lies on the component side, and how well a photograph of the keyboard fits an open keyboard layout. The keys, the scan's scale down the board, and the board's size and outline hold, and the solder side holds except for a few holes. Two checks failed and were revised the same day, each kept on record as it failed: the case's front edge, measured on the plane of the keys, which it does not lie in; and a row by row check of the board's width scale, which magnified the noise of short rows and met one long row off the pitch, and as revised lands between pass and stop. The solder side then lies on the component side within the plan's limits over every hole found, and the board's chips come out as footprints, pin one read from the print."
 order: 28
 ---
 
@@ -791,3 +791,236 @@ Tests: the site test that bound the check as first written is now the plan's
 row as revised (nothing judged is a stop, y passes, x's median is judged, and
 the verdict as first written is recorded); a strict pass of x's median stays a
 to-do naming this entry, since it is between pass and stop.
+
+## Task 3: the solder side registered, and the pads, drills and footprints
+
+`tools/bbc-micro-model/board_register.py` registers the solder side (I2,
+flipped left to right) to the board frame of task 2 on every hole it finds on
+both faces, judges the fit on holes held out of it, and then finds the
+board's pads, drills and footprints. It writes `data/registration.json`;
+`run-board.sh` now runs it after `board_frame.py`.
+
+### How it was measured
+
+- **Tests first.** `tests/test_board_register.py` draws one set of holes
+  twice: as the component side is scanned, and as the solder side is, turned
+  over (mirrored), turned 0.7 degrees, scaled 0.3 per cent larger, warped by a
+  cubic of up to about 0.3 mm, with 2 per cent of the holes missing. Run before
+  the module existed, it failed on the import. It now recovers every hole to
+  under 0.05 mm held out, with the cubic chosen and the affine worse. A second
+  drawing has DIPs of 14 to 40 pins, pin 1 marked by a square pad or by the
+  print's chamfer, two narrow DIPs side by side where only the print says
+  which rows pair, a connector row, a DIP with a pad not drawn and one whose
+  end pin is under a long blob of solder; each DIP comes back with its pin
+  count and pin 1. Tests added later in the task were each seen to fail first
+  (the two last DIP cases by switching off the code they test).
+- **Holes, two kinds.** A tinned pad: most of this board's holes are full of
+  solder, and the hole is the solder blob's centre, found by task 0's finder
+  unchanged (a test holds that). An open hole, a via or a pad the solder did
+  not fill: a light copper ring round a dark middle, lighter than the middle in
+  each of eight sectors, centred on the centroid of the dark middle, which a
+  track joining the ring cannot pull. Read off I1 and I2 before any fit: the
+  ring L 0.7 to 0.95 out to about 0.5 mm, the middle 0.2 to 0.35.
+- **The registration, as task 0's spike.** Four holes marked on both faces seed
+  an affine; holes pair when each is the other's nearest within 1.0 mm; three
+  rounds of refit and rematch. Then an affine and a cubic (a homography and a
+  cubic correction), each scored on a chequerboard of 20 mm blocks of the
+  board frame, each colour held out of the fit to the other. Written into the
+  code before the run: the model is the lower held-out median, and within
+  0.005 mm of each other the affine, the simpler, wins.
+- **The outlier rule, as the plan fixed it.** A matched hole is left out of the
+  scoring only if its blob on either face has an axis ratio from second
+  moments over 1.25, or an area outside 0.6 to 1.6 times the median of the
+  matched holes' blobs on that face. An open hole's blob is its ring and the
+  middle it encloses. It reads no residual. `registration.json` keeps every
+  matched hole's two blobs and held-out error, so the site test applies the
+  rule itself and recomputes both sets of figures.
+
+### The figures
+
+Measured on 4 October 2026 with `cd tools/bbc-micro-model &&
+BBC_MODEL_INPUTS=~/dbhq-previews/bbc-model-research /tmp/bbcvenv/bin/python
+board_register.py` (the same as `run-board.sh`'s last step), which exits 3
+on a stop. It took about nine minutes on this host, most of it waiting on a
+load average over 40.
+
+**The solder side: passes.** 2367 holes matched. Held out:
+
+| Fit | Median | 90th percentile | Largest |
+|---|---|---|---|
+| Affine | 0.125 mm | 0.283 mm | 0.889 mm |
+| Cubic (chosen) | 0.114 mm | 0.258 mm | 0.766 mm |
+
+The cubic is chosen: its median is 0.011 mm lower, over the 0.005 tie. The
+plan passes at a median of 0.15 and a 90th percentile of 0.30, and stops over
+0.25 or 0.50; the largest is recorded, not judged. 9 holes are over 0.6 mm,
+scattered (the largest at board x 77.8, y 11.0 mm, near the rear). By kind:
+the 2092 pairs of solder blobs are task 0's set again, median 0.121, 90th
+percentile 0.273, largest 0.766; the 271 pairs of open rings are much
+tighter, median 0.075, 90th percentile 0.143, largest 0.218, because a ring's
+dark middle is the hole itself where a blob's centroid is wherever the solder
+went. 4 pairs are a ring on one face and solder on the other.
+
+**With the outlier rule: 1087 of the 2367 excluded**, median 0.098, 90th
+percentile 0.205, largest 0.746. That is far more than task 0's 9 ragged pads
+suggested, and it is the rule doing what it says: 808 fail on axis ratio
+alone, 95 on area alone and 184 on both, 821 times on the component side and
+664 on the solder side. A tinned pad's blob is rarely round to 1.25 on these
+scans (the solder is ridged and catches the light in streaks), and an open
+ring's blob carries the stubs of the tracks that join it. The rule was fixed
+before the run and is applied as written; the verdict is on the figures
+without it, which pass.
+
+**The first run, kept.** The first run of the day found 1167 rings on I1 and
+945 on I2 and matched 2521 holes: cubic, median 0.116, 90th percentile 0.292,
+largest 1.009 (affine 0.126, 0.320 and 0.980), a pass, with 1146 excluded by
+the rule (0.100, 0.244 and 1.009). What was wrong with it showed on the
+footprint overlay, not in the residuals: IC69's left row had two drills
+0.47 mm apart where there is one pin, and IC74's row broke the same way. A
+contact sheet of rings by their distance from the nearest solder blob showed
+why. Within about 0.6 mm (339 on I1, 136 on I2) a ring was a dark speck in
+the middle of a tinned pad, solder round a speck being ring-shaped; between
+0.9 and 1.3 mm it was the edge of a pad or a letter of the print (R, 1, 3, 9
+and 6 have dark middles); beyond 3 mm every one looked at was a via. On the
+lighter half of the ring a via is green (OKLab a -0.068 to -0.007, median
+-0.054; b 0.008 to 0.047), a speck in solder is grey (a -0.016 to 0, chroma
+about 0.01), and print is yellow (b 0.05 to 0.12). Since then a ring must be
+green (a at most -0.02) and not yellow (b at most 0.05), and clear of every
+solder blob by 1.3 mm, where a pad (about 0.85 mm in radius) and a ring
+(0.5 mm) would overlap. The rules were set from those rings, looked at, and the
+registration was run again: 399 rings on I1 and 703 on I2, the figures above.
+Both runs pass, and `registration.json` keeps the first run's figures under
+`firstRun`, with this reason.
+
+### Solder-filled holes, and the drills
+
+A drill is a pad on each face that pair up through the registration; it sits
+at the mean of the two faces' centres. 2797 drills: 2522 have solder in them
+on at least one face, so their diameter cannot be seen and is recorded as
+not known; 275 are open on both, and their dark middles measure 0.674 mm
+across at the median (0.636 to 0.676 from the 5th to the 95th percentile).
+Where the two faces put a hole further apart is where one face's solder sits
+off the hole: the faces are 0.118 mm apart at the median and 0.278 at the
+90th percentile, and 93 drills have them more than 0.4 mm apart, so that each
+face's centre is over 0.2 mm from the mean. The site test that every drill
+has a pad on both faces within 0.2 mm holds because each drill's pad is
+placed at the drill; the faces' disagreement is recorded with each drill as
+`spreadMm`, not hidden by it.
+
+3040 pads: 2797 at drills, 22 that pair across the faces but are too ragged on
+both to place a drill (kept as pads with no drill, unless one blob is bigger
+than a pad, which may be two pads bridged: 25 of those were dropped), 207 seen
+on one face only, and 14 a DIP's rows needed (below). A pad's shape is its
+solder's, not its copper's: solder hides the copper's outline on both faces.
+
+### Footprints
+
+Pads 2.54 mm apart in a line are chained into rows, across and down. Two rows
+that face each other pad for pad at 7.62, 10.16 or 15.24 mm are a DIP. The
+first grouping found 80 DIPs, many short or split: one pad not found broke a
+row in two. Now a row may skip up to two pads; every run of slots where one
+row or the other has a pad is a candidate; a slot empty on both rows ends a
+run; and the run is trimmed until both rows have a pad at each end, or one
+row has its pad and the scan shows solder where the other's goes (IC52's top
+right pin is under a blob 2.75 times as long as it is wide, on both faces).
+A missing pin is then completed from a spare blob within 0.6 mm (8 were) or
+inferred where its row puts it (6 were, recorded as `inferred`).
+
+Where a row could pair either way (the RAM block's narrow DIPs sit 7.62 mm
+apart, row to row), the print decides: a DIP's outline runs just inside both
+its rows. Every pairing the first run accepted scored 0.74 or more on the
+print, the wrong ones it was the evidence against 0.1 to 0.2; a pairing needs
+0.5, set then. A row whose pads sit 0.46 mm off its line (IC1's last pin) is
+still one row: the across tolerance went from 0.4 to 0.5 mm after that was
+seen.
+
+**Pin 1 from the print.** No pad on this board is square: the squareness of
+every pad-sized blob on I1 runs smoothly from 0.75 to 0.93, with no group
+apart. Pin 1 is marked by the outline's chamfered corner. The code looks for
+print in a box inside each corner. The first rule, a corner with twice the
+next corner's print, missed 11 chamfers that were plainly there, because the
+narrow DIPs' outlines run about 1.9 mm inside their rows (1.1 mm on IC1) and
+cross every corner's box; the rule became a margin (at least 0.15, and 0.10
+over the next corner), after a floor of 0.30 was tried and lost the wide DIPs'
+clean chamfers (about 0.2 against nothing). Every pin 1 is drawn on the
+overlay and was looked at. Three are marked by hand in `marks.json`: IC69,
+IC21 and the 28-pin at the left edge whose label task 0 could not read, each
+with a chamfer larger than the box.
+
+**References, by hand.** Nothing here reads text, so each reference is a mark
+in `marks.json`: a point inside the footprint, the crop the label was read on,
+and why. IC1, IC2, IC3, IC4, IC7, IC51, IC69 and IC78 are the footprints task
+0 named, their labels checked again on crops; IC5, IC6 and IC52 were read now
+(IC52's label sits between its left row and its outline, and the IC88 on its
+far side belongs to the next socket); IC21 came with its pin 1. One more mark
+says a "DIP" is not one: two columns of resistor and capacitor pads (R85 to
+R87, C32 and C33), whose labels scored as an outline.
+
+The result: 92 DIPs (35 of 14 pins, 27 of 16, 11 of 20, 2 of 24, 12 of 28 and
+5 of 40), 25 connectors and 58 SIPs. IC1, IC2, IC3, IC69 and IC78 are 40-pin,
+IC4 24-pin, and IC5, IC6, IC7, IC51 and IC52 28-pin. Not grouped, and left for
+task 5: IC30 (board x about 76 to 84 mm, y 68 to 86), whose two rows were not
+paired, and three DIPs at the right of the row below the RAM block (x about
+273 to 305 mm, y 141 to 161), each left as rows. Two-pad parts (resistors,
+capacitors, diodes) are not grouped at all: their pads are in the pad list.
+
+### The mounting holes, on their top rims
+
+Task 2's circle stops at the lid seen through a hole. Each of the nine is now
+fitted on its top rim. The scanned face lies on the glass, so the rim nearest
+the glass bounds the pale region on the side away from the crescent, and the
+crescent's outer edge continues it on the other side. Along 180 rays from the
+middle, the rim is where the light first falls below half way between the
+lid and the lacquer round the hole, or the colour rises to the print's (the
+first try ran into a print circle below one hole and fitted it; a ray now
+stops at the print as well); a circle is fitted robustly. The circles were
+looked at on the overlay: they follow the crescents' outer edges. Several
+holes also have a wider grey band outside the fitted rim, about 0.5 mm
+across, darker than the crescent. [guessing - verify] It is a copper or
+bare annulus round the hole on the board's face, not the hole: if it were
+the hole, the holes would be 4.5 to 5 mm across. I1 cannot tell, and the
+fit stops at the crescent's edge, as the plan asked.
+
+The diameters are now 3.75 to 4.00 mm, where task 2 read 3.20 to 3.86. The
+centres move 0.131 mm at the mean and 0.268 at the most (the hole at x 6.05,
+y 29.11). The move is mostly to the left (mean -0.103 mm in x) and only a
+little to the rear (-0.036 in y): task 2's centres were biased right more
+than forwards, and the crescents on the overlay sit on the rear and left
+sides of the holes. The front edge's slots are not used here: task 2 found
+their walls weakly fitted, and they place the slots only.
+
+### Decisions, and what they were chosen over
+
+- Holes from both solder blobs and open rings, over solder blobs alone (task
+  0's set): "every hole found" asked for it, and the rings turned out the most
+  precise holes on the board. The solder-only figures are recorded beside
+  them.
+- The excluded holes are left out of the scoring only, not out of the fit:
+  the plan's words are "left out of the scoring".
+- Drills at the mean of the two faces, over the component side alone: both
+  faces measure the same hole, and neither is better in general.
+- `registration.json` one record to a line and rounded to a micron, over the
+  usual one number to a line: written the usual way it was 1.5 MB, the largest
+  file in the repository; now about half that, 765 KB (`common.write_data`
+  gained the option, with a test). Still large, and kept as one object per
+  pad, drill and footprint because the plan's interface names them so.
+
+### Tests
+
+`/tmp/bbcvenv/bin/python -m pytest tools/bbc-micro-model/tests -q`: 48
+passed (4 October 2026). `run-board.sh` was run end to end from the inputs
+and gave `frame.json` and `registration.json` back byte for byte. Each new
+site test was seen to fail on a copy of `registration.json` broken its way (an
+excluded hole dropped, the verdict changed, IC5's reference removed, a
+drill's pad moved 0.3 mm, a DIP's last pad dropped). `cd site && npm test`:
+286 passed before this task, 292 after, one to-do, none failed; both
+workflows' floors are raised to 292. `site/tests/bbc-models.test.mjs` gains six
+tests: the solder row passes on the figures without exclusion, with the model
+chosen by its rule, the verdict the one the figures give, and the figures
+recomputed from every matched hole; the excluded holes are exactly those the
+roundness rule names, applied in the test to every matched hole's blobs, with
+both sets of figures; every drill has a pad on both faces within 0.2 mm;
+every DIP has an even pin count from 14 to 40, a pad per pin, pin 1 first and
+rows the right length; IC1 to IC7, IC51, IC52, IC69 and IC78 each have a DIP
+footprint whose reference was marked by hand with a reason; and the
+mounting holes are refitted, with the move from task 2 recorded.

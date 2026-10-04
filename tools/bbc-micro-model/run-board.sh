@@ -15,5 +15,6 @@ py="${PYTHON:-python3}"
 : "${BBC_MODEL_INPUTS:?set BBC_MODEL_INPUTS to the folder of inputs (see tools/bbc-micro-model/README.md)}"
 cd "$here"
 
-"$py" verify.py I1
+"$py" verify.py I1 I2
 "$py" board_frame.py        # data/frame.json: the scan's scale, turn, outline and holes
+"$py" board_register.py     # data/registration.json: the solder side registered; pads, drills and footprints

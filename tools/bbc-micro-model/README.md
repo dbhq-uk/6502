@@ -24,8 +24,9 @@ So far (tasks 0 and 2) it holds:
 | `verify.py` | Checks every input against its SHA-256 |
 | `spike.py` | Task 0's three numbers: the scan's scale, the solder side's registration and the keys' registration, each judged against the plan's thresholds. Kept as a record; not part of the run |
 | `board_frame.py` | Task 2: the board frame on scan I1: x and y scales from rows of pads (held out and judged), the board's turn, its outline and its holes; writes `data/frame.json` and a rectified copy of I1 in `out/` |
-| `run-board.sh` | The inside model's scripts, in order (so far `verify.py I1` and `board_frame.py`) |
-| `tests/test_common.py`, `tests/test_board_frame.py` | pytest, on made-up inputs |
+| `board_register.py` | Task 3: the solder side (I2, mirrored) registered to I1 on every hole found, tinned pads and open rings, and judged on holes held out; the pads, drills and footprints (DIPs with pin 1, connectors, SIPs); the mounting holes on their top rims; writes `data/registration.json` and overlays in `out/` |
+| `run-board.sh` | The inside model's scripts, in order (so far `verify.py I1 I2`, `board_frame.py` and `board_register.py`) |
+| `tests/test_common.py`, `tests/test_board_frame.py`, `tests/test_board_register.py` | pytest, on made-up inputs |
 | `data/` | See [`data/README.md`](data/README.md) |
 
 ## Fetching the inputs by hand
@@ -63,7 +64,7 @@ export BBC_MODEL_INPUTS=~/dbhq-previews/bbc-model-research
 /tmp/bbcvenv/bin/python tools/bbc-micro-model/verify.py          # every input; or name some: verify.py I1 I2
 /tmp/bbcvenv/bin/python -m pytest tools/bbc-micro-model/tests -q
 cd tools/bbc-micro-model && /tmp/bbcvenv/bin/python spike.py      # writes data/spike.json, and overlays in out/
-PYTHON=/tmp/bbcvenv/bin/python tools/bbc-micro-model/run-board.sh   # writes data/frame.json, and out/rectified-16.jpg
+PYTHON=/tmp/bbcvenv/bin/python tools/bbc-micro-model/run-board.sh   # writes data/frame.json and data/registration.json, and overlays in out/
 ```
 
 `verify.py` says, for each input, present, missing or hash differs. It exits

@@ -250,3 +250,153 @@ test('frame.json\'s holes are inside the board, and its rectified copy is never 
   const ignore = fs.readFileSync(path.join(REPO_ROOT, '.gitignore'), 'utf8');
   assert.match(ignore, /^tools\/bbc-micro-model\/out\/$/m);
 });
+
+// Task 3: the solder side registered to the component side, and the pads,
+// drills and footprints (tools/bbc-micro-model/board_register.py).
+const registration = JSON.parse(fs.readFileSync(path.join(TOOL, 'data', 'registration.json'), 'utf8'));
+const SOLDER_PASS = { median: 0.15, p90: 0.30 };
+const SOLDER_STOP = { median: 0.25, p90: 0.50 };
+// The plan's outlier rule, fixed on 4 October 2026 before task 3.
+const ROUND_MAX_AXIS = 1.25;
+const ROUND_AREA = [0.6, 1.6];
+
+// numpy's default percentile (linear between the closest ranks)
+function percentile(values, q) {
+  const v = [...values].sort((a, b) => a - b);
+  const r = (q / 100) * (v.length - 1);
+  const lo = Math.floor(r);
+  const hi = Math.ceil(r);
+  return v[lo] + (v[hi] - v[lo]) * (r - lo);
+}
+const summary = (v) => ({ median: percentile(v, 50), p90: percentile(v, 90), max: Math.max(...v) });
+
+test('registration.json passes the plan\'s solder row on the figures without exclusion, and records the largest', () => {
+  const s = registration.solder;
+  assert.ok(s.holes >= 200, `only ${s.holes} holes matched`);
+  assert.ok(['affine', 'cubic'].includes(s.model));
+  assert.deepEqual(s.heldOutMm, s.fits[s.model].heldOutMm, 'the figures are the chosen model\'s');
+  // the model with the lower held-out median; within 0.005 mm the affine
+  const want = s.fits.cubic.heldOutMm.median < s.fits.affine.heldOutMm.median - 0.005 ? 'cubic' : 'affine';
+  assert.equal(s.model, want);
+  const h = s.heldOutMm;
+  const verdict = h.median > SOLDER_STOP.median || h.p90 > SOLDER_STOP.p90 ? 'STOP' : h.median <= SOLDER_PASS.median && h.p90 <= SOLDER_PASS.p90 && s.holes >= 200 ? 'pass' : 'between pass and stop';
+  assert.equal(s.verdict, verdict, 'the recorded verdict is the one the figures give');
+  assert.equal(verdict, 'pass');
+  // the largest is recorded, not judged
+  assert.ok(Number.isFinite(h.max) && h.max >= h.p90);
+  // the figures are the matched holes' own
+  const rows = s.matched.rows;
+  assert.equal(rows.length, s.holes);
+  const col = s.matched.columns.indexOf('heldOutMm');
+  const got = summary(rows.map((r) => r[col]));
+  for (const k of ['median', 'p90', 'max']) assert.ok(Math.abs(got[k] - h[k]) < 1e-3, `${k}: ${got[k]} against ${h[k]}`);
+});
+
+test('the excluded holes are exactly those the roundness rule names, counted, with both sets of figures', () => {
+  const s = registration.solder;
+  const o = s.outliers;
+  assert.match(o.rule, /1\.25/);
+  assert.match(o.rule, /0\.6 to 1\.6/);
+  assert.match(o.rule, /no residual/);
+  const c = Object.fromEntries(s.matched.columns.map((k, i) => [k, i]));
+  const rows = s.matched.rows;
+  const median = (v) => percentile(v, 50);
+  const med = { top: median(rows.map((r) => r[c.topArea])), bottom: median(rows.map((r) => r[c.bottomArea])) };
+  const near = (x, lim) => Math.abs(x - lim) < 2e-4; // a value rounded to 4 places on the limit: either way
+  const named = [];
+  rows.forEach((r, i) => {
+    const fails = [];
+    let unsure = false;
+    for (const [face, axis, area] of [['top', r[c.topAxis], r[c.topArea]], ['bottom', r[c.bottomAxis], r[c.bottomArea]]]) {
+      if (near(axis, ROUND_MAX_AXIS)) unsure = true;
+      if (axis > ROUND_MAX_AXIS) fails.push(face);
+      const ratio = area / med[face];
+      if (ratio < ROUND_AREA[0] || ratio > ROUND_AREA[1]) fails.push(face);
+    }
+    if (!unsure && fails.length) named.push(i);
+    if (unsure) named.push(o.excluded.some((e) => e.hole === i) ? i : null);
+  });
+  assert.deepEqual(o.excluded.map((e) => e.hole), named.filter((i) => i !== null), 'the excluded holes are the ones the rule names');
+  assert.equal(o.count, o.excluded.length);
+  for (const e of o.excluded) assert.ok(e.why.length > 0 && e.why.every((w) => /^(top|bottom): (axis ratio \d\.\d\d over 1\.25|area \d+\.\d\d times)/.test(w)), JSON.stringify(e));
+  // both sets of figures, each the matched holes' own
+  const kept = rows.filter((_, i) => !o.excluded.some((e) => e.hole === i)).map((r) => r[c.heldOutMm]);
+  const w = summary(kept);
+  for (const k of ['median', 'p90', 'max']) {
+    assert.ok(Number.isFinite(s.heldOutMm[k]));
+    assert.ok(Math.abs(w[k] - o.heldOutMmWithExclusion[k]) < 1e-3, `with exclusion ${k}: ${w[k]} against ${o.heldOutMmWithExclusion[k]}`);
+  }
+});
+
+test('every drill in registration.json has a pad on both faces within 0.2 mm', () => {
+  const { drills, pads } = registration;
+  assert.ok(drills.length >= 200);
+  const byDrill = new Map();
+  for (const p of pads) if (p.drill !== null) byDrill.set(p.drill, [...(byDrill.get(p.drill) ?? []), p]);
+  drills.forEach((d, i) => {
+    const mine = byDrill.get(i) ?? [];
+    const near = (p) => Math.hypot(p.x - d.x, p.y - d.y) <= 0.2;
+    const both = mine.some((p) => p.face === 'both' && near(p));
+    const top = mine.some((p) => p.face === 'top' && near(p));
+    const bottom = mine.some((p) => p.face === 'bottom' && near(p));
+    assert.ok(both || (top && bottom), `drill ${i} at ${d.x}, ${d.y} has no pad on both faces within 0.2 mm`);
+    // the drill is the mean of where each face put the hole; how far apart they were is recorded
+    assert.ok(Number.isFinite(d.spreadMm) && d.spreadMm >= 0 && d.spreadMm <= 1.0, `drill ${i}: faces ${d.spreadMm} mm apart, over the 1.0 mm match gate`);
+    assert.ok(d.d === null ? d.filled === true : d.d > 0.2 && d.d < 2, `drill ${i}: diameter ${d.d}`);
+  });
+  for (const p of pads) {
+    assert.ok(['round', 'square', 'oval'].includes(p.shape) && ['top', 'bottom', 'both'].includes(p.face));
+    assert.ok(p.x > -1 && p.x < frame.board.widthMm + 1 && p.y > -1 && p.y < frame.board.depthMm + 1, JSON.stringify(p));
+  }
+});
+
+test('every DIP footprint in registration.json has an even pin count from 14 to 40, a pad per pin and pin 1 first', () => {
+  const { footprints, pads } = registration;
+  const dips = footprints.filter((f) => f.kind === 'dip');
+  assert.ok(dips.length >= 40, `only ${dips.length} DIPs`);
+  for (const f of footprints) assert.ok(['dip', 'sip', 'axial', 'radial', 'connector', 'other'].includes(f.kind));
+  for (const f of dips) {
+    assert.ok(f.pins % 2 === 0 && f.pins >= 14 && f.pins <= 40, `${f.ref}: ${f.pins} pins`);
+    assert.equal(f.pads.length, f.pins);
+    assert.equal(new Set(f.pads).size, f.pins, 'a pad is one pin');
+    const p1 = pads[f.pads[0]];
+    assert.ok(Math.hypot(p1.x - f.pin1[0], p1.y - f.pin1[1]) < 1e-3, `${f.ref}: pin 1 is its first pad`);
+    assert.ok(f.pin1From === 'print' || f.pin1From === 'square pad' || f.pin1From === 'marked by hand', `${f.ref}: pin 1 from ${f.pin1From}`);
+    // pin N/2 is (N/2 - 1) x 2.54 mm along the row from pin 1, and pin N faces pin 1
+    const half = pads[f.pads[f.pins / 2 - 1]];
+    const last = pads[f.pads[f.pins - 1]];
+    assert.ok(Math.abs(Math.hypot(half.x - p1.x, half.y - p1.y) - (f.pins / 2 - 1) * 2.54) < 0.6, `${f.ref}: row length`);
+    assert.ok(Math.abs(Math.hypot(last.x - p1.x, last.y - p1.y) - f.rowSpacingMm) < 0.6, `${f.ref}: row spacing`);
+    for (const i of f.pads) {
+      const p = pads[i];
+      assert.ok(p.x >= f.box[0] && p.x <= f.box[2] && p.y >= f.box[1] && p.y <= f.box[3], `${f.ref}: a pad outside its box`);
+    }
+  }
+});
+
+test('IC1 to IC7, IC51, IC52, IC69 and IC78 each have a DIP footprint, its reference marked by hand with a reason', () => {
+  const marks = JSON.parse(fs.readFileSync(path.join(TOOL, 'data', 'marks.json'), 'utf8')).footprints.marks;
+  for (const ref of ['IC1', 'IC2', 'IC3', 'IC4', 'IC5', 'IC6', 'IC7', 'IC51', 'IC52', 'IC69', 'IC78']) {
+    const f = registration.footprints.filter((x) => x.ref === ref);
+    assert.equal(f.length, 1, `${ref}: ${f.length} footprints`);
+    assert.equal(f[0].kind, 'dip', ref);
+    const m = marks.find((x) => x.ref === ref);
+    assert.ok(m && m.reason.length > 20 && m.crop && m.crop.box.length === 4, `${ref}: its mark, crop and reason`);
+  }
+  // every reference in the footprints was marked by hand, once
+  const refs = registration.footprints.map((f) => f.ref).filter(Boolean);
+  assert.equal(new Set(refs).size, refs.length, 'a reference twice');
+  for (const r of refs) assert.ok(marks.some((m) => m.ref === r), `${r} has no mark`);
+});
+
+test('registration.json fits each mounting hole on its top rim and records the move from task 2\'s centre', () => {
+  const holes = registration.holes.filter((h) => 'x' in h);
+  assert.equal(holes.length, frame.holes.length, 'every hole of frame.json refitted');
+  for (const h of holes) {
+    assert.ok(Math.abs(h.shiftMm[0] - (h.x - h.task2.x)) < 1e-3 && Math.abs(h.shiftMm[1] - (h.y - h.task2.y)) < 1e-3);
+    assert.ok(h.d >= h.task2.d - 0.05, 'the top rim is outside the lid seen through the hole');
+    assert.ok(h.d > 2.5 && h.d < 5);
+  }
+  const shifts = holes.map((h) => h.shiftLenMm);
+  assert.ok(Math.abs(registration.holeShiftMm.max - Math.max(...shifts)) < 1e-3);
+});
