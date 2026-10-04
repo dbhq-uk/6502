@@ -101,6 +101,22 @@ disc drive in a hairline box of its own.
   latch for one key; latched, the key is filled `--card` with a `--white` edge, a
   change of shape as well as colour, and says so with `aria-pressed`. No key
   takes the lime.
+- **The library of discs** sits at the top of the disc drive's box, above the
+  visitor's own-file controls and separated from them by a hairline. It is a
+  native `<select>` with its own label, grouped by kind with `<optgroup>`
+  (games, puzzles, demos, tools), chosen over a list of buttons because it stays
+  one line tall on a phone and a screen reader already knows how to read it.
+  Under it is the chosen disc's credit in the panel's body colour, the title in
+  white: author, year, what it is, its keys, and its licence and source as links.
+  A photosensitivity note comes first in that credit, in white with a white rule
+  down its left edge and `role="note"`, so it is read before the disc is loaded.
+  Insert and run, then Insert in drive 0, are the site's ordinary small buttons:
+  Start keeps the page's one lime fill, so the library takes none. The list works
+  as soon as the script does, so the credits can be read before Start; the
+  buttons wait for the machine, dashed until then like the other controls.
+- **Credits and licences** for every disc are a section of their own further
+  down the page, a plain prose list built from the manifest, so they can be read
+  without loading anything.
 - The new text colours are in the contrast table in `tests/design.test.mjs`.
 
 ## The imagery

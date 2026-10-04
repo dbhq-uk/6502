@@ -27,7 +27,11 @@ counts as implemented. The BBC Micro Model B, the second, runs Acorn's own
 operating system, BBC BASIC and disc filing system, passes its acceptance test,
 and runs in the browser at
 [6502.dbhq.uk/machines/bbc-micro/](https://6502.dbhq.uk/machines/bbc-micro/),
-with its keyboard, sound and a disc drive, so it counts too. The NES is the
+with its keyboard, sound and a disc drive, so it counts too. Its page offers a
+library of homebrew and freely licensed discs to start with one click, each
+kept in [`machines/bbc-micro/discs/`](machines/bbc-micro/discs/) with its
+author's licence and, where the licence asks for it, its source; a disc image
+of your own goes in as before. The NES is the
 next of the three. The programme's
 design is in
 [`docs/superpowers/specs/2026-09-30-machines-and-site-design.md`](docs/superpowers/specs/2026-09-30-machines-and-site-design.md).
