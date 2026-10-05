@@ -501,3 +501,9 @@ def test_nothing_in_a_mounting_hole_is_a_hole_here():
     c = frame1().to_px([(20.0, 10.0)])[0]
     got, info = board_register.holes_of_one_face(img, [(c[0], c[1], 20.0)])
     assert [h['kind'] for h in got] == ['ring'] and info['inMountingHoles'] == 1
+
+
+def test_a_hand_pin_one_says_whether_the_grouping_agreed_only_when_it_had_one(built):
+    c = _find(built[0]['footprints'], 'C')
+    assert c['pin1From'] == 'marked by hand' and c['pin1FromGrouping'] is None
+    assert c['pin1AgreesWithGrouping'] is None

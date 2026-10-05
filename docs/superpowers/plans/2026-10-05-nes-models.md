@@ -834,7 +834,7 @@ A short spike, before any pipeline. If a STOP is crossed, the task ends BLOCKED 
 - Modify: `site/tests/nes-models.test.mjs`
 
 **Interfaces:**
-- Produces `data/registration.json`: `{ "solder": {"model", "holes", "heldOutMm": {"median","p90","max"}, "outliers": {"rule", "excluded": [[hole, reason]], "heldOutMmWithExclusion": {...}}}, "drills": [{"x","y","d"}], "pads": [{"x","y","w","h","shape","face","drill"}], "footprints": [{"ref", "kind": "dip"|"connector"|"edge"|"crystal"|"axial"|"radial"|"other", "pins", "pin1": [x,y], "pads": [indexes], "box": [x0,y0,x1,y1]}] }`.
+- Produces `data/registration.json`: `{ "solder": {"model", "holes", "heldOutMm": {"median","p90","max"}, "outliers": {"rule", "excluded": [{"hole", "at": [x,y], "why": [reasons]}], "count", "heldOutMmWithExclusion": {...}}}, "drills": [{"x","y","d"}], "pads": [{"x","y","w","h","shape","face","drill"}], "footprints": [{"ref", "kind": "dip"|"connector"|"edge"|"crystal"|"axial"|"radial"|"other", "pins", "pin1": [x,y], "pads": [indexes], "box": [x0,y0,x1,y1]}] }`. (`outliers.excluded` changed on 5 October 2026, after the code was written, to the shape the code writes; it was `[[hole, reason]]`.)
 
 - [ ] **Step 1: pytest first.** A synthetic pair, one mirrored, rotated, scaled, with a mild cubic warp and 2 per cent of holes missing: registration recovers it to under 0.05 mm held out; pad grouping turns 2.54 mm rows into DIPs with the right pin count and pin 1 at the square pad; the edge fingers are one footprint of 36 per face. Run: fail. Implement. Run: pass.
 - [ ] **Step 2: Register I1-back to I1-front** over every hole, as task 0's spike; judge against the table on the figures without exclusion: STOP if crossed.

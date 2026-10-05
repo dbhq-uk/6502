@@ -269,6 +269,11 @@ test('the excluded holes are exactly those the roundness rule names, with the fi
 test('every drill in registration.json has a pad on both faces within 0.2 mm', () => {
   const { drills, pads } = registration;
   assert.ok(drills.length >= MIN.solderHoles);
+  // A drill is made only where its two faces agree within 0.4 mm, so its pads are within 0.2 mm by construction:
+  // what can fail is the count. Every matched hole is a drill or is recorded as not drilled, and not drilled stays rare.
+  const notDrilled = registration.notDrilled.pairs.length;
+  assert.equal(drills.length + notDrilled, registration.solder.holes, 'every matched hole is a drill or recorded as not drilled');
+  assert.ok(notDrilled <= 0.1 * registration.solder.holes, `${notDrilled} of ${registration.solder.holes} matched holes not drilled`);
   const byDrill = new Map();
   for (const p of pads) if (p.drill !== null) byDrill.set(p.drill, [...(byDrill.get(p.drill) ?? []), p]);
   drills.forEach((d, i) => {
@@ -277,8 +282,9 @@ test('every drill in registration.json has a pad on both faces within 0.2 mm', (
       assert.ok(mine.some((p) => p.face === face && Math.hypot(p.x - d.x, p.y - d.y) <= 0.2), `drill ${i} at ${d.x}, ${d.y} has no ${face} pad within 0.2 mm`);
     }
     assert.ok(d.spreadMm >= 0 && d.spreadMm <= 0.4, `drill ${i}: its faces ${d.spreadMm} mm apart`);
-    // a diameter is what the open rims show: a via part filled with solder shows less than its drill, so only its sense is checked
-    assert.ok(d.d === null ? d.filled === true : d.d > 0 && d.d < 2.5, `drill ${i}: diameter ${d.d}`);
+    // a diameter is what the open rims show: a via part filled with solder shows less than its drill (the smallest, 0.19 mm on
+    // 5 Oct 2026, is one such via, a dome on one face and a dimple on the other), so the floor is 0.15 mm
+    assert.ok(d.d === null ? d.filled === true : d.d > 0.15 && d.d < 2.5, `drill ${i}: diameter ${d.d}`);
   });
   for (const p of pads) {
     assert.ok(['round', 'square', 'oval', 'rect'].includes(p.shape) && ['top', 'bottom', 'both'].includes(p.face), JSON.stringify(p));
@@ -304,6 +310,8 @@ test('U1 to U10 each have a DIP footprint with the pin count the plan\'s Facts g
     const p1 = pads[f.pads[0]];
     assert.ok(Math.hypot(p1.x - f.pin1[0], p1.y - f.pin1[1]) < 1e-3, `${f.ref}: pin 1 is its first pad`);
     if (f.ref) assert.ok(['print', 'square pad', 'marked by hand'].includes(f.pin1From), `${f.ref}: pin 1 from ${f.pin1From}`);
+    // a hand mark's agreement with the grouping is said only where the grouping had a pin 1 of its own
+    if ('pin1AgreesWithGrouping' in f) assert.equal(f.pin1AgreesWithGrouping === null, f.pin1FromGrouping === null, `${f.ref}: agreement`);
     // pin N/2 is (N/2 - 1) x 2.54 mm along the row from pin 1, and pin N faces pin 1
     const half = pads[f.pads[f.pins / 2 - 1]];
     const last = pads[f.pads[f.pins - 1]];
@@ -328,5 +336,7 @@ test('P1 has 72 fingers across both faces, 36 on each, on the 2.50 mm pitch', ()
     assert.equal(xs.length, 36, face);
     const inner = xs.slice(2, -1).map((x, i) => x - xs[i + 1]);
     assert.ok(Math.abs(inner.reduce((a, b) => a + b, 0) / inner.length - 2.5) < 0.02, `${face}: the inner fingers' pitch`);
+    // and every gap between neighbouring inner fingers, one by one (the end fingers are wider, widened outwards)
+    inner.forEach((g, i) => assert.ok(Math.abs(g - 2.5) < 0.15, `${face}: fingers ${i + 2} and ${i + 3} are ${g} mm apart`));
   }
 });

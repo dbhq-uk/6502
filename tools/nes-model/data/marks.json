@@ -2981,27 +2981,59 @@
     "rows": [
      {
       "first": [
-       1972,
-       1245
+       1973,
+       1232
       ],
       "last": [
-       2160,
-       1245
+       2161,
+       1232
       ],
       "pins": 5
      }
     ],
     "crop": {
      "box": [
-      1930,
-      1150,
-      2200,
-      1290
+      1948,
+      1205,
+      2186,
+      1260
      ],
-     "zoom": 2,
-     "gridPx": 10
+     "zoom": 8,
+     "gridPx": 5,
+     "parts": [
+      [
+       1948,
+       1205,
+       1998,
+       1260
+      ],
+      [
+       1995,
+       1205,
+       2045,
+       1260
+      ],
+      [
+       2042,
+       1205,
+       2092,
+       1260
+      ],
+      [
+       2088,
+       1205,
+       2138,
+       1260
+      ],
+      [
+       2135,
+       1205,
+       2185,
+       1260
+      ]
+     ]
     },
-    "reason": "The RF modulator: five large rings 4 mm apart below the print's 'MOD RF' strip, which reads '5' above the right end, so pin 1 is the left. The modulator's can is held by tabs in slots, which are not round holes and are not grouped here."
+    "reason": "The RF modulator: five large rings 4 mm apart below the print's 'MOD RF' strip, which reads '5' above the right end, so pin 1 is the left. The modulator's can is held by tabs in slots, which are not round holes and are not grouped here. Re-marked on 5 October 2026 after review: the first marks, (1972, 1245) and (2160, 1245) read off a crop enlarged twice, sat on the rings' lower edges, about 1.1 mm low. Each ring was read again on its own crop enlarged eight times, its outer edge's left, right, top and bottom: centres (1973, 1232), (2020, 1232.5), (2067.5, 1232.5), (2113, 1232) and (2161, 1232), 4.0 mm apart."
    },
    {
     "ref": "P4",
@@ -3078,24 +3110,24 @@
     "kind": "connector",
     "pins": [
      [
-      2220,
-      837.5
+      2220.5,
+      843.5
      ],
      [
-      2220,
-      752.5
+      2221,
+      754.5
      ],
      [
-      2220,
-      692.5
+      2221,
+      695
      ],
      [
-      2220,
-      635
+      2221,
+      635.3
      ],
      [
-      2220,
-      575
+      2220.5,
+      576.5
      ]
     ],
     "crop": {
@@ -3106,9 +3138,43 @@
       880
      ],
      "zoom": 2,
-     "gridPx": 10
+     "gridPx": 10,
+     "parts": [
+      [
+       2200,
+       821,
+       2241,
+       862
+      ],
+      [
+       2200,
+       734,
+       2241,
+       775
+      ],
+      [
+       2200,
+       674,
+       2241,
+       715
+      ],
+      [
+       2200,
+       615,
+       2241,
+       656
+      ],
+      [
+       2200,
+       556,
+       2241,
+       597
+      ]
+     ],
+     "partsZoom": 10,
+     "partsGridPx": 2
     },
-    "reason": "Power and reset: five large rings down the right edge, four 5 mm apart and the bottom one 7.5 mm further, so grouped pin by pin. The print reads '5' beside the top ring, so pin 1 is the bottom."
+    "reason": "Power and reset: five large rings down the right edge, four 5 mm apart and the bottom one 7.5 mm further, so grouped pin by pin. The print reads '5' beside the top ring, so pin 1 is the bottom. Re-read on 5 October 2026 after review, each ring on its own crop enlarged ten times with a 2 px grid, as the middle of its hole between its edges: pin 1 had been marked about 0.5 mm high and pins 2 and 3 about 0.2 mm high."
    },
    {
     "ref": "X1",
@@ -3123,12 +3189,12 @@
       340
      ],
      [
-      825,
-      237.5
+      828.3,
+      236.3
      ],
      [
-      827.5,
-      382.5
+      827.8,
+      386.3
      ]
     ],
     "crop": {
@@ -3139,9 +3205,25 @@
       410
      ],
      "zoom": 2,
-     "gridPx": 10
+     "gridPx": 10,
+     "parts": [
+      [
+       813,
+       224,
+       843,
+       254
+      ],
+      [
+       813,
+       370,
+       843,
+       400
+      ]
+     ],
+     "partsZoom": 12,
+     "partsGridPx": 2
     },
-    "reason": "The crystal: the print reads 'X1' and 'X'tal' beside an outline lying on the board; its two leads are the two holes at the outline's left (upper first), and the two holes at its right corners hold the can down. No pin numbers are printed; the order is the leads, upper first, then the can's two, upper first."
+    "reason": "The crystal: the print reads 'X1' and 'X'tal' beside an outline lying on the board; its two leads are the two holes at the outline's left (upper first), and the two holes at its right corners hold the can down. No pin numbers are printed; the order is the leads, upper first, then the can's two, upper first. The can's two holes re-read on 5 October 2026 after review, each on a crop enlarged twelve times with a 2 px grid: they had been marked about 0.3 mm off their middles. The leads were looked at again at eight times and kept."
    },
    {
     "ref": "X2",
@@ -3169,7 +3251,7 @@
      "zoom": 3,
      "gridPx": 10
     },
-    "reason": "The 4 MHz resonator: three holes 2.5 mm apart down the board in an outline, the print reading '3', 'X2' and '1' beside it from the top, so pin 1 is the bottom."
+    "reason": "The 4 MHz resonator: three holes 2.5 mm apart down the board in an outline, the print reading '3', 'X2' and '1' beside it from the top, so pin 1 is the bottom. Looked at again on 5 October 2026 after review at eight times: each pin's mark is within about 0.2 mm of its hole's middle; kept."
    }
   ]
  }

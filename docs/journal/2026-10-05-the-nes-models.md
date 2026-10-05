@@ -996,3 +996,42 @@ changed to STOP and one excluded hole renumbered by hand, two of them failed.
 `npm test` (with `results.json` copied in for the run and removed after):
 tests 318, pass 317, fail 0, todo 1 (the BBC Micro's, already there). The
 floors are 317 in both workflows.
+
+### After review, the same day
+
+- **P3 was marked about 1.1 mm low.** Its row was marked on a crop enlarged
+  twice, and the marks sat on the rings' lower edges. None of its five rings
+  is found by either finder, so all five pins are inferred at the marks, and
+  the error went straight into `registration.json`. Each ring was read again
+  on its own crop enlarged eight times, from its outer edge's four sides:
+  centres (1973, 1232), (2020, 1232.5), (2067.5, 1232.5), (2113, 1232) and
+  (2161, 1232) pixels, 4.0 mm apart. Every pin moved 1.10 mm up the scan and
+  0.08 mm to the right. P6, X1 and X2 were looked at again the same way.
+  P6's pin 1 had been marked 0.51 mm high and its pins 2 and 3 about 0.2 mm
+  high; pins 4 and 5 were within 0.13 mm. All five were re-read on crops
+  enlarged ten times, and every P6 pin is inferred, so each moved by those
+  amounts. X1's two can holes were 0.3 mm off; the one that is inferred
+  moved 0.30 mm, and the other takes the drill found there either way. X1's
+  leads and X2 were within 0.2 mm and kept. The re-run, the same command as
+  before, printed the same registration to the last digit; `solder`,
+  `drills` and `notDrilled` in the file are unchanged, and only `pads` and
+  `footprints` moved.
+- **A check that could not fail.** "Every drill has a pad on both faces within
+  0.2 mm" holds by construction: a drill is made only where its faces agree
+  within 0.4 mm, at their mean. The site test now also checks that every
+  matched hole is either a drill or recorded as not drilled (480 and 31 of
+  511), and that no more than a tenth are not drilled. It failed with one
+  not-drilled pair removed by hand, with the hole count changed by hand, and
+  with the tenth lowered to a twentieth.
+- **The roundness test's areas mix two masks.** A ring hole's blob is task
+  0's, common.pad_mask opened 11 pixels; an open hole's or a dome's is the
+  second finder's mask opened 5 pixels. So the areas are not comparable
+  across kinds, and each face's median mixes them. This is the plan's rule as
+  written, applied to the blob each hole was found from, and the judged
+  figures, which are without the rule, are not touched by it.
+- Smaller things: where the grouping found no pin 1 of its own, a hand mark's
+  agreement with it is now recorded as null, not true (U2, U4, U7, U1's
+  narrow footprint); the drill diameter's floor in the site test is 0.15 mm,
+  with the 0.19 mm part-filled via named; every gap between the inner edge
+  fingers is checked, not only their mean; and the plan's interface line for
+  `outliers.excluded` now gives the shape the code writes.

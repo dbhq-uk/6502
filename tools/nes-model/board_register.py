@@ -1172,7 +1172,8 @@ def apply_marks(fps, marks, sites, to_board):
                 if key is None:
                     out.append({'ref': m['ref'], 'found': True, 'pin1': 'not a corner pad'})
                     continue
-                agrees = f['pin1From'] is None or f['pads'][0] == f['pads'][k]
+                # None where the grouping found no pin 1 of its own to agree with
+                agrees = None if f['pin1From'] is None else f['pads'][0] == f['pads'][k]
                 f['pads'] = _pin_order(a, b, key)
                 f['pin1FromGrouping'] = f['pin1From']
                 f['pin1AgreesWithGrouping'] = agrees
