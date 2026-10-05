@@ -79,10 +79,12 @@ public sealed class NesBus : IBus
     // denominator it holds.
     private int _dotAccumulator;
 
-    // The accumulator worked out once for each value it can hold, 0 to the denominator less one:
-    // the dots a cycle starting there runs, and the value it leaves. A cycle then divides nothing.
-    private readonly int[] _dotsFrom;
-    private readonly int[] _accumulatorAfter;
+    // The region's dots a cycle split once into whole dots and the remainder, so a cycle adds the
+    // remainder and runs one more dot when the accumulator reaches the denominator: the same
+    // count as dividing, with no division and no table.
+    private readonly int _wholeDots;
+    private readonly int _dotRemainder;
+    private readonly int _dotDenominator;
 
     // What the board said it needs, asked once: the per-cycle call, and its IRQ line read.
     private readonly bool _mapperCountsCycles;
@@ -133,13 +135,9 @@ public sealed class NesBus : IBus
             _prg = prg;
             _prgWindows = windows;
         }
-        _dotsFrom = new int[region.DotsDenominator];
-        _accumulatorAfter = new int[region.DotsDenominator];
-        for (int held = 0; held < region.DotsDenominator; held++)
-        {
-            _dotsFrom[held] = (held + region.DotsNumerator) / region.DotsDenominator;
-            _accumulatorAfter[held] = (held + region.DotsNumerator) % region.DotsDenominator;
-        }
+        _wholeDots = region.DotsNumerator / region.DotsDenominator;
+        _dotRemainder = region.DotsNumerator % region.DotsDenominator;
+        _dotDenominator = region.DotsDenominator;
     }
 
     /// <summary>The PPU, whose registers sit at <c>$2000</c> to <c>$3FFF</c>.</summary>
@@ -300,8 +298,13 @@ public sealed class NesBus : IBus
         bool nmi = _ppu.Nmi;
         bool irq = _apu.Irq || (_mapperCanInterrupt && _mapper.Irq);
 
-        int dots = _dotsFrom[_dotAccumulator];
-        _dotAccumulator = _accumulatorAfter[_dotAccumulator];
+        // The accumulator stays under the denominator, so adding the remainder passes it at most
+        // once: carry is 0 or 1, worked out without a branch, which on PAL would go one way in five.
+        int held = _dotAccumulator + _dotRemainder;
+        int carry = held >= _dotDenominator ? 1 : 0;
+        _dotAccumulator = held - (carry * _dotDenominator);
+        int dots = _wholeDots + carry;
+
         int before = Math.Min(DotsBeforeAccess, dots);
         for (int i = 0; i < before; i++)
         {
