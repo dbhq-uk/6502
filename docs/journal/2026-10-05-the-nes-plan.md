@@ -151,3 +151,87 @@ said a sprite at X = 4 with the left columns hidden makes no hit, but an 8-pixel
 sprite there reaches column 11, so the hit comes at column 8. Both were worked
 by eye from the rules rather than computed from the bit layout. Every worked
 example in the sheet was then recomputed from the layout, and the rest held.
+
+## Task 2: the region, the cartridge and NROM
+
+The second task added `Region`, the cartridge reader, the board interface and
+the first board, NROM, with 71 tests. They were written first and failed to
+compile, because none of the types existed.
+
+**The region holds every number that differs.** Lines (262 and 312), the
+pre-render line, the dropped odd-frame dot, the dot ratio as a numerator and a
+denominator (3 over 1 and 16 over 5), the CPU clock, the noise and DMC tables,
+the frame counter's steps and the PAL red and green swap. The CPU clock is
+computed from the master clock the sheet gives (236.25 MHz over 11 and over 12;
+26.6017125 MHz over 16), and the frame rate is computed from the clock, the
+ratio and the dots in a frame, so no rate is typed. The test recomputes both
+from the master clock and checks them to 0.001 of a frame a second. They come
+out near the sheet's 60.0988 and 50.0070, which checks the formula.
+
+**The frame counter lists follow the sheet's table row by row, not the plan's
+shorter list.** The plan's facts list gave four entries for each mode. The
+table in `apu.md` section 10 has six rows for each, because the 4-step mode
+sets the IRQ flag on three consecutive cycles and the 5-step mode has a step
+with no clock. So the NTSC 4-step list is 7457, 14913, 22371, 29828, 29829,
+29830 and the 5-step list is 7457, 14913, 22371, 29829, 37281, 37282. PAL is
+the same shape. The last entry of each is where the sequence wraps. The plan's
+four numbers are all in the lists.
+
+**The header fields.** Byte 6 gives the mirroring (bit 0 set is vertical,
+bit 3 is four-screen and wins), the battery (bit 1), the trainer (bit 2) and
+the low mapper nibble. Byte 7 gives the high nibble and, with bits 3 and 2 equal
+to `10`, marks NES 2.0. A NES 2.0 header adds a third mapper nibble and the
+submapper in byte 8, the high size nibbles in byte 9, the RAM sizes in bytes
+10 and 11 and the timing in byte 12. A trainer is skipped, not refused, as it
+costs nothing to skip. The high mapper nibble of an iNES file is ignored when
+bytes 12 to 15 are not zero, because old tools wrote text there ("DiskDude!")
+that adds 64 to the mapper. That is the sheet's first choice of the two it
+offers (the other was to refuse the file).
+
+**The iNES 1 region flag is not read.** `cartridge.md` quotes the iNES page:
+very few emulators honour it, because virtually no image sets it. A flag that
+is nearly always zero says NTSC for a PAL game, which would be wrong in the way
+that matters. So an iNES file names no region and the page starts at NTSC and
+lets the visitor choose. NES 2.0 byte 12 is read, where the format means it:
+0 is NTSC, 1 is PAL, 2 is "either" and so names no region.
+
+**Dendy is refused, in the header, with its name.** A NES 2.0 file with timing 3
+throws a `NesFormatException` that says the cartridge is for the Dendy. It was
+chosen over running it as PAL, which would be a quiet wrong speed (the Dendy
+runs three dots a cycle on a PAL frame), and over a fifth region, which the
+spec puts out of scope. No licensed game uses the value, so a refusal costs
+almost nobody anything.
+
+**The size limit is 4 MB, one constant in `Cartridge`.** It is sixteen times
+the largest ROM the tests use and far over what any board this machine models
+holds, and it bounds what a hostile or mistaken file can make the page copy. The
+check is the first thing `Load` does after the empty test, before the header is
+read. The NES 2.0 sizes can ask for tens of megabytes, so they are checked
+against the file's length one at a time before they are added, and an exponent
+form size that does not fit in 64 bits is treated as too big. The first version
+of that check added the sizes first, and the test with an exponent of 63
+overflowed the sum and reached `Span` with a bad length. The test found it. Each
+refusal is one plain sentence, and the tests check that each has a single full
+stop and no dash, because the page shows them as written.
+
+**Two sizes could not be tested the way the brief said.** A NES 2.0 PRG with
+the high size nibble set starts at 256 banks of 16 KB, which is 4 MB, so it is
+over the limit and cannot be loaded. The test uses the CHR nibble instead (256
+banks of 8 KB, 2 MB). And the unsupported mapper is refused by `CreateMapper`
+and not by `Load`, so a header can be read, and its fields tested, for any
+mapper number. The message names the mapper and lists the ones that are
+modelled, from one array that each later board's task extends.
+
+**PRG RAM.** An iNES header's byte 8 counts 8 KB units and the format says 0
+means 8 KB. That matters: the test ROMs report their result at `$6000` and their
+headers have byte 8 equal to 0. So an iNES cartridge has 8 KB of PRG RAM unless
+it says more, and a NES 2.0 one has what bytes 10 and 11 say, which can be none,
+and then `$6000` is open bus. A RAM smaller than the 8 KB window repeats through
+it. A NES 2.0 file with no CHR ROM and no CHR RAM has no character memory, as
+`cartridge.md` section 2 says, and reads of it give 0 and writes are dropped
+rather than failing.
+
+**What was not done.** The sheet's rule that a NES 2.0 header whose sizes do not
+fit the file may be an iNES one is not applied: such a file is refused as
+shorter than its header says. The Vs. System and PlayChoice console types are
+read as ordinary cartridges.
