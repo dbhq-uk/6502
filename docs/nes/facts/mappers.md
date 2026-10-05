@@ -179,9 +179,12 @@ its example; the values are an example]. If the writes came from `INC $E000`
   is dot 261. `mmc3_test_2`'s `4-scanline_timing` passes with the rise on dot
   261, fails with status 2 ("Scanline 0 IRQ should occur later when
   $2000=$08") with it moved to 260, and with status 3 ("should occur sooner")
-  with it moved to 262 [measured in task 11, 5 October 2026]. So the page's 260
-  and the model's 261 are the same moment counted two ways, and the model's dot
-  is the one the ROM accepts.
+  with it moved to 262 [measured in task 11, 5 October 2026]. So dot 261,
+  together with the model's CPU and PPU phase and its taking the IRQ line as
+  each cycle begins (`bus.md`), is what the ROM accepts. Why the page says 260
+  is unexplained: nothing read shows it counts a different moment, such as a
+  cycle number rather than the dot an address goes out, and a one-dot
+  difference could come from the model's alignment as well [inferring].
 - With the background at `$1000` and sprites at `$0000` it clocks at dot 324 of
   the line before, and the pre-render line clocks twice every other frame [from
   MMC3].
@@ -216,8 +219,10 @@ the IRQ "after decrementing/reloading, if the counter is zero" (the new
 behaviour), and Crystalis's the other ("revision A") [from the fork:
 mmc3_test_2/readme.txt, mmc3_irq_tests/readme.txt]. `5-MMC3` and
 `6.MMC3_rev_B` test the first and pass; `6-MMC3_alt` and `5.MMC3_rev_A` test
-the second and fail on the sub-test where the two differ (2 and 3) [measured in
-task 11, 5 October 2026]. The readme of `mmc3_irq_tests` says "at most only one
+the second and fail. Both of `6-MMC3_alt`'s sub-tests are the second chip's
+rule, and it stops at its first failure, test 2, so test 3 never runs;
+`5.MMC3_rev_A` passes its test 2, which both chips share, and fails test 3
+[measured in task 11, 5 October 2026]. The readme of `mmc3_irq_tests` says "at most only one
 will pass on a particular emulator".
 
 ## 7. The interface the mappers need
@@ -250,8 +255,8 @@ From the above, a mapper sees [inferring from sections 2 to 6]:
    verify].
 7. What the PPU's address bus carries on the post-render line and when
    rendering is switched off mid-frame. The sheet says `v` "in VBlank or with
-   rendering off"; the model tells the board of `v` only when a register write or
-   a `$2007` access changes it, so a `v` with bit 12 set left by rendering is not
+   rendering off"; the model tells the board of `v` only when, outside
+   rendering, a register write or a `$2007` access changes it, so a `v` with bit 12 set left by rendering is not
    seen as a rise until the program next moves it (task 11) [guessing - verify].
 8. MMC6 (submapper 1) is not modelled: it runs as an MMC3, whose `$A001` means
    something else (6).

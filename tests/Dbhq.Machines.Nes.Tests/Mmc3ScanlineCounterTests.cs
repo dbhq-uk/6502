@@ -96,9 +96,55 @@ public class Mmc3ScanlineCounterTests
         Assert.All(clocks, c => Assert.Equal(325, c.Dot));
     }
 
+    // A $2006 pair written during rendering, its second write landing on one dot of every visible
+    // line: PPUCTRL, the high byte (the low is $00), the dot, and the dot the counter should clock
+    // on, once a rendering line, or -1 for never. During rendering the bus carries the fetches,
+    // not v (ppu.md 6), so the write must change nothing.
+    public static TheoryData<string, byte, byte, int, int> Writes2006DuringRendering()
+    {
+        var data = new TheoryData<string, byte, byte, int, int>();
+        foreach (string region in new[] { "NTSC", "PAL" })
+        {
+            // Sprites at $1000, $2000 on dot 262. A told v would be a false low, but the slot's own
+            // high-plane fetch on dot 263 ends it after a dot, so this case alone could not fail.
+            data.Add(region, 0x08, 0x20, 262, ClockDot);
+
+            // Both tables at $1000: no told low lasts long enough, so the counter never clocks. A
+            // told $2000 on dot 337 would be a false low 9 dots before the next line's first
+            // pattern fetch on dot 5, and a clock.
+            data.Add(region, 0x18, 0x20, 337, -1);
+
+            // Background at $1000, sprites at $0000: A12 low since dot 257. A told $1000 on dot 300
+            // would be a false rise after a long low, a second clock besides dot 325's.
+            data.Add(region, 0x10, 0x10, 300, 325);
+        }
+
+        return data;
+    }
+
+    [Theory]
+    [MemberData(nameof(Writes2006DuringRendering))]
+    public void A2006WriteDuringRenderingIsNotOnTheBusAndGivesNoExtraClock(string name, byte ctrl, byte high, int writeDot, int clockDot)
+    {
+        Region region = RegionNamed(name);
+        List<(int Line, int Dot)> clocks = ClocksInAFrame(region, ctrl, ppu =>
+        {
+            if (ppu.Line < 240 && ppu.Dot == writeDot)
+            {
+                ppu.WriteRegister(6, high);
+                ppu.WriteRegister(6, 0x00);
+            }
+        });
+
+        int[] expectedLines = clockDot < 0 ? [] : [.. Enumerable.Range(0, 240), region.PreRenderLine];
+        Assert.Equal(expectedLines, clocks.Select(c => c.Line));
+        Assert.All(clocks, c => Assert.Equal(clockDot, c.Dot));
+    }
+
     // The (line, dot) of each clock in the second frame of a PPU run alone, latch 0, rendering on
     // from power on: the first frame settles, and every clock is acknowledged as it comes.
-    private static List<(int Line, int Dot)> ClocksInAFrame(Region region, byte ctrl)
+    // <paramref name="beforeDot"/>, when given, runs before every dot of both frames.
+    private static List<(int Line, int Dot)> ClocksInAFrame(Region region, byte ctrl, Action<Ppu>? beforeDot = null)
     {
         var board = new Clocked(Mmc3Cartridge().CreateMapper());
         var ppu = new Ppu(region, board);
@@ -113,6 +159,7 @@ public class Mmc3ScanlineCounterTests
         var clocks = new List<(int Line, int Dot)>();
         while (ppu.Frame < 2)
         {
+            beforeDot?.Invoke(ppu);
             (long frame, int line, int dot) = (ppu.Frame, ppu.Line, ppu.Dot);
             ppu.Tick();
             dots++;

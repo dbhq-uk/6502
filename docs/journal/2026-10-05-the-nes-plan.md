@@ -1160,10 +1160,12 @@ the ROMs of the other chip revision.
 **The variant.** The sheet chooses the Sharp ("new") behaviour at latch 0. The
 fork has ROMs for both: `mmc3_test_2`'s `5-MMC3` and `mmc3_irq_tests`'
 `6.MMC3_rev_B` for it, `6-MMC3_alt` and `5.MMC3_rev_A` for the other, which the
-readmes call Crystalis's chip. The first two pass. The second two fail on the
-one sub-test where the chips differ (status 2, and failed test 3) and pass the
-rest, so they are kept as a table of known failures that runs every time and
-records what they print. The readme of `mmc3_irq_tests` says at most one of the
+readmes call Crystalis's chip. The first two pass. The second two fail.
+`6-MMC3_alt` has two sub-tests and both test the other chip's rule; it stops at
+its first failure, test 2 (status 2), so its test 3 never runs.
+`5.MMC3_rev_A` passes its test 2, which both chips share, and fails test 3, the
+other chip's rule. They are kept as a table of known failures that runs every
+time and records what they print. The readme of `mmc3_irq_tests` says at most one of the
 two can pass on any emulator. The old behaviour was not built as an option: no
 file names it (an iNES header cannot), and the sheet says games rely on the new.
 
@@ -1188,9 +1190,12 @@ wiki, marked a guess. In the model the first sprite pattern address goes out on
 dot 261, and that is where the counter clocks. To see whether
 `4-scanline_timing` can tell, the rise was moved for one run each: on dot 260 it
 fails with status 2, "Scanline 0 IRQ should occur later when $2000=$08", and on
-dot 262 with status 3, "should occur sooner". Only 261 passes. The wiki's 260
-and the model's 261 are the same moment, counted from a different start. The
-sheet now says so. `mmc3_irq_tests`' timing ROM passes at all three, so it is
+dot 262 with status 3, "should occur sooner". Only 261 passes. What is measured
+is that dot 261, together with the model's CPU and PPU phase and its taking the
+IRQ line as each cycle begins, is what `4-scanline_timing` accepts. Why the
+wiki says 260 is not explained: nothing found shows that it counts a different
+moment (a cycle number rather than the dot an address goes out), and a one-dot
+difference could come from either side's alignment. The sheet now says so. `mmc3_irq_tests`' timing ROM passes at all three, so it is
 the coarser of the two.
 
 **The filter.** The sheet says a rise counts after A12 has been low for three
@@ -1256,3 +1261,18 @@ sprite slot) and the board's read takes its CHR window from 1 KB instead of
 - A first draft of the PPU comment said the 9-dot low from dot 337 was shorter
   than the filter. It is exactly 3 cycles on NTSC; the reason to leave those
   fetches out is the sheet's one clock a line, and the comment says so.
+
+**Review fixes.** The review found that with the `< $2000` filter gone the PPU
+told the board of `v` on `$2006` and `$2007` traffic during rendering too,
+where `ppu.md` 6 says the bus carries the fetches. A mid-frame `$2006` write,
+as an IRQ handler's split makes, could then give a false A12 edge and a
+spurious clock. `Report` now returns while the PPU renders. The case the review
+named (sprites at `$1000`, a `$2006` to `$2000` landing on dot 262) passes with
+or without the guard: the slot's own high-plane fetch on dot 263 ends the false
+low after one dot. So the test has two more placements that do fail without it,
+in both regions: both tables at `$1000` and `$2000` written on dot 337 (a false
+low 9 dots before the next line's first pattern fetch), and the background at
+`$1000` and `$1000` written on dot 300 (a false rise after a long low). With
+the guard taken out for one run, those four and a PPU test fail; with it in, all
+pass. The wording on the two known-failure ROMs and on dot 260 against 261 was
+also made exact (above).

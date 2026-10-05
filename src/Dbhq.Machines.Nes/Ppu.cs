@@ -70,8 +70,9 @@ namespace Dbhq.Machines.Nes;
 /// <b>The PPU's address bus.</b> The addresses the PPU puts on its bus go to
 /// <see cref="IMapper.PpuAddressChanged"/>, which is what MMC3 watches (its A12): during rendering
 /// the background's and the sprites' pattern fetches, and each sprite slot's first garbage
-/// nametable fetch; in VBlank or with rendering off <c>v</c> whenever it changes and the
-/// <c>$2007</c> accesses, whatever the address (ppu.md 6). The background's nametable and
+/// nametable fetch; outside rendering (in VBlank or with rendering off) <c>v</c> whenever it
+/// changes and the <c>$2007</c> accesses, whatever the address (ppu.md 6). A <c>$2006</c> or
+/// <c>$2007</c> access during rendering is not told: the bus is carrying the fetches. The background's nametable and
 /// attribute fetches are left out, though their A12 is always 0: between two pattern fetches they
 /// are a 4-dot low, which MMC3's filter ignores anyway, and from dot 337 to the next line's dot 4
 /// a 9-dot low, exactly 3 CPU cycles on NTSC, which told would clock the counter twice a line with
@@ -650,10 +651,16 @@ public sealed partial class Ppu
         return (ushort)((v & ~0x03E0) | (coarseY << 5));
     }
 
-    // Tells the board of v, or a $2007 access, on the PPU's bus. Every address goes, nametable and
+    // Tells the board of v, or a $2007 access, on the PPU's bus. Only outside rendering: while it
+    // renders the bus carries the fetches, not v (ppu.md 6). Every address goes, nametable and
     // palette ones too: A12 is bit 12 of any of them, so $3F00 is A12 high (ppu.md 6, task 11).
     private void Report(ushort address)
     {
+        if (Rendering)
+        {
+            return;
+        }
+
         _mapper.PpuAddressChanged((ushort)(address & 0x3FFF), CpuCycle);
     }
 

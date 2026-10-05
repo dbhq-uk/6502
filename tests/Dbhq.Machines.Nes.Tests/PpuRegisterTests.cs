@@ -290,6 +290,28 @@ public class PpuRegisterTests
     }
 
     [Fact]
+    public void A2006WriteIsReportedWithRenderingOffAndNotDuringRendering()
+    {
+        (Ppu ppu, TestMapper mapper) = Build();
+
+        // Rendering off: v = $1234 is on the bus.
+        SetAddress(ppu, 0x1234);
+        Assert.Equal(new ushort[] { 0x1234 }, mapper.Reported.Select(r => r.Address));
+
+        // Rendering on, on a visible line between fetches: the bus carries the fetches, not v.
+        ppu.WriteRegister(1, 0x18);
+        while (!(ppu.Line == 10 && ppu.Dot == 262))
+        {
+            ppu.Tick();
+        }
+
+        mapper.Reported.Clear();
+        SetAddress(ppu, 0x1567);
+        ppu.WriteRegister(7, 0x00);
+        Assert.Empty(mapper.Reported);
+    }
+
+    [Fact]
     public void APaletteAddressInVIsReportedWithA12High()
     {
         (Ppu ppu, TestMapper mapper) = Build();

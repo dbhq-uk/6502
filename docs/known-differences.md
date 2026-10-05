@@ -977,11 +977,13 @@ ROMs, `mmc3_test_2`'s singles 1 to 5 and `mmc3_irq_tests` 1 to 4 and 6 pass.
 Sharp ("new") chip, which raises the IRQ whenever a clock leaves the counter at
 0; the sheet chooses it because games rely on it. The other chip, Crystalis's in
 the fork's readmes, raises it only when the counter changes to 0 or is reloaded
-by request. So the two ROMs that test that chip fail on the sub-test where the
-two differ, and are kept in `BlarggTests` as known failures with what they print:
+by request. So the two ROMs that test that chip fail, and are kept in
+`BlarggTests` as known failures with what they print:
 `mmc3_test_2/rom_singles/6-MMC3_alt` (status 2, "IRQ shouldn't be set when
-reloading to 0 due to counter naturally reaching 0 previously") and
-`mmc3_irq_tests/5.MMC3_rev_A` (failed test 3). The readme of the second says at
+reloading to 0 due to counter naturally reaching 0 previously"; both its
+sub-tests are the other chip's rule, and it stops at the first, so its test 3
+never runs) and `mmc3_irq_tests/5.MMC3_rev_A` (failed test 3; its test 2, which
+both chips share, passes). The readme of the second says at
 most one of its last two ROMs can pass on any emulator.
 
 **What is not modelled.** The "pathological" behaviour the readmes describe
@@ -993,8 +995,9 @@ whose `$A001` means something else, so its battery RAM may read as switched off.
 `$1000`: the model clocks once on every rendering line there.
 
 **The PPU's address bus is told in part.** The board is told of every pattern
-fetch, each sprite slot's first nametable fetch, and `v` when a `$2006` write or
-a `$2007` access moves it. The background's nametable and attribute fetches are
+fetch, each sprite slot's first nametable fetch, and, outside rendering only,
+`v` when a `$2006` write or a `$2007` access moves it (during rendering the bus
+carries the fetches, so those accesses are not told). The background's nametable and attribute fetches are
 not told (their A12 is 0, and told they would give a second clock a line with
 the background at `$1000`, where the sheet says one). The bus's `v` on the
 post-render line, or when rendering is switched off mid-frame, is not told

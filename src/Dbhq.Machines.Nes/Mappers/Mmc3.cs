@@ -53,6 +53,9 @@ public sealed class Mmc3 : Board
     /// </summary>
     public const int FilterCycles = 3;
 
+    // R0 to R7 at power on: the first 32 KB of PRG and 8 KB of CHR in order (see the remarks).
+    private static readonly int[] PowerOnBanks = [0, 2, 4, 5, 6, 7, 0, 1];
+
     private readonly int[] _banks = new int[8];
     private readonly Mirroring _headerMirroring;
     private int _select;
@@ -171,8 +174,7 @@ public sealed class Mmc3 : Board
 
     private void PowerOn()
     {
-        int[] banks = [0, 2, 4, 5, 6, 7, 0, 1];
-        banks.CopyTo(_banks, 0);
+        PowerOnBanks.CopyTo(_banks, 0);
         _select = 0;
         Mirroring = _headerMirroring;
         PrgRamEnabled = true;

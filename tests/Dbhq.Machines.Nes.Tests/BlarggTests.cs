@@ -331,7 +331,7 @@ public class BlarggTests(ITestOutputHelper output)
             false,
             2,
             "IRQ shouldn't be set when reloading to 0 due to counter naturally reaching 0 previously",
-            "its test 2 is the other chip's latch-0 rule: with the counter run down to 0 and the latch set to 0, that chip raises no IRQ on the clocks that follow, and the Sharp chip modelled raises one on each, as 5-MMC3 asks"
+            "both its sub-tests are the other chip's latch-0 rule, and it stops at its first failure, test 2: with the counter run down to 0 and the latch set to 0, that chip raises no IRQ on the clocks that follow, and the Sharp chip modelled raises one on each, as 5-MMC3 asks; its test 3 never runs"
         },
         {
             "mmc3_irq_tests/5.MMC3_rev_A",
