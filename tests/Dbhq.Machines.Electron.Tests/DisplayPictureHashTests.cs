@@ -23,7 +23,8 @@ namespace Dbhq.Machines.Electron.Tests;
 /// to <c>MODE 5</c> is typed (only the prompt shows, so modes that draw a white <c>&gt;</c> the
 /// same width give the same hash: 0 and 3, 1 and 4, 2 and 5); the display alone with random screen memory in each mode, over both fields; and a
 /// field with a palette change and a mode change in the middle of it, as the display tests make
-/// them.
+/// them. A scrolled screen whose lines wrap past $7FFF, in modes 0 and 4, was added after the
+/// review and recorded at the same commit the same way.
 /// </para>
 /// </remarks>
 public class DisplayPictureHashTests
@@ -83,6 +84,33 @@ public class DisplayPictureHashTests
         }
 
         display.CatchUp(39_936 + (255 * Line) + 1);
+        Assert.Equal(hash, Hash(display.Screen.Pixels));
+    }
+
+    /// <remarks>
+    /// Added after task 13's review, which found that no point above scrolls the screen, so none
+    /// draws a line that wraps past $7FFF. Recorded the same way as the rest, on 5 October 2026,
+    /// from this test run at commit <c>7a3818b</c> (the display before the pixel table), unpacked
+    /// with <c>git archive</c> into a scratch folder: the old code's picture, not the sheet's.
+    /// </remarks>
+    [Theory]
+    [InlineData(0, "D389571EC627D10EB24B9DCA768F43EE")]
+    [InlineData(4, "0F7E5DE50B4018F6EA874D2D3FFC3A86")]
+    public void AScrolledScreenWhoseLinesWrapPast7FFF(int mode, string hash)
+    {
+        // A start of $7F00 ($FE02 = $80, $FE03 = $3F, as UlaDisplayTests.PastThe7FFFTheAddressWrapsToTheModesStart
+        // sets it, ula.md s5e): byte 32 of the first line is at $8000, so the line wraps to the
+        // mode's own start part of the way along, in mode 0 ($3000) as in mode 4 ($5800).
+        var ram = new byte[0x8000];
+        new Random(1985 + mode).NextBytes(ram);
+        var display = new UlaDisplay(ram);
+        display.Write(7, (byte)(mode << 3), 0);
+        display.Write(2, 0x80, 0);
+        display.Write(3, 0x3F, 0);
+        display.Write(8, 0x11, 0);
+        display.Write(9, 0x11, 0);
+        display.CatchUp(39_936 + (255 * Line) + 1);
+        Assert.Equal(0x7F00, display.StartAddress);
         Assert.Equal(hash, Hash(display.Screen.Pixels));
     }
 

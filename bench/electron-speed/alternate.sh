@@ -9,6 +9,7 @@
 # Each launch is one headless Chrome launch of a build (run-in-browser.mjs): power on, four
 # million cycles to the prompt, then five timed runs of two million cycles in each mode of
 # MODES (default 6,0). Run from this folder; folders are relative to it or absolute.
+# No spaces in a folder's path: the medians are grouped by each line's first word, the folder.
 set -euo pipefail
 cd "$(dirname "$0")"
 
