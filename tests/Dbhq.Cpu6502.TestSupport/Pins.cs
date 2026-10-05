@@ -18,6 +18,19 @@ public static class Pins
     public const string NestestRomSha256 = "f67d55fd6b3cf0bad1cc85f1df0d739c65b53e79cecb7fea8f77ec0eadab0004";
     public const string NestestLogSha256 = "442c4dd5539c7e88b3fd73c7b732a7eadbd22b47c2cd9e58397ef147f64f6f8f";
 
+    // The NES test ROMs, from the fork dbhq-uk/nes-test-roms at one commit: the
+    // same commit nestest comes from, which a test checks. Each is keyed by its
+    // path in the fork and checked against its SHA-256 every time it is read
+    // (NesTestRoms.Read). Each task of the NES plan adds the ROMs it uses.
+    // nestest's hash is the constant above, so the two can never disagree.
+    public const string NesTestRomsCommit = "95d8f621ae55cee0d09b91519a8989ae0e64753b";
+
+    public static IReadOnlyDictionary<string, string> NesTestRomHashes { get; } = new Dictionary<string, string>(StringComparer.Ordinal)
+    {
+        ["other/nestest.nes"] = NestestRomSha256,
+        ["ppu_vbl_nmi/ppu_vbl_nmi.nes"] = "8dbab1be785585c399cf055ef02147b788ab75fd80e81cf9568a2feafc03fb7d",
+    };
+
     // The KIM-1 monitor ROM, MOS Technology's, as Hans Otten dumped it from
     // real 6530-002 and 6530-003 chips, with their $00 filler bytes. The files
     // are committed under roms/, with where they came from and what is known

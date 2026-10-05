@@ -1,0 +1,5 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <ItemGroup>
+    <ProjectReference Include="../Dbhq.Cpu6502/Dbhq.Cpu6502.csproj" />
+  </ItemGroup>
+</Project>

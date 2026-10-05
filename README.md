@@ -27,8 +27,9 @@ counts as implemented. The BBC Micro Model B, the second, runs Acorn's own
 operating system, BBC BASIC and disc filing system, passes its acceptance test,
 and runs in the browser at
 [6502.dbhq.uk/machines/bbc-micro/](https://6502.dbhq.uk/machines/bbc-micro/),
-with its keyboard, sound and a disc drive, so it counts too. The NES is the
-next of the three. The programme's
+with its keyboard, sound and a disc drive, so it counts too. The NES, NTSC and
+PAL, is next: its design, plan and fact sheets are in the repository, and it is
+built task by task. The programme's
 design is in
 [`docs/superpowers/specs/2026-09-30-machines-and-site-design.md`](docs/superpowers/specs/2026-09-30-machines-and-site-design.md).
 
