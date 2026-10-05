@@ -60,6 +60,11 @@ public static class Pins
         ["sprite_overflow_tests/3.Timing.nes"] = "2252ec8fc35932b408f409ef9b6863edf084aa871fc10ad180b0ac4c2468ef8c",
         ["sprite_overflow_tests/4.Obscure.nes"] = "aebf2199344321465ae0d8dcd81f6c528c7f661f31f1814711365b4e573a8263",
         ["sprite_overflow_tests/5.Emulator.nes"] = "cf994454219696de82794f0b84f2bd63458444d12a1171c85bba8697ab94acb4",
+
+        // The browser speed check's ROM (task 6 of the NES plan): SNOW, a demo by Repulse that keeps
+        // rendering on and changes the picture every frame, NROM-256 with CHR ROM. Fetched by
+        // bench/nes-speed/ from the same fork at the same commit, and never committed.
+        ["other/snow.nes"] = "7db551e868b2c0182941bd68adc447c2f0668098a4425e8e170b20e4327b7210",
     };
 
     // The KIM-1 monitor ROM, MOS Technology's, as Hans Otten dumped it from
