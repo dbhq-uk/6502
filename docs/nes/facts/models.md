@@ -1,0 +1,89 @@
+# NES: sources for the 3D models
+
+Researched on 5 October 2026 for [the NES's models design](../../superpowers/specs/2026-10-05-nes-models-design.md): the NES has a case, so it gets two models, the **outside** (case, buttons, LED, ports) and the **inside** (the main board, its chips and copper), each drawn for both consoles, the NTSC NES-001 and the PAL NESE-001. Tags as in the other fact sheets: `[from <url>]` was read or measured directly, `[inferring ...]` joins dots, `[guessing - verify]` needs checking. Nothing here is code from another emulator, and no 3D model made by someone else is used.
+
+**The rule for what goes in the repository** is the BBC Micro's ([its sheet](../../bbc-micro/facts/models.md)): a model is ours, geometry we measured, with credit for anything traced or derived from a photograph. Photographs are credited and are not MIT. A photograph or scan that is too large or has no stated licence is not committed: the tool that reads it takes a path, and the repository records its URL, fetch date and SHA-256 and commits only what the tool made.
+
+## What was found
+
+| | Verdict | Why |
+|---|---|---|
+| **Inside, NTSC** | Measure the board to about 0.2 mm; the copper on both faces | Flatbed scans at 300 dpi of a **bare** NES-CPU-10, both sides, so no parts hide copper, and the print names every part. Public-domain photographs of a populated NES-CPU-07, both sides, flat, at about 20 pixels a millimetre, give the chips' markings |
+| **Inside, PAL** | The NTSC copper with the PAL parts, if one layout | A CC BY 4.0 photograph of a populated NES-CPU-11 "PAL-EEC", top side only, with every marking readable. No bare PAL board and no PAL solder side were found. ConsoleMods says the board is the same in every region with only the CPU, PPU, crystal and lockout chip changed [not checked: task 0 of the plan checks it] |
+| **Outside, NTSC** | Proportions and features to about 1 to 2 mm; size from published figures | Public-domain photographs of an NES-001 from all four corners at 112 mm (little perspective), and the design patent's six orthographic views. No size from Nintendo was found |
+| **Outside, PAL** | Features from photographs to a few mm | A CC BY 4.0 set of an NESE-001 taken apart, with the front label straight on, the underside and the case parts; a 20 mm lens, so strong perspective, and the plastic has yellowed |
+
+## Outside: sources
+
+| # | Source | Author, date | Licence, as stated | Size, view | Use |
+|---|---|---|---|---|---|
+| O1 | US Design Patent D299,726, https://patentimages.storage.googleapis.com/pdfs/USD299726.pdf ; Commons copy of sheet 1, `File:NES patented design.png` | Masayuki Yukawa, for Nintendo; filed 4 November 1985 | Commons: `{{PD-US-Patent}}` | 4 pages, each 2320x3408 at 300 dpi, 1-bit | FIG 3 front, FIG 4 rear, FIG 5 top, FIG 6 bottom (the expansion cover), FIG 7 and 8 sides, FIG 1 and 2 perspective with the door open. Proportions, as a check on the photographs: width to depth to height 1 : 0.78 : 0.367 as the research read them, against 1 : 0.793 : 0.347 from the published figures, so the drawings may not be exactly to scale [inferring] |
+| O2 | https://commons.wikimedia.org/wiki/File:Nintendo-Entertainment-System-NES-Console-FL.jpg , and `-FR`, `-BL`, `-BR` | Evan-Amos, 27 July 2016 | `{{PD-self}}`: "I, the copyright holder of this work, release this work into the public domain" | 4020x2880 each; NTSC NES-001 | Front and rear corners. Nikon D7000 at 112 mm (168 mm in 35 mm terms) [from the Exif, read 5 October 2026]. Colours, buttons, LED, ports, door, vents, the rear connectors |
+| O3 | `File:Nintendo-Entertainment-System-NES-Deconstruction-01.jpg` to `-04` | Evan-Amos, 27 July 2016 | `{{PD-self}}` | 4020x2640; NTSC | The case opened in stages: inner shell, shield, tray. Where the board sits in the case |
+| O4 | `File:Geöffnetes deutsches NES 20221102 HOF06342 RAW-Export.png`, in the Commons category "Nintendo Entertainment System NESE-001" (42 files) | PantheraLeo1359531, 2 November 2022 | `{{self\|cc-by-4.0}}` | 8606x2253, 92.9 MB; PAL | The PAL top shell straight on from the front, its label legible. Sony A7R IV at 20 mm, so strong perspective. The set also has a near top-down case (HOF06345), the tray, the shield and the port bracket |
+| O5 | `File:Unterseite NES NESE-001 20221102 132229.jpg` | PantheraLeo1359531, 2 November 2022 | CC BY 4.0 | 4000x3000; PAL | The underside, slightly oblique: the expansion cover, the feet, the rating label. Samsung SM-G988B at 19 mm [from the Exif] |
+| O6 | `File:NES PAL.jpg` | RobinLe (from Pixabay), 2017 | `{{cc-zero}}` | 3456x2304; PAL | A PAL front, oblique. Reference only |
+| O7 | `File:Nintendo Entertainment System - Mattel Version (42532353740).jpg` | Matthew Paul Argall, 2018 | CC BY 2.0 | 6000x4000 | The PAL-A "Mattel Version". Out of scope; not fetched |
+| O8 | `File:Nintendo-Entertainment-System-NES-Controller-Plug.jpg` | Evan-Amos, 2016 | `{{PD-self}}` | 2400x2460 | The controller plug, for the port's shape |
+| D1 | https://www.dimensions.com/element/nintendo-entertainment-system-nes | Dimensions.com | "©2026 Dimensions.com \| All rights reserved." | Text and drawings | "10.1 x 8 x 3.5 in" (256 x 203.2 x 88.9 mm), 2.27 kg. The figures are quoted as facts with credit; the drawings are not used |
+| D2 | NES Fandom wiki, and Thingiverse thing 243385's description | Various | Not needed: figures only | Text | 10 x 8 x 3.5 inches; "254 X 203 X 89 mm". The open door adds about an inch [from the Fandom wiki] |
+| D3 | RetroTechCollection | n/a | n/a | Text | 254 x 203 x 76 mm: the height is the outlier |
+
+**Published sizes, and none of them Nintendo's.** No dimensions from Nintendo were found; the NESE-001 manual on manua.ls and the technical manual index at Limbofunk give none [from the research, 5 October 2026]. The width and depth agree at about 10 by 8 inches. The height does not (76 to 89 mm), so the plan measures it.
+
+## Inside: sources
+
+| # | Source | Author, date | Licence, as stated | Size, view | Use |
+|---|---|---|---|---|---|
+| I1 | OpenTendo, https://github.com/Redherring32/OpenTendo , `Scans/NES-CPU-10_front_300dpi.png` and `Scans/NES-CPU-10_back_300dpi.png`, at commit `3bd0b0be5c9ed6fc6a36d9e458bc58d9976b2009` (the head of `master` on 5 October 2026; the scans arrived in `e3caa02cfcbfbd0d77504259277e5c60fe922b16`, "fix: file structure", 22 August 2024) | Added by Kamoteshake, August 2024; the scanner is not named | The repository's README: "Licensed under the TAPR Open Hardware License (www.tapr.org/OHL)". GitHub reports `NOASSERTION`. The scans state no licence of their own; that the README's covers them is inferred | 2376x1492 each, 300 dpi (about 11.81 px/mm); a **bare** NES-CPU-10, "©1987 Nintendo", with an "NTSC" sticker | The reference frame: outline, holes, pads, both copper faces, the print, which names the parts (CPU, PPU, SRAM (WRAM), SRAM (VRAM), 74LS373, 74LS139, 40H368 twice, CIC, 74HCU04) |
+| I2 | OpenTendo `Board Files/Motherboard.kicad_pcb`, same commit | Redherring32 and others, 2019 to 2025 | As I1 | KiCad 8, 10.95 MB | A redrawing of the front-loader's board ("almost 1:1 of the OEM NES") from a schematic of the NES-CPU-11. The research read its Edge.Cuts outline as 196.25 by 118.70 mm. A cross-check of the outline and the part places only |
+| I3 | `File:Frontalansicht Mainboard NES NESE-001 HOF06378.png` | PantheraLeo1359531, 2 November 2022 | `{{self\|cc-by-4.0}}` (a Commons "Quality image") | 5462x3966, 76.8 MB; populated top side, background cut out; **NES-CPU-11, "PAL-EEC"** | The PAL parts and their markings: RP2A07A, RP2C07-0, two XRM6216-10 RAMs, CIC 3195A, MB74LS373, two MC74HC368N, SN74LS139N, SN74HCU04N, the ALPS RF modulator. About 21 px/mm from DIP pitch [from the research]. A 20 mm lens, so tall parts lean |
+| I4 | https://commons.wikimedia.org/wiki/File:Nintendo-NES-Mk1-Motherboard-Top.jpg | Evan-Amos, 15 July 2015 | `{{PD-self}}` | 4570x3330; populated top, flat; **NES-CPU-07**, "NTSC" sticker; the modulator's lid off | The NTSC parts and their markings: RP2C02G-0, RP2A03G, CIC 3193A, MB8416A RAMs, SN74LS373N. About 20.7 px/mm. Nikon D7100, 60 mm macro [from the Exif] |
+| I5 | `File:Nintendo-NES-Mk1-Motherboard-Bottom.jpg` | Evan-Amos, 15 July 2015 | `{{PD-self}}` | 5280x3690; populated, solder side, flat; NES-CPU-07 | The populated solder side: what is soldered where, as a check on I1's back |
+| I6 | `File:RP2A07A 20221102.png` | PantheraLeo1359531, 2022 | CC BY 4.0 | 1206x408 | The PAL CPU close up |
+| I7 | `File:Nintendo-Entertainment-System-NES-Motherboard-FL.jpg`, `-FR`, `-BL`, `-BR`, `-Bottom` | Evan-Amos, 2016 | `{{PD-self}}` | 3900 wide; oblique, populated; NTSC | Part heights, the modulator box's sides |
+| I8 | `File:Nintendo 10nes pal-a.jpg`, `File:Ricoh 2a07.jpg` | it:User:Leo72, 2011 | Public domain | 1600x1200 | PAL-A parts. Out of scope; not fetched |
+
+**What the scan shows** [from I1, looked at on 5 October 2026]: the main board alone. The RF modulator is a separate can soldered at the lower right ("MOD RF"), the 72-pin cartridge connector clamps onto the edge fingers at the bottom, and the 48-pin expansion port's footprint is the long slot in the middle. The controller ports reach the board through a header at the upper right.
+
+## Not usable, and not to be used
+
+- **Printables 132150 "NES Frontloader replica Shell" and 110082 "lid"**, RetroGameRevival: "Creative Commons - Attribution - Noncommercial". Non-commercial, and someone else's 3D model.
+- **Thingiverse 243385 "Original NES Console"**, qpowel1: CC BY-SA 4.0, but a 3D model. Only its stated size is quoted (D2).
+- **GrabCAD NES models**: other people's 3D models. Their licences were not checked, because they would not be used either way.
+- **Dimensions.com's drawings**: all rights reserved. Its figures are quoted as facts (D1).
+- **nesdev forum photographs, Flickr osr/7866767354, the ConsoleMods wiki's photographs**: no licence found, or the page would not load to check one.
+- **Small or oblique views**: `File:10NES 1/2 (NES).jpg` and `NES ouverte 1-4` (256 pixels wide); `File:NES Motherboard.png` (CC BY 2.0) and `File:NESmainboardPCB.jpg` (liftarn, CC BY-SA 2.0, PAL-EEC, 3072x2304), oblique and coarse. Licensed well enough, but poor for measuring.
+
+## Choices taken
+
+Taken on 5 October 2026 with Dan; the design's decisions table has each with what it was chosen over.
+
+1. **Both consoles**, NTSC and PAL, for both views (Dan).
+2. **The NTSC board is an NES-CPU-10**, from I1, identified from I4 and I5.
+3. **The PAL board is I1's copper with I3's parts**, only if task 0 shows one layout.
+4. **No Nintendo logo shapes.** The case's words are drawn in the site's own face; the board's print is traced as it is.
+5. **The console as made**, not as yellowed.
+6. **OpenTendo forked into `dbhq-uk`** and pinned before it is read.
+
+## Downloaded for the work
+
+SHA-256 of the files the research downloaded on 5 October 2026 (kept at `~/dbhq-previews/nes-model-research/full/`, not committed: the scans state no licence of their own and the PAL originals are up to 93 MB). From task 0 every input is listed in `tools/nes-model/data/sources.json` with its URL, author, licence as stated, size and fetch date, and checked against its hash before it is read.
+
+| # | File | Bytes | SHA-256 |
+|---|---|---|---|
+| O1 | `USD299726.pdf` | 140750 | `4c699b1b31a40ddf4a80f9827b7c927058dd54979acdd1988aa94c3060775f3d` |
+| O2 | `Nintendo-Entertainment-System-NES-Console-FL.jpg` | 2193817 | `53c4ff11da6ba56bc2d9d8138dd585d126e08fe22350e8e0363003f9ddb8ab3c` |
+| O2 | `Nintendo-Entertainment-System-NES-Console-BL.jpg` | 2269902 | `e068546c7b4ce5e2e5709c68b499bce9c7f5b2559e9b992650d74dc7e366be9d` |
+| O2 | `Nintendo-Entertainment-System-NES-Console-BR.jpg` | 2230258 | `0681170937ae3af9db3fc8898e155792e295dacb5cb73942f8d2371c8733907f` |
+| O4 | `Geöffnetes_deutsches_NES_20221102_HOF06342_RAW-Export.png` | 92882699 | `3cf7eca8f43bafd3a8f341127d6c6f728acd2da3d2deb2464d93b66681b913d6` |
+| O5 | `Unterseite_NES_NESE-001_20221102_132229.jpg` | 3025854 | `a8e10ed2cf0148beccab8f7979f0a92497b01846df684e6c5260c56d4c9a4c27` |
+| I1 | `opentendo_NES-CPU-10_front_300dpi.png` | 6354680 | `fd41c714258a4d379d034eaf39cdcfcc7aab5273f4dafb74ff8517b55c88ab3a` |
+| I1 | `opentendo_NES-CPU-10_back_300dpi.png` | 6710399 | `fa15ea9e5a57c8621932fa4cbd8b8121feba82a746cc996627f95b6d12b8a0a5` |
+| I2 | `opentendo_Motherboard.kicad_pcb` (kept one folder up) | 10954333 | `9cce8323c9c18f0c583f99d1e07d7650f85858ca2599cbf52b2c75f384e8224a` |
+| I3 | `Frontalansicht_Mainboard_NES_NESE-001_HOF06378.png` | 76772853 | `e9f606535f4b01507a62f185ce38aa3403862bb82f434cc51f148a90088ea8cd` |
+| I4 | `Nintendo-NES-Mk1-Motherboard-Top.jpg` | 10715307 | `2158318ca6e7c913fce4220e8763dc8df4b37e70fea50cf29a1c975556a5b46c` |
+| I5 | `Nintendo-NES-Mk1-Motherboard-Bottom.jpg` | 9247611 | `64d52d1dbedfd123a56780def11821ef4157694e4d88d701924d567e2cb1ae10` |
+| I6 | `RP2A07A_20221102.png` | 2438824 | `99208c2054e674c68aa78942f2c784873b13463d7bd5f2d649ec3e96c7e68c72` |
+
+The two scans' sizes are the ones GitHub gives for those paths at the pinned commit (checked with `gh api` on 5 October 2026). Not yet fetched: O2's `-FR`, O3, O6, O8, I7. The task that first needs each fetches it and records it here and in `sources.json`.
