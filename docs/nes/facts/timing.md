@@ -49,8 +49,9 @@ the skip does not happen that frame [from PPU registers, PPUMASK notes].
 
 **When the skip is decided** is tested by `ppu_vbl_nmi` test 10 to one dot
 ("Clock is skipped too soon/too late, relative to enabling BG") [from the fork:
-ppu_vbl_nmi/readme.txt]. Which dot samples the rendering bit is not on the
-pages read. Measured in task 4 (5 October 2026), with the model's position
+ppu_vbl_nmi/readme.txt]. The pages say where the skip happens, a jump "from
+(339,261)" to (0,0) [from PPU frame timing; PPU rendering], and not when the
+rendering bit is read for it. Measured in task 4 (5 October 2026), with the model's position
 meaning the dot the PPU runs next: the bit is sampled when dot 338 of the
 pre-render line runs, so a `$2001` write made while the PPU is at dot 338 or
 earlier counts for this frame and one made at dot 339 does not. With the sample
@@ -59,9 +60,12 @@ enabling BG" (text `08 07`); at dot 337 with code 2, "too soon" (text `09`);
 at 338 it passes, and so do the other nine singles [measured: `dotnet test
 tests/Dbhq.Machines.Nes.Tests -c Release --filter
 "FullyQualifiedName~BlarggTests"`, with the sample dot changed between runs].
-The model applies a `$2001` write at once, so this dot may stand for a later
-sample plus the write's delay of `ppu.md` section 1; the test cannot tell the
-two apart [inferring].
+Dot 338 is the model's cutoff in its own alignment of CPU and PPU (section 4,
+`bus.md` section 2): the last position at which a `$2001` write still counts.
+Set against the wiki's dot 339 it is an effective delay of one dot for the
+write, where `ppu.md` section 1 gives 3 to 4 dots for a rendering toggle. The
+gap between one dot and 3 to 4 is open: the alignment, the sample point and the
+delay all move the cutoff, and test 10 sees only the cutoff [inferring].
 
 ### Worked example 1: one frame in dots
 
@@ -158,8 +162,15 @@ the NMI comes one instruction early. With the line at the end, test 5 printed
 the NMI line as the chips held it when the cycle began, so a change made during
 cycle N reaches the CPU in cycle N + 1. This is the core's own convention: its
 interrupts were checked against the transistor-level model with "the line
-changed at the start of a cycle" (journal, 30 September 2026). The bus takes the
-IRQ line at the same point; no IRQ source exists until task 8, which checks it.
+changed at the start of a cycle" (journal, 30 September 2026). The
+start-of-cycle NMI line is also what reproduces the suppression window of
+`bus.md` section 2: a `$2002` read on the dot the flag is set, or one dot after,
+clears it in the cycle that set it, which began with the NMI not raised, so the
+CPU never sees it; a read two dots after falls in the next cycle, which began
+with the NMI already raised, so it comes [inferring; task 5 pins it in both
+regions with `NesBusTests`, reads landing at line 241 dots 2, 3 and 4]. The bus
+takes the IRQ line at the same point; no IRQ source exists until task 8, which
+checks it.
 
 **On PAL** the same rule gives two dots before the access and one after, and in
 the cycle that carries the fourth dot, two after. With the accumulator from zero

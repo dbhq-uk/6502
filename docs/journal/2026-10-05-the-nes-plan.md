@@ -417,3 +417,185 @@ million, so the slowest uses about a third of it.
 - The Y increment's worked example has three rows. Only the first can be reached
   through the registers alone, because `$2006` clears bit 14. The other two wait
   for task 5, whose pipeline copies `t` into `v`.
+
+## Task 5: the PPU draws
+
+The fifth task made the PPU draw. The background pipeline runs dot by dot, and
+the sprite unit evaluates, fetches and multiplexes. Sprite 0 hit and the
+overflow flag work, the overflow flag with its hardware bug. `PpuPalette`
+computes the 64 colours under 8 emphasis settings, and `FrameBuffer` takes a
+pixel a dot. All eleven `sprite_hit_tests_2005.10.05` ROMs and all five
+`sprite_overflow_tests` ROMs pass on NTSC, and the ten `ppu_vbl_nmi` singles
+still pass.
+
+**The tests went first, mostly.** The frame buffer, background and sprite tests
+were written before the PPU's code, and failed to compile, because `Ppu.Screen`
+did not exist. With a stub `Screen` they compiled, and of the 213 tests in those
+files, `PpuPaletteTests` and `NesBusTests`, 112 failed: every drawing test, the
+frame buffer tests, the OAM DMA test, and the PAL rows of the suppression test
+(below). `PpuPalette` was written before its tests were run, so its tests
+passed at their first run, which is no evidence that they can fail. So four
+faults were put into a copy of it (greyscale ignored, no swap, the red and green
+emphasis hues exchanged, the subcarrier angle moved by 60 degrees), and 18 of
+its 24 tests failed: the hue rows, the emphasis rows, the swap and greyscale. The new test of task 4's frame count passed against
+task 4's code, as a pin of behaviour that was already right should.
+
+**The sprite ROMs need OAM DMA, so it came early.** Every sprite ROM loads OAM
+with a write to `$4014`, and the bus ignored it until task 7. So this task
+built OAM DMA in the bus, and task 7 keeps its tests and its share with DMC
+DMA. The write only records the page. The copy runs at the start of the CPU's
+next read, because the CPU can be halted only on a read (`bus.md` section 5).
+That one rule also makes `INC $4014` copy the second page written, as the sheet
+says, with no special case. The halted cycles repeat the CPU's read, and every
+cycle of the copy goes through `Cycle`, so the PPU runs through it. Which
+cycles are gets is the model's choice: the even ones. The sprite ROMs pass with
+either parity (measured by swapping it), so they do not settle it.
+
+**The 2005 ROMs report another way.** These ROMs do not use the `$6000` protocol
+of `cartridge.md` section 5. Their source in the fork (`runtime_rom.a`,
+`validation.a`) keeps the number of the test running in zero page `$F8`. Each
+prints PASSED or FAILED with that number, beeps, and stops in `exit: jmp exit`.
+So `BlarggRunner.RunScreenReporting` steps until the CPU sits on a `JMP` to
+itself, and reads `$F8`: 1 is a pass. It also reads the text the ROM printed
+from nametable 0, because the ROM's console loads its font so that each tile
+number is the ASCII code. Every ROM is mapper 0 with 16 KB of PRG and CHR RAM,
+so none had to wait for a mapper.
+
+**What each ROM printed**, from a throwaway test that printed each
+`BlarggResult` (5 October 2026, `dotnet test tests/Dbhq.Machines.Nes.Tests -c
+Release --filter FullyQualifiedName~ZzThrowaway --logger
+"console;verbosity=detailed"`, the test since removed):
+
+| ROM | Result | Cycles to the result |
+|---|---|---|
+| `01.basics` | SPRITE HIT BASICS, PASSED | 1,424,770 |
+| `02.alignment` | PASSED | 1,335,428 |
+| `03.corners` | PASSED | 1,007,843 |
+| `04.flip` | PASSED | 1,007,843 |
+| `05.left_clip` | PASSED | 1,275,868 |
+| `06.right_edge` | PASSED | 1,067,403 |
+| `07.screen_bottom` | PASSED | 1,156,750 |
+| `08.double_height` | PASSED | 1,007,842 |
+| `09.timing_basics` | PASSED | 2,437,315 |
+| `10.timing_order` | PASSED | 2,318,196 |
+| `11.edge_timing` | PASSED | 2,288,416 |
+| `1.Basics` | SPRITE OVERFLOW BASICS, PASSED | 859,026 |
+| `2.Details` | PASSED | 1,097,272 |
+| `3.Timing` | PASSED | 4,730,511 |
+| `4.Obscure` | PASSED | 1,067,492 |
+| `5.Emulator` | PASSED | 799,462 |
+
+They share the 18 million cycle budget of the `ppu_vbl_nmi` singles. No ROM is a
+known failure, so `known-differences.md` gains no failure table. It gains a
+section on where the picture stops instead.
+
+**How sharp the ROMs are.** All sixteen passed at the first run. A pass that
+easy needs checking, so each kind of fault was put in on purpose and the ROMs
+run again. Each fault was a copy of `Ppu.cs` with an environment switch, now
+removed:
+- The hit flag held back 1 or 2 dots: all pass. 3 dots: `10.timing_order` fails
+  with 7, "Lower-left corner too late". 4 dots: `09.timing_basics` fails with 7
+  as well. 5 dots: 09 with 7 and 10 with 3, "Upper-left corner too late". Before the change below, with column `X` decided on dot
+  `X + 1`, holding the hit back 3 dots passed, and 6 failed both. So the ROMs
+  accept the hit on dots `X + 1` to `X + 4`.
+- The overflow bug taken out (only `n` goes up): `4.Obscure` fails with 2,
+  "Checks that second byte of sprite #10 is treated as its Y", and `3.Timing`
+  with 12.
+- The overflow flag set 3 dots late: all pass. 6 dots late: `3.Timing` fails
+  with 5, "too late for first scanline".
+- The unit tests caught the same faults: without the bug both rows of worked
+  example 6 fail in both regions, and with the DMA parity reversed the DMA test
+  fails.
+
+**The dot of a column, a change from the sheet.** `ppu.md` guessed that column
+`X` is decided on dot `X + 1`, and the first version did that. PPU rendering
+says sprite 0 hit "acts as if the image starts at cycle 2 (which is the same
+cycle that the shifters shift for the first time)". The ROMs accept both, so
+the model now takes the wiki's: column `X` on dot `X + 2`, from the shifters
+before that dot shifts them. The picture is the same. Only the dot of the hit
+and of a mid-line register change moves, one dot later.
+
+**The colours.** The colour table's licence was not checked in task 1. No page
+of the wiki read states terms for its content. The only licence on NTSC video
+is for its example programs (Creative Commons Attribution-ShareAlike 4.0). So
+the Pally tables are not used. `PpuPalette` computes the colours from NTSC
+video (revision 24244, read from the Internet Archive's copy of 30 September
+2026, as the sheets were). It uses the page's terminated voltage table, the
+square wave of 12 phases, the attenuation for each emphasis bit, and the page's
+YUV decode and matrix. The formula is in `ppu.md` section 11 and the code
+comments. Two choices were the page's to offer: black at `$1D` with no 7.5 IRE
+setup, and white at `$20`. One angle was derived: `pi (p + 2.5) / 6`, which puts
+hue 8 on the colour burst. The page's own program has `p + 3 - 0.5`. It was
+checked against the sheet's known entries: the greys, the blacks, white, the
+emphasis bits, and the hues of row `$1x` of the 2C02G table, within 20 degrees.
+A throwaway script also compared all 64 with task 1's table. Every hue was
+within 28 degrees, and the greys were brighter by the missing setup. The two
+64-entry tables are out of `ppu.md` now, and only row `$1x` is kept, for the
+test. The darkening by emphasis, open in `ppu.md` since task 1, is settled from
+the same page.
+
+**Task 4's carries.**
+- The PPU no longer calls a delegate for the CPU cycle on each reported address.
+  The bus sets `Ppu.CpuCycle` once a cycle, before the dots, so the hot path
+  reads a field. The constructor is unchanged.
+- A new test runs three frames with rendering off, both regions, and after every
+  cycle checks `Frame x Lines x 341 + Line x 341 + Dot = PpuDots`.
+- A new test pins the `$2002` suppression window in both regions. A read lands
+  with the PPU at line 241 dot 2, 3 or 4. At dots 2 and 3 there is no NMI. At
+  dot 4 there is one. On NTSC the cycles start on different dots in each of
+  three frames, so the right cycle comes. On PAL it never came, because a PAL
+  frame is 33247.5 cycles and the cycles' starting dots repeat every two
+  frames. The test moves the alignment with the reset button instead. The reset
+  restarts the PPU at line 0 dot 0 while the bus's accumulator runs on. The
+  first version of that retry did not move it either: each attempt happened to
+  run a multiple of 5 cycles, so the accumulator was the same at every reset.
+  Each attempt now runs one cycle more than the last.
+- The dot-338 inference is reworded in `timing.md`, `known-differences.md` and
+  here. Dot 338 is the model's cutoff, in its own alignment. Against the wiki's
+  dot 339, where the skip happens (PPU frame timing: "jumping directly from
+  (339,261)"), that is an effective delay of one dot for the `$2001` write. The
+  sheet gives 3 to 4 dots for a rendering toggle, and the gap is open.
+  `timing.md` also says now why the start-of-cycle NMI line gives the
+  suppression window of `bus.md` section 2.
+- Rows 2 and 3 of `ppu.md` worked example 2, the Y increment at coarse Y 29 and
+  31, are tested now, through the pre-render copy and line 0's dot 256.
+
+**Two of task 4's tests changed**, because the PPU now draws. One test wrote
+`$2004` during rendering, then read it back during rendering. A `$2004` read
+during rendering now shows what evaluation reads, as `ppu.md` section 1 says,
+so the test switches rendering off before it reads. The reset test ran 1000
+dots with rendering on and expected `v` unchanged. Rendering moves `v` now, so
+the test checks that the reset keeps `v` where rendering left it.
+
+**Speed.** The per-dot path allocates nothing. The first version looped over
+the 8 sprite slots for every pixel. It now lays each fetched sprite into a
+256-byte buffer for the next line, so a pixel costs one lookup. The lowest slot
+still wins, because the slots are laid in order and a taken column is kept. A
+measurement was tried, and it is not a figure. The machine's load average was
+45 to 85 on 8 cores at the time (5 October 2026, `/proc/loadavg`). A throwaway
+test timed 60 frames of the PPU alone: 17 ns a dot with rendering off and 56 ns
+with it on, at a load average of 67. Task 6 measures the speed properly.
+
+**Decisions.**
+- OAM DMA was built in this task, not left failing until task 7 (above). It was
+  chosen over adding the sprite ROMs as known failures that tested nothing.
+- The 2C07's black border, its OAM refresh, and the OAMADDR-at-dot-65 sprite 0
+  quirk are not modelled. They are in `known-differences.md`.
+- Line 0 has no sprites, because the pre-render line does not evaluate. Its
+  fetches run with every slot empty, tile `$FF`, so MMC3 in task 11 sees the
+  fetches it counts.
+- A `$2004` read during rendering on a visible line returns the byte evaluation
+  or the fetches last read: `$FF` on dots 1 to 64. Nothing pinned checks the
+  rest yet; `oam_read` and `oam_stress` are task 12's.
+- PPU registers says greyscale ANDs the colour with `$30`, and NTSC video does
+  not cover `$xE` and `$xF`. The model takes the AND, and `ppu.md` records the
+  gap.
+
+**Mistakes.**
+- `FrameBuffer.Frame` did not move at first: `EndFrame` counted the PPU's frame
+  and not the buffer's. The frame buffer test caught it.
+- Several tests set the scroll and then wrote a byte through `$2006`. That
+  write changes `t`, so the picture scrolled somewhere else. The fix was to set
+  the scroll after the last write, as a program must.
+- The DMA test first waited for the wrong parity before the two writes, so the
+  write to `$4014` landed one cycle off from the parity it named.

@@ -76,6 +76,56 @@ public static class BlarggRunner
         return new BlarggResult(last, ReadText(nes.Bus), nes.Bus.Cycles, true);
     }
 
+    /// <summary>
+    /// Runs one of Blargg's 2005 ROMs, which report on the screen and by beeping, not through
+    /// <c>$6000</c>: <c>sprite_hit_tests_2005.10.05</c> and <c>sprite_overflow_tests</c>. Each
+    /// keeps the number of the test it is on in zero page <c>$F8</c> (its <c>result</c>), prints
+    /// the outcome, beeps, and stops in <c>exit: jmp exit</c> (the fork's
+    /// <c>source/runtime/runtime_rom.a</c> and <c>validation.a</c>). So the runner steps until the
+    /// CPU sits on a <c>JMP</c> to itself, and the status is <c>$F8</c>: 1 a pass, 2 and up the
+    /// number of the failing test, as each readme lists them. The text is what the ROM printed:
+    /// its console puts ASCII codes straight into nametable 0, whose tiles it loads as the font.
+    /// </summary>
+    public static BlarggResult RunScreenReporting(string pinnedName, Region region, long maxCpuCycles)
+    {
+        var nes = new Nes(Cartridge.Load(NesTestRoms.Read(pinnedName)), region);
+        nes.PowerOn();
+
+        while (nes.Bus.Cycles < maxCpuCycles)
+        {
+            nes.Step();
+            ushort pc = nes.Cpu.PC;
+            if (nes.Bus.Peek(pc) == 0x4C && nes.Bus.Peek((ushort)(pc + 1)) == (byte)pc && nes.Bus.Peek((ushort)(pc + 2)) == (byte)(pc >> 8))
+            {
+                return new BlarggResult(nes.Bus.Peek(0x00F8), ScreenText(nes.Bus.Ppu), nes.Bus.Cycles, false);
+            }
+        }
+
+        return new BlarggResult(nes.Bus.Peek(0x00F8), ScreenText(nes.Bus.Ppu), nes.Bus.Cycles, true);
+    }
+
+    private static string ScreenText(Ppu ppu)
+    {
+        var lines = new List<string>();
+        for (int row = 0; row < 30; row++)
+        {
+            var line = new StringBuilder();
+            for (int column = 0; column < 32; column++)
+            {
+                byte b = ppu.PeekVram((ushort)(0x2000 + (row * 32) + column));
+                line.Append(b is >= 0x20 and < 0x7F ? (char)b : ' ');
+            }
+
+            string text = line.ToString().Trim();
+            if (text.Length > 0)
+            {
+                lines.Add(text);
+            }
+        }
+
+        return string.Join('\n', lines);
+    }
+
     private static bool HasSignature(NesBus bus)
     {
         return bus.Peek(0x6001) == Signature[0] && bus.Peek(0x6002) == Signature[1] && bus.Peek(0x6003) == Signature[2];

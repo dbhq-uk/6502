@@ -318,6 +318,9 @@ public class PpuRegisterTests
         ppu.WriteRegister(1, 0x08);
         ppu.WriteRegister(4, 0x99);
 
+        // Read back with rendering off: during rendering a $2004 read shows what sprite
+        // evaluation is reading, not OAM at OAMADDR (ppu.md 1; PpuSpriteTests).
+        ppu.WriteRegister(1, 0x00);
         Assert.Equal(0x00, ppu.Oam[0x10]);
         Assert.Equal(0x77, ppu.ReadRegister(4));
     }
@@ -416,12 +419,14 @@ public class PpuRegisterTests
             ppu.Tick();
         }
 
+        // Rendering has moved v on from $2001; the reset leaves it where it is.
+        ushort v = ppu.V;
         ppu.Reset();
 
         Assert.False(ppu.RenderingEnabled);
         Assert.False(ppu.WriteToggle);
         Assert.Equal(0, ppu.T);
-        Assert.Equal(0x2001, ppu.V);
+        Assert.Equal(v, ppu.V);
         Assert.Equal((0, 0), (ppu.Line, ppu.Dot));
         Assert.Equal(0x44, ppu.PeekVram(0x2000));
         Assert.Equal(0x55, ppu.Oam[3]);

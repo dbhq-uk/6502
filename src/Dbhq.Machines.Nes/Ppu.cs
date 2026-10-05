@@ -2,13 +2,13 @@ namespace Dbhq.Machines.Nes;
 
 /// <summary>
 /// The picture processing unit, the 2C02 on NTSC and the 2C07 on PAL: its eight registers, its
-/// memory, and its clock of one dot a <see cref="Tick"/>.
+/// memory, and its clock of one dot a <see cref="Tick"/>, on which it draws the picture.
 /// </summary>
 /// <remarks>
 /// <para>
-/// Built from <c>docs/nes/facts/ppu.md</c> sections 1 to 5 and 12, and <c>timing.md</c> section 2.
-/// This is the PPU of task 4 of the NES plan: the registers, VRAM, OAM, the scroll registers and
-/// the frame's timing. It draws nothing yet; the picture, sprite 0 and overflow are task 5's.
+/// Built from <c>docs/nes/facts/ppu.md</c> and <c>timing.md</c> section 2. Task 4 of the NES plan
+/// built the registers, VRAM, OAM, the scroll registers and the frame's timing; task 5 the drawing:
+/// the background pipeline, the sprite unit, sprite 0 hit, the overflow flag and the colours.
 /// </para>
 /// <para>
 /// <b>The position.</b> <see cref="Line"/> and <see cref="Dot"/> name the dot the PPU runs next.
@@ -32,6 +32,35 @@ namespace Dbhq.Machines.Nes;
 /// against <c>ppu_vbl_nmi</c> test 10, which fails with the sample at 337 or 339.
 /// </para>
 /// <para>
+/// <b>The background</b> (ppu.md 6), on the visible lines and the pre-render line while either
+/// layer is on. Dots 1 to 256 and 321 to 336 fetch a tile every 8 dots: the nametable byte on the
+/// second dot, the attribute byte on the fourth, the low and high pattern bytes on the sixth and
+/// eighth, each pattern address put out on the dot before its read; the eighth dot moves coarse X
+/// on. The fetched tile goes into the low halves of two 16-bit pattern shifters, and its two
+/// attribute bits, spread to 8, into two attribute shifters, on dots 9, 17 ... 257, 329 and 337.
+/// The shifters shift left on dots 2 to 257 and 322 to 337, and fine X picks the pixel from their
+/// top 8 bits. Dot 256 does the Y increment, dot 257 copies <c>t</c>'s horizontal bits into
+/// <c>v</c>, and dots 280 to 304 of the pre-render line copy its vertical bits.
+/// </para>
+/// <para>
+/// <b>The sprites</b> (ppu.md 7 to 9). On each visible line, dots 1 to 64 fill secondary OAM with
+/// <c>$FF</c>, and dots 65 to 256 evaluate, reading OAM on odd dots and acting on even ones: the
+/// first 8 sprites in range for the next line are copied, and then the search for a ninth reads the
+/// diagonal bytes the hardware does, so the overflow flag has its bug. The pre-render line does
+/// not evaluate, so line 0 has no sprites. Dots 257 to 320 fetch the 8 slots' pattern bytes, an
+/// empty slot fetching tile <c>$FF</c>, and clear OAMADDR. A sprite is drawn on the line after
+/// the one that found it.
+/// </para>
+/// <para>
+/// <b>The pixel.</b> Column <c>X</c> of a visible line is decided on dot <c>X + 2</c>, from the
+/// shifters before that dot shifts them: the wiki has sprite 0 hit act "as if the image starts at
+/// cycle 2" (ppu.md 6). It is decided by the multiplexer of ppu.md 7, and written to <see cref="Screen"/> in the colour the palette
+/// entry, greyscale and emphasis give (<see cref="PpuPalette"/>). With rendering off the pixel is
+/// the backdrop, or the palette entry <c>v</c> points at when it points into the palette. Sprite
+/// 0 hit is set on the dot an opaque pixel of sprite 0 meets an opaque background pixel, except
+/// at column 255 and where the left-column clip hides either.
+/// </para>
+/// <para>
 /// <b>The I/O latch</b> is the PPU's own, not the CPU's open bus (ppu.md 1). Every register write
 /// fills it, reads of <c>$2004</c> and <c>$2007</c> fill it, a read of <c>$2002</c> fills bits 7 to
 /// 5, and a read of a write-only register returns it. The decay of its bits over 3 to 30 ms is not
@@ -39,9 +68,13 @@ namespace Dbhq.Machines.Nes;
 /// </para>
 /// <para>
 /// <b>The PPU's address bus.</b> Every pattern-table address the PPU puts on its bus goes to
-/// <see cref="IMapper.PpuAddressChanged"/>, which is what MMC3 watches. With no rendering yet the
-/// only addresses are <c>v</c> and the <c>$2007</c> accesses (ppu.md 6: in VBlank or with
-/// rendering off the bus carries <c>v</c>).
+/// <see cref="IMapper.PpuAddressChanged"/>, which is what MMC3 watches: the background's and the
+/// sprites' pattern fetches during rendering, and in VBlank or with rendering off <c>v</c> and the
+/// <c>$2007</c> accesses (ppu.md 6). The CPU cycle given with each is <see cref="CpuCycle"/>,
+/// which the bus sets once a cycle.
+/// </para>
+/// <para>
+/// Nothing on the per-dot path allocates: every buffer is made with the PPU.
 /// </para>
 /// </remarks>
 public sealed class Ppu
@@ -56,6 +89,9 @@ public sealed class Ppu
     private const int StatusVblank = 0x80;
     private const int StatusSprite0 = 0x40;
     private const int StatusOverflow = 0x20;
+
+    // Each byte with its bits in the other order, for a sprite flipped horizontally.
+    private static readonly byte[] Reversed = BuildReversed();
 
     private readonly Region _region;
     private readonly IMapper _mapper;
@@ -91,6 +127,56 @@ public sealed class Ppu
     // Decided when dot 338 of the pre-render line runs: this odd frame drops its last dot.
     private bool _dropDot;
 
+    // The colours of this region's PPU, (emphasis << 6) | colour, and PPUMASK's part in the index.
+    private readonly uint[] _colours;
+    private int _emphasis;
+    private int _greyscaleMask = 0x3F;
+
+    // The background: the bytes the 8-dot fetch has read, the pattern address it put out, and the
+    // four shifters (ppu.md 6).
+    private byte _nametableByte;
+    private int _attributeBits;
+    private byte _patternLowByte;
+    private byte _patternHighByte;
+    private ushort _patternAddress;
+    private ushort _patternLow;
+    private ushort _patternHigh;
+    private ushort _attributeLow;
+    private ushort _attributeHigh;
+
+    // Sprite evaluation for the next line (ppu.md 7 and 9): secondary OAM, the sprite n and byte
+    // m being read, the byte the last odd dot read, where in secondary OAM the next byte goes, how
+    // many sprites are copied, and whether 8 are found, the search is over, sprite 0 is among them.
+    private readonly byte[] _secondaryOam = new byte[32];
+    private int _evaluationN;
+    private int _evaluationM;
+    private byte _oamLatch;
+    private int _secondaryIndex;
+    private int _found;
+    private bool _secondaryFull;
+    private bool _evaluationDone;
+    private bool _sprite0Found;
+
+    // The sprites of the next line, laid out as the fetches on dots 257 to 320 read them: for each
+    // column the winning sprite pixel, 0 where none is opaque, else its value (bits 1 and 0), its
+    // palette (3 and 2), its priority (bit 5) and whether it is sprite 0 (bit 6). The slots are
+    // laid in order and a column already taken is kept, so the lowest-numbered sprite wins.
+    private readonly byte[] _spriteLine = new byte[256];
+    private const int SpriteBehind = 0x20;
+    private const int SpriteIsSprite0 = 0x40;
+
+    // How many slots of the line being fetched hold a sprite, and whether slot 0 is sprite 0.
+    private int _spriteCount;
+    private bool _sprite0OnLine;
+
+    // The slot being fetched on dots 257 to 320.
+    private byte _fetchY;
+    private byte _fetchTile;
+    private byte _fetchAttributes;
+    private byte _fetchX;
+    private byte _fetchLow;
+    private ushort _spriteAddress;
+
     /// <summary>A PPU for <paramref name="region"/>, whose pattern tables and nametable wiring are <paramref name="mapper"/>'s.</summary>
     public Ppu(Region region, IMapper mapper)
     {
@@ -101,7 +187,11 @@ public sealed class Ppu
         _preRenderLine = region.PreRenderLine;
         _lines = region.Lines;
         _oddFrameSkipsADot = region.OddFrameSkipsADot;
+        _colours = PpuPalette.Table(region.EmphasisSwapsRedAndGreen);
     }
+
+    /// <summary>The picture, written a pixel a dot.</summary>
+    public FrameBuffer Screen { get; } = new();
 
     /// <summary>The region this PPU is: the 2C02 for NTSC, the 2C07 for PAL.</summary>
     public Region Region => _region;
@@ -143,10 +233,11 @@ public sealed class Ppu
     public bool RenderingEnabled => (_mask & 0x18) != 0;
 
     /// <summary>
-    /// The CPU cycle count, for <see cref="IMapper.PpuAddressChanged"/>. The bus sets it; alone the
-    /// PPU reports cycle 0.
+    /// The CPU cycle the PPU's dots are running in, given with each address to
+    /// <see cref="IMapper.PpuAddressChanged"/>. The bus sets it once a cycle, before the cycle's
+    /// dots; alone the PPU reports cycle 0.
     /// </summary>
-    internal Func<long> CpuCycles { get; set; } = static () => 0;
+    internal long CpuCycle { get; set; }
 
     // Rendering is on and the PPU is on a line that renders: the visible lines and the pre-render line.
     private bool Rendering => RenderingEnabled && (_line < 240 || _line == _preRenderLine);
@@ -167,6 +258,7 @@ public sealed class Ppu
         Array.Clear(Oam);
         Array.Clear(_palette);
         Array.Clear(_nametables);
+        Screen.PowerOn();
         Reset();
     }
 
@@ -179,7 +271,7 @@ public sealed class Ppu
     public void Reset()
     {
         _ctrl = 0;
-        _mask = 0;
+        SetMask(0);
         _w = false;
         _t = 0;
         _x = 0;
@@ -189,11 +281,51 @@ public sealed class Ppu
         _dot = 0;
         _suppressVblank = false;
         _dropDot = false;
+        _patternLow = 0;
+        _patternHigh = 0;
+        _attributeLow = 0;
+        _attributeHigh = 0;
+        _spriteCount = 0;
+        _sprite0OnLine = false;
+        _found = 0;
+        _sprite0Found = false;
+        Array.Clear(_spriteLine);
     }
 
     /// <summary>Runs one dot: the dot <see cref="Line"/> and <see cref="Dot"/> name, then moves on.</summary>
     public void Tick()
     {
+        if (_line < 240)
+        {
+            if ((_mask & 0x18) != 0)
+            {
+                RenderDot(true);
+            }
+            else if (_dot >= 2 && _dot <= 257)
+            {
+                DrawRenderingOff();
+                if (_dot == 257)
+                {
+                    // No sprite was fetched for the next line.
+                    _spriteCount = 0;
+                    Array.Clear(_spriteLine);
+                }
+            }
+        }
+        else if (_line == _preRenderLine)
+        {
+            if ((_mask & 0x18) != 0)
+            {
+                RenderDot(false);
+            }
+            else if (_dot == 257)
+            {
+                // No sprite was fetched for line 0.
+                _spriteCount = 0;
+                Array.Clear(_spriteLine);
+            }
+        }
+
         if (_dot == 1)
         {
             if (_line == VblankLine)
@@ -260,7 +392,7 @@ public sealed class Ppu
             }
 
             case 4:
-                _latch = Oam[_oamAddress];
+                _latch = OamData();
                 return _latch;
 
             case 7:
@@ -303,7 +435,7 @@ public sealed class Ppu
                 break;
 
             case 1:
-                _mask = value;
+                SetMask(value);
                 break;
 
             case 2:
@@ -381,7 +513,7 @@ public sealed class Ppu
             case 2:
                 return (byte)((_status & 0xE0) | (_latch & 0x1F));
             case 4:
-                return Oam[_oamAddress];
+                return OamData();
             case 7:
             {
                 ushort address = (ushort)(_v & 0x3FFF);
@@ -412,6 +544,7 @@ public sealed class Ppu
     {
         _frame++;
         _oddFrame = !_oddFrame;
+        Screen.EndFrame();
     }
 
     private byte ReadPalette(ushort address)
@@ -517,7 +650,430 @@ public sealed class Ppu
         address &= 0x3FFF;
         if (address < 0x2000)
         {
-            _mapper.PpuAddressChanged(address, CpuCycles());
+            _mapper.PpuAddressChanged(address, CpuCycle);
         }
+    }
+
+    private void SetMask(byte value)
+    {
+        _mask = value;
+        _emphasis = (value >> 5) << 6;
+        _greyscaleMask = (value & 0x01) != 0 ? 0x30 : 0x3F;
+    }
+
+    // What a $2004 read sees: during rendering on a visible line, what sprite evaluation and the
+    // sprite fetches are reading ($FF while secondary OAM is cleared, ppu.md 1); otherwise OAM.
+    private byte OamData()
+    {
+        return _line < 240 && RenderingEnabled ? _oamLatch : Oam[_oamAddress];
+    }
+
+    // One dot of a line that renders, with rendering on (ppu.md 6 and 7).
+    private void RenderDot(bool visible)
+    {
+        int dot = _dot;
+        if (dot == 0)
+        {
+            return;
+        }
+
+        if (dot <= 256)
+        {
+            if (dot >= 2)
+            {
+                // Column dot - 2 is decided from the shifters as they stand, then they shift.
+                if (visible)
+                {
+                    DrawPixel(dot - 2);
+                }
+
+                Shift();
+            }
+
+            if ((dot & 7) == 1 && dot >= 9)
+            {
+                Reload();
+            }
+
+            if (visible)
+            {
+                Evaluate(dot);
+            }
+
+            FetchBackground(dot);
+            if (dot == 256)
+            {
+                _v = IncrementY(_v);
+            }
+
+            return;
+        }
+
+        if (dot <= 320)
+        {
+            if (dot == 257)
+            {
+                if (visible)
+                {
+                    DrawPixel(255);
+                }
+
+                Shift();
+                Reload();
+
+                // t's horizontal bits: coarse X and the horizontal nametable bit.
+                _v = (ushort)((_v & ~0x041F) | (_t & 0x041F));
+
+                // The next line's sprites are the ones this line found; the pre-render line finds none.
+                _spriteCount = visible ? _found : 0;
+                _sprite0OnLine = visible && _sprite0Found;
+                Array.Clear(_spriteLine);
+            }
+            else if (!visible && dot >= 280 && dot <= 304)
+            {
+                // t's vertical bits: fine Y, the vertical nametable bit and coarse Y.
+                _v = (ushort)((_v & ~0x7BE0) | (_t & 0x7BE0));
+            }
+
+            _oamAddress = 0;
+            FetchSprite(dot - 257);
+            return;
+        }
+
+        if (dot <= 336)
+        {
+            if (dot >= 322)
+            {
+                Shift();
+            }
+
+            if (dot == 329)
+            {
+                Reload();
+            }
+
+            FetchBackground(dot);
+        }
+        else if (dot == 337)
+        {
+            Shift();
+            Reload();
+        }
+    }
+
+    private void Shift()
+    {
+        _patternLow <<= 1;
+        _patternHigh <<= 1;
+        _attributeLow <<= 1;
+        _attributeHigh <<= 1;
+    }
+
+    // The fetched tile into the low halves of the shifters, its attribute bits spread to 8.
+    private void Reload()
+    {
+        _patternLow = (ushort)((_patternLow & 0xFF00) | _patternLowByte);
+        _patternHigh = (ushort)((_patternHigh & 0xFF00) | _patternHighByte);
+        _attributeLow = (ushort)((_attributeLow & 0xFF00) | ((_attributeBits & 1) != 0 ? 0xFF : 0x00));
+        _attributeHigh = (ushort)((_attributeHigh & 0xFF00) | ((_attributeBits & 2) != 0 ? 0xFF : 0x00));
+    }
+
+    // The 8-dot fetch of one background tile (ppu.md 6): each read on the second dot of its pair.
+    private void FetchBackground(int dot)
+    {
+        switch (dot & 7)
+        {
+            case 2:
+                _nametableByte = _nametables[NametableIndex((ushort)(0x2000 | (_v & 0x0FFF)))];
+                break;
+
+            case 4:
+            {
+                int address = 0x23C0 | (_v & 0x0C00) | ((_v >> 4) & 0x38) | ((_v >> 2) & 0x07);
+                byte attribute = _nametables[NametableIndex((ushort)address)];
+
+                // The quadrant: coarse Y bit 1 picks the bottom half, coarse X bit 1 the right.
+                _attributeBits = (attribute >> (((_v >> 4) & 4) | (_v & 2))) & 3;
+                break;
+            }
+
+            case 5:
+                _patternAddress = (ushort)(((_ctrl & 0x10) << 8) | (_nametableByte << 4) | ((_v >> 12) & 7));
+                _mapper.PpuAddressChanged(_patternAddress, CpuCycle);
+                break;
+
+            case 6:
+                _patternLowByte = _mapper.PpuRead(_patternAddress);
+                break;
+
+            case 7:
+                _mapper.PpuAddressChanged((ushort)(_patternAddress + 8), CpuCycle);
+                break;
+
+            case 0:
+                _patternHighByte = _mapper.PpuRead((ushort)(_patternAddress + 8));
+                _v = IncrementCoarseX(_v);
+                break;
+        }
+    }
+
+    // Column x of the line being drawn: the background, the sprites, the multiplexer (ppu.md 7),
+    // sprite 0 hit (ppu.md 8), and the colour.
+    private void DrawPixel(int x)
+    {
+        int pixel = 0;
+        if ((_mask & 0x08) != 0 && (x >= 8 || (_mask & 0x02) != 0))
+        {
+            int bit = 15 - _x;
+            pixel = ((_patternLow >> bit) & 1) | (((_patternHigh >> bit) & 1) << 1);
+            if (pixel != 0)
+            {
+                pixel |= (((_attributeLow >> bit) & 1) << 2) | (((_attributeHigh >> bit) & 1) << 3);
+            }
+        }
+
+        int sprite = _spriteLine[x];
+        if (sprite != 0 && (_mask & 0x10) != 0 && (x >= 8 || (_mask & 0x04) != 0))
+        {
+            if ((sprite & SpriteIsSprite0) != 0 && pixel != 0 && x != 255)
+            {
+                _status |= StatusSprite0;
+            }
+
+            // The winning sprite pixel goes in front unless it is behind and the background is opaque.
+            if (pixel == 0 || (sprite & SpriteBehind) == 0)
+            {
+                pixel = 0x10 | (sprite & 0x0F);
+            }
+        }
+
+        // A pixel value of 0 is the backdrop, $3F00, so index 0 needs no mirror.
+        Screen.Pixels[(_line << 8) | x] = _colours[_emphasis | (_palette[pixel] & _greyscaleMask)];
+    }
+
+    // With rendering off the picture is the backdrop, or the entry v points at in the palette (ppu.md 10).
+    private void DrawRenderingOff()
+    {
+        int entry = (_v & 0x3F00) == 0x3F00 ? PaletteIndex(_v) : 0;
+        Screen.Pixels[(_line << 8) | (_dot - 2)] = _colours[_emphasis | (_palette[entry] & _greyscaleMask)];
+    }
+
+    // One dot of sprite evaluation on a visible line, dots 1 to 256 (ppu.md 7 and 9).
+    private void Evaluate(int dot)
+    {
+        if (dot <= 64)
+        {
+            if (dot == 1)
+            {
+                Array.Fill(_secondaryOam, (byte)0xFF);
+                _evaluationN = 0;
+                _evaluationM = 0;
+                _secondaryIndex = 0;
+                _found = 0;
+                _secondaryFull = false;
+                _evaluationDone = false;
+                _sprite0Found = false;
+            }
+
+            _oamLatch = 0xFF;
+            return;
+        }
+
+        if ((dot & 1) == 1)
+        {
+            _oamLatch = Oam[(_evaluationN << 2) | _evaluationM];
+            return;
+        }
+
+        if (_evaluationDone)
+        {
+            return;
+        }
+
+        int row = _line - _oamLatch;
+        bool inRange = row >= 0 && row < ((_ctrl & 0x20) != 0 ? 16 : 8);
+        if (_secondaryFull)
+        {
+            // The search for a ninth sprite, with the hardware's bug: out of range, n and m both
+            // go up, so the next check reads another byte of the next sprite as its Y.
+            if (inRange)
+            {
+                _status |= StatusOverflow;
+                _evaluationDone = true;
+            }
+            else
+            {
+                _evaluationM = (_evaluationM + 1) & 3;
+                NextSprite();
+            }
+
+            return;
+        }
+
+        if (_evaluationM == 0)
+        {
+            // The Y is written to secondary OAM whether it is in range or not.
+            _secondaryOam[_secondaryIndex] = _oamLatch;
+            if (inRange)
+            {
+                _sprite0Found |= _evaluationN == 0;
+                _secondaryIndex++;
+                _evaluationM = 1;
+            }
+            else
+            {
+                NextSprite();
+            }
+
+            return;
+        }
+
+        _secondaryOam[_secondaryIndex++] = _oamLatch;
+        if (++_evaluationM == 4)
+        {
+            _evaluationM = 0;
+            _found++;
+            NextSprite();
+        }
+    }
+
+    private void NextSprite()
+    {
+        if (++_evaluationN == 64)
+        {
+            _evaluationN = 0;
+            _evaluationDone = true;
+        }
+        else if (_found == 8)
+        {
+            _secondaryFull = true;
+        }
+    }
+
+    // One dot of the sprite fetches, dots 257 to 320: slot k / 8, step k % 8 (ppu.md 7).
+    private void FetchSprite(int k)
+    {
+        int slot = k >> 3;
+        switch (k & 7)
+        {
+            case 0:
+                if (slot < _spriteCount)
+                {
+                    int at = slot << 2;
+                    _fetchY = _secondaryOam[at];
+                    _fetchTile = _secondaryOam[at + 1];
+                    _fetchAttributes = _secondaryOam[at + 2];
+                    _fetchX = _secondaryOam[at + 3];
+                }
+                else
+                {
+                    // An empty slot fetches tile $FF (ppu.md 7).
+                    _fetchY = 0xFF;
+                    _fetchTile = 0xFF;
+                    _fetchAttributes = 0xFF;
+                    _fetchX = 0xFF;
+                }
+
+                _oamLatch = _fetchY;
+                break;
+
+            case 1:
+                _oamLatch = _fetchTile;
+                break;
+
+            case 2:
+                _oamLatch = _fetchAttributes;
+                break;
+
+            case 3:
+                _oamLatch = _fetchX;
+                break;
+
+            case 4:
+            {
+                int row = slot < _spriteCount ? _line - _fetchY : 0;
+                if ((_ctrl & 0x20) == 0)
+                {
+                    if ((_fetchAttributes & 0x80) != 0 && slot < _spriteCount)
+                    {
+                        row = 7 - row;
+                    }
+
+                    _spriteAddress = (ushort)(((_ctrl & 0x08) << 9) | (_fetchTile << 4) | row);
+                }
+                else
+                {
+                    // 8 by 16: bit 0 of the tile picks the table, and the two tiles are a pair; a
+                    // vertical flip runs the 16 rows backwards, so it swaps them too.
+                    if ((_fetchAttributes & 0x80) != 0 && slot < _spriteCount)
+                    {
+                        row = 15 - row;
+                    }
+
+                    int tile = (_fetchTile & 0xFE) + (row >> 3);
+                    _spriteAddress = (ushort)(((_fetchTile & 1) << 12) | (tile << 4) | (row & 7));
+                }
+
+                _mapper.PpuAddressChanged(_spriteAddress, CpuCycle);
+                break;
+            }
+
+            case 5:
+                _fetchLow = _mapper.PpuRead(_spriteAddress);
+                break;
+
+            case 6:
+                _mapper.PpuAddressChanged((ushort)(_spriteAddress + 8), CpuCycle);
+                break;
+
+            default:
+            {
+                byte high = _mapper.PpuRead((ushort)(_spriteAddress + 8));
+                if (slot < _spriteCount)
+                {
+                    LaySprite(slot, _fetchLow, high);
+                }
+
+                break;
+            }
+        }
+    }
+
+    // A fetched sprite's 8 pixels into the next line's columns, where no lower slot has an opaque pixel.
+    private void LaySprite(int slot, int low, int high)
+    {
+        if ((_fetchAttributes & 0x40) != 0)
+        {
+            low = Reversed[low];
+            high = Reversed[high];
+        }
+
+        int tag = ((_fetchAttributes & 3) << 2) | (_fetchAttributes & SpriteBehind) | (slot == 0 && _sprite0OnLine ? SpriteIsSprite0 : 0);
+        int x = _fetchX;
+        for (int bit = 7; bit >= 0 && x < 256; bit--, x++)
+        {
+            int value = ((low >> bit) & 1) | (((high >> bit) & 1) << 1);
+            if (value != 0 && _spriteLine[x] == 0)
+            {
+                _spriteLine[x] = (byte)(tag | value);
+            }
+        }
+    }
+
+    private static byte[] BuildReversed()
+    {
+        var table = new byte[256];
+        for (int i = 0; i < 256; i++)
+        {
+            int reversed = 0;
+            for (int bit = 0; bit < 8; bit++)
+            {
+                reversed |= ((i >> bit) & 1) << (7 - bit);
+            }
+
+            table[i] = (byte)reversed;
+        }
+
+        return table;
     }
 }

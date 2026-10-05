@@ -41,6 +41,25 @@ public static class Pins
         ["ppu_vbl_nmi/rom_singles/08-nmi_off_timing.nes"] = "1d2a4093091c8e58a7f99d6a3531bbc6346b52cfc59bcb17ca04c1f2376cf2fc",
         ["ppu_vbl_nmi/rom_singles/09-even_odd_frames.nes"] = "1ac04283021ddd9294cc74ee709c55e20a350dc4815c15a8a93b3654837e858d",
         ["ppu_vbl_nmi/rom_singles/10-even_odd_timing.nes"] = "7217d2d172ce11ad45c4da40c2f22201cf0eb758bc2cd8dd39d2cf0a7d4ca83e",
+
+        // Sprite 0 hit and the sprite overflow flag, every ROM in each folder, each NROM-128 with
+        // CHR RAM (task 5 of the NES plan).
+        ["sprite_hit_tests_2005.10.05/01.basics.nes"] = "51819e8e502bd88fe3b7244198a074dbeef2e848f66c587be04b04f1f0d4bb52",
+        ["sprite_hit_tests_2005.10.05/02.alignment.nes"] = "125bbb3ce1e67370f1f4559c2ad3221e52a3e98880b9789400292b5f3a8b39e6",
+        ["sprite_hit_tests_2005.10.05/03.corners.nes"] = "9dd57776bc6267fe6183c5521d67cbe3fccc6662ae545eb2c419949bf39644d3",
+        ["sprite_hit_tests_2005.10.05/04.flip.nes"] = "5f7142bddb51b7577f93fa22f9f668efebbeea00346d7255089e1863acb9d46a",
+        ["sprite_hit_tests_2005.10.05/05.left_clip.nes"] = "69b329658c17b953f149c2f0de77eb272089df22c815bd2fd3d6f43206791c13",
+        ["sprite_hit_tests_2005.10.05/06.right_edge.nes"] = "8e6653fcb869e06873e29e5e4423122ea72ba0bf38f3ba9e39f471420db759a4",
+        ["sprite_hit_tests_2005.10.05/07.screen_bottom.nes"] = "05849956f80267838c5b6556310266b794078a4300841cbb36339fd141905a0b",
+        ["sprite_hit_tests_2005.10.05/08.double_height.nes"] = "127fd966b6b32d6d88a53c5f59d7e938827783c9ad056091f119be1c4ab21c71",
+        ["sprite_hit_tests_2005.10.05/09.timing_basics.nes"] = "311698c717e50150edd0b5fd0016c41de686463205c20efb5630d6adb90859fd",
+        ["sprite_hit_tests_2005.10.05/10.timing_order.nes"] = "0f36bc07bfe51c416e3cc1a5231053572aa6b15aa60e6d2fd0568be49b6dc2e9",
+        ["sprite_hit_tests_2005.10.05/11.edge_timing.nes"] = "5a7c121f6e76617be88a0a7035c0e402293be5c685c95b97190a8d70835736ab",
+        ["sprite_overflow_tests/1.Basics.nes"] = "1a6782f63ccb3a3dd1aa6a24272036c9c3aa232c2d1ff0b21e872741a3ee4fe2",
+        ["sprite_overflow_tests/2.Details.nes"] = "6405a7ff1042fe7a50d9bfe521e43460a3251799425bd3e1863b29b67e7cd587",
+        ["sprite_overflow_tests/3.Timing.nes"] = "2252ec8fc35932b408f409ef9b6863edf084aa871fc10ad180b0ac4c2468ef8c",
+        ["sprite_overflow_tests/4.Obscure.nes"] = "aebf2199344321465ae0d8dcd81f6c528c7f661f31f1814711365b4e573a8263",
+        ["sprite_overflow_tests/5.Emulator.nes"] = "cf994454219696de82794f0b84f2bd63458444d12a1171c85bba8697ab94acb4",
     };
 
     // The KIM-1 monitor ROM, MOS Technology's, as Hans Otten dumped it from

@@ -229,9 +229,14 @@ On every visible line (0 to 239) and the pre-render line, with rendering on
   [from PPU rendering].
 - **Pixel output.** "Sprite 0 hit acts as if the image starts at cycle 2", and
   the first pixel leaves the chip during dot 4 [from PPU rendering]. For the
-  model: picture column `X` is decided on dot `X + 1` (dots 1 to 256)
-  [guessing - verify: the `sprite_hit_tests_2005.10.05` timing tests settle the
-  dot].
+  model: picture column `X` is decided on dot `X + 2` (dots 2 to 257), from the
+  shifters as they stand before that dot shifts them [from PPU rendering]. The
+  timing ROMs of `sprite_hit_tests_2005.10.05` (09, 10 and 11) bound it but do
+  not pin it: they pass with the hit decided on any dot from `X + 1` to `X + 4`,
+  and from `X + 5` test 10 fails with code 7, "Lower-left corner too late"
+  [measured in task 5, 5 October 2026: the hit flag held back by 1 to 5 dots,
+  each run through `BlarggRunner.RunScreenReporting`]. A dot earlier than
+  `X + 1` was not tried.
 - **The PPU address bus.** During rendering it carries the fetch addresses
   above; in VBlank or with rendering off it carries `v` [from PPU rendering]. This
   is what MMC3 watches (`mappers.md` 6).
@@ -369,13 +374,20 @@ above].
   palettes]. `$0D` is "blacker than black" and should not be used [from PPU
   palettes].
 - **Greyscale** (PPUMASK bit 0) ANDs the colour with `$30`; palette reads show
-  the AND too [from PPU registers].
+  the AND too [from PPU registers]. NTSC video says "all colors between `$x1-$xD`
+  are treated as `$x0`", which does not say what happens to `$xE` and `$xF`;
+  the AND makes them `$x0` too. The model follows PPU registers [noting a
+  difference between two pages; no pinned test checks it].
 - **Emphasis** (PPUMASK bits 7 to 5) darkens the other two components; all
   three dims every colour [from PPU registers]. The 2C02 order is blue (bit 7),
   green (bit 6), red (bit 5); **the 2C07 swaps red and green**: blue (7), red
-  (6), green (5) [from PPU registers; Cycle reference chart]. How much the
-  darkening is was not on the pages read [guessing - verify: on the wiki's NTSC
-  video page, not yet read].
+  (6), green (5) [from PPU registers; Cycle reference chart]. **How much:** each
+  bit attenuates the signal during the 6 of the 12 colour phases in which one
+  hue's wave is high, bit 5 hue `$C`, bit 6 hue `$4`, bit 7 hue `$8`, so the
+  picture tints towards the opposite hue, red, green or blue; one shared
+  attenuator, active for 6, 10 or 12 of the 12 phases with one, two or three bits
+  set. Hues `$E` and `$F` are not affected; `$D` is. The attenuated voltages are
+  in section 11, on average 0.816328 of the plain ones [from NTSC video].
 - **Rendering off.** The picture shows the backdrop; if `v` points into
   `$3F00-$3FFF` it shows that entry instead [from PPU rendering].
 
@@ -397,33 +409,73 @@ above].
 
 The PPU makes a composite signal, not RGB, so any colour table is one decode of
 it; no single table matches every television [from PPU palettes]. The wiki gives
-tables generated with the Pally tool; one is chosen here, and the choice is the
-plan's [from PPU palettes].
+tables generated with the Pally tool [from PPU palettes]. Their licence is not
+stated: no page read gives terms for the wiki's content, and the one licence on
+NTSC video covers its example programs, not the tables (Creative Commons
+Attribution-ShareAlike 4.0) [from NTSC video]. So the model does not use them.
+`PpuPalette` **computes** its 64 colours, under each of the 8 emphasis
+settings, from the signal the NTSC video page describes. Task 1 copied two of
+the Pally tables into this section; task 5 took them out, and kept only the
+entries the tests compare against, below.
 
-**2C02, the wiki's `2C02G_U_wiki` table** (Pally v0.23.0, 7.5 IRE setup), as
-`RRGGBB` [from PPU palettes, the cell colours of its table]:
+**The signal** [from NTSC video, revision 24244, the terminated measurements]:
 
-| | x0 | x1 | x2 | x3 | x4 | x5 | x6 | x7 | x8 | x9 | xA | xB | xC | xD | xE | xF |
-|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| `$0x` | `575757` | `000C8E` | `0800A6` | `340096` | `550061` | `630015` | `5A0000` | `3C0E00` | `112800` | `003B00` | `004200` | `003A05` | `002652` | `000000` | `000000` | `000000` |
-| `$1x` | `A5A5A5` | `0041D9` | `2F1EFF` | `6704F2` | `9400B4` | `AA0057` | `A31800` | `803900` | `4B5B00` | `137600` | `008100` | `007923` | `006288` | `000000` | `000000` | `000000` |
-| `$2x` | `FFFFFF` | `4A9FFF` | `797EFF` | `AF63FF` | `DD55FF` | `F757C2` | `F76A63` | `DC8810` | `AEA900` | `78C400` | `4AD211` | `2FCF64` | `2FBDC4` | `414141` | `000000` | `000000` |
-| `$3x` | `FFFFFF` | `B9DDFF` | `CAD1FF` | `DEC6FF` | `F0C0FF` | `FCC0EE` | `FDC6CA` | `F5D0AA` | `E4DD95` | `D0E892` | `BDEEA2` | `B2EEC0` | `B0E8E3` | `B3B3B3` | `000000` | `000000` |
+| Level | Low | High | Low, attenuated | High, attenuated |
+|---|---|---|---|---|
+| 0 | 0.228 V | 0.616 V | 0.192 V | 0.500 V |
+| 1 | 0.312 V | 0.840 V | 0.256 V | 0.676 V |
+| 2 | 0.552 V | 1.100 V | 0.448 V | 0.896 V |
+| 3 | 0.880 V | 1.100 V | 0.712 V | 0.896 V |
 
-**2C07, the wiki's `2C07_wiki` table** (Pally v0.22.1), as `RRGGBB` [from PPU
-palettes, the cell colours of its table]:
+- A colour `$LH` swings between the low and high voltage of level `L` as a
+  square wave of 12 phases; hue `H` is high in the phases `p` where
+  `(H + p) mod 12 < 6`. Hue 0 is high all the time, hues `$D` to `$F` low all
+  the time, and `$E` and `$F` are level 1 whatever `L` says, so they are the
+  same voltage as `$1D` [from NTSC video].
+- Emphasis attenuates in the phases of section 10, and not for hues `$E` and
+  `$F` [from NTSC video].
+- `$0F`, the blanking level, is the same voltage as `$1D` [from NTSC video].
 
-| | x0 | x1 | x2 | x3 | x4 | x5 | x6 | x7 | x8 | x9 | xA | xB | xC | xD | xE | xF |
-|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| `$0x` | `626262` | `002263` | `0D107D` | `2B027D` | `440063` | `530036` | `530502` | `441500` | `2B2700` | `0D3600` | `003E00` | `003D02` | `003336` | `000000` | `000000` | `000000` |
-| `$1x` | `ABABAB` | `1251A8` | `3438CB` | `5C24CB` | `7E19A8` | `921B6B` | `922924` | `7E3F00` | `5C5700` | `346B00` | `127600` | `007424` | `00676B` | `000000` | `000000` | `000000` |
-| `$2x` | `FFFFFF` | `62A1FA` | `8589FF` | `AC75FF` | `CF6AFA` | `E36CBC` | `E37975` | `CF9037` | `ACA814` | `85BC14` | `62C737` | `4EC575` | `4EB7BC` | `4E4E4E` | `000000` | `000000` |
-| `$3x` | `FFFFFF` | `C4DDFF` | `D1D3FF` | `E1CBFF` | `EFC7FF` | `F6C8E7` | `F6CDCB` | `EFD6B3` | `E1DFA6` | `D1E7A6` | `C4EBB3` | `BCEBCB` | `BCE5E7` | `B8B8B8` | `000000` | `000000` |
+**The decode** [from NTSC video, "Composite decoding" and its example program,
+restated, not copied]:
 
-Whether these 128 numbers may be committed under this repository's licence was
-not checked [guessing - verify: the task that builds `PpuPalette` reads the
-wiki's licence terms first, and if they do not allow it, generates its own table
-from the composite model on the NTSC video page and records that instead].
+1. Scale each of the 12 samples so that `$1D` (0.312 V, black) is 0 and `$20`
+   (1.100 V) is 1. The page allows either black point (with or without the
+   7.5 IRE setup) and either white point; this choice takes black without the
+   setup and `$20` for white, as its example program does.
+2. Y is the mean of the 12. U and V are twice the mean of each sample times the
+   sine, and the cosine, of the subcarrier at that sample, at angle
+   `pi (p + 2.5) / 6`. The 2 is the page's saturation correction. The angle puts
+   hue 8 on the colour burst, which the page gives as pure -U; it is the page's
+   example program's `p + 3 - 0.5` [inferring: the centre of hue 8's six high
+   phases is at `p = 6.5`, and `pi (6.5 + 2.5) / 6` is 270 degrees, pure -U].
+3. R = Y + 1.139883 V, G = Y - 0.394642 U - 0.580622 V, B = Y + 2.032062 U,
+   each clipped to 0 to 1, times 255, rounded [from NTSC video].
+
+The page's own program decodes a whole line, so colours bleed into their
+neighbours; the model decodes each colour alone, from one whole colour cycle,
+so it has no artefacts. Neither the differential phase distortion the page
+describes (the hues of brighter rows turned by about 2.5 to 5 degrees a row) nor
+a television's filtering is modelled. PAL uses the same table, with the 2C07's
+emphasis bits swapped (section 10); the 2C07's own decode, about 15 degrees of
+hue apart, is a known difference.
+
+**What it was checked against.** The sheet's known entries, which are these
+from the 2C02G table task 1 copied (`2C02G_U_wiki`, Pally v0.23.0, with the
+7.5 IRE setup), as `RRGGBB` [from PPU palettes, the cell colours of its table]:
+
+| | x0 | x1 | x2 | x3 | x4 | x5 | x6 | x7 | x8 | x9 | xA | xB | xC | xD |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| `$1x` | `A5A5A5` | `0041D9` | `2F1EFF` | `6704F2` | `9400B4` | `AA0057` | `A31800` | `803900` | `4B5B00` | `137600` | `008100` | `007923` | `006288` | `000000` |
+
+and the rules of section 10: hue 0 and `$D` are greys, `$E` and `$F` black,
+`$20` and `$30` white, `$0D` blacker than black. `PpuPaletteTests` checks each
+rule, and that each colour of row `$1x` has the hue of the table to within 20
+degrees. Measured on 5 October 2026 with a throwaway script against the whole
+of task 1's table: every hue within 28 degrees, the largest gaps in rows 2 and
+3, where Pally's phase distortion turns the hues most, and the greys brighter
+by the missing setup (`$00` computes as `626262`, the table has `575757`)
+[measured].
 
 ## 12. Power-up
 
@@ -441,8 +493,12 @@ from the composite model on the NTSC video page and records that instead].
 
 ## 13. Open items
 
-1. The dot of each picture column against sprite 0 hit timing (6) [guessing -
-   verify].
+1. The dot of each picture column against sprite 0 hit timing (6): bounded in
+   task 5, not pinned. The model takes `X + 2` from PPU rendering; the ROMs
+   accept `X + 1` to `X + 4`.
 2. The rendering-toggle delay of 3 to 4 dots (1) [guessing - verify].
-3. The size of the emphasis darkening (10) [guessing - verify].
-4. Whether the colour tables may be committed (11) [guessing - verify].
+3. The size of the emphasis darkening (10): settled in task 5, from NTSC video.
+4. Whether the colour tables may be committed (11): not settled, so they are not
+   used; the colours are computed and only the row the tests use is kept.
+5. Greyscale on `$xE` and `$xF` (10): PPU registers and NTSC video read
+   differently [guessing - verify].

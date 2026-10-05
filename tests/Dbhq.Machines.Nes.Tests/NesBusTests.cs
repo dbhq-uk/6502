@@ -505,4 +505,138 @@ public class NesBusTests
         Assert.Equal(7, nes.Step());
         Assert.Equal(0xC100, nes.Cpu.PC);
     }
+
+    // A machine whose program is never run: the tests drive the bus's cycles themselves.
+    private static Nes IdleMachine(Region region)
+    {
+        var nes = new Nes(Cartridge.Load(TestCartridge.Ines1(1, 1)), region);
+        nes.PowerOn();
+        return nes;
+    }
+
+    [Theory]
+    [MemberData(nameof(Regions))]
+    public void WithRenderingOffThePpusFrameLineAndDotAreTheBussDotCount(string region)
+    {
+        Region r = RegionNamed(region);
+        var nes = IdleMachine(r);
+        Ppu ppu = nes.Bus.Ppu;
+
+        // Three and a bit frames, checked after every cycle: no frame is a dot short.
+        long cycles = (long)(3.2 * r.Lines * Region.DotsPerLine * r.DotsDenominator / r.DotsNumerator);
+        for (long i = 0; i < cycles; i++)
+        {
+            nes.Bus.Read(0x0000);
+            long position = (ppu.Frame * r.Lines * Region.DotsPerLine) + (ppu.Line * Region.DotsPerLine) + ppu.Dot;
+            Assert.Equal(nes.Bus.PpuDots, position);
+        }
+
+        Assert.Equal(3, ppu.Frame);
+    }
+
+    public static TheoryData<string, int, bool> RegionsAndSuppressionDots()
+    {
+        var rows = new TheoryData<string, int, bool>();
+        foreach (string region in new[] { "NTSC", "PAL" })
+        {
+            rows.Add(region, 2, false);
+            rows.Add(region, 3, false);
+            rows.Add(region, 4, true);
+        }
+
+        return rows;
+    }
+
+    [Theory]
+    [MemberData(nameof(RegionsAndSuppressionDots))]
+    public void AStatusReadOnTheDotTheFlagIsSetOrTheNextReadsItAndStopsTheNmi(string region, int dot, bool nmi)
+    {
+        // bus.md 2: a $2002 read on the dot the flag is set, or one dot after, reads it set and the
+        // NMI does not happen; two dots after, the NMI does. In the model the flag is set as dot
+        // (241, 1) runs, so a read whose access lands with the PPU at (241, 2) is on that dot,
+        // (241, 3) one after, and (241, 4) two after.
+        Region r = RegionNamed(region);
+        var nes = IdleMachine(r);
+        Ppu ppu = nes.Bus.Ppu;
+        nes.Bus.Write(0x2000, 0x80);
+
+        // Two of a cycle's dots run before its access, so the cycle must start at (241, dot - 2).
+        // On NTSC the cycles' starts fall on other dots in each of three frames. A PAL frame is
+        // 33247.5 cycles, so its starts repeat every two frames; there the reset button, which
+        // restarts the PPU at line 0 dot 0 while the bus's dot accumulator runs on, moves them.
+        bool found = false;
+        for (int attempt = 0; attempt < 10 && !found; attempt++)
+        {
+            long limit = nes.Bus.Cycles + (3L * r.Lines * Region.DotsPerLine);
+            while (nes.Bus.Cycles < limit && !(found = ppu.Line == 241 && ppu.Dot == dot - 2))
+            {
+                nes.Bus.Read(0x0000);
+            }
+
+            if (!found)
+            {
+                // A different count of cycles each time, so the accumulator differs at the reset.
+                for (int i = 0; i <= attempt; i++)
+                {
+                    nes.Bus.Read(0x0000);
+                }
+
+                nes.Reset();
+                nes.Bus.Write(0x2000, 0x80);
+            }
+        }
+
+        Assert.True(found, $"no cycle started at line 241 dot {dot - 2}");
+
+        byte status = nes.Bus.Read(0x2002);
+        Assert.True((status & 0x80) != 0, $"a read landing at (241, {dot}) read the flag clear");
+
+        // The line the CPU saw in the read's cycle, and in the one after.
+        bool seen = nes.Cpu.Nmi;
+        nes.Bus.Read(0x0000);
+        seen |= nes.Cpu.Nmi;
+        Assert.Equal(nmi, seen);
+    }
+
+    [Theory]
+    [MemberData(nameof(Regions))]
+    public void AWriteTo4014CopiesAPageIntoOamInTheNextReadsCycle513Or514CyclesLonger(string region)
+    {
+        // The sprite ROMs of task 5 load OAM this way. bus.md 5: the CPU is halted on its next read,
+        // then one cycle more if the next is not a get, then 256 get and put pairs. The model makes
+        // the even cycles gets, so a write on an even cycle costs 513 and one on an odd cycle 514.
+        var nes = IdleMachine(RegionNamed(region));
+        for (int i = 0; i < 256; i++)
+        {
+            nes.Bus.PokeRam((ushort)(0x0200 + i), (byte)(255 - i));
+        }
+
+        foreach (int parity in new[] { 0, 1 })
+        {
+            // The $2003 write, then the $4014 write two cycles on, in a cycle of this parity.
+            while (nes.Bus.Cycles % 2 != parity)
+            {
+                nes.Bus.Read(0x0000);
+            }
+
+            nes.Bus.Write(0x2003, 0x00);
+            long before = nes.Bus.Cycles;
+            nes.Bus.Write(0x4014, 0x02);
+            Assert.Equal(before + 1, nes.Bus.Cycles);
+            Assert.Equal(parity, (int)(nes.Bus.Cycles % 2));
+
+            long start = nes.Bus.Cycles;
+            long dots = nes.Bus.PpuDots;
+            nes.Bus.Read(0x0000);
+            int stall = parity == 0 ? 513 : 514;
+            Assert.Equal(stall + 1, nes.Bus.Cycles - start);
+            Assert.True(nes.Bus.PpuDots - dots >= 3 * (stall + 1), "the PPU did not run through the stall");
+
+            for (int i = 0; i < 256; i++)
+            {
+                byte expected = (byte)(255 - i);
+                Assert.Equal(i % 4 == 2 ? (byte)(expected & 0xE3) : expected, nes.Bus.Ppu.Oam[i]);
+            }
+        }
+    }
 }

@@ -68,6 +68,7 @@ sheets were written from at
 | NES 2.0 | 24066 | 4 Aug 2026 |
 | NMI | 23420 | 30 Jun 2026 |
 | NROM | 23660 | 19 May 2026 |
+| NTSC video (read in task 5) | 24244 | 30 Sep 2026 |
 | Open bus behavior | 23814 | 19 May 2026 |
 | Overscan | 22760 | 26 Aug 2026 |
 | PPU attribute tables | 21522 | 23 May 2026 |

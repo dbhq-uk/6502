@@ -718,9 +718,17 @@ access except reads of `$4015`, so a board could put a register in the PPU or
 sound range. The interface has no such board, so the bus does not pass those
 addresses on.
 
-**What the stubs do not do.** The sound unit, the controllers and DMA are
+**What the stubs do not do.** The sound unit, the controllers and DMC DMA are
 stubs until tasks 7 to 9. A read of a controller port gives bits 7 to 5 of the
-bus latch and zeros below, and a write to `$4014` does nothing.
+bus latch and zeros below.
+
+**OAM DMA came early, and its parity is a choice.** Task 5 built OAM DMA,
+because the sprite test ROMs load OAM with it; task 7 owns it. A write to
+`$4014` halts the CPU on its next read, and the copy takes 513 or 514 cycles
+(`bus.md` section 5). Which CPU cycles are get cycles is random on a console at
+power on; the model makes the even ones gets, so a write in an even cycle
+costs 513 and one in an odd cycle 514. The sprite ROMs pass with either choice
+(measured in task 5 by swapping it), so nothing pinned settles which.
 
 ## The NES: the PPU's registers and timing, where the model stops
 
@@ -754,11 +762,65 @@ so this shows only for a program that does not.
 `v` at once, where the chip takes 1 to 1.5 dots, and a `$2001` write switches
 rendering at once, where the chip takes 3 to 4 dots (`ppu.md` sections 1 and
 2). The odd-frame dot is sampled at dot 338, measured against `ppu_vbl_nmi`
-test 10; that may be a later sample plus the delay, which the test cannot tell
-apart.
+test 10. That is the model's cutoff in its own alignment of CPU and PPU. Against
+the wiki's dot 339, where the skip happens, it is an effective delay of one dot
+for the `$2001` write, not the 3 to 4 the sheet gives, and why the two differ is
+open (`timing.md` section 2).
 
-**Left for the drawing PPU (task 5).** A `$2004` read during sprite evaluation
-returns what evaluation sees, not OAM; OAMADDR is cleared on dots 257 to 320;
-the rendering pipeline moves `v` during the visible lines. None of these
-happens yet. A `$2007` access during rendering already does its coarse X and Y
-increment.
+**Left for the drawing PPU (task 5), and done there.** A `$2004` read during
+rendering on a visible line returns what evaluation and the sprite fetches are
+reading, OAMADDR is cleared on dots 257 to 320, and the pipeline moves `v`. The
+next section says where the drawing stops.
+
+## The NES: the PPU's picture, where the model stops
+
+**What.** Task 5 of the NES plan: the background pipeline, the sprites, sprite 0
+hit, the overflow flag, `PpuPalette` and `FrameBuffer`. The sources are
+`docs/nes/facts/ppu.md` sections 2 and 6 to 11 and the wiki's NTSC video page.
+`BlarggTests` runs every ROM of `sprite_hit_tests_2005.10.05` and of
+`sprite_overflow_tests` on NTSC, and none is a known failure.
+
+**The colours are one decode, computed.** The PPU makes a composite signal and a
+television decodes it. `PpuPalette` makes the signal from the wiki's measured
+voltages and decodes each colour alone, from one whole colour cycle, with black
+at `$1D` (no 7.5 IRE setup) and white at `$20` (`ppu.md` section 11). A real
+picture differs: colours bleed into their neighbours and crawl from line to line
+and frame to frame, the hues of the brighter rows turn by the differential
+phase distortion, and each television decodes and filters in its own way. None
+of that is modelled. The wiki's Pally tables were not used, because their
+licence is not stated.
+
+**PAL uses the NTSC colours.** The 2C07's own decode is about 15 degrees of hue
+away (`ppu.md` section 10). The model swaps the 2C07's red and green emphasis
+bits, and nothing else about its colour.
+
+**The 2C07's border is not drawn.** The 2C07 blacks out columns 0, 1, 254 and
+255 and line 0 of the picture (`ppu.md` section 10). The model draws them as the
+2C02 does.
+
+**The 2C07's OAM refresh is not modelled.** It refreshes OAM itself on lines 265
+to 310, so OAM can be written only in the first 24 lines of its VBlank, and its
+sprite evaluation cannot be fully turned off (`ppu.md` section 4). The model
+lets OAM be written all through VBlank on both.
+
+**The column a dot decides is bounded, not pinned.** Column `X` is decided on
+dot `X + 2`, which is what the wiki's "sprite 0 hit acts as if the image starts
+at cycle 2" says. The sprite 0 timing ROMs pass with the hit on any dot from
+`X + 1` to `X + 4`, so they do not settle it. The first pixel leaving the chip
+during dot 4, the analogue delay after that, is not modelled.
+
+**Greyscale follows one page of two.** PPU registers says greyscale ANDs the
+colour with `$30`; NTSC video says colours `$x1` to `$xD` become `$x0`, and says
+nothing of `$xE` and `$xF`, which the AND turns grey. The model ANDs. No pinned
+test reads the difference.
+
+**Evaluation starts at sprite 0.** On the chip, an OAMADDR that is not 0 at dot
+65 makes evaluation start elsewhere and treat another sprite as sprite 0
+(`ppu.md` section 8). The model always starts at sprite 0. The `$2004` reads
+during rendering show the bytes evaluation and the fetches read, one a dot,
+which is close to what the sheet says but not checked against a ROM:
+`oam_read` and `oam_stress` are task 12's.
+
+**OAM does not decay**, and the 2C02G's OAM corruption on some OAMADDR writes
+is not modelled (`ppu.md` section 4).
+

@@ -53,8 +53,8 @@ namespace Dbhq.Machines.Nes;
 /// byte.
 /// </para>
 /// <para>
-/// The sound unit is a stub, a private nested type that task 8 replaces. The controllers, OAM DMA
-/// and DMC DMA come in tasks 7 to 9.
+/// The sound unit is a stub, a private nested type that task 8 replaces. The controllers and DMC
+/// DMA come in tasks 7 and 9. OAM DMA came early, in task 5, because the sprite test ROMs need it.
 /// </para>
 /// </remarks>
 public sealed class NesBus : IBus
@@ -81,6 +81,9 @@ public sealed class NesBus : IBus
     // Bit 0 of the last write to $4016, which both pads see. The controllers arrive in task 7.
     private byte _strobe;
 
+    // The page a write to $4014 asked OAM DMA to copy, or -1 when none is waiting.
+    private int _dmaPage = -1;
+
     /// <summary>
     /// A bus with the cartridge's board fitted. The board is made here, so a cartridge for a mapper
     /// this machine does not model throws.
@@ -92,7 +95,7 @@ public sealed class NesBus : IBus
         ArgumentNullException.ThrowIfNull(region);
         Region = region;
         _mapper = cartridge.CreateMapper();
-        _ppu = new Ppu(region, _mapper) { CpuCycles = () => _cycles };
+        _ppu = new Ppu(region, _mapper);
         _apu = new StubApu((options ?? new NesOptions()).SampleRate);
     }
 
@@ -118,9 +121,17 @@ public sealed class NesBus : IBus
     /// </summary>
     public long PpuDots => _ppuDots;
 
-    /// <summary>One CPU read: one cycle.</summary>
+    /// <summary>
+    /// One CPU read: one cycle. If a write to <c>$4014</c> is waiting, the OAM DMA it asked for
+    /// runs first, halting the CPU on this read (<see cref="RunOamDma"/>).
+    /// </summary>
     public byte Read(ushort address)
     {
+        if (_dmaPage >= 0)
+        {
+            RunOamDma(address);
+        }
+
         return Cycle(false, address, 0);
     }
 
@@ -179,6 +190,7 @@ public sealed class NesBus : IBus
         _cycles = 0;
         _ppuDots = 0;
         _strobe = 0;
+        _dmaPage = -1;
         _ppu.PowerOn();
         _apu.Reset();
         if (_cpu is not null)
@@ -207,6 +219,7 @@ public sealed class NesBus : IBus
     private byte Cycle(bool write, ushort address, byte value)
     {
         _cycles++;
+        _ppu.CpuCycle = _cycles;
 
         // The lines as the cycle begins: a change made during this cycle is the CPU's next cycle's.
         bool nmi = _ppu.Nmi;
@@ -247,6 +260,38 @@ public sealed class NesBus : IBus
         }
 
         return value;
+    }
+
+    /// <summary>
+    /// OAM DMA (bus.md section 5): the CPU is halted on the read at <paramref name="halted"/>,
+    /// which it repeats on each halted cycle and makes again once the copy is done. One halt cycle,
+    /// one alignment cycle if the next is not a get, then 256 pairs of a read of page <c>N</c> on a
+    /// get and a write to <c>$2004</c> on a put: 513 or 514 cycles, each through <see cref="Cycle"/>,
+    /// so the PPU and the sound unit run through them. Which cycles are gets is random at power
+    /// on; the model makes the even ones gets, so a write to <c>$4014</c> in an even cycle costs 513
+    /// and one in an odd cycle 514.
+    /// </summary>
+    /// <remarks>
+    /// Task 5 of the NES plan built this because the sprite ROMs load OAM this way; task 7 owns
+    /// OAM DMA, its tests and DMC DMA's part in it.
+    /// </remarks>
+    private void RunOamDma(ushort halted)
+    {
+        int page = _dmaPage << 8;
+        _dmaPage = -1;
+
+        Cycle(false, halted, 0);
+        if ((_cycles & 1) == 0)
+        {
+            // The next cycle is a put: wait one more for a get.
+            Cycle(false, halted, 0);
+        }
+
+        for (int i = 0; i < 256; i++)
+        {
+            byte value = Cycle(false, (ushort)(page | i), 0);
+            Cycle(true, 0x2004, value);
+        }
     }
 
     private byte ReadAccess(ushort address)
@@ -305,7 +350,13 @@ public sealed class NesBus : IBus
                 // Both pads see bit 0 (bus.md section 7).
                 _strobe = (byte)(value & 1);
             }
-            else if (address <= 0x4017 && address != 0x4014)
+            else if (address == 0x4014)
+            {
+                // OAM DMA starts on the CPU's next read; a second write first, as INC $4014
+                // makes, replaces the page (bus.md section 5).
+                _dmaPage = value;
+            }
+            else if (address <= 0x4017)
             {
                 _apu.Write(address, value);
             }
