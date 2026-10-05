@@ -33,3 +33,6 @@ __pycache__/
 
 # Published output of the BBC Micro browser speed check, made locally.
 bench/bbc-micro-speed/publish/
+
+# Published output of the Acorn Electron browser speed check, made locally.
+bench/electron-speed/publish/
