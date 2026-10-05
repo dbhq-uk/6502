@@ -467,4 +467,27 @@ public class PpuSpriteTests
         scene.Ppu.WriteRegister(1, 0x00);
         Assert.Equal(scene.Ppu.Oam[0], scene.Ppu.ReadRegister(4));
     }
+
+    [Theory]
+    [MemberData(nameof(Regions))]
+    public void An8By8FetchUsesThreeBitsOfRowEvenIfEvaluationRanIn8By16(string region)
+    {
+        // Line 59 evaluates in 8 by 16 and finds the sprite at Y = 50 on its row 9. PPUCTRL bit 5 is
+        // cleared before the fetches, so slot 0 fetches as 8 by 8: tile 2, row 9 & 7 = 1, $0021,
+        // and never $0029, which would be the high plane.
+        PpuScene scene = Scene(region);
+        Sprite(scene, 0, 50, 2, 0, 100);
+        scene.Scroll(0, 0, ctrl: 0x20);
+        scene.Ppu.WriteRegister(1, 0x14);
+        scene.RunFrames(1);
+
+        scene.TickTo(59, 257);
+        scene.Ppu.WriteRegister(0, 0x00);
+        scene.TickTo(59, 261);
+        scene.Mapper.Reported.Clear();
+        scene.Ppu.Tick();
+
+        Assert.Equal([(ushort)0x0021], scene.Mapper.Reported.Select(r => r.Address));
+    }
 }
+

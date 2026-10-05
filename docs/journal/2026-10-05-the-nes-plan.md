@@ -433,12 +433,20 @@ were written before the PPU's code, and failed to compile, because `Ppu.Screen`
 did not exist. With a stub `Screen` they compiled, and of the 213 tests in those
 files, `PpuPaletteTests` and `NesBusTests`, 112 failed: every drawing test, the
 frame buffer tests, the OAM DMA test, and the PAL rows of the suppression test
-(below). `PpuPalette` was written before its tests were run, so its tests
-passed at their first run, which is no evidence that they can fail. So four
-faults were put into a copy of it (greyscale ignored, no swap, the red and green
-emphasis hues exchanged, the subcarrier angle moved by 60 degrees), and 18 of
-its 24 tests failed: the hue rows, the emphasis rows, the swap and greyscale. The new test of task 4's frame count passed against
-task 4's code, as a pin of behaviour that was already right should.
+(below) [`dotnet test tests/Dbhq.Machines.Nes.Tests -c Release --no-build
+--filter "<F>"`, where `<F>` is `FullyQualifiedName~` with each of
+`PpuBackground`, `PpuSprite`, `PpuPalette`, `FrameBuffer` and `NesBusTests`,
+joined by `|`].
+`PpuPalette` was written before its tests were run, so its tests passed at
+their first run, which is no evidence that they can fail. So four faults were
+put into a copy of it (greyscale ignored, no swap, the red and green emphasis
+hues exchanged, the subcarrier angle moved by 60 degrees), and 18 of its 24
+tests failed: the hue rows, the emphasis rows, the swap and greyscale
+[`dotnet test tests/Dbhq.Machines.Nes.Tests -c Release --no-build --filter
+"FullyQualifiedName~PpuPaletteTests"`]. Those were the first tests, before the
+review's fix below replaced the hue rows. The new test of task 4's frame count
+passed against task 4's code, as a pin of behaviour that was already right
+should.
 
 **The sprite ROMs need OAM DMA, so it came early.** Every sprite ROM loads OAM
 with a write to `$4014`, and the bus ignored it until task 7. So this task
@@ -495,9 +503,10 @@ run again. Each fault was a copy of `Ppu.cs` with an environment switch, now
 removed:
 - The hit flag held back 1 or 2 dots: all pass. 3 dots: `10.timing_order` fails
   with 7, "Lower-left corner too late". 4 dots: `09.timing_basics` fails with 7
-  as well. 5 dots: 09 with 7 and 10 with 3, "Upper-left corner too late". Before the change below, with column `X` decided on dot
-  `X + 1`, holding the hit back 3 dots passed, and 6 failed both. So the ROMs
-  accept the hit on dots `X + 1` to `X + 4`.
+  as well. 5 dots: 09 with 7 and 10 with 3, "Upper-left corner too late".
+  Before the change below, with column `X` decided on dot `X + 1`, holding the
+  hit back 3 dots passed, and 6 failed both. So the ROMs accept the hit on dots
+  `X + 1` to `X + 4`.
 - The overflow bug taken out (only `n` goes up): `4.Obscure` fails with 2,
   "Checks that second byte of sprite #10 is treated as its Y", and `3.Timing`
   with 12.
@@ -525,14 +534,17 @@ square wave of 12 phases, the attenuation for each emphasis bit, and the page's
 YUV decode and matrix. The formula is in `ppu.md` section 11 and the code
 comments. Two choices were the page's to offer: black at `$1D` with no 7.5 IRE
 setup, and white at `$20`. One angle was derived: `pi (p + 2.5) / 6`, which puts
-hue 8 on the colour burst. The page's own program has `p + 3 - 0.5`. It was
-checked against the sheet's known entries: the greys, the blacks, white, the
-emphasis bits, and the hues of row `$1x` of the 2C02G table, within 20 degrees.
-A throwaway script also compared all 64 with task 1's table. Every hue was
-within 28 degrees, and the greys were brighter by the missing setup. The two
-64-entry tables are out of `ppu.md` now, and only row `$1x` is kept, for the
-test. The darkening by emphasis, open in `ppu.md` since task 1, is settled from
-the same page.
+hue 8 on the colour burst. The page's own program has `p + 3 - 0.5`. It is
+checked against the page's prose and the rules of `ppu.md` section 10, not
+against any table: hue 8 decodes as pure -U, each hue on turns the chroma 30
+degrees, the hues of a row share one luma and one saturation, the rows' luma
+rises, the greys have no chroma, and the blacks, white, greyscale and emphasis
+act as section 10 says. A throwaway script also compared all 64 with task 1's
+table. Every hue was within 28 degrees, and the greys were brighter by the
+missing setup. The copied tables were removed from `ppu.md` for licence
+reasons, every value of them; they remain in the git history of commit
+`8a11beb`, and rewriting that history is Dan's decision. The darkening by
+emphasis, open in `ppu.md` since task 1, is settled from the same page.
 
 **Task 4's carries.**
 - The PPU no longer calls a delegate for the CPU cycle on each reported address.
@@ -599,3 +611,18 @@ with it on, at a load average of 67. Task 6 measures the speed properly.
   the scroll after the last write, as a program must.
 - The DMA test first waited for the wrong parity before the two writes, so the
   write to `$4014` landed one cycle off from the parity it named.
+
+**The review's fixes.** The review of task 5 found that part of the copied
+table was still committed: twelve colours in `PpuPaletteTests` and fourteen in
+`ppu.md`. Both are gone. The test now checks the decoded Y, U and V against what
+NTSC video says in prose: hue 8 as pure -U, 30 degrees a hue, one luma and one
+saturation a row, the rows' luma rising, no chroma in the greys.
+`PpuPalette.Yuv` was made public so that it can. Moving the subcarrier angle by
+30 degrees fails the hue 8 rows. A new test renders with PPUMASK bit 5 and
+checks the pixel against the fixed table: emphasis 1 on NTSC, emphasis 2 (green)
+on PAL. With the PPU given the unswapped table, its PAL row fails. An 8 by 8
+sprite fetch now masks its row to three bits, so a PPUCTRL bit 5 change between
+evaluation and fetch cannot reach address bit 3, and a test checks the fetch
+address. Without the mask it fails. The sprite ROMs must also print PASSED, not
+only leave 1 in `$F8`. A test pins dot 280 as the first dot of the vertical
+copy, and fails with the copy started at 281.

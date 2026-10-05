@@ -410,4 +410,46 @@ public class PpuBackgroundTests
         Assert.Equal(Expected(0x16), scene.Pixel(42, 24));
         Assert.Equal(Expected(Backdrop), scene.Pixel(0, 0));
     }
+
+    [Theory]
+    [MemberData(nameof(Regions))]
+    public void TheVerticalCopyStartsOnDot280(string region)
+    {
+        // Before dot 280 runs, v's vertical bits are what dot 256's Y increment left; dot 280
+        // copies t's into it (ppu.md 2).
+        PpuScene scene = Scene(region);
+        scene.Scroll(0, 0x50);
+        scene.Ppu.WriteRegister(1, 0x0A);
+        scene.RunFrames(1);
+
+        int pre = scene.Region.PreRenderLine;
+        scene.TickTo(pre, 257);
+        int afterIncrement = scene.Ppu.V & 0x7BE0;
+        Assert.NotEqual(scene.Ppu.T & 0x7BE0, afterIncrement);
+
+        scene.TickTo(pre, 280);
+        Assert.Equal(afterIncrement, scene.Ppu.V & 0x7BE0);
+        scene.Ppu.Tick();
+        Assert.Equal(scene.Ppu.T & 0x7BE0, scene.Ppu.V & 0x7BE0);
+    }
+
+    [Theory]
+    [MemberData(nameof(Regions))]
+    public void ThePalPpuEmphasisesWithItsRedAndGreenBitsSwapped(string region)
+    {
+        // PPUMASK bit 5. PpuPalette numbers emphasis in the 2C02's order, bit 0 red and bit 1
+        // green, so on the 2C02 bit 5 is emphasis 1, and on the 2C07, where bit 5 is green
+        // (ppu.md 10), it is emphasis 2 of the same table.
+        PpuScene scene = Scene(region);
+        PlaceTheTile(scene);
+        scene.Scroll(0, 0);
+
+        scene.Show(0x2A);
+
+        int emphasis = region == "PAL" ? 2 : 1;
+        Assert.Equal(PpuPalette.Colour(0x12, emphasis, false, false), scene.Pixel(40, 24));
+        Assert.Equal(PpuPalette.Colour(0x16, emphasis, false, false), scene.Pixel(42, 24));
+        Assert.Equal(PpuPalette.Colour(Backdrop, emphasis, false, false), scene.Pixel(0, 0));
+        Assert.NotEqual(PpuPalette.Colour(0x12, 1, false, false), PpuPalette.Colour(0x12, 2, false, false));
+    }
 }

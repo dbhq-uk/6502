@@ -999,7 +999,9 @@ public sealed class Ppu
                         row = 7 - row;
                     }
 
-                    _spriteAddress = (ushort)(((_ctrl & 0x08) << 9) | (_fetchTile << 4) | row);
+                    // Three bits of row: PPUCTRL bit 5 can change between evaluation and this
+                    // fetch, and a row found for 8 by 16 must not reach address bit 3.
+                    _spriteAddress = (ushort)(((_ctrl & 0x08) << 9) | (_fetchTile << 4) | (row & 7));
                 }
                 else
                 {

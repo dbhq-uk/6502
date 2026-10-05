@@ -414,9 +414,7 @@ stated: no page read gives terms for the wiki's content, and the one licence on
 NTSC video covers its example programs, not the tables (Creative Commons
 Attribution-ShareAlike 4.0) [from NTSC video]. So the model does not use them.
 `PpuPalette` **computes** its 64 colours, under each of the 8 emphasis
-settings, from the signal the NTSC video page describes. Task 1 copied two of
-the Pally tables into this section; task 5 took them out, and kept only the
-entries the tests compare against, below.
+settings, from the signal the NTSC video page describes.
 
 **The signal** [from NTSC video, revision 24244, the terminated measurements]:
 
@@ -460,22 +458,24 @@ a television's filtering is modelled. PAL uses the same table, with the 2C07's
 emphasis bits swapped (section 10); the 2C07's own decode, about 15 degrees of
 hue apart, is a known difference.
 
-**What it was checked against.** The sheet's known entries, which are these
-from the 2C02G table task 1 copied (`2C02G_U_wiki`, Pally v0.23.0, with the
-7.5 IRE setup), as `RRGGBB` [from PPU palettes, the cell colours of its table]:
+**What it was checked against.** The prose of NTSC video and the rules of
+section 10, never a table: hue 8 decodes as pure -U, the colour burst's phase;
+each hue on turns the chroma by 30 degrees, one phase of the twelve; the hues of
+a row share one luma and one saturation ("exactly the same luminosity; only the
+chroma phase differs"); each row's luma is above the row below; hue 0 and `$D`
+are greys with no chroma, `$E` and `$F` black, `$20` and `$30` white, `$0D`
+blacker than black; greyscale ANDs with `$30`; each emphasis bit darkens the
+other two channels [from NTSC video; section 10]. `PpuPaletteTests` checks each,
+on the decoded Y, U and V where the rule is about the signal.
 
-| | x0 | x1 | x2 | x3 | x4 | x5 | x6 | x7 | x8 | x9 | xA | xB | xC | xD |
-|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| `$1x` | `A5A5A5` | `0041D9` | `2F1EFF` | `6704F2` | `9400B4` | `AA0057` | `A31800` | `803900` | `4B5B00` | `137600` | `008100` | `007923` | `006288` | `000000` |
-
-and the rules of section 10: hue 0 and `$D` are greys, `$E` and `$F` black,
-`$20` and `$30` white, `$0D` blacker than black. `PpuPaletteTests` checks each
-rule, and that each colour of row `$1x` has the hue of the table to within 20
-degrees. Measured on 5 October 2026 with a throwaway script against the whole
-of task 1's table: every hue within 28 degrees, the largest gaps in rows 2 and
-3, where Pally's phase distortion turns the hues most, and the greys brighter
-by the missing setup (`$00` computes as `626262`, the table has `575757`)
-[measured].
+**The tables taken out.** Task 1 copied the wiki's `2C02G_U_wiki` and
+`2C07_wiki` tables into this section. Their licence is not stated, so task 5
+removed them, and a later review removed the last row kept for a test. They
+remain in the git history, in commit `8a11beb`; whether to rewrite that history
+is Dan's decision. Before they were removed, a throwaway script compared all 64
+computed colours with the 2C02G table on 5 October 2026: every hue within 28
+degrees, the largest gaps in rows 2 and 3, where Pally's phase distortion turns
+the hues most, and the greys brighter by the missing 7.5 IRE setup [measured].
 
 ## 12. Power-up
 
@@ -499,6 +499,6 @@ by the missing setup (`$00` computes as `626262`, the table has `575757`)
 2. The rendering-toggle delay of 3 to 4 dots (1) [guessing - verify].
 3. The size of the emphasis darkening (10): settled in task 5, from NTSC video.
 4. Whether the colour tables may be committed (11): not settled, so they are not
-   used; the colours are computed and only the row the tests use is kept.
+   used, and none of their values is kept; the colours are computed.
 5. Greyscale on `$xE` and `$xF` (10): PPU registers and NTSC video read
    differently [guessing - verify].

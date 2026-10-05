@@ -146,20 +146,32 @@ public static class PpuPalette
         return InPhase(hue, phase) ? high : low;
     }
 
-    private static uint Decode(int colour, int emphasis)
+    /// <summary>
+    /// The decoded signal of palette value <paramref name="colour"/> (6 bits) under
+    /// <paramref name="emphasis"/> (0 to 7, the 2C02's order), before it becomes RGB: luma Y, 0
+    /// at black and 1 at <c>$20</c>, and the chroma U and V. For tests and a debugger, which can
+    /// check the decode against what the NTSC video page says of the signal, unclipped.
+    /// </summary>
+    public static (double Y, double U, double V) Yuv(int colour, int emphasis)
     {
         double y = 0;
         double u = 0;
         double v = 0;
         for (int phase = 0; phase < 12; phase++)
         {
-            double level = (Signal(colour, emphasis, phase) - BlackVolts) / (WhiteVolts - BlackVolts) / 12;
+            double level = (Signal(colour & 0x3F, emphasis & 7, phase) - BlackVolts) / (WhiteVolts - BlackVolts) / 12;
             double angle = Math.PI * (phase + 2.5) / 6;
             y += level;
             u += level * Math.Sin(angle) * 2;
             v += level * Math.Cos(angle) * 2;
         }
 
+        return (y, u, v);
+    }
+
+    private static uint Decode(int colour, int emphasis)
+    {
+        (double y, double u, double v) = Yuv(colour, emphasis);
         uint r = Quantise(y + 1.139883 * v);
         uint g = Quantise(y - 0.394642 * u - 0.580622 * v);
         uint b = Quantise(y + 2.032062 * u);

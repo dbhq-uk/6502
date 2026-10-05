@@ -3,9 +3,10 @@ using Xunit;
 namespace Dbhq.Machines.Nes.Tests;
 
 /// <summary>
-/// The computed colours, against what <c>docs/nes/facts/ppu.md</c> sections 10 and 11 say is
-/// known of them: the greys, the blacks, white, the hue of each colour of the second row, how
-/// greyscale and emphasis act, and the 2C07's swapped emphasis bits.
+/// The computed colours, against what <c>docs/nes/facts/ppu.md</c> sections 10 and 11 and the
+/// wiki's NTSC video page say of the signal in prose: the greys, the blacks, white, hue 8 on the
+/// colour burst, 30 degrees a hue, one luma a row, how greyscale and emphasis act, and the
+/// 2C07's swapped emphasis bits. No colour is compared with a copied table.
 /// </summary>
 public class PpuPaletteTests
 {
@@ -54,37 +55,87 @@ public class PpuPaletteTests
         Assert.Equal(0, Channels(Plain(0x0D)).R);
     }
 
-    // The hue, in degrees, of the 2C02G table's row $1x in ppu.md section 11 (the wiki's
-    // 2C02G_U_wiki), the sheet's known entries, against which the computed colours are checked.
-    public static TheoryData<int, string> SecondRow() => new()
+    // The angle of a colour's chroma in the U, V plane, in degrees: atan2(V, U).
+    private static double ChromaAngle(int colour)
     {
-        { 0x11, "0041D9" }, { 0x12, "2F1EFF" }, { 0x13, "6704F2" }, { 0x14, "9400B4" },
-        { 0x15, "AA0057" }, { 0x16, "A31800" }, { 0x17, "803900" }, { 0x18, "4B5B00" },
-        { 0x19, "137600" }, { 0x1A, "008100" }, { 0x1B, "007923" }, { 0x1C, "006288" },
-    };
-
-    [Theory]
-    [MemberData(nameof(SecondRow))]
-    public void EachColourOfTheSecondRowHasTheHueOfTheSheetsTable(int index, string sheet)
-    {
-        (int r, int g, int b, _) = Channels(Plain(index));
-        int sr = Convert.ToInt32(sheet[..2], 16);
-        int sg = Convert.ToInt32(sheet[2..4], 16);
-        int sb = Convert.ToInt32(sheet[4..], 16);
-
-        // The sheet's table is Pally's, which models the 2C02G's phase distortion and a 7.5 IRE
-        // setup; the formula here does neither, so the hues agree to within 20 degrees, not exactly.
-        double difference = Math.Abs(((Hue(r, g, b) - Hue(sr, sg, sb) + 540) % 360) - 180);
-        Assert.True(difference <= 20, $"${index:X2} computed {r:X2}{g:X2}{b:X2}, sheet {sheet}: {difference:F1} degrees apart");
+        (_, double u, double v) = PpuPalette.Yuv(colour, 0);
+        return Math.Atan2(v, u) * 180 / Math.PI;
     }
 
-    private static double Hue(int r, int g, int b)
+    private static double AngleBetween(double a, double b) => Math.Abs(((a - b + 540) % 360) - 180);
+
+    [Theory]
+    [InlineData(0x08)]
+    [InlineData(0x18)]
+    [InlineData(0x28)]
+    [InlineData(0x38)]
+    public void Hue8DecodesAsPureMinusUTheColourBurstsPhase(int colour)
     {
-        int max = Math.Max(r, Math.Max(g, b));
-        int min = Math.Min(r, Math.Min(g, b));
-        double c = max - min;
-        double h = max == r ? (g - b) / c : max == g ? 2 + (b - r) / c : 4 + (r - g) / c;
-        return ((h * 60) + 360) % 360;
+        // NTSC video: "NTSC colorburst (pure shade -U) is the same phase as phase 8".
+        (_, double u, double v) = PpuPalette.Yuv(colour, 0);
+        Assert.True(u < 0, $"${colour:X2}: U is {u}, not negative");
+        Assert.True(AngleBetween(ChromaAngle(colour), 180) < 0.5, $"${colour:X2} is at {ChromaAngle(colour):F2} degrees, not 180");
+    }
+
+    public static TheoryData<int> HueSteps()
+    {
+        var rows = new TheoryData<int>();
+        for (int row = 0; row < 4; row++)
+        {
+            for (int hue = 1; hue < 0xC; hue++)
+            {
+                rows.Add((row << 4) | hue);
+            }
+        }
+
+        return rows;
+    }
+
+    [Theory]
+    [MemberData(nameof(HueSteps))]
+    public void EachHueStepTurnsTheChromaByAPhaseOf30Degrees(int colour)
+    {
+        // NTSC video: 12 colour square waves at regular phases, hue H using wave H. One hue on
+        // is one phase of twelve on, 30 degrees, the same way round every time.
+        double turn = ((ChromaAngle(colour + 1) - ChromaAngle(colour)) + 360) % 360;
+        Assert.True(Math.Abs(turn - 30) < 0.5, $"${colour:X2} to ${colour + 1:X2} turns {turn:F2} degrees");
+    }
+
+    [Theory]
+    [InlineData(0x00)]
+    [InlineData(0x10)]
+    [InlineData(0x20)]
+    [InlineData(0x30)]
+    public void TheHuesOfARowShareOneLumaAndOneSaturation(int row)
+    {
+        // NTSC video: the colours of a row have "exactly the same luminosity; only the chroma
+        // phase differs".
+        (double y1, double u1, double v1) = PpuPalette.Yuv(row | 1, 0);
+        for (int hue = 2; hue <= 0xC; hue++)
+        {
+            (double y, double u, double v) = PpuPalette.Yuv(row | hue, 0);
+            Assert.Equal(y1, y, 9);
+            Assert.Equal(Math.Sqrt((u1 * u1) + (v1 * v1)), Math.Sqrt((u * u) + (v * v)), 9);
+        }
+    }
+
+    [Fact]
+    public void EachRowsLumaIsAboveTheRowBelowIt()
+    {
+        for (int row = 0; row < 3; row++)
+        {
+            Assert.True(PpuPalette.Yuv((row << 4) | 1, 0).Y < PpuPalette.Yuv(((row + 1) << 4) | 1, 0).Y, $"row {row + 1} is not brighter than row {row}");
+        }
+    }
+
+    [Fact]
+    public void GreysHaveNoChroma()
+    {
+        foreach (int colour in new[] { 0x00, 0x10, 0x20, 0x30, 0x0D, 0x1D, 0x2D, 0x3D, 0x0F })
+        {
+            (_, double u, double v) = PpuPalette.Yuv(colour, 0);
+            Assert.True(Math.Abs(u) < 1e-9 && Math.Abs(v) < 1e-9, $"${colour:X2} has chroma {u}, {v}");
+        }
     }
 
     [Fact]
