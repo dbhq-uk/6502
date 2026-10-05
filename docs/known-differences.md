@@ -859,8 +859,8 @@ lets every read clear it; both ROMs pass.
 then takes effect after the clock, and a reload is dropped if the counter was
 not 0. The rule is from `pal_apu_tests`' readme, tests 10 and 11, which pass on
 PAL; the model applies it on NTSC too. The fork's `blargg_apu_2005.07.30` has
-the NTSC tests of the same name; it is not pinned yet, and task 12 is where it
-belongs.
+the NTSC tests of the same name, and task 12 runs them: both pass with the rule,
+and both fail with it taken out (`apu.md` open item 5).
 
 **A pulse with a period under 8 is silent on PAL too.** The APU Pulse page asks
 "PAL behavior?" and no pinned ROM checks it (`apu.md` open item 3).
@@ -876,7 +876,15 @@ reset and an unknown phase at power on.
 
 **The reset keeps the IRQ inhibit bit.** The fork's `apu_reset` readme says the
 mode is written again at reset "but IRQ inhibit flag is sometimes cleared". The
-model writes the last mode and keeps the inhibit bit. `apu_reset` is task 12's.
+model writes the last mode and keeps the inhibit bit. All six `apu_reset` ROMs
+pass (task 12); `4017_written` checks the mode after each reset and not the
+inhibit bit, so it does not choose between "kept" and "sometimes cleared".
+
+**A pulse gives table entry 0 from a `$4003` or `$4007` write until its first
+advance.** The APU Pulse page gives the order the sequencer reads its table in,
+and not whether the first output is taken before or after the first advance
+from entry 0. The model outputs entry 0 until then (`apu.md` section 2). No
+pinned ROM is known to depend on it.
 
 **The output is the sheet's mixer formulas** with every channel, the DMC
 included, through tables built from them at start-up (task 9). The triangle,
@@ -898,6 +906,14 @@ lists four outputs a console gives, by the CPU and PPU alignment, all of which
 treat the second read oddly ("sometimes ignores extra read, and puts odd things
 into buffer"). The model's PPU makes two whole reads and prints CRC `D84F6815`.
 `BlarggTests.KnownFailures` runs it and holds that output, so a fix shows.
+Task 12 looked again. The model prints `33 44 55 66 77` for the double read,
+where the source's four console outputs begin `22 44`, `22 33`, `02 44` and
+`32 44`: in each, the second read does not return the byte the first read put
+in the buffer, so on the chip the buffer is filled some dots after the read and
+not at once. The wiki's PPU registers page says only that the buffer is updated
+"after the previous contents have been returned to the CPU", with no number of
+dots, and the four outputs depend on the alignment. A refill delay chosen to
+make one of them come out would be a guess at the chip, so it stays as it is.
 
 **The DMA bugs are not modelled.** The DMA page's aborted one-cycle DMA (a
 sample stopped in the APU cycle before a reload would be scheduled) and the
@@ -955,7 +971,13 @@ submapper 2 of mapper 2 and of mapper 7 as "AND-type bus conflicts" (the
 nesdev UxROM and AxROM pages list it so), because a file that says it has them
 should not be run without. An iNES file, and submappers 0 and 1, have none.
 CNROM keeps the sheet's rule, which the sheet marks as a guess; nothing pinned
-writes a value that differs from the ROM byte.
+writes a value that differs from the ROM byte. The road not taken for UxROM and
+AxROM is the sheet read strictly, no conflicts for any submapper. CNROM's risk
+runs the other way: the AND is applied to iNES files and submapper 0, so a CNROM
+game made for a board without conflicts would switch to the wrong bank
+(`mappers.md` open items 2 and 5). The two CNROM test ROMs of task 12 pass with
+the AND or without it (tried once, with the AND taken out), so they do not
+settle this.
 
 **Only the plain MMC1 boards.** SOROM, SUROM, SXROM and SZROM, which bank PRG
 RAM or more PRG through the CHR registers, are not modelled, so a 512 KB MMC1
@@ -1017,3 +1039,22 @@ other boards.
 **A file smaller than the registers can name wraps.** Bank numbers are taken
 modulo the 8 KB PRG and 1 KB CHR banks in the file; the fixed second-last bank
 of a one-bank program is that bank.
+
+## The NES: the community test ROMs, where the model stops
+
+**What.** Task 12 of the NES plan ran every ROM the plan lists that reports a
+result a test can read, on the regions each ROM's readme or source gives. The
+table is in the journal entry of 5 October 2026, task 12.
+
+**`instr_test-v5` 03-immediate and `all_instrs` fail on opcode `$AB`.** `LXA`
+(the ROM's `ATX #n`) sets A and X to (A OR a constant) AND the operand, and the
+constant differs between chips. The core takes `$EE` from Harte's `nes6502`
+data, which the core's own tests pin (the "Unstable NMOS opcodes" entry above).
+The ROM's checksum was made on a console; with `$FF` in the core, tried once,
+03-immediate passes, and with `$00` it fails. So the console Blargg used had
+`$FF`. The two references disagree, and the core keeps Harte's, because a
+change would take an exception into the core's reference tests.
+`BlarggTests.RamReportingKnownFailures` runs both ROMs on both regions and
+holds their output (status 1, `AB ATX #n`); every other instruction in the
+suite passes.
+

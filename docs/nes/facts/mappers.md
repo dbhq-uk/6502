@@ -241,7 +241,16 @@ From the above, a mapper sees [inferring from sections 2 to 6]:
 
 1. MMC3's exact clock dot, 260 or 261 (6). Settled in task 11: dot 261 in the
    model's numbering, the only one `4-scanline_timing` accepts.
-2. CNROM bus conflicts (5) [guessing - verify].
+2. CNROM bus conflicts (5) [guessing - verify]. The AND is applied to an iNES
+   file and to submapper 0, which the wiki calls unknown. The risk is the
+   opposite of UxROM's and AxROM's: a CNROM game that writes a value differing
+   from the ROM byte, made for a board without conflicts and dumped with no
+   submapper, would switch to the wrong bank here, where on those two boards a
+   game that relied on the conflict would switch to the wrong bank. Task 12's
+   two CNROM test ROMs do not settle it: `ppu_read_buffer` writes each bank
+   number over a ROM byte that holds the same number (its `bank_switch.s`), so
+   it passes with the AND or without (tried once, with the AND taken out), and
+   `cpu_dummy_reads` never switches.
 3. PRG RAM size for MMC1 boards beyond 8 KB (3) [guessing - verify].
 4. What the console's reset button does to MMC1 and the other boards' registers.
    The sheet gives only the power-on state. The model leaves them alone, as the
@@ -249,7 +258,10 @@ From the above, a mapper sees [inferring from sections 2 to 6]:
 5. UxROM and AxROM submapper 2 as AND-type bus conflicts. The sheet says the
    submappers tell and does not give their numbers; task 10 took them from the
    nesdev UxROM and AxROM pages, which list 0 unknown, 1 none and 2 AND-type for
-   both (read 5 October 2026).
+   both (read 5 October 2026). The alternative, kept here so it can be chosen
+   instead, is the sheet read strictly: no bus conflicts on either board for any
+   submapper. It was not taken because a file that says it has the conflicts
+   should not be run without them; no pinned ROM tells the two apart.
 6. MMC3's power-on bank registers and PRG RAM protect (6). The sheet says they
    are unspecified; the model's choice is the one the test ROMs need [guessing -
    verify].

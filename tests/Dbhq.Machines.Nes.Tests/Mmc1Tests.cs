@@ -336,6 +336,43 @@ public class Mmc1Tests
         Assert.Equal(5, bus.Peek(0x8000));
     }
 
+    // A real INC $E000 on the CPU, through the bus: it reads $E000 (7, bank 7's fill), writes the 7
+    // back and then 8 on the next cycle. Only the first write reaches the shift register, so
+    // with four STA $E000 of 1 after it the register is 1,1,1,1,1 and bank 15 (7 of the file's 8)
+    // is at $8000 (read past the program, which bank 7 also holds). Had the second write counted,
+    // the bits would be 1,0,1,1,1 and the bank 13 (5): with the rule switched off once, it was.
+    [Fact]
+    public void ARealIncOnTheCpuLoadsOneBitNotTwo()
+    {
+        byte[] file = TestCartridge.Banked(1, 8, 16384, 2, 4096);
+        byte[] program =
+        [
+            0xEE, 0x00, 0xE0,
+            0xA9, 0x01,
+            0x8D, 0x00, 0xE0,
+            0x8D, 0x00, 0xE0,
+            0x8D, 0x00, 0xE0,
+            0x8D, 0x00, 0xE0,
+            0x4C, 0x11, 0xC0,
+        ];
+
+        // Bank 7 is fixed at $C000 at power on (control $0C); the program starts it, and the reset
+        // vector points there.
+        int bank7 = 16 + (7 * 16384);
+        program.CopyTo(file, bank7);
+        file[bank7 + 0x3FFC] = 0x00;
+        file[bank7 + 0x3FFD] = 0xC0;
+        var nes = new Nes(Cartridge.Load(file), Region.Ntsc);
+        nes.PowerOn();
+
+        while (nes.Cpu.PC != 0xC011)
+        {
+            nes.Step();
+        }
+
+        Assert.Equal(7, nes.Bus.Peek(0x8100));
+    }
+
     [Fact]
     public void ThePrgRamIsAtSixThousandAndTheBankRegisterCanDisableIt()
     {

@@ -1276,3 +1276,175 @@ low 9 dots before the next line's first pattern fetch), and the background at
 the guard taken out for one run, those four and a PPU test fail; with it in, all
 pass. The wording on the two known-failure ROMs and on dot 260 against 261 was
 also made exact (above).
+
+## Task 12: the community test ROMs, all of them, and the failures written down
+
+**Done.** Every ROM on the plan's list that reports a result a test can read now
+runs in `BlarggTests`, on the regions its readme or source gives, and each
+failure is fixed or written down. The class ran 149 of 149 in 1.96 minutes, with
+the load average between 6 and 15 [`dotnet test tests/Dbhq.Machines.Nes.Tests
+-c Release --filter BlarggTests`, 5 October 2026]. The project passed 1,189 of
+1,189, and the core's `NestestTests` 2 of 2 [`dotnet test
+tests/Dbhq.Machines.Nes.Tests -c Release`, the same day]. The slowest rows are
+the combined `official_only` (about 8 seconds a region), `ppu_read_buffer`
+(6 to 7), the combined `instr_timing` (6) and `oam_stress` (4 a region).
+
+**The pins.** 56 ROMs were added to `Pins.NesTestRomHashes`, each hashed from a
+fresh download of `raw.githubusercontent.com/dbhq-uk/nes-test-roms/` at the
+pinned commit. A clone of the fork at that commit matched every download, and
+was used only to read the readmes and sources. Headers: the singles of
+`instr_test-v5`, `instr_timing` and `cpu_interrupts_v2`, and `cpu_reset`,
+`apu_reset`, `cpu_dummy_writes`, `ppu_open_bus`, `oam_read` and `oam_stress`,
+are NROM with CHR ROM and report through `$6000`. Each folder's combined ROM is
+MMC1 with CHR RAM. `cpu_dummy_reads` and `ppu_read_buffer` are CNROM.
+`branch_timing_tests` and `blargg_apu_2005.07.30` are NROM-128 with CHR RAM, in
+the 2005 shell that reports on the screen. Every mapper they need was built.
+
+**Which run on PAL, and why.** The plan said the list comes from each readme.
+Most readmes name no region, so where one is silent the source decides, and a
+ROM that times against the NTSC frame or frame counter runs NTSC only:
+
+- `instr_test-v5`: the readme names no region; its `instr_test.inc` sets
+  `REGION_FREE = 1`, so both. `01-basics` and `16-special` do not include it,
+  and on PAL they print "Note: This test is meant for NTSC NES only.", so those
+  two run NTSC only. The combined `official_only` prints no such note: both.
+- `instr_timing`: "synchronizing to the APU length counter"; its
+  `2-branch_timing` waits `29830-7120` cycles, the NTSC frame counter: NTSC.
+- `cpu_interrupts_v2`: "Occasionally fails on NES due to PPU-CPU
+  synchronization"; its shell builds `NTSC_ONLY` unless told otherwise, and its
+  delays (29709, 29830) are NTSC's: NTSC.
+- `branch_timing_tests`: "Tests branch timing basics and PPU NMI timing"; the
+  NMI period is the NTSC frame's: NTSC.
+- `cpu_dummy_reads`: no readme of its own; the source waits 29800 cycles after
+  the VBlank flag to read `$2002` just before the next, the NTSC frame: NTSC.
+- `cpu_dummy_writes`: "The PPUMEM test can be used on emulators and on the real
+  NES", no region and no frame timing: both.
+- `ppu_open_bus`: no region; its timings are in milliseconds: both.
+- `oam_read` ("On my NTSC front-loader NES, I get the following four general
+  patterns") and `oam_stress` ("On an NTSC NES, this passes only for one of the
+  four random PPU-CPU synchronizations") say where they were measured, not that
+  the behaviour is NTSC's, and their sources hold no frame timing: both.
+- `ppu_read_buffer`: no region; its only NTSC figure delays the picture it
+  shows while it waits (`delay_n_scanlines_ntsc` in `graphics.s`): both.
+- `cpu_reset`: register values and RAM, no region: both.
+- `apu_reset`: no region in the readme; its shell builds `NTSC_ONLY` and its
+  delays are the NTSC frame counter's (29831): NTSC.
+- `blargg_apu_2005.07.30`: its readme gives the frame counter in NTSC cycles
+  (7459, 14915, 29830), and `pal_apu_tests` is its PAL edition: NTSC.
+
+**The final table** [`BlarggTests`, 5 October 2026]. "Both" is a row for each
+region; a pass through `$6000` is status 0.
+
+| ROM | Region | Result | Entry |
+| --- | --- | --- | --- |
+| `instr_test-v5/rom_singles/01-basics`, `16-special` | NTSC | status 0 | |
+| `instr_test-v5/rom_singles/02` and `04` to `15` | both | status 0 | |
+| `instr_test-v5/rom_singles/03-immediate` | both | status 1, `AB ATX #n` (known failure) | NES community test ROMs: `$AB` |
+| `instr_test-v5/official_only` (MMC1) | both | "All 16 tests passed" | |
+| `instr_test-v5/all_instrs` (MMC1) | both | status 1, `AB ATX #n` (known failure) | NES community test ROMs: `$AB` |
+| `instr_timing` singles 1 and 2, and the combined ROM (MMC1) | NTSC | status 0; "All 2 tests passed" | |
+| `cpu_interrupts_v2` singles 1 to 5, and the combined ROM (MMC1) | NTSC | status 0; "All 5 tests passed" | |
+| `branch_timing_tests` 1 to 3 | NTSC | `$F8` = 1, "PASSED" | |
+| `cpu_dummy_reads` (CNROM) | NTSC | "Passed" on the screen | |
+| `cpu_dummy_writes_oam`, `cpu_dummy_writes_ppumem` | both | status 0 | |
+| `ppu_open_bus` | both | status 0, after the fix below | PPU: the latch decays at one time |
+| `oam_read`, `oam_stress` | both | status 0 | |
+| `ppu_read_buffer` (CNROM) | both | status 0 | |
+| `cpu_reset` (2 ROMs) | both | status 0 | |
+| `apu_reset` (6 ROMs) | NTSC | status 0 | sound unit: the reset keeps the IRQ inhibit bit |
+| `blargg_apu_2005.07.30` 01 to 11 | NTSC | "$01" on the screen | sound unit: a length write |
+| `dmc_dma_during_read4/double_2007_read` | NTSC | CRC `D84F6815` (known failure, from task 9) | NES DMC: `double_2007_read` |
+| `mmc3_test_2/6-MMC3_alt`, `mmc3_irq_tests/5.MMC3_rev_A` | NTSC | the other revision (known failures, from task 11) | NES MMC3 |
+
+The rows already there from tasks 4 to 11 (`ppu_vbl_nmi`, the sprite ROMs,
+`apu_test`, `apu_mixer`, `pal_apu_tests`, `dmc_dma_during_read4`,
+`sprdma_and_dmc_dma`, the MMC3 ROMs) all still pass. The "Entry" column names
+the section of `docs/known-differences.md`.
+
+**Not run, and why.**
+- `nmi_sync`: two demos, `demo_ntsc` and `demo_pal`, that draw a line with timed
+  `$2001` writes. The readme says to look at the picture ("the left pixel of the
+  middle line will be darker"); nothing in RAM or on the nametable says pass or
+  fail. Left to task 13's frame checks, and not pinned here.
+- `dmc_tests`: four ROMs with no readme and no source in the fork. Read with the
+  core's disassembler, `status.nes` sets up the DMC, waits, plays a pulse tone
+  and stops in a `JMP` to itself; run, all four leave nothing on the screen, in
+  `$6000` or in zero page. Its
+  result is a sound to listen to, so there is nothing a test can read; the
+  fork's own `status.txt` marks all four "Not sure yet". Not pinned.
+
+**Fixed: the PPU's I/O latch now decays** (its own commit, `fix(nes)`).
+`ppu_open_bus` failed test 3, "Decay value should become zero by one second":
+the latch's decay had been left out as a known difference before any ROM
+checked it. Each bit now reads 0 after 600 ms without being driven, the time the
+ROM's readme measured on a console; the wiki says at least one bit goes after 3
+to 30 ms. A write drives all eight bits, a `$2002` read bits 7 to 5, a palette
+`$2007` read bits 5 to 0, other `$2004` and `$2007` reads all eight, and a read
+of a write-only register none, as the readme's table and `ppu.md` 1 give. The
+time is worked out only when the latch is used, from the frame count, line and
+dot, and keeps counting across the reset button. Red first: of the eight
+`PpuRegisterTests` cases on the latch, five failed before the change (the other
+three guard against decaying too soon, and passed). With `$2002` made to drive all eight bits for
+one run, a unit test fails and the ROM fails test 7, "Reading $2002 shouldn't
+refresh low 5 bits of decay value". `ppu_read_buffer` and
+`cpu_dummy_writes_ppumem`, which also read the latch, still pass.
+
+**Fixed: the runner pressed reset twice.** `apu_reset/4017_written` failed test
+3, "At reset, $4017 should should be rewritten with last value written". A trace
+of its `$4015` and `$4017` accesses showed the model was right: the ROM never
+got to write `$80` before the second reset, because the runner pressed it too
+soon. `$6000` is cartridge RAM, which the reset keeps, so it still reads `$81`
+after a reset until the shell starts again and writes `$80` (its `text_out.s`),
+which here is 75,000 cycles of the ROM's reset code later. The runner took the
+old `$81` for a new request. It now waits for `$6000` to leave `$81` after each
+reset. The ROM passes; no machine change.
+
+**Known failure: opcode `$AB`.** `03-immediate` and `all_instrs` fail on `LXA`
+(the ROM's `ATX #n`), A and X = (A OR a constant) AND the operand. The core uses
+`$EE`, from Harte's `nes6502` data, which the core's tests pin. With `$FF` put in
+for one run, `03-immediate` passes; with `$00` it fails. So the console the ROM
+was calibrated on had `$FF`. The core keeps Harte's value because changing it
+means an exception in the core's reference tests; that is Dan's call, and the
+recommendation is in the task report. Every other instruction passes, on both
+regions.
+
+**`double_2007_read`, looked at again and left.** The model prints `33 44 55 66
+77` for the double read; the source's four console outputs begin `22 44`,
+`22 33`, `02 44` and `32 44`. In all four the second read does not get the byte
+the first read fetched, so the chip fills the buffer some dots after the read.
+The wiki gives no number of dots, and the four outputs depend on the alignment,
+so choosing a delay to make one of them come out would be guessing at the chip.
+It stays a known failure, with that cause.
+
+**Task 8's open rule, checked.** `blargg_apu_2005.07.30` 10 and 11 are the NTSC
+tests of the length counter's write timing, which task 8 took from the PAL
+readme and applied to NTSC with nothing to check it. Both pass, and with the
+rule taken out for one run they print `$03` and `$04`. `apu.md` open item 5.
+
+**Carried from task 10.**
+- `Mmc1Tests.ARealIncOnTheCpuLoadsOneBitNotTwo`: a real `INC $E000` on the
+  CPU, through the bus, then four `STA $E000`. Bank 7 ends up at `$8000`; with
+  the consecutive-write rule switched off for one run it was bank 5, as the
+  test's comment works out.
+- The UxROM and AxROM alternative (no conflicts for any submapper, the sheet
+  read strictly) and CNROM's opposite risk (the AND applied to submapper 0 and
+  iNES files) are in `mappers.md` open items 2 and 5 and in known differences.
+  Both CNROM ROMs of this task pass with the AND taken out for one run, so they
+  do not settle it: `ppu_read_buffer` writes each bank number over a ROM byte
+  holding the same number.
+- `Board` masks a PRG RAM address when the size is a power of two, as every NES
+  2.0 size is, and takes the remainder otherwise. A pure refactor; the tests
+  were green before and after.
+
+**Budgets.** Each ROM's cycle budget is a hang guard, about three times what it
+needed. The new rows log their cycles (`--logger "console;verbosity=detailed"`
+on the command above), for example `official_only` 58.1 million on PAL against
+180 million, `oam_stress` 50.8 million against 150, and `1-instr_timing` 30.2
+million against 90. The combined `ppu_vbl_nmi` needed 48.1 million against task
+10's 72, so it now has 150.
+
+**Mistakes.**
+- `4017_written` looked like an APU reset bug, and the first look was at the
+  APU's reset. The trace showed the runner was at fault.
+- The first sweep ran `cpu_dummy_reads` through the `$6000` runner, where it
+  ran out its budget: its shell does not use `$6000`. It prints on the screen.

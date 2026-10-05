@@ -13,7 +13,9 @@ namespace Dbhq.Machines.Nes.Tests;
 /// Then the DMC (task 9): <c>apu_test</c> 7 and 8, <c>dmc_dma_during_read4</c>,
 /// <c>sprdma_and_dmc_dma</c> and <c>apu_mixer</c>, all NTSC. Then MMC3 (task 11):
 /// <c>mmc3_test_2</c>'s singles and <c>mmc3_irq_tests</c>, NTSC, one ROM of each a known failure
-/// because it tests the other revision of the chip.
+/// because it tests the other revision of the chip. Then the rest (task 12): the CPU's own tests,
+/// dummy reads and writes, open bus, OAM, the read buffer, power and reset, and the 2005 APU tests,
+/// each on the regions its readme or source gives (the journal quotes them).
 /// </summary>
 public class BlarggTests(ITestOutputHelper output)
 {
@@ -174,7 +176,7 @@ public class BlarggTests(ITestOutputHelper output)
             "dmc_dma_during_read4/double_2007_read",
             "D84F6815",
             ["85CFD627", "F018C287", "440EF923", "E52F41A5"],
-            "two $2007 reads in adjacent cycles (LDA $20F7,X with X = $10 reads $2007, then $2107) are two whole reads in the PPU model; the source says hardware sometimes ignores the second and puts odd things in the buffer. No DMC in it: a PPU matter"
+            "two $2007 reads in adjacent cycles (LDA $20F7,X with X = $10 reads $2007, then $2107) are two whole reads in the PPU model, which fills the read buffer at once, so the second returns what the first fetched (33 44 55 66 77); in all four console outputs the source lists, the second read does not, so the chip fills the buffer some dots later, and no sheet or wiki page gives how many. No DMC in it: a PPU matter"
         },
     };
 
@@ -256,20 +258,182 @@ public class BlarggTests(ITestOutputHelper output)
         Assert.True(ninetieth < ApuMixerQuiet, $"apu_mixer/{rom}: the tone during the test is {ninetieth:F1} dB against the short tone (90th percentile block)");
     }
 
-    // The two combined ROMs, each every one of its singles in one MMC1 cartridge (task 10 gave the
-    // board; task 12 runs the rest). Each is run from power on to its report through $6000: status
-    // 0 and the text "All N tests passed" its shell prints at the end. The cycles each needed when
-    // it was written are in the journal, task 10.
-    [Theory]
-    [InlineData("ppu_vbl_nmi/ppu_vbl_nmi.nes", "All 10 tests passed")]
-    [InlineData("apu_test/apu_test.nes", "All 8 tests passed")]
-    public void EachCombinedMmc1RomPasses(string pinnedName, string expected)
+    // The combined ROMs, each every one of its singles in one MMC1 cartridge. Each is run from
+    // power on to its report through $6000: status 0 and the text "All N tests passed" its shell
+    // prints at the end. Task 10 added the first two; task 12 added official_only, every
+    // instr_test-v5 single's official instructions in one ROM, on both regions as the singles, and
+    // instr_timing's and cpu_interrupts_v2's, NTSC as theirs (all_instrs is a known failure). The
+    // fourth column is the budget in millions of cycles, a hang guard about three times what the
+    // ROM needed (the journal, tasks 10 and 12).
+    public static TheoryData<string, string, Region, int> CombinedMmc1Roms() => new()
     {
-        BlarggResult result = BlarggRunner.Run(pinnedName, Region.Ntsc, 4 * Budget);
+        { "ppu_vbl_nmi/ppu_vbl_nmi.nes", "All 10 tests passed", Region.Ntsc, 150 },
+        { "apu_test/apu_test.nes", "All 8 tests passed", Region.Ntsc, 72 },
+        { "instr_test-v5/official_only.nes", "All 16 tests passed", Region.Ntsc, 180 },
+        { "instr_test-v5/official_only.nes", "All 16 tests passed", Region.Pal, 180 },
+        { "instr_timing/instr_timing.nes", "All 2 tests passed", Region.Ntsc, 120 },
+        { "cpu_interrupts_v2/cpu_interrupts.nes", "All 5 tests passed", Region.Ntsc, 72 },
+    };
 
-        Assert.False(result.TimedOut, $"{pinnedName} gave no result in {4 * Budget} cycles (status {result.Status}). Its text:\n{result.Text}");
+    [Theory]
+    [MemberData(nameof(CombinedMmc1Roms))]
+    public void EachCombinedMmc1RomPasses(string pinnedName, string expected, Region region, int millions)
+    {
+        long budget = millions * 1_000_000L;
+        BlarggResult result = BlarggRunner.Run(pinnedName, region, budget);
+        output.WriteLine($"{pinnedName} on {region.Name}: status {result.Status} after {result.Cycles} cycles");
+
+        Assert.False(result.TimedOut, $"{pinnedName} gave no result in {budget} cycles (status {result.Status}). Its text:\n{result.Text}");
         Assert.True(result.Status == 0, $"{pinnedName} reported status {result.Status} after {result.Cycles} cycles. Its text:\n{result.Text}");
         Assert.True(result.Text.Contains(expected, StringComparison.Ordinal), $"{pinnedName} did not print {expected}. Its text:\n{result.Text}");
+    }
+
+    // Task 12's ROMs that report through $6000, each with the region it runs on and its budget in
+    // millions of cycles (a hang guard, about three times what it needed; the journal, task 12).
+    // instr_test-v5's singles build with REGION_FREE, so they run on both, except 01-basics and
+    // 16-special, which do not and print "This test is meant for NTSC NES only" on PAL. 03-immediate
+    // is in RamReportingKnownFailures. instr_timing and cpu_interrupts_v2 time against the NTSC frame
+    // counter (29830 in their sources; cpu_interrupts_v2 builds NTSC_ONLY), and apu_reset builds
+    // NTSC_ONLY: NTSC. cpu_reset, cpu_dummy_writes, ppu_open_bus, oam_read, oam_stress and
+    // ppu_read_buffer name no region and their sources hold no frame timing: both. The cpu_reset
+    // and apu_reset ROMs ask for the reset button, which the runner presses.
+    public static TheoryData<string, Region, int> RamReportingRoms()
+    {
+        var data = new TheoryData<string, Region, int>();
+        string[] regionFree =
+        [
+            "02-implied", "04-zero_page", "05-zp_xy", "06-absolute", "07-abs_xy", "08-ind_x", "09-ind_y",
+            "10-branches", "11-stack", "12-jmp_jsr", "13-rts", "14-rti", "15-brk",
+        ];
+        data.Add("instr_test-v5/rom_singles/01-basics.nes", Region.Ntsc, 30);
+        foreach (string single in regionFree)
+        {
+            data.Add($"instr_test-v5/rom_singles/{single}.nes", Region.Ntsc, 30);
+            data.Add($"instr_test-v5/rom_singles/{single}.nes", Region.Pal, 30);
+        }
+
+        data.Add("instr_test-v5/rom_singles/16-special.nes", Region.Ntsc, 30);
+        data.Add("instr_timing/rom_singles/1-instr_timing.nes", Region.Ntsc, 90);
+        data.Add("instr_timing/rom_singles/2-branch_timing.nes", Region.Ntsc, 18);
+        foreach (string single in new[] { "1-cli_latency", "2-nmi_and_brk", "3-nmi_and_irq", "4-irq_and_dma", "5-branch_delays_irq" })
+        {
+            data.Add($"cpu_interrupts_v2/rom_singles/{single}.nes", Region.Ntsc, 36);
+        }
+
+        foreach (string rom in new[] { "4015_cleared", "4017_timing", "4017_written", "irq_flag_cleared", "len_ctrs_enabled", "works_immediately" })
+        {
+            data.Add($"apu_reset/{rom}.nes", Region.Ntsc, 18);
+        }
+
+        foreach (Region region in new[] { Region.Ntsc, Region.Pal })
+        {
+            data.Add("cpu_reset/ram_after_reset.nes", region, 18);
+            data.Add("cpu_reset/registers.nes", region, 18);
+            data.Add("cpu_dummy_writes/cpu_dummy_writes_oam.nes", region, 36);
+            data.Add("cpu_dummy_writes/cpu_dummy_writes_ppumem.nes", region, 36);
+            data.Add("ppu_open_bus/ppu_open_bus.nes", region, 36);
+            data.Add("oam_read/oam_read.nes", region, 18);
+            data.Add("oam_stress/oam_stress.nes", region, 150);
+            data.Add("ppu_read_buffer/test_ppu_read_buffer.nes", region, 120);
+        }
+
+        return data;
+    }
+
+    [Theory]
+    [MemberData(nameof(RamReportingRoms))]
+    public void EachRamReportingRomPasses(string pinnedName, Region region, int millions)
+    {
+        long budget = millions * 1_000_000L;
+        BlarggResult result = BlarggRunner.Run(pinnedName, region, budget);
+        output.WriteLine($"{pinnedName} on {region.Name}: status {result.Status} after {result.Cycles} cycles");
+
+        Assert.False(result.TimedOut, $"{pinnedName} gave no result in {budget} cycles (status {result.Status}). Its text:\n{result.Text}");
+        Assert.True(result.Status == 0, $"{pinnedName} reported status {result.Status} after {result.Cycles} cycles. Its text:\n{result.Text}");
+    }
+
+    // The known failures among the ROMs that report through $6000. Each runs as the others do and
+    // is not skipped: the test holds the status and text it gives now, so a change shows. Columns:
+    // the ROM, the region, the status now, text it prints now, the budget in millions of cycles,
+    // and the cause, which docs/known-differences.md also gives.
+    public static TheoryData<string, Region, int, string, int, string> RamReportingKnownFailures()
+    {
+        const string lxa = "opcode $AB (LXA, which the ROM calls ATX #n) is A = X = (A | magic) AND the operand, with a magic constant that differs between chips; the core takes $EE from Harte's nes6502 data, which its own tests pin, and the ROM's checksum, made on a console, is matched by $FF (tried once in task 12: $FF passes, $00 fails)";
+        var data = new TheoryData<string, Region, int, string, int, string>();
+        foreach (Region region in new[] { Region.Ntsc, Region.Pal })
+        {
+            data.Add("instr_test-v5/rom_singles/03-immediate.nes", region, 1, "AB ATX #n", 30, lxa);
+            data.Add("instr_test-v5/all_instrs.nes", region, 1, "AB ATX #n", 180, lxa);
+        }
+
+        return data;
+    }
+
+    [Theory]
+    [MemberData(nameof(RamReportingKnownFailures))]
+    public void EachRamReportingKnownFailureStillFailsAsWrittenDown(string pinnedName, Region region, int statusNow, string printsNow, int millions, string cause)
+    {
+        long budget = millions * 1_000_000L;
+        BlarggResult result = BlarggRunner.Run(pinnedName, region, budget);
+        output.WriteLine($"{pinnedName}: known failure, because {cause}. Its text:\n{result.Text}");
+
+        Assert.False(result.TimedOut, $"{pinnedName} gave no result in {budget} cycles. Its text:\n{result.Text}");
+        Assert.False(result.Status == 0, $"{pinnedName} now passes: move it out of the known failures and its known-differences entry. Its text:\n{result.Text}");
+        Assert.True(result.Status == statusNow && result.Text.Contains(printsNow, StringComparison.Ordinal), $"{pinnedName} fails differently from the record (status {statusNow}, {printsNow}): status {result.Status}. Its text:\n{result.Text}");
+    }
+
+    // branch_timing_tests (task 12): the 2005 shell, the result in $F8 and on the screen. Its first
+    // ROM times the PPU's NMI period, the NTSC frame's, so the three run NTSC; the readme says they
+    // must run, and pass, in order, which the rows keep.
+    [Theory]
+    [InlineData("1.Branch_Basics")]
+    [InlineData("2.Backward_Branch")]
+    [InlineData("3.Forward_Branch")]
+    public void EachBranchTimingTestPasses(string rom)
+    {
+        AssertScreenReportingRomPasses($"branch_timing_tests/{rom}.nes");
+    }
+
+    // blargg_apu_2005.07.30 (task 12), the NTSC edition of pal_apu_tests: its tests.txt says each
+    // reports "a result code on screen", 1 when every test passed. The shell prints the code as
+    // "$01" and stops in its forever loop. NTSC, as its figures (29830 and 14915) are. 10 and 11
+    // check the length counter's write timing that task 8 applied to NTSC with no ROM to check it.
+    public static TheoryData<string> BlarggApu2005() => new()
+    {
+        "01.len_ctr",
+        "02.len_table",
+        "03.irq_flag",
+        "04.clock_jitter",
+        "05.len_timing_mode0",
+        "06.len_timing_mode1",
+        "07.irq_flag_timing",
+        "08.irq_timing",
+        "09.reset_timing",
+        "10.len_halt_timing",
+        "11.len_reload_timing",
+    };
+
+    [Theory]
+    [MemberData(nameof(BlarggApu2005))]
+    public void EachBlarggApu2005RomPrintsResultCode1(string rom)
+    {
+        string pinnedName = $"blargg_apu_2005.07.30/{rom}.nes";
+        BlarggResult result = BlarggRunner.RunScreenReporting(pinnedName, Region.Ntsc, Budget);
+
+        Assert.False(result.TimedOut, $"{pinnedName} did not finish in {Budget} cycles. Its screen:\n{result.Text}");
+        Assert.True(result.Text == "$01", $"{pinnedName} printed a result code other than $01. Its screen:\n{result.Text}");
+    }
+
+    // cpu_dummy_reads (task 12), CNROM, prints on the screen only: its name, then nothing more on a
+    // pass, "Failed" or "Error n" otherwise, and stops in its forever loop. Its source waits 29800
+    // cycles after the VBlank flag to read $2002 just before the next one, the NTSC frame: NTSC.
+    [Fact]
+    public void CpuDummyReadsPasses()
+    {
+        BlarggResult result = BlarggRunner.RunUntilForever("cpu_dummy_reads/cpu_dummy_reads.nes", Region.Ntsc, Budget);
+
+        Assert.False(result.TimedOut, $"cpu_dummy_reads did not finish in {Budget} cycles. Its screen:\n{result.Text}");
+        Assert.Equal("cpu_dummy_reads\nPassed", result.Text);
     }
 
     // mmc3_test_2's singles (task 11), mapper 4, reporting through $6000. The readme names no

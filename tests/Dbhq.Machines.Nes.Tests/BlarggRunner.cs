@@ -42,6 +42,11 @@ public static class BlarggRunner
         long resetDelay = (long)(region.CpuHz * 0.15);
         long resetAt = -1;
 
+        // $6000 is cartridge RAM, which the reset button keeps, so after a reset it still reads $81
+        // until the ROM's shell starts again and writes $80 (its text_out.s). Until then the $81
+        // is the old request, not a new one, and pressing reset on it would cut the ROM short.
+        bool resetJustPressed = false;
+
         while (nes.Bus.Cycles < maxCpuCycles)
         {
             nes.Step();
@@ -51,6 +56,16 @@ public static class BlarggRunner
             }
 
             byte status = nes.Bus.Peek(0x6000);
+            if (resetJustPressed)
+            {
+                if (status == ResetWanted)
+                {
+                    continue;
+                }
+
+                resetJustPressed = false;
+            }
+
             if (status == ResetWanted)
             {
                 if (resetAt < 0)
@@ -60,6 +75,7 @@ public static class BlarggRunner
                 else if (nes.Bus.Cycles >= resetAt)
                 {
                     resetAt = -1;
+                    resetJustPressed = true;
                     nes.Reset();
                 }
 

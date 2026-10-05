@@ -366,3 +366,8 @@ and with the page's linear approximation put in for one run, 9.5 to 25.7 dB
    ROMs pass either way. Task 9 ran `sprdma_and_dmc_dma`, its `_512` variant,
    `apu_test` and `pal_apu_tests` with the parity swapped: all pass, so it is
    still open [measured in task 9].
+5. Closed in task 12: the length counter's write rule (section 5) on NTSC. Its
+   source is `pal_apu_tests`' readme, and task 8 applied it to NTSC with no ROM
+   to check it. The fork's `blargg_apu_2005.07.30` 10.len_halt_timing and
+   11.len_reload_timing are the NTSC tests of the same name and pass with it;
+   with the rule taken out once they print `$03` and `$04` [measured in task 12].

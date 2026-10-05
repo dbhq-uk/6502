@@ -119,6 +119,76 @@ public static class Pins
         ["mmc3_irq_tests/5.MMC3_rev_A.nes"] = "6b662c2d08ee4094d89b6d1ddde330e47f81929fb642dc217b6e4c33f8926944",
         ["mmc3_irq_tests/6.MMC3_rev_B.nes"] = "d8a2af42cdafe8046b36109e6f6ff71ca0d7f5d62c7d5953e0aa1d1828a86088",
 
+        // The CPU's own tests (task 12 of the NES plan). instr_test-v5's sixteen singles, instr_timing's
+        // two and cpu_interrupts_v2's five are NROM with CHR ROM and report through $6000; each folder's
+        // combined ROM is MMC1 with CHR RAM. branch_timing_tests' three are NROM-128 with CHR RAM and
+        // report on the screen and in $F8, as the 2005 ROMs do. cpu_reset's two report through $6000
+        // and ask for the reset button.
+        ["branch_timing_tests/1.Branch_Basics.nes"] = "7b69e3044eaeb86317147a900d1f4a467b666f59d375ec1ba6658233f23786cd",
+        ["branch_timing_tests/2.Backward_Branch.nes"] = "f7966e9b86b04b4adb987439a442e926e9cfe6bb71436dd5dd56f41f9eb029a4",
+        ["branch_timing_tests/3.Forward_Branch.nes"] = "d0fbc6b1899bc948172c45f37a981eb0dade212d7e807cc56efedae93d6f9c9b",
+        ["cpu_interrupts_v2/cpu_interrupts.nes"] = "ccbac4e824eb96ecfe8b82d331a083be186eb6776aa57e25c52251eaf7df9c4f",
+        ["cpu_interrupts_v2/rom_singles/1-cli_latency.nes"] = "e402d36118f77dcbbe8ddca90c15fc76a46bcb30b25cb028c383e4a621de5fc0",
+        ["cpu_interrupts_v2/rom_singles/2-nmi_and_brk.nes"] = "6e6bf6205930afcfebdc213c583df53986a688a8b36f8856b805ef4c1853e6eb",
+        ["cpu_interrupts_v2/rom_singles/3-nmi_and_irq.nes"] = "3008a9524d174a8aca562ff0361eba81da53e38cf1ebb5125322fe151f14d945",
+        ["cpu_interrupts_v2/rom_singles/4-irq_and_dma.nes"] = "6d7b4c1947ada64679af56cf0c227286b2408afe1747dfaa4dc7363d57ff87f6",
+        ["cpu_interrupts_v2/rom_singles/5-branch_delays_irq.nes"] = "f9e10b4a24d8f3cd3e51fb7457c72858aab96a6467fdbbd806d0661c2d32fdc7",
+        ["cpu_reset/ram_after_reset.nes"] = "f1802a5618aaaa0c4d592caa45b0b13c54082af93fc311bda0c27bceacbc7c7f",
+        ["cpu_reset/registers.nes"] = "a30f33fb6c9f56012fba38dc85ddc3dccc06bfc0b25fef7711b63f8207279715",
+        ["instr_test-v5/all_instrs.nes"] = "353870c157242e3d428ef7387109deaee0d2e158bdb432ab9aae4e657072c785",
+        ["instr_test-v5/official_only.nes"] = "589b8835deb5cbc69618dac193a3dbd675540f7f2794e2d2a92e97beb8abc3cb",
+        ["instr_test-v5/rom_singles/01-basics.nes"] = "4dd1cdd406bc3f747972e7da314ce8ca89321eb7a836c1ced569ee54ae44a384",
+        ["instr_test-v5/rom_singles/02-implied.nes"] = "1c4d4fa130cf6feebc072543a5cd3627ae71063b56b08642bf43e9a6c6f44996",
+        ["instr_test-v5/rom_singles/03-immediate.nes"] = "6f7ad8ff31c762c37deaee0f323df03eb94025cf1f3b0343ebe6fe567da0e943",
+        ["instr_test-v5/rom_singles/04-zero_page.nes"] = "7a8feada4bb4460250c8f05401e5d728878bbe71956756d0b11d488e57eb12fd",
+        ["instr_test-v5/rom_singles/05-zp_xy.nes"] = "767f422dc4e651e331456b207f7c6d60d19329fde0c0827e83591dbd91ae5e23",
+        ["instr_test-v5/rom_singles/06-absolute.nes"] = "98df36dc4fcc4f37d9eb0539c71283020776b1e5dc6a6ce58671739a8d6534af",
+        ["instr_test-v5/rom_singles/07-abs_xy.nes"] = "9ff58d77d8d384cc918fcd3ed877898c5e7330cd475ed2dafb11cbe80ff32eff",
+        ["instr_test-v5/rom_singles/08-ind_x.nes"] = "2ec6f5d4a8caee5d8295cebe563f203c26ea9bc05f1dbc967feb88f5dc4f261f",
+        ["instr_test-v5/rom_singles/09-ind_y.nes"] = "0fbc8b228d5daa83a4a083bf87ae3a61b5247ebdd91a6b91c8cf8c42784804ac",
+        ["instr_test-v5/rom_singles/10-branches.nes"] = "63ab768e88931db6f7dfcfafe43d5e29ebc3dcb80da8fc7fcda8c930f34aef54",
+        ["instr_test-v5/rom_singles/11-stack.nes"] = "c534191fe3ea4c8940944fda98dd58eb42710268d453f97e8e2c4ae7f15f9cdb",
+        ["instr_test-v5/rom_singles/12-jmp_jsr.nes"] = "f5b4652690fc04e6b573a2b3b54a29407ad0615d3c264e7cb618b6694b50de55",
+        ["instr_test-v5/rom_singles/13-rts.nes"] = "b711d25bc55585c252046a1304a0bc64c13cacce7c96a1bac5c8e91f9fc2597f",
+        ["instr_test-v5/rom_singles/14-rti.nes"] = "f084b00605be1840946b53935032581e68abe1bb24479942751cfe46ddfcb280",
+        ["instr_test-v5/rom_singles/15-brk.nes"] = "da7ae9a191c4483b540771e15b1f6f18df68f1d1ecd717b59ea8b1ee3596ec3e",
+        ["instr_test-v5/rom_singles/16-special.nes"] = "7d03410b61784e49920901e84b00a4f31a19078391f20005c6fac9036d2190f7",
+        ["instr_timing/instr_timing.nes"] = "3d1bca14266f1e25b75a34ddd29c9df1ce9c6d990c8663a218f72e7861660fb0",
+        ["instr_timing/rom_singles/1-instr_timing.nes"] = "e260068839fe3d0402376e97e4ee15f5790ee77c701fd0700bba057527910222",
+        ["instr_timing/rom_singles/2-branch_timing.nes"] = "0afaa393f375844ab98834c1ecba7fa6d8c44880c8b6e738936d0f04a84c8538",
+
+        // Dummy reads and writes, open bus and OAM (task 12). cpu_dummy_reads and ppu_read_buffer are
+        // CNROM (mapper 3); the rest are NROM with CHR ROM. All report through $6000 except
+        // cpu_dummy_reads, which prints on the screen only.
+        ["cpu_dummy_reads/cpu_dummy_reads.nes"] = "db4f91b80c5fbc123e7dcb420fb7fea9b8a18613edf4de7f3d1e3ed95e3117c9",
+        ["cpu_dummy_writes/cpu_dummy_writes_oam.nes"] = "7c1d71a38b2e873d0874add8b823ff39b99151bb29f50096d8021787020c566c",
+        ["cpu_dummy_writes/cpu_dummy_writes_ppumem.nes"] = "f59ac329f4872277ccbeff9dd595b901d861af8d53e8a43dcca93bb86752a6b3",
+        ["oam_read/oam_read.nes"] = "f298973dabeb61ca35007445f7a615f77e87703c958c870986af83b1aabde926",
+        ["oam_stress/oam_stress.nes"] = "95882d72a7acabe928fd277e3b3e0372f21ef3d41e36d7d8fb17fc017a356f70",
+        ["ppu_open_bus/ppu_open_bus.nes"] = "d4208a3ff6340532dd0fced7f9d408d5b6585853a0ddc9c1f64ee1722ef08e67",
+        ["ppu_read_buffer/test_ppu_read_buffer.nes"] = "230a52fc557c098eba163801d1b6bbf9f57fe8c5ff79a3f968c804dedb1290ba",
+
+        // The sound unit at power and reset, and the older APU tests (task 12). apu_reset's six are NROM
+        // and report through $6000, asking for the reset button. blargg_apu_2005.07.30, the NTSC
+        // edition of pal_apu_tests, is NROM-128 with CHR RAM and prints its result code on the screen.
+        ["apu_reset/4015_cleared.nes"] = "ef83bc2831f0ddb9e563ac5cbcfa21b129f092911ef42adabae7d47b3e990d95",
+        ["apu_reset/4017_timing.nes"] = "0e6072c6dcee98fb73dc7f3af2e48face78be300e8510515ed48dc75d15c1f13",
+        ["apu_reset/4017_written.nes"] = "022bd3b45a733179d9a0a9bf0311d09ca81419d7e7434e6f559e42650b39616b",
+        ["apu_reset/irq_flag_cleared.nes"] = "e2435b213bf21065b7c9c645359500c1c860a7395d12d051232ab14dad1b0bb5",
+        ["apu_reset/len_ctrs_enabled.nes"] = "e05546cbfaa1414d9193b0212084b324ea6b13130af5f171a34c9e574f5ac373",
+        ["apu_reset/works_immediately.nes"] = "c750113762ee375319b1bfbf65c457875dbb194649d7e7b3594fba38eb8eefa1",
+        ["blargg_apu_2005.07.30/01.len_ctr.nes"] = "e1e3a29ab5369ab84a6f5f2f426c64bde86b9a1d26a906739d43fbf624bb8829",
+        ["blargg_apu_2005.07.30/02.len_table.nes"] = "63cc6a57fae3da5e30df9520d02b723c5b93789e8a6eef6793f876345b245b51",
+        ["blargg_apu_2005.07.30/03.irq_flag.nes"] = "6f71c7e3de4b6c00da92c20a86c1c2095196a55dc201ee3286004ecf33a08c2f",
+        ["blargg_apu_2005.07.30/04.clock_jitter.nes"] = "46fa69b26fe8c24dc1d0b5908f90ab0141972eeb607bd563d28f53d6f4543fe6",
+        ["blargg_apu_2005.07.30/05.len_timing_mode0.nes"] = "606802d6849ccfcf74e907a8512c03a50d443752d1f616e62a242a1fa7eca0ff",
+        ["blargg_apu_2005.07.30/06.len_timing_mode1.nes"] = "0f34e26d56ad235d8d6d63565ed4728fbd0b9b8590a4fd4048eaf64283b429d4",
+        ["blargg_apu_2005.07.30/07.irq_flag_timing.nes"] = "851c9698941d51da34b4bfbc9644aa08ee41b39c6c814cc9b8412c204ea68085",
+        ["blargg_apu_2005.07.30/08.irq_timing.nes"] = "0a20a2b9ca9a8e78d65b500b161294c889399f0ff048edd104b07b15255946ca",
+        ["blargg_apu_2005.07.30/09.reset_timing.nes"] = "bb04f8328a51abb2d17e6e5362b8375f3cbfbf0641733d068b22f23e7dc588e6",
+        ["blargg_apu_2005.07.30/10.len_halt_timing.nes"] = "cbdaa9a5cf9c19ba2360d3349a47922eec25a3e610374d963c422f2b67c57ac9",
+        ["blargg_apu_2005.07.30/11.len_reload_timing.nes"] = "40e633285a4a8710780bfd80d346dee62406f4be161eb75615f469cd9e84e132",
+
         // The browser speed check's ROM (task 6 of the NES plan): SNOW, a demo by Repulse that keeps
         // rendering on and changes the picture every frame, NROM-256 with CHR ROM. Fetched by
         // bench/nes-speed/ from the same fork at the same commit, and never committed.
