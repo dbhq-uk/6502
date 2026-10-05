@@ -215,12 +215,13 @@ public sealed class NesBus : IBus
 
     /// <summary>
     /// The power-on state of the chips: RAM zero (a real console's pattern is undefined, so zeros
-    /// are the choice, a known difference), the counters and the open bus at zero, the board's PRG
-    /// RAM cleared, the PPU and the sound unit reset.
+    /// are the choice, a known difference), the counters and the open bus at zero, the board's
+    /// registers and PRG RAM cleared, the PPU and the sound unit reset.
     /// </summary>
     internal void PowerOn()
     {
         Array.Clear(_ram);
+        _mapper.Reset(true);
         _mapper.ClearPrgRam();
         _openBus = 0;
         _dotAccumulator = 0;
@@ -242,7 +243,8 @@ public sealed class NesBus : IBus
 
     /// <summary>
     /// The console's reset button: the PPU and the sound unit reset (the NES-001 resets the PPU with
-    /// the CPU, timing.md 4), and RAM, the PRG RAM and the counters are kept.
+    /// the CPU, timing.md 4), and RAM, the PRG RAM, the board's registers and the counters are kept
+    /// (the boards' chips have no reset line, <see cref="IMapper.Reset"/>).
     /// </summary>
     internal void Reset()
     {
@@ -250,6 +252,7 @@ public sealed class NesBus : IBus
         // reset button stops the CPU, so the copy that was asked for is dropped.
         _dmaPage = -1;
         _lastReadAddress = -1;
+        _mapper.Reset(false);
         _ppu.Reset();
         _apu.Reset();
     }

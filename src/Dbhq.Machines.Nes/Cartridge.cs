@@ -52,7 +52,7 @@ public sealed class Cartridge
     /// The mapper numbers <see cref="CreateMapper"/> can build, kept in one place for its message.
     /// Each mapper's task adds its number here and its case there.
     /// </summary>
-    private static readonly int[] SupportedMappers = [0];
+    public static IReadOnlyList<int> SupportedMappers { get; } = [0, 1, 2, 3, 7];
 
     private readonly byte[]? _chrRom;
     private byte[]? _chrRamBlock;
@@ -247,6 +247,14 @@ public sealed class Cartridge
         {
             case 0:
                 return new Nrom(this);
+            case 1:
+                return new Mmc1(this);
+            case 2:
+                return new Uxrom(this);
+            case 3:
+                return new Cnrom(this);
+            case 7:
+                return new Axrom(this);
             default:
                 throw new NesFormatException(
                     $"This cartridge needs mapper {Mapper}, and this machine models only these mappers: {string.Join(", ", SupportedMappers)}.");

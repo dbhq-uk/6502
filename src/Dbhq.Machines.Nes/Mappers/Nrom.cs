@@ -87,6 +87,15 @@ public sealed class Nrom : IMapper
     }
 
     /// <inheritdoc />
+    public void Reset(bool power)
+    {
+        if (power && _chrIsRam)
+        {
+            Array.Clear(_chr);
+        }
+    }
+
+    /// <inheritdoc />
     public void ClearPrgRam()
     {
         Array.Clear(PrgRam);

@@ -345,7 +345,23 @@ public class CartridgeTests
 
         AssertPlainSentence(error.Message);
         Assert.Contains("mapper 5", error.Message);
-        Assert.Contains("mappers: 0", error.Message);
+        Assert.Contains("mappers: 0, 1, 2, 3, 7.", error.Message);
+    }
+
+    [Fact]
+    public void TheSupportedMappersAreTheOnesTheMessageListsAndEachBuilds()
+    {
+        Assert.Equal([0, 1, 2, 3, 7], Cartridge.SupportedMappers);
+
+        foreach (int mapper in Cartridge.SupportedMappers)
+        {
+            Assert.NotNull(Cartridge.Load(TestCartridge.Banked(mapper, 2, 16384, 2, 8192)).CreateMapper());
+        }
+
+        // The message prints the list, whatever it holds, and a number outside it is refused.
+        var error = Assert.Throws<NesFormatException>(() => Cartridge.Load(TestCartridge.Ines1(1, 1, mapper: 4)).CreateMapper());
+        Assert.Contains($"mappers: {string.Join(", ", Cartridge.SupportedMappers)}.", error.Message);
+        Assert.DoesNotContain(4, Cartridge.SupportedMappers);
     }
 
     [Fact]

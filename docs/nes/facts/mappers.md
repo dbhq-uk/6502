@@ -214,3 +214,10 @@ From the above, a mapper sees [inferring from sections 2 to 6]:
    test 4 checks the timing].
 2. CNROM bus conflicts (5) [guessing - verify].
 3. PRG RAM size for MMC1 boards beyond 8 KB (3) [guessing - verify].
+4. What the console's reset button does to MMC1 and the other boards' registers.
+   The sheet gives only the power-on state. The model leaves them alone, as the
+   chips have no reset line (task 10) [guessing - verify].
+5. UxROM and AxROM submapper 2 as AND-type bus conflicts. The sheet says the
+   submappers tell and does not give their numbers; task 10 took them from the
+   nesdev UxROM and AxROM pages, which list 0 unknown, 1 none and 2 AND-type for
+   both (read 5 October 2026).

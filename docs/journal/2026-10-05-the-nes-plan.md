@@ -1037,3 +1037,103 @@ speed has to come from.
   linear run showed it.
 - The averaging of the ultrasonic triangle was built, measured and taken out;
   the blocks do the job without changing what is heard.
+
+## Task 10: MMC1, UxROM, CNROM and AxROM
+
+**Done.** Four boards in `src/Dbhq.Machines.Nes/Mappers/`: `Mmc1`, `Uxrom`,
+`Cnrom` and `Axrom`, on one shared base, `Board`. `Cartridge.CreateMapper` now
+builds mappers 0, 1, 2, 3 and 7, and `Cartridge.SupportedMappers`, which the
+refusal message prints, is public so a test can hold the message to the list.
+The two combined test ROMs that need MMC1 now run and pass. The project passed
+966 of 966 [`dotnet test tests/Dbhq.Machines.Nes.Tests -c Release`, 5 October
+2026]; the four new test classes are 76 of them.
+
+**Red, then green.** The tests came first and did not build: `Cartridge` had no
+`SupportedMappers` and, in one test, the bus's `PowerOn` is internal; the boards did not exist, so no mapper but 0 could be made. Once the
+boards were in, one test failed, and it was the test's: control `%10011` is PRG
+mode 0, which ignores the low bit of bank 3, so the bank read was 2. With the
+control `%11111` it passed. Then one mutation as a check on the main claim:
+with the "write on the next cycle is ignored" line taken out, three tests fail
+(`AWriteOnTheCycleAfterAWriteIsIgnored`, `ARunOfConsecutiveWritesTakesOnlyTheFirst`
+and the one that drives the real bus), and nothing else.
+
+**The interface.** `IMapper` gained `Reset(bool power)`. The bus calls
+`Reset(true)` and `ClearPrgRam` on a power-on and `Reset(false)` on the reset
+button, so PRG RAM is cleared by a power cycle and kept by a reset (Review Focus
+5) and a board's registers are put back by a power-on only. `Nrom` and the test
+mapper took the new method; `Nrom`'s clears a CHR RAM on power. `CpuRead`'s
+comment now says a read must be pure, because `NesBus.Peek` calls it. No board
+here needs a read with a side effect, so there is no separate peek method.
+
+**The shared base.** A board sets four window bases for PRG (8 KB each) and two
+for CHR (4 KB each) when a register changes, so a read is one array access and
+one add, with no division. That is the per-cycle path, and `CpuCycle` is the
+other half of it: only MMC1 uses it, and it is a compare and an add on a byte
+that stops at 2. Nothing allocates after construction.
+
+**Bad ROM safety (Review Focus 1).** A register can name more banks than a
+file has. Every memory is made a whole number of banks when the board is built
+(a copy, only when it is not already one, padded by repeating its bytes) and
+every bank number is taken modulo the count, so no address a board computes can
+leave its array. A 32 KB MMC1 mode on a 16 KB file shows the one bank twice. A
+NES 2.0 PRG of a bank and a half (the exponent form, 24,576 bytes) is padded to
+two. A file with no CHR and no CHR RAM reads 0 and ignores writes. The MMC1 test
+runs all 32 control values against all 32 bank values for 16, 32 and 48 KB of PRG
+with 8 and 16 KB of CHR ROM and with CHR RAM, and reads the edge of every window.
+
+**MMC1, from the sheet.** The serial port, the reset write, the four PRG modes,
+the two CHR modes, the five mirroring settings, the PRG RAM switch (bit 4 of the
+PRG register, the MMC1B's) and the consecutive-write rule are the sheet's
+section 3, and the tests are the sheet's worked example 2 and its rules. The rule
+for the cycle after a write counts cycles since the last write, in `CpuCycle`,
+and a write that is ignored still counts as one, so of three writes in a row only
+the first goes in. The sheet says "ignores every write after the first"; the
+wiki's wording was read again to be sure it is every one, not every other one.
+The bit 7 reset is never ignored, and has its own test on the cycle straight
+after a write. One test goes through the real bus: an `INC`'s two writes are two
+bus cycles in a row, and the second is dropped, while two writes with a read
+between them are both taken.
+
+**What the reset button does to MMC1 is not on the sheet.** The sheet gives the
+power-on state (control `$0C`) and says nothing of the button. The chip has no
+reset pin, so the model leaves it alone: `Reset(false)` changes nothing in any
+of these boards. The test ROMs' shells write `$80` themselves, so they do not
+tell. It is in the sheet's open items (4) and in known differences.
+
+**Bus conflicts.** The sheet's rule is none for UxROM and AxROM, and an AND for
+CNROM unless NES 2.0 submapper 1. It says the submappers tell and does not give
+the numbers for the first two, so the nesdev pages were read (5 October 2026):
+for mapper 2 and mapper 7 both, 0 is unknown, 1 is none and 2 is AND-type. The
+model follows them: submapper 2 on mapper 2 or 7 ANDs the write with the ROM
+byte at the address written, and anything else does not. That is a small step
+past the sheet, and recorded as open item 5 and in known differences. Tests use
+files whose bank bytes are their numbers, so where a write lands decides what it
+is ANDed with: a write of 3 at `$8000` over bank 0 (bytes `$00`) is a write of 0,
+and at `$C000` over bank 7 it is a write of 3. For AxROM's, which would stick at
+bank 0 in a banked file, one test sets bank 0's bytes to `$13` and writes `$1B`.
+
+**The two combined ROMs.** Both are MMC1 with 8 KB of CHR RAM and header
+mapper nibble 1: `ppu_vbl_nmi/ppu_vbl_nmi.nes` is 256 KB of PRG, and
+`apu_test/apu_test.nes`, newly pinned (its hash is in `Pins.NesTestRomHashes`,
+from the same fork commit), 128 KB. Each was run on NTSC from power on
+[`BlarggTests.EachCombinedMmc1RomPasses`, 5 October 2026]:
+
+| ROM | Result | Cycles to its report |
+| --- | --- | --- |
+| `ppu_vbl_nmi.nes` | status 0, "All 10 tests passed" | 48,093,527 |
+| `apu_test.nes` | status 0, "All 8 tests passed" | 8,872,386 |
+
+`ppu_vbl_nmi` needs more than the 18,000,000 cycles a single did, so the test
+gives it four times the budget (about 5 seconds). They are in `BlarggTests` with
+their real status, ahead of task 12, which has the rest of the MMC1 ROMs.
+
+**Not done.** SOROM, SUROM, SXROM and SZROM (more PRG RAM or PRG through the CHR
+registers); the sheet's open item 3. PRG RAM is whatever the header
+says, which both ROMs above need and use through `$6000`.
+
+**Mistakes.**
+- The first idea for the consecutive-write test could not tell the rule from its
+  absence: with a bank of 5 and a sixth write of 1, the low four bits were the same
+  either way. The test now looks at when the register loads, not at what.
+- Two tests began a write on the cycle after a `Load`'s last write, so the write
+  they meant as the first was itself ignored. They begin with an idle cycle.

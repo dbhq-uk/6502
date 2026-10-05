@@ -12,6 +12,12 @@ public interface IMapper
     /// (<c>$4020</c> to <c>$FFFF</c>). Where the board drives nothing it returns
     /// <paramref name="openBus"/>, the value the bus last held, so a read of nothing keeps it.
     /// </summary>
+    /// <remarks>
+    /// A read must be pure: it changes nothing in the board. <c>NesBus.Peek</c> calls it to show
+    /// memory with no cycle and no side effect, and a read that moved a register would change the
+    /// machine each time a debugger looked. No board this machine models needs one that does; a
+    /// board that does would need a separate peek method.
+    /// </remarks>
     byte CpuRead(ushort address, byte openBus);
 
     /// <summary>A CPU write at <paramref name="address"/>: a register, PRG RAM, or nothing.</summary>
@@ -35,8 +41,22 @@ public interface IMapper
     /// </summary>
     void PpuAddressChanged(ushort address, long cpuCycle);
 
-    /// <summary>Called once a CPU cycle, for a board that must tell one cycle from the next (MMC1 ignores a write the cycle after a write).</summary>
+    /// <summary>
+    /// Called once a CPU cycle, before that cycle's access, for a board that must tell one cycle from
+    /// the next (MMC1 ignores a write the cycle after a write). It runs for every cycle, so it must
+    /// be trivial and allocate nothing.
+    /// </summary>
     void CpuCycle();
+
+    /// <summary>
+    /// Puts the board's registers where a switch-on or the reset button leaves them. With
+    /// <paramref name="power"/> true (the console is switched on) every register goes to its
+    /// power-on value, and so does CHR RAM, which a real board's RAM loses with the power. With
+    /// <paramref name="power"/> false (the reset button) the board does what the real chips do, which
+    /// for the boards here is nothing: their registers have no reset line. Neither clears PRG RAM;
+    /// <see cref="ClearPrgRam"/> does, and only a power cycle calls it.
+    /// </summary>
+    void Reset(bool power);
 
     /// <summary>The board's PRG RAM, battery backed or not, or an empty array when it has none.</summary>
     byte[] PrgRam { get; }

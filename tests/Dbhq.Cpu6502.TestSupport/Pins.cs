@@ -30,6 +30,9 @@ public static class Pins
         ["other/nestest.nes"] = NestestRomSha256,
         ["ppu_vbl_nmi/ppu_vbl_nmi.nes"] = "8dbab1be785585c399cf055ef02147b788ab75fd80e81cf9568a2feafc03fb7d",
 
+        // The combined apu_test, an MMC1 cartridge like the combined ppu_vbl_nmi above (task 10).
+        ["apu_test/apu_test.nes"] = "00d4722bae1c82a14528dd3220462d3fb9ce4b14b8cec996619dea23e07fef0a",
+
         // The ten singles of ppu_vbl_nmi, each NROM (task 4 of the NES plan).
         ["ppu_vbl_nmi/rom_singles/01-vbl_basics.nes"] = "06aea5af4edab4e3141c939cd5ac9936f8758203b25dcaf84ae1a09db49e024a",
         ["ppu_vbl_nmi/rom_singles/02-vbl_set_time.nes"] = "dd98856130078844e3aa4bd95a9be8ab501ea84c089f1d8ad49a1b20af4b3a80",

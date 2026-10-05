@@ -6,7 +6,7 @@ namespace Dbhq.Machines.Nes.Tests;
 /// <summary>
 /// Blargg's test ROMs, from the fork at the pinned commit. The <c>ppu_vbl_nmi</c> singles: the
 /// VBlank flag, NMI and the odd frame, each to one PPU dot. NTSC only, because the readme says
-/// they test "the NTSC PPU". The combined ROM is an MMC1 cartridge and runs in task 12; each single
+/// they test "the NTSC PPU". The combined ROM is an MMC1 cartridge and runs from task 10; each single
 /// is NROM. Then <c>sprite_hit_tests_2005.10.05</c> and <c>sprite_overflow_tests</c> (task 5),
 /// every ROM in each folder, all NROM with CHR RAM, which report on the screen. Then the sound unit
 /// (task 8): <c>apu_test</c>'s singles 1 to 6 on NTSC, and every <c>pal_apu_tests</c> ROM on PAL.
@@ -252,6 +252,22 @@ public class BlarggTests(ITestOutputHelper output)
         output.WriteLine($"apu_mixer/{rom}: over {test.Length} blocks of the test, against the short tone: 90th percentile {ninetieth:F1} dB, median {test[test.Length / 2]:F1} dB, loudest {test[^1]:F1} dB");
 
         Assert.True(ninetieth < ApuMixerQuiet, $"apu_mixer/{rom}: the tone during the test is {ninetieth:F1} dB against the short tone (90th percentile block)");
+    }
+
+    // The two combined ROMs, each every one of its singles in one MMC1 cartridge (task 10 gave the
+    // board; task 12 runs the rest). Each is run from power on to its report through $6000: status
+    // 0 and the text "All N tests passed" its shell prints at the end. The cycles each needed when
+    // it was written are in the journal, task 10.
+    [Theory]
+    [InlineData("ppu_vbl_nmi/ppu_vbl_nmi.nes", "All 10 tests passed")]
+    [InlineData("apu_test/apu_test.nes", "All 8 tests passed")]
+    public void EachCombinedMmc1RomPasses(string pinnedName, string expected)
+    {
+        BlarggResult result = BlarggRunner.Run(pinnedName, Region.Ntsc, 4 * Budget);
+
+        Assert.False(result.TimedOut, $"{pinnedName} gave no result in {4 * Budget} cycles (status {result.Status}). Its text:\n{result.Text}");
+        Assert.True(result.Status == 0, $"{pinnedName} reported status {result.Status} after {result.Cycles} cycles. Its text:\n{result.Text}");
+        Assert.True(result.Text.Contains(expected, StringComparison.Ordinal), $"{pinnedName} did not print {expected}. Its text:\n{result.Text}");
     }
 
     [Theory]

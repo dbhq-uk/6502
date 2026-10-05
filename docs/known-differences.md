@@ -929,3 +929,40 @@ the page.
 
 **The sample buffer drops the oldest samples** when its reader falls behind
 (the plan's Review Focus 3). The machine's holds a quarter of a second.
+
+## The NES: the simple boards and MMC1, where the model stops
+
+**What.** Task 10 of the NES plan: `Mmc1`, `Uxrom`, `Cnrom` and `Axrom` in
+`src/Dbhq.Machines.Nes/Mappers/`, on a shared `Board`. The source is
+`docs/nes/facts/mappers.md` sections 3 to 5. Both combined MMC1 test ROMs pass:
+`ppu_vbl_nmi/ppu_vbl_nmi.nes` and `apu_test/apu_test.nes`.
+
+**The reset button leaves the boards alone.** None of these chips has a reset
+line, so `Reset(false)` changes nothing in them, MMC1's shift register and
+control register included; only a power-on (`Reset(true)`) puts them back. The
+sheet gives only MMC1's power-on state. That the button does nothing is from the
+chips' having no reset pin, not from a page that says so (the nesdev MMC1 page
+does not mention the console's reset). A program that is reset in PRG mode 2 or 0
+therefore starts in the wrong place, as it would on a console, and a ROM must
+write `$80` itself, as the pinned test ROMs' shells do.
+
+**Bus conflicts follow the NES 2.0 submapper.** The sheet says to model none for
+UxROM and AxROM and the AND for CNROM unless submapper 1. The model also takes
+submapper 2 of mapper 2 and of mapper 7 as "AND-type bus conflicts" (the
+nesdev UxROM and AxROM pages list it so), because a file that says it has them
+should not be run without. An iNES file, and submappers 0 and 1, have none.
+CNROM keeps the sheet's rule, which the sheet marks as a guess; nothing pinned
+writes a value that differs from the ROM byte.
+
+**Only the plain MMC1 boards.** SOROM, SUROM, SXROM and SZROM, which bank PRG
+RAM or more PRG through the CHR registers, are not modelled, so a 512 KB MMC1
+cartridge reads only its first 256 KB, as the PRG register's four bits reach.
+PRG RAM is whatever the header says, repeated through `$6000` to `$7FFF`.
+Bit 4 of the PRG register switches it off (the MMC1B's behaviour; the MMC1A has
+no such bit).
+
+**A file smaller than the registers can name wraps.** A bank number is taken
+modulo the banks in the file, and a size that is not a whole bank (a NES 2.0
+exponent size) is padded to one by repeating its bytes, so no register value
+reads outside the file. A real board's chips would show open bus or mirrors;
+which is board by board and no pinned file depends on it.

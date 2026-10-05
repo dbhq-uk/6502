@@ -32,6 +32,10 @@ public sealed class TestMapper : IMapper
     {
     }
 
+    public void Reset(bool power)
+    {
+    }
+
     public void ClearPrgRam()
     {
     }
