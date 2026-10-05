@@ -52,6 +52,26 @@ public interface IMapper
     void CpuCycle();
 
     /// <summary>
+    /// True when the board needs <see cref="PpuAddressChanged"/>: false lets the PPU skip the call,
+    /// about 90 a line while it renders. It must not change after the board is made. A board that
+    /// does not say is told, so leaving it out is never wrong, only slower.
+    /// </summary>
+    bool WatchesPpuAddresses => true;
+
+    /// <summary>
+    /// True when the board needs <see cref="CpuCycle"/>: false lets the bus skip the call each
+    /// cycle. It must not change after the board is made. A board that does not say is called.
+    /// </summary>
+    bool CountsCpuCycles => true;
+
+    /// <summary>
+    /// True when the board can ever hold the IRQ line: false lets the bus skip reading
+    /// <see cref="Irq"/> each cycle. It must not change after the board is made. A board that does
+    /// not say is read.
+    /// </summary>
+    bool CanInterrupt => true;
+
+    /// <summary>
     /// Puts the board's registers where a switch-on or the reset button leaves them. With
     /// <paramref name="power"/> true (the console is switched on) every register goes to its
     /// power-on value, and so does CHR RAM, which a real board's RAM loses with the power. With

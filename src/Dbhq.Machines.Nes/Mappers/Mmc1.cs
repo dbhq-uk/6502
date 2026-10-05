@@ -45,6 +45,9 @@ public sealed class Mmc1 : Board
     }
 
     /// <inheritdoc />
+    public override bool CountsCpuCycles => true;
+
+    /// <inheritdoc />
     public override void CpuCycle()
     {
         if (_sinceWrite < 2)

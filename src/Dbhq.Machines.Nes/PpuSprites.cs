@@ -123,7 +123,7 @@ public sealed partial class Ppu
 
                 // The slot's first fetch is a garbage nametable one (ppu.md 7), so A12 falls here
                 // between two slots' pattern fetches; the second garbage fetch changes nothing.
-                _mapper.PpuAddressChanged((ushort)(0x2000 | (_v & 0x0FFF)), CpuCycle);
+                Fetching((ushort)(0x2000 | (_v & 0x0FFF)));
                 break;
 
             case 1:
@@ -165,7 +165,7 @@ public sealed partial class Ppu
                     _spriteAddress = (ushort)(((_fetchTile & 1) << 12) | (tile << 4) | (row & 7));
                 }
 
-                _mapper.PpuAddressChanged(_spriteAddress, CpuCycle);
+                Fetching(_spriteAddress);
                 break;
             }
 
@@ -174,7 +174,7 @@ public sealed partial class Ppu
                 break;
 
             case 6:
-                _mapper.PpuAddressChanged((ushort)(_spriteAddress + 8), CpuCycle);
+                Fetching((ushort)(_spriteAddress + 8));
                 break;
 
             default:

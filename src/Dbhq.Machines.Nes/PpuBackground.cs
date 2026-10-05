@@ -41,7 +41,7 @@ public sealed partial class Ppu
 
             case 5:
                 _patternAddress = (ushort)(((_ctrl & 0x10) << 8) | (_nametableByte << 4) | ((_v >> 12) & 7));
-                _mapper.PpuAddressChanged(_patternAddress, CpuCycle);
+                Fetching(_patternAddress);
                 break;
 
             case 6:
@@ -49,7 +49,7 @@ public sealed partial class Ppu
                 break;
 
             case 7:
-                _mapper.PpuAddressChanged((ushort)(_patternAddress + 8), CpuCycle);
+                Fetching((ushort)(_patternAddress + 8));
                 break;
 
             case 0:

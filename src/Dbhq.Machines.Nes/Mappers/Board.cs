@@ -137,6 +137,18 @@ public abstract class Board : IMapper
     }
 
     /// <inheritdoc />
+    /// <remarks>False here: a board that watches overrides <see cref="PpuAddressChanged"/> and this.</remarks>
+    public virtual bool WatchesPpuAddresses => false;
+
+    /// <inheritdoc />
+    /// <remarks>False here: a board that counts overrides <see cref="CpuCycle"/> and this.</remarks>
+    public virtual bool CountsCpuCycles => false;
+
+    /// <inheritdoc />
+    /// <remarks>False here: a board with an IRQ overrides <see cref="Irq"/> and this.</remarks>
+    public virtual bool CanInterrupt => false;
+
+    /// <inheritdoc />
     public virtual void Reset(bool power)
     {
         if (power && _chrIsRam)

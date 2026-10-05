@@ -79,6 +79,15 @@ public sealed class NesBus : IBus
     // denominator it holds.
     private int _dotAccumulator;
 
+    // The accumulator worked out once for each value it can hold, 0 to the denominator less one:
+    // the dots a cycle starting there runs, and the value it leaves. A cycle then divides nothing.
+    private readonly int[] _dotsFrom;
+    private readonly int[] _accumulatorAfter;
+
+    // What the board said it needs, asked once: the per-cycle call, and its IRQ line read.
+    private readonly bool _mapperCountsCycles;
+    private readonly bool _mapperCanInterrupt;
+
     private long _cycles;
     private long _ppuDots;
 
@@ -112,6 +121,15 @@ public sealed class NesBus : IBus
         int sampleRate = (options ?? new NesOptions()).SampleRate;
         _sound = new SampleBuffer(sampleRate, region.CpuHz, Math.Max(1, sampleRate / 4));
         _dmcRepeatsHaltedRead = region.DmcDmaRepeatsHaltedRead;
+        _mapperCountsCycles = _mapper.CountsCpuCycles;
+        _mapperCanInterrupt = _mapper.CanInterrupt;
+        _dotsFrom = new int[region.DotsDenominator];
+        _accumulatorAfter = new int[region.DotsDenominator];
+        for (int held = 0; held < region.DotsDenominator; held++)
+        {
+            _dotsFrom[held] = (held + region.DotsNumerator) / region.DotsDenominator;
+            _accumulatorAfter[held] = (held + region.DotsNumerator) % region.DotsDenominator;
+        }
     }
 
     /// <summary>The PPU, whose registers sit at <c>$2000</c> to <c>$3FFF</c>.</summary>
@@ -270,11 +288,10 @@ public sealed class NesBus : IBus
 
         // The lines as the cycle begins: a change made during this cycle is the CPU's next cycle's.
         bool nmi = _ppu.Nmi;
-        bool irq = _apu.Irq || _mapper.Irq;
+        bool irq = _apu.Irq || (_mapperCanInterrupt && _mapper.Irq);
 
-        _dotAccumulator += Region.DotsNumerator;
-        int dots = _dotAccumulator / Region.DotsDenominator;
-        _dotAccumulator %= Region.DotsDenominator;
+        int dots = _dotsFrom[_dotAccumulator];
+        _dotAccumulator = _accumulatorAfter[_dotAccumulator];
         int before = Math.Min(DotsBeforeAccess, dots);
         for (int i = 0; i < before; i++)
         {
@@ -283,7 +300,10 @@ public sealed class NesBus : IBus
 
         _apu.Tick();
         _sound.Add(_apu.Output);
-        _mapper.CpuCycle();
+        if (_mapperCountsCycles)
+        {
+            _mapper.CpuCycle();
+        }
 
         if (write)
         {

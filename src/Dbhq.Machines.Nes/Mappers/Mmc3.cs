@@ -79,6 +79,12 @@ public sealed class Mmc3 : Board
     public override bool Irq => _irq;
 
     /// <inheritdoc />
+    public override bool CanInterrupt => true;
+
+    /// <inheritdoc />
+    public override bool WatchesPpuAddresses => true;
+
+    /// <inheritdoc />
     public override void PpuAddressChanged(ushort address, long cpuCycle)
     {
         if ((address & 0x1000) == 0)

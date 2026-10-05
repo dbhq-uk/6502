@@ -105,6 +105,9 @@ public sealed partial class Ppu
 
     private readonly Region _region;
     private readonly IMapper _mapper;
+
+    // Whether the board wants the addresses on the PPU's bus, asked once (IMapper.WatchesPpuAddresses).
+    private readonly bool _watchesAddresses;
     private readonly int _preRenderLine;
     private readonly int _lines;
     private readonly bool _oddFrameSkipsADot;
@@ -202,6 +205,7 @@ public sealed partial class Ppu
         ArgumentNullException.ThrowIfNull(mapper);
         _region = region;
         _mapper = mapper;
+        _watchesAddresses = mapper.WatchesPpuAddresses;
         _preRenderLine = region.PreRenderLine;
         _lines = region.Lines;
         _oddFrameSkipsADot = region.OddFrameSkipsADot;
@@ -729,12 +733,21 @@ public sealed partial class Ppu
     // palette ones too: A12 is bit 12 of any of them, so $3F00 is A12 high (ppu.md 6, task 11).
     private void Report(ushort address)
     {
-        if (Rendering)
+        if (!_watchesAddresses || Rendering)
         {
             return;
         }
 
         _mapper.PpuAddressChanged((ushort)(address & 0x3FFF), CpuCycle);
+    }
+
+    // Tells the board of an address the rendering fetches put on the PPU's bus, if it watches.
+    private void Fetching(ushort address)
+    {
+        if (_watchesAddresses)
+        {
+            _mapper.PpuAddressChanged(address, CpuCycle);
+        }
     }
 
     private void SetMask(byte value)

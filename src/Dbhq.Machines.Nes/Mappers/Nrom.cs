@@ -17,6 +17,12 @@ public sealed class Nrom : IMapper
     private readonly byte[] _chr;
     private readonly bool _chrIsRam;
 
+    // Each memory's length less one when it is a power of two, as every real NROM's is, so an
+    // access masks instead of dividing; -1 for any other length, which takes the remainder.
+    private readonly int _prgMask;
+    private readonly int _chrMask;
+    private readonly int _prgRamMask;
+
     /// <summary>A board from a parsed cartridge. A CHR RAM is the board's own, so each board starts with it clear.</summary>
     internal Nrom(Cartridge cartridge)
     {
@@ -25,6 +31,9 @@ public sealed class Nrom : IMapper
         _chr = _chrIsRam ? new byte[cartridge.ChrRamSize] : cartridge.Chr;
         PrgRam = new byte[cartridge.PrgRamSize];
         Mirroring = cartridge.Mirroring;
+        _prgMask = MaskFor(_prg.Length);
+        _chrMask = MaskFor(_chr.Length);
+        _prgRamMask = MaskFor(PrgRam.Length);
     }
 
     /// <inheritdoc />
@@ -41,12 +50,12 @@ public sealed class Nrom : IMapper
     {
         if (address >= 0x8000)
         {
-            return _prg[(address - 0x8000) % _prg.Length];
+            return _prg[Wrap(address - 0x8000, _prgMask, _prg.Length)];
         }
 
         if (address >= 0x6000 && PrgRam.Length > 0)
         {
-            return PrgRam[(address - 0x6000) % PrgRam.Length];
+            return PrgRam[Wrap(address - 0x6000, _prgRamMask, PrgRam.Length)];
         }
 
         return openBus;
@@ -57,14 +66,14 @@ public sealed class Nrom : IMapper
     {
         if (address is >= 0x6000 and < 0x8000 && PrgRam.Length > 0)
         {
-            PrgRam[(address - 0x6000) % PrgRam.Length] = value;
+            PrgRam[Wrap(address - 0x6000, _prgRamMask, PrgRam.Length)] = value;
         }
     }
 
     /// <inheritdoc />
     public byte PpuRead(ushort address)
     {
-        return _chr.Length == 0 ? (byte)0 : _chr[(address & 0x1FFF) % _chr.Length];
+        return _chr.Length == 0 ? (byte)0 : _chr[Wrap(address & 0x1FFF, _chrMask, _chr.Length)];
     }
 
     /// <inheritdoc />
@@ -72,7 +81,7 @@ public sealed class Nrom : IMapper
     {
         if (_chrIsRam && _chr.Length > 0)
         {
-            _chr[(address & 0x1FFF) % _chr.Length] = value;
+            _chr[Wrap(address & 0x1FFF, _chrMask, _chr.Length)] = value;
         }
     }
 
@@ -85,6 +94,15 @@ public sealed class Nrom : IMapper
     public void CpuCycle()
     {
     }
+
+    /// <inheritdoc />
+    public bool WatchesPpuAddresses => false;
+
+    /// <inheritdoc />
+    public bool CountsCpuCycles => false;
+
+    /// <inheritdoc />
+    public bool CanInterrupt => false;
 
     /// <inheritdoc />
     public void Reset(bool power)
@@ -100,4 +118,10 @@ public sealed class Nrom : IMapper
     {
         Array.Clear(PrgRam);
     }
+
+    // The length less one for a power of two, else -1 (and -1 for an empty memory, never read).
+    private static int MaskFor(int length) => length > 0 && System.Numerics.BitOperations.IsPow2(length) ? length - 1 : -1;
+
+    // An offset into a memory of the given length, repeating it: the same as the remainder.
+    private static int Wrap(int offset, int mask, int length) => mask >= 0 ? offset & mask : offset % length;
 }
