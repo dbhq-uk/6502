@@ -419,13 +419,20 @@ test('copper.json records the verdicts its figures give against the plan\'s copp
   assert.match(copper.thresholds.nets, /at least 8 ICs/);
 });
 
-test('copper.json passes the plan\'s coverage and drills rows; the nets row is recorded as measured', () => {
+test('copper.json passes the plan\'s coverage and drills rows, and its nets row stays the FAIL the plan\'s revision records', () => {
   assert.equal(copper.verdicts.coverage, 'pass');
   assert.equal(copper.verdicts.drillsInCopper, 'pass');
-  // The nets row is the held-out test: run once, on 5 October 2026, after the method was fixed. Its verdict is
-  // whatever the figures give (the test above), and is not asserted to pass here: see the journal.
-  assert.ok(['pass', 'fail'].includes(copper.verdicts.nets));
-  assert.ok(copper.nets.chips >= COPPER_ROWS.chips, 'at least 8 ICs went into the nets check');
+  // The plan's Known nets row, revised on 5 Oct 2026 after task 4's figures were seen (the controller's ruling after
+  // review): task 4's result is FAIL, kept as measured (10 ICs: GND 1 of 10 pins in the largest net, +5V 2 of 10, a GND
+  // and a +5V pin in one net), and the map is to look at, its connections not verified. A re-run that changes this
+  // verdict must change that revision, the journal and every sentence that describes the copper, so it is pinned here.
+  assert.equal(copper.verdicts.nets, 'fail');
+  assert.deepEqual([copper.nets.chips, copper.nets.gnd, copper.nets.vcc, copper.nets.touching],
+    [10, { pins: 10, inLargest: 1 }, { pins: 10, inLargest: 2 }, true]);
+  const plan = fs.readFileSync(path.join(REPO_ROOT, 'docs', 'superpowers', 'plans', '2026-10-05-nes-models.md'), 'utf8');
+  const row = plan.split('\n').find((l) => l.startsWith('  | Known nets |')) ?? '';
+  assert.match(row, /Revised on 5 Oct 2026, after task 4's figures were seen/);
+  assert.match(row, /\*\*FAIL\*\* \(10 ICs: GND 1 of 10 pins in the largest net, \+5V 2 of 10/);
 });
 
 test('ic-table.json gives each IC its GND and +5V pins, each pinout with its source', () => {

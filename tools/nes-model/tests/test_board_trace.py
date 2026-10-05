@@ -206,6 +206,11 @@ def test_the_nets_are_found_apart_and_joined_through_the_via(traced):
     assert n['gnd'] == {'pins': 3, 'inLargest': 3}
     assert n['vcc'] == {'pins': 2, 'inLargest': 2}
     assert n['touching'] is False
+    # each pin's net is written as a plain label, the face and the piece's number there
+    import re
+    for k in ('gnd', 'vcc'):
+        for ref, net in n['pinNets'][k]:
+            assert net is None or re.fullmatch(r'(top|bottom):[0-9]+', net), (ref, net)
     # without the via, the third GND pad is on its own
     n = board_trace.nets_check(t['copper'], b['copper'], [], chips)
     assert n['gnd'] == {'pins': 3, 'inLargest': 2}

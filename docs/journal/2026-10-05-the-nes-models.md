@@ -1305,3 +1305,78 @@ SHA-256 changed, an IC's GND pin changed and the licence's name taken out of
 `NOTICE.md`, by hand, four failed. `npm test` (with `results.json` copied in
 for the run and removed after): tests 323, pass 322, fail 0, todo 1 (the BBC
 Micro's). The floors are 322 in both workflows.
+
+### After review, the same day: the record made honest
+
+Nothing in the trace, the map or any figure was changed in this round. The
+review compared all 20 GND and +5V pins with the KiCad redrawing's netlist:
+the nets check itself is sound (the right pins, the right way round), and
+the trace is poor. **The controller's ruling, recorded as such:** the nets
+row stays FAILED on record; the track map is accepted as traced to look at,
+its connectivity not verified, and every page sentence that describes the
+copper must say so; a better re-trace needs a new check fixed before it runs
+and is an open item in the plan's Deferred list, not done now. The existing
+nets check is no longer held out, since its failure has now been diagnosed.
+The plan's Known nets row, task 4's steps 3 and 5, task 7's interface and
+the Deferred list carry the dated revision.
+
+**The diagnosis above was incomplete.** It blamed the rim rule and thin
+tracks on the solder side. The review found more. I checked the piece's
+area (268.8 square mm, the piece U6's GND pin sits on, from the diagnosis
+script) and the rim-off figures by running them; the rest is the review's
+reading of the overlays and the redrawing:
+
+- The short: a single piece of copper on the component side, 269 square mm,
+  joins about 20 pads across U6's lower row and both rows of U1. U6's GND
+  pin sits on it, and the chain is how a GND pin and a +5V pin come to share a
+  net.
+- Missed: whole buses of fine tracks, and the diagonal hatched pours round
+  the video RAM (U4). The power pins' own tracks, 1.25 to 1.5 mm wide, and
+  their pours are partly missed too. On the solder side, wide tracks no lighter
+  than the laminate are not found, not only thin ones.
+- With the rim rule turned off (a scratch script that makes `keep_off_rims`
+  return its input and writes nothing; run on 5 October 2026 with the same
+  inputs) the check still fails: GND 3 of 10 pins in the largest net, +5V 5 of
+  10, still touching (coverage 50.9 and 40.0 per cent). So the rim rule is not
+  the whole cause.
+
+**Coverage, every reading I saw.** The `--look` runs printed each face's
+copper share. In order, the component side read 59.8, 59.8, 51.8 and 50.9
+per cent (the solder side 40.0 each time), then 45.8 (solder side 31.2) on
+the run that finished at 19:15:08 UTC, the first with the rim rule in; the
+method was fixed at 19:15:51. So the coverage row was over its 50 per cent
+limit on the component side before the rim rule went in, and the rim rule
+that brought it under is the same rule this section blames, in part, for the
+nets failing. The coverage pass does not show the trace is right: merges
+(the 269 square mm piece) and misses (buses, hatched pours) partly cancel in
+a share of the board.
+
+**The made-up board does not predict the scan.** The tests' board has no
+hatched pour, no dense bus, no track shown only by its edges and no thermal
+spoke, so its intersection over union of 0.995 says nothing about the real
+scan. Dan should see the map against the scan before task 7 shows it.
+
+**The script's hash.** The copy fixed before the nets run had SHA-256
+`d49305fe68694f2cc14c00d5b072a19d8a7c6fe289653ab23fe4e50a4fb78801`. The
+copy committed with task 4 has
+`e368c877385d92679485a740d4782bf44d3e003e90c56ff0bc40a59d48c5845c`. The
+fixed copy was not kept. The statement that the two differ only by the
+docstring and the rim's output field rests on the committed code reproducing
+every recorded figure, which it does: run again it prints the same lines and
+writes the same map, byte for byte.
+
+**One output change.** `copper.json`'s `pinNets` stored each net as Python's
+text for a tuple, such as `('b', 795)`. `board_trace.py` now writes a plain
+label, `bottom:795`, and was run once to rewrite the file (`cd
+tools/nes-model && NES_MODEL_INPUTS=/tmp/nes-inputs nice -n 10
+/tmp/nesvenv/bin/python board_trace.py --map-ppm 10`): it printed the same
+seven lines as before; the map's SHA-256
+(`f78d9a5408de8227e9abd9603d5f461d3671d6ba3c9c7d9db4434e612b76144e`) and
+size (144,774 bytes) are unchanged; and every entry of `copper.json` but
+`pinNets` is identical, the labels mapping one to one.
+
+`NOTICE.md` and the photographs' README now say the copper is traced to look
+at, its connectivity not verified. The site test that let the nets verdict
+be either value is replaced by one that pins it to FAIL with its figures and
+reads the plan's revision; with the verdict set to pass by hand, and with
+the revision's words taken out of the plan by hand, it failed.

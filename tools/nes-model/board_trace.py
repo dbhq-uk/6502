@@ -568,7 +568,10 @@ def nets_check(top, bottom, drills, chips):
             counts[n] = counts.get(n, 0) + 1
         out[k] = {'pins': len(pins[k]), 'inLargest': max(counts.values()) if counts else 0}
     out['touching'] = bool(nets['gnd'] & nets['vcc'])
-    out['pinNets'] = {k: [[ref, None if n is None else str(u.find(n))] for ref, n in pins[k]] for k in pins}
+    def label(n):
+        face, piece = u.find(n)
+        return f"{'top' if face == 't' else 'bottom'}:{piece}"
+    out['pinNets'] = {k: [[ref, None if n is None else label(n)] for ref, n in pins[k]] for k in pins}
     return out
 
 

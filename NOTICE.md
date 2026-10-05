@@ -91,6 +91,8 @@ above covers it too. The datasheet itself is not in the repository.
 faces of the NES's main board, NES-CPU-10, and its printed legend, as one
 lossless WebP, 10 pixels to the millimetre, edge to edge in the board frame.
 Red is the component side's copper, green the solder side's, blue the print.
+The copper is traced to look at: its connectivity is not verified (the
+check on its known nets failed, 5 October 2026).
 It is ours in the sense that our code traced it (`tools/nes-model/board_trace.py`,
 5 October 2026), but **the map is traced from OpenTendo's scans**, so it is a
 derivative of them and is not MIT.

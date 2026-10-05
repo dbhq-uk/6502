@@ -169,6 +169,7 @@ Hardware License (www.tapr.org/OHL).
 |---|---|
 | Made by | `tools/nes-model/board_trace.py` on 5 October 2026, from the full-size scans, in the board frame of `tools/nes-model/data/frame.json`. Its `README.md` says how to run it; `tools/nes-model/data/copper.json` holds the map's size, bytes and SHA-256 and the checks on it; the journal for 5 October 2026 has the figures |
 | This copy | 1959 by 1194 pixels, 10 pixels to the millimetre, lossless, covering the board edge to edge; each channel 255 or 0 |
+| Connections | The copper is traced to look at: its connectivity is not verified (the check on its known nets failed, 5 October 2026) |
 | Terms | The TAPR Open Hardware License's, credited to OpenTendo and its authors; `NOTICE.md` says what is derived from the scans |
 
 The build does not run the analysis, and nothing in the tests or the build
