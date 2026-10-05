@@ -20,7 +20,7 @@
 // "A" tapped on the on-screen keys alone, SHIFT latched for each quote, prints A;
 // the sound turns on and off without an error.
 //
-// Then the tape. Each damaged or unsupported file in BAD_TAPES, built here from
+// Then the tape. Each damaged, unsupported or mistaken file in BAD_TAPES, built here from
 // bytes, goes in through the file input and is refused in the machine's reader's
 // own words, with the machine still running. Then a program is typed, saved with
 // the OS's own SAVE onto a blank tape, Save tape downloads it, the program is
@@ -72,6 +72,13 @@ export const BAD_TAPES = [
     bytes: () => uef({}, chunk(0x0117, 0x2c, 0x01)),
     says: "Chunk &0117 at offset 12 sets the data encoding to 300, and only 1200 baud is loaded (the Electron's ULA is a fixed 1200 baud receiver).",
     source: ['sets the data encoding to {baud}, and only 1200 baud is loaded (the Electron\'s ULA is a fixed 1200 baud receiver)', 'Chunk &{id:X4} at offset {at} {why}.'],
+  },
+  {
+    // Named .uef, and not a UEF at all: some text with no "UEF File!" at its start.
+    name: 'not-a-tape.uef',
+    bytes: () => Uint8Array.from([...'These are notes, not a tape.'].map((c) => c.charCodeAt(0))),
+    says: 'This is not a UEF: the file does not start with "UEF File!" and a zero byte.',
+    source: ['This is not a UEF: the file does not start with \\"UEF File!\\" and a zero byte.'],
   },
   {
     name: 'version-1.uef',
@@ -168,12 +175,18 @@ async function run({ browser, watch, problems, origin }) {
     for (let i = 0; i < d.length; i += 4) if (d[i] + d[i + 1] + d[i + 2] > 0) lit++;
     return { lit, size: `${c.width}x${c.height}`, shown: `${c.clientWidth}x${c.clientHeight}`, frames: Number(document.querySelector('[data-electron]').dataset.frames) };
   });
+  const ta = Date.now();
   const a = await drawn();
   await page.waitForTimeout(1000);
   const b = await drawn();
-  console.log(`electron: canvas ${a.size}, shown at ${a.shown}, ${a.lit} pixels lit; frames ${a.frames} then ${b.frames} a second later`);
+  const elapsed = Date.now() - ta;
+  // The Electron's Frames counts whole frames, 25 a second (it moves at the end of the odd
+  // field), where the BBC Micro's counts fields, 50 a second. The floor is 40% of 25 frames a
+  // second over the time that really passed, as the BBC Micro's is 40% of 50 fields.
+  const floor = Math.floor(0.4 * 25 * (elapsed / 1000));
+  console.log(`electron: canvas ${a.size}, shown at ${a.shown}, ${a.lit} pixels lit; frames ${a.frames} then ${b.frames} ${elapsed} ms later (at least ${floor} wanted)`);
   if (a.lit < 500) problems.push(`electron: the canvas is blank (${a.lit} pixels lit)`);
-  if (!(b.frames > a.frames + 20)) problems.push(`electron: the picture is not being redrawn (frames ${a.frames} then ${b.frames})`);
+  if (!(b.frames - a.frames >= floor)) problems.push(`electron: the picture is not being redrawn (frames ${a.frames} then ${b.frames} in ${elapsed} ms, under ${floor})`);
   const [w, h] = a.shown.split('x').map(Number);
   if (Math.abs(w / h - 4 / 3) > 0.02) problems.push(`electron: the screen is shown ${a.shown}, not four by three`);
   const handover = await page.evaluate(() => {

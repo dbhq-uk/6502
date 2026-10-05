@@ -63,6 +63,8 @@ const SAMPLE_RATE = 48_000;
 // most a UEF may be (tests/electron.test.mjs holds the two equal). A larger file
 // is refused before it is read.
 export const MOST_BYTES = 4 * 1024 * 1024;
+const MOST_MIB = `${MOST_BYTES / (1024 * 1024)} MiB`;
+const NOT_RUNNING = 'A tape dropped on the page was not taken, because the Electron is not running.';
 
 for (const panel of document.querySelectorAll('[data-electron]')) prepare(panel);
 
@@ -88,12 +90,19 @@ function prepare(panel) {
   document.addEventListener('drop', (event) => {
     if (!event.dataTransfer?.files.length) return;
     event.preventDefault();
-    if (panel.putTape) panel.putTape(event.dataTransfer.files[0]);
+    const { files } = event.dataTransfer;
+    if (panel.putTape) panel.putTape(files[0], othersDropped(files));
     else if (panel.dataset.state === 'ready') say('Press Start first, then drop the tape on the page again.', 'ready');
     else if (panel.dataset.state === 'loading') say('The Electron is still loading. Drop the tape on the page again once it runs.', 'loading');
+    // The failure stays on the status line, and the drop is not lost without a word.
+    else if (panel.dataset.state === 'failed' && !status.textContent.endsWith(NOT_RUNNING)) status.textContent += ` ${NOT_RUNNING}`;
   });
   start.addEventListener('click', () => run(panel, say), { once: true });
 }
+
+// One tape at a time: with several files dropped, the first is tried and the tape line says so.
+// Exported for tests/electron.test.mjs.
+export const othersDropped = (files) => (files.length > 1 ? `Only the first of the ${files.length} files dropped, ${files[0].name}, was tried: drop one tape at a time.` : '');
 
 async function run(panel, say) {
   const start = panel.querySelector('[data-electron-start]');
@@ -363,19 +372,21 @@ export function tape(panel, electron) {
   // The ticket of the latest insert, blank tape or save (LATEST WINS above).
   let latest = 0;
 
-  const describe = (text) => {
+  const describeLine = (text) => {
     line.textContent = text;
     panel.dataset.tape = name ?? '';
     save.disabled = rewind.disabled = name === null;
   };
-  const put = async (chosen) => {
+  const put = async (chosen, others = '') => {
+    // What the visitor did with several files at once goes after whatever this one comes to.
+    const describe = (text) => describeLine(others ? `${text} ${others}` : text);
     if (!/\.uef$/i.test(chosen?.name ?? '')) {
       describe(`${chosen?.name ?? 'That'} is not a tape this recorder takes: it takes .uef tape images.`);
       return;
     }
     // Refused before it is read: a tape the reader takes is never larger.
     if (chosen.size > MOST_BYTES) {
-      describe(`${chosen.name} is ${chosen.size.toLocaleString('en-GB')} bytes, more than the 4 MiB a tape may be here, so it was not read.`);
+      describe(`${chosen.name} is ${chosen.size.toLocaleString('en-GB')} bytes, more than the ${MOST_MIB} a tape may be here, so it was not read.`);
       return;
     }
     const ticket = ++latest;
@@ -398,6 +409,7 @@ export function tape(panel, electron) {
     describe(`In the recorder: ${name}, rewound. Type LOAD "" or CHAIN "" and press RETURN to load the first program on it.`);
   };
 
+  const describe = describeLine;
   insert.addEventListener('click', () => file.click());
   file.addEventListener('change', () => {
     if (file.files.length > 0) put(file.files[0]);
@@ -419,6 +431,11 @@ export function tape(panel, electron) {
     describe(was ? `Rewound: the recording on ${name} now plays. Type LOAD "" and press RETURN to load it back.` : `Rewound: ${name} plays from the start.`);
   });
   save.addEventListener('click', () => {
+    // The OS is still writing a SAVE: taking the tape out now would keep half of it.
+    if (recording && electron.MotorOn()) {
+      describe('The Electron is still saving to the tape: wait for the prompt to come back, then press Save tape.');
+      return;
+    }
     latest++;
     const data = electron.EjectTape();
     if (!data) {

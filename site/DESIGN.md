@@ -154,6 +154,12 @@ the two pages then change apart: a fix to one panel cannot move the other.
 - **The symbols table and the program** use the site's prose table and code
   window, as the BBC Micro's do; the program's code window is the shared
   `bbc-program` block, since it is the same markup for both.
+- **A known limit, shared with the BBC Micro's page: Caps Lock on a Mac.** Both
+  pages send the PC's Caps Lock as one press of the machine's key at its key
+  down. macOS sends Caps Lock's key down only when the light goes on and its key
+  up when it goes off, so on a Mac every second press of Caps Lock reaches the
+  page as a key up and turns nothing over. The machine's own CAPS LK key on the
+  on-screen keys works every time. The BBC Micro's page is left as it is.
 - The new text colours are in the contrast table in `tests/design.test.mjs`.
 
 ## The imagery

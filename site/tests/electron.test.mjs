@@ -140,8 +140,12 @@ test('the symbol table says where each symbol is on a PC keyboard, from the key 
 
 const savedDocument = Object.getOwnPropertyDescriptor(globalThis, 'document');
 Object.defineProperty(globalThis, 'document', { configurable: true, writable: true, value: { querySelectorAll: () => [], hidden: false, addEventListener: () => {}, createElement: () => ({ click() {} }) } });
-const { keyboard, onScreenKeys, tape, MOST_BYTES } = await import(pathToFileURL(path.join(PUBLIC, 'electron.js')).href);
+const { keyboard, onScreenKeys, tape, MOST_BYTES, othersDropped } = await import(pathToFileURL(path.join(PUBLIC, 'electron.js')).href);
+// The recorder's Save tape test replaces these two; they are put back when the file is done.
+const { createObjectURL, revokeObjectURL } = URL;
 test.after(() => {
+  URL.createObjectURL = createObjectURL;
+  URL.revokeObjectURL = revokeObjectURL;
   if (savedDocument) Object.defineProperty(globalThis, 'document', savedDocument);
   else delete globalThis.document;
 });
@@ -289,13 +293,15 @@ function recorder(reasons = new Map()) {
   const panel = { dataset: {}, querySelector: (q) => els[q] };
   const calls = [];
   let ejected = null;
+  // The motor and the tape counter, as the test sets them.
+  const state = { motor: false, seconds: 0 };
   const electron = {
     InsertTape: (data) => { calls.push(['insert', data.length]); return reasons.get(data.length) ?? ''; },
     StartRecording: () => calls.push(['record']),
     Rewind: () => calls.push(['rewind']),
     EjectTape: () => { calls.push(['eject']); return ejected; },
-    MotorOn: () => false,
-    TapeSeconds: () => 0,
+    MotorOn: () => state.motor,
+    TapeSeconds: () => state.seconds,
   };
   const recorder = tape(panel, electron);
   const file = (name, bytes) => ({ name, size: bytes.length, arrayBuffer: async () => Uint8Array.from(bytes).buffer });
@@ -304,18 +310,21 @@ function recorder(reasons = new Map()) {
     els['[data-electron-file]'].on.change();
     await new Promise((r) => setTimeout(r, 0));
   };
-  return { els, panel, calls, file, choose, recorder, eject: (b) => { ejected = b; }, line: () => els['[data-electron-tape]'].textContent };
+  return { els, panel, calls, file, choose, recorder, state, eject: (b) => { ejected = b; }, line: () => els['[data-electron-tape]'].textContent };
 }
 
 test('the bad tapes the browser check uses are the reader\'s own cases, worded as UefReader.cs words them', () => {
   const source = fs.readFileSync(path.join(REPO_ROOT, 'src', 'Dbhq.Machines.Electron', 'Tape', 'UefReader.cs'), 'utf8');
-  assert.deepEqual(BAD_TAPES.map((t) => t.name), ['empty.uef', 'cut.uef', 'slow.uef', 'version-1.uef']);
+  assert.deepEqual(BAD_TAPES.map((t) => t.name), ['empty.uef', 'cut.uef', 'slow.uef', 'not-a-tape.uef', 'version-1.uef']);
   for (const t of BAD_TAPES) for (const part of t.source) assert.ok(source.includes(part), `UefReader.cs does not say "${part}"`);
-  // The four files are what they say: empty, gzip cut short, &0117 at 300 (&012C), major version 1.
-  const [empty, cut, slow, version] = BAD_TAPES.map((t) => t.bytes());
+  // The files are what they say: empty, gzip cut short, &0117 at 300 (&012C), not a UEF though
+  // named one, and major version 1.
+  const [empty, cut, slow, notTape, version] = BAD_TAPES.map((t) => t.bytes());
   assert.equal(empty.length, 0);
   assert.deepEqual([...cut.subarray(0, 2)], [0x1f, 0x8b]);
   assert.deepEqual([...slow.subarray(12)], [0x17, 0x01, 2, 0, 0, 0, 0x2c, 0x01]);
+  assert.ok(notTape.length >= 12, 'too short to reach the header check');
+  assert.notEqual(String.fromCharCode(...notTape.subarray(0, 9)), 'UEF File!');
   assert.deepEqual([...version.subarray(9, 12)], [0, 0, 1]);
 });
 
@@ -357,6 +366,16 @@ test('a file that is not a .uef, or is larger than the reader takes, is refused 
   assert.deepEqual(calls, []);
 });
 
+test('several files dropped at once: the first is tried, and the tape line says the others were left', async () => {
+  assert.equal(othersDropped([{ name: 'a.uef' }]), '');
+  const others = othersDropped([{ name: 'a.uef' }, { name: 'b.uef' }, { name: 'c.uef' }]);
+  assert.equal(others, 'Only the first of the 3 files dropped, a.uef, was tried: drop one tape at a time.');
+  const { panel, file, line } = recorder();
+  await panel.putTape(file('a.uef', [1, 2, 3]), others);
+  assert.equal(panel.dataset.tape, 'a.uef');
+  assert.ok(line().endsWith(` ${others}`), line());
+});
+
 test('the page\'s largest tape is the reader\'s own limit', () => {
   const source = fs.readFileSync(path.join(REPO_ROOT, 'src', 'Dbhq.Machines.Electron', 'Tape', 'UefReader.cs'), 'utf8');
   assert.match(source, /public const int MaxInflatedBytes = 4 \* 1024 \* 1024;/);
@@ -376,9 +395,9 @@ test('Blank tape records, Rewind plays it, and Save tape downloads it and puts i
   assert.match(line(), /nothing on the tape to save yet/);
   calls.length = 0;
   const made = [];
+  URL.createObjectURL = () => 'blob:x';
+  URL.revokeObjectURL = () => {};
   globalThis.document.createElement = () => { const a = { click() { made.push(a.download); } }; return a; };
-  globalThis.URL.createObjectURL = () => 'blob:x';
-  globalThis.URL.revokeObjectURL = () => {};
   eject(new Uint8Array([0x1f, 0x8b, 1, 2]));
   els['[data-electron-save]'].click();
   assert.deepEqual(made, ['tape.uef']);
@@ -389,11 +408,38 @@ test('Blank tape records, Rewind plays it, and Save tape downloads it and puts i
   assert.deepEqual(calls, [['rewind']]);
 });
 
-test('the motor line follows the machine: off, then on with the seconds of tape, then off', () => {
-  const { els, panel, recorder: r } = recorder();
-  assert.equal(typeof r.tick, 'function');
+test('Save tape while the OS is still writing a SAVE is refused with a sentence, and nothing is taken out', () => {
+  const { els, calls, state, eject, line } = recorder();
+  els['[data-electron-blank]'].click();
+  calls.length = 0;
+  state.motor = true;
+  eject(new Uint8Array([0x1f, 0x8b, 1, 2]));
+  els['[data-electron-save]'].click();
+  assert.deepEqual(calls, [], 'the half-written tape was taken out');
+  assert.equal(line(), 'The Electron is still saving to the tape: wait for the prompt to come back, then press Save tape.');
+});
+
+test('the motor line follows the machine: off, then on with the seconds of tape, then off after them', () => {
+  const { els, panel, state, recorder: r } = recorder();
+  const motor = () => els['[data-electron-motor]'].textContent;
   r.tick(0);
-  assert.equal(els['[data-electron-motor]'].textContent, 'Motor off.');
+  assert.equal(motor(), 'Motor off.');
+  assert.equal(panel.dataset.motor, 'off');
+  state.motor = true;
+  state.seconds = 2.34;
+  r.tick(100);
+  assert.equal(motor(), 'Motor on: 2.3 seconds of tape played.');
+  assert.equal(panel.dataset.motor, 'on');
+  // Under a quarter of a second later the line is left as it is; after, it moves on.
+  state.seconds = 2.5;
+  r.tick(200);
+  assert.equal(motor(), 'Motor on: 2.3 seconds of tape played.');
+  r.tick(400);
+  assert.equal(motor(), 'Motor on: 2.5 seconds of tape played.');
+  state.motor = false;
+  state.seconds = 5.56;
+  r.tick(420);
+  assert.equal(motor(), 'Motor off, after 5.6 seconds of tape played.');
   assert.equal(panel.dataset.motor, 'off');
 });
 
@@ -457,6 +503,13 @@ test('the four parts left out are the ones the design and tape.md s6 name, each 
   assert.deepEqual(NOT_MODELLED.map((m) => m.issue), [57, 58, 59, 60]);
   const parts = NOT_MODELLED.map((m) => m.part).join(' / ');
   for (const part of ['Plus 1', 'cartridge', 'Plus 3', 'disc', 'joystick', 'printer', '300 baud', 'non-standard tapes']) assert.ok(parts.includes(part), `${part} is not listed`);
+});
+
+test('the try-it program is the BBC Micro\'s, line for line, as the page says it is', () => {
+  const electron = loadTryIt('electron');
+  const bbc = loadTryIt('bbc-micro');
+  assert.deepEqual(electron.lines, bbc.lines);
+  assert.deepEqual(electron.shows, bbc.shows);
 });
 
 test('the try-it program is BASIC lines and what they print, read as the BBC Micro\'s is', () => {

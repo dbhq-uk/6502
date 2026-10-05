@@ -70,11 +70,11 @@ test('the home page\'s count is the registry\'s running count, computed and not 
   assert.match(read('/'), new RegExp(`>${previewed.running} of ${previewed.inScope}<`));
 });
 
-test('no workflow builds or deploys with a preview: only this test and the browser check use one', () => {
+test('no workflow builds or deploys with a preview or points the tests at another build: only this test and the browser check do', () => {
   for (const name of ['validate.yml', 'deploy-site.yml']) {
-    assert.doesNotMatch(fs.readFileSync(path.join(root, '.github', 'workflows', name), 'utf8'), /REGISTRY_PREVIEW|fixtures\/electron-running/, `${name} sets a preview`);
+    assert.doesNotMatch(fs.readFileSync(path.join(root, '.github', 'workflows', name), 'utf8'), /REGISTRY_PREVIEW|SITE_DIST|fixtures\/electron-running/, `${name} sets a preview`);
   }
-  assert.doesNotMatch(fs.readFileSync(path.join(process.cwd(), 'package.json'), 'utf8'), /REGISTRY_PREVIEW/);
+  assert.doesNotMatch(fs.readFileSync(path.join(process.cwd(), 'package.json'), 'utf8'), /REGISTRY_PREVIEW|SITE_DIST/);
 });
 
 test('the preview builds, and has the Electron\'s page, linked from the machines table', () => {
