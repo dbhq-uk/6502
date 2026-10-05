@@ -1,3 +1,5 @@
+using System.Runtime.CompilerServices;
+
 namespace Dbhq.Machines.Nes;
 
 /// <summary>
@@ -70,6 +72,9 @@ public sealed class Apu
     private int[] _actions;
     private int _stepIndex;
     private int _frameCycle;
+
+    // _steps[_stepIndex], the cycle of the next step, kept so the tick reads no array.
+    private int _nextStep;
     private int _resetIn;
 
     // The mode last written to $4017, which takes effect at the reset it schedules.
@@ -131,6 +136,7 @@ public sealed class Apu
     /// </remarks>
     public double Output
     {
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         get
         {
             if (_mixStale)
@@ -164,6 +170,7 @@ public sealed class Apu
         _actions = FourStepActions;
         _stepIndex = 0;
         _frameCycle = 0;
+        _nextStep = _steps[0];
         ScheduleResetAsIfWrittenBeforeTheFirstInstruction(fiveStep: false);
     }
 
@@ -192,7 +199,7 @@ public sealed class Apu
         {
             ResetSequence();
         }
-        else if (++_frameCycle == _steps[_stepIndex])
+        else if (++_frameCycle == _nextStep)
         {
             Step();
         }
@@ -338,6 +345,7 @@ public sealed class Apu
         _actions = _fiveStepMode ? FiveStepActions : FourStepActions;
         _stepIndex = 0;
         _frameCycle = 0;
+        _nextStep = _steps[0];
         if (_fiveStepMode)
         {
             ClockQuarterFrame();
@@ -373,6 +381,8 @@ public sealed class Apu
         {
             _stepIndex++;
         }
+
+        _nextStep = _steps[_stepIndex];
     }
 
     private void Remix()

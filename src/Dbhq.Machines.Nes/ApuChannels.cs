@@ -1,3 +1,5 @@
+using System.Runtime.CompilerServices;
+
 namespace Dbhq.Machines.Nes;
 
 /// <summary>
@@ -285,6 +287,7 @@ public sealed class PulseChannel
 
     // One APU cycle: the timer counts down, and on passing 0 reloads and moves the sequencer.
     // Returns true when the sequencer moved, which may change the output.
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal bool ClockTimer()
     {
         if (_timer == 0)
@@ -415,6 +418,7 @@ public sealed class TriangleChannel
     }
 
     // One CPU cycle. Returns true when the sequencer moved.
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal bool ClockTimer()
     {
         if (_timer == 0)
@@ -535,6 +539,7 @@ public sealed class NoiseChannel
     // One APU cycle. The table is in CPU cycles, all even, so the timer, a divider of period
     // reload + 1 APU cycles, reloads with half the entry less one.
     // Returns true when the register shifted.
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal bool ClockTimer()
     {
         if (_timer == 0)
@@ -738,6 +743,7 @@ public sealed class DmcChannel
     // One APU cycle, in the CPU cycle numbered cycle. The rates are in CPU cycles, all even, so the
     // timer, a divider of period reload + 1 APU cycles, reloads with half the rate less one.
     // Returns true when the output unit was clocked, which may change the level.
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal bool ClockTimer(long cycle)
     {
         if (_timer > 0)
@@ -746,6 +752,12 @@ public sealed class DmcChannel
             return false;
         }
 
+        return ClockOutput(cycle);
+    }
+
+    // The timer passed 0: it reloads and the output unit is clocked. Returns true.
+    private bool ClockOutput(long cycle)
+    {
         _timer = Reload(_rateIndex);
         if (!_silent)
         {

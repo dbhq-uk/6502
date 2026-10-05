@@ -1,3 +1,5 @@
+using System.Runtime.CompilerServices;
+
 namespace Dbhq.Machines.Nes;
 
 /// <summary>
@@ -154,14 +156,19 @@ public sealed class SampleBuffer
     /// ends a block: a change in the block's mean is placed where the block began, and each sample
     /// instant the block passes is finished and stored.
     /// </summary>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void Add(double level)
     {
         _blockSum += level;
-        if (--_blockLeft != 0)
+        if (--_blockLeft == 0)
         {
-            return;
+            EndBlock();
         }
+    }
 
+    // The eighth cycle of a block: its mean, a step if it moved, and the sample instants it passes.
+    private void EndBlock()
+    {
         double mean = _blockSum / BlockCycles;
         _blockSum = 0;
         _blockLeft = BlockCycles;
