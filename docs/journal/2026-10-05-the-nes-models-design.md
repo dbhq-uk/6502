@@ -105,3 +105,76 @@ And three decisions of the design's own:
   answer "Both inside and out", which could mean one console for both views or
   both consoles. A second question settled it. A clearer first question would
   have named the third option, both consoles, outright.
+
+## The plan, and what was run before it was written
+
+Dan approved the written spec, and the plan followed:
+[`../superpowers/plans/2026-10-05-nes-models.md`](../superpowers/plans/2026-10-05-nes-models.md).
+Every code block in it was run before it went in, twice: once in a scratch
+copy while it was written, and once more by taking the blocks back out of the
+plan's own text and applying them to a fresh copy of the repository at
+`ead017d`, as an implementer would. Nothing from either copy was committed. On
+the fresh copy, on 5 October 2026:
+
+- `/tmp/bbcvenv/bin/python -m pytest tools/nes-model/tests -q`: 22 passed
+  (the BBC Micro's shared tool code with the NES's names, and two new tests
+  for the KiCad reader).
+- `NES_MODEL_INPUTS=/tmp/nes-inputs python3 verify.py`: all 13 inputs
+  matched their recorded SHA-256, with the folder holding links to the
+  research's downloads.
+- `node --test` on the five new or extended site test files and the mirrors
+  test: 18 passed. Two of the input tests were also shown to fail, on a
+  changed hash in the fact sheet and on an original copied into `tools/`; the
+  test of task 0's recorded verdicts passed on a made-up `spike.json` whose
+  verdicts match its figures and failed on one whose do not.
+- `dotnet test tests/Dbhq.Machines.Nes.Tests -c Release`, warnings as errors,
+  in a scratch project with the repository's build settings: 19 passed.
+
+Read along the way, each with the command:
+
+- **The KiCad redrawing's outline is 196.252 by 118.700 mm**, and it names
+  every IC, from the plan's `kicad_outline_box` and `kicad_footprints` run on
+  the downloaded file. Its two 74HC368s carry the values "40H368 (CI)" and
+  "40H368 (CII)", as the scan's print does, which is the first evidence for
+  which buffer serves which controller port. The design was corrected to say
+  so; task 6 checks it against the nesdev wiki.
+- **Every licence was confirmed on Commons itself**, through its API's
+  `extmetadata` for each of the ten Commons files: public domain for Evan-Amos's
+  and the patent's, CC BY 4.0 for PantheraLeo1359531's. One date differs: the
+  NES-CPU-07 solder side's Exif says 15 July 2015 and Commons says 13 July.
+  The fact sheet now gives both.
+- **The nine Commons file URLs answer** (HTTP 206 on a one-byte range request
+  to each).
+
+Decisions taken while writing the plan, each with what it was chosen over:
+
+- **The scan's y scale comes from DIP row spacings on drill centres**, over
+  pad centroids. Every DIP on this board lies the same way, so pin pitch gives
+  only x; the BBC Micro's task 0 found solder centroids read row spacings
+  about 1 per cent wide, so the holes' rims are used, and the 600-mil and
+  300-mil chips are reported apart as a check on that bias.
+- **Task 0 has eight checks, not four.** The design's four become x, y and x
+  against y for the scale, the solder side, the PAL layout, the case's depth,
+  the case's height (no stop: the published 88.9 mm is the fallback, said on
+  the page), and the PAL front against the NTSC front (a stop for the PAL
+  models only).
+- **The counters' arithmetic is tested where it is used.** A C# test of a
+  wrapping counter would have needed a test-only setter; the wrap matters in
+  the page, which takes differences, so it is tested there.
+- **The sampler resets on a new machine.** A region change builds a new
+  machine whose counters start from zero, so a difference across it would show
+  a rate of billions. The sampler drops its last snapshot on `nes:start` and
+  `nes:region`, and divides by the time it measured, not the time it asked
+  for. Both are tested.
+- **`$4016` writes count on the CPU's row**, over the pads'. A write is the
+  strobe, on the CPU's own output pin; only reads pass through the 74HC368s.
+  The design was corrected.
+
+## Mistakes, while writing the plan
+
+- **The first C# test of the counter's wrap did nothing.** It held a loop that
+  broke at once and an assertion on two constants. Caught on reading it back
+  before the plan was written; the test was dropped and the wrap is tested in
+  the page's code, above.
+- **The first sampler design lived in the three.js module**, which node would
+  have had to load to test it. Moved to the plain module beside `accessRates`.

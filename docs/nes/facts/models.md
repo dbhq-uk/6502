@@ -36,10 +36,10 @@ Researched on 5 October 2026 for [the NES's models design](../../superpowers/spe
 | # | Source | Author, date | Licence, as stated | Size, view | Use |
 |---|---|---|---|---|---|
 | I1 | OpenTendo, https://github.com/Redherring32/OpenTendo , `Scans/NES-CPU-10_front_300dpi.png` and `Scans/NES-CPU-10_back_300dpi.png`, at commit `3bd0b0be5c9ed6fc6a36d9e458bc58d9976b2009` (the head of `master` on 5 October 2026; the scans arrived in `e3caa02cfcbfbd0d77504259277e5c60fe922b16`, "fix: file structure", 22 August 2024) | Added by Kamoteshake, August 2024; the scanner is not named | The repository's README: "Licensed under the TAPR Open Hardware License (www.tapr.org/OHL)". GitHub reports `NOASSERTION`. The scans state no licence of their own; that the README's covers them is inferred | 2376x1492 each, 300 dpi (about 11.81 px/mm); a **bare** NES-CPU-10, "©1987 Nintendo", with an "NTSC" sticker | The reference frame: outline, holes, pads, both copper faces, the print, which names the parts (CPU, PPU, SRAM (WRAM), SRAM (VRAM), 74LS373, 74LS139, 40H368 twice, CIC, 74HCU04) |
-| I2 | OpenTendo `Board Files/Motherboard.kicad_pcb`, same commit | Redherring32 and others, 2019 to 2025 | As I1 | KiCad 8, 10.95 MB | A redrawing of the front-loader's board ("almost 1:1 of the OEM NES") from a schematic of the NES-CPU-11. The research read its Edge.Cuts outline as 196.25 by 118.70 mm. A cross-check of the outline and the part places only |
+| I2 | OpenTendo `Board Files/Motherboard.kicad_pcb`, same commit | Redherring32 and others, 2019 to 2025 | As I1 | KiCad 8, 10.95 MB | A redrawing of the front-loader's board ("almost 1:1 of the OEM NES") from a schematic of the NES-CPU-11. Its Edge.Cuts outline is 196.252 by 118.700 mm, read on 5 October 2026 with the `kicad_outline_box` the models plan's task 0 adds to `tools/nes-model/common.py` (run in a scratch copy before the plan was written). It names U6 "RP2A03 CPU", U5 "RP2C02 PPU", U1 "6116 (WRAM)", U4 "6116 (VRAM)", U2 74HC373, U3 74HC139, U7 "40H368 (CI)", U8 "40H368 (CII)", U9 74LS04, U10 CIC, X1 21.477272 MHz, X2 4 MHz, P1 the 72-pin connector, P2 the expansion connector, P3 the RF modulator, P4 and P5 the controller inputs and P6 the power and reset input A cross-check of the outline and the part places only |
 | I3 | `File:Frontalansicht Mainboard NES NESE-001 HOF06378.png` | PantheraLeo1359531, 2 November 2022 | `{{self\|cc-by-4.0}}` (a Commons "Quality image") | 5462x3966, 76.8 MB; populated top side, background cut out; **NES-CPU-11, "PAL-EEC"** | The PAL parts and their markings: RP2A07A, RP2C07-0, two XRM6216-10 RAMs, CIC 3195A, MB74LS373, two MC74HC368N, SN74LS139N, SN74HCU04N, the ALPS RF modulator. About 21 px/mm from DIP pitch [from the research]. A 20 mm lens, so tall parts lean |
 | I4 | https://commons.wikimedia.org/wiki/File:Nintendo-NES-Mk1-Motherboard-Top.jpg | Evan-Amos, 15 July 2015 | `{{PD-self}}` | 4570x3330; populated top, flat; **NES-CPU-07**, "NTSC" sticker; the modulator's lid off | The NTSC parts and their markings: RP2C02G-0, RP2A03G, CIC 3193A, MB8416A RAMs, SN74LS373N. About 20.7 px/mm. Nikon D7100, 60 mm macro [from the Exif] |
-| I5 | `File:Nintendo-NES-Mk1-Motherboard-Bottom.jpg` | Evan-Amos, 15 July 2015 | `{{PD-self}}` | 5280x3690; populated, solder side, flat; NES-CPU-07 | The populated solder side: what is soldered where, as a check on I1's back |
+| I5 | `File:Nintendo-NES-Mk1-Motherboard-Bottom.jpg` | Evan-Amos, 15 July 2015 by the Exif (Commons gives 13 July) | `{{PD-self}}` | 5280x3690; populated, solder side, flat; NES-CPU-07 | The populated solder side: what is soldered where, as a check on I1's back |
 | I6 | `File:RP2A07A 20221102.png` | PantheraLeo1359531, 2022 | CC BY 4.0 | 1206x408 | The PAL CPU close up |
 | I7 | `File:Nintendo-Entertainment-System-NES-Motherboard-FL.jpg`, `-FR`, `-BL`, `-BR`, `-Bottom` | Evan-Amos, 2016 | `{{PD-self}}` | 3900 wide; oblique, populated; NTSC | Part heights, the modulator box's sides |
 | I8 | `File:Nintendo 10nes pal-a.jpg`, `File:Ricoh 2a07.jpg` | it:User:Leo72, 2011 | Public domain | 1600x1200 | PAL-A parts. Out of scope; not fetched |
@@ -68,22 +68,22 @@ Taken on 5 October 2026 with Dan; the design's decisions table has each with wha
 
 ## Downloaded for the work
 
-SHA-256 of the files the research downloaded on 5 October 2026 (kept at `~/dbhq-previews/nes-model-research/full/`, not committed: the scans state no licence of their own and the PAL originals are up to 93 MB). From task 0 every input is listed in `tools/nes-model/data/sources.json` with its URL, author, licence as stated, size and fetch date, and checked against its hash before it is read.
+SHA-256 of the files the research downloaded on 5 October 2026 (kept at `~/dbhq-previews/nes-model-research/full/`, I2 one folder up, not committed: the scans state no licence of their own and the PAL originals are up to 93 MB). From task 0 every input is listed in `tools/nes-model/data/sources.json` with its URL, author, licence as stated, size and fetch date, and checked against its hash before it is read.
 
-| # | File | Bytes | SHA-256 |
+| Id | File | Bytes | SHA-256 |
 |---|---|---|---|
 | O1 | `USD299726.pdf` | 140750 | `4c699b1b31a40ddf4a80f9827b7c927058dd54979acdd1988aa94c3060775f3d` |
-| O2 | `Nintendo-Entertainment-System-NES-Console-FL.jpg` | 2193817 | `53c4ff11da6ba56bc2d9d8138dd585d126e08fe22350e8e0363003f9ddb8ab3c` |
-| O2 | `Nintendo-Entertainment-System-NES-Console-BL.jpg` | 2269902 | `e068546c7b4ce5e2e5709c68b499bce9c7f5b2559e9b992650d74dc7e366be9d` |
-| O2 | `Nintendo-Entertainment-System-NES-Console-BR.jpg` | 2230258 | `0681170937ae3af9db3fc8898e155792e295dacb5cb73942f8d2371c8733907f` |
+| O2-FL | `Nintendo-Entertainment-System-NES-Console-FL.jpg` | 2193817 | `53c4ff11da6ba56bc2d9d8138dd585d126e08fe22350e8e0363003f9ddb8ab3c` |
+| O2-BL | `Nintendo-Entertainment-System-NES-Console-BL.jpg` | 2269902 | `e068546c7b4ce5e2e5709c68b499bce9c7f5b2559e9b992650d74dc7e366be9d` |
+| O2-BR | `Nintendo-Entertainment-System-NES-Console-BR.jpg` | 2230258 | `0681170937ae3af9db3fc8898e155792e295dacb5cb73942f8d2371c8733907f` |
 | O4 | `Geöffnetes_deutsches_NES_20221102_HOF06342_RAW-Export.png` | 92882699 | `3cf7eca8f43bafd3a8f341127d6c6f728acd2da3d2deb2464d93b66681b913d6` |
 | O5 | `Unterseite_NES_NESE-001_20221102_132229.jpg` | 3025854 | `a8e10ed2cf0148beccab8f7979f0a92497b01846df684e6c5260c56d4c9a4c27` |
-| I1 | `opentendo_NES-CPU-10_front_300dpi.png` | 6354680 | `fd41c714258a4d379d034eaf39cdcfcc7aab5273f4dafb74ff8517b55c88ab3a` |
-| I1 | `opentendo_NES-CPU-10_back_300dpi.png` | 6710399 | `fa15ea9e5a57c8621932fa4cbd8b8121feba82a746cc996627f95b6d12b8a0a5` |
-| I2 | `opentendo_Motherboard.kicad_pcb` (kept one folder up) | 10954333 | `9cce8323c9c18f0c583f99d1e07d7650f85858ca2599cbf52b2c75f384e8224a` |
+| I1-front | `opentendo_NES-CPU-10_front_300dpi.png` | 6354680 | `fd41c714258a4d379d034eaf39cdcfcc7aab5273f4dafb74ff8517b55c88ab3a` |
+| I1-back | `opentendo_NES-CPU-10_back_300dpi.png` | 6710399 | `fa15ea9e5a57c8621932fa4cbd8b8121feba82a746cc996627f95b6d12b8a0a5` |
+| I2 | `opentendo_Motherboard.kicad_pcb` | 10954333 | `9cce8323c9c18f0c583f99d1e07d7650f85858ca2599cbf52b2c75f384e8224a` |
 | I3 | `Frontalansicht_Mainboard_NES_NESE-001_HOF06378.png` | 76772853 | `e9f606535f4b01507a62f185ce38aa3403862bb82f434cc51f148a90088ea8cd` |
 | I4 | `Nintendo-NES-Mk1-Motherboard-Top.jpg` | 10715307 | `2158318ca6e7c913fce4220e8763dc8df4b37e70fea50cf29a1c975556a5b46c` |
 | I5 | `Nintendo-NES-Mk1-Motherboard-Bottom.jpg` | 9247611 | `64d52d1dbedfd123a56780def11821ef4157694e4d88d701924d567e2cb1ae10` |
 | I6 | `RP2A07A_20221102.png` | 2438824 | `99208c2054e674c68aa78942f2c784873b13463d7bd5f2d649ec3e96c7e68c72` |
 
-The two scans' sizes are the ones GitHub gives for those paths at the pinned commit (checked with `gh api` on 5 October 2026). Not yet fetched: O2's `-FR`, O3, O6, O8, I7. The task that first needs each fetches it and records it here and in `sources.json`.
+The two scans' sizes are the ones GitHub gives for those paths at the pinned commit (checked with `gh api` on 5 October 2026). Each id here is the id in `sources.json`: O2's corner photographs are O2-FL, O2-BL and O2-BR, and I1's two faces I1-front and I1-back. Not yet fetched: O2's `-FR`, O3, O6, O8, I7. The task that first needs each fetches it and records it here and in `sources.json`.

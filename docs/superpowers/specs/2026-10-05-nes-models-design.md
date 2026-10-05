@@ -116,12 +116,14 @@ apart by address, and the model shows them. `NesBus` gains one counter per
 | `NesChip` | Counts | Marks on the board |
 |---|---|---|
 | `Ppu` | reads and writes of `$2000-$3FFF`, OAM DMA's writes to `$2004` included | the PPU |
-| `Apu` | reads and writes of the sound and I/O registers, `$4000-$4015` and the `$4017` write | the CPU's legend row (the sound unit is on the CPU's die) |
-| `Pad1`, `Pad2` | reads of `$4016` and of `$4017` | the 74HC368 that buffers that port [inferring which buffer serves which port from the nesdev wiki; the fact sheet records it with its page before task 6 relies on it] |
+| `Apu` | reads and writes of the sound and I/O registers on the CPU's own die, `$4000-$4015`, and the writes to `$4016` (the controllers' strobe, the CPU's own output pin) and `$4017` (the frame counter) | the CPU's legend row (the sound unit is on the CPU's die) |
+| `Pad1`, `Pad2` | reads of `$4016` and of `$4017` | the 74HC368 printed "40H368(CI)" and the one printed "40H368(CII)" [from the board's print on the scan, and the same values in the KiCad redrawing; that CI and CII are controller ports one and two, and so `$4016` and `$4017`, is inferred from the names, and task 6 checks it against the nesdev wiki before relying on it] |
 
 `Peek` counts nothing and no cycle is added. The host gains `AccessCounts()`
 (wrapping counters, so a reader takes differences); `panel.nes` gains
-`accessCounts()`. Every quarter second the model marks each chip whose count
+`accessCounts()`, `running`, `region` (so a view loaded after a region change
+draws the region the page has now) and `reset()`, and the page announces
+`nes:start`, `nes:reset` and `nes:region`. Every quarter second the model marks each chip whose count
 moved, and the legend shows each counted chip's accesses per second, read from
 the same differences. The words say what a mark means: "read or written by the
 processor in the last quarter second", not "working". The legend says in words
@@ -209,9 +211,12 @@ recorded as crossed, and the plan is reconsidered; it is never tuned around
 
 The numbers are in the plan. The scan is 300 dots an inch, about 11.8 pixels
 a millimetre against the BBC Micro's 15.7, so its limits are looser in
-proportion. The scan's outline against the KiCad file's (196.25 by 118.70 mm,
-as the research read it) is recorded, not judged: the KiCad layout is a
-redrawing, "almost 1:1", not the original.
+proportion. The scan's outline against the KiCad file's (196.252 by 118.700
+mm, read from its Edge.Cuts on 5 October 2026 by the reader the plan's task 0
+adds) is recorded, not judged: the KiCad layout is a redrawing, "almost 1:1",
+not the original. Every DIP on this board lies the same way, so pin pitch
+gives the scan's x scale only; the y scale comes from the DIP row spacings on
+drill centres, and x against y is the check between them.
 
 ## Measured, typical, and known limits
 
