@@ -702,3 +702,131 @@ and reads each back bit for bit. The pad has no interlock in its wiring (`bus.md
 parity had three loops that undid each other. It was replaced with one. A test
 that asserted `$4015` reads 0 as a way to record the DMC gap was dropped: it
 would have broken at task 9 for no reason.
+
+## Task 8: the sound unit's pulses, triangle, noise and frame counter
+
+**Done.** `Apu` (`src/Dbhq.Machines.Nes/Apu.cs`) and its channels
+(`ApuChannels.cs`) replace the bus's stub. The bus ticks it once a cycle where
+the stub was, its frame IRQ drives the CPU's IRQ line from the same place as the
+NMI, a `$4015` read clears the flag while `Peek` does not, and `$4017` writes
+reach it (ruling B). New tests: `PulseTests` 48 rows, `TriangleTests` 18,
+`NoiseTests` 43, `FrameCounterTests` 40, `ApuTests` 10, four in `NesBusTests`,
+and 16 ROM rows in `BlarggTests`. The project passed 706 of 706 [`dotnet test
+tests/Dbhq.Machines.Nes.Tests -c Release`, 5 October 2026].
+
+**The ROMs.** Every pinned sound ROM that needs no DMC passes, first time:
+`apu_test` singles 1-len_ctr, 2-len_table, 3-irq_flag, 4-jitter, 5-len_timing
+and 6-irq_flag_timing on NTSC, and all ten of `pal_apu_tests` on PAL. Each was
+checked in its header first: the singles are NROM-256 with CHR ROM, the PAL ROMs
+NROM-128 with CHR RAM. Left out, with the reason: `apu_test` 7-dmc_basics and
+8-dmc_rates test the DMC, which is task 9's; the combined `apu_test.nes` is MMC1
+(128 KB of program), which is task 10's, so it belongs with task 12. The regions
+come from the readmes. `pal_apu_tests/readme.txt`: "These tests verify the PAL
+APU's frame sequencer timing. They have been tested on a PAL NES and all give a
+passing result." `apu_test/readme.txt` names no region, but its 6-irq_flag_timing
+says the flag "is set three times in a row 29831 clocks after writing $00 to
+$4017", the NTSC figure, so it runs on NTSC. The PAL ROMs report as the 2005 ROMs
+do, on the screen and in `$F8`, so they use the runner's screen helper. The
+task's instructions named 03.irq_flag, 07.irq_flag_timing and 08.irq_timing as
+`apu_test` ROMs; those are `pal_apu_tests`' names. `apu_test` has 3-irq_flag and
+6-irq_flag_timing, and no test of when the IRQ is taken.
+
+**The IRQ is taken as the cycle began, like the NMI, and the ROMs pin it.**
+Task 4 chose the start of the cycle for the NMI and applied it to the IRQ
+untested. `pal_apu_tests` 08.irq_timing times the IRQ handler to the cycle in two
+phases a cycle apart. With the line as the cycle began it passes; taken at the
+end of the cycle it fails code 2, "too soon"; taken one cycle later it fails code
+3, "too late". The other flag ROMs poll `$4015` with interrupts off, so they say
+nothing about it. A new `NesBusTests` theory pins the hand-over on both regions:
+the flag set in cycle N reaches `Cpu.Irq` in cycle N + 1.
+
+**Three rules the ROMs settled, each measured by taking it out.**
+- *A length write in the cycle before a half frame meets the clock.* The sheet
+  did not have this. `pal_apu_tests`' readme does: halt changes "occur after
+  clocking length, not before", and a reload "during length counter clocking" is
+  dropped when the counter is not 0. The unit clocks in the tick that begins a
+  cycle, so "during" is the cycle before. Without the rule 10.len_halt_timing
+  fails code 3 and 11.len_reload_timing code 4. `FrameCounterTests` has 16 rows
+  for it, and the 8 "cycle before" rows failed without it.
+- *The `$4017` delay depends on parity.* With a fixed 3, `apu_test` 4-jitter and
+  `pal_apu_tests` 04.clock_jitter both fail code 5, "odd jitter". With 3 and 4
+  swapped between the parities, everything passes. So the ROMs prove the parity
+  rule on both regions (the sheet's open item 1, the PAL delay, is closed) but
+  not which parity gets 3. The model gives 3 to an odd cycle, a put in the bus's
+  count, so the reset lands on a get and the steps on the puts the sheet's table
+  names. That stays a choice.
+- *A flag set in the cycle of a read is cleared by it.* The APU page says such a
+  read returns 1 and leaves the flag set. Applied to the last of the three sets,
+  `apu_test` 6-irq_flag_timing and `pal_apu_tests` 07.irq_flag_timing both fail
+  code 5, "last set too late". The three sets in a row are how the rule looks
+  from the CPU, and the model needs nothing more. Recorded in `apu.md` 9 and in
+  known differences.
+
+**Ruling I's index meaning is right.** The six entries of each frame counter
+list are the rows of `apu.md` 10: 4-step [0] a quarter, [1] a quarter and a
+half, [2] a quarter, [3] the IRQ flag, [4] a quarter, a half and the flag, [5]
+the flag and the wrap; 5-step [0] to [2] the same, [3] nothing, [4] a quarter and
+a half, [5] the wrap. `FrameCounterTests` reads every cycle from `Region`, over
+two whole frames, on both parities of the `$4017` write.
+
+**Where the brief and the sheet differed, the sheet won.**
+- The brief said the 4-step sequence's "fourth is the half and the IRQ". The
+  half frames are at steps [1] and [4], and the flag is set at [3], [4] and [5].
+- The brief asked for a test that periods 0 and 1 of the triangle are "silent as
+  the sheet says". The sheet says they give an ultrasonic wave and that the
+  model keeps it unless the resampler needs otherwise. The model runs them, a
+  step every CPU cycle or every second one, and the test checks that. Task 9
+  decides whether the resampler needs them halted.
+- The brief asked for the noise's "first 10 output bits listed in the sheet's
+  worked example". The example listed two register values, and from the power-on
+  seed of 1 the first fourteen output bits are 0 in both modes, so ten bits
+  cannot tell the modes apart. The worked example now lists sixteen register
+  values for each mode (they part at the tenth clock), and the tests check those
+  and the output bits.
+
+**Every table, against its page through the sheet.** The length table, all 32
+entries (`PulseTests` loads each on both pulses; `2-len_table` and
+`02.len_table` pass). The duty sequences, by worked example 0, which the sheet
+gained in task 1 and a test now reproduces. The noise periods, all 16 on each
+region, timed between shifts of the register, and entries 0, 7 and 15 typed from
+the sheet in their own test. The frame counter steps, by the ROMs. Of the plan's
+remembered numbers for these, the one that was wrong was the PAL frame counter's
+last step, 33253 to 33255 where the page gives 33252 to 33254, corrected in task
+1. Task 8 put the remembered figures back into `Region` for one run: 7 of the 10
+`pal_apu_tests` ROMs failed (04, 05, 06, 07, 08, 10 and 11), because the ROMs
+synchronise themselves from the frame IRQ. The noise periods, the length table
+and the NTSC steps held.
+
+**Power and reset.** At power the unit acts as if `$00` was written to `$4017`
+ten cycles before the first instruction (`apu.md` 10): that is cycle -2, an even
+one, so the sequence resets in cycle 2. At reset the last value written to
+`$4017` is written again the same way, the channels are disabled, the triangle
+returns to step 0 and the frame IRQ flag clears; the fork's `apu_reset` readme
+gives the last two, and its ROMs are task 12's.
+
+**The output.** `Apu.Output` is the sheet's non-linear mixer formula, with the
+DMC at 0, computed when read, so the tick pays nothing for it. Task 9 adds the
+DMC, decides how the sample buffer reads it and whether a lookup table is worth
+it: read every cycle it costs about 65 ns a cycle on the loaded machine below.
+
+**Speed.** The tick does a compare for the frame counter, a count for the
+triangle and, on odd cycles, a count for each pulse and the noise; it does not
+allocate. Alone, `Apu.Tick` took 11.3 to 16.3 ns a call over six runs of 100
+million, while an empty loop's iteration took 1.4 to 2.6 ns, on a machine with a
+load average of about 30 on 8 cores [a throwaway console program in `/tmp`
+calling `Tick` on a unit with every channel playing, 5 October 2026]. The whole
+machine natively was too noisy to compare on that machine (1.7 to 4.7 MHz from
+run to run with and without the tick), so the figure for task 9's re-run of the
+speed check should come from a quiet machine.
+
+**Mistakes.** The first run of the new tests against the empty skeleton hung:
+some tests waited in loops for a sequencer that never moved. The run was stopped
+after ten minutes, and every such loop now has a limit and fails instead
+(`ApuTesting.TickUntil`). The reset first wrote back the mode in force rather
+than the mode last written, which differs for the 3 or 4 cycles before a write
+takes effect; a test caught it. The red run, against a skeleton with every
+member present and doing nothing, was 144 failing and 76 passing of 220
+[`dotnet test ... --filter` on the five new classes and `NesBusTests`]; the new
+tests that passed against it were the ones that check nothing moves (a held
+triangle, a timer write that does not restart, ignored DMC registers, the typed
+noise entries, the output's range).

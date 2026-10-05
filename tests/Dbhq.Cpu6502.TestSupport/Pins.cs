@@ -61,6 +61,27 @@ public static class Pins
         ["sprite_overflow_tests/4.Obscure.nes"] = "aebf2199344321465ae0d8dcd81f6c528c7f661f31f1814711365b4e573a8263",
         ["sprite_overflow_tests/5.Emulator.nes"] = "cf994454219696de82794f0b84f2bd63458444d12a1171c85bba8697ab94acb4",
 
+        // The sound unit's length counters, frame counter and IRQ (task 8 of the NES plan). The
+        // apu_test singles 1 to 6 are NROM with the $6000 report, and run NTSC; 7 and 8 test the
+        // DMC and wait for task 9. pal_apu_tests is every ROM in the folder, NROM-128 with CHR RAM,
+        // reporting on the screen, and runs PAL.
+        ["apu_test/rom_singles/1-len_ctr.nes"] = "aacf86c1d773badd11392e54506a43a06a3dd0b67a4c255909d1daf770a4a1e2",
+        ["apu_test/rom_singles/2-len_table.nes"] = "c002ff1483b4dfb36a6eb004d49739cd58a2dff16e0bac167d5a7c12235caeeb",
+        ["apu_test/rom_singles/3-irq_flag.nes"] = "dd888551665937391a2d691b1f96d1858316dbfce4951306146e9e396367f079",
+        ["apu_test/rom_singles/4-jitter.nes"] = "bff573d72d0f134fe307f0bb8b968b8d2ffdb85e8aadad9c152839068d6db32a",
+        ["apu_test/rom_singles/5-len_timing.nes"] = "4d88f8cc0b21303dc151af4d0f4169d79284634a73082d7ea1ae5cfafedd1e46",
+        ["apu_test/rom_singles/6-irq_flag_timing.nes"] = "fc1daff82dd1a49c7c1242392ffbf1c6f44fb70156868582117f2a844cc4dffd",
+        ["pal_apu_tests/01.len_ctr.nes"] = "5e4a07738703232dfefce6a26f12da304f333008c60224b27e7fbadf4a7cdc0c",
+        ["pal_apu_tests/02.len_table.nes"] = "ac5537885469a85e733df1a7a6a0a76a76f157f080c60d04f1128902a45423d4",
+        ["pal_apu_tests/03.irq_flag.nes"] = "e0c04111c61d0fc671990c5c3ac6cb7f57082ad687b5e11d380277c7d75e56d1",
+        ["pal_apu_tests/04.clock_jitter.nes"] = "dc85b14f7ece5e7bd4010b831f5b796debfdf338837c8a29a1d221de8c63776d",
+        ["pal_apu_tests/05.len_timing_mode0.nes"] = "04896f081373f5ab6ce83ce115c5fc0ff823acf831f1499d7d406f4a651e7cbc",
+        ["pal_apu_tests/06.len_timing_mode1.nes"] = "454b1b6339bd2ea27e3f4e8a8de7e2d95e3afc26940a88255e24a033d42d5a05",
+        ["pal_apu_tests/07.irq_flag_timing.nes"] = "c91aa1fc7bcb2638f3b07996270eb38c67e8b0fefa1a0db02a34b2e2ffd883c7",
+        ["pal_apu_tests/08.irq_timing.nes"] = "dee9e8fac623327b04e8160456362cc1fe4ca0b2c8e3f45eedcb6851ebb00aae",
+        ["pal_apu_tests/10.len_halt_timing.nes"] = "c41238ed0e7f4044c21fcd14c99b9e4516611adbee5c5f139d3bb95bebebcec9",
+        ["pal_apu_tests/11.len_reload_timing.nes"] = "1e94a9c0d829378f93b460c2c5f875418490401afd50c30cd05ea22113819909",
+
         // The browser speed check's ROM (task 6 of the NES plan): SNOW, a demo by Repulse that keeps
         // rendering on and changes the picture every frame, NROM-256 with CHR ROM. Fetched by
         // bench/nes-speed/ from the same fork at the same commit, and never committed.

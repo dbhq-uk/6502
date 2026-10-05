@@ -169,8 +169,14 @@ clears it in the cycle that set it, which began with the NMI not raised, so the
 CPU never sees it; a read two dots after falls in the next cycle, which began
 with the NMI already raised, so it comes [inferring; task 5 pins it in both
 regions with `NesBusTests`, reads landing at line 241 dots 2, 3 and 4]. The bus
-takes the IRQ line at the same point; no IRQ source exists until task 8, which
-checks it.
+takes the IRQ line at the same point. Task 8 checked it with the first IRQ
+source, the APU's frame counter: `pal_apu_tests` 08.irq_timing, which times the
+IRQ handler to the cycle, passes with the line as the cycle began, fails "too
+soon" (code 2) with the line taken at the end of the cycle, and fails "too late"
+(code 3) with it one cycle later [measured in task 8, `dotnet test
+tests/Dbhq.Machines.Nes.Tests -c Release --filter "FullyQualifiedName~BlarggTests.EachPal"`].
+The other IRQ ROMs (`apu_test` 3-irq_flag and 6-irq_flag_timing, `pal_apu_tests`
+03.irq_flag and 07.irq_flag_timing) poll `$4015` and do not depend on it.
 
 **On PAL** the same rule gives two dots before the access and one after, and in
 the cycle that carries the fourth dot, two after. With the accumulator from zero

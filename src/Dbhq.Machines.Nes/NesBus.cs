@@ -53,7 +53,10 @@ namespace Dbhq.Machines.Nes;
 /// byte.
 /// </para>
 /// <para>
-/// The sound unit is a stub, a private nested type that task 8 replaces. DMC DMA comes in task 9.
+/// The sound unit is <see cref="Apu"/> (task 8): it is ticked before the access, so a read of
+/// <c>$4015</c> sees a flag set in its own cycle, and its IRQ line reaches the CPU by the same
+/// start-of-cycle rule as the NMI, which <c>pal_apu_tests</c> 08.irq_timing confirms to the cycle.
+/// The DMC and its DMA come in task 9.
 /// OAM DMA came early, in task 5, because the sprite test ROMs need it; the controllers and the
 /// audit of OAM DMA are task 7.
 /// </para>
@@ -63,7 +66,7 @@ public sealed class NesBus : IBus
     private readonly byte[] _ram = new byte[0x800];
     private readonly IMapper _mapper;
     private readonly Ppu _ppu;
-    private readonly StubApu _apu;
+    private readonly Apu _apu;
     private Cpu? _cpu;
 
     // The value last on the CPU's data bus.
@@ -101,11 +104,17 @@ public sealed class NesBus : IBus
         Region = region;
         _mapper = cartridge.CreateMapper();
         _ppu = new Ppu(region, _mapper);
-        _apu = new StubApu((options ?? new NesOptions()).SampleRate);
+        _apu = new Apu(region);
+
+        // The options' sample rate is for the sample buffer, which task 9 adds.
+        _ = options;
     }
 
     /// <summary>The PPU, whose registers sit at <c>$2000</c> to <c>$3FFF</c>.</summary>
     public Ppu Ppu => _ppu;
+
+    /// <summary>The sound unit, whose registers sit at <c>$4000</c> to <c>$4013</c>, <c>$4015</c> and <c>$4017</c>.</summary>
+    public Apu Apu => _apu;
 
     /// <summary>The region this console is: its dot ratio comes from it.</summary>
     public Region Region { get; }
@@ -178,7 +187,7 @@ public sealed class NesBus : IBus
         {
             return address switch
             {
-                0x4015 => 0,
+                0x4015 => (byte)(_apu.PeekStatus() | (_openBus & 0x20)),
                 0x4016 => (byte)((_openBus & 0xE0) | _controllers[0].Peek()),
                 0x4017 => (byte)((_openBus & 0xE0) | _controllers[1].Peek()),
                 _ => _openBus,
@@ -212,7 +221,7 @@ public sealed class NesBus : IBus
         _dmaPage = -1;
         _lastReadAddress = -1;
         _ppu.PowerOn();
-        _apu.Reset();
+        _apu.PowerOn();
         if (_cpu is not null)
         {
             _cpu.Nmi = false;
@@ -400,42 +409,12 @@ public sealed class NesBus : IBus
             }
             else if (address <= 0x4017)
             {
-                _apu.Write(address, value);
+                _apu.Write(address - 0x4000, value);
             }
         }
         else
         {
             _mapper.CpuWrite(address, value);
-        }
-    }
-
-    // The sound unit of task 3: it holds no line and answers nothing. Task 8 replaces it.
-    private sealed class StubApu
-    {
-        public StubApu(int sampleRate)
-        {
-            SampleRate = sampleRate;
-        }
-
-        public int SampleRate { get; }
-
-        public bool Irq => false;
-
-        public void Tick()
-        {
-        }
-
-        public void Reset()
-        {
-        }
-
-        public byte ReadStatus()
-        {
-            return 0;
-        }
-
-        public void Write(ushort address, byte value)
-        {
         }
     }
 }

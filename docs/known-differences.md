@@ -706,8 +706,9 @@ against the ten `ppu_vbl_nmi` singles: two dots before the access, the rest
 after, and the CPU sees the interrupt lines as the chips held them when the
 cycle began. It is one alignment of the several a real console can power up in
 (`timing.md` section 4), the one the test ROMs are written for. On PAL the same
-rule is applied with no test to check it, and the IRQ line follows the NMI
-line's rule with no IRQ source yet to check it (task 8).
+rule is applied with no test to check it. The IRQ line follows the NMI line's
+rule, and task 8 checked it with `pal_apu_tests` 08.irq_timing, which fails a
+cycle either side of it (`timing.md` section 3).
 
 **Open bus is the last value that crossed the bus.** A read of `$4015` leaves
 it alone. Nothing else drives the bus in the model: there is no decay, and no
@@ -718,8 +719,8 @@ access except reads of `$4015`, so a board could put a register in the PPU or
 sound range. The interface has no such board, so the bus does not pass those
 addresses on.
 
-**What the stubs do not do.** The sound unit and DMC DMA are stubs until tasks 8
-and 9. The controllers are real (task 7): a read of a port gives the pad in bit
+**What is not built yet.** The DMC and its DMA are task 9's: the DMC's
+registers are taken and ignored, and its `$4015` bits read 0. The controllers are real (task 7): a read of a port gives the pad in bit
 0, the open bus in bits 7 to 5 and zeros in bits 4 to 1.
 
 **OAM DMA came early, and its parity is a choice.** Task 5 built OAM DMA,
@@ -830,3 +831,49 @@ which is close to what the sheet says but not checked against a ROM:
 **OAM does not decay**, and the 2C02G's OAM corruption on some OAMADDR writes
 is not modelled (`ppu.md` section 4).
 
+## The NES: the sound unit, where the model stops
+
+**What.** Task 8 of the NES plan, `Apu` and its channels in `ApuChannels.cs`:
+the two pulses, the triangle, the noise and the frame counter. The source is
+`docs/nes/facts/apu.md`. Every pinned sound ROM that needs no DMC passes:
+`apu_test` singles 1 to 6 on NTSC and all ten `pal_apu_tests` on PAL.
+
+**Which parity takes the 3-cycle `$4017` delay is a choice.** The page says 3
+cycles "during an APU cycle" and 4 "between". The model gives 3 to a write on an
+odd cycle, which the bus counts as a put, so the reset lands on a get and the
+steps on the puts the sheet's table names. The jitter ROMs on both regions fail
+with a fixed delay and pass with the rule either way round, so they do not say
+which (`apu.md` open item 4).
+
+**A flag set in the cycle of a `$4015` read is cleared by it.** The APU page says
+such a read returns 1 and does not clear the flag. With that rule on the third
+of the frame counter's three sets, `apu_test` 6-irq_flag_timing and
+`pal_apu_tests` 07.irq_flag_timing fail their "last set too late" check. The
+model sets the flag on three cycles in a row, as the sheet's table has it, and
+lets every read clear it; both ROMs pass.
+
+**A length write in the cycle before a half frame meets the clock.** The halt
+then takes effect after the clock, and a reload is dropped if the counter was
+not 0. The rule is from `pal_apu_tests`' readme, tests 10 and 11, which pass on
+PAL; the model applies it on NTSC too. The fork's `blargg_apu_2005.07.30` has
+the NTSC tests of the same name; it is not pinned yet, and task 12 is where it
+belongs.
+
+**A pulse with a period under 8 is silent on PAL too.** The APU Pulse page asks
+"PAL behavior?" and no pinned ROM checks it (`apu.md` open item 3).
+
+**The triangle's periods 0 and 1 are not halted.** They give the ultrasonic wave
+the sheet describes, a step every CPU cycle or every second one. Some emulators
+halt them to avoid the noise this makes in a sampled output; task 9's resampler
+decides whether that is needed.
+
+**The triangle starts at step 0 at power on.** The sheet gives step 0 after a
+reset and an unknown phase at power on.
+
+**The reset keeps the IRQ inhibit bit.** The fork's `apu_reset` readme says the
+mode is written again at reset "but IRQ inhibit flag is sometimes cleared". The
+model writes the last mode and keeps the inhibit bit. `apu_reset` is task 12's.
+
+**The output is the sheet's mixer formula with the DMC at 0,** computed when
+read. Task 9 adds the DMC, the sample buffer and the filters the NES has after
+its DACs.

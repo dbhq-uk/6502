@@ -64,8 +64,9 @@ order 0, 7, 6, 5, 4, 3, 2, 1"]. Each step lasts `t + 1` = 101 APU cycles, 202
 CPU cycles, except the first: the write does not reset the timer's divider
 [from APU Pulse], so the first step ends when the divider next passes 0, which
 can be sooner [inferring]. Whether the first output sample is taken before or
-after the first advance from entry 0 is not said on the page [guessing - verify:
-`apu_test` and a unit test on the sequencer settle it].
+after the first advance from entry 0 is not said on the page. Task 8 takes the
+output at entry 0 from the write until the first advance, which gives the row
+above; no pinned ROM reads it, so it stays a choice [inferring; `PulseTests`].
 - **Output** is the envelope volume, or 0 when the sequencer output is 0, the
   sweep mutes, the length counter is 0, or `t < 8` [from APU Pulse].
 - The two channels differ only in the sweep's negate (section 3) [from APU
@@ -124,6 +125,15 @@ disabled [from APU Sweep].
   Length Counter].
 - The table is the length plus one, for the model where a channel stops when the
   counter **becomes** 0 [from APU Length Counter].
+- **A write that meets a half-frame clock.** "Changes to length counter halt
+  occur after clocking length, not before", and a "write to length counter
+  reload should be ignored when made during length counter clocking and the
+  length counter is not zero" [from the fork: pal_apu_tests/readme.txt, tests 10
+  and 11]. In task 8's model, which clocks in the tick that begins a cycle, the
+  write that is "during" the clock is the one in the cycle before it: test 10
+  passes a halt written at 16628 cycles after the `$4017` write as taking effect
+  first and one at 16629 as too late, and the half frame lands at 16630
+  [inferring, from the ROM's cycle counts; both ROMs fail without the rule].
 
 ## 6. Triangle (`$4008-$400B`)
 
@@ -139,9 +149,9 @@ disabled [from APU Sweep].
   counter are not 0 [from APU Triangle]. Its 32 steps are `15 14 ... 1 0 0 1
   ... 14 15` [from APU Triangle].
 - Silenced, it holds its last value, not 0 [from APU]. Periods 0 and 1 give an
-  ultrasonic wave, which some emulators halt instead [from APU Triangle]
-  [guessing - verify: the model keeps the real behaviour unless the resampler
-  needs otherwise].
+  ultrasonic wave, which some emulators halt instead [from APU Triangle]. Task 8
+  keeps the real behaviour: period 0 steps every CPU cycle and period 1 every
+  second. Whether the resampler needs it halted is task 9's question [inferring].
 
 ## 7. Noise (`$400C-$400F`)
 
@@ -169,6 +179,19 @@ disabled [from APU Sweep].
 From 1 in mode 0: feedback = bit 0 (1) XOR bit 1 (0) = 1; shift right gives 0;
 bit 14 set gives `$4000`. Next: bit 0 = 0, bit 1 = 0, feedback 0, result
 `$2000` [inferring from the rule on APU Noise].
+
+The first 16 values in each mode, from 1, by the same rule [inferring, computed
+in task 8]. The two modes part at the 10th clock, where mode 1 sees bit 6 of
+`$0040` set:
+
+| Clock | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13 | 14 | 15 | 16 |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| Mode 0 | `4000` | `2000` | `1000` | `0800` | `0400` | `0200` | `0100` | `0080` | `0040` | `0020` | `0010` | `0008` | `0004` | `0002` | `4001` | `6000` |
+| Mode 1 | `4000` | `2000` | `1000` | `0800` | `0400` | `0200` | `0100` | `0080` | `0040` | `4020` | `2010` | `1008` | `0804` | `0402` | `0201` | `4100` |
+
+The output bit is bit 0: in both modes the first 14 are 0 (the channel sounds)
+and the 15th is 1. So the first ten output bits cannot tell the modes apart; the
+register values can.
 
 ## 8. DMC (`$4010-$4013`)
 
@@ -217,6 +240,11 @@ APU DMC: "432 CPU cycles ... between boundaries"].
 - **Read** `IF-D NT21`: DMC IRQ, frame IRQ, DMC bytes remaining over 0, length
   counters over 0. The read clears the frame IRQ flag but not the DMC's; a flag
   set on the same cycle as the read reads 1 and is not cleared [from APU].
+  Task 8's model does not add that last rule: the flag is set on three cycles in
+  a row (section 10), and with the rule applied to the third, `apu_test`
+  6-irq_flag_timing and `pal_apu_tests` 07.irq_flag_timing both fail their
+  "last set too late" check; without it both pass [inferring, measured in task
+  8]. The three sets are what the rule looks like from the CPU.
 - Bit 5 is open bus, and the read does not drive the external bus (`bus.md` 3)
   [from APU].
 
@@ -228,13 +256,25 @@ APU DMC: "432 CPU cycles ... between boundaries"].
   during an APU cycle and 4 if between, and with M = 1 a quarter and a half
   frame clock happen at once [from APU Frame Counter]. "PAL behavior is currently
   assumed to be the same" [from APU Frame Counter].
+- Task 8 reads "during" as a put and "between" as a get: 3 from a put and 4 from
+  a get, so the reset always lands on a get and the steps below land on the puts
+  the table names [inferring]. `apu_test` 4-jitter and `pal_apu_tests`
+  04.clock_jitter fail with a fixed delay of 3 and pass with the parity rule
+  either way round, so the ROMs confirm that the delay depends on parity, and on
+  PAL too, but not which parity gets 3 [measured in task 8].
+- The IRQ inhibit acts at the write; the mode at the reset [inferring: the page
+  says setting I clears the flag, and the reset is when the sequence restarts].
 - At power and reset the APU acts as if `$4017` was written 10 cycles before the
   first instruction; at power `$4017` is 0, so the frame IRQ is enabled [from
-  PPU power up state; CPU power up state].
+  PPU power up state; CPU power up state]. At reset the last value written to
+  `$4017` is written again, and the frame IRQ flag is clear [from the fork:
+  apu_reset/readme.txt].
 
 **The steps in APU cycles** [from APU Frame Counter], and in CPU cycles taking a
 put as `2n + 1` and a get as `2n` [inferring; the NTSC results agree with the
-CPU-cycle figures the plan remembered from the older version of the page]:
+CPU-cycle figures the plan remembered from the older version of the page; task
+8's model counts them from the reset and passes `apu_test` 3 to 6 on NTSC and
+every `pal_apu_tests` ROM on PAL with them]:
 
 | Step | Quarter | Half | IRQ (4-step, I clear) | NTSC APU | NTSC CPU | PAL APU | PAL CPU |
 |---|---|---|---|---|---|---|---|
@@ -287,7 +327,7 @@ at 14 kHz [from APU Mixer]. These belong to the resampler's task.
 | CPU clock | 1.789773 MHz | 1.662607 MHz | [from APU Pulse; Cycle reference chart] |
 | Noise periods | section 7 | section 7 | [from APU Noise] |
 | DMC rates | section 8 | section 8 | [from APU DMC] |
-| Frame counter steps | section 10 | section 10 | [from APU Frame Counter] |
+| Frame counter steps | section 10 | section 10 | [from APU Frame Counter; `pal_apu_tests` passes on the PAL figures in task 8] |
 | Length table, duty, envelope, sweep, mixer | same | same | [inferring: the pages give one table each] |
 | DMC DMA register conflicts | yes | no | [from DMA] |
 
@@ -297,16 +337,20 @@ at 14 kHz [from APU Mixer]. These belong to the resampler's task.
 |---|---|---|---|
 | `$4000-$4013` | 0 | unchanged (`$4011` keeps bit 0 only) | [from CPU power up state] |
 | `$4015` | 0 | 0 | [from CPU power up state; APU] |
-| `$4017` | 0, IRQ enabled | unchanged | [from CPU power up state] |
+| `$4017` | 0, IRQ enabled | written again with its last value | [from CPU power up state; the fork: apu_reset/readme.txt] |
+| Frame IRQ flag | clear | clear | [from the fork: apu_reset/readme.txt] |
 | Triangle phase | unknown | step 0, output 15 | [from CPU power up state] |
 | Noise register | 1 (section 7) | unchanged | [from APU Noise] |
 | DMC level | 0 | `&= 1` | [from APU DMC; CPU power up state] |
 
 ## 14. Open items
 
-1. The frame counter's PAL `$4017` write delay, assumed equal to NTSC on the page
-   [from APU Frame Counter] [guessing - verify: `pal_apu_tests` checks it].
-2. The CPU-cycle conversion of the step table (10) [inferring; task 8 checks it
-   against `apu_test` and `pal_apu_tests`].
+1. Closed in task 8: the PAL `$4017` write delay is the NTSC rule;
+   `pal_apu_tests` 04.clock_jitter passes with it and fails without the parity.
+2. Closed in task 8: the CPU-cycle conversion of the step table (10) passes
+   `apu_test` 3 to 6 and every `pal_apu_tests` ROM.
 3. Whether `t < 8` silences a PAL pulse ("TODO: PAL behavior?" on APU Pulse)
-   [guessing - verify].
+   [guessing - verify]. Task 8 silences it on both; no pinned ROM checks it.
+4. Which parity of CPU cycle gets the 3-cycle `$4017` delay (section 10): the
+   ROMs pass either way. Task 9's `sprdma_and_dmc_dma` ties the APU's parity to
+   the DMA's and may settle it.

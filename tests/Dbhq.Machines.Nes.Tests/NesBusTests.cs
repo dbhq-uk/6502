@@ -367,8 +367,8 @@ public class NesBusTests
 
         nes.Bus.Read(0x8000);
 
-        // Neither the PPU (no VBlank, NMI off) nor the stub sound unit holds a line, so the bus has
-        // taken them low.
+        // Neither the PPU (no VBlank, NMI off) nor the sound unit (its frame IRQ flag is clear at
+        // power on) holds a line, so the bus has taken them low.
         Assert.False(nes.Cpu.Nmi);
         Assert.False(nes.Cpu.Irq);
     }
@@ -610,5 +610,85 @@ public class NesBusTests
         nes.Bus.Read(0x0000);
         seen |= nes.Cpu.Nmi;
         Assert.Equal(nmi, seen);
+    }
+
+    // A machine running a program at $C000, with the reset vector at $C000 and the IRQ vector at
+    // $C010.
+    private static Nes IrqMachine(string region, byte[] main, byte[] handler)
+    {
+        byte[] prg = new byte[16384];
+        main.CopyTo(prg, 0);
+        handler.CopyTo(prg, 0x10);
+        prg[0x3FFC] = 0x00;
+        prg[0x3FFD] = 0xC0;
+        prg[0x3FFE] = 0x10;
+        prg[0x3FFF] = 0xC0;
+        var nes = new Nes(Cartridge.Load(TestCartridge.Join(TestCartridge.Ines1(1, 1)[..16], prg, new byte[8192])), RegionNamed(region));
+        nes.PowerOn();
+        return nes;
+    }
+
+    [Theory]
+    [MemberData(nameof(Regions))]
+    public void PeekOf4015ShowsTheFrameIrqFlagAndLeavesItAReadClearsIt(string region)
+    {
+        (NesBus bus, _) = Build(region);
+        int period = RegionNamed(region).FrameCounterFourStep[5];
+        for (int i = 0; i < period + 10; i++)
+        {
+            bus.Read(0x0000);
+        }
+
+        Assert.Equal(0x40, bus.Peek(0x4015) & 0x40);
+        Assert.Equal(0x40, bus.Peek(0x4015) & 0x40);
+        Assert.Equal(0x40, bus.Read(0x4015) & 0x40);
+        Assert.Equal(0, bus.Peek(0x4015) & 0x40);
+    }
+
+    [Theory]
+    [MemberData(nameof(Regions))]
+    public void TheFrameIrqReachesTheCpuOncePerFrameWhenTheHandlerReads4015(string region)
+    {
+        // CLI, then JMP to itself; the handler counts in $00 and reads $4015 to clear the flag.
+        Nes nes = IrqMachine(region, [0x58, 0x4C, 0x01, 0xC0], [0xE6, 0x00, 0xAD, 0x15, 0x40, 0x40]);
+        int period = RegionNamed(region).FrameCounterFourStep[5];
+
+        nes.Run((2 * period) + 100);
+
+        Assert.Equal(2, nes.Bus.Peek(0x0000));
+    }
+
+    [Theory]
+    [MemberData(nameof(Regions))]
+    public void AWriteTo4017ReachesTheFrameCounter(string region)
+    {
+        // LDA #$40, STA $4017 (IRQ inhibit), CLI, then JMP to itself: no IRQ comes.
+        Nes nes = IrqMachine(region, [0xA9, 0x40, 0x8D, 0x17, 0x40, 0x58, 0x4C, 0x06, 0xC0], [0xE6, 0x00, 0xAD, 0x15, 0x40, 0x40]);
+        int period = RegionNamed(region).FrameCounterFourStep[5];
+
+        nes.Run(3 * period);
+
+        Assert.Equal(0, nes.Bus.Peek(0x0000));
+        Assert.False(nes.Bus.Apu.Irq);
+    }
+
+    [Theory]
+    [MemberData(nameof(Regions))]
+    public void TheFrameIrqReachesTheCpuInTheCycleAfterTheOneThatSetIt(string region)
+    {
+        // The NMI's rule (timing.md 3) applied to the IRQ: the CPU sees the line as the cycle
+        // began. pal_apu_tests 08.irq_timing fails "too soon" with the line taken at the end of
+        // the cycle and "too late" with it a cycle later (task 8, the journal).
+        var nes = new Nes(Cartridge.Load(TestCartridge.Ines1(1, 1)), RegionNamed(region));
+        nes.PowerOn();
+        while (!nes.Bus.Apu.Irq)
+        {
+            Assert.True(nes.Bus.Cycles < 100_000, "the frame IRQ flag was never set");
+            nes.Bus.Read(0x0000);
+        }
+
+        Assert.False(nes.Cpu.Irq);
+        nes.Bus.Read(0x0000);
+        Assert.True(nes.Cpu.Irq);
     }
 }
