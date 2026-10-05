@@ -545,17 +545,17 @@ public sealed partial class Ppu
         switch (register & 7)
         {
             case 2:
-                return (byte)((_status & 0xE0) | (Latch() & 0x1F));
+                return (byte)((_status & 0xE0) | (DecayedLatch() & 0x1F));
             case 4:
                 return OamData();
             case 7:
             {
                 ushort address = (ushort)(_v & 0x3FFF);
-                return address >= 0x3F00 ? (byte)(ReadPalette(address) | (Latch() & 0xC0)) : _readBuffer;
+                return address >= 0x3F00 ? (byte)(ReadPalette(address) | (DecayedLatch() & 0xC0)) : _readBuffer;
             }
 
             default:
-                return Latch();
+                return DecayedLatch();
         }
     }
 
@@ -577,22 +577,31 @@ public sealed partial class Ppu
     // The dots run since power on.
     private long Time => _timeBase + (_line * Region.DotsPerLine) + _dot;
 
-    // The latch as it reads now: each bit not driven for the decay time is 0. Clearing a bit for
-    // good is the same, since only a drive sets it again.
-    private byte Latch()
+    // The latch as it reads now: each bit not driven for the decay time is 0. Nothing is written,
+    // so a peek can use it.
+    private byte DecayedLatch()
     {
-        if (_latch != 0)
+        int value = _latch;
+        if (value != 0)
         {
             long now = Time;
             for (int bit = 0; bit < 8; bit++)
             {
-                if ((_latch & (1 << bit)) != 0 && now - _latchDriven[bit] > _latchDecayDots)
+                if ((value & (1 << bit)) != 0 && now - _latchDriven[bit] > _latchDecayDots)
                 {
-                    _latch &= (byte)~(1 << bit);
+                    value &= ~(1 << bit);
                 }
             }
         }
 
+        return (byte)value;
+    }
+
+    // The latch as it reads now, with its decayed bits cleared for good, which is the same, since
+    // only a drive sets a bit again.
+    private byte Latch()
+    {
+        _latch = DecayedLatch();
         return _latch;
     }
 

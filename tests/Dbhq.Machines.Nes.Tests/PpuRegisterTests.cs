@@ -493,12 +493,24 @@ public class PpuRegisterTests
     [Fact]
     public void TheDecayCountsOnAcrossTheResetButton()
     {
+        // Written at power on (frame 0, line 0, dot 0). With rendering off an NTSC frame is
+        // 262 x 341 dots, so frame 35 line 250 is 3,212,220 dots on, about 1.7 ms short of the
+        // 600 ms: the bits are still there. The reset there puts the PPU back to line 0, and
+        // 20,000 dots (3.7 ms) after it the bits have gone 602 ms. A time that lost the reset's
+        // partial frame (250 lines, about 16 ms) would say 586 ms and keep them.
         (Ppu ppu, _) = Build();
-        Run(ppu, Region.Ntsc, 0.3);
         ppu.WriteRegister(2, 0xFF);
-        Run(ppu, Region.Ntsc, 0.4);
+        while (!(ppu.Frame == 35 && ppu.Line == 250 && ppu.Dot == 0))
+        {
+            ppu.Tick();
+        }
+
+        Assert.Equal(0xFF, ppu.ReadRegister(0));
         ppu.Reset();
-        Run(ppu, Region.Ntsc, 0.4);
+        for (int i = 0; i < 20_000; i++)
+        {
+            ppu.Tick();
+        }
 
         Assert.Equal(0x00, ppu.ReadRegister(0));
     }

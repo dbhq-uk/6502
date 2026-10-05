@@ -1058,3 +1058,12 @@ change would take an exception into the core's reference tests.
 holds their output (status 1, `AB ATX #n`); every other instruction in the
 suite passes.
 
+**Decided, 5 October 2026:** LXA (`$AB`) on the Ricoh2A03 stays as the core has
+it (`$EE`, from Harte's `nes6502` data), because changing it would override a
+pinned core reference and would break that data unless `$AB` were excluded from
+the `nes6502` set. The two `instr_test-v5` ROMs (`03-immediate` and
+`all_instrs`, both regions) stay as known failures, with this cause. The road
+not taken is to use `$FF` for the Ricoh2A03, the console-calibrated value the ROM
+passes with, and exclude `$AB` from the `nes6502` Harte set; that is left for the
+project owner to choose.
+

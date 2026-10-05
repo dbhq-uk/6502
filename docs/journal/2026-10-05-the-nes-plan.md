@@ -1284,8 +1284,9 @@ runs in `BlarggTests`, on the regions its readme or source gives, and each
 failure is fixed or written down. The class ran 149 of 149 in 1.96 minutes, with
 the load average between 6 and 15 [`dotnet test tests/Dbhq.Machines.Nes.Tests
 -c Release --filter BlarggTests`, 5 October 2026]. The project passed 1,189 of
-1,189, and the core's `NestestTests` 2 of 2 [`dotnet test
-tests/Dbhq.Machines.Nes.Tests -c Release`, the same day]. The slowest rows are
+1,189 [`dotnet test tests/Dbhq.Machines.Nes.Tests -c Release`, the same day],
+and the core's `NestestTests` 2 of 2 [`dotnet test tests/Dbhq.Cpu6502.Tests -c
+Release --filter Nestest`, the same day]. The slowest rows are
 the combined `official_only` (about 8 seconds a region), `ppu_read_buffer`
 (6 to 7), the combined `instr_timing` (6) and `oam_stress` (4 a region).
 
@@ -1403,10 +1404,15 @@ reset. The ROM passes; no machine change.
 (the ROM's `ATX #n`), A and X = (A OR a constant) AND the operand. The core uses
 `$EE`, from Harte's `nes6502` data, which the core's tests pin. With `$FF` put in
 for one run, `03-immediate` passes; with `$00` it fails. So the console the ROM
-was calibrated on had `$FF`. The core keeps Harte's value because changing it
-means an exception in the core's reference tests; that is Dan's call, and the
-recommendation is in the task report. Every other instruction passes, on both
-regions.
+was calibrated on had `$FF`. Every other instruction passes, on both regions.
+**Decided, 5 October 2026:** LXA (`$AB`) on the Ricoh2A03 stays as the core has
+it (`$EE`, from Harte's `nes6502` data), because changing it would override a
+pinned core reference and would break that data unless `$AB` were excluded from
+the `nes6502` set. The two `instr_test-v5` ROMs (`03-immediate` and
+`all_instrs`, both regions) stay as known failures, with this cause. The road
+not taken is to use `$FF` for the Ricoh2A03, the console-calibrated value the ROM
+passes with, and exclude `$AB` from the `nes6502` Harte set; that is left for the
+project owner to choose.
 
 **`double_2007_read`, looked at again and left.** The model prints `33 44 55 66
 77` for the double read; the source's four console outputs begin `22 44`,

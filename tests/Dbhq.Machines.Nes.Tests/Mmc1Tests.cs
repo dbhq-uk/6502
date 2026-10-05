@@ -365,11 +365,13 @@ public class Mmc1Tests
         var nes = new Nes(Cartridge.Load(file), Region.Ntsc);
         nes.PowerOn();
 
-        while (nes.Cpu.PC != 0xC011)
+        // The program is 8 instructions, about 40 cycles after the reset; 10,000 is a hang guard.
+        while (nes.Cpu.PC != 0xC011 && nes.Bus.Cycles < 10_000)
         {
             nes.Step();
         }
 
+        Assert.Equal(0xC011, nes.Cpu.PC);
         Assert.Equal(7, nes.Bus.Peek(0x8100));
     }
 
