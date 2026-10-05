@@ -3283,5 +3283,1364 @@
     "reason": "A cream paper sticker printed \"NTSC\" in black, stuck over the board left of the edge fingers, below \"SRAM(WRAM)\". It is as light as the white print (L 0.742 against the print's 0.737), so it is marked, not told apart by colour. Its edges run from x 506 to 750 and y 1233 to 1312, a little turned; the box takes 2 pixels more each way."
    }
   ]
+ },
+ "parts": {
+  "what": "Task 5, read by eye on 5 October 2026. I4 and I5 (Evan-Amos's NES-CPU-07, top and solder side) and I3 (the PAL NES-CPU-11): points in the original's pixels, (0, 0) the centre of the top left pixel, each read off a crop enlarged as `crop` says with a grid labelled in the original's pixels in strips outside the crop. Passives: board millimetres, each lead a hole read off I1-front rectified at 16 px/mm with a 1 mm grid and the scan's holes numbered on it, and the part looked at on I4 with those holes drawn through I4's fit; board_parts.py moves each lead to the scan's pad within 0.6 mm of it and records which it did.",
+  "I4": {
+   "seeds": {
+    "what": "U6's corner pins where the lead meets its pad, to start the fit only (crop 60 px square enlarged 4 times, 5 px grid)",
+    "pins": [
+     {
+      "ref": "U6",
+      "pin": 1,
+      "px": [
+       369.5,
+       1571
+      ]
+     },
+     {
+      "ref": "U6",
+      "pin": 20,
+      "px": [
+       1336,
+       1571
+      ]
+     },
+     {
+      "ref": "U6",
+      "pin": 21,
+      "px": [
+       1336,
+       1265
+      ]
+     },
+     {
+      "ref": "U6",
+      "pin": 40,
+      "px": [
+       370,
+       1265
+      ]
+     }
+    ]
+   },
+   "midlines": {
+    "what": "U7 and U8, the MN74HC368s, whose leads show grey between two highlights, not as light flats: the midline at the first and last lead columns, x the middle of the two leads (top and bottom), y half way between the body's two long edges, read on crops 90 by 200 px enlarged 4 times with a 10 px grid",
+    "parts": [
+     {
+      "ref": "U7",
+      "ends": [
+       {
+        "pins": [
+         1,
+         16
+        ],
+        "px": [
+         2568,
+         473.5
+        ]
+       },
+       {
+        "pins": [
+         8,
+         9
+        ],
+        "px": [
+         2918.5,
+         474.5
+        ]
+       }
+      ],
+      "reason": "body edges y 412.5 and 534.5 at the left column, 413 and 536 at the right; leads x 2567 to 2569 and 2918 to 2919"
+     },
+     {
+      "ref": "U8",
+      "ends": [
+       {
+        "pins": [
+         1,
+         16
+        ],
+        "px": [
+         2566.5,
+         730
+        ]
+       },
+       {
+        "pins": [
+         8,
+         9
+        ],
+        "px": [
+         2917,
+         730.5
+        ]
+       }
+      ],
+      "reason": "body edges y 668 and 792 at the left column, 668 and 793 at the right; leads x 2566 to 2567 and 2917"
+     }
+    ]
+   },
+   "outlines": {
+    "what": "Each body's outline as seen from above, [left, top, right, bottom] in pixels: its top, which stands above the board and leans away from the middle of the picture (not corrected; about its height times its distance from the middle over the camera's height, about 0.8 m). Read on crops enlarged 1 to 2 times with a 10 to 50 px grid",
+    "boxes": [
+     {
+      "ref": "P1",
+      "box": [
+       520,
+       2213,
+       2800,
+       2662
+      ],
+      "reason": "the black body between its ears (the ears, x 247 to 520 and 2800 to 3062, y 2405 to 2665, hang below the board's edge and are not in the box); its top edge at y 2213 is where it meets the tinned edge fingers"
+     },
+     {
+      "ref": "P2",
+      "box": [
+       900,
+       603,
+       2362,
+       879
+      ],
+      "reason": "the metal frame round the socket, left side x 898 to 902, right 2360 to 2364, top 600 to 605, bottom 876 to 881"
+     },
+     {
+      "ref": "P4",
+      "box": [
+       3225,
+       15,
+       3555,
+       175
+      ],
+      "reason": "the cream housing, open towards the board's top edge; seven pins"
+     },
+     {
+      "ref": "P5",
+      "box": [
+       3790,
+       440,
+       3945,
+       760
+      ],
+      "reason": "the cream housing, open towards the board's right edge"
+     },
+     {
+      "ref": "P6",
+      "box": [
+       3672,
+       862,
+       3962,
+       1458
+      ],
+      "reason": "the blue switch block for POWER and RESET, which runs past the board's right edge"
+     },
+     {
+      "ref": "X1",
+      "box": [
+       1222,
+       362,
+       1500,
+       592
+      ],
+      "reason": "the blue crystal lying flat, a wire strap over it"
+     },
+     {
+      "ref": "P3",
+      "box": [
+       3178,
+       1960,
+       4440,
+       3155
+      ],
+      "reason": "the RF modulator's frame, lid off: its left wall x 3175 to 3180, right 4435 to 4445, top 1955 to 1965, bottom 3150 to 3160; its jacks and bracket stand outside the box"
+     }
+    ]
+   }
+  },
+  "I5": {
+   "seeds": {
+    "what": "U6's corner pins' solder joints (the solder side, mirrored), to start the fit only",
+    "pins": [
+     {
+      "ref": "U6",
+      "pin": 1,
+      "px": [
+       4255,
+       1865
+      ]
+     },
+     {
+      "ref": "U6",
+      "pin": 20,
+      "px": [
+       3290,
+       1865
+      ]
+     },
+     {
+      "ref": "U6",
+      "pin": 21,
+      "px": [
+       3290,
+       1560
+      ]
+     },
+     {
+      "ref": "U6",
+      "pin": 40,
+      "px": [
+       4255,
+       1560
+      ]
+     }
+    ]
+   },
+   "looked": {
+    "what": "Where the joint finder found fewer joints than holes: each connector's and crystal's holes drawn on I5 through its fit, on a crop enlarged once or twice with a 20 px grid, and what the crop showed; `sits` is what was judged from it",
+    "P1": {
+     "sits": true,
+     "what": "no holes: the edge fingers, which the connector clamps; on I4 its body lies across them, its outline's middle 0.9 mm right of the fingers' middle and its ends past both end fingers (parts.json \"beside\")"
+    },
+    "P3": {
+     "sits": true,
+     "what": "every hole has its joint under the cross (pins 1 to 5)"
+    },
+    "P4": {
+     "sits": true,
+     "what": "every hole has its joint under the cross (7)"
+    },
+    "P5": {
+     "sits": true,
+     "what": "every hole has its joint under the cross (7)"
+    },
+    "P6": {
+     "sits": true,
+     "what": "every hole has its joint under the cross (5 large joints)"
+    },
+    "X1": {
+     "sits": true,
+     "what": "every hole has its joint under the cross (the two leads and the two strap holes)"
+    },
+    "X2": {
+     "sits": true,
+     "what": "every hole has its joint, pin 1 about 0.5 mm from the cross"
+    },
+    "P2": {
+     "sits": true,
+     "what": "every hole has its joint under the cross; the finder missed pin 3's, whose highlight runs off its disc"
+    }
+   }
+  },
+  "I3": {
+   "outlines": {
+    "what": "As I4's outlines, on I3 (20 mm lens: a top leans further)",
+    "boxes": [
+     {
+      "ref": "X1",
+      "box": [
+       1570,
+       632,
+       1850,
+       818
+      ],
+      "reason": "the orange crystal lying flat, a wire strap over it; its lower edge meets the expansion socket's frame; so the box is what is seen, its lower part hidden"
+     },
+     {
+      "ref": "P3",
+      "box": [
+       3705,
+       2300,
+       5020,
+       3600
+      ],
+      "reason": "the modulator's can, lid on, \"ALPS\" embossed; its left wall x 3690 to 3720 and its top wall y 2290 to 2310 seen edge on"
+     }
+    ]
+   }
+  },
+  "passives": {
+   "what": "Each two- or more-lead part fitted on I4, at the holes the CPU-10's print gives its reference: kind axial, radial or other, the part as seen, and its leads in board millimetres (pins: an array's pin count, where only its end leads are given). Not fitted on I4 though printed on the CPU-10, and not drawn: R14, R15, R16, R17, C6, C7. C2: the CPU-07 has an axial part on holes about 8.7 mm apart where the CPU-10 has C2's two holes 5.2 mm apart; not drawn",
+   "parts": [
+    {
+     "ref": "R13",
+     "kind": "axial",
+     "part": "resistor",
+     "leads": [
+      [
+       17.62,
+       20.7
+      ],
+      [
+       18.04,
+       30.43
+      ]
+     ]
+    },
+    {
+     "ref": "R12",
+     "kind": "axial",
+     "part": "resistor",
+     "leads": [
+      [
+       20.81,
+       20.79
+      ],
+      [
+       20.82,
+       30.77
+      ]
+     ]
+    },
+    {
+     "ref": "C44",
+     "kind": "radial",
+     "part": "disc",
+     "leads": [
+      [
+       17.67,
+       33.92
+      ],
+      [
+       20.87,
+       33.65
+      ]
+     ]
+    },
+    {
+     "ref": "C46",
+     "kind": "radial",
+     "part": "disc",
+     "leads": [
+      [
+       19.53,
+       38.32
+      ],
+      [
+       24.53,
+       38.33
+      ]
+     ]
+    },
+    {
+     "ref": "Q2",
+     "kind": "other",
+     "part": "transistor",
+     "leads": [
+      [
+       24.07,
+       21.14
+      ],
+      [
+       26.52,
+       21.14
+      ],
+      [
+       29.1,
+       21.17
+      ]
+     ]
+    },
+    {
+     "ref": "C43",
+     "kind": "radial",
+     "part": "disc",
+     "leads": [
+      [
+       32.84,
+       21.19
+      ],
+      [
+       36.02,
+       21.19
+      ]
+     ]
+    },
+    {
+     "ref": "C42",
+     "kind": "radial",
+     "part": "disc",
+     "leads": [
+      [
+       24.02,
+       25.62
+      ],
+      [
+       27.23,
+       25.64
+      ]
+     ]
+    },
+    {
+     "ref": "R11",
+     "kind": "axial",
+     "part": "resistor",
+     "leads": [
+      [
+       34.14,
+       25.8
+      ],
+      [
+       34.14,
+       35.74
+      ]
+     ]
+    },
+    {
+     "ref": "R10",
+     "kind": "axial",
+     "part": "resistor",
+     "leads": [
+      [
+       37.33,
+       25.79
+      ],
+      [
+       37.25,
+       35.5
+      ]
+     ]
+    },
+    {
+     "ref": "Q3",
+     "kind": "other",
+     "part": "transistor",
+     "leads": [
+      [
+       24.05,
+       30.8
+      ],
+      [
+       26.5,
+       30.8
+      ],
+      [
+       29.05,
+       30.8
+      ]
+     ]
+    },
+    {
+     "ref": "C45",
+     "kind": "radial",
+     "part": "disc",
+     "leads": [
+      [
+       33.48,
+       39.57
+      ],
+      [
+       36.66,
+       39.59
+      ]
+     ]
+    },
+    {
+     "ref": "TC1",
+     "kind": "other",
+     "part": "trimmer",
+     "leads": [
+      [
+       42.4,
+       20.5
+      ],
+      [
+       42.4,
+       25.66
+      ]
+     ]
+    },
+    {
+     "ref": "C41",
+     "kind": "radial",
+     "part": "disc",
+     "leads": [
+      [
+       47.59,
+       19.86
+      ],
+      [
+       47.6,
+       23.5
+      ]
+     ]
+    },
+    {
+     "ref": "C25",
+     "kind": "radial",
+     "part": "disc",
+     "leads": [
+      [
+       15.5,
+       54.4
+      ],
+      [
+       20.09,
+       54.14
+      ]
+     ]
+    },
+    {
+     "ref": "C13",
+     "kind": "radial",
+     "part": "disc",
+     "leads": [
+      [
+       15.25,
+       57.71
+      ],
+      [
+       20.09,
+       58.03
+      ]
+     ]
+    },
+    {
+     "ref": "R4",
+     "kind": "axial",
+     "part": "resistor",
+     "leads": [
+      [
+       16.99,
+       82.84
+      ],
+      [
+       16.98,
+       92.89
+      ]
+     ]
+    },
+    {
+     "ref": "R3",
+     "kind": "axial",
+     "part": "resistor",
+     "leads": [
+      [
+       20.79,
+       82.82
+      ],
+      [
+       20.81,
+       92.9
+      ]
+     ]
+    },
+    {
+     "ref": "C3",
+     "kind": "radial",
+     "part": "disc",
+     "leads": [
+      [
+       29.67,
+       87.23
+      ],
+      [
+       29.68,
+       92.28
+      ]
+     ]
+    },
+    {
+     "ref": "R9",
+     "kind": "axial",
+     "part": "resistor",
+     "leads": [
+      [
+       57.64,
+       46.75
+      ],
+      [
+       67.63,
+       46.78
+      ]
+     ]
+    },
+    {
+     "ref": "R7",
+     "kind": "axial",
+     "part": "resistor",
+     "leads": [
+      [
+       57.7,
+       50.0
+      ],
+      [
+       67.64,
+       49.62
+      ]
+     ]
+    },
+    {
+     "ref": "R8",
+     "kind": "axial",
+     "part": "resistor",
+     "leads": [
+      [
+       57.67,
+       52.22
+      ],
+      [
+       67.8,
+       53.1
+      ]
+     ]
+    },
+    {
+     "ref": "RA2",
+     "kind": "other",
+     "part": "sip",
+     "leads": [
+      [
+       56.36,
+       57.38
+      ],
+      [
+       58.94,
+       57.36
+      ],
+      [
+       61.45,
+       57.33
+      ],
+      [
+       63.9,
+       57.8
+      ],
+      [
+       66.5,
+       57.8
+      ]
+     ]
+    },
+    {
+     "ref": "C39",
+     "kind": "radial",
+     "part": "disc",
+     "leads": [
+      [
+       84.92,
+       72.62
+      ],
+      [
+       84.93,
+       77.57
+      ]
+     ]
+    },
+    {
+     "ref": "C32",
+     "kind": "radial",
+     "part": "disc",
+     "leads": [
+      [
+       72.9,
+       59.8
+      ],
+      [
+       72.85,
+       64.99
+      ]
+     ]
+    },
+    {
+     "ref": "RA1",
+     "kind": "other",
+     "part": "sip",
+     "leads": [
+      [
+       86.8,
+       23.1
+      ],
+      [
+       117.39,
+       23.03
+      ]
+     ],
+     "pins": 13
+    },
+    {
+     "ref": "C10",
+     "kind": "radial",
+     "part": "disc",
+     "leads": [
+      [
+       123.67,
+       76.29
+      ],
+      [
+       123.67,
+       81.34
+      ]
+     ]
+    },
+    {
+     "ref": "C9",
+     "kind": "radial",
+     "part": "electrolytic",
+     "leads": [
+      [
+       131.93,
+       87.7
+      ],
+      [
+       135.12,
+       87.66
+      ]
+     ]
+    },
+    {
+     "ref": "C1",
+     "kind": "radial",
+     "part": "electrolytic",
+     "leads": [
+      [
+       137.69,
+       92.76
+      ],
+      [
+       137.4,
+       96.0
+      ]
+     ]
+    },
+    {
+     "ref": "C5",
+     "kind": "radial",
+     "part": "disc",
+     "leads": [
+      [
+       164.8,
+       91.0
+      ],
+      [
+       166.84,
+       90.92
+      ]
+     ]
+    },
+    {
+     "ref": "C4",
+     "kind": "radial",
+     "part": "disc",
+     "leads": [
+      [
+       171.3,
+       86.64
+      ],
+      [
+       171.34,
+       91.56
+      ]
+     ]
+    },
+    {
+     "ref": "R2",
+     "kind": "axial",
+     "part": "resistor",
+     "leads": [
+      [
+       161.93,
+       69.61
+      ],
+      [
+       172.13,
+       69.8
+      ]
+     ]
+    },
+    {
+     "ref": "FC2",
+     "kind": "axial",
+     "part": "ferrite",
+     "leads": [
+      [
+       167.52,
+       73.25
+      ],
+      [
+       167.48,
+       83.24
+      ]
+     ]
+    },
+    {
+     "ref": "FC1",
+     "kind": "axial",
+     "part": "inductor",
+     "leads": [
+      [
+       171.34,
+       73.26
+      ],
+      [
+       171.31,
+       83.24
+      ]
+     ]
+    },
+    {
+     "ref": "R1",
+     "kind": "axial",
+     "part": "resistor",
+     "leads": [
+      [
+       152.91,
+       75.79
+      ],
+      [
+       152.88,
+       85.8
+      ]
+     ]
+    },
+    {
+     "ref": "Q1",
+     "kind": "other",
+     "part": "transistor",
+     "leads": [
+      [
+       155.6,
+       46.6
+      ],
+      [
+       157.88,
+       46.41
+      ],
+      [
+       160.4,
+       46.48
+      ]
+     ]
+    },
+    {
+     "ref": "R6",
+     "kind": "axial",
+     "part": "resistor",
+     "leads": [
+      [
+       155.37,
+       51.6
+      ],
+      [
+       165.47,
+       51.6
+      ]
+     ]
+    },
+    {
+     "ref": "R5",
+     "kind": "axial",
+     "part": "resistor",
+     "leads": [
+      [
+       169.44,
+       45.37
+      ],
+      [
+       169.42,
+       55.38
+      ]
+     ]
+    },
+    {
+     "ref": "C21",
+     "kind": "radial",
+     "part": "disc",
+     "leads": [
+      [
+       154.86,
+       55.25
+      ],
+      [
+       157.88,
+       55.35
+      ]
+     ]
+    },
+    {
+     "ref": "C20",
+     "kind": "radial",
+     "part": "disc",
+     "leads": [
+      [
+       162.3,
+       55.3
+      ],
+      [
+       165.53,
+       55.45
+      ]
+     ]
+    },
+    {
+     "ref": "C23",
+     "kind": "radial",
+     "part": "electrolytic",
+     "leads": [
+      [
+       147.9,
+       53.75
+      ],
+      [
+       151.05,
+       54.09
+      ]
+     ]
+    },
+    {
+     "ref": "C24",
+     "kind": "radial",
+     "part": "disc",
+     "leads": [
+      [
+       146.51,
+       58.67
+      ],
+      [
+       146.5,
+       63.7
+      ]
+     ]
+    },
+    {
+     "ref": "C14",
+     "kind": "radial",
+     "part": "disc",
+     "leads": [
+      [
+       176.98,
+       66.8
+      ],
+      [
+       181.98,
+       67.08
+      ]
+     ]
+    },
+    {
+     "ref": "C12",
+     "kind": "radial",
+     "part": "disc",
+     "leads": [
+      [
+       178.9,
+       73.08
+      ],
+      [
+       183.89,
+       73.1
+      ]
+     ]
+    },
+    {
+     "ref": "C11",
+     "kind": "radial",
+     "part": "disc",
+     "leads": [
+      [
+       179.02,
+       75.91
+      ],
+      [
+       183.85,
+       76.22
+      ]
+     ]
+    },
+    {
+     "ref": "C18",
+     "kind": "radial",
+     "part": "disc",
+     "leads": [
+      [
+       176.9,
+       46.6
+      ],
+      [
+       181.99,
+       46.33
+      ]
+     ]
+    },
+    {
+     "ref": "C17",
+     "kind": "radial",
+     "part": "disc",
+     "leads": [
+      [
+       177.04,
+       51.55
+      ],
+      [
+       182.04,
+       51.54
+      ]
+     ]
+    },
+    {
+     "ref": "C16",
+     "kind": "radial",
+     "part": "disc",
+     "leads": [
+      [
+       177.03,
+       56.68
+      ],
+      [
+       182.03,
+       56.65
+      ]
+     ]
+    },
+    {
+     "ref": "C15",
+     "kind": "radial",
+     "part": "disc",
+     "leads": [
+      [
+       177.0,
+       61.77
+      ],
+      [
+       182.01,
+       61.72
+      ]
+     ]
+    },
+    {
+     "ref": "C31",
+     "kind": "radial",
+     "part": "disc",
+     "leads": [
+      [
+       184.09,
+       23.02
+      ],
+      [
+       187.28,
+       23.01
+      ]
+     ]
+    },
+    {
+     "ref": "C30",
+     "kind": "radial",
+     "part": "disc",
+     "leads": [
+      [
+       184.04,
+       25.64
+      ],
+      [
+       187.3,
+       25.6
+      ]
+     ]
+    },
+    {
+     "ref": "C29",
+     "kind": "radial",
+     "part": "disc",
+     "leads": [
+      [
+       184.03,
+       28.16
+      ],
+      [
+       187.25,
+       28.14
+      ]
+     ]
+    },
+    {
+     "ref": "C28",
+     "kind": "radial",
+     "part": "disc",
+     "leads": [
+      [
+       184.05,
+       30.65
+      ],
+      [
+       187.17,
+       30.7
+      ]
+     ]
+    },
+    {
+     "ref": "C27",
+     "kind": "radial",
+     "part": "disc",
+     "leads": [
+      [
+       183.95,
+       33.09
+      ],
+      [
+       187.16,
+       33.26
+      ]
+     ]
+    },
+    {
+     "ref": "C26",
+     "kind": "radial",
+     "part": "disc",
+     "leads": [
+      [
+       185.7,
+       38.0
+      ],
+      [
+       190.86,
+       38.28
+      ]
+     ]
+    },
+    {
+     "ref": "BC1",
+     "kind": "radial",
+     "part": "disc",
+     "leads": [
+      [
+       181.3,
+       33.22
+      ],
+      [
+       181.31,
+       38.2
+      ]
+     ]
+    },
+    {
+     "ref": "C37",
+     "kind": "radial",
+     "part": "disc",
+     "leads": [
+      [
+       162.34,
+       9.03
+      ],
+      [
+       162.32,
+       12.23
+      ]
+     ]
+    },
+    {
+     "ref": "C36",
+     "kind": "radial",
+     "part": "disc",
+     "leads": [
+      [
+       164.81,
+       9.0
+      ],
+      [
+       164.74,
+       12.29
+      ]
+     ]
+    },
+    {
+     "ref": "C35",
+     "kind": "radial",
+     "part": "disc",
+     "leads": [
+      [
+       167.3,
+       9.12
+      ],
+      [
+       167.22,
+       12.31
+      ]
+     ]
+    },
+    {
+     "ref": "C34",
+     "kind": "radial",
+     "part": "disc",
+     "leads": [
+      [
+       169.71,
+       9.11
+      ],
+      [
+       169.81,
+       12.22
+      ]
+     ]
+    },
+    {
+     "ref": "C33",
+     "kind": "radial",
+     "part": "disc",
+     "leads": [
+      [
+       172.35,
+       9.04
+      ],
+      [
+       172.25,
+       12.27
+      ]
+     ]
+    },
+    {
+     "ref": "C38",
+     "kind": "radial",
+     "part": "disc",
+     "leads": [
+      [
+       159.84,
+       14.16
+      ],
+      [
+       159.9,
+       19.1
+      ]
+     ]
+    },
+    {
+     "ref": "BC2",
+     "kind": "radial",
+     "part": "disc",
+     "leads": [
+      [
+       154.14,
+       16.76
+      ],
+      [
+       154.21,
+       21.75
+      ]
+     ]
+    },
+    {
+     "ref": "DA1",
+     "kind": "other",
+     "part": "sip",
+     "leads": [
+      [
+       155.44,
+       25.54
+      ],
+      [
+       170.65,
+       25.68
+      ]
+     ],
+     "pins": 7
+    },
+    {
+     "ref": "DA2",
+     "kind": "other",
+     "part": "sip",
+     "leads": [
+      [
+       154.82,
+       29.59
+      ],
+      [
+       170.65,
+       29.4
+      ]
+     ],
+     "pins": 7
+    },
+    {
+     "ref": "DA3",
+     "kind": "other",
+     "part": "sip",
+     "leads": [
+      [
+       155.33,
+       38.24
+      ],
+      [
+       170.53,
+       38.28
+      ]
+     ],
+     "pins": 7
+    },
+    {
+     "ref": "DA4",
+     "kind": "other",
+     "part": "sip",
+     "leads": [
+      [
+       155.45,
+       41.95
+      ],
+      [
+       170.5,
+       42.2
+      ]
+     ],
+     "pins": 7
+    },
+    {
+     "ref": "C40",
+     "kind": "radial",
+     "part": "disc",
+     "leads": [
+      [
+       140.19,
+       28.04
+      ],
+      [
+       145.21,
+       28.11
+      ]
+     ]
+    },
+    {
+     "ref": "C22",
+     "kind": "radial",
+     "part": "disc",
+     "leads": [
+      [
+       74.76,
+       91.62
+      ],
+      [
+       74.78,
+       96.7
+      ]
+     ]
+    },
+    {
+     "ref": "C19",
+     "kind": "radial",
+     "part": "disc",
+     "leads": [
+      [
+       171.96,
+       58.63
+      ],
+      [
+       171.97,
+       63.65
+      ]
+     ]
+    },
+    {
+     "ref": "C8",
+     "kind": "radial",
+     "part": "disc",
+     "leads": [
+      [
+       141.45,
+       87.71
+      ],
+      [
+       146.4,
+       87.7
+      ]
+     ]
+    }
+   ]
+  }
  }
 }

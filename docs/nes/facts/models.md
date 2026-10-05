@@ -118,6 +118,49 @@ command); each is a measurement of that day.
   the published figures (widths of 254 and 256 mm), 0.797 and 0.349, it is
   3.08 per cent short. The plan judges the latter, within 5 per cent.
 
+## What task 5 found: each console's parts
+
+Read on 5 October 2026 by looking at crops of each part (the journal for that
+day lists every crop), and recorded in `tools/nes-model/data/ic-table.json`
+and `parts.json`. NTSC from I4 (an NES-CPU-07); PAL from I3 (an NES-CPU-11),
+the PAL CPU also on I6. The marking is the part's top line; date codes left out.
+
+| Ref | Role (the CPU-10's print) | NTSC, on I4 | PAL, on I3 |
+|---|---|---|---|
+| U6 | CPU | RP2A03G | RP2A07A (also I6) |
+| U5 | PPU | RP2C02G-0 | RP2C07-0 |
+| U1 | SRAM (WRAM) | MB8416A-15-SK (Fujitsu) | XRM6216-10 |
+| U4 | SRAM (VRAM) | MB8416A-15-SK (Fujitsu) | XRM6216-10 |
+| U2 | 74LS373 | SN74LS373N (Motorola's mark) | MB74LS373 (Fujitsu, Malaysia) |
+| U3 | 74LS139 | SN74LS139N | SN74LS139N |
+| U7 | 40H368(CI) | MN74HC368 | MC74HC368N (Motorola) |
+| U8 | 40H368(CII) | MN74HC368 | MC74HC368N (Motorola) |
+| U9 | 74HCU04P | 74HCU04AP (Toshiba) | SN74HCU04N (Texas Instruments) |
+| U10 | CIC | 3193A | 3195A |
+| X1 | X'tal | 21.47727, "KDS 8A", blue | 26.601712, "KDS 1G", orange |
+| P3 | MOD RF | the modulator's frame, lid off, no marking seen | a closed can, "ALPS" embossed |
+
+- **The RAMs are 300 mil parts on both boards.** The MB8416A-15-SK is a
+  "skinny" DIP about 7 mm wide, and sits on the 300 mil footprint of U1 and
+  U4, as the PAL board's XRM6216-10 does (task 0). Through I4's fit, the RAMs
+  are 3.9 and 3.7 mm from where they would be on the 600 mil footprint.
+- **The NTSC crystal reads 21.47727**, five places; the KiCad redrawing gives
+  21.477272 MHz. **The PAL crystal reads 26.601712** [from I3, the can read
+  upside down and turned].
+- **U7 and U8 on the CPU-07 are MN74HC368s** (Panasonic's, by the MN prefix [inferring]), where the CPU-10's
+  print and the redrawing say 40H368 (ic-table.json's pinout source is
+  Toshiba's TC40H368, the 74LS368's pinout). Which controller port each serves
+  is still inferred from the print, "CI" and "CII"; task 6 checks it.
+- **The CPU-07 differs from the CPU-10 in its passives, not its chips.** Every
+  IC and connector of the CPU-07 sits on the CPU-10 footprint of the same
+  reference (each IC within 0.44 mm, held out, on I4 and on I5). Printed on
+  the CPU-10 and not fitted on I4: R14, R15, R16, R17, C6, C7. Where the
+  CPU-10 has C2's two holes 5.2 mm apart, the CPU-07 has an axial part on
+  holes about 8.7 mm apart; it is not drawn.
+- **Heights are typical, not measured.** The oblique photographs (I7) were not
+  fetched for task 5; `HEIGHTS` in the parts module says `measured: false`
+  for each.
+
 ## Downloaded for the work
 
 SHA-256 of the files the research downloaded on 5 October 2026 (kept at `~/dbhq-previews/nes-model-research/full/`, I2 one folder up, not committed: the scans state no licence of their own and the PAL originals are up to 93 MB). From task 0 every input is listed in `tools/nes-model/data/sources.json` with its URL, author, licence as stated, size and fetch date, and checked against its hash before it is read.

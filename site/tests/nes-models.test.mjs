@@ -468,3 +468,192 @@ test('NOTICE.md and the photographs\' README name the NES track map, its TAPR Op
   assert.match(ours, /traced from OpenTendo's scans/);
   assert.match(ours, /TAPR Open Hardware License/);
 });
+
+// --- task 5: the parts, placed from the scan and named for both consoles -----------------------
+
+const parts = JSON.parse(fs.readFileSync(path.join(TOOL, 'data', 'parts.json'), 'utf8'));
+const PARTS_MJS = path.join(process.cwd(), 'src', 'models', 'nes-famicom-board-parts.mjs');
+// The counters the machine keeps, in the host's order (NesChip in C#). Task 7
+// creates site/src/models/nes-famicom-access.mjs with this list as COUNTED; once
+// it is there, the test below holds the two the same.
+const COUNTED = ['ppu', 'apu', 'pad1', 'pad2'];
+// Why an IC is never marked: the plan's list, and 'clock' for U9 (the plan's
+// task 5 interface, revised on 5 Oct 2026).
+const ALWAYS = ['cpu', 'ram', 'decoder', 'latch', 'cartridge', 'lockout', 'clock'];
+
+function insidePolygon(poly, [x, y]) {
+  let c = false;
+  for (let i = 0, j = poly.length - 1; i < poly.length; j = i++) {
+    const [x1, y1] = poly[j];
+    const [x2, y2] = poly[i];
+    if ((y1 > y) !== (y2 > y) && x < ((x2 - x1) * (y - y1)) / (y2 - y1) + x1) c = !c;
+  }
+  return c;
+}
+
+function corners({ x, y, l, w, rotation }) {
+  const t = (rotation * Math.PI) / 180;
+  const u = [(Math.cos(t) * l) / 2, (Math.sin(t) * l) / 2];
+  const v = [(-Math.sin(t) * w) / 2, (Math.cos(t) * w) / 2];
+  return [[-1, -1], [1, -1], [1, 1], [-1, 1]].map(([a, b]) => [x + a * u[0] + b * v[0], y + a * u[1] + b * v[1]]);
+}
+
+function overlaps(a, b) {
+  const A = corners(a);
+  const B = corners(b);
+  for (const P of [A, B]) {
+    for (let i = 0; i < 4; i++) {
+      const e = [P[(i + 1) % 4][0] - P[i][0], P[(i + 1) % 4][1] - P[i][1]];
+      const n = [-e[1], e[0]];
+      const pa = A.map((p) => p[0] * n[0] + p[1] * n[1]);
+      const pb = B.map((p) => p[0] * n[0] + p[1] * n[1]);
+      if (Math.max(...pa) <= Math.min(...pb) + 1e-9 || Math.max(...pb) <= Math.min(...pa) + 1e-9) return false;
+    }
+  }
+  return true;
+}
+
+// The similarity (turn, one scale, shift) taking `src` onto `dst` that fits best, by least squares.
+function similarity(src, dst) {
+  const n = src.length;
+  const mean = (P) => [P.reduce((s, p) => s + p[0], 0) / n, P.reduce((s, p) => s + p[1], 0) / n];
+  const [sx, sy] = mean(src);
+  const [dx, dy] = mean(dst);
+  let a = 0;
+  let b = 0;
+  let q = 0;
+  for (let i = 0; i < n; i++) {
+    const u = src[i][0] - sx;
+    const v = src[i][1] - sy;
+    const p = dst[i][0] - dx;
+    const r = dst[i][1] - dy;
+    a += u * p + v * r;
+    b += u * r - v * p;
+    q += u * u + v * v;
+  }
+  a /= q;
+  b /= q;
+  return (p) => [a * (p[0] - sx) - b * (p[1] - sy) + dx, b * (p[0] - sx) + a * (p[1] - sy) + dy];
+}
+
+const ics = parts.model.ics;
+const footprintOf = (name) => registration.footprints.find((f) => f.ref === name);
+
+test('every IC sits on a footprint whose pad count is its pins, and the model draws each IC in ic-table.json once', () => {
+  assert.deepEqual(ics.map((i) => i.ref), icTable.ics.map((i) => i.ref));
+  assert.deepEqual(parts.problems, []);
+  for (const ic of ics) {
+    const t = icTable.ics.find((i) => i.ref === ic.ref);
+    const place = parts.places[ic.ref];
+    const f = footprintOf(place.footprint);
+    assert.ok(place.footprint === ic.ref || place.footprint.startsWith(`${ic.ref} (`), `${ic.ref} sits on ${place.footprint}`);
+    assert.equal(ic.pins, t.pins, ic.ref);
+    assert.equal(f.pads.length, ic.pins, `${ic.ref}: ${f.pads.length} pads on ${place.footprint}, ${ic.pins} pins`);
+    assert.equal(place.padCount, f.pads.length, ic.ref);
+    // its place is its pads' centre
+    const c = f.pads.reduce((s, k) => [s[0] + registration.pads[k].x / f.pads.length, s[1] + registration.pads[k].y / f.pads.length], [0, 0]);
+    assert.ok(Math.hypot(c[0] - ic.x, c[1] - ic.y) < 0.002, `${ic.ref}: its place is its pads' centre`);
+  }
+});
+
+test('each console\'s part is the one ic-table.json gives, read off its own photograph, and the crystal\'s too', () => {
+  for (const ic of ics) {
+    const t = icTable.ics.find((i) => i.ref === ic.ref);
+    assert.deepEqual(ic.parts, { ntsc: t.parts.ntsc.part, pal: t.parts.pal.part }, ic.ref);
+    assert.deepEqual([t.parts.ntsc.seen, t.parts.pal.seen], ['I4', 'I3'], ic.ref);
+    for (const r of ['ntsc', 'pal']) assert.match(t.parts[r].part, /^[0-9A-Z][0-9A-Z-]+$/, `${ic.ref} ${r}`);
+  }
+  // the consoles' CPUs, PPUs and lockout chips differ; the plan's Facts
+  const part = (ref, r) => ics.find((i) => i.ref === ref).parts[r];
+  assert.deepEqual(['U6', 'U5', 'U10'].map((r) => [part(r, 'ntsc'), part(r, 'pal')]),
+    [['RP2A03G', 'RP2A07A'], ['RP2C02G-0', 'RP2C07-0'], ['3193A', '3195A']]);
+  const x1 = icTable.crystals.find((c) => c.ref === 'X1');
+  for (const r of ['ntsc', 'pal']) {
+    const drawn = parts.model.others[r].find((o) => o.kind === 'crystal');
+    assert.equal(drawn.part, x1.parts[r].part, r);
+  }
+  assert.deepEqual([x1.parts.ntsc.seen, x1.parts.pal.seen], ['I4', 'I3']);
+});
+
+test('every IC has a chip or an always, never both; every chip is one of COUNTED; U7 is pad1 and U8 pad2, inferred from the print', async () => {
+  for (const ic of ics) {
+    assert.ok((ic.chip === null) !== (ic.always === null), `${ic.ref}: chip ${ic.chip}, always ${ic.always}`);
+    if (ic.chip !== null) assert.ok(COUNTED.includes(ic.chip), `${ic.ref}: ${ic.chip}`);
+    if (ic.always !== null) assert.ok(ALWAYS.includes(ic.always), `${ic.ref}: ${ic.always}`);
+  }
+  const chip = Object.fromEntries(ics.map((i) => [i.ref, i.chip]));
+  assert.deepEqual([chip.U6, chip.U5, chip.U7, chip.U8], ['apu', 'ppu', 'pad1', 'pad2']);
+  assert.deepEqual(ics.filter((i) => i.chip).map((i) => i.chip).sort(), [...COUNTED].sort(), 'each counter marks one IC');
+  for (const ref of ['U7', 'U8']) {
+    const t = icTable.ics.find((i) => i.ref === ref);
+    assert.equal(t.port.inferred, true, `${ref}: the port it serves is inferred, and task 6 checks it`);
+    assert.equal(t.port.value, ref === 'U7' ? 1 : 2);
+  }
+  assert.match(parts.chipInferred, /inferred/);
+  const access = path.join(process.cwd(), 'src', 'models', 'nes-famicom-access.mjs');
+  if (fs.existsSync(access)) assert.deepEqual((await import(access)).COUNTED, COUNTED);
+});
+
+test('every part is inside the board\'s outline; a body that runs past it is one the photographs show doing so, and is recorded', () => {
+  const { outline } = parts.model.board;
+  for (const ic of ics) for (const c of corners(ic)) assert.ok(insidePolygon(outline, c), `${ic.ref}: corner ${c}`);
+  for (const p of parts.passives.parts) {
+    assert.ok(insidePolygon(outline, [p.x, p.y]), `${p.ref}`);
+    for (const l of p.leads) assert.ok(insidePolygon(outline, l), `${p.ref}: lead ${l}`);
+  }
+  const over = [];
+  const held = [...parts.model.connectors.map((c) => [c, c.ref]), ...['ntsc', 'pal'].flatMap((r) => parts.model.others[r].map((o) => [o, `${o.ref} (${r})`]))];
+  for (const [c, name] of held) {
+    const f = footprintOf(c.ref);
+    for (const k of f.pads) assert.ok(insidePolygon(outline, [registration.pads[k].x, registration.pads[k].y]), `${name}: its pad ${k}`);
+    if (corners(c).some((p) => !insidePolygon(outline, p))) over.push(name);
+  }
+  assert.deepEqual(over.sort(), [...parts.overhang.refs].sort());
+});
+
+test('no two IC bodies overlap', () => {
+  for (let i = 0; i < ics.length; i++) for (let j = i + 1; j < ics.length; j++) assert.ok(!overlaps(ics[i], ics[j]), `${ics[i].ref} and ${ics[j].ref}`);
+});
+
+test('the ICs\' places against the KiCad redrawing\'s, after a best-fit similarity: none more than 3 mm off', () => {
+  const refs = ics.map((i) => i.ref);
+  const src = refs.map((r) => parts.kicad.places[r]);
+  const dst = ics.map((i) => [i.x, i.y]);
+  const S = similarity(src, dst);
+  const off = Object.fromEntries(refs.map((r, k) => { const g = S(src[k]); return [r, Math.hypot(g[0] - dst[k][0], g[1] - dst[k][1])]; }));
+  const worst = Math.max(...Object.values(off));
+  assert.ok(worst <= 3.0, `${worst.toFixed(3)} mm`);
+  assert.ok(Math.abs(worst - parts.kicad.maxMm) < 0.002, `recorded ${parts.kicad.maxMm}, recomputed ${worst.toFixed(4)}`);
+  for (const r of refs) assert.ok(Math.abs(off[r] - parts.kicad.perPart[r].offMm) < 0.002, r);
+  assert.equal(parts.kicad.verdict, 'pass');
+  // each U is on its own redrawn footprint: the redrawing's value names the same part
+  assert.equal(parts.kicad.limitMm, 3.0);
+});
+
+test('each part of the CPU-07 sits on the CPU-10 footprint of the same reference, and every check parts.json records passes', () => {
+  for (const [ref, s] of Object.entries(parts.sitsOn.ics)) {
+    assert.ok(s.I4 <= parts.sitsOn.limitMm && s.I5 <= parts.sitsOn.limitMm, `${ref}: ${s.I4}, ${s.I5}`);
+    assert.equal(s.verdict, 'sits on it', ref);
+  }
+  assert.equal(parts.sitsOn.limitMm, 2.0);
+  for (const [ref, s] of Object.entries(parts.sitsOn.others)) assert.equal(s.verdict, 'sits on it', ref);
+  assert.deepEqual(parts.verdicts.map((v) => v.verdict), parts.verdicts.map(() => 'pass'));
+  // the RAMs are on their 300 mil footprints: on the 600 mil ones they would be over 3 mm off on I4
+  assert.ok(parts.photographs.I4.otherWidthMm.U1 > 3 && parts.photographs.I4.otherWidthMm.U4 > 3);
+});
+
+test('the board parts module is generated from parts.json, names its sources, and agrees with it', async () => {
+  const text = fs.readFileSync(PARTS_MJS, 'utf8');
+  assert.match(text, /^\/\/ GENERATED by tools\/nes-model\/board_parts\.py/);
+  const head = text.split('\nexport ')[0];
+  for (const s of parts.model.sources) assert.ok(head.includes(s), `the header names ${s}`);
+  const m = await import(PARTS_MJS);
+  const want = { BOARD: 'board', ICS: 'ics', CONNECTORS: 'connectors', PASSIVES: 'passives', OTHERS: 'others', HEIGHTS: 'heights' };
+  assert.deepEqual(Object.keys(m).sort(), Object.keys(want).sort());
+  for (const [name, key] of Object.entries(want)) assert.deepEqual(m[name], parts.model[key], name);
+  assert.deepEqual(Object.keys(m.OTHERS).sort(), ['ntsc', 'pal']);
+  assert.equal(m.BOARD.thickness, 1.6);
+  assert.equal(m.HEIGHTS.board, 1.6);
+  for (const [k, h] of Object.entries(m.HEIGHTS)) if (k !== 'board') assert.equal(typeof h.measured, 'boolean', k);
+  for (const p of m.PASSIVES) assert.ok(['axial', 'radial', 'other'].includes(p.kind));
+});

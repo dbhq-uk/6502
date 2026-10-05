@@ -1380,3 +1380,196 @@ at, its connectivity not verified. The site test that let the nets verdict
 be either value is replaced by one that pins it to FAIL with its figures and
 reads the plan's revision; with the verdict set to pass by hand, and with
 the revision's words taken out of the plan by hand, it failed.
+
+## Task 5: the parts, placed from the scan and named for both consoles
+
+`tools/nes-model/board_parts.py` puts every part on task 3's footprints in
+task 2's frame, names each console's parts from the photographs, and writes
+`data/parts.json`, each console's part into `data/ic-table.json`, and the
+module the page will read, `site/src/models/nes-famicom-board-parts.mjs`.
+`run-board.sh` now ends with `verify.py I3 I4 I5` and `board_parts.py`. The
+venv as before: Python 3.12.3, numpy 2.5.3, opencv-python-headless 5.0.0.93,
+Pillow 12.3.0, scipy 1.18.1, pytest 9.1.1.
+
+### Decisions
+
+- **An IC's place is its pads' centre, its turn from pin 1** to the last pin
+  of pin 1's row. A footprint whose pad count is not its part's pin count is
+  reported and not placed (none was).
+- **The RAMs sit on the 300 mil footprints.** U1 and U4 each have two
+  footprints (task 3). On I4 the NTSC RAMs read MB8416A-15-SK, about 7 mm
+  wide, and the PAL RAMs on I3 are XRM6216-10 on the 300 mil rows (task 0).
+  Held out on I4 against the 600 mil footprint's midline instead, the RAMs
+  are 3.87 and 3.66 mm off, against 0.11 and 0.20 mm on the 300 mil ones.
+- **Each photographed board on the scan, by a homography and parts held
+  out.** I4 (top side, NES-CPU-07): at every pair of lead columns across a
+  DIP, the leads' middles along the row and the body's two long edges, the
+  midline half way between them; that is the midline of the two pins' pads
+  on the scan. I5 (solder side): every pin's joint, the centre of its
+  colourless disc (the lacquer is green). I3 (PAL): task 0's marks, the
+  pins' feet, so task 0's fit is reused as it was asked. Four pins of U6
+  marked by hand start I4 and I5; the fit then grows part by part. Each IC
+  is then held out in turn: the homography on the others, its points through
+  it, the mean against the mean of its pads. **The limit for "sits on the
+  footprint of its name", 2.0 mm, was set before any figure was seen**: the
+  plan's PAL layout row's "none over 2.0".
+- **U7 and U8's midlines by hand on I4.** Their MN74HC368 leads show grey
+  between two highlights, not as light flats, so the lead finder found two
+  to four leads a row; on the first look U7 and U8 had too few columns to
+  hold out. Their midline ends were then read by hand on crops enlarged four
+  times (`marks.json` `parts.I4.midlines`, with the body edges read). This
+  was done after seeing the finder fail on them, not after any held-out
+  figure for them.
+- **`chip` and `always`.** U6 `apu` (its sound unit), U5 `ppu`, U7 `pad1`,
+  U8 `pad2`; U1 and U4 `ram`, U2 `latch`, U3 `decoder`, U10 `lockout`.
+  U9, the hex inverter that runs the master clock's oscillator, had no
+  reason in the plan's list, so it carries `clock`, and the plan's task 5
+  interface says so, dated. That U7 is port one and U8 port two is from the
+  print alone, "40H368(CI)" and "40H368(CII)"; `ic-table.json` marks it
+  `inferred` and task 6 checks it.
+- **Body sizes from I4, per package.** Each IC's body was measured on I4
+  (three lines along it and three across, through the fit, the dark
+  colourless run through the middle, the marking's letters bridged), and
+  the model draws each package at the median of its parts: DIP-40 53.5 by
+  14.3 mm, DIP-24 31.8 by 7.1, DIP-20 26.3 by 7.3, DIP-16 20.7 by 6.6, DIP-14
+  19.6 by 7.1. A body's centre is not its pads' everywhere: U5, U1 and U4
+  read about 1 mm to the right of their pads' centre and U8 1 mm to the left;
+  recorded (`bodies.onI4`), not used, the place staying the pads'.
+- **Heights are typical, not measured.** I7, the oblique photographs, was
+  not fetched; the plan allows typical heights where it is not. Every entry
+  in `HEIGHTS` says `measured: false` and what it is.
+- **Connectors, crystals and modulators from outlines marked on the
+  photographs** (`marks.json` `parts.I4.outlines` and `parts.I3.outlines`),
+  each through its photograph's fit. That fit is the board's plane, so a
+  tall part's top, which is what an outline from above shows, leans away
+  from the middle of the picture: on I4 (a 60 mm lens, about 0.8 m up) a
+  15 mm top 100 mm out leans about 2 mm. Not corrected; said in the marks.
+- **Passives by hand.** Each two- or three-lead part fitted on I4 was found
+  at the holes the CPU-10's print gives its reference, on I1-front
+  rectified at 16 px/mm with a 1 mm grid and the scan's free holes numbered,
+  then drawn back on I4 through its fit and looked at. 70 parts, plus X2;
+  each lead is moved to the scan's pad within 0.6 mm (`leadMovedMm`; null
+  where no pad was found and the read place is kept). Typical bodies by kind.
+
+### Identities, each a crop looked at
+
+Every crop is of the original, cut by `/tmp/t5/crop.py` with a grid
+labelled in the original's pixels in strips outside the crop.
+
+| Ref | NTSC on I4: crop (box, zoom), what it showed | PAL on I3: crop, what it showed |
+|---|---|---|
+| U6 | 300,1240,1420,1600 x1: RP2A03G, 8A2 B7 | 624,1541,1755,1872 x1: RP2A07A, 1HM 2V; I6 whole: the same |
+| U5 | 1850,980,2920,1340 x1: RP2C02G-0, 7M3 52 | 2243,1326,3374,1638 x1: RP2C07-0, 1GM 3U |
+| U1 | 740,1800,1380,2000 x1: Fujitsu's mark, MB8416A-15-SK, JAPAN, 8804 KR05 | 1053,2126,1755,2321 x1: XRM6216-10, 126 10963 |
+| U4 | 1860,1850,2500,2050 x1: as U1 | 2223,2184,2926,2379 x1: as U1 |
+| U2 | 1860,1440,2400,1640 x1: SN74LS373N, Motorola's mark, IICW8805S | 2262,1755,2809,1950 x1: Fujitsu's mark, MB74LS373, MALAYSIA 9122 KF69 |
+| U3 | 330,880,780,1090 x1: J805XJL, SN74LS139N (a capacitor over its corner) | 663,1170,1111,1365 x1: SN74LS139N, XJAJ9128 |
+| U7 | 2480,330,3000,860 x1: MN74HC368, 8 1 0; the print 40H368(CI) | 2945,643,3394,838 x1: Motorola's mark, MC74HC368N, JJBA9126A |
+| U8 | the same crop: MN74HC368; the print 40H368(CII) | 2945,897,3394,1092 x1: as U7 |
+| U9 | 2990,1180,3410,1400 x1: TOSHIBA 8807H, 74HCU04AP, JAPAN | 3433,1482,3881,1658 x1: TI's mark, SN74HCU04N, MALAYSIA 128ER |
+| U10 | 2590,1540,3040,1760 x1: 3193A, (c) 1986 Nintendo, 8744 A | 3023,1872,3472,2048 x1: 3195A, (c) 1986 Nintendo, 9133 C |
+| X1 | 1100,300,1560,640 x2: blue, "21.47727 KDS 8A" twice, the print X'tal | 1480,560,1900,840 x2, then 1580,640,1860,840 turned a quarter and x3: orange, "26.601712 KDS 1G" twice, upside down |
+| X2 | 3040,1480,3480,1900 x1: a white block on X2's three holes, the print 4.000MHz | 3500,1800,3950,2250 x1: the same white block |
+| P3 | 3300,1450,4570,3330 and 2600,1900,3500,3330: the modulator's frame, lid off, its board seen, no part number | 3500,1700,5462,3966: a closed can, "ALPS" embossed |
+
+The PAL crystal's value was read, not taken from anywhere: 26.601712. The
+NTSC crystal reads 21.47727, where the KiCad redrawing gives 21.477272 MHz;
+both are in `ic-table.json`.
+
+**Where the photographs and the CPU-10 disagree.** The CPU-10's print and
+the redrawing call U7 and U8 40H368; the CPU-07 has MN74HC368s. The print
+says 74LS373 and 74LS139 where the redrawing says 74HC373 and 74HC139, and
+74HCU04P where the redrawing says 74LS04; the photographs agree with the
+print. Printed on the CPU-10 and not fitted on the CPU-07 (I4): R14, R15,
+R16, R17, C6 and C7, their holes bare. Where the CPU-10 has C2's two holes
+5.2 mm apart, the CPU-07 has an axial part on holes about 8.7 mm apart: a
+difference between the revisions, not drawn.
+
+### What it measured
+
+`cd tools/nes-model && NES_MODEL_INPUTS=/tmp/nes-inputs nice -n 10
+/tmp/nesvenv/bin/python board_parts.py`, 5 October 2026, exit 0, after
+`verify.py I3 I4 I5 I2` (all present, hashes match). Run twice; the second
+run changed no file. It printed:
+
+```
+pad counts: pass
+KiCad places: pass
+CPU-07 parts on the CPU-10 footprints: pass
+IC bodies inside the outline: pass
+IC bodies apart: pass
+KiCad places: max 0.438 mm, median 0.292, scale 0.99462, turn -0.262 deg
+held out (mm), I4 / I5 / I3: U6 0.056/0.013/0.297; U5 0.153/0.038/0.066; U1 0.112/0.033/0.348; U4 0.197/0.060/0.280; U2 0.084/0.068/0.071; U3 0.230/0.008/0.346; U7 0.432/0.031/0.082; U8 0.246/0.007/0.038; U9 0.138/0.037/0.102; U10 0.302/0.099/0.217
+fits: I4 98 points, median 0.127; I5 199, 0.054; I3 39, 0.170
+U1 and U4 on the 600 mil footprint instead: 3.87 and 3.66 mm off
+connectors and crystals on I5: P1 0/72 (sits on it); P2 47/48 (sits on it); P3 0/5 (sits on it); P4 3/7 (sits on it); P5 1/7 (sits on it); P6 0/5 (sits on it); X1 1/4 (sits on it); X2 1/3 (sits on it)
+overhang: ['P1', 'P4', 'P5', 'P6', 'P3 (ntsc)', 'P3 (pal)']; IC bodies outside: 0; clashes: []
+ICs 10, connectors 5, passives 71, others 2 + 2
+```
+
+- **The KiCad places check passes**: every IC within 0.438 mm (U5) of the
+  redrawing's place after the best-fit similarity, against the plan's 3 mm;
+  median 0.292. With U7 and U8 swapped (12.7 mm apart) the same check puts
+  them 12.31 and 13.11 mm off and fails (computed on 5 October 2026 with
+  `board_parts.kicad_check` on `parts.json`, the two places swapped); the
+  pytest on made-up places and the site test with the two swapped by hand
+  both fail on it too. The connectors and crystals through the
+  same similarity, recorded and not judged, are within 0.90 mm (P3).
+- **Every CPU-07 part sits on the CPU-10 footprint of the same reference.**
+  The largest IC error held out is U7's on I4, 0.432 mm, from its hand
+  marks, against 2.0; on I5 none is over 0.10 mm. The joint finder found
+  fewer joints than holes at P2, P3, P4, P5, P6, X1 and X2; each was drawn
+  on I5 and looked at, and every hole has its joint (the finder missed P2's
+  pin 3, whose highlight runs off its disc). P1 has no holes: on I4 its body
+  lies across the fingers, its middle 0.9 mm right of theirs.
+- **Bodies over the outline.** The cartridge connector, the controller and
+  power headers and both modulators run past the board's edge, as the
+  photographs show them. The site test takes "every part is inside the
+  outline" as: every IC's body, every passive and every pad of a connector,
+  crystal or modulator inside it, and a body that runs over it is one
+  `parts.json` records.
+- **The two modulators.** The NTSC frame (I4) reads x 158.3 to 221.1 mm,
+  y 95.3 to 155.4; the PAL can's top (I3) x 162.2 to 225.1, y 95.9 to 158.4,
+  about 4 mm to the right. I3's 20 mm lens leans a 22 mm can's top by several
+  millimetres, but a lean would grow with the distance from the middle of the
+  picture and this shift does not, so the photograph cannot say how much is
+  lean and how much the can's own place. Recorded as read.
+- **The PAL crystal** is drawn as seen on I3: its lower edge is hidden by the
+  expansion socket's frame, which stands taller and leans over it, so its
+  box (8.9 mm across the board) is shorter than the NTSC one (11.5 mm).
+
+### Mistakes
+
+- The first full run gave the KiCad check a failure of 448 mm: the places
+  were the pads' list positions in `registration.json`, not their places.
+  A bug in passing the footprints, fixed; the check itself did not change.
+- The KiCad reader skipped surface pads, so P1, whose fingers are surface
+  pads in the redrawing, had none. It now takes them where a footprint has
+  no plated holes.
+- Writing `ic-table.json` through `write_data` sorted its keys and rewrote
+  the whole file; it is now written in its own order.
+- Three of the made-up tests were wrong as first written: a moved part's
+  neighbours were held to 1 mm when they carry some of its error through
+  their fits (now: only the moved part over 2.0, and it the largest); two
+  bodies that touch were counted as overlapping; the upper row's predicted
+  places were in the wrong order.
+
+### Tests
+
+- `tests/test_board_parts.py` first: RED, `ModuleNotFoundError`. Then 15
+  pass and 3 fail (the three test mistakes above), then 18 pass.
+  `/tmp/nesvenv/bin/python -m pytest tools/nes-model/tests -q`: 88 passed.
+- `site/tests/nes-models.test.mjs` gains 8 tests: pad counts and places;
+  each console's part is `ic-table.json`'s; `chip` or `always`, `COUNTED`,
+  U7 `pad1` and U8 `pad2` inferred; inside the outline; no overlap; the
+  KiCad places, the similarity fitted again in the test; each CPU-07 part on
+  its footprint; the module agrees with `parts.json`. Each was seen to fail
+  on a hand edit of a copy, then restored (`cmp`): U7 and U8's places
+  swapped (3 fail, the KiCad test among them), U7's chip set to `pad2`
+  (2), the PAL PPU named RP2C02G-0 (2), U2 moved onto U5 (4, the overlap
+  test among them), a passive moved off the board (1), U6's pad count set
+  to 39 (1), the module edited by hand (1).
+- `npm test` (the build first; `results.json` copied in and removed
+  afterwards; both machines' WebAssembly already built): tests 331, pass
+  330, fail 0, todo 1 (the BBC Micro's, as before). Floors raised from 322
+  to 330 in both workflows.

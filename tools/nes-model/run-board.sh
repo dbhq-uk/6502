@@ -19,3 +19,5 @@ cd "$here"
 "$py" board_frame.py        # data/frame.json: the scan's scale, turn, outline and holes
 "$py" board_register.py     # data/registration.json: the solder side registered; the pads, drills and footprints
 "$py" board_trace.py --map-ppm 10   # data/copper.json and the track map: both copper faces, the print, the checks (10 px/mm chosen from --look on 5 Oct 2026)
+"$py" verify.py I3 I4 I5
+"$py" board_parts.py        # data/parts.json, ic-table.json's parts and site/src/models/nes-famicom-board-parts.mjs: every part, both consoles
