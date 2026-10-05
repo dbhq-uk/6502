@@ -17,7 +17,7 @@ Researched on 5 October 2026 for [the NES's models design](../../superpowers/spe
 
 | # | Source | Author, date | Licence, as stated | Size, view | Use |
 |---|---|---|---|---|---|
-| O1 | US Design Patent D299,726, https://patentimages.storage.googleapis.com/pdfs/USD299726.pdf ; Commons copy of sheet 1, `File:NES patented design.png` | Masayuki Yukawa, for Nintendo; filed 4 November 1985 | Commons: `{{PD-US-Patent}}` | 4 pages, each 2320x3408 at 300 dpi, 1-bit | FIG 3 front, FIG 4 rear, FIG 5 top, FIG 6 bottom (the expansion cover), FIG 7 and 8 sides, FIG 1 and 2 perspective with the door open. Proportions, as a check on the photographs: width to depth to height 1 : 0.78 : 0.367 as the research read them, against 1 : 0.793 : 0.347 from the published figures, so the drawings may not be exactly to scale [inferring] |
+| O1 | US Design Patent D299,726, https://patentimages.storage.googleapis.com/pdfs/USD299726.pdf ; Commons copy of sheet 1, `File:NES patented design.png` | Masayuki Yukawa, for Nintendo; filed 4 November 1985 | Commons: `{{PD-US-Patent}}` | 4 pages, each 2320x3408 at 300 dpi, 1-bit | FIG 3 front, FIG 4 rear, FIG 5 top, FIG 6 bottom (the expansion cover), FIG 7 and 8 sides, FIG 1 and 2 perspective with the door open. Proportions, as a check on the photographs: width to depth to height 1 : 0.78 : 0.367 as the research read them, against 1 : 0.793 : 0.347 from the published figures, so the drawings may not be exactly to scale [inferring]. Task 0 measured the views on 5 October 2026: see "What task 0 found" |
 | O2 | https://commons.wikimedia.org/wiki/File:Nintendo-Entertainment-System-NES-Console-FL.jpg , and `-FR`, `-BL`, `-BR` | Evan-Amos, 27 July 2016 | `{{PD-self}}`: "I, the copyright holder of this work, release this work into the public domain" | 4020x2880 each; NTSC NES-001 | Front and rear corners. Nikon D7000 at 112 mm (168 mm in 35 mm terms) [from the Exif, read 5 October 2026]. Colours, buttons, LED, ports, door, vents, the rear connectors |
 | O3 | `File:Nintendo-Entertainment-System-NES-Deconstruction-01.jpg` to `-04` | Evan-Amos, 27 July 2016 | `{{PD-self}}` | 4020x2640; NTSC | The case opened in stages: inner shell, shield, tray. Where the board sits in the case |
 | O4 | `File:Geöffnetes deutsches NES 20221102 HOF06342 RAW-Export.png`, in the Commons category "Nintendo Entertainment System NESE-001" (42 files) | PantheraLeo1359531, 2 November 2022 | `{{self\|cc-by-4.0}}` | 8606x2253, 92.9 MB; PAL | The PAL top shell straight on from the front, its label legible. Sony A7R IV at 20 mm, so strong perspective. The set also has a near top-down case (HOF06345), the tray, the shield and the port bracket |
@@ -96,11 +96,25 @@ command); each is a measurement of that day.
   of 112 / 23.6 x 4020 pixels, which takes the 4020 pixels to span the
   sensor, is not the camera's: the case top's vanishing points give about
   24,600 (O2-FL) and 23,800 pixels (O2-BR), near the 23,386 of a crop that was
-  not resized [inferring]. The case's depth to width from them is 0.736 and
-  0.730, against 0.800 from the published figures and about 0.78 from the
-  patent as the research read it, and the corners' vertical edges do not lean
-  as that camera says they must: the photographs may have been corrected for
-  perspective, or cropped off centre [guessing - verify].
+  not resized [inferring]. With that camera the case's depth to width is 0.736
+  and 0.730, against 0.800 from the published figures, and the corners'
+  vertical edges do not lean as that camera says they must. The pictures'
+  own records say how they were made [from the XMP and Exif in both files,
+  read 5 October 2026]: Camera Raw's PerspectiveVertical and
+  PerspectiveHorizontal are 0 and its HasCrop is False, the Software is Adobe
+  Photoshop CS5 Windows, and the Exif SubjectDistance is 2.24 m; Camera Raw's
+  LensProfileEnable is 1, so a lens profile was applied. So the crop
+  was made in Photoshop, and Camera Raw corrected no perspective; a transform
+  in Photoshop itself is not ruled out [guessing - verify]. The plan was
+  revised that day: the case's proportions are judged on the patent, and
+  these photographs give features only.
+- **The patent's orthographic views** (O1, sheets 2 and 3 taken out of the
+  PDF at their 300 dpi, the case's body without its buttons and feet),
+  measured by `spike.py` (`spike.json`'s `case.patent`): depth to width 0.7723
+  on the top view (FIG 5), 0.7758 on the bottom view (FIG 6) and 0.7914 from
+  the side over the front (FIG 7 over FIG 3); height to width 0.3525 (FIG 3)
+  and 0.3534 (FIG 7), 0.3682 and 0.3709 with the feet. Against the published
+  0.800 and 0.350, the top view is 3.46 per cent short.
 
 ## Downloaded for the work
 

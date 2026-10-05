@@ -1,7 +1,7 @@
 ---
 title: "The NES's models: the inputs, and the eight checks they rest on"
 date: 2026-10-05
-summary: "Before the NES's two models are built, the work measures what they rest on. The bare board scan's scale holds, its solder side lies on its component side, and the European board's chips sit where the American board's do. The case does not: its depth, read from the two corner photographs with the camera the plan set, comes out well short of the published figure, and that check stops every model until Dan decides. On the way, the cartridge connector's fingers turned out to be on a metric pitch, not the tenth of an inch the plan assumed."
+summary: "Before the NES's two models are built, the work measures what they rest on. The bare board scan's scale holds, its solder side lies on its component side, and the European board's chips sit where the American board's do. The case does not. Read from the two corner photographs, its depth came out well short of the published figure, and Dan ruled that this measured the camera, not the case. Judged again on the design patent's drawings, it is still just over the limit, and the European front's band differs from the drawing's by more than its limit too. Both stops stand, and the models wait on Dan. On the way, the cartridge connector's fingers turned out to be on a metric pitch, not the tenth of an inch the plan assumed."
 order: 30
 ---
 
@@ -18,12 +18,18 @@ design's decisions in short, then task 0: the inputs checked, and the eight
 checks everything rests on, each judged against thresholds the plan set
 before any measuring.
 
-**Task 0 crossed a STOP threshold.** The case's depth to width, from the two
-corner photographs with the camera the plan set, is 8.8 per cent short of the
-published 203.2 / 254 on the worse photograph, where the plan stops at 3. The
-plan says what that stops: the outside, and so every model, because a cased
-machine claims both views or none. The machine still counts. Every other
-check was measured too, and none of them stops. The figures are below.
+**Task 0 crossed a STOP threshold, and after the plan was revised it crosses
+two.** The case's depth to width, from the two corner photographs with the
+camera the plan set, is 8.8 per cent short of the published 203.2 / 254 on
+the worse photograph, where the plan stops at 3. Dan ruled the same day that
+the check measured the camera, not the case, and the plan was revised to
+judge the case on the design patent's orthographic views, with the same
+limits ("The case revised, later the same day", below). On the patent the
+top view is 3.46 per cent short: still a STOP. The PAL front, judged on O4
+against the patent's front view, stops too, on its label band. The plan says
+what they stop: the outside, and so every model, because a cased machine
+claims both views or none; and the PAL models. The machine still counts. The
+first figures are below as they were measured, then the revision.
 
 ## The design's decisions
 
@@ -163,8 +169,9 @@ apart, against 88.9 if they were on 2.54. The KiCad redrawing agrees to the
 hundredth: P1's pads 2.5 mm apart, its end pads 3 mm wide, 88.5 mm end to end.
 The check above is judged as the plan words it, with the fingers at 2.54 mm.
 Without them, the six other rows' median is 0.032 mm and x is 11.8004. Either
-way it passes; the plan's row should name the fingers' real pitch, which is a
-revision for the plan, not for me.
+way it passes. Taking the fingers at 2.54 mm moved the x scale by 0.11 per
+cent (11.7871 against 11.8004), so the plan's task 2 now says its frame takes
+x from the rows without the fingers, or with their true pitch and widths.
 
 **2. Scale y: between pass and stop.** Ten footprints, each held out in turn,
 their row spacing on drill centres: median error 0.566 per cent, largest 1.158
@@ -273,9 +280,9 @@ explain, and task 2 measures the outline properly.
   wants 1.3 (1.5) and the edge is 0.5 (0.0). Vertical lines that stay vertical
   in a picture taken from above are what a perspective correction does, or a
   crop far off centre; either breaks the camera the plan set.
-- The research read 0.78 off the patent's top view, and the published figures
-  give 0.80; the photographs give 0.73 with the camera that makes the top a
-  rectangle.
+- The published figures give 0.80, and the patent's top view, measured after
+  the revision below, 0.77; the photographs give 0.73 with the camera that
+  makes the top a rectangle.
 
 So the stop is real and stays recorded, and the question is the plan's to
 answer. What I would try, for the plan's next version to choose:
@@ -300,6 +307,107 @@ machine claims both views or none; the machine still counts. The checks the
 inside rests on (the scale, the solder side, the PAL layout) pass or sit
 between pass and stop, and none of them stops on its own. Whether the inside
 goes on depends on Dan's answer about the outside.
+
+## The case revised, later the same day
+
+Dan ruled on 5 October 2026, after an independent review of the figures
+above: the case depth check judged the wrong quantity. It measured the
+camera, not the case. The two photographs fail their camera's own check (the
+vertical edges), they are nearly the same view, and they put depth to width,
+height to width and the front band 3 to 7 per cent below the patent's. The
+STOP of -8.77 per cent stays on record as crossed, in `spike.json` under
+`case.depthToWidthErrPct` with the photographs' other figures, now recorded
+only, and the first eight verdicts are kept in `spike.json`'s `revision`. No
+limit moved. The plan's three rows, and task 0's steps 11 and 12, now say:
+
+- **Case depth to width**, on the patent's orthographic views (FIG 5 top,
+  FIG 6 bottom, FIG 7 side over FIG 3 front), against the published 0.800,
+  judged on the worst view: pass within 1.5 per cent, STOP over 3.
+- **Case height to width**, on FIG 3 and FIG 7, against the published
+  88.9 / 254 = 0.350, the same limits. The row on the two photographs'
+  heights agreeing is dropped as not meaningful; its figure (0.67 per cent, a
+  pass) stays recorded.
+- **The PAL front**, O4 against the patent's FIG 3 front, O2-FL recorded. A
+  pass needs at least two measured ratios, each within 2 per cent; a STOP is
+  any over 4. The verdict function and its test now say so, and a test shows
+  one ratio alone can never pass.
+
+Two of the first figures rested on the same faulty camera, and are recorded,
+not judged, for that reason: the case height "pass" (the bottom edge read
+through the cameras' face plane) and O2-FL's label band, read through the
+camera's plane of the front.
+
+**What the photographs' own records say.** Both files' XMP has Camera Raw's
+PerspectiveVertical="0", PerspectiveHorizontal="0" and HasCrop="False", with
+LensProfileEnable="1"; the Software is Adobe Photoshop CS5 Windows, and the
+Exif SubjectDistance is 2.24 m (read on 5 October 2026 from the files'
+metadata). So the crop was made in Photoshop, not in Camera Raw, and Camera
+Raw corrected no perspective; a transform in Photoshop itself is not ruled
+out. The same is now in `docs/nes/facts/models.md`.
+
+### The patent, measured
+
+`spike.py` takes the PDF's pages 3 and 4 (the patent's sheets 2 and 3) out at
+their own 300 dpi with `pdfimages` (poppler), the one program outside Python
+it reads with. Each view is a box marked by hand round its drawing. Across,
+the view's extent is its outermost drawn pixels; down, from the outer edge of
+its first long line to that of its last, a long line being a row at least
+half as black as the blackest, so the buttons in the top view and the feet in
+the front and side views are left out; the overall extents are recorded
+beside. Measured on 5 October 2026 with `cd tools/nes-model &&
+NES_MODEL_INPUTS=/tmp/nes-inputs /tmp/nesvenv/bin/python spike.py` (exit 3),
+figures in `spike.json`'s `case.patent`:
+
+| View | Depth to width | Against 0.800 |
+|---|---|---|
+| FIG 5, top | 0.7723 | -3.46 per cent |
+| FIG 6, bottom | 0.7758 | -3.02 per cent |
+| FIG 7 side over FIG 3 front | 0.7914 | -1.07 per cent |
+
+| View | Height to width | Against 0.350 |
+|---|---|---|
+| FIG 3, front | 0.3525 | +0.72 per cent |
+| FIG 7, side | 0.3534 | +0.97 per cent |
+
+With the feet, the heights are 0.3682 and 0.3709.
+
+**Case depth: STOP, as revised.** The worst view, the top, is 3.46 per cent
+short, over the 3 per cent stop; the bottom view is 3.02, also over it. The
+ruling expected about 0.78 and so a result between pass and stop; the drawing
+gives 0.772 to 0.776 on the two plan views. It is recorded as a STOP, not
+tuned. Two things about it, neither a reason to move anything: a design
+patent's drawings need not be exactly to scale, and the side view over the
+front, from two drawings on different sheets, gives 0.791, so the patent does
+not agree with itself to better than about 2.5 per cent.
+
+**Case height: passes, as revised.** +0.97 per cent at the worst, within 1.5,
+on the body without its feet.
+
+**PAL front: STOP, as revised.** On the patent's FIG 3 (the top shell's sides
+at 653.0 and 1786.5 px, its top and the seam, the door's left side and
+the black strip's left edge, POWER's and RESET's middle outlines), against O4
+as measured before:
+
+| Ratio, over the face's width | Patent FIG 3 | O4 | O4 against the patent | O2-FL, recorded |
+|---|---|---|---|---|
+| Door width | 0.5823 | 0.5764 | -1.01 per cent | 0.5744 |
+| Label band height | 0.1719 | 0.1580 | -8.08 per cent | 0.1637 |
+| Buttons' span | 0.2144 | not on O4 | not measured | 0.2611 |
+
+Two ratios are measured, and the label band is over the 4 per cent stop. The
+two photographs agree with each other better than either does with the
+drawing (O4 against O2-FL -3.49 per cent; O2-FL against the patent -4.75),
+and O4's band rests on taking O4 as straight on, so the cause may be the
+drawing's proportions as much as the PAL shell; the check cannot tell. O2-FL's
+buttons' span, +21.8 per cent against the patent, is a poor figure in any case:
+the buttons stand out of the face, and it was read through the face's plane.
+
+### Where this leaves the plan
+
+Two STOPs stand, as revised: the case depth, which stops the outside and so
+every model, and the PAL front, which stops the PAL models. The inside's
+checks (scale, solder side, PAL layout) pass or sit between pass and stop.
+What happens next is Dan's call.
 
 ## Mistakes
 
@@ -331,3 +439,9 @@ the verdicts test on a changed verdict in `spike.json`.
 `tests/nes-spike-verdicts.test.mjs` failed on the missing module, then 3
 passed. `cd site && npm run build && npm test`: 301 passed, one to-do, none
 failed, so both workflows' floors are raised from 292 to 301.
+
+After the revision: pytest 23 passed again; `node --test
+tests/nes-spike-verdicts.test.mjs` 4 passed, the new test seen to fail with
+the two-ratio rule taken out of the verdict function; `cd site && npm run
+build && npm test`: 302 passed, one to-do, none failed, so both floors are
+raised to 302.

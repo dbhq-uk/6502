@@ -26,6 +26,99 @@
    "fl": 0.3355
   },
   "heightToWidthAgreePct": 0.6725,
+  "patent": {
+   "depthToWidth": {
+    "bottom": 0.7758,
+    "sideOverFront": 0.7914,
+    "top": 0.7723
+   },
+   "depthToWidthErrPct": -3.4632,
+   "depthToWidthErrPctEach": {
+    "bottom": -3.0191,
+    "sideOverFront": -1.0689,
+    "top": -3.4632
+   },
+   "front": {
+    "bandHeight": 0.1719,
+    "buttonsSpan": 0.2144,
+    "doorWidth": 0.5823,
+    "faceWidthPx": 1133.5,
+    "linesPx": {
+     "bandTop": 479.0,
+     "doorLeft": 801.2,
+     "doorRight": 1461.2,
+     "faceLeft": 653.0,
+     "faceRight": 1786.5,
+     "powerLeft": 836.5,
+     "resetRight": 1079.5,
+     "seam": 673.8571
+    }
+   },
+   "heightToWidth": {
+    "front": 0.3525,
+    "side": 0.3534
+   },
+   "heightToWidthErrPct": 0.9723,
+   "heightToWidthErrPctEach": {
+    "front": 0.723,
+    "side": 0.9723
+   },
+   "heightToWidthWithFeet": {
+    "front": 0.3682,
+    "side": 0.3709
+   },
+   "published": {
+    "depthToWidth": 0.8,
+    "heightToWidth": 0.35
+   },
+   "views": {
+    "FIG 3": {
+     "acrossPx": 1146,
+     "box": [
+      647,
+      478,
+      1792,
+      881
+     ],
+     "downPx": 404,
+     "overallDownPx": 422
+    },
+    "FIG 5": {
+     "acrossPx": 1155,
+     "box": [
+      641,
+      1832,
+      1795,
+      2723
+     ],
+     "downPx": 892,
+     "overallDownPx": 899
+    },
+    "FIG 6": {
+     "acrossPx": 1151,
+     "box": [
+      744,
+      417,
+      1894,
+      1309
+     ],
+     "downPx": 893,
+     "overallDownPx": 899
+    },
+    "FIG 7": {
+     "acrossPx": 907,
+     "box": [
+      870,
+      1583,
+      1776,
+      1987
+     ],
+     "downPx": 405,
+     "overallDownPx": 425
+    }
+   }
+  },
+  "photographsRecordedOnly": "The figures at this level are the corner photographs', each through its camera: recorded, not judged, since the plan was revised on 5 October 2026 (see revision). The judged figures are under patent.",
   "photos": {
    "O2-BR": {
     "base": {
@@ -367,32 +460,41 @@
   },
   "measured": [
    "door width",
-   "label strip height"
+   "label band height"
   ],
   "notMeasured": [
    {
     "ratio": "buttons span",
-    "why": "O4 is the PAL top shell taken off its console; POWER and RESET are on the bottom shell, which O4 does not show. Measured on O2-FL only."
+    "why": "O4 is the PAL top shell taken off its console; POWER and RESET are on the bottom shell, which O4 does not show. Measured on O2-FL and the patent, recorded."
    }
   ],
   "ratioErrPct": [
-   0.3537,
-   -3.4912
+   -1.0081,
+   -8.0791
   ],
   "ratios": [
    {
     "O2-FL": 0.5744,
+    "O2-FLAgainstPatentPct": -1.357,
     "O4": 0.5764,
+    "O4AgainstO2-FLPct": 0.3537,
+    "patentFig3": 0.5823,
     "ratio": "door width"
    },
    {
     "O2-FL": 0.1637,
+    "O2-FLAgainstPatentPct": -4.7539,
     "O4": 0.158,
-    "ratio": "label strip height"
+    "O4AgainstO2-FLPct": -3.4912,
+    "patentFig3": 0.1719,
+    "ratio": "label band height"
    },
    {
     "O2-FL": 0.2611,
+    "O2-FLAgainstPatentPct": 21.8018,
     "O4": null,
+    "O4AgainstO2-FLPct": null,
+    "patentFig3": 0.2144,
     "ratio": "buttons span"
    }
   ],
@@ -557,6 +659,44 @@
    "p90": 0.3977
   },
   "unmatched": []
+ },
+ "revision": {
+  "date": "2026-10-05",
+  "firstVerdicts": [
+   {
+    "check": "scale x",
+    "verdict": "pass"
+   },
+   {
+    "check": "scale y",
+    "verdict": "between pass and stop"
+   },
+   {
+    "check": "x against y",
+    "verdict": "pass"
+   },
+   {
+    "check": "solder side",
+    "verdict": "pass"
+   },
+   {
+    "check": "PAL layout",
+    "verdict": "pass"
+   },
+   {
+    "check": "case depth",
+    "verdict": "STOP"
+   },
+   {
+    "check": "case height, the two photographs",
+    "verdict": "pass"
+   },
+   {
+    "check": "PAL front",
+    "verdict": "between pass and stop"
+   }
+  ],
+  "note": "The case depth check as first written, on the corner photographs O2-FL and O2-BR each through its camera, crossed its STOP: -8.77 per cent on O2-BR (case.depthToWidthErrPct, kept with the photographs' other figures, recorded only). Dan ruled on 5 October 2026, after an independent review, that it judged the wrong quantity: it measured the camera, not the case. The plan (docs/superpowers/plans/2026-10-05-nes-models.md, Global Constraints, the rows revised that day) now judges the case's depth and height on the design patent's orthographic views (case.patent), against the same 1.5 and 3 per cent, drops the row on the two photographs' heights agreeing, and judges the PAL front on O4 against the patent's front view, on at least two measured ratios."
  },
  "scale": {
   "fingers": {
@@ -1178,12 +1318,12 @@
    "verdict": "STOP"
   },
   {
-   "check": "case height, the two photographs",
+   "check": "case height",
    "verdict": "pass"
   },
   {
    "check": "PAL front",
-   "verdict": "between pass and stop"
+   "verdict": "STOP"
   }
  ]
 }

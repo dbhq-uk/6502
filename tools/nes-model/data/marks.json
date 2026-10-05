@@ -2172,8 +2172,96 @@
   "notMeasured": [
    {
     "ratio": "buttons span",
-    "why": "O4 is the PAL top shell taken off its console; POWER and RESET are on the bottom shell, which O4 does not show. Measured on O2-FL only."
+    "why": "O4 is the PAL top shell taken off its console; POWER and RESET are on the bottom shell, which O4 does not show. Measured on O2-FL and the patent, recorded."
    }
   ]
+ },
+ "patent": {
+  "what": "O1, the design patent: each view a box marked by hand round its drawing, on the PDF page pdfimages takes it from (page 3 is sheet 2, page 4 sheet 3, 2320 by 3408 px at 300 dpi), read off the sheets shrunk three times and checked on crops at full scale. front: lines on FIG 3, the front view, each a place marked by hand on a crop enlarged four times with a 5 px grid, and the run along it that is read: the top shell's two sides, its top and the seam below it (two drawn lines, read together), the door's left side (two lines) and the black strip's left edge (two lines), POWER's left and RESET's right edges (each the middle of the three lines drawn round each button).",
+  "pages": {
+   "FIG 3": 3,
+   "FIG 5": 3,
+   "FIG 6": 4,
+   "FIG 7": 4
+  },
+  "boxes": {
+   "FIG 3": [
+    600,
+    440,
+    1870,
+    960
+   ],
+   "FIG 5": [
+    600,
+    1780,
+    1870,
+    2790
+   ],
+   "FIG 6": [
+    700,
+    395,
+    1920,
+    1340
+   ],
+   "FIG 7": [
+    820,
+    1560,
+    1810,
+    2020
+   ]
+  },
+  "front": {
+   "faceLeft": {
+    "line": "vertical",
+    "at": 653,
+    "from": 520,
+    "to": 650
+   },
+   "faceRight": {
+    "line": "vertical",
+    "at": 1786,
+    "from": 520,
+    "to": 650
+   },
+   "bandTop": {
+    "line": "horizontal",
+    "at": 479.5,
+    "from": 800,
+    "to": 1400
+   },
+   "seam": {
+    "line": "horizontal",
+    "at": 674.5,
+    "from": 800,
+    "to": 1400,
+    "half": 6
+   },
+   "doorLeft": {
+    "line": "vertical",
+    "at": 802.5,
+    "from": 500,
+    "to": 600
+   },
+   "doorRight": {
+    "line": "vertical",
+    "at": 1461.5,
+    "from": 500,
+    "to": 600
+   },
+   "powerLeft": {
+    "line": "vertical",
+    "at": 836.5,
+    "from": 765,
+    "to": 795,
+    "half": 1.5
+   },
+   "resetRight": {
+    "line": "vertical",
+    "at": 1079.5,
+    "from": 765,
+    "to": 795,
+    "half": 1.5
+   }
+  }
  }
 }

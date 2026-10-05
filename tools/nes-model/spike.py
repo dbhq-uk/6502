@@ -23,8 +23,10 @@ a figure crosses a STOP threshold.
    chequerboard of 20 mm blocks. The outlier rule is the plan's.
 3. The PAL layout: I3's parts against I1-front's by a homography, each part
    held out in turn.
-4. The case: O2-FL and O2-BR, each with its camera, recover the box.
-5. The PAL front: O4 against O2-FL's front face rectified.
+4. The case: its depth and height over its width on the design patent's
+   orthographic views (O1), judged; from O2-FL and O2-BR, each with its
+   camera, recorded only (the plan as revised on 5 October 2026).
+5. The PAL front: O4 against the patent's front view; O2-FL recorded only.
 """
 import json
 import math
@@ -36,11 +38,15 @@ import common
 
 # The plan's thresholds, as set before the measurements (the same numbers as
 # site/tests/nes-spike-verdicts.mjs).
+# Revised 5 October 2026 after task 0's figures were seen (Dan): the case is
+# judged on the patent's orthographic views, its height with the depth's
+# limits, and the PAL front on O4 against the patent's front, on at least two
+# measured ratios. No limit moved.
 PASS = {'xMedian': 0.15, 'yMedianPct': 0.5, 'solderMedian': 0.20, 'solderP90': 0.40, 'palMedian': 1.0, 'palMax': 2.0,
-        'depthPct': 1.5, 'heightAgreePct': 2.0, 'palFrontPct': 2.0}
+        'depthPct': 1.5, 'heightPct': 1.5, 'palFrontPct': 2.0}
 STOP = {'xMedian': 0.25, 'yMedianPct': 1.0, 'ratioPct': 1.5, 'solderMedian': 0.30, 'solderP90': 0.60, 'palAny': 3.0,
-        'depthPct': 3.0, 'palFrontPct': 4.0}
-MIN = {'xRows': 4, 'yFootprints': 8, 'solderHoles': 150, 'palParts': 10}
+        'depthPct': 3.0, 'heightPct': 3.0, 'palFrontPct': 4.0}
+MIN = {'xRows': 4, 'yFootprints': 8, 'solderHoles': 150, 'palParts': 10, 'palFrontRatios': 2}
 
 PITCH = 2.54
 STATED_DPI = 300
@@ -50,7 +56,7 @@ SCALED_TO_MM = 48.26                     # each scored row's error is scaled to 
 MATCH_GATE_MM = 1.0                      # under half the pitch, set before matching
 BLOCK_MM = 20.0
 TIE_MM = 0.005                           # two fits' held-out medians this close are a tie; the simpler wins
-CASE_WIDTH_MM, CASE_DEPTH_MM = 254.0, 203.2
+CASE_WIDTH_MM, CASE_DEPTH_MM, CASE_HEIGHT_MM = 254.0, 203.2, 88.9     # published, not Nintendo's (docs/nes/facts/models.md, D1)
 
 
 def marks():
@@ -655,6 +661,7 @@ def case():
     worse = max(errs.values(), key=abs)
     hw = {'fl': fl['heightToWidth'], 'br': br['heightToWidth']}
     return {
+        'photographsRecordedOnly': 'The figures at this level are the corner photographs\', each through its camera: recorded, not judged, since the plan was revised on 5 October 2026 (see revision). The judged figures are under patent.',
         'depthToWidth': {'fl': fl['depthToWidth'], 'br': br['depthToWidth']},
         'depthToWidthErrPct': worse,
         'depthToWidthErrPctEach': errs,
@@ -665,6 +672,97 @@ def case():
                     'used': {'fl': fl['focalPx']['used'], 'br': br['focalPx']['used']}},
         'photos': {'O2-FL': fl, 'O2-BR': br},
     }, fl_ctx
+
+
+# --- 4b. the case on the design patent (O1), as the plan was revised on 5 October 2026 ---------
+#
+# The patent's drawings are orthographic, so they need no camera. Its sheets
+# 2 and 3 (the PDF's pages 3 and 4) are taken out at their own 300 dpi by
+# pdfimages (poppler), which is the one program outside Python this reads
+# with. Each view is a box marked by hand round the drawing (data/marks.json
+# "patent"), its speckle under 50 px dropped. Across, a view's extent is its
+# outermost drawn pixels: nothing stands out sideways in these views. Down,
+# it is from the outer edge of its first long line to the outer edge of its
+# last (a long line: a row at least half as black as the blackest row), so
+# what stands out of the body (the buttons in the top view, the feet in the
+# front and side views) is left out; the overall extents are recorded beside.
+
+def patent_pages():
+    import shutil
+    import subprocess
+    import tempfile
+    from PIL import Image
+    if not shutil.which('pdfimages'):
+        sys.exit('pdfimages (poppler-utils) is needed to read O1, the patent')
+    pdf = common.original('O1')
+    with tempfile.TemporaryDirectory() as tmp:
+        subprocess.run(['pdfimages', '-png', '-f', '3', '-l', '4', str(pdf), f'{tmp}/p'], check=True)
+        return {3: np.asarray(Image.open(f'{tmp}/p-000.png').convert('L')) < 128,
+                4: np.asarray(Image.open(f'{tmp}/p-001.png').convert('L')) < 128}
+
+
+def view_extent(page, box):
+    import cv2
+    x0, y0, x1, y1 = box
+    b = page[y0:y1, x0:x1].astype(np.uint8)
+    n, lab, st, _ = cv2.connectedComponentsWithStats(b, 8)
+    keep = np.isin(lab, [i for i in range(1, n) if st[i, 4] >= 50])
+    rows = keep.sum(1)
+    long_rows = np.nonzero(rows >= 0.5 * rows.max())[0]
+    ys, xs = np.nonzero(keep)
+    across = int(xs.max() - xs.min() + 1)
+    down = int(long_rows.max() - long_rows.min() + 1)
+    return {'acrossPx': across, 'downPx': down, 'overallDownPx': int(ys.max() - ys.min() + 1),
+            'box': [int(x0 + xs.min()), int(y0 + long_rows.min()), int(x0 + xs.max()), int(y0 + long_rows.max())]}
+
+
+def line_place(page, feature, half=5):
+    """A drawn line's place: in each row (or column) along it, the mean of
+    its black pixels within `half` px of the mark; the median of those."""
+    at, lo, hi = feature['at'], feature['from'], feature['to']
+    h = feature.get('half', half)
+    vals = []
+    for k in range(int(lo), int(hi) + 1):
+        a, b = int(round(at - h)), int(round(at + h)) + 1
+        seg = page[k, a:b] if feature['line'] == 'vertical' else page[a:b, k]
+        idx = np.nonzero(seg)[0]
+        if len(idx):
+            vals.append(a + idx.mean())
+    return float(np.median(vals))
+
+
+def patent():
+    m = marks()['patent']
+    pages = patent_pages()
+    v = {k: view_extent(pages[m['pages'][k]], m['boxes'][k]) for k in m['boxes']}
+    front_w = v['FIG 3']['acrossPx']
+    d2w = {'top': v['FIG 5']['downPx'] / v['FIG 5']['acrossPx'],
+           'bottom': v['FIG 6']['downPx'] / v['FIG 6']['acrossPx'],
+           'sideOverFront': v['FIG 7']['acrossPx'] / front_w}
+    h2w = {'front': v['FIG 3']['downPx'] / front_w, 'side': v['FIG 7']['downPx'] / front_w}
+    d_target, h_target = CASE_DEPTH_MM / CASE_WIDTH_MM, CASE_HEIGHT_MM / CASE_WIDTH_MM
+    d_err = {k: 100 * (x - d_target) / d_target for k, x in d2w.items()}
+    h_err = {k: 100 * (x - h_target) / h_target for k, x in h2w.items()}
+    page = pages[m['pages']['FIG 3']]
+    f = {k: line_place(page, spec) for k, spec in m['front'].items()}
+    face = f['faceRight'] - f['faceLeft']
+    front = {'faceWidthPx': face,
+             'doorWidth': (f['doorRight'] - f['doorLeft']) / face,
+             'bandHeight': (f['seam'] - f['bandTop']) / face,
+             'buttonsSpan': (f['resetRight'] - f['powerLeft']) / face,
+             'linesPx': f}
+    return {
+        'views': v,
+        'depthToWidth': d2w,
+        'depthToWidthErrPctEach': d_err,
+        'depthToWidthErrPct': max(d_err.values(), key=abs),
+        'heightToWidth': h2w,
+        'heightToWidthErrPctEach': h_err,
+        'heightToWidthErrPct': max(h_err.values(), key=abs),
+        'heightToWidthWithFeet': {'front': v['FIG 3']['overallDownPx'] / front_w, 'side': v['FIG 7']['overallDownPx'] / front_w},
+        'published': {'depthToWidth': d_target, 'heightToWidth': h_target},
+        'front': front,
+    }
 
 
 # --- 5. the PAL front -------------------------------------------------------------------------
@@ -678,13 +776,14 @@ def case():
 # directly. The band's height over its width needs the band's real shape:
 # on O2-FL from the case's camera (the vertical plane through the top's front
 # edge); on O4, which is taken straight on, from its picture, its mean height
-# over its mean width in pixels.
+# over its mean width in pixels; on the patent's front view (FIG 3), from the
+# drawing, which is orthographic.
 
 def band_u(G, top, bottom, line):
     return float(np.mean([common.transform('homography', {'H': G}, [meet(line, e)])[0][0] for e in (top, bottom)]))
 
 
-def pal_front(fl_ctx):
+def pal_front(fl_ctx, pat_front):
     m = marks()['palFront']
     L, K, n, X0, face, W, ln_case, below = fl_ctx
     f = m['O2-FL']
@@ -711,13 +810,17 @@ def pal_front(fl_ctx):
     height4 = (np.hypot(*(C4[3] - C4[0])) + np.hypot(*(C4[2] - C4[1]))) / 2
     o4 = {'doorWidth': door4, 'bandHeight': float(height4 / width4), 'buttonsSpan': None, 'cornersPx': C4.tolist(), 'lines': fit4}
 
-    names = ['door width', 'label strip height', 'buttons span']
+    # Judged (the plan as revised on 5 October 2026): O4 against the patent's
+    # front view. Recorded only: O2-FL against the patent, and O4 against O2-FL.
+    names = ['door width', 'label band height', 'buttons span']
     keys = ['doorWidth', 'bandHeight', 'buttonsSpan']
+    pct = lambda a, b: None if a is None or b is None else 100 * (a - b) / b
     ratios, errs, measured = [], [], []
     for name, k in zip(names, keys):
-        ratios.append({'ratio': name, 'O2-FL': fl[k], 'O4': o4[k]})
-        if o4[k] is not None and fl[k] is not None:
-            errs.append(100 * (o4[k] - fl[k]) / fl[k])
+        ratios.append({'ratio': name, 'patentFig3': pat_front[k], 'O4': o4[k], 'O2-FL': fl[k],
+                       'O2-FLAgainstPatentPct': pct(fl[k], pat_front[k]), 'O4AgainstO2-FLPct': pct(o4[k], fl[k])})
+        if o4[k] is not None:
+            errs.append(pct(o4[k], pat_front[k]))
             measured.append(name)
     return {'ratios': ratios, 'ratioErrPct': errs, 'measured': measured, 'notMeasured': m['notMeasured'],
             'what': m['what'], 'O2-FL': fl, 'O4': o4}
@@ -729,9 +832,10 @@ def verdicts(s):
     def v(ok, stop):
         return 'STOP' if stop else ('pass' if ok else 'between pass and stop')
     sc, so, pal = s['scale'], s['solder']['heldOutMm'], s['palLayout']
-    depth = abs(s['case']['depthToWidthErrPct'])
-    agree = abs(s['case']['heightToWidthAgreePct'])
-    front = max(abs(x) for x in s['palFront']['ratioErrPct'])
+    depth = abs(s['case']['patent']['depthToWidthErrPct'])
+    height = abs(s['case']['patent']['heightToWidthErrPct'])
+    ratios = s['palFront']['ratioErrPct']
+    front = max(abs(x) for x in ratios) if ratios else 0.0
     return [
         {'check': 'scale x', 'verdict': v(sc['x']['scaledErrMm']['median'] <= PASS['xMedian'] and sc['x']['rows'] >= MIN['xRows'],
                                           sc['x']['scaledErrMm']['median'] > STOP['xMedian'])},
@@ -743,8 +847,8 @@ def verdicts(s):
         {'check': 'PAL layout', 'verdict': v(pal['heldOutMm']['median'] <= PASS['palMedian'] and pal['heldOutMm']['max'] <= PASS['palMax'] and pal['parts'] >= MIN['palParts'],
                                              pal['heldOutMm']['max'] > STOP['palAny'] or len(pal['unmatched']) > 0)},
         {'check': 'case depth', 'verdict': v(depth <= PASS['depthPct'], depth > STOP['depthPct'])},
-        {'check': 'case height, the two photographs', 'verdict': v(agree <= PASS['heightAgreePct'], False)},
-        {'check': 'PAL front', 'verdict': v(front <= PASS['palFrontPct'], front > STOP['palFrontPct'])},
+        {'check': 'case height', 'verdict': v(height <= PASS['heightPct'], height > STOP['heightPct'])},
+        {'check': 'PAL front', 'verdict': v(front <= PASS['palFrontPct'] and len(ratios) >= MIN['palFrontRatios'], front > STOP['palFrontPct'])},
     ]
 
 
@@ -789,6 +893,28 @@ ABOUT = ('Task 0 of the NES models plan: the eight checks the two models rest on
          'date of the journal entry that quotes it (docs/journal/2026-10-05-the-nes-models.md).')
 
 
+REVISION = {
+    'date': '2026-10-05',
+    'note': ('The case depth check as first written, on the corner photographs O2-FL and O2-BR each through its camera, '
+             'crossed its STOP: -8.77 per cent on O2-BR (case.depthToWidthErrPct, kept with the photographs\' other figures, '
+             'recorded only). Dan ruled on 5 October 2026, after an independent review, that it judged the wrong quantity: '
+             'it measured the camera, not the case. The plan (docs/superpowers/plans/2026-10-05-nes-models.md, Global '
+             'Constraints, the rows revised that day) now judges the case\'s depth and height on the design patent\'s '
+             'orthographic views (case.patent), against the same 1.5 and 3 per cent, drops the row on the two photographs\' '
+             'heights agreeing, and judges the PAL front on O4 against the patent\'s front view, on at least two measured ratios.'),
+    'firstVerdicts': [
+        {'check': 'scale x', 'verdict': 'pass'},
+        {'check': 'scale y', 'verdict': 'between pass and stop'},
+        {'check': 'x against y', 'verdict': 'pass'},
+        {'check': 'solder side', 'verdict': 'pass'},
+        {'check': 'PAL layout', 'verdict': 'pass'},
+        {'check': 'case depth', 'verdict': 'STOP'},
+        {'check': 'case height, the two photographs', 'verdict': 'pass'},
+        {'check': 'PAL front', 'verdict': 'between pass and stop'},
+    ],
+}
+
+
 def main():
     F = common.read_rgb('I1-front')
     LF, A, B = common.oklab(F)
@@ -806,9 +932,11 @@ def main():
     so['drillsLost'] = {'I1-front': lost_f, 'I1-back': lost_b}
     pal = pal_layout(F, sx, sy)
     cs, fl_ctx = case()
-    pf = pal_front(fl_ctx)
+    cs['patent'] = patent()
+    pf = pal_front(fl_ctx, cs['patent']['front'])
     s = {'about': ABOUT, 'scale': sc, 'outline': ol, 'solder': so, 'palLayout': pal, 'case': cs, 'palFront': pf}
     s['verdicts'] = verdicts(s)
+    s['revision'] = REVISION
     common.write_data('spike.json', s)
     for v in s['verdicts']:
         print(f"{v['check']}: {v['verdict']}")

@@ -24,7 +24,7 @@ So far (task 0) it holds:
 |---|---|
 | `common.py` | Where things are; the inputs and their hashes; finding the pads on a scan; reading the KiCad redrawing's footprints and outline; fitting one set of points to another (similarity, affine, homography, or a homography and a cubic correction) with the error measured on points held out of the fit; writing the data files. Adapted from the BBC Micro's |
 | `verify.py` | Checks every input against its SHA-256 |
-| `spike.py` | Task 0's eight checks: the scan's x and y scales and the two against each other, the solder side's registration, the PAL board's layout against the scan's, the case's depth and height from the corner photographs, and the PAL front against the NTSC front, each judged against the plan's thresholds. Kept as a record; not part of the run |
+| `spike.py` | Task 0's eight checks: the scan's x and y scales and the two against each other, the solder side's registration, the PAL board's layout against the scan's, the case's depth and height on the design patent's orthographic views (the corner photographs' figures recorded only, since the plan's revision of 5 October 2026), and the PAL front against the patent's front view, each judged against the plan's thresholds. Kept as a record; not part of the run |
 | `tests/test_common.py` | pytest, on made-up inputs |
 | `data/` | See [`data/README.md`](data/README.md) |
 
@@ -58,7 +58,9 @@ test holds equal to it.
 ## Running it
 
 Python 3.12 with numpy, opencv-python-headless, Pillow, scipy and pytest, in a
-virtual environment so nothing touches the system or the site:
+virtual environment so nothing touches the system or the site, and
+`pdfimages` from poppler-utils, which `spike.py` uses to take the patent's
+sheets out of O1 at their own resolution:
 
 ```
 python3 -m venv /tmp/nesvenv
@@ -78,7 +80,8 @@ cd tools/nes-model && /tmp/nesvenv/bin/python spike.py      # writes data/spike.
 non-zero when a hash differs, or when an input it was asked for by name is
 missing; an input not fetched yet is only reported. `spike.py` takes about
 five minutes; it exits 3 when a figure crosses one of task 0's STOP
-thresholds (it does: the case's depth, see `data/spike.json`). `out/` is
+thresholds (it does: the case's depth and the PAL front, both as revised, see
+`data/spike.json`). `out/` is
 git-ignored.
 
 The versions it was run with, and every figure it printed, are in the journal
