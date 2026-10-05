@@ -85,6 +85,13 @@ public sealed class Ula
     public byte Status =>
         (byte)(0x80 | (_sources & SourceMask) | (_powerOn ? PowerOnBit : 0) | (Irq ? MasterIrqBit : 0));
 
+    /// <summary>
+    /// What listens on the cassette registers, if anything (<see cref="ITapeTap"/>). Null by
+    /// default, and then $FE04 cannot be read and the bus answers it as any other unreadable
+    /// register.
+    /// </summary>
+    internal ITapeTap? Tap { get; set; }
+
     /// <summary>The CPU's IRQ line: an enabled source is set (s6a). Current as of the last catch-up.</summary>
     public bool Irq => (_sources & _enable) != 0;
 

@@ -45,18 +45,24 @@ public sealed class ElectronSession
 
     public ElectronMachine Machine { get; }
 
+    /// <summary>
+    /// Called after every instruction while set, for a test-only device that acts at its own
+    /// times (<see cref="TapeProbe"/>). Null, the default, runs the machine in whole runs.
+    /// </summary>
+    internal Action? AfterEachStep { get; set; }
+
     /// <summary>Switches on and runs; the default is one second of machine time (<c>ula.md</c> s10a, s10b).</summary>
     public ElectronSession Boot(long cycles = 2_000_000)
     {
         Machine.PowerOn();
-        Machine.Run(cycles);
+        Run(cycles);
         return this;
     }
 
     /// <summary>Runs for at least <paramref name="cycles"/> more CPU cycles.</summary>
     public ElectronSession RunFor(long cycles)
     {
-        Machine.Run(cycles);
+        Run(cycles);
         return this;
     }
 
@@ -83,14 +89,14 @@ public sealed class ElectronSession
             }
 
             keyboard.Down(press.Key);
-            Machine.Run(HoldCycles);
+            Run(HoldCycles);
             keyboard.Up(press.Key);
             if (press.Shift)
             {
                 keyboard.Up(ElectronKey.Shift);
             }
 
-            Machine.Run(RestCycles);
+            Run(RestCycles);
         }
 
         return this;
@@ -137,7 +143,7 @@ public sealed class ElectronSession
         string[] rows = [];
         while (Machine.Cycles < end)
         {
-            Machine.Run(Field);
+            Run(Field);
             rows = ScreenText();
             bool atPrompt = AtPrompt(rows, OsCursor);
             if (atPrompt && previous is not null && rows.SequenceEqual(previous))
@@ -158,6 +164,23 @@ public sealed class ElectronSession
     {
         int last = Array.FindLastIndex(rows, r => r.TrimEnd().Length > 0);
         return last >= 0 && rows[last].TrimEnd() == ">" && cursor == (1, last);
+    }
+
+    /// <summary>Runs whole instructions for at least <paramref name="cycles"/> cycles, calling <see cref="AfterEachStep"/> after each if it is set.</summary>
+    private void Run(long cycles)
+    {
+        if (AfterEachStep is not { } after)
+        {
+            Machine.Run(cycles);
+            return;
+        }
+
+        long end = Machine.Cycles + cycles;
+        while (Machine.Cycles < end)
+        {
+            Machine.Step();
+            after();
+        }
     }
 
     private static Dictionary<char, (ElectronKey, bool)> MakeKeys()
