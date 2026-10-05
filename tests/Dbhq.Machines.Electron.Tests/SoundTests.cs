@@ -96,8 +96,8 @@ public class SoundTests
     public void TheStartUpBeepTogglesTheOutputAtAnAudiblePitch()
     {
         // The beep is OSWRCH 7 (s8, from ROM $DA3F). A property of the ROM and not a number from
-        // the model: typing VDU 7 makes the output toggle, and the counter the OS gave it, whenever
-        // it toggled, is a pitch within what a person hears, 20 Hz to 20 kHz, by the sheet's
+        // the model: typing VDU 7 makes the output toggle, and the counter the OS gave it, before and
+        // after any step in which it toggled, is a pitch within what a person hears, 20 Hz to 20 kHz, by the sheet's
         // formula 1 MHz / (32 x (S + 1)).
         ElectronSession session = new ElectronSession().Boot().RunUntilPrompt();
         session.Type("VDU 7");
@@ -122,7 +122,7 @@ public class SoundTests
         }
     }
 
-    /// <summary>Steps for <paramref name="cycles"/>, noting the counter in force whenever a step made the output toggle.</summary>
+    /// <summary>Steps for <paramref name="cycles"/>, noting the counter before and after any step that made the output toggle (a step can write it).</summary>
     private static void Observe(ElectronMachine machine, long cycles, SortedSet<int> counters, ref long toggles)
     {
         ElectronBus bus = machine.Bus;
@@ -136,6 +136,7 @@ public class SoundTests
             if (now > toggles && sounding)
             {
                 counters.Add(counter);
+                counters.Add(bus.Sound.Counter);
             }
 
             toggles = now;

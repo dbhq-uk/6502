@@ -808,12 +808,23 @@ item 9) or the form it takes in the page is a choice, the model chooses:
 
 - **A write to `$FE06` restarts the divider.** The next toggle is 32 x (S + 1)
   cycles after the write. Whether the real counter restarts there or only
-  reloads at its next toggle is not established.
+  reloads at its next toggle is not established. If the OS rewrote `$FE06` with an
+  unchanged value on its 100 Hz tick, each rewrite would lose the part of a half
+  period already counted: a note would sound flat by about 5.6 per cent (1,120 of
+  each 20,000 cycles lost) for the start-up beep's S of 58, whose half period is
+  1,888 cycles against a tick of 20,000. That is a possibility and not a finding: in the model's run of the
+  start-up beep the OS wrote `$FE06` once in sound mode, so none of that happens
+  there, and a `SOUND` with an envelope was not looked at.
 - **Entering sound mode keeps the output level and starts the divider.** The
   level is whatever the output last held, and the first toggle is 32 x (S + 1)
   cycles after the write that entered the mode. The real divider's phase on
   entry, and the level, are not established. A write to `$FE07` that stays in
   sound mode does not touch the divider.
+- **Software cannot set a level at S of 0 or 1.** The sheet says those two
+  values are usable as an on-off speaker bit (section 8, from S3), but the model
+  changes the level only by toggling, and at S of 0 or 1 it never toggles, so the
+  level stays as it was. How the real ULA lets a program set it is not in the
+  sources, and the brief fixed a constant level with no toggles.
 - **Outside sound mode the output holds its last level and does not toggle**,
   as the sheet says. Cassette output uses the same pin; that is the tape's.
 - **Power on is in sound mode with S of 0 and the level low**: silent. The

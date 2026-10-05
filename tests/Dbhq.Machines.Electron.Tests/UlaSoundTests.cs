@@ -302,6 +302,139 @@ public class UlaSoundTests
         Assert.All(rig.Drain(), s => Assert.Equal(0f, s));
     }
 
+    /// <summary>
+    /// Runs one script of register writes two ways and returns the samples of each: <c>whole</c>
+    /// jumps from write to write and drains once at the end, <c>split</c> is caught up in uneven
+    /// steps (primes, ending mid-sample, across toggles) and drained in pieces along the way. The
+    /// buffer must not depend on when the page reads it.
+    /// </summary>
+    private static (float[] Whole, float[] Split) RunBothWays(
+        (long Cycle, int Register, byte Value)[] script, long end, int rate = 44_100)
+    {
+        var whole = new Rig(rate);
+        foreach ((long cycle, int register, byte value) in script)
+        {
+            whole.RunTo(cycle);
+            whole.Write(register, value);
+        }
+
+        whole.RunTo(end);
+
+        var split = new Rig(rate);
+        long[] steps = [997, 1_009, 4_099, 12_343, 7, 25_013, 1_999, 31];
+        var pieces = new List<float>();
+        int next = 0;
+        int step = 0;
+        while (split.Now < end)
+        {
+            long target = Math.Min(split.Now + steps[step++ % steps.Length], end);
+            while (next < script.Length && script[next].Cycle <= target)
+            {
+                split.RunTo(script[next].Cycle);
+                split.Write(script[next].Register, script[next].Value);
+                next++;
+            }
+
+            split.RunTo(target);
+
+            // The page reads some of the time and not others, never a whole second late.
+            if (step % 3 == 0)
+            {
+                pieces.AddRange(split.Drain());
+            }
+        }
+
+        pieces.AddRange(split.Drain());
+        return (whole.Drain(), pieces.ToArray());
+    }
+
+    [Fact]
+    public void TheSamplesDoNotDependOnWhenThePageReads()
+    {
+        // S = 15 from cycle 0, the counter written again at 400 (a restart), the display mode
+        // changed in sound mode at 90,000, a new pitch (S = 31) at 120,001: toggles, writes and
+        // the ends of the steps all fall mid-sample. 1,800,000 cycles are 0.9 s, which the
+        // one-second buffer holds whole.
+        (long, int, byte)[] script =
+        [
+            (0, ControlRegister, SoundMode),
+            (0, CounterRegister, 15),
+            (400, CounterRegister, 15),
+            (90_000, ControlRegister, 0x30 | SoundMode),
+            (120_001, CounterRegister, 31),
+        ];
+        (float[] whole, float[] split) = RunBothWays(script, 1_800_000);
+        Assert.Equal(whole, split);
+        Assert.Equal(39_690, whole.Length);
+        Assert.Contains(whole, s => s > 0.3f);
+    }
+
+    [Fact]
+    public void TheSamplesDoNotDependOnWhenThePageReadsAcrossAHeldLevelDecaying()
+    {
+        // S = 15 toggles every 512 cycles, so by cycle 50,000 it has toggled 97 times and the level
+        // is high. Leaving sound mode there holds it, and the coupling lets the step go: the
+        // samples fall to a tiny value and then to exactly 0, which every path must reach at the
+        // same sample, whatever the read that lands inside it.
+        (long, int, byte)[] script =
+        [
+            (0, ControlRegister, SoundMode),
+            (0, CounterRegister, 15),
+            (50_000, ControlRegister, CassetteIn),
+        ];
+        (float[] whole, float[] split) = RunBothWays(script, 1_800_000);
+        Assert.Equal(whole, split);
+        Assert.Equal(0f, whole[^1]);
+        Assert.Contains(whole, s => s != 0f && Math.Abs(s) < 1e-4f);
+    }
+
+    [Fact]
+    public void TheSamplesDoNotDependOnWhenThePageReadsAtAnotherRate()
+    {
+        (long, int, byte)[] script =
+        [
+            (0, ControlRegister, SoundMode),
+            (0, CounterRegister, 15),
+            (50_000, ControlRegister, CassetteIn),
+        ];
+        (float[] whole, float[] split) = RunBothWays(script, 1_800_000, rate: 22_050);
+        Assert.Equal(whole, split);
+    }
+
+    [Fact]
+    public void AReadAtAnyCycleAroundTheSampleWhereTheCouplingSettlesChangesNothing()
+    {
+        // The coupling lets a held level go until a sample is exactly 0; that is the sample a
+        // read landing inside it could once have made differently. Find it in an unread run, then
+        // read at every cycle for 200 either side of it, one read a run, and compare the whole.
+        const long Leave = 50_000;
+        const long End = 1_000_000;
+        float[] Run(long? readAt)
+        {
+            var rig = new Rig(44_100);
+            rig.Write(ControlRegister, SoundMode);
+            rig.Write(CounterRegister, 15);
+            rig.RunTo(Leave);
+            rig.Write(ControlRegister, CassetteIn);
+            if (readAt is long cut)
+            {
+                rig.RunTo(cut);
+            }
+
+            rig.RunTo(End);
+            return rig.Drain();
+        }
+
+        float[] expected = Run(null);
+        int settled = Array.FindIndex(expected, (int)(Leave * 44_100 / CyclesPerSecond), s => s == 0f);
+        Assert.True(settled > 0);
+        long settleCycle = (long)settled * CyclesPerSecond / 44_100;
+        for (long cut = settleCycle - 200; cut <= settleCycle + 200; cut++)
+        {
+            Assert.True(expected.AsSpan().SequenceEqual(Run(cut)), $"a read at cycle {cut} changed the samples");
+        }
+    }
+
     [Fact]
     public void ABufferNobodyReadsKeepsTheNewestSecondAndCountsWhatItDropped()
     {

@@ -30,7 +30,14 @@ namespace Dbhq.Machines.Electron;
 /// at 10 Hz (<c>y = x - xPrev + r x yPrev</c>), so a square wave comes out as a swing of about
 /// plus and minus a half about 0, a held level decays to exactly 0 and stays there, and entering
 /// or leaving sound mode with the level high does not click at the speaker. The first sample
-/// from silence has nothing before it to remove, so it is its mean exactly.
+/// from silence has nothing before it to remove, so it is its mean exactly. The samples do not
+/// depend on when the page reads: a sample is made the same way whether the catch-up that makes
+/// it covers one sample or a million.
+/// </para>
+/// <para>
+/// <b>Position is cycles x sampleRate in a <c>long</c>,</b> so it overflows at
+/// <c>long.MaxValue / sampleRate</c> cycles of machine time: about 139 days at the 384,000 cap
+/// and about 3.3 years at 44,100. A machine left running that long wraps its sound.
 /// </para>
 /// <para>
 /// <b>Two things the sheet leaves open (s12 item 9), both chosen and recorded in
@@ -208,6 +215,14 @@ public sealed class UlaSound
     private void EmitSample(double mean)
     {
         double y = mean - _xPrev + _retain * _yPrev;
+        if (mean == _xPrev && Math.Abs(y) < Settled)
+        {
+            // A step has gone: snap to exactly 0, here and nowhere else, so that a sample is the
+            // same whether it is made one at a time or inside a run (EmitRun), and so whenever
+            // the page happened to read.
+            y = 0;
+        }
+
         _xPrev = mean;
         _yPrev = y;
         Buffer.Add((float)y);
@@ -215,15 +230,16 @@ public sealed class UlaSound
 
     /// <summary>
     /// <paramref name="count"/> samples of one level. The coupling takes a while to let a step go,
-    /// so they are made one at a time until it has, and the rest of a long run is silence in one go.
+    /// so they are made one at a time, by <see cref="EmitSample"/>, until it has, and the rest of
+    /// a long run is silence in one go. That is only a shortcut: once the last sample was exactly
+    /// 0 at this level, every later one is exactly 0 by the same arithmetic.
     /// </summary>
     private void EmitRun(double level, long count)
     {
         for (long left = count; left > 0; left--)
         {
-            if (level == _xPrev && Math.Abs(_yPrev) < Settled)
+            if (level == _xPrev && _yPrev == 0)
             {
-                _yPrev = 0;
                 Buffer.AddSilence(left);
                 return;
             }
