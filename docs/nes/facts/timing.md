@@ -127,6 +127,11 @@ Five cycles, 16 dots, and the accumulator is back at 0. 33247.5 cycles a frame
 is 6649.5 of these groups, so the fourth dot falls at a different place in the
 line from frame to frame [inferring].
 
+The bus works this out without dividing (task 6b of the plan, for speed): 16 is
+3 whole dots and a remainder of 1, so each cycle runs 3 dots, adds 1 to what is
+left, and runs a fourth when that reaches 5. What is left is the "Left" column
+above, and the dots are the same 3, 3, 3, 3, 4. On NTSC the remainder is 0.
+
 ### The order inside one CPU cycle, measured
 
 `bus.md` section 2 left the order of the dots and the access inside a cycle to

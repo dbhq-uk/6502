@@ -8,7 +8,8 @@ BBC Micro. The figures, and what they were run on, are in the journal entry
 [`docs/journal/2026-10-05-the-nes-speed.md`](../../docs/journal/2026-10-05-the-nes-speed.md).
 This file is how to run it again.
 
-The sound and the mappers will add to the cost, so these figures are a ceiling.
+The first figures were taken before the sound and the mappers were built; each row of the table
+below says which code it measured.
 
 ## What is here
 
@@ -18,6 +19,7 @@ The sound and the mappers will add to the cost, so these figures are a ceiling.
 | `index.html`, `main.js` | The page. It fetches the ROM, boots it, then times the runs. |
 | `run-in-browser.mjs`, `package.json` | Fetches the ROM from the pinned fork, checks it against its SHA-256 in `Pins.cs`, serves it with the page and a published copy of the app on `127.0.0.1`, and runs it in a headless Chrome, a fresh launch each time. |
 | `native/` | The same workload as a console program, in the solution so CI builds it. |
+| `differential/` | The check that a change for speed changed nothing else: it runs every pinned NES test ROM in both regions and writes one line of hashes for each (every instruction's registers, cycle and PPU position, every frame's pixels, the sound, the end state). In the solution too. |
 
 ## The workload
 
@@ -58,6 +60,18 @@ dotnet run -c Release --project native -- 5 1790000 ntsc            # timed runs
 dotnet run -c Release --project native -- 5 1790000 pal
 ```
 
+To check that a change for speed changed no behaviour, run the differential check on the code
+before and after it and compare the files; they must be identical:
+
+```sh
+dotnet run -c Release --project differential -- before.txt      # on the code before
+dotnet run -c Release --project differential -- after.txt       # on the code after
+cmp before.txt after.txt
+```
+
+For a profile of the WebAssembly build, publish it with `-p:WasmNativeStrip=false`, which keeps
+the function names, and record a CPU profile in Chrome (the journal entry says how).
+
 `publish/` is git-ignored. `run-in-browser.mjs` uses `/usr/bin/google-chrome`; set
 `CHROME_PATH` to use another. Run one build at a time, leave the machine otherwise idle, and
 note `uptime` before and after. If an AOT publish follows an interpreter publish and the
@@ -71,4 +85,5 @@ Dated, with the command that made them; the journal entry has the full output.
 
 | Date | Code | AOT median | Interpreter median | Where |
 | --- | --- | --- | --- | --- |
+| 5 October 2026, late | task 6b, the speed work (`f97483d` against `5021298`, alternated) | NTSC 2.09 to 2.82 and PAL 2.44 to 3.24 times real time, at a load of about 2, the BBC Micro bench at 29.0 to 29.5 MHz in the same minutes (a quiet machine) | NTSC 0.26 to 0.39 and PAL 0.30 to 0.49 times real time, at a load of 2 to 3 | [the speed entry](../../docs/journal/2026-10-05-the-nes-speed.md), task 6b |
 | 5 October 2026 | task 6, the bus and the PPU drawing the background and sprites (`47e72ee` and the `Ppu` split) | NTSC 1.94 and PAL 1.71 times real time at a load of 6 to 8 (0.92 and 1.04 in a later set at a load of 3 to 36); the BBC Micro bench in the same sets gave 9.17 and 5.32 times 2 MHz; a quiet machine is estimated at 2.4 to 2.9 times | NTSC 0.18 and PAL 0.24 times real time, at a load of about 20 | [the speed entry](../../docs/journal/2026-10-05-the-nes-speed.md) |
