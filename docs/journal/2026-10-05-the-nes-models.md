@@ -1573,3 +1573,51 @@ ICs 10, connectors 5, passives 71, others 2 + 2
   afterwards; both machines' WebAssembly already built): tests 331, pass
   330, fail 0, todo 1 (the BBC Micro's, as before). Floors raised from 322
   to 330 in both workflows.
+
+### After review, the same day
+
+**A correction: U9 does not run the master clock.** Above, U9 is "the hex
+inverter that runs the master clock's oscillator", and it carried
+`always: 'clock'`. That was wrong: I had not checked it. The review read
+the KiCad redrawing's nets, and I read them again with a scratch script
+(`common._sexpr` on I2, each pad's `net`, and every other pad on that net):
+X1's two pins are on Q2's collector (with C42, C45, Q3, R10 and R11) and on
+C41 with the trimmer TC1, a discrete transistor stage; U9's six inverters
+are on X2, C7 and R1 (pins 1 and 2: the 4 MHz resonator's oscillator), on
+`/CIC-CLK` (pin 4, to the cartridge and the expansion port) and U10's
+`CLK_IN` (pin 12), on `/PPU-A13` in and `/PPU-~{A13}` out (pins 5 and 6,
+to the cartridge), on `/~{RST}` (pin 9, to R5 from pin 8) and on
+`/EXP-AUDIO-OUT` (pins 10 and 11, with R6 across them). So U9 runs the
+lockout chips' clock, inverts the PPU's address line A13 and the reset line,
+and amplifies the expansion port's audio. These are the redrawing's nets, a
+cross-check, not traced on the scan. U9 is in use whenever the machine runs,
+so `always` was right; its value is now `'inverter'`, in `board_parts.py`,
+the site test and the plan, whose task 7 legend now says it in words.
+`board_parts.py` was run again (`cd tools/nes-model &&
+NES_MODEL_INPUTS=/tmp/nes-inputs nice -n 10 /tmp/nesvenv/bin/python
+board_parts.py`, exit 0, the same lines as above): in the data files only
+U9's `always` changed, and `sitsOn.what`, for the next point;
+`ic-table.json` is byte for byte the same.
+
+**I3 is judged too.** An IC now sits on the footprint of its name only if
+its held-out error on I3, the PAL board, is also within 2.0 mm; the largest
+is U1's 0.348 mm, so nothing moved. The site test holds it; with U3's I3
+error set to 2.5 mm by hand, it failed.
+
+**The overhang test can fail on its own.** Each body that runs past the
+outline must now cover every pad of its own footprint, and its nearest pad
+must be within 15 mm of the edge. I chose 15 mm after seeing the distances:
+1.7 mm (P1), 4.8 (P4), 4.9 (P5), 8.9 (P6) and 11.9 (P3, the modulator's
+pins); an IC's or the expansion socket's nearest pad is 18 mm or more in.
+With P1's body slid down to y 135 mm, still over the edge but off its
+fingers, it failed.
+
+**Three connectors rest on a look, not the finder.** For P1, P3 and P6 the
+joint finder found none of the joints (0 of 72, 0 of 5 and 0 of 5), so their
+"sits on it" rests on the hand look recorded in `marks.json`
+`parts.I5.looked`: P3's and P6's joints seen on I5 under each hole's cross,
+P1's body seen on I4 lying across its fingers.
+
+The docstring's step 1 said the bodies were each package's typical size; it
+now says what the code does: measured on I4, the median of each package's
+parts.

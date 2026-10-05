@@ -387,7 +387,7 @@
    {"always":"decoder","chip":null,"height":4.0,"l":20.675,"parts":{"ntsc":"SN74LS139N","pal":"SN74LS139N"},"pins":16,"ref":"U3","role":"the address decoder (74LS139)","rotation":-0.123,"w":6.575,"x":27.171,"y":47.16},
    {"always":null,"chip":"pad1","height":4.0,"l":20.675,"parts":{"ntsc":"MN74HC368","pal":"MC74HC368N"},"pins":16,"ref":"U7","role":"the controller ports' buffer CI (40H368)","rotation":0.094,"w":6.575,"x":136.396,"y":21.74},
    {"always":null,"chip":"pad2","height":4.0,"l":20.675,"parts":{"ntsc":"MN74HC368","pal":"MC74HC368N"},"pins":16,"ref":"U8","role":"the controller ports' buffer CII (40H368)","rotation":-0.171,"w":6.575,"x":136.4,"y":34.417},
-   {"always":"clock","chip":null,"height":4.0,"l":19.6,"parts":{"ntsc":"74HCU04AP","pal":"SN74HCU04N"},"pins":14,"ref":"U9","role":"the hex inverter (74HCU04)","rotation":0.011,"w":7.05,"x":159.234,"y":62.322},
+   {"always":"inverter","chip":null,"height":4.0,"l":19.6,"parts":{"ntsc":"74HCU04AP","pal":"SN74HCU04N"},"pins":14,"ref":"U9","role":"the hex inverter (74HCU04)","rotation":0.011,"w":7.05,"x":159.234,"y":62.322},
    {"always":"lockout","chip":null,"height":4.0,"l":20.675,"parts":{"ntsc":"3193A","pal":"3195A"},"pins":16,"ref":"U10","role":"the lockout chip (CIC)","rotation":0.074,"w":6.575,"x":140.175,"y":80.013}
   ],
   "others": {
@@ -1155,7 +1155,7 @@
     "verdict": "sits on it"
    }
   },
-  "what": "Each part of the CPU-07 (I4, I5) on the CPU-10 footprint of the same reference: an IC sits on it if its held-out error on I4 and on I5 is at most 2.0 mm (the plan's PAL layout row's \"none over 2.0\", set before any figure was seen); a connector or crystal if its holes have their joints on I5 (the finder's count, and where it found fewer, what the crop showed). I3's held-out errors are the PAL board's, recorded beside"
+  "what": "Each part of the CPU-07 (I4, I5) on the CPU-10 footprint of the same reference: an IC sits on it if its held-out error on I4 and on I5 is at most 2.0 mm (the plan's PAL layout row's \"none over 2.0\", set before any figure was seen); a connector or crystal if its holes have their joints on I5 (the finder's count, and where it found fewer, what the crop showed). I3's held-out errors, the PAL board's, are judged on the same limit (since task 5's review)"
  },
  "verdicts": [
   {"check":"pad counts","verdict":"pass"},

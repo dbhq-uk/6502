@@ -18,8 +18,10 @@ edge fingers), on task 3's footprints and pads (registration.json).
    pad count is not its part's pin count (ic-table.json) is reported, not
    placed. U1 and U4 each have a 600 mil and a 300 mil footprint (task 3);
    the photographs show which the RAMs sit on (USE below, and step 2). The
-   body is the package's typical size (PACKAGE_MM), not measured; the
-   photographs' outlines of each body are recorded beside, not used.
+   body's size is measured on I4 (body_size: three lines along it and three
+   across, through I4's fit, the dark colourless run through the middle), and
+   the model draws each package at the median of its parts' sizes; each body's
+   centre against its pads' is recorded beside, not used.
 
 2. Each photographed board on the scan's footprints. I4 (Evan-Amos's NTSC
    NES-CPU-07, top side) and I5 (its solder side) are registered to the board
@@ -676,12 +678,17 @@ PASSIVE_MM = {
 # `always` says why an IC is never marked. U7 and U8 are the controller ports'
 # buffers by the board's print, "40H368(CI)" and "40H368(CII)"; that CI and CII
 # are ports one and two, so $4016 and $4017, is inferred from the names, and
-# task 6 checks it against the nesdev wiki. U9, the hex inverter, is the master
-# clock's oscillator: the plan's list of reasons had none for it, so 'clock' was
-# added (5 October 2026; the plan's task 5 interface says so).
+# task 6 checks it against the nesdev wiki. U9 is the hex inverter that, by the
+# KiCad redrawing's nets (read 5 October 2026, a cross-check, not the scan),
+# runs the lockout chips' 4 MHz clock with X2 and buffers it to U10 and the
+# cartridge, inverts the PPU's address line A13 for the cartridge and the reset
+# line, and amplifies the expansion port's audio: in use whenever the machine
+# runs. The plan's list of reasons had none for it, so 'inverter' was added (the
+# plan's task 5 interface says so; first written 'clock', on the wrong belief
+# that it ran the master clock, and corrected after review the same day).
 CHIP = {'U6': 'apu', 'U5': 'ppu', 'U7': 'pad1', 'U8': 'pad2'}
-ALWAYS_OF = {'U1': 'ram', 'U4': 'ram', 'U2': 'latch', 'U3': 'decoder', 'U10': 'lockout', 'U9': 'clock'}
-ALWAYS = ALWAYS + ('clock',)
+ALWAYS_OF = {'U1': 'ram', 'U4': 'ram', 'U2': 'latch', 'U3': 'decoder', 'U10': 'lockout', 'U9': 'inverter'}
+ALWAYS = ALWAYS + ('inverter',)
 CHIP_INFERRED = ('U7 is pad1 and U8 pad2 by the board\'s print, "40H368(CI)" and "40H368(CII)"; that CI and CII are controller ports one '
                  'and two, so the reads of $4016 and $4017, is inferred from the names, and task 6 checks it against the nesdev wiki')
 
@@ -791,7 +798,7 @@ def main():
 
     sits = {}
     for ref in ics:
-        worst = max(held4[ref]['heldOutMm'], held5[ref]['heldOutMm'])
+        worst = max(held4[ref]['heldOutMm'], held5[ref]['heldOutMm'], held3[ref]['heldOutMm'])
         sits[ref] = {'I4': held4[ref]['heldOutMm'], 'I5': held5[ref]['heldOutMm'], 'I3': held3[ref]['heldOutMm'],
                      'verdict': 'sits on it' if worst <= SITS_MM else 'does not sit on it'}
     others_sit = {}
@@ -910,7 +917,8 @@ def main():
         'sitsOn': {'what': (f'Each part of the CPU-07 (I4, I5) on the CPU-10 footprint of the same reference: an IC sits on it if its held-out '
                             f'error on I4 and on I5 is at most {SITS_MM} mm (the plan\'s PAL layout row\'s "none over 2.0", set before any figure '
                             f'was seen); a connector or crystal if its holes have their joints on I5 (the finder\'s count, and where it found '
-                            f'fewer, what the crop showed). I3\'s held-out errors are the PAL board\'s, recorded beside'),
+                            f'fewer, what the crop showed). I3\'s held-out errors, the PAL board\'s, are judged on the same limit (since task '
+                            f'5\'s review)'),
                    'limitMm': SITS_MM, 'ics': sits, 'others': others_sit},
         'kicad': {'what': ('Each IC\'s place (its pads\' centre) against the centre of the same pads in the KiCad redrawing (I2), for U1 and U4 '
                            'the 300 mil copies, after the similarity that fits them best; none may be more than 3 mm off (the plan). The '

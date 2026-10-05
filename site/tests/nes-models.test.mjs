@@ -477,9 +477,9 @@ const PARTS_MJS = path.join(process.cwd(), 'src', 'models', 'nes-famicom-board-p
 // creates site/src/models/nes-famicom-access.mjs with this list as COUNTED; once
 // it is there, the test below holds the two the same.
 const COUNTED = ['ppu', 'apu', 'pad1', 'pad2'];
-// Why an IC is never marked: the plan's list, and 'clock' for U9 (the plan's
-// task 5 interface, revised on 5 Oct 2026).
-const ALWAYS = ['cpu', 'ram', 'decoder', 'latch', 'cartridge', 'lockout', 'clock'];
+// Why an IC is never marked: the plan's list, and 'inverter' for U9, the hex
+// inverter (the plan's task 5 interface, revised on 5 Oct 2026).
+const ALWAYS = ['cpu', 'ram', 'decoder', 'latch', 'cartridge', 'lockout', 'inverter'];
 
 function insidePolygon(poly, [x, y]) {
   let c = false;
@@ -496,6 +496,26 @@ function corners({ x, y, l, w, rotation }) {
   const u = [(Math.cos(t) * l) / 2, (Math.sin(t) * l) / 2];
   const v = [(-Math.sin(t) * w) / 2, (Math.cos(t) * w) / 2];
   return [[-1, -1], [1, -1], [1, 1], [-1, 1]].map(([a, b]) => [x + a * u[0] + b * v[0], y + a * u[1] + b * v[1]]);
+}
+
+function within(body, [px, py]) {
+  const t = (body.rotation * Math.PI) / 180;
+  const dx = px - body.x;
+  const dy = py - body.y;
+  return Math.abs(dx * Math.cos(t) + dy * Math.sin(t)) <= body.l / 2 && Math.abs(-dx * Math.sin(t) + dy * Math.cos(t)) <= body.w / 2;
+}
+
+function edgeDistance(poly, [x, y]) {
+  let best = Infinity;
+  for (let i = 0; i < poly.length; i++) {
+    const [ax, ay] = poly[i];
+    const [bx, by] = poly[(i + 1) % poly.length];
+    const dx = bx - ax;
+    const dy = by - ay;
+    const t = Math.max(0, Math.min(1, ((x - ax) * dx + (y - ay) * dy) / (dx * dx + dy * dy || 1)));
+    best = Math.min(best, Math.hypot(x - ax - t * dx, y - ay - t * dy));
+  }
+  return best;
 }
 
 function overlaps(a, b) {
@@ -606,7 +626,17 @@ test('every part is inside the board\'s outline; a body that runs past it is one
   for (const [c, name] of held) {
     const f = footprintOf(c.ref);
     for (const k of f.pads) assert.ok(insidePolygon(outline, [registration.pads[k].x, registration.pads[k].y]), `${name}: its pad ${k}`);
-    if (corners(c).some((p) => !insidePolygon(outline, p))) over.push(name);
+    if (corners(c).some((p) => !insidePolygon(outline, p))) {
+      over.push(name);
+      // A body over the edge is anchored on its own pads: it covers every pad of its footprint, and its nearest pad is within
+      // 15 mm of the edge. 15 mm was chosen after seeing the data (5 Oct 2026, task 5's review): the overhanging bodies' nearest
+      // pads lie 1.7 (P1), 4.8 (P4), 4.9 (P5), 8.9 (P6) and 11.9 mm (P3, the modulator's pins) from the edge, and an IC's or
+      // the expansion socket's 18 mm or more; so it holds what the photographs show and refuses a box slid off its pads.
+      const pads = f.pads.map((k) => [registration.pads[k].x, registration.pads[k].y]);
+      for (const q of pads) assert.ok(within(c, q), `${name} does not cover its pad at ${q}`);
+      const near = Math.min(...pads.map((q) => edgeDistance(outline, q)));
+      assert.ok(near <= 15, `${name}: its nearest pad is ${near.toFixed(2)} mm from the edge`);
+    }
   }
   assert.deepEqual(over.sort(), [...parts.overhang.refs].sort());
 });
@@ -632,7 +662,8 @@ test('the ICs\' places against the KiCad redrawing\'s, after a best-fit similari
 
 test('each part of the CPU-07 sits on the CPU-10 footprint of the same reference, and every check parts.json records passes', () => {
   for (const [ref, s] of Object.entries(parts.sitsOn.ics)) {
-    assert.ok(s.I4 <= parts.sitsOn.limitMm && s.I5 <= parts.sitsOn.limitMm, `${ref}: ${s.I4}, ${s.I5}`);
+    // the CPU-07 (I4, I5) and the PAL board (I3) alike, each IC within the limit of the CPU-10 footprint of its name
+    assert.ok(s.I4 <= parts.sitsOn.limitMm && s.I5 <= parts.sitsOn.limitMm && s.I3 <= parts.sitsOn.limitMm, `${ref}: ${s.I4}, ${s.I5}, ${s.I3}`);
     assert.equal(s.verdict, 'sits on it', ref);
   }
   assert.equal(parts.sitsOn.limitMm, 2.0);
