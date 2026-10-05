@@ -24,6 +24,10 @@ public abstract class Board : IMapper
 
     private readonly bool _chrIsRam;
 
+    // The PRG RAM's length less one when it is a power of two, as every NES 2.0 size is, so an
+    // access masks instead of dividing; -1 for any other length, which takes the remainder.
+    private readonly int _prgRamMask;
+
     /// <summary>
     /// Builds a board's memory from a parsed cartridge, with PRG in whole banks of
     /// <paramref name="prgBankSize"/> and CHR in whole 8 KB banks, at least one.
@@ -36,6 +40,7 @@ public abstract class Board : IMapper
             ? new byte[Math.Max(ChrBank, RoundUp(cartridge.ChrRamSize, ChrBank))]
             : Fit(cartridge.Chr, ChrBank);
         PrgRam = new byte[cartridge.PrgRamSize];
+        _prgRamMask = System.Numerics.BitOperations.IsPow2(PrgRam.Length) ? PrgRam.Length - 1 : -1;
         Mirroring = cartridge.Mirroring;
 
         // Until a board says otherwise: the whole PRG from its start, the first CHR 8 KB.
@@ -87,7 +92,7 @@ public abstract class Board : IMapper
 
         if (address >= 0x6000 && PrgRamEnabled && PrgRam.Length > 0)
         {
-            return PrgRam[(address - 0x6000) % PrgRam.Length];
+            return PrgRam[PrgRamIndex(address)];
         }
 
         return openBus;
@@ -102,7 +107,7 @@ public abstract class Board : IMapper
         }
         else if (address >= 0x6000 && PrgRamEnabled && PrgRamWritable && PrgRam.Length > 0)
         {
-            PrgRam[(address - 0x6000) % PrgRam.Length] = value;
+            PrgRam[PrgRamIndex(address)] = value;
         }
     }
 
@@ -249,5 +254,12 @@ public abstract class Board : IMapper
         {
             ChrBase[firstWindow + i] = offset + (i * ChrWindow);
         }
+    }
+
+    // Where in PrgRam an address from $6000 falls; RAM smaller than the 8 KB window repeats in it.
+    private int PrgRamIndex(ushort address)
+    {
+        int offset = address - 0x6000;
+        return _prgRamMask >= 0 ? offset & _prgRamMask : offset % PrgRam.Length;
     }
 }
