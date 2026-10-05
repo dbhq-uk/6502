@@ -231,4 +231,28 @@ public class ElectronBusTests
         Assert.Equal(8, bus.Cycles);
         Assert.Equal(bus.Cycles, bus.Ticks);
     }
+
+    [Fact]
+    public void BasicCanBeLeftInOneSlotForTheBootTests()
+    {
+        // The test seam of task 5: BASIC in slot 10 only leaves slot 11 empty, which reads the
+        // high byte of the address (s12 item 3), and the stock bus has it in both (s2b).
+        var bus = new ElectronBus(new ElectronRoms(Os, Basic), 44_100, [10]);
+        Select(bus, 10);
+        Assert.Equal(Basic[0x0009], bus.Read(0x8009));
+        Select(bus, 11);
+        Assert.Equal(0x80, bus.Read(0x8009));
+
+        ElectronBus stock = NewBus();
+        Select(stock, 11);
+        Assert.Equal(Basic[0x0009], stock.Read(0x8009));
+
+        // The OS's sequence (s2a): $0C first, so the register accepts any slot, then the slot.
+        static void Select(ElectronBus b, int slot)
+        {
+            b.Write(0xFE05, 0x0C);
+            b.Write(0xFE05, (byte)slot);
+            Assert.Equal(slot, b.RomSlot);
+        }
+    }
 }

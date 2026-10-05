@@ -714,6 +714,13 @@ that times the clock and display-end interrupts (`ula.md` sections 1c, 5d and
   that is at the next bus access. A real ULA counts lines, so it may differ for
   a program that changes mode in the last rows of a field; none does so in the
   boot or in BASIC.
+- **The ULA's IRQ line reaches the CPU between instructions.** The machine
+  copies the line into the core after each whole instruction, caught up to the
+  cycle that instruction ended on. A real 6502 samples the line in the
+  second-to-last cycle of an instruction (section 12 item 13), so an interrupt
+  that rises during an instruction is taken up to one instruction later here
+  than on the machine. The sheet's own model polled at instruction boundaries
+  too and still matched the real BASIC timings (section 11d).
 - **A read of a register the ULA does not answer is the high byte of the
   address.** The sheet is split on this (section 1b, section 12 item 3): one
   source says the ROM byte under it, another that the bus floats. The OS reads

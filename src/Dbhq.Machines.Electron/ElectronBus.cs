@@ -41,14 +41,29 @@ public class ElectronBus : IBus
     private readonly byte[] _ram = new byte[0x8000];
     private readonly byte[] _os;
     private readonly byte[] _basic;
+    private readonly bool[] _basicIn = new bool[Slots];
     private readonly Ula _ula = new();
     private long _cycles;
 
     public ElectronBus(ElectronRoms roms, int sampleRate = 44100)
+        : this(roms, sampleRate, [10, BasicSlotHigh])
+    {
+    }
+
+    /// <summary>
+    /// A bus with BASIC in the given slots and no other: for the boot tests, which take it out or
+    /// leave it in one slot (s2c). Slots 8 and 9 stay the keyboard whatever this says.
+    /// </summary>
+    internal ElectronBus(ElectronRoms roms, int sampleRate, IEnumerable<int> basicSlots)
     {
         ArgumentNullException.ThrowIfNull(roms);
+        ArgumentNullException.ThrowIfNull(basicSlots);
         _os = roms.Os;
         _basic = roms.Basic;
+        foreach (int slot in basicSlots)
+        {
+            _basicIn[slot] = true;
+        }
 
         // The sample rate is for the sound task, which builds the sound buffer here.
         _ = sampleRate;
@@ -179,15 +194,15 @@ public class ElectronBus : IBus
     private byte ReadPaged(ushort address)
     {
         int slot = RomSlot;
-        if (slot is 10 or BasicSlotHigh)
-        {
-            return _basic[address - 0x8000];
-        }
-
         if (slot is KeyboardSlotLow or KeyboardSlotLow + 1)
         {
             // One device in both slots (s2b): the low 14 address bits pick the columns (s7a).
             return Keyboard.Read(address);
+        }
+
+        if (_basicIn[slot])
+        {
+            return _basic[address - 0x8000];
         }
 
         // An empty slot reads the high byte of the address (s12 item 3: not measured; the boot

@@ -404,4 +404,22 @@ public class ElectronKeyboardTests
         bus.Read(0x9FFF);
         Assert.Equal(before + 2, bus.Cycles);
     }
+
+    [Fact]
+    public void TheSessionTypesWhatTheOsKeyTablesSay()
+    {
+        // The session's typing table is written from s7b and the key legends. Here it is held
+        // against the OS ROM's own tables, so a wrong legend cannot hide. The unshifted code of the
+        // key at column c, bit b is the byte at OS $EDD3 + 4c + b (s7b; letters are stored small
+        // and type capitals with Caps Lock on, s7c). The code with Shift is the byte at OS $EFB7
+        // plus the unshifted code: the key handler reads it with LDA $EFB7,X at $EBA3.
+        byte[] os = ElectronSession.Roms.Os;
+        foreach ((char c, (ElectronKey key, bool shift)) in ElectronSession.Keys)
+        {
+            int column = (int)key & 0x0F, bit = (int)key >> 4;
+            int code = os[0xEDD3 - 0xC000 + (4 * column) + bit];
+            int typed = shift ? os[0xEFB7 - 0xC000 + code] : code is >= 0x61 and <= 0x7A ? code - 0x20 : code;
+            Assert.True(typed == c, $"'{c}' is {key}{(shift ? " with Shift" : "")}, which the OS reads as ${typed:X2}");
+        }
+    }
 }
