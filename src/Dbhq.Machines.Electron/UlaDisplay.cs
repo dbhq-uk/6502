@@ -41,6 +41,11 @@ namespace Dbhq.Machines.Electron;
 /// line. Both fields draw the same 256 lines into the same rows.
 /// </para>
 /// <para>
+/// <b>A byte at a time.</b> A line is drawn as one copy a byte, from a table of each byte value's
+/// ready-made framebuffer pixels in the current mode and palette, made again only when either
+/// changes. Writing each pixel on its own cost the browser most of its speed in mode 0 (task 13).
+/// </para>
+/// <para>
 /// <b>What is not exact</b>, in <c>docs/known-differences.md</c>: a line's bytes are read at its
 /// start and not one by one through it; the offset from a fetch to its pixel is not modelled; a
 /// palette write is seen from the next line, not at once (s12 item 6); what the counters do when
@@ -89,6 +94,12 @@ public sealed class UlaDisplay
     private readonly byte[] _ram;
     private readonly byte[] _palette = new byte[8];
     private readonly uint[] _colours = new uint[16];
+
+    // Each byte value's framebuffer pixels in the mode and palette the table was made for, 8 a
+    // byte in modes 0 to 3 and 16 in modes 4 to 6, ready to copy: a line is 80 or 40 copies, not
+    // a write per pixel. Made again only when the mode or the palette has changed since.
+    private readonly uint[] _pixels = new uint[256 * (Width / 40)];
+    private int _pixelsMode = -1;
     private byte _startLow;
     private byte _startHigh;
 
@@ -258,12 +269,14 @@ public sealed class UlaDisplay
         }
         else
         {
+            if (_pixelsMode != mode)
+            {
+                MakePixels(mode);
+            }
+
             int bytes = BytesPerLine(mode);
-            int perByte = PixelsPerByte(mode);
-            int width = Width / (bytes * perByte);
-            byte[] table = Table(perByte);
+            int across = Width / bytes;
             int wrapTo = ScreenStart(mode);
-            int x = 0;
             for (int k = 0; k < bytes; k++)
             {
                 int address = _rowBase + (8 * k) + _lineInRow;
@@ -272,12 +285,7 @@ public sealed class UlaDisplay
                     address = address - 0x8000 + wrapTo;
                 }
 
-                int first = _ram[address] * perByte;
-                for (int p = 0; p < perByte; p++)
-                {
-                    row.Slice(x, width).Fill(_colours[table[first + p]]);
-                    x += width;
-                }
+                _pixels.AsSpan(_ram[address] * across, across).CopyTo(row.Slice(k * across, across));
             }
         }
 
@@ -331,6 +339,31 @@ public sealed class UlaDisplay
 
             _colours[c] = colour;
         }
+
+        _pixelsMode = -1;
+    }
+
+    /// <summary>
+    /// Makes the pixel table for <paramref name="mode"/> and the palette as it is: for each byte
+    /// value, its pixels' logical colours (s5b, s5c) through the palette, each pixel as wide as the
+    /// mode's pixels are on the framebuffer.
+    /// </summary>
+    private void MakePixels(int mode)
+    {
+        int perByte = PixelsPerByte(mode);
+        int across = Width / BytesPerLine(mode);
+        int width = across / perByte;
+        byte[] logical = Table(perByte);
+        for (int value = 0; value < 256; value++)
+        {
+            Span<uint> pixels = _pixels.AsSpan(value * across, across);
+            for (int p = 0; p < perByte; p++)
+            {
+                pixels.Slice(p * width, width).Fill(_colours[logical[(value * perByte) + p]]);
+            }
+        }
+
+        _pixelsMode = mode;
     }
 
     private static (int, int)[,] MakePaletteBits()

@@ -14,6 +14,7 @@ the seventh task's section. This file is how to run it again.
 | --- | --- |
 | `../../src/Dbhq.Machines.Electron.Wasm/` | The machine as a WebAssembly app. The bench calls `Load`, `Run`, `Cycles`, `Mode`, `SetMode`, `ScreenRow` and `Peek`. It holds no ROMs. |
 | `index.html`, `main.js` | The page. It fetches the two ROMs, boots the OS, checks the prompt is on the screen, then times the runs in each mode asked for. |
+| `alternate.sh` | Runs two or more published builds in turn, a launch each at a time, and prints each one's medians. |
 | `run-in-browser.mjs`, `package.json` | Reads the OS from `roms/electron/` and BASIC from `roms/bbc-micro/`, checks each against its SHA-256 in `Pins.cs`, serves them with the page and a published copy of the app on `127.0.0.1`, and runs it in a headless Chrome, a fresh launch each time. |
 
 ## The workload
@@ -49,5 +50,12 @@ node run-in-browser.mjs publish/aot 3 2000000 4000000 5 0,6   # the modes in the
 to use another. Run one build at a time, leave the machine otherwise idle, and note `uptime`
 before and after. If an AOT publish follows an interpreter publish and the runtime refuses to
 start, delete `src/Dbhq.Machines.Electron.Wasm/obj/Release` and publish again.
+
+**On a shared machine, compare builds side by side.** `./alternate.sh <launches> <folder>...`
+runs one launch of each build in turn, so a change in the machine's load falls on all of them,
+and prints each build's median in each mode (`MODES=0,6` to change the modes). To compare with
+an older commit, unpack its source with `git archive <commit> src Directory.Build.props` into a
+scratch folder, publish it from there, and give that folder to the script. The ratio between two
+builds run this way means more than either figure alone.
 
 Benchmarks are run locally. They are not run in CI.
