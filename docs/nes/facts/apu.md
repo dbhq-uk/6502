@@ -151,7 +151,9 @@ disabled [from APU Sweep].
 - Silenced, it holds its last value, not 0 [from APU]. Periods 0 and 1 give an
   ultrasonic wave, which some emulators halt instead [from APU Triangle]. Task 8
   keeps the real behaviour: period 0 steps every CPU cycle and period 1 every
-  second. Whether the resampler needs it halted is task 9's question [inferring].
+  second. Task 9's resampler does not need it halted: through it, periods 0 and
+  1 come out 72 dB or more under a full triangle, measured on both regions
+  (`ResamplerTests`) [measured in task 9].
 
 ## 7. Noise (`$400C-$400F`)
 
@@ -309,7 +311,16 @@ with each group 0 when its inputs are all 0. Pulse, triangle and noise are 0 to
 within 4% [from APU Mixer].
 
 After the DACs the NES has high-pass filters at 90 Hz and 440 Hz and a low-pass
-at 14 kHz [from APU Mixer]. These belong to the resampler's task.
+at 14 kHz [from APU Mixer]. Task 9 applies them, first order each, after the
+resampler (`SampleBuffer`) [inferring the order from the page, which gives the
+filters and not their form].
+
+The formulas are the model's, through tables built from them at start-up. The
+fork's `apu_mixer` ROMs (dmc, noise, square, triangle) play a tone and cancel it
+with the inverse on the DMC's DAC; with the formulas the tone in the machine's
+own sound is 32 to 38 dB under the ROMs' short tone (the 90th percentile block),
+and with the page's linear approximation put in for one run, 9.5 to 25.7 dB
+[measured in task 9].
 
 ### Worked example 4: the mixer
 
@@ -352,5 +363,6 @@ at 14 kHz [from APU Mixer]. These belong to the resampler's task.
 3. Whether `t < 8` silences a PAL pulse ("TODO: PAL behavior?" on APU Pulse)
    [guessing - verify]. Task 8 silences it on both; no pinned ROM checks it.
 4. Which parity of CPU cycle gets the 3-cycle `$4017` delay (section 10): the
-   ROMs pass either way. Task 9's `sprdma_and_dmc_dma` ties the APU's parity to
-   the DMA's and may settle it.
+   ROMs pass either way. Task 9 ran `sprdma_and_dmc_dma`, its `_512` variant,
+   `apu_test` and `pal_apu_tests` with the parity swapped: all pass, so it is
+   still open [measured in task 9].

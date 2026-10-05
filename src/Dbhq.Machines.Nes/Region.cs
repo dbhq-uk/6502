@@ -34,7 +34,8 @@ public sealed class Region
         int[] dmcRates,
         int[] frameCounterFourStep,
         int[] frameCounterFiveStep,
-        bool emphasisSwapsRedAndGreen)
+        bool emphasisSwapsRedAndGreen,
+        bool dmcDmaRepeatsHaltedRead)
     {
         Name = name;
         Lines = lines;
@@ -48,6 +49,7 @@ public sealed class Region
         FrameCounterFourStep = Array.AsReadOnly(frameCounterFourStep);
         FrameCounterFiveStep = Array.AsReadOnly(frameCounterFiveStep);
         EmphasisSwapsRedAndGreen = emphasisSwapsRedAndGreen;
+        DmcDmaRepeatsHaltedRead = dmcDmaRepeatsHaltedRead;
     }
 
     /// <summary>
@@ -65,7 +67,8 @@ public sealed class Region
         dmcRates: [428, 380, 340, 320, 286, 254, 226, 214, 190, 160, 142, 128, 106, 84, 72, 54],
         frameCounterFourStep: [7457, 14913, 22371, 29828, 29829, 29830],
         frameCounterFiveStep: [7457, 14913, 22371, 29829, 37281, 37282],
-        emphasisSwapsRedAndGreen: false);
+        emphasisSwapsRedAndGreen: false,
+        dmcDmaRepeatsHaltedRead: true);
 
     /// <summary>
     /// The PAL console (2A07 and 2C07): master clock 26.6017125 MHz, the CPU at master / 16, the PPU
@@ -82,7 +85,8 @@ public sealed class Region
         dmcRates: [398, 354, 316, 298, 276, 236, 210, 198, 176, 148, 132, 118, 98, 78, 66, 50],
         frameCounterFourStep: [8313, 16627, 24939, 33252, 33253, 33254],
         frameCounterFiveStep: [8313, 16627, 24939, 33253, 41565, 41566],
-        emphasisSwapsRedAndGreen: true);
+        emphasisSwapsRedAndGreen: true,
+        dmcDmaRepeatsHaltedRead: false);
 
     /// <summary>"NTSC" or "PAL", for the page to show.</summary>
     public string Name { get; }
@@ -145,4 +149,11 @@ public sealed class Region
     /// bit 5 emphasises green and bit 6 red.
     /// </summary>
     public bool EmphasisSwapsRedAndGreen { get; }
+
+    /// <summary>
+    /// True on NTSC: while a DMC fetch halts it, the 2A03 repeats the CPU's halted read on each
+    /// cycle that moves no data, so a fetch that lands on a read of <c>$2007</c>, <c>$4015</c> or a
+    /// pad reads it again. The 2A07 does not (apu.md 12, bus.md 6).
+    /// </summary>
+    public bool DmcDmaRepeatsHaltedRead { get; }
 }

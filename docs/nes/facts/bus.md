@@ -173,6 +173,25 @@ of the two consoles [inferring].
 - The test ROM `dmc_dma_during_read4` checks these conflicts [from Emulator
   tests].
 
+- **What task 9 measured** against the fork's ROMs, each rule taken out for one
+  run [measured in task 9]. The load's halt cycle (the 3rd or 4th, by parity)
+  is pinned: halting one cycle earlier fails both `sprdma_and_dmc_dma` ROMs and
+  `dmc_dma_during_read4`'s `dma_4016_read` and `dma_2007_read`; a fixed 3 fails
+  the two `sprdma` ROMs. A reload's halt on a put is pinned: on a get, five
+  ROMs fail. How long after the output unit empties the buffer a reload halts
+  is not: halting at the next put or the one after both pass, because the ROMs
+  synchronise themselves to the DMC. The repeated halted read on the 2A03 is
+  pinned: without it `dma_4016_read` and `dma_2007_read` fail. The overlap with
+  OAM DMA is pinned: a DMC fetch that waits for OAM DMA to end fails both
+  `sprdma` ROMs.
+- **The 2A07's cycles with no transfer.** The DMA page says the 2A07 "fixes
+  these extra read problems, but the mechanism is not yet understood", that "it
+  is suspected that a different address (perhaps the DMA address) is on the bus"
+  during them, and that the CPU still reads on the halt cycle at least [from
+  DMA]. Task 9's model reads the DMC's sample address on all of a DMC fetch's
+  cycles with no transfer on PAL, so no register is read again [guessing -
+  verify; no pinned ROM tests the 2A07].
+
 ### Worked example 4: a reload fetch in the common case
 
 | Cycle | Get or put | Bus |
@@ -243,3 +262,8 @@ controller].
 1. The CPU cycle parity that is a get cycle at power-on, for the model
    (random on a real console) [from DMA]: a choice, recorded where made.
 2. The 2A07's DMC DMA bugs [from DMA: not known].
+3. On the 2A03 the registers at `$4000-$401F` are selected by the 6502 core's
+   address bits 15 to 5 and the 2A03's bits 4 to 0, so a DMC fetch while the
+   CPU is halted on a read of `$4000-$401F` can select a register by the sample
+   address's low bits [from DMA]. Not modelled in task 9; no pinned ROM needs
+   it.

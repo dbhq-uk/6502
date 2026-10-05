@@ -82,6 +82,24 @@ public static class Pins
         ["pal_apu_tests/10.len_halt_timing.nes"] = "c41238ed0e7f4044c21fcd14c99b9e4516611adbee5c5f139d3bb95bebebcec9",
         ["pal_apu_tests/11.len_reload_timing.nes"] = "1e94a9c0d829378f93b460c2c5f875418490401afd50c30cd05ea22113819909",
 
+        // The DMC, its DMA and the mixer (task 9 of the NES plan). Every one is NROM-256 (32 KB of
+        // program; the header's mapper nibbles are 0): apu_test's DMC singles 7 and 8 and the four
+        // apu_mixer ROMs with CHR ROM report through $6000; dmc_dma_during_read4's five and the two
+        // sprdma_and_dmc_dma ROMs, with CHR RAM and CHR ROM, print on the screen. All NTSC.
+        ["apu_test/rom_singles/7-dmc_basics.nes"] = "547324867ee0ba2aa11401001d8d1288530aa4e0ecaaac1667ce79980a388ec1",
+        ["apu_test/rom_singles/8-dmc_rates.nes"] = "5d9a79a505b37fa277cacc95a362f7e2a56e59ace7a698213d78432cc06a8867",
+        ["apu_mixer/dmc.nes"] = "036e7a3222f56e7a823b693bae0243e6c8c7ae032defbbd15c8631da468d6ea7",
+        ["apu_mixer/noise.nes"] = "47b637cc911dc4416f55891c67976780e0985b6729b339a3f1db277ef6bd4910",
+        ["apu_mixer/square.nes"] = "b16e333a2d3698201fc45c21375507a80981928562d3b10f865e23da3922696a",
+        ["apu_mixer/triangle.nes"] = "3756d4be75126ab51b40e013e60a125e0f6f198307dcfb9612cd4477f6762279",
+        ["dmc_dma_during_read4/dma_2007_read.nes"] = "a2e0fa3f6f155cbe0b8c9517b2f6a57f1fd68f13711c11d6d2fe5676c522d7b2",
+        ["dmc_dma_during_read4/dma_2007_write.nes"] = "54c75d491c685fb4cfff281bcf3e199a41e95f6c523e2b0607d67ba039f19f84",
+        ["dmc_dma_during_read4/dma_4016_read.nes"] = "c6af72e11c197b449129921a9992db2351d9121bb593b3d0ab71895b646b0ebe",
+        ["dmc_dma_during_read4/double_2007_read.nes"] = "779e6e7db863a7405a3dda8723b8517a23d271e78ce4802970fb0a7d3039ce6b",
+        ["dmc_dma_during_read4/read_write_2007.nes"] = "bc5281ca3f12a6d0ac9fe1a5e727ecc3cac5fc6a47f45ac130d644f0dbd522cf",
+        ["sprdma_and_dmc_dma/sprdma_and_dmc_dma.nes"] = "db3199bc1b0bdc07a316b3ab999d8fd8bb361456d2154e364c132cb06a26a10f",
+        ["sprdma_and_dmc_dma/sprdma_and_dmc_dma_512.nes"] = "3789f5134b0561b4344e3f4ce08b4d2a416f67435e083917a80d87fdb9d3583c",
+
         // The browser speed check's ROM (task 6 of the NES plan): SNOW, a demo by Repulse that keeps
         // rendering on and changes the picture every frame, NROM-256 with CHR ROM. Fetched by
         // bench/nes-speed/ from the same fork at the same commit, and never committed.

@@ -303,3 +303,13 @@ Nothing was changed for speed; these are for the decision.
   decision: `cd bench/nes-speed && node run-in-browser.mjs publish/aot 3 1790000
   5000000 5 0`, the same for region 1, and the BBC bench beside it, at a
   one-minute load under 1.
+
+## Again, after the sound (task 9)
+
+Task 9 added the DMC, its DMA, the mixer's tables and the sample buffer, and ran
+this check again on 5 October 2026 against the commit before it (exported with
+`git archive` and built the same way), alternating the two. At a load of 2.6 to
+4.2, AOT medians went from 1.81 to 1.67 times real time on NTSC and from 2.19 to
+1.96 on PAL; natively, at 3.6 to 4.8, from 3.27 to 3.05 on NTSC. That is 7 to
+10 % for the sound. The table, the commands and how the cost divides are in
+[Planning the NES](2026-10-05-the-nes-plan.md), under task 9.

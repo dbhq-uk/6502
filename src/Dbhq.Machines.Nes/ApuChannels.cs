@@ -284,17 +284,18 @@ public sealed class PulseChannel
     }
 
     // One APU cycle: the timer counts down, and on passing 0 reloads and moves the sequencer.
-    internal void ClockTimer()
+    // Returns true when the sequencer moved, which may change the output.
+    internal bool ClockTimer()
     {
         if (_timer == 0)
         {
             _timer = _period;
             _step = (_step + 1) & 7;
+            return true;
         }
-        else
-        {
-            _timer--;
-        }
+
+        _timer--;
+        return false;
     }
 
     internal void ClockQuarter() => _envelope.ClockQuarter();
@@ -333,8 +334,8 @@ public sealed class PulseChannel
 /// </summary>
 /// <remarks>
 /// Periods 0 and 1 are not halted. The sheet says they give an ultrasonic wave, which some
-/// emulators halt instead, and that the model keeps the real behaviour unless the resampler needs
-/// otherwise (task 9 settles that with the resampler).
+/// emulators halt instead. The sample buffer's resampler does not need them halted: an ultrasonic
+/// triangle comes out of it at 72 dB or more under a full one (task 9, <c>ResamplerTests</c>).
 /// </remarks>
 public sealed class TriangleChannel
 {
@@ -364,6 +365,9 @@ public sealed class TriangleChannel
 
     /// <summary>The linear counter, 0 to 127.</summary>
     public int LinearCounter => _linear;
+
+    /// <summary>True while the sequencer runs: the linear and length counters are both over 0.</summary>
+    public bool Running => _linear != 0 && _length.Value != 0;
 
     /// <summary>The length counter.</summary>
     public int LengthCounter => _length.Value;
@@ -410,8 +414,8 @@ public sealed class TriangleChannel
         }
     }
 
-    // One CPU cycle.
-    internal void ClockTimer()
+    // One CPU cycle. Returns true when the sequencer moved.
+    internal bool ClockTimer()
     {
         if (_timer == 0)
         {
@@ -419,12 +423,14 @@ public sealed class TriangleChannel
             if (_linear != 0 && _length.Value != 0)
             {
                 _step = (_step + 1) & 31;
+                return true;
             }
+
+            return false;
         }
-        else
-        {
-            _timer--;
-        }
+
+        _timer--;
+        return false;
     }
 
     internal void ClockQuarter()
@@ -528,18 +534,19 @@ public sealed class NoiseChannel
 
     // One APU cycle. The table is in CPU cycles, all even, so the timer, a divider of period
     // reload + 1 APU cycles, reloads with half the entry less one.
-    internal void ClockTimer()
+    // Returns true when the register shifted.
+    internal bool ClockTimer()
     {
         if (_timer == 0)
         {
             _timer = _reload;
             int feedback = (_shiftRegister ^ (_shiftRegister >> _feedbackBit)) & 1;
             _shiftRegister = (_shiftRegister >> 1) | (feedback << 14);
+            return true;
         }
-        else
-        {
-            _timer--;
-        }
+
+        _timer--;
+        return false;
     }
 
     internal void ClockQuarter() => _envelope.ClockQuarter();
@@ -547,4 +554,241 @@ public sealed class NoiseChannel
     internal void ClockHalf() => _length.Clock();
 
     private int ReloadFor(int index) => (_periods[index] / 2) - 1;
+}
+
+/// <summary>
+/// The DMC, <c>docs/nes/facts/apu.md</c> section 8: a timer at the region's rate, an output unit
+/// that moves a 7-bit level by 2 for each bit of a sample byte, and a reader that asks the bus for
+/// the next byte by DMA (<c>bus.md</c> section 6) whenever the one-byte buffer is empty and bytes
+/// remain.
+/// </summary>
+/// <remarks>
+/// <para>
+/// <b>The fetch is the bus's.</b> The channel only says when it wants one: the cycle from which the
+/// bus may halt the CPU, and the address. The bus halts on its next read at or after that cycle,
+/// runs the stolen cycles and hands the byte back (<see cref="CompleteFetch"/>). A load, the first
+/// fetch after <c>$4015</c> starts a sample with the buffer empty, may halt on the get of the second
+/// APU cycle after the write: 3 cycles after a write on a put, 4 after one on a get. A reload, after
+/// the output unit empties the buffer, may halt on the next put. The bus's even cycles are gets, as
+/// for OAM DMA, and the unit's APU-cycle clocks fall on the odd ones, the puts, so a reload made in
+/// a put's tick may halt two cycles later. When in that APU cycle the hardware schedules it is not
+/// on the sheet; the fork's DMA ROMs synchronise themselves to the DMC, so they test the cost and the
+/// parity, which follow from this, more than the delay.
+/// </para>
+/// <para>
+/// <b>Not modelled</b> (the DMA page's "Bugs"): a sample stopped in the APU cycle before a reload
+/// would be scheduled does not start an aborted one-cycle DMA, and the late 2A03G and 2A03H's
+/// extra fetch does not happen.
+/// </para>
+/// </remarks>
+public sealed class DmcChannel
+{
+    private readonly int[] _rates;
+
+    private int _rateIndex;
+    private int _timer;
+    private int _level;
+    private bool _irqEnabled;
+    private bool _loop;
+    private bool _irqFlag;
+    private int _sampleAddress;
+    private int _sampleLength;
+
+    // The reader.
+    private int _currentAddress;
+    private int _bytesRemaining;
+    private int _buffer;
+    private bool _bufferFull;
+    private long _fetchFrom;
+
+    // The output unit.
+    private int _shift;
+    private int _bitsRemaining;
+    private bool _silent;
+
+    internal DmcChannel(Region region)
+    {
+        _rates = [.. region.DmcRates];
+        PowerOn();
+    }
+
+    /// <summary>The output level, 0 to 127, which always goes to the mixer.</summary>
+    public int Level => _level;
+
+    /// <summary>The time between output changes in CPU cycles: the region's rate for the index in <c>$4010</c>.</summary>
+    public int Period => _rates[_rateIndex];
+
+    /// <summary>The sample's start, <c>$C000 + A x 64</c> for the <c>A</c> written to <c>$4012</c>.</summary>
+    public int SampleAddress => _sampleAddress;
+
+    /// <summary>The sample's length in bytes, <c>L x 16 + 1</c> for the <c>L</c> written to <c>$4013</c>.</summary>
+    public int SampleLength => _sampleLength;
+
+    /// <summary>The address of the next byte the reader will fetch.</summary>
+    public int CurrentAddress => _currentAddress;
+
+    /// <summary>The bytes of the sample still to fetch; over 0 is what <c>$4015</c> bit 4 shows.</summary>
+    public int BytesRemaining => _bytesRemaining;
+
+    /// <summary>The DMC's IRQ flag: set when a sample ends with the IRQ enabled and no loop; it holds the IRQ line.</summary>
+    public bool IrqFlag => _irqFlag;
+
+    /// <summary>True while the reader wants a byte: the buffer is empty and bytes remain.</summary>
+    internal bool FetchWanted => !_bufferFull && _bytesRemaining > 0;
+
+    /// <summary>True when the reader wants a byte and the bus may halt the CPU for it in <paramref name="cycle"/>.</summary>
+    internal bool WantsHalt(long cycle) => !_bufferFull && _bytesRemaining > 0 && cycle >= _fetchFrom;
+
+    /// <summary>The address the bus's DMA reads.</summary>
+    internal ushort FetchAddress => (ushort)_currentAddress;
+
+    internal void PowerOn()
+    {
+        _rateIndex = 0;
+        _timer = Reload(0);
+        _level = 0;
+        _irqEnabled = false;
+        _loop = false;
+        _irqFlag = false;
+        _sampleAddress = 0xC000;
+        _sampleLength = 1;
+        _currentAddress = 0xC000;
+        _bytesRemaining = 0;
+        _buffer = 0;
+        _bufferFull = false;
+        _fetchFrom = 0;
+        _shift = 0;
+        _bitsRemaining = 8;
+        _silent = true;
+    }
+
+    // apu.md 13: after a reset the level keeps bit 0; $4015 is written 0 by the unit.
+    internal void Reset()
+    {
+        _level &= 1;
+    }
+
+    internal void Write(int register, byte value)
+    {
+        switch (register)
+        {
+            case 0:
+                _irqEnabled = (value & 0x80) != 0;
+                _loop = (value & 0x40) != 0;
+                _rateIndex = value & 0x0F;
+                if (!_irqEnabled)
+                {
+                    _irqFlag = false;
+                }
+
+                break;
+            case 1:
+                _level = value & 0x7F;
+                break;
+            case 2:
+                _sampleAddress = 0xC000 + (value * 64);
+                break;
+            default:
+                _sampleLength = (value * 16) + 1;
+                break;
+        }
+    }
+
+    // A $4015 write in cycle writeCycle (apu.md 9): D = 0 stops the sample, D = 1 starts it only
+    // if no bytes remain, and either way the IRQ flag clears. A start with the buffer empty is a
+    // load: its fetch may halt on the get of the second APU cycle after the write.
+    internal void WriteEnable(bool enabled, long writeCycle)
+    {
+        _irqFlag = false;
+        if (!enabled)
+        {
+            _bytesRemaining = 0;
+            return;
+        }
+
+        if (_bytesRemaining == 0)
+        {
+            Restart();
+            if (!_bufferFull)
+            {
+                _fetchFrom = writeCycle + ((writeCycle & 1) != 0 ? 3 : 4);
+            }
+        }
+    }
+
+    /// <summary>The byte the bus's DMA read: into the buffer, and the reader moves on.</summary>
+    internal void CompleteFetch(byte value)
+    {
+        _buffer = value;
+        _bufferFull = true;
+        _currentAddress = _currentAddress == 0xFFFF ? 0x8000 : _currentAddress + 1;
+        if (--_bytesRemaining == 0)
+        {
+            if (_loop)
+            {
+                Restart();
+            }
+            else if (_irqEnabled)
+            {
+                _irqFlag = true;
+            }
+        }
+    }
+
+    // One APU cycle, in the CPU cycle numbered cycle. The rates are in CPU cycles, all even, so the
+    // timer, a divider of period reload + 1 APU cycles, reloads with half the rate less one.
+    // Returns true when the output unit was clocked, which may change the level.
+    internal bool ClockTimer(long cycle)
+    {
+        if (_timer > 0)
+        {
+            _timer--;
+            return false;
+        }
+
+        _timer = Reload(_rateIndex);
+        if (!_silent)
+        {
+            if ((_shift & 1) != 0)
+            {
+                if (_level <= 125)
+                {
+                    _level += 2;
+                }
+            }
+            else if (_level >= 2)
+            {
+                _level -= 2;
+            }
+        }
+
+        _shift >>= 1;
+        if (--_bitsRemaining > 0)
+        {
+            return true;
+        }
+
+        // The output cycle ends: the next byte, if there is one, moves in, and the reader is free
+        // to fetch again, from the next put.
+        _bitsRemaining = 8;
+        if (!_bufferFull)
+        {
+            _silent = true;
+            return true;
+        }
+
+        _silent = false;
+        _shift = _buffer;
+        _bufferFull = false;
+        _fetchFrom = cycle + 2;
+        return true;
+    }
+
+    private void Restart()
+    {
+        _currentAddress = _sampleAddress;
+        _bytesRemaining = _sampleLength;
+    }
+
+    private int Reload(int index) => (_rates[index] / 2) - 1;
 }

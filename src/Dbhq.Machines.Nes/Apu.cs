@@ -1,16 +1,18 @@
 namespace Dbhq.Machines.Nes;
 
 /// <summary>
-/// The sound unit of the 2A03 and 2A07: two pulses, the triangle, the noise and the frame
-/// counter, one <see cref="Tick"/> a CPU cycle. Built from <c>docs/nes/facts/apu.md</c>. The DMC
-/// is task 9's: its registers are taken and ignored until then.
+/// The sound unit of the 2A03 and 2A07: two pulses, the triangle, the noise, the DMC and the frame
+/// counter, one <see cref="Tick"/> a CPU cycle, and the mixer. Built from
+/// <c>docs/nes/facts/apu.md</c>. The DMC's sample fetches are DMA, which the bus runs
+/// (<see cref="NesBus"/>).
 /// </summary>
 /// <remarks>
 /// <para>
-/// <b>The clocks.</b> The triangle's timer counts CPU cycles; the pulses' and the noise's count APU
-/// cycles, one in two CPU cycles (apu.md 1). The model clocks them on the odd cycles, which with
-/// the bus's count from power on are the puts, the second half of an APU cycle; which half is
-/// which is a choice, the same one the bus makes for OAM DMA (even cycles are gets).
+/// <b>The clocks.</b> The triangle's timer counts CPU cycles; the pulses', the noise's and the
+/// DMC's count APU cycles, one in two CPU cycles (apu.md 1). The model clocks them on the odd
+/// cycles, which with the bus's count from power on are the puts, the second half of an APU cycle;
+/// which half is which is a choice, the same one the bus makes for its DMA (even cycles are
+/// gets).
 /// </para>
 /// <para>
 /// <b>The frame counter</b> (apu.md 10) counts CPU cycles from its last reset and acts at the
@@ -30,8 +32,9 @@ namespace Dbhq.Machines.Nes;
 /// </para>
 /// <para>
 /// <b>Speed.</b> The tick does a compare for the frame counter, a count for the triangle and, on
-/// odd cycles, a count for each pulse and the noise; nothing else happens until a timer or a step
-/// comes round, and nothing allocates.
+/// odd cycles, a count for each pulse, the noise and the DMC; nothing else happens until a timer or
+/// a step comes round, and nothing allocates. <see cref="Output"/> is a field, worked out again
+/// through the mixer's tables (<see cref="ApuMixer"/>) only when something feeding it moved.
 /// </para>
 /// </remarks>
 public sealed class Apu
@@ -52,6 +55,12 @@ public sealed class Apu
     private readonly int[] _fiveStep;
 
     private long _cycles;
+
+    // The mixed level as last worked out, and whether something may have changed it since.
+    private double _output;
+    private double _pulseMix;
+    private double _tndMix;
+    private bool _mixStale = true;
 
     // The frame counter.
     private bool _fiveStepMode;
@@ -82,6 +91,7 @@ public sealed class Apu
         Pulse2 = new PulseChannel(onesComplement: false);
         Triangle = new TriangleChannel();
         Noise = new NoiseChannel(region);
+        Dmc = new DmcChannel(region);
         PowerOn();
     }
 
@@ -100,27 +110,35 @@ public sealed class Apu
     /// <summary>The noise, at <c>$400C</c> to <c>$400F</c>.</summary>
     public NoiseChannel Noise { get; }
 
+    /// <summary>The DMC, at <c>$4010</c> to <c>$4013</c>.</summary>
+    public DmcChannel Dmc { get; }
+
     /// <summary>CPU cycles ticked since power on; its parity tells a get (even) from a put (odd).</summary>
     public long Cycles => _cycles;
 
-    /// <summary>The IRQ line the unit holds: the frame counter's flag (the DMC's comes in task 9).</summary>
-    public bool Irq => _frameIrq;
+    /// <summary>The IRQ line the unit holds: the frame counter's flag or the DMC's.</summary>
+    public bool Irq => _frameIrq || Dmc.IrqFlag;
 
     /// <summary>
-    /// The mixed level, 0 to 1, from the sheet's non-linear formulas (apu.md 11) with the DMC at
-    /// 0. Computed when read, so the tick pays nothing for it. Task 9 adds the DMC and decides how
-    /// the sample buffer reads it.
+    /// The mixed level, 0 to 1, from the sheet's non-linear formulas (apu.md 11) through the
+    /// mixer's tables, as it stands after the last tick or write. The bus reads it once a cycle for
+    /// the sample buffer.
     /// </summary>
+    /// <remarks>
+    /// It is worked out only when something that feeds it may have changed: a timer that moved a
+    /// channel's sequence (and then only the group it is in), a frame counter step, a register
+    /// write. Otherwise it is the value of the cycle before, so reading it costs nothing.
+    /// </remarks>
     public double Output
     {
         get
         {
-            int pulses = Pulse1.Output + Pulse2.Output;
-            double pulse = pulses == 0 ? 0 : 95.88 / ((8128.0 / pulses) + 100);
-            int triangle = Triangle.Output;
-            int noise = Noise.Output;
-            double tnd = triangle + noise == 0 ? 0 : 159.79 / ((1 / ((triangle / 8227.0) + (noise / 12241.0))) + 100);
-            return pulse + tnd;
+            if (_mixStale)
+            {
+                Remix();
+            }
+
+            return _output;
         }
     }
 
@@ -132,10 +150,12 @@ public sealed class Apu
     public void PowerOn()
     {
         _cycles = 0;
+        _mixStale = true;
         Pulse1.PowerOn();
         Pulse2.PowerOn();
         Triangle.PowerOn();
         Noise.PowerOn();
+        Dmc.PowerOn();
         _lengthWritten = false;
         _fiveStepMode = false;
         _irqInhibit = false;
@@ -149,14 +169,16 @@ public sealed class Apu
 
     /// <summary>
     /// The reset button (apu.md 13 and the fork's <c>apu_reset/readme.txt</c>): the channels are
-    /// disabled, the triangle goes back to step 0, the frame IRQ flag clears, and the last
-    /// <c>$4017</c> mode is written again ten cycles before the first instruction. The other
-    /// registers keep their values.
+    /// disabled, the triangle goes back to step 0, the DMC's level keeps bit 0, the frame IRQ flag
+    /// clears, and the last <c>$4017</c> mode is written again ten cycles before the first
+    /// instruction. The other registers keep their values.
     /// </summary>
     public void Reset()
     {
+        _mixStale = true;
         WriteStatus(0);
         Triangle.Reset();
+        Dmc.Reset();
         _frameIrq = false;
         ScheduleResetAsIfWrittenBeforeTheFirstInstruction(_pendingFiveStepMode);
     }
@@ -175,12 +197,34 @@ public sealed class Apu
             Step();
         }
 
-        Triangle.ClockTimer();
+        bool tnd = Triangle.ClockTimer();
+        bool pulses = false;
         if ((_cycles & 1) != 0)
         {
-            Pulse1.ClockTimer();
-            Pulse2.ClockTimer();
-            Noise.ClockTimer();
+            pulses = Pulse1.ClockTimer() | Pulse2.ClockTimer();
+            tnd |= Noise.ClockTimer() | Dmc.ClockTimer(_cycles);
+        }
+
+        if (_mixStale)
+        {
+            Remix();
+        }
+        else
+        {
+            if (pulses)
+            {
+                _pulseMix = ApuMixer.Pulse(Pulse1.Output, Pulse2.Output);
+            }
+
+            if (tnd)
+            {
+                _tndMix = ApuMixer.Tnd(Triangle.Output, Noise.Output, Dmc.Level);
+            }
+
+            if (pulses | tnd)
+            {
+                _output = _pulseMix + _tndMix;
+            }
         }
 
         if (_lengthWritten)
@@ -194,9 +238,9 @@ public sealed class Apu
     }
 
     /// <summary>
-    /// A read of <c>$4015</c> (apu.md 9): bits 0 to 3 are the length counters over 0, bit 6 the
-    /// frame IRQ flag, which the read clears. Bits 4 and 7 are the DMC's (task 9) and bit 5 is the
-    /// bus's.
+    /// A read of <c>$4015</c> (apu.md 9): bits 0 to 3 are the length counters over 0, bit 4 the
+    /// DMC's bytes remaining over 0, bit 6 the frame IRQ flag, which the read clears, and bit 7 the
+    /// DMC's IRQ flag, which it does not. Bit 5 is the bus's.
     /// </summary>
     public byte ReadStatus()
     {
@@ -212,16 +256,19 @@ public sealed class Apu
             | (Pulse2.LengthCounter > 0 ? 0x02 : 0)
             | (Triangle.LengthCounter > 0 ? 0x04 : 0)
             | (Noise.LengthCounter > 0 ? 0x08 : 0)
-            | (_frameIrq ? 0x40 : 0);
+            | (Dmc.BytesRemaining > 0 ? 0x10 : 0)
+            | (_frameIrq ? 0x40 : 0)
+            | (Dmc.IrqFlag ? 0x80 : 0);
         return (byte)status;
     }
 
     /// <summary>
     /// A write to <c>$4000</c> to <c>$4017</c>, as register <c>0</c> to <c>0x17</c>. <c>$4014</c>
-    /// and <c>$4016</c> are not the unit's and are ignored; so are the DMC's until task 9.
+    /// and <c>$4016</c> are not the unit's and are ignored.
     /// </summary>
     public void Write(int register, byte value)
     {
+        _mixStale = true;
         switch (register)
         {
             case < 0x04:
@@ -240,6 +287,9 @@ public sealed class Apu
                 Noise.Write(register - 0x0C, value);
                 _lengthWritten |= register is 0x0C or 0x0F;
                 break;
+            case < 0x14:
+                Dmc.Write(register - 0x10, value);
+                break;
             case 0x15:
                 WriteStatus(value);
                 break;
@@ -255,6 +305,7 @@ public sealed class Apu
         Pulse2.Length.SetEnabled((value & 0x02) != 0);
         Triangle.Length.SetEnabled((value & 0x04) != 0);
         Noise.Length.SetEnabled((value & 0x08) != 0);
+        Dmc.WriteEnable((value & 0x10) != 0, _cycles);
     }
 
     // A $4017 write made in cycle writeCycle: the inhibit acts now, the mode at the reset, 3 cycles
@@ -281,6 +332,7 @@ public sealed class Apu
 
     private void ResetSequence()
     {
+        _mixStale = true;
         _fiveStepMode = _pendingFiveStepMode;
         _steps = _fiveStepMode ? _fiveStep : _fourStep;
         _actions = _fiveStepMode ? FiveStepActions : FourStepActions;
@@ -295,6 +347,7 @@ public sealed class Apu
 
     private void Step()
     {
+        _mixStale = true;
         int actions = _actions[_stepIndex];
         if ((actions & Quarter) != 0)
         {
@@ -320,6 +373,14 @@ public sealed class Apu
         {
             _stepIndex++;
         }
+    }
+
+    private void Remix()
+    {
+        _mixStale = false;
+        _pulseMix = ApuMixer.Pulse(Pulse1.Output, Pulse2.Output);
+        _tndMix = ApuMixer.Tnd(Triangle.Output, Noise.Output, Dmc.Level);
+        _output = _pulseMix + _tndMix;
     }
 
     private void ClockQuarterFrame()

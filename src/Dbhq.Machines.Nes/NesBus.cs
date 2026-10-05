@@ -56,9 +56,10 @@ namespace Dbhq.Machines.Nes;
 /// The sound unit is <see cref="Apu"/> (task 8): it is ticked before the access, so a read of
 /// <c>$4015</c> sees a flag set in its own cycle, and its IRQ line reaches the CPU by the same
 /// start-of-cycle rule as the NMI, which <c>pal_apu_tests</c> 08.irq_timing confirms to the cycle.
-/// The DMC and its DMA come in task 9.
-/// OAM DMA came early, in task 5, because the sprite test ROMs need it; the controllers and the
-/// audit of OAM DMA are task 7.
+/// Its mixed level goes to <see cref="Sound"/> each cycle (task 9). The two DMA units, OAM's and
+/// the DMC's, halt the CPU on a read and run in <see cref="RunDma"/>. OAM DMA came early, in task
+/// 5, because the sprite test ROMs need it; the controllers and the audit of OAM DMA are task 7;
+/// the DMC's DMA is task 9.
 /// </para>
 /// </remarks>
 public sealed class NesBus : IBus
@@ -67,6 +68,8 @@ public sealed class NesBus : IBus
     private readonly IMapper _mapper;
     private readonly Ppu _ppu;
     private readonly Apu _apu;
+    private readonly SampleBuffer _sound;
+    private readonly bool _dmcRepeatsHaltedRead;
     private Cpu? _cpu;
 
     // The value last on the CPU's data bus.
@@ -97,6 +100,7 @@ public sealed class NesBus : IBus
     /// this machine does not model throws.
     /// </summary>
     /// <exception cref="NesFormatException">The cartridge needs a mapper this machine does not model.</exception>
+    /// <exception cref="ArgumentOutOfRangeException">The options' sample rate is not above 0, or is above an eighth of the CPU clock.</exception>
     public NesBus(Cartridge cartridge, Region region, NesOptions? options = null)
     {
         ArgumentNullException.ThrowIfNull(cartridge);
@@ -105,9 +109,9 @@ public sealed class NesBus : IBus
         _mapper = cartridge.CreateMapper();
         _ppu = new Ppu(region, _mapper);
         _apu = new Apu(region);
-
-        // The options' sample rate is for the sample buffer, which task 9 adds.
-        _ = options;
+        int sampleRate = (options ?? new NesOptions()).SampleRate;
+        _sound = new SampleBuffer(sampleRate, region.CpuHz, Math.Max(1, sampleRate / 4));
+        _dmcRepeatsHaltedRead = region.DmcDmaRepeatsHaltedRead;
     }
 
     /// <summary>The PPU, whose registers sit at <c>$2000</c> to <c>$3FFF</c>.</summary>
@@ -115,6 +119,12 @@ public sealed class NesBus : IBus
 
     /// <summary>The sound unit, whose registers sit at <c>$4000</c> to <c>$4013</c>, <c>$4015</c> and <c>$4017</c>.</summary>
     public Apu Apu => _apu;
+
+    /// <summary>
+    /// The sound, as samples at the options' rate: the mixed level goes in once a cycle. It holds a
+    /// quarter of a second, and drops the oldest when the reader falls behind.
+    /// </summary>
+    public SampleBuffer Sound => _sound;
 
     /// <summary>The region this console is: its dot ratio comes from it.</summary>
     public Region Region { get; }
@@ -148,14 +158,14 @@ public sealed class NesBus : IBus
     public long PpuDots => _ppuDots;
 
     /// <summary>
-    /// One CPU read: one cycle. If a write to <c>$4014</c> is waiting, the OAM DMA it asked for
-    /// runs first, halting the CPU on this read (<see cref="RunOamDma"/>).
+    /// One CPU read: one cycle. If a write to <c>$4014</c> is waiting, or the DMC wants a sample
+    /// byte, the DMA runs first, halting the CPU on this read (<see cref="RunDma"/>).
     /// </summary>
     public byte Read(ushort address)
     {
-        if (_dmaPage >= 0)
+        if (_dmaPage >= 0 || _apu.Dmc.WantsHalt(_cycles + 1))
         {
-            RunOamDma(address);
+            RunDma(address);
         }
 
         return Cycle(false, address, 0);
@@ -222,6 +232,7 @@ public sealed class NesBus : IBus
         _lastReadAddress = -1;
         _ppu.PowerOn();
         _apu.PowerOn();
+        _sound.Clear();
         if (_cpu is not null)
         {
             _cpu.Nmi = false;
@@ -268,6 +279,7 @@ public sealed class NesBus : IBus
         }
 
         _apu.Tick();
+        _sound.Add(_apu.Output);
         _mapper.CpuCycle();
 
         if (write)
@@ -298,37 +310,93 @@ public sealed class NesBus : IBus
     }
 
     /// <summary>
-    /// OAM DMA (bus.md section 5): the CPU is halted on the read at <paramref name="halted"/>,
-    /// which it repeats on each halted cycle and makes again once the copy is done. One halt cycle,
-    /// one alignment cycle if the next is not a get, then 256 pairs of a read of page <c>N</c> on a
-    /// get and a write to <c>$2004</c> on a put: 513 or 514 cycles, each through <see cref="Cycle"/>,
-    /// so the PPU and the sound unit run through them. Which cycles are gets is random at power
-    /// on; the model makes the even ones gets, so a write to <c>$4014</c> in an even cycle costs 513
-    /// and one in an odd cycle 514.
+    /// The DMA units (bus.md sections 5 and 6), with the CPU halted on its read of
+    /// <paramref name="halted"/>, which it makes again once they are done. Every cycle goes
+    /// through <see cref="Cycle"/>, so the PPU and the sound unit run through them. The model makes
+    /// the even cycles gets and the odd ones puts.
     /// </summary>
     /// <remarks>
-    /// Task 5 of the NES plan built this because the sprite ROMs load OAM this way, and task 7
-    /// audited it against the sheet and tested it (<c>OamDmaTests</c>). It is a loop in the bus, on
-    /// the CPU's next read, not in the write: the sheet's DMA halts the CPU with RDY, which only
-    /// works on a read. The 513 or 514 are the stolen cycles, not counting the <c>$4014</c> write
-    /// or the CPU's own read, which comes after.
+    /// <para>
+    /// <b>OAM DMA</b>, after a write to <c>$4014</c>: one halt cycle, an alignment cycle if the next
+    /// is not a get, then 256 pairs of a read of page <c>N</c> on a get and a write to
+    /// <c>$2004</c> on a put, 513 or 514 cycles (task 5 built it on the CPU's next read, which the
+    /// sheet's halt is, and task 7 audited it).
+    /// </para>
+    /// <para>
+    /// <b>DMC DMA</b>, from the cycle the DMC asks for: a halt cycle, a dummy cycle, then the read
+    /// of the sample byte on the next get, 3 or 4 cycles. Its halt and dummy cycles do nothing on
+    /// the bus of their own, so inside OAM DMA they overlap the copy's reads and writes; its read
+    /// takes a get from the copy, which then spends a put realigning. So a fetch in the middle of
+    /// the copy costs 2, one on its second-to-last put 1 and one on its last put 3, as the DMA page
+    /// shows them.
+    /// </para>
+    /// <para>
+    /// <b>A cycle with no transfer</b> (a halt, a dummy or an alignment cycle) repeats the CPU's
+    /// halted read on the 2A03, which is how a fetch that lands on a read of <c>$2007</c>,
+    /// <c>$4015</c> or a pad reads it again (bus.md 6). The 2A07 "fixes these extra read problems",
+    /// by a mechanism the page says is not understood and suspects puts the DMA's own address on
+    /// the bus; so on PAL the DMC's cycles with no transfer read the sample address instead, which
+    /// has no side effect. OAM DMA alone repeats the halted read on both, as task 7 left it.
+    /// </para>
     /// </remarks>
-    private void RunOamDma(ushort halted)
+    private void RunDma(ushort halted)
     {
         int page = _dmaPage << 8;
+        bool oam = _dmaPage >= 0;
         _dmaPage = -1;
 
-        Cycle(false, halted, 0);
-        if ((_cycles & 1) == 0)
-        {
-            // The next cycle is a put: wait one more for a get.
-            Cycle(false, halted, 0);
-        }
+        bool oamHalted = false;
+        bool holding = false;
+        byte value = 0;
+        int index = 0;
 
-        for (int i = 0; i < 256; i++)
+        // 0: no fetch; 1: this cycle is its halt; 2: its dummy; 3: waiting for a get to read.
+        int dmc = 0;
+
+        while (true)
         {
-            byte value = Cycle(false, (ushort)(page | i), 0);
-            Cycle(true, 0x2004, value);
+            long cycle = _cycles + 1;
+            bool get = (cycle & 1) == 0;
+            if (dmc == 0 && _apu.Dmc.WantsHalt(cycle))
+            {
+                dmc = 1;
+            }
+
+            if (!oam && dmc == 0)
+            {
+                return;
+            }
+
+            if (dmc == 3 && get)
+            {
+                _apu.Dmc.CompleteFetch(Cycle(false, _apu.Dmc.FetchAddress, 0));
+                dmc = 0;
+            }
+            else if (oam && oamHalted && get && !holding)
+            {
+                value = Cycle(false, (ushort)(page | index), 0);
+                holding = true;
+            }
+            else if (oam && oamHalted && !get && holding)
+            {
+                Cycle(true, 0x2004, value);
+                holding = false;
+                oam = ++index < 256;
+            }
+            else if (dmc != 0 && !_dmcRepeatsHaltedRead)
+            {
+                Cycle(false, _apu.Dmc.FetchAddress, 0);
+            }
+            else
+            {
+                Cycle(false, halted, 0);
+            }
+
+            oamHalted = true;
+            if (dmc is 1 or 2)
+            {
+                dmc++;
+            }
         }
     }
 

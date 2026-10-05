@@ -25,7 +25,7 @@ public class ApuTests
         // output 15, and holds it while silent (apu.md 6).
         Apu apu = Make(region);
         Assert.Equal(0.2464, apu.Output, 4);
-        Assert.Equal(Mix(0, 0, 15, 0), apu.Output, 12);
+        Assert.Equal(Mix(0, 0, 15, 0), apu.Output, 6);
     }
 
     [Theory]
@@ -44,7 +44,7 @@ public class ApuTests
 
         Assert.Equal(15, apu.Pulse1.Output);
         Assert.Equal(15, apu.Pulse2.Output);
-        Assert.Equal(Mix(15, 15, 15, 0), apu.Output, 12);
+        Assert.Equal(Mix(15, 15, 15, 0), apu.Output, 6);
         Assert.Equal(0.2585, Mix(15, 15, 0, 0), 4);
     }
 
@@ -70,7 +70,38 @@ public class ApuTests
         {
             apu.Tick();
             Assert.InRange(apu.Output, 0.0, 1.0);
-            Assert.Equal(Mix(apu.Pulse1.Output, apu.Pulse2.Output, apu.Triangle.Output, apu.Noise.Output), apu.Output, 12);
+            Assert.Equal(Mix(apu.Pulse1.Output, apu.Pulse2.Output, apu.Triangle.Output, apu.Noise.Output), apu.Output, 6);
+        }
+    }
+
+    [Theory]
+    [MemberData(nameof(Regions), MemberType = typeof(ApuTesting))]
+    public void TheMixWorkedOutOnlyOnChangesIsTheChannelsMixOnEveryCycle(string region)
+    {
+        // The unit works the mix out again only when a timer, a frame step or a write may have
+        // changed it. Through a machine, with every channel and the DMC playing, envelopes
+        // decaying, sweeps, length counters running out and random writes to every register at
+        // random times (a fixed seed), the cached level must be the channels' mix on every cycle.
+        var random = new Random(9);
+        byte[] prg = new byte[0x8000];
+        random.NextBytes(prg);
+        Nes nes = DmcTesting.Machine(region, prg);
+        Apu apu = nes.Bus.Apu;
+        byte[] registers = [0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x0A, 0x0B, 0x0C, 0x0E, 0x0F, 0x10, 0x11, 0x12, 0x13, 0x15, 0x17];
+        nes.Bus.Write(0x4015, 0x1F);
+        nes.Bus.Write(0x4010, 0x4F);
+        for (int c = 0; c < 200_000; c++)
+        {
+            if (random.Next(300) == 0)
+            {
+                nes.Bus.Write((ushort)(0x4000 + registers[random.Next(registers.Length)]), (byte)random.Next(256));
+            }
+            else
+            {
+                nes.Bus.Read(0x0000);
+            }
+
+            Assert.Equal(ApuMixer.Mix(apu.Pulse1.Output, apu.Pulse2.Output, apu.Triangle.Output, apu.Noise.Output, apu.Dmc.Level), apu.Output, 12);
         }
     }
 
@@ -97,18 +128,21 @@ public class ApuTests
 
     [Theory]
     [MemberData(nameof(Regions), MemberType = typeof(ApuTesting))]
-    public void TheDmcRegistersAreAcceptedAndChangeNothingYet(string region)
+    public void TheDmcsRegistersReachItAndItsBitsShowInTheStatus(string region)
     {
-        // The DMC is task 9's. Until then its four registers and its $4015 bit are taken and ignored.
+        // Task 9 replaced task 8's "accepted and ignored": $4011 sets the level the mixer hears,
+        // $4013 the length, and enabling it shows bytes remaining in bit 4 (apu.md 8 and 9).
         Apu apu = Make(region);
-        double before = apu.Output;
-        for (int r = 0x10; r <= 0x13; r++)
-        {
-            apu.Write(r, 0xFF);
-        }
+        apu.Write(0x11, 0x40);
+        Assert.Equal(0x40, apu.Dmc.Level);
+        Assert.Equal(ApuMixer.Mix(0, 0, 15, 0, 0x40), apu.Output, 6);
 
+        apu.Write(0x13, 0x01);
         apu.Write(0x15, 0x10);
+        Assert.Equal(17, apu.Dmc.BytesRemaining);
+        Assert.Equal(0x10, apu.PeekStatus());
+
+        apu.Write(0x15, 0x00);
         Assert.Equal(0, apu.PeekStatus());
-        Assert.Equal(before, apu.Output);
     }
 }

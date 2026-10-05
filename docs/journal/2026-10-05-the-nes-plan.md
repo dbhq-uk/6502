@@ -830,3 +830,210 @@ member present and doing nothing, was 144 failing and 76 passing of 220
 tests that passed against it were the ones that check nothing moves (a held
 triangle, a timer write that does not restart, ignored DMC registers, the typed
 noise entries, the output's range).
+
+## Task 9: the DMC, its DMA, the mixer and the sample buffer
+
+**Done.** The DMC (`DmcChannel` in `ApuChannels.cs`), its DMA (`NesBus.RunDma`,
+one loop for both DMA units), the mixer's tables (`ApuMixer.cs`) and the sample
+buffer (`SampleBuffer.cs`), which `Nes.Sound` and `NesBus.Sound` expose at the
+options' rate. `Region` gained `DmcDmaRepeatsHaltedRead`, true on NTSC. New
+tests: `DmcTests`, `DmcDmaTests`, `MixerTests`, `SampleBufferTests`,
+`ResamplerTests`, and in `BlarggTests` the DMC ROMs, the `apu_mixer` listening
+test and a table of known failures. Task 8's
+`ApuTests.TheDmcRegistersAreAcceptedAndChangeNothingYet` was no longer true and
+is replaced by a test that the DMC's registers reach it and show in `$4015`.
+The project passed 886 of 886 [`dotnet test tests/Dbhq.Machines.Nes.Tests -c
+Release`, 5 October 2026].
+
+**Red, then green.** With every new member present and doing nothing, the new
+and changed tests failed 150 of 167 [`dotnet test tests/Dbhq.Machines.Nes.Tests
+-c Release --filter` on the six classes, 5 October 2026]. The first build that
+did the work passed all but six, all of them task 8's output tests comparing to
+12 decimal places: the TND table is single precision, within 1e-7 of the
+formula, so they compare to 6, the brief's 1e-6.
+
+**The DMC** is the sheet's section 8. Its fetches are the bus's: the channel
+says from which cycle the CPU may be halted and from which address, and the bus
+halts on its next read at or after that cycle. A load (the first fetch after
+`$4015` starts a sample with the buffer empty) may halt on the get of the second
+APU cycle after the write, 3 cycles after a write on a put and 4 after one on a
+get; a reload, when the output unit empties the buffer, from the next put.
+
+**The DMA, one loop.** OAM DMA (task 5, audited in task 7) and the DMC's now run
+in one loop, cycle by cycle. A DMC fetch's halt and dummy cycles move no data,
+so inside a copy they overlap its reads and writes; its read takes a get from
+the copy, which then spends a put realigning. That gives the DMA page's costs
+without special cases. `DmcDmaTests` measures each as the change in
+`Bus.Cycles`, on both regions: a load steals 3 and halts on the cycle the sheet
+names, a reload steals 4 and halts on a put, a halt delayed by one or two writes
+steals 4 or 3 (a load) and by one, two or three writes 3, 4 or 3 (a reload), a
+fetch in the middle of OAM DMA costs 2, on its second-to-last put 1 and on its
+last put 3, the copy still reaches OAM, and a program's own cycle count
+(`Cpu.Cycles`) is the same with the DMC playing as without while the bus's grows
+by 3 and then 4 a fetch. On NTSC a fetch that halts a read of `$4016` loses a
+pad bit, and one that halts a read of `$2007` reads it three times more; on PAL
+neither.
+
+**The PAL choice.** The DMA page says the 2A07 has no extra reads, by a
+mechanism "not yet understood", and suspects the DMA's address is on the bus.
+On PAL the model's DMC fetch reads its sample address on its idle cycles. That
+is a guess, in `bus.md` 6 and known differences; nothing pinned tests the 2A07's
+DMA.
+
+**The ROMs.** Each header first: all thirteen are NROM-256 (mapper nibbles 0),
+CHR ROM or CHR RAM, so none waits for task 10. All run NTSC: `apu_test` names
+NTSC figures, `dmc_dma_during_read4` tests the 2A03's conflicts, and
+`sprdma_and_dmc_dma` prints "This test is meant for NTSC NES only".
+- `apu_test` 7-dmc_basics and 8-dmc_rates pass, the two task 8 left.
+- `sprdma_and_dmc_dma` and `sprdma_and_dmc_dma_512` pass. Task 7 found they spin
+  on `$4015` bit 4; with the DMC they finish, and they report through `$6000`
+  with the signature, which task 7 could not see. They print a table of OAM DMA
+  costs (525 to 528 cycles) and "Passed".
+- `dmc_dma_during_read4`: `dma_2007_read` prints `44 55` in its middle row and
+  the CRC `5E3DF9C4`, one of the two its source lists; `dma_2007_write`,
+  `dma_4016_read` (`08 08 07 08 08`) and `read_write_2007` print "Passed". These
+  write nothing to `$6000`; they stop in their shell's `forever` loop, which
+  is `sei`, a write to `$2000` and a `JMP` back, not a jump to itself, so the
+  runner gained `RunUntilForever`.
+- `double_2007_read` fails, printing `D84F6815`. It reads `$2007` in two
+  adjacent cycles through an indexed read's dummy read, with no DMC, and its
+  source lists four outputs, all of which treat the second read oddly. The
+  model's PPU makes two whole reads. It is the PPU's, and stays visible:
+  `BlarggTests.KnownFailures` runs it and holds its output and the cause, so a
+  fix or a different failure shows, and known differences has it.
+
+**What the ROMs pin, each rule taken out for one run** [the DMC ROMs with
+`apu_test` and `pal_apu_tests`, 5 October 2026]:
+- The load's halt cycle: one cycle earlier fails both `sprdma` ROMs,
+  `dma_4016_read` and `dma_2007_read`; a fixed 3 whatever the parity fails the
+  two `sprdma` ROMs.
+- A reload on a put: halting it on a get fails five (both `sprdma`,
+  `dma_4016_read`, `dma_2007_write`, `dma_2007_read`). Halting at the put after
+  the next passes everything, so the delay is not pinned: the ROMs synchronise
+  to the DMC. The model's delay is two cycles, a choice.
+- The 2A03's repeated halted read: without it `dma_4016_read` and
+  `dma_2007_read` fail.
+- The overlap with OAM DMA: a fetch that waits for the copy to end fails both
+  `sprdma` ROMs.
+- Not pinned: the parity that gets the 3-cycle `$4017` delay. Swapped, all of
+  these and the task 8 ROMs pass, so `apu.md` open item 4 stays open.
+
+**The mixer, and listening to `apu_mixer`.** The four ROMs (dmc, noise, square,
+triangle) play a tone on a channel and the inverse on the DMC's DAC, which
+cancel to near silence if the mixer is right; they cannot hear themselves and
+report 0 whatever they played. So the test listens: it reads the machine's own
+sound as it fills, cuts it into blocks of 1024 samples, and measures each
+block's level at the tone's pitch (a period of 1792 cycles in each source, the
+short tone's too). The two short tones are the loud blocks; between them, the
+test must be far quieter. Against the short tone, the 90th percentile block of
+each test was
+[`BlarggTests.EachApuMixerRomCancelsItsToneToNearSilence`, detailed logger, 5
+October 2026]:
+
+| ROM | 90th percentile | median | loudest |
+| --- | --- | --- | --- |
+| dmc | -38.3 dB | -43.8 dB | -35.4 dB |
+| noise | -32.2 dB | -38.3 dB | -25.4 dB |
+| square | -38.5 dB | -41.5 dB | -35.4 dB |
+| triangle | -38.0 dB | -39.9 dB | -36.9 dB |
+
+With the APU Mixer page's linear approximation put into the tables for one run
+the same figures were -10.8, -23.9, -9.5 and -25.7 dB (90th percentile), so the
+test's line of -30 dB tells the formulas from the approximation on every ROM.
+The 90th percentile, not the loudest block, because the noise ROM's loudest
+blocks, where its volume steps, are as loud with either mixer (-25.5 and -23.3).
+How near silence a console gets is not written down; the readme says "a faint
+tone might be audible through headphones".
+
+**The resampler, chosen by measurement.** The line, set before measuring: no
+alias stronger than 40 dB under the note anywhere below the Nyquist. The method:
+a 50 % pulse at volume 15 from the mixer, at timer periods 16, 40 and 100 (6.6,
+2.7 and 1.1 kHz on NTSC), through each resampler to 65,536 samples, a spectrum
+through a Blackman-Harris window, and the strongest bin that is not a harmonic
+or 0 Hz. The box filter (each sample the mean of its own period) against the
+band-limited step as first built (a step a cycle, 512 phases):
+
+| Pulse | Box, worst alias | Steps, worst alias |
+| --- | --- | --- |
+| NTSC t=16, 48 kHz | -22.1 dB | -71.5 dB |
+| NTSC t=40, 48 kHz | -24.0 dB | -79.1 dB |
+| NTSC t=100, 48 kHz | -32.4 dB | -86.8 dB |
+| NTSC t=40, 44.1 kHz | -23.6 dB | -77.9 dB |
+| PAL t=16, 48 kHz | -20.3 dB | -71.8 dB |
+| PAL t=40, 48 kHz | -26.0 dB | -79.3 dB |
+| PAL t=100, 48 kHz | -32.4 dB | -87.3 dB |
+
+The box filter misses the line on every pulse, and below 16 kHz too (-22.1 to
+-39.7 dB). Task 8's carry, the triangle at periods 0 and 1, measured as the
+peak-to-peak swing against a full triangle's: through the box filter -18.0 and
+-7.1 dB on NTSC, -22.7 and -6.3 dB on PAL, a tone folded into the band; through
+the steps -66.0 to -74.9 dB. So the band-limited step is kept, and the
+simpler box filter stays in the tests as what it was measured against
+[`dotnet test tests/Dbhq.Machines.Nes.Tests -c Release --filter
+FullyQualifiedName~ResamplerTests --logger "console;verbosity=detailed"`, 5
+October 2026].
+
+**Then its cost, and what changed.** Measured alone (a throwaway program in
+`/tmp` running `Apu.Tick` with and without `Add(Output)`, every channel playing,
+load 15 to 34), the first version added 20 to 40 ns a cycle, and with an
+ultrasonic triangle 120 to 200 ns: it steps every cycle or two, and each step
+was 33 multiply-adds. That would have cost a game that parks its triangle
+there a third or more of the machine's speed. Two things were tried.
+- *The triangle mixed as its mean when its pitch is above the Nyquist*, which is
+  all a band-limited resampler keeps of it. Against the whole path it matched to
+  -81 dB alone, but with the noise playing it differed by -46.6 dB (99th
+  percentile): the non-linear mix makes the triangle and the noise intermodulate
+  into the band, and the mean throws that away. Dropped.
+- *Blocks of 8 cycles.* The level is averaged over 8 CPU cycles, and each change
+  of a block's mean becomes a step. Every pulse period (16 (t + 1) cycles) and
+  triangle period (32 (t + 1)) is a whole number of blocks, so a note's block
+  means repeat with it exactly and the blocks can fold only onto its own
+  harmonics; the mean is down by under 0.25 dB at 20 kHz. The pulses measured
+  the same; the ultrasonic triangle went to -55.0 to -63.8 dB, because its steps
+  are now up to eight levels and an edge placed to 1/512 of a sample is too
+  coarse for them. At 1/4096 (a 540 KB table, of which a step reads one row) the
+  pulses' worst alias is -89.6 to -100.9 dB and the triangle -72.4 to -76.1 dB.
+  Kept.
+
+The kernel's response, worked out from it: flat to 0.35 of the sample rate (16.8
+kHz at 48 kHz), -6 dB at 0.42, -60 dB at the Nyquist, -94 dB or more from 0.55
+up. The mix is now worked out only when a timer moves a channel (and then only
+its group), a frame step or a write, so `Output` is a field. Measured again on a
+quieter machine (load 2 to 3), the sound adds about 4 ns a cycle to a tick of 8
+to 10 ns, and 11 to 15 ns with an ultrasonic triangle. `ResamplerTests` fails if
+the steps lose much of that (-65 dB) or the box filter starts meeting the line.
+
+**The ring.** It drops the oldest sample for each new one when full and counts
+them in `Dropped`; ten times its capacity with no reader leaves it full with the
+newest tenth (Review Focus 3). Adding allocates nothing (`GC` counter, a million
+adds). The machine's holds a quarter of a second.
+
+**Speed, task 6's check again.** Beside task 6's set A (AOT median 1.94 times
+NTSC and 1.71 PAL, native 3.38 and 2.81, at a load of 5.6 to 8.4), task 9's,
+with the commit before this work exported by `git archive` to `/tmp` and built
+and run the same way, alternating, 5 October 2026:
+
+| Build | Load | Before task 9, median (best) | After, median (best) |
+| --- | --- | --- | --- |
+| AOT, NTSC | 2.6 to 4.2 | 1.81 (2.15) times | 1.67 (1.96) times |
+| AOT, PAL | 2.6 to 4.2 | 2.19 (2.44) times | 1.96 (2.21) times |
+| Native, NTSC | 3.6 to 4.8 | 3.27 (3.76) times | 3.05 (3.29) times |
+
+Twenty timed runs a browser row (four launches of five) and thirty a native row
+(six of five) [`node run-in-browser.mjs <folder> 1 1790000 5000000 5 <region>`
+and `dotnet run -c Release --project bench/nes-speed/native -- 5 1790000 ntsc`,
+the medians and bests taken over the `times_real` lines]. A third native build
+without the `Add` call gave 3.16, so the sound costs about 3.5 % and the DMC,
+its DMA check and the mix's upkeep about the same again: 7 to 10 % in all. An
+earlier set at a load of 5 to 16 was too noisy to read (the same builds ranged
+0.43 to 2.49 times), and is not used. Ruling M's PPU task is still where the
+speed has to come from.
+
+**Mistakes.**
+- The first runner for `dmc_dma_during_read4` waited for a jump to itself, which
+  its shell never makes; the probe showed the `forever` loop.
+- The first `apu_mixer` line was the loudest block, which the noise ROM's volume
+  steps decide whatever the mixer is; it moved to the 90th percentile after the
+  linear run showed it.
+- The averaging of the ultrasonic triangle was built, measured and taken out;
+  the blocks do the job without changing what is heard.

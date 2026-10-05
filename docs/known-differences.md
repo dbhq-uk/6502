@@ -719,9 +719,9 @@ access except reads of `$4015`, so a board could put a register in the PPU or
 sound range. The interface has no such board, so the bus does not pass those
 addresses on.
 
-**What is not built yet.** The DMC and its DMA are task 9's: the DMC's
-registers are taken and ignored, and its `$4015` bits read 0. The controllers are real (task 7): a read of a port gives the pad in bit
-0, the open bus in bits 7 to 5 and zeros in bits 4 to 1.
+**The controllers** are real (task 7): a read of a port gives the pad in bit
+0, the open bus in bits 7 to 5 and zeros in bits 4 to 1. The DMC and its DMA
+came in task 9; where they stop is the section on them below.
 
 **OAM DMA came early, and its parity is a choice.** Task 5 built OAM DMA,
 because the sprite test ROMs load OAM with it; task 7 owns it. A write to
@@ -864,8 +864,9 @@ belongs.
 
 **The triangle's periods 0 and 1 are not halted.** They give the ultrasonic wave
 the sheet describes, a step every CPU cycle or every second one. Some emulators
-halt them to avoid the noise this makes in a sampled output; task 9's resampler
-decides whether that is needed.
+halt them to avoid the noise this makes in a sampled output. Task 9's resampler
+does not need it: an ultrasonic triangle comes out of it 72 dB or more under a
+full one.
 
 **The triangle starts at step 0 at power on.** The sheet gives step 0 after a
 reset and an unknown phase at power on.
@@ -874,6 +875,57 @@ reset and an unknown phase at power on.
 mode is written again at reset "but IRQ inhibit flag is sometimes cleared". The
 model writes the last mode and keeps the inhibit bit. `apu_reset` is task 12's.
 
-**The output is the sheet's mixer formula with the DMC at 0,** computed when
-read. Task 9 adds the DMC, the sample buffer and the filters the NES has after
-its DACs.
+**The output is the sheet's mixer formulas** with every channel, the DMC
+included, through tables built from them at start-up (task 9). The triangle,
+noise and DMC table is single precision, within 1e-7 of the formula.
+
+## The NES: the DMC, its DMA and the sound out, where the model stops
+
+**What.** Task 9 of the NES plan: the DMC in `ApuChannels.cs`, its DMA in
+`NesBus.RunDma`, the mixer's tables in `ApuMixer.cs`, and `SampleBuffer`. The
+sources are `docs/nes/facts/apu.md` sections 8 and 11 and `bus.md` section 6,
+with the DMA page itself (revision 23450). Every pinned DMC ROM passes but one:
+`apu_test` 7-dmc_basics and 8-dmc_rates, both `sprdma_and_dmc_dma` ROMs, and
+four of `dmc_dma_during_read4`'s five, on NTSC.
+
+**`dmc_dma_during_read4/double_2007_read` fails, and it is the PPU's.** It
+reads `$2007` twice in adjacent cycles (`LDA $20F7,X` with X = `$10`, whose
+dummy read is `$2007` and whose real one `$2107`), with no DMC in it. Its source
+lists four outputs a console gives, by the CPU and PPU alignment, all of which
+treat the second read oddly ("sometimes ignores extra read, and puts odd things
+into buffer"). The model's PPU makes two whole reads and prints CRC `D84F6815`.
+`BlarggTests.KnownFailures` runs it and holds that output, so a fix shows.
+
+**The DMA bugs are not modelled.** The DMA page's aborted one-cycle DMA (a
+sample stopped in the APU cycle before a reload would be scheduled) and the
+late 2A03G and 2A03H's extra fetch do not happen. No pinned ROM tests them.
+
+**When a reload halts after the output unit empties the buffer is a choice.**
+The page says a reload halts on a put. The model's output unit clocks on the
+puts, and a reload may halt from the next put, two cycles later. Halting at the
+put after that passes every ROM too: they synchronise themselves to the DMC, so
+they test the parity and the cost, not the delay.
+
+**The 2A07's DMC fetch reads its own address on its idle cycles.** The page
+says the 2A07 has no extra reads by a mechanism "not yet understood", and
+suspects the DMA's address is on the bus. On PAL the model reads the sample
+address on the halt, dummy and alignment cycles of a DMC fetch, so no register
+is read again; OAM DMA alone still repeats the halted read there, as task 7 left
+it. A guess: no pinned ROM tests the 2A07's DMA.
+
+**The 2A03's register select during a fetch is not modelled.** On the 2A03 a
+DMC fetch while the CPU is halted on a read of `$4000-$401F` can select a
+register by the sample address's low five bits (`bus.md` open item 3). The model
+reads only the sample address.
+
+**The sound is resampled, and the console's filters follow.** The level is
+averaged over blocks of 8 CPU cycles, and each change of a block's mean is added
+as a band-limited step (a Kaiser-windowed sinc, 16 samples each side, placed to
+1/4096 of a sample); then high-passes at 90 Hz and 440 Hz and a low-pass at 14
+kHz, first order each. The 8-cycle mean is down by under 0.25 dB at 20 kHz.
+Measured on pulses, the worst alias under the Nyquist is 89.6 dB under the note
+or better (`ResamplerTests`). The order and the form of the filters are not on
+the page.
+
+**The sample buffer drops the oldest samples** when its reader falls behind
+(the plan's Review Focus 3). The machine's holds a quarter of a second.

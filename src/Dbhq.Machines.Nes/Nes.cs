@@ -19,6 +19,7 @@ public sealed class Nes
     /// header's, or else NTSC.
     /// </summary>
     /// <exception cref="NesFormatException">The cartridge needs a mapper this machine does not model.</exception>
+    /// <exception cref="ArgumentOutOfRangeException">The options' sample rate is not above 0, or is above an eighth of the CPU clock.</exception>
     public Nes(Cartridge cartridge, Region? region = null, NesOptions? options = null)
     {
         ArgumentNullException.ThrowIfNull(cartridge);
@@ -33,6 +34,9 @@ public sealed class Nes
     public Cpu Cpu { get; }
 
     public Region Region { get; }
+
+    /// <summary>The sound, as samples at the options' sample rate, for the page to read.</summary>
+    public SampleBuffer Sound => Bus.Sound;
 
     /// <summary>
     /// Switches on: the chips and RAM are cleared, the CPU's registers start at zero, and its reset

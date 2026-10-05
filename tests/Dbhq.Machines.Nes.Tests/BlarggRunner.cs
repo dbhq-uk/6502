@@ -104,6 +104,107 @@ public static class BlarggRunner
         return new BlarggResult(nes.Bus.Peek(0x00F8), ScreenText(nes.Bus.Ppu), nes.Bus.Cycles, true);
     }
 
+    /// <summary>
+    /// Runs one of the ROMs whose shell writes nothing to <c>$6000</c> and ends in its
+    /// <c>forever</c> loop: <c>dmc_dma_during_read4</c>'s, whose <c>shell.inc</c> ends with
+    /// <c>jmp forever</c> after printing, and whose loop is <c>sei</c>, a write of 0 to
+    /// <c>$2000</c> and a <c>JMP</c> back (read from the ROMs). So the runner steps until the CPU
+    /// sits on a <c>JMP</c> to an address at most 8 bytes before it, and returns the screen. The
+    /// status is -1: the text is the result.
+    /// </summary>
+    public static BlarggResult RunUntilForever(string pinnedName, Region region, long maxCpuCycles)
+    {
+        var nes = new Nes(Cartridge.Load(NesTestRoms.Read(pinnedName)), region);
+        nes.PowerOn();
+
+        while (nes.Bus.Cycles < maxCpuCycles)
+        {
+            nes.Step();
+            ushort pc = nes.Cpu.PC;
+            if (nes.Bus.Peek(pc) == 0x4C)
+            {
+                int target = nes.Bus.Peek((ushort)(pc + 1)) | (nes.Bus.Peek((ushort)(pc + 2)) << 8);
+                if (target <= pc && pc - target <= 8)
+                {
+                    return new BlarggResult(-1, ScreenText(nes.Bus.Ppu), nes.Bus.Cycles, false);
+                }
+            }
+        }
+
+        return new BlarggResult(-1, ScreenText(nes.Bus.Ppu), nes.Bus.Cycles, true);
+    }
+
+    /// <summary>
+    /// Runs a ROM by the <c>$6000</c> protocol, as <see cref="Run"/> does, while listening to the
+    /// machine's own sound: its sample buffer is read as it fills, cut into blocks of 1024
+    /// samples, and each block's amplitude at the pitch of a period of
+    /// <paramref name="periodCycles"/> CPU cycles is measured (a Goertzel filter through a Hann
+    /// window). Returns the result and the amplitude of each block, in order.
+    /// </summary>
+    public static (BlarggResult Result, double[] Blocks) RunListening(string pinnedName, Region region, int periodCycles, long maxCpuCycles)
+    {
+        const int blockLength = 1024;
+        var nes = new Nes(Cartridge.Load(NesTestRoms.Read(pinnedName)), region);
+        nes.PowerOn();
+        int sampleRate = new NesOptions().SampleRate;
+        double frequency = region.CpuHz / periodCycles;
+        double coefficient = 2 * Math.Cos(2 * Math.PI * frequency / sampleRate);
+        double[] window = [.. Enumerable.Range(0, blockLength).Select(i => 0.5 - (0.5 * Math.Cos(2 * Math.PI * i / blockLength)))];
+
+        var blocks = new List<double>();
+        float[] pending = new float[blockLength];
+        int filled = 0;
+        float[] scratch = new float[4096];
+
+        void Listen()
+        {
+            int count;
+            while ((count = nes.Sound.Read(scratch)) > 0)
+            {
+                for (int i = 0; i < count; i++)
+                {
+                    pending[filled++] = scratch[i];
+                    if (filled == blockLength)
+                    {
+                        double s1 = 0;
+                        double s2 = 0;
+                        for (int n = 0; n < blockLength; n++)
+                        {
+                            double s0 = (pending[n] * window[n]) + (coefficient * s1) - s2;
+                            s2 = s1;
+                            s1 = s0;
+                        }
+
+                        blocks.Add(Math.Sqrt((s1 * s1) + (s2 * s2) - (coefficient * s1 * s2)) / blockLength);
+                        filled = 0;
+                    }
+                }
+            }
+        }
+
+        while (nes.Bus.Cycles < maxCpuCycles)
+        {
+            nes.Step();
+            if (nes.Sound.Available > nes.Sound.Capacity / 2)
+            {
+                Listen();
+            }
+
+            if (HasSignature(nes.Bus))
+            {
+                byte status = nes.Bus.Peek(0x6000);
+                if (status != Running && status != ResetWanted)
+                {
+                    Listen();
+                    return (new BlarggResult(status, ReadText(nes.Bus), nes.Bus.Cycles, false), [.. blocks]);
+                }
+            }
+        }
+
+        int last = HasSignature(nes.Bus) ? nes.Bus.Peek(0x6000) : -1;
+        return (new BlarggResult(last, ReadText(nes.Bus), nes.Bus.Cycles, true), [.. blocks]);
+    }
+
     private static string ScreenText(Ppu ppu)
     {
         var lines = new List<string>();
