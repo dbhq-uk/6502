@@ -88,6 +88,11 @@ public sealed class NesBus : IBus
     private readonly bool _mapperCountsCycles;
     private readonly bool _mapperCanInterrupt;
 
+    // The board's PRG ROM as it keeps it (IMapper.TryGetPrgWindows), so a read from $8000, which
+    // most cycles are, needs no call to the board; null where it does not keep it so.
+    private readonly byte[]? _prg;
+    private readonly int[]? _prgWindows;
+
     private long _cycles;
     private long _ppuDots;
 
@@ -123,6 +128,11 @@ public sealed class NesBus : IBus
         _dmcRepeatsHaltedRead = region.DmcDmaRepeatsHaltedRead;
         _mapperCountsCycles = _mapper.CountsCpuCycles;
         _mapperCanInterrupt = _mapper.CanInterrupt;
+        if (_mapper.TryGetPrgWindows(out byte[]? prg, out int[]? windows))
+        {
+            _prg = prg;
+            _prgWindows = windows;
+        }
         _dotsFrom = new int[region.DotsDenominator];
         _accumulatorAfter = new int[region.DotsDenominator];
         for (int held = 0; held < region.DotsDenominator; held++)
@@ -453,6 +463,10 @@ public sealed class NesBus : IBus
                     value = _openBus;
                     break;
             }
+        }
+        else if (address >= 0x8000 && _prgWindows is not null)
+        {
+            value = _prg![_prgWindows[(address >> 13) & 3] + (address & 0x1FFF)];
         }
         else
         {

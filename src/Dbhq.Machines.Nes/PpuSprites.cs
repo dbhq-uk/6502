@@ -191,7 +191,7 @@ public sealed partial class Ppu
             }
 
             case 5:
-                _fetchLow = _mapper.PpuRead(_spriteAddress);
+                _fetchLow = ReadPattern(_spriteAddress);
                 break;
 
             case 6:
@@ -200,7 +200,7 @@ public sealed partial class Ppu
 
             default:
             {
-                byte high = _mapper.PpuRead((ushort)(_spriteAddress + 8));
+                byte high = ReadPattern((ushort)(_spriteAddress + 8));
                 if (slot < _spriteCount)
                 {
                     LaySprite(slot, _fetchLow, high);
@@ -222,6 +222,19 @@ public sealed partial class Ppu
 
         int tag = ((_fetchAttributes & 3) << 2) | (_fetchAttributes & SpriteBehind) | (slot == 0 && _sprite0OnLine ? SpriteIsSprite0 : 0);
         int x = _fetchX;
+        int right = Math.Min(x + 8, 256);
+        if (_spriteWidth == 0)
+        {
+            _spriteLeft = x;
+            _spriteWidth = right - x;
+        }
+        else
+        {
+            int left = Math.Min(_spriteLeft, x);
+            _spriteWidth = Math.Max(_spriteLeft + _spriteWidth, right) - left;
+            _spriteLeft = left;
+        }
+
         for (int bit = 7; bit >= 0 && x < 256; bit--, x++)
         {
             int value = ((low >> bit) & 1) | (((high >> bit) & 1) << 1);
@@ -230,6 +243,14 @@ public sealed partial class Ppu
                 _spriteLine[x] = (byte)(tag | value);
             }
         }
+    }
+
+    // Empties the line buffer: no sprite is laid in it.
+    private void ClearSpriteLine()
+    {
+        Array.Clear(_spriteLine);
+        _spriteLeft = 0;
+        _spriteWidth = 0;
     }
 
     private static byte[] BuildReversed()

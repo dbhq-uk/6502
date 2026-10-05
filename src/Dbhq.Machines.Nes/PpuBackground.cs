@@ -99,7 +99,7 @@ public sealed partial class Ppu
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private void FetchPatternLow()
     {
-        _patternLowByte = _mapper.PpuRead(_patternAddress);
+        _patternLowByte = ReadPattern(_patternAddress);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -112,7 +112,7 @@ public sealed partial class Ppu
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private void FetchPatternHigh()
     {
-        _patternHighByte = _mapper.PpuRead((ushort)(_patternAddress + 8));
+        _patternHighByte = ReadPattern((ushort)(_patternAddress + 8));
         _v = IncrementCoarseX(_v);
     }
 }

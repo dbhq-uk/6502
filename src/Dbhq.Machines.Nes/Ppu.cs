@@ -110,6 +110,12 @@ public sealed partial class Ppu
 
     // Whether the board wants the addresses on the PPU's bus, asked once (IMapper.WatchesPpuAddresses).
     private readonly bool _watchesAddresses;
+
+    // The board's pattern tables and nametable layout as it keeps them, read without a call to it
+    // (IMapper.TryGetPatternWindows and NametablePageTable), or null where it does not keep them so.
+    private readonly byte[]? _chr;
+    private readonly int[]? _chrWindows;
+    private readonly int[]? _nametablePages;
     private readonly int _preRenderLine;
     private readonly int _lines;
     private readonly bool _oddFrameSkipsADot;
@@ -199,6 +205,12 @@ public sealed partial class Ppu
     // palette (3 and 2), its priority (bit 5) and whether it is sprite 0 (bit 6). The slots are
     // laid in order and a column already taken is kept, so the lowest-numbered sprite wins.
     private readonly byte[] _spriteLine = new byte[256];
+
+    // The columns of _spriteLine that a sprite was laid in, from _spriteLeft for _spriteWidth
+    // columns; every column outside them is 0, so a pixel there need not look (a width of 0 when
+    // none was laid).
+    private int _spriteLeft;
+    private int _spriteWidth;
     private const int SpriteBehind = 0x20;
     private const int SpriteIsSprite0 = 0x40;
 
@@ -222,6 +234,13 @@ public sealed partial class Ppu
         _region = region;
         _mapper = mapper;
         _watchesAddresses = mapper.WatchesPpuAddresses;
+        if (mapper.TryGetPatternWindows(out byte[]? chr, out int[]? windows))
+        {
+            _chr = chr;
+            _chrWindows = windows;
+        }
+
+        _nametablePages = mapper.NametablePageTable;
         _preRenderLine = region.PreRenderLine;
         _lines = region.Lines;
         _oddFrameSkipsADot = region.OddFrameSkipsADot;
@@ -339,7 +358,7 @@ public sealed partial class Ppu
         _sprite0OnLine = false;
         _found = 0;
         _sprite0Found = false;
-        Array.Clear(_spriteLine);
+        ClearSpriteLine();
     }
 
     /// <summary>Runs one dot: the dot <see cref="Line"/> and <see cref="Dot"/> name, then moves on.</summary>
@@ -358,7 +377,7 @@ public sealed partial class Ppu
                 {
                     // No sprite was fetched for the next line.
                     _spriteCount = 0;
-                    Array.Clear(_spriteLine);
+                    ClearSpriteLine();
                 }
             }
         }
@@ -372,7 +391,7 @@ public sealed partial class Ppu
             {
                 // No sprite was fetched for line 0.
                 _spriteCount = 0;
-                Array.Clear(_spriteLine);
+                ClearSpriteLine();
             }
         }
 
@@ -690,15 +709,18 @@ public sealed partial class Ppu
     {
         int table = (address >> 10) & 3;
         int offset = address & 0x3FF;
-        int page = _mapper.Mirroring switch
-        {
-            Mirroring.Vertical => table & 1,
-            Mirroring.Horizontal => table >> 1,
-            Mirroring.SingleScreenLow => 0,
-            Mirroring.SingleScreenHigh => 1,
-            _ => table,
-        };
+        int[]? pages = _nametablePages;
+        int page = pages is not null ? pages[table] : NametablePages.Of(_mapper.Mirroring, table);
         return (page << 10) | offset;
+    }
+
+    // A rendering fetch from the pattern tables: from the board's windows where it keeps them,
+    // which is what its PpuRead would give, else through PpuRead.
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private byte ReadPattern(ushort address)
+    {
+        int[]? windows = _chrWindows;
+        return windows is not null ? _chr![windows[(address >> 10) & 7] + (address & 0x3FF)] : _mapper.PpuRead(address);
     }
 
     // After a $2007 access: up by 1 or 32 outside rendering; during rendering a coarse X and a Y
@@ -808,6 +830,7 @@ public sealed partial class Ppu
     // sprite evaluation the dot's parity gives (odd dots read, even dots act; the 8-dot phase has
     // the same parity) and the fetch step. A test of the dot's phase in each part would be a branch
     // the CPU's predictor gets wrong when the 6502's own code runs between two dots.
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private void RenderVisibleDot(int dot)
     {
         if ((uint)(dot - 2) > 254)
@@ -926,7 +949,7 @@ public sealed partial class Ppu
                 // The next line's sprites are the ones this line found; the pre-render line finds none.
                 _spriteCount = visible ? _found : 0;
                 _sprite0OnLine = visible && _sprite0Found;
-                Array.Clear(_spriteLine);
+                ClearSpriteLine();
             }
             else if (!visible && dot >= 280 && dot <= 304)
             {
@@ -972,7 +995,7 @@ public sealed partial class Ppu
             pixel = (int)(_backgroundPixels >> ((15 - _x) << 2)) & 0xF;
         }
 
-        int sprite = _spriteLine[x];
+        int sprite = (uint)(x - _spriteLeft) < (uint)_spriteWidth ? _spriteLine[x] : 0;
         if (sprite != 0 && x >= _spritesFrom)
         {
             if ((sprite & SpriteIsSprite0) != 0 && pixel != 0 && x != 255)

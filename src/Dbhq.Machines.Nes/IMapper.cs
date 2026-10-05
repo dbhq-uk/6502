@@ -72,6 +72,46 @@ public interface IMapper
     bool CanInterrupt => true;
 
     /// <summary>
+    /// The board's pattern tables as memory the PPU may read without a call, when the board keeps
+    /// them so: eight 1 KB windows into <paramref name="chr"/>, starting at the offsets in
+    /// <paramref name="windows"/>, so that a read at <c>a</c> is
+    /// <c>chr[windows[(a &gt;&gt; 10) &amp; 7] + (a &amp; 0x3FF)]</c>, exactly what
+    /// <see cref="PpuRead"/> returns. The board must keep both arrays for good and change only the
+    /// window offsets, in place, when it switches banks. A board that does not keep its pattern
+    /// tables that way returns false, and the PPU calls <see cref="PpuRead"/>.
+    /// </summary>
+    bool TryGetPatternWindows([System.Diagnostics.CodeAnalysis.NotNullWhen(true)] out byte[]? chr, [System.Diagnostics.CodeAnalysis.NotNullWhen(true)] out int[]? windows)
+    {
+        chr = null;
+        windows = null;
+        return false;
+    }
+
+    /// <summary>
+    /// The board's PRG ROM as memory the bus may read without a call, when the board keeps it so:
+    /// four 8 KB windows into <paramref name="prg"/>, for <c>$8000</c>, <c>$A000</c>, <c>$C000</c>
+    /// and <c>$E000</c>, starting at the offsets in <paramref name="windows"/>, so that a CPU read
+    /// at <c>a</c> from <c>$8000</c> up is <c>prg[windows[(a &gt;&gt; 13) &amp; 3] + (a &amp; 0x1FFF)]</c>,
+    /// exactly what <see cref="CpuRead"/> returns there. The board must keep both arrays for good
+    /// and change only the offsets, in place, when it switches banks. A board that does not keep
+    /// its PRG that way returns false, and the bus calls <see cref="CpuRead"/>.
+    /// </summary>
+    bool TryGetPrgWindows([System.Diagnostics.CodeAnalysis.NotNullWhen(true)] out byte[]? prg, [System.Diagnostics.CodeAnalysis.NotNullWhen(true)] out int[]? windows)
+    {
+        prg = null;
+        windows = null;
+        return false;
+    }
+
+    /// <summary>
+    /// Four entries, the page of nametable RAM each nametable uses under <see cref="Mirroring"/>
+    /// now (<see cref="NametablePages"/>), which the board keeps for good and fills again in place
+    /// whenever its mirroring changes, so the PPU reads it without a call; or null, and the PPU
+    /// asks <see cref="Mirroring"/> on each nametable fetch.
+    /// </summary>
+    int[]? NametablePageTable => null;
+
+    /// <summary>
     /// Puts the board's registers where a switch-on or the reset button leaves them. With
     /// <paramref name="power"/> true (the console is switched on) every register goes to its
     /// power-on value, and so does CHR RAM, which a real board's RAM loses with the power. With

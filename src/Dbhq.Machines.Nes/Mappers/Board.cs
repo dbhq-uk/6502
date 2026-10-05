@@ -73,8 +73,21 @@ public abstract class Board : IMapper
     /// <summary>False while the board refuses writes to its PRG RAM and still lets it be read (MMC3's write protect).</summary>
     private protected bool PrgRamWritable { get; set; } = true;
 
+    private Mirroring _mirroring;
+
     /// <inheritdoc />
-    public Mirroring Mirroring { get; private protected set; }
+    public Mirroring Mirroring
+    {
+        get => _mirroring;
+        private protected set
+        {
+            _mirroring = value;
+            NametablePages.Fill(NametablePageTable, value);
+        }
+    }
+
+    /// <inheritdoc />
+    public int[] NametablePageTable { get; } = new int[4];
 
     /// <inheritdoc />
     public virtual bool Irq => false;
@@ -109,6 +122,24 @@ public abstract class Board : IMapper
         {
             PrgRam[PrgRamIndex(address)] = value;
         }
+    }
+
+    /// <inheritdoc />
+    /// <remarks>Always true: <see cref="Chr"/> and <see cref="ChrBase"/> are the board's for good, and its banks move only the offsets.</remarks>
+    public bool TryGetPatternWindows([System.Diagnostics.CodeAnalysis.NotNullWhen(true)] out byte[]? chr, [System.Diagnostics.CodeAnalysis.NotNullWhen(true)] out int[]? windows)
+    {
+        chr = Chr;
+        windows = ChrBase;
+        return true;
+    }
+
+    /// <inheritdoc />
+    /// <remarks>Always true: <see cref="Prg"/> and <see cref="PrgBase"/> are the board's for good, and its banks move only the offsets.</remarks>
+    public bool TryGetPrgWindows([System.Diagnostics.CodeAnalysis.NotNullWhen(true)] out byte[]? prg, [System.Diagnostics.CodeAnalysis.NotNullWhen(true)] out int[]? windows)
+    {
+        prg = Prg;
+        windows = PrgBase;
+        return true;
     }
 
     /// <inheritdoc />

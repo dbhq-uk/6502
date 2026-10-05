@@ -31,6 +31,7 @@ public sealed class Nrom : IMapper
         _chr = _chrIsRam ? new byte[cartridge.ChrRamSize] : cartridge.Chr;
         PrgRam = new byte[cartridge.PrgRamSize];
         Mirroring = cartridge.Mirroring;
+        NametablePages.Fill(NametablePageTable, Mirroring);
         _prgMask = MaskFor(_prg.Length);
         _chrMask = MaskFor(_chr.Length);
         _prgRamMask = MaskFor(PrgRam.Length);
@@ -103,6 +104,54 @@ public sealed class Nrom : IMapper
 
     /// <inheritdoc />
     public bool CanInterrupt => false;
+
+    /// <inheritdoc />
+    public int[] NametablePageTable { get; } = new int[4];
+
+    /// <inheritdoc />
+    /// <remarks>
+    /// True when the PRG is a whole number of 8 KB, as every real NROM's 16 or 32 KB is: then
+    /// <see cref="CpuRead"/>'s remainder lands each 8 KB window on a whole bank, 16 KB repeating
+    /// at <c>$C000</c>. Any other length is false, and the bus calls.
+    /// </remarks>
+    public bool TryGetPrgWindows([System.Diagnostics.CodeAnalysis.NotNullWhen(true)] out byte[]? prg, [System.Diagnostics.CodeAnalysis.NotNullWhen(true)] out int[]? windows)
+    {
+        if (_prg.Length == 0 || _prg.Length % 0x2000 != 0)
+        {
+            prg = null;
+            windows = null;
+            return false;
+        }
+
+        prg = _prg;
+        windows = new int[4];
+        for (int window = 0; window < windows.Length; window++)
+        {
+            windows[window] = window * 0x2000 % _prg.Length;
+        }
+
+        return true;
+    }
+
+    /// <inheritdoc />
+    /// <remarks>
+    /// True when the CHR is at least 8 KB, as every real NROM's is: then <see cref="PpuRead"/>'s
+    /// remainder never wraps and the windows are the first 8 KB in order. A smaller CHR wraps
+    /// inside 8 KB, which the windows cannot say, so it is false and the PPU calls.
+    /// </remarks>
+    public bool TryGetPatternWindows([System.Diagnostics.CodeAnalysis.NotNullWhen(true)] out byte[]? chr, [System.Diagnostics.CodeAnalysis.NotNullWhen(true)] out int[]? windows)
+    {
+        if (_chr.Length < 0x2000)
+        {
+            chr = null;
+            windows = null;
+            return false;
+        }
+
+        chr = _chr;
+        windows = [0x0000, 0x0400, 0x0800, 0x0C00, 0x1000, 0x1400, 0x1800, 0x1C00];
+        return true;
+    }
 
     /// <inheritdoc />
     public void Reset(bool power)
