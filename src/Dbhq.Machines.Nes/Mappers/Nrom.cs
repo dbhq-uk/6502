@@ -22,7 +22,7 @@ public sealed class Nrom : IMapper
     {
         _prg = cartridge.Prg;
         _chrIsRam = cartridge.ChrIsRam;
-        _chr = _chrIsRam ? new byte[cartridge.Chr.Length] : cartridge.Chr;
+        _chr = _chrIsRam ? new byte[cartridge.ChrRamSize] : cartridge.Chr;
         PrgRam = new byte[cartridge.PrgRamSize];
         Mirroring = cartridge.Mirroring;
     }

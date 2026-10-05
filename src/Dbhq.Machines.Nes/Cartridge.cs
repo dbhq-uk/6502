@@ -39,17 +39,30 @@ public sealed class Cartridge
     private const int InesPrgRamUnit = 8 * 1024;
 
     /// <summary>
+    /// The most PRG RAM, and the most CHR RAM, a header may ask for: 64 KB each. The boards this
+    /// machine models have 8 KB of each (mappers.md; a few MMC1 boards have up to 32 KB of PRG RAM),
+    /// but a header's size fields can name megabytes, and RAM is allocated and not read from the
+    /// file, so a 16 KB file could otherwise make the page allocate many times that. An iNES
+    /// header's byte 8 is often junk, so it is clamped to this and the file still loads; a NES 2.0
+    /// header states its sizes on purpose, so a size over it is refused.
+    /// </summary>
+    public const int MaxRamSize = 64 * 1024;
+
+    /// <summary>
     /// The mapper numbers <see cref="CreateMapper"/> can build, kept in one place for its message.
     /// Each mapper's task adds its number here and its case there.
     /// </summary>
     private static readonly int[] SupportedMappers = [0];
 
+    private readonly byte[]? _chrRom;
+    private byte[]? _chrRamBlock;
+
     private Cartridge(
         int mapper,
         int submapper,
         byte[] prg,
-        byte[] chr,
-        bool chrIsRam,
+        byte[]? chrRom,
+        int chrRamSize,
         int prgRamSize,
         bool battery,
         Mirroring mirroring,
@@ -58,8 +71,8 @@ public sealed class Cartridge
         Mapper = mapper;
         Submapper = submapper;
         Prg = prg;
-        Chr = chr;
-        ChrIsRam = chrIsRam;
+        _chrRom = chrRom;
+        ChrRamSize = chrRamSize;
         PrgRamSize = prgRamSize;
         Battery = battery;
         Mirroring = mirroring;
@@ -77,12 +90,17 @@ public sealed class Cartridge
 
     /// <summary>
     /// The character memory: the ROM's bytes, or when <see cref="ChrIsRam"/> is true a block of
-    /// zeros the size of the RAM, which each board copies and does not share.
+    /// zeros the size of the RAM, which no board shares: each takes its own, sized by
+    /// <see cref="ChrRamSize"/>. The block of zeros is made on first use, so a board that does not
+    /// ask for it does not allocate it twice.
     /// </summary>
-    public byte[] Chr { get; }
+    public byte[] Chr => _chrRom ?? (_chrRamBlock ??= new byte[ChrRamSize]);
 
     /// <summary>True when the file has no CHR ROM and the board has CHR RAM in its place.</summary>
-    public bool ChrIsRam { get; }
+    public bool ChrIsRam => _chrRom is null && ChrRamSize > 0;
+
+    /// <summary>Bytes of CHR RAM, or 0 when the cartridge has CHR ROM or no character memory at all.</summary>
+    internal int ChrRamSize { get; }
 
     /// <summary>
     /// Bytes of PRG RAM at <c>$6000</c>. An iNES header counts it in 8 KB units and says 0 for 8 KB,
@@ -169,35 +187,34 @@ public sealed class Cartridge
                 "The file is shorter than its header says, so part of the cartridge is missing.");
         }
 
-        // Every size is now no more than the file's length, so the arrays below are small.
-        int offset = HeaderSize + (trainer ? TrainerSize : 0);
-        byte[] prg = file.AsSpan(offset, (int)prgSize).ToArray();
-        offset += (int)prgSize;
-
-        byte[] chr;
-        bool chrIsRam = false;
-        if (chrSize > 0)
-        {
-            chr = file.AsSpan(offset, (int)chrSize).ToArray();
-        }
-        else
-        {
-            long ramSize = nes2 ? RamSize(file[11] & 0x0F) + RamSize(file[11] >> 4) : DefaultInesChrRamSize;
-            chrIsRam = ramSize > 0;
-            chr = new byte[ramSize];
-        }
-
-        int prgRamSize;
         bool battery = (file[6] & 0x02) != 0;
+        int prgRamSize;
+        int chrRamSize = 0;
         if (nes2)
         {
-            prgRamSize = (int)(RamSize(file[10] & 0x0F) + RamSize(file[10] >> 4));
+            long prgRam = RamSize(file[10] & 0x0F) + RamSize(file[10] >> 4);
+            long chrRam = chrSize > 0 ? 0 : RamSize(file[11] & 0x0F) + RamSize(file[11] >> 4);
+            if (prgRam > MaxRamSize || chrRam > MaxRamSize)
+            {
+                throw new NesFormatException(
+                    $"The header asks for more than {MaxRamSize / 1024} KB of cartridge RAM, which is more than this machine will give a cartridge.");
+            }
+
+            prgRamSize = (int)prgRam;
+            chrRamSize = (int)chrRam;
             battery |= (file[10] >> 4) != 0;
         }
         else
         {
-            prgRamSize = (file[8] == 0 ? 1 : file[8]) * InesPrgRamUnit;
+            prgRamSize = Math.Min((file[8] == 0 ? 1 : file[8]) * InesPrgRamUnit, MaxRamSize);
+            chrRamSize = chrSize > 0 ? 0 : DefaultInesChrRamSize;
         }
+
+        // Every size is now no more than the file's length, or than MaxRamSize, so the arrays below are small.
+        int offset = HeaderSize + (trainer ? TrainerSize : 0);
+        byte[] prg = file.AsSpan(offset, (int)prgSize).ToArray();
+        offset += (int)prgSize;
+        byte[]? chrRom = chrSize > 0 ? file.AsSpan(offset, (int)chrSize).ToArray() : null;
 
         Mirroring mirroring = (file[6] & 0x08) != 0
             ? Mirroring.FourScreen
@@ -216,7 +233,7 @@ public sealed class Cartridge
             mapper |= file[7] & 0xF0;
         }
 
-        return new Cartridge(mapper, submapper, prg, chr, chrIsRam, prgRamSize, battery, mirroring, region);
+        return new Cartridge(mapper, submapper, prg, chrRom, chrRamSize, prgRamSize, battery, mirroring, region);
     }
 
     /// <summary>

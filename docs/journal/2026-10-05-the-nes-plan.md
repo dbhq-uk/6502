@@ -235,3 +235,13 @@ rather than failing.
 fit the file may be an iNES one is not applied: such a file is refused as
 shorter than its header says. The Vs. System and PlayChoice console types are
 read as ordinary cartridges.
+
+**RAM sizes are capped at 64 KB each (a review finding).** The first version took
+the PRG RAM and CHR RAM sizes from the header alone. A 16 KB NES 2.0 file with
+bytes 10 and 11 at `$FF` named 2 MB of each kind, and the board made its own copy
+of the CHR RAM as well, so about 12 MB was allocated for a 16 KB file. Now
+`Cartridge.MaxRamSize` is 64 KB. An iNES byte 8 over the cap is clamped to it, so
+a junk byte 8 does not stop a playable file loading. A NES 2.0 size over the cap
+is refused with a plain sentence, because that header states its sizes on
+purpose. The cartridge keeps the size of its CHR RAM, and makes its block of
+zeros only if `Chr` is read, so the board's copy is the only one in use.

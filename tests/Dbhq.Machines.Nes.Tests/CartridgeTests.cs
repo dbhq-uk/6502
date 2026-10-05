@@ -414,6 +414,67 @@ public class CartridgeTests
     }
 
     [Fact]
+    public void ANes20HeaderAskingForMegabytesOfRamIsRefusedWithoutAllocatingIt()
+    {
+        // Bytes 10 and 11 at 0xFF ask for 2 MB of volatile and 2 MB of non-volatile PRG RAM, and
+        // 2 MB of each kind of CHR RAM, from a file of 16 KB of PRG.
+        byte[] file = TestCartridge.Nes2(prgBanks: 1, chrBanks: 0);
+        file[10] = 0xFF;
+        file[11] = 0xFF;
+
+        NesFormatException error = Assert.Throws<NesFormatException>(() => Cartridge.Load(file));
+
+        AssertPlainSentence(error.Message);
+        Assert.Contains("RAM", error.Message);
+    }
+
+    [Fact]
+    public void ANes20HeaderAskingForTooMuchChrRamAloneIsRefused()
+    {
+        // 64 << 11 = 128 KB, over the cap, with no PRG RAM named.
+        byte[] file = TestCartridge.Nes2(prgBanks: 1, chrBanks: 0, chrRamShift: 11);
+
+        NesFormatException error = Assert.Throws<NesFormatException>(() => Cartridge.Load(file));
+
+        AssertPlainSentence(error.Message);
+    }
+
+    [Fact]
+    public void ANes20HeaderAskingForExactlyTheCapIsAccepted()
+    {
+        // 64 << 10 = 64 KB of PRG RAM and of CHR RAM.
+        Cartridge cartridge = Cartridge.Load(TestCartridge.Nes2(1, 0, prgRamShift: 10, chrRamShift: 10));
+
+        Assert.Equal(Cartridge.MaxRamSize, cartridge.PrgRamSize);
+        Assert.Equal(Cartridge.MaxRamSize, cartridge.Chr.Length);
+    }
+
+    [Fact]
+    public void AnInesByte8Of255IsClampedToTheCapAndTheFileStillLoads()
+    {
+        byte[] file = TestCartridge.Ines1(1, 1, prgRamUnits: 255);
+
+        Cartridge cartridge = Cartridge.Load(file);
+
+        Assert.Equal(Cartridge.MaxRamSize, cartridge.PrgRamSize);
+        Assert.Equal(Cartridge.MaxRamSize, cartridge.CreateMapper().PrgRam.Length);
+    }
+
+    [Fact]
+    public void ABoardAllocatesItsChrRamOnceAndTheCartridgeDoesNotHoldAnotherUntilAsked()
+    {
+        Cartridge cartridge = Cartridge.Load(TestCartridge.Ines1(1, 0));
+        IMapper mapper = cartridge.CreateMapper();
+
+        mapper.PpuWrite(0x0000, 0x77);
+
+        // The cartridge's own block is separate and stays clear.
+        Assert.Equal(0, cartridge.Chr[0]);
+        Assert.Equal(8192, cartridge.Chr.Length);
+        Assert.Equal(0x77, mapper.PpuRead(0x0000));
+    }
+
+    [Fact]
     public void AMapperCanBeCreatedMoreThanOnceAndEachOwnsItsChrRam()
     {
         Cartridge cartridge = Cartridge.Load(TestCartridge.Ines1(1, 0));
