@@ -132,7 +132,7 @@ const ON = {
   '.kim1 .key': ['veil', 'card', 'void', 'iron'],
   '.kim1-status': ['iron'],
   '.kim1-speed': ['iron'],
-  '.steps kbd, .bbc-symbols kbd': ['iron'],
+  '.steps kbd, .bbc-symbols kbd, .electron-symbols kbd': ['iron'],
   // The BBC Micro's page. Its lines sit on the iron panel; a disabled button is
   // iron too, before the machine loads. The symbol table's keys are on iron
   // over the black canvas, like the KIM-1 program's, and share its rule.
@@ -157,6 +157,20 @@ const ON = {
   // while pressed; disabled, before the machine runs, iron.
   '.bbc-key': ['veil', 'card', 'void'],
   '.bbc-key:disabled': ['iron'],
+  // The Electron's page, the BBC Micro's panel again: its lines on the iron panel,
+  // a disabled button iron before the machine loads, the on-screen keys on veil,
+  // card when hovered or latched and the black canvas while pressed, and the
+  // symbol table's caption on the black canvas.
+  '.electron .btn:disabled': ['iron'],
+  '.electron-status': ['iron'],
+  '.electron-line': ['iron'],
+  '.electron-note': ['iron'],
+  '.electron-note kbd': ['iron'],
+  '.electron-speed': ['iron'],
+  '.electron-tape legend': ['iron'],
+  '.electron-symbols caption': ['void'],
+  '.electron-key': ['veil', 'card', 'void'],
+  '.electron-key:disabled': ['iron'],
   // The machine page's 3D model: its label sits on an iron tag over the canvas,
   // and its status line on the black canvas.
   '.model-tag': ['iron'],

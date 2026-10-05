@@ -227,11 +227,41 @@ footer .linkbtn:hover { color: var(--white); }
 .bbc-key[aria-pressed="true"] { background: var(--card); border-color: var(--white); }
 .bbc-key:disabled { cursor: default; border-style: dashed; background: var(--iron); color: var(--moss-70); }
 @media (prefers-reduced-motion: reduce) { .bbc-key { transition: none; } }
+/* The Electron's page, the BBC Micro's panel again: the screen on the black canvas, its controls and the cassette recorder below, on an iron panel. No lime but Start and the screen's focus ring. */
+.electron { margin-top: 24px; padding: clamp(16px, 4vw, 32px); display: grid; gap: 14px; background: var(--iron); border: 1px solid var(--circuit); border-radius: var(--r-window); }
+.electron-screen { background: var(--void); border: 1px solid var(--hairline); border-radius: var(--r-card); padding: clamp(6px, 1.5vw, 14px); outline-offset: 3px; }
+/* The framebuffer is 640 by 256, one row a scan line; the television showed it four wide by three high, so each row is drawn about twice as tall as a pixel is wide. */
+.electron-screen canvas { display: block; width: 100%; height: auto; aspect-ratio: 4 / 3; background: var(--void); }
+/* Focus is what hands the keyboard to the machine, as on the BBC Micro's page. */
+.electron-screen:focus { outline: 2px solid var(--lime); }
+.electron-controls { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; }
+.electron .btn:disabled { cursor: default; border-style: dashed; background: var(--iron); color: var(--moss-70); }
+.electron .btn[hidden] { display: none; }
+.electron-status { color: var(--moss-80); }
+.electron-line { color: var(--moss-80); font-size: 14px; }
+.electron-note { color: var(--sage-60); font-size: 14px; max-width: 72ch; }
+.electron-note kbd { font-family: var(--font-mono); font-size: 13px; letter-spacing: 0; color: var(--white); }
+.electron-speed { color: var(--sage-60); font-family: var(--font-mono); font-size: 12.5px; letter-spacing: 0; max-width: 60ch; }
+.electron-speed:empty { display: none; }
+.electron-tape { margin: 0; padding: 14px 16px 16px; display: grid; gap: 12px; border: 1px solid var(--hairline); border-radius: var(--r-card); }
+.electron-tape legend { padding: 0 6px; color: var(--white); font-weight: 500; }
+.electron-symbols caption { text-align: left; padding: 0 0 8px; color: var(--white); font-weight: 500; }
+/* The machine's keys as buttons, a row at a time, as the BBC Micro's: latched SHIFT, CTRL and CAPS LK FUNC show as a filled key with a bright edge. */
+.electron-keys { display: grid; gap: 3px; }
+.electron-keys-row { display: flex; flex-wrap: wrap; justify-content: center; gap: 3px; }
+.electron-key { min-width: 44px; min-height: 44px; padding: 0 4px; display: flex; align-items: center; justify-content: center; font-family: var(--font-mono); font-size: 14px; letter-spacing: 0; line-height: 1.1; color: var(--white); background: var(--veil); border: 1px solid var(--circuit); border-radius: 8px; cursor: pointer; transition: background 0.15s ease-out; }
+.electron-key.word { width: 44px; font-size: 10px; }
+.electron-key.space { flex: 0 1 60%; }
+.electron-key:hover { background: var(--card); }
+.electron-key:active { background: var(--void); }
+.electron-key[aria-pressed="true"] { background: var(--card); border-color: var(--white); }
+.electron-key:disabled { cursor: default; border-style: dashed; background: var(--iron); color: var(--moss-70); }
+@media (prefers-reduced-motion: reduce) { .electron-key { transition: none; } }
 .prose .steps { display: grid; gap: 18px; }
 .prose .steps li + li { margin-top: 0; }
 .steps p { margin: 0; }
 .steps .keys { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 6px; }
-.steps kbd, .bbc-symbols kbd { font-family: var(--font-mono); font-size: 14px; letter-spacing: 0; color: var(--white); background: var(--iron); border: 1px solid var(--circuit); border-radius: 6px; padding: 1px 7px; }
+.steps kbd, .bbc-symbols kbd, .electron-symbols kbd { font-family: var(--font-mono); font-size: 14px; letter-spacing: 0; color: var(--white); background: var(--iron); border: 1px solid var(--circuit); border-radius: 6px; padding: 1px 7px; }
 .steps .shows code { white-space: pre; }
 .roms code { overflow-wrap: anywhere; }
 .machine-head p { margin-top: 12px; }

@@ -32,7 +32,9 @@ library of homebrew and freely licensed discs to start with one click, each
 kept in [`machines/bbc-micro/discs/`](machines/bbc-micro/discs/) with its
 author's licence and, where the licence asks for it, its source; a disc image
 of your own goes in as before. The Acorn
-Electron is next, then the Atari 2600, the NES and the Commodore 64, one at a
+Electron is under way: its operating system ROM and the record of its rights are
+in [`roms/`](roms/README.md), and its code is being built, so it does not count yet.
+The Atari 2600, the NES and the Commodore 64 follow, one at a
 time and smallest first. The programme's design is in
 [`docs/superpowers/specs/2026-09-30-machines-and-site-design.md`](docs/superpowers/specs/2026-09-30-machines-and-site-design.md).
 

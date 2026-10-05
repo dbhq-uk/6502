@@ -119,6 +119,49 @@ disc drive in a hairline box of its own.
   without loading anything.
 - The new text colours are in the contrast table in `tests/design.test.mjs`.
 
+## The Electron page
+
+The third machine page, built on 5 October 2026 and shown once the registry
+says the Electron runs. It is the BBC Micro's panel again, rule for rule, under
+its own class names (`.electron-*`), with a cassette recorder where the BBC
+Micro has its disc drive. Chosen over sharing the BBC Micro's classes because
+the two pages then change apart: a fix to one panel cannot move the other.
+
+- **The screen is a canvas, and it is the machine's own picture,** 640 by 256
+  pixels as the ULA draws it, one row a scan line, shown four wide by three high
+  as the television showed it, so a row is drawn about twice as tall as a pixel
+  is wide. Nothing is added, and the line under it says so. Not recoloured: the
+  Electron's colours are the page's subject, as the BBC Micro's are.
+- **Start is the page's one lime fill**, as on the BBC Micro's page, and the
+  screen's focus ring is the other lime, for the same reason: focus is the
+  keyboard. The site test that rations the lime names `.electron-screen:focus`.
+- **The other controls are the site's ordinary small buttons,** Break, the sound
+  and the recorder's, dashed and dimmer while disabled.
+- **The machine's keys, under the screen,** every one of its 54 in the rows the
+  matrix gives, the BBC Micro's key style: mono on `--veil`, a `--circuit` edge,
+  at least 44 pixels square. The legends are the Electron's own words and
+  arrows; CAPS LK and FUNC, one key, has both on it. SHIFT, CTRL and CAPS LK FUNC
+  latch, shown filled `--card` with a `--white` edge and `aria-pressed`. No key
+  takes the lime.
+- **The cassette recorder** is a hairline box of its own, like the disc drive:
+  Insert a tape, Blank tape, Rewind and Save tape in a row, then two lines in the
+  panel's body colour, what is in the recorder (polite live region) and whether
+  the motor is on, with the seconds of tape read from the machine. The notes
+  under it say how long a tape takes, from the machine's own measurement, and
+  how to save and load. A refused tape is told in the same line, in the reader's
+  words, not in a warning colour: nothing on the page is an error colour, and the
+  sentence says what is wrong.
+- **The symbols table and the program** use the site's prose table and code
+  window, as the BBC Micro's do; the program's code window is the shared
+  `bbc-program` block, since it is the same markup for both.
+- **A known limit, shared with the BBC Micro's page: Caps Lock on a Mac.** Both
+  pages send the PC's Caps Lock as one press of the machine's key at its key
+  down. macOS sends Caps Lock's key down only when the light goes on and its key
+  up when it goes off, so on a Mac every second press of Caps Lock reaches the
+  page as a key up and turns nothing over. The machine's own CAPS LK key on the
+  on-screen keys works every time. The BBC Micro's page is left as it is.
+- The new text colours are in the contrast table in `tests/design.test.mjs`.
+
 ## The imagery
 
 Three generated images, made with the `imager` skill on 30 September 2026 with

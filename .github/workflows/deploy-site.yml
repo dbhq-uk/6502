@@ -49,8 +49,8 @@ permissions:
 
 jobs:
   # The machines' browser builds, in a job of their own that holds no token:
-  # the KIM-1 and the BBC Micro as .NET WebAssembly, compiled ahead of time, and
-  # their ROMs, read from roms/ and checked against the pins in Pins.cs. The
+  # the KIM-1, the BBC Micro and the Electron as .NET WebAssembly, compiled ahead
+  # of time, and their ROMs, read from roms/ and checked against the pins in Pins.cs. The
   # same job as validate.yml's. The deploy job puts its output where the Astro build copies
   # it into dist.
   machines:
@@ -65,7 +65,7 @@ jobs:
       # is restored rather than compiled again: AOT takes minutes. Each machine
       # has its own cache, keyed on the core, its own two projects and what the
       # build reads, so a change to one machine rebuilds that machine alone. The
-      # workload version is in the keys, so moving the pin rebuilds both. The
+      # workload version is in the keys, so moving the pin rebuilds them all. The
       # BBC Micro's build also publishes its preset discs, so its key hashes
       # machines/bbc-micro/discs/ too: a disc added or changed is never served
       # from a stale cache.
@@ -81,17 +81,25 @@ jobs:
         with:
           path: site/public/machines/bbc-micro
           key: machine-bbc-micro-sdk-10.0.400-wasm-tools-10.0.401-${{ hashFiles('src/Dbhq.Machines.BbcMicro/**', 'src/Dbhq.Machines.BbcMicro.Wasm/**', 'src/Dbhq.Cpu6502/**', 'Directory.Build.props', 'tests/Dbhq.Cpu6502.TestSupport/Pins.cs', 'site/scripts/build-machines.mjs', 'site/src/lib/pins.mjs', 'site/src/lib/machines.mjs', 'site/src/lib/bbc-discs.mjs', 'machines/bbc-micro/discs/**') }}
+      - name: Cache the Electron's browser build
+        id: electron
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
+        with:
+          path: site/public/machines/electron
+          key: machine-electron-sdk-10.0.400-wasm-tools-10.0.401-${{ hashFiles('src/Dbhq.Machines.Electron/**', 'src/Dbhq.Machines.Electron.Wasm/**', 'src/Dbhq.Cpu6502/**', 'Directory.Build.props', 'tests/Dbhq.Cpu6502.TestSupport/Pins.cs', 'site/scripts/build-machines.mjs', 'site/src/lib/pins.mjs', 'site/src/lib/machines.mjs') }}
       # The machines whose cache missed, by registry id, for the build below.
       - name: Which machines to build
         id: which
         env:
           KIM1_HIT: ${{ steps.kim-1.outputs.cache-hit }}
           BBC_HIT: ${{ steps.bbc-micro.outputs.cache-hit }}
+          ELECTRON_HIT: ${{ steps.electron.outputs.cache-hit }}
         run: |
           IDS=""
           [ "$KIM1_HIT" = "true" ] || IDS="$IDS kim-1"
           [ "$BBC_HIT" = "true" ] || IDS="$IDS bbc-micro"
-          echo "building:${IDS:- none, both restored}"
+          [ "$ELECTRON_HIT" = "true" ] || IDS="$IDS electron"
+          echo "building:${IDS:- none, all restored}"
           echo "ids=${IDS# }" >> "$GITHUB_OUTPUT"
       # The SDK is pinned here, not left at 10.0.x, because a workload version
       # belongs to one SDK feature band: 10.0.401 is a 10.0.400 band set.
@@ -106,8 +114,9 @@ jobs:
         uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
           node-version: '22.22'
-      # Both machines: the KIM-1, and the BBC Micro, whose files are published
-      # with the site but linked from no page until the registry says it runs.
+      # The three machines: the KIM-1, the BBC Micro, and the Electron, whose
+      # files are published with the site but linked from no page until the
+      # registry says it runs.
       - if: steps.which.outputs.ids != ''
         name: Build the machines and fetch their ROMs
         env:
@@ -276,7 +285,10 @@ jobs:
       # a 404 on it and the machine never starts. bbc-micro.js, bbc-keys.js and
       # bbc-audio.js are the BBC Micro's page: its driver, the key table the
       # driver imports, and the sound worklet it loads with addModule, which no
-      # import names.
+      # import names. electron.js, electron-keys.js and electron-audio.js are
+      # the Electron's, the same three. They are published before any page loads
+      # them, while the registry still says planned, so the day it says running
+      # they are already known to serve.
       # site/tests/build.test.mjs derives the required list from the built pages.
       # analytics.js and consent.js are in this list for a sharp reason. A 404 on
       # analytics.js means no analytics and nothing to opt out of. A 404 on
@@ -289,7 +301,7 @@ jobs:
       - name: The machine-readable files must be serving
         run: |
           set -euo pipefail
-          for f in sitemap-index.xml sitemap-0.xml robots.txt analytics.js consent.js machines-table.js table-sort.js chip.js kim-1.js machine-host.js bbc-micro.js bbc-keys.js bbc-audio.js model-loader.js models/kim-1.js models/kim-1-tracks.webp; do
+          for f in sitemap-index.xml sitemap-0.xml robots.txt analytics.js consent.js machines-table.js table-sort.js chip.js kim-1.js machine-host.js bbc-micro.js bbc-keys.js bbc-audio.js electron.js electron-keys.js electron-audio.js model-loader.js models/kim-1.js models/kim-1-tracks.webp; do
             CODE=$(curl -s --max-time 20 --retry 3 --retry-delay 5 -o /dev/null -w "%{http_code}" "https://6502.dbhq.uk/${f}?cb=${GITHUB_SHA}")
             echo "${f} -> ${CODE}"
             [ "$CODE" = "200" ]

@@ -6,7 +6,7 @@ import path from 'node:path';
 import crypto from 'node:crypto';
 import { spawnSync } from 'node:child_process';
 import { MACHINE_BUILDS, machineBuilds, readRom } from '../src/lib/machines.mjs';
-import { bbcRoms, kim1Roms, pin } from '../src/lib/pins.mjs';
+import { bbcRoms, electronRoms, kim1Roms, pin } from '../src/lib/pins.mjs';
 import { REPO_ROOT } from '../src/lib/registry.mjs';
 
 // scripts/build-machines.mjs publishes a machine by its registry id, with the
@@ -16,13 +16,32 @@ import { REPO_ROOT } from '../src/lib/registry.mjs';
 
 const sha256 = (bytes) => crypto.createHash('sha256').update(bytes).digest('hex');
 
-test('the builds are the KIM-1 and the BBC Micro, each from its own WebAssembly project, by its registry id', () => {
-  assert.deepEqual(Object.keys(MACHINE_BUILDS), ['kim-1', 'bbc-micro']);
+test('the builds are the KIM-1, the BBC Micro and the Electron, each from its own WebAssembly project, by its registry id', () => {
+  assert.deepEqual(Object.keys(MACHINE_BUILDS), ['kim-1', 'bbc-micro', 'electron']);
   for (const { project } of Object.values(MACHINE_BUILDS)) assert.ok(fs.existsSync(path.join(REPO_ROOT, 'src', project, `${project}.csproj`)), `no project ${project}`);
   const ids = JSON.parse(fs.readFileSync(path.join(REPO_ROOT, 'machines', 'registry.json'), 'utf8')).machines.map((m) => m.id);
   for (const id of Object.keys(MACHINE_BUILDS)) assert.ok(ids.includes(id), `${id} is not a registry id`);
   assert.equal(MACHINE_BUILDS['kim-1'].roms, kim1Roms);
   assert.equal(MACHINE_BUILDS['bbc-micro'].roms, bbcRoms);
+  assert.equal(MACHINE_BUILDS.electron.roms, electronRoms);
+  assert.equal(MACHINE_BUILDS.electron.discs, false);
+});
+
+test('the Electron\'s ROMs are its OS pin and the BBC Micro\'s BASIC pin, in the order ElectronHost.Load takes them, and each file in roms/ matches its pin', () => {
+  const roms = electronRoms();
+  assert.deepEqual(roms.map((r) => r.rom), ['os', 'basic']);
+  assert.deepEqual(roms.map((r) => r.path), [pin('ElectronOsPath'), pin('BbcBasicPath')]);
+  assert.deepEqual(roms.map((r) => r.sha256), [pin('ElectronOsSha256'), pin('BbcBasicSha256')]);
+  assert.equal(roms[0].path, 'roms/electron/os.rom');
+  const host = fs.readFileSync(path.join(REPO_ROOT, 'src', 'Dbhq.Machines.Electron.Wasm', 'Program.cs'), 'utf8');
+  assert.match(host, /public static void Load\(byte\[\] os, byte\[\] basic, int sampleRate\)/);
+  for (const r of roms) {
+    assert.equal(r.file, path.basename(r.path));
+    assert.equal(r.url, `https://github.com/dbhq-uk/6502/blob/main/${r.path}`);
+    const bytes = readRom(r);
+    assert.equal(bytes.length, 16 * 1024, `${r.file} is not 16 KB`);
+    assert.equal(sha256(bytes), r.sha256);
+  }
 });
 
 test('the BBC Micro\'s ROMs are its three pins in Pins.cs, in the order BbcHost.Load takes them, and each file in roms/ matches its pin', () => {
@@ -58,8 +77,9 @@ test('a ROM whose bytes are not its pin\'s, or that is missing, is refused', () 
 test('the machines to build are named, each once, and a name with no build is refused', () => {
   assert.deepEqual(machineBuilds(['kim-1']).map((b) => b.id), ['kim-1']);
   assert.deepEqual(machineBuilds(['bbc-micro', 'kim-1', 'bbc-micro']).map((b) => b.id), ['bbc-micro', 'kim-1']);
-  assert.throws(() => machineBuilds([]), /name the machines to build/);
-  assert.throws(() => machineBuilds(['nes']), /no build for "nes"/);
+  assert.deepEqual(machineBuilds(['electron']).map((b) => b.id), ['electron']);
+  assert.throws(() => machineBuilds([]), /name the machines to build: kim-1, bbc-micro or electron, or several/);
+  assert.throws(() => machineBuilds(['nes']), /no build for "nes": the machines are kim-1, bbc-micro and electron/);
 });
 
 /**
@@ -99,6 +119,24 @@ test('the script stops before publishing anything when the machine, or an option
   }
 });
 
+test('the Electron\'s OS ROM is checked before any publish: one bit changed stops the build before dotnet runs', () => {
+  const { root, run, dotnetRan } = scratchRepo((r) => {
+    const file = path.join(r, 'roms', 'electron', 'os.rom');
+    const bytes = fs.readFileSync(file);
+    bytes[0] ^= 1;
+    fs.writeFileSync(file, bytes);
+  });
+  try {
+    const result = run(['kim-1', 'electron']);
+    assert.notEqual(result.status, 0);
+    assert.match(result.stderr, /roms\/electron\/os\.rom does not match its pinned hash/);
+    assert.doesNotMatch(result.stdout, /dotnet publish/);
+    assert.ok(!dotnetRan(), 'dotnet ran before every ROM was checked');
+  } finally {
+    fs.rmSync(root, { recursive: true, force: true });
+  }
+});
+
 test('every ROM of every machine named is read and checked before the first publish: a ROM that fails its hash stops it before dotnet runs', () => {
   // One bit of the BBC Micro's OS ROM changed, and the KIM-1 named first, so its publish would come first.
   const { root, run, dotnetRan } = scratchRepo((r) => {
@@ -119,7 +157,7 @@ test('every ROM of every machine named is read and checked before the first publ
   }
 });
 
-test('CI and npm run machines publish both machines, each cached on its own inputs, so a change to one rebuilds that one', () => {
+test('CI and npm run machines publish every machine, each cached on its own inputs, so a change to one rebuilds that one', () => {
   const root = path.resolve(process.cwd(), '..');
   for (const name of ['validate.yml', 'deploy-site.yml']) {
     const text = fs.readFileSync(path.join(root, '.github', 'workflows', name), 'utf8');

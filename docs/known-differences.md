@@ -686,3 +686,237 @@ front of the model. Where that differs from sitting at a Model B:
   after the last disc command, or until `*CAT`. The page says so, and does not
   make DFS read the new disc when it goes in (`DiscTests` shows the old
   catalogue until DFS reads it again).
+
+## The Acorn Electron: the ULA's interrupts, where the sources stop
+
+**What.** `Ula` is the Electron's ULA so far: the interrupt enable and status
+at `$FE00`, the clears in `$FE05`, the display mode in `$FE07` and the frame
+that times the clock and display-end interrupts (`ula.md` sections 1c, 5d and
+6). Where the fact sheet is silent or open, the model chooses:
+
+- **Transmit empty (status bit 5) is set at power on.** The sheet says it is
+  "normally set" and clear only while a byte is being sent, and leaves its
+  power-on value open (section 12 item 4). The model starts with it set, which
+  is the state a machine that is not sending is in.
+- **The display mode is 0 at power on.** The sheet does not say what `$FE07`
+  holds before the OS writes it (section 12 item 4); the OS writes it during
+  reset. All zeros is the model's choice, and it makes the display end fall at
+  the 256-line time until then.
+- **BREAK resets nothing in the ULA.** The sheet says only that the ULA asserts
+  reset (section 12 item 5). The model has no ULA reset: BREAK leaves the
+  enable, the status and the mode as they were, and does not set the power-on
+  flag, which is how the OS tells a BREAK from a power on. The OS rewrites what
+  it needs.
+- **The mode in force when an event comes due decides a display end, and a
+  mode write moves the pending one.** A write that changes the mode between
+  the clock interrupt and the display end changes when the display end falls.
+  If the new time is already past, the interrupt is raised at the next catch-up,
+  that is at the next bus access. A real ULA counts lines, so it may differ for
+  a program that changes mode in the last rows of a field; none does so in the
+  boot or in BASIC.
+- **The ULA's IRQ line reaches the CPU between instructions.** The machine
+  copies the line into the core after each whole instruction, caught up to the
+  cycle that instruction ended on. A real 6502 samples the line in the
+  second-to-last cycle of an instruction (section 12 item 13), so an interrupt
+  that rises during an instruction is taken up to one instruction later here
+  than on the machine. The sheet's own model polled at instruction boundaries
+  too and still matched the real BASIC timings (section 11d).
+- **A read of a register the ULA does not answer is the high byte of the
+  address.** The sheet is split on this (section 1b, section 12 item 3): one
+  source says the ROM byte under it, another that the bus floats. The OS reads
+  only `$FE00` and `$FE04`.
+
+## The Acorn Electron: the contention, where the sources stop
+
+**What.** In modes 0 to 3 the ULA holds a RAM access while it fetches the
+display (`ula.md` section 4). The rule and its totals are from the sources and
+reproduce seven real timings of a BASIC loop (section 11d). Where the sources
+stop, the model chooses:
+
+- **The window's phase is a convention.** The 1 MHz boundaries are the even
+  cycles, a line starts at position 0, and the window blocks the boundaries at
+  positions 2 to 80. No source gives the phase of the 1 MHz clock against the
+  line, or of the window against the first pixel (section 4f, section 12 item
+  1). Any phase gives the same 24 free boundaries per contended line and so the
+  same totals; it moves single instants by a cycle or two, which matters only to
+  code that counts cycles to a pixel.
+- **The ULA's registers and FRED and JIM are 1 MHz with no contention.** The
+  keyboard is 1 MHz by a real-machine measurement; the sources disagree about
+  the rest (section 3a, section 12 item 2), and the model follows the one that
+  says 1 MHz. The effect on the BASIC loop is under a hundredth of a second.
+- **The mode in force when an access starts decides its wait.** A write to
+  `$FE07` changes the contention from the next access. One source says a mode
+  change takes effect at the end of the current line (section 12 item 6); no
+  program in the boot or in BASIC changes mode inside a line.
+- **An NMI does not take the RAM from the ULA.** A source says an NMI gives the
+  6502 priority over the display, which makes snow (section 4a). Nothing on a
+  stock Electron raises an NMI, so the model does not have it.
+- **The Plus 1's slow-down is not modelled.** Real machines with a Plus 1 run
+  the loop about 16 per cent slower in modes 0 to 2 and 7 per cent in modes 4
+  to 6, for a reason nobody has found (section 4g, section 12 item 12). The
+  Plus 1 is out of scope.
+
+## The Acorn Electron: the display, where the model stops
+
+**What.** `UlaDisplay` is the ULA's picture in modes 0 to 6: the start
+address, the mode, the palette and the address generator of `ula.md` section
+5, drawing a line at a time into a picture of 640 by 256 pixels. Where the
+sheet is silent or open, or where drawing a line at a time is coarser than the
+chip, the model chooses:
+
+- **A line's bytes are read at its start, not one by one through it.** Each
+  line is drawn whole from the registers and RAM as they are at the cycle it
+  starts. A store to screen memory in the middle of a line's 40 microseconds is
+  not seen by that line, even in the part of it fetched after the store; it is
+  seen from the next field. The real ULA fetches each byte in its own slot
+  (section 4d).
+- **There is no offset from a fetch to its pixel.** How many cycles pass
+  between the ULA taking a byte and its pixels leaving is not known (section 12
+  item 6). The model has none: a line's pixels are its bytes, placed from the
+  left edge of the picture.
+- **A palette write takes effect from the next line.** The sheet says a
+  palette write takes effect at once (section 12 item 6). Here it is seen by
+  every line that starts at or after the write, so a change in the middle of a
+  line shows from the line after it.
+- **A mode write takes effect at the end of the line it lands in**, which is
+  what one source says (section 5e, section 12 item 6). A write exactly at a
+  line's first cycle is in time for that line. The contention follows the mode
+  from the next access, as before.
+- **The counters when the mode moves between 80 and 40 bytes a line in the
+  middle of a row are not established** (section 5e, section 12 item 7). The
+  model keeps the row base and the line in the row as they are and goes on in
+  the new mode; a line past the new mode's last line in the row (after a change
+  from mode 3 or 6) ends the row and is drawn black.
+- **The address counter advances once a row through the blank lines of modes 3
+  and 6.** Lines 8 and 9 of each row fetch nothing and are black, and the row
+  base moves on by 8 times the bytes a line at the end of line 9 (section 12
+  item 8, from one source only).
+- **What the display registers hold at power on is not known** (section 12
+  item 4). The model takes zero: mode 0 from `$0000`, which the rule for a start
+  below `$0800` makes `$3000`, and a palette of zeros, which in negative logic is
+  every colour white, until the OS writes them.
+- **Both fields draw the same 256 lines into one picture.** The sheet says the
+  fields use the same lines (section 4c); the 625-line interlace is not shown,
+  and the picture is 256 lines tall, which the page stretches to 4:3.
+
+## The Acorn Electron: the sound, where the model stops
+
+**What.** `UlaSound` is the ULA's one channel and one bit (`ula.md` section 8):
+selected by `$FE07` bits 2 and 1 = `01`, toggling every 32 x (S + 1) cycles of
+2 MHz, with S of 0 and 1 a constant level. Where the sheet is open (section 12
+item 9) or the form it takes in the page is a choice, the model chooses:
+
+- **A write to `$FE06` restarts the divider.** The next toggle is 32 x (S + 1)
+  cycles after the write. Whether the real counter restarts there or only
+  reloads at its next toggle is not established. If the OS rewrote `$FE06` with an
+  unchanged value on its 100 Hz tick, each rewrite would lose the part of a half
+  period already counted: a note would sound flat by about 5.6 per cent (1,120 of
+  each 20,000 cycles lost) for the start-up beep's S of 58, whose half period is
+  1,888 cycles against a tick of 20,000. That is a possibility and not a finding: in the model's run of the
+  start-up beep the OS wrote `$FE06` once in sound mode, so none of that happens
+  there, and a `SOUND` with an envelope was not looked at.
+- **Entering sound mode keeps the output level and starts the divider.** The
+  level is whatever the output last held, and the first toggle is 32 x (S + 1)
+  cycles after the write that entered the mode. The real divider's phase on
+  entry, and the level, are not established. A write to `$FE07` that stays in
+  sound mode does not touch the divider.
+- **Software cannot set a level at S of 0 or 1.** The sheet says those two
+  values are usable as an on-off speaker bit (section 8, from S3), but the model
+  changes the level only by toggling, and at S of 0 or 1 it never toggles, so the
+  level stays as it was. How the real ULA lets a program set it is not in the
+  sources, and the brief fixed a constant level with no toggles.
+- **Outside sound mode the output holds its last level and does not toggle**,
+  as the sheet says. Cassette output uses the same pin; that is the tape's.
+- **Power on is in sound mode with S of 0 and the level low**: silent. The
+  sheet says the ULA resets to sound mode (section 10) and leaves the rest
+  open (section 12 item 4).
+- **The amplifier is a 10 Hz high-pass, so silence is 0.** The sheet leaves
+  the filtering open. Each sample, the mean of the 1-bit level over its
+  interval, goes through `y = x - xPrev + r x yPrev` with `r = exp(-2 pi x 10 /
+  sampleRate)`. A held level decays to exactly 0 and does not click when sound
+  starts or stops. It also droops a low pitch's flat tops: at 122 Hz a half wave
+  loses about a quarter of its height. The real amplifier's response is not
+  known; there is no low-pass, so the page's own resampling is what removes
+  what lies above its rate.
+- **A sample is the mean of the level over its interval, in exact integers,**
+  not the output of an analogue chain. A toggle at exactly a sample's boundary
+  counts for the sample after it.
+- **The sound is not on the bus's per-access path.** It is brought up to date
+  at a write to `$FE06` or `$FE07` and when the page reads or counts its buffer.
+  A page that never reads it gets the newest second, and `Overruns` counts what
+  fell out.
+- **The sample rate is 1 to 384,000 a second**, refused outside that.
+
+**How the tests treat it.** `UlaSoundTests` holds the formula (S = 15 is a
+toggle every 512 cycles and 1,953.125 Hz; S = 255 is 122.07 Hz), the constant
+level at S of 0 and 1, silence outside sound mode, the two choices above, the
+mean over an interval worked by hand, the sample count and zero crossings of a
+second of sound, and the buffer's overflow. `SoundTests` checks the registers
+through the bus and its mirrors, that the page's read catches the sound up, and
+on the real OS that `VDU 7` makes the output toggle at a pitch between 20 Hz and
+20 kHz.
+
+## The Acorn Electron: the cassette, where the model stops
+
+**What.** `UlaTape` is the cassette at the ULA's serial register (`tape.md`
+sections 4 and 5, `ula.md` section 9): a tape is a list of carrier, bytes and
+silence, and the ULA's tape side answers at bit-time pace with the interrupts
+the OS waits for. The OS runs its own tape code against it unchanged. Where a
+source stops or the form is a choice, the model chooses:
+
+- **No waveform.** Tone shape, phase, and a tape error that is a damaged
+  waveform are not modelled (`tape.md` s5); a damaged tape is a wrong byte. A
+  UEF whose data is a raw bit stream or another framing is refused, not
+  played (s6).
+- **300 baud is not modelled.** The ULA here is a fixed 1200 baud receiver and
+  transmitter, and a tape at 300 baud is refused by the reader (`tape.md` s6,
+  s7 item 8).
+- **The high-tone detector is a count of bit times, not a circuit.**
+  High-tone-detect is set after ten bit times, 16,640 cycles, of carrier heard
+  without a break, and again every ten bit times while the carrier lasts. The
+  real detector is an RC circuit on the `CAS RC` pin whose time constants are
+  not in the sources (`ula.md` s12 item 10), and whether it raises the flag
+  again once cleared is open (`tape.md` s7 item 11). The model follows the test
+  probe, with which the OS loaded every tape. The counter at `$FE06`, which the
+  sheet says must be 0 for the detector to work, is not consulted.
+- **A byte unread for 4,000 cycles is lost**, about 2 ms (`ula.md` s9):
+  receive-full is cleared and `LostBytes` counts it. Section 6a gives the
+  window as two bit times, 3,328 cycles, until the next start bit; the model
+  takes the 2 ms figure. A good load loses none.
+- **Transmit-empty works in every mode, motor or not.** A write to `$FE04`
+  clears it, and it is set nine bit times after the byte starts on the line,
+  the later of the write and the end of the byte before. Whether the real ULA
+  shifts out in input or sound mode is not established.
+- **The receive-full quirk of output mode is not modelled.** Entering output
+  mode, or a pattern that looks like a start and stop bit, raises receive-full
+  on a real ULA (`ula.md` s6a), and two games use it as a timer. Here
+  receive-full comes only from a tape being played.
+- **The recorder rounds and drops.** Idle line is recorded as carrier to the
+  nearest 2400 Hz cycle (832 CPU cycles), and idle line of one bit time or less
+  is not recorded at all: the OS never leaves such a gap inside a block
+  (`tape.md` s7 item 2). Playing a recording back is therefore exact to within
+  half a carrier cycle a gap, not to the cycle.
+- **The tape moves only with the motor on in input or output mode**, and,
+  while recording, only in output mode, so the position is the time spent
+  recording. That is not quite the length of what was recorded, because the
+  recording rounds its carriers and drops idle stretches under one bit time
+  (above). A played tape stops at its end. A byte whose ninth bit went by
+  before the machine started listening is missed.
+- **A UEF of more than 4 MiB is refused**, inflated if it is gzip and as it is
+  if not. Half an hour of tape at 1200 baud is 216,000 bytes (`tape.md` s4),
+  so this is about nineteen tape sides, and it bounds the memory a file can ask
+  of the browser: every byte on tape is an entry in the list of events. The
+  first limit was 16 MiB, for gzip only.
+- **`LostBytes` counts one tape load.** Putting a tape in, rewinding, taking
+  it out and starting a recording each set it back to 0.
+- **`$FE04` reads as 0 until a byte arrives.** The ULA's power-on state is not
+  known (`ula.md` s12 item 4).
+
+**How the tests treat it.** `UlaTapeTests` drives the port alone, with no OS:
+the times of high tone, receive-full, a lost byte and transmit-empty to the
+cycle, the recorder's carrier rounding and threshold, the motor and the modes,
+and that the result does not depend on how often the ULA is caught up.
+`TapeRoundTripTests` saves a program with the OS, writes it as a UEF, reads it
+back and loads it on a fresh machine, and checks the production cassette
+records the same tape as the task 10 probe. `TapeFaultTests` covers a bad data
+CRC, BREAK, ejecting, a silent tape and `*CAT`, each bounded in cycles.

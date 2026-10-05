@@ -47,3 +47,26 @@ export function bbcRoms(source = fs.readFileSync(PINS_FILE, 'utf8')) {
     };
   });
 }
+
+/**
+ * The Electron's two 16 KB ROMs, in the order ElectronHost.Load takes them: the
+ * operating system, from roms/electron/, and BASIC, which is the BBC Micro's
+ * file in roms/bbc-micro/, kept once (roms/README.md). The same fields as
+ * bbcRoms; BASIC's pins are the BBC Micro's, as Pins.cs says.
+ */
+export function electronRoms(source = fs.readFileSync(PINS_FILE, 'utf8')) {
+  return [
+    { rom: 'os', name: 'OS 1.00, the operating system', paths: ['ElectronOsPath', 'ElectronOsSha256'] },
+    { rom: 'basic', name: 'BBC BASIC 2, the BBC Micro\'s file', paths: ['BbcBasicPath', 'BbcBasicSha256'] },
+  ].map(({ rom, name, paths: [at, hash] }) => {
+    const relative = pin(at, source);
+    return {
+      rom,
+      name,
+      file: path.posix.basename(relative),
+      path: relative,
+      url: `https://github.com/dbhq-uk/6502/blob/main/${relative}`,
+      sha256: pin(hash, source),
+    };
+  });
+}

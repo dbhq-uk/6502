@@ -1,0 +1,83 @@
+---
+// The Electron: its screen, the controls a person at the machine has (BREAK,
+// the sound, the cassette recorder) and the line that says how fast this
+// browser runs it. public/electron.js brings it to life when the visitor
+// presses Start, and downloads nothing before then. Without JavaScript every
+// control is disabled and the status line says why. The BBC Micro's panel
+// (BbcPanel.astro) is the pattern.
+//
+// The canvas is the framebuffer's size, 640 by 256 (Framebuffer in
+// src/Dbhq.Machines.Electron), and the stylesheet shows it in the television's
+// shape, four wide by three high.
+//
+// The screen is where the keyboard goes: with focus on it, keys type into the
+// machine. The script makes it focusable once the machine runs; Tab is never
+// taken, so focus can always move on.
+//
+// Under the screen are the Electron's keys as buttons (ON_SCREEN_ROWS in
+// public/electron-keys.js), for touch and for FUNC with another key. SHIFT,
+// CTRL and CAPS LK FUNC latch for the next key.
+//
+// The cassette recorder takes a .uef tape image, dropped on the page or chosen
+// with Insert a tape, read in the tab and never sent anywhere; Blank tape
+// records what the OS saves, and Save tape downloads it. How long a tape takes
+// is the machine's own figure, from the journal (TAPE_TIMES in
+// src/lib/electron.mjs), never typed here.
+import { TAPE_TIMES, machineSeconds, megabytes } from '../lib/electron.mjs';
+import { ON_SCREEN_ROWS, STICKY, legend, spokenName } from '../../public/electron-keys.js';
+
+interface Props {
+  /** Where the machine's files are served from, /machines/electron/. */
+  base: string;
+  /** The machine's clock in MHz, from the registry. */
+  clockMhz: number;
+  /** The ROM files the page loads, in the order ElectronHost.Load takes them. */
+  roms: string[];
+  /** The bytes the Start button downloads, read from the build, or null when this build has no machine. */
+  download: number | null;
+}
+const { base, clockMhz, roms, download } = Astro.props;
+---
+
+<div class="electron" data-electron data-base={base} data-clock-mhz={clockMhz} data-roms={roms.join(' ')} data-download={download ?? undefined} data-state="static">
+  <div class="electron-screen" data-electron-screen role="application" aria-label="The Electron's screen" aria-describedby="electron-typing">
+    <canvas data-electron-canvas width="640" height="256"></canvas>
+  </div>
+  <p class="electron-note">The picture is the machine's own, pixel for pixel, as its ULA draws it, shown in the television's shape. It models the picture, not a television: no scan lines, no glow and no curve.</p>
+  <p class="electron-note" id="electron-typing">With the screen focused, your keyboard types into the Electron, key for key by where the keys are, and the machine's own keys further down type by a tap or a click. Tab moves on, so the page never keeps the keyboard.</p>
+  <div class="electron-controls">
+    <button type="button" class="btn pill" data-electron-start disabled>Start the Electron{download !== null && `, a download of up to ${megabytes(download)} MB`}</button>
+    <button type="button" class="btn small" data-electron-break disabled>Break</button>
+    <button type="button" class="btn small" data-electron-sound disabled>Turn sound on</button>
+  </div>
+  <p class="electron-status" role="status" data-electron-status>The Electron runs in your browser, and it needs JavaScript to do that. With JavaScript off, the page and the program below are shown, but nothing runs.</p>
+  <p class="electron-line" data-electron-sound-status aria-live="polite">Sound is off.</p>
+  <p class="electron-speed" data-electron-speed></p>
+  <div class="electron-keys" role="group" aria-label="The Electron's keys">
+    {ON_SCREEN_ROWS.map((row) => (
+      <div class="electron-keys-row">
+        {row.map((key) => {
+          const words = legend(key).length > 2;
+          const sticky = STICKY.includes(key);
+          return (
+            <button type="button" class={`electron-key${words ? ' word' : ''}${key === 'Space' ? ' space' : ''}`} data-electron-key={key} aria-label={spokenName(key) === legend(key) ? undefined : spokenName(key)} aria-pressed={sticky ? 'false' : undefined} disabled>{legend(key)}</button>
+          );
+        })}
+      </div>
+    ))}
+  </div>
+  <fieldset class="electron-tape">
+    <legend>The cassette recorder</legend>
+    <div class="electron-controls">
+      <button type="button" class="btn small" data-electron-insert disabled>Insert a tape</button>
+      <input type="file" accept=".uef" data-electron-file hidden />
+      <button type="button" class="btn small" data-electron-blank disabled>Blank tape</button>
+      <button type="button" class="btn small" data-electron-rewind disabled>Rewind</button>
+      <button type="button" class="btn small" data-electron-save disabled>Save tape</button>
+    </div>
+    <p class="electron-line" data-electron-tape aria-live="polite">No tape in the recorder.</p>
+    <p class="electron-line" data-electron-motor>Motor off.</p>
+    <p class="electron-note">A tape plays at the Electron's own pace, as a cassette does, and nothing is sped up. In the machine's own test on {TAPE_TIMES.measured}, saving a one-line program took {machineSeconds(TAPE_TIMES.saveCycles)} seconds of the Electron's time, from RETURN to the motor stopping, and loading it back {machineSeconds(TAPE_TIMES.loadCycles)} seconds (<a href={TAPE_TIMES.journal}>the journal</a> has the run). Most of that is the steady tone the OS writes before and after a program; the program itself goes at 1,200 baud, 120 bytes a second, in blocks of 256 bytes with a short tone between them.</p>
+    <p class="electron-note">To save: press Blank tape, type <kbd>SAVE "NAME"</kbd> and press RETURN, then RETURN again when the machine says RECORD then RETURN. When the prompt is back, Save tape downloads the tape as a .uef file. To load: drop a .uef tape image on the page, or press Insert a tape, then type <kbd>LOAD ""</kbd> and press RETURN. The file is read in this tab and is not uploaded anywhere. A tape the machine cannot read is refused with the reason, and the tape that was in stays in.</p>
+  </fieldset>
+</div>

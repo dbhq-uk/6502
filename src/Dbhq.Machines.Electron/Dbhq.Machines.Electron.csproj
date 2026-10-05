@@ -1,0 +1,8 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <ItemGroup>
+    <InternalsVisibleTo Include="Dbhq.Machines.Electron.Tests" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="../Dbhq.Cpu6502/Dbhq.Cpu6502.csproj" />
+  </ItemGroup>
+</Project>
