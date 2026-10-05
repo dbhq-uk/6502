@@ -1,0 +1,2179 @@
+{
+ "about": "Points marked by hand: read by eye off crops of the original input, each a crop of the stated box (left, top, right, bottom, in the original's pixels) enlarged `zoom` times with a grid every `gridPx` pixels labelled in the original's pixels, the labels in a strip outside the crop. Pixel coordinates are the original's, with (0, 0) the centre of the top left pixel. I1-back is read flipped left to right (its x is 2375 less the file's). Nothing here is moved after a fit; spike.py records what it does to each mark.",
+ "scale": {
+  "what": "On I1-front. Rows across: the first and last pin of both rows of the ten ICs and of the expansion header P2, each the middle of the pad as read by eye, then moved to its blob's centroid by common.refine_to_pad (refused beyond 0.6 mm). Pin 1 is at the lower left of each DIP: every DIP lies with its notch to the left. Drills: pin 1 and pin N, directly across from it on the other row, of each IC, the middle of the hole as read by eye, then fitted on the hole's top rim by spike.py.",
+  "rows": [
+   {
+    "id": "U6 pins 1 to 20",
+    "part": "U6",
+    "pins": 40,
+    "pitches": 19,
+    "pitchMm": 2.54,
+    "first": [
+     244,
+     956
+    ],
+    "last": [
+     813,
+     955.5
+    ],
+    "crops": {
+     "first": {
+      "box": [
+       220,
+       935,
+       260,
+       975
+      ],
+      "zoom": 8,
+      "gridPx": 5
+     },
+     "last": {
+      "box": [
+       790,
+       935,
+       830,
+       975
+      ],
+      "zoom": 8,
+      "gridPx": 5
+     }
+    }
+   },
+   {
+    "id": "U6 pins 40 to 21",
+    "part": "U6",
+    "pins": 40,
+    "pitches": 19,
+    "pitchMm": 2.54,
+    "first": [
+     243.5,
+     777
+    ],
+    "last": [
+     813,
+     777
+    ],
+    "crops": {
+     "first": {
+      "box": [
+       220,
+       755,
+       260,
+       795
+      ],
+      "zoom": 8,
+      "gridPx": 5
+     },
+     "last": {
+      "box": [
+       790,
+       755,
+       830,
+       795
+      ],
+      "zoom": 8,
+      "gridPx": 5
+     }
+    }
+   },
+   {
+    "id": "U5 pins 1 to 20",
+    "part": "U5",
+    "pins": 40,
+    "pitches": 19,
+    "pitchMm": 2.54,
+    "first": [
+     1143,
+     807
+    ],
+    "last": [
+     1711,
+     806.5
+    ],
+    "crops": {
+     "first": {
+      "box": [
+       1120,
+       785,
+       1160,
+       825
+      ],
+      "zoom": 8,
+      "gridPx": 5
+     },
+     "last": {
+      "box": [
+       1690,
+       785,
+       1730,
+       825
+      ],
+      "zoom": 8,
+      "gridPx": 5
+     }
+    }
+   },
+   {
+    "id": "U5 pins 40 to 21",
+    "part": "U5",
+    "pins": 40,
+    "pitches": 19,
+    "pitchMm": 2.54,
+    "first": [
+     1143,
+     627
+    ],
+    "last": [
+     1712,
+     627
+    ],
+    "crops": {
+     "first": {
+      "box": [
+       1120,
+       605,
+       1160,
+       645
+      ],
+      "zoom": 8,
+      "gridPx": 5
+     },
+     "last": {
+      "box": [
+       1690,
+       605,
+       1730,
+       645
+      ],
+      "zoom": 8,
+      "gridPx": 5
+     }
+    }
+   },
+   {
+    "id": "U1 pins 1 to 12",
+    "part": "U1",
+    "pins": 24,
+    "pitches": 11,
+    "pitchMm": 2.54,
+    "first": [
+     483.5,
+     1197.5
+    ],
+    "last": [
+     813,
+     1197.5
+    ],
+    "crops": {
+     "first": {
+      "box": [
+       460,
+       1175,
+       500,
+       1215
+      ],
+      "zoom": 8,
+      "gridPx": 5
+     },
+     "last": {
+      "box": [
+       790,
+       1175,
+       830,
+       1215
+      ],
+      "zoom": 8,
+      "gridPx": 5
+     }
+    }
+   },
+   {
+    "id": "U1 pins 24 to 13",
+    "part": "U1",
+    "pins": 24,
+    "pitches": 11,
+    "pitchMm": 2.54,
+    "first": [
+     483.5,
+     1016.5
+    ],
+    "last": [
+     813,
+     1016
+    ],
+    "crops": {
+     "first": {
+      "box": [
+       460,
+       995,
+       500,
+       1035
+      ],
+      "zoom": 8,
+      "gridPx": 5
+     },
+     "last": {
+      "box": [
+       790,
+       995,
+       830,
+       1035
+      ],
+      "zoom": 8,
+      "gridPx": 5
+     }
+    }
+   },
+   {
+    "id": "U4 pins 1 to 12",
+    "part": "U4",
+    "pins": 24,
+    "pitches": 11,
+    "pitchMm": 2.54,
+    "first": [
+     1142,
+     1227.5
+    ],
+    "last": [
+     1472,
+     1227
+    ],
+    "crops": {
+     "first": {
+      "box": [
+       1120,
+       1205,
+       1160,
+       1245
+      ],
+      "zoom": 8,
+      "gridPx": 5
+     },
+     "last": {
+      "box": [
+       1450,
+       1205,
+       1490,
+       1245
+      ],
+      "zoom": 8,
+      "gridPx": 5
+     }
+    }
+   },
+   {
+    "id": "U4 pins 24 to 13",
+    "part": "U4",
+    "pins": 24,
+    "pitches": 11,
+    "pitchMm": 2.54,
+    "first": [
+     1142,
+     1047
+    ],
+    "last": [
+     1472,
+     1047
+    ],
+    "crops": {
+     "first": {
+      "box": [
+       1120,
+       1025,
+       1160,
+       1065
+      ],
+      "zoom": 8,
+      "gridPx": 5
+     },
+     "last": {
+      "box": [
+       1450,
+       1025,
+       1490,
+       1065
+      ],
+      "zoom": 8,
+      "gridPx": 5
+     }
+    }
+   },
+   {
+    "id": "U2 pins 1 to 10",
+    "part": "U2",
+    "pins": 20,
+    "pitches": 9,
+    "pitchMm": 2.54,
+    "first": [
+     1143,
+     986.5
+    ],
+    "last": [
+     1412.5,
+     986.5
+    ],
+    "crops": {
+     "first": {
+      "box": [
+       1120,
+       965,
+       1160,
+       1005
+      ],
+      "zoom": 8,
+      "gridPx": 5
+     },
+     "last": {
+      "box": [
+       1390,
+       965,
+       1430,
+       1005
+      ],
+      "zoom": 8,
+      "gridPx": 5
+     }
+    }
+   },
+   {
+    "id": "U2 pins 20 to 11",
+    "part": "U2",
+    "pins": 20,
+    "pitches": 9,
+    "pitchMm": 2.54,
+    "first": [
+     1143,
+     896.5
+    ],
+    "last": [
+     1413,
+     896.5
+    ],
+    "crops": {
+     "first": {
+      "box": [
+       1120,
+       875,
+       1160,
+       915
+      ],
+      "zoom": 8,
+      "gridPx": 5
+     },
+     "last": {
+      "box": [
+       1390,
+       875,
+       1430,
+       915
+      ],
+      "zoom": 8,
+      "gridPx": 5
+     }
+    }
+   },
+   {
+    "id": "U3 pins 1 to 8",
+    "part": "U3",
+    "pins": 16,
+    "pitches": 7,
+    "pitchMm": 2.54,
+    "first": [
+     244,
+     657
+    ],
+    "last": [
+     454,
+     657
+    ],
+    "crops": {
+     "first": {
+      "box": [
+       220,
+       635,
+       260,
+       675
+      ],
+      "zoom": 8,
+      "gridPx": 5
+     },
+     "last": {
+      "box": [
+       430,
+       635,
+       470,
+       675
+      ],
+      "zoom": 8,
+      "gridPx": 5
+     }
+    }
+   },
+   {
+    "id": "U3 pins 16 to 9",
+    "part": "U3",
+    "pins": 16,
+    "pitches": 7,
+    "pitchMm": 2.54,
+    "first": [
+     244,
+     567
+    ],
+    "last": [
+     454,
+     567
+    ],
+    "crops": {
+     "first": {
+      "box": [
+       220,
+       545,
+       260,
+       585
+      ],
+      "zoom": 8,
+      "gridPx": 5
+     },
+     "last": {
+      "box": [
+       430,
+       545,
+       470,
+       585
+      ],
+      "zoom": 8,
+      "gridPx": 5
+     }
+    }
+   },
+   {
+    "id": "U7 pins 1 to 8",
+    "part": "U7",
+    "pins": 16,
+    "pitches": 7,
+    "pitchMm": 2.54,
+    "first": [
+     1533,
+     357
+    ],
+    "last": [
+     1743,
+     357
+    ],
+    "crops": {
+     "first": {
+      "box": [
+       1510,
+       335,
+       1550,
+       375
+      ],
+      "zoom": 8,
+      "gridPx": 5
+     },
+     "last": {
+      "box": [
+       1720,
+       335,
+       1760,
+       375
+      ],
+      "zoom": 8,
+      "gridPx": 5
+     }
+    }
+   },
+   {
+    "id": "U7 pins 16 to 9",
+    "part": "U7",
+    "pins": 16,
+    "pitches": 7,
+    "pitchMm": 2.54,
+    "first": [
+     1532.5,
+     266.5
+    ],
+    "last": [
+     1743,
+     267.5
+    ],
+    "crops": {
+     "first": {
+      "box": [
+       1510,
+       245,
+       1550,
+       285
+      ],
+      "zoom": 8,
+      "gridPx": 5
+     },
+     "last": {
+      "box": [
+       1720,
+       245,
+       1760,
+       285
+      ],
+      "zoom": 8,
+      "gridPx": 5
+     }
+    }
+   },
+   {
+    "id": "U8 pins 1 to 8",
+    "part": "U8",
+    "pins": 16,
+    "pitches": 7,
+    "pitchMm": 2.54,
+    "first": [
+     1532.5,
+     507
+    ],
+    "last": [
+     1742,
+     506
+    ],
+    "crops": {
+     "first": {
+      "box": [
+       1510,
+       485,
+       1550,
+       525
+      ],
+      "zoom": 8,
+      "gridPx": 5
+     },
+     "last": {
+      "box": [
+       1720,
+       485,
+       1760,
+       525
+      ],
+      "zoom": 8,
+      "gridPx": 5
+     }
+    }
+   },
+   {
+    "id": "U8 pins 16 to 9",
+    "part": "U8",
+    "pins": 16,
+    "pitches": 7,
+    "pitchMm": 2.54,
+    "first": [
+     1532.5,
+     417
+    ],
+    "last": [
+     1742.5,
+     417
+    ],
+    "crops": {
+     "first": {
+      "box": [
+       1510,
+       395,
+       1550,
+       435
+      ],
+      "zoom": 8,
+      "gridPx": 5
+     },
+     "last": {
+      "box": [
+       1720,
+       395,
+       1760,
+       435
+      ],
+      "zoom": 8,
+      "gridPx": 5
+     }
+    }
+   },
+   {
+    "id": "U10 pins 1 to 8",
+    "part": "U10",
+    "pins": 16,
+    "pitches": 7,
+    "pitchMm": 2.54,
+    "first": [
+     1577,
+     1046.5
+    ],
+    "last": [
+     1786.5,
+     1046.5
+    ],
+    "crops": {
+     "first": {
+      "box": [
+       1555,
+       1025,
+       1595,
+       1065
+      ],
+      "zoom": 8,
+      "gridPx": 5
+     },
+     "last": {
+      "box": [
+       1765,
+       1025,
+       1805,
+       1065
+      ],
+      "zoom": 8,
+      "gridPx": 5
+     }
+    }
+   },
+   {
+    "id": "U10 pins 16 to 9",
+    "part": "U10",
+    "pins": 16,
+    "pitches": 7,
+    "pitchMm": 2.54,
+    "first": [
+     1577,
+     955.5
+    ],
+    "last": [
+     1787,
+     956
+    ],
+    "crops": {
+     "first": {
+      "box": [
+       1555,
+       935,
+       1595,
+       975
+      ],
+      "zoom": 8,
+      "gridPx": 5
+     },
+     "last": {
+      "box": [
+       1765,
+       935,
+       1805,
+       975
+      ],
+      "zoom": 8,
+      "gridPx": 5
+     }
+    }
+   },
+   {
+    "id": "U9 pins 1 to 7",
+    "part": "U9",
+    "pins": 14,
+    "pitches": 6,
+    "pitchMm": 2.54,
+    "first": [
+     1817,
+     838
+    ],
+    "last": [
+     1997,
+     837
+    ],
+    "crops": {
+     "first": {
+      "box": [
+       1795,
+       815,
+       1835,
+       855
+      ],
+      "zoom": 8,
+      "gridPx": 5
+     },
+     "last": {
+      "box": [
+       1975,
+       815,
+       2015,
+       855
+      ],
+      "zoom": 8,
+      "gridPx": 5
+     }
+    }
+   },
+   {
+    "id": "U9 pins 14 to 8",
+    "part": "U9",
+    "pins": 14,
+    "pitches": 6,
+    "pitchMm": 2.54,
+    "first": [
+     1817,
+     748
+    ],
+    "last": [
+     1997,
+     747.5
+    ],
+    "crops": {
+     "first": {
+      "box": [
+       1795,
+       725,
+       1835,
+       765
+      ],
+      "zoom": 8,
+      "gridPx": 5
+     },
+     "last": {
+      "box": [
+       1975,
+       725,
+       2015,
+       765
+      ],
+      "zoom": 8,
+      "gridPx": 5
+     }
+    }
+   },
+   {
+    "id": "P2 pins 1 to 24",
+    "part": "P2",
+    "pins": 48,
+    "pitches": 23,
+    "pitchMm": 2.54,
+    "first": [
+     649,
+     514
+    ],
+    "last": [
+     1339,
+     513.5
+    ],
+    "crops": {
+     "first": {
+      "box": [
+       625,
+       490,
+       665,
+       530
+      ],
+      "zoom": 8,
+      "gridPx": 5
+     },
+     "last": {
+      "box": [
+       1315,
+       490,
+       1355,
+       530
+      ],
+      "zoom": 8,
+      "gridPx": 5
+     }
+    }
+   },
+   {
+    "id": "P2 pins 48 to 25",
+    "part": "P2",
+    "pins": 48,
+    "pitches": 23,
+    "pitchMm": 2.54,
+    "first": [
+     649.5,
+     439.5
+    ],
+    "last": [
+     1338.5,
+     439.5
+    ],
+    "crops": {
+     "first": {
+      "box": [
+       625,
+       415,
+       665,
+       455
+      ],
+      "zoom": 8,
+      "gridPx": 5
+     },
+     "last": {
+      "box": [
+       1315,
+       415,
+       1355,
+       455
+      ],
+      "zoom": 8,
+      "gridPx": 5
+     }
+    }
+   }
+  ],
+  "fingers": {
+   "id": "P1 edge fingers 1 and 36",
+   "part": "P1",
+   "pitches": 35,
+   "first": [
+    470,
+    1400
+   ],
+   "last": [
+    1515,
+    1400
+   ],
+   "crops": {
+    "first": {
+     "box": [
+      430,
+      1340,
+      530,
+      1460
+     ],
+     "zoom": 8,
+     "gridPx": 5
+    },
+    "last": {
+     "box": [
+      1460,
+      1340,
+      1560,
+      1460
+     ],
+     "zoom": 8,
+     "gridPx": 5
+    }
+   },
+   "band": [
+    1365,
+    1435
+   ],
+   "note": "The end fingers of the component side, a point in the middle of each read by eye. Not refined with common.refine_to_pad, which finds round pads; spike.py puts each between its two edges (finger_centre)."
+  },
+  "drills": [
+   {
+    "part": "U6",
+    "pins": 40,
+    "rowSpacingMm": 15.24,
+    "pin1": [
+     244,
+     956
+    ],
+    "pinN": [
+     243.5,
+     777
+    ],
+    "crops": {
+     "pin1": {
+      "box": [
+       220,
+       935,
+       260,
+       975
+      ],
+      "zoom": 8,
+      "gridPx": 5
+     },
+     "pinN": {
+      "box": [
+       220,
+       755,
+       260,
+       795
+      ],
+      "zoom": 8,
+      "gridPx": 5
+     }
+    }
+   },
+   {
+    "part": "U5",
+    "pins": 40,
+    "rowSpacingMm": 15.24,
+    "pin1": [
+     1143,
+     807
+    ],
+    "pinN": [
+     1143,
+     627
+    ],
+    "crops": {
+     "pin1": {
+      "box": [
+       1120,
+       785,
+       1160,
+       825
+      ],
+      "zoom": 8,
+      "gridPx": 5
+     },
+     "pinN": {
+      "box": [
+       1120,
+       605,
+       1160,
+       645
+      ],
+      "zoom": 8,
+      "gridPx": 5
+     }
+    }
+   },
+   {
+    "part": "U1",
+    "pins": 24,
+    "rowSpacingMm": 15.24,
+    "pin1": [
+     483.5,
+     1197.5
+    ],
+    "pinN": [
+     483.5,
+     1016.5
+    ],
+    "crops": {
+     "pin1": {
+      "box": [
+       460,
+       1175,
+       500,
+       1215
+      ],
+      "zoom": 8,
+      "gridPx": 5
+     },
+     "pinN": {
+      "box": [
+       460,
+       995,
+       500,
+       1035
+      ],
+      "zoom": 8,
+      "gridPx": 5
+     }
+    }
+   },
+   {
+    "part": "U4",
+    "pins": 24,
+    "rowSpacingMm": 15.24,
+    "pin1": [
+     1142,
+     1227.5
+    ],
+    "pinN": [
+     1142,
+     1047
+    ],
+    "crops": {
+     "pin1": {
+      "box": [
+       1120,
+       1205,
+       1160,
+       1245
+      ],
+      "zoom": 8,
+      "gridPx": 5
+     },
+     "pinN": {
+      "box": [
+       1120,
+       1025,
+       1160,
+       1065
+      ],
+      "zoom": 8,
+      "gridPx": 5
+     }
+    }
+   },
+   {
+    "part": "U2",
+    "pins": 20,
+    "rowSpacingMm": 7.62,
+    "pin1": [
+     1143,
+     986.5
+    ],
+    "pinN": [
+     1143,
+     896.5
+    ],
+    "crops": {
+     "pin1": {
+      "box": [
+       1120,
+       965,
+       1160,
+       1005
+      ],
+      "zoom": 8,
+      "gridPx": 5
+     },
+     "pinN": {
+      "box": [
+       1120,
+       875,
+       1160,
+       915
+      ],
+      "zoom": 8,
+      "gridPx": 5
+     }
+    }
+   },
+   {
+    "part": "U3",
+    "pins": 16,
+    "rowSpacingMm": 7.62,
+    "pin1": [
+     244,
+     657
+    ],
+    "pinN": [
+     244,
+     567
+    ],
+    "crops": {
+     "pin1": {
+      "box": [
+       220,
+       635,
+       260,
+       675
+      ],
+      "zoom": 8,
+      "gridPx": 5
+     },
+     "pinN": {
+      "box": [
+       220,
+       545,
+       260,
+       585
+      ],
+      "zoom": 8,
+      "gridPx": 5
+     }
+    }
+   },
+   {
+    "part": "U7",
+    "pins": 16,
+    "rowSpacingMm": 7.62,
+    "pin1": [
+     1533,
+     357
+    ],
+    "pinN": [
+     1532.5,
+     266.5
+    ],
+    "crops": {
+     "pin1": {
+      "box": [
+       1510,
+       335,
+       1550,
+       375
+      ],
+      "zoom": 8,
+      "gridPx": 5
+     },
+     "pinN": {
+      "box": [
+       1510,
+       245,
+       1550,
+       285
+      ],
+      "zoom": 8,
+      "gridPx": 5
+     }
+    }
+   },
+   {
+    "part": "U8",
+    "pins": 16,
+    "rowSpacingMm": 7.62,
+    "pin1": [
+     1532.5,
+     507
+    ],
+    "pinN": [
+     1532.5,
+     417
+    ],
+    "crops": {
+     "pin1": {
+      "box": [
+       1510,
+       485,
+       1550,
+       525
+      ],
+      "zoom": 8,
+      "gridPx": 5
+     },
+     "pinN": {
+      "box": [
+       1510,
+       395,
+       1550,
+       435
+      ],
+      "zoom": 8,
+      "gridPx": 5
+     }
+    }
+   },
+   {
+    "part": "U10",
+    "pins": 16,
+    "rowSpacingMm": 7.62,
+    "pin1": [
+     1577,
+     1046.5
+    ],
+    "pinN": [
+     1577,
+     955.5
+    ],
+    "crops": {
+     "pin1": {
+      "box": [
+       1555,
+       1025,
+       1595,
+       1065
+      ],
+      "zoom": 8,
+      "gridPx": 5
+     },
+     "pinN": {
+      "box": [
+       1555,
+       935,
+       1595,
+       975
+      ],
+      "zoom": 8,
+      "gridPx": 5
+     }
+    }
+   },
+   {
+    "part": "U9",
+    "pins": 14,
+    "rowSpacingMm": 7.62,
+    "pin1": [
+     1817,
+     838
+    ],
+    "pinN": [
+     1817,
+     748
+    ],
+    "crops": {
+     "pin1": {
+      "box": [
+       1795,
+       815,
+       1835,
+       855
+      ],
+      "zoom": 8,
+      "gridPx": 5
+     },
+     "pinN": {
+      "box": [
+       1795,
+       725,
+       1835,
+       765
+      ],
+      "zoom": 8,
+      "gridPx": 5
+     }
+    }
+   }
+  ]
+ },
+ "solderSeeds": {
+  "what": "Four holes far apart, each the middle of the hole read by eye on I1-front and on I1-back flipped left to right.",
+  "holes": [
+   {
+    "id": "U6 pin 1",
+    "I1-front": [
+     244,
+     956
+    ],
+    "I1-back mirrored": [
+     258.5,
+     961
+    ],
+    "crops": {
+     "I1-front": {
+      "box": [
+       220,
+       935,
+       260,
+       975
+      ],
+      "zoom": 8,
+      "gridPx": 5
+     },
+     "I1-back mirrored": {
+      "box": [
+       235,
+       940,
+       275,
+       980
+      ],
+      "zoom": 8,
+      "gridPx": 5
+     }
+    }
+   },
+   {
+    "id": "U3 pin 16",
+    "I1-front": [
+     244,
+     567
+    ],
+    "I1-back mirrored": [
+     258,
+     570
+    ],
+    "crops": {
+     "I1-front": {
+      "box": [
+       220,
+       545,
+       260,
+       585
+      ],
+      "zoom": 8,
+      "gridPx": 5
+     },
+     "I1-back mirrored": {
+      "box": [
+       235,
+       550,
+       275,
+       590
+      ],
+      "zoom": 8,
+      "gridPx": 5
+     }
+    }
+   },
+   {
+    "id": "U5 pin 21",
+    "I1-front": [
+     1712,
+     627
+    ],
+    "I1-back mirrored": [
+     1726,
+     630
+    ],
+    "crops": {
+     "I1-front": {
+      "box": [
+       1690,
+       605,
+       1730,
+       645
+      ],
+      "zoom": 8,
+      "gridPx": 5
+     },
+     "I1-back mirrored": {
+      "box": [
+       1705,
+       610,
+       1745,
+       650
+      ],
+      "zoom": 8,
+      "gridPx": 5
+     }
+    }
+   },
+   {
+    "id": "U10 pin 8",
+    "I1-front": [
+     1786.5,
+     1046.5
+    ],
+    "I1-back mirrored": [
+     1801,
+     1051
+    ],
+    "crops": {
+     "I1-front": {
+      "box": [
+       1765,
+       1025,
+       1805,
+       1065
+      ],
+      "zoom": 8,
+      "gridPx": 5
+     },
+     "I1-back mirrored": {
+      "box": [
+       1780,
+       1030,
+       1820,
+       1070
+      ],
+      "zoom": 8,
+      "gridPx": 5
+     }
+    }
+   }
+  ]
+ },
+ "palLayout": {
+  "what": "The pins' feet where they meet the board on I3, the PAL NES-CPU-11 (the solder joint or pad of each end pin, not the leg's shoulder: a 20 mm lens leans what is tall), read by eye off crops enlarged twice with a 10 px grid; the same pins on I1-front from its pads, moved by common.refine_to_pad. Pin 1 is at the lower left of each DIP on both boards.",
+  "crops": "I3: for each IC, its four corners, each a crop of 180 by 140 px centred on the pin's place predicted from U6 and U5, enlarged twice with a 10 px grid. I1-front: the scale's tiles, and for the 300 mil rows of U1 and U4, 40 px tiles enlarged eight times with a 5 px grid.",
+  "parts": [
+   {
+    "part": "U6",
+    "pins": [
+     {
+      "pin": 1,
+      "I3": [
+       708,
+       1888
+      ],
+      "I1-front": [
+       244,
+       956
+      ]
+     },
+     {
+      "pin": 20,
+      "I3": [
+       1710,
+       1893
+      ],
+      "I1-front": [
+       813,
+       955.5
+      ]
+     },
+     {
+      "pin": 21,
+      "I3": [
+       1708,
+       1562
+      ],
+      "I1-front": [
+       813,
+       777
+      ]
+     },
+     {
+      "pin": 40,
+      "I3": [
+       712,
+       1561
+      ],
+      "I1-front": [
+       243.5,
+       777
+      ]
+     }
+    ]
+   },
+   {
+    "part": "U5",
+    "pins": [
+     {
+      "pin": 1,
+      "I3": [
+       2287,
+       1622
+      ],
+      "I1-front": [
+       1143,
+       807
+      ]
+     },
+     {
+      "pin": 20,
+      "I3": [
+       3301,
+       1622
+      ],
+      "I1-front": [
+       1711,
+       806.5
+      ]
+     },
+     {
+      "pin": 21,
+      "I3": [
+       3301,
+       1305
+      ],
+      "I1-front": [
+       1712,
+       627
+      ]
+     },
+     {
+      "pin": 40,
+      "I3": [
+       2287,
+       1305
+      ],
+      "I1-front": [
+       1143,
+       627
+      ]
+     }
+    ]
+   },
+   {
+    "part": "U1",
+    "pins": [
+     {
+      "pin": 1,
+      "I3": [
+       1126,
+       2308
+      ],
+      "I1-front": [
+       483.5,
+       1197.5
+      ]
+     },
+     {
+      "pin": 12,
+      "I3": [
+       1709,
+       2309
+      ],
+      "I1-front": [
+       813,
+       1197.5
+      ]
+     },
+     {
+      "pin": 13,
+      "I3": [
+       1708,
+       2148
+      ],
+      "I1-front": [
+       813,
+       1108
+      ]
+     },
+     {
+      "pin": 24,
+      "I3": [
+       1120,
+       2147
+      ],
+      "I1-front": [
+       483.5,
+       1107.5
+      ]
+     }
+    ],
+    "note": "Both boards carry two footprints here, 600 and 300 mil, sharing the row of pins 1 to 12; I3's RAM is in the 300 mil one, so its pins 13 and 24 are marked in the 300 mil row on both boards."
+   },
+   {
+    "part": "U4",
+    "pins": [
+     {
+      "pin": 1,
+      "I3": [
+       2290,
+       2362
+      ],
+      "I1-front": [
+       1142,
+       1227.5
+      ]
+     },
+     {
+      "pin": 12,
+      "I3": [
+       2878,
+       2362
+      ],
+      "I1-front": [
+       1472,
+       1227
+      ]
+     },
+     {
+      "pin": 13,
+      "I3": [
+       2876,
+       2201
+      ],
+      "I1-front": [
+       1472,
+       1138
+      ]
+     },
+     {
+      "pin": 24,
+      "I3": [
+       2290,
+       2201
+      ],
+      "I1-front": [
+       1142,
+       1137
+      ]
+     }
+    ],
+    "note": "Both boards carry two footprints here, 600 and 300 mil, sharing the row of pins 1 to 12; I3's RAM is in the 300 mil one, so its pins 13 and 24 are marked in the 300 mil row on both boards."
+   },
+   {
+    "part": "U2",
+    "pins": [
+     {
+      "pin": 1,
+      "I3": [
+       2291,
+       1938
+      ],
+      "I1-front": [
+       1143,
+       986.5
+      ]
+     },
+     {
+      "pin": 10,
+      "I3": [
+       2765,
+       1940
+      ],
+      "I1-front": [
+       1412.5,
+       986.5
+      ]
+     },
+     {
+      "pin": 11,
+      "I3": [
+       2765,
+       1778
+      ],
+      "I1-front": [
+       1413,
+       896.5
+      ]
+     },
+     {
+      "pin": 20,
+      "I3": [
+       2291,
+       1778
+      ],
+      "I1-front": [
+       1143,
+       896.5
+      ]
+     }
+    ]
+   },
+   {
+    "part": "U3",
+    "pins": [
+     {
+      "pin": 1,
+      "I3": [
+       700,
+       1359
+      ],
+      "I1-front": [
+       244,
+       657
+      ]
+     },
+     {
+      "pin": 8,
+      "I3": [
+       1073,
+       1361
+      ],
+      "I1-front": [
+       454,
+       657
+      ]
+     },
+     {
+      "pin": 9,
+      "I3": [
+       1068,
+       1198
+      ],
+      "I1-front": [
+       454,
+       567
+      ]
+     }
+    ],
+    "note": "Pin 16 is under a capacitor on I3, so U3 is marked by pins 1, 8 and 9 on both boards."
+   },
+   {
+    "part": "U7",
+    "pins": [
+     {
+      "pin": 1,
+      "I3": [
+       2979,
+       826
+      ],
+      "I1-front": [
+       1533,
+       357
+      ]
+     },
+     {
+      "pin": 8,
+      "I3": [
+       3347,
+       828
+      ],
+      "I1-front": [
+       1743,
+       357
+      ]
+     },
+     {
+      "pin": 9,
+      "I3": [
+       3350,
+       664
+      ],
+      "I1-front": [
+       1743,
+       267.5
+      ]
+     },
+     {
+      "pin": 16,
+      "I3": [
+       2981,
+       661
+      ],
+      "I1-front": [
+       1532.5,
+       266.5
+      ]
+     }
+    ]
+   },
+   {
+    "part": "U8",
+    "pins": [
+     {
+      "pin": 1,
+      "I3": [
+       2979,
+       1092
+      ],
+      "I1-front": [
+       1532.5,
+       507
+      ]
+     },
+     {
+      "pin": 8,
+      "I3": [
+       3349,
+       1092
+      ],
+      "I1-front": [
+       1742,
+       506
+      ]
+     },
+     {
+      "pin": 9,
+      "I3": [
+       3349,
+       932
+      ],
+      "I1-front": [
+       1742.5,
+       417
+      ]
+     },
+     {
+      "pin": 16,
+      "I3": [
+       2981,
+       932
+      ],
+      "I1-front": [
+       1532.5,
+       417
+      ]
+     }
+    ]
+   },
+   {
+    "part": "U10",
+    "pins": [
+     {
+      "pin": 1,
+      "I3": [
+       3057,
+       2049
+      ],
+      "I1-front": [
+       1577,
+       1046.5
+      ]
+     },
+     {
+      "pin": 8,
+      "I3": [
+       3425,
+       2051
+      ],
+      "I1-front": [
+       1786.5,
+       1046.5
+      ]
+     },
+     {
+      "pin": 9,
+      "I3": [
+       3428,
+       1885
+      ],
+      "I1-front": [
+       1787,
+       956
+      ]
+     },
+     {
+      "pin": 16,
+      "I3": [
+       3059,
+       1887
+      ],
+      "I1-front": [
+       1577,
+       955.5
+      ]
+     }
+    ]
+   },
+   {
+    "part": "U9",
+    "pins": [
+     {
+      "pin": 1,
+      "I3": [
+       3484,
+       1677
+      ],
+      "I1-front": [
+       1817,
+       838
+      ]
+     },
+     {
+      "pin": 7,
+      "I3": [
+       3802,
+       1681
+      ],
+      "I1-front": [
+       1997,
+       837
+      ]
+     },
+     {
+      "pin": 8,
+      "I3": [
+       3804,
+       1517
+      ],
+      "I1-front": [
+       1997,
+       747.5
+      ]
+     },
+     {
+      "pin": 14,
+      "I3": [
+       3486,
+       1517
+      ],
+      "I1-front": [
+       1817,
+       748
+      ]
+     }
+    ]
+   }
+  ],
+  "unmatched": [],
+  "notMeasured": [
+   {
+    "part": "P1",
+    "why": "On I3 the 72-pin cartridge connector is fitted over the edge fingers, so no finger can be seen."
+   },
+   {
+    "part": "P2",
+    "why": "On I3 the expansion port's socket is fitted; its body hides every pin."
+   },
+   {
+    "part": "P3",
+    "why": "On I3 the PAL modulator's can covers the place of the 5-pin MOD RF footprint that I1 shows; its own pins on its small board above the can are not the board's."
+   }
+  ]
+ },
+ "case": {
+  "what": "Each of the case top's four edges marked by hand as a segment along it (two points read by eye off crops enlarged two or three times with a 10 px grid, away from the rounded corners); spike.py fits a line to the edge near each segment and puts each corner where two lines meet. nearLong is the long top edge nearer the camera (the front in O2-FL, the rear in O2-BR), farLong the other, nearShort and farShort the short ones. base is a segment along the bottom edge of the near long face, where the case meets the table. An optional third number is the half width of the search across the segment, in px. verticals are two segments along the corners' vertical edges at the near long face's two ends, between the top and where the bottom shell starts: a check on the camera, not used in the figures.",
+  "O2-FL": {
+   "edges": {
+    "farShort": [
+     [
+      320,
+      1122
+     ],
+     [
+      1180,
+      359
+     ]
+    ],
+    "farLong": [
+     [
+      1450,
+      279
+     ],
+     [
+      2900,
+      630
+     ]
+    ],
+    "nearShort": [
+     [
+      2900,
+      1765
+     ],
+     [
+      3700,
+      905
+     ]
+    ],
+    "nearLong": [
+     [
+      700,
+      1310
+     ],
+     [
+      1900,
+      1617
+     ]
+    ]
+   },
+   "base": [
+    [
+     600,
+     2073
+    ],
+    [
+     2000,
+     2464
+    ]
+   ],
+   "verticals": [
+    [
+     [
+      248,
+      1240
+     ],
+     [
+      246,
+      1560
+     ]
+    ],
+    [
+     [
+      2802,
+      1920
+     ],
+     [
+      2800,
+      2240
+     ]
+    ]
+   ]
+  },
+  "O2-BR": {
+   "edges": {
+    "farShort": [
+     [
+      320,
+      1112
+     ],
+     [
+      1180,
+      361
+     ]
+    ],
+    "farLong": [
+     [
+      1500,
+      283
+     ],
+     [
+      2900,
+      623
+     ]
+    ],
+    "nearShort": [
+     [
+      2900,
+      1765
+     ],
+     [
+      3700,
+      905
+     ]
+    ],
+    "nearLong": [
+     [
+      1100,
+      1398
+     ],
+     [
+      2700,
+      1826
+     ]
+    ]
+   },
+   "base": [
+    [
+     1900,
+     2425
+    ],
+    [
+     2600,
+     2615
+    ]
+   ],
+   "verticals": [
+    [
+     [
+      250,
+      1240
+     ],
+     [
+      247,
+      1560
+     ]
+    ],
+    [
+     [
+      2801,
+      1920
+     ],
+     [
+      2799,
+      2240
+     ]
+    ]
+   ]
+  },
+  "notes": "The corners' vertical edges stop where the bottom shell starts: below it the bottom shell's sides lean in, so no corner edge reaches the table. The height is read instead from the bottom edge of the near long face, through the vertical plane of that face (spike.py, case_photo). On O2-BR the near long face's bottom edge is used right of its middle notch only: left of it the edge is broken by the connector panel and the notch."
+ },
+ "palFront": {
+  "what": "Lines on the front band of the top shell, each a segment marked by hand along it; spike.py fits each line. O2-FL: the band's ends are the corners' vertical edges, its top the case top's near long edge (from \"case\"), its bottom where the bottom shell starts, either side of the black strip; the door's left side is the middle of the dark gap beside it, its right side the black strip's left edge; POWER's left edge and RESET's right edge on the bottom shell. O4: the PAL top shell, taken apart, straight on: its band's four edges, the door's left gap and the black block's left edge.",
+  "O2-FL": {
+   "lines": {
+    "leftEnd": [
+     [
+      248,
+      1240
+     ],
+     [
+      246,
+      1560
+     ]
+    ],
+    "rightEnd": [
+     [
+      2802,
+      1920
+     ],
+     [
+      2800,
+      2240
+     ]
+    ],
+    "seamLeft": [
+     [
+      400,
+      1621
+     ],
+     [
+      1000,
+      1781
+     ]
+    ],
+    "seamRight": [
+     [
+      2500,
+      2207
+     ],
+     [
+      2770,
+      2280
+     ]
+    ],
+    "doorLeft": [
+     [
+      572,
+      1330
+     ],
+     [
+      574,
+      1530
+     ]
+    ],
+    "doorRight": [
+     [
+      2043,
+      1720
+     ],
+     [
+      2046,
+      2000
+     ]
+    ],
+    "powerLeft": [
+     [
+      533,
+      1840
+     ],
+     [
+      531,
+      1940
+     ]
+    ],
+    "resetRight": [
+     [
+      1158,
+      1980
+     ],
+     [
+      1155,
+      2050
+     ]
+    ]
+   },
+   "dark": [
+    "doorLeft"
+   ]
+  },
+  "O4": {
+   "lines": {
+    "top": [
+     [
+      800,
+      434
+     ],
+     [
+      7800,
+      498
+     ],
+     25
+    ],
+    "bottom": [
+     [
+      800,
+      1615
+     ],
+     [
+      5600,
+      1664
+     ],
+     25
+    ],
+    "leftEnd": [
+     [
+      588,
+      540
+     ],
+     [
+      509,
+      1560
+     ],
+     25
+    ],
+    "rightEnd": [
+     [
+      8044,
+      560
+     ],
+     [
+      8101,
+      1620
+     ],
+     25
+    ],
+    "doorLeft": [
+     [
+      1550,
+      800
+     ],
+     [
+      1550,
+      1300
+     ],
+     25
+    ],
+    "doorRight": [
+     [
+      5884,
+      800
+     ],
+     [
+      5884,
+      1300
+     ],
+     25
+    ]
+   },
+   "dark": [
+    "doorLeft"
+   ]
+  },
+  "notMeasured": [
+   {
+    "ratio": "buttons span",
+    "why": "O4 is the PAL top shell taken off its console; POWER and RESET are on the bottom shell, which O4 does not show. Measured on O2-FL only."
+   }
+  ]
+ }
+}

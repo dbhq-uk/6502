@@ -35,5 +35,8 @@ __pycache__/
 tools/bbc-micro-model/out/
 .pytest_cache/
 
+# The NES model tools' working images (overlays to look at).
+tools/nes-model/out/
+
 # Published output of the BBC Micro browser speed check, made locally.
 bench/bbc-micro-speed/publish/

@@ -9,7 +9,7 @@ Researched on 5 October 2026 for [the NES's models design](../../superpowers/spe
 | | Verdict | Why |
 |---|---|---|
 | **Inside, NTSC** | Measure the board to about 0.2 mm; the copper on both faces | Flatbed scans at 300 dpi of a **bare** NES-CPU-10, both sides, so no parts hide copper, and the print names every part. Public-domain photographs of a populated NES-CPU-07, both sides, flat, at about 20 pixels a millimetre, give the chips' markings |
-| **Inside, PAL** | The NTSC copper with the PAL parts, if one layout | A CC BY 4.0 photograph of a populated NES-CPU-11 "PAL-EEC", top side only, with every marking readable. No bare PAL board and no PAL solder side were found. ConsoleMods says the board is the same in every region with only the CPU, PPU, crystal and lockout chip changed [not checked: task 0 of the plan checks it] |
+| **Inside, PAL** | The NTSC copper with the PAL parts, if one layout | A CC BY 4.0 photograph of a populated NES-CPU-11 "PAL-EEC", top side only, with every marking readable. No bare PAL board and no PAL solder side were found. ConsoleMods says the board is the same in every region with only the CPU, PPU, crystal and lockout chip changed. Task 0 checked the ten ICs' places against the bare scan's (below); the connectors could not be seen on I3 |
 | **Outside, NTSC** | Proportions and features to about 1 to 2 mm; size from published figures | Public-domain photographs of an NES-001 from all four corners at 112 mm (little perspective), and the design patent's six orthographic views. No size from Nintendo was found |
 | **Outside, PAL** | Features from photographs to a few mm | A CC BY 4.0 set of an NESE-001 taken apart, with the front label straight on, the underside and the case parts; a 20 mm lens, so strong perspective, and the plastic has yellowed |
 
@@ -65,6 +65,42 @@ Taken on 5 October 2026 with Dan; the design's decisions table has each with wha
 4. **No Nintendo logo shapes.** The case's words are drawn in the site's own face; the board's print is traced as it is.
 5. **The console as made**, not as yellowed.
 6. **OpenTendo forked into `dbhq-uk`** and pinned before it is read.
+
+## What task 0 found
+
+Measured on 5 October 2026 by `tools/nes-model/spike.py` (the figures are in
+`tools/nes-model/data/spike.json`, and the journal for that day has the
+command); each is a measurement of that day.
+
+- **The edge fingers are on 2.50 mm, not 2.54.** The 35 gaps between the 36
+  fingers on I1-front lie 2.499 mm apart, through the x scale of the DIP rows
+  and the expansion header, and the two end fingers are 3.0 mm wide where the
+  others are about 2 mm, so their centres are 3.0 mm from their neighbours: the
+  end fingers' centres are 88.5 mm apart [from I1-front]. The KiCad redrawing
+  agrees: P1's pads are 2.5 mm apart, its end pads 3 mm wide, 88.5 mm end to
+  end [from I2]. The models plan's table counted the fingers among the rows at
+  2.54 mm.
+- **The pads on these scans** are tinned rings, light grey, round open holes,
+  on lacquer so dark that it is no more coloured than the pads; light tells
+  them apart, colour does not. The probe values are in `common.py`, beside
+  `PAD_MIN_L`.
+- **U1 and U4 each have two footprints** on both boards, a 600 mil one and a
+  300 mil one sharing the row of pins 1 to 12 [from I1-front and I3]. The PAL
+  board's XRM6216-10 RAMs sit in the 300 mil one [from I3].
+- **The PAL NES-CPU-11's ten ICs are where the bare NES-CPU-10's are**, to
+  about 0.4 mm at the most after a homography that each IC was held out of
+  [from I1-front and I3]. Its 72-pin connector, expansion socket and modulator
+  can hide their footprints on I3, so P1, P2 and P3 were not compared.
+- **O2's photographs are not the camera's whole frame.** They are 4020 by
+  2880 pixels, where the D7000 takes 4928 by 3264, so the plan's focal length
+  of 112 / 23.6 x 4020 pixels, which takes the 4020 pixels to span the
+  sensor, is not the camera's: the case top's vanishing points give about
+  24,600 (O2-FL) and 23,800 pixels (O2-BR), near the 23,386 of a crop that was
+  not resized [inferring]. The case's depth to width from them is 0.736 and
+  0.730, against 0.800 from the published figures and about 0.78 from the
+  patent as the research read it, and the corners' vertical edges do not lean
+  as that camera says they must: the photographs may have been corrected for
+  perspective, or cropped off centre [guessing - verify].
 
 ## Downloaded for the work
 
