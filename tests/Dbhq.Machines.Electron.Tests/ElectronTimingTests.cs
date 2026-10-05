@@ -6,7 +6,7 @@ namespace Dbhq.Machines.Electron.Tests;
 
 public class ElectronTimingTests
 {
-    // Mode 6 has no contention (ula.md s4c), so Complete's mode makes no difference yet.
+    // Mode 6 has no contention (ula.md s4c), so these are the bare costs of s4b.
     [Theory]
     [InlineData(AccessKind.Rom, 0, 1)]
     [InlineData(AccessKind.Rom, 1, 1)]
@@ -29,7 +29,16 @@ public class ElectronTimingTests
     private static readonly byte[] Os = RepoPaths.ReadChecked(Pins.ElectronOsPath, Pins.ElectronOsSha256);
     private static readonly byte[] Basic = RepoPaths.ReadChecked(Pins.BbcBasicPath, Pins.BbcBasicSha256);
 
-    private static ElectronBus NewBus() => new(new ElectronRoms(Os, Basic));
+    /// <summary>
+    /// A bus in mode 6, which has no contention (ula.md s4c), so the timings below are the bare
+    /// costs of s4b. The write to $FE07 is an I/O access from 0, so the clock is even after it.
+    /// </summary>
+    private static ElectronBus NewBus()
+    {
+        var bus = new ElectronBus(new ElectronRoms(Os, Basic));
+        bus.Write(0xFE07, 6 << 3);
+        return bus;
+    }
 
     /// <summary>Wraps the bus and writes down every access the core makes, in order.</summary>
     private sealed class RecordingBus(ElectronBus inner) : IBus

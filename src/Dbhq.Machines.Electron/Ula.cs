@@ -1,11 +1,12 @@
 namespace Dbhq.Machines.Electron;
 
 /// <summary>
-/// The Electron's ULA, so far its interrupt registers and the frame that times them (fact sheet
-/// <c>ula.md</c> s1c, s5a, s5d and s6). It is lazy, as the BBC's chips are: it does nothing on
-/// the cycle, and <see cref="NextEvent"/> says when it next has something to do. The bus compares
-/// that one number against its clock on every access and calls <see cref="CatchUp"/> only when
-/// the clock has reached it.
+/// The Electron's ULA, so far its interrupt registers, the frame that times them, and where the
+/// display is at a given time, which sets the contention (fact sheet <c>ula.md</c> s1c, s4b, s5a,
+/// s5d and s6). It is lazy, as the BBC's chips are: it does nothing on the cycle, and
+/// <see cref="NextEvent"/> says when it next has something to do. The bus compares that one
+/// number against its clock on every access and calls <see cref="CatchUp"/> only when the clock
+/// has reached it.
 /// </summary>
 /// <remarks>
 /// <para>
@@ -24,6 +25,8 @@ public sealed class Ula
 {
     // The frame, in 2 MHz cycles from power on (s5d).
     private const long FrameCycles = 80_000;
+    private const long EvenFieldStart = 39_936;
+    private const long LineCycles = 128;
     private const long OddRtc = 12_670;
     private const long EvenRtc = 52_670;
     private const long OddDisplayEnd = 32_736;
@@ -90,6 +93,19 @@ public sealed class Ula
     /// every access. It moves on at each catch-up and when the mode is written.
     /// </summary>
     internal long NextEvent { get; private set; }
+
+    /// <summary>
+    /// Where the display is at time <paramref name="t"/> (s4b, s5d): the line within the field and
+    /// the cycle within the line, 0 to 127. A field starts at <c>t mod 80,000 == 0</c> (the odd
+    /// field, 312 lines) and at 39,936 (the even field, 313 lines); line 0 is the first active line.
+    /// </summary>
+    public static void FieldAndLine(long t, out int line, out int position)
+    {
+        long inFrame = t % FrameCycles;
+        long inField = inFrame < EvenFieldStart ? inFrame : inFrame - EvenFieldStart;
+        line = (int)(inField / LineCycles);
+        position = (int)(inField % LineCycles);
+    }
 
     /// <summary>
     /// Sets the power-on flag, which the first read of $FE00 clears (s6a). BREAK does not call it:

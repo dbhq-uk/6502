@@ -172,8 +172,10 @@ public class ElectronBusTests
     public void EachAccessCostsWhatItsOwnAddressSays()
     {
         // ula.md s4b. Every start here is on a 1 MHz boundary (even), so RAM and I/O cost 2 and
-        // ROM 1; after the ROM read the count is odd, so the next RAM access costs 3.
+        // ROM 1; after the ROM read the count is odd, so the next RAM access costs 3. The ULA is
+        // put in mode 6 first, which has no contention (s4c); the write is I/O, 2 cycles from 0.
         ElectronBus bus = NewBus();
+        bus.Write(0xFE07, 6 << 3);
         long Cost(Action access)
         {
             long before = bus.Cycles;
@@ -223,12 +225,14 @@ public class ElectronBusTests
     [Fact]
     public void TickRunsOncePerElapsedCycle()
     {
+        // Mode 0 at power on, so the first RAM access meets line 0's display window and its wait
+        // is ticked too (ula.md s4b, convention of s4f: it completes at position 82).
         var bus = new CountingBus(new ElectronRoms(Os, Basic));
-        bus.Read(0x0000);   // 2
+        bus.Read(0x0000);   // waits for the window: 82
         bus.Read(0xC000);   // 1
-        bus.Read(0x0000);   // 3
+        bus.Read(0x0000);   // 3, from position 83, after the window
         bus.Write(0xFE05, 0x0C); // I/O from an even count: 2
-        Assert.Equal(8, bus.Cycles);
+        Assert.Equal(82 + 1 + 3 + 2, bus.Cycles);
         Assert.Equal(bus.Cycles, bus.Ticks);
     }
 

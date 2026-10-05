@@ -21,11 +21,13 @@ namespace Dbhq.Machines.Electron;
 /// </list>
 /// <para>
 /// The cost of a cycle (s4b) is <see cref="ElectronTiming.Complete"/>: a ROM access is one
-/// cycle, and a RAM or I/O access is two from a 1 MHz boundary and three from one cycle off.
-/// Each cycle is judged by its own address, so the core's dummy reads and the first write of a
-/// read-modify-write are charged like any other access. The wait comes first and the access
-/// happens at the end of it, as on the BBC's bus. <see cref="Cycles"/> moves in one place,
-/// <c>Advance</c>, which calls <see cref="Tick"/> once for every cycle that passes.
+/// cycle, and a RAM or I/O access is two from a 1 MHz boundary and three from one cycle off; in
+/// modes 0 to 3 a RAM access that meets the display window of a contended line waits for its end,
+/// with the ULA's mode as it is when the access starts. Each cycle is judged by its own address,
+/// so the core's dummy reads and the first write of a read-modify-write are charged like any
+/// other access. The wait comes first and the access happens at the end of it, as on the BBC's
+/// bus. <see cref="Cycles"/> moves in one place, <c>Advance</c>, which calls <see cref="Tick"/>
+/// once for every cycle that passes.
 /// </para>
 /// <para>
 /// The chips join in the decode, in <c>ReadSheila</c> and <c>WriteSheila</c> for the ULA and in

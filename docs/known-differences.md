@@ -725,3 +725,33 @@ that times the clock and display-end interrupts (`ula.md` sections 1c, 5d and
   address.** The sheet is split on this (section 1b, section 12 item 3): one
   source says the ROM byte under it, another that the bus floats. The OS reads
   only `$FE00` and `$FE04`.
+
+## The Acorn Electron: the contention, where the sources stop
+
+**What.** In modes 0 to 3 the ULA holds a RAM access while it fetches the
+display (`ula.md` section 4). The rule and its totals are from the sources and
+reproduce seven real timings of a BASIC loop (section 11d). Where the sources
+stop, the model chooses:
+
+- **The window's phase is a convention.** The 1 MHz boundaries are the even
+  cycles, a line starts at position 0, and the window blocks the boundaries at
+  positions 2 to 80. No source gives the phase of the 1 MHz clock against the
+  line, or of the window against the first pixel (section 4f, section 12 item
+  1). Any phase gives the same 24 free boundaries per contended line and so the
+  same totals; it moves single instants by a cycle or two, which matters only to
+  code that counts cycles to a pixel.
+- **The ULA's registers and FRED and JIM are 1 MHz with no contention.** The
+  keyboard is 1 MHz by a real-machine measurement; the sources disagree about
+  the rest (section 3a, section 12 item 2), and the model follows the one that
+  says 1 MHz. The effect on the BASIC loop is under a hundredth of a second.
+- **The mode in force when an access starts decides its wait.** A write to
+  `$FE07` changes the contention from the next access. One source says a mode
+  change takes effect at the end of the current line (section 12 item 6); no
+  program in the boot or in BASIC changes mode inside a line.
+- **An NMI does not take the RAM from the ULA.** A source says an NMI gives the
+  6502 priority over the display, which makes snow (section 4a). Nothing on a
+  stock Electron raises an NMI, so the model does not have it.
+- **The Plus 1's slow-down is not modelled.** Real machines with a Plus 1 run
+  the loop about 16 per cent slower in modes 0 to 2 and 7 per cent in modes 4
+  to 6, for a reason nobody has found (section 4g, section 12 item 12). The
+  Plus 1 is out of scope.
