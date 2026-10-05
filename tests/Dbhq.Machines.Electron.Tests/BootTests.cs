@@ -3,15 +3,17 @@ using Xunit;
 namespace Dbhq.Machines.Electron.Tests;
 
 /// <summary>
-/// The real OS 1.00 booting with BASIC, checked before the display exists. In mode 6 the OS
-/// writes the banner into screen memory at <c>$6000</c> as 8-byte cells of its own font, so the
-/// text can be read from RAM (<see cref="ScreenMemoryText"/>); it comes from the ROMs running on
-/// the CPU, so the check is not circular.
+/// The real OS 1.00 booting with BASIC. The text is read off the picture the ULA drew
+/// (<see cref="ElectronSession.ScreenText"/>), and in one test also out of screen memory at
+/// <c>$6000</c> (<see cref="ScreenMemoryText"/>), so that a fault in the display cannot hide a
+/// fault in the boot, or the other way round. Both come from the ROMs running on the CPU, so the
+/// check is not circular.
 /// </summary>
 /// <remarks>
 /// Every expected row is <c>ula.md</c> s10b: <c>Acorn Electron </c> at OS <c>$C303</c> with the
 /// bell glyph after it on a power on, the language title <c>BASIC</c> at BASIC <c>$8009</c>
-/// printed by the OS, and BASIC's prompt <c>&gt;</c>.
+/// printed by the OS, and BASIC's prompt <c>&gt;</c>. The bell glyph is no character of the font,
+/// so its cell reads as the decoders' unknown mark.
 /// </remarks>
 public class BootTests
 {
@@ -27,6 +29,30 @@ public class BootTests
     [Fact]
     public void ColdBootPrintsTheBannerAndTheBasicPromptInMode6()
     {
+        var s = new ElectronSession().Boot();
+        string[] rows = s.ScreenText();
+
+        Assert.Equal(6, s.OsMode);
+        Assert.Equal(6, s.Machine.Bus.Display.Mode);
+        Assert.Equal(25, rows.Length);
+        Assert.All(rows, r => Assert.Equal(40, r.Length));
+        Assert.Equal("", rows[0].TrimEnd());
+        Assert.Equal(Banner + " " + ScreenText.Unknown, rows[BellRow].TrimEnd());
+        Assert.Equal("", rows[2].TrimEnd());
+        Assert.Equal("BASIC", rows[3].TrimEnd());
+        Assert.Equal("", rows[4].TrimEnd());
+        AssertPrompt(rows[5]);
+        for (int row = 6; row < 25; row++)
+        {
+            Assert.Equal("", rows[row].TrimEnd());
+        }
+    }
+
+    [Fact]
+    public void ColdBootPutsTheSameTextInScreenMemory()
+    {
+        // The same screen read out of RAM, with no display involved: the boot is checked even if
+        // the picture is wrong.
         var s = new ElectronSession().Boot();
         string[] rows = s.ScreenMemoryRows();
 
@@ -50,6 +76,19 @@ public class BootTests
         Assert.Equal(0x6000 + (1 * 320) + (15 * 8), ScreenMemoryText.CellAddress(BellRow, BellColumn));
         Assert.Equal(BellGlyph, ElectronSession.Roms.Os[0x042B..0x0433]);
         Assert.Equal(BellGlyph, ScreenMemoryText.Cell(s.Machine.Bus, BellRow, BellColumn));
+
+        // And on the picture: in mode 6 a cell is 16 pixels across and 10 lines down, a font bit
+        // two pixels wide (s5a), white where the glyph's bit is set and black where not (s5c, the
+        // OS's mode 6 palette). Row 1, column 15 is x = 240 to 255, lines 10 to 19.
+        Framebuffer screen = s.Machine.Bus.Screen;
+        for (int line = 0; line < 10; line++)
+        {
+            for (int x = 0; x < 16; x++)
+            {
+                bool lit = line < 8 && ((BellGlyph[line] >> (7 - (x / 2))) & 1) != 0;
+                Assert.Equal(lit ? 0xFFFFFFFF : 0xFF000000, screen.Pixel((BellColumn * 16) + x, (BellRow * 10) + line));
+            }
+        }
     }
 
     [Fact]
@@ -62,7 +101,7 @@ public class BootTests
 
         s.Machine.PressBreak();
         s.Machine.Run(2_000_000);
-        string[] rows = s.ScreenMemoryRows();
+        string[] rows = s.ScreenText();
 
         Assert.Equal(0, s.Machine.Bus.Peek(0x028D));
         Assert.Equal(Banner, rows[BellRow].TrimEnd());
@@ -79,7 +118,7 @@ public class BootTests
         // stops there, the cursor after it, with no prompt. So it is the paging and the OS's ROM
         // scan that start BASIC.
         var s = new ElectronSession(new ElectronOptions { BasicSlots = [] }).Boot();
-        string[] rows = s.ScreenMemoryRows();
+        string[] rows = s.ScreenText();
 
         Assert.StartsWith(Banner, rows[BellRow]);
         AssertTextThenCursor("Language?", rows[3]);
@@ -96,7 +135,7 @@ public class BootTests
         // recorded, the highest slot, is the language it enters. BASIC in 10 and 11 is one chip in
         // both, and slot 11 is chosen.
         var s = new ElectronSession(new ElectronOptions { BasicSlots = slots }).Boot();
-        string[] rows = s.ScreenMemoryRows();
+        string[] rows = s.ScreenText();
 
         Assert.Equal("BASIC", rows[3].TrimEnd());
         AssertPrompt(rows[5]);
@@ -110,8 +149,8 @@ public class BootTests
         // and colon on the Electron's legends. BASIC echoes the line on the prompt's row, prints
         // the answer on the next and a new prompt below it.
         var s = new ElectronSession().Boot();
-        s.Type("PRINT 6*7\r").RunFor(200_000);
-        string[] rows = s.ScreenMemoryRows();
+        s.Type("PRINT 6*7\r").RunUntilPrompt();
+        string[] rows = s.ScreenText();
 
         Assert.Equal(">PRINT 6*7", rows[5].TrimEnd());
         Assert.Equal("42", rows[6].Trim());
@@ -144,6 +183,58 @@ public class BootTests
 
         m.Run(2_000_000);
         Assert.Equal(0, m.Bus.Peek(0x028D)); // s10b: 0 on a soft BREAK
+    }
+
+    [Theory]
+    [InlineData(0)]
+    [InlineData(1)]
+    [InlineData(2)]
+    [InlineData(3)]
+    [InlineData(4)]
+    [InlineData(5)]
+    public void EachModeTypedInBasicShowsThePromptAtTheTopLeft(int mode)
+    {
+        // Boot in mode 6, then MODE 0, MODE 1, ... in turn up to this mode, each typed in BASIC,
+        // which clears the screen and prints the prompt at the top left. The geometry is the OS's
+        // own: the screen start from its tables at $C3FB (the mode's map) and $C40B (the start's
+        // high byte for each map), and the text grid from $C3B4 and $C3AD (ula.md s5a). Typing in
+        // modes 0 to 3 is slower, because the display holds the CPU off RAM (s4), hence the cap.
+        byte[] os = ElectronSession.Roms.Os;
+        var s = new ElectronSession().Boot();
+        for (int n = 0; n <= mode; n++)
+        {
+            s.Type($"MODE {n}\r").RunUntilPrompt(maxCycles: 8_000_000);
+        }
+
+        int start = os[0x040B + os[0x03FB + mode]] << 8;
+        (int columns, int rows) = ScreenText.Grid(os, mode);
+        Assert.Equal(mode, s.OsMode);
+        Assert.Equal(mode, s.Machine.Bus.Display.Mode);
+        Assert.Equal(start, s.Machine.Bus.Display.StartAddress);
+        Assert.Equal(UlaDisplay.ScreenStart(mode), start);
+        Assert.Equal((1, 0), s.OsCursor);
+
+        string[] text = s.ScreenText();
+        Assert.Equal(rows, text.Length);
+        Assert.All(text, r => Assert.Equal(columns, r.Length));
+        AssertPrompt(text[0]);
+        Assert.All(text.Skip(1), r => Assert.Equal("", r.TrimEnd()));
+
+        // The '>' itself, pixel by pixel in the top left cell: 640 / columns pixels across, a font
+        // bit 640 / columns / 8 of them, one line a row of the picture, lit where its bit is set.
+        // Lit is the text colour and unlit colour 0, which the OS's palettes make white and black
+        // in every mode (s5c).
+        int bitWidth = 640 / columns / 8;
+        ReadOnlySpan<byte> glyph = ScreenText.Glyph(os, '>');
+        Framebuffer screen = s.Machine.Bus.Screen;
+        for (int line = 0; line < 8; line++)
+        {
+            for (int x = 0; x < 8 * bitWidth; x++)
+            {
+                bool lit = ((glyph[line] >> (7 - (x / bitWidth))) & 1) != 0;
+                Assert.True((lit ? 0xFFFFFFFF : 0xFF000000) == screen.Pixel(x, line), $"mode {mode}, line {line}, x {x}");
+            }
+        }
     }
 
     /// <summary>Row 5: BASIC's prompt in column 0 and the cursor beside it, then nothing (s10b).</summary>

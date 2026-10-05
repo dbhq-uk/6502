@@ -33,6 +33,12 @@ namespace Dbhq.Machines.Electron;
 /// The chips join in the decode, in <c>ReadSheila</c> and <c>WriteSheila</c> for the ULA and in
 /// <c>ReadPaged</c> for the keyboard: each later task adds a case there.
 /// </para>
+/// <para>
+/// The display (<see cref="UlaDisplay"/>) reads the same RAM. It draws a line at a time, lazily,
+/// and the bus brings it up to date before anything that could change what a line still to be
+/// drawn shows: a write to the start address, the mode or the palette, and a store to RAM at or
+/// above the lowest address such a line could fetch.
+/// </para>
 /// </remarks>
 public class ElectronBus : IBus
 {
@@ -45,6 +51,7 @@ public class ElectronBus : IBus
     private readonly byte[] _basic;
     private readonly bool[] _basicIn = new bool[Slots];
     private readonly Ula _ula = new();
+    private readonly UlaDisplay _display;
     private long _cycles;
 
     public ElectronBus(ElectronRoms roms, int sampleRate = 44100)
@@ -74,6 +81,7 @@ public class ElectronBus : IBus
 
         // The sample rate is for the sound task, which builds the sound buffer here.
         _ = sampleRate;
+        _display = new UlaDisplay(_ram, () => _cycles);
     }
 
     /// <summary>2 MHz cycles since power on, wait cycles included.</summary>
@@ -81,6 +89,12 @@ public class ElectronBus : IBus
 
     /// <summary>The ULA: its interrupt registers and the frame that times them.</summary>
     public Ula Ula => _ula;
+
+    /// <summary>The ULA's display: its start address, mode and palette, and the picture.</summary>
+    public UlaDisplay Display => _display;
+
+    /// <summary>The picture the ULA draws, brought up to now whenever it is read.</summary>
+    public Framebuffer Screen => _display.Screen;
 
     /// <summary>The keyboard matrix, which slots 8 and 9 read (s7).</summary>
     public ElectronKeyboard Keyboard { get; } = new();
@@ -117,6 +131,13 @@ public class ElectronBus : IBus
         CatchUpUla();
         if (address < 0x8000)
         {
+            // A store a line still to be drawn could show: that line, and every one before it,
+            // is drawn first from RAM as it was. Two comparisons, and nothing else on most stores.
+            if (address >= _display.WatchFrom && _cycles > _display.NextLineStart)
+            {
+                _display.CatchUp(_cycles);
+            }
+
             _ram[address] = value;
         }
         else if (address is >= 0xFC00 and < 0xFF00)
@@ -142,6 +163,7 @@ public class ElectronBus : IBus
             throw new ArgumentOutOfRangeException(nameof(address), address, "RAM ends at $7FFF.");
         }
 
+        _display.CatchUp(_cycles);
         _ram[address] = value;
     }
 
@@ -247,6 +269,9 @@ public class ElectronBus : IBus
                 _ula.Write(offset, value);
                 break;
             default:
+                // The start address, the mode and the palette are the display's too; it draws the
+                // lines that started before this write first (UlaDisplay's remarks).
+                _display.Write(offset, value, _cycles);
                 _ula.Write(offset, value);
                 break;
         }
@@ -267,12 +292,17 @@ public class ElectronBus : IBus
         }
     }
 
-    /// <summary>One comparison per access: the ULA does its work only when its next event has come.</summary>
+    /// <summary>
+    /// One comparison per access: the ULA does its work only when its next event has come. The
+    /// picture is brought up to date then too, four times a frame, so it never falls far behind
+    /// (two of the four are the display ends, after a field's last line has started).
+    /// </summary>
     private void CatchUpUla()
     {
         if (_cycles >= _ula.NextEvent)
         {
             _ula.CatchUp(_cycles);
+            _display.CatchUp(_cycles);
         }
     }
 

@@ -172,11 +172,17 @@ public sealed class Ula
 
                 break;
             case 7:
-                int mode = (value >> 3) & 7;
-                Mode = mode == 7 ? 4 : mode;
+                Mode = ModeOf(value);
                 NextEvent = EventTime(_event);
                 break;
         }
+    }
+
+    /// <summary>The display mode a write of <paramref name="control"/> to $FE07 selects: bits 5 to 3, a 7 acting as mode 4 (s5a).</summary>
+    internal static int ModeOf(byte control)
+    {
+        int mode = (control >> 3) & 7;
+        return mode == 7 ? 4 : mode;
     }
 
     /// <summary>

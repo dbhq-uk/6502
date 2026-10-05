@@ -755,3 +755,46 @@ stop, the model chooses:
   the loop about 16 per cent slower in modes 0 to 2 and 7 per cent in modes 4
   to 6, for a reason nobody has found (section 4g, section 12 item 12). The
   Plus 1 is out of scope.
+
+## The Acorn Electron: the display, where the model stops
+
+**What.** `UlaDisplay` is the ULA's picture in modes 0 to 6: the start
+address, the mode, the palette and the address generator of `ula.md` section
+5, drawing a line at a time into a picture of 640 by 256 pixels. Where the
+sheet is silent or open, or where drawing a line at a time is coarser than the
+chip, the model chooses:
+
+- **A line's bytes are read at its start, not one by one through it.** Each
+  line is drawn whole from the registers and RAM as they are at the cycle it
+  starts. A store to screen memory in the middle of a line's 40 microseconds is
+  not seen by that line, even in the part of it fetched after the store; it is
+  seen from the next field. The real ULA fetches each byte in its own slot
+  (section 4d).
+- **There is no offset from a fetch to its pixel.** How many cycles pass
+  between the ULA taking a byte and its pixels leaving is not known (section 12
+  item 6). The model has none: a line's pixels are its bytes, placed from the
+  left edge of the picture.
+- **A palette write takes effect from the next line.** The sheet says a
+  palette write takes effect at once (section 12 item 6). Here it is seen by
+  every line that starts at or after the write, so a change in the middle of a
+  line shows from the line after it.
+- **A mode write takes effect at the end of the line it lands in**, which is
+  what one source says (section 5e, section 12 item 6). A write exactly at a
+  line's first cycle is in time for that line. The contention follows the mode
+  from the next access, as before.
+- **The counters when the mode moves between 80 and 40 bytes a line in the
+  middle of a row are not established** (section 5e, section 12 item 7). The
+  model keeps the row base and the line in the row as they are and goes on in
+  the new mode; a line past the new mode's last line in the row (after a change
+  from mode 3 or 6) ends the row and is drawn black.
+- **The address counter advances once a row through the blank lines of modes 3
+  and 6.** Lines 8 and 9 of each row fetch nothing and are black, and the row
+  base moves on by 8 times the bytes a line at the end of line 9 (section 12
+  item 8, from one source only).
+- **What the display registers hold at power on is not known** (section 12
+  item 4). The model takes zero: mode 0 from `$0000`, which the rule for a start
+  below `$0800` makes `$3000`, and a palette of zeros, which in negative logic is
+  every colour white, until the OS writes them.
+- **Both fields draw the same 256 lines into one picture.** The sheet says the
+  fields use the same lines (section 4c); the 625-line interlace is not shown,
+  and the picture is 256 lines tall, which the page stretches to 4:3.

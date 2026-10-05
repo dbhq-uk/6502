@@ -99,6 +99,67 @@ public sealed class ElectronSession
     /// <summary>Mode 6 only: the 25 rows of 40 characters in screen memory at <c>$6000</c> (<see cref="ScreenMemoryText"/>).</summary>
     public string[] ScreenMemoryRows() => ScreenMemoryText.Read(Machine.Bus, Roms.Os);
 
+    /// <summary>
+    /// The OS's screen mode, from its variable at <c>$0355</c>: the mode change reads its grid
+    /// tables with it (<c>LDX $0355 : LDY $C3B4,X</c> at <c>$CA0C</c>).
+    /// </summary>
+    public int OsMode => Machine.Bus.Peek(0x0355);
+
+    /// <summary>
+    /// The OS's text cursor, column at <c>$0318</c> and row at <c>$0319</c>: the mode change and
+    /// CLS zero both (<c>STA $0318 : STA $0319</c> at <c>$CBB0</c>).
+    /// </summary>
+    public (int Column, int Row) OsCursor => (Machine.Bus.Peek(0x0318), Machine.Bus.Peek(0x0319));
+
+    /// <summary>
+    /// The text on the screen, a string a row, each as wide as the mode, read off the picture by
+    /// <see cref="global::Dbhq.Machines.Electron.Tests.ScreenText"/>. Two things come from the
+    /// OS's variables, neither of them screen memory: the mode (<see cref="OsMode"/>), which says
+    /// how to cut the picture into cells, and the cursor (<see cref="OsCursor"/>), which says
+    /// which cell's line 7 may be the cursor's.
+    /// </summary>
+    public string[] ScreenText() =>
+        global::Dbhq.Machines.Electron.Tests.ScreenText.Read(Machine.Bus.Screen.Pixels, OsMode, OsCursor, Roms.Os);
+
+    /// <summary>
+    /// Runs until BASIC's prompt is on the picture and has stayed for a field: the last row that
+    /// is not blank is <c>&gt;</c> and nothing else, with the OS's cursor beside it, in column 1 of
+    /// that row, and the whole screen read the same a field later. Fails with the screen as read
+    /// if it has not happened within <paramref name="maxCycles"/>.
+    /// </summary>
+    public ElectronSession RunUntilPrompt(long maxCycles = 4_000_000)
+    {
+        // A field is 39,936 or 40,064 cycles (ula.md s5d); 40,000 is their mean, and two reads
+        // that far apart are a field apart give or take a line.
+        const long Field = 40_000;
+        long end = Machine.Cycles + maxCycles;
+        string[]? previous = null;
+        string[] rows = [];
+        while (Machine.Cycles < end)
+        {
+            Machine.Run(Field);
+            rows = ScreenText();
+            bool atPrompt = AtPrompt(rows, OsCursor);
+            if (atPrompt && previous is not null && rows.SequenceEqual(previous))
+            {
+                return this;
+            }
+
+            previous = atPrompt ? rows : null;
+        }
+
+        throw new Xunit.Sdk.XunitException(
+            $"No prompt within {maxCycles:N0} cycles. Mode {OsMode}, cursor {OsCursor}, the screen:\n" +
+            string.Join("\n", rows.Select(r => "|" + r.TrimEnd())));
+    }
+
+    /// <summary>Whether the last row that is not blank is the prompt alone, with the cursor beside it.</summary>
+    private static bool AtPrompt(string[] rows, (int Column, int Row) cursor)
+    {
+        int last = Array.FindLastIndex(rows, r => r.TrimEnd().Length > 0);
+        return last >= 0 && rows[last].TrimEnd() == ">" && cursor == (1, last);
+    }
+
     private static Dictionary<char, (ElectronKey, bool)> MakeKeys()
     {
         var keys = new Dictionary<char, (ElectronKey, bool)>
