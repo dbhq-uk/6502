@@ -123,13 +123,100 @@ public class NesBusTests
     {
         (NesBus bus, _) = Build(region);
 
-        // The stub keeps writes and reads the open bus; the decode is what is checked: a write
-        // anywhere in the window must not touch RAM or the cartridge.
+        // A write anywhere in the window reaches the PPU and must not touch RAM or the cartridge.
         bus.Write(0x3456, 0x99);
         bus.Write(0x2000, 0x98);
 
         Assert.Equal(0, bus.Peek(0x0000));
         Assert.Equal(0, bus.Peek(0x0456));
+    }
+
+    [Theory]
+    [MemberData(nameof(Regions))]
+    public void AWriteTo3456ReachesPpuaddr(string region)
+    {
+        (NesBus bus, _) = Build(region);
+
+        // bus.md worked example 1: $3456 is $2006.
+        bus.Write(0x3456, 0x21);
+        bus.Write(0x3456, 0x08);
+        Assert.Equal(0x2108, bus.Ppu.V);
+
+        bus.Write(0x2007, 0x6B);
+        Assert.Equal(0x6B, bus.Ppu.PeekVram(0x2108));
+
+        // And $200A and $3FFA are $2002: a read of either resets the write toggle.
+        bus.Write(0x2005, 0x00);
+        Assert.True(bus.Ppu.WriteToggle);
+        bus.Read(0x3FFA);
+        Assert.False(bus.Ppu.WriteToggle);
+    }
+
+    [Theory]
+    [MemberData(nameof(Regions))]
+    public void ThePpuHasItsOwnLatchApartFromTheCpusOpenBus(string region)
+    {
+        (NesBus bus, _) = Build(region);
+
+        // The CPU's bus holds $AB; the PPU's latch still holds 0, and a write-only register gives it.
+        bus.Write(0x5000, 0xAB);
+        Assert.Equal(0x00, bus.Read(0x2000));
+
+        // A PPU write fills the PPU's latch, and what the PPU drives is then on the CPU's bus too.
+        bus.Write(0x2003, 0x5C);
+        bus.Write(0x0000, 0x11);
+        Assert.Equal(0x5C, bus.Read(0x2005));
+        Assert.Equal(0x5C, bus.Read(0x5000));
+    }
+
+    [Theory]
+    [MemberData(nameof(Regions))]
+    public void PeekOfStatusAndDataHasNoSideEffect(string region)
+    {
+        (NesBus bus, _) = Build(region);
+        bus.Write(0x2006, 0x21);
+        bus.Write(0x2006, 0x00);
+        bus.Write(0x2007, 0x42);
+        bus.Write(0x2006, 0x21);
+        bus.Write(0x2006, 0x00);
+        bus.Read(0x2007);
+        while (!(bus.Ppu.Line == 241 && bus.Ppu.Dot > 1))
+        {
+            bus.Read(0x0000);
+        }
+
+        // Peeks: the flag stays set, the buffer and v do not move, and the cycle count holds.
+        long cycles = bus.Cycles;
+        Assert.Equal(0x80, bus.Peek(0x2002) & 0x80);
+        Assert.Equal(0x80, bus.Peek(0x200A) & 0x80);
+        Assert.Equal(0x42, bus.Peek(0x2007));
+        Assert.Equal(0x42, bus.Peek(0x2007));
+        Assert.Equal(0x2101, bus.Ppu.V);
+        Assert.Equal(cycles, bus.Cycles);
+
+        // The reads then do what the peeks did not.
+        Assert.Equal(0x80, bus.Read(0x2002) & 0x80);
+        Assert.Equal(0x00, bus.Peek(0x2002) & 0x80);
+        Assert.Equal(0x42, bus.Read(0x2007));
+        Assert.Equal(0x2102, bus.Ppu.V);
+    }
+
+    [Theory]
+    [MemberData(nameof(Regions))]
+    public void PeekLeavesTheOpenBusLatchAlone(string region)
+    {
+        (NesBus bus, _) = Build(region);
+        bus.Write(0x2003, 0x77);
+        bus.Write(0x5000, 0xAB);
+
+        foreach (ushort address in new ushort[] { 0x0000, 0x2000, 0x2002, 0x2004, 0x2007, 0x4015, 0x4016, 0x5000, 0x8000, 0xFFFF })
+        {
+            bus.Peek(address);
+        }
+
+        // The CPU's latch still holds the $AB written, and the PPU's still holds $77.
+        Assert.Equal(0xAB, bus.Read(0x5000));
+        Assert.Equal(0x77, bus.Read(0x2000));
     }
 
     [Theory]
@@ -266,8 +353,156 @@ public class NesBusTests
 
         nes.Bus.Read(0x8000);
 
-        // The stubs hold neither line, so the bus has taken them low.
+        // Neither the PPU (no VBlank, NMI off) nor the stub sound unit holds a line, so the bus has
+        // taken them low.
         Assert.False(nes.Cpu.Nmi);
         Assert.False(nes.Cpu.Irq);
+    }
+
+    [Fact]
+    public void ResetResetsThePpu()
+    {
+        byte[] prg = TestCartridge.Filled(16384, 0xEA);
+        var nes = new Nes(Cartridge.Load(TestCartridge.Join(TestCartridge.Ines1(1, 1)[..16], prg, new byte[8192])));
+        nes.PowerOn();
+        nes.Bus.Write(0x2000, 0x80);
+        nes.Bus.Write(0x2001, 0x1E);
+        nes.Bus.Write(0x2005, 0x00);
+        nes.Run(30_000);
+        Assert.True(nes.Bus.Ppu.Frame >= 1);
+
+        nes.Reset();
+
+        // PPUCTRL, PPUMASK and the toggle are cleared, and the PPU starts again from the top of
+        // the picture: the seven reset cycles leave it at line 0 dot 21, as at power on.
+        Assert.False(nes.Bus.Ppu.RenderingEnabled);
+        Assert.False(nes.Bus.Ppu.WriteToggle);
+        Assert.False(nes.Bus.Ppu.Nmi);
+        Assert.Equal((0, 21), (nes.Bus.Ppu.Line, nes.Bus.Ppu.Dot));
+    }
+
+    // A 16 KB program: at $C000 a number of NOPs, then enable NMI and count in an 11-cycle loop;
+    // at $C100 an NMI handler that increments $0300 and returns. The vectors point at them. Each
+    // NOP moves the loop two cycles against the PPU, and 2 has no factor in common with 11, so
+    // eleven different counts put the NMI on every cycle of the loop once.
+    private static Nes NmiMachine(Region region, int nops = 0)
+    {
+        byte[] prg = new byte[16384];
+        int loop = 0xC000 + nops + 5;
+        byte[] main =
+        [
+            .. Enumerable.Repeat((byte)0xEA, nops),
+            0xA9, 0x80,                                 // LDA #$80
+            0x8D, 0x00, 0x20,                           // STA $2000
+            0xE8,                                       // loop: INX       2 cycles
+            0xEA,                                       // NOP             2
+            0xAD, 0x00, 0x02,                           // LDA $0200       4
+            0x4C, (byte)loop, (byte)(loop >> 8),        // JMP loop        3
+        ];
+        byte[] handler =
+        [
+            0xEE, 0x00, 0x03,       // C100 INC $0300
+            0x40,                   // C103 RTI
+        ];
+        main.CopyTo(prg, 0x0000);
+        handler.CopyTo(prg, 0x0100);
+        prg[0x3FFA] = 0x00;
+        prg[0x3FFB] = 0xC1;
+        prg[0x3FFC] = 0x00;
+        prg[0x3FFD] = 0xC0;
+        prg[0x3FFE] = 0x00;
+        prg[0x3FFF] = 0xC1;
+        var nes = new Nes(Cartridge.Load(TestCartridge.Join(TestCartridge.Ines1(1, 1)[..16], prg, new byte[8192])), region);
+        nes.PowerOn();
+        return nes;
+    }
+
+    public static TheoryData<string, int> RegionsAndShifts()
+    {
+        var rows = new TheoryData<string, int>();
+        foreach (string region in new[] { "NTSC", "PAL" })
+        {
+            for (int nops = 0; nops < 11; nops++)
+            {
+                rows.Add(region, nops);
+            }
+        }
+
+        return rows;
+    }
+
+    [Theory]
+    [MemberData(nameof(RegionsAndShifts))]
+    public void ThePpusNmiReachesTheCpuAtTheInstructionBoundaryAfterTheCycleThatRaisedIt(string region, int nops)
+    {
+        Region r = RegionNamed(region);
+        var nes = NmiMachine(r, nops);
+
+        // The cycle N in which the PPU runs line 241 dot 1, the dot that sets the flag. Dots
+        // 0 to n-1 run in cycles 1 to c when c * numerator / denominator >= n.
+        long setDot = 241L * 341 + 1;
+        long n = 1;
+        while (n * r.DotsNumerator / r.DotsDenominator <= setDot)
+        {
+            n++;
+        }
+
+        // The CPU sees a line changed during cycle N from cycle N + 1 on (the line as the cycle
+        // began), so the instruction holding cycle N + 1 is the last before the NMI.
+        long seen = n + 1;
+        ushort returnAddress = 0;
+        while (true)
+        {
+            long start = nes.Bus.Cycles;
+            Assert.True(nes.Cpu.PC < 0xC100, $"the NMI was taken early, before cycle {seen}");
+            nes.Step();
+            Assert.Equal(nes.Bus.Cycles >= n, nes.Bus.Ppu.Nmi);
+            if (start < seen && seen <= nes.Bus.Cycles)
+            {
+                returnAddress = nes.Cpu.PC;
+                break;
+            }
+        }
+
+        // The next step is the NMI: seven cycles, to the handler, with the return address pushed.
+        Assert.Equal(7, nes.Step());
+        Assert.Equal(0xC100, nes.Cpu.PC);
+        ushort pushed = (ushort)(nes.Bus.Peek((ushort)(0x0100 + nes.Cpu.S + 2)) | nes.Bus.Peek((ushort)(0x0100 + nes.Cpu.S + 3)) << 8);
+        Assert.Equal(returnAddress, pushed);
+
+        // The handler runs and writes its byte, and RTI goes back.
+        Assert.Equal(0, nes.Bus.Peek(0x0300));
+        nes.Step();
+        nes.Step();
+        Assert.Equal(1, nes.Bus.Peek(0x0300));
+        Assert.Equal(returnAddress, nes.Cpu.PC);
+    }
+
+    [Theory]
+    [MemberData(nameof(Regions))]
+    public void EnablingNmiDuringVblankIsTakenAfterTheNextInstruction(string region)
+    {
+        var nes = NmiMachine(RegionNamed(region));
+
+        // Run the loop at $C005 with NMI still off, until the PPU is well into VBlank.
+        nes.Cpu.PC = 0xC005;
+        while (nes.Bus.Ppu.Line != 245)
+        {
+            nes.Step();
+        }
+
+        Assert.False(nes.Bus.Ppu.Nmi);
+
+        // LDA #$80, STA $2000: the write in STA's last cycle raises NMI, which is taken after the
+        // next instruction, INX, and not straight after the STA (ppu_vbl_nmi test 4, item 11).
+        nes.Cpu.PC = 0xC000;
+        nes.Step();
+        nes.Step();
+        Assert.True(nes.Bus.Ppu.Nmi);
+        Assert.Equal(0xC005, nes.Cpu.PC);
+        nes.Step();
+        Assert.Equal(0xC006, nes.Cpu.PC);
+        Assert.Equal(7, nes.Step());
+        Assert.Equal(0xC100, nes.Cpu.PC);
     }
 }

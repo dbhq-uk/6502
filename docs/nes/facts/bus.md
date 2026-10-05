@@ -56,7 +56,10 @@ rule 1). What the wiki gives to settle where in the cycle the access falls:
 
 The order itself is the plan's to choose (spec, "Settled in the plan"). This
 sheet only names the target: the alignment above, where a read sees the flag
-from the dot it changes.
+from the dot it changes. Task 4 measured it against the `ppu_vbl_nmi` singles:
+two dots before the access, the rest after, and the interrupt lines the CPU sees
+in a cycle are those the chips held as it began. The table of what was tried is
+in `timing.md` section 3.
 
 ## 3. Open bus
 

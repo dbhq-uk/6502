@@ -50,8 +50,18 @@ the skip does not happen that frame [from PPU registers, PPUMASK notes].
 **When the skip is decided** is tested by `ppu_vbl_nmi` test 10 to one dot
 ("Clock is skipped too soon/too late, relative to enabling BG") [from the fork:
 ppu_vbl_nmi/readme.txt]. Which dot samples the rendering bit is not on the
-pages read [guessing - verify: dot 339 of line 261, the dot the skip happens
-at; task 5 checks it against test 10].
+pages read. Measured in task 4 (5 October 2026), with the model's position
+meaning the dot the PPU runs next: the bit is sampled when dot 338 of the
+pre-render line runs, so a `$2001` write made while the PPU is at dot 338 or
+earlier counts for this frame and one made at dot 339 does not. With the sample
+at dot 339 test 10 fails with code 3, "Clock is skipped too late, relative to
+enabling BG" (text `08 07`); at dot 337 with code 2, "too soon" (text `09`);
+at 338 it passes, and so do the other nine singles [measured: `dotnet test
+tests/Dbhq.Machines.Nes.Tests -c Release --filter
+"FullyQualifiedName~BlarggTests"`, with the sample dot changed between runs].
+The model applies a `$2001` write at once, so this dot may stand for a later
+sample plus the write's delay of `ppu.md` section 1; the test cannot tell the
+two apart [inferring].
 
 ### Worked example 1: one frame in dots
 
@@ -66,8 +76,10 @@ at; task 5 checks it against test 10].
 
 With the PPU at line 0 dot 0 on power-on (section 4), the flag is set on the
 dot that takes the PPU to line 241 dot 1: dot number 241 x 341 + 1 = 82182
-from the start. On NTSC that dot falls in CPU cycle 82182 / 3 = 27394
-[inferring]. PPU power up state says the flag is first set "around 27384"
+from the start, counting the first dot as 0. After 27394 CPU cycles exactly
+82182 dots have run, numbers 0 to 82181, so on NTSC that dot is the first of CPU
+cycle 27395 [inferring; corrected in task 4, which first wrote 82182 / 3 =
+27394, the cycles before it]. PPU power up state says the flag is first set "around 27384"
 cycles after reset. The pages read do not account for the 10-cycle gap; it is
 within the "around", and the same page puts the start of the APU 10 cycles
 before the first instruction (section 4) [guessing - verify: task 5's
@@ -110,6 +122,50 @@ taking 5 each time.
 Five cycles, 16 dots, and the accumulator is back at 0. 33247.5 cycles a frame
 is 6649.5 of these groups, so the fourth dot falls at a different place in the
 line from frame to frame [inferring].
+
+### The order inside one CPU cycle, measured
+
+`bus.md` section 2 left the order of the dots and the access inside a cycle to
+the plan. Task 4 (5 October 2026) measured it against the ten `ppu_vbl_nmi`
+singles on NTSC. Two things were varied: how many of the cycle's three dots run
+before the CPU's access (the rest run after), and when in the cycle the PPU's
+NMI output is taken as the line the CPU sees for that cycle: as the cycle
+begins (what the previous cycle left), after the dots before the access, after
+the access, or at the end of the cycle. The odd-frame sample was at dot 338
+(section 2) for every row [measured: `dotnet test tests/Dbhq.Machines.Nes.Tests
+-c Release --filter "FullyQualifiedName~BlarggTests"`, sixteen runs]:
+
+| Dots before the access | NMI line taken | Singles passed | Failing singles (status) |
+|---|---|---|---|
+| 0 | start, after the dots before, after the access, end | 6, 6, 5, 5 | 05, 06, 07, 08 (1); and 04 (11) when taken after the access or at the end |
+| 1 | the same four | 6, 6, 5, 5 | the same as with 0 |
+| **2** | **start** | **10** | **none** |
+| 2 | after the dots before | 6 | 05, 06, 07, 08 (1) |
+| 2 | after the access | 5 | 04 (11), 05, 06, 07, 08 (1) |
+| 2 | end | 8 | 04 (11), 05 (1) |
+| 3 | the same four | 6, 6, 5, 5 | the same as with 0 |
+
+Singles 01, 02, 03 and 09 passed in every row: they time themselves from the
+flag, so moving every read by the same amount does not change what they see.
+Test 4's code 11 is "Immediate occurence should be after NEXT instruction":
+with the line taken after the access, a `$2000` write that enables NMI during
+VBlank in an instruction's last cycle reaches the CPU in that same cycle, and
+the NMI comes one instruction early. With the line at the end, test 5 printed
+`3 3 3 3 3 3 2 2 2 2` for offsets 00 to 09 where the readme gives `4 4 4 3 3 3
+3 3 3 2`: the NMI was one CPU cycle early.
+
+**The model:** two dots before the access and the rest after, and the CPU sees
+the NMI line as the chips held it when the cycle began, so a change made during
+cycle N reaches the CPU in cycle N + 1. This is the core's own convention: its
+interrupts were checked against the transistor-level model with "the line
+changed at the start of a cycle" (journal, 30 September 2026). The bus takes the
+IRQ line at the same point; no IRQ source exists until task 8, which checks it.
+
+**On PAL** the same rule gives two dots before the access and one after, and in
+the cycle that carries the fourth dot, two after. With the accumulator from zero
+(worked example 3) that is the fifth cycle of every five, the pattern 3, 3, 3,
+3, 4. No PAL test ROM checks this to the dot [from the fork: ppu_vbl_nmi tests
+"the NTSC PPU"], so on PAL it is the NTSC rule applied, not a measurement.
 
 ## 4. CPU and PPU alignment at reset
 
@@ -163,5 +219,9 @@ fork: other/nestest.log].
 1. The PAL pre-render clear at dot 1 of line 311: implied by 70 lines of VBlank,
    not confirmed on a page [guessing - verify].
 2. The PAL fourth-dot phase at power-on [guessing - verify].
-3. The dot at which the NTSC odd-frame skip samples the rendering bit
-   [guessing - verify].
+3. The dot at which the NTSC odd-frame skip samples the rendering bit: settled
+   in task 4, dot 338 (section 2).
+4. The first VBlank after power on: the model sets it in cycle 27395 counted
+   from power on, and PPU power up state says "around 27384" (worked example
+   2). The `ppu_vbl_nmi` singles time themselves from the flag and do not
+   settle it [guessing - verify].

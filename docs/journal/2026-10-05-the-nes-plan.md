@@ -309,3 +309,111 @@ thing, and the stub PPU simply returns the bus latch until task 4.
 - The constructor builds the board, so it can throw `NesFormatException` for a
   mapper the machine does not model. A caller shows a visitor's file, so it
   catches the exception from `Cartridge.Load` and from the constructor.
+
+## Task 4: the PPU's registers, memory and timing
+
+The fourth task added `Ppu`: the eight registers with `v`, `t`, `x` and `w`, the
+`$2007` read buffer, the palette and nametable RAM, OAM, the VBlank flag and
+NMI, and the frame with its odd-frame dot. It draws nothing yet. The bus now
+owns it in place of the stub, and the order of the dots inside a CPU cycle was
+measured, not chosen. Blargg's ten `ppu_vbl_nmi` singles are pinned and all ten
+pass on NTSC.
+
+**The tests went first.** The runner and the ten singles were written before the
+PPU and run against the stub: all ten timed out with `$6000` at `$80`, because
+the stub never sets the VBlank flag the tests wait for. The register and timing
+tests failed to compile, because `Ppu` did not exist.
+
+**The order inside a cycle.** Two things were varied: how many of a cycle's
+dots run before the access (0 to 3), and at which point in the cycle the PPU's
+NMI output becomes the line the CPU sees (the start of the cycle, after the dots
+before the access, after the access, or the end). Each of the sixteen was run
+against the ten singles (`dotnet test tests/Dbhq.Machines.Nes.Tests -c Release
+--filter "FullyQualifiedName~BlarggTests"`, 5 October 2026):
+
+| Dots before | NMI line taken | Passed | Failing (status) |
+|---|---|---|---|
+| 0, 1 or 3 | start, after the dots before | 6 | 05, 06, 07, 08 (1) |
+| 0, 1 or 3 | after the access, end | 5 | 04 (11), 05, 06, 07, 08 (1) |
+| 2 | start | 10 | none |
+| 2 | after the dots before | 6 | 05, 06, 07, 08 (1) |
+| 2 | after the access | 5 | 04 (11), 05, 06, 07, 08 (1) |
+| 2 | end | 8 | 04 (11), 05 (1) |
+
+The plan's first version, two before and one after with the line taken at the
+end of the cycle, passed eight. Test 4 said "Immediate occurence should be after
+NEXT instruction", and test 5 printed `3 3 3 3 3 3 2 2 2 2` where the readme
+gives `4 4 4 3 3 3 3 3 3 2`. Both say the CPU saw the NMI one cycle early. The
+core already had the answer: its interrupts were checked against the
+transistor-level model with "the line changed at the start of a cycle", so a
+line that changes during cycle N belongs to cycle N + 1. Taking the lines as the
+cycle begins passes all ten, and it is the only row that does. The IRQ line is
+taken at the same point. Nothing holds it yet, so task 8 checks that.
+
+**The PAL pattern.** The same rule gives two dots before the access and the rest
+after. From a zero accumulator the fourth dot falls in the fifth cycle of every
+five (3, 3, 3, 3, 4), so that cycle runs two after. No test ROM checks the PPU on
+PAL to the dot, so this is the NTSC rule carried over, not a measurement, and
+`known-differences.md` says so.
+
+**The odd frame's dot.** The first version sampled rendering when dot 339 of
+the pre-render line ran. Test 10 failed with code 3, "Clock is skipped too late,
+relative to enabling BG". Sampling at dot 337 failed with code 2, "too soon".
+Dot 338 passes. The model applies a `$2001` write at once, and the sheet says the
+chip takes 3 to 4 dots, so 338 may be a later sample plus that delay. The test
+cannot tell them apart, and the sheet records it as measured.
+
+**How long the singles run.** Each single was run once more through
+`BlarggRunner.Run` by a throwaway test that printed `BlarggResult.Cycles` (5
+October 2026, Release build). From power on to the result: 01 4,230,162 cycles,
+02 5,332,051, 03 5,064,021, 04 984,069, 05 6,553,059, 06 6,642,399, 07
+5,897,881, 08 6,612,617, 09 2,324,202, 10 4,259,942. The test's budget is 18
+million, so the slowest uses about a third of it.
+
+**Edge cases found.**
+- The signature at `$6001` to `$6003` is `$DE $B0 $61`. It was read from the ROM
+  (`A9 DE 8D 01 60 A9 B0 8D 02 60 A9 61 8D 03 60`), and the runner waits for
+  these bytes before it trusts `$6000`. `cartridge.md` is corrected.
+- Singles 01, 02, 03 and 09 passed in all sixteen rows. They time themselves from
+  the flag, so moving every read by the same amount changes nothing they see.
+  Only the NMI tests and test 10 told the rows apart.
+- `timing.md` worked example 2 said the first VBlank dot falls in cycle 82182 / 3
+  = 27394. That is the count of cycles before it; the dot is the first of cycle
+  27395. Corrected. The wiki's "around 27384" is still not explained, and the
+  singles cannot settle it.
+- The first version of the test that an NMI reaches the CPU at the right
+  instruction boundary passed with the line taken at the wrong point, because
+  the NMI rarely lands on an instruction's last cycle. It now runs from eleven
+  start points, each two cycles apart in an 11-cycle loop, so the NMI lands on
+  every cycle of the loop once. With the wrong point, 8 of its 22 rows fail.
+
+**Decisions.**
+- `Line` and `Dot` name the dot the PPU runs next. A register access between
+  two ticks therefore comes before that dot, so "a read at line 241 dot 1 sees
+  the flag clear and suppresses it" means what the sheet means. It also matches
+  `nestest.log`, whose `PPU: 0, 21` comes after 21 dots.
+- The PPU has its own I/O latch. The stub returned the CPU's bus latch. A write
+  to any register fills it, a `$2002` read fills bits 7 to 5, and a read of a
+  write-only register returns it. Its decay is not modelled, and a test pins
+  that.
+- `NesBus.Peek` is pure for the PPU's registers. It asks `Ppu.PeekRegister`,
+  which clears no flag, moves no buffer and leaves the latch alone. A test
+  peeks every kind of address and then checks that both latches are unchanged.
+- The reset button resets the PPU: PPUCTRL, PPUMASK, `w`, `t`, `x`, the buffer
+  and the odd flag go to zero, and the PPU starts again at line 0 dot 0, the top
+  of the picture, as the sheet says the NES-001 does. VBlank, OAMADDR, `v` and
+  the memories are kept. `PpuDots` on the bus is never reset except by power on.
+- `v`, `t`, `x` and `w` are public and read-only, for the tests. This was chosen
+  over `InternalsVisibleTo`, which this repository does not use anywhere.
+- The nametable RAM is one 4 KB array. The first 2 KB is the console's, and the
+  second is used only while the board says four-screen, so a board that changes
+  its mirroring can never index past the end.
+- The PPU reports `v` to the board each time it becomes a pattern-table address,
+  and each `$2007` access to one. The board is given the CPU cycle through a
+  function the bus sets, so the PPU keeps the constructor the plan gives it.
+- Writes to `$2000`, `$2001`, `$2005` and `$2006` are not ignored before the
+  first VBlank. No pinned test needs it, and every test of the PPU alone would
+  have had to run a frame first. It is in `known-differences.md`.
+- The Y increment's worked example has three rows. Only the first can be reached
+  through the registers alone, because `$2006` clears bit 14. The other two wait
+  for task 5, whose pipeline copies `t` into `v`.

@@ -139,9 +139,11 @@ fork: ppu_vbl_nmi/readme.txt]:
   as text is added [from the fork: ppu_vbl_nmi/readme.txt].
 - `$6001-$6003` hold a signature so an emulator can tell the data is valid. The
   readme writes it as "`$DE $B0 $G1`", where `$G1` is not hexadecimal
-  [from the fork: ppu_vbl_nmi/readme.txt]. The plan remembered `DE B0 61`
-  [guessing - verify: task 4 reads the bytes from a running ROM and corrects
-  this line].
+  [from the fork: ppu_vbl_nmi/readme.txt]. The bytes are `$DE $B0 $61`: the
+  single `01-vbl_basics.nes` stores them with `A9 DE 8D 01 60 A9 B0 8D 02 60 A9
+  61 8D 03 60` at file offset `$6B06`, and all ten singles, run in task 4, put
+  them there before they report [from the fork: the file, read 5 October 2026;
+  the task 4 runner, which waits for these three bytes].
 - A multi-test ROM's result is the first sub-test that failed; the singles are in
   `rom_singles/` [from the fork: ppu_vbl_nmi/readme.txt].
 
@@ -163,5 +165,5 @@ not on the pages read [guessing - verify: the plan's task for each ROM says].
 
 ## 6. Open items
 
-1. The `$6001-$6003` signature's third byte (5) [guessing - verify].
+1. The `$6001-$6003` signature's third byte (5): settled in task 4, `$61`.
 2. Which test ROMs are meaningful on PAL (5) [guessing - verify].

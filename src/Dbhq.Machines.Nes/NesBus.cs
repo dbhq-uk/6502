@@ -20,11 +20,23 @@ namespace Dbhq.Machines.Nes;
 /// <para>
 /// <b>One place runs a cycle: <see cref="Cycle"/>.</b> It is the only code that counts a cycle, so a
 /// cycle never passes without an access and an access never happens outside one (AGENTS.md rule 1).
-/// It advances the dot accumulator, ticks the PPU the region's number of dots, ticks the sound
-/// unit, makes the access, and then sets the CPU's NMI and IRQ lines from the chips, so the CPU,
-/// which samples them in the last part of the cycle, sees what that cycle did. The first version is
-/// "all the dots, then the access". Where in the cycle the dots fall relative to the access is task
-/// 4's decision (<c>bus.md</c> section 2); it stays in this one method.
+/// It advances the dot accumulator, notes the chips' interrupt lines, runs two of the cycle's dots,
+/// ticks the sound unit, makes the access, runs the rest of the dots, and hands the CPU the lines it
+/// noted.
+/// </para>
+/// <para>
+/// <b>The order inside a cycle was measured</b> against Blargg's <c>ppu_vbl_nmi</c> singles (task 4
+/// of the NES plan; the table of what was tried is in <c>timing.md</c> section 3 and the journal).
+/// Two things were varied: how many of the cycle's dots run before the access (0 to 3), and when
+/// in the cycle the PPU's NMI output is taken for the CPU (at the start, after the dots before the
+/// access, after the access, at the end). Of the sixteen, one passes all ten singles: <b>two dots
+/// before the access, the rest after, and the lines as the chips held them when the cycle
+/// began</b>. A line that changes during a cycle reaches the CPU in the next one, which is the
+/// core's convention, "the line changed at the start of a cycle" (its interrupts were checked
+/// against the transistor-level model that way). So an NMI enabled by a write in an instruction's
+/// last cycle is taken after the next instruction, as test 4 asks. On PAL the cycle with a fourth
+/// dot runs it after the access: two before, two after. Nothing tests that on PAL; it is the same
+/// rule, kept.
 /// </para>
 /// <para>
 /// <b>The dot ratio is whole numbers.</b> NTSC is three dots a cycle. PAL is 3.2, which is 16 dots
@@ -41,15 +53,15 @@ namespace Dbhq.Machines.Nes;
 /// byte.
 /// </para>
 /// <para>
-/// The PPU and the sound unit are stubs in this task, private nested types that tasks 4 and 8
-/// replace. The controllers, OAM DMA and DMC DMA come in tasks 6 to 9.
+/// The sound unit is a stub, a private nested type that task 8 replaces. The controllers, OAM DMA
+/// and DMC DMA come in tasks 7 to 9.
 /// </para>
 /// </remarks>
 public sealed class NesBus : IBus
 {
     private readonly byte[] _ram = new byte[0x800];
     private readonly IMapper _mapper;
-    private readonly StubPpu _ppu = new();
+    private readonly Ppu _ppu;
     private readonly StubApu _apu;
     private Cpu? _cpu;
 
@@ -62,6 +74,9 @@ public sealed class NesBus : IBus
 
     private long _cycles;
     private long _ppuDots;
+
+    // Of each cycle's dots, how many run before the access; the rest run after (measured, see above).
+    private const int DotsBeforeAccess = 2;
 
     // Bit 0 of the last write to $4016, which both pads see. The controllers arrive in task 7.
     private byte _strobe;
@@ -77,8 +92,12 @@ public sealed class NesBus : IBus
         ArgumentNullException.ThrowIfNull(region);
         Region = region;
         _mapper = cartridge.CreateMapper();
+        _ppu = new Ppu(region, _mapper) { CpuCycles = () => _cycles };
         _apu = new StubApu((options ?? new NesOptions()).SampleRate);
     }
+
+    /// <summary>The PPU, whose registers sit at <c>$2000</c> to <c>$3FFF</c>.</summary>
+    public Ppu Ppu => _ppu;
 
     /// <summary>The region this console is: its dot ratio comes from it.</summary>
     public Region Region { get; }
@@ -124,7 +143,7 @@ public sealed class NesBus : IBus
 
         if (address < 0x4000)
         {
-            return _openBus;
+            return _ppu.PeekRegister(address & 7);
         }
 
         if (address < 0x4020)
@@ -160,7 +179,7 @@ public sealed class NesBus : IBus
         _cycles = 0;
         _ppuDots = 0;
         _strobe = 0;
-        _ppu.Reset();
+        _ppu.PowerOn();
         _apu.Reset();
         if (_cpu is not null)
         {
@@ -169,30 +188,39 @@ public sealed class NesBus : IBus
         }
     }
 
-    /// <summary>The console's reset button: the sound unit resets, and RAM, the PRG RAM and the counters are kept.</summary>
+    /// <summary>
+    /// The console's reset button: the PPU and the sound unit reset (the NES-001 resets the PPU with
+    /// the CPU, timing.md 4), and RAM, the PRG RAM and the counters are kept.
+    /// </summary>
     internal void Reset()
     {
+        _ppu.Reset();
         _apu.Reset();
     }
 
     /// <summary>
-    /// The one cycle. Counts it, runs the dots the region owes, ticks the sound unit and the board,
-    /// makes the access, then sets the CPU's interrupt lines from what the chips now hold. Returns the
-    /// byte a read gave, and <paramref name="value"/> for a write.
+    /// The one cycle. Counts it, notes the interrupt lines the chips hold as it begins, runs two of
+    /// the dots the region owes, ticks the sound unit and the board, makes the access, runs the rest
+    /// of the dots, then hands the CPU the lines it noted. Returns the byte a read gave, and
+    /// <paramref name="value"/> for a write.
     /// </summary>
     private byte Cycle(bool write, ushort address, byte value)
     {
         _cycles++;
 
+        // The lines as the cycle begins: a change made during this cycle is the CPU's next cycle's.
+        bool nmi = _ppu.Nmi;
+        bool irq = _apu.Irq || _mapper.Irq;
+
         _dotAccumulator += Region.DotsNumerator;
         int dots = _dotAccumulator / Region.DotsDenominator;
         _dotAccumulator %= Region.DotsDenominator;
-        for (int i = 0; i < dots; i++)
+        int before = Math.Min(DotsBeforeAccess, dots);
+        for (int i = 0; i < before; i++)
         {
             _ppu.Tick();
         }
 
-        _ppuDots += dots;
         _apu.Tick();
         _mapper.CpuCycle();
 
@@ -205,10 +233,17 @@ public sealed class NesBus : IBus
             value = ReadAccess(address);
         }
 
+        for (int i = before; i < dots; i++)
+        {
+            _ppu.Tick();
+        }
+
+        _ppuDots += dots;
+
         if (_cpu is not null)
         {
-            _cpu.Nmi = _ppu.Nmi;
-            _cpu.Irq = _apu.Irq || _mapper.Irq;
+            _cpu.Nmi = nmi;
+            _cpu.Irq = irq;
         }
 
         return value;
@@ -223,7 +258,7 @@ public sealed class NesBus : IBus
         }
         else if (address < 0x4000)
         {
-            value = _ppu.Read(address & 7, _openBus);
+            value = _ppu.ReadRegister(address & 7);
         }
         else if (address < 0x4020)
         {
@@ -261,7 +296,7 @@ public sealed class NesBus : IBus
         }
         else if (address < 0x4000)
         {
-            _ppu.Write(address & 7, value);
+            _ppu.WriteRegister(address & 7, value);
         }
         else if (address < 0x4020)
         {
@@ -278,34 +313,6 @@ public sealed class NesBus : IBus
         else
         {
             _mapper.CpuWrite(address, value);
-        }
-    }
-
-    // The PPU of task 3: it has no state to run, and its registers are kept for task 4. The bus
-    // counts the dots itself (PpuDots), so the count survives the real PPU replacing this.
-    private sealed class StubPpu
-    {
-        private readonly byte[] _registers = new byte[8];
-
-        public bool Nmi => false;
-
-        public void Tick()
-        {
-        }
-
-        public void Reset()
-        {
-            Array.Clear(_registers);
-        }
-
-        public byte Read(int register, byte openBus)
-        {
-            return openBus;
-        }
-
-        public void Write(int register, byte value)
-        {
-            _registers[register] = value;
         }
     }
 

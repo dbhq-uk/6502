@@ -701,9 +701,13 @@ starts at zero at power on and gives 3, 3, 3, 3, 4. A real console may start
 in any of the five phases (`timing.md` section 3), and the pages do not say
 which is common. The tests check the sum, 16 dots in 5 cycles, and this phase.
 
-**The order of the dots and the access inside a cycle** is the first version's,
-all the dots and then the access. Task 4 settles it against `ppu_vbl_nmi` and
-this entry is updated then.
+**The order of the dots and the access inside a cycle** was measured in task 4
+against the ten `ppu_vbl_nmi` singles: two dots before the access, the rest
+after, and the CPU sees the interrupt lines as the chips held them when the
+cycle began. It is one alignment of the several a real console can power up in
+(`timing.md` section 4), the one the test ROMs are written for. On PAL the same
+rule is applied with no test to check it, and the IRQ line follows the NMI
+line's rule with no IRQ source yet to check it (task 8).
 
 **Open bus is the last value that crossed the bus.** A read of `$4015` leaves
 it alone. Nothing else drives the bus in the model: there is no decay, and no
@@ -714,7 +718,47 @@ access except reads of `$4015`, so a board could put a register in the PPU or
 sound range. The interface has no such board, so the bus does not pass those
 addresses on.
 
-**What the stubs do not do.** The PPU, the sound unit, the controllers and DMA
-are stubs until tasks 4 to 9. A read of a PPU register gives the bus latch, a
-read of a controller port gives bits 7 to 5 of it and zeros below, and a write
-to `$4014` does nothing.
+**What the stubs do not do.** The sound unit, the controllers and DMA are
+stubs until tasks 7 to 9. A read of a controller port gives bits 7 to 5 of the
+bus latch and zeros below, and a write to `$4014` does nothing.
+
+## The NES: the PPU's registers and timing, where the model stops
+
+**What.** Task 4 of the NES plan, `Ppu`. The sources are
+`docs/nes/facts/ppu.md` sections 1 to 5 and 12 and `timing.md` section 2. It
+passes the ten `ppu_vbl_nmi` singles on NTSC. It draws nothing yet (task 5).
+
+**The power-on alignment is a choice.** The PPU starts at line 0 dot 0 in the
+same instant as the CPU's first reset cycle, which is what `nestest.log` needs.
+A real console powers up with the CPU and PPU in one of several alignments, and
+the `ppu_vbl_nmi` readme says some of them fail its tests (`timing.md` section
+4). The model has one, the one the tests are written for. Its first VBlank is
+set in cycle 27395 from power on; the wiki says "around 27384", and nothing
+pinned settles which.
+
+**Power on is zeros.** VBlank is often set at power on and OAM, the palette and
+the nametables are unspecified (`ppu.md` section 12). The model clears all of
+them so a run is repeatable.
+
+**The I/O latch does not decay.** On the chip its bits fade after 3 to 30 ms.
+The model keeps the last value until the next access, and a test pins that
+choice (`TheLatchDoesNotDecay_ItsDecayIsNotModelled`). `ppu_open_bus` would
+check the decay; it is not pinned.
+
+**Writes are not ignored after power on or reset.** The chip ignores writes to
+`$2000`, `$2001`, `$2005` and `$2006` until the end of the first VBlank
+(`ppu.md` section 1). The model takes them at once. Games wait for VBlank first,
+so this shows only for a program that does not.
+
+**Two small delays are not modelled.** The second `$2006` write copies `t` to
+`v` at once, where the chip takes 1 to 1.5 dots, and a `$2001` write switches
+rendering at once, where the chip takes 3 to 4 dots (`ppu.md` sections 1 and
+2). The odd-frame dot is sampled at dot 338, measured against `ppu_vbl_nmi`
+test 10; that may be a later sample plus the delay, which the test cannot tell
+apart.
+
+**Left for the drawing PPU (task 5).** A `$2004` read during sprite evaluation
+returns what evaluation sees, not OAM; OAMADDR is cleared on dots 257 to 320;
+the rendering pipeline moves `v` during the visible lines. None of these
+happens yet. A `$2007` access during rendering already does its coarse X and Y
+increment.
