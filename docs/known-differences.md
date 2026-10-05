@@ -718,9 +718,9 @@ access except reads of `$4015`, so a board could put a register in the PPU or
 sound range. The interface has no such board, so the bus does not pass those
 addresses on.
 
-**What the stubs do not do.** The sound unit, the controllers and DMC DMA are
-stubs until tasks 7 to 9. A read of a controller port gives bits 7 to 5 of the
-bus latch and zeros below.
+**What the stubs do not do.** The sound unit and DMC DMA are stubs until tasks 8
+and 9. The controllers are real (task 7): a read of a port gives the pad in bit
+0, the open bus in bits 7 to 5 and zeros in bits 4 to 1.
 
 **OAM DMA came early, and its parity is a choice.** Task 5 built OAM DMA,
 because the sprite test ROMs load OAM with it; task 7 owns it. A write to
@@ -729,6 +729,12 @@ because the sprite test ROMs load OAM with it; task 7 owns it. A write to
 power on; the model makes the even ones gets, so a write in an even cycle
 costs 513 and one in an odd cycle 514. The sprite ROMs pass with either choice
 (measured in task 5 by swapping it), so nothing pinned settles which.
+
+**A halt on a pad read clocks the pad once, on both chips.** The halt and the
+alignment cycle repeat the CPU's read in consecutive cycles, and the pad sees
+one clock for the run (`bus.md` 7). The model does this for the 2A07 too. The
+sheet says the 2A07 lacks the extra reads of DMC DMA and does not say whether
+OAM DMA differs there, so this is a guess for PAL (`bus.md` open item 2).
 
 ## The NES: the PPU's registers and timing, where the model stops
 

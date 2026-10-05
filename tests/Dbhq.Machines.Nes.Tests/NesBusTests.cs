@@ -106,15 +106,20 @@ public class NesBusTests
 
     [Theory]
     [MemberData(nameof(Regions))]
-    public void TheControllerPortsDriveOnlyTheLowFiveBitsAndTheRestIsOpenBus(string region)
+    public void TheControllerPortsDriveOnlyBitZeroAndTheTopThreeBitsAreOpenBus(string region)
     {
         (NesBus bus, _) = Build(region);
 
-        bus.Write(0x0000, 0x40);
-        bus.Read(0x0000);
+        // The bus holds $FF. Nothing is pressed, so the pad gives bit 0 clear and bits 4 to 1 clear
+        // too (nothing drives them): the result is $E0, the three open-bus bits, and not $FF.
+        bus.Write(0x0000, 0xFF);
+        Assert.Equal(0xE0, bus.Read(0x4016));
+        bus.Write(0x0000, 0xFF);
+        Assert.Equal(0xE0, bus.Read(0x4017));
 
+        // And a bus of $40, the usual high byte, gives $40.
+        bus.Write(0x0000, 0x40);
         Assert.Equal(0x40, bus.Read(0x4016));
-        Assert.Equal(0x40, bus.Read(0x4017));
     }
 
     [Theory]
@@ -123,12 +128,21 @@ public class NesBusTests
     {
         (NesBus bus, _) = Build(region);
 
-        // A write anywhere in the window reaches the PPU and must not touch RAM or the cartridge.
-        bus.Write(0x3456, 0x99);
-        bus.Write(0x2000, 0x98);
+        // OAMADDR through one mirror and OAMDATA through two others: each lands in OAM, so each is
+        // the register $2003 or $2004 and not RAM, and the address moves on between them.
+        bus.Write(0x200B, 0x10);
+        bus.Write(0x3FFC, 0x55);
+        bus.Write(0x2014, 0x66);
+        bus.Write(0x2FFC, 0x77);
 
-        Assert.Equal(0, bus.Peek(0x0000));
-        Assert.Equal(0, bus.Peek(0x0456));
+        Assert.Equal(0x55, bus.Ppu.Oam[0x10]);
+        Assert.Equal(0x66, bus.Ppu.Oam[0x11]);
+        Assert.Equal(0x63, bus.Ppu.Oam[0x12]); // $77 with the attribute byte's unused bits cleared
+
+        // And none of them touched RAM, whose mirrors the same low bits would reach.
+        Assert.Equal(0, bus.Peek(0x000B));
+        Assert.Equal(0, bus.Peek(0x03FC));
+        Assert.Equal(0, bus.Peek(0x0014));
     }
 
     [Theory]
@@ -596,47 +610,5 @@ public class NesBusTests
         nes.Bus.Read(0x0000);
         seen |= nes.Cpu.Nmi;
         Assert.Equal(nmi, seen);
-    }
-
-    [Theory]
-    [MemberData(nameof(Regions))]
-    public void AWriteTo4014CopiesAPageIntoOamInTheNextReadsCycle513Or514CyclesLonger(string region)
-    {
-        // The sprite ROMs of task 5 load OAM this way. bus.md 5: the CPU is halted on its next read,
-        // then one cycle more if the next is not a get, then 256 get and put pairs. The model makes
-        // the even cycles gets, so a write on an even cycle costs 513 and one on an odd cycle 514.
-        var nes = IdleMachine(RegionNamed(region));
-        for (int i = 0; i < 256; i++)
-        {
-            nes.Bus.PokeRam((ushort)(0x0200 + i), (byte)(255 - i));
-        }
-
-        foreach (int parity in new[] { 0, 1 })
-        {
-            // The $2003 write, then the $4014 write two cycles on, in a cycle of this parity.
-            while (nes.Bus.Cycles % 2 != parity)
-            {
-                nes.Bus.Read(0x0000);
-            }
-
-            nes.Bus.Write(0x2003, 0x00);
-            long before = nes.Bus.Cycles;
-            nes.Bus.Write(0x4014, 0x02);
-            Assert.Equal(before + 1, nes.Bus.Cycles);
-            Assert.Equal(parity, (int)(nes.Bus.Cycles % 2));
-
-            long start = nes.Bus.Cycles;
-            long dots = nes.Bus.PpuDots;
-            nes.Bus.Read(0x0000);
-            int stall = parity == 0 ? 513 : 514;
-            Assert.Equal(stall + 1, nes.Bus.Cycles - start);
-            Assert.True(nes.Bus.PpuDots - dots >= 3 * (stall + 1), "the PPU did not run through the stall");
-
-            for (int i = 0; i < 256; i++)
-            {
-                byte expected = (byte)(255 - i);
-                Assert.Equal(i % 4 == 2 ? (byte)(expected & 0xE3) : expected, nes.Bus.Ppu.Oam[i]);
-            }
-        }
     }
 }

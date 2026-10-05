@@ -626,3 +626,79 @@ evaluation and fetch cannot reach address bit 3, and a test checks the fetch
 address. Without the mask it fails. The sprite ROMs must also print PASSED, not
 only leave 1 in `$F8`. A test pins dot 280 as the first dot of the vertical
 copy, and fails with the copy started at 281.
+
+## Task 7: OAM DMA audited, and the controllers
+
+**Done.** `Controller` (the strobe, the shift register, `Buttons`),
+`Nes.SetButtons(pad, mask)`, the two ports in the bus, and `OamDmaTests`, which
+is the audit of the DMA task 5 built. `ControllerTests` has 35 test rows and
+`OamDmaTests` 34 [`dotnet test tests/Dbhq.Machines.Nes.Tests -c Release
+--filter "FullyQualifiedName~<class>"`, run on 5 October 2026; the whole project
+passes].
+
+**The plan's DMA and the sheet differ, and the sheet won (ruling N).** The plan
+says the cost is "the change in `Bus.Cycles` across the write" and that the
+stall is a loop inside the `Write` call. The sheet says the CPU is halted with
+RDY, which only works on a read, so the copy runs on the CPU's next read. Task
+5 built it the sheet's way, and task 7 kept it. The cost the tests measure is
+the stolen cycles: 513 from a write that lands on an even cycle and 514 from an
+odd one, then the CPU's own read, one more. Across the read the bus counts 514
+or 515.
+
+**The audit found two defects, and fixed each with a test first.**
+- *The reset button did not drop a waiting copy.* A `$4014` write followed by
+  the reset button ran the copy inside the reset sequence's first read, 513
+  cycles after the PPU was reset. The reset sequence now takes seven cycles. The
+  new test fails, in both regions, without the fix.
+- *A halt on a pad read clocked the pad twice or three times.* The halt cycle
+  and the alignment cycle each repeated the read, and each moved the shift
+  register. The sheet says a pad sees one clock for each run of consecutive
+  reads (`bus.md` 7), so the halted run is one clock and the CPU's own read
+  after the copy is a second. A program that does `STA $4014` then `LDA $4016`
+  reads the second button, not the first, which is the real bit-deletion
+  glitch. The bus now notes the address read in the last cycle, and a pad read
+  in the cycle after a read of the same address does not clock. A test with only
+  B held reads B after the copy; without the fix, the odd-cycle start read Select.
+  Both rows (NTSC and PAL) fail without it. It is a guess for the 2A07 (known
+  differences).
+
+**What the audit confirmed, with tests.** The cost is 513 or 514 on both regions
+and both parities. The PPU runs through the stall: exactly 3 dots a cycle on
+NTSC, 3.2 on PAL, and the PPU's own line and dot moved by the same count. A copy
+starting at OAM address `$04` wraps (source byte `i` lands at `(4 + i) mod 256`),
+and one at `$FC` wraps at the first four. The CPU fetches no instruction in the
+stall: a program with `STA $4014` then `INC $0300` runs the INC once, and the
+step takes the stall and the INC's six cycles. A second write before the copy,
+as `INC $4014` makes, replaces the page. A write is never halted. A read of
+`$2002` that is halted is repeated, so the CPU's own read finds the flag already
+cleared. With rendering on, the copy writes nothing to OAM (`ppu.md` 4). Power on
+also drops a waiting copy.
+
+**`sprdma_and_dmc_dma` is not added, and the reason is recorded.** The two ROMs
+in the fork (`sprdma_and_dmc_dma.nes` and `sprdma_and_dmc_dma_512.nes`, both
+NROM, 40976 bytes) cannot be run on OAM DMA alone. The first thing the code does
+is write `$4013`, `$4010` and `$4015` and wait for the DMC, and it spins on
+`$4015` bit 4 until it sees it. Run on the model as it is, the ROM prints the
+heading "T+ Clocks (decimal)" and stops there, in a loop at `$E2A5`, after 50
+million cycles. Every measurement is an OAM DMA against a DMC DMA. So both ROMs
+wait for task 9, which builds the DMC and its DMA, and are pinned there. The
+fork's `status.txt` has the same ROMs failing in the emulator the fork's list was
+made with, "incorrect cycle counts", so passing them is not a given.
+
+**Review notes carried from task 3.** The open-bus test of the pad ports seeded
+`$40` and expected `$40`, which a pad that drives bits 4 to 0 as zero cannot tell
+from one that returns the whole bus. It now seeds `$FF` and expects `$E0`, and a
+pressed A gives `$E1`. The PPU mirror test named "mirrored every eight bytes"
+only checked that RAM was untouched; it now writes OAMADDR and OAMDATA through
+`$200B`, `$3FFC`, `$2014` and `$2FFC` and checks OAM. The `$3456` to `$2006` case
+was already `AWriteTo3456ReachesPpuaddr`, from task 4.
+
+**Any mask is reported as written.** A test sets `$C0` (Left and Right) and
+`$30` (Up and Down) and reads both bits; another sets every mask from 0 to 255
+and reads each back bit for bit. The pad has no interlock in its wiring (`bus.md`
+7), and some games read the impossible mask on purpose.
+
+**Mistakes.** The first draft of the helper that writes `$4014` on a chosen
+parity had three loops that undid each other. It was replaced with one. A test
+that asserted `$4015` reads 0 as a way to record the DMC gap was dropped: it
+would have broken at task 9 for no reason.

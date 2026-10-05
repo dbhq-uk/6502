@@ -53,8 +53,9 @@ namespace Dbhq.Machines.Nes;
 /// byte.
 /// </para>
 /// <para>
-/// The sound unit is a stub, a private nested type that task 8 replaces. The controllers and DMC
-/// DMA come in tasks 7 and 9. OAM DMA came early, in task 5, because the sprite test ROMs need it.
+/// The sound unit is a stub, a private nested type that task 8 replaces. DMC DMA comes in task 9.
+/// OAM DMA came early, in task 5, because the sprite test ROMs need it; the controllers and the
+/// audit of OAM DMA are task 7.
 /// </para>
 /// </remarks>
 public sealed class NesBus : IBus
@@ -78,8 +79,12 @@ public sealed class NesBus : IBus
     // Of each cycle's dots, how many run before the access; the rest run after (measured, see above).
     private const int DotsBeforeAccess = 2;
 
-    // Bit 0 of the last write to $4016, which both pads see. The controllers arrive in task 7.
-    private byte _strobe;
+    // The two controller ports: $4016 reads the first, $4017 the second. A write to $4016 strobes both.
+    private readonly Controller[] _controllers = [new Controller(), new Controller()];
+
+    // The address the previous cycle read, or -1 when it was a write or there was none. A pad's clock
+    // is the read line, so reads in consecutive cycles of one address are one clock (bus.md 6, 7).
+    private int _lastReadAddress = -1;
 
     // The page a write to $4014 asked OAM DMA to copy, or -1 when none is waiting.
     private int _dmaPage = -1;
@@ -104,6 +109,18 @@ public sealed class NesBus : IBus
 
     /// <summary>The region this console is: its dot ratio comes from it.</summary>
     public Region Region { get; }
+
+    /// <summary>Controller <paramref name="pad"/>, 0 or 1: the one the port at <c>$4016</c> or <c>$4017</c> reads.</summary>
+    /// <exception cref="ArgumentOutOfRangeException">The pad is neither 0 nor 1.</exception>
+    public Controller GetController(int pad)
+    {
+        if (pad is < 0 or > 1)
+        {
+            throw new ArgumentOutOfRangeException(nameof(pad), pad, "the console has two controller ports, 0 and 1");
+        }
+
+        return _controllers[pad];
+    }
 
     /// <summary>The CPU whose NMI and IRQ lines the bus sets at the end of each cycle.</summary>
     public Cpu? Cpu
@@ -162,7 +179,8 @@ public sealed class NesBus : IBus
             return address switch
             {
                 0x4015 => 0,
-                0x4016 or 0x4017 => (byte)(_openBus & 0xE0),
+                0x4016 => (byte)((_openBus & 0xE0) | _controllers[0].Peek()),
+                0x4017 => (byte)((_openBus & 0xE0) | _controllers[1].Peek()),
                 _ => _openBus,
             };
         }
@@ -189,8 +207,10 @@ public sealed class NesBus : IBus
         _dotAccumulator = 0;
         _cycles = 0;
         _ppuDots = 0;
-        _strobe = 0;
+        _controllers[0].PowerOn();
+        _controllers[1].PowerOn();
         _dmaPage = -1;
+        _lastReadAddress = -1;
         _ppu.PowerOn();
         _apu.Reset();
         if (_cpu is not null)
@@ -206,6 +226,10 @@ public sealed class NesBus : IBus
     /// </summary>
     internal void Reset()
     {
+        // A DMA still waiting would run in the reset's first read, after the PPU was reset. The
+        // reset button stops the CPU, so the copy that was asked for is dropped.
+        _dmaPage = -1;
+        _lastReadAddress = -1;
         _ppu.Reset();
         _apu.Reset();
     }
@@ -240,10 +264,12 @@ public sealed class NesBus : IBus
         if (write)
         {
             WriteAccess(address, value);
+            _lastReadAddress = -1;
         }
         else
         {
             value = ReadAccess(address);
+            _lastReadAddress = address;
         }
 
         for (int i = before; i < dots; i++)
@@ -272,8 +298,11 @@ public sealed class NesBus : IBus
     /// and one in an odd cycle 514.
     /// </summary>
     /// <remarks>
-    /// Task 5 of the NES plan built this because the sprite ROMs load OAM this way; task 7 owns
-    /// OAM DMA, its tests and DMC DMA's part in it.
+    /// Task 5 of the NES plan built this because the sprite ROMs load OAM this way, and task 7
+    /// audited it against the sheet and tested it (<c>OamDmaTests</c>). It is a loop in the bus, on
+    /// the CPU's next read, not in the write: the sheet's DMA halts the CPU with RDY, which only
+    /// works on a read. The 513 or 514 are the stolen cycles, not counting the <c>$4014</c> write
+    /// or the CPU's own read, which comes after.
     /// </remarks>
     private void RunOamDma(ushort halted)
     {
@@ -314,9 +343,11 @@ public sealed class NesBus : IBus
                     // bus latch is not changed, and only bit 5 shows it.
                     return (byte)(_apu.ReadStatus() | (_openBus & 0x20));
                 case 0x4016:
+                    // Bit 0 is the pad and bits 4 to 1 read 0, which nothing drives; 7 to 5 are open bus.
+                    value = (byte)((_openBus & 0xE0) | ReadPad(0, address));
+                    break;
                 case 0x4017:
-                    // Bits 4 to 0 are the pad, which is not connected yet; 7 to 5 are open bus.
-                    value = (byte)(_openBus & 0xE0);
+                    value = (byte)((_openBus & 0xE0) | ReadPad(1, address));
                     break;
                 default:
                     value = _openBus;
@@ -330,6 +361,16 @@ public sealed class NesBus : IBus
 
         _openBus = value;
         return value;
+    }
+
+    // A pad's shift register moves when the read ends, and a run of reads in consecutive cycles of
+    // one address is a single read to it, because the line stays low (bus.md 7). That happens when
+    // OAM DMA halts the CPU on a read of a pad: the halted cycles repeat the read, the pad sees one
+    // clock for the lot, and the CPU's own read afterwards is a second one.
+    private byte ReadPad(int pad, ushort address)
+    {
+        Controller controller = _controllers[pad];
+        return _lastReadAddress == address ? controller.Peek() : controller.Read();
     }
 
     private void WriteAccess(ushort address, byte value)
@@ -348,7 +389,8 @@ public sealed class NesBus : IBus
             if (address == 0x4016)
             {
                 // Both pads see bit 0 (bus.md section 7).
-                _strobe = (byte)(value & 1);
+                _controllers[0].Strobe((value & 1) != 0);
+                _controllers[1].Strobe((value & 1) != 0);
             }
             else if (address == 0x4014)
             {

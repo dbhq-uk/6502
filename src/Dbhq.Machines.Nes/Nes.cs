@@ -59,6 +59,18 @@ public sealed class Nes
         Cpu.Reset();
     }
 
+    /// <summary>
+    /// Sets the buttons held on a controller. Any 8-bit mask is kept as given, opposite directions
+    /// together included.
+    /// </summary>
+    /// <param name="pad">0 for the controller in port 1 ($4016), 1 for port 2 ($4017).</param>
+    /// <param name="mask">Bit 0 A, 1 B, 2 Select, 3 Start, 4 Up, 5 Down, 6 Left, 7 Right.</param>
+    /// <exception cref="ArgumentOutOfRangeException">The pad is neither 0 nor 1.</exception>
+    public void SetButtons(int pad, byte mask)
+    {
+        Bus.GetController(pad).Buttons = mask;
+    }
+
     /// <summary>Runs one instruction, or one interrupt sequence, and returns the CPU cycles it took.</summary>
     public int Step()
     {
