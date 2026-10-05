@@ -76,13 +76,12 @@ public class TapeProbeTests(ITestOutputHelper output)
         Assert.All(tape.Skip(1).SkipLast(1), p => Assert.True(p.IsByte));
         Assert.Equal(0x2A, sent[0].Value);
 
+        // Every write to $FE04 was made while recording: none was made outside output mode or with the motor off.
+        Assert.Equal(sent.Count, run.Probe.Log.Count(a => a.IsWrite && a.Register == 4));
+
         // Each later byte is written after transmit-empty and inside the stop bit of the byte
         // before (tape.md s4), so it starts on the line the moment that byte ends.
-        foreach ((TapeProbe.Sent before, TapeProbe.Sent next) in sent.Zip(sent.Skip(1)))
-        {
-            Assert.InRange(next.Cycle, before.Start + TapeProbe.ReadyCycles, before.Start + TapeProbe.ByteCycles - 1);
-            Assert.Equal(before.Start + TapeProbe.ByteCycles, next.Start);
-        }
+        TapeRuns.AssertLatencies(run, output);
     }
 
     [Fact]
@@ -151,6 +150,9 @@ public class TapeBlockTests(ITestOutputHelper output)
     }
 
     [Fact]
+    public void EveryBlockIsSentBackToBack() => TapeRuns.AssertLatencies(Big.Value, output);
+
+    [Fact]
     public void ANameOfElevenCharactersIsRefusedBeforeTheMotorStarts()
     {
         var s = new ElectronSession().Boot();
@@ -204,20 +206,36 @@ public class TapeLoadTests(ITestOutputHelper output)
         Assert.Contains("   10 PRINT \"HELLO\"", Trimmed(s));
     }
 
+    /// <summary>
+    /// The catalogue line the OS prints for a block (ROM $F82E-$F86D): the name padded to eleven
+    /// columns, the block number in hex, and on the last block a space and the file's length in hex.
+    /// </summary>
+    private static string Catalogue(string name, int block, int? fileLength = null) =>
+        name.PadRight(11) + block.ToString("X2") + (fileLength is { } n ? " " + n.ToString("X4") : "");
+
     [Fact]
     public void ABadHeaderCrcSaysDataAndSearchesAgain() =>
-        AssertRewind(Broken(TapeProbeTests.Test.Value, b => b.HeaderCrcAt), "LOAD \"TEST\"\r", "Data?");
+        AssertRewind(
+            Broken(TapeProbeTests.Test.Value, b => b.HeaderCrcAt),
+            "LOAD \"TEST\"\r",
+            ["Searching", "Loading", Catalogue("TEST", 0, 0x10), "Data?", "Rewind tape", "Searching"]);
 
     [Fact]
     public void ABadDataCrcSaysDataAndSearchesAgain() =>
-        AssertRewind(Broken(TapeProbeTests.Test.Value, b => b.DataAt), "LOAD \"TEST\"\r", "Data?");
+        AssertRewind(
+            Broken(TapeProbeTests.Test.Value, b => b.DataAt),
+            "LOAD \"TEST\"\r",
+            ["Searching", "Loading", Catalogue("TEST", 0, 0x10), "Data?", "Rewind tape", "Searching"]);
 
     [Fact]
     public void ABlockOutOfOrderSaysBlockAndSearchesAgain()
     {
         (List<long> carriers, List<byte[]> blocks) = TapeRuns.Split(TapeBlockTests.Big.Value.Probe.Recorded);
         carriers[0] = ShortLeader;
-        AssertRewind(TapeRuns.Join(carriers, [blocks[0], blocks[2], blocks[1]]), "*LOAD \"ABCDEFGHIJ\"\r", "Block?");
+        AssertRewind(
+            TapeRuns.Join(carriers, [blocks[0], blocks[2], blocks[1]]),
+            "*LOAD \"ABCDEFGHIJ\"\r",
+            ["Searching", "Loading", Catalogue("ABCDEFGHIJ", 0), Catalogue("ABCDEFGHIJ", 2, 0x201), "Block?", "Rewind tape", "Searching"]);
     }
 
     [Fact]
@@ -248,7 +266,7 @@ public class TapeLoadTests(ITestOutputHelper output)
         s.RunFor(2_000_000);
         string[] rows = Trimmed(s);
         Assert.Equal("Searching", rows[^2]); // no message, no prompt: the file's catalogue line, and the search goes on
-        Assert.StartsWith("TEST ", rows[^1], StringComparison.Ordinal);
+        Assert.Equal(Catalogue("TEST", 0, 0x10), rows[^1]);
         Assert.True(probe.MotorOn);
 
         s.Machine.Keyboard.Down(ElectronKey.Escape);
@@ -281,8 +299,12 @@ public class TapeLoadTests(ITestOutputHelper output)
         return TapeRuns.Join(carriers, blocks);
     }
 
-    /// <summary>LOADs the tape until the OS asks for a rewind, and checks the message before it and that it searches again.</summary>
-    private static void AssertRewind(List<Piece> tape, string command, string message)
+    /// <summary>
+    /// LOADs the tape until the OS searches a second time, and checks every row from the first
+    /// <c>Searching</c> on: the messages are OS $F59E Searching, $F92A Loading, $FA00 Data?,
+    /// $FA16 Block? and $FA35 Rewind tape.
+    /// </summary>
+    private static void AssertRewind(List<Piece> tape, string command, string[] expected)
     {
         var s = new ElectronSession().Boot();
         TapeProbe probe = TapeProbe.Attach(s);
@@ -291,10 +313,7 @@ public class TapeLoadTests(ITestOutputHelper output)
         s.Type(command);
         TapeRuns.RunUntil(s, rows => rows.Count(r => r.TrimEnd() == "Searching") == 2, tape.Sum(p => p.Length));
         string[] rows = Trimmed(s);
-        int rewind = Array.IndexOf(rows, "Rewind tape"); // OS $FA35
-        Assert.True(rewind > 0, string.Join("\n", rows));
-        Assert.Equal(message, rows[rewind - 1]);         // OS $FA00 Data?, $FA16 Block?
-        Assert.Equal("Searching", rows[rewind + 1]);
+        Assert.Equal(expected, rows[Array.IndexOf(rows, "Searching")..]);
         Assert.True(probe.MotorOn);
     }
 
@@ -346,6 +365,36 @@ internal static class TapeRuns
         long lastByte = probe.Written[^1].Cycle;
         long motorOff = probe.Log.First(a => a.Cycle > lastByte && a.Register == 7 && (a.Value & 0x40) == 0).Cycle;
         return new SaveRun(probe, returnDown, motorOff, s.Machine.Bus);
+    }
+
+    /// <summary>
+    /// The OS's latency after transmit-empty: for each byte after the first in a block, the cycles
+    /// from the byte before raising transmit-empty to the OS's write of this one. Each must be
+    /// below one bit time, so the write lands in the stop bit and the byte starts as that one ends
+    /// (tape.md s5). Prints the least and the most over every block of the run.
+    /// </summary>
+    public static void AssertLatencies(SaveRun run, ITestOutputHelper output)
+    {
+        List<TapeProbe.Sent> sent = run.Probe.Written;
+        var latencies = new List<long>();
+        int first = 0;
+        foreach (Block block in Blocks(run.Probe.Recorded))
+        {
+            int count = BlockBytes(block);
+            for (int i = first + 1; i < first + count; i++)
+            {
+                latencies.Add(sent[i].Cycle - (sent[i - 1].Start + TapeProbe.ReadyCycles));
+                Assert.Equal(sent[i - 1].Start + TapeProbe.ByteCycles, sent[i].Start);
+            }
+
+            first += count;
+        }
+
+        Assert.Equal(sent.Count, first);
+        output.WriteLine($"latency after transmit-empty: least {latencies.Min()}, most {latencies.Max()} cycles, over {latencies.Count} writes");
+        Assert.All(latencies, l => Assert.InRange(l, 0, TapeProbe.BitCycles - 1));
+
+        static int BlockBytes(Block b) => b.DataAt + b.Length + (b.Length > 0 ? 2 : 0);
     }
 
     /// <summary>Runs a field at a time until <paramref name="done"/> holds of the screen; fails with the screen if <paramref name="maxCycles"/> pass first.</summary>
