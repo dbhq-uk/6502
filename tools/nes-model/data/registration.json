@@ -2910,6 +2910,22 @@
     "p90": 0.6
    }
   },
+  "transform": {
+   "cornersMm": [
+    [-3.366,-4.802],
+    [197.864,-4.757],
+    [-3.717,121.428],
+    [197.512,121.473]
+   ],
+   "cornersPx": [
+    [0,0],
+    [2376,0],
+    [0,1492],
+    [2376,1492]
+   ],
+   "model": "affine",
+   "what": "I1-back flipped left to right (pixel x becomes width - 1 - x): its corners in pixels, and where the chosen model puts them in board millimetres. Three of them fix the affine; the fourth checks it"
+  },
   "verdict": "pass",
   "worst": [
    {"at":[132.402,63.285],"heldOutMm":0.915,"hole":227,"kinds":["ring","ring"]},

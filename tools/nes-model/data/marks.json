@@ -3254,5 +3254,34 @@
     "reason": "The 4 MHz resonator: three holes 2.5 mm apart down the board in an outline, the print reading '3', 'X2' and '1' beside it from the top, so pin 1 is the bottom. Looked at again on 5 October 2026 after review at eight times: each pin's mark is within about 0.2 mm of its hole's middle; kept."
    }
   ]
+ },
+ "hidden": {
+  "what": "On I1-front: what hides the board and is not its printed legend, as a box (left, top, right, bottom, in the original's pixels), read by eye off its crop. board_trace.py (task 4) leaves the board under it neither copper nor print, and records its area.",
+  "marks": [
+   {
+    "id": "NTSC sticker",
+    "boxPx": [
+     [
+      504,
+      1231
+     ],
+     [
+      752,
+      1314
+     ]
+    ],
+    "crop": {
+     "box": [
+      480,
+      1200,
+      780,
+      1360
+     ],
+     "zoom": 2,
+     "gridPx": 25
+    },
+    "reason": "A cream paper sticker printed \"NTSC\" in black, stuck over the board left of the edge fingers, below \"SRAM(WRAM)\". It is as light as the white print (L 0.742 against the print's 0.737), so it is marked, not told apart by colour. Its edges run from x 506 to 750 and y 1233 to 1312, a little turned; the box takes 2 pixels more each way."
+   }
+  ]
  }
 }

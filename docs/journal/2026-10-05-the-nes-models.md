@@ -1035,3 +1035,273 @@ floors are 317 in both workflows.
   with the 0.19 mm part-filled via named; every gap between the inner edge
   fingers is checked, not only their mean; and the plan's interface line for
   `outliers.excluded` now gives the shape the code writes.
+
+## Task 4: the copper on both faces, and the print
+
+`tools/nes-model/board_trace.py` traces the copper on both faces of the bare
+board and its white print from the scans I1-front and I1-back, runs the
+plan's three copper checks on them, and writes the track map,
+`site/src/assets/tracks/nes-famicom-board.webp`, with `data/copper.json`
+beside it. Both faces are resampled onto one grid at 12 pixels per
+millimetre over the outline's box: the component side through task 2's
+frame, the solder side, flipped, through task 3's affine. `data/ic-table.json`
+holds the GND and +5V pins the nets check needs, each with its source.
+
+**The nets check failed.** It was run once, after the method was fixed, and
+its result stands as measured: of the ten ICs, the largest GND net holds 1 of
+their 10 GND pins and the largest +5V net 2 of their 10 +5V pins, against at
+least 90 per cent each, and a GND pin and a +5V pin share a net. Coverage and
+drills in copper pass. What went wrong is below, under "Why the nets fail".
+
+### Decisions
+
+- **The solder side's affine is now in `registration.json`.** Task 3 kept the
+  chosen fit's parameters in memory only. `board_register.py` now writes them
+  as `solder.transform`: the board millimetres of I1-back's four corners,
+  flipped (three fix the affine; the fourth checks it, within 0.002 mm, in
+  `affine_from_corners`). Corners and not the matrix, because the file keeps
+  three places and a matrix entry near 0.085 rounded to three places would be
+  off by half a per cent. It was re-run (`cd tools/nes-model &&
+  NES_MODEL_INPUTS=/tmp/nes-inputs nice -n 10 /tmp/nesvenv/bin/python
+  board_register.py`, exit 0): it printed task 3's figures to the last digit
+  (affine, 511 holes, 0.089/0.319/0.915), and the file is the same apart from
+  the new key.
+- **What a pixel is.** OKLab, as the KIM-1's trace. On these scans copper
+  under the green lacquer is the laminate's own colour made lighter (hue 145
+  to 147 degrees for both), so lightness tells them apart; tin is grey; the
+  print white. The thresholds and the probes behind them (5 October 2026,
+  boxes in the 12 px/mm grid unless said; all in the script's comments):
+  - Laminate under the lacquer, component side (x 585-640, y 815-840): L
+    0.146; solder side (x 1030-1090, y 970-1030): 0.144. Copper under the
+    lacquer (x 425-455, y 760-800, between U6's rows; solder side x
+    1122-1150, y 982-995): 0.212 and 0.213.
+  - Tin: the component side's left plane (scan x 40-130, y 470-640) L 0.179
+    / 0.339 / 0.520 (5th, 50th, 99th percentiles), chroma over lightness
+    0.044 at the median; the solder side's hatched strip 0.237 / 0.380 /
+    0.568, 0.033. The lacquer's chroma over lightness: 0.121 at its 1st
+    percentile. **Tin: chroma under 0.08 of lightness, L over 0.15**, half way
+    between the tin's median and the lacquer's 1st percentile.
+  - Print ("NES-CPU-10", scan x 930-1230, y 828-862), its pixels over L 0.6:
+    0.627 / 0.737 / 0.804. **Print: L 0.63 or more**, half way between the
+    tin's 99th percentile and the print's median, on the component side only
+    (the solder side has none), not on a pad task 3 found (a pad's solder is as
+    white: up to L 0.80 and 0.89), grown by 0.15 mm for the strokes' blurred
+    edges.
+  - The NTSC sticker (scan x 530-720, y 1255-1300): L 0.742, hue 83, as light
+    as the print, so it is marked by hand in `marks.json` (`hidden`), not told
+    apart by colour. It hides 157 square mm, neither copper nor print.
+- **The lacquer's level: a smooth surface, not an opening.** The plan asked
+  for the KIM-1's local colour by an opening. On these scans a local level in
+  blocks (the 10th percentile in 12 mm windows, and a two-component mixture in
+  10 mm blocks) drew the board's layout, not the light: a block or an
+  opening's disc inside a wide pour sees no laminate. Its map was looked at.
+  The laminate itself drifts by more than half the copper's contrast across
+  the component side (top rows about 0.18 to 0.20, lower right about 0.13). So
+  the level is a quadratic in x and y fitted, outliers out, to the median L of
+  the laminate in 10 mm blocks every 5 mm, the laminate being what lies under
+  Otsu's split of L less a first surface fitted to the blocks' 10th
+  percentiles. Its blocks scatter round it by a robust 0.010 (component side)
+  and 0.011 (solder side).
+- **Smoothing 1.25 pixels, over the lacquer alone.** The two probe boxes sit
+  3.3 (component side) and 3.0 (solder side) of their pooled standard
+  deviations apart unsmoothed, 6.2 and 4.4 after a Gaussian of 1.25 pixels
+  (6.6 and 4.9 at 1.5, 5.9 and 4.0 at 1.0). The gaps between the wide tracks
+  under U6 are 2 to 4 pixels, read by eye; on the tests' made-up board, four
+  tracks 3 pixels apart came back as one piece at 1.5 and as four at 1.25 and
+  1.0, so 1.25, the largest that keeps them. The smoothing is a normalised
+  convolution over the lacquer's pixels, so the tin and the print do not
+  bleed into it.
+- **Otsu's threshold with hysteresis, the low threshold Otsu's.** The
+  KIM-1's hysteresis (keep a region over 0.6 of the threshold if it holds a
+  pixel over it) was tried first on the made-up board and widened every
+  track by a pixel each side (the solder side's intersection over union
+  0.82), which would close those gaps. So a region over Otsu's threshold is
+  kept if it holds a pixel as far over it as the laminate's median is under
+  it: the edge stays where Otsu puts it and the high threshold only refuses
+  specks. Otsu put the threshold at dL 0.0327 (component side) and 0.0416
+  (solder side).
+- **The lacquer's bright rim round a pad.** Looked at on the solder side's
+  overlay: between neighbouring DIP pins the lacquer is lighter than copper
+  under it (sRGB about (6, 72, 47) between two of U6's pins, L 0.25 to 0.36),
+  and copper under the lacquer joined every pin of a row. The rim's width is
+  measured on each face as it is traced: the median L of the lacquer at each
+  whole pixel's distance from the pads, the rim ending where that is within
+  0.005 of its median 10 to 12 pixels out. It read **5 pixels on the
+  component side and 9 on the solder side**. Copper under the lacquer within
+  the rim is kept only where a track runs on past it: out from the pad, as
+  many steps beyond the rim as the rim is wide; or, 3 pixels or more from
+  every pad, both ways along any line, for a track passing between two pads.
+  Both conditions were set on the made-up board, where a looser rule let a
+  slanting walk from one pad's rim ride into a track between two pads and
+  join them. It took 1,037 square mm off the component side's copper and
+  1,906 off the solder side's.
+- **Drills' holes filled when grey.** A drill in a pad is filled when the
+  piece of not-copper is under 2 square mm and mostly grey. The first rule
+  said "dark"; a made-up drill drawn near black came back with L 0.134 in
+  OKLab, no darker than the laminate, so dark could not tell it. A ring of
+  bare laminate round a pad is green and is never filled.
+- **Copper under the print, only in line.** Along the line straight across
+  the print's stroke (the nearest of 8 to its normal, from the print mask's
+  structure tensor), the print must be crossed within 1.2 mm with copper on
+  both sides running on for 0.3 mm the same way. First any of the 8 lines
+  would do; on U6's outline a slanting line from a gap between two tracks
+  reached a track each side. The made-up board's side by side tracks under a
+  print line test it.
+- **A pad's radius for the print.** The first look run showed no print at
+  all: 95 of task 3's 1,296 pads (not counting the fingers) have blobs that
+  ran into a plane, up to 201 mm across, and their discs covered the board.
+  A pad's radius is now its blob's half side up to 1.6 mm, else 0.8 mm.
+- **The map at 10 pixels to the millimetre.** The look run before the final
+  printed its size at each choice: 144,774 bytes at 10, 125,654 at 9,
+  108,026 at 8, 90,798 at 7 and 74,200 at 6, all inside 600,000, so 10, the
+  highest offered.
+
+### The order: the method fixed, then the nets run once
+
+Everything above was set while only `--look` was run, which traces both
+faces, draws the overlays and prints the map's sizes and runs no check (it
+did print each face's copper share, so coverage was seen before the method
+was fixed; the share moved from 59.8 and 40.0 per cent at the first look to
+45.8 and 31.2 at the last, by the pad radius fix and the rim rule, both made
+for what the overlays showed). At 19:15:51 UTC on 5 October 2026 the method
+was fixed, with the SHA-256 of `board_trace.py`
+(`d49305fe68694f2cc14c00d5b072a19d8a7c6fe289653ab23fe4e50a4fb78801`),
+`ic-table.json`, `marks.json` and `registration.json` recorded, and the
+checks run once:
+
+```
+cd tools/nes-model && NES_MODEL_INPUTS=/tmp/nes-inputs nice -n 10 /tmp/nesvenv/bin/python board_trace.py --map-ppm 10
+top: Otsu dL 0.0327; level from 734 of 739 blocks, robust sd 0.0103; copper 45.8% of the board (tin 28.5%, under the lacquer 16.5%)
+bottom: Otsu dL 0.0416; level from 832 of 842 blocks, robust sd 0.0109; copper 31.2% of the board (tin 18.4%, under the lacquer 12.8%)
+coverage: top 45.8%, bottom 31.2%, print 9.1%: pass
+drills in copper: top 99.6%, bottom 99.0% of 480: pass
+nets: 10 ICs (U6, U5, U1, U4, U2, U3, U7, U8, U9, U10); excluded []; GND 1 of 10 in one net, +5V 2 of 10; touching True: fail
+print 2049 mm2, copper recovered under it 241 mm2; map 10 px/mm, 1959 x 1194, 144774 bytes
+```
+
+Nothing in the method was changed after; the script's docstring was tidied
+(two sentences re-wrapped and reworded, no code). The run was made once more, the
+same command, only to write the rim's figures into `copper.json`, which the
+first run printed but did not keep (one line of the output dict): it printed
+the same lines, the map came out byte for byte the same, and `copper.json`
+differs only by the new `rim` entries.
+
+| Check | Figure | Pass | Verdict |
+|---|---|---|---|
+| Copper coverage, each face | component side 45.8 per cent, solder side 31.2 | 10 to 50 per cent | pass |
+| Drills in copper | component side 99.6 per cent, solder side 99.0, of 480 drills | at least 95 per cent each | pass |
+| Known nets | 10 ICs, none left out; GND 1 of 10 in the largest net, +5V 2 of 10; a GND and a +5V pin in one net | at least 8 ICs; 90 per cent each; never connected | fail |
+
+The component side's 45.8 per cent is the nearest a limit: its tinned plane
+round the edge alone is 28.5 per cent of the board.
+
+**No IC was left out.** All ten have a footprint with pin 1 from task 3 and
+a pinout with its source: U6 and U5 from the nesdev wiki's "CPU pinout" and
+"PPU pinout" pages (GND pin 20, +5V pin 40, both as the plan said), U10 from
+its "CIC lockout chip pinout" page (GND 8, +5V 16; the page also shows pins
+11 to 15 grounded in an NES, not used), U1 and U4 from Hitachi's HM6116 data
+sheet (Vss 12, Vcc 24), U2 from Texas Instruments' SN74HC373 data sheet (10,
+20), U3 from its SN74HC139 (8, 16), U7 and U8 from its SN74HC368 (8, 16;
+the board's TC40H368 is the 74LS368's pinout, as a page on it says, its own
+data sheet not found as text), and U9 from its SN74HCU04 (7, 14). Each was
+read on 5 October 2026; the board's parts are LS or Toshiba's 40H where the
+data sheets are HC, and those families share each pinout.
+
+### Why the nets fail
+
+Looked at after the run, without changing anything: the pieces of copper
+that each power pin sits on. Of the 20 power pins, 8 sit on a piece under 3
+square mm on both faces, that is the pad alone, and 2 more on pieces under
+6. The rim rule cut the tracks from those pads: a track leaving a pad in a
+slant, or a pad in a pour joined by short spokes, rarely runs straight on
+past the rim for 9 pixels, and the solder side's rim, 9 pixels (0.75 mm), is
+wider than the 0.74 mm gap between two DIP pins. Thin tracks are missing too: on the solder side a
+track shows mostly as two dark lines (the lacquer's step at each edge) with
+copper between them no lighter than the laminate, so lightness does not find
+it; inside the PPU's outline the component side's thin tracks are faint
+stripes, mostly missed. The pins that do sit on large pieces sit on wrong
+ones: U6's GND pin and U1's +5V pin end up in one net. The trace is not good
+enough for the nets on this scan, with this method, and the check says so.
+What I would try, not done here because it would be tuning after the check:
+a track's two dark edges as the cue on the solder side, and the rim rule
+replaced by the pads' known outlines from task 3.
+
+### What the print hid
+
+The print covers 2,049 square mm of the component side (9.1 per cent of the
+board, under the 15 per cent the site's test allows blue). Copper was
+recovered under 241 square mm of it, 11.7 per cent, where tracks cross the
+DIPs' outlines and the labels' thin strokes; the wide printed blocks (the
+resistors' value boxes, the white box by "MOD RF", the logo's letters over
+pours) hide what is under them, and the map shows them blue only. The
+sticker hides 157 square mm more.
+
+### What the overlays showed
+
+`out/trace-top.png` and `-bottom.png` draw each face's copper edge in red,
+the print in blue and what was recovered under it in yellow;
+`out/trace-*-masks.png` the same as flat colours; `out/trace-close-cpu.png`,
+`-ppu.png` and `-edge.png` each face round U6, U5 and the edge fingers, the
+component side above the solder side; `out/trace-nets.png` the power pins on
+both faces' copper.
+
+- Round the CPU: on the component side the wide tracks between U6's rows
+  come back as separate pieces with their 3 to 5 pixel gaps kept, under the
+  outline's print as well; the pads stand alone, their tracks cut at the rim.
+  On the solder side the pins of a row are separate after the rim rule (before
+  it, every row was one piece), and the pour to the lower left is traced, its
+  pads joined to it only at a few spokes.
+- Round the PPU: the outline and the legend are blue; inside the outline the
+  component side's thin tracks are mostly missed and one pour on the left is
+  found; the solder side's rows of pins stand alone.
+- The edge connector: the fingers are tin on both faces and are traced as
+  copper, the bare gaps between them as not.
+- The board's tinned plane round the component side's edge, the solder side's
+  hatched strips and the modulator's area come back whole; the logo and the
+  "NES-CPU-10" legend are blue, over copper and laminate alike.
+
+### Mistakes
+
+- The print vanished on the first look run: the pads' discs, sized from task
+  3's blobs, included 95 blobs run into planes, up to 201 mm across. Fixed
+  before any check, as above.
+- The hole fill first looked for dark pixels; in OKLab a drill is not dark.
+- The first recovery under the print, along any line, joined tracks under
+  U6's outline; the first hysteresis widened tracks; the first rim rule joined
+  pads through a track between them. Each was caught on the made-up board or
+  an overlay, before the nets check.
+- I printed each face's copper share in the look runs, so coverage was seen
+  before the method was fixed. It is not the held-out test, and no change was
+  made to move it, but it was not hidden from me.
+
+### Tests
+
+pytest first: `tests/test_board_trace.py`, a made-up board drawn as the scans
+show it (the probe colours, a 15 per cent fall in the light across it, noise
+and a little blur): two nets, GND three pads joined through a via to the
+solder side and +5V two pads, 0.4 mm apart; print lines across both nets'
+tracks, a 3 mm block of print, a label and a sticker; four tracks side by
+side 3 pixels apart under a print line; a row of pads on the solder side with
+the lacquer's bright rim round each, a track leaving one and another passing
+between two. Run before the code: the module did not exist. Then, as each
+rule was added, the new test failed first: the side by side tracks' gap
+recovered under the print (then the tracks joined at 1.5 pixels' smoothing),
+and the rim test (the row's pads joined, then the track between two pads cut,
+then joined to a pad). After: 10 passed; the copper comes back at an
+intersection over union of 0.995 on the component side and 0.966 on the
+solder side. `/tmp/nesvenv/bin/python -m pytest tools/nes-model/tests -q`:
+70 passed. Python 3.12.3, numpy 2.5.3, opencv-python-headless 5.0.0, Pillow
+12.3.0, scipy 1.18.1, pytest 9.1.1.
+
+`cd site && node --test tests/nes-models.test.mjs`: 21 passed, five new: the
+map is committed, WebP, the size and SHA-256 `copper.json` gives, inside
+600,000 bytes, red and green each 10 to 50 per cent and blue under 15; the
+verdicts `copper.json` records are the ones its figures give; coverage and
+drills pass (the nets row is not asserted to pass: it failed, as above);
+every IC has its GND and +5V pins with a source; and `NOTICE.md` and the
+photographs' README name the map, the TAPR Open Hardware License and
+OpenTendo. With `copper.json`'s nets verdict set to pass and its map's
+SHA-256 changed, an IC's GND pin changed and the licence's name taken out of
+`NOTICE.md`, by hand, four failed. `npm test` (with `results.json` copied in
+for the run and removed after): tests 323, pass 322, fail 0, todo 1 (the BBC
+Micro's). The floors are 322 in both workflows.

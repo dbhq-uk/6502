@@ -340,3 +340,124 @@ test('P1 has 72 fingers across both faces, 36 on each, on the 2.50 mm pitch', ()
     inner.forEach((g, i) => assert.ok(Math.abs(g - 2.5) < 0.15, `${face}: fingers ${i + 2} and ${i + 3} are ${g} mm apart`));
   }
 });
+
+// Task 4: the copper on both faces and the print, traced from the bare scans
+// (tools/nes-model/board_trace.py), the plan's checks on them, and the track map.
+const copper = JSON.parse(fs.readFileSync(path.join(TOOL, 'data', 'copper.json'), 'utf8'));
+const icTable = JSON.parse(fs.readFileSync(path.join(TOOL, 'data', 'ic-table.json'), 'utf8'));
+const NES_MAP = path.join(process.cwd(), 'src', 'assets', 'tracks', 'nes-famicom-board.webp');
+const NES_MAP_BUDGET = 600_000;
+// The plan's table, fixed before the measurements
+const COPPER_ROWS = { coverage: [0.10, 0.50], drills: 0.95, chips: 8, share: 0.90 };
+
+function copperVerdicts(c) {
+  const ok = (b) => (b ? 'pass' : 'fail');
+  const n = c.nets;
+  return {
+    coverage: ok(['top', 'bottom'].every((f) => c.coverage[f] >= COPPER_ROWS.coverage[0] && c.coverage[f] <= COPPER_ROWS.coverage[1])),
+    drillsInCopper: ok(['top', 'bottom'].every((f) => c.drillsInCopper[f] >= COPPER_ROWS.drills)),
+    nets: ok(n.chips >= COPPER_ROWS.chips && !n.touching
+      && ['gnd', 'vcc'].every((k) => n[k].pins > 0 && n[k].inLargest >= COPPER_ROWS.share * n[k].pins - 1e-9)),
+  };
+}
+
+test('the NES board\'s track map is committed, WebP, the size copper.json gives, inside its budget, its three channels apart', async () => {
+  const sharp = (await import('sharp')).default;
+  assert.ok(fs.existsSync(NES_MAP), 'src/assets/tracks/nes-famicom-board.webp is missing');
+  const bytes = fs.readFileSync(NES_MAP);
+  assert.ok(bytes.length <= NES_MAP_BUDGET, `the track map is ${bytes.length} bytes, over its ${NES_MAP_BUDGET} budget`);
+  assert.equal(bytes.length, copper.map.bytes);
+  assert.equal(crypto.createHash('sha256').update(bytes).digest('hex'), copper.map.sha256, 'copper.json\'s map.sha256 is not the committed map\'s');
+  assert.equal((await sharp(bytes).metadata()).format, 'webp');
+  assert.ok([10, 9, 8, 7, 6].includes(copper.mapPxPerMm));
+  const { data, info } = await sharp(bytes).removeAlpha().raw().toBuffer({ resolveWithObject: true });
+  assert.deepEqual([info.width, info.height], [copper.map.width, copper.map.height]);
+  // edge to edge in the board frame: the traced grid, which covers the outline's box, at the map's resolution
+  assert.equal(info.width, Math.round((copper.grid.width / copper.grid.pxPerMm) * copper.mapPxPerMm));
+  assert.equal(info.height, Math.round((copper.grid.height / copper.grid.pxPerMm) * copper.mapPxPerMm));
+  assert.ok(Math.abs(copper.grid.width / copper.grid.pxPerMm - frame.board.widthMm) < 0.1, 'the grid is the board\'s width');
+  assert.ok(Math.abs(copper.grid.height / copper.grid.pxPerMm - frame.board.depthMm) < 0.1, 'the grid is the board\'s depth');
+  // red the component side, green the solder side, blue the print; each 255 or 0
+  const on = [0, 0, 0];
+  let between = 0;
+  for (let i = 0; i < data.length; i += info.channels) {
+    for (let k = 0; k < 3; k += 1) {
+      if (data[i + k] > 127) on[k] += 1;
+      if (data[i + k] > 8 && data[i + k] < 247) between += 1;
+    }
+  }
+  const n = info.width * info.height;
+  const [red, green, blue] = on.map((v) => v / n);
+  assert.ok(red >= 0.10 && red <= 0.50, `red (the component side) covers ${(red * 100).toFixed(1)}%`);
+  assert.ok(green >= 0.10 && green <= 0.50, `green (the solder side) covers ${(green * 100).toFixed(1)}%`);
+  assert.ok(blue < 0.15, `blue (the print) covers ${(blue * 100).toFixed(1)}%`);
+  assert.ok(between / (3 * n) < 0.001, 'the channels are not 255 or 0');
+});
+
+test('copper.json records the verdicts its figures give against the plan\'s copper, drills and nets rows', () => {
+  assert.deepEqual(copper.verdicts, copperVerdicts(copper));
+  for (const f of ['top', 'bottom', 'print']) assert.ok(copper.coverage[f] > 0 && copper.coverage[f] < 1, f);
+  assert.equal(copper.drills.n, registration.drills.length, 'every drill task 3 made is checked');
+  for (const f of ['top', 'bottom']) {
+    const share = 1 - copper.drills.notInCopper[f].length / copper.drills.n;
+    assert.ok(Math.abs(share - copper.drillsInCopper[f]) < 1e-3, `${f}: the share is the drills' own`);
+  }
+  // every IC of the table is either in the nets check or left out with a reason
+  const refs = icTable.ics.map((i) => i.ref);
+  assert.deepEqual([...copper.netsChips, ...copper.nets.excluded.map(([r]) => r)].sort(), [...refs].sort());
+  for (const [ref, why] of copper.nets.excluded) assert.ok(typeof why === 'string' && why.length > 10, `${ref}: why it is left out`);
+  assert.equal(copper.nets.chips, copper.netsChips.length);
+  for (const k of ['gnd', 'vcc']) {
+    assert.equal(copper.nets[k].pins, copper.netsChips.length, `${k}: one pin a chip`);
+    assert.equal(copper.pinNets[k].length, copper.nets[k].pins);
+    const ids = copper.pinNets[k].map(([, net]) => net).filter((x) => x !== null);
+    const most = Math.max(0, ...ids.map((x) => ids.filter((y) => y === x).length));
+    assert.equal(copper.nets[k].inLargest, most, `${k}: the largest net is the pins' own`);
+  }
+  const gnd = new Set(copper.pinNets.gnd.map(([, x]) => x).filter((x) => x !== null));
+  assert.equal(copper.nets.touching, copper.pinNets.vcc.some(([, x]) => x !== null && gnd.has(x)), 'touching is the pins\' own');
+  assert.match(copper.thresholds.nets, /at least 8 ICs/);
+});
+
+test('copper.json passes the plan\'s coverage and drills rows; the nets row is recorded as measured', () => {
+  assert.equal(copper.verdicts.coverage, 'pass');
+  assert.equal(copper.verdicts.drillsInCopper, 'pass');
+  // The nets row is the held-out test: run once, on 5 October 2026, after the method was fixed. Its verdict is
+  // whatever the figures give (the test above), and is not asserted to pass here: see the journal.
+  assert.ok(['pass', 'fail'].includes(copper.verdicts.nets));
+  assert.ok(copper.nets.chips >= COPPER_ROWS.chips, 'at least 8 ICs went into the nets check');
+});
+
+test('ic-table.json gives each IC its GND and +5V pins, each pinout with its source', () => {
+  const PINS = { U1: 24, U2: 20, U3: 16, U4: 24, U5: 40, U6: 40, U7: 16, U8: 16, U9: 14, U10: 16 };
+  assert.deepEqual(Object.fromEntries(icTable.ics.map((i) => [i.ref, i.pins])), PINS);
+  for (const ic of icTable.ics) {
+    for (const k of ['ref', 'role', 'pins', 'package', 'gnd', 'vcc', 'pinoutSource']) assert.ok(k in ic, `${ic.ref}: ${k}`);
+    assert.ok(Number.isInteger(ic.gnd) && Number.isInteger(ic.vcc) && ic.gnd !== ic.vcc, ic.ref);
+    assert.ok(ic.gnd >= 1 && ic.gnd <= ic.pins && ic.vcc >= 1 && ic.vcc <= ic.pins, ic.ref);
+    assert.ok(ic.package.startsWith(`DIP-${ic.pins} `), ic.ref);
+    assert.match(ic.pinoutSource, /https:\/\/\S+/, `${ic.ref}: its source is named with its address`);
+    assert.match(ic.pinoutSource, new RegExp(`pin ${ic.gnd} `), `${ic.ref}: the source's GND pin`);
+  }
+  // the large chips from the nesdev wiki's pinout pages, the 6116 from its data sheet
+  for (const [ref, page] of [['U6', 'CPU_pinout'], ['U5', 'PPU_pinout'], ['U10', 'CIC_lockout_chip_pinout']]) {
+    assert.ok(icTable.ics.find((i) => i.ref === ref).pinoutSource.includes(`nesdev.org/wiki/${page}`), ref);
+  }
+  assert.deepEqual(['U6', 'U5'].map((r) => { const i = icTable.ics.find((x) => x.ref === r); return [i.gnd, i.vcc]; }), [[20, 40], [20, 40]]);
+});
+
+test('NOTICE.md and the photographs\' README name the NES track map, its TAPR Open Hardware License terms and OpenTendo', () => {
+  const notice = fs.readFileSync(path.join(REPO_ROOT, 'NOTICE.md'), 'utf8');
+  const flat = (t) => t.replace(/\s+/g, ' ');
+  const section = flat(notice.split(/^## /m).find((s) => s.includes('nes-famicom-board.webp')) ?? '');
+  assert.ok(section, 'NOTICE.md does not name site/src/assets/tracks/nes-famicom-board.webp');
+  assert.match(section, /TAPR Open Hardware License/);
+  assert.match(section, /OpenTendo/);
+  assert.match(section, /traced from OpenTendo's scans/);
+  assert.match(section, /dbhq-uk\/OpenTendo/);
+  assert.match(section, /3bd0b0be5c9ed6fc6a36d9e458bc58d9976b2009/);
+  const photos = fs.readFileSync(path.join(process.cwd(), 'src', 'assets', 'photos', 'README.md'), 'utf8');
+  const ours = flat(photos.split(/^## /m).find((s) => s.includes('nes-famicom-board.webp')) ?? '');
+  assert.match(ours, /traced from OpenTendo's scans/);
+  assert.match(ours, /TAPR Open Hardware License/);
+});

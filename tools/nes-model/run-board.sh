@@ -18,3 +18,4 @@ cd "$here"
 "$py" verify.py I1-front I1-back I2
 "$py" board_frame.py        # data/frame.json: the scan's scale, turn, outline and holes
 "$py" board_register.py     # data/registration.json: the solder side registered; the pads, drills and footprints
+"$py" board_trace.py --map-ppm 10   # data/copper.json and the track map: both copper faces, the print, the checks (10 px/mm chosen from --look on 5 Oct 2026)

@@ -1281,6 +1281,23 @@ def overlays(front, back_m, out, frame):
     im.save(common.OUT / 'footprints.png')
 
 
+def solder_transform(reg, shape):
+    """The chosen model as later tasks read it (added in task 4, which traces
+    the solder side's copper through it): the board millimetres that I1-back
+    flipped's four corners map to. The file keeps three places, a micron, so
+    the corners carry the affine to a micron where its matrix, rounded to
+    three places, would not."""
+    if reg['model'] != 'affine':
+        raise ValueError('only the affine is written as corners; a cubic needs a grid')
+    h, w = shape[:2]
+    px = [[0, 0], [w, 0], [0, h], [w, h]]
+    return {'model': reg['model'],
+            'what': ('I1-back flipped left to right (pixel x becomes width - 1 - x): its corners in pixels, and where the chosen '
+                     'model puts them in board millimetres. Three of them fix the affine; the fourth checks it'),
+            'cornersPx': px,
+            'cornersMm': common.transform(reg['model'], reg['params'], px).tolist()}
+
+
 def main():
     fj, frame = load_frame()
     m = marks()
@@ -1306,6 +1323,7 @@ def main():
             'fits': reg['fits'],
             'choice': f'the lower held-out median; within {TIE_MM} mm a tie, which the affine (the simpler) wins',
             'heldOutByKind': reg['heldOutByKind'],
+            'transform': solder_transform(reg, back_m.shape),
             'found': reg['found'],
             'seedFitPx': reg['seedFitPx'],
             'gateMm': reg['gateMm'], 'blockMm': reg['blockMm'],

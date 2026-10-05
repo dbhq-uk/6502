@@ -146,3 +146,30 @@ model and here, with each channel's source named; none of it is MIT.
 
 The build does not run the analysis, and nothing in the tests or the build
 fetches a photograph or the replica.
+
+## The NES board's track map, src/assets/tracks/nes-famicom-board.webp
+
+The copper on both faces of the NES main board, NES-CPU-10, for the NES's
+inside 3D model, and its printed legend. **The map is traced from OpenTendo's
+scans**, the bare board scanned on both faces at 300 dpi, read from the
+`dbhq-uk` fork at commit `3bd0b0be5c9ed6fc6a36d9e458bc58d9976b2009`
+([dbhq-uk/OpenTendo](https://github.com/dbhq-uk/OpenTendo), a fork of
+[Redherring32/OpenTendo](https://github.com/Redherring32/OpenTendo)). The scans
+are not photographs of ours and are not committed: they state no licence of
+their own, and OpenTendo's README puts the repository under the TAPR Open
+Hardware License (www.tapr.org/OHL).
+
+| Channel | What | From | Terms |
+|---|---|---|---|
+| Red | The component side's copper | `NES-CPU-10_front_300dpi.png`, traced | TAPR Open Hardware License, as OpenTendo's README states it |
+| Green | The solder side's copper | `NES-CPU-10_back_300dpi.png`, registered to the front and traced | The same |
+| Blue | The printed legend, as it is printed, Nintendo's name included | `NES-CPU-10_front_300dpi.png`, traced | The same |
+
+| | |
+|---|---|
+| Made by | `tools/nes-model/board_trace.py` on 5 October 2026, from the full-size scans, in the board frame of `tools/nes-model/data/frame.json`. Its `README.md` says how to run it; `tools/nes-model/data/copper.json` holds the map's size, bytes and SHA-256 and the checks on it; the journal for 5 October 2026 has the figures |
+| This copy | 1959 by 1194 pixels, 10 pixels to the millimetre, lossless, covering the board edge to edge; each channel 255 or 0 |
+| Terms | The TAPR Open Hardware License's, credited to OpenTendo and its authors; `NOTICE.md` says what is derived from the scans |
+
+The build does not run the analysis, and nothing in the tests or the build
+fetches a scan. The inside model that draws the map comes later.

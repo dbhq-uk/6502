@@ -18,7 +18,7 @@ outside the repository, and every script refuses an input whose SHA-256 is not
 the one in [`data/sources.json`](data/sources.json). No input is committed,
 not even resized.
 
-So far (tasks 0 and 2) it holds:
+So far (tasks 0 to 4) it holds:
 
 | File | What it does |
 |---|---|
@@ -27,8 +27,9 @@ So far (tasks 0 and 2) it holds:
 | `spike.py` | Task 0's eight checks: the scan's x and y scales and the two against each other, the solder side's registration, the PAL board's layout against the scan's, the case's depth and height on the design patent's orthographic views (the corner photographs' figures recorded only, since the plan's revisions of 5 October 2026), and the PAL front, O4 against O2-FL's front, each judged against the plan's thresholds. Kept as a record; not part of the run |
 | `board_frame.py` | Task 2: the board's frame on the bare scan I1-front. The x scale from the rows of pins across the board and the y scale from the DIPs' row spacings, both drill to drill, each row and footprint held out in turn and judged against the plan's thresholds; the board's turn; the outline, its shape marked by hand and each edge measured on the light, with its round notches; the mounting holes on their top rims. Writes `data/frame.json`, a copy of the scan rectified at 12 px/mm and overlays to look at, in `out/` |
 | `board_register.py` | Task 3: the solder side, I1-back flipped, registered to the component side on every hole found on both faces (task 0's ring finder, and a second finder for vias, large rings and domes of solder), an affine and a cubic each scored on a chequerboard of 20 mm blocks held out, judged against the plan's solder row with the plan's outlier rule beside; then the drills, the pads on each face, the edge fingers, and the footprints, grouped by pitch and the print and named by hand from `data/marks.json`. Writes `data/registration.json` and overlays to look at, in `out/` |
-| `run-board.sh` | The inside model's measurements in order (so far: `verify.py I1-front I1-back I2`, `board_frame.py`, `board_register.py`); stops at the first that crosses a STOP |
-| `tests/test_common.py`, `tests/test_board_frame.py`, `tests/test_board_register.py` | pytest, on made-up inputs |
+| `board_trace.py` | Task 4: the copper on both faces and the print, traced from I1-front and I1-back (the solder side through task 3's affine) on one grid at 12 px/mm: OKLab; tin by its grey; the print by its white, off the pads; copper under the lacquer lighter than a smooth level fitted to the laminate, over Otsu's threshold with hysteresis; the lacquer's bright rim round each pad taken off except where a track runs on past it; copper under thin print recovered where it continues in line. Then the plan's checks (coverage, drills in copper, and the known nets from `data/ic-table.json`, the held-out test) and the track map. `--look` draws the overlays and prints the map's sizes and runs no check; `--map-ppm N` runs the checks and writes `data/copper.json` and the map |
+| `run-board.sh` | The inside model's measurements in order (so far: `verify.py I1-front I1-back I2`, `board_frame.py`, `board_register.py`, `board_trace.py --map-ppm 10`); stops at the first that crosses a STOP |
+| `tests/test_common.py`, `tests/test_board_frame.py`, `tests/test_board_register.py`, `tests/test_board_trace.py` | pytest, on made-up inputs |
 | `data/` | See [`data/README.md`](data/README.md) |
 
 ## Fetching the inputs by hand
