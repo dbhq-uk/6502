@@ -4642,5 +4642,1145 @@
     }
    ]
   }
+ },
+ "caseFeatures": {
+  "what": "Task 8. Lines are segments marked by hand along an edge (two points, an optional half width of the search in px), each fitted by case_measure.py as spike.py fits its lines; points and boxes are read by eye. The patent's features (O1) are boxes [left, top, right, bottom] or circles [x, y, r] in the page's pixels, read off crops enlarged 0.8 to 1.6 times with a 10 to 40 px grid, to about 1 px (0.2 to 0.3 mm). Photographs' features are polygons or points in the original's pixels, read off crops enlarged 0.6 to 1.2 times with a 25 to 100 px grid, to about 3 px; each is said where it is used to be in its face's plane or not.",
+  "patent": {
+   "pages": {
+    "FIG 3": 3,
+    "FIG 4": 3,
+    "FIG 5": 3,
+    "FIG 6": 4,
+    "FIG 7": 4
+   },
+   "boxes": {
+    "FIG 3": [
+     600,
+     440,
+     1870,
+     960
+    ],
+    "FIG 4": [
+     600,
+     1110,
+     1870,
+     1600
+    ],
+    "FIG 5": [
+     600,
+     1780,
+     1870,
+     2790
+    ],
+    "FIG 6": [
+     700,
+     395,
+     1920,
+     1340
+    ],
+    "FIG 7": [
+     820,
+     1560,
+     1810,
+     2020
+    ]
+   },
+   "FIG 3": {
+    "what": "The front. The door's two sides and its lower edge; its tab; the black band, the top shell's part and the controller block below the seam; the two ports' frames; the recessed panel round the buttons, the LED and POWER's and RESET's middle outlines; the feet below the body.",
+    "door": [
+     802.5,
+     479,
+     1461.5,
+     631
+    ],
+    "lip": [
+     1084,
+     617,
+     1212,
+     623
+    ],
+    "band": [
+     1461.5,
+     479,
+     1641.5,
+     881
+    ],
+    "block": [
+     1461.5,
+     678,
+     1641.5,
+     881
+    ],
+    "port1": [
+     1475.6,
+     707,
+     1552.5,
+     815
+    ],
+    "port2": [
+     1558,
+     707,
+     1633.8,
+     815
+    ],
+    "panel": [
+     771,
+     678,
+     1112,
+     825.6
+    ],
+    "led": [
+     796,
+     766,
+     825,
+     796
+    ],
+    "power": [
+     829,
+     745.6,
+     954,
+     816
+    ],
+    "reset": [
+     965,
+     745.6,
+     1087,
+     816
+    ],
+    "feet": [
+     [
+      740,
+      881,
+      818,
+      899
+     ],
+     [
+      1625.6,
+      881,
+      1703.8,
+      899
+     ]
+    ]
+   },
+   "FIG 4": {
+    "what": "The rear, seen from behind: its left is the case's right. The recessed window, open at the base, with the power jack, the channel switch and the RF jack (each its outline and, for the round ones, its centre), and the label strip; the notch in the base; the black band.",
+    "window": [
+     730,
+     1394,
+     1005,
+     1554
+    ],
+    "labelStrip": [
+     746,
+     1471,
+     990,
+     1504
+    ],
+    "power": [
+     750,
+     1402,
+     792,
+     1463
+    ],
+    "powerCentre": [
+     771,
+     1433
+    ],
+    "channel": [
+     838,
+     1404,
+     885,
+     1446
+    ],
+    "rf": [
+     895,
+     1399,
+     944,
+     1455
+    ],
+    "rfCentre": [
+     918,
+     1429
+    ],
+    "notch": [
+     1265.6,
+     1485,
+     1342.5,
+     1544
+    ],
+    "band": [
+     783,
+     1145,
+     979,
+     1335
+    ]
+   },
+   "FIG 5": {
+    "what": "The top, its front at the bottom of the page. The door's outline on the top, from its rear edge to the front; the black band; the ribbed vents between its two black ends (each rib drawn as a bar of two lines; case_measure.py counts the lines across the band between the two x in ribsCount); POWER and RESET seen from above, standing out past the front.",
+    "door": [
+     798.8,
+     2552.5,
+     1463.8,
+     2723
+    ],
+    "band": [
+     1455,
+     1832,
+     1645,
+     2723
+    ],
+    "ribs": [
+     1466,
+     2002.5,
+     1640,
+     2550
+    ],
+    "ribsCount": [
+     1480,
+     1625
+    ],
+    "front": 2722.8,
+    "buttons": [
+     [
+      838.8,
+      2713.9,
+      951,
+      2727.2
+     ],
+     [
+      967.5,
+      2713.9,
+      1080,
+      2727.2
+     ]
+    ]
+   },
+   "FIG 6": {
+    "what": "The underside, the case turned over about its left to right axis: its front at the top of the page and the case's right on the page's right, as its features show (the controller ports' bracket at the top right, the rear window's bump at the bottom right, the AV jacks' bump on the right edge nearer the bottom). The four feet, the screw holes, the expansion cover and its inner panel, the two straps of the moulding, the vents, the other moulded panels.",
+    "feet": [
+     [
+      880,
+      558.8,
+      40
+     ],
+     [
+      1763.8,
+      558.8,
+      40
+     ],
+     [
+      880,
+      1200,
+      40
+     ],
+     [
+      1763.8,
+      1200,
+      40
+     ]
+    ],
+    "screws": [
+     [
+      807.5,
+      467.5,
+      17
+     ],
+     [
+      1817.5,
+      467.5,
+      17
+     ],
+     [
+      813.8,
+      1256,
+      17
+     ],
+     [
+      1847.5,
+      1256,
+      17
+     ],
+     [
+      1320,
+      470,
+      15
+     ],
+     [
+      1320,
+      1256,
+      15
+     ]
+    ],
+    "cover": [
+     1007.5,
+     650,
+     1442.5,
+     875
+    ],
+    "coverInner": [
+     1116,
+     719,
+     1341,
+     809
+    ],
+    "strapAcross": [
+     785,
+     700,
+     1845,
+     771
+    ],
+    "strapDown": [
+     1191,
+     871,
+     1265,
+     1309
+    ],
+    "vents": [
+     {
+      "box": [
+       799,
+       812,
+       939,
+       909
+      ],
+      "slots": 4
+     },
+     {
+      "box": [
+       1695,
+       809,
+       1839,
+       909
+      ],
+      "slots": 4
+     },
+     {
+      "box": [
+       1695,
+       1027,
+       1839,
+       1105
+      ],
+      "slots": 3
+     }
+    ],
+    "panels": [
+     [
+      864,
+      940,
+      1155,
+      1062
+     ],
+     [
+      930,
+      1085,
+      1155,
+      1200
+     ],
+     [
+      1320,
+      987,
+      1651,
+      1192
+     ],
+     [
+      1435,
+      921,
+      1545,
+      941
+     ]
+    ],
+    "frontBracket": [
+     1561,
+     417,
+     1745,
+     494
+    ],
+    "rearBump": [
+     1532,
+     1277,
+     1801,
+     1305
+    ],
+    "avBump": [
+     1851,
+     937,
+     1889,
+     1190
+    ]
+   },
+   "FIG 7": {
+    "what": "The side with the AV jacks, its rear on the right of the page (the jacks and the oval recess are nearer the rear, as O2-FL shows them): the jacks' window, the two jacks' centres (video nearer the rear, audio in front of it, as I7-FL and O2-FL show their colours), the oval, the moulded tab at the base.",
+    "avWindow": [
+     1405,
+     1832,
+     1660,
+     1935
+    ],
+    "audio": [
+     1493,
+     1871,
+     25
+    ],
+    "video": [
+     1575,
+     1871,
+     25
+    ],
+    "oval": [
+     1705,
+     1865,
+     1745,
+     1935
+    ],
+    "tab": [
+     1160,
+     1925,
+     1230,
+     1985
+    ]
+   }
+  },
+  "O2-FL": {
+   "what": "The front face, rectified on its four bounding lines: the top's near long edge, the top shell's two ends (task 0's marks) and the base, where the bottom shell meets the table. Lines: the seam either side of the black block, the bottom shell's two ends leaning in (on the left end its silhouette; on the right end, which the camera sees, the change of light where the end turns away), the door's sides and its lower edge, the panel's three edges, the black block's right edge. The smaller features are boxes read off the rectified front (onFace). The top face, rectified on task 0's four corners: the door's rear edge on the top, the black band's two sides (the right one along its rear black end, where the vents' ends do not cross it) and the ends of the ribbed vents.",
+   "lines": {
+    "top": [
+     [
+      700,
+      1310
+     ],
+     [
+      1900,
+      1617
+     ]
+    ],
+    "left": [
+     [
+      248,
+      1240
+     ],
+     [
+      246,
+      1560
+     ]
+    ],
+    "right": [
+     [
+      2802,
+      1920
+     ],
+     [
+      2800,
+      2240
+     ]
+    ],
+    "base": [
+     [
+      600,
+      2073
+     ],
+     [
+      2000,
+      2464
+     ]
+    ],
+    "seamLeft": [
+     [
+      400,
+      1621
+     ],
+     [
+      1000,
+      1781
+     ]
+    ],
+    "seamRight": [
+     [
+      2500,
+      2207
+     ],
+     [
+      2770,
+      2280
+     ]
+    ],
+    "slantLeft": [
+     [
+      252,
+      1689
+     ],
+     [
+      400,
+      2011
+     ],
+     8
+    ],
+    "slantRight": [
+     [
+      2797,
+      2300
+     ],
+     [
+      2675,
+      2610
+     ],
+     6
+    ],
+    "doorLeft": [
+     [
+      572,
+      1330
+     ],
+     [
+      574,
+      1530
+     ]
+    ],
+    "doorRight": [
+     [
+      2043,
+      1720
+     ],
+     [
+      2046,
+      2000
+     ]
+    ],
+    "doorBottom": [
+     [
+      1500,
+      1820
+     ],
+     [
+      1950,
+      1945
+     ]
+    ],
+    "panelLeft": [
+     [
+      503,
+      1690
+     ],
+     [
+      520,
+      1930
+     ],
+     12
+    ],
+    "panelRight": [
+     [
+      1200,
+      1860
+     ],
+     [
+      1200,
+      2110
+     ],
+     12
+    ],
+    "panelBottom": [
+     [
+      600,
+      1971
+     ],
+     [
+      1150,
+      2122
+     ],
+     12
+    ],
+    "blockRight": [
+     [
+      2451,
+      2080
+     ],
+     [
+      2453,
+      2380
+     ]
+    ]
+   },
+   "dark": [
+    "doorLeft"
+   ],
+   "top": {
+    "lines": {
+     "doorRear": [
+      [
+       800,
+       1105
+      ],
+      [
+       1650,
+       1325
+      ],
+      25
+     ],
+     "bandLeft": [
+      [
+       2961,
+       714
+      ],
+      [
+       2150,
+       1564
+      ],
+      25
+     ],
+     "bandRight": [
+      [
+       3420,
+       777
+      ],
+      [
+       3280,
+       925
+      ],
+      8
+     ],
+     "ribsRear": [
+      [
+       2860,
+       860
+      ],
+      [
+       3290,
+       935
+      ],
+      20
+     ],
+     "ribsFront": [
+      [
+       2260,
+       1468
+      ],
+      [
+       2650,
+       1570
+      ],
+      20
+     ]
+    }
+   },
+   "onFace": {
+    "what": "Boxes [u0, z0, u1, z1] in millimetres on the front face, u from its left end and z up from the base, read by eye off the rectified front that case_measure.py draws (out/case-front-left.png and -right.png, 8 px/mm, a 5 mm grid), to about 0.3 mm. The buttons stand about 1 mm out of the face (FIG 5), so their holes in the panel, which lie in it, are read: each hole's two sides and its top, its bottom hidden under the button's face and put 14 mm below its top, where the button's front face's bottom reads (13.9 to 14.0).",
+    "lip": [
+     91.1,
+     54.6,
+     120.5,
+     57.1
+    ],
+    "led": [
+     33.4,
+     18.4,
+     37.8,
+     23.2
+    ],
+    "power": [
+     40.3,
+     13.5,
+     65.1,
+     27.5
+    ],
+    "reset": [
+     67.6,
+     13.5,
+     92.4,
+     27.5
+    ],
+    "powerFace": [
+     40.75,
+     14.0,
+     61.75,
+     24.9
+    ],
+    "resetFace": [
+     68.4,
+     13.9,
+     91.1,
+     24.9
+    ],
+    "band": [
+     180.1,
+     0,
+     220.1,
+     88.9
+    ],
+    "port1": [
+     183.4,
+     13.2,
+     200.5,
+     39.4
+    ],
+    "port2": [
+     201.75,
+     13.2,
+     218.6,
+     39.4
+    ],
+    "words": {
+     "Nintendo": [
+      38.6,
+      70.9,
+      78.0,
+      77.4
+     ],
+     "ENTERTAINMENT SYSTEM": [
+      38.6,
+      65.6,
+      111.1,
+      68.8
+     ],
+     "POWER": [
+      43.6,
+      15.5,
+      59.9,
+      18.0
+     ],
+     "RESET": [
+      73.0,
+      15.6,
+      87.4,
+      18.1
+     ],
+     "1": [
+      189.0,
+      40.3,
+      190.9,
+      43.4
+     ],
+     "2": [
+      207.1,
+      40.3,
+      210.75,
+      43.4
+     ]
+    }
+   }
+  },
+  "O2-BR": {
+   "what": "The rear face, seen from behind, rectified on its bounding lines: the top's near long edge, the top shell's two ends (task 0's marks) and the base right of the notch. Lines: the bottom shell's two ends leaning in (the profile's held-out check), the window panel's base, the top's far short edge (a line square to the face), the notch's two sides. The window's panel is set back from the face: a point on it reads off its place through the face's homography along the far short edge's direction, by as much as the panel's base reads above the base, and case_measure.py takes that off. The features are boxes read off the rectified rear (onFace).",
+   "lines": {
+    "top": [
+     [
+      1100,
+      1398
+     ],
+     [
+      2700,
+      1826
+     ]
+    ],
+    "left": [
+     [
+      250,
+      1240
+     ],
+     [
+      247,
+      1560
+     ]
+    ],
+    "right": [
+     [
+      2801,
+      1920
+     ],
+     [
+      2799,
+      2240
+     ]
+    ],
+    "base": [
+     [
+      1900,
+      2425
+     ],
+     [
+      2600,
+      2615
+     ]
+    ],
+    "slantLeft": [
+     [
+      355,
+      1872
+     ],
+     [
+      405,
+      1995
+     ],
+     10
+    ],
+    "slantRight": [
+     [
+      2790,
+      2320
+     ],
+     [
+      2685,
+      2590
+     ]
+    ],
+    "panelBase": [
+     [
+      520,
+      1997
+     ],
+     [
+      1000,
+      2128
+     ],
+     12
+    ],
+    "farShort": [
+     [
+      320,
+      1112
+     ],
+     [
+      1180,
+      361
+     ]
+    ],
+    "notchLeft": [
+     [
+      1625,
+      2250
+     ],
+     [
+      1626,
+      2320
+     ],
+     10
+    ],
+    "notchRight": [
+     [
+      1785,
+      2290
+     ],
+     [
+      1786,
+      2340
+     ],
+     10
+    ]
+   },
+   "onFace": {
+    "what": "Boxes [u0, z0, u1, z1] in millimetres on the rear face seen from behind, u from its left end as seen (the case's right) and z up from the base, read by eye off the rectified rear (out/case-rear.png, 8 px/mm, a 5 mm grid). The window's outline lies in the face; everything inside it is on the panel set back from the face, read as it shows, and case_measure.py takes the panel's shift off.",
+    "window": [
+     20.0,
+     0.0,
+     81.5,
+     32.15
+    ],
+    "panel": {
+     "powerOpening": [
+      27.75,
+      22.4,
+      37.1,
+      32.2
+     ],
+     "channelSlot": [
+      47.1,
+      25.9,
+      57.1,
+      32.2
+     ],
+     "rfRing": [
+      61.6,
+      22.75,
+      70.9,
+      32.05
+     ],
+     "labelStrip": [
+      27.75,
+      13.4,
+      79.5,
+      19.3
+     ],
+     "words": {
+      "AC ADAPTER": [
+       29.5,
+       15.6,
+       44.6,
+       17.5
+      ],
+      "CH3-CH4": [
+       47.4,
+       15.6,
+       57.6,
+       17.5
+      ],
+      "RF SWITCH": [
+       60.75,
+       15.6,
+       73.9,
+       17.5
+      ]
+     }
+    }
+   }
+  },
+  "I7-FL": {
+   "what": "The modulator's rear face on the NTSC board (I7-FL, the board component side up, looked at from beyond its edge fingers), by its four corners, its width the modulator's from parts.json (its x extent on I4). Only places along the face are used, so its height need not be known. The jacks: the RF jack's body where it meets the face (its ring stands out of it), the channel switch's slot, the power jack's socket.",
+   "corners": [
+    [
+     2150,
+     1754
+    ],
+    [
+     2928,
+     1960
+    ],
+    [
+     2928,
+     2213
+    ],
+    [
+     2150,
+     2009
+    ]
+   ],
+   "points": {
+    "rf": [
+     2259,
+     1954
+    ],
+    "channel": [
+     2468,
+     1959
+    ],
+    "power": [
+     2732,
+     2082
+    ]
+   }
+  },
+  "HOF06601": {
+   "what": "The PAL set's photograph of the bottom shell from above with the board in it, solder side up, the case's front at the top: the rim's four outer edges (the left one is the case's right), and two of the board's mounting holes as a seed; case_measure.py then finds the board's holes and the ICs' end pins near where the seed puts them.",
+   "rim": {
+    "left": [
+     [
+      922,
+      600
+     ],
+     [
+      903,
+      3300
+     ],
+     20
+    ],
+    "right": [
+     [
+      5364,
+      600
+     ],
+     [
+      5309,
+      3300
+     ],
+     20
+    ],
+    "top": [
+     [
+      2600,
+      240
+     ],
+     [
+      5200,
+      284
+     ],
+     20
+    ],
+    "base": [
+     [
+      1300,
+      3695
+     ],
+     [
+      4900,
+      3722
+     ],
+     20
+    ]
+   },
+   "seed": {
+    "H5": [
+     2926,
+     1518
+    ],
+    "H4": [
+     4037,
+     1530
+    ]
+   }
+  },
+  "O4": {
+   "what": "The PAL top shell's front band straight on (task 0's corners): the words, polygons by eye.",
+   "polys": {
+    "Nintendo": [
+     [
+      1738,
+      702
+     ],
+     [
+      2870,
+      702
+     ],
+     [
+      2870,
+      878
+     ],
+     [
+      1738,
+      878
+     ]
+    ],
+    "ENTERTAINMENT SYSTEM": [
+     [
+      1738,
+      930
+     ],
+     [
+      3830,
+      930
+     ],
+     [
+      3830,
+      1038
+     ],
+     [
+      1738,
+      1038
+     ]
+    ],
+    "EUROPEAN VERSION": [
+     [
+      1738,
+      1078
+     ],
+     [
+      3042,
+      1078
+     ],
+     [
+      3042,
+      1190
+     ],
+     [
+      1738,
+      1190
+     ]
+    ]
+   }
+  },
+  "O5": {
+   "what": "The PAL underside, seen from below and turned so that the case's rear is at the top of the picture and its right on the left (the AV jacks' bump on the left edge, the controller bracket at the bottom left), taken close with a 19 mm lens, so its outline (at the seam, about 45 mm further off than the bottom) is not in the bottom's plane. The bottom is rectified instead on its six screw holes, which lie in it, against their places on the patent's FIG 6; each hole is a seed marked by eye and found as the dark blob near it. The two labels and the expansion cover are polygons by eye; the feet are circles by eye [x, y, r].",
+   "screws": {
+    "rearRight": [
+     717,
+     627
+    ],
+    "rearMiddle": [
+     2023,
+     593
+    ],
+    "rearLeft": [
+     3227,
+     600
+    ],
+    "frontRight": [
+     790,
+     2500
+    ],
+    "frontMiddle": [
+     2023,
+     2490
+    ],
+    "frontLeft": [
+     3287,
+     2483
+    ]
+   },
+   "feet": [
+    [
+     950,
+     750,
+     95
+    ],
+    [
+     3088,
+     742,
+     95
+    ],
+    [
+     945,
+     2288,
+     95
+    ],
+    [
+     3108,
+     2288,
+     95
+    ]
+   ],
+   "polys": {
+    "label1": [
+     [
+      1230,
+      790
+     ],
+     [
+      2020,
+      790
+     ],
+     [
+      2020,
+      1255
+     ],
+     [
+      1230,
+      1255
+     ]
+    ],
+    "label2": [
+     [
+      2440,
+      1068
+     ],
+     [
+      3100,
+      1068
+     ],
+     [
+      3100,
+      1365
+     ],
+     [
+      2440,
+      1365
+     ]
+    ],
+    "cover": [
+     [
+      1850,
+      1725
+     ],
+     [
+      2625,
+      1725
+     ],
+     [
+      2625,
+      1950
+     ],
+     [
+      1850,
+      1950
+     ]
+    ]
+   }
+  }
  }
 }

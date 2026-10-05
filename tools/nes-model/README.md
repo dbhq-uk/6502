@@ -18,7 +18,7 @@ outside the repository, and every script refuses an input whose SHA-256 is not
 the one in [`data/sources.json`](data/sources.json). No input is committed,
 not even resized.
 
-So far (tasks 0 to 4) it holds:
+So far (tasks 0 to 5, and 8) it holds:
 
 | File | What it does |
 |---|---|
@@ -29,8 +29,10 @@ So far (tasks 0 to 4) it holds:
 | `board_register.py` | Task 3: the solder side, I1-back flipped, registered to the component side on every hole found on both faces (task 0's ring finder, and a second finder for vias, large rings and domes of solder), an affine and a cubic each scored on a chequerboard of 20 mm blocks held out, judged against the plan's solder row with the plan's outlier rule beside; then the drills, the pads on each face, the edge fingers, and the footprints, grouped by pitch and the print and named by hand from `data/marks.json`. Writes `data/registration.json` and overlays to look at, in `out/` |
 | `board_trace.py` | Task 4: the copper on both faces and the print, traced from I1-front and I1-back (the solder side through task 3's affine) on one grid at 12 px/mm: OKLab; tin by its grey; the print by its white, off the pads; copper under the lacquer lighter than a smooth level fitted to the laminate, over Otsu's threshold with hysteresis; the lacquer's bright rim round each pad taken off except where a track runs on past it; copper under thin print recovered where it continues in line. Then the plan's checks (coverage, drills in copper, and the known nets from `data/ic-table.json`, the held-out test) and the track map. `--look` draws the overlays and prints the map's sizes and runs no check; `--map-ppm N` runs the checks and writes `data/copper.json` and the map |
 | `board_parts.py` | Task 5: every part on the board, both consoles. Each IC on its footprint (its pads' centre, its turn from pin 1); I4 and I5 (the NTSC NES-CPU-07, top and solder side) fitted to the board by a homography on the ICs' midlines and solder joints, I3 (the PAL NES-CPU-11) by task 0's marks, each IC held out in turn to show each photographed part sits on the footprint of its name; the places against the KiCad redrawing's after a best-fit similarity (the plan's 3 mm); the bodies measured on I4; the connectors, crystals and modulators from outlines marked on I4 and I3; the passives at their pads. Each console's parts are in the script, read by looking at crops. Writes `data/parts.json`, each console's part into `data/ic-table.json`, and `site/src/models/nes-famicom-board-parts.mjs` |
+| `case_measure.py` | Task 8: the case, both consoles. The size is the published 254 by 203.2 by 88.9 mm (not Nintendo's); every face of a photograph is rectified on its own four bounding lines (O2-FL's front and top, O2-BR's rear, the set-back of the rear's window panel taken off), so no camera relates two of its planes; the patent's views (O1) scaled to the case for what the photographs cannot show (the underside, the AV jacks' side, the feet) and recorded beside the rest; the end profile built on O2-FL and checked on a point of O2-BR held out of it; the board's place in the case from O9, the board and the bottom shell in one view, through the camera its XMP records; the rear connectors' board places (I7-FL's modulator face) against O2-BR; the PAL console's words (O4, O10) and underside labels (O5). Writes `data/case.json` and `site/src/models/nes-famicom-case-parts.mjs`; `--look` draws the rectified faces, with what was read off them, in `out/` |
+| `run-case.sh` | The outside model's measurements: `verify.py` on its inputs, then `case_measure.py`. It reads `parts.json` and `registration.json`, so `run-board.sh` comes first |
 | `run-board.sh` | The inside model's measurements in order (so far: `verify.py I1-front I1-back I2`, `board_frame.py`, `board_register.py`, `board_trace.py --map-ppm 10`, `verify.py I3 I4 I5`, `board_parts.py`); stops at the first that crosses a STOP |
-| `tests/test_common.py`, `tests/test_board_frame.py`, `tests/test_board_register.py`, `tests/test_board_trace.py`, `tests/test_board_parts.py` | pytest, on made-up inputs |
+| `tests/test_common.py`, `tests/test_board_frame.py`, `tests/test_board_register.py`, `tests/test_board_trace.py`, `tests/test_board_parts.py`, `tests/test_case.py` | pytest, on made-up inputs |
 | `data/` | See [`data/README.md`](data/README.md) |
 
 ## Fetching the inputs by hand
@@ -55,6 +57,12 @@ repository (AGENTS.md rule 3).
 | I4 | `Nintendo-NES-Mk1-Motherboard-Top.jpg` | [Commons](https://commons.wikimedia.org/wiki/File:Nintendo-NES-Mk1-Motherboard-Top.jpg) (the original file) |
 | I5 | `Nintendo-NES-Mk1-Motherboard-Bottom.jpg` | [Commons](https://commons.wikimedia.org/wiki/File:Nintendo-NES-Mk1-Motherboard-Bottom.jpg) (the original file) |
 | I6 | `RP2A07A_20221102.png` | [Commons](https://commons.wikimedia.org/wiki/File:RP2A07A_20221102.png) (the original file) |
+| O3-01 to O3-04 | `Nintendo-Entertainment-System-NES-Deconstruction-01.jpg` to `-04.jpg` | [Commons](https://commons.wikimedia.org/wiki/File:Nintendo-Entertainment-System-NES-Deconstruction-01.jpg) (the original files; the others the same with `-02` to `-04`) |
+| I7-FL | `Nintendo-Entertainment-System-NES-Motherboard-FL.jpg` | [Commons](https://commons.wikimedia.org/wiki/File:Nintendo-Entertainment-System-NES-Motherboard-FL.jpg) (the original file) |
+| I7-FR | `Nintendo-Entertainment-System-NES-Motherboard-FR.jpg` | [Commons](https://commons.wikimedia.org/wiki/File:Nintendo-Entertainment-System-NES-Motherboard-FR.jpg) (the original file) |
+| I7-Bottom | `Nintendo-Entertainment-System-NES-Motherboard-Bottom.jpg` | [Commons](https://commons.wikimedia.org/wiki/File:Nintendo-Entertainment-System-NES-Motherboard-Bottom.jpg) (the original file) |
+| O9 | `Geöffnetes_deutsches_NES_20221102_HOF06601_RAW-Export.png` | [Commons](https://commons.wikimedia.org/wiki/File:Ge%C3%B6ffnetes_deutsches_NES_20221102_HOF06601_RAW-Export.png) (the original file, 150 MB) |
+| O10 | `Geöffnetes_deutsches_NES_20221102_HOF06440_RAW-Export.png` | [Commons](https://commons.wikimedia.org/wiki/File:Ge%C3%B6ffnetes_deutsches_NES_20221102_HOF06440_RAW-Export.png) (the original file, 125 MB) |
 
 Later tasks add inputs to `data/sources.json` as they first need them, with
 the same fields, and to the table in `docs/nes/facts/models.md`, which a site
@@ -80,6 +88,7 @@ export NES_MODEL_INPUTS=~/dbhq-previews/nes-model-research/full
 /tmp/nesvenv/bin/python -m pytest tools/nes-model/tests -q
 cd tools/nes-model && /tmp/nesvenv/bin/python spike.py      # writes data/spike.json, and overlays in out/
 PYTHON=/tmp/nesvenv/bin/python tools/nes-model/run-board.sh   # the board's measurements in order: data/frame.json, data/registration.json, ...
+PYTHON=/tmp/nesvenv/bin/python tools/nes-model/run-case.sh    # the case's: data/case.json and the case parts module
 ```
 
 `verify.py` says, for each input, present, missing or hash differs. It exits
@@ -90,7 +99,8 @@ thresholds. As the plan was revised twice on 5 October 2026 none does; the
 earlier stops are kept in `data/spike.json`'s `revision`. `board_frame.py`
 takes about a minute and exits 3 if the scale crosses a STOP;
 `board_register.py` takes about eight minutes on a busy machine and exits 3
-if the solder side crosses its STOP. `out/` is git-ignored.
+if the solder side crosses its STOP. `case_measure.py` takes about two
+minutes; none of its checks stops anything, and it prints each. `out/` is git-ignored.
 
 The versions it was run with, and every figure it printed, are in the journal
 for 5 October 2026.

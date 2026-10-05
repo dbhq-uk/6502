@@ -1,0 +1,2285 @@
+{
+ "about": "The NES-001 and NESE-001 cases, measured by tools/nes-model/case_measure.py (task 8 of the NES models plan). Millimetres in the case frame: from the case's left rear corner at table level, x to the right as seen from the front, y towards the front, z up.",
+ "band": {
+  "blackEnds": {
+   "frontY": 164.37,
+   "rearD": 38.48
+  },
+  "from": "front: O2-FL rectified; top: O2-FL's top rectified; rear: O1 FIG 4",
+  "front": {
+   "w": 40.0,
+   "x": 180.1
+  },
+  "rear": {
+   "w": 43.37,
+   "x": 178.99
+  },
+  "top": {
+   "w": 41.08,
+   "x": 181.48
+  }
+ },
+ "boardInCase": {
+  "from": "O9 (the PAL set's HOF06601), the board and the bottom shell in one view, through the camera its XMP records; the PAL and NTSC boards share the layout (task 0) and the shells the moulding [inferring]",
+  "mapping": "board (bx, by) is at case (x + bx, y - by): the board lies solder side up, its edge fingers to the rear",
+  "o3": "O3-01 to O3-04 never show the whole board and the case together (the cartridge tray or the shield covers the board, or it is out), so the width cross-check on O3 could not be made",
+  "o9": {
+   "boardBelowRimMm": 10.73,
+   "cameraOverRimMm": 308.8,
+   "imageToBoardHeldOutMm": {
+    "max": 0.73,
+    "median": 0.2,
+    "p90": 0.43
+   },
+   "k": 0.9664,
+   "missed": [],
+   "movedByPrincipalPoint100PxMm": 0.2,
+   "points": 48,
+   "rimOrthogonality": 0.0025,
+   "rimScaleRatio": 1.0239,
+   "similarityFitMm": {
+    "max": 1.25,
+    "median": 0.46,
+    "p90": 0.88
+   },
+   "xmp": {
+    "crs:CropBottom": "1",
+    "crs:CropLeft": "0.173395",
+    "crs:CropRight": "0.824017",
+    "crs:CropTop": "0.232919",
+    "crs:LensProfileEnable": "1",
+    "crs:PerspectiveHorizontal": "0",
+    "crs:PerspectiveVertical": "0",
+    "exif:FocalLength": "200/10",
+    "tiff:Model": "ILCE-7RM4"
+   }
+  },
+  "solderSideUp": true,
+  "turnDeg": 0.24,
+  "x": 24.39,
+  "y": 164.24,
+  "z": 37.84,
+  "zWhat": "the solder side's face: the rim (the seam, O2-FL) less how far below it the board lies on O9"
+ },
+ "buttons": [
+  {
+   "d": 3.03,
+   "face": {
+    "h": 10.9,
+    "w": 21.0,
+    "x": 40.75,
+    "z": 17.96
+   },
+   "from": "O2-FL, the front face rectified: the button's hole in the panel",
+   "h": 14.0,
+   "name": "POWER",
+   "patent": {
+    "h": 15.49,
+    "w": 27.71,
+    "x": 40.34,
+    "z": 18.48
+   },
+   "proudMm": 1.0,
+   "travelFrom": "typical",
+   "travelMm": 3.0,
+   "w": 24.8,
+   "x": 40.3,
+   "y": 203.2,
+   "z": 17.46
+  },
+  {
+   "d": 3.03,
+   "face": {
+    "h": 11.0,
+    "w": 22.7,
+    "x": 68.4,
+    "z": 17.86
+   },
+   "from": "O2-FL, the front face rectified: the button's hole in the panel",
+   "h": 14.0,
+   "name": "RESET",
+   "patent": {
+    "h": 15.49,
+    "w": 27.04,
+    "x": 70.48,
+    "z": 18.48
+   },
+   "proudMm": 1.0,
+   "travelFrom": "typical",
+   "travelMm": 3.0,
+   "w": 24.8,
+   "x": 67.6,
+   "y": 203.2,
+   "z": 17.46
+  }
+ ],
+ "door": {
+  "from": "O2-FL: the front and the top rectified",
+  "front": {
+   "h": 33.09,
+   "w": 146.78,
+   "x": 33.32,
+   "z": 59.77
+  },
+  "lip": {
+   "h": 2.5,
+   "w": 29.4,
+   "x": 91.1,
+   "z": 58.56
+  },
+  "patent": {
+   "front": {
+    "h": 33.45,
+    "w": 146.06,
+    "x": 34.47,
+    "z": 59.19
+   },
+   "top": {
+    "d": 38.84,
+    "w": 146.24,
+    "x": 34.7,
+    "y": 164.13
+   }
+  },
+  "top": {
+   "d": 36.42,
+   "w": 148.16,
+   "x": 33.32,
+   "y": 166.78
+  }
+ },
+ "feet": [
+  {
+   "d": 17.65,
+   "h": 3.96,
+   "x": 30.01,
+   "y": 170.93
+  },
+  {
+   "d": 17.65,
+   "h": 3.96,
+   "x": 225.05,
+   "y": 170.93
+  },
+  {
+   "d": 17.65,
+   "h": 3.96,
+   "x": 30.01,
+   "y": 25.03
+  },
+  {
+   "d": 17.65,
+   "h": 3.96,
+   "x": 225.05,
+   "y": 25.03
+  }
+ ],
+ "feetFrom": "O1 FIG 3, the feet below the body, scaled with its height",
+ "feetMm": 3.96,
+ "footprint": {
+  "depthFrom": "published",
+  "depthMm": 203.2,
+  "notNintendos": true,
+  "widthMm": 254.0,
+  "widthSource": "published, not Nintendo's: 10 by 8 by 3.5 inches (the NES Fandom wiki, and Thingiverse 243385's \"254 X 203 X 89 mm\", D2) and 10.1 by 8 by 3.5 inches (dimensions.com, D1); good to about 3 per cent"
+ },
+ "heightFrom": "published",
+ "heightMm": 88.9,
+ "heightWhat": "the body without its feet: the patent's height to width without its feet (FIG 3 and FIG 7) is within 1.4 per cent of 88.9 over 254 and 255, and with them 4.6 to 6.4 per cent over",
+ "labels": {
+  "ntsc": [
+   {
+    "box": [
+     38.6,
+     74.86,
+     39.4,
+     6.5
+    ],
+    "face": "front",
+    "from": "O2-FL",
+    "words": "Nintendo"
+   },
+   {
+    "box": [
+     38.6,
+     69.56,
+     72.5,
+     3.2
+    ],
+    "face": "front",
+    "from": "O2-FL",
+    "words": "ENTERTAINMENT SYSTEM"
+   },
+   {
+    "box": [
+     43.6,
+     19.46,
+     16.3,
+     2.5
+    ],
+    "face": "button:POWER",
+    "from": "O2-FL",
+    "words": "POWER"
+   },
+   {
+    "box": [
+     73.0,
+     19.56,
+     14.4,
+     2.5
+    ],
+    "face": "button:RESET",
+    "from": "O2-FL",
+    "words": "RESET"
+   },
+   {
+    "box": [
+     189.0,
+     44.26,
+     1.9,
+     3.1
+    ],
+    "face": "front",
+    "from": "O2-FL",
+    "words": "1"
+   },
+   {
+    "box": [
+     207.1,
+     44.26,
+     3.65,
+     3.1
+    ],
+    "face": "front",
+    "from": "O2-FL",
+    "words": "2"
+   },
+   {
+    "box": [
+     212.85,
+     15.17,
+     15.1,
+     1.9
+    ],
+    "face": "rear",
+    "from": "O2-BR",
+    "words": "AC ADAPTER"
+   },
+   {
+    "box": [
+     199.85,
+     15.17,
+     10.2,
+     1.9
+    ],
+    "face": "rear",
+    "from": "O2-BR",
+    "words": "CH3-CH4"
+   },
+   {
+    "box": [
+     183.55,
+     15.17,
+     13.15,
+     1.9
+    ],
+    "face": "rear",
+    "from": "O2-BR",
+    "words": "RF SWITCH"
+   }
+  ],
+  "pal": [
+   {
+    "box": [
+     40.07,
+     76.23,
+     38.9,
+     7.02
+    ],
+    "face": "front",
+    "from": "O4",
+    "words": "Nintendo"
+   },
+   {
+    "box": [
+     40.49,
+     70.22,
+     71.16,
+     4.76
+    ],
+    "face": "front",
+    "from": "O4",
+    "words": "ENTERTAINMENT SYSTEM"
+   },
+   {
+    "box": [
+     40.77,
+     64.54,
+     44.38,
+     4.63
+    ],
+    "face": "front",
+    "from": "O4",
+    "words": "EUROPEAN VERSION"
+   },
+   {
+    "box": [
+     43.6,
+     19.46,
+     16.3,
+     2.5
+    ],
+    "face": "button:POWER",
+    "from": "O2-FL",
+    "words": "POWER"
+   },
+   {
+    "box": [
+     73.0,
+     19.56,
+     14.4,
+     2.5
+    ],
+    "face": "button:RESET",
+    "from": "O2-FL",
+    "words": "RESET"
+   },
+   {
+    "box": [
+     189.0,
+     44.26,
+     1.9,
+     3.1
+    ],
+    "face": "front",
+    "from": "O2-FL",
+    "words": "1"
+   },
+   {
+    "box": [
+     207.1,
+     44.26,
+     3.65,
+     3.1
+    ],
+    "face": "front",
+    "from": "O2-FL",
+    "words": "2"
+   },
+   {
+    "box": [
+     212.85,
+     15.17,
+     15.1,
+     1.9
+    ],
+    "face": "rear",
+    "from": "O10, placed as on O2-BR",
+    "words": "ANSCHLUSS NETZGERAT/ ADAPTER"
+   },
+   {
+    "box": [
+     199.85,
+     15.17,
+     10.2,
+     1.9
+    ],
+    "face": "rear",
+    "from": "O10, placed as on O2-BR",
+    "words": "KANAL 3 / KANAL 4"
+   },
+   {
+    "box": [
+     183.55,
+     15.17,
+     13.15,
+     1.9
+    ],
+    "face": "rear",
+    "from": "O10, placed as on O2-BR",
+    "words": "ANSCHLUSS ANTENNE"
+   },
+   {
+    "box": [
+     126.62,
+     29.29,
+     71.98,
+     45.48
+    ],
+    "face": "bottom",
+    "from": "O5, the label read on it; its three marks (a house, TÜV GS, TÜV) left out",
+    "words": "Nintendo\nENTERTAINMENT SYSTEM\nBezeichnung : NESE-001    Nennstrom : 1.3A (AC)\nNennspannung : AC9V, 50Hz    Schutzklasse : III\n© 1985 Nintendo\nDarf nur in Verbindung mit Netzgerät/Adapter NES-002ED (TÜV GS S 60534) in Betrieb genommen werden.\nFRG"
+   },
+   {
+    "box": [
+     28.67,
+     57.14,
+     60.26,
+     29.03
+    ],
+    "face": "bottom",
+    "from": "O5, the label read on it; the Bundespost's mark and the pkm mark left out",
+    "words": "Model: NESE 001\nBrand: Nintendo\nSerial-No.\nG 625\n592 W\nFRG"
+   }
+  ]
+ },
+ "led": {
+  "d": 4.4,
+  "from": "O2-FL, the front face rectified",
+  "h": 4.8,
+  "patent": {
+   "h": 6.6,
+   "w": 6.43,
+   "x": 33.02,
+   "z": 22.89
+  },
+  "w": 4.4,
+  "x": 33.4,
+  "y": 203.2,
+  "z": 22.36
+ },
+ "model": {
+  "BUTTONS": {
+   "list": [
+    {
+     "d": 3.03,
+     "h": 14.0,
+     "name": "POWER",
+     "proudMm": 1.0,
+     "travelFrom": "typical",
+     "travelMm": 3.0,
+     "w": 24.8,
+     "x": 40.3,
+     "y": 203.2,
+     "z": 17.46
+    },
+    {
+     "d": 3.03,
+     "h": 14.0,
+     "name": "RESET",
+     "proudMm": 1.0,
+     "travelFrom": "typical",
+     "travelMm": 3.0,
+     "w": 24.8,
+     "x": 67.6,
+     "y": 203.2,
+     "z": 17.46
+    }
+   ],
+   "note": "O2-FL, the front face rectified; travel typical; POWER shown in while running [guessing - verify]"
+  },
+  "CASE": {
+   "band": {
+    "blackEnds": {
+     "frontY": 164.37,
+     "rearD": 38.48
+    },
+    "from": "front: O2-FL rectified; top: O2-FL's top rectified; rear: O1 FIG 4",
+    "front": {
+     "w": 40.0,
+     "x": 180.1
+    },
+    "rear": {
+     "w": 43.37,
+     "x": 178.99
+    },
+    "top": {
+     "w": 41.08,
+     "x": 181.48
+    }
+   },
+   "depth": 203.2,
+   "feet": 3.96,
+   "height": 88.9,
+   "notch": {
+    "from": "its sides O2-BR, its height O1 FIG 4",
+    "h": 12.98,
+    "w": 16.29,
+    "x": 98.45,
+    "z": 3.96
+   },
+   "note": "published size, not Nintendo's (published, not Nintendo's: 10 by 8 by 3.5 inches (the NES Fandom wiki, and Thingiverse 243385's \"254 X 203 X 89 mm\", D2) and 10.1 by 8 by 3.5 inches (dimensions.com, D1); good to about 3 per cent); the feet from O1 FIG 3; the seam from O2-FL",
+   "outline": [
+    [
+     0,
+     0
+    ],
+    [
+     254.0,
+     0
+    ],
+    [
+     254.0,
+     203.2
+    ],
+    [
+     0,
+     203.2
+    ]
+   ],
+   "panel": {
+    "from": "O2-FL",
+    "h": 33.23,
+    "patent": {
+     "h": 32.48,
+     "w": 75.58,
+     "x": 27.48,
+     "z": 16.37
+    },
+    "w": 69.06,
+    "x": 27.67,
+    "z": 15.34
+   },
+   "rearWindow": {
+    "from": "O2-BR, the rear face rectified",
+    "h": 32.15,
+    "labelStrip": {
+     "h": 5.9,
+     "w": 51.75,
+     "x": 177.95,
+     "z": 12.97
+    },
+    "patent": {
+     "h": 35.21,
+     "w": 60.84,
+     "x": 173.24,
+     "z": 2.42
+    },
+    "setBackReadMm": 4.39,
+    "shiftMm": [
+     3.45,
+     4.39
+    ],
+    "w": 61.5,
+    "x": 172.5,
+    "z": 3.96
+   },
+   "seamZ": 48.57,
+   "width": 254.0
+  },
+  "DOOR": {
+   "front": {
+    "h": 33.09,
+    "w": 146.78,
+    "x": 33.32,
+    "z": 59.77
+   },
+   "lip": {
+    "h": 2.5,
+    "w": 29.4,
+    "x": 91.1,
+    "z": 58.56
+   },
+   "note": "O2-FL: the front and the top rectified",
+   "top": {
+    "d": 36.42,
+    "w": 148.16,
+    "x": 33.32,
+    "y": 166.78
+   }
+  },
+  "FEET": {
+   "list": [
+    {
+     "d": 17.65,
+     "h": 3.96,
+     "x": 30.01,
+     "y": 170.93
+    },
+    {
+     "d": 17.65,
+     "h": 3.96,
+     "x": 225.05,
+     "y": 170.93
+    },
+    {
+     "d": 17.65,
+     "h": 3.96,
+     "x": 30.01,
+     "y": 25.03
+    },
+    {
+     "d": 17.65,
+     "h": 3.96,
+     "x": 225.05,
+     "y": 25.03
+    }
+   ],
+   "note": "O1 FIG 6 for their places, FIG 3 for their height"
+  },
+  "LABELS": {
+   "note": "words only, to be drawn in the site's own face",
+   "ntsc": [
+    {
+     "box": [
+      38.6,
+      74.86,
+      39.4,
+      6.5
+     ],
+     "face": "front",
+     "words": "Nintendo"
+    },
+    {
+     "box": [
+      38.6,
+      69.56,
+      72.5,
+      3.2
+     ],
+     "face": "front",
+     "words": "ENTERTAINMENT SYSTEM"
+    },
+    {
+     "box": [
+      43.6,
+      19.46,
+      16.3,
+      2.5
+     ],
+     "face": "button:POWER",
+     "words": "POWER"
+    },
+    {
+     "box": [
+      73.0,
+      19.56,
+      14.4,
+      2.5
+     ],
+     "face": "button:RESET",
+     "words": "RESET"
+    },
+    {
+     "box": [
+      189.0,
+      44.26,
+      1.9,
+      3.1
+     ],
+     "face": "front",
+     "words": "1"
+    },
+    {
+     "box": [
+      207.1,
+      44.26,
+      3.65,
+      3.1
+     ],
+     "face": "front",
+     "words": "2"
+    },
+    {
+     "box": [
+      212.85,
+      15.17,
+      15.1,
+      1.9
+     ],
+     "face": "rear",
+     "words": "AC ADAPTER"
+    },
+    {
+     "box": [
+      199.85,
+      15.17,
+      10.2,
+      1.9
+     ],
+     "face": "rear",
+     "words": "CH3-CH4"
+    },
+    {
+     "box": [
+      183.55,
+      15.17,
+      13.15,
+      1.9
+     ],
+     "face": "rear",
+     "words": "RF SWITCH"
+    }
+   ],
+   "pal": [
+    {
+     "box": [
+      40.07,
+      76.23,
+      38.9,
+      7.02
+     ],
+     "face": "front",
+     "words": "Nintendo"
+    },
+    {
+     "box": [
+      40.49,
+      70.22,
+      71.16,
+      4.76
+     ],
+     "face": "front",
+     "words": "ENTERTAINMENT SYSTEM"
+    },
+    {
+     "box": [
+      40.77,
+      64.54,
+      44.38,
+      4.63
+     ],
+     "face": "front",
+     "words": "EUROPEAN VERSION"
+    },
+    {
+     "box": [
+      43.6,
+      19.46,
+      16.3,
+      2.5
+     ],
+     "face": "button:POWER",
+     "words": "POWER"
+    },
+    {
+     "box": [
+      73.0,
+      19.56,
+      14.4,
+      2.5
+     ],
+     "face": "button:RESET",
+     "words": "RESET"
+    },
+    {
+     "box": [
+      189.0,
+      44.26,
+      1.9,
+      3.1
+     ],
+     "face": "front",
+     "words": "1"
+    },
+    {
+     "box": [
+      207.1,
+      44.26,
+      3.65,
+      3.1
+     ],
+     "face": "front",
+     "words": "2"
+    },
+    {
+     "box": [
+      212.85,
+      15.17,
+      15.1,
+      1.9
+     ],
+     "face": "rear",
+     "words": "ANSCHLUSS NETZGERAT/ ADAPTER"
+    },
+    {
+     "box": [
+      199.85,
+      15.17,
+      10.2,
+      1.9
+     ],
+     "face": "rear",
+     "words": "KANAL 3 / KANAL 4"
+    },
+    {
+     "box": [
+      183.55,
+      15.17,
+      13.15,
+      1.9
+     ],
+     "face": "rear",
+     "words": "ANSCHLUSS ANTENNE"
+    },
+    {
+     "box": [
+      126.62,
+      29.29,
+      71.98,
+      45.48
+     ],
+     "face": "bottom",
+     "words": "Nintendo\nENTERTAINMENT SYSTEM\nBezeichnung : NESE-001    Nennstrom : 1.3A (AC)\nNennspannung : AC9V, 50Hz    Schutzklasse : III\n© 1985 Nintendo\nDarf nur in Verbindung mit Netzgerät/Adapter NES-002ED (TÜV GS S 60534) in Betrieb genommen werden.\nFRG"
+    },
+    {
+     "box": [
+      28.67,
+      57.14,
+      60.26,
+      29.03
+     ],
+     "face": "bottom",
+     "words": "Model: NESE 001\nBrand: Nintendo\nSerial-No.\nG 625\n592 W\nFRG"
+    }
+   ]
+  },
+  "LED": {
+   "d": 4.4,
+   "h": 4.8,
+   "note": "O2-FL, the front face rectified",
+   "w": 4.4,
+   "x": 33.4,
+   "y": 203.2,
+   "z": 22.36
+  },
+  "PORTS": {
+   "list": [
+    {
+     "h": 26.2,
+     "name": "1",
+     "w": 17.1,
+     "x": 183.4,
+     "y": 203.2,
+     "z": 17.16
+    },
+    {
+     "h": 26.2,
+     "name": "2",
+     "w": 16.85,
+     "x": 201.75,
+     "y": 203.2,
+     "z": 17.16
+    }
+   ],
+   "note": "O2-FL, the front face rectified"
+  },
+  "PROFILE": {
+   "from": "photographs",
+   "note": "the end seen from the front, from photographs; its held-out check 0.71 mm against 2.0",
+   "points": [
+    {
+     "inset": 0.0,
+     "z": 92.86
+    },
+    {
+     "inset": 0.0,
+     "z": 48.57
+    },
+    {
+     "inset": 0.0,
+     "z": 45.05
+    },
+    {
+     "inset": 16.0,
+     "z": 3.96
+    }
+   ]
+  },
+  "REAR": {
+   "note": "NTSC: O2-BR and O1 FIG 7; PAL: the same places, its words from O10",
+   "ntsc": [
+    {
+     "centre": {
+      "x": 225.03,
+      "z": 26.87
+     },
+     "face": "rear",
+     "h": 9.8,
+     "kind": "power jack",
+     "label": "AC ADAPTER",
+     "w": 9.35,
+     "x": 220.35,
+     "z": 21.97
+    },
+    {
+     "centre": {
+      "x": 205.35,
+      "z": 28.62
+     },
+     "face": "rear",
+     "h": 6.3,
+     "kind": "channel switch",
+     "label": "CH3-CH4",
+     "w": 10.0,
+     "x": 200.35,
+     "z": 25.47
+    },
+    {
+     "centre": {
+      "x": 191.2,
+      "z": 26.97
+     },
+     "face": "rear",
+     "h": 9.3,
+     "kind": "RF jack",
+     "label": "RF SWITCH",
+     "w": 9.3,
+     "x": 186.55,
+     "z": 22.32
+    },
+    {
+     "d": 11.2,
+     "face": "right",
+     "kind": "RCA jack",
+     "label": "VIDEO",
+     "x": 248.0,
+     "y": 45.26,
+     "z": 29.64
+    },
+    {
+     "d": 11.2,
+     "face": "right",
+     "kind": "RCA jack",
+     "label": "AUDIO",
+     "x": 248.0,
+     "y": 63.63,
+     "z": 29.64
+    }
+   ],
+   "pal": [
+    {
+     "centre": {
+      "x": 225.03,
+      "z": 26.87
+     },
+     "face": "rear",
+     "h": 9.8,
+     "kind": "power jack",
+     "label": "ANSCHLUSS NETZGERAT/ ADAPTER",
+     "w": 9.35,
+     "x": 220.35,
+     "z": 21.97
+    },
+    {
+     "centre": {
+      "x": 205.35,
+      "z": 28.62
+     },
+     "face": "rear",
+     "h": 6.3,
+     "kind": "channel switch",
+     "label": "KANAL 3 / KANAL 4",
+     "w": 10.0,
+     "x": 200.35,
+     "z": 25.47
+    },
+    {
+     "centre": {
+      "x": 191.2,
+      "z": 26.97
+     },
+     "face": "rear",
+     "h": 9.3,
+     "kind": "RF jack",
+     "label": "ANSCHLUSS ANTENNE",
+     "w": 9.3,
+     "x": 186.55,
+     "z": 22.32
+    },
+    {
+     "d": 11.2,
+     "face": "right",
+     "kind": "RCA jack",
+     "label": "VIDEO",
+     "x": 248.0,
+     "y": 45.26,
+     "z": 29.64
+    },
+    {
+     "d": 11.2,
+     "face": "right",
+     "kind": "RCA jack",
+     "label": "AUDIO",
+     "x": 248.0,
+     "y": 63.63,
+     "z": 29.64
+    }
+   ]
+  },
+  "UNDERSIDE": {
+   "note": "O1 FIG 6 for both; the PAL labels from O5",
+   "ntsc": {
+    "baseInsetMm": 16.0,
+    "bumps": {
+     "avBump": {
+      "d": 57.57,
+      "w": 8.39,
+      "x": 244.29,
+      "y": 27.31
+     },
+     "frontBracket": {
+      "d": 17.52,
+      "w": 40.6,
+      "x": 180.29,
+      "y": 185.68
+     },
+     "rearBump": {
+      "d": 6.37,
+      "w": 59.36,
+      "x": 173.89,
+      "y": 1.14
+     }
+    },
+    "cover": {
+     "d": 51.2,
+     "w": 95.99,
+     "x": 58.15,
+     "y": 98.98
+    },
+    "coverInner": {
+     "d": 20.48,
+     "w": 49.65,
+     "x": 82.09,
+     "y": 114.0
+    },
+    "feet": [
+     {
+      "d": 17.65,
+      "x": 30.01,
+      "y": 170.93
+     },
+     {
+      "d": 17.65,
+      "x": 225.05,
+      "y": 170.93
+     },
+     {
+      "d": 17.65,
+      "x": 30.01,
+      "y": 25.03
+     },
+     {
+      "d": 17.65,
+      "x": 225.05,
+      "y": 25.03
+     }
+    ],
+    "panels": [
+     {
+      "d": 27.76,
+      "w": 64.22,
+      "x": 26.48,
+      "y": 56.43
+     },
+     {
+      "d": 26.17,
+      "w": 49.65,
+      "x": 41.05,
+      "y": 25.03
+     },
+     {
+      "d": 46.65,
+      "w": 73.04,
+      "x": 127.11,
+      "y": 26.85
+     },
+     {
+      "d": 4.55,
+      "w": 24.27,
+      "x": 152.49,
+      "y": 83.97
+     }
+    ],
+    "screws": [
+     {
+      "d": 7.5,
+      "x": 14.01,
+      "y": 191.71
+     },
+     {
+      "d": 7.5,
+      "x": 236.9,
+      "y": 191.71
+     },
+     {
+      "d": 7.5,
+      "x": 15.4,
+      "y": 12.29
+     },
+     {
+      "d": 7.5,
+      "x": 243.52,
+      "y": 12.29
+     },
+     {
+      "d": 6.62,
+      "x": 127.11,
+      "y": 191.14
+     },
+     {
+      "d": 6.62,
+      "x": 127.11,
+      "y": 12.29
+     }
+    ],
+    "straps": [
+     {
+      "d": 16.16,
+      "w": 233.92,
+      "x": 9.05,
+      "y": 122.65
+     },
+     {
+      "d": 99.67,
+      "w": 16.33,
+      "x": 98.64,
+      "y": 0.23
+     }
+    ]
+   },
+   "pal": {
+    "baseInsetMm": 16.0,
+    "bumps": {
+     "avBump": {
+      "d": 57.57,
+      "w": 8.39,
+      "x": 244.29,
+      "y": 27.31
+     },
+     "frontBracket": {
+      "d": 17.52,
+      "w": 40.6,
+      "x": 180.29,
+      "y": 185.68
+     },
+     "rearBump": {
+      "d": 6.37,
+      "w": 59.36,
+      "x": 173.89,
+      "y": 1.14
+     }
+    },
+    "cover": {
+     "d": 51.2,
+     "w": 95.99,
+     "x": 58.15,
+     "y": 98.98
+    },
+    "coverInner": {
+     "d": 20.48,
+     "w": 49.65,
+     "x": 82.09,
+     "y": 114.0
+    },
+    "feet": [
+     {
+      "d": 17.65,
+      "x": 30.01,
+      "y": 170.93
+     },
+     {
+      "d": 17.65,
+      "x": 225.05,
+      "y": 170.93
+     },
+     {
+      "d": 17.65,
+      "x": 30.01,
+      "y": 25.03
+     },
+     {
+      "d": 17.65,
+      "x": 225.05,
+      "y": 25.03
+     }
+    ],
+    "labels": [
+     {
+      "box": [
+       126.62,
+       29.29,
+       71.98,
+       45.48
+      ]
+     },
+     {
+      "box": [
+       28.67,
+       57.14,
+       60.26,
+       29.03
+      ]
+     }
+    ],
+    "panels": [
+     {
+      "d": 27.76,
+      "w": 64.22,
+      "x": 26.48,
+      "y": 56.43
+     },
+     {
+      "d": 26.17,
+      "w": 49.65,
+      "x": 41.05,
+      "y": 25.03
+     },
+     {
+      "d": 46.65,
+      "w": 73.04,
+      "x": 127.11,
+      "y": 26.85
+     },
+     {
+      "d": 4.55,
+      "w": 24.27,
+      "x": 152.49,
+      "y": 83.97
+     }
+    ],
+    "screws": [
+     {
+      "d": 7.5,
+      "x": 14.01,
+      "y": 191.71
+     },
+     {
+      "d": 7.5,
+      "x": 236.9,
+      "y": 191.71
+     },
+     {
+      "d": 7.5,
+      "x": 15.4,
+      "y": 12.29
+     },
+     {
+      "d": 7.5,
+      "x": 243.52,
+      "y": 12.29
+     },
+     {
+      "d": 6.62,
+      "x": 127.11,
+      "y": 191.14
+     },
+     {
+      "d": 6.62,
+      "x": 127.11,
+      "y": 12.29
+     }
+    ],
+    "straps": [
+     {
+      "d": 16.16,
+      "w": 233.92,
+      "x": 9.05,
+      "y": 122.65
+     },
+     {
+      "d": 99.67,
+      "w": 16.33,
+      "x": 98.64,
+      "y": 0.23
+     }
+    ]
+   }
+  },
+  "VENTS": {
+   "list": [
+    {
+     "d": 125.89,
+     "face": "top",
+     "from": "O2-FL's top rectified; 20 gaps between the slats there, against 21 bars on O1 FIG 5",
+     "slots": 20,
+     "w": 41.08,
+     "x": 181.48,
+     "y": 38.48
+    },
+    {
+     "d": 22.07,
+     "face": "bottom",
+     "from": "O1 FIG 6",
+     "slots": 4,
+     "w": 30.89,
+     "x": 12.14,
+     "y": 91.25
+    },
+    {
+     "d": 22.75,
+     "face": "bottom",
+     "from": "O1 FIG 6",
+     "slots": 4,
+     "w": 31.78,
+     "x": 209.86,
+     "y": 91.25
+    },
+    {
+     "d": 17.75,
+     "face": "bottom",
+     "from": "O1 FIG 6",
+     "slots": 3,
+     "w": 31.78,
+     "x": 209.86,
+     "y": 46.65
+    }
+   ],
+   "note": "top: O2-FL's top rectified; bottom: O1 FIG 6"
+  }
+ },
+ "notch": {
+  "from": "its sides O2-BR, its height O1 FIG 4",
+  "h": 12.98,
+  "w": 16.29,
+  "x": 98.45,
+  "z": 3.96
+ },
+ "outline": [
+  [
+   0,
+   0
+  ],
+  [
+   254.0,
+   0
+  ],
+  [
+   254.0,
+   203.2
+  ],
+  [
+   0,
+   203.2
+  ]
+ ],
+ "outlineWhat": "the top seen from above, the published width and depth; its corners are rounded on the case and not measured",
+ "palDifferences": [
+  "The front label adds a third line, \"EUROPEAN VERSION\", under \"ENTERTAINMENT SYSTEM\" (O4); the words above it sit higher on the band.",
+  "The rear's words are German: \"ANSCHLUSS NETZGERAT/ ADAPTER\", \"KANAL 3 / KANAL 4\", \"ANSCHLUSS ANTENNE\" (O10), where the NTSC console's say \"AC ADAPTER\", \"CH3-CH4\", \"RF SWITCH\" (O2-BR).",
+  "The underside carries two labels, the rating label and the type approval label, with their words (O5); no photograph of the NTSC underside was used, so the NTSC model has none.",
+  "Inside, the modulator is an ALPS can, not the NTSC frame (task 5, parts.json); its jacks are not photographed face on, so the PAL rear is not checked against the PAL board.",
+  "The PAL console photographed is yellowed; the model draws both as made, in the same greys (the plan)."
+ ],
+ "palFront": {
+  "measured": [
+   "door width",
+   "label band height"
+  ],
+  "ratios": [
+   {
+    "O2-FL": 0.5744,
+    "O2-FLAgainstPatentPct": -1.357,
+    "O4": 0.5764,
+    "O4AgainstO2-FLPct": 0.3537,
+    "O4AgainstPatentPct": -1.0081,
+    "patentFig3": 0.5823,
+    "ratio": "door width"
+   },
+   {
+    "O2-FL": 0.1637,
+    "O2-FLAgainstPatentPct": -4.7539,
+    "O4": 0.158,
+    "O4AgainstO2-FLPct": -3.4912,
+    "O4AgainstPatentPct": -8.0791,
+    "patentFig3": 0.1719,
+    "ratio": "label band height"
+   },
+   {
+    "O2-FL": 0.2611,
+    "O2-FLAgainstPatentPct": 21.8018,
+    "O4": null,
+    "O4AgainstO2-FLPct": null,
+    "O4AgainstPatentPct": null,
+    "patentFig3": 0.2144,
+    "ratio": "buttons span"
+   }
+  ],
+  "verdict": "between pass and stop",
+  "words": {
+   "ENTERTAINMENT SYSTEM": [
+    40.49,
+    70.22,
+    71.16,
+    4.76
+   ],
+   "EUROPEAN VERSION": [
+    40.77,
+    64.54,
+    44.38,
+    4.63
+   ],
+   "Nintendo": [
+    40.07,
+    76.23,
+    38.9,
+    7.02
+   ]
+  }
+ },
+ "panel": {
+  "from": "O2-FL",
+  "h": 33.23,
+  "patent": {
+   "h": 32.48,
+   "w": 75.58,
+   "x": 27.48,
+   "z": 16.37
+  },
+  "w": 69.06,
+  "x": 27.67,
+  "z": 15.34
+ },
+ "ports": [
+  {
+   "from": "O2-FL, the front face rectified: the port's frame",
+   "h": 26.2,
+   "name": "1",
+   "patent": {
+    "h": 23.77,
+    "w": 17.04,
+    "x": 183.65,
+    "z": 18.7
+   },
+   "w": 17.1,
+   "x": 183.4,
+   "y": 203.2,
+   "z": 17.16
+  },
+  {
+   "from": "O2-FL, the front face rectified: the port's frame",
+   "h": 26.2,
+   "name": "2",
+   "patent": {
+    "h": 23.77,
+    "w": 16.8,
+    "x": 201.91,
+    "z": 18.7
+   },
+   "w": 16.85,
+   "x": 201.75,
+   "y": 203.2,
+   "z": 17.16
+  }
+ ],
+ "powerLatch": {
+  "seen": false,
+  "what": "No photograph shows POWER pushed in: O2-FL, O3-01 to O3-04 and the PAL set show both buttons out, the consoles off. O3-01 shows the switch board behind them, two push switches of different sizes, which does not say whether POWER's latches. The model shows POWER in while the machine runs, as the design says [guessing - verify]."
+ },
+ "profile": [
+  {
+   "inset": 0.0,
+   "z": 92.86
+  },
+  {
+   "inset": 0.0,
+   "z": 48.57
+  },
+  {
+   "inset": 0.0,
+   "z": 45.05
+  },
+  {
+   "inset": 16.0,
+   "z": 3.96
+  }
+ ],
+ "profileCheck": {
+  "errMm": 0.71,
+  "fallback": "O1 FIG 3's outline, scaled to the case",
+  "fallbackUsed": false,
+  "limitMm": 2.0,
+  "passes": true,
+  "what": "the bottom shell's inset at the base, read on O2-BR's rear face (both ends averaged), held out of the profile built on O2-FL's front"
+ },
+ "profileEachEnd": {
+  "O2-BR": {
+   "caseLeft": {
+    "break": 42.92,
+    "inset": 12.86
+   },
+   "caseRight": {
+    "break": 37.88,
+    "inset": 17.71
+   }
+  },
+  "O2-FL": {
+   "left": {
+    "break": 35.96,
+    "inset": 17.6
+   },
+   "right": {
+    "break": 46.21,
+    "inset": 14.4
+   }
+  },
+  "what": "break: the z where the end starts to lean, from the base; inset: at the base. Where the photograph shows the end's silhouette (O2-FL's left end, O2-BR's left as seen, the case's right) the insets are 17.6 and 17.7 mm; where it shows the end itself turning away (the other two) they are 14.4 and 12.9: the rounded edge between the front and the end reads differently each way"
+ },
+ "profileFrom": "photographs",
+ "profilePatent": [
+  {
+   "inset": 17.62,
+   "z": 3.96
+  },
+  {
+   "inset": 14.63,
+   "z": 5.96
+  },
+  {
+   "inset": 13.63,
+   "z": 7.96
+  },
+  {
+   "inset": 12.74,
+   "z": 9.96
+  },
+  {
+   "inset": 11.97,
+   "z": 11.96
+  },
+  {
+   "inset": 11.08,
+   "z": 13.96
+  },
+  {
+   "inset": 10.08,
+   "z": 15.96
+  },
+  {
+   "inset": 9.2,
+   "z": 17.96
+  },
+  {
+   "inset": 8.31,
+   "z": 19.96
+  },
+  {
+   "inset": 7.54,
+   "z": 21.96
+  },
+  {
+   "inset": 6.65,
+   "z": 23.96
+  },
+  {
+   "inset": 5.76,
+   "z": 25.96
+  },
+  {
+   "inset": 4.88,
+   "z": 27.96
+  },
+  {
+   "inset": 3.99,
+   "z": 29.96
+  },
+  {
+   "inset": 3.32,
+   "z": 31.96
+  },
+  {
+   "inset": 2.44,
+   "z": 33.96
+  },
+  {
+   "inset": 1.44,
+   "z": 35.96
+  },
+  {
+   "inset": 0.55,
+   "z": 37.96
+  },
+  {
+   "inset": 0.11,
+   "z": 39.96
+  },
+  {
+   "inset": 0.0,
+   "z": 41.96
+  },
+  {
+   "inset": 0.11,
+   "z": 43.96
+  },
+  {
+   "inset": 0.11,
+   "z": 45.96
+  },
+  {
+   "inset": 0.11,
+   "z": 47.96
+  },
+  {
+   "inset": 0.44,
+   "z": 49.96
+  },
+  {
+   "inset": 0.22,
+   "z": 51.96
+  },
+  {
+   "inset": 0.33,
+   "z": 53.96
+  },
+  {
+   "inset": 0.33,
+   "z": 55.96
+  },
+  {
+   "inset": 0.55,
+   "z": 57.96
+  },
+  {
+   "inset": 0.55,
+   "z": 59.96
+  },
+  {
+   "inset": 0.78,
+   "z": 61.96
+  },
+  {
+   "inset": 0.78,
+   "z": 63.96
+  },
+  {
+   "inset": 0.89,
+   "z": 65.96
+  },
+  {
+   "inset": 0.89,
+   "z": 67.96
+  },
+  {
+   "inset": 1.11,
+   "z": 69.96
+  },
+  {
+   "inset": 1.11,
+   "z": 71.96
+  },
+  {
+   "inset": 1.22,
+   "z": 73.96
+  },
+  {
+   "inset": 1.33,
+   "z": 75.96
+  },
+  {
+   "inset": 1.33,
+   "z": 77.96
+  },
+  {
+   "inset": 1.44,
+   "z": 79.96
+  },
+  {
+   "inset": 1.66,
+   "z": 81.96
+  },
+  {
+   "inset": 1.66,
+   "z": 83.96
+  },
+  {
+   "inset": 1.66,
+   "z": 85.96
+  },
+  {
+   "inset": 1.77,
+   "z": 87.96
+  },
+  {
+   "inset": 1.88,
+   "z": 89.96
+  },
+  {
+   "inset": 2.55,
+   "z": 91.96
+  }
+ ],
+ "profileWhat": "the end of the case seen from the front, the same at both ends and at the front and the rear: points (inset from the end, z). The case's front and rear faces are upright (O1 FIG 7 and FIG 8), so its side outline is the footprint's depth by the height; the bottom shell's two ends lean in below a break (O1 FIG 3 and FIG 4, O2-FL, O2-BR). Built from O2-FL's front, its two ends averaged.",
+ "rear": {
+  "ntsc": [
+   {
+    "board": {
+     "from": "I7-FL, the modulator's face, at the width parts.json gives the modulator",
+     "x": 205.14,
+     "y": 155.37
+    },
+    "boardPlusOffsetX": 230.19,
+    "centre": {
+     "x": 225.03,
+     "z": 26.87
+    },
+    "checkMm": 5.16,
+    "face": "rear",
+    "from": "O2-BR, the rear face rectified, the window panel's set-back taken off",
+    "h": 9.8,
+    "kind": "power jack",
+    "label": "AC ADAPTER",
+    "patentX": 225.02,
+    "w": 9.35,
+    "within": false,
+    "x": 220.35,
+    "z": 21.97
+   },
+   {
+    "board": {
+     "from": "I7-FL, the modulator's face, at the width parts.json gives the modulator",
+     "x": 183.81,
+     "y": 155.37
+    },
+    "boardPlusOffsetX": 208.85,
+    "centre": {
+     "x": 205.35,
+     "z": 28.62
+    },
+    "checkMm": 3.5,
+    "face": "rear",
+    "from": "O2-BR, the rear face rectified, the window panel's set-back taken off",
+    "h": 6.3,
+    "kind": "channel switch",
+    "label": "CH3-CH4",
+    "patentX": 204.99,
+    "w": 10.0,
+    "within": false,
+    "x": 200.35,
+    "z": 25.47
+   },
+   {
+    "board": {
+     "from": "I7-FL, the modulator's face, at the width parts.json gives the modulator",
+     "x": 167.0,
+     "y": 155.37
+    },
+    "boardPlusOffsetX": 192.05,
+    "centre": {
+     "x": 191.2,
+     "z": 26.97
+    },
+    "checkMm": 0.85,
+    "face": "rear",
+    "from": "O2-BR, the rear face rectified, the window panel's set-back taken off",
+    "h": 9.3,
+    "kind": "RF jack",
+    "label": "RF SWITCH",
+    "patentX": 192.49,
+    "w": 9.3,
+    "within": true,
+    "x": 186.55,
+    "z": 22.32
+   },
+   {
+    "d": 11.2,
+    "face": "right",
+    "from": "O1 FIG 7, scaled to the case; its words not read: O2-FL sees that face edge on",
+    "kind": "RCA jack",
+    "label": "VIDEO",
+    "x": 248.0,
+    "y": 45.26,
+    "z": 29.64
+   },
+   {
+    "d": 11.2,
+    "face": "right",
+    "from": "O1 FIG 7, scaled to the case; its words not read: O2-FL sees that face edge on",
+    "kind": "RCA jack",
+    "label": "AUDIO",
+    "x": 248.0,
+    "y": 63.63,
+    "z": 29.64
+   }
+  ],
+  "pal": [
+   {
+    "centre": {
+     "x": 225.03,
+     "z": 26.87
+    },
+    "face": "rear",
+    "from": "O2-BR, the rear face rectified, the window panel's set-back taken off; the PAL shell's window is the same, as O10 shows its three openings [inferring]",
+    "h": 9.8,
+    "kind": "power jack",
+    "label": "ANSCHLUSS NETZGERAT/ ADAPTER",
+    "patentX": 225.02,
+    "w": 9.35,
+    "x": 220.35,
+    "z": 21.97
+   },
+   {
+    "centre": {
+     "x": 205.35,
+     "z": 28.62
+    },
+    "face": "rear",
+    "from": "O2-BR, the rear face rectified, the window panel's set-back taken off; the PAL shell's window is the same, as O10 shows its three openings [inferring]",
+    "h": 6.3,
+    "kind": "channel switch",
+    "label": "KANAL 3 / KANAL 4",
+    "patentX": 204.99,
+    "w": 10.0,
+    "x": 200.35,
+    "z": 25.47
+   },
+   {
+    "centre": {
+     "x": 191.2,
+     "z": 26.97
+    },
+    "face": "rear",
+    "from": "O2-BR, the rear face rectified, the window panel's set-back taken off; the PAL shell's window is the same, as O10 shows its three openings [inferring]",
+    "h": 9.3,
+    "kind": "RF jack",
+    "label": "ANSCHLUSS ANTENNE",
+    "patentX": 192.49,
+    "w": 9.3,
+    "x": 186.55,
+    "z": 22.32
+   },
+   {
+    "d": 11.2,
+    "face": "right",
+    "from": "O1 FIG 7, scaled to the case; its words not read: O2-FL sees that face edge on; the PAL shell's window is the same, as O10 shows its three openings [inferring]",
+    "kind": "RCA jack",
+    "label": "VIDEO",
+    "x": 248.0,
+    "y": 45.26,
+    "z": 29.64
+   },
+   {
+    "d": 11.2,
+    "face": "right",
+    "from": "O1 FIG 7, scaled to the case; its words not read: O2-FL sees that face edge on; the PAL shell's window is the same, as O10 shows its three openings [inferring]",
+    "kind": "RCA jack",
+    "label": "AUDIO",
+    "x": 248.0,
+    "y": 63.63,
+    "z": 29.64
+   }
+  ]
+ },
+ "rearCheck": {
+  "checked": 3,
+  "limitMm": 2.0,
+  "placedFrom": "O2-BR: the board's places are recorded beside, and the model does not use them, because they miss O2-BR (and O1 FIG 4, which agrees with O2-BR) by more than the limit; chosen after the figures were seen",
+  "what": "each rear connector's place along the rear on the board (I7-FL's modulator face, at the modulator's width from parts.json) plus the board's place in the case (O9), against where O2-BR shows it",
+  "within": 1,
+  "worstMm": 5.16
+ },
+ "rearWindow": {
+  "from": "O2-BR, the rear face rectified",
+  "h": 32.15,
+  "labelStrip": {
+   "h": 5.9,
+   "w": 51.75,
+   "x": 177.95,
+   "z": 12.97
+  },
+  "patent": {
+   "h": 35.21,
+   "w": 60.84,
+   "x": 173.24,
+   "z": 2.42
+  },
+  "setBackReadMm": 4.39,
+  "shiftMm": [
+   3.45,
+   4.39
+  ],
+  "w": 61.5,
+  "x": 172.5,
+  "z": 3.96
+ },
+ "seamFrom": "O2-FL, the front face rectified; O1 FIG 3 gives 49.76",
+ "seamZ": 48.57,
+ "sources": [
+  "O1",
+  "O2-FL",
+  "O2-BR",
+  "O3-01",
+  "O4",
+  "O5",
+  "O9",
+  "O10",
+  "I7-FL"
+ ],
+ "spike": {
+  "caseDepth": "pass",
+  "caseHeight": "pass",
+  "palFront": "between pass and stop",
+  "publishedDepthMm": 203.2,
+  "publishedHeightMm": 88.9
+ },
+ "underside": {
+  "ntsc": {
+   "baseInsetMm": 16.0,
+   "bumps": {
+    "avBump": {
+     "d": 57.57,
+     "w": 8.39,
+     "x": 244.29,
+     "y": 27.31
+    },
+    "frontBracket": {
+     "d": 17.52,
+     "w": 40.6,
+     "x": 180.29,
+     "y": 185.68
+    },
+    "rearBump": {
+     "d": 6.37,
+     "w": 59.36,
+     "x": 173.89,
+     "y": 1.14
+    }
+   },
+   "cover": {
+    "d": 51.2,
+    "w": 95.99,
+    "x": 58.15,
+    "y": 98.98
+   },
+   "coverInner": {
+    "d": 20.48,
+    "w": 49.65,
+    "x": 82.09,
+    "y": 114.0
+   },
+   "feet": [
+    {
+     "d": 17.65,
+     "x": 30.01,
+     "y": 170.93
+    },
+    {
+     "d": 17.65,
+     "x": 225.05,
+     "y": 170.93
+    },
+    {
+     "d": 17.65,
+     "x": 30.01,
+     "y": 25.03
+    },
+    {
+     "d": 17.65,
+     "x": 225.05,
+     "y": 25.03
+    }
+   ],
+   "from": "O1 FIG 6, the case turned over, scaled to the case; no photograph of the NTSC underside was used, so its label is not drawn",
+   "panels": [
+    {
+     "d": 27.76,
+     "w": 64.22,
+     "x": 26.48,
+     "y": 56.43
+    },
+    {
+     "d": 26.17,
+     "w": 49.65,
+     "x": 41.05,
+     "y": 25.03
+    },
+    {
+     "d": 46.65,
+     "w": 73.04,
+     "x": 127.11,
+     "y": 26.85
+    },
+    {
+     "d": 4.55,
+     "w": 24.27,
+     "x": 152.49,
+     "y": 83.97
+    }
+   ],
+   "screws": [
+    {
+     "d": 7.5,
+     "x": 14.01,
+     "y": 191.71
+    },
+    {
+     "d": 7.5,
+     "x": 236.9,
+     "y": 191.71
+    },
+    {
+     "d": 7.5,
+     "x": 15.4,
+     "y": 12.29
+    },
+    {
+     "d": 7.5,
+     "x": 243.52,
+     "y": 12.29
+    },
+    {
+     "d": 6.62,
+     "x": 127.11,
+     "y": 191.14
+    },
+    {
+     "d": 6.62,
+     "x": 127.11,
+     "y": 12.29
+    }
+   ],
+   "straps": [
+    {
+     "d": 16.16,
+     "w": 233.92,
+     "x": 9.05,
+     "y": 122.65
+    },
+    {
+     "d": 99.67,
+     "w": 16.33,
+     "x": 98.64,
+     "y": 0.23
+    }
+   ]
+  },
+  "pal": {
+   "baseInsetMm": 16.0,
+   "bumps": {
+    "avBump": {
+     "d": 57.57,
+     "w": 8.39,
+     "x": 244.29,
+     "y": 27.31
+    },
+    "frontBracket": {
+     "d": 17.52,
+     "w": 40.6,
+     "x": 180.29,
+     "y": 185.68
+    },
+    "rearBump": {
+     "d": 6.37,
+     "w": 59.36,
+     "x": 173.89,
+     "y": 1.14
+    }
+   },
+   "cover": {
+    "d": 51.2,
+    "w": 95.99,
+    "x": 58.15,
+    "y": 98.98
+   },
+   "coverInner": {
+    "d": 20.48,
+    "w": 49.65,
+    "x": 82.09,
+    "y": 114.0
+   },
+   "feet": [
+    {
+     "d": 17.65,
+     "x": 30.01,
+     "y": 170.93
+    },
+    {
+     "d": 17.65,
+     "x": 225.05,
+     "y": 170.93
+    },
+    {
+     "d": 17.65,
+     "x": 30.01,
+     "y": 25.03
+    },
+    {
+     "d": 17.65,
+     "x": 225.05,
+     "y": 25.03
+    }
+   ],
+   "from": "O1 FIG 6 for the moulding [inferring: the same shell]; O5 for the labels, its feet recorded against FIG 6's",
+   "labels": [
+    {
+     "box": [
+      126.62,
+      29.29,
+      71.98,
+      45.48
+     ]
+    },
+    {
+     "box": [
+      28.67,
+      57.14,
+      60.26,
+      29.03
+     ]
+    }
+   ],
+   "o5": {
+    "cover": [
+     72.65,
+     119.36,
+     69.76,
+     21.84
+    ],
+    "feet": [
+     {
+      "d": 17.33,
+      "x": 224.14,
+      "y": 25.19
+     },
+     {
+      "d": 17.35,
+      "x": 29.14,
+      "y": 26.1
+     },
+     {
+      "d": 16.95,
+      "x": 223.19,
+      "y": 171.39
+     },
+     {
+      "d": 16.97,
+      "x": 30.23,
+      "y": 173.2
+     }
+    ],
+    "screwsToFig6Mm": {
+     "fitMm": {
+      "max": 1.2407,
+      "median": 0.6669,
+      "p90": 1.1157
+     },
+     "heldOutMm": {
+      "max": 3.6302,
+      "median": 2.1961,
+      "p90": 3.4961
+     },
+     "n": 6,
+     "worst": [
+      [
+       "rearRight",
+       3.6302
+      ],
+      [
+       "rearLeft",
+       3.362
+      ],
+      [
+       "frontRight",
+       2.3031
+      ]
+     ]
+    }
+   },
+   "panels": [
+    {
+     "d": 27.76,
+     "w": 64.22,
+     "x": 26.48,
+     "y": 56.43
+    },
+    {
+     "d": 26.17,
+     "w": 49.65,
+     "x": 41.05,
+     "y": 25.03
+    },
+    {
+     "d": 46.65,
+     "w": 73.04,
+     "x": 127.11,
+     "y": 26.85
+    },
+    {
+     "d": 4.55,
+     "w": 24.27,
+     "x": 152.49,
+     "y": 83.97
+    }
+   ],
+   "screws": [
+    {
+     "d": 7.5,
+     "x": 14.01,
+     "y": 191.71
+    },
+    {
+     "d": 7.5,
+     "x": 236.9,
+     "y": 191.71
+    },
+    {
+     "d": 7.5,
+     "x": 15.4,
+     "y": 12.29
+    },
+    {
+     "d": 7.5,
+     "x": 243.52,
+     "y": 12.29
+    },
+    {
+     "d": 6.62,
+     "x": 127.11,
+     "y": 191.14
+    },
+    {
+     "d": 6.62,
+     "x": 127.11,
+     "y": 12.29
+    }
+   ],
+   "straps": [
+    {
+     "d": 16.16,
+     "w": 233.92,
+     "x": 9.05,
+     "y": 122.65
+    },
+    {
+     "d": 99.67,
+     "w": 16.33,
+     "x": 98.64,
+     "y": 0.23
+    }
+   ]
+  }
+ },
+ "vents": [
+  {
+   "d": 125.89,
+   "face": "top",
+   "from": "O2-FL's top rectified; 20 gaps between the slats there, against 21 bars on O1 FIG 5",
+   "slots": 20,
+   "w": 41.08,
+   "x": 181.48,
+   "y": 38.48
+  },
+  {
+   "d": 22.07,
+   "face": "bottom",
+   "from": "O1 FIG 6",
+   "slots": 4,
+   "w": 30.89,
+   "x": 12.14,
+   "y": 91.25
+  },
+  {
+   "d": 22.75,
+   "face": "bottom",
+   "from": "O1 FIG 6",
+   "slots": 4,
+   "w": 31.78,
+   "x": 209.86,
+   "y": 91.25
+  },
+  {
+   "d": 17.75,
+   "face": "bottom",
+   "from": "O1 FIG 6",
+   "slots": 3,
+   "w": 31.78,
+   "x": 209.86,
+   "y": 46.65
+  }
+ ],
+ "widthCrossCheck": {
+  "againstPublishedMidpointPct": -1.96,
+  "depthToWidth": 0.7813,
+  "what": "on O9, the rim's depth to width through the camera its XMP records, where the rim is taken as the published 254 by 203.2",
+  "widthAgainstBoard": "not separable on O9: the board lies about 11 mm below the rim, and that depth and the rim's true width trade against each other in one view"
+ }
+}

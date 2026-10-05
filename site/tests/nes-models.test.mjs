@@ -688,3 +688,171 @@ test('the board parts module is generated from parts.json, names its sources, an
   for (const [k, h] of Object.entries(m.HEIGHTS)) if (k !== 'board') assert.equal(typeof h.measured, 'boolean', k);
   for (const p of m.PASSIVES) assert.ok(['axial', 'radial', 'other'].includes(p.kind));
 });
+
+// --- task 8: the case, measured, for both consoles -------------------------------------------
+
+const caseData = JSON.parse(fs.readFileSync(path.join(TOOL, 'data', 'case.json'), 'utf8'));
+const CASE_MJS = path.join(process.cwd(), 'src', 'models', 'nes-famicom-case-parts.mjs');
+const CASE_EXPORTS = ['CASE', 'PROFILE', 'DOOR', 'VENTS', 'BUTTONS', 'LED', 'PORTS', 'REAR', 'LABELS', 'UNDERSIDE', 'FEET'];
+
+test('case.json\'s size is the published figures, said not to be Nintendo\'s, and agrees with spike.json and its verdicts', () => {
+  const c = caseData;
+  assert.equal(c.footprint.widthMm, 254);
+  assert.equal(c.footprint.depthMm, spike.case.patent.published.depthMm);
+  assert.equal(c.heightMm, spike.case.patent.published.heightMm);
+  assert.equal(c.footprint.depthFrom, 'published');
+  assert.equal(c.heightFrom, 'published');
+  assert.equal(c.footprint.notNintendos, true);
+  assert.match(c.footprint.widthSource, /not Nintendo's/);
+  const v = Object.fromEntries(spike.verdicts.map((x) => [x.check, x.verdict]));
+  assert.equal(c.spike.caseDepth, v['case depth']);
+  assert.equal(c.spike.caseHeight, v['case height']);
+  assert.equal(c.spike.palFront, v['PAL front']);
+  for (const k of ['caseDepth', 'caseHeight', 'palFront']) assert.notEqual(c.spike[k], 'STOP', k);
+});
+
+const onCase = (what, lo, hi, tol = 0.5) => {
+  for (let i = 0; i < 3; i++) assert.ok(lo[i] >= -tol && hi[i] <= [254, 203.2, caseData.heightMm + caseData.feetMm][i] + tol, `${what}: ${lo} to ${hi}`);
+};
+
+test('every feature of the case lies on the case', () => {
+  const c = caseData;
+  const top = c.heightMm + c.feetMm;
+  const front = (what, b) => onCase(what, [b.x, 203.2, b.z], [b.x + b.w, 203.2, b.z + b.h]);
+  front('door', c.door.front);
+  front('panel', c.panel);
+  front('LED', c.led);
+  for (const b of c.buttons) front(b.name, b);
+  for (const p of c.ports) front(`port ${p.name}`, p);
+  onCase('the door on the top', [c.door.top.x, c.door.top.y, top], [c.door.top.x + c.door.top.w, c.door.top.y + c.door.top.d, top]);
+  for (const r of ['ntsc', 'pal']) {
+    for (const x of c.rear[r]) {
+      if (x.face === 'rear') onCase(x.label, [x.x, 0, x.z], [x.x + x.w, 0, x.z + x.h]);
+      else onCase(x.label, [x.x - x.d / 2, x.y - x.d / 2, x.z - x.d / 2], [x.x, x.y + x.d / 2, x.z + x.d / 2]);
+    }
+    const u = c.underside[r];
+    for (const f of u.feet) onCase('a foot', [f.x - f.d / 2, f.y - f.d / 2, 0], [f.x + f.d / 2, f.y + f.d / 2, 0]);
+    for (const b of [u.cover, u.coverInner, ...u.panels, ...u.straps]) onCase('an underside part', [b.x, b.y, 0], [b.x + b.w, b.y + b.d, 0], 1.5);
+    for (const l of c.labels[r]) {
+      const [a, b, w, h] = l.box;
+      if (l.face === 'bottom') onCase(l.words, [a, b, 0], [a + w, b + h, 0]);
+      else onCase(l.words, [a, 0, b], [a + w, 0, b + h]);
+    }
+  }
+  for (const v of c.vents) onCase(`vents, ${v.face}`, [v.x, v.y, 0], [v.x + v.w, v.y + v.d, 0]);
+  for (const p of c.profile) assert.ok(p.inset >= 0 && p.inset < 127 && p.z >= 0 && p.z <= top + 0.01, JSON.stringify(p));
+  const b = c.boardInCase;
+  onCase('the board', [b.x, b.y - 119.445, b.z - 1.6], [b.x + 195.95, b.y, b.z]);
+});
+
+test('the buttons, LED and ports are in the order the photographs show, and the rear\'s connectors too', () => {
+  const c = caseData;
+  const [power, reset] = c.buttons;
+  assert.deepEqual(c.buttons.map((b) => b.name), ['POWER', 'RESET']);
+  assert.deepEqual(c.ports.map((p) => p.name), ['1', '2']);
+  const xs = [c.led, power, reset, ...c.ports].map((f) => f.x);
+  assert.deepEqual(xs, [...xs].sort((p, q) => p - q), 'left to right: the LED, POWER, RESET, port 1, port 2');
+  assert.ok(c.led.x + c.led.w <= power.x && power.x + power.w <= reset.x && reset.x + reset.w <= c.ports[0].x && c.ports[0].x + c.ports[0].w <= c.ports[1].x);
+  // seen from behind, left to right: AC ADAPTER, CH3-CH4, RF SWITCH, so x falls
+  const rear = c.rear.ntsc.filter((x) => x.face === 'rear');
+  assert.deepEqual(rear.map((x) => x.label), ['AC ADAPTER', 'CH3-CH4', 'RF SWITCH']);
+  assert.ok(rear[0].x > rear[1].x && rear[1].x > rear[2].x);
+  // the AV jacks: video nearer the rear than audio
+  const side = Object.fromEntries(c.rear.ntsc.filter((x) => x.face === 'right').map((x) => [x.label, x]));
+  assert.ok(side.VIDEO.y < side.AUDIO.y);
+});
+
+test('each rear connector\'s place on the board plus the board\'s offset is recorded against where O2-BR shows it, judged at 2 mm as measured', () => {
+  const c = caseData;
+  const b = c.boardInCase;
+  const t = (b.turnDeg * Math.PI) / 180;
+  assert.equal(c.rearCheck.limitMm, 2.0);
+  let within = 0;
+  let worst = 0;
+  const checked = c.rear.ntsc.filter((x) => 'checkMm' in x);
+  assert.equal(checked.length, 3);
+  for (const x of checked) {
+    const bx = x.board.x;
+    const by = -x.board.y;
+    const viaBoard = b.x + Math.cos(t) * bx - Math.sin(t) * by;
+    assert.ok(Math.abs(viaBoard - x.boardPlusOffsetX) < 0.05, `${x.label}: ${viaBoard} against ${x.boardPlusOffsetX}`);
+    const err = Math.abs(x.boardPlusOffsetX - x.centre.x);
+    assert.ok(Math.abs(err - x.checkMm) < 0.02, x.label);
+    assert.equal(x.within, err <= 2.0, x.label);
+    within += x.within ? 1 : 0;
+    worst = Math.max(worst, err);
+    // the window's opening holds the connector the model draws
+    assert.ok(x.centre.x >= x.x && x.centre.x <= x.x + x.w, x.label);
+  }
+  assert.equal(c.rearCheck.within, within);
+  assert.equal(c.rearCheck.checked, checked.length);
+  assert.ok(Math.abs(c.rearCheck.worstMm - worst) < 0.02);
+  // where the check misses, case.json says what the model uses instead
+  if (within < checked.length) assert.match(c.rearCheck.placedFrom, /O2-BR/);
+});
+
+test('the profile\'s held-out check passes within 2 mm, or the patent\'s fallback is used and flagged', () => {
+  const p = caseData.profileCheck;
+  assert.equal(p.limitMm, 2.0);
+  assert.equal(p.passes, p.errMm <= p.limitMm);
+  assert.equal(caseData.profileFrom, p.passes ? 'photographs' : 'patent');
+  assert.equal(p.fallbackUsed, !p.passes);
+  if (!p.passes) assert.deepEqual(caseData.profile, caseData.profilePatent);
+  const zs = caseData.profile.map((q) => q.z);
+  assert.equal(Math.max(...zs), Math.round((caseData.heightMm + caseData.feetMm) * 100) / 100);
+});
+
+test('the case\'s labels are words, and no label, export or module has an image, a path or a logo', async () => {
+  for (const r of ['ntsc', 'pal']) {
+    for (const l of caseData.labels[r]) {
+      for (const k of Object.keys(l)) assert.ok(['words', 'box', 'face', 'from'].includes(k), `${r}: ${l.words} has ${k}`);
+      assert.equal(typeof l.words, 'string');
+      assert.ok(l.words.trim().length > 0);
+      assert.doesNotMatch(l.words, /[<>{}\\]/);
+      assert.equal(l.box.length, 4);
+      for (const v of l.box) assert.equal(typeof v, 'number');
+    }
+  }
+  const text = fs.readFileSync(CASE_MJS, 'utf8');
+  assert.doesNotMatch(text, /<svg|<path|\bpath\s*:|"path"|\.png|\.webp|\.jpe?g|\.svg|data:image|logo/i);
+  const m = await import(CASE_MJS);
+  for (const r of ['ntsc', 'pal']) for (const l of m.LABELS[r]) assert.deepEqual(Object.keys(l).sort(), ['box', 'face', 'words']);
+});
+
+test('the PAL console\'s differences from the NTSC console are listed, and its words are its own', () => {
+  const c = caseData;
+  assert.ok(Array.isArray(c.palDifferences) && c.palDifferences.length >= 3);
+  const words = (r) => c.labels[r].map((l) => l.words);
+  assert.ok(words('pal').includes('EUROPEAN VERSION') && !words('ntsc').includes('EUROPEAN VERSION'));
+  assert.ok(words('ntsc').includes('AC ADAPTER') && !words('pal').includes('AC ADAPTER'));
+  assert.ok(words('pal').some((w) => /ANSCHLUSS ANTENNE/.test(w)));
+  assert.ok(c.labels.pal.some((l) => l.face === 'bottom') && !c.labels.ntsc.some((l) => l.face === 'bottom'));
+  assert.ok(c.palDifferences.some((d) => /EUROPEAN VERSION/.test(d)) && c.palDifferences.some((d) => /German/.test(d)));
+  assert.equal(c.palFront.verdict, spike.verdicts.find((v) => v.check === 'PAL front').verdict);
+});
+
+test('whether POWER latches is said, and marked a guess when nothing shows it', () => {
+  const p = caseData.powerLatch;
+  assert.equal(typeof p.seen, 'boolean');
+  if (!p.seen) assert.match(p.what, /\[guessing - verify\]/);
+  for (const b of caseData.buttons) assert.ok(['typical', 'photographs'].includes(b.travelFrom), b.name);
+});
+
+test('the case parts module is generated from case.json, names its sources, and agrees with it', async () => {
+  const text = fs.readFileSync(CASE_MJS, 'utf8');
+  assert.match(text, /^\/\/ GENERATED by tools\/nes-model\/case_measure\.py/);
+  const head = text.split('\nexport ')[0];
+  for (const s of caseData.sources) assert.ok(head.includes(s), `the header names ${s}`);
+  assert.doesNotMatch(text, /#[0-9a-fA-F]{3,8}\b|\b(rgb|hsl)a?\(/);
+  const m = await import(CASE_MJS);
+  assert.deepEqual(Object.keys(m).sort(), [...CASE_EXPORTS].sort());
+  for (const name of CASE_EXPORTS) {
+    assert.deepEqual(m[name], caseData.model[name], name);
+    assert.equal(typeof m[name].note, 'string', `${name} has a source note`);
+  }
+  for (const name of ['REAR', 'LABELS', 'UNDERSIDE']) for (const r of ['ntsc', 'pal']) assert.ok(r in m[name], `${name}.${r}`);
+  assert.equal(m.CASE.width, caseData.footprint.widthMm);
+  assert.equal(m.CASE.depth, caseData.footprint.depthMm);
+  assert.equal(m.CASE.height, caseData.heightMm);
+  for (const s of caseData.sources) assert.ok(sources.some((x) => x.id === s), `${s} is in sources.json`);
+});

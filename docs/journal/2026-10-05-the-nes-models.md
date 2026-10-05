@@ -1621,3 +1621,269 @@ P1's body seen on I4 lying across its fingers.
 The docstring's step 1 said the bodies were each package's typical size; it
 now says what the code does: measured on I4, the median of each package's
 parts.
+
+## Task 8: the case, measured for both consoles
+
+`tools/nes-model/case_measure.py` measures the outside of the NTSC NES-001
+and the PAL NESE-001, and writes `data/case.json` and the module the page will
+read, `site/src/models/nes-famicom-case-parts.mjs`. `run-case.sh` runs it
+after `verify.py` on its inputs. The venv as before: Python 3.12.3, numpy
+2.5.3, opencv-python-headless 5.0.0, Pillow 12.3.0, scipy 1.18.1, pytest
+9.1.1; `pdfimages` 24.02.0.
+
+The NES machine's pull request (#55) has not merged, and it edits the NES row
+of `machines/registry.json`, so this run did everything that is offline and
+left out what needs the registry; the list is at the end of this section.
+
+### The inputs fetched
+
+Fetched by hand on 5 October 2026 with Commons' API (`prop=imageinfo`,
+`iiprop=url|size|sha1|extmetadata`), each licence read from its
+`LicenseShortName`, each file checked against Commons' SHA-1 before its
+SHA-256 was taken, and kept out of the repository with the others:
+
+| Id | What | Author | Licence, as stated |
+|---|---|---|---|
+| O3-01 to O3-04 | Evan-Amos's NES-001 opened in stages | Evan-Amos | Public domain |
+| I7-FL, I7-FR, I7-Bottom | The NTSC board with its modulator, from two corners and from below | Evan-Amos | Public domain |
+| O9 | HOF06601: the PAL bottom shell from above, the board in it | PantheraLeo1359531 | CC BY 4.0 |
+| O10 | HOF06440: the PAL bottom shell from the rear | PantheraLeo1359531 | CC BY 4.0 |
+
+Their sizes and hashes are in `sources.json` and the facts sheet. O2-FR was
+fetched to look at and not used, so it is not listed. The 46 files in the
+PAL set's Commons category were looked at as thumbnails first; O9 and O10 are
+the two that show what O3 does not.
+
+### Decisions
+
+- **The size is the published 254 by 203.2 by 88.9 mm,** as the plan's second
+  revision says, stated as not Nintendo's. The 88.9 is taken as the body
+  without its feet: on the patent the height without the feet is within 1.4
+  per cent of it, with them 4.6 to 6.4 per cent over. The feet, 3.96 mm, are
+  read off FIG 3 and scaled with its height.
+- **One face at a time.** Task 0 found O2's camera fails its own check, so
+  nothing here relates two of a photograph's planes through a camera. Each
+  face is rectified on its own by the homography that takes its four
+  bounding lines to the published rectangle. A homography is exact for points
+  on that face whatever the camera was, and whatever perspective correction
+  Photoshop may have made, since that is a homography too; only lens
+  distortion breaks it. Task 0 did the same for the door's width.
+- **Small features are read off the rectified faces.** I first marked them as
+  polygons on the original and mapped them; the overlay showed the buttons'
+  and ports' boxes several millimetres out, my polygons being poor. So the
+  script draws each rectified face at 8 px/mm with a millimetre grid
+  (`--look`), and the features are boxes in millimetres read off that, about
+  0.3 mm. The long edges are still lines fitted as task 0 fits them.
+- **What stands out of or back from a face reads off its place.** The buttons
+  stand about 1 mm proud of the front (FIG 5), so their holes in the panel,
+  which lie in the face, are taken. The rear window's panel is set back: its
+  base reads 4.39 mm above the base, and along the top's far short edge,
+  which runs square to the face, that is a shift of 3.45 mm along the face,
+  which the script takes off every point on the panel. Without it, the three
+  rear openings read 3.5 mm off where the patent's FIG 4 draws them; with it,
+  within 1.3 mm.
+- **Photographs first, the patent where they cannot see.** The underside (no
+  NTSC photograph of it was used), the AV jacks' side (O2-FL sees it nearly
+  edge on), the feet and the notch's height come from the patent's views,
+  each axis scaled to the published size on its own. Everything else is from
+  the photographs, with the patent's figure recorded beside it in
+  `case.json`.
+- **The profile is the end seen from the front.** The patent's side views show
+  the front and rear faces upright, so the side outline is a rectangle; what
+  varies is the bottom shell's ends, which lean in below a break. The plan's
+  `profile: [{y, z}]` became `[{inset, z}]`, noted in the plan.
+- **The board lies solder side up, its fingers to the rear.** I7-Bottom's
+  Commons description says the solder side faces up when the console is taken
+  apart; O3-03, O9 and I7-FL agree, and put the modulator, so the rear jacks
+  and the AV jacks, at the rear right. Board (bx, by) is at case (x + bx,
+  y - by).
+- **The board's offset from O9, not O3.** None of O3's four photographs shows
+  the whole board and the case together: the cartridge tray or the shield
+  covers the board, or it is out. O9 shows the PAL board in the PAL bottom
+  shell from above, and its XMP records an ILCE-7RM4 at 20 mm, a crop of the
+  whole 9504 by 6336 frame (CropLeft 0.173395, CropTop 0.232919) with no
+  resize and no perspective correction, the lens profile applied. So its
+  camera is known: f 5324.4 px, the principal point at the frame's centre less
+  the crop's origin. The rim's homography with that camera gives the vertical
+  vanishing point (the nadir). A point on the board, lower than the rim, reads
+  through the rim's homography as F + k (P - F), F the nadir on the rim's
+  plane, so the board's 48 points (the ten ICs' end pins and the eight holes
+  not under the cartridge connector, found as blobs near a seed of two holes
+  marked by hand) give the offset by a similarity. The PAL and NTSC boards
+  share the layout (task 0) and the shells the moulding [inferring].
+- **The labels are words.** "Nintendo" and "ENTERTAINMENT SYSTEM" are written
+  as words, to be drawn in the site's own face; the registered and trade
+  marks beside them and every logo (the house, TÜV, the Bundespost's horn,
+  pkm) are left out.
+
+### Thresholds, set before the figures
+
+The plan's: the profile's held-out point within 2.0 mm, else the patent's
+FIG 3 outline scaled to the case; each rear connector within 2 mm of its
+board place plus the offset. The profile's check point (the inset at the
+base on O2-BR's rear, held out of the profile built on O2-FL's front) was
+written into the script's docstring before either was run. That the profile
+averages O2-FL's two ends was decided after O2-FL's two ends were seen to
+differ (17.6 and 14.4 mm) and before O2-BR was measured.
+
+### What it measured
+
+Measured on 5 October 2026 with `cd tools/nes-model &&
+NES_MODEL_INPUTS=/tmp/nes-inputs nice -n 10 /tmp/nesvenv/bin/python
+case_measure.py`, which printed:
+
+```
+profile from photographs: held-out 0.71 mm (limit 2.0)
+board in case: x 24.39 y 164.24 z 37.84 mm, turn 0.24 deg
+rear check: 1 of 3 within 2.0 mm, worst 5.16
+  AC ADAPTER: board plus offset 230.19, O2-BR 225.03, O1 225.02, 5.16 mm
+  CH3-CH4: board plus offset 208.85, O2-BR 205.35, O1 204.99, 3.5 mm
+  RF SWITCH: board plus offset 192.05, O2-BR 191.2, O1 192.49, 0.85 mm
+width cross-check (O9): depth to width 0.7813, -1.96 per cent
+```
+
+Run twice; the second run's `case.json` and module were byte for byte the
+first's (`cmp`).
+
+**The rear connectors' check fails, as measured: one of three within 2 mm,
+the worst 5.16.** The board's places come from I7-FL's view of the
+modulator's rear face, rectified on its four corners at the modulator's
+width that task 5 measured on I4 (62.8 mm, its outline from above with the
+lid off), plus O9's offset. O2-BR and the patent's FIG 4 agree with each
+other within 1.3 mm on all three, and put the jacks about 13 per cent closer
+together than I7-FL does at that width. So the likeliest cause is the width
+I7-FL's face was scaled to, not the offset [inferring]: the RF jack, nearest
+the face's left end, is within the limit, and the error grows along the
+face. The model places the three where O2-BR shows them, records the board's
+places beside, and `case.json`'s `rearCheck` says so; that choice was made
+after the figures were seen. It is reported to the controller to rule on.
+
+**The profile passes: 0.71 mm** against 2.0. Each end, the break (where the
+end starts to lean, above the base) and the inset at the base:
+
+| Photograph, end | Edge it shows | Break | Inset |
+|---|---|---|---|
+| O2-FL, the case's left | its silhouette | 35.96 | 17.60 |
+| O2-FL, the case's right | the end turning away | 46.21 | 14.40 |
+| O2-BR, the case's right | its silhouette | 37.88 | 17.71 |
+| O2-BR, the case's left | the end turning away | 42.92 | 12.86 |
+
+The two silhouettes, on opposite ends in two photographs, agree within 0.11
+mm; the two ends seen turning away read 3 to 5 mm less. The edge between the
+front and the end is rounded, and a silhouette and a change of light find
+different places on it. The averaged profile (a break at 41.09 mm above the
+base, clamped below the seam, and 16.00 mm at the base) is what the rule as
+written gives, and the check passes on it; the patent's FIG 3 gives about 15.5
+at the base (its outline 0.88 mm up) and a break near 36. Recorded, not
+judged further.
+
+**The board in the case:** its top left corner (as the scan lies) at x 24.39,
+y 164.24 mm, turned 0.24 degrees; its solder face 10.73 mm below the rim,
+37.84 mm above the table. On O9 the image to board homography's held-out
+error is 0.20 mm median (0.73 the worst, U1's pin 1), all 48 points found;
+the similarity leaves 0.46 mm median; moving the principal point 100 px any
+way moves the place 0.20 mm. The camera stands 308.8 mm over the rim.
+
+**The width cross-check:** on O3, not possible (above). On O9, the rim
+through the XMP's camera has depth to width 0.7813, 1.96 per cent under the
+published midpoint 0.797, beside the patent's top view's 0.772. Its width
+against the board's 196.252 mm cannot be had from one view: the board lies
+about 11 mm below the rim, and that depth and the rim's true size trade
+against each other.
+
+**The photographs against the patent**, front, places along the face: the
+door's left side 33.32 against 34.47, its width 146.78 against 146.06; the
+LED at 33.40 against 33.02; the ports at 183.40 and 201.75 against 183.65 and
+201.91; the rear window 172.5 wide 61.5 against 173.24 wide 60.84. Where they
+differ: the patent's POWER and RESET are 27.7 and 27.0 wide against the holes'
+24.8; its panel 75.6 wide against 69.1; the ports' frames 23.8 tall against
+26.2; the rear window's top 1.5 mm higher. The top: the black band's left
+edge 181.48 against 179.01; the vents run from 38.48 to 164.37 mm from the
+rear (the patent 38.84 to 163.56), with 20 gaps between slats on O2-FL's top
+against 21 bars drawn on FIG 5.
+
+**The PAL underside:** O5 rectified on its six screw holes against FIG 6's
+places, held out one at a time: 2.20 mm median, 3.63 the worst. O5's feet
+fall within 2.3 mm of FIG 6's. The labels' places come from it.
+
+**POWER's latch:** not shown. O2-FL, O3-01 to O3-04 and the PAL set all have
+both buttons out, and O3-01's view of the switch board (two push switches of
+different sizes) does not say which latches. The model shows POWER in while
+the machine runs, as the design says [guessing - verify].
+
+### What the overlays showed
+
+`--look` draws each rectified face with what was read off it in magenta and
+the patent's boxes in cyan, O9 with its rim and every point found, and the
+rectified faces with millimetre grids. Looked at, they showed three marks
+wrong, each fixed before any check was read:
+
+- O2-FL's left end: the fit followed the inside of the rounded edge, about 11
+  px in from the silhouette; the segment was marked again on the silhouette
+  with a narrower search.
+- O2-FL's right end: the fit wandered (rms 8.3 px) on the soft change of
+  light; marked again above the moulded slot at its foot, with a 6 px search
+  (rms 3.2).
+- O2-FL's top: the black band's right edge fitted across the vents' ends (rms
+  9.5 px); marked again along the band's rear black end only.
+
+O5's outline lines fitted poorly on the carpet (rms 3 to 15 px), and the
+outline is the seam's, about 45 mm further from a 19 mm lens than the
+bottom; so O5 is rectified on its screw holes instead, which lie in the
+bottom.
+
+### Mistakes
+
+- The first O2-BR label polygons were typed from the wrong crop's scale (px
+  = 400 + (sx - 40) / 1.5 read as 1.0); caught on the overlay, replaced by
+  boxes read off the rectified rear.
+- `ribCount` was first written `ribs_count`, out of the file's style.
+- The site test's first word check matched "logo" in the module's own note,
+  which said there was none; the note now just says the labels are words.
+
+### Tests
+
+pytest first: `tests/test_case.py`, 13 tests on made-up scenes (a stepped
+box from two corners by a known camera; a face rectified on four fitted
+lines; the board in the case from one view with its nadir, from three
+camera places, and without it to show the nadir is needed; ports placed by a
+known offset; the profile's choice; words only; the module). RED:
+`ModuleNotFoundError: No module named 'case_measure'`. GREEN: 13 passed.
+The whole tool suite: `/tmp/nesvenv/bin/python -m pytest tools/nes-model/tests
+-q`, 101 passed.
+
+Site, in `site/tests/nes-models.test.mjs`, nine tests: the size is the
+published figures and agrees with `spike.json` and its verdicts; every
+feature lies on the case; the buttons, LED, ports and rear connectors are in
+the photographs' order; the rear check is recorded as measured and its
+verdicts agree with its figures; the profile check or its fallback; the
+labels are words, with no image, path or logo in the module; the PAL
+differences are listed; POWER's latch is marked a guess; the module agrees
+with `case.json`. Each was seen to fail on a hand edit and the files were
+restored (`cmp`): the height typed as 89, POWER and RESET swapped, a label
+given a path, the profile's check set to fail, a rear error changed, the PAL
+differences emptied, the latch's guess removed, the LED moved off the case,
+the module edited by hand.
+
+`cd site && npm run build && npm test` (results.json copied in from the main
+checkout for the run and deleted after; both machines' WebAssembly already
+built): tests 340, pass 339, fail 0, todo 1 (the BBC Micro's, already
+there). The floors go from 330 to 339 in both workflows.
+
+### Left for after the machine merges
+
+Not done in this run, by the controller's ruling, because the NES machine's
+pull request (#55) has not merged and edits the NES row of
+`machines/registry.json`:
+
+- step 4: resize and commit three photographs under `site/src/assets/photos/`
+  (O2-FL, O2-BR and one PAL photograph, `cwebp -q 82 -resize 1600 0
+  -metadata none`);
+- their sections in `site/src/assets/photos/README.md`, with both SHA-256;
+- their entries in the NES row's `photos` in `machines/registry.json`, each
+  with its credit, `fetched`, `used` and alt text;
+- `committed` set for each in `tools/nes-model/data/sources.json`;
+- step 5's site test that the new photographs are committed, credited and
+  match their README hashes, and the floors raised again for it.
+
+The same list is in the plan, under task 8.

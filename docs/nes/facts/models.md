@@ -25,6 +25,8 @@ Researched on 5 October 2026 for [the NES's models design](../../superpowers/spe
 | O6 | `File:NES PAL.jpg` | RobinLe (from Pixabay), 2017 | `{{cc-zero}}` | 3456x2304; PAL | A PAL front, oblique. Reference only |
 | O7 | `File:Nintendo Entertainment System - Mattel Version (42532353740).jpg` | Matthew Paul Argall, 2018 | CC BY 2.0 | 6000x4000 | The PAL-A "Mattel Version". Out of scope; not fetched |
 | O8 | `File:Nintendo-Entertainment-System-NES-Controller-Plug.jpg` | Evan-Amos, 2016 | `{{PD-self}}` | 2400x2460 | The controller plug, for the port's shape |
+| O9 | `File:Geöffnetes deutsches NES 20221102 HOF06601 RAW-Export.png`, in the same Commons category as O4 | PantheraLeo1359531, 2 November 2022 | CC BY 4.0 (Commons' `LicenseShortName`, read 5 October 2026) | 6184x4861, 150.1 MB; PAL | The bottom shell from above with the board in it, solder side up: where the board lies in the case (task 8). Sony ILCE-7RM4 at 20 mm; its XMP records the crop, no perspective correction and the lens profile, so its camera is known [from the XMP, read 5 October 2026] |
+| O10 | `File:Geöffnetes deutsches NES 20221102 HOF06440 RAW-Export.png` | PantheraLeo1359531, 2 November 2022 | CC BY 4.0 (as O9) | 6921x3839, 125.4 MB; PAL | The bottom shell from the rear: the German words on the rear window (task 8) |
 | D1 | https://www.dimensions.com/element/nintendo-entertainment-system-nes | Dimensions.com | "©2026 Dimensions.com \| All rights reserved." | Text and drawings | "10.1 x 8 x 3.5 in" (256 x 203.2 x 88.9 mm), 2.27 kg. The figures are quoted as facts with credit; the drawings are not used |
 | D2 | NES Fandom wiki, and Thingiverse thing 243385's description | Various | Not needed: figures only | Text | 10 x 8 x 3.5 inches; "254 X 203 X 89 mm". The open door adds about an inch [from the Fandom wiki] |
 | D3 | RetroTechCollection | n/a | n/a | Text | 254 x 203 x 76 mm: the height is the outlier |
@@ -161,6 +163,52 @@ the PAL CPU also on I6. The marking is the part's top line; date codes left out.
   fetched for task 5; `HEIGHTS` in the parts module says `measured: false`
   for each.
 
+## What task 8 found: the case
+
+Measured on 5 October 2026 by `tools/nes-model/case_measure.py` (the
+figures are in `tools/nes-model/data/case.json`, and the journal for that
+day has the command); each is a measurement of that day.
+
+- **The case's size in the model is the published 254 by 203.2 by 88.9 mm,**
+  which are not Nintendo's figures (D1, D2). The 88.9 is the body without its
+  feet: the patent's height to width without them is within 1.4 per cent of
+  it, and with them 4.6 to 6.4 per cent over. The feet are about 4 mm tall
+  [from O1 FIG 3].
+- **The board lies in the case solder side up,** turned over about its left
+  to right axis, its edge fingers and the modulator at the rear, the modulator
+  at the right [from I7-Bottom's description, O9, O3-03 and I7-FL]. So the
+  rear connectors and the AV jacks are on the modulator, at the rear right.
+- **O2's photographs are good for one face at a time.** Each face rectified on
+  its own four bounding lines gives places along the face that agree with the
+  patent's orthographic views to about a millimetre (the door's sides, the
+  panel's left edge, the LED, the ports, the rear window and its three
+  openings), whatever the camera did; heights differ more, 2 to 3 mm on the
+  ports' frames and the rear window. Elsewhere the two disagree: the patent's
+  buttons are 2 to 3 mm wider than the holes O2-FL shows, and its panel 6.5 mm
+  wider [from O2-FL, O1 FIG 3]. The model takes the photographs.
+- **The rear window's panel is set back from the rear face,** so a point on it
+  read through the face's plane is out by about 3.5 mm along the face on
+  O2-BR; with that taken off, O2-BR and the patent's FIG 4 agree on the three
+  connectors within 1.3 mm.
+- **O9's camera is known from its own XMP:** an ILCE-7RM4 at 20 mm, the
+  picture a crop of the whole frame with no resize and no perspective
+  correction, the lens profile applied [from O9's XMP, read 5 October 2026].
+- **The words on the case,** read off the photographs: NTSC front "Nintendo",
+  "ENTERTAINMENT SYSTEM", "POWER", "RESET", "1", "2"; NTSC rear "AC ADAPTER",
+  "CH3-CH4", "RF SWITCH" [from O2-FL, O2-BR]. PAL front the same with a third
+  line, "EUROPEAN VERSION" [from O4]; PAL rear "ANSCHLUSS NETZGERAT/ ADAPTER"
+  (an umlaut on the A, if there is one, is not legible), "KANAL 3 / KANAL 4",
+  "ANSCHLUSS ANTENNE" [from O10]; the PAL underside's two labels [from O5].
+  The registered and trade marks beside "Nintendo" and "SYSTEM" are left out,
+  and so is every logo.
+- **Whether POWER latches in when on is not shown** by any photograph used:
+  every one has both buttons out. The model shows it in while the machine
+  runs, as the design says [guessing - verify].
+- **The patent's FIG 7 has the case's rear on its right,** as the AV jacks and
+  the oval recess near them show (they are near the rear on O2-FL), and its
+  FIG 6 is the case turned over about its left to right axis, the front at
+  the top [from O1, O2-FL, O5].
+
 ## Downloaded for the work
 
 SHA-256 of the files the research downloaded on 5 October 2026 (kept at `~/dbhq-previews/nes-model-research/full/`, I2 one folder up, not committed: the scans state no licence of their own and the PAL originals are up to 93 MB). From task 0 every input is listed in `tools/nes-model/data/sources.json` with its URL, author, licence as stated, size and fetch date, and checked against its hash before it is read.
@@ -180,5 +228,14 @@ SHA-256 of the files the research downloaded on 5 October 2026 (kept at `~/dbhq-
 | I4 | `Nintendo-NES-Mk1-Motherboard-Top.jpg` | 10715307 | `2158318ca6e7c913fce4220e8763dc8df4b37e70fea50cf29a1c975556a5b46c` |
 | I5 | `Nintendo-NES-Mk1-Motherboard-Bottom.jpg` | 9247611 | `64d52d1dbedfd123a56780def11821ef4157694e4d88d701924d567e2cb1ae10` |
 | I6 | `RP2A07A_20221102.png` | 2438824 | `99208c2054e674c68aa78942f2c784873b13463d7bd5f2d649ec3e96c7e68c72` |
+| O3-01 | `Nintendo-Entertainment-System-NES-Deconstruction-01.jpg` | 2395877 | `48b896dac434f458094aadbc62cc6145b9ce091850c0cc8ec3123f505f8c270e` |
+| O3-02 | `Nintendo-Entertainment-System-NES-Deconstruction-02.jpg` | 2522921 | `04672176cbb7988ed273079e232bf44e64c311410bc044eb6d5235e65174b207` |
+| O3-03 | `Nintendo-Entertainment-System-NES-Deconstruction-03.jpg` | 2441783 | `3cb3a306d3bae161dda7a7afe9df1ebda0e7c6ad6afe32231f02b2e947d4f059` |
+| O3-04 | `Nintendo-Entertainment-System-NES-Deconstruction-04.jpg` | 2340748 | `7e981543d0fe0c8b32f4e4c34da71964f025c2d60a0cca01dce01907a82f42bf` |
+| I7-FL | `Nintendo-Entertainment-System-NES-Motherboard-FL.jpg` | 2706602 | `8b6bc5f4e49dada4f550436e4fbdadf778f5f04540dd708fa43ac6e80b180ed7` |
+| I7-FR | `Nintendo-Entertainment-System-NES-Motherboard-FR.jpg` | 2315883 | `e519ecd11a1f66bb2df8cb8c0d6cf3d77ca0093cbafa1a48675e22119ab47bd2` |
+| I7-Bottom | `Nintendo-Entertainment-System-NES-Motherboard-Bottom.jpg` | 2773118 | `14625abc6011a3c46bb3d4f3388c2b837047d170ae8c02c333f29b0734b20c23` |
+| O9 | `Geöffnetes_deutsches_NES_20221102_HOF06601_RAW-Export.png` | 150054991 | `b3add1f8480e6afb1a89a11e1aa447f1a195c1e5752bb7dbce08cc2a269d03df` |
+| O10 | `Geöffnetes_deutsches_NES_20221102_HOF06440_RAW-Export.png` | 125363453 | `15a62769d03497da6f09a0ab6351c8d00167acb63d4af4a1ba18048df1e7be10` |
 
-The two scans' sizes are the ones GitHub gives for those paths at the pinned commit (checked with `gh api` on 5 October 2026). Each id here is the id in `sources.json`: O2's corner photographs are O2-FL, O2-BL and O2-BR, and I1's two faces I1-front and I1-back. Not yet fetched: O2's `-FR`, O3, O6, O8, I7. The task that first needs each fetches it and records it here and in `sources.json`.
+The two scans' sizes are the ones GitHub gives for those paths at the pinned commit (checked with `gh api` on 5 October 2026). Each id here is the id in `sources.json`: O2's corner photographs are O2-FL, O2-BL and O2-BR, and I1's two faces I1-front and I1-back. O3's four photographs, I7's FL, FR and Bottom, O9 and O10 were fetched by hand for task 8 on 5 October 2026, each licence read from Commons' API (`extmetadata`, `LicenseShortName`) that day, and each file checked against the SHA-1 Commons gives before its SHA-256 was taken. O2's `-FR` was fetched to look at and not used, so it is not listed. Not yet fetched: O6, O8, and I7's BL and BR. The task that first needs each fetches it and records it here and in `sources.json`.
