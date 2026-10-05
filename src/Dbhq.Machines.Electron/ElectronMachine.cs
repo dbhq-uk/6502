@@ -35,7 +35,9 @@ public sealed class ElectronMachine
     /// <summary>
     /// Switches on: the ULA raises its power-on flag, which the OS reads to tell a power on from a
     /// BREAK (s6a, s10a), then the 6502 runs its reset sequence and starts at the vector in the OS
-    /// ROM, <c>$D8D2</c> (s1a). The ULA is otherwise in its power-on state from construction.
+    /// ROM, <c>$D8D2</c> (s1a). Only the flag is raised: RAM, the ULA's registers and the ROM latch
+    /// are not cleared. They are in their power-on state from construction, so a machine is
+    /// switched on once, and a second call is not a cold start.
     /// </summary>
     public void PowerOn()
     {

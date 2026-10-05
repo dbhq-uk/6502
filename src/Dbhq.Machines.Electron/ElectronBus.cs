@@ -52,7 +52,7 @@ public class ElectronBus : IBus
 
     /// <summary>
     /// A bus with BASIC in the given slots and no other: for the boot tests, which take it out or
-    /// leave it in one slot (s2c). Slots 8 and 9 stay the keyboard whatever this says.
+    /// leave it in one slot (s2c). Slots 8 and 9 are the keyboard, so a slot there is refused.
     /// </summary>
     internal ElectronBus(ElectronRoms roms, int sampleRate, IEnumerable<int> basicSlots)
     {
@@ -62,6 +62,11 @@ public class ElectronBus : IBus
         _basic = roms.Basic;
         foreach (int slot in basicSlots)
         {
+            if (slot is < 0 or >= Slots or KeyboardSlotLow or KeyboardSlotLow + 1)
+            {
+                throw new ArgumentOutOfRangeException(nameof(basicSlots), slot, "BASIC goes in a slot from 0 to 15 other than 8 and 9, which are the keyboard.");
+            }
+
             _basicIn[slot] = true;
         }
 

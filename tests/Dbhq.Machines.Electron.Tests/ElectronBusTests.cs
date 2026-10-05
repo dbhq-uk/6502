@@ -255,4 +255,15 @@ public class ElectronBusTests
             Assert.Equal(slot, b.RomSlot);
         }
     }
+
+    [Theory]
+    [InlineData(-1)]
+    [InlineData(8)]
+    [InlineData(9)]
+    [InlineData(16)]
+    public void TheSeamRefusesASlotBasicCannotBeIn(int slot)
+    {
+        // s2b: there are 16 slots, and 8 and 9 are the keyboard, not a ROM image.
+        Assert.Throws<ArgumentOutOfRangeException>(() => new ElectronBus(new ElectronRoms(Os, Basic), 44_100, [slot]));
+    }
 }
