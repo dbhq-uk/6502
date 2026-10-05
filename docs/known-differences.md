@@ -798,3 +798,49 @@ chip, the model chooses:
 - **Both fields draw the same 256 lines into one picture.** The sheet says the
   fields use the same lines (section 4c); the 625-line interlace is not shown,
   and the picture is 256 lines tall, which the page stretches to 4:3.
+
+## The Acorn Electron: the sound, where the model stops
+
+**What.** `UlaSound` is the ULA's one channel and one bit (`ula.md` section 8):
+selected by `$FE07` bits 2 and 1 = `01`, toggling every 32 x (S + 1) cycles of
+2 MHz, with S of 0 and 1 a constant level. Where the sheet is open (section 12
+item 9) or the form it takes in the page is a choice, the model chooses:
+
+- **A write to `$FE06` restarts the divider.** The next toggle is 32 x (S + 1)
+  cycles after the write. Whether the real counter restarts there or only
+  reloads at its next toggle is not established.
+- **Entering sound mode keeps the output level and starts the divider.** The
+  level is whatever the output last held, and the first toggle is 32 x (S + 1)
+  cycles after the write that entered the mode. The real divider's phase on
+  entry, and the level, are not established. A write to `$FE07` that stays in
+  sound mode does not touch the divider.
+- **Outside sound mode the output holds its last level and does not toggle**,
+  as the sheet says. Cassette output uses the same pin; that is the tape's.
+- **Power on is in sound mode with S of 0 and the level low**: silent. The
+  sheet says the ULA resets to sound mode (section 10) and leaves the rest
+  open (section 12 item 4).
+- **The amplifier is a 10 Hz high-pass, so silence is 0.** The sheet leaves
+  the filtering open. Each sample, the mean of the 1-bit level over its
+  interval, goes through `y = x - xPrev + r x yPrev` with `r = exp(-2 pi x 10 /
+  sampleRate)`. A held level decays to exactly 0 and does not click when sound
+  starts or stops. It also droops a low pitch's flat tops: at 122 Hz a half wave
+  loses about a quarter of its height. The real amplifier's response is not
+  known; there is no low-pass, so the page's own resampling is what removes
+  what lies above its rate.
+- **A sample is the mean of the level over its interval, in exact integers,**
+  not the output of an analogue chain. A toggle at exactly a sample's boundary
+  counts for the sample after it.
+- **The sound is not on the bus's per-access path.** It is brought up to date
+  at a write to `$FE06` or `$FE07` and when the page reads or counts its buffer.
+  A page that never reads it gets the newest second, and `Overruns` counts what
+  fell out.
+- **The sample rate is 1 to 384,000 a second**, refused outside that.
+
+**How the tests treat it.** `UlaSoundTests` holds the formula (S = 15 is a
+toggle every 512 cycles and 1,953.125 Hz; S = 255 is 122.07 Hz), the constant
+level at S of 0 and 1, silence outside sound mode, the two choices above, the
+mean over an interval worked by hand, the sample count and zero crossings of a
+second of sound, and the buffer's overflow. `SoundTests` checks the registers
+through the bus and its mirrors, that the page's read catches the sound up, and
+on the real OS that `VDU 7` makes the output toggle at a pitch between 20 Hz and
+20 kHz.

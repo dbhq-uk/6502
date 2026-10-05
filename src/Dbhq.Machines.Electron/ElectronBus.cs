@@ -30,6 +30,10 @@ namespace Dbhq.Machines.Electron;
 /// once for every cycle that passes.
 /// </para>
 /// <para>
+/// The sound (<see cref="UlaSound"/>) is lazy too: the bus tells it of a write to $FE06 or $FE07
+/// and nothing else, and it makes its samples when the page reads them.
+/// </para>
+/// <para>
 /// The chips join in the decode, in <c>ReadSheila</c> and <c>WriteSheila</c> for the ULA and in
 /// <c>ReadPaged</c> for the keyboard: each later task adds a case there.
 /// </para>
@@ -52,6 +56,7 @@ public class ElectronBus : IBus
     private readonly bool[] _basicIn = new bool[Slots];
     private readonly Ula _ula = new();
     private readonly UlaDisplay _display;
+    private readonly UlaSound _sound;
     private long _cycles;
 
     public ElectronBus(ElectronRoms roms, int sampleRate = 44100)
@@ -79,8 +84,7 @@ public class ElectronBus : IBus
             _basicIn[slot] = true;
         }
 
-        // The sample rate is for the sound task, which builds the sound buffer here.
-        _ = sampleRate;
+        _sound = new UlaSound(sampleRate, () => _cycles);
         _display = new UlaDisplay(_ram, () => _cycles);
     }
 
@@ -95,6 +99,13 @@ public class ElectronBus : IBus
 
     /// <summary>The picture the ULA draws, brought up to now whenever it is read.</summary>
     public Framebuffer Screen => _display.Screen;
+
+    /// <summary>
+    /// The ULA's one-bit sound and the buffer of samples the page reads (s8). It is lazy and the
+    /// bus gives it nothing on the cycle: it is told of a write to $FE06 or $FE07, and the page's
+    /// read of its buffer brings it up to the bus clock.
+    /// </summary>
+    public UlaSound Sound => _sound;
 
     /// <summary>The keyboard matrix, which slots 8 and 9 read (s7).</summary>
     public ElectronKeyboard Keyboard { get; } = new();
@@ -273,6 +284,12 @@ public class ElectronBus : IBus
                 // lines that started before this write first (UlaDisplay's remarks).
                 _display.Write(offset, value, _cycles);
                 _ula.Write(offset, value);
+                if (offset is 0x6 or 0x7)
+                {
+                    // The counter and the control register, whose bits 2 and 1 pick sound (s8).
+                    _sound.Write(offset, value, _cycles);
+                }
+
                 break;
         }
     }
