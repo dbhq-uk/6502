@@ -513,3 +513,65 @@ with the case limits put back to 1.5 and 3 and with the stop moved to 8.2;
 the PAL front's judged figures are O4 against O2-FL. `cd site && npm run
 build && npm test`: 303 passed, one to-do, none failed, so both floors are
 raised to 303.
+
+## Task 1: a model can draw more than one console
+
+Each NES module draws two consoles, the NTSC NES-001 and the PAL NESE-001, and
+the page's region says which. So a model entry in `site/src/models/models.mjs`
+may now carry `regions`, a non-empty list such as `['ntsc', 'pal']`, and then
+its `label`, `about` and `made` are keyed by region: each console has its own
+accessible name, caption and note on how it was made. An entry with no
+`regions` is one console and is read as before.
+
+**Why it lives in `MODELS` and not in the registry.** The registry says which
+models a machine has, as a list of `{ view, module }`, and the check that ties
+it to `MODELS` stays as it was: one module for one view. Which consoles a
+module draws is a fact about the module, as its caption and its note are. Four
+modules, with a region on each registry claim, would have made the registry
+rules longer and cost a second download when the region changes. One module
+draws both, and the region switch needs no download.
+
+**What was added.** `wordsFor(entry, region)` returns a model's words for one
+console, the first region by default, and throws for a region the model does
+not draw. `regionProblems(module, entry)` says in sentences what is wrong with
+an entry's regions: empty, listed twice, not a lower-case word, no label or
+caption for one, no note for one, a key that is not a region. `regionViews(entry)`
+gives the model section one view for each console: its words, whether it is
+hidden (all but the first region), and a suffix that keeps the element ids
+apart. `MachineModel.astro` now reads its words only through `regionViews`. For
+a model with regions it draws each console's caption and note in an element
+with `data-model-region="<region>"`, all but the first `hidden`. The accessible
+name is an attribute and cannot be hidden, so each region's name also sits in a
+hidden element with `data-model-label` and the same attribute. The model
+switches them in task 7. The page `[id].astro` never read a model's words, only
+its module, so it did not change. `site/tests/model-regions.test.mjs` has the
+tests, with a made-up entry because no machine has regions yet; the real NES
+entry arrives in task 7.
+
+**How the two pages were shown unchanged.** The test came first and failed on
+the missing export (`does not provide an export named 'regionProblems'`). Then
+the code. Then the site was built from the commit before this change, in a
+scratch copy (`git archive HEAD` into `/tmp/t1-old`, with `node_modules`
+linked), and from this change, and the two machine pages compared:
+
+```
+cmp /tmp/t1-old/site/dist/machines/kim-1/index.html site/dist/machines/kim-1/index.html
+cmp /tmp/t1-old/site/dist/machines/bbc-micro/index.html site/dist/machines/bbc-micro/index.html
+```
+
+Both are identical, byte for byte (59,889 and 49,404 bytes). The BBC Micro has
+no model section on this branch's base, so its comparison shows only that the
+page is untouched. One mistake on the way: the component still read
+`model.made` once, in the check that the measurements exist. The test that the
+component never reads the entry's fields caught it, and the check now asks the
+views.
+
+Tests for task 1: `cd site && node --test tests/model-regions.test.mjs` 5
+passed (the three of the brief, one for the page's views and one that the
+component reads its words only through them). `cd site && npm test`, with the
+two machines' WebAssembly built first (`node scripts/build-machines.mjs`):
+308 passed, one to-do, none failed, so both floors are raised from 303 to 308.
+Without the WebAssembly built, the four tests that read it fail, as they do on
+any checkout that has not run it; the BBC Micro's page then differs from a
+build that has it, so the scratch build for the `cmp` was given the same built
+files.

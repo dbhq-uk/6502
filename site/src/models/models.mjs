@@ -15,7 +15,12 @@
 //   2. Add an entry here, naming its `machine` and its `view`, with the text
 //      alternative the page shows beside it and, if it was measured, `made`: a
 //      function of its measurements (src/data/<module>-model.json, which every
-//      claimed model must have) giving the note on how it was made.
+//      claimed model must have) giving the note on how it was made. A model
+//      that draws more than one console (the NES's, NTSC and PAL) lists them in
+//      `regions` and keys `label`, `about` and `made` by region; read the words
+//      through wordsFor(entry), never from the fields directly. It is here and
+//      not in the registry because the regions are a fact about what the module
+//      draws, and the registry's claim stays one module for one view.
 //   3. Claim it in the machine's registry entry. src/lib/registry.mjs refuses a
 //      claimed model whose module or results file is missing, and a machine
 //      with a case that claims one of its two models without the other.
@@ -75,3 +80,49 @@ export const modelSrc = (module) => `/models/${module}.js`;
 
 /** The models a machine claims in the registry, in the order its page offers them: none when it claims none. */
 export const modelsOf = (machine) => machine.models ?? [];
+
+/**
+ * A model's words for one console: its accessible name, its caption and its
+ * note on how it was made. A model that draws more than one console (the NES's,
+ * NTSC and PAL) lists them in `regions` and keys `label`, `about` and `made` by
+ * region; the first region is the one shown until the page names another. A
+ * model with no `regions` draws one console and has one of each.
+ */
+export function wordsFor(entry, region = null) {
+  if (!entry.regions) return { label: entry.label, about: entry.about, made: entry.made };
+  const r = region ?? entry.regions[0];
+  if (!entry.regions.includes(r)) throw new Error(`this model draws ${entry.regions.join(' and ')}, not ${r}`);
+  return { label: entry.label[r], about: entry.about[r], made: entry.made?.[r] };
+}
+
+/** What is wrong with a model's `regions`, as sentences: none for a model that has none. */
+export function regionProblems(module, entry) {
+  if (entry.regions === undefined) return [];
+  const errors = [];
+  if (!Array.isArray(entry.regions) || entry.regions.length === 0) return [`${module}: regions, when given, must be a non-empty list`];
+  if (new Set(entry.regions).size !== entry.regions.length) errors.push(`${module}: a region is listed twice`);
+  for (const r of entry.regions) {
+    if (!/^[a-z]+$/.test(r)) errors.push(`${module}: region "${r}" must be a lower-case word`);
+    for (const field of ['label', 'about']) {
+      if (typeof entry[field]?.[r] !== 'string' || entry[field][r].length === 0) errors.push(`${module}: no ${field} for ${r}`);
+    }
+    if (entry.made !== undefined && typeof entry.made?.[r] !== 'function') errors.push(`${module}: made has no note for ${r}`);
+  }
+  for (const field of ['label', 'about', 'made']) {
+    const extra = Object.keys(entry[field] ?? {}).filter((k) => !entry.regions.includes(k));
+    if (typeof entry[field] === 'object' && extra.length) errors.push(`${module}: ${field} has ${extra.join(', ')}, which is not in regions`);
+  }
+  return errors;
+}
+
+/**
+ * What the model section draws, one view for each console: its words, whether
+ * the page hides it (all but the first region, which the visitor sees until
+ * the model switches them), and the suffix that keeps its element ids apart.
+ * A model with no `regions` is one view with no region and no suffix, so its
+ * markup is what it always was.
+ */
+export function regionViews(entry) {
+  if (!entry.regions) return [{ region: null, hidden: false, suffix: '', ...wordsFor(entry) }];
+  return entry.regions.map((region, i) => ({ region, hidden: i > 0, suffix: `-${region}`, ...wordsFor(entry, region) }));
+}

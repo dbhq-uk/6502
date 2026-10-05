@@ -6,6 +6,14 @@
 // presses the button. Without JavaScript it never shows, and the photograph
 // and the machine's own panel are the page.
 //
+// A model that draws more than one console (`regions` in its entry) shows each
+// console's caption and note in an element of its own, carrying
+// data-model-region, and all but the first region's are hidden: the model
+// switches them when the region changes. Each console's accessible name is kept
+// beside them, in a hidden element that carries the same attribute and
+// data-model-label, because a name is an attribute and cannot be hidden. A
+// model with one console renders as it always did.
+//
 // A model with a track map (a `texture` in its entry) gets two toggle buttons,
 // Show tracks (on to start with) and Show tracks only.
 //
@@ -19,7 +27,7 @@
 // cannot disagree. A reference is a source that is not committed (a flatbed
 // scan, a photograph whose source states no licence); it is credited as a
 // drawing is, after the drawings.
-import { MODELS, CONTROLS, CONTROLS_DESCRIPTION, TRACK_BUTTONS, modelSrc } from '../models/models.mjs';
+import { MODELS, CONTROLS, CONTROLS_DESCRIPTION, TRACK_BUTTONS, modelSrc, regionProblems, regionViews } from '../models/models.mjs';
 
 interface Source { author: string; sourceUrl: string; licence: string | null; licenceUrl?: string; used: string; caption?: string; title?: string; sha256?: string }
 interface Props {
@@ -33,12 +41,17 @@ interface Props {
 const { module: id, photos, drawings = [], references = [] } = Astro.props;
 const model = MODELS[id];
 if (!model) throw new Error(`model ${id} has no entry in src/models/models.mjs`);
+const problems = regionProblems(id, model);
+if (problems.length) throw new Error(problems.join('; '));
+const views = regionViews(model);
+const first = views[0];
 const tracks = Boolean(model.texture);
 const help = [CONTROLS.pointer, CONTROLS.touch, CONTROLS.keys, ...(tracks ? [CONTROLS.tracks] : [])].join(' ');
 const measured = import.meta.glob<{ default: object }>('../data/*-model.json', { eager: true });
 const figures = measured[`../data/${id}-model.json`]?.default;
-if (model.made && !figures) throw new Error(`model ${id} describes how it was made, but src/data/${id}-model.json is missing`);
-const made = model.made ? model.made(figures) : null;
+if (views.some((v) => v.made) && !figures) throw new Error(`model ${id} describes how it was made, but src/data/${id}-model.json is missing`);
+// Each console's note on how it was made, from the same measurements.
+for (const v of views) v.note = v.made ? v.made(figures) : null;
 const sources = [
   ...photos.map((p) => ({ ...p, what: `the photograph of ${p.caption ?? 'the original'}` })),
   ...drawings.map((d) => ({ ...d, what: d.title })),
@@ -49,7 +62,8 @@ const sources = [
 <section class="model" aria-labelledby="model" data-model={id} data-model-src={modelSrc(id)} data-model-texture={model.texture} data-state="idle" hidden>
   <div class="wrap narrow">
     <h2 id="model">A model of the board</h2>
-    <section class="model-stage" data-model-stage tabindex="0" aria-label={model.label} aria-description={CONTROLS_DESCRIPTION} aria-describedby="model-about">
+    <section class="model-stage" data-model-stage tabindex="0" aria-label={first.label} aria-description={CONTROLS_DESCRIPTION} aria-describedby={`model-about${first.suffix}`}>
+      {first.region && views.map((v) => <span data-model-region={v.region} data-model-label hidden>{v.label}</span>)}
       <span class="model-tag" aria-hidden="true">Model, not a photograph</span>
       <span class="model-hint" aria-hidden="true"><span class="hint-pointer">{CONTROLS.hint}</span><span class="hint-touch">{CONTROLS.hintTouch}</span></span>
       <button type="button" class="btn small model-load" data-model-load>Load the 3D model</button>
@@ -65,20 +79,20 @@ const sources = [
       <p class="model-status" role="status" data-model-status>The 3D model loads when you scroll to it.</p>
     </div>
     <p class="model-help" id="model-help">{help}</p>
-    <p class="figure-caption model-about" id="model-about">{model.about}</p>
-    {made && (
-      <div class="model-made prose" data-model-made>
-        <h3 id="model-made">How the model was made</h3>
-        {made.paragraphs.map((p) => <p>{p}</p>)}
+    {views.map((v) => <p class="figure-caption model-about" id={`model-about${v.suffix}`} data-model-region={v.region} hidden={v.hidden}>{v.about}</p>)}
+    {views.map((v) => v.note && (
+      <div class="model-made prose" data-model-made data-model-region={v.region} hidden={v.hidden}>
+        <h3 id={`model-made${v.suffix}`}>How the model was made</h3>
+        {v.note.paragraphs.map((p) => <p>{p}</p>)}
         <p>What it was traced and measured from:</p>
         <ul class="model-credit" data-model-credit>
           {sources.map((s) => <li data-model-source>{s.used.charAt(0).toUpperCase() + s.used.slice(1)}: from <a href={s.sourceUrl}>{s.what}</a>, by {s.author}, {s.licence === null ? 'no licence stated' : s.licenceUrl ? <a href={s.licenceUrl}>{s.licence}</a> : s.licence}.</li>)}
         </ul>
         <p>What it does not show, or shows less well:</p>
         <ul class="model-limits" data-model-limits>
-          {made.limits.map((l) => <li>{l}</li>)}
+          {v.note.limits.map((l) => <li>{l}</li>)}
         </ul>
       </div>
-    )}
+    ))}
   </div>
 </section>
