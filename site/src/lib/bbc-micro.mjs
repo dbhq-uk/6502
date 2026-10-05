@@ -1,9 +1,8 @@
-import fs from 'node:fs';
-import path from 'node:path';
 import { SITE_ROOT } from './registry.mjs';
 import { bbcRoms } from './pins.mjs';
 import { readRom } from './machines.mjs';
 import { DISCS_FOLDER } from './bbc-discs.mjs';
+import { downloadBytes as machineDownloadBytes, issueUrl, megabytes } from './machine-page.mjs';
 import { PC_LABELS, bbcCharacters, legend, pcKeysFor } from '../../public/bbc-keys.js';
 
 // What the BBC Micro's page says that is the BBC Micro's own, kept out of the
@@ -23,7 +22,7 @@ export const NOT_MODELLED = [
   { part: 'the 1 MHz bus', issue: 38 },
 ];
 
-export const issueUrl = (n) => `https://github.com/dbhq-uk/6502/issues/${n}`;
+export { issueUrl, megabytes };
 
 /**
  * How many bytes the Start button downloads: every file the build put in
@@ -33,24 +32,7 @@ export const issueUrl = (n) => `https://github.com/dbhq-uk/6502/issues/${n}`;
  * fetched only when the visitor inserts it. Null when the machine was not
  * built into this copy of the site, which the page says.
  */
-export function downloadBytes(root = SITE_ROOT) {
-  const dir = path.join(root, 'public', 'machines', 'bbc-micro');
-  if (!fs.existsSync(path.join(dir, '_framework'))) return null;
-  let total = 0;
-  const walk = (d) => {
-    for (const e of fs.readdirSync(d, { withFileTypes: true })) {
-      if (d === dir && e.name === DISCS_FOLDER) continue;
-      const full = path.join(d, e.name);
-      if (e.isDirectory()) walk(full);
-      else total += fs.statSync(full).size;
-    }
-  };
-  walk(dir);
-  return total;
-}
-
-/** Megabytes, one decimal place, the British way: 12.3. */
-export const megabytes = (bytes) => (bytes / 1e6).toLocaleString('en-GB', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+export const downloadBytes = (root = SITE_ROOT) => machineDownloadBytes('bbc-micro', root, [DISCS_FOLDER]);
 
 
 /**

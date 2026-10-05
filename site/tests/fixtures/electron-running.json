@@ -1,0 +1,23 @@
+{
+  "about": "A preview of the Electron's registry record as it will be once the machine counts as running, for builds that test its page before then: tests/electron-page.test.mjs and scripts/browser-check-electron.mjs build the site with REGISTRY_PREVIEW set to this file, and nothing that deploys does. The record's acceptance, rights and notes are already in machines/registry.json, because the registry accepts them on a planned machine. status and cpu are the record as it will be: copy them into machines/registry.json when the Electron is switched on, then delete this file. cpu names the clock because the page runs the machine at it (2 MHz cycles, the ULA's waits included). photos is a stand-in, the KIM-1's photograph, only because a running machine must have one and the Electron's is not chosen yet; it is never published, and it is not copied. The BBC Micro's page was built the same way, from tests/fixtures/bbc-micro-running.json, deleted when it counted.",
+  "machines": {
+    "electron": {
+      "status": "running",
+      "cpu": "6502, 2 MHz",
+      "photos": [
+        {
+          "file": "kim-1.webp",
+          "author": "Rama & Musée Bolo, cropped by Tomer T",
+          "sourceUrl": "https://commons.wikimedia.org/wiki/File:MOS_KIM-1_IMG_4211_cropped.jpg",
+          "licence": "CC BY-SA 2.0 fr",
+          "licenceUrl": "https://creativecommons.org/licenses/by-sa/2.0/fr/deed.en",
+          "date": "2010-08-24",
+          "caption": "an original MOS Technology KIM-1, on display at the Musée Bolo, EPFL, Lausanne",
+          "alt": "An original KIM-1 board seen from directly above on a black background: a dark green circuit board with gold edge contacts on two tabs down its left side, three 40-pin chips at the top left, a column of eight memory chips, a crystal and the KIM-1 name at the top right, the six-digit display behind a dark filter, and the black keypad of 23 keys with its SST switch at the bottom right.",
+          "fetched": "2026-10-02",
+          "used": "the tracks on the top face, as one of three photographs of it; the keypad's size and its keys' places, the display window, the crystal, the name and the red wire; and a check on where the chips sit"
+        }
+      ]
+    }
+  }
+}

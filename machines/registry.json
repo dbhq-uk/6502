@@ -460,9 +460,9 @@
       "cpu": "6502",
       "core": "nmos",
       "status": "planned",
-      "acceptance": null,
-      "rights": null,
-      "notes": null
+      "acceptance": "ElectronAcceptanceTests",
+      "rights": "The two ROMs are Acorn's: the operating system, OS 1.00, and BBC BASIC 2, the same BASIC as the BBC Micro's, byte for byte. The operating system's own text says (C) 1983 Acorn Computers Ltd. and BASIC's (C)1982 Acorn. Who holds that copyright now was not established, and no licence or permission from any holder was found. Our copy of the operating system is from the elkjs repository at a pinned commit, and BASIC is the BBC Micro's copy, from jsbeeb's ROM folder; elkjs is licensed GPL-2.0 and says nothing about the ROMs, so that licence is not a licence for them. Both are kept in this repository under roms/, with where they came from, and checked by SHA-256 each time they are read. The position is documented, not cleared: if a rights holder asks, the ROMs will be removed.",
+      "notes": "The keyboard, the picture in screen modes 0 to 6, the one-bit sound, and the cassette, with tapes as UEF files, on OS 1.00 and BBC BASIC 2. Not modelled: the Plus 1 and its cartridge slots, the Plus 3 and its disc drive, the joystick and printer ports, and 300 baud and non-standard tapes."
     },
     {
       "id": "bbc-micro-b-plus",

@@ -2,6 +2,7 @@
 import Base from '../../layouts/Base.astro';
 import Kim1Panel from '../../components/Kim1Panel.astro';
 import BbcPanel from '../../components/BbcPanel.astro';
+import ElectronPanel from '../../components/ElectronPanel.astro';
 import MachinePhoto from '../../components/MachinePhoto.astro';
 import MachineModel from '../../components/MachineModel.astro';
 import MachinePhotos from '../../components/MachinePhotos.astro';
@@ -9,10 +10,11 @@ import { MODELS } from '../../models/models.mjs';
 import { registry, results } from '../../lib/data.mjs';
 import { fmt } from '../../lib/figures.mjs';
 import { acceptanceSummary, loadTryIt, parseKeys, runningMachines } from '../../lib/machines.mjs';
-import { bbcRoms, kim1Roms } from '../../lib/pins.mjs';
+import { bbcRoms, electronRoms, kim1Roms } from '../../lib/pins.mjs';
 import { NOT_MODELLED, downloadBytes, issueUrl, symbolTable } from '../../lib/bbc-micro.mjs';
 import { discFolderUrl, discLibrary, discLicenceUrl, discSourceUrl, needsSource } from '../../lib/bbc-discs.mjs';
 import { NOT_ON_A_PC, legend } from '../../../public/bbc-keys.js';
+import { NOT_MODELLED as ELECTRON_NOT_MODELLED, downloadBytes as electronDownloadBytes, symbolTable as electronSymbolTable } from '../../lib/electron.mjs';
 
 // One page for each machine that runs, and only those. "Running" means it runs
 // in the browser, so a running machine with no panel to run it in stops the
@@ -21,30 +23,36 @@ export function getStaticPaths() {
   return runningMachines(registry).map((m) => ({ params: { id: m.id }, props: { machine: m } }));
 }
 const { machine } = Astro.props;
-const Panel = { 'kim-1': Kim1Panel, 'bbc-micro': BbcPanel }[machine.id];
+const Panel = { 'kim-1': Kim1Panel, 'bbc-micro': BbcPanel, electron: ElectronPanel }[machine.id];
 if (!Panel) throw new Error(`machine ${machine.id} is running but has no panel in src/pages/machines/[id].astro, so its page could not run it`);
 // The photograph is required of every running machine (the registry check
 // stops the build without one). The 3D model is shown for a machine in
 // src/models/models.mjs, which says how to add the next; its loader is tiny,
 // and the model itself is loaded only when the visitor gets near it.
 const hasModel = machine.id in MODELS;
-const scripts = [...({ 'kim-1': ['/kim-1.js'], 'bbc-micro': ['/bbc-micro.js'] }[machine.id] ?? []), ...(hasModel ? ['/model-loader.js'] : [])];
+const scripts = [...({ 'kim-1': ['/kim-1.js'], 'bbc-micro': ['/bbc-micro.js'], electron: ['/electron.js'] }[machine.id] ?? []), ...(hasModel ? ['/model-loader.js'] : [])];
 const base = `/machines/${machine.id}/`;
 const clockMhz = Number(/([\d.]+) MHz/.exec(machine.cpu ?? '')?.[1]);
 if (!(clockMhz > 0)) throw new Error(`machine ${machine.id}: its cpu field names no clock in MHz, and the page runs it at that clock`);
 const program = loadTryIt(machine.id);
 const bbc = machine.id === 'bbc-micro';
-const roms = machine.id === 'kim-1' ? kim1Roms() : bbc ? bbcRoms() : [];
+const electron = machine.id === 'electron';
+const roms = machine.id === 'kim-1' ? kim1Roms() : bbc ? bbcRoms() : electron ? electronRoms() : [];
 // The BBC Micro's panel is given its ROM files and the size of its download,
 // read from the build (src/lib/bbc-micro.mjs), and its preset discs, read from
 // machines/bbc-micro/discs/manifest.json and checked (src/lib/bbc-discs.mjs).
 // The KIM-1's takes none of these.
 const library = bbc ? discLibrary() : null;
-const panelProps = bbc ? { roms: roms.map((r) => r.file), download: downloadBytes(), library } : {};
+// The Electron's is given its ROM files and the size of its download, read from
+// the build (src/lib/electron.mjs).
+const panelProps = bbc ? { roms: roms.map((r) => r.file), download: downloadBytes(), library } : electron ? { roms: roms.map((r) => r.file), download: electronDownloadBytes() } : {};
 const description = bbc
   ? `${machine.name}, running on the 6502 core in the browser, with its own ROMs. Type BBC BASIC in on its keyboard and run it.`
-  : `${machine.name}, running on the 6502 core in the browser, with its own ROM. Type a program in on its keypad and run it.`;
+  : electron
+    ? `The Acorn ${machine.name}, running on the 6502 core in the browser, with its own ROMs. Type BBC BASIC in on its keyboard, run it, and save it to tape.`
+    : `${machine.name}, running on the 6502 core in the browser, with its own ROM. Type a program in on its keypad and run it.`;
 const symbols = bbc ? symbolTable() : [];
+const electronSymbols = electron ? electronSymbolTable() : [];
 const notOnAPc = Object.entries(NOT_ON_A_PC).reduce((groups, [key, why]) => groups.set(why, [...(groups.get(why) ?? []), legend(key)]), new Map());
 ---
 
@@ -69,7 +77,7 @@ const notOnAPc = Object.entries(NOT_ON_A_PC).reduce((groups, [key, why]) => grou
     </div>
   </section>
 
-  {program && !bbc && (
+  {program && !bbc && !electron && (
     <section aria-labelledby="try">
       <div class="wrap narrow">
         <h2 id="try">Try it</h2>
@@ -90,7 +98,7 @@ const notOnAPc = Object.entries(NOT_ON_A_PC).reduce((groups, [key, why]) => grou
     </section>
   )}
 
-  {program && bbc && (
+  {program && (bbc || electron) && (
     <section aria-labelledby="try">
       <div class="wrap narrow">
         <h2 id="try">Try it</h2>
@@ -100,6 +108,7 @@ const notOnAPc = Object.entries(NOT_ON_A_PC).reduce((groups, [key, why]) => grou
         <p>The screen should then show:</p>
         <pre class="bbc-program"><code>{program.shows.join('\n')}</code></pre>
         <p>The machine starts with CAPS LOCK on, as the real one does, so letters come out as capitals. Some symbols are not where a PC keyboard has them: the table below says where each one is.</p>
+        {electron && <p>The Electron's BASIC is the BBC Micro's, byte for byte, so this is the same program as on the BBC Micro's page, and it prints the same. Then save it to tape and load it back, as the cassette recorder above says.</p>}
         </div>
       </div>
     </section>
@@ -125,6 +134,28 @@ const notOnAPc = Object.entries(NOT_ON_A_PC).reduce((groups, [key, why]) => grou
         <ul>
           {[...notOnAPc].map(([why, keys]) => <li>{keys.join(', ')}: {why}.</li>)}
         </ul>
+        </div>
+      </div>
+    </section>
+  )}
+
+  {electron && (
+    <section aria-labelledby="keyboard">
+      <div class="wrap narrow">
+        <h2 id="keyboard">The keyboard</h2>
+        <div class="prose">
+        <p>Every key the Electron has is in the on-screen keys under the screen, for a phone, a tablet or a mouse. Tap SHIFT or CTRL and it stays down for the next key you tap, then lets go, so SHIFT and then 2 types a double quote; tap it again to let go without typing.</p>
+        <p>CAPS LK and FUNC are one key on the Electron. On screen, tap it and then another key, and that key is pressed with FUNC: FUNC and a digit is one of the function keys, and FUNC and a letter types a BASIC keyword (FUNC and K types CHAIN). Tap it twice instead and it is pressed alone, which turns CAPS LOCK on or off. Your own Caps Lock key does that too.</p>
+        <p>Each key on your keyboard presses the Electron's key in the same place, so the symbols are where the Electron has them, not where your keyboard prints them. A few PC keys stand in for keys of their own: Backspace and Delete for DELETE, Enter for RETURN, End for COPY, the arrow keys for the cursor keys, and Esc for ESCAPE. The Break button, or the Pause key, is BREAK. Your keyboard presses every key the Electron has, so no key is on the on-screen keys only.</p>
+        <table class="electron-symbols">
+          <caption>Where the symbols are</caption>
+          <thead><tr><th scope="col">To type</th><th scope="col">On the Electron</th><th scope="col">On your keyboard</th></tr></thead>
+          <tbody>
+            {electronSymbols.map((s) => (
+              <tr><td><kbd>{s.character}</kbd></td><td>{s.electron}</td><td>{s.pc ?? 'not on a PC keyboard here'}</td></tr>
+            ))}
+          </tbody>
+        </table>
         </div>
       </div>
     </section>
@@ -163,13 +194,27 @@ const notOnAPc = Object.entries(NOT_ON_A_PC).reduce((groups, [key, why]) => grou
     </section>
   )}
 
+  {electron && (
+    <section aria-labelledby="left-out">
+      <div class="wrap narrow">
+        <h2 id="left-out">What is not modelled</h2>
+        <div class="prose">
+        <p>These parts of the Electron, and the add-ons it took, are left out. Each has an issue that says what it would take.</p>
+        <ul>
+          {ELECTRON_NOT_MODELLED.map((m) => <li>{m.part[0].toUpperCase() + m.part.slice(1)}: <a href={issueUrl(m.issue)}>issue {m.issue}</a></li>)}
+        </ul>
+        </div>
+      </div>
+    </section>
+  )}
+
   {hasModel && <MachineModel id={machine.id} photos={machine.photos} drawings={machine.drawings} />}
 
   <MachinePhotos machine={machine} model={hasModel} />
 
   <section aria-labelledby="rom">
     <div class="wrap narrow">
-      <h2 id="rom">{bbc ? 'Whose ROMs these are' : 'Whose ROM this is'}</h2>
+      <h2 id="rom">{bbc || electron ? 'Whose ROMs these are' : 'Whose ROM this is'}</h2>
       <div class="prose">
       <p>{machine.rights}</p>
       {roms.length > 0 && (
@@ -177,7 +222,7 @@ const notOnAPc = Object.entries(NOT_ON_A_PC).reduce((groups, [key, why]) => grou
           {roms.map((r) => <li>{r.chip ?? r.name}: <a href={r.url}>the copy in the repository</a>, SHA-256 <code>{r.sha256}</code></li>)}
         </ul>
       )}
-      {bbc
+      {bbc || electron
         ? <p>The ROMs are kept in the repository, in <code>roms/</code>, with where they came from. Each is checked against its hash when the site is built, and served from this site beside the emulator.</p>
         : <p>The ROM is kept in the repository, in <code>roms/</code>, with where it came from. It is checked against its hash when the site is built, and served from this site beside the emulator.</p>}
       </div>

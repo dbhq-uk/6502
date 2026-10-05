@@ -2,8 +2,9 @@
 import fs from 'node:fs';
 import path from 'node:path';
 
-// The built site.
-export const DIST = path.resolve(process.cwd(), 'dist');
+// The built site, dist/ unless SITE_DIST names another build: tests/electron-page.test.mjs
+// runs the whole suite against a build of the Electron's preview that way.
+export const DIST = path.resolve(process.cwd(), process.env.SITE_DIST ?? 'dist');
 
 /** Every built page as { url, file, html }, for example url "/status/". */
 export function pages() {
