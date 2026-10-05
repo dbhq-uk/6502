@@ -434,9 +434,13 @@ limits now say that:
 - **Case height to width**: the patent's two figures against 88.9 / 255 =
   0.349, 255 mm being the published widths' midpoint; the same 5 and 8.
 - **The PAL front**: back to the plan's first form, O4 against O2-FL's front
-  face rectified on its four corners. That rectification is planar and needs
-  no camera, so the first revision's reason for moving it does not apply. At
-  least two measured ratios, each within 2 per cent, to pass; STOP over 4.
+  face rectified on its four corners. For the door's width that
+  rectification is planar and needs no camera, so the first revision's
+  reason for moving it does not apply. The label band's height does need
+  one: on O2-FL it is read through the case's camera, which the first
+  revision found faulty, and O4 is taken to be straight on, so the band's
+  figure is the weakest and the nearest a stop, which is known and said here.
+  At least two measured ratios, each within 2 per cent, to pass; STOP over 4.
   The patent's front figures are recorded, not judged.
 - **The case's size in the model** (task 8): the published 254 by 203.2 by
   88.9 mm, said on the page to be no figures of Nintendo's and good to about 3

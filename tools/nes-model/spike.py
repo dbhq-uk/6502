@@ -935,7 +935,10 @@ REVISION = {
              'and 3 per cent limits can resolve (the patent\'s top view against its side over front; the published widths of 254 '
              'and 256 mm at a depth of 203.2), and the check\'s real purpose is to catch a gross scale error. So the case\'s depth '
              'and height are judged against the published ratios\' midpoints, pass within 5 per cent, STOP over 8, and the PAL front '
-             'is back on O4 against O2-FL\'s front as the plan first had it (a planar rectification, needing no camera).'),
+             'is back on O4 against O2-FL\'s front as the plan first had it. Its door width needs no camera (the rectification on '
+             'four corners is planar); its label band height does: on O2-FL it is read through the case\'s camera, the one the first '
+             'revision found faulty, and O4 is taken to be straight on, so the band\'s figure is the weakest and the nearest a stop, '
+             'known and disclosed.'),
     'firstVerdicts': [
         {'check': 'scale x', 'verdict': 'pass'},
         {'check': 'scale y', 'verdict': 'between pass and stop'},
