@@ -769,7 +769,11 @@ def build(parts):
     inset = float(np.mean([fl['left']['inset'], fl['right']['inset']]))
     built = [{'inset': 0.0, 'z': HEIGHT_MM}, {'inset': 0.0, 'z': seam}, {'inset': 0.0, 'z': brk}, {'inset': inset, 'z': 0.0}]
     check_pt = {'inset': float(np.mean([br['left']['inset'], br['right']['inset']])), 'z': 0.0}
-    patent_prof = [{'inset': p['inset'], 'z': p['z']} for p in pat['profile']]
+    # FIG 3's first row, at the base itself, is the bottom corner's rounded
+    # edge, not the end's lean (it reads 17.62 where the row 0.88 mm up reads
+    # about 15.5): left out of the patent's profile, and said so
+    patent_prof = [{'inset': p['inset'], 'z': p['z']} for p in pat['profile'] if p['z'] > 0]
+    patent_dropped = [{'inset': p['inset'], 'z': p['z']} for p in pat['profile'] if p['z'] <= 0]
     choice = profile_choice(built, check_pt, patent_prof)
     profile = [{'inset': _r(p['inset']), 'z': _r(p['z'] + feet)} for p in choice['profile']]
     base_inset = _inset_at(choice['profile'], 0.0)
@@ -794,14 +798,15 @@ def build(parts):
                      'centre': {'x': _r(px), 'z': _r(photo[key]['z'] - shift[1] + feet)},
                      'from': 'O2-BR, the rear face rectified, the window panel\'s set-back taken off',
                      'board': {'x': _r(on_board[0]), 'y': _r(on_board[1]), 'from': 'I7-FL, the modulator\'s face, at the width parts.json gives the modulator'},
-                     'boardPlusOffsetX': _r(via_board[0]), 'checkMm': _r(err), 'within': err <= REAR_LIMIT_MM,
+                     'boardPlusOffsetX': _r(via_board[0]), 'checkMm': _r(err), 'within': err <= REAR_LIMIT_MM, 'checked': True,
                      'patentX': _r(pat['rear'][key + 'Centre']['x'])})
     side = []
     for name, label in (('video', 'VIDEO'), ('audio', 'AUDIO')):
         s = pat['side'][name]
         side.append({'label': label, 'kind': 'RCA jack', 'face': 'right', 'y': _r(s['y']), 'z': _r(s['z']),
                      'x': _r(WIDTH_MM - _inset_at(choice['profile'], s['z'] - feet)), 'd': _r(s['d']),
-                     'from': 'O1 FIG 7, scaled to the case; its words not read: O2-FL sees that face edge on'})
+                     'from': 'O1 FIG 7, scaled to the case; its words not read: O2-FL sees that face edge on',
+                     'checked': False, 'checkedWhy': 'no photograph shows the modulator\'s side face square enough to place the jacks on the board (I7-FR is too oblique), so nothing checks FIG 7\'s places'})
     rear_ntsc = rear + side
     rear_pal = [{**r, 'label': {'AC ADAPTER': 'ANSCHLUSS NETZGERAT/ ADAPTER', 'CH3-CH4': 'KANAL 3 / KANAL 4', 'RF SWITCH': 'ANSCHLUSS ANTENNE'}.get(r['label'], r['label']),
                  'from': r['from'] + '; the PAL shell\'s window is the same, as O10 shows its three openings [inferring]'} for r in rear_ntsc]
@@ -810,7 +815,14 @@ def build(parts):
         r.pop('boardPlusOffsetX', None)
         r.pop('checkMm', None)
         r.pop('within', None)
+        if r['face'] == 'rear':
+            r['checked'] = False
+            r['checkedWhy'] = 'the PAL modulator\'s jacks are never photographed face on, so the PAL rear is not checked against the PAL board'
     checked = [r for r in rear if 'checkMm' in r]
+    used_vs_patent = max(abs(r['centre']['x'] - r['patentX']) for r in checked)
+    rear_words = (f"O2-BR and the patent's rear view agree within {used_vs_patent:.1f} mm; the board's places miss by up to "
+                  f"{max(r['checkMm'] for r in checked):.1f} mm; the check failed as measured")
+    ends = [fl['left']['inset'], fl['right']['inset'], br['left']['inset'], br['right']['inset']]
 
     # the front
     door_front = {'x': _r(fl['door']['left']), 'w': _r(on['band'][0] - fl['door']['left']), 'z': _r(fl['door']['bottom'] + feet),
@@ -900,12 +912,18 @@ def build(parts):
                         'The case\'s front and rear faces are upright (O1 FIG 7 and FIG 8), so its side outline is the footprint\'s depth by the height; '
                         'the bottom shell\'s two ends lean in below a break (O1 FIG 3 and FIG 4, O2-FL, O2-BR). Built from O2-FL\'s front, its two ends averaged.'),
         'profileCheck': {'what': 'the bottom shell\'s inset at the base, read on O2-BR\'s rear face (both ends averaged), held out of the profile built on O2-FL\'s front',
+                         'endsMm': {'min': _r(min(ends)), 'max': _r(max(ends))},
+                         'endsWhat': (f'the four ends read at the base {min(ends):.2f} to {max(ends):.2f} mm (the silhouettes {fl["left"]["inset"]:.2f} and {br["left"]["inset"]:.2f}, the ends turning away '
+                                      f'{fl["right"]["inset"]:.2f} and {br["right"]["inset"]:.2f}; the patent about 15.5); the profile\'s {inset:.1f} is O2-FL\'s two ends averaged (all four average {np.mean(ends):.1f}), good to about 2.5 mm. '
+                                      'The held-out figure shows that the averaging repeats on a second photograph, not that the average is the true inset'),
                          'errMm': _r(choice['check']['errMm']), 'limitMm': PROFILE_LIMIT_MM, 'passes': choice['check']['passes'],
                          'fallback': 'O1 FIG 3\'s outline, scaled to the case', 'fallbackUsed': choice['from'] == 'patent'},
         'profileEachEnd': {'O2-FL': {'left': {k: _r(v) for k, v in fl['left'].items()}, 'right': {k: _r(v) for k, v in fl['right'].items()}},
                            'O2-BR': {'caseRight': {k: _r(v) for k, v in br['left'].items()}, 'caseLeft': {k: _r(v) for k, v in br['right'].items()}},
                            'what': 'break: the z where the end starts to lean, from the base; inset: at the base. Where the photograph shows the end\'s silhouette (O2-FL\'s left end, O2-BR\'s left as seen, the case\'s right) the insets are 17.6 and 17.7 mm; where it shows the end itself turning away (the other two) they are 14.4 and 12.9: the rounded edge between the front and the end reads differently each way'},
-        'profilePatent': [{'inset': _r(p['inset']), 'z': _r(p['z'] + feet)} for p in pat['profile']],
+        'profilePatent': [{'inset': _r(p['inset']), 'z': _r(p['z'] + feet)} for p in patent_prof],
+        'profilePatentLeftOut': {'points': [{'inset': _r(p['inset']), 'z': _r(p['z'] + feet)} for p in patent_dropped],
+                                 'why': 'the row at the base itself is the bottom corner\'s rounded edge, not the end\'s lean'},
         'door': {'front': door_front, 'top': door_top, 'lip': {**_fbox(on['lip'], feet)}, 'from': 'O2-FL: the front and the top rectified',
                  'patent': {'front': {k: _r(v) for k, v in pat['front']['door'].items()}, 'top': {k: _r(v) for k, v in pat['top']['door'].items()}}},
         'band': band, 'panel': panel_front,
@@ -924,11 +942,19 @@ def build(parts):
         'rearCheck': {'what': 'each rear connector\'s place along the rear on the board (I7-FL\'s modulator face, at the modulator\'s width from parts.json) plus the board\'s place in the case (O9), against where O2-BR shows it',
                       'limitMm': REAR_LIMIT_MM, 'checked': len(checked), 'within': sum(1 for r in checked if r['within']),
                       'worstMm': _r(max(r['checkMm'] for r in checked)),
+                      'uncertaintyMm': {'placesUsed': _r(used_vs_patent, 1), 'boardMiss': _r(max(r['checkMm'] for r in checked)),
+                                        'what': 'placesUsed: the largest difference between O2-BR\'s places, which the model uses, and the patent\'s rear view (FIG 4); boardMiss: the largest by which the board\'s places miss O2-BR\'s'},
+                      'words': rear_words,
+                      'ruling': 'Accepted as failed, as measured (the controller, 5 Oct 2026): the model keeps O2-BR\'s places, and the page states the uncertainty; a recheck needs the modulator face\'s width measured on its own first, with its limit fixed in the plan before it runs',
                       'placedFrom': 'O2-BR: the board\'s places are recorded beside, and the model does not use them, because they miss O2-BR (and O1 FIG 4, which agrees with O2-BR) by more than the limit; chosen after the figures were seen'},
         'labels': {'ntsc': labels_ntsc, 'pal': labels_pal},
         'underside': underside,
         'feet': feet_list,
         'boardInCase': {'x': _r(placed['x']), 'y': _r(placed['y']), 'z': _r(board_z), 'turnDeg': _r(placed['turnDeg']),
+                        'uncertaintyMm': float(math.ceil(view['placed']['fitMm']['max'] + view['movedByPrincipalPoint100PxMm'])),
+                        'uncertaintyWhat': (f"about {math.ceil(view['placed']['fitMm']['max'] + view['movedByPrincipalPoint100PxMm']):.0f} mm in x and y: the similarity's worst residual ({view['placed']['fitMm']['max']:.2f} mm) "
+                                            f"plus the move when the principal point is put 100 px out ({view['movedByPrincipalPoint100PxMm']:.2f} mm), rounded up to a whole millimetre; "
+                                            'the shared-moulding assumption (the PAL shell for the NTSC one) is not in it, and stays flagged'),
                         'solderSideUp': True, 'mapping': 'board (bx, by) is at case (x + bx, y - by): the board lies solder side up, its edge fingers to the rear',
                         'zWhat': 'the solder side\'s face: the rim (the seam, O2-FL) less how far below it the board lies on O9',
                         'from': 'O9 (the PAL set\'s HOF06601), the board and the bottom shell in one view, through the camera its XMP records; the PAL and NTSC boards share the layout (task 0) and the shells the moulding [inferring]',
@@ -936,6 +962,7 @@ def build(parts):
                                'k': _r(view['placed']['k'], 4), 'points': len(view['points']), 'missed': view['missed'],
                                'imageToBoardHeldOutMm': {k: _r(v) for k, v in view['imageToBoard']['heldOutMm'].items()},
                                'similarityFitMm': {k: _r(v) for k, v in view['placed']['fitMm'].items()},
+                               'cameraCheck': 'rimScaleRatio is O9\'s own camera check: the rim\'s two scales through the XMP\'s camera, 1 if that camera and the published 254 by 203.2 agreed',
                                'movedByPrincipalPoint100PxMm': _r(view['movedByPrincipalPoint100PxMm']),
                                'rimScaleRatio': _r(view['poseCheck']['scaleRatio'], 4), 'rimOrthogonality': _r(view['poseCheck']['orthogonality'], 4),
                                'xmp': view['xmp']},
@@ -957,7 +984,9 @@ def module_exports(c):
         'CASE': {'note': 'published size, not Nintendo\'s (' + c['footprint']['widthSource'] + '); the feet from O1 FIG 3; the seam from O2-FL',
                  'width': c['footprint']['widthMm'], 'depth': c['footprint']['depthMm'], 'height': c['heightMm'], 'feet': c['feetMm'],
                  'seamZ': c['seamZ'], 'outline': c['outline'], 'band': c['band'], 'panel': c['panel'], 'notch': c['notch'], 'rearWindow': c['rearWindow']},
-        'PROFILE': {'note': f"the end seen from the front, from {c['profileFrom']}; its held-out check {c['profileCheck']['errMm']} mm against {c['profileCheck']['limitMm']}",
+        'PROFILE': {'note': (f"the end seen from the front, from {c['profileFrom']}; its inset at the base is O2-FL's two ends averaged, of four ends that read "
+                             f"{c['profileCheck']['endsMm']['min']} to {c['profileCheck']['endsMm']['max']} mm, good to about 2.5 mm; its held-out check, "
+                             f"{c['profileCheck']['errMm']} mm against {c['profileCheck']['limitMm']}, shows the averaging repeats, not that it is the true inset"),
                     'points': c['profile'], 'from': c['profileFrom']},
         'DOOR': {'note': c['door']['from'], 'front': c['door']['front'], 'top': c['door']['top'], 'lip': c['door']['lip']},
         'VENTS': {'note': 'top: O2-FL\'s top rectified; bottom: O1 FIG 6', 'list': c['vents']},
@@ -965,8 +994,8 @@ def module_exports(c):
                     'list': [{k: b[k] for k in ('name', 'x', 'y', 'z', 'w', 'h', 'd', 'proudMm', 'travelMm', 'travelFrom')} for b in c['buttons']]},
         'LED': {'note': c['led']['from'], **{k: c['led'][k] for k in ('x', 'y', 'z', 'w', 'h', 'd')}},
         'PORTS': {'note': 'O2-FL, the front face rectified', 'list': [{k: p[k] for k in ('name', 'x', 'y', 'z', 'w', 'h')} for p in c['ports']]},
-        'REAR': {'note': 'NTSC: O2-BR and O1 FIG 7; PAL: the same places, its words from O10',
-                 **{r: [{k: v for k, v in x.items() if k in ('label', 'kind', 'face', 'x', 'y', 'z', 'w', 'h', 'd', 'centre')} for x in c['rear'][r]] for r in ('ntsc', 'pal')}},
+        'REAR': {'note': 'NTSC: O2-BR and O1 FIG 7; PAL: the same places, its words from O10. ' + c['rearCheck']['words'],
+                 **{r: [{k: v for k, v in x.items() if k in ('label', 'kind', 'face', 'x', 'y', 'z', 'w', 'h', 'd', 'centre', 'checked', 'checkedWhy')} for x in c['rear'][r]] for r in ('ntsc', 'pal')}},
         'LABELS': {'note': 'words only, to be drawn in the site\'s own face',
                    **{r: [{k: v for k, v in x.items() if k in ('words', 'box', 'face')} for x in c['labels'][r]] for r in ('ntsc', 'pal')}},
         'UNDERSIDE': {'note': 'O1 FIG 6 for both; the PAL labels from O5',

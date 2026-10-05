@@ -193,6 +193,16 @@ day has the command); each is a measurement of that day.
 - **O9's camera is known from its own XMP:** an ILCE-7RM4 at 20 mm, the
   picture a crop of the whole frame with no resize and no perspective
   correction, the lens profile applied [from O9's XMP, read 5 October 2026].
+- **The rear connectors' places on the board miss the photograph.** Placed
+  on the modulator's face (I7-FL) and moved by the board's offset in the
+  case, they miss where O2-BR shows them by 0.85, 3.50 and 5.16 mm, against a
+  2 mm limit; O2-BR and the patent's rear view agree within 1.3 mm. The
+  check failed as measured and was accepted so (the controller, 5 October
+  2026); the model uses O2-BR's places [from I7-FL, O9, O2-BR, O1 FIG 4].
+- **The board's offset in the case comes from O9, the PAL console,** to about
+  2 mm, and is used for the NTSC console too on the assumption that the two
+  shells are one moulding and the two boards one layout (task 0 checked the
+  layout) [inferring: the shells].
 - **The words on the case,** read off the photographs: NTSC front "Nintendo",
   "ENTERTAINMENT SYSTEM", "POWER", "RESET", "1", "2"; NTSC rear "AC ADAPTER",
   "CH3-CH4", "RF SWITCH" [from O2-FL, O2-BR]. PAL front the same with a third

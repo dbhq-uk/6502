@@ -789,6 +789,25 @@ test('each rear connector\'s place on the board plus the board\'s offset is reco
   assert.ok(Math.abs(c.rearCheck.worstMm - worst) < 0.02);
   // where the check misses, case.json says what the model uses instead
   if (within < checked.length) assert.match(c.rearCheck.placedFrom, /O2-BR/);
+  // Pinned as measured on 5 Oct 2026 and accepted as failed by the controller:
+  // a re-run that moves these must change the plan's and the page's words too.
+  assert.equal(c.rearCheck.within, 1);
+  assert.equal(c.rearCheck.worstMm, 5.16);
+  assert.deepEqual(checked.map((x) => [x.label, x.checkMm]), [['AC ADAPTER', 5.16], ['CH3-CH4', 3.5], ['RF SWITCH', 0.85]]);
+  const plan = fs.readFileSync(path.join(REPO_ROOT, 'docs', 'superpowers', 'plans', '2026-10-05-nes-models.md'), 'utf8');
+  assert.ok(plan.includes('The rear connectors\' check failed as measured'));
+  // the uncertainty the page will state: the places used against the patent, the board's miss
+  const used = Math.max(...checked.map((x) => Math.abs(x.centre.x - x.patentX)));
+  assert.equal(c.rearCheck.uncertaintyMm.placesUsed, Math.round(used * 10) / 10);
+  assert.equal(c.rearCheck.uncertaintyMm.boardMiss, worst > 0 ? Math.round(worst * 100) / 100 : 0);
+  assert.equal(c.rearCheck.words, `O2-BR and the patent's rear view agree within ${c.rearCheck.uncertaintyMm.placesUsed.toFixed(1)} mm; the board's places miss by up to ${worst.toFixed(1)} mm; the check failed as measured`);
+  // what is not checked says so, here and in the module
+  for (const r of ['ntsc', 'pal']) for (const x of c.rear[r]) {
+    assert.equal(typeof x.checked, 'boolean', `${r} ${x.label}`);
+    assert.equal(x.checked, r === 'ntsc' && x.face === 'rear', `${r} ${x.label}`);
+    if (!x.checked) assert.ok(x.checkedWhy.length > 0, `${r} ${x.label}`);
+  }
+  assert.ok(c.model.REAR.note.endsWith(c.rearCheck.words));
 });
 
 test('the profile\'s held-out check passes within 2 mm, or the patent\'s fallback is used and flagged', () => {
@@ -798,6 +817,15 @@ test('the profile\'s held-out check passes within 2 mm, or the patent\'s fallbac
   assert.equal(caseData.profileFrom, p.passes ? 'photographs' : 'patent');
   assert.equal(p.fallbackUsed, !p.passes);
   if (!p.passes) assert.deepEqual(caseData.profile, caseData.profilePatent);
+  // the ends' spread at the base, which the held-out figure does not show (pinned, 5 Oct 2026)
+  assert.deepEqual(p.endsMm, { min: 12.86, max: 17.71 });
+  const each = caseData.profileEachEnd;
+  const ends = [each['O2-FL'].left.inset, each['O2-FL'].right.inset, each['O2-BR'].caseRight.inset, each['O2-BR'].caseLeft.inset];
+  assert.equal(p.endsMm.min, Math.min(...ends));
+  assert.equal(p.endsMm.max, Math.max(...ends));
+  assert.match(p.endsWhat, /good to about 2\.5 mm/);
+  assert.match(caseData.model.PROFILE.note, /not that it is the true inset/);
+  assert.ok(caseData.profilePatent.every((q) => q.z > caseData.feetMm), 'the patent profile\'s row at the base is left out');
   const zs = caseData.profile.map((q) => q.z);
   assert.equal(Math.max(...zs), Math.round((caseData.heightMm + caseData.feetMm) * 100) / 100);
 });

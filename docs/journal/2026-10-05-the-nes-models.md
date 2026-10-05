@@ -1887,3 +1887,58 @@ pull request (#55) has not merged and edits the NES row of
   match their README hashes, and the floors raised again for it.
 
 The same list is in the plan, under task 8.
+
+### After review, the same day
+
+The review found the work sound and asked for the uncertainty to be said
+where it is, not only in the figures. **The controller ruled** on the rear
+connectors: the check is accepted as failed, as measured (one of three within
+2 mm); the model keeps O2-BR's places, which agree with the patent's rear view
+within 1.3 mm, since the plan's step 3 names the photographs as the source and
+the board as the check; the page will state the uncertainty. No recheck now
+and nothing rescaled to fit. A recheck needs the modulator face's width
+measured on its own first, with its limit fixed in the plan before it runs;
+it is in the plan's Deferred list.
+
+What changed, all added fields, by one run of `cd tools/nes-model &&
+NES_MODEL_INPUTS=/tmp/nes-inputs nice -n 10 /tmp/nesvenv/bin/python
+case_measure.py`, which printed the same seven lines as before; a structural
+diff of `case.json` against the previous run shows only fields added, the two
+notes changed and the patent profile's first point taken out:
+
+- `rearCheck.words`, also at the end of the module's `REAR.note`: "O2-BR and
+  the patent's rear view agree within 1.3 mm; the board's places miss by up to
+  5.2 mm; the check failed as measured". `rearCheck.uncertaintyMm` has
+  `placesUsed` 1.3 (the largest difference between O2-BR's places, which the
+  model uses, and FIG 4's: the RF jack's, 1.29 mm) and `boardMiss` 5.16.
+- `profileCheck.endsMm` is 12.86 to 17.71: the four ends at the base, which the
+  held-out figure hides. The profile's 16.0 is O2-FL's two ends averaged (all
+  four average 15.6), good to about 2.5 mm; the 0.71 mm held-out figure shows
+  that the averaging repeats on a second photograph, not that 16.0 is the true
+  inset. `PROFILE.note` says so. The 16.0 and the rule are unchanged: both were
+  fixed before O2-BR was measured.
+- `boardInCase.uncertaintyMm` is 2: the similarity's worst residual, 1.25 mm,
+  plus the 0.20 mm the place moves when the principal point is put 100 px out,
+  rounded up to a whole millimetre. The shared-moulding assumption is not in
+  that figure and stays flagged. The rim's scale ratio, 1.0239, is named as O9's
+  own camera check.
+- Every rear entry carries `checked`: true for the NTSC console's three on the
+  rear, false with the reason for the AV jacks (no photograph shows the
+  modulator's side square enough) and for the PAL rear (the PAL modulator's
+  jacks are never photographed face on). The module carries both.
+- The patent profile's row at the base itself (17.62 mm) is the bottom
+  corner's rounded edge, not the end's lean, and is now left out of
+  `profilePatent` and recorded under `profilePatentLeftOut` with the reason.
+- **O2-BL is not used for the rear connectors,** though step 3 names it: O2-BR
+  was read first and agreed with the patent's FIG 4 within 1.3 mm, and O2-BL
+  was not read in this run, so that agreement rests on one photograph and the
+  patent.
+
+The rear-check site test now pins the figures as measured (1 of 3 within, the
+worst 5.16, each connector's 5.16, 3.50 and 0.85) and the plan's sentence
+"The rear connectors' check failed as measured", as task 4's nets test is
+pinned: a re-run that moved them must change the words too. With the CH3-CH4
+jack's figures edited to a consistent pass (its board place moved so that
+every recomputation agreed), only the pin failed; with the plan's sentence
+changed, it failed; with `endsMm` changed, the profile test failed. Each file
+was restored and compared (`cmp`).
