@@ -16,7 +16,8 @@ namespace Dbhq.Machines.Electron;
 /// stands still. Its position is in CPU cycles of tape, and an event on it falls at
 /// <c>cycle = anchor + (tapeTime - anchorPosition)</c>, so the time it raises an interrupt is exact
 /// to the cycle and does not depend on when anything looks. A played tape stops at its end. While
-/// recording, the tape moves only in output mode, so its position is the length of the recording.
+/// recording, the tape moves only in output mode, so its position is the time spent recording, which
+/// is not quite the recording's length: that rounds its carriers and drops idle stretches under a bit time.
 /// </para>
 /// <para>
 /// <b>Input.</b> In input mode a played tape delivers. Carrier raises high-tone-detect (status bit
@@ -116,7 +117,10 @@ internal sealed class UlaTape
     /// <summary>Whether <c>$FE07</c> bit 6, the cassette motor relay, was last written set (<c>ula.md</c> s9).</summary>
     public bool MotorOn => (_control & MotorBit) != 0;
 
-    /// <summary>Bytes the tape delivered that were not read within <see cref="LostCycles"/>.</summary>
+    /// <summary>
+    /// Bytes the tape delivered that were not read within <see cref="LostCycles"/>, since the tape
+    /// was last inserted, rewound, ejected or started recording: a count for one load.
+    /// </summary>
     public int LostBytes { get; private set; }
 
     /// <summary>The receive register, as a read of <c>$FE04</c> would give it, without clearing anything.</summary>
@@ -303,7 +307,7 @@ internal sealed class UlaTape
             }
         }
 
-        _events = events;
+        _events = [.. events];
         _byteStarts = [.. byteStarts];
         _byteValues = [.. byteValues];
         _runStarts = [.. runStarts];
@@ -314,6 +318,7 @@ internal sealed class UlaTape
         _byte = 0;
         _run = 0;
         _lostAt = long.MaxValue;
+        LostBytes = 0;
         _anchorCycle = cycle;
         _anchorPosition = 0;
         _moving = false;

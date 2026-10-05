@@ -24,7 +24,8 @@ public class TapeProbeTests(ITestOutputHelper output)
         var m = new ElectronMachine(ElectronSession.Roms);
         m.InsertTape([new Carrier(20), new TapeByte(0x2A)]);
         m.Bus.Write(0xFE07, 0x40); // input mode, motor on
-        long ready = m.Bus.Cycles + (20 * TapeTiming.CarrierCycleCpuCycles) + TapeProbe.ReadyCycles;
+        // Receive-full nine bit times into the byte (tape.md s4, ula.md s6a).
+        long ready = m.Bus.Cycles + (20 * TapeTiming.CarrierCycleCpuCycles) + (9 * TapeTiming.BitCpuCycles);
         while (m.Bus.Cycles < ready)
         {
             m.Bus.Read(0xC000);

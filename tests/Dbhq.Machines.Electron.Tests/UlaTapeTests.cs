@@ -144,6 +144,41 @@ public class UlaTapeTests
     }
 
     [Fact]
+    public void LostBytesCountsOneLoadAndStartsAgainWithEachTape()
+    {
+        // A byte lost as above, then each way of changing the tape: the count is per tape load.
+        foreach (Action<ElectronMachine> change in new Action<ElectronMachine>[]
+        {
+            m => m.InsertTape([new Carrier(20)]),
+            m => m.Rewind(),
+            m => m.EjectTape(),
+            m => m.StartRecording(),
+        })
+        {
+            var m = NewMachine();
+            m.InsertTape([new Carrier(20), new TapeByte(0x01)]);
+            long on = Write(m.Bus, 0xFE07, InputMotorOn);
+            RunTo(m.Bus, on + (20 * CarrierCycle) + Ready + 4_000);
+            Assert.Equal(1, m.LostBytes);
+
+            change(m);
+            Assert.Equal(0, m.LostBytes);
+        }
+    }
+
+    [Fact]
+    public void TheTapeIsACopyOfTheListInsertedNotTheListItself()
+    {
+        var m = NewMachine();
+        List<TapeEvent> tape = [new Carrier(20), new TapeByte(0x01)];
+        m.InsertTape(tape);
+        tape.Add(new TapeByte(0x02));
+        tape[0] = new Carrier(99);
+
+        Assert.Equal(new TapeEvent[] { new Carrier(20), new TapeByte(0x01) }, m.EjectTape());
+    }
+
+    [Fact]
     public void TheTapeStopsAtItsEndAndDeliversNothingMore()
     {
         var m = NewMachine();

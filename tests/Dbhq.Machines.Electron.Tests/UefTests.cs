@@ -2,6 +2,7 @@ using System.Diagnostics;
 using System.IO.Compression;
 using Dbhq.Machines.Electron.Tape;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace Dbhq.Machines.Electron.Tests;
 
@@ -10,7 +11,7 @@ namespace Dbhq.Machines.Electron.Tests;
 /// layout, so no test reads what the writer wrote with the writer's own idea of the format, except
 /// the round trip, which says so.
 /// </summary>
-public class UefTests
+public class UefTests(ITestOutputHelper output)
 {
     // "UEF File!" and its zero, then the minor and the major version byte (tape.md s1).
     private static byte[] Header(byte minor = 10, byte major = 0) => [.. "UEF File!\0"u8, minor, major];
@@ -226,21 +227,22 @@ public class UefTests
         Assert.Equal<TapeEvent>([new Carrier(300)], UefReader.Read(Uef(Chunk(0x0110, 100, 0), Chunk(0x0110, 200, 0))));
 
     [Fact]
-    public async Task OneChunkOfAMillionBytesIsFastAndReadsEveryByte()
+    public void OneChunkOfAMillionBytesIsFastAndReadsEveryByte()
     {
         byte[] data = new byte[1_000_000];
         new Random(1).NextBytes(data);
         byte[] file = Gzip(Uef(Chunk(0x0100, data)));
 
+        // Only the read is timed, on this thread. The limit is wide so that a loaded machine does
+        // not fail it: a reader that is quadratic in the chunk's length would take hours, not seconds.
         var clock = Stopwatch.StartNew();
-        Task<IReadOnlyList<TapeEvent>> read = Task.Run(() => UefReader.Read(file));
-        Task finished = await Task.WhenAny(read, Task.Delay(TimeSpan.FromSeconds(2)));
-        Assert.True(ReferenceEquals(finished, read), "a data chunk of a million bytes took more than 2 seconds");
-        IReadOnlyList<TapeEvent> events = await read;
+        IReadOnlyList<TapeEvent> events = UefReader.Read(file);
+        clock.Stop();
+        output.WriteLine($"a data chunk of a million bytes read in {clock.ElapsedMilliseconds} ms");
+        Assert.True(clock.Elapsed < TimeSpan.FromSeconds(30), $"a data chunk of a million bytes took {clock.Elapsed}");
 
         Assert.Equal(1_000_000, events.Count);
         Assert.Equal(data, events.Select(e => ((TapeByte)e).Value).ToArray());
-        Assert.True(clock.Elapsed < TimeSpan.FromSeconds(2));
     }
 
     // ---- Disc, ROM and snapshot chunks are not tape
@@ -468,7 +470,7 @@ public class UefTests
     [Fact]
     public void AGzipBombIsRefusedBeyondTheLimitRatherThanInflated()
     {
-        // 40 MB of zeros is about 40 KB of gzip. The limit is 16 MB (UefReader.MaxInflatedBytes).
+        // 40 MB of zeros is about 40 KB of gzip. The limit is 4 MiB (UefReader.MaxInflatedBytes).
         byte[] bomb = Gzip(new byte[40_000_000]);
         Assert.True(bomb.Length < 100_000);
 
@@ -476,8 +478,48 @@ public class UefTests
         UefException e = Refused(bomb);
         long used = GC.GetAllocatedBytesForCurrentThread() - before;
 
-        Assert.Contains("inflates to more than", e.Message);
+        Assert.Contains("inflates to more than 4 MiB", e.Message);
         Assert.True(used < 4 * UefReader.MaxInflatedBytes, $"{used} bytes allocated");
+    }
+
+    [Fact]
+    public void TheLimitIsFourMiBWhichIsManyTimesATapeSide()
+    {
+        // Half an hour of tape at 1200 baud, ten bits a byte, is 1,800 x 120 = 216,000 bytes
+        // (tape.md s4). Four MiB is about nineteen of those, and a byte read costs a reference in
+        // the list of events, so the most a file can ask of the browser's memory stays small.
+        Assert.Equal(4 * 1024 * 1024, UefReader.MaxInflatedBytes);
+        Assert.True(UefReader.MaxInflatedBytes > 19 * 216_000);
+    }
+
+    [Fact]
+    public void AStreamThatInflatesJustPastTheLimitIsRefusedAndOneJustUnderIsRead()
+    {
+        int under = UefReader.MaxInflatedBytes - 18;
+        Assert.Equal(under, UefReader.Read(Gzip(ZerosUef(under))).Count);
+        Assert.Contains("inflates to more than 4 MiB", Refused(Gzip(ZerosUef(under + 1))).Message);
+    }
+
+    [Fact]
+    public void APlainFileLargerThanTheLimitIsRefusedToo()
+    {
+        // Not gzip, so nothing is inflated, but it would still be a list of millions of events.
+        int under = UefReader.MaxInflatedBytes - 18;
+        Assert.Equal(under, UefReader.Read(ZerosUef(under)).Count);
+        Assert.Contains("more than 4 MiB", Refused(ZerosUef(under + 1)).Message);
+    }
+
+    /// <summary>
+    /// A UEF of one data chunk of <paramref name="length"/> zero bytes, built in place: the header's
+    /// 12 bytes and the chunk's 6 make a file of <paramref name="length"/> + 18.
+    /// </summary>
+    private static byte[] ZerosUef(int length)
+    {
+        byte[] file = new byte[18 + length];
+        Header().CopyTo(file, 0);
+        Chunk(0x0100).CopyTo(file, 12);
+        BitConverter.GetBytes((uint)length).CopyTo(file, 14);
+        return file;
     }
 
     [Fact]

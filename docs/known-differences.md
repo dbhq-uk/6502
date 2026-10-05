@@ -897,9 +897,18 @@ source stops or the form is a choice, the model chooses:
   (`tape.md` s7 item 2). Playing a recording back is therefore exact to within
   half a carrier cycle a gap, not to the cycle.
 - **The tape moves only with the motor on in input or output mode**, and,
-  while recording, only in output mode, so the position is the length of the
-  recording. A played tape stops at its end. A byte whose ninth bit went by
+  while recording, only in output mode, so the position is the time spent
+  recording. That is not quite the length of what was recorded, because the
+  recording rounds its carriers and drops idle stretches under one bit time
+  (above). A played tape stops at its end. A byte whose ninth bit went by
   before the machine started listening is missed.
+- **A UEF of more than 4 MiB is refused**, inflated if it is gzip and as it is
+  if not. Half an hour of tape at 1200 baud is 216,000 bytes (`tape.md` s4),
+  so this is about nineteen tape sides, and it bounds the memory a file can ask
+  of the browser: every byte on tape is an entry in the list of events. The
+  first limit was 16 MiB, for gzip only.
+- **`LostBytes` counts one tape load.** Putting a tape in, rewinding, taking
+  it out and starting a recording each set it back to 0.
 - **`$FE04` reads as 0 until a byte arrives.** The ULA's power-on state is not
   known (`ula.md` s12 item 4).
 

@@ -16,11 +16,15 @@ public sealed class UefException(string message) : Exception(message);
 public static class UefReader
 {
     /// <summary>
-    /// The most a gzip stream may inflate to, 16 MiB. A tape of half an hour a side is a few hundred
-    /// kilobytes, so this is generous, and it bounds what a gzip stream of a few kilobytes can ask
-    /// for. A stream that inflates further is refused.
+    /// The most a UEF may be, 4 MiB, inflated if it is gzip and as it is if not. Half an hour of
+    /// tape at 1200 baud is 216,000 bytes (<c>tape.md</c> s4: 120 bytes a second), so this is
+    /// about nineteen tape sides. It bounds what a gzip stream of a few kilobytes can ask for, and
+    /// the list of events a file can make: a byte on tape is a reference in that list, and the page
+    /// runs in a browser. A file larger than this, or a stream that inflates further, is refused.
     /// </summary>
-    public const int MaxInflatedBytes = 16 * 1024 * 1024;
+    public const int MaxInflatedBytes = 4 * 1024 * 1024;
+
+    private const string Limit = "4 MiB";
 
     private const int HeaderLength = 12;
     private static readonly byte[] Magic = [.. "UEF File!\0"u8];
@@ -41,12 +45,17 @@ public static class UefReader
         ReadOnlySpan<byte> bytes = file;
         if (file.Length >= 2 && file[0] == 0x1F && file[1] == 0x8B)
         {
+            // A gzip stream is bounded as it inflates.
             inflated = Inflate(file);
             bytes = inflated;
             if (bytes.Length == 0)
             {
                 throw new UefException("The gzip stream inflates to nothing: it is empty.");
             }
+        }
+        else if (file.Length > MaxInflatedBytes)
+        {
+            throw new UefException($"The file is {file.Length} bytes, more than {Limit}, which is more than a tape needs: refused.");
         }
 
         CheckHeader(bytes);
@@ -104,7 +113,7 @@ public static class UefReader
                 used += read;
                 if (used > MaxInflatedBytes)
                 {
-                    throw new UefException($"The gzip stream inflates to more than {MaxInflatedBytes / (1024 * 1024)} MB, which is more than a tape needs: refused.");
+                    throw new UefException($"The gzip stream inflates to more than {Limit}, which is more than a tape needs: refused.");
                 }
             }
         }

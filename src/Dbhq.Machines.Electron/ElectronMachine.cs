@@ -83,7 +83,11 @@ public sealed class ElectronMachine
     /// </summary>
     public long TapePosition => WithTape(t => t.PositionAt(Bus.Cycles));
 
-    /// <summary>Bytes the tape delivered that the OS did not read in time, about 2 ms (s9): none, on a good load.</summary>
+    /// <summary>
+    /// Bytes the tape delivered that the OS did not read in time, about 2 ms (s9): none, on a good
+    /// load. It counts one tape load: <see cref="InsertTape"/>, <see cref="EjectTape"/>,
+    /// <see cref="Rewind"/> and <see cref="StartRecording"/> each set it back to 0.
+    /// </summary>
     public int LostBytes => Bus.Ula.Tape.LostBytes;
 
     /// <summary>Puts a tape in, rewound, in place of any tape or recording. It plays when the OS turns the motor on in input mode.</summary>
