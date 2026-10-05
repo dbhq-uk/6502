@@ -91,8 +91,8 @@ periods and the DMC rates in both regions, and the PPU's position at reset as
 - **The PPU test ROM needs a mapper that comes six tasks later.** The combined
   `ppu_vbl_nmi.nes` is an MMC1 cartridge (256 KB of program, mapper 1), and MMC1
   is task 10, but task 4 runs it. Its ten single tests are plain NROM
-  cartridges, so task 4 can run those; the plan's list now says so. The combined
-  ROM is still pinned, as this task's ruling asked.
+  cartridges, so task 4 now pins and runs those, and the combined ROM moves to
+  task 12, after MMC1. It is still pinned here, as this task's ruling asked.
 - **Two test ROM folders the design names are not in the fork.** There is no
   `ppu_sprite_hit` or `ppu_sprite_overflow`; the older
   `sprite_hit_tests_2005.10.05` and `sprite_overflow_tests` are there, and the
@@ -105,6 +105,9 @@ Two further findings are for later tasks rather than corrections:
   (Overscan page). Task 14 decides whether the page shows PAL at its own shape.
 - **The PAL PPU blanks part of the picture.** The 2C07 draws a black border over
   the top line and two pixels at each side, which the NTSC PPU does not.
+
+The plan's task 14 now shows the picture in each region's own pixel shape, 8:7
+on NTSC and about 1.386:1 on PAL, and tests it.
 
 ## The PAL dot ratio
 
@@ -137,3 +140,14 @@ pinned, that nestest has one hash and not two, and that a name that is not
 pinned is refused. Changing one character of the PPU ROM's pin made the test
 fail with the download's hash mismatch, which is the check that the test reads
 the pin.
+
+## Mistakes
+
+The review of this task found two worked examples in `ppu.md` that a test would
+have been wrong to copy. One gave the pattern fetch addresses for `v` = `$2000`
+as if fine Y were 0, but in the rendering layout `$2000` is fine Y = 2, so the
+addresses were 2 too low; it now uses `v` = `$0000` and shows both. The other
+said a sprite at X = 4 with the left columns hidden makes no hit, but an 8-pixel
+sprite there reaches column 11, so the hit comes at column 8. Both were worked
+by eye from the rules rather than computed from the bit layout. Every worked
+example in the sheet was then recomputed from the layout, and the rest held.
