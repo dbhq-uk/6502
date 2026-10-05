@@ -1211,6 +1211,397 @@
    }
   ]
  },
+ "outline": {
+  "what": "On I1-front: the outline's shape, for board_frame.py to measure. The corners in order round the board, clockwise as the scan lies, from the top left; edge i runs from corner i to corner i + 1, and the last back to the first. Each corner is read by eye on its crop to about half a millimetre: it says where to look and where the outline turns, and where each edge lies is measured by board_frame.py on the light, never taken from here. The coordinates were first placed from an automatic trace of the outline by an earlier version of board_frame.py, then each was checked on its crop and moved where it was wrong: corners 0 and 1 down to the routed edge under the break-off tabs' remains (the bottoms of the half holes between them), corners 6 and 7 up to the step's edge from the shadow below it. The round notches are marked by their deepest points and the edge they are in. Edge 0, the short top left stretch, carries the remains of break-off tabs over most of its length, standing about 0.9 mm out, with half holes between them reaching down to the routed edge (the top right stretch has them over its right end only, and its straight part is most of it).",
+  "corners": [
+   {
+    "corner": 0,
+    "what": "top left: the left edge and the routed top edge of the short top left stretch, under its tabs' remains",
+    "at": [
+     26.5,
+     52.5
+    ],
+    "crop": {
+     "box": [
+      -14,
+      12,
+      66,
+      92
+     ],
+     "zoom": 4,
+     "gridPx": 5
+    }
+   },
+   {
+    "corner": 1,
+    "what": "the short top left stretch's right end, at its routed edge",
+    "at": [
+     212.5,
+     52.5
+    ],
+    "crop": {
+     "box": [
+      172,
+      12,
+      252,
+      92
+     ],
+     "zoom": 4,
+     "gridPx": 5
+    }
+   },
+   {
+    "corner": 2,
+    "what": "the step down in the top edge, inside corner",
+    "at": [
+     212.5,
+     88.0
+    ],
+    "crop": {
+     "box": [
+      172,
+      48,
+      252,
+      128
+     ],
+     "zoom": 4,
+     "gridPx": 5
+    }
+   },
+   {
+    "corner": 3,
+    "what": "the step back up in the top edge, inside corner",
+    "at": [
+     1776.5,
+     88.0
+    ],
+    "crop": {
+     "box": [
+      1736,
+      48,
+      1816,
+      128
+     ],
+     "zoom": 4,
+     "gridPx": 5
+    }
+   },
+   {
+    "corner": 4,
+    "what": "the top right stretch's left end",
+    "at": [
+     1776.5,
+     53.0
+    ],
+    "crop": {
+     "box": [
+      1736,
+      13,
+      1816,
+      93
+     ],
+     "zoom": 4,
+     "gridPx": 5
+    }
+   },
+   {
+    "corner": 5,
+    "what": "top right",
+    "at": [
+     2339.0,
+     53.5
+    ],
+    "crop": {
+     "box": [
+      2299,
+      13,
+      2379,
+      93
+     ],
+     "zoom": 4,
+     "gridPx": 5
+    }
+   },
+   {
+    "corner": 6,
+    "what": "the right edge's step, outer corner (marked at the dark lower edge of the bare laminate, above the shadow)",
+    "at": [
+     2337.0,
+     927.5
+    ],
+    "crop": {
+     "box": [
+      2297,
+      887,
+      2377,
+      967
+     ],
+     "zoom": 4,
+     "gridPx": 5
+    }
+   },
+   {
+    "corner": 7,
+    "what": "the right edge's step, inside corner (as corner 6)",
+    "at": [
+     2303.0,
+     927.5
+    ],
+    "crop": {
+     "box": [
+      2263,
+      887,
+      2343,
+      967
+     ],
+     "zoom": 4,
+     "gridPx": 5
+    }
+   },
+   {
+    "corner": 8,
+    "what": "bottom right",
+    "at": [
+     2301.0,
+     1464.5
+    ],
+    "crop": {
+     "box": [
+      2261,
+      1424,
+      2341,
+      1504
+     ],
+     "zoom": 4,
+     "gridPx": 5
+    }
+   },
+   {
+    "corner": 9,
+    "what": "the right slot's right wall at the bottom edge",
+    "at": [
+     1679.5,
+     1463.0
+    ],
+    "crop": {
+     "box": [
+      1639,
+      1423,
+      1719,
+      1503
+     ],
+     "zoom": 4,
+     "gridPx": 5
+    }
+   },
+   {
+    "corner": 10,
+    "what": "the right slot's top right inside corner",
+    "at": [
+     1679.5,
+     1348.5
+    ],
+    "crop": {
+     "box": [
+      1639,
+      1308,
+      1719,
+      1388
+     ],
+     "zoom": 4,
+     "gridPx": 5
+    }
+   },
+   {
+    "corner": 11,
+    "what": "the right slot's top left inside corner",
+    "at": [
+     1542.0,
+     1348.0
+    ],
+    "crop": {
+     "box": [
+      1502,
+      1308,
+      1582,
+      1388
+     ],
+     "zoom": 4,
+     "gridPx": 5
+    }
+   },
+   {
+    "corner": 12,
+    "what": "the right slot's left wall at the bottom edge",
+    "at": [
+     1541.0,
+     1463.0
+    ],
+    "crop": {
+     "box": [
+      1501,
+      1423,
+      1581,
+      1503
+     ],
+     "zoom": 4,
+     "gridPx": 5
+    }
+   },
+   {
+    "corner": 13,
+    "what": "the left slot's right wall at the bottom edge",
+    "at": [
+     440.0,
+     1463.5
+    ],
+    "crop": {
+     "box": [
+      400,
+      1423,
+      480,
+      1503
+     ],
+     "zoom": 4,
+     "gridPx": 5
+    }
+   },
+   {
+    "corner": 14,
+    "what": "the left slot's top right inside corner",
+    "at": [
+     443.0,
+     1346.0
+    ],
+    "crop": {
+     "box": [
+      403,
+      1306,
+      483,
+      1386
+     ],
+     "zoom": 4,
+     "gridPx": 5
+    }
+   },
+   {
+    "corner": 15,
+    "what": "the left slot's top left inside corner",
+    "at": [
+     318.0,
+     1348.5
+    ],
+    "crop": {
+     "box": [
+      278,
+      1308,
+      358,
+      1388
+     ],
+     "zoom": 4,
+     "gridPx": 5
+    }
+   },
+   {
+    "corner": 16,
+    "what": "the left slot's left wall at the bottom edge",
+    "at": [
+     317.5,
+     1463.5
+    ],
+    "crop": {
+     "box": [
+      277,
+      1423,
+      357,
+      1503
+     ],
+     "zoom": 4,
+     "gridPx": 5
+    }
+   },
+   {
+    "corner": 17,
+    "what": "bottom left",
+    "at": [
+     25.5,
+     1462.5
+    ],
+    "crop": {
+     "box": [
+      -15,
+      1422,
+      65,
+      1502
+     ],
+     "zoom": 4,
+     "gridPx": 5
+    }
+   }
+  ],
+  "tabs": [
+   0
+  ],
+  "notches": [
+   {
+    "id": "left",
+    "edge": 17,
+    "what": "the round notch in the left edge, its deepest point",
+    "deepest": [
+     52.0,
+     289.5
+    ],
+    "crop": {
+     "box": [
+      12,
+      250,
+      92,
+      330
+     ],
+     "zoom": 6,
+     "gridPx": 5
+    }
+   },
+   {
+    "id": "right upper",
+    "edge": 5,
+    "what": "the small round notch in the right edge, above the step, its deepest point",
+    "deepest": [
+     2321.0,
+     544.0
+    ],
+    "crop": {
+     "box": [
+      2290,
+      520,
+      2360,
+      570
+     ],
+     "zoom": 8,
+     "gridPx": 5
+    }
+   },
+   {
+    "id": "right lower",
+    "edge": 5,
+    "what": "the small round notch in the right edge, just above the step, its deepest point",
+    "deepest": [
+     2320.5,
+     881.0
+    ],
+    "crop": {
+     "box": [
+      2290,
+      858,
+      2360,
+      908
+     ],
+     "zoom": 8,
+     "gridPx": 5
+    }
+   }
+  ]
+ },
  "solderSeeds": {
   "what": "Four holes far apart, each the middle of the hole read by eye on I1-front and on I1-back flipped left to right.",
   "holes": [

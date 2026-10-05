@@ -559,7 +559,7 @@ cmp /tmp/t1-old/site/dist/machines/kim-1/index.html site/dist/machines/kim-1/ind
 cmp /tmp/t1-old/site/dist/machines/bbc-micro/index.html site/dist/machines/bbc-micro/index.html
 ```
 
-Both are identical, byte for byte (59,889 and 49,404 bytes). The BBC Micro has
+Both are identical, byte for byte (59,889 and 49,456 bytes). The BBC Micro has
 no model section on this branch's base, so its comparison shows only that the
 page is untouched. One mistake on the way: the component still read
 `model.made` once, in the check that the measurements exist. The test that the
@@ -575,3 +575,196 @@ Without the WebAssembly built, the four tests that read it fail, as they do on
 any checkout that has not run it; the BBC Micro's page then differs from a
 build that has it, so the scratch build for the `cmp` was given the same built
 files.
+
+## Task 2: the board's frame from the bare scan
+
+`tools/nes-model/board_frame.py` measures the frame every later board script
+reads I1-front through: the scan's x and y scale, the board's turn on the
+glass, the outline and the mounting holes. It writes `data/frame.json`, a
+copy of the scan rectified at 12 pixels per millimetre in `out/` (git-ignored:
+the scan states no licence) and pictures to look at. `run-board.sh` runs it
+after `verify.py I1-front I2`.
+
+**This task was taken over part way.** A first implementer had written a
+`board_frame.py`, its tests and a `frame.json`, unreviewed, and stopped. Its
+scale fits, held-out errors, verdicts, frame and rectification were read,
+tested and kept. Three parts were rewritten, because the pictures showed them
+wrong on the scan:
+
+- **The outline.** It was traced automatically from the board's mask. On the
+  scan that put the origin on top of a break-off tab's remains, about a
+  millimetre above the board's routed edge, traced the short top left stretch
+  as loose contour points over the tabs, refused the round notch in the left
+  edge as not round and drew it as a polygon cut inside the notch, and put the
+  right edge's step out in the shadow below it. Now the outline's shape is
+  marked by hand (below) and only where each edge lies is measured.
+- **The x scale's ends.** It took each row's first and last pad on its solder
+  blob's centroid, as task 0 did. On this scan those wander by up to 4 pixels
+  from the drills (the blobs are uneven, joined to tracks), and U5's pin 1 row
+  read 0.18 mm short held out. Now every pin is found on its drill, as the
+  plan already required for y.
+- **The mounting holes' rim.** It chose each hole's sharp half by where the
+  edges were steepest; dirt in one hole (at 179.7, 113.6 mm) turned the choice
+  round and the circle sat inside the hole, 3.37 mm across where the hole is
+  4.11. Now the crescent's side is
+  found from the light and the circle is fitted by consensus.
+
+`rim_centre` moved from `spike.py` to `common.py` unchanged, with a new test
+that it finds the hole's centre, not the solder's, and refuses where there is
+no hole. `spike.py` was run again after the move (`cd tools/nes-model &&
+NES_MODEL_INPUTS=/tmp/nes-inputs /tmp/nesvenv/bin/python spike.py`, exit 0)
+and `git diff` showed `spike.json` unchanged.
+
+### Decisions
+
+- **x from the drills, without the edge fingers.** The rows across are the
+  ten DIPs' two rows each and both rows of the expansion header P2, first
+  drill to last. The edge fingers are left out: task 0 found them on 2.50 mm,
+  not 2.54, and their pitch is not known from anything but this scale. That
+  pitch through the frame is recorded (2.4988 mm over their 35 gaps). Using
+  the drills for x as well as y was decided before the drills' x figures were
+  seen, on the grounds above; the solder centroids' figure, task 0's way, is
+  recorded beside and not judged.
+- **A drill is found twice and checked against its row.** Its top rim is
+  fitted from where the marks put the pin and again from the solder's
+  centroid; the drill is refused if the two fits are more than 0.10 mm apart,
+  or if it lies more than 0.15 mm from where a straight, evenly spaced row
+  through the row's other drills puts it, each drill judged held out of that
+  row's fit so an end drill cannot pull the row to itself. Both limits were
+  set from the rim fits before any scale figure was judged: fits that agree do
+  so within 0.05 mm, and those that do not are 0.2 to 0.6 mm apart. Five
+  drills were refused: U5's pin 16 and U2's pin 8 off their rows, U4's pin 2 on
+  two fits that disagree, U10's pin 2 with no rim and its pin 5 off its row.
+  Their pairs are left out of y.
+- **The outline's shape by hand, its place by the light.** Over tracing it
+  automatically, which needed a rule for every kind of feature on this edge
+  (tabs' remains, half holes, notches round and small, steps, slots) and got
+  three of them wrong. `data/marks.json` now has `outline`: 18 corners in
+  order from the top left, three round notches by their deepest points, and
+  which edge carries tabs' remains. The marks only say where to look and
+  where the outline turns. Each edge is measured at stations every 0.1 mm,
+  1 mm in from its ends (the router leaves inside corners rounded, about
+  0.6 mm), as where the light, linear as the scanner mixes it, rises fastest
+  from the board to the lid within 1.2 mm of the mark. That is a blurred
+  step's half way point; profiles across the left, bottom and step edges were
+  read in linear light to check it before it was chosen. A line is fitted to
+  the stations one sided, leaving out points standing out of the board, so the
+  tabs' remains on the top right edge drop out. The coordinates were first
+  placed from the first implementer's automatic trace and then checked on
+  their crops and moved where they were wrong, which marks.json says.
+- **The short top left stretch sits at its half holes' bottoms.** Its top
+  edge is mostly the remains of break-off tabs, standing about 0.9 mm out, with
+  half holes between them that reach down to the routed edge; on the top right
+  stretch the same tabs stand on a straight routed edge at that level. So this
+  one edge is held square at the innermost 5 per cent of its stations. The two
+  stretches then agree within 0.09 mm, which they were not made to.
+- **One crescent direction for the scan.** A hole's far wall shows as a dark
+  crescent on one side, where the light falls fastest at the far rim, not the
+  hole's top rim. The crescent comes from the scanner's optics, so it lies the
+  same way in every hole; the direction used is the circular median of each
+  hole's darkest stretch (270.0 degrees, to the rear; 11 of the 12 holes read
+  within 5 degrees of it, and the twelfth, in a plated ring, read 84). The rim is then fitted
+  on rays within 75 degrees of straight away from it, by consensus: of the
+  circles through three ray points, the one most of the others lie within
+  0.08 mm of, then refined. A first version took each hole's own darkest
+  direction, and a speck of dirt drawn in the test's made-up hole turned it
+  round; a robust least squares fit was then dragged by the quarter of rays
+  that hit the dirt. The consensus fit is the one that passed.
+
+### What it measured
+
+`NES_MODEL_INPUTS=/tmp/nes-inputs PYTHON=/tmp/nesvenv/bin/python
+tools/nes-model/run-board.sh` on 5 October 2026, exit 0, about a minute and a
+half (the same venv as task 0), printed:
+
+```
+scale x: pass
+scale y: pass
+x against y: pass
+x 11.8020, y 11.8222 px/mm, ratio 0.99829; x median 0.011 mm over 6 rows, largest 0.032 (U6 pins 1 to 20); y median 0.432 %, max 0.981 % over 10 footprints
+recorded: x from the solder's centroids median 0.031 mm, largest 0.184; y from centroids median 0.293 %
+board 195.95 x 119.45 mm (KiCad 196.252 x 118.700), turned 0.0398 degrees, 12 holes, 3 notches, outline 85 points; fingers' pitch 2.4988 mm
+```
+
+Against the plan's thresholds, as written:
+
+| Check | Figure | Pass | STOP if | Verdict |
+|---|---|---|---|---|
+| Scale x | median 0.011 mm over the 6 scored rows (the 40-pin rows and P2's); largest 0.032 mm, U6 pins 1 to 20, recorded | median at most 0.15 mm, at least 4 rows | median over 0.25 | pass |
+| Scale y | median 0.432 per cent over 10 footprints, max 0.981 (U6); 600 mil median 0.478 (4), 300 mil 0.427 (6) | median at most 0.5 per cent, at least 8 | median over 1.0 | pass |
+| x against y | 11.8020 against 11.8222 px/mm, 0.17 per cent apart; the stated 300 dpi is 11.8110 | | over 1.5 per cent | pass |
+
+The y median is the figure nearest a limit: 0.432 against 0.5. U6 and U8 read
+0.98 and 0.97 per cent narrow. Checked on U6: its 20 pairs read 15.006 to
+15.184 mm, standard deviation 0.037, so the narrowness is the footprint's or
+the scan's, not one bad drill. Recorded beside, not judged: the same spacings
+from the solder's centroids give a median of 0.293 per cent but a maximum of
+1.787; pin 1 and pin N alone, task 0's way, 0.566 and 1.156; and x from the
+centroids 0.031 mm, largest 0.184 (U5 pins 1 to 20). Task 0's own figures
+were 0.113 mm (fingers at 2.54) and 0.032 mm (without them) for x, and 0.566
+per cent for y.
+
+The turn, from every long row's drills at once, is 0.0398 degrees. Each long
+row's drills lie within 0.032 mm rms of a straight line; none reaches the
+plan's 0.05 mm. The rows' own angles spread from -0.10 to 0.11 degrees and the
+DIPs' spacings sit up to 0.22 degrees (U8) from square to them, median 0.03:
+recorded, not judged.
+
+The board is 195.95 by 119.45 mm between its outermost edges, against the
+KiCad redrawing's 196.252 by 118.700: 0.30 mm narrower and 0.75 mm deeper,
+inside the 2 mm sanity bound. The long edges are not quite square to the rows:
+the left edge leans -0.07 degrees, the right -0.11 and -0.15, the top -0.04;
+the slopes are kept, and edges under 5 mm are held square. The 12 mounting
+holes are 2.30 to 4.24 mm across; the 10 that have a round hole in the KiCad
+outline near them sit a median (0.29, 0.19) mm from it, the two frames'
+difference, recorded. The round notch in the left edge fits a circle of
+2.25 mm radius within 0.023 mm rms; the right edge's two small notches fit
+1.11 mm (0.065 mm rms, the least round) and 0.96 mm (0.015).
+
+**Known, and left as measured.** The right edge's step, the short edge where
+the board narrows by 2.9 mm, is placed 0.69 mm beyond where it was marked, at
+the dark lower edge of the bare laminate. Under the step the lid is in deep
+shadow, boxed in by the board on two sides, and the light rises most steeply
+at the shadow's far side, not at the board. The overlay shows it. Nothing was
+changed to move it: the rule is one rule for every edge. On the other edges
+that face down the scan the board shows a dark band before the lid, which the
+rule counts as board; whether the shadow under the step is the edge's wall in
+shadow or the lid, the scan cannot tell. The step's two corners carry that
+error, at most the 0.69 mm.
+
+Every corner, notch, hole and row end was looked at in close-ups drawn by
+`board_frame.py` (`out/frame-close-ups.jpg`) and the outline on the rectified
+copy (`out/frame-overlay.jpg`): the lines sit on the board's edges, the tabs'
+remains stand outside the outline, the notch arcs follow the notches, the hole
+circles sit on the holes' rims (the dirty one included), and the drill marks
+sit in the holes' middles.
+
+### Tests
+
+pytest first, on a made-up scan drawn as task 0's pads are, with a known x and
+y scale, turn and offset: drills inside rings whose solder is drawn off the
+drill (1 per cent of the spacing on the DIPs, 0.1 mm outwards at every row's
+ends), an outline with every kind of feature this board has, tabs' remains
+with half holes, a lid shaded next to the board, mounting holes with the
+crescent and one with dirt on its rim. The tests ask for each scale within
+0.05 per cent, the turn within 0.01 degrees, every corner within 0.1 mm, the
+notches' centres and radii within 0.1 mm, the holes' centres within 0.05 mm,
+x and y from the drills and not the solder, a drill off its row refused, and
+an outline marked where it does not turn refused. Run before the code: 2
+failed and 8 errors, on the missing functions. After: 14 passed. The made-up
+board's worst corner comes back 0.092 mm off, near the 0.1 bound: its short
+edges' fitted slopes pick up the drawing's pixel steps, and the lid's shading
+moves the light's edge 0.02 to 0.05 mm outwards.
+
+`/tmp/nesvenv/bin/python -m pytest tools/nes-model/tests -q`: 38 passed.
+`cd site && node --test tests/nes-models.test.mjs`: 11 passed, four of them
+new. They check that `frame.json`'s recorded verdicts are what its figures give
+against the plan's x, y and x against y rows, and its figures what its rows
+give; that all three pass; that the outline is closed, starts at the origin,
+is within 0.5 mm of the board's size and within 2 mm of the KiCad outline each
+way; and that the holes are inside the board and the rectified copy is not
+committed. With one recorded verdict changed by hand, two of them failed.
+
+The figure in task 1's section for the BBC Micro's page was corrected to
+49,456 bytes, the size `cmp` printed in that task's report; it had been
+written as 49,404.

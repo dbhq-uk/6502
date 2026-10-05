@@ -213,6 +213,29 @@ def test_refine_moves_a_mark_to_the_pad_only_within_the_limit():
     assert common.refine_to_pad(img, 109.0, 100.0, PX_PER_MM) is None      # 9 px is 0.76 mm, over 0.6
 
 
+def test_rim_centre_finds_the_drill_not_the_solder():
+    # rim_centre moved here from spike.py for task 2. The ring of solder is
+    # drawn 2 px off the hole's centre, as solder lies on a real pad: the rim
+    # is the hole's, so the centre found is the hole's, within 0.3 px.
+    import cv2
+    img = np.zeros((1200, 1200, 3), np.uint8)
+    img[:] = (12, 32, 16)
+    ring, hole = (100.0 + 2.0, 100.0), (100.0, 100.0)
+
+    def at(p):
+        return (int(round((4 * p[0] + 1.5) * 16)), int(round((4 * p[1] + 1.5) * 16)))
+    cv2.circle(img, at(ring), int(round(9.75 * 4 * 16)), (98, 100, 94), -1, cv2.LINE_AA, 4)
+    cv2.circle(img, at(hole), int(round(5.6 * 4 * 16)), (40, 40, 40), -1, cv2.LINE_AA, 4)
+    cv2.circle(img, at(hole), int(round(4.1 * 4 * 16)), (75, 75, 73), -1, cv2.LINE_AA, 4)
+    L = common.oklab(cv2.resize(img, (300, 300), interpolation=cv2.INTER_AREA))[0]
+    found, rim = common.rim_centre(L, 101.5, 99.0, px_per_mm=PX_PER_MM)
+    assert found is not None and len(rim) >= common.RIM_RAYS / 2
+    assert np.hypot(found['x'] - hole[0], found['y'] - hole[1]) < 0.3
+    assert abs(found['diameterMm'] - 2 * 5.6 / PX_PER_MM) < 0.06
+    flat = common.oklab(np.full((60, 60, 3), (12, 32, 16), np.uint8))[0]
+    assert common.rim_centre(flat, 30.0, 30.0) == (None, None)          # no hole: refused
+
+
 # --- the KiCad redrawing (I2) ----------------------------------------------------
 
 KICAD = '''(kicad_pcb (version 20240108) (generator "pcbnew")

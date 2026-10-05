@@ -4,7 +4,7 @@ import crypto from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
 import { REPO_ROOT } from '../src/lib/registry.mjs';
-import { verdicts } from './nes-spike-verdicts.mjs';
+import { MIN, PASS, STOP, verdicts } from './nes-spike-verdicts.mjs';
 
 // The NES's two 3D models, each drawn for the NTSC and the PAL console: their
 // inputs and the measurements they rest on. The tools in tools/nes-model/ run
@@ -102,4 +102,92 @@ test('the PAL front is judged on O4 against O2-FL\'s front, on the ratios O4 sho
   const r = spike.palFront.ratios;
   assert.deepEqual(spike.palFront.ratioErrPct, r.filter((x) => x.O4 !== null).map((x) => x['O4AgainstO2-FLPct']));
   for (const x of r) assert.ok('patentFig3' in x && 'O4AgainstPatentPct' in x, `${x.ratio}: the patent's figure is not recorded`);
+});
+
+// Task 2: the board's frame on the bare scan I1-front (tools/nes-model/board_frame.py).
+const frame = JSON.parse(fs.readFileSync(path.join(TOOL, 'data', 'frame.json'), 'utf8'));
+
+// The plan's scale rows (x, y, and x against y), the same numbers task 0's
+// verdicts are judged on.
+function frameVerdicts(f) {
+  const v = (ok, stop) => (stop ? 'STOP' : ok ? 'pass' : 'between pass and stop');
+  const x = f.heldOutX;
+  const y = f.heldOutY;
+  const ratioPct = 100 * Math.abs(f.pxPerMm.x / f.pxPerMm.y - 1);
+  return [
+    { check: 'scale x', verdict: v(x.scaledErrMm.median <= PASS.xMedian && x.n >= MIN.xRows, x.scaledErrMm.median > STOP.xMedian) },
+    { check: 'scale y', verdict: v(y.errPct.median <= PASS.yMedianPct && y.footprints.length >= MIN.yFootprints, y.errPct.median > STOP.yMedianPct) },
+    { check: 'x against y', verdict: v(true, ratioPct > STOP.ratioPct) },
+  ];
+}
+
+const median = (a) => {
+  const s = [...a].sort((p, q) => p - q);
+  return s.length % 2 ? s[(s.length - 1) / 2] : (s[s.length / 2 - 1] + s[s.length / 2]) / 2;
+};
+
+test('frame.json records the verdicts its figures give, and its figures are the ones its rows give', () => {
+  assert.deepEqual(frame.verdicts, frameVerdicts(frame));
+  assert.ok(Math.abs(frame.ratio - frame.pxPerMm.x / frame.pxPerMm.y) < 1e-3);
+  assert.ok(Math.abs(frame.ratioPct - 100 * Math.abs(frame.ratio - 1)) < 1e-2);
+  assert.equal(frame.statedDpi, 300);
+  // each row across is scaled to a 48.26 mm row, and scored only if 30 mm or longer
+  for (const r of frame.heldOutX.rows) {
+    assert.ok(Math.abs(r.scaledErrMm - (r.errMm * 48.26) / (r.pitches * 2.54)) < 2e-3, r.row);
+    assert.equal(r.scored, r.pitches * 2.54 >= 30, r.row);
+  }
+  const scored = frame.heldOutX.rows.filter((r) => r.scored);
+  assert.equal(frame.heldOutX.n, scored.length);
+  assert.ok(Math.abs(frame.heldOutX.scaledErrMm.median - median(scored.map((r) => Math.abs(r.scaledErrMm)))) < 2e-3);
+  assert.ok(Math.abs(frame.heldOutX.scaledErrMm.max - Math.max(...scored.map((r) => Math.abs(r.scaledErrMm)))) < 2e-3);
+  const largest = scored.find((r) => r.row === frame.heldOutX.largestRow);
+  assert.ok(largest && Math.abs(Math.abs(largest.scaledErrMm) - frame.heldOutX.scaledErrMm.max) < 2e-3, 'the largest row is named');
+  assert.ok(!frame.heldOutX.rows.some((r) => r.row.startsWith('P1')), 'the edge fingers (2.50 mm) are not in the x scale');
+  // y: each footprint's error a per cent of its own spacing; the two sets apart
+  const fp = frame.heldOutY.footprints;
+  assert.ok(Math.abs(frame.heldOutY.errPct.median - median(fp.map((f) => Math.abs(f.errPct)))) < 2e-3);
+  assert.ok(Math.abs(frame.heldOutY.errPct.max - Math.max(...fp.map((f) => Math.abs(f.errPct)))) < 2e-3);
+  for (const [key, spacing] of [['errPct600', 15.24], ['errPct300', 7.62]]) {
+    const set = fp.filter((f) => f.spacingMm === spacing).map((f) => Math.abs(f.errPct));
+    assert.equal(frame.heldOutY[key].n, set.length, key);
+    assert.ok(Math.abs(frame.heldOutY[key].median - median(set)) < 2e-3, key);
+  }
+  // straightness is recorded, not judged: the rows at or over 0.05 mm are named
+  assert.deepEqual(frame.straightness.over, frame.straightness.rows.filter((r) => r.rmsMm >= 0.05).map((r) => r.row));
+});
+
+test('frame.json passes the plan\'s x, y and x against y rows', () => {
+  assert.deepEqual(frame.verdicts.map((v) => v.verdict), ['pass', 'pass', 'pass']);
+});
+
+test('frame.json\'s outline is closed, starts at the origin, and is the board\'s size, within 2 mm of the KiCad redrawing', () => {
+  const o = frame.outline;
+  assert.ok(o.length >= 5);
+  assert.deepEqual(o[0], o[o.length - 1], 'the outline is closed');
+  assert.deepEqual(o[0], [0, 0], 'it starts at the board\'s top left corner, the origin');
+  const xs = o.map((p) => p[0]);
+  const ys = o.map((p) => p[1]);
+  const w = Math.max(...xs) - Math.min(...xs);
+  const d = Math.max(...ys) - Math.min(...ys);
+  assert.ok(Math.abs(w - frame.board.widthMm) <= 0.5, `outline width ${w} against ${frame.board.widthMm}`);
+  assert.ok(Math.abs(d - frame.board.depthMm) <= 0.5, `outline depth ${d} against ${frame.board.depthMm}`);
+  // a sanity bound: the KiCad file is a redrawing, compared and never drawn
+  assert.ok(Math.abs(frame.kicad.widthMm - 196.252) < 1e-3 && Math.abs(frame.kicad.depthMm - 118.7) < 1e-3, 'the KiCad outline as read in task 0');
+  assert.ok(Math.abs(frame.board.widthMm - frame.kicad.widthMm) <= 2.0, `width ${frame.board.widthMm} against KiCad ${frame.kicad.widthMm}`);
+  assert.ok(Math.abs(frame.board.depthMm - frame.kicad.depthMm) <= 2.0, `depth ${frame.board.depthMm} against KiCad ${frame.kicad.depthMm}`);
+  // the corners are on the outline, and every notch's circle crosses its edge
+  for (const c of frame.corners) assert.ok(o.some((p) => Math.hypot(p[0] - c[0], p[1] - c[1]) < 1e-3), `corner ${c} is not on the outline`);
+  assert.equal(frame.notches.length, 3);
+});
+
+test('frame.json\'s holes are inside the board, and its rectified copy is never committed', () => {
+  assert.ok(frame.holes.length >= 4);
+  for (const h of frame.holes) {
+    assert.ok(h.x > 0 && h.x < frame.board.widthMm && h.y > 0 && h.y < frame.board.depthMm, JSON.stringify(h));
+    assert.ok(h.d > 1.4 && h.d < 6, JSON.stringify(h));
+  }
+  assert.equal(frame.rectified.pxPerMm, 12);
+  assert.ok(frame.rectified.file.startsWith('out/'));
+  const ignore = fs.readFileSync(path.join(REPO_ROOT, '.gitignore'), 'utf8');
+  assert.match(ignore, /^tools\/nes-model\/out\/$/m);
 });

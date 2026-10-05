@@ -179,6 +179,102 @@ def refine_to_pad(rgb, x, y, px_per_mm, limit_mm=0.6):
     return float(pads[i, 0]), float(pads[i, 1]), float(moved)
 
 
+# --- a drill's centre, on its top rim (from spike.py, task 0) -------------------
+#
+# On these scans a hole is open: a tinned ring, light, round a hole that shows
+# the scanner's lid, grey, with the hole's wall in shadow on one side. The top
+# rim is the ring's inner edge, where the board's face meets the hole. Along 72
+# rays from a first guess, the rim is the steepest rise in light on the way out
+# to the ring's brightest point (within 3.5 px inside it); a circle is fitted to
+# the rim points by consensus (the circle through three of them that most of
+# the others lie within 0.75 px of, its radius 5.0 to 7.5 px, a hole of 0.85 to
+# 1.27 mm), refined by least squares on those, and the rays are cast again from
+# its centre, three times. A glint inside the hole or solder in it makes rays
+# that disagree; the consensus leaves them out. A fit is refused when fewer
+# than half the rays agree.
+
+RIM_RAYS = 72
+RIM_RADIUS_PX = (5.0, 7.5)
+RIM_TOL_PX = 0.75
+_TRIPLES = {}
+
+
+def _circle(P):
+    A = np.c_[2 * P, np.ones(len(P))]
+    s = np.linalg.lstsq(A, (P ** 2).sum(1), rcond=None)[0]
+    return np.array([s[0], s[1], math.sqrt(max(s[2] + s[0] ** 2 + s[1] ** 2, 0.0))])
+
+
+def _consensus(P):
+    import itertools
+    n = len(P)
+    if n not in _TRIPLES:
+        _TRIPLES[n] = np.array(list(itertools.combinations(range(0, n, 2), 3)))
+    T = _TRIPLES[n]
+    a, b, c = P[T[:, 0]], P[T[:, 1]], P[T[:, 2]]
+    d = 2 * (a[:, 0] * (b[:, 1] - c[:, 1]) + b[:, 0] * (c[:, 1] - a[:, 1]) + c[:, 0] * (a[:, 1] - b[:, 1]))
+    ok = np.abs(d) > 1e-9
+    d = np.where(ok, d, 1.0)
+    sa, sb, sc = (a ** 2).sum(1), (b ** 2).sum(1), (c ** 2).sum(1)
+    ux = (sa * (b[:, 1] - c[:, 1]) + sb * (c[:, 1] - a[:, 1]) + sc * (a[:, 1] - b[:, 1])) / d
+    uy = (sa * (c[:, 0] - b[:, 0]) + sb * (a[:, 0] - c[:, 0]) + sc * (b[:, 0] - a[:, 0])) / d
+    r = np.hypot(a[:, 0] - ux, a[:, 1] - uy)
+    ok &= (r >= RIM_RADIUS_PX[0]) & (r <= RIM_RADIUS_PX[1])
+    if not ok.any():
+        return None, np.zeros(n, bool)
+    ux, uy, r = ux[ok], uy[ok], r[ok]
+    dist = np.abs(np.hypot(P[None, :, 0] - ux[:, None], P[None, :, 1] - uy[:, None]) - r[:, None])
+    i = int(np.argmax((dist <= RIM_TOL_PX).sum(1)))
+    inl = dist[i] <= RIM_TOL_PX
+    circ = np.array([ux[i], uy[i], r[i]])
+    for _ in range(3):
+        circ = _circle(P[inl])
+        inl = np.abs(np.hypot(*(P - circ[:2]).T) - circ[2]) <= RIM_TOL_PX
+    return circ, inl
+
+
+def rim_centre(L, x, y, rounds=3, px_per_mm=300 / 25.4):
+    """The drill's centre from its top rim, near (x, y) on an OKLab L image.
+    Returns {"x", "y", "diameterMm", "rimRmsPx", "rays"} (rays: how many of 72
+    agree) and the rim points, or (None, None) when it is refused.
+    px_per_mm only turns the diameter into millimetres (the scan's stated
+    300 dpi unless given). Moved here from spike.py for task 2, unchanged."""
+    from scipy.ndimage import gaussian_filter1d, map_coordinates
+    step = 0.25
+    rs = np.arange(0, 11.01, step)
+    near = np.nonzero((rs >= 4.5) & (rs <= 9.5))[0]
+    th = np.linspace(0, 2 * np.pi, RIM_RAYS, endpoint=False)
+    cx, cy = float(x), float(y)
+    for _ in range(rounds):
+        X = cx + np.outer(np.cos(th), rs)
+        Y = cy + np.outer(np.sin(th), rs)
+        prof = gaussian_filter1d(map_coordinates(L, [Y, X], order=1), 2.0, axis=1)
+        g = np.gradient(prof, rs, axis=1)
+        pts = []
+        for k in range(RIM_RAYS):
+            ip = near[int(np.argmax(prof[k, near]))]
+            w = np.nonzero((rs >= rs[ip] - 3.5) & (rs <= rs[ip]))[0]
+            i = w[int(np.argmax(g[k, w]))]
+            if g[k, i] <= 0 or i == 0:
+                continue
+            a, b, c = g[k, i - 1], g[k, i], g[k, i + 1]
+            den = a - 2 * b + c
+            r = rs[i] + (0.5 * (a - c) / den if den < 0 else 0.0) * step
+            pts.append((cx + r * math.cos(th[k]), cy + r * math.sin(th[k])))
+        if len(pts) < 3:
+            return None, None
+        P = np.array(pts)
+        circ, keep = _consensus(P)
+        if circ is None:
+            return None, None
+        cx, cy, rad = (float(v) for v in circ)
+    if keep.sum() < RIM_RAYS / 2:
+        return None, None
+    res = np.hypot(P[keep, 0] - cx, P[keep, 1] - cy) - rad
+    return {'x': cx, 'y': cy, 'diameterMm': 2 * rad / px_per_mm, 'rimRmsPx': float(np.sqrt((res ** 2).mean())),
+            'rays': int(keep.sum())}, P[keep]
+
+
 # --- KiCad files ------------------------------------------------------------------
 
 def _sexpr(text):

@@ -18,14 +18,16 @@ outside the repository, and every script refuses an input whose SHA-256 is not
 the one in [`data/sources.json`](data/sources.json). No input is committed,
 not even resized.
 
-So far (task 0) it holds:
+So far (tasks 0 and 2) it holds:
 
 | File | What it does |
 |---|---|
 | `common.py` | Where things are; the inputs and their hashes; finding the pads on a scan; reading the KiCad redrawing's footprints and outline; fitting one set of points to another (similarity, affine, homography, or a homography and a cubic correction) with the error measured on points held out of the fit; writing the data files. Adapted from the BBC Micro's |
 | `verify.py` | Checks every input against its SHA-256 |
 | `spike.py` | Task 0's eight checks: the scan's x and y scales and the two against each other, the solder side's registration, the PAL board's layout against the scan's, the case's depth and height on the design patent's orthographic views (the corner photographs' figures recorded only, since the plan's revisions of 5 October 2026), and the PAL front, O4 against O2-FL's front, each judged against the plan's thresholds. Kept as a record; not part of the run |
-| `tests/test_common.py` | pytest, on made-up inputs |
+| `board_frame.py` | Task 2: the board's frame on the bare scan I1-front. The x scale from the rows of pins across the board and the y scale from the DIPs' row spacings, both drill to drill, each row and footprint held out in turn and judged against the plan's thresholds; the board's turn; the outline, its shape marked by hand and each edge measured on the light, with its round notches; the mounting holes on their top rims. Writes `data/frame.json`, a copy of the scan rectified at 12 px/mm and overlays to look at, in `out/` |
+| `run-board.sh` | The inside model's measurements in order (so far: `verify.py I1-front I2`, then `board_frame.py`); stops at the first that crosses a STOP |
+| `tests/test_common.py`, `tests/test_board_frame.py` | pytest, on made-up inputs |
 | `data/` | See [`data/README.md`](data/README.md) |
 
 ## Fetching the inputs by hand
@@ -74,6 +76,7 @@ export NES_MODEL_INPUTS=~/dbhq-previews/nes-model-research/full
 /tmp/nesvenv/bin/python tools/nes-model/verify.py          # every input; or name some: verify.py I1-front I2
 /tmp/nesvenv/bin/python -m pytest tools/nes-model/tests -q
 cd tools/nes-model && /tmp/nesvenv/bin/python spike.py      # writes data/spike.json, and overlays in out/
+PYTHON=/tmp/nesvenv/bin/python tools/nes-model/run-board.sh   # the board's measurements in order: data/frame.json, ...
 ```
 
 `verify.py` says, for each input, present, missing or hash differs. It exits
@@ -81,7 +84,8 @@ non-zero when a hash differs, or when an input it was asked for by name is
 missing; an input not fetched yet is only reported. `spike.py` takes about
 five minutes; it exits 3 when a figure crosses one of task 0's STOP
 thresholds. As the plan was revised twice on 5 October 2026 none does; the
-earlier stops are kept in `data/spike.json`'s `revision`. `out/` is
+earlier stops are kept in `data/spike.json`'s `revision`. `board_frame.py`
+takes about a minute and exits 3 if the scale crosses a STOP. `out/` is
 git-ignored.
 
 The versions it was run with, and every figure it printed, are in the journal
