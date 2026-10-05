@@ -26,7 +26,9 @@ real Electron is the figure in MHz divided by two. Mode 6 is the boot default an
 by the display; mode 0 is held up on every one of its 256 contended lines. After each mode the
 page checks the ULA is still in it. The machine sits at the prompt: it is the OS's idle loop,
 which in mode 0 spends about half its time held off RAM, so it runs half the instructions it does
-in mode 6. Mode 6 is the heavier case for the browser.
+in mode 6. For the idle loop, mode 6 is the heavier case for the browser; ROM-resident code with few
+RAM accesses would run more instructions a second than it does, and nothing here measures that. The
+mode 0 figure is for the idle loop at the prompt only and is likely optimistic for busier programs.
 
 ## How to run it
 

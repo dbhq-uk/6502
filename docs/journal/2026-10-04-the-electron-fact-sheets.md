@@ -143,7 +143,7 @@ Multiples of a 2 MHz Electron are the figure in MHz divided by two, worked in Py
 | Interpreter, modes 6 then 0 | 6, no contention | 3.164 (1.58 times) | 2.821 (1.41 times) | 2.443 (1.22 times) |
 | Interpreter, modes 6 then 0 | 0, contended | 4.690 (2.35 times) | 4.280 (2.14 times) | 3.488 (1.74 times) |
 
-AOT, `node run-in-browser.mjs publish/aot 3`, started 04:37:15 UTC (the lines of the `0,6` set have the same form, with the modes in the other order, and the table has their figures):
+AOT, `node run-in-browser.mjs publish/aot 3`, started 04:37:15 UTC (the second set, with the modes in the other order, follows):
 
 ```
 launch 1 boot cycles=4000006 ms=136.800 cycles_per_second=29239810 mhz=29.240
@@ -188,6 +188,53 @@ launch 3 mode 0 timed 3 cycles=2000000 ms=63.600 cycles_per_second=31446541 mhz=
 launch 3 mode 0 timed 4 cycles=2000000 ms=60.100 cycles_per_second=33277870 mhz=33.278
 launch 3 mode 0 timed 5 cycles=2000000 ms=49.400 cycles_per_second=40485830 mhz=40.486
 launch 3 mode 0 held yes
+```
+
+AOT, modes in the other order, `node run-in-browser.mjs publish/aot 3 2000000 4000000 5 0,6`, started 04:37:22 UTC (the same session, straight after the first set; these are the lines it printed):
+
+```
+launch 1 boot cycles=4000006 ms=119.000 cycles_per_second=33613496 mhz=33.613
+launch 1 prompt yes
+launch 1 mode 0 timed 1 cycles=2000000 ms=39.700 cycles_per_second=50377834 mhz=50.378
+launch 1 mode 0 timed 2 cycles=2000004 ms=43.100 cycles_per_second=46403805 mhz=46.404
+launch 1 mode 0 timed 3 cycles=2000004 ms=39.300 cycles_per_second=50890687 mhz=50.891
+launch 1 mode 0 timed 4 cycles=2000000 ms=38.200 cycles_per_second=52356021 mhz=52.356
+launch 1 mode 0 timed 5 cycles=2000000 ms=39.000 cycles_per_second=51282051 mhz=51.282
+launch 1 mode 0 held yes
+launch 1 mode 6 timed 1 cycles=2000000 ms=61.000 cycles_per_second=32786885 mhz=32.787
+launch 1 mode 6 timed 2 cycles=2000002 ms=60.800 cycles_per_second=32894770 mhz=32.895
+launch 1 mode 6 timed 3 cycles=2000000 ms=63.000 cycles_per_second=31746032 mhz=31.746
+launch 1 mode 6 timed 4 cycles=2000002 ms=63.400 cycles_per_second=31545773 mhz=31.546
+launch 1 mode 6 timed 5 cycles=2000003 ms=61.500 cycles_per_second=32520374 mhz=32.520
+launch 1 mode 6 held yes
+launch 2 boot cycles=4000006 ms=125.800 cycles_per_second=31796550 mhz=31.797
+launch 2 prompt yes
+launch 2 mode 0 timed 1 cycles=2000000 ms=37.800 cycles_per_second=52910053 mhz=52.910
+launch 2 mode 0 timed 2 cycles=2000004 ms=44.100 cycles_per_second=45351565 mhz=45.352
+launch 2 mode 0 timed 3 cycles=2000004 ms=37.100 cycles_per_second=53908464 mhz=53.908
+launch 2 mode 0 timed 4 cycles=2000000 ms=41.500 cycles_per_second=48192771 mhz=48.193
+launch 2 mode 0 timed 5 cycles=2000000 ms=39.100 cycles_per_second=51150895 mhz=51.151
+launch 2 mode 0 held yes
+launch 2 mode 6 timed 1 cycles=2000000 ms=69.900 cycles_per_second=28612303 mhz=28.612
+launch 2 mode 6 timed 2 cycles=2000002 ms=66.000 cycles_per_second=30303061 mhz=30.303
+launch 2 mode 6 timed 3 cycles=2000000 ms=64.400 cycles_per_second=31055901 mhz=31.056
+launch 2 mode 6 timed 4 cycles=2000002 ms=65.500 cycles_per_second=30534382 mhz=30.534
+launch 2 mode 6 timed 5 cycles=2000003 ms=66.100 cycles_per_second=30257232 mhz=30.257
+launch 2 mode 6 held yes
+launch 3 boot cycles=4000006 ms=119.600 cycles_per_second=33444866 mhz=33.445
+launch 3 prompt yes
+launch 3 mode 0 timed 1 cycles=2000000 ms=44.900 cycles_per_second=44543430 mhz=44.543
+launch 3 mode 0 timed 2 cycles=2000004 ms=48.100 cycles_per_second=41580125 mhz=41.580
+launch 3 mode 0 timed 3 cycles=2000004 ms=50.400 cycles_per_second=39682619 mhz=39.683
+launch 3 mode 0 timed 4 cycles=2000000 ms=46.300 cycles_per_second=43196544 mhz=43.197
+launch 3 mode 0 timed 5 cycles=2000000 ms=37.700 cycles_per_second=53050398 mhz=53.050
+launch 3 mode 0 held yes
+launch 3 mode 6 timed 1 cycles=2000000 ms=68.200 cycles_per_second=29325513 mhz=29.326
+launch 3 mode 6 timed 2 cycles=2000002 ms=82.900 cycles_per_second=24125476 mhz=24.125
+launch 3 mode 6 timed 3 cycles=2000000 ms=59.300 cycles_per_second=33726813 mhz=33.727
+launch 3 mode 6 timed 4 cycles=2000002 ms=60.700 cycles_per_second=32948962 mhz=32.949
+launch 3 mode 6 timed 5 cycles=2000003 ms=61.600 cycles_per_second=32467581 mhz=32.468
+launch 3 mode 6 held yes
 ```
 
 Interpreter, `node run-in-browser.mjs publish/interpreter 3`, started 04:37:36 UTC:
@@ -240,10 +287,10 @@ launch 3 mode 0 held yes
 ### What the figures say
 
 - **Mode 0 is faster than mode 6 in multiples of real time, and that is the contention working, not a fault.** In mode 0 the idle loop spends about half its time held off RAM, so the CPU runs half as many instructions in the same machine second. A throwaway console program (not kept; it built the machine from the pinned ROMs, booted four million cycles, wrote `$FE07` and counted `Step` calls over two million cycles) printed 414,005 instructions in mode 6 and 209,002 to 209,012 in mode 0, with `Ula.Mode` as set. The cost is the instructions, so the cheaper second is the one with fewer of them. Per instruction, mode 0 costs more (about 185 ns against 157 ns, from the AOT medians and the instruction counts): the question on every access is there, and it is small.
-- **So mode 6 is the heavier case for the browser, not mode 0.** The AOT median there is 15.43 times (15.77 in the other order), and its slowest readings, 12.22 and 12.06 times, are the lowest of any AOT set. Every AOT reading in either mode is over 10 times. The BBC's figure to beat was about 10 times at its worst and 13 at its boot screen, and this machine is above both, with a bus that asks a question on every access.
+- **So for the idle loop, mode 6 is the heavier case for the browser, not mode 0.** The AOT median there is 15.43 times (15.77 in the other order), and its slowest readings, 12.22 and 12.06 times, are the lowest of any AOT set. Every AOT reading in either mode is over 10 times. Code that lives in ROM and makes few RAM accesses would run more instructions a second than the mode 6 idle loop, and nothing here measures that. The BBC's figure to beat was about 10 times at its worst and 13 at its boot screen, and this machine is above both. **That comparison is not like for like:** the BBC's worst case was a dense teletext page with all four sound channels sounding, and this is an idle prompt with no display drawing and no sound, so it flatters this machine. What it does show is that the bus asking a question on every access does not by itself bring the machine near ten times.
 - **The interpreter is above real time in both modes** (1.41 and 2.14 times), which the BBC's was not (0.64 times at its first check).
 - **The order of the modes does not matter**: the `0,6` set is within a few per cent of the `6,0` set in both modes.
 
 ### What this does not say
 
-One machine at a fairly quiet hour, one browser, three launches a build, and an idle loop for the workload. A program that keeps the CPU busy in RAM-heavy code in mode 0 will execute more instructions per machine second than the idle loop does there, so mode 0's 25.9 times is a floor for the idle loop and not a promise for every program. The figures are for the machine as it stands after task 6, with no display, sound or tape: the display, the sound and the tape will add to them, and the plan's later tasks measure again. The plain loop of the contention rule was fast enough, so the arithmetic form the plan keeps in reserve was not needed and was not written.
+One machine at a fairly quiet hour, one browser, three launches a build, and an idle loop for the workload. The 25.9 times for mode 0 is for the idle loop at the prompt only, and is likely optimistic for busier programs: the idle loop is held off RAM about half the time there, so code that runs more instructions per machine second would come out lower. The figures are for the machine as it stands after task 6, with no display, sound or tape: the display, the sound and the tape will add to them, and the plan's later tasks measure again. The plain loop of the contention rule was fast enough, so the arithmetic form the plan keeps in reserve was not needed and was not written.
