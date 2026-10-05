@@ -245,3 +245,67 @@ a junk byte 8 does not stop a playable file loading. A NES 2.0 size over the cap
 is refused with a plain sentence, because that header states its sizes on
 purpose. The cartridge keeps the size of its CHR RAM, and makes its block of
 zeros only if `Chr` is read, so the board's copy is the only one in use.
+
+## Task 3: the bus, the machine and nestest through the real bus
+
+The third task added `NesBus`, `Nes` and `NesOptions`, with the PPU and the
+sound unit as private stubs that tasks 4 and 8 replace. The tests were written
+first and failed to compile, because the types did not exist. `nestest.nes` then
+ran through the whole machine, in both regions, and every line of its log
+matched on the first run.
+
+**What the log's PPU column proved.** The log's first line is
+`PPU:  0, 21 CYC:7`. The bus counts dots on its own, and the CPU's reset takes
+seven bus cycles, so after `PowerOn` the counter reads 21, which is line 0 dot
+21. All 8,991 lines then agree on line and dot, with the dots counted by the
+bus and not computed from the CPU's cycle count. So the dot counter, the
+three-to-one ratio and the reset alignment (the PPU at line 0 dot 0 at cycle 0,
+running from the first reset cycle) are right on NTSC. The test also checks that
+the bus's cycle count equals the CPU's on every line. The log is Nintendulator's
+and not a real console's, so this proves agreement with a good emulator and
+nothing more.
+
+**The PAL ratio is kept in whole numbers.** Each cycle adds 16 to an
+accumulator, and one dot runs for every 5 it holds, with the remainder kept.
+From zero that gives 3, 3, 3, 3, 4, which the bus test checks, and the 7 reset
+cycles run 22 dots. NTSC uses the same code with 3 over 1. The bus never asks
+which region it is: it reads the numerator and denominator from `Region`.
+nestest's log has no PAL column, so on PAL the test compares the dot counter to
+`CYC * 16 / 5` in integers. That checks the accumulator against the ratio, not
+against a PAL console, and the sheet says the phase a real console powers up in
+is not known.
+
+**One method runs a cycle.** `Cycle` is the only place that counts a cycle. It
+runs the dots, ticks the sound unit, makes the access, then sets the CPU's NMI
+and IRQ lines from the chips. The lines are set after the access, so a write
+that changes a line is seen in the same cycle's sample, which is what the CPU
+core does with the bus. The first version runs all the dots and then the
+access. Where the dots fall around the access is task 4's decision, made
+against `ppu_vbl_nmi`, and it is all inside this one method. The first draft
+passed a closure for the access. It allocated on every cycle, so it became
+arguments instead.
+
+**Open bus is an assumption.** The bus keeps the last value that crossed it, and
+a read of nothing returns it, so a write of `$AB` to `$5000` followed by a read
+of `$5001` gives `$AB`. The sheet says the same, and its worked example
+(`LDA $5000` gives `$50`) follows because the CPU's last read was the operand's
+high byte. A read of `$4015` is the exception: it is internal to the CPU and
+leaves the latch alone. The controller ports drive bits 4 to 0 and leave 7 to 5
+to the latch, as the sheet says, and the pads themselves arrive in task 7.
+Nothing here is checked against hardware. The PPU's own I/O latch is a different
+thing, and the stub PPU simply returns the bus latch until task 4.
+
+**Decisions.**
+- Writes to `$4016` strobe both pads, and writes to `$4017` go to the frame
+  counter, as `bus.md` section 7 and the register table say. Both are stubbed.
+- `PpuDots` is a permanent counter on the bus, only ever reset by power on, so
+  task 4's PPU can keep its own position and this stays the total.
+- Power on clears RAM to zero. The real pattern is undefined. Zeros were chosen
+  over a pseudo-random fill because a test then reads the same thing every time.
+  It is in `known-differences.md`.
+- `PowerOn` clears the board's PRG RAM and `Reset` keeps it. A board's own
+  registers are not cleared by `PowerOn`, because the interface has no reset and
+  NROM has none. Task 10 adds one when the first board with registers needs it.
+- The constructor builds the board, so it can throw `NesFormatException` for a
+  mapper the machine does not model. A caller shows a visitor's file, so it
+  catches the exception from `Cartridge.Load` and from the constructor.

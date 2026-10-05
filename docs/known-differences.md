@@ -686,3 +686,35 @@ front of the model. Where that differs from sitting at a Model B:
   after the last disc command, or until `*CAT`. The page says so, and does not
   make DFS read the new disc when it goes in (`DiscTests` shows the old
   catalogue until DFS reads it again).
+
+## The NES: the bus, where the model stops
+
+**What.** Task 3 of the NES plan, `NesBus` and `Nes`. The sources are
+`docs/nes/facts/bus.md` and `timing.md`.
+
+**RAM at power on is zero.** A real console's RAM holds an undefined pattern,
+and some games read it. The model clears it to zeros so a run is repeatable.
+`PowerOn` does it, and `Reset` does not touch RAM.
+
+**The PAL fourth dot falls in the fifth cycle of every five.** The accumulator
+starts at zero at power on and gives 3, 3, 3, 3, 4. A real console may start
+in any of the five phases (`timing.md` section 3), and the pages do not say
+which is common. The tests check the sum, 16 dots in 5 cycles, and this phase.
+
+**The order of the dots and the access inside a cycle** is the first version's,
+all the dots and then the access. Task 4 settles it against `ppu_vbl_nmi` and
+this entry is updated then.
+
+**Open bus is the last value that crossed the bus.** A read of `$4015` leaves
+it alone. Nothing else drives the bus in the model: there is no decay, and no
+bus conflicts between the cartridge and the CPU.
+
+**A mapper sees only `$4020` to `$FFFF`.** The sheet says a board sees every CPU
+access except reads of `$4015`, so a board could put a register in the PPU or
+sound range. The interface has no such board, so the bus does not pass those
+addresses on.
+
+**What the stubs do not do.** The PPU, the sound unit, the controllers and DMA
+are stubs until tasks 4 to 9. A read of a PPU register gives the bus latch, a
+read of a controller port gives bits 7 to 5 of it and zeros below, and a write
+to `$4014` does nothing.
