@@ -33,7 +33,7 @@ public class TestRomTests
     }
 
     [Fact]
-    public void TheRomsTasksThreeAndFourNeedArePinned()
+    public void NestestAndTheCombinedPpuVblNmiRomArePinned()
     {
         Assert.Contains("other/nestest.nes", Pins.NesTestRomHashes.Keys);
         Assert.Contains("ppu_vbl_nmi/ppu_vbl_nmi.nes", Pins.NesTestRomHashes.Keys);

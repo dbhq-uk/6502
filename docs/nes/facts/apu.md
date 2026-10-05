@@ -45,6 +45,27 @@ Written 5 October 2026 for the NES plan, task 1. Tags and page revisions are in
 
   The sequencer counts down from 0, so it reads its table in the order 0, 7, 6,
   ... 1 [from APU Pulse].
+
+### Worked example 0: the 12.5% duty after a `$4003` write
+
+Duty 0, constant volume 15, `t` = 100, length counter loaded, sweep muting
+nothing. The `$4003` write puts the sequencer at its first step [from APU Pulse].
+The duty 0 lookup table is `0 0 0 0 0 0 0 1` (entries 0 to 7), read in the order
+0, 7, 6, 5, 4, 3, 2, 1, so the first 8 outputs, one per sequencer step, are:
+
+| Step after the write | 1st | 2nd | 3rd | 4th | 5th | 6th | 7th | 8th |
+|---|---|---|---|---|---|---|---|---|
+| Table entry | 0 | 7 | 6 | 5 | 4 | 3 | 2 | 1 |
+| Sequencer bit | 0 | 1 | 0 | 0 | 0 | 0 | 0 | 0 |
+| To the mixer | 0 | 15 | 0 | 0 | 0 | 0 | 0 | 0 |
+
+[from APU Pulse: the two duty tables and "reads the sequence lookup table in the
+order 0, 7, 6, 5, 4, 3, 2, 1"]. Each step lasts `t + 1` = 101 APU cycles, 202
+CPU cycles, except the first: the write does not reset the timer's divider
+[from APU Pulse], so the first step ends when the divider next passes 0, which
+can be sooner [inferring]. Whether the first output sample is taken before or
+after the first advance from entry 0 is not said on the page [guessing - verify:
+`apu_test` and a unit test on the sequencer settle it].
 - **Output** is the envelope volume, or 0 when the sequencer output is 0, the
   sweep mutes, the length counter is 0, or `t < 8` [from APU Pulse].
 - The two channels differ only in the sweep's negate (section 3) [from APU

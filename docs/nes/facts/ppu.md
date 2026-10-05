@@ -151,11 +151,19 @@ The page shows these as bit strings; the hex is [inferring, converted].
 
 ### Worked example 3: the read buffer
 
-VRAM `$2000` = `$11`, `$2001` = `$22`, buffer = `$00`, increment 1. Write `$20`
-then `$00` to `$2006`. Read `$2007` three times: `$00`, `$11`, `$22`. Then set
-`$3F00` (holding `$0F`, with `$2F00` holding `$AB` underneath) and read once:
-`$0F` with bits 7 and 6 from the latch, and the buffer now holds `$AB` [from PPU
-registers; the values are an example].
+VRAM `$2000` = `$11`, `$2001` = `$22`, buffer = `$00`, increment 1, rendering
+off. Write `$20` then `$00` to `$2006` (`v` = `$2000`). Read `$2007` three
+times: `$00` (the old buffer), `$11`, `$22`; `v` ends at `$2003` [from PPU
+registers: the read returns the buffer, then refills it from `v`].
+
+Then write `$3F` then `$00` to `$2006` (`v` = `$3F00`), with palette entry
+`$3F00` = `$0F` and nametable byte `$2F00` = `$AB`, and read `$2007` once. It
+returns `$0F` in bits 5 to 0 and the I/O latch in bits 7 and 6; the latch holds
+`$00` from the last write, so the read is `$0F` [from PPU registers]. The buffer
+now holds `$AB`: the read "underneath" `$3F00` goes to PPU memory `$3F00`, which
+the console's wiring mirrors to `$2F00` [inferring from PPU memory map: `$3000-$3EFF`
+is usually a mirror of `$2000-$2EFF`; PPU registers: "usually mirrored
+nametables"; the values are an example].
 
 ## 4. OAM
 
@@ -230,11 +238,25 @@ On every visible line (0 to 239) and the pre-render line, with rendering on
 
 ### Worked example 4: the first fetches of a line
 
-`v` = `$2000`, rendering on, PPUCTRL = `$00`, nametable `$2000` holds tile `$24`.
-On the pre-render line, dots 321 to 328 fetch the nametable byte from `$2000`
-(tile `$24`), the attribute from `$23C0`, then pattern bytes from `$0240` and
-`$0248`; dot 328 increments `v` to `$2001` [inferring from the tables above and
-the fetch addresses in section 2].
+`v` = `$0000` (fine Y 0, nametable 0, coarse Y 0, coarse X 0; in the rendering
+layout of section 2, the `$2000` of the tile address comes from the fetch rule,
+not from `v`), rendering on, PPUCTRL = `$00`, nametable byte `$2000` = `$24`.
+Dots 321 to 328 of the pre-render line fetch:
+
+| Dots | Fetch | Address | Why |
+|---|---|---|---|
+| 321, 322 | nametable | `$2000` | `$2000 \| (v & $0FFF)` = `$2000 \| $000` |
+| 323, 324 | attribute | `$23C0` | `$23C0 \| (v & $0C00) \| ((v >> 4) & $38) \| ((v >> 2) & $07)` with every field 0 |
+| 325, 326 | pattern low | `$0240` | table `$0000` + tile `$24` x 16 + fine Y 0 |
+| 327, 328 | pattern high | `$0248` | the low address + 8 |
+
+Dot 328 then increments coarse X, so `v` = `$0001` [inferring from the tables
+above and the fetch rules in section 2].
+
+With `v` = `$2000` instead, the fetch addresses for the nametable and attribute
+are the same (bits 14 to 12 are not part of either), but `v` = `$2000` is fine Y
+= 2, so the pattern bytes come from `$0242` and `$024A` [inferring from the
+same rules]. A test taken from this example should check both.
 
 ## 7. Sprites
 
@@ -297,11 +319,19 @@ unless a test needs it].
 
 ### Worked example 5: a hit
 
-Sprite 0 at Y = 30, X = 40, tile all `$FF` (opaque), background opaque
-everywhere, PPUMASK = `$1E`. Sprite 0 is drawn on lines 31 to 38, so the hit
-comes on line 31 at column 40 [inferring from sections 4, 6 and 8]. With X = 255
-there is no hit [from PPU OAM]; with PPUMASK = `$18` and X = 4 there is no hit
-[from PPU OAM: left clipping].
+Sprite 0 at Y = 30, X = 40, its tile's pattern bytes all `$FF` (every pixel
+opaque, colour 3), 8x8 sprites, background opaque everywhere, PPUMASK = `$1E`.
+Sprite 0 is drawn on lines 31 to 38 and columns 40 to 47, so the hit comes on
+line 31 at column 40 [inferring from sections 4, 6 and 8].
+
+- X = 255: the sprite covers only column 255, and there is no hit at 255, so no
+  hit [from PPU OAM].
+- PPUMASK = `$18` (both layers on, both left columns hidden) and X = 4: the
+  sprite covers columns 4 to 11. Columns 4 to 7 are clipped, so the hit comes at
+  column 8 on line 31 [from PPU OAM: no hit at X 0 to 7 while clipping is on;
+  inferring the column].
+- PPUMASK = `$18` and X = 0: the sprite covers columns 0 to 7, all clipped, so no
+  hit on that line [from PPU OAM].
 
 ## 9. Sprite overflow and its bug
 
