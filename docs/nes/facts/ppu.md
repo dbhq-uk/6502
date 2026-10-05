@@ -52,8 +52,13 @@ Effects of each access:
 **The I/O latch.** A write to any PPU register, including `$2002`, fills an
 8-bit latch. A read of `$2002`, `$2004` or `$2007` fills it with the bits read
 (`$2002` only bits 7 to 5). A read of a write-only register returns the latch.
-Bits decay after 3 to 30 ms [from PPU registers; Open bus behavior]. The test ROM
-`ppu_open_bus` checks this [from Emulator tests].
+At least one bit decays after 3 to 30 ms, faster when the PPU is warm [from PPU
+registers]. The fork's `ppu_open_bus/readme.txt`, measured on a console, says a
+bit not refreshed for about 600 ms decays to 0, some sooner; and that a read
+refreshes only the bits it drives: all eight for `$2004` and non-palette `$2007`,
+bits 7 to 5 for `$2002`, bits 5 to 0 for a palette `$2007`, none for a
+write-only register. The model takes 600 ms for every bit (task 12). The test
+ROM `ppu_open_bus` checks this [from Emulator tests].
 
 **Writes ignored after reset.** `$2000`, `$2001`, `$2005` and `$2006` ignore
 writes until the end of the first VBlank, about 29658 cycles NTSC and 33132 PAL

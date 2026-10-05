@@ -399,18 +399,119 @@ public class PpuRegisterTests
     }
 
     [Fact]
-    public void TheLatchDoesNotDecay_ItsDecayIsNotModelled()
+    public void TheLatchKeepsItsBitsForHalfASecond()
     {
         (Ppu ppu, _) = Build();
         ppu.WriteRegister(3, 0xA5);
 
-        // Two frames, about 33 ms: a real latch would have lost its bits (3 to 30 ms, ppu.md 1).
-        for (int i = 0; i < 2 * 262 * 341; i++)
+        Run(ppu, Region.Ntsc, 0.5);
+
+        Assert.Equal(0xA5, ppu.ReadRegister(5));
+    }
+
+    // ppu.md 1 and the fork's ppu_open_bus/readme.txt: a bit not refreshed for about 600 ms reads
+    // 0. A read of a write-only register returns the latch and refreshes nothing.
+    [Theory]
+    [MemberData(nameof(Regions))]
+    public void ALatchBitNotRefreshedForMoreThanTheDecayTimeReadsZero(Region region)
+    {
+        var ppu = new Ppu(region, new TestMapper());
+        ppu.PowerOn();
+        ppu.WriteRegister(2, 0xFF);
+
+        for (int i = 0; i < 7; i++)
+        {
+            Run(ppu, region, 0.1);
+            ppu.ReadRegister(0);
+        }
+
+        Assert.Equal(0x00, ppu.ReadRegister(0));
+        Assert.Equal(0x00, ppu.PeekRegister(5));
+    }
+
+    [Fact]
+    public void AWriteRefreshesEveryBit()
+    {
+        (Ppu ppu, _) = Build();
+        ppu.WriteRegister(2, 0xFF);
+        Run(ppu, Region.Ntsc, 0.4);
+        ppu.WriteRegister(2, 0xF0);
+        Run(ppu, Region.Ntsc, 0.4);
+
+        Assert.Equal(0xF0, ppu.ReadRegister(0));
+    }
+
+    // A $2002 read drives bits 7 to 5 and so refreshes those alone; bits 4 to 0 still decay.
+    [Fact]
+    public void AStatusReadRefreshesOnlyItsTopThreeBits()
+    {
+        (Ppu ppu, _) = Build();
+        ppu.WriteRegister(2, 0xFF);
+        Run(ppu, Region.Ntsc, 0.4);
+        byte status = ppu.ReadRegister(2);
+        Run(ppu, Region.Ntsc, 0.4);
+
+        Assert.Equal(0x1F, status & 0x1F);
+        Assert.Equal(status & 0xE0, ppu.ReadRegister(0));
+    }
+
+    // A palette read drives bits 5 to 0; bits 7 and 6 come from the latch and still decay.
+    [Fact]
+    public void APaletteReadRefreshesOnlyItsLowSixBits()
+    {
+        (Ppu ppu, _) = Build();
+        Poke(ppu, 0x3F00, 0x2A);
+        ppu.WriteRegister(2, 0xFF);
+        Run(ppu, Region.Ntsc, 0.4);
+        SetAddress(ppu, 0x3F00);
+        ppu.WriteRegister(2, 0xFF);
+        Run(ppu, Region.Ntsc, 0.4);
+
+        // The write refreshed every bit 0.4 s ago, so the read gives the top two from it.
+        Assert.Equal(0xEA, ppu.ReadRegister(7));
+        Run(ppu, Region.Ntsc, 0.4);
+
+        Assert.Equal(0x2A, ppu.ReadRegister(0));
+    }
+
+    // A $2004 read drives all eight bits, the attribute byte's three unused ones as 0 included.
+    [Fact]
+    public void AnOamReadRefreshesEveryBit()
+    {
+        (Ppu ppu, _) = Build();
+        ppu.WriteRegister(3, 0x02);
+        ppu.WriteRegister(4, 0xFF);
+        ppu.WriteRegister(3, 0x02);
+        Run(ppu, Region.Ntsc, 0.4);
+        byte attributes = ppu.ReadRegister(4);
+        Run(ppu, Region.Ntsc, 0.4);
+
+        Assert.Equal(0xE3, attributes);
+        Assert.Equal(0xE3, ppu.ReadRegister(0));
+    }
+
+    [Fact]
+    public void TheDecayCountsOnAcrossTheResetButton()
+    {
+        (Ppu ppu, _) = Build();
+        Run(ppu, Region.Ntsc, 0.3);
+        ppu.WriteRegister(2, 0xFF);
+        Run(ppu, Region.Ntsc, 0.4);
+        ppu.Reset();
+        Run(ppu, Region.Ntsc, 0.4);
+
+        Assert.Equal(0x00, ppu.ReadRegister(0));
+    }
+
+    public static TheoryData<Region> Regions() => new() { Region.Ntsc, Region.Pal };
+
+    private static void Run(Ppu ppu, Region region, double seconds)
+    {
+        long dots = (long)(seconds * region.CpuHz * region.DotsNumerator / region.DotsDenominator);
+        for (long i = 0; i < dots; i++)
         {
             ppu.Tick();
         }
-
-        Assert.Equal(0xA5, ppu.ReadRegister(5));
     }
 
     [Fact]

@@ -63,8 +63,11 @@ namespace Dbhq.Machines.Nes;
 /// <para>
 /// <b>The I/O latch</b> is the PPU's own, not the CPU's open bus (ppu.md 1). Every register write
 /// fills it, reads of <c>$2004</c> and <c>$2007</c> fill it, a read of <c>$2002</c> fills bits 7 to
-/// 5, and a read of a write-only register returns it. The decay of its bits over 3 to 30 ms is not
-/// modelled: it holds its value until the next access.
+/// 5, and a read of a write-only register returns it. Each bit decays to 0 once it has gone
+/// <see cref="LatchDecaySeconds"/> without being driven: a write drives all eight, a <c>$2002</c>
+/// read bits 7 to 5, a palette read bits 5 to 0, and any other read of <c>$2004</c> or
+/// <c>$2007</c> all eight. The time is worked out only when the latch is used, so the dots pay
+/// nothing for it.
 /// </para>
 /// <para>
 /// <b>The PPU's address bus.</b> The addresses the PPU puts on its bus go to
@@ -117,6 +120,14 @@ public sealed partial class Ppu
     private byte _oamAddress;
     private byte _latch;
     private byte _readBuffer;
+
+    // When each bit of the latch was last driven, in dots of _time, and how many dots it lasts.
+    private readonly long[] _latchDriven = new long[8];
+    private readonly long _latchDecayDots;
+
+    // Dots run before the present frame's line 0 dot 0 and since the last reset; with the
+    // frame's lines and dots it makes a time that keeps counting across the reset button.
+    private long _timeBase;
 
     private ushort _v;
     private ushort _t;
@@ -195,7 +206,15 @@ public sealed partial class Ppu
         _lines = region.Lines;
         _oddFrameSkipsADot = region.OddFrameSkipsADot;
         _colours = PpuPalette.Table(region.EmphasisSwapsRedAndGreen);
+        _latchDecayDots = (long)(LatchDecaySeconds * region.CpuHz * region.DotsNumerator / region.DotsDenominator);
     }
+
+    /// <summary>
+    /// How long a bit of the I/O latch keeps its value when nothing drives it: about 600 ms, the
+    /// fork's <c>ppu_open_bus/readme.txt</c> measured on a console (ppu.md 1). The wiki says at
+    /// least one bit goes after 3 to 30 ms; the model gives every bit the readme's time.
+    /// </summary>
+    public const double LatchDecaySeconds = 0.6;
 
     /// <summary>The picture, written a pixel a dot.</summary>
     public FrameBuffer Screen { get; } = new();
@@ -260,6 +279,8 @@ public sealed partial class Ppu
         _status = 0;
         _oamAddress = 0;
         _latch = 0;
+        _timeBase = 0;
+        Array.Clear(_latchDriven);
         _v = 0;
         _frame = 0;
         Array.Clear(Oam);
@@ -277,6 +298,8 @@ public sealed partial class Ppu
     /// </summary>
     public void Reset()
     {
+        // The position goes back to the top; the time the latch's bits are measured in does not.
+        _timeBase += (_line * Region.DotsPerLine) + _dot;
         _ctrl = 0;
         SetMask(0);
         _w = false;
@@ -362,7 +385,7 @@ public sealed partial class Ppu
                 _dropDot = false;
                 _dot = 0;
                 _line = 0;
-                EndFrame();
+                EndFrame((_lines * Region.DotsPerLine) - 1);
                 return;
             }
         }
@@ -373,7 +396,7 @@ public sealed partial class Ppu
             if (++_line == _lines)
             {
                 _line = 0;
-                EndFrame();
+                EndFrame(_lines * Region.DotsPerLine);
             }
         }
     }
@@ -385,8 +408,8 @@ public sealed partial class Ppu
         {
             case 2:
             {
-                byte value = (byte)((_status & 0xE0) | (_latch & 0x1F));
-                _latch = value;
+                byte value = (byte)((_status & 0xE0) | (Latch() & 0x1F));
+                Drive(value, 0xE0);
                 _status &= unchecked((byte)~StatusVblank);
                 _w = false;
                 if (_line == VblankLine && _dot == 1)
@@ -399,8 +422,11 @@ public sealed partial class Ppu
             }
 
             case 4:
-                _latch = OamData();
-                return _latch;
+            {
+                byte value = OamData();
+                Drive(value, 0xFF);
+                return value;
+            }
 
             case 7:
             {
@@ -410,30 +436,31 @@ public sealed partial class Ppu
                 {
                     // A palette read is immediate, with the latch in bits 7 and 6; the buffer takes
                     // the nametable byte underneath (ppu.md 3).
-                    value = (byte)(ReadPalette(address) | (_latch & 0xC0));
+                    value = (byte)(ReadPalette(address) | (Latch() & 0xC0));
                     _readBuffer = ReadNametable((ushort)(address - 0x1000));
+                    Drive(value, 0x3F);
                 }
                 else
                 {
                     value = _readBuffer;
                     _readBuffer = ReadVram(address);
+                    Drive(value, 0xFF);
                 }
 
                 Report(address);
-                _latch = value;
                 IncrementAfterAccess();
                 return value;
             }
 
             default:
-                return _latch;
+                return Latch();
         }
     }
 
     /// <summary>A CPU write of <paramref name="value"/> to register <paramref name="register"/> (0 to 7), with its side effects.</summary>
     public void WriteRegister(int register, byte value)
     {
-        _latch = value;
+        Drive(value, 0xFF);
         switch (register & 7)
         {
             case 0:
@@ -518,17 +545,17 @@ public sealed partial class Ppu
         switch (register & 7)
         {
             case 2:
-                return (byte)((_status & 0xE0) | (_latch & 0x1F));
+                return (byte)((_status & 0xE0) | (Latch() & 0x1F));
             case 4:
                 return OamData();
             case 7:
             {
                 ushort address = (ushort)(_v & 0x3FFF);
-                return address >= 0x3F00 ? (byte)(ReadPalette(address) | (_latch & 0xC0)) : _readBuffer;
+                return address >= 0x3F00 ? (byte)(ReadPalette(address) | (Latch() & 0xC0)) : _readBuffer;
             }
 
             default:
-                return _latch;
+                return Latch();
         }
     }
 
@@ -547,8 +574,45 @@ public sealed partial class Ppu
         return (index & 0x13) == 0x10 ? index & 0x0F : index;
     }
 
-    private void EndFrame()
+    // The dots run since power on.
+    private long Time => _timeBase + (_line * Region.DotsPerLine) + _dot;
+
+    // The latch as it reads now: each bit not driven for the decay time is 0. Clearing a bit for
+    // good is the same, since only a drive sets it again.
+    private byte Latch()
     {
+        if (_latch != 0)
+        {
+            long now = Time;
+            for (int bit = 0; bit < 8; bit++)
+            {
+                if ((_latch & (1 << bit)) != 0 && now - _latchDriven[bit] > _latchDecayDots)
+                {
+                    _latch &= (byte)~(1 << bit);
+                }
+            }
+        }
+
+        return _latch;
+    }
+
+    // Puts the bits of value under mask on the latch, as an access that drives those bits does.
+    private void Drive(byte value, int mask)
+    {
+        long now = Time;
+        _latch = (byte)((Latch() & ~mask) | (value & mask));
+        for (int bit = 0; bit < 8; bit++)
+        {
+            if ((mask & (1 << bit)) != 0)
+            {
+                _latchDriven[bit] = now;
+            }
+        }
+    }
+
+    private void EndFrame(int dots)
+    {
+        _timeBase += dots;
         _frame++;
         _oddFrame = !_oddFrame;
         Screen.EndFrame();

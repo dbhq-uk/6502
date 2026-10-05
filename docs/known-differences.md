@@ -755,10 +755,13 @@ pinned settles which.
 the nametables are unspecified (`ppu.md` section 12). The model clears all of
 them so a run is repeatable.
 
-**The I/O latch does not decay.** On the chip its bits fade after 3 to 30 ms.
-The model keeps the last value until the next access, and a test pins that
-choice (`TheLatchDoesNotDecay_ItsDecayIsNotModelled`). `ppu_open_bus` would
-check the decay; it is not pinned.
+**The I/O latch decays at one fixed time.** Each bit reads 0 once it has gone
+600 ms without being driven, the time the fork's `ppu_open_bus/readme.txt`
+measured on a console. The wiki says at least one bit goes after 3 to 30 ms,
+faster when the PPU is warm, and the readme says some decay sooner, depending
+on the console and the temperature. The model gives every bit the same time on
+every console. Which accesses drive which bits follows `ppu.md` section 1, and
+`ppu_open_bus` passes (task 12).
 
 **Writes are not ignored after power on or reset.** The chip ignores writes to
 `$2000`, `$2001`, `$2005` and `$2006` until the end of the first VBlank
