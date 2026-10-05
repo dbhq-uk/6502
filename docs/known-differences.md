@@ -855,3 +855,59 @@ second of sound, and the buffer's overflow. `SoundTests` checks the registers
 through the bus and its mirrors, that the page's read catches the sound up, and
 on the real OS that `VDU 7` makes the output toggle at a pitch between 20 Hz and
 20 kHz.
+
+## The Acorn Electron: the cassette, where the model stops
+
+**What.** `UlaTape` is the cassette at the ULA's serial register (`tape.md`
+sections 4 and 5, `ula.md` section 9): a tape is a list of carrier, bytes and
+silence, and the ULA's tape side answers at bit-time pace with the interrupts
+the OS waits for. The OS runs its own tape code against it unchanged. Where a
+source stops or the form is a choice, the model chooses:
+
+- **No waveform.** Tone shape, phase, and a tape error that is a damaged
+  waveform are not modelled (`tape.md` s5); a damaged tape is a wrong byte. A
+  UEF whose data is a raw bit stream or another framing is refused, not
+  played (s6).
+- **300 baud is not modelled.** The ULA here is a fixed 1200 baud receiver and
+  transmitter, and a tape at 300 baud is refused by the reader (`tape.md` s6,
+  s7 item 8).
+- **The high-tone detector is a count of bit times, not a circuit.**
+  High-tone-detect is set after ten bit times, 16,640 cycles, of carrier heard
+  without a break, and again every ten bit times while the carrier lasts. The
+  real detector is an RC circuit on the `CAS RC` pin whose time constants are
+  not in the sources (`ula.md` s12 item 10), and whether it raises the flag
+  again once cleared is open (`tape.md` s7 item 11). The model follows the test
+  probe, with which the OS loaded every tape. The counter at `$FE06`, which the
+  sheet says must be 0 for the detector to work, is not consulted.
+- **A byte unread for 4,000 cycles is lost**, about 2 ms (`ula.md` s9):
+  receive-full is cleared and `LostBytes` counts it. Section 6a gives the
+  window as two bit times, 3,328 cycles, until the next start bit; the model
+  takes the 2 ms figure. A good load loses none.
+- **Transmit-empty works in every mode, motor or not.** A write to `$FE04`
+  clears it, and it is set nine bit times after the byte starts on the line,
+  the later of the write and the end of the byte before. Whether the real ULA
+  shifts out in input or sound mode is not established.
+- **The receive-full quirk of output mode is not modelled.** Entering output
+  mode, or a pattern that looks like a start and stop bit, raises receive-full
+  on a real ULA (`ula.md` s6a), and two games use it as a timer. Here
+  receive-full comes only from a tape being played.
+- **The recorder rounds and drops.** Idle line is recorded as carrier to the
+  nearest 2400 Hz cycle (832 CPU cycles), and idle line of one bit time or less
+  is not recorded at all: the OS never leaves such a gap inside a block
+  (`tape.md` s7 item 2). Playing a recording back is therefore exact to within
+  half a carrier cycle a gap, not to the cycle.
+- **The tape moves only with the motor on in input or output mode**, and,
+  while recording, only in output mode, so the position is the length of the
+  recording. A played tape stops at its end. A byte whose ninth bit went by
+  before the machine started listening is missed.
+- **`$FE04` reads as 0 until a byte arrives.** The ULA's power-on state is not
+  known (`ula.md` s12 item 4).
+
+**How the tests treat it.** `UlaTapeTests` drives the port alone, with no OS:
+the times of high tone, receive-full, a lost byte and transmit-empty to the
+cycle, the recorder's carrier rounding and threshold, the motor and the modes,
+and that the result does not depend on how often the ULA is caught up.
+`TapeRoundTripTests` saves a program with the OS, writes it as a UEF, reads it
+back and loads it on a fresh machine, and checks the production cassette
+records the same tape as the task 10 probe. `TapeFaultTests` covers a bad data
+CRC, BREAK, ejecting, a silent tape and `*CAT`, each bounded in cycles.

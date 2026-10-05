@@ -252,11 +252,11 @@ public class ElectronBus : IBus
 
     /// <summary>
     /// A read of the ULA. The registers are the same in every 16-byte block, so the register is
-    /// the low four bits of the address. $FE00 is the status. $FE04, the cassette's shift
-    /// register, is answered by the ULA's tape tap when one is set; a peek never asks it, because a
-    /// read of $FE04 changes the tape's state. Any other register cannot be read, and the bus
-    /// returns the high byte of the address, $FE (s1b, s12 item 3: what the real bus returns is not
-    /// settled).
+    /// the low four bits of the address. $FE00 is the status. $FE04 is the cassette's receive
+    /// register (s9), or the test-only tape tap's answer when one is set; a peek gives the
+    /// register without asking either, because a read of $FE04 clears receive-full. Any other
+    /// register cannot be read, and the bus returns the high byte of the address, $FE (s1b, s12
+    /// item 3: what the real bus returns is not settled).
     /// </summary>
     private byte ReadSheila(ushort address, bool peek)
     {
@@ -266,9 +266,15 @@ public class ElectronBus : IBus
             return peek ? _ula.Status : _ula.Read(0);
         }
 
-        if (register == 4 && !peek && _ula.Tap is { } tap)
+        if (register == 4)
         {
-            return tap.OnReadData(_cycles);
+            // The cassette's receive register; a read clears receive-full, so a peek only looks.
+            if (peek)
+            {
+                return _ula.Tape.Data;
+            }
+
+            return _ula.Tap is { } tap ? tap.OnReadData(_cycles) : _ula.Tape.ReadData();
         }
 
         return (byte)(address >> 8);
@@ -302,8 +308,17 @@ public class ElectronBus : IBus
 
         if (offset is >= 0x4 and <= 0x7)
         {
-            // The cassette's registers: the shift register, the clear, the counter and the control.
-            _ula.Tap?.OnWrite(offset, value, _cycles);
+            // The cassette's registers: the shift register, the clear, the counter and the
+            // control. The ULA has taken the clear and the mode; the cassette takes the shift
+            // register and the motor and comms bits, unless the test-only probe is in its place.
+            if (_ula.Tap is { } tap)
+            {
+                tap.OnWrite(offset, value, _cycles);
+            }
+            else
+            {
+                _ula.Tape.Write(offset, value, _cycles);
+            }
         }
     }
 

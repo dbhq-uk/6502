@@ -1,4 +1,5 @@
 using Dbhq.Cpu6502;
+using Dbhq.Machines.Electron.Tape;
 
 namespace Dbhq.Machines.Electron;
 
@@ -70,6 +71,39 @@ public sealed class ElectronMachine
         return (int)(Bus.Cycles - start);
     }
 
+    /// <summary>
+    /// Whether the OS has the cassette motor on: <c>$FE07</c> bit 6, as last written (s9). The OS
+    /// writes it, so it says what the OS asked for, not whether a tape is in.
+    /// </summary>
+    public bool MotorOn => Bus.Ula.Tape.MotorOn;
+
+    /// <summary>
+    /// CPU cycles of tape played since the tape was inserted or rewound, or recorded since
+    /// <see cref="StartRecording"/>. It moves only while the motor is on in a tape mode (<see cref="UlaTape"/>).
+    /// </summary>
+    public long TapePosition => WithTape(t => t.PositionAt(Bus.Cycles));
+
+    /// <summary>Bytes the tape delivered that the OS did not read in time, about 2 ms (s9): none, on a good load.</summary>
+    public int LostBytes => Bus.Ula.Tape.LostBytes;
+
+    /// <summary>Puts a tape in, rewound, in place of any tape or recording. It plays when the OS turns the motor on in input mode.</summary>
+    public void InsertTape(IReadOnlyList<TapeEvent> events) => WithTape(t => t.Insert(events, Bus.Cycles));
+
+    /// <summary>
+    /// Takes the tape out and returns it: the tape that was inserted, or what was recorded since
+    /// <see cref="StartRecording"/>. The machine is left with no tape, which plays as nothing.
+    /// </summary>
+    public IReadOnlyList<TapeEvent> EjectTape() => WithTape(t => t.Eject(Bus.Cycles));
+
+    /// <summary>Winds the tape back to its start. A recording stops, and is then the tape that plays.</summary>
+    public void Rewind() => WithTape(t => t.Rewind(Bus.Cycles));
+
+    /// <summary>
+    /// Puts in a blank tape and presses record: from now, what the OS sends in output mode with the
+    /// motor on is recorded, the bytes and the idle line between them as carrier (<c>tape.md</c> s5).
+    /// </summary>
+    public void StartRecording() => WithTape(t => t.StartRecording(Bus.Cycles));
+
     /// <summary>Runs whole instructions until at least <paramref name="cycles"/> more 2 MHz cycles have passed.</summary>
     public void Run(long cycles)
     {
@@ -78,5 +112,18 @@ public sealed class ElectronMachine
         {
             Step();
         }
+    }
+
+    /// <summary>The cassette, caught up to the bus clock first, so nothing due by now is left undone.</summary>
+    private T WithTape<T>(Func<UlaTape, T> use)
+    {
+        Bus.Ula.CatchUp(Bus.Cycles);
+        return use(Bus.Ula.Tape);
+    }
+
+    private void WithTape(Action<UlaTape> use)
+    {
+        Bus.Ula.CatchUp(Bus.Cycles);
+        use(Bus.Ula.Tape);
     }
 }

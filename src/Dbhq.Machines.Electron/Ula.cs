@@ -1,9 +1,9 @@
 namespace Dbhq.Machines.Electron;
 
 /// <summary>
-/// The Electron's ULA, so far its interrupt registers, the frame that times them, and where the
-/// display is at a given time, which sets the contention (fact sheet <c>ula.md</c> s1c, s4b, s5a,
-/// s5d and s6). It is lazy, as the BBC's chips are: it does nothing on the cycle, and
+/// The Electron's ULA: its interrupt registers, the frame that times them, where the display is
+/// at a given time, which sets the contention, and the cassette (<see cref="UlaTape"/>) (fact
+/// sheet <c>ula.md</c> s1c, s4b, s5a, s5d, s6 and s9). It is lazy, as the BBC's chips are: it does nothing on the cycle, and
 /// <see cref="NextEvent"/> says when it next has something to do. The bus compares that one
 /// number against its clock on every access and calls <see cref="CatchUp"/> only when the clock
 /// has reached it.
@@ -59,6 +59,7 @@ public sealed class Ula
     private bool _powerOn;
     private long _frameStart;
     private int _event;
+    private long _frameNext;
 
     /// <summary>
     /// A ULA at power on. Its power-on state, where the sheet does not give it (s12 item 4): no
@@ -66,10 +67,12 @@ public sealed class Ula
     /// </summary>
     public Ula()
     {
+        Tape = new UlaTape(this);
         PowerOn();
         _enable = 0;
         _sources = TransmitEmptyBit;
-        NextEvent = EventTime(_event);
+        _frameNext = EventTime(_event);
+        Reschedule();
     }
 
     /// <summary>
@@ -85,10 +88,14 @@ public sealed class Ula
     public byte Status =>
         (byte)(0x80 | (_sources & SourceMask) | (_powerOn ? PowerOnBit : 0) | (Irq ? MasterIrqBit : 0));
 
+    /// <summary>The cassette, at the ULA's serial register: $FE04, the motor and mode bits of $FE07, and status bits 4 to 6 (s9).</summary>
+    internal UlaTape Tape { get; }
+
     /// <summary>
-    /// What listens on the cassette registers, if anything (<see cref="ITapeTap"/>). Null by
-    /// default, and then $FE04 cannot be read and the bus answers it as any other unreadable
-    /// register.
+    /// A test-only listener on the cassette registers in place of <see cref="Tape"/>, if set
+    /// (<see cref="ITapeTap"/>): the probe that found what the OS does on tape (<c>tape.md</c> s7)
+    /// and is kept as an independent check on the cassette. While it is set the bus gives it the
+    /// cassette's writes and reads and the cassette sees none of them. Null by default.
     /// </summary>
     internal ITapeTap? Tap { get; set; }
 
@@ -96,8 +103,9 @@ public sealed class Ula
     public bool Irq => (_sources & _enable) != 0;
 
     /// <summary>
-    /// The next cycle at which something happens, which the bus compares against its clock on
-    /// every access. It moves on at each catch-up and when the mode is written.
+    /// The next cycle at which something happens, the frame's or the tape's, which the bus
+    /// compares against its clock on every access. It moves on at each catch-up, when the mode is
+    /// written and when the tape's next event moves.
     /// </summary>
     internal long NextEvent { get; private set; }
 
@@ -123,11 +131,13 @@ public sealed class Ula
 
     /// <summary>
     /// Raises the clock and display-end interrupts that have come due by <paramref name="cycle"/>,
-    /// each at its own time and in order, with the mode in force now.
+    /// each at its own time and in order, with the mode in force now, and brings the tape up to the
+    /// same cycle. The two only set and clear status bits, each its own, so their order between
+    /// them does not matter.
     /// </summary>
     internal void CatchUp(long cycle)
     {
-        while (NextEvent <= cycle)
+        while (_frameNext <= cycle)
         {
             switch (_event)
             {
@@ -145,9 +155,15 @@ public sealed class Ula
                 _frameStart += FrameCycles;
             }
 
-            NextEvent = EventTime(_event);
+            _frameNext = EventTime(_event);
         }
+
+        Tape.CatchUp(cycle);
+        Reschedule();
     }
+
+    /// <summary>Sets <see cref="NextEvent"/> to the sooner of the frame's next event and the tape's.</summary>
+    internal void Reschedule() => NextEvent = Math.Min(_frameNext, Tape.NextEvent);
 
     /// <summary>A write to register 0 to 15; the bus has already mirrored the address.</summary>
     internal void Write(int register, byte value)
@@ -180,7 +196,8 @@ public sealed class Ula
                 break;
             case 7:
                 Mode = ModeOf(value);
-                NextEvent = EventTime(_event);
+                _frameNext = EventTime(_event);
+                Reschedule();
                 break;
         }
     }

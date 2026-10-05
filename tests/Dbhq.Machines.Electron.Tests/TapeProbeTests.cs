@@ -17,10 +17,37 @@ public class TapeProbeTests(ITestOutputHelper output)
     internal static readonly Lazy<TapeRuns.SaveRun> Test = new(() => TapeRuns.Save("10 PRINT \"HELLO\"\r", "SAVE \"TEST\"\r"));
 
     [Fact]
-    public void WithNoTapAFe04ReadIsTheHighByteAsBefore()
+    public void WithNoTapTheCassetteAnswersFe04()
     {
-        var bus = new ElectronBus(ElectronSession.Roms);
-        Assert.Equal(0xFE, bus.Read(0xFE04));
+        // Until task 12 nothing was behind $FE04 with no tap, and it read as $FE, the high byte of
+        // the address. Now the cassette is: with no tap set, a read gives its receive register.
+        var m = new ElectronMachine(ElectronSession.Roms);
+        m.InsertTape([new Carrier(20), new TapeByte(0x2A)]);
+        m.Bus.Write(0xFE07, 0x40); // input mode, motor on
+        long ready = m.Bus.Cycles + (20 * TapeTiming.CarrierCycleCpuCycles) + TapeProbe.ReadyCycles;
+        while (m.Bus.Cycles < ready)
+        {
+            m.Bus.Read(0xC000);
+        }
+
+        Assert.Equal(0x2A, m.Bus.Read(0xFE04));
+    }
+
+    [Fact]
+    public void WithATapSetTheCassetteSeesNothing()
+    {
+        // The probe stays an independent check on the cassette (task 12): while it is on the seam
+        // it takes the cassette's registers, and the cassette neither moves nor records.
+        var m = new ElectronMachine(ElectronSession.Roms);
+        m.StartRecording();
+        var probe = new TapeProbe(m.Bus.Ula);
+        m.Bus.Ula.Tap = probe;
+        m.Bus.Write(0xFE07, 0x44); // output mode, motor on
+        m.Bus.Write(0xFE04, 0x2A);
+
+        Assert.True(probe.MotorOn);
+        Assert.False(m.MotorOn);
+        Assert.Empty(m.EjectTape());
     }
 
     [Fact]
