@@ -1,3 +1,5 @@
+using System.Runtime.CompilerServices;
+
 namespace Dbhq.Machines.Nes;
 
 /// <summary>
@@ -153,17 +155,31 @@ public sealed partial class Ppu
     private int _emphasis;
     private int _greyscaleMask = 0x3F;
 
+    // The colour each of the 32 palette entries shows now, with PPUMASK's emphasis and greyscale:
+    // the pixel's colour worked out ahead, so a dot does one lookup. Refreshed whenever an entry,
+    // the emphasis or the greyscale changes (RefreshColour, RefreshColours).
+    private readonly uint[] _entryColours = new uint[32];
+
+    // The first column each layer shows in, from PPUMASK: 0, 8 with the left 8 clipped, or 256
+    // with the layer off, so the pixel's test is one compare (ppu.md 10).
+    private int _backgroundFrom = 256;
+    private int _spritesFrom = 256;
+
+    // The picture's pixels: Screen.Pixels, which is made once with the frame buffer.
+    private readonly uint[] _pixels;
+
     // The background: the bytes the 8-dot fetch has read, the pattern address it put out, and the
-    // four shifters (ppu.md 6).
+    // shifters (ppu.md 6). The chip's four 16-bit shifters, two of pattern bits and two of
+    // attribute bits, shift together and are reloaded together, so they are kept as one: 16
+    // pixels of 4 bits, bit k of each chip shifter in the 4 bits from 4k. Each 4 bits are the
+    // pixel the multiplexer sees, the two pattern bits and, where they are not both 0, the two
+    // attribute bits; a transparent pixel is 0, as the chip's mixing gives it.
     private byte _nametableByte;
     private int _attributeBits;
     private byte _patternLowByte;
     private byte _patternHighByte;
     private ushort _patternAddress;
-    private ushort _patternLow;
-    private ushort _patternHigh;
-    private ushort _attributeLow;
-    private ushort _attributeHigh;
+    private ulong _backgroundPixels;
 
     // Sprite evaluation for the next line (ppu.md 7 and 9): secondary OAM, the sprite n and byte
     // m being read, the byte the last odd dot read, where in secondary OAM the next byte goes, how
@@ -210,6 +226,8 @@ public sealed partial class Ppu
         _lines = region.Lines;
         _oddFrameSkipsADot = region.OddFrameSkipsADot;
         _colours = PpuPalette.Table(region.EmphasisSwapsRedAndGreen);
+        _pixels = Screen.Pixels;
+        RefreshColours();
         _latchDecayDots = (long)(LatchDecaySeconds * region.CpuHz * region.DotsNumerator / region.DotsDenominator);
     }
 
@@ -289,6 +307,7 @@ public sealed partial class Ppu
         _frame = 0;
         Array.Clear(Oam);
         Array.Clear(_palette);
+        RefreshColours();
         Array.Clear(_nametables);
         Screen.PowerOn();
         Reset();
@@ -315,10 +334,7 @@ public sealed partial class Ppu
         _dot = 0;
         _suppressVblank = false;
         _dropDot = false;
-        _patternLow = 0;
-        _patternHigh = 0;
-        _attributeLow = 0;
-        _attributeHigh = 0;
+        _backgroundPixels = 0;
         _spriteCount = 0;
         _sprite0OnLine = false;
         _found = 0;
@@ -333,7 +349,7 @@ public sealed partial class Ppu
         {
             if ((_mask & 0x18) != 0)
             {
-                RenderDot(true);
+                RenderVisibleDot(_dot);
             }
             else if (_dot >= 2 && _dot <= 257)
             {
@@ -656,7 +672,9 @@ public sealed partial class Ppu
         }
         else
         {
-            _palette[PaletteIndex(address)] = (byte)(value & 0x3F);
+            int entry = PaletteIndex(address);
+            _palette[entry] = (byte)(value & 0x3F);
+            RefreshColour(entry);
         }
     }
 
@@ -667,6 +685,7 @@ public sealed partial class Ppu
 
     // Where in the nametable RAM a PPU address in $2000 to $3EFF lands, by the board's wiring
     // (mappers.md 1). $3000 to $3EFF repeats $2000 to $2EFF.
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private int NametableIndex(ushort address)
     {
         int table = (address >> 10) & 3;
@@ -697,6 +716,7 @@ public sealed partial class Ppu
         }
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static ushort IncrementCoarseX(ushort v)
     {
         return (v & 0x001F) == 31 ? (ushort)((v & ~0x001F) ^ 0x0400) : (ushort)(v + 1);
@@ -742,6 +762,7 @@ public sealed partial class Ppu
     }
 
     // Tells the board of an address the rendering fetches put on the PPU's bus, if it watches.
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private void Fetching(ushort address)
     {
         if (_watchesAddresses)
@@ -755,6 +776,23 @@ public sealed partial class Ppu
         _mask = value;
         _emphasis = (value >> 5) << 6;
         _greyscaleMask = (value & 0x01) != 0 ? 0x30 : 0x3F;
+        _backgroundFrom = (value & 0x08) == 0 ? 256 : (value & 0x02) != 0 ? 0 : 8;
+        _spritesFrom = (value & 0x10) == 0 ? 256 : (value & 0x04) != 0 ? 0 : 8;
+        RefreshColours();
+    }
+
+    // The colour palette entry `entry` shows with the present emphasis and greyscale.
+    private void RefreshColour(int entry)
+    {
+        _entryColours[entry] = _colours[_emphasis | (_palette[entry] & _greyscaleMask)];
+    }
+
+    private void RefreshColours()
+    {
+        for (int entry = 0; entry < _entryColours.Length; entry++)
+        {
+            RefreshColour(entry);
+        }
     }
 
     // What a $2004 read sees: during rendering on a visible line, what sprite evaluation and the
@@ -762,6 +800,71 @@ public sealed partial class Ppu
     private byte OamData()
     {
         return _line < 240 && RenderingEnabled ? _oamLatch : Oam[_oamAddress];
+    }
+
+    // One dot of a visible line with rendering on. Dots 2 to 256, three quarters of the dots, take
+    // one dispatch on the dot's place in its 8-dot tile fetch, and each case does in a straight line
+    // what the general RenderDot does for that dot: the pixel, the shift, the reload, the half of
+    // sprite evaluation the dot's parity gives (odd dots read, even dots act; the 8-dot phase has
+    // the same parity) and the fetch step. A test of the dot's phase in each part would be a branch
+    // the CPU's predictor gets wrong when the 6502's own code runs between two dots.
+    private void RenderVisibleDot(int dot)
+    {
+        if ((uint)(dot - 2) > 254)
+        {
+            RenderDot(true);
+            return;
+        }
+
+        // Column dot - 2 is decided from the shifters as they stand, then they shift.
+        DrawPixel(dot - 2);
+        Shift();
+        switch (dot & 7)
+        {
+            case 1:
+                Reload();
+                EvaluateOddDot(dot);
+                break;
+
+            case 2:
+                EvaluateEvenDot(dot);
+                FetchNametableByte();
+                break;
+
+            case 3:
+                EvaluateOddDot(dot);
+                break;
+
+            case 4:
+                EvaluateEvenDot(dot);
+                FetchAttributeBits();
+                break;
+
+            case 5:
+                EvaluateOddDot(dot);
+                PutPatternLowAddress();
+                break;
+
+            case 6:
+                EvaluateEvenDot(dot);
+                FetchPatternLow();
+                break;
+
+            case 7:
+                EvaluateOddDot(dot);
+                PutPatternHighAddress();
+                break;
+
+            default:
+                EvaluateEvenDot(dot);
+                FetchPatternHigh();
+                if (dot == 256)
+                {
+                    _v = IncrementY(_v);
+                }
+
+                break;
+        }
     }
 
     // One dot of a line that renders, with rendering on (ppu.md 6 and 7).
@@ -859,21 +962,18 @@ public sealed partial class Ppu
 
     // Column x of the line being drawn: the background, the sprites, the multiplexer (ppu.md 7),
     // sprite 0 hit (ppu.md 8), and the colour.
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private void DrawPixel(int x)
     {
         int pixel = 0;
-        if ((_mask & 0x08) != 0 && (x >= 8 || (_mask & 0x02) != 0))
+        if (x >= _backgroundFrom)
         {
-            int bit = 15 - _x;
-            pixel = ((_patternLow >> bit) & 1) | (((_patternHigh >> bit) & 1) << 1);
-            if (pixel != 0)
-            {
-                pixel |= (((_attributeLow >> bit) & 1) << 2) | (((_attributeHigh >> bit) & 1) << 3);
-            }
+            // Fine X picks bit 15 - x of the chip's shifters: the 4 bits from 4 (15 - x).
+            pixel = (int)(_backgroundPixels >> ((15 - _x) << 2)) & 0xF;
         }
 
         int sprite = _spriteLine[x];
-        if (sprite != 0 && (_mask & 0x10) != 0 && (x >= 8 || (_mask & 0x04) != 0))
+        if (sprite != 0 && x >= _spritesFrom)
         {
             if ((sprite & SpriteIsSprite0) != 0 && pixel != 0 && x != 255)
             {
@@ -888,13 +988,13 @@ public sealed partial class Ppu
         }
 
         // A pixel value of 0 is the backdrop, $3F00, so index 0 needs no mirror.
-        Screen.Pixels[(_line << 8) | x] = _colours[_emphasis | (_palette[pixel] & _greyscaleMask)];
+        _pixels[(_line << 8) | x] = _entryColours[pixel];
     }
 
     // With rendering off the picture is the backdrop, or the entry v points at in the palette (ppu.md 10).
     private void DrawRenderingOff()
     {
         int entry = (_v & 0x3F00) == 0x3F00 ? PaletteIndex(_v) : 0;
-        Screen.Pixels[(_line << 8) | (_dot - 2)] = _colours[_emphasis | (_palette[entry] & _greyscaleMask)];
+        _pixels[(_line << 8) | (_dot - 2)] = _entryColours[entry];
     }
 }

@@ -1,40 +1,61 @@
+using System.Runtime.CompilerServices;
+
 namespace Dbhq.Machines.Nes;
 
 /// <summary>The sprite half of the picture processing unit: evaluation, the fetches and the line buffer (ppu.md 7 and 9). The rest of the class is in <c>Ppu.cs</c>.</summary>
 public sealed partial class Ppu
 {
-    // One dot of sprite evaluation on a visible line, dots 1 to 256 (ppu.md 7 and 9).
+    // One dot of sprite evaluation on a visible line, dots 1 to 256 (ppu.md 7 and 9). The dots 2
+    // to 256 call the odd or the even half from their own dispatch (RenderVisibleDot).
     private void Evaluate(int dot)
     {
-        if (dot <= 64)
+        if (dot == 1)
         {
-            if (dot == 1)
-            {
-                Array.Fill(_secondaryOam, (byte)0xFF);
-                _evaluationN = 0;
-                _evaluationM = 0;
-                _secondaryIndex = 0;
-                _found = 0;
-                _secondaryFull = false;
-                _evaluationDone = false;
-                _sprite0Found = false;
-            }
-
-            _oamLatch = 0xFF;
-            return;
+            Array.Fill(_secondaryOam, (byte)0xFF);
+            _evaluationN = 0;
+            _evaluationM = 0;
+            _secondaryIndex = 0;
+            _found = 0;
+            _secondaryFull = false;
+            _evaluationDone = false;
+            _sprite0Found = false;
         }
 
         if ((dot & 1) == 1)
         {
-            _oamLatch = Oam[(_evaluationN << 2) | _evaluationM];
-            return;
+            EvaluateOddDot(dot);
         }
-
-        if (_evaluationDone)
+        else
         {
-            return;
+            EvaluateEvenDot(dot);
         }
+    }
 
+    // An odd dot: secondary OAM is being cleared to $FF up to dot 64, and after it OAM is read.
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private void EvaluateOddDot(int dot)
+    {
+        _oamLatch = dot <= 64 ? (byte)0xFF : Oam[(_evaluationN << 2) | _evaluationM];
+    }
+
+    // An even dot: secondary OAM is being cleared to $FF up to dot 64, and after it the byte the
+    // odd dot read is acted on.
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private void EvaluateEvenDot(int dot)
+    {
+        if (dot <= 64)
+        {
+            _oamLatch = 0xFF;
+        }
+        else if (!_evaluationDone)
+        {
+            EvaluationStep();
+        }
+    }
+
+    // What an even dot from 65 does with the byte the odd dot before it read, until the search ends.
+    private void EvaluationStep()
+    {
         int row = _line - _oamLatch;
         bool inRange = row >= 0 && row < ((_ctrl & 0x20) != 0 ? 16 : 8);
         if (_secondaryFull)
