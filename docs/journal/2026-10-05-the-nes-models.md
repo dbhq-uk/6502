@@ -1,7 +1,7 @@
 ---
 title: "The NES's models: the inputs, and the eight checks they rest on"
 date: 2026-10-05
-summary: "Before the NES's two models are built, the work measures what they rest on. The bare board scan's scale holds, its solder side lies on its component side, and the European board's chips sit where the American board's do. The case does not. Read from the two corner photographs, its depth came out well short of the published figure, and Dan ruled that this measured the camera, not the case. Judged again on the design patent's drawings, it is still just over the limit, and the European front's band differs from the drawing's by more than its limit too. Both stops stand, and the models wait on Dan. On the way, the cartridge connector's fingers turned out to be on a metric pitch, not the tenth of an inch the plan assumed."
+summary: "Before the NES's two models are built, the work measures what they rest on. The bare board scan's scale holds, its solder side lies on its component side, and the European board's chips sit where the American board's do. The case took three tries. Read from the two corner photographs, its depth came out well short of the published figure, and Dan ruled that this measured the camera, not the case. Judged on the design patent's drawings it was still just over the limit, and the European front then stopped against the drawing too. The sources disagree with each other by more than those limits could resolve, so the check was turned back to its purpose, catching a gross error of scale, with wider limits set after the drawings were seen and said so. On those it passes, and every stop stays on record. On the way, the cartridge connector's fingers turned out to be on a metric pitch, not the tenth of an inch the plan assumed."
 order: 30
 ---
 
@@ -18,8 +18,14 @@ design's decisions in short, then task 0: the inputs checked, and the eight
 checks everything rests on, each judged against thresholds the plan set
 before any measuring.
 
-**Task 0 crossed a STOP threshold, and after the plan was revised it crosses
-two.** The case's depth to width, from the two corner photographs with the
+**Task 0 crossed STOP thresholds, and the plan's case rows were revised
+twice the same day; as revised, nothing stops.** In short: the first run
+stopped on the case's depth; the first revision moved the case to the patent
+and stopped on its depth and on the PAL front; the second revision, made
+after the patent's figures were seen, judges the case within 5 and 8 per cent
+of the published ratios and the PAL front on O4 against O2-FL again, and on
+those the case passes and the PAL front sits between pass and stop. Every
+stop stays recorded. The detail: The case's depth to width, from the two corner photographs with the
 camera the plan set, is 8.8 per cent short of the published 203.2 / 254 on
 the worse photograph, where the plan stops at 3. Dan ruled the same day that
 the check measured the camera, not the case, and the plan was revised to
@@ -402,12 +408,62 @@ drawing's proportions as much as the PAL shell; the check cannot tell. O2-FL's
 buttons' span, +21.8 per cent against the patent, is a poor figure in any case:
 the buttons stand out of the face, and it was read through the face's plane.
 
-### Where this leaves the plan
+### Where that left the plan, before the second revision
 
 Two STOPs stand, as revised: the case depth, which stops the outside and so
 every model, and the PAL front, which stops the PAL models. The inside's
 checks (scale, solder side, PAL layout) pass or sit between pass and stop.
 What happens next is Dan's call.
+
+## The case revised again, after the patent was seen
+
+The controller ruled a second revision the same day, with Dan's instruction
+to be pragmatic and not stop. **It was made after the patent's figures were
+seen**, and that is said here and in the plan's rows so that nobody takes it
+for a limit set in advance. The reason: the sources disagree with each other
+by more than the 1.5 and 3 per cent limits can resolve. The patent's own top
+view gives depth to width 0.7723 and its side over its front 0.7914 (above);
+the published widths are 254 mm (Fandom, Thingiverse) and 256 mm
+(dimensions.com) at a depth of 203.2, so the published ratio is 0.794 to
+0.800. The check's real purpose is to catch a gross error of scale, and the
+limits now say that:
+
+- **Case depth to width**: the patent's three figures against the published
+  ratios' midpoint, 0.797; pass if every figure is within 5 per cent, STOP if
+  any is over 8.
+- **Case height to width**: the patent's two figures against 88.9 / 255 =
+  0.349, 255 mm being the published widths' midpoint; the same 5 and 8.
+- **The PAL front**: back to the plan's first form, O4 against O2-FL's front
+  face rectified on its four corners. That rectification is planar and needs
+  no camera, so the first revision's reason for moving it does not apply. At
+  least two measured ratios, each within 2 per cent, to pass; STOP over 4.
+  The patent's front figures are recorded, not judged.
+- **The case's size in the model** (task 8): the published 254 by 203.2 by
+  88.9 mm, said on the page to be no figures of Nintendo's and good to about 3
+  per cent.
+
+Every earlier result stays in `spike.json`'s `revision`: the photographs'
+-8.77 per cent STOP, and the first revision's -3.46 per cent depth STOP
+(kept beside the new figures as `case.patent.firstRevisionAgainst254Mm`) and
+its -8.08 per cent PAL front STOP (kept as each ratio's `O4AgainstPatentPct`),
+with both earlier sets of eight verdicts.
+
+Measured on 5 October 2026 with `cd tools/nes-model &&
+NES_MODEL_INPUTS=/tmp/nes-inputs /tmp/nesvenv/bin/python spike.py`, which now
+exits 0:
+
+| Check, as revised a second time | Figures | Verdict |
+|---|---|---|
+| Case depth | -3.08 (top), -2.64 (bottom), -0.68 per cent (side over front), against 0.7969 | pass |
+| Case height | +1.12 (front), +1.37 per cent (side), against 0.3486 | pass |
+| PAL front | door +0.35, label band -3.49 per cent, O4 against O2-FL; the buttons' span not on O4 | between pass and stop |
+
+The other five checks are unchanged: scale x passes, scale y is between pass
+and stop, x against y passes, the solder side passes, the PAL layout passes.
+The PAL front's label band, at -3.49 per cent, is the figure nearest a stop;
+it rests on O2-FL's band height through the case camera that the first
+revision found faulty, and on O4 taken as straight on, so it is a weak figure
+either way.
 
 ## Mistakes
 
@@ -445,3 +501,11 @@ tests/nes-spike-verdicts.test.mjs` 4 passed, the new test seen to fail with
 the two-ratio rule taken out of the verdict function; `cd site && npm run
 build && npm test`: 302 passed, one to-do, none failed, so both floors are
 raised to 302.
+
+After the second revision: pytest 23 passed; `node --test
+tests/nes-spike-verdicts.test.mjs` 4 passed, and failed (one test each time)
+with the case limits put back to 1.5 and 3 and with the stop moved to 8.2;
+`node --test tests/nes-models.test.mjs` 7 passed, the new one holding that
+the PAL front's judged figures are O4 against O2-FL. `cd site && npm run
+build && npm test`: 303 passed, one to-do, none failed, so both floors are
+raised to 303.

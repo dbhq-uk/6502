@@ -97,3 +97,9 @@ test('the site never runs the NES model tools', () => {
 test('spike.json records the verdicts its figures give against the plan\'s thresholds', () => {
   assert.deepEqual(spike.verdicts, verdicts(spike));
 });
+
+test('the PAL front is judged on O4 against O2-FL\'s front, on the ratios O4 shows; the patent\'s front is recorded', () => {
+  const r = spike.palFront.ratios;
+  assert.deepEqual(spike.palFront.ratioErrPct, r.filter((x) => x.O4 !== null).map((x) => x['O4AgainstO2-FLPct']));
+  for (const x of r) assert.ok('patentFig3' in x && 'O4AgainstPatentPct' in x, `${x.ratio}: the patent's figure is not recorded`);
+});

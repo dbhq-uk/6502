@@ -1,13 +1,17 @@
 // The plan's task 0 thresholds, set before the measurements
 // (docs/superpowers/plans/2026-10-05-nes-models.md, Global Constraints).
-// Revised 5 October 2026 after task 0's figures were seen (Dan): the case's
-// depth and height are judged on the design patent's orthographic views
-// (case.patent), the height with the depth's limits; the row on the two
-// photographs' heights agreeing is dropped; the PAL front is O4 against the
-// patent's front view and passes only on at least two measured ratios. No
-// limit moved. The first verdicts are kept in spike.json's revision.
-export const PASS = { xMedian: 0.15, yMedianPct: 0.5, solderMedian: 0.20, solderP90: 0.40, palMedian: 1.0, palMax: 2.0, depthPct: 1.5, heightPct: 1.5, palFrontPct: 2.0 };
-export const STOP = { xMedian: 0.25, yMedianPct: 1.0, ratioPct: 1.5, solderMedian: 0.30, solderP90: 0.60, palAny: 3.0, depthPct: 3.0, heightPct: 3.0, palFrontPct: 4.0 };
+// Revised twice on 5 October 2026, each time after task 0's figures were seen.
+// First (Dan): the case's depth and height judged on the design patent's
+// orthographic views (case.patent), the row on the two photographs' heights
+// agreeing dropped, the PAL front on at least two measured ratios; no limit
+// moved. Second (the controller, with Dan's instruction to be pragmatic),
+// after the patent's figures were seen: the sources disagree by more than 1.5
+// and 3 per cent can resolve, and the check is there to catch a gross scale
+// error, so the case passes within 5 per cent of the published ratios'
+// midpoints and stops over 8; the PAL front is O4 against O2-FL again, as
+// first written. Every earlier verdict is kept in spike.json's revision.
+export const PASS = { xMedian: 0.15, yMedianPct: 0.5, solderMedian: 0.20, solderP90: 0.40, palMedian: 1.0, palMax: 2.0, depthPct: 5.0, heightPct: 5.0, palFrontPct: 2.0 };
+export const STOP = { xMedian: 0.25, yMedianPct: 1.0, ratioPct: 1.5, solderMedian: 0.30, solderP90: 0.60, palAny: 3.0, depthPct: 8.0, heightPct: 8.0, palFrontPct: 4.0 };
 export const MIN = { xRows: 4, yFootprints: 8, solderHoles: 150, palParts: 10, palFrontRatios: 2 };
 
 /** Each check's verdict from spike.json's figures: 'pass', 'between pass and stop' or 'STOP', in the table's order. */

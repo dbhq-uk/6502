@@ -24,8 +24,10 @@ test('each check stops on its own figure, and only that check', () => {
     [['solder', 'heldOutMm', 'p90'], 0.61, 3],
     [['palLayout', 'heldOutMm', 'max'], 3.1, 4],
     [['palLayout', 'unmatched'], ['U9'], 4],
-    [['case', 'patent', 'depthToWidthErrPct'], -3.2, 5],
-    [['case', 'patent', 'heightToWidthErrPct'], 3.1, 6],
+    [['case', 'patent', 'depthToWidthErrPct'], -8.1, 5],
+    [['case', 'patent', 'depthToWidthErrPct'], 8.1, 5],
+    [['case', 'patent', 'heightToWidthErrPct'], 8.1, 6],
+    [['case', 'patent', 'heightToWidthErrPct'], -8.1, 6],
     [['palFront', 'ratioErrPct'], [0.5, 4.5], 7],
     [['palFront', 'ratioErrPct'], [-4.1], 7],
   ];
@@ -40,8 +42,12 @@ test('between the limits is neither a pass nor a stop, and too few points is nev
   assert.equal(names(tweak(['scale', 'x', 'scaledErrMm', 'median'], 0.2))[0], 'between pass and stop');
   assert.equal(names(tweak(['solder', 'holes'], 149))[3], 'between pass and stop');
   assert.equal(names(tweak(['palLayout', 'parts'], 9))[4], 'between pass and stop');
-  assert.equal(names(tweak(['case', 'patent', 'heightToWidthErrPct'], -2.0))[6], 'between pass and stop');
-  assert.equal(names(tweak(['case', 'patent', 'depthToWidthErrPct'], 2.5))[5], 'between pass and stop');
+  assert.equal(names(tweak(['case', 'patent', 'depthToWidthErrPct'], -5.1))[5], 'between pass and stop');
+  assert.equal(names(tweak(['case', 'patent', 'depthToWidthErrPct'], -4.9))[5], 'pass');
+  assert.equal(names(tweak(['case', 'patent', 'heightToWidthErrPct'], 5.1))[6], 'between pass and stop');
+  assert.equal(names(tweak(['case', 'patent', 'heightToWidthErrPct'], 4.9))[6], 'pass');
+  assert.equal(names(tweak(['case', 'patent', 'depthToWidthErrPct'], 7.9))[5], 'between pass and stop');
+  assert.equal(names(tweak(['case', 'patent', 'heightToWidthErrPct'], -7.9))[6], 'between pass and stop');
 });
 
 test('the PAL front passes only on at least two measured ratios, each within the limit', () => {

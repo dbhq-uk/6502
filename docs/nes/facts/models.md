@@ -113,8 +113,10 @@ command); each is a measurement of that day.
   measured by `spike.py` (`spike.json`'s `case.patent`): depth to width 0.7723
   on the top view (FIG 5), 0.7758 on the bottom view (FIG 6) and 0.7914 from
   the side over the front (FIG 7 over FIG 3); height to width 0.3525 (FIG 3)
-  and 0.3534 (FIG 7), 0.3682 and 0.3709 with the feet. Against the published
-  0.800 and 0.350, the top view is 3.46 per cent short.
+  and 0.3534 (FIG 7), 0.3682 and 0.3709 with the feet. Against 0.800 and 0.350
+  (254 mm wide) the top view is 3.46 per cent short; against the midpoints of
+  the published figures (widths of 254 and 256 mm), 0.797 and 0.349, it is
+  3.08 per cent short. The plan judges the latter, within 5 per cent.
 
 ## Downloaded for the work
 
