@@ -178,3 +178,12 @@ Decisions taken while writing the plan, each with what it was chosen over:
   the page's code, above.
 - **The first sampler design lived in the three.js module**, which node would
   have had to load to test it. Moved to the plain module beside `accessRates`.
+
+## Approval
+
+Dan approved the written spec, and then the plan, on 5 October 2026, and chose
+subagent-driven execution (a fresh agent per task, each reviewed before the
+next) over doing it in one session. This task's brief ended at the written
+design and plan, so no model, tool or site code was started. Execution begins
+with task 0, whose first step asks Dan whether to fork OpenTendo into
+`dbhq-uk`.
