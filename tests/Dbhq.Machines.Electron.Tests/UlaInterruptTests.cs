@@ -366,6 +366,20 @@ public class UlaInterruptTests
     }
 
     [Theory]
+    [InlineData(0xFE07, 4)]
+    [InlineData(0xFEA7, 5)]
+    [InlineData(0xFEF7, 6)]
+    public void AWriteToAMirrorOfTheControlRegisterReachesTheMode(int address, int mode)
+    {
+        // s1c: the registers repeat in every 16-byte block, so $FEA7 and $FEF7 are $FE07. The
+        // mode is bits 5 to 3 of the byte written.
+        ElectronBus bus = NewBus();
+        Assert.Equal(0, bus.Ula.Mode);
+        bus.Write((ushort)address, ModeBits(mode));
+        Assert.Equal(mode, bus.Ula.Mode);
+    }
+
+    [Theory]
     [InlineData(0xFE02)]
     [InlineData(0xFEA2)]
     [InlineData(0xFE0F)]

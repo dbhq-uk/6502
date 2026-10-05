@@ -96,7 +96,7 @@ public sealed class Ula
     /// that is how the OS tells a BREAK from a power on, and the ULA has no reset of its own on
     /// BREAK (s12 item 5).
     /// </summary>
-    public void PowerOn() => _powerOn = true;
+    internal void PowerOn() => _powerOn = true;
 
     /// <summary>
     /// Raises the clock and display-end interrupts that have come due by <paramref name="cycle"/>,

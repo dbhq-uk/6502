@@ -68,3 +68,15 @@ The third task gave the bus a ULA: the interrupt enable and status at `$FE00`, t
 - **A read of a register the ULA does not answer is the high byte of the address**, task 2's rule, now only for registers 1 to 15. `$FE04`, the cassette, joins `$FE00` in task 10.
 - **Three choices the sheet leaves open**, written in `docs/known-differences.md`: transmit empty is set at power on, the mode is 0 at power on, and BREAK resets nothing in the ULA.
 - **The tape's hooks.** `SetStatus` and `ClearStatus` take bit 4, 5 or 6 and nothing else, so the tape tasks can raise receive full and high tone and drop transmit empty without reaching into the ULA's other state.
+
+## The keyboard (fourth task, 5 October)
+
+The fourth task built the keyboard matrix and wired it into slots 8 and 9.
+
+- **It is a device, and it is one device in two slots.** Slots 8 and 9 hold no image. The bus sends a read in either slot to the same `ElectronKeyboard`, with the full 16-bit address, and slot 10 and 11 still read BASIC. The cost of the access is task 2's rule, unchanged: the keyboard slots were already a 1 MHz access.
+- **The OR rule.** Each of the 14 address lines A0 to A13 selects a column when it is low, and a read ORs the four bits of every selected column. So `$A000` (A13 high, A0 to A12 low) asks "is any key down in columns 0 to 12", which is the OS's probe, and `$9FFF` asks about column 13 alone. A test holds that Escape, Caps Lock, Ctrl and Shift, which all sit in column 13, never show at `$A000`. Bits 7 to 4 read 0, and so does every address with no column line low.
+- **54 keys, not 56.** The task brief said 56. The table in `ula.md` section 7b has 14 columns of 4 positions, which is 56 positions, and marks two of them not connected (column 0 bit 2 and column 2 bit 3). That leaves 54 keys. The enum has 54, and a test derives that figure from the table copied into it. The brief's 56 counted the positions, not the keys.
+- **Two positions that are one key each.** Both Shift keys are one position in the matrix, so there is one `Shift`. Caps Lock and Func are one key, so there is one `CapsLock`. Pressed together with another key it is the same position, and the matrix cannot tell a function key from a lock toggle: that is the OS's job. A test presses Caps Lock with K and sees only the two positions.
+- **A key is a state, not a count.** Pressing a key twice and releasing it once leaves it up, as a switch does.
+- **A value that is not a key is refused.** The enum value is `column | (bit << 4)`, so a cast can name a position that is not connected. `Down`, `Up` and `IsDown` throw for it rather than set a bit that nothing can read.
+- **Two clean-ups from the third task's review.** A test now writes the display mode at `$FEA7` and `$FEF7` and sees it in `Ula.Mode`, so the mirroring of the control register is held and not only the status register's. And `Ula.PowerOn` is internal: nothing outside the assembly needs it.

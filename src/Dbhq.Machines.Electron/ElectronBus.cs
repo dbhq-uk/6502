@@ -60,6 +60,9 @@ public class ElectronBus : IBus
     /// <summary>The ULA: its interrupt registers and the frame that times them.</summary>
     public Ula Ula => _ula;
 
+    /// <summary>The keyboard matrix, which slots 8 and 9 read (s7).</summary>
+    public ElectronKeyboard Keyboard { get; } = new();
+
     /// <summary>
     /// The CPU's IRQ line: the ULA's, made current for this cycle first. The machine copies it
     /// into the core after each step.
@@ -183,9 +186,8 @@ public class ElectronBus : IBus
 
         if (slot is KeyboardSlotLow or KeyboardSlotLow + 1)
         {
-            // Placeholder, owned by task 4: the keyboard matrix is decoded here from the low
-            // address bits. Until then no key is down as far as the bus can tell.
-            return 0x00;
+            // One device in both slots (s2b): the low 14 address bits pick the columns (s7a).
+            return Keyboard.Read(address);
         }
 
         // An empty slot reads the high byte of the address (s12 item 3: not measured; the boot
