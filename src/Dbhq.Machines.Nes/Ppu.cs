@@ -67,11 +67,17 @@ namespace Dbhq.Machines.Nes;
 /// modelled: it holds its value until the next access.
 /// </para>
 /// <para>
-/// <b>The PPU's address bus.</b> Every pattern-table address the PPU puts on its bus goes to
-/// <see cref="IMapper.PpuAddressChanged"/>, which is what MMC3 watches: the background's and the
-/// sprites' pattern fetches during rendering, and in VBlank or with rendering off <c>v</c> and the
-/// <c>$2007</c> accesses (ppu.md 6). The CPU cycle given with each is <see cref="CpuCycle"/>,
-/// which the bus sets once a cycle.
+/// <b>The PPU's address bus.</b> The addresses the PPU puts on its bus go to
+/// <see cref="IMapper.PpuAddressChanged"/>, which is what MMC3 watches (its A12): during rendering
+/// the background's and the sprites' pattern fetches, and each sprite slot's first garbage
+/// nametable fetch; in VBlank or with rendering off <c>v</c> whenever it changes and the
+/// <c>$2007</c> accesses, whatever the address (ppu.md 6). The background's nametable and
+/// attribute fetches are left out, though their A12 is always 0: between two pattern fetches they
+/// are a 4-dot low, which MMC3's filter ignores anyway, and from dot 337 to the next line's dot 4
+/// a 9-dot low, exactly 3 CPU cycles on NTSC, which told would clock the counter twice a line with
+/// the background at <c>$1000</c>, where the sheet says once (mappers.md 6, ppu.md 6). Leaving
+/// them out also saves a call every 4 dots. The CPU cycle given with each is
+/// <see cref="CpuCycle"/>, which the bus sets once a cycle.
 /// </para>
 /// <para>
 /// Nothing on the per-dot path allocates: every buffer is made with the PPU.
@@ -644,14 +650,11 @@ public sealed partial class Ppu
         return (ushort)((v & ~0x03E0) | (coarseY << 5));
     }
 
-    // Tells the board of a pattern-table address on the PPU's bus.
+    // Tells the board of v, or a $2007 access, on the PPU's bus. Every address goes, nametable and
+    // palette ones too: A12 is bit 12 of any of them, so $3F00 is A12 high (ppu.md 6, task 11).
     private void Report(ushort address)
     {
-        address &= 0x3FFF;
-        if (address < 0x2000)
-        {
-            _mapper.PpuAddressChanged(address, CpuCycle);
-        }
+        _mapper.PpuAddressChanged((ushort)(address & 0x3FFF), CpuCycle);
     }
 
     private void SetMask(byte value)

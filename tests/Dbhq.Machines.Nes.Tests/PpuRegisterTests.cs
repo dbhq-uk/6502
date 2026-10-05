@@ -273,7 +273,7 @@ public class PpuRegisterTests
     }
 
     [Fact]
-    public void EveryPatternTableAddressOnThePpusBusIsReportedToTheBoard()
+    public void EveryAddressOnThePpusBusOutsideRenderingIsReportedToTheBoard()
     {
         (Ppu ppu, TestMapper mapper) = Build();
 
@@ -282,9 +282,23 @@ public class PpuRegisterTests
         SetAddress(ppu, 0x2000);
         ppu.ReadRegister(7);
 
-        // $2006 put $1FFF on the bus, the $2007 write accessed it, and the increment moved to
-        // $2000, which is a nametable, so it is not a pattern-table address and not reported.
-        Assert.Equal(new ushort[] { 0x1FFF, 0x1FFF }, mapper.Reported.Select(r => r.Address));
+        // With rendering off the bus carries v (ppu.md 6): $2006 put $1FFF on it, the $2007 write
+        // accessed it, the increment moved v to $2000, $2006 put $2000 there again, the read
+        // accessed it and the increment moved it to $2001. A nametable address is on the bus too,
+        // and its A12 is what MMC3 watches (task 11 found the PPU left these out).
+        Assert.Equal(new ushort[] { 0x1FFF, 0x1FFF, 0x2000, 0x2000, 0x2000, 0x2001 }, mapper.Reported.Select(r => r.Address));
+    }
+
+    [Fact]
+    public void APaletteAddressInVIsReportedWithA12High()
+    {
+        (Ppu ppu, TestMapper mapper) = Build();
+
+        // $3F00 has bit 12 set: on the bus it is A12 high, which an MMC3 counts as a rise.
+        SetAddress(ppu, 0x3F00);
+        ppu.WriteRegister(7, 0x0F);
+
+        Assert.Equal(new ushort[] { 0x3F00, 0x3F00, 0x3F01 }, mapper.Reported.Select(r => r.Address));
     }
 
     [Fact]

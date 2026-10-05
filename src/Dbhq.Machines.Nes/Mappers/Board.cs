@@ -1,7 +1,7 @@
 namespace Dbhq.Machines.Nes.Mappers;
 
 /// <summary>
-/// What the simple boards share: PRG ROM read through four 8 KB windows, CHR read through two 4 KB
+/// What the boards share: PRG ROM read through four 8 KB windows, CHR read through eight 1 KB
 /// windows, PRG RAM at <c>$6000</c>, and CHR RAM that a power cycle clears. A board sets the
 /// window bases when its registers change, so a read is one array access and one add.
 /// </summary>
@@ -12,14 +12,14 @@ namespace Dbhq.Machines.Nes.Mappers;
 /// count. Then no address a board computes can fall outside its array.
 /// </para>
 /// <para>
-/// Built from <c>docs/nes/facts/mappers.md</c> sections 3 to 5. Reads are pure (they change
+/// Built from <c>docs/nes/facts/mappers.md</c> sections 3 to 6. Reads are pure (they change
 /// nothing in the board), as <see cref="IMapper.CpuRead"/> asks.
 /// </para>
 /// </remarks>
 public abstract class Board : IMapper
 {
     private const int PrgWindow = 0x2000;
-    private const int ChrWindow = 0x1000;
+    private const int ChrWindow = 0x400;
     private const int ChrBank = 0x2000;
 
     private readonly bool _chrIsRam;
@@ -44,7 +44,10 @@ public abstract class Board : IMapper
             PrgBase[window] = window * PrgWindow % Prg.Length;
         }
 
-        ChrBase[1] = ChrWindow;
+        for (int window = 0; window < ChrBase.Length; window++)
+        {
+            ChrBase[window] = window * ChrWindow;
+        }
     }
 
     /// <summary>The PRG ROM, a whole number of banks long, so a window base plus an offset never leaves it.</summary>
@@ -56,11 +59,14 @@ public abstract class Board : IMapper
     /// <summary>Where in <see cref="Prg"/> each 8 KB window of <c>$8000</c> to <c>$FFFF</c> starts.</summary>
     private protected int[] PrgBase { get; } = new int[4];
 
-    /// <summary>Where in <see cref="Chr"/> each 4 KB half of the pattern tables starts.</summary>
-    private protected int[] ChrBase { get; } = new int[2];
+    /// <summary>Where in <see cref="Chr"/> each 1 KB window of the pattern tables starts.</summary>
+    private protected int[] ChrBase { get; } = new int[8];
 
-    /// <summary>False while the board has switched its PRG RAM off.</summary>
+    /// <summary>False while the board has switched its PRG RAM off: reads are open bus and writes go nowhere.</summary>
     private protected bool PrgRamEnabled { get; set; } = true;
+
+    /// <summary>False while the board refuses writes to its PRG RAM and still lets it be read (MMC3's write protect).</summary>
+    private protected bool PrgRamWritable { get; set; } = true;
 
     /// <inheritdoc />
     public Mirroring Mirroring { get; private protected set; }
@@ -94,7 +100,7 @@ public abstract class Board : IMapper
         {
             WriteRegister(address, value);
         }
-        else if (address >= 0x6000 && PrgRamEnabled && PrgRam.Length > 0)
+        else if (address >= 0x6000 && PrgRamEnabled && PrgRamWritable && PrgRam.Length > 0)
         {
             PrgRam[(address - 0x6000) % PrgRam.Length] = value;
         }
@@ -103,7 +109,7 @@ public abstract class Board : IMapper
     /// <inheritdoc />
     public byte PpuRead(ushort address)
     {
-        return Chr[ChrBase[(address >> 12) & 1] + (address & 0x0FFF)];
+        return Chr[ChrBase[(address >> 10) & 7] + (address & (ChrWindow - 1))];
     }
 
     /// <inheritdoc />
@@ -111,12 +117,12 @@ public abstract class Board : IMapper
     {
         if (_chrIsRam)
         {
-            Chr[ChrBase[(address >> 12) & 1] + (address & 0x0FFF)] = value;
+            Chr[ChrBase[(address >> 10) & 7] + (address & (ChrWindow - 1))] = value;
         }
     }
 
     /// <inheritdoc />
-    public void PpuAddressChanged(ushort address, long cpuCycle)
+    public virtual void PpuAddressChanged(ushort address, long cpuCycle)
     {
     }
 
@@ -164,25 +170,39 @@ public abstract class Board : IMapper
         SetPrg(0, Wrap(bank, Prg.Length / 0x8000) * 0x8000, 4);
     }
 
+    /// <summary>
+    /// Points an 8 KB window of the CPU space (0 for <c>$8000</c> to 3 for <c>$E000</c>) at an 8 KB
+    /// bank of <see cref="Prg"/>, taken modulo the banks there are; a negative bank counts back
+    /// from the end, so -1 is the last.
+    /// </summary>
+    private protected void SetPrg8(int window, int bank)
+    {
+        PrgBase[window] = Wrap(bank, Prg8Count) * PrgWindow;
+    }
+
     /// <summary>Points the pattern tables at an 8 KB bank of <see cref="Chr"/>, taken modulo the banks there are.</summary>
     private protected void SetChr8(int bank)
     {
-        int offset = Wrap(bank, Chr.Length / ChrBank) * ChrBank;
-        ChrBase[0] = offset;
-        ChrBase[1] = offset + ChrWindow;
+        SetChr(0, Wrap(bank, Chr.Length / ChrBank) * ChrBank, 8);
     }
 
     /// <summary>Points a 4 KB half of the pattern tables (0 for <c>$0000</c>, 1 for <c>$1000</c>) at a 4 KB bank of <see cref="Chr"/>, taken modulo the banks there are.</summary>
     private protected void SetChr4(int half, int bank)
     {
-        ChrBase[half] = Wrap(bank, Chr4Count) * ChrWindow;
+        SetChr(half * 4, Wrap(bank, Chr.Length / 0x1000) * 0x1000, 4);
+    }
+
+    /// <summary>Points a 1 KB window of the pattern tables (0 for <c>$0000</c> to 7 for <c>$1C00</c>) at a 1 KB bank of <see cref="Chr"/>, taken modulo the banks there are.</summary>
+    private protected void SetChr1(int window, int bank)
+    {
+        ChrBase[window] = Wrap(bank, Chr.Length / ChrWindow) * ChrWindow;
     }
 
     /// <summary>The number of 16 KB banks in the PRG.</summary>
     private protected int Prg16Count => Prg.Length / 0x4000;
 
-    /// <summary>The number of 4 KB banks in the CHR.</summary>
-    private protected int Chr4Count => Chr.Length / ChrWindow;
+    /// <summary>The number of 8 KB banks in the PRG.</summary>
+    private protected int Prg8Count => Prg.Length / PrgWindow;
 
     /// <summary>
     /// <paramref name="data"/> as a whole number of <paramref name="unit"/> byte banks: the same
@@ -212,13 +232,22 @@ public abstract class Board : IMapper
 
     private static int RoundUp(int size, int unit) => (size + unit - 1) / unit * unit;
 
-    private static int Wrap(int bank, int count) => bank % count;
+    // The bank modulo the count, never negative.
+    private static int Wrap(int bank, int count) => ((bank % count) + count) % count;
 
     private void SetPrg(int firstWindow, int offset, int windows)
     {
         for (int i = 0; i < windows; i++)
         {
             PrgBase[firstWindow + i] = offset + (i * PrgWindow);
+        }
+    }
+
+    private void SetChr(int firstWindow, int offset, int windows)
+    {
+        for (int i = 0; i < windows; i++)
+        {
+            ChrBase[firstWindow + i] = offset + (i * ChrWindow);
         }
     }
 }

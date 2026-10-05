@@ -36,8 +36,11 @@ public interface IMapper
     bool Irq { get; }
 
     /// <summary>
-    /// Told of every pattern-table address the PPU puts on its bus, with the CPU cycle it did so
-    /// in, which is all MMC3's scanline counter needs to watch address line A12.
+    /// Told of the addresses the PPU puts on its bus (<c>$0000</c> to <c>$3FFF</c>), with the CPU
+    /// cycle it did so in, which is all MMC3's scanline counter needs to watch address line A12:
+    /// every pattern fetch and each sprite slot's first nametable fetch while rendering, and
+    /// <c>v</c> and the <c>$2007</c> accesses otherwise, whatever the address. It runs on the
+    /// PPU's busiest path, so it must be trivial and allocate nothing.
     /// </summary>
     void PpuAddressChanged(ushort address, long cpuCycle);
 

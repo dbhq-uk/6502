@@ -1137,3 +1137,122 @@ says, which both ROMs above need and use through `$6000`.
   either way. The test now looks at when the register loads, not at what.
 - Two tests began a write on the cycle after a `Load`'s last write, so the write
   they meant as the first was itself ignored. They begin with an idle cycle.
+
+## Task 11: MMC3 and its scanline counter
+
+**Done.** `src/Dbhq.Machines.Nes/Mappers/Mmc3.cs`, mapper 4, on the shared
+`Board`, which now has eight CHR windows of 1 KB instead of two of 4 KB (the
+other boards set four at a time; a read is still one array access and one add),
+a write protect for PRG RAM, and a virtual `PpuAddressChanged`. `Cartridge`
+builds mapper 4 and lists it. The project passed 1,038 of 1,038 [`dotnet test
+tests/Dbhq.Machines.Nes.Tests -c Release`, 5 October 2026], and the core's
+`NestestTests` 2 of 2.
+
+**Red, then green.** The tests came first and built, because they use only
+`IMapper`; run, 61 of the 106 selected failed, each on "This cartridge needs
+mapper 4" or on an address the PPU did not report. With the board in and the
+PPU untouched, 10 failed. Four were the real-PPU tests' own fault: the IRQ of
+the frame they let settle was still held when they began to record, so their
+first record was a stale one. They now acknowledge it first. Four were the PPU
+reporting tests (two of them one test in both regions), and the last two were
+the ROMs of the other chip revision.
+
+**The variant.** The sheet chooses the Sharp ("new") behaviour at latch 0. The
+fork has ROMs for both: `mmc3_test_2`'s `5-MMC3` and `mmc3_irq_tests`'
+`6.MMC3_rev_B` for it, `6-MMC3_alt` and `5.MMC3_rev_A` for the other, which the
+readmes call Crystalis's chip. The first two pass. The second two fail on the
+one sub-test where the chips differ (status 2, and failed test 3) and pass the
+rest, so they are kept as a table of known failures that runs every time and
+records what they print. The readme of `mmc3_irq_tests` says at most one of the
+two can pass on any emulator. The old behaviour was not built as an option: no
+file names it (an iNES header cannot), and the sheet says games rely on the new.
+
+**The MMC3 ROMs** [`BlarggTests`, NTSC, 5 October 2026]:
+
+| ROM | Result |
+| --- | --- |
+| `mmc3_test_2/rom_singles/1-clocking` to `5-MMC3` | status 0, each |
+| `mmc3_test_2/rom_singles/6-MMC3_alt` | status 2, the other revision (known failure) |
+| `mmc3_irq_tests/1.Clocking` to `4.Scanline_timing`, `6.MMC3_rev_B` | $F8 = 1, "PASSED", each |
+| `mmc3_irq_tests/5.MMC3_rev_A` | failed test 3, the other revision (known failure) |
+
+All twelve are pinned in `Pins.NesTestRomHashes` from fresh downloads of the
+fork at the pinned commit. Each header says mapper 4: `mmc3_test_2`'s with
+32 KB of PRG and 8 KB of CHR ROM, reporting through `$6000`; `mmc3_irq_tests`'
+with 16 KB of PRG and CHR RAM, reporting on the screen. Neither readme names a
+region, but `mmc3_irq_tests`' says "an NTSC NES PPU" and the timing ROM's
+figures are NTSC's, so they run on NTSC.
+
+**The clock dot, the sheet's open item 1.** The sheet had "dot 260" from the
+wiki, marked a guess. In the model the first sprite pattern address goes out on
+dot 261, and that is where the counter clocks. To see whether
+`4-scanline_timing` can tell, the rise was moved for one run each: on dot 260 it
+fails with status 2, "Scanline 0 IRQ should occur later when $2000=$08", and on
+dot 262 with status 3, "should occur sooner". Only 261 passes. The wiki's 260
+and the model's 261 are the same moment, counted from a different start. The
+sheet now says so. `mmc3_irq_tests`' timing ROM passes at all three, so it is
+the coarser of the two.
+
+**The filter.** The sheet says a rise counts after A12 has been low for three
+falling edges of M2. M2 falls at the end of each CPU cycle, so the board counts
+a rise in cycle `c + 3` or later after a low that began in cycle `c`. With the
+constant at 1 or 2, `2-details` and `4-scanline_timing` fail in both suites; at
+3, 4 and 7 every ROM that should pass does, and only the unit tests that pin the
+sheet's three fail. So the ROMs bound it from below at the sheet's value. It is
+a compare and two stores per address, with nothing allocated.
+
+**The IRQ line.** The board's line reaches the CPU by the bus's start-of-cycle
+rule, which was already wired: `NesBus.Cycle` reads `_mapper.Irq` beside the
+APU's as the cycle begins. To
+confirm it, the line was taken at the end of the cycle for one run:
+`4-scanline_timing` fails with status 2. So the rule holds for MMC3 as it did
+for the APU in task 8.
+
+**The cycle each address is told with.** Task 5 left it untested. Three tests
+now pin it. A made-up sequence drives the board's filter directly. On the real
+bus, in both regions, `$2006` writes put A12 low and then high with 0, 1 and 2
+reads between: the high is 2, 3 and 4 cycles after the low, and only the last
+two clock, which would not differ if the board were told any cycle but the
+access's. A real PPU, alone and on the bus, in both regions, clocks once a line
+on lines 0 to 239 and the pre-render line (241 times a frame, PAL's 312 lines
+included), on dot 261 with the background at `$0000` and sprites at `$1000`.
+Alone, with them the other way round, it clocks once a line on dot 325.
+
+**A defect in the PPU's reporting, fixed.** `ppu.md` says the bus carries `v`
+"in VBlank or with rendering off". The PPU told the board only of addresses
+under `$2000`, so `v` moving to `$2000` (A12 low) or to `$3F00` (A12 high) was
+never seen, and an MMC3 would miss a rise or a fall a program made that way.
+Now every address `v` takes is told. During rendering each sprite slot's first
+garbage nametable fetch is told too, so A12 falls between two slots' pattern
+fetches as it does on the chip, which matters with 8x16 sprites from both
+tables. Two PPU tests pin these; one existing test, which asserted the old
+behaviour, was rewritten. No ROM needed the fix (all passed before it), so it
+rests on the sheet. The background's nametable fetches are still not told: the
+9 dots of them from dot 337 to the next line's dot 4 are exactly 3 cycles on
+NTSC, and told they would clock the counter twice a line with the background at
+`$1000`, where the sheet says once. That is the sheet's open item 9.
+
+**Power on, and PRG RAM.** R6, R7 and the bank select are unspecified on the
+sheet. `mmc3_test_2`'s shell writes no bank register and never writes `$A001`,
+and its programs are 32 KB, so the model starts the banks at 0, 2, 4, 5, 6, 7,
+0, 1 (everything in order) and PRG RAM on and writable. The protect register
+then works as the sheet's table: bit 7 on, bit 6 refuses writes. MMC6 is not
+modelled. These are open items 6 and 8 and in known differences.
+
+**Bad ROM safety (Review Focus 1).** Bank numbers wrap modulo the 8 KB and 1 KB
+banks the file has, and the fixed second-last bank of a one-bank program is
+that bank (the wrap is now never negative). One test writes every value to
+every register in all four mode combinations for four file sizes, and another
+loads an 8 KB NES 2.0 program.
+
+**Speed.** Not measured: the machine's load average was about 21 during this
+task, which makes a figure noise. The PPU now makes 8 more calls a line (one a
+sprite slot) and the board's read takes its CHR window from 1 KB instead of
+4 KB, the same work. The performance task after task 12 measures it.
+
+**Mistakes.**
+- Three unit tests of single edges forgot that A12 starts low at power on, so
+  their first "high" was a real rise. They now put A12 high first.
+- A first draft of the PPU comment said the 9-dot low from dot 337 was shorter
+  than the filter. It is exactly 3 cycles on NTSC; the reason to leave those
+  fetches out is the sheet's one clock a line, and the comment says so.

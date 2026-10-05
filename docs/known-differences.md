@@ -966,3 +966,48 @@ modulo the banks in the file, and a size that is not a whole bank (a NES 2.0
 exponent size) is padded to one by repeating its bytes, so no register value
 reads outside the file. A real board's chips would show open bus or mirrors;
 which is board by board and no pinned file depends on it.
+
+## The NES: MMC3, where the model stops
+
+**What.** Task 11 of the NES plan: `Mmc3` in `src/Dbhq.Machines.Nes/Mappers/`,
+mapper 4, from `docs/nes/facts/mappers.md` section 6. Of the pinned MMC3 test
+ROMs, `mmc3_test_2`'s singles 1 to 5 and `mmc3_irq_tests` 1 to 4 and 6 pass.
+
+**One revision of the chip.** MMC3 chips differ at latch 0. The model is the
+Sharp ("new") chip, which raises the IRQ whenever a clock leaves the counter at
+0; the sheet chooses it because games rely on it. The other chip, Crystalis's in
+the fork's readmes, raises it only when the counter changes to 0 or is reloaded
+by request. So the two ROMs that test that chip fail on the sub-test where the
+two differ, and are kept in `BlarggTests` as known failures with what they print:
+`mmc3_test_2/rom_singles/6-MMC3_alt` (status 2, "IRQ shouldn't be set when
+reloading to 0 due to counter naturally reaching 0 previously") and
+`mmc3_irq_tests/5.MMC3_rev_A` (failed test 3). The readme of the second says at
+most one of its last two ROMs can pass on any emulator.
+
+**What is not modelled.** The "pathological" behaviour the readmes describe
+(a `$C001` write, a clock and another `$C001` write make the next clock OR the
+counter with `$80` or freeze it); the readme advises against it and no game it
+tried needs it. MMC6 (StarTropics), which shares mapper 4: it runs as an MMC3,
+whose `$A001` means something else, so its battery RAM may read as switched off.
+"The pre-render line clocks twice every other frame" with the background at
+`$1000`: the model clocks once on every rendering line there.
+
+**The PPU's address bus is told in part.** The board is told of every pattern
+fetch, each sprite slot's first nametable fetch, and `v` when a `$2006` write or
+a `$2007` access moves it. The background's nametable and attribute fetches are
+not told (their A12 is 0, and told they would give a second clock a line with
+the background at `$1000`, where the sheet says one). The bus's `v` on the
+post-render line, or when rendering is switched off mid-frame, is not told
+until the program moves it, so a `v` with bit 12 set left by rendering is no
+rise until then. Both are open items in the sheet.
+
+**Power on.** The sheet leaves R6, R7 and the bank select unspecified. The model
+starts R0 to R7 at 0, 2, 4, 5, 6, 7, 0, 1, so the first 32 KB of PRG and 8 KB of
+CHR read in order, and PRG RAM on and writable. The test ROMs need both. A real
+chip's power-on state may differ; a program that relies on it would also fail
+on some consoles. The reset button changes nothing in the board, as for the
+other boards.
+
+**A file smaller than the registers can name wraps.** Bank numbers are taken
+modulo the 8 KB PRG and 1 KB CHR banks in the file; the fixed second-last bank
+of a one-bank program is that bank.

@@ -103,6 +103,22 @@ public static class Pins
         ["sprdma_and_dmc_dma/sprdma_and_dmc_dma.nes"] = "db3199bc1b0bdc07a316b3ab999d8fd8bb361456d2154e364c132cb06a26a10f",
         ["sprdma_and_dmc_dma/sprdma_and_dmc_dma_512.nes"] = "3789f5134b0561b4344e3f4ce08b4d2a416f67435e083917a80d87fdb9d3583c",
 
+        // MMC3 and its scanline counter (task 11 of the NES plan). mmc3_test_2's six singles, each
+        // mapper 4 with 32 KB of PRG and 8 KB of CHR ROM, report through $6000; mmc3_irq_tests'
+        // six, mapper 4 with 16 KB of PRG and CHR RAM, report on the screen. Both run NTSC.
+        ["mmc3_test_2/rom_singles/1-clocking.nes"] = "b06d8a97f0ca672be92c841d6af7d1e650696e86e9cc0cf6eeb90d67a6ab499b",
+        ["mmc3_test_2/rom_singles/2-details.nes"] = "e7af16c764b119e60effb7b1cfeec3dd8e2e657041283693cdbbeedb4081f1e3",
+        ["mmc3_test_2/rom_singles/3-A12_clocking.nes"] = "b375f15b9f9d372c8084b9c50928be9e41a3ac48be831ce82d203c18891433ad",
+        ["mmc3_test_2/rom_singles/4-scanline_timing.nes"] = "14a220b9d1272acc7a820ab38e9762a7cdf2d54c65e753be87f23dfcaf1bb845",
+        ["mmc3_test_2/rom_singles/5-MMC3.nes"] = "e0824123d60b83868dac1189b28250f8e10376a01be468a5a74aa59937cb32ca",
+        ["mmc3_test_2/rom_singles/6-MMC3_alt.nes"] = "56698b6918453d161a8d4e51f66e363d6966b054939c8176c53c401a6b55269b",
+        ["mmc3_irq_tests/1.Clocking.nes"] = "699d0644bd2b6ff4c9ba598c9609f4a3da536594b6363585b2caf82cf337ac88",
+        ["mmc3_irq_tests/2.Details.nes"] = "0af95238b69806c072c28aed0fa8ad812157dfee928a6c9cea8d5420268baade",
+        ["mmc3_irq_tests/3.A12_clocking.nes"] = "3b936e1079f12bdc5e55aa82def017ddc76fd79e3879ff0478d41ca718302e7c",
+        ["mmc3_irq_tests/4.Scanline_timing.nes"] = "3369e8f73a96ec97918c6c9440804a369a19256c57df91e62881555f21528894",
+        ["mmc3_irq_tests/5.MMC3_rev_A.nes"] = "6b662c2d08ee4094d89b6d1ddde330e47f81929fb642dc217b6e4c33f8926944",
+        ["mmc3_irq_tests/6.MMC3_rev_B.nes"] = "d8a2af42cdafe8046b36109e6f6ff71ca0d7f5d62c7d5953e0aa1d1828a86088",
+
         // The browser speed check's ROM (task 6 of the NES plan): SNOW, a demo by Repulse that keeps
         // rendering on and changes the picture every frame, NROM-256 with CHR ROM. Fetched by
         // bench/nes-speed/ from the same fork at the same commit, and never committed.

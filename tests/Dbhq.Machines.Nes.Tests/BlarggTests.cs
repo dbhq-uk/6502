@@ -11,7 +11,9 @@ namespace Dbhq.Machines.Nes.Tests;
 /// every ROM in each folder, all NROM with CHR RAM, which report on the screen. Then the sound unit
 /// (task 8): <c>apu_test</c>'s singles 1 to 6 on NTSC, and every <c>pal_apu_tests</c> ROM on PAL.
 /// Then the DMC (task 9): <c>apu_test</c> 7 and 8, <c>dmc_dma_during_read4</c>,
-/// <c>sprdma_and_dmc_dma</c> and <c>apu_mixer</c>, all NTSC.
+/// <c>sprdma_and_dmc_dma</c> and <c>apu_mixer</c>, all NTSC. Then MMC3 (task 11):
+/// <c>mmc3_test_2</c>'s singles and <c>mmc3_irq_tests</c>, NTSC, one ROM of each a known failure
+/// because it tests the other revision of the chip.
 /// </summary>
 public class BlarggTests(ITestOutputHelper output)
 {
@@ -268,6 +270,91 @@ public class BlarggTests(ITestOutputHelper output)
         Assert.False(result.TimedOut, $"{pinnedName} gave no result in {4 * Budget} cycles (status {result.Status}). Its text:\n{result.Text}");
         Assert.True(result.Status == 0, $"{pinnedName} reported status {result.Status} after {result.Cycles} cycles. Its text:\n{result.Text}");
         Assert.True(result.Text.Contains(expected, StringComparison.Ordinal), $"{pinnedName} did not print {expected}. Its text:\n{result.Text}");
+    }
+
+    // mmc3_test_2's singles (task 11), mapper 4, reporting through $6000. The readme names no
+    // region; the timing test's figures are NTSC's (6976 PPU clocks from the VBlank flag to line
+    // 0's IRQ, 341 a line), and mmc3_irq_tests, the same tests before, says "an NTSC NES PPU".
+    // 5-MMC3 tests the Sharp ("new") chip at latch 0, the model's; 6-MMC3_alt tests the other
+    // chip and is in Mmc3OtherRevision below.
+    public static TheoryData<string> Mmc3Test2Singles() => new()
+    {
+        "1-clocking",
+        "2-details",
+        "3-A12_clocking",
+        "4-scanline_timing",
+        "5-MMC3",
+    };
+
+    [Theory]
+    [MemberData(nameof(Mmc3Test2Singles))]
+    public void EachMmc3Test2SinglePasses(string single)
+    {
+        BlarggResult result = BlarggRunner.Run($"mmc3_test_2/rom_singles/{single}.nes", Region.Ntsc, Budget);
+
+        Assert.False(result.TimedOut, $"{single} gave no result in {Budget} cycles (status {result.Status}). Its text:\n{result.Text}");
+        Assert.True(result.Status == 0, $"{single} reported status {result.Status} after {result.Cycles} cycles. Its text:\n{result.Text}");
+    }
+
+    // mmc3_irq_tests (task 11), the older build of the same tests, mapper 4 with CHR RAM, which
+    // report on the screen and in $F8 as the 2005 ROMs do. Its readme: "The last two ROMs test
+    // different revisions of the MMC3, so at most only one will pass on a particular emulator".
+    // 6.MMC3_rev_B is the Sharp chip's (Super Mario Bros. 3, Mega Man 3); 5.MMC3_rev_A is in
+    // Mmc3OtherRevision below.
+    public static TheoryData<string> Mmc3IrqTests() => new()
+    {
+        "1.Clocking",
+        "2.Details",
+        "3.A12_clocking",
+        "4.Scanline_timing",
+        "6.MMC3_rev_B",
+    };
+
+    [Theory]
+    [MemberData(nameof(Mmc3IrqTests))]
+    public void EachMmc3IrqTestPasses(string rom)
+    {
+        AssertScreenReportingRomPasses($"mmc3_irq_tests/{rom}.nes");
+    }
+
+    // The known failures of the MMC3 ROMs: the two that test the chip the model is not. The model
+    // is the Sharp ("new") MMC3, which raises the IRQ whenever a clock leaves the counter at 0; the
+    // other chip (the readmes' "revision A", Crystalis's) raises it only when the counter changes
+    // to 0 or is reloaded by request (mappers.md 6). Each runs as the other tables do and is not
+    // skipped: the test holds what it reports now, so a change shows. Columns: the ROM, whether it
+    // reports on the screen ($F8) or through $6000, the status it gives now, text it prints now,
+    // and the cause, which docs/known-differences.md also gives.
+    public static TheoryData<string, bool, int, string, string> Mmc3OtherRevision() => new()
+    {
+        {
+            "mmc3_test_2/rom_singles/6-MMC3_alt",
+            false,
+            2,
+            "IRQ shouldn't be set when reloading to 0 due to counter naturally reaching 0 previously",
+            "its test 2 is the other chip's latch-0 rule: with the counter run down to 0 and the latch set to 0, that chip raises no IRQ on the clocks that follow, and the Sharp chip modelled raises one on each, as 5-MMC3 asks"
+        },
+        {
+            "mmc3_irq_tests/5.MMC3_rev_A",
+            true,
+            3,
+            "FAILED #3",
+            "its test 3, \"IRQ shouldn't occur when reloading after counter normally reaches 0\", is the other chip's rule, the opposite of 6.MMC3_rev_B's test 2, which passes; its test 2, which both chips share, passes"
+        },
+    };
+
+    [Theory]
+    [MemberData(nameof(Mmc3OtherRevision))]
+    public void EachMmc3RomOfTheOtherRevisionStillFailsAsWrittenDown(string rom, bool screen, int statusNow, string printsNow, string cause)
+    {
+        string pinnedName = $"{rom}.nes";
+        BlarggResult result = screen
+            ? BlarggRunner.RunScreenReporting(pinnedName, Region.Ntsc, Budget)
+            : BlarggRunner.Run(pinnedName, Region.Ntsc, Budget);
+        output.WriteLine($"{rom}: known failure, because {cause}. Its text:\n{result.Text}");
+
+        Assert.False(result.TimedOut, $"{rom} gave no result in {Budget} cycles. Its text:\n{result.Text}");
+        Assert.False(result.Status == (screen ? 1 : 0), $"{rom} now passes: move it out of the known failures and its known-differences entry. Its text:\n{result.Text}");
+        Assert.True(result.Status == statusNow && result.Text.Contains(printsNow, StringComparison.Ordinal), $"{rom} fails differently from the record (status {statusNow}, {printsNow}): status {result.Status}. Its text:\n{result.Text}");
     }
 
     [Theory]

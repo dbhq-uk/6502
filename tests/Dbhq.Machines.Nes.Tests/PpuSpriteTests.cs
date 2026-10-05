@@ -470,6 +470,31 @@ public class PpuSpriteTests
 
     [Theory]
     [MemberData(nameof(Regions))]
+    public void EachSpriteSlotPutsAGarbageNametableAddressOnTheBusBeforeItsPatternFetches(string region)
+    {
+        // Dots 257 to 320: each slot's first fetch is a nametable one (ppu.md 7), so A12 falls
+        // between two slots' pattern fetches, as an MMC3 sees with 8x16 sprites from both tables.
+        PpuScene scene = Scene(region);
+        scene.Scroll(0, 0, ctrl: 0x08);
+        scene.Ppu.WriteRegister(1, 0x10);
+        scene.RunFrames(1);
+
+        scene.TickTo(30, 257);
+        scene.Mapper.Reported.Clear();
+        scene.TickTo(30, 321);
+
+        ushort[] addresses = [.. scene.Mapper.Reported.Select(r => r.Address)];
+        Assert.Equal(24, addresses.Length);
+        for (int slot = 0; slot < 8; slot++)
+        {
+            Assert.Equal(0x2000, addresses[slot * 3] & 0x3000);
+            Assert.Equal(0x1FF0, addresses[(slot * 3) + 1]);
+            Assert.Equal(0x1FF8, addresses[(slot * 3) + 2]);
+        }
+    }
+
+    [Theory]
+    [MemberData(nameof(Regions))]
     public void An8By8FetchUsesThreeBitsOfRowEvenIfEvaluationRanIn8By16(string region)
     {
         // Line 59 evaluates in 8 by 16 and finds the sprite at Y = 50 on its row 9. PPUCTRL bit 5 is

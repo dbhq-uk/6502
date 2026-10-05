@@ -239,7 +239,17 @@ On every visible line (0 to 239) and the pre-render line, with rendering on
   `X + 1` was not tried.
 - **The PPU address bus.** During rendering it carries the fetch addresses
   above; in VBlank or with rendering off it carries `v` [from PPU rendering]. This
-  is what MMC3 watches (`mappers.md` 6).
+  is what MMC3 watches (`mappers.md` 6). For the model (task 11): the board is
+  told of every pattern fetch and of each sprite slot's first garbage nametable
+  fetch, and of `v` whenever a `$2006` write or a `$2007` access moves it,
+  nametable and palette addresses included (`$3F00` has A12 set). The
+  background's nametable and attribute fetches are not told, though their A12
+  is always 0. Between two pattern fetches they are a 4-dot low, under MMC3's
+  filter either way. From dot 337 to the next line's dot 4 they are a 9-dot
+  low, which is exactly 3 CPU cycles on NTSC: told, it would clock the counter
+  a second time each line with the background at `$1000`, where `mappers.md` 6
+  says it clocks once. Whether the real filter takes that 9-dot low is not on
+  the sheet (`mappers.md` open item 9) [inferring].
 
 ### Worked example 4: the first fetches of a line
 

@@ -120,6 +120,10 @@ public sealed partial class Ppu
                 }
 
                 _oamLatch = _fetchY;
+
+                // The slot's first fetch is a garbage nametable one (ppu.md 7), so A12 falls here
+                // between two slots' pattern fetches; the second garbage fetch changes nothing.
+                _mapper.PpuAddressChanged((ushort)(0x2000 | (_v & 0x0FFF)), CpuCycle);
                 break;
 
             case 1:

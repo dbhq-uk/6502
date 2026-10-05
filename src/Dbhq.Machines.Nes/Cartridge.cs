@@ -52,7 +52,7 @@ public sealed class Cartridge
     /// The mapper numbers <see cref="CreateMapper"/> can build, kept in one place for its message.
     /// Each mapper's task adds its number here and its case there.
     /// </summary>
-    public static IReadOnlyList<int> SupportedMappers { get; } = [0, 1, 2, 3, 7];
+    public static IReadOnlyList<int> SupportedMappers { get; } = [0, 1, 2, 3, 4, 7];
 
     private readonly byte[]? _chrRom;
     private byte[]? _chrRamBlock;
@@ -253,6 +253,8 @@ public sealed class Cartridge
                 return new Uxrom(this);
             case 3:
                 return new Cnrom(this);
+            case 4:
+                return new Mmc3(this);
             case 7:
                 return new Axrom(this);
             default:

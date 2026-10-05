@@ -150,22 +150,38 @@ its example; the values are an example]. If the writes came from `INC $E000`
 | `$E001` odd | IRQ enable | enables IRQs |
 
 - R6, R7 and `$8000` are unspecified at power-on, so the reset vector is in the
-  fixed `$E000-$FFFF` [from MMC3].
+  fixed `$E000-$FFFF` [from MMC3]. For the model: R0 to R7 start at 0, 2, 4, 5,
+  6, 7, 0, 1 and the bank select at 0, so the first 32 KB of PRG and the first
+  8 KB of CHR read in order, and PRG RAM starts on and writable. The test ROMs
+  need both: `mmc3_test_2`'s are 32 KB programs whose shell writes no bank
+  register and never writes `$A001`, and they report through `$6000` [from the
+  fork: mmc3_test_2/source/common/build_rom.s, shell.inc; the choice is
+  guessing - verify against a console].
 
 **The IRQ counter** [from MMC3]:
 
 - It is clocked by a rising edge of PPU A12 that comes after A12 has been low for
   three falling edges of M2 (the CPU clock). This filter is why the counter sees
-  one edge a line [from MMC3].
+  one edge a line [from MMC3]. For the model: M2 falls at the end of each CPU
+  cycle, so a low that began in cycle `c` has seen three falls when A12 rises in
+  cycle `c + 3` or later [inferring]. With the filter at 1 or 2 cycles,
+  `mmc3_test_2`'s `2-details` and `4-scanline_timing` fail; at 3, 4 and 7 every
+  ROM that should pass does [measured in task 11, 5 October 2026: the constant
+  changed and the MMC3 tests run].
 - On a clock: if the counter is 0 or the reload flag is set, counter = latch and
   the reload flag clears; otherwise it counts down. Then, if the counter is 0
   and IRQs are enabled, IRQ is raised (the "new" or Sharp behaviour; the NEC
   "old" behaviour raises it only on a change from 1 to 0) [from MMC3].
 - With the background at `$0000` and 8x8 sprites at `$1000`, A12 rises once a
-  line, on dot 260 of the visible and pre-render lines (the sprite fetches) [from
-  MMC3; inferring the dot from PPU rendering: the first sprite pattern fetch is
-  at dots 261 and 262, its address out on 261, so A12 is high from 261
-  [guessing - verify against the page's "PPU cycle 260"]].
+  line, at the first sprite pattern fetch of the visible and pre-render lines
+  [from MMC3]. The page says "PPU cycle 260"; in the model, whose fetches put
+  their address out on the first of their two dots (section 6 of `ppu.md`), it
+  is dot 261. `mmc3_test_2`'s `4-scanline_timing` passes with the rise on dot
+  261, fails with status 2 ("Scanline 0 IRQ should occur later when
+  $2000=$08") with it moved to 260, and with status 3 ("should occur sooner")
+  with it moved to 262 [measured in task 11, 5 October 2026]. So the page's 260
+  and the model's 261 are the same moment counted two ways, and the model's dot
+  is the one the ROM accepts.
 - With the background at `$1000` and sprites at `$0000` it clocks at dot 324 of
   the line before, and the pre-render line clocks twice every other frame [from
   MMC3].
@@ -194,7 +210,15 @@ differ in the IRQ at latch 0: Sharp chips fire every line, NEC chips once [from
 MMC3]. `mmc3_test_2` has tests for both [from the fork:
 mmc3_test_2/rom_singles]. For the model: the Sharp ("new") behaviour [from
 MMC3: "games ... rely on the Sharp behavior", and the emulators that implement
-only it run the others].
+only it run the others]. The fork's readmes call the chip in Super Mario Bros.
+3 and Mega Man 3 the one whose counter at 0 reloads on every clock and raises
+the IRQ "after decrementing/reloading, if the counter is zero" (the new
+behaviour), and Crystalis's the other ("revision A") [from the fork:
+mmc3_test_2/readme.txt, mmc3_irq_tests/readme.txt]. `5-MMC3` and
+`6.MMC3_rev_B` test the first and pass; `6-MMC3_alt` and `5.MMC3_rev_A` test
+the second and fail on the sub-test where the two differ (2 and 3) [measured in
+task 11, 5 October 2026]. The readme of `mmc3_irq_tests` says "at most only one
+will pass on a particular emulator".
 
 ## 7. The interface the mappers need
 
@@ -210,8 +234,8 @@ From the above, a mapper sees [inferring from sections 2 to 6]:
 
 ## 8. Open items
 
-1. MMC3's exact clock dot, 260 or 261 (6) [guessing - verify: `mmc3_test_2`
-   test 4 checks the timing].
+1. MMC3's exact clock dot, 260 or 261 (6). Settled in task 11: dot 261 in the
+   model's numbering, the only one `4-scanline_timing` accepts.
 2. CNROM bus conflicts (5) [guessing - verify].
 3. PRG RAM size for MMC1 boards beyond 8 KB (3) [guessing - verify].
 4. What the console's reset button does to MMC1 and the other boards' registers.
@@ -221,3 +245,19 @@ From the above, a mapper sees [inferring from sections 2 to 6]:
    submappers tell and does not give their numbers; task 10 took them from the
    nesdev UxROM and AxROM pages, which list 0 unknown, 1 none and 2 AND-type for
    both (read 5 October 2026).
+6. MMC3's power-on bank registers and PRG RAM protect (6). The sheet says they
+   are unspecified; the model's choice is the one the test ROMs need [guessing -
+   verify].
+7. What the PPU's address bus carries on the post-render line and when
+   rendering is switched off mid-frame. The sheet says `v` "in VBlank or with
+   rendering off"; the model tells the board of `v` only when a register write or
+   a `$2007` access changes it, so a `v` with bit 12 set left by rendering is not
+   seen as a rise until the program next moves it (task 11) [guessing - verify].
+8. MMC6 (submapper 1) is not modelled: it runs as an MMC3, whose `$A001` means
+   something else (6).
+9. "The pre-render line clocks twice every other frame" with the background at
+   `$1000` and sprites at `$0000` (6) is not modelled: the model clocks once on
+   every rendering line, at dot 325, because it does not tell the board of the
+   background's nametable fetches (`ppu.md` 6). Which low the second clock comes
+   from, and so how long the real filter needs, is not on the sheet [guessing -
+   verify].
