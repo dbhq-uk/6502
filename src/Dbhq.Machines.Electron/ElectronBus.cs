@@ -38,13 +38,10 @@ public class ElectronBus : IBus
     private const int KeyboardSlotLow = 8;
     private const int BasicSlotHigh = 11;
 
-    // Until task 3 gives the ULA a mode, the bus costs every access as in mode 6, which has no
-    // contention (s4c), so the mode makes no difference to the timing.
-    private const int PlaceholderMode = 6;
-
     private readonly byte[] _ram = new byte[0x8000];
     private readonly byte[] _os;
     private readonly byte[] _basic;
+    private readonly Ula _ula = new();
     private long _cycles;
 
     public ElectronBus(ElectronRoms roms, int sampleRate = 44100)
@@ -60,6 +57,22 @@ public class ElectronBus : IBus
     /// <summary>2 MHz cycles since power on, wait cycles included.</summary>
     public long Cycles => _cycles;
 
+    /// <summary>The ULA: its interrupt registers and the frame that times them.</summary>
+    public Ula Ula => _ula;
+
+    /// <summary>
+    /// The CPU's IRQ line: the ULA's, made current for this cycle first. The machine copies it
+    /// into the core after each step.
+    /// </summary>
+    public bool Irq
+    {
+        get
+        {
+            CatchUpUla();
+            return _ula.Irq;
+        }
+    }
+
     /// <summary>
     /// The paged ROM select, 0 to 15. Slot 0 at power on: that is not established (s12 item 4),
     /// and the OS writes $F8 first, which selects slot 8 from any slot.
@@ -68,13 +81,15 @@ public class ElectronBus : IBus
 
     public byte Read(ushort address)
     {
-        Advance(ElectronTiming.Complete(_cycles, Classify(address), PlaceholderMode));
-        return Decode(address);
+        Advance(ElectronTiming.Complete(_cycles, Classify(address), _ula.Mode));
+        CatchUpUla();
+        return DecodeRead(address);
     }
 
     public void Write(ushort address, byte value)
     {
-        Advance(ElectronTiming.Complete(_cycles, Classify(address), PlaceholderMode));
+        Advance(ElectronTiming.Complete(_cycles, Classify(address), _ula.Mode));
+        CatchUpUla();
         if (address < 0x8000)
         {
             _ram[address] = value;
@@ -92,7 +107,7 @@ public class ElectronBus : IBus
     }
 
     /// <summary>Reads memory without a bus cycle: for tests and debuggers, never for the CPU.</summary>
-    public byte Peek(ushort address) => Decode(address);
+    public byte Peek(ushort address) => Decode(address, peek: true);
 
     /// <summary>Loads RAM without a bus cycle: for tests.</summary>
     public void PokeRam(ushort address, byte value)
@@ -133,7 +148,10 @@ public class ElectronBus : IBus
         return address is >= 0xFC00 and < 0xFF00 ? AccessKind.Io : AccessKind.Rom;
     }
 
-    private byte Decode(ushort address)
+    private byte DecodeRead(ushort address) => Decode(address, peek: false);
+
+    /// <summary>The byte at the address. A read of the status register clears the power-on flag; a peek does not.</summary>
+    private byte Decode(ushort address, bool peek)
     {
         if (address < 0x8000)
         {
@@ -149,7 +167,7 @@ public class ElectronBus : IBus
         {
             // FRED and JIM have nothing fitted. The sheet recommends the high byte of the address
             // (s12 item 3); the OS does not depend on it (s1b).
-            return address < 0xFE00 ? (byte)(address >> 8) : ReadSheila(address & 0x0F);
+            return address < 0xFE00 ? (byte)(address >> 8) : ReadSheila(address, peek);
         }
 
         return _os[address - 0xC000];
@@ -176,16 +194,20 @@ public class ElectronBus : IBus
     }
 
     /// <summary>
-    /// A read of the ULA. The registers are the same in every 16-byte block, so the offset is the
-    /// low four bits of the address.
+    /// A read of the ULA. The registers are the same in every 16-byte block, so the register is
+    /// the low four bits of the address. $FE00 is the status; task 10 adds $FE04, the cassette.
+    /// Any other register cannot be read, and the bus returns the high byte of the address, $FE
+    /// (s1b, s12 item 3: what the real bus returns is not settled).
     /// </summary>
-    private static byte ReadSheila(int offset)
+    private byte ReadSheila(ushort address, bool peek)
     {
-        // Placeholder, owned by task 3, which adds a case for each readable register ($FE00
-        // status, $FE04 cassette). Until then every read returns the high byte of the address,
-        // $FE (s1b: what the real bus returns is not settled).
-        _ = offset;
-        return 0xFE;
+        int register = address & 0x0F;
+        if (register == 0)
+        {
+            return peek ? _ula.Status : _ula.Read(0);
+        }
+
+        return (byte)(address >> 8);
     }
 
     /// <summary>A write to the ULA; the offset is the low four bits of the address.</summary>
@@ -194,9 +216,14 @@ public class ElectronBus : IBus
         switch (offset)
         {
             case 0x5:
-                // Bits 3 to 0 select the paged ROM; bits 7 to 4 are interrupt clears, which task 3
-                // adds here as one more line beside this one (s2a, s6b).
+                // One write does both jobs: bits 3 to 0 select the paged ROM, here, and bits 7 to 4
+                // are the ULA's interrupt clears (s2a, s6b). The select's acceptance rule stays in
+                // the bus.
                 SelectRom(value);
+                _ula.Write(offset, value);
+                break;
+            default:
+                _ula.Write(offset, value);
                 break;
         }
     }
@@ -213,6 +240,15 @@ public class ElectronBus : IBus
         if (!pagedIn8To11 || (value & 0x08) != 0)
         {
             RomSlot = value & (Slots - 1);
+        }
+    }
+
+    /// <summary>One comparison per access: the ULA does its work only when its next event has come.</summary>
+    private void CatchUpUla()
+    {
+        if (_cycles >= _ula.NextEvent)
+        {
+            _ula.CatchUp(_cycles);
         }
     }
 

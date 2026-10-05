@@ -686,3 +686,35 @@ front of the model. Where that differs from sitting at a Model B:
   after the last disc command, or until `*CAT`. The page says so, and does not
   make DFS read the new disc when it goes in (`DiscTests` shows the old
   catalogue until DFS reads it again).
+
+## The Acorn Electron: the ULA's interrupts, where the sources stop
+
+**What.** `Ula` is the Electron's ULA so far: the interrupt enable and status
+at `$FE00`, the clears in `$FE05`, the display mode in `$FE07` and the frame
+that times the clock and display-end interrupts (`ula.md` sections 1c, 5d and
+6). Where the fact sheet is silent or open, the model chooses:
+
+- **Transmit empty (status bit 5) is set at power on.** The sheet says it is
+  "normally set" and clear only while a byte is being sent, and leaves its
+  power-on value open (section 12 item 4). The model starts with it set, which
+  is the state a machine that is not sending is in.
+- **The display mode is 0 at power on.** The sheet does not say what `$FE07`
+  holds before the OS writes it (section 12 item 4); the OS writes it during
+  reset. All zeros is the model's choice, and it makes the display end fall at
+  the 256-line time until then.
+- **BREAK resets nothing in the ULA.** The sheet says only that the ULA asserts
+  reset (section 12 item 5). The model has no ULA reset: BREAK leaves the
+  enable, the status and the mode as they were, and does not set the power-on
+  flag, which is how the OS tells a BREAK from a power on. The OS rewrites what
+  it needs.
+- **The mode in force when an event comes due decides a display end, and a
+  mode write moves the pending one.** A write that changes the mode between
+  the clock interrupt and the display end changes when the display end falls.
+  If the new time is already past, the interrupt is raised at the next catch-up,
+  that is at the next bus access. A real ULA counts lines, so it may differ for
+  a program that changes mode in the last rows of a field; none does so in the
+  boot or in BASIC.
+- **A read of a register the ULA does not answer is the high byte of the
+  address.** The sheet is split on this (section 1b, section 12 item 3): one
+  source says the ROM byte under it, another that the bus floats. The OS reads
+  only `$FE00` and `$FE04`.

@@ -15,7 +15,7 @@ public class ElectronBusTests
     {
         public long Ticks { get; private set; }
 
-        protected override void Tick() => Ticks++;
+        protected internal override void Tick() => Ticks++;
     }
 
     [Fact]
@@ -148,12 +148,12 @@ public class ElectronBusTests
     }
 
     [Fact]
-    public void AnUlaRegisterReadsTheHighByteOfTheAddressUntilTheUlaIsBuilt()
+    public void FredAndJimAndAnUnreadableUlaRegisterReadTheHighByteOfTheAddress()
     {
-        // Placeholder owned by task 3, which decodes the registers here. The same for FRED and JIM,
-        // which have nothing fitted (ula.md s1b, s12 item 3).
+        // FRED and JIM have nothing fitted, and the ULA answers only the status ($FE00): the
+        // model's rule is the high byte of the address (ula.md s1b, s12 item 3).
         ElectronBus bus = NewBus();
-        Assert.Equal(0xFE, bus.Peek(0xFE00));
+        Assert.Equal(0xFE, bus.Peek(0xFE01));
         Assert.Equal(0xFC, bus.Peek(0xFC70));
         Assert.Equal(0xFD, bus.Peek(0xFD10));
     }
