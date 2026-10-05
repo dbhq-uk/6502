@@ -636,6 +636,22 @@ and `git diff` showed `spike.json` unchanged.
   drills were refused: U5's pin 16 and U2's pin 8 off their rows, U4's pin 2 on
   two fits that disagree, U10's pin 2 with no rim and its pin 5 off its row.
   Their pairs are left out of y.
+- **y from every pin pair of a DIP, not pin 1 and pin N alone.** This is a
+  change from task 0, which took each DIP's spacing from pin 1 to pin N only.
+  Here each footprint's spacing is the mean of all its pin pairs, drill to
+  drill, 8 to 20 of them. The reason: the brief asks for the scale over every
+  DIP and connector row, and averaging 8 to 20 pairs evens out one drill's
+  error, where a single pair carries it whole. The choice came with the code
+  inherited from the stopped first implementer, with no record of when it was
+  made. I kept it after reading it. It changes the verdict. Task 0's way reads
+  0.566 per cent, between pass and stop, and that verdict stays recorded in
+  `spike.json` (and here as `yFromPin1AndPinN`); every pair reads 0.432, a
+  pass. The refusal rule above does not help this figure. With it turned off
+  (both limits widened in a scratch script run on 5 October 2026, which wrote
+  no data file), y reads 0.312 per cent, max 1.330 (U10), so the rule makes
+  the judged figure worse, not better. The verdict rule for y is the plan's,
+  median at most 0.5 per cent to pass and over 1.0 to stop, and it was not
+  changed.
 - **The outline's shape by hand, its place by the light.** Over tracing it
   automatically, which needed a rule for every kind of feature on this edge
   (tabs' remains, half holes, notches round and small, steps, slots) and got
