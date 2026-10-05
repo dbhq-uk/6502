@@ -211,6 +211,8 @@ def _consensus(P):
     if n not in _TRIPLES:
         _TRIPLES[n] = np.array(list(itertools.combinations(range(0, n, 2), 3)))
     T = _TRIPLES[n]
+    if not len(T):                  # under five points: no three to fit (task 3 met it on a dome of solder)
+        return None, np.zeros(n, bool)
     a, b, c = P[T[:, 0]], P[T[:, 1]], P[T[:, 2]]
     d = 2 * (a[:, 0] * (b[:, 1] - c[:, 1]) + b[:, 0] * (c[:, 1] - a[:, 1]) + c[:, 0] * (a[:, 1] - b[:, 1]))
     ok = np.abs(d) > 1e-9

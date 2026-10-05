@@ -15,5 +15,6 @@ py="${PYTHON:-python3}"
 : "${NES_MODEL_INPUTS:?set NES_MODEL_INPUTS to the folder of inputs (see tools/nes-model/README.md)}"
 cd "$here"
 
-"$py" verify.py I1-front I2
+"$py" verify.py I1-front I1-back I2
 "$py" board_frame.py        # data/frame.json: the scan's scale, turn, outline and holes
+"$py" board_register.py     # data/registration.json: the solder side registered; the pads, drills and footprints

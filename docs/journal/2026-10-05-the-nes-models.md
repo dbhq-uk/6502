@@ -784,3 +784,215 @@ committed. With one recorded verdict changed by hand, two of them failed.
 The figure in task 1's section for the BBC Micro's page was corrected to
 49,456 bytes, the size `cmp` printed in that task's report; it had been
 written as 49,404.
+
+## Task 3: the solder side registered, with its pads and footprints
+
+`tools/nes-model/board_register.py` registers the solder side (I1-back,
+flipped left to right) to the component side on every hole it finds on both,
+judges the fit against the plan's solder row, and then builds the drills, the
+pads on each face and the footprints. It writes
+`data/registration.json` and pictures in `out/`. `run-board.sh` now runs
+`verify.py I1-front I1-back I2`, `board_frame.py`, then this. Everything is
+in task 2's frame; its x and y scales are used, not fitted again.
+
+### Decisions
+
+- **Every hole, by three finders, kept apart by kind.** Task 0's spike found
+  holes one way: a pad's tinned ring round an open hole, fitted on its top rim
+  (`ring`). It matched 323. The board has many more: vias as small open rings
+  on the solder side, the RF modulator's large rings, and holes filled with a
+  dome of solder, which show no rim. So a second finder takes round light
+  blobs the first leaves out (the same light, low-colour mask opened only 5
+  pixels, 40 to 2500 pixels), and fits each on its top rim with the hole's
+  radius scaled to the blob (`open`), or, where there is no rim, fits the
+  dome's outline by consensus (`dome`). Task 0's finder is kept as it was,
+  with one refusal added: a rim the light does not rise across, from inside
+  it into the ring, by 0.05 has no open hole under it. A made-up dome, lit
+  brightest in its middle, was given a rim by both fitters until that was
+  added. The rule was set on the made-up board, before any registration of
+  the scans was run. Holes in the solder side's tinned planes show only as
+  specks and are not found; nor are pads whose solder runs into the print's
+  outline beside them (the DA rows on I1-front).
+- **What was looked at before the first registration was run.** The finders
+  were run on both scans alone and drawn by kind. Two things were set from
+  those pictures: on I1-front nothing within 0.5 mm of a mounting hole's rim
+  (task 2's) is taken for a hole, because the lid seen through one is a round
+  light blob; and an open hole or a dome found on one face only is not a
+  pad, because on I1-front the second finder also takes some printed figures
+  (an 0, a 6) and scratches in the tinned planes. Only task 0's kind makes a
+  pad on one face alone. Nothing about the finders, the match or the fits
+  changed after the first registration was seen; the four runs below all
+  give the same registration.
+- **Match, folds, model choice and outlier rule: task 0's.** The four marked
+  seed holes, mutual nearest within 1.0 mm, three rounds of affine, then an
+  affine and a cubic each held out on a chequerboard of 20 mm blocks; the
+  lower held-out median wins, within 0.005 mm the affine. The outlier rule is
+  the plan's, applied to each hole's blob as found (task 0's blob for a ring
+  hole, the second finder's for the others), with the median of each face's
+  matched blobs, and it takes no residual. The verdict is on the figures
+  without it.
+- **A drill where the two faces agree within 0.4 mm.** A matched pair is a
+  drill at the mean of its two faces' centres when they are within 0.4 mm, so
+  each face's pad is within 0.2 mm of it, the plan's check; 31 pairs further
+  apart are recorded in `notDrilled`, not drilled. The registration's figures
+  include them. Each drill has a pad on each face at that face's own centre.
+  Its diameter is the mean of the open rims it shows; a via part filled with
+  solder shows less than its drill, so a few read under 0.3 mm (the smallest
+  0.19).
+- **Footprints by pitch and print, references by hand.** Rows 2.54 mm apart
+  are paired at 7.62 or 15.24 mm into DIPs, the print deciding a row that
+  could pair either way (an outline 1.2 to 2.2 mm inside both rows). Pin 1 is
+  the print's notch where it can be seen, read as a half circle at the
+  outline's end with its middle third on print; the print is not looked for
+  within 1 mm of a hole. There are no square pads on this board; the made-up
+  board tests that path. Every reference is read from the print by hand in
+  `marks.json` `footprints`, each with its crop and reason. U1 and U4 each
+  have three rows: their 600 mil footprint (the plan's Facts) and a 300 mil
+  one sharing the lower row, which the PAL board's RAMs use; the marks say
+  which pairing is the chip's and keep the other as an alternate, `U1 (300
+  mil)` and `U4 (300 mil)`. P2 to P6, X1 and X2 are grouped by hand, row by
+  row or pin by pin, because their pitches (4.0, 2.0, 5.0 and 7.5, 2.5 mm) or
+  spacing (P2's rows 6.3 mm apart) are not a DIP's.
+- **The edge fingers on their own.** Tall tinned strips, darker than the pads
+  (light 0.36 to 0.44 on a strip, 0.17 to 0.22 in a gap), found on each face
+  as one row with even gaps, 36 a face, one footprint, P1, of 72. Pin 1 is
+  the component side's left finger: the print reads 1 above it and 36 above
+  the right one.
+
+### What it measured
+
+`NES_MODEL_INPUTS=/tmp/nes-inputs nice -n 10 /tmp/nesvenv/bin/python
+board_register.py`, run in `tools/nes-model` on 5 October 2026, exit 0, about
+eight minutes on a busy machine (the venv as task 0's; `verify.py I1-front
+I1-back I2` first: all three present, hashes match). It printed:
+
+```
+solder side: affine, 511 holes; held out median 0.089, p90 0.319, max 0.915 mm: pass
+  with the roundness rule (280 excluded): median 0.070, p90 0.138, max 0.421 mm
+  fits: affine 0.089/0.319/0.915; cubic 0.092/0.340/0.927
+  found: {'front': {'ring': 583, 'open': 187, 'dome': 94, 'refused': 72, 'inMountingHoles': 4}, 'back': {'ring': 466, 'open': 107, 'dome': 116, 'refused': 43, 'inMountingHoles': 0}}
+drills 480 (not drilled 31), pads 1368, footprints 27 (12 DIPs); fingers 36 + 36
+```
+
+| Check | Figure | Pass | STOP if | Verdict |
+|---|---|---|---|---|
+| Solder side, held out, without exclusion | 511 holes; median 0.089 mm, 90th percentile 0.319, largest 0.915 (recorded) | median at most 0.20, 90th percentile at most 0.40, at least 150 holes | median over 0.30 or 90th percentile over 0.60 | pass |
+
+The affine is chosen: its held-out median is lower than the cubic's (0.089
+against 0.092), and within 0.005 mm it would have won anyway. With the
+outlier rule, 280 of the 511 are left out (a blob's axis ratio over 1.25 on
+the solder side 188 times and on the component side 118, its area out of
+range 148 and 135 times; a hole can fail more than one): median 0.070, 90th
+percentile 0.138, largest 0.421. That figure is recorded, not judged.
+
+The 90th percentile, 0.319 against 0.40, is the figure nearest a limit. It
+comes from the kinds task 0 did not use. By the kind found on each face
+(component side first), held out:
+
+| Kinds | Holes | Median | 90th percentile | Largest |
+|---|---|---|---|---|
+| ring / ring | 318 | 0.075 | 0.237 | 0.915 |
+| ring / dome | 60 | 0.127 | 0.356 | 0.738 |
+| ring / open | 36 | 0.218 | 0.407 | 0.833 |
+| open / ring | 32 | 0.166 | 0.400 | 0.736 |
+| open / open | 24 | 0.169 | 0.380 | 0.592 |
+| dome / open | 17 | 0.158 | 0.226 | 0.294 |
+| dome / dome | 8 | 0.148 | 0.485 | 0.501 |
+| dome / ring | 8 | 0.478 | 0.695 | 0.709 |
+| open / dome | 8 | 0.176 | 0.475 | 0.621 |
+
+The ring pairs alone read as task 0's spike did (0.074, 0.239, 0.921 on 323).
+The others are less sure: a dome's centre is its solder's, not its hole's,
+and some of the second finder's holes on I1-front are print matched to a
+hole beside it. The eight dome on the component side against a ring on the
+solder side read worst (median 0.478); those are not left out, since nothing
+but the plan's rule may leave a hole out. Across the board the held-out
+median rises from about 0.08 mm on the left to about 0.12 from x = 120 mm
+on, where the overlay shows fewer holes matched. The largest, 0.915 mm, is a ring
+pair at (132.4, 63.3) mm, a pin of U5's lower row.
+
+480 drills: their two faces' centres a median 0.085 mm apart (90th percentile
+0.263, the most 0.40 by the rule). 1368 pads: 960 at drills (two each), 310
+found on one face only (task 0's kind), 72 edge fingers, 5 completing a DIP's
+row from a hole found on one face, and 21 inferred where a footprint's pin
+was found on neither (P3's five and P6's five large rings, which neither
+finder takes; two of X1's and two of X2's; P2's pins 39, 40 and 44; U5's,
+U2's and the narrow footprints' missing pins).
+
+Footprints: the ten ICs, each a DIP with the pin count the plan's Facts give
+(U5 and U6 40, U1 and U4 24, U2 20, U3, U7, U8 and U10 16, U9 14); the two
+narrow alternates of 24; P1 72; P2 48, P3 5, P4 7, P5 7, P6 5, X1 4, X2 3;
+and seven groups the grouping found that are not named: the two rows of
+vias above the edge fingers, three resistor arrays (nine of RA1's 13 holes,
+DA1, DA4), C28 to C31's column, and C33 to C37's two rows of five, which it
+calls a connector. Pin 1 came
+from the print's notch on seven DIPs and was marked by hand on five: U2 and
+U7, which have a via in the notch; U1 and U4, whose 600 mil outline has no
+notch at its middle (the grouping's own reading agreed on U1); and U1's
+narrow footprint, whose middle row's first hole is not found. Every pin 1 is
+at the lower left, as task 0's marks have every DIP. The print reads
+74HCU04P at U9, where the KiCad redrawing has a 74LS04, as the plan's Facts
+already say.
+
+### Runs, and what changed between them
+
+Four runs on 5 October 2026, each the command above; the registration's
+figures were the same in all four, to the last digit printed.
+
+1. The first found 3 edge fingers on I1-front and 9 on I1-back. The strips
+   are darker than the pads' floor (0.34), and the scanner's lid below the
+   board's edge, the bare edge under the strips and the vias above them join
+   every strip to the next. The finger finder was rewritten on the light
+   read across the strips (the probe above): averaged 15 pixels down the
+   scan, a floor of 0.29, the lid left out, opened with a box 4 mm tall, and
+   linked by even gaps, not even centres (the end fingers are wider).
+2. The second found 36 on each face. Its footprint overlay showed the notch
+   missed where a via's pad sits in it, U1's and U4's narrow footprints cut to
+   20 pins (their middle rows' end holes not found), and P2 split between two
+   rows of different lengths. So the print is now scored only where it is
+   not cleared round a hole, an alternate runs the length of the row it
+   shares, and connectors and crystals are grouped by hand; the grouping's
+   own row of the same holes gives way to the hand's.
+3. The third gave the footprints above, with U2, U7 and U1's narrow footprint
+   still without a pin 1; their pin 1 marks were added.
+4. The fourth is the one committed.
+
+Looked at: every hole found on each face by kind (`out/register-holes-front.png`,
+`-back.png`), the matched holes coloured by held-out error
+(`out/register-held-out.png`), and the pads and footprints on I1-front
+(`out/footprints.png`): the DIP boxes sit on their rows, pin 1's circle on the
+lower left pin of each, P1's strips on the fingers of both faces, and the
+connectors' pins on their rings.
+
+### Tests
+
+pytest first, on a made-up pair of scans drawn as task 0's pads are: DIPs
+lying across with pin 1 by the print's notch, by a square pad, by hand, and
+one turned round; a DIP with a third row (its first hole missing); a via in a
+notch; a row of ten; small open vias and domes of solder lit brightest in the
+middle; 36 edge fingers on each face, the end ones widened outwards; the
+solder side mirrored, turned, scaled and warped by a mild cubic, with 2 per
+cent of its holes missing. Run before the code: the module did not exist.
+Then the first run stopped at its first failure, 184 of 191 holes matched
+(the made-up domes taken for open holes); then 4 failed (the notch filled in
+by the solder mask, so no pin 1 from the print, and the end fingers joined
+to their neighbours),
+then the three tests for the second run's changes failed before their code
+(a hand-grouped row had no place to go). After: 20 passed; the tests ask
+for the made-up pair's held-out median and 90th percentile under 0.05 mm and
+its largest under 0.08.
+`common._consensus` no longer fails on fewer than five rim points (a made-up
+dome gave three); it refuses them, which changes nothing that ran before,
+since before it stopped with an error.
+
+`/tmp/nesvenv/bin/python -m pytest tools/nes-model/tests -q`: 59 passed.
+`cd site && node --test tests/nes-models.test.mjs`: 16 passed, five of them
+new: the solder row passes on the figures without exclusion over at least 150
+holes with its recorded verdict the one its figures give; the excluded holes
+are exactly those the rule names; every drill has a pad on both faces within
+0.2 mm; U1 to U10 each have one DIP with the Facts' pin count, pin 1 first,
+marked by hand; P1 has 72 fingers, 36 a face. With the recorded verdict
+changed to STOP and one excluded hole renumbered by hand, two of them failed.
+`npm test` (with `results.json` copied in for the run and removed after):
+tests 318, pass 317, fail 0, todo 1 (the BBC Micro's, already there). The
+floors are 317 in both workflows.

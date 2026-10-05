@@ -236,6 +236,15 @@ def test_rim_centre_finds_the_drill_not_the_solder():
     assert common.rim_centre(flat, 30.0, 30.0) == (None, None)          # no hole: refused
 
 
+def test_the_rims_consensus_refuses_too_few_points_rather_than_failing():
+    # Task 3: a dome of solder gave rim_centre three or four rays, and the
+    # consensus, taking every second point, had no three to fit.
+    for n in (3, 4):
+        P = np.array([[math.cos(t) * 6, math.sin(t) * 6] for t in np.linspace(0, 2, n)])
+        circ, keep = common._consensus(P)
+        assert circ is None and not keep.any()
+
+
 # --- the KiCad redrawing (I2) ----------------------------------------------------
 
 KICAD = '''(kicad_pcb (version 20240108) (generator "pcbnew")
