@@ -48,8 +48,8 @@ Tags follow the other sheets. `[from Sn ref]` was read directly. `[from ROM]` wa
 | `&0102` | Explicit tape data | First byte is the count of unused bits at the end, then raw bits, least significant bit of each byte first | Not used by Acorn program tapes; see section 6 | Never |
 | `&0104` | Defined tape format | Three header bytes (bits per packet, parity `N` `E` `O`, stop bits) then data | Refuse the tape with a message, section 6 | Never |
 | `&0110` | Carrier tone | 2 bytes: number of cycles at twice the base frequency | A gap in the data and a signal that high tone was heard | Before the first block, between blocks and after the last: the idle line (section 7 items 1 and 2) |
-| `&0111` | Carrier tone with a dummy byte | 4 bytes: cycles before, then cycles after, with ten bits `0 0 1 0 1 0 1 0 1 1` between them | As above, with a `$55`-pattern dummy byte | Never: the OS writes no dummy byte (section 7 item 1) |
-| `&0112` | Integer gap | 2 bytes: a count of half cycles at the base frequency (the gap is `1 / (2 x n x base frequency)` seconds) | Silence. Skip | Between files |
+| `&0111` | Carrier tone with a dummy byte | 4 bytes: cycles before, then cycles after, with ten bits `0 0 1 0 1 0 1 0 1 1` between them | As above, with a dummy byte of `$AA`: the ten bits are the start bit, `0 1 0 1 0 1 0 1` least significant bit first, and the stop bit. (This sheet first said `$55`, which is the same pattern read the wrong way round; S2 says "always `&AA`" and task 11 checked the arithmetic, 5 Oct 2026) | Never: the OS writes no dummy byte (section 7 item 1) |
+| `&0112` | Integer gap | 2 bytes: a count of half cycles at the base frequency. S2 prints the gap as `1 / (2n x base frequency)` seconds, which shrinks as n grows, so it cannot be a length; the reader takes `n / (2 x 1200)` seconds, 2,400 being one second (task 11, 5 Oct 2026) | Silence. Skip | Between files |
 | `&0113` | Change of base frequency | One 4-byte IEEE float | Refuse if it is not 1200 | Never |
 | `&0114` | Security cycles | Count, two flags, bit-packed cycles | Skip | Never |
 | `&0115` | Phase change | 16-bit angle | Skip | Never |

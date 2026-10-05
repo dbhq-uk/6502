@@ -1,3 +1,4 @@
+using Dbhq.Machines.Electron.Tape;
 using Xunit;
 using Xunit.Abstractions;
 using Piece = Dbhq.Machines.Electron.Tests.TapeProbe.Piece;
@@ -59,8 +60,8 @@ public class TapeProbeTests(ITestOutputHelper output)
 
         // tape.md s3: the header CRC is over the name to the next-file address, the data CRC over
         // the data, both high byte first. This is the proof on a real file that s3 asked for.
-        Assert.Equal(TapeRuns.Crc(b.HeaderSpan), b.HeaderCrc);
-        Assert.Equal(TapeRuns.Crc(b.Data), b.DataCrc);
+        Assert.Equal(TapeCrc.Of(b.HeaderSpan), b.HeaderCrc);
+        Assert.Equal(TapeCrc.Of(b.Data), b.DataCrc);
     }
 
     [Fact]
@@ -132,8 +133,8 @@ public class TapeBlockTests(ITestOutputHelper output)
             Assert.Equal("ABCDEFGHIJ", b.Name);
             Assert.Equal(Start, (ushort)b.Load);
             Assert.Equal(0u, b.Next);
-            Assert.Equal(TapeRuns.Crc(b.HeaderSpan), b.HeaderCrc);
-            Assert.Equal(TapeRuns.Crc(b.Data), b.DataCrc);
+            Assert.Equal(TapeCrc.Of(b.HeaderSpan), b.HeaderCrc);
+            Assert.Equal(TapeCrc.Of(b.Data), b.DataCrc);
         });
         Assert.Equal(run.Memory(Start, Length), blocks.SelectMany(b => b.Data).ToArray());
     }
@@ -291,7 +292,7 @@ public class TapeLoadTests(ITestOutputHelper output)
 
         if (fixHeaderCrc)
         {
-            ushort crc = TapeRuns.Crc(TapeRuns.Parse(first).HeaderSpan);
+            ushort crc = TapeCrc.Of(first[1..b.HeaderCrcAt]); // the flipped header no longer parses: it is the span that is wanted
             first[b.HeaderCrcAt] = (byte)(crc >> 8);
             first[b.HeaderCrcAt + 1] = (byte)crc;
         }
@@ -412,22 +413,6 @@ internal static class TapeRuns
         }
     }
 
-    /// <summary>CRC-16 CCITT, polynomial $1021, initial 0 (<c>tape.md</c> s3, the sheet's loop).</summary>
-    public static ushort Crc(IEnumerable<byte> data)
-    {
-        int c = 0;
-        foreach (byte b in data)
-        {
-            c ^= b << 8;
-            for (int i = 0; i < 8; i++)
-            {
-                c = (c & 0x8000) != 0 ? ((c << 1) ^ 0x1021) & 0xFFFF : (c << 1) & 0xFFFF;
-            }
-        }
-
-        return (ushort)c;
-    }
-
     /// <summary>The carriers and the runs of bytes between them; a run of bytes is one block.</summary>
     public static (List<long> Carriers, List<byte[]> Blocks) Split(IReadOnlyList<Piece> tape)
     {
@@ -476,31 +461,28 @@ internal static class TapeRuns
     public static List<Block> Blocks(IReadOnlyList<Piece> tape) => [.. Split(tape).Blocks.Select(Parse)];
 
     /// <summary>
-    /// A block by <c>tape.md</c> s2a: <c>$2A</c>, the name and a zero, load and execution address,
-    /// block number, length, flag, next-file address, header CRC high byte first, the data, and
-    /// the data CRC high byte first when there is data. Fails on anything else.
+    /// A block by <c>tape.md</c> s2a, read by the production <see cref="TapeBlocks.Parse"/> (which
+    /// also checks both CRCs and that the bytes are exactly one block), with the places its fields
+    /// sit in <paramref name="b"/> and the CRCs as stored, which the tests that break a tape need.
     /// </summary>
     public static Block Parse(byte[] b)
     {
-        Assert.Equal(0x2A, b[0]);
-        int zero = Array.IndexOf(b, (byte)0, 1);
-        int f = zero + 1; // the first byte of the load address
-        uint Le32(int at) => (uint)(b[at] | (b[at + 1] << 8) | (b[at + 2] << 16) | (b[at + 3] << 24));
-        int length = b[f + 10] | (b[f + 11] << 8);
+        TapeBlock block = Assert.Single(TapeBlocks.Parse(b));
+        int f = 1 + block.Name.Length + 1; // the first byte of the load address: sync, name, zero
         int headerCrcAt = f + 17;
         int dataAt = headerCrcAt + 2;
-        Assert.Equal(dataAt + length + (length > 0 ? 2 : 0), b.Length);
+        int length = block.Data.Length;
         return new Block(
-            System.Text.Encoding.ASCII.GetString(b, 1, zero - 1),
-            Le32(f),
-            Le32(f + 4),
-            b[f + 8] | (b[f + 9] << 8),
+            block.Name,
+            block.Load,
+            block.Exec,
+            block.Number,
             length,
-            b[f + 12],
-            Le32(f + 13),
+            block.Flag,
+            block.Next,
             b[1..headerCrcAt],
             (ushort)((b[headerCrcAt] << 8) | b[headerCrcAt + 1]),
-            b[dataAt..(dataAt + length)],
+            block.Data,
             length > 0 ? (ushort)((b[dataAt + length] << 8) | b[dataAt + length + 1]) : (ushort)0,
             f + 12,
             headerCrcAt,

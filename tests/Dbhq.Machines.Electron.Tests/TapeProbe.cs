@@ -1,3 +1,5 @@
+using Dbhq.Machines.Electron.Tape;
+
 namespace Dbhq.Machines.Electron.Tests;
 
 /// <summary>
@@ -35,10 +37,10 @@ namespace Dbhq.Machines.Electron.Tests;
 internal sealed class TapeProbe : ITapeTap
 {
     /// <summary>One bit at 1200 baud in 2 MHz cycles (<c>tape.md</c> s4).</summary>
-    public const long BitCycles = 1_664;
+    public const long BitCycles = TapeTiming.BitCpuCycles;
 
     /// <summary>A byte of ten bits (s4).</summary>
-    public const long ByteCycles = 10 * BitCycles;
+    public const long ByteCycles = TapeTiming.ByteCpuCycles;
 
     /// <summary>Receive-full and transmit-empty come nine bit times into a byte (s4).</summary>
     public const long ReadyCycles = 9 * BitCycles;
