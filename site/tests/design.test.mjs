@@ -144,6 +144,14 @@ const ON = {
   '.bbc-speed': ['iron'],
   '.bbc-disc legend': ['iron'],
   '.bbc-protect': ['iron'],
+  // The library of discs: the list, its label and the chosen disc's credit sit on the
+  // iron panel; the photosensitivity note is white with a white rule, so it is read first.
+  '.bbc-preset-label': ['iron'],
+  '.bbc-presets select': ['iron'],
+  '.bbc-presets select:disabled': ['iron'],
+  '.bbc-preset-about': ['iron'],
+  '.bbc-preset-disc b': ['iron'],
+  '.bbc-preset-note': ['iron'],
   '.bbc-symbols caption': ['void'],
   // The on-screen keys: veil, card when hovered or latched, the black canvas
   // while pressed; disabled, before the machine runs, iron.

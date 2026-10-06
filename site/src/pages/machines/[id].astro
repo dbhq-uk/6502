@@ -11,6 +11,7 @@ import { fmt } from '../../lib/figures.mjs';
 import { acceptanceSummary, loadTryIt, parseKeys, runningMachines } from '../../lib/machines.mjs';
 import { bbcRoms, kim1Roms } from '../../lib/pins.mjs';
 import { NOT_MODELLED, downloadBytes, issueUrl, symbolTable } from '../../lib/bbc-micro.mjs';
+import { discFolderUrl, discLibrary, discLicenceUrl, discSourceUrl, needsSource } from '../../lib/bbc-discs.mjs';
 import { NOT_ON_A_PC, legend } from '../../../public/bbc-keys.js';
 
 // One page for each machine that runs, and only those. "Running" means it runs
@@ -42,8 +43,11 @@ const program = loadTryIt(machine.id);
 const bbc = machine.id === 'bbc-micro';
 const roms = machine.id === 'kim-1' ? kim1Roms() : bbc ? bbcRoms() : [];
 // The BBC Micro's panel is given its ROM files and the size of its download,
-// read from the build (src/lib/bbc-micro.mjs). The KIM-1's takes neither.
-const panelProps = bbc ? { roms: roms.map((r) => r.file), download: downloadBytes() } : {};
+// read from the build (src/lib/bbc-micro.mjs), and its preset discs, read from
+// machines/bbc-micro/discs/manifest.json and checked (src/lib/bbc-discs.mjs).
+// The KIM-1's takes none of these.
+const library = bbc ? discLibrary() : null;
+const panelProps = bbc ? { roms: roms.map((r) => r.file), download: downloadBytes(), library } : {};
 const description = bbc
   ? `${machine.name}, running on the 6502 core in the browser, with its own ROMs. Type BBC BASIC in on its keyboard and run it.`
   : `${machine.name}, running on the 6502 core in the browser, with its own ROM. Type a program in on its keypad and run it.`;
@@ -127,6 +131,25 @@ const notOnAPc = Object.entries(NOT_ON_A_PC).reduce((groups, [key, why]) => grou
         <p>Your keyboard presses every key but these, which are on the on-screen keys only:</p>
         <ul>
           {[...notOnAPc].map(([why, keys]) => <li>{keys.join(', ')}: {why}.</li>)}
+        </ul>
+        </div>
+      </div>
+    </section>
+  )}
+
+  {bbc && (
+    <section aria-labelledby="discs">
+      <div class="wrap narrow">
+        <h2 id="discs">Credits and licences for the discs</h2>
+        <div class="prose">
+        <p>The discs in the library are other people's software. Each is shared here under its author's own licence, not under this project's MIT licence, and each is credited below with a link to its licence and to its author. Each disc's folder in the repository keeps its licence text, a note of where the image came from and its SHA-256, and, where the licence asks for it, its source.</p>
+        <p>Only discs whose authors have written down that they may be shared are in the library. Commercial games are not, because nobody who holds their rights has said so. A disc image of your own, of anything, goes in with Insert a disc.</p>
+        <ul class="bbc-credits">
+          {library.discs.map((d) => (
+            <li data-bbc-credit={d.slug}>
+              <b>{d.title}</b>, {d.author}, {d.year}. Licence: <a href={discLicenceUrl(d)}>{d.licence}</a>. <a href={d.sourceUrl}>The author's page</a>{needsSource(d) && <>; <a href={discSourceUrl(d)}>the source</a></>}; <a href={discFolderUrl(d)}>the disc's folder</a>.{d.note && <> {d.note}</>}
+            </li>
+          ))}
         </ul>
         </div>
       </div>

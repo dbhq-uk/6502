@@ -187,6 +187,15 @@ public static partial class BbcHost
     [JSExport]
     public static void Break() => Machine.PressBreak();
 
+    /// <summary>
+    /// SHIFT held through BREAK, the way a disc is started: queued with the keys
+    /// (<see cref="BbcKeyPresses.ShiftBreak"/>), so it follows any key the page reported before
+    /// it, and SHIFT is let go half a second of machine time after the reset. With a disc in drive
+    /// 0 the DFS runs its <c>!BOOT</c>. The page's preset discs use it for Insert and run.
+    /// </summary>
+    [JSExport]
+    public static void ShiftBreak() => Keys.ShiftBreak();
+
     /// <summary>The framebuffer's width in pixels.</summary>
     [JSExport]
     public static int ScreenWidth() => Machine.Screen.Width;

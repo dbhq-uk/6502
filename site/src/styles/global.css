@@ -204,6 +204,15 @@ footer .linkbtn:hover { color: var(--white); }
 .bbc-disc legend { padding: 0 6px; color: var(--white); font-weight: 500; }
 .bbc-protect { display: inline-flex; align-items: center; gap: 8px; color: var(--white); font-size: 14px; }
 .bbc-protect input { width: 16px; height: 16px; margin: 0; }
+.bbc-presets { display: grid; gap: 10px; padding-bottom: 14px; border-bottom: 1px solid var(--hairline); }
+.bbc-preset-label { color: var(--white); font-size: 14px; }
+.bbc-presets select { justify-self: start; max-width: 100%; min-height: 44px; font: inherit; font-size: 14px; color: var(--white); background: var(--iron); border: 1px solid var(--circuit); border-radius: 8px; padding: 8px 12px; }
+.bbc-presets select:disabled { border-style: dashed; color: var(--moss-70); }
+.bbc-preset-about { color: var(--moss-80); font-size: 14px; max-width: 72ch; }
+.bbc-preset-disc { display: grid; gap: 6px; }
+.bbc-preset-disc[hidden] { display: none; }
+.bbc-preset-disc b { color: var(--white); font-weight: 500; }
+.bbc-preset-note { color: var(--white); border-left: 2px solid var(--white); padding-left: 10px; }
 .bbc-program code { white-space: pre; }
 .bbc-symbols caption { text-align: left; padding: 0 0 8px; color: var(--white); font-weight: 500; }
 /* The machine's keys as buttons, in its own layout, a row at a time; a row wraps on a narrow screen rather than shrink a key under 44 pixels. Latched SHIFT and CTRL show as a filled key with a bright edge, a shape and not only a colour. No lime: no key matters more than another. */

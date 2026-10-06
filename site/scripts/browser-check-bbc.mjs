@@ -15,6 +15,16 @@
 // keys alone, SHIFT latched for each quote, prints A; the sound button turns sound on and off without an error; a disc
 // image put in through the file input lists its catalogue with *CAT; Save disc
 // downloads the same bytes; and Break restarts the machine.
+//
+// Then the library of preset discs: Start fetched none of them; the default's
+// credit shows under the list; with the page scrolled so the screen is out of
+// view, Insert and run fetches it from this site, puts it in drive 0, starts it
+// with SHIFT and BREAK and brings the screen into view, and the machine leaves BASIC's
+// mode 7 for the disc's own screen, in colour; choosing another disc shows its
+// credit instead; Insert in drive 0 puts a disc in without starting it, and
+// *CAT lists it; Insert and run starts a second disc over the first and its
+// title shows; and the visitor's own file still goes in through the file input
+// after them, and *CAT lists it.
 import fs from 'node:fs';
 
 const TIMEOUT = 120_000;
@@ -213,6 +223,107 @@ export async function checkBbcMicro({ browser, watch, problems, origin }) {
   await page.locator('[data-bbc-break]').click();
   await waitRows((r) => r.includes('BBC Computer') && !r.includes('>*CAT'), 'Break did not restart the machine');
   console.log(`bbc: after Break: ${JSON.stringify((await rows()).filter((x) => x !== ''))}`);
+
+  // The library of preset discs. Start fetched none of them.
+  const discsAtStart = fetched.filter((f) => f.path.includes('/discs/')).map((f) => f.path);
+  if (discsAtStart.length > 0) problems.push(`bbc: a preset disc was fetched before it was inserted: ${discsAtStart.join(', ')}`);
+  const list = page.locator('[data-bbc-preset]');
+  const credit = async (slug) => ({ shown: await page.locator(`[data-bbc-preset-disc="${slug}"]`).isVisible(), text: await page.locator(`[data-bbc-preset-disc="${slug}"]`).innerText() });
+  const first = await list.inputValue();
+  const firstCredit = await credit(first);
+  console.log(`bbc: the library offers ${await list.locator('option').count()} discs; chosen "${first}", its credit ${firstCredit.shown ? 'shown' : 'NOT SHOWN'}: ${JSON.stringify(firstCredit.text)}`);
+  if (!firstCredit.shown) problems.push(`bbc: the chosen disc's credit is not shown`);
+  const colours = () => page.evaluate(() => {
+    const c = document.querySelector('[data-bbc-canvas]');
+    const d = c.getContext('2d').getImageData(0, 0, c.width, c.height).data;
+    const seen = new Set();
+    for (let i = 0; i < d.length; i += 4) seen.add((d[i] << 16) | (d[i + 1] << 8) | d[i + 2]);
+    return seen.size;
+  });
+  const mode = () => page.evaluate(() => document.querySelector('[data-bbc]').bbc.host.Peek(0x0355));
+  const waitFor = async (test, label, limit = TIMEOUT) => {
+    const until = Date.now() + limit;
+    while (Date.now() < until) {
+      if (await test()) return true;
+      await page.waitForTimeout(250);
+    }
+    problems.push(`bbc: ${label}`);
+    return false;
+  };
+  const inDrive = (name) => page.waitForFunction((n) => document.querySelector('[data-bbc]').dataset.disc === n, name, { timeout: 30_000 }).then(() => true, () => false);
+
+  // The page scrolled down to the disc drive, so the screen is out of view above: Insert and
+  // run must bring it back, or the visitor types into a game they cannot see.
+  const canvasBox = () => page.evaluate(() => {
+    const r = document.querySelector('[data-bbc-canvas]').getBoundingClientRect();
+    return { top: Math.round(r.top), bottom: Math.round(r.bottom), height: innerHeight };
+  });
+  await page.evaluate(() => {
+    const button = document.querySelector('[data-bbc-preset-run]');
+    window.scrollTo({ top: button.getBoundingClientRect().top + scrollY - 120, behavior: 'instant' });
+  });
+  const away = await canvasBox();
+  if (!(away.bottom < 0)) problems.push(`bbc: the check could not scroll the screen out of view (${JSON.stringify(away)})`);
+  const t2 = Date.now();
+  await page.locator('[data-bbc-preset-run]').click();
+  let seen = await canvasBox();
+  const inView = (b) => b.top >= 0 && b.bottom <= b.height;
+  for (let i = 0; i < 20 && !inView(seen); i++) {
+    await page.waitForTimeout(150);
+    seen = await canvasBox();
+  }
+  console.log(`bbc: the screen before Insert and run ${JSON.stringify(away)}, after ${JSON.stringify(seen)}: ${inView(seen) ? 'in view' : 'NOT IN VIEW'}`);
+  if (!inView(seen)) problems.push(`bbc: after Insert and run the screen is not in view (${JSON.stringify(seen)})`);
+  if (!(await inDrive(`${first}.ssd`))) problems.push(`bbc: Insert and run did not put ${first} in drive 0`);
+  console.log(`bbc: Insert and run: "${await page.locator('[data-bbc-drive]').innerText()}"; the screen has focus: ${await page.evaluate(() => document.activeElement?.hasAttribute('data-bbc-screen') ?? false)}`);
+  if (await waitFor(async () => (await mode()) !== 7 && (await colours()) > 2, `${first} did not leave BASIC's mode 7 for a screen of its own`)) {
+    console.log(`bbc: ${first} is running ${Date.now() - t2} ms after Insert and run: mode ${await mode()}, ${await colours()} colours on the canvas`);
+  }
+  const fromSite = fetched.filter((f) => f.path.includes('/discs/'));
+  console.log(`bbc: discs fetched: ${fromSite.map((f) => `${f.path} ${f.bytes} bytes`).join(', ')}`);
+  if (!fromSite.some((f) => f.path === `/machines/bbc-micro/discs/${first}.ssd` && f.bytes > 0)) problems.push(`bbc: ${first} was not fetched from this site`);
+
+  // Another disc's credit, then Insert in drive 0, which starts nothing: *CAT lists it.
+  await list.selectOption('onslaught');
+  const before = await credit(first);
+  const onslaught = await credit('onslaught');
+  console.log(`bbc: chose onslaught: its credit ${onslaught.shown ? 'shown' : 'NOT SHOWN'}, ${first}'s ${before.shown ? 'STILL SHOWN' : 'hidden'}: ${JSON.stringify(onslaught.text)}`);
+  if (!onslaught.shown || before.shown || !/Matt Godbolt/.test(onslaught.text) || !/MIT/.test(onslaught.text)) problems.push('bbc: choosing a disc did not show its credit alone');
+  await page.locator('[data-bbc-break]').click();
+  await waitRows((r) => r[r.findLastIndex((x) => x !== '')] === '>', 'Break did not return to the prompt after the disc');
+  await page.locator('[data-bbc-preset-insert]').click();
+  if (!(await inDrive('onslaught.ssd'))) problems.push('bbc: Insert in drive 0 did not put onslaught in');
+  const insertedOnly = await page.locator('[data-bbc-drive]').innerText();
+  console.log(`bbc: Insert in drive 0: "${insertedOnly}"`);
+  if (!/type \*CAT/.test(insertedOnly)) problems.push(`bbc: Insert in drive 0 says "${insertedOnly}"`);
+  await page.locator('[data-bbc-screen]').click();
+  await type(['Shift+Quote', 'KeyC', 'KeyA', 'KeyT', 'Enter']);
+  if (await waitRows((r) => r.lastIndexOf('>*CAT') >= 0 && r.slice(r.lastIndexOf('>*CAT')).some((x) => x.startsWith('ONSLAUGHT')), '*CAT did not list the inserted disc')) {
+    const r = await rows();
+    console.log(`bbc: *CAT lists ${JSON.stringify(r.slice(r.lastIndexOf('>*CAT')).filter((x) => x !== '').slice(0, 4))}`);
+  }
+
+  // A second disc started over the first: its title shows.
+  await list.selectOption('caterpillar');
+  await page.locator('[data-bbc-preset-run]').click();
+  if (!(await inDrive('caterpillar.ssd'))) problems.push('bbc: Insert and run did not put caterpillar in');
+  if (await waitRows((r) => r.some((x) => x.includes('Guide the caterpillar')), 'caterpillar did not start')) {
+    console.log(`bbc: caterpillar started over onslaught: ${JSON.stringify((await rows()).filter((x) => x.trim() !== '').slice(2, 5))}`);
+  }
+
+  // The visitor's own file still goes in after a preset, and lists.
+  await page.locator('[data-bbc-file]').setInputFiles({ name: 'test.ssd', mimeType: 'application/octet-stream', buffer: disc });
+  if (!(await inDrive('test.ssd'))) problems.push('bbc: the file input did not insert a file after a preset');
+  const own = await page.locator('[data-bbc-drive]').innerText();
+  console.log(`bbc: own disc after the presets: "${own}"`);
+  if (!own.startsWith('In drive 0: test.ssd, 40 tracks, single sided')) problems.push(`bbc: the drive says "${own}"`);
+  await page.locator('[data-bbc-break]').click();
+  await waitRows((r) => r[r.findLastIndex((x) => x !== '')] === '>', 'Break did not return to the prompt after caterpillar');
+  await page.locator('[data-bbc-screen]').click();
+  await type(['Shift+Quote', 'KeyC', 'KeyA', 'KeyT', 'Enter']);
+  if (await waitRows((r) => r.lastIndexOf('>*CAT') >= 0 && r.slice(r.lastIndexOf('>*CAT')).some((x) => x.startsWith('TESTDISC')), '*CAT did not list the own disc after the presets')) {
+    console.log('bbc: *CAT lists TESTDISC again');
+  }
 
   // Every image on the page loads, from this site.
   const images = await page.evaluate(async () => {
