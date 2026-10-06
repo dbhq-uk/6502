@@ -28,9 +28,10 @@ export const REGIONS = ['ntsc', 'pal'];
 /** Each console, as the caption names it. */
 export const CONSOLES = {
   // `board` is the board the caption says the console's parts are drawn on: the NTSC parts are on the scanned
-  // NES-CPU-10's own layout; the PAL parts were read off an NES-CPU-11, whose layout task 0 checked against the scan.
+  // NES-CPU-10's own layout; the PAL parts were read off an NES-CPU-11, whose chips' places task 0 checked against the scan's
+  // (the connectors and the copper were not compared; reworded in the final fix wave, 6 Oct 2026).
   ntsc: { name: 'an NTSC NES-001', sold: 'North America', short: 'NTSC', a: 'an NTSC console', board: 'an NES-CPU-10' },
-  pal: { name: 'a PAL NESE-001', sold: 'Europe', short: 'PAL', a: 'a PAL console', board: 'drawn on an NES-CPU-10, whose layout the PAL console\'s NES-CPU-11 was checked to share' },
+  pal: { name: 'a PAL NESE-001', sold: 'Europe', short: 'PAL', a: 'a PAL console', board: 'drawn on an NES-CPU-10, whose chips\' places the PAL console\'s NES-CPU-11 was checked to share' },
 };
 
 /**

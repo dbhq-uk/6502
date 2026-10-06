@@ -182,6 +182,8 @@
  "footprint": {
   "depthFrom": "published",
   "depthMm": 203.2,
+  "goodToPct": 3,
+  "goodToWhy": "the largest disagreement between the published size's proportions and the design patent's drawings, task 0's judged figures in spike.json case.patent (3.08 per cent), to a whole per cent",
   "notNintendos": true,
   "widthMm": 254.0,
   "widthSource": "published, not Nintendo's: 10 by 8 by 3.5 inches (the NES Fandom wiki, and Thingiverse 243385's \"254 X 203 X 89 mm\", D2) and 10.1 by 8 by 3.5 inches (dimensions.com, D1); good to about 3 per cent"
@@ -859,7 +861,7 @@
   },
   "PROFILE": {
    "from": "photographs",
-   "note": "the end seen from the front, from photographs; its inset at the base is O2-FL's two ends averaged, of four ends that read 12.86 to 17.71 mm, good to about 2.5 mm; its held-out check, 0.71 mm against 2.0, shows the averaging repeats, not that it is the true inset",
+   "note": "the end seen from the front, from photographs; its inset at the base is O2-FL's two ends averaged, of four ends that read 12.86 to 17.71 mm, good to about 2.4 mm; its held-out check, 0.71 mm against 2.0, shows the averaging repeats, not that it is the true inset",
    "points": [
     {
      "inset": 0.0,
@@ -1499,10 +1501,12 @@
    "max": 17.71,
    "min": 12.86
   },
-  "endsWhat": "the four ends read at the base 12.86 to 17.71 mm (the silhouettes 17.60 and 17.71, the ends turning away 14.40 and 12.86; the patent about 15.5); the profile's 16.0 is O2-FL's two ends averaged (all four average 15.6), good to about 2.5 mm. The held-out figure shows that the averaging repeats on a second photograph, not that the average is the true inset",
+  "endsWhat": "the four ends read at the base 12.86 to 17.71 mm (the silhouettes 17.60 and 17.71, the ends turning away 14.40 and 12.86; the patent about 15.5); the profile's 16.0 is O2-FL's two ends averaged (all four average 15.6), good to about 2.4 mm, half the four ends' range. The held-out figure shows that the averaging repeats on a second photograph, not that the average is the true inset",
   "errMm": 0.71,
   "fallback": "O1 FIG 3's outline, scaled to the case",
   "fallbackUsed": false,
+  "goodToMm": 2.4,
+  "goodToWhy": "half the range of the four ends, (17.71 - 12.86) / 2 = 2.425 mm, to one place",
   "limitMm": 2.0,
   "passes": true,
   "what": "the bottom shell's inset at the base, read on O2-BR's rear face (both ends averaged), held out of the profile built on O2-FL's front"

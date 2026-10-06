@@ -67,12 +67,12 @@ def test_a_source_missing_from_sources_json_stops_it():
 
 def made_up_case():
     case = {
-        'footprint': {'widthMm': 254.0, 'depthMm': 203.2, 'notNintendos': True, 'widthSource': 'published, not Nintendo\'s; good to about 3 per cent'},
+        'footprint': {'widthMm': 254.0, 'depthMm': 203.2, 'notNintendos': True, 'widthSource': 'published, not Nintendo\'s; good to about 3 per cent', 'goodToPct': 3, 'goodToWhy': 'the reason'},
         'heightMm': 88.9, 'heightFrom': 'published',
         'model': {'CASE': {'feet': 3.96}, 'PROFILE': {'points': [{'inset': 0.0, 'z': 92.86}, {'inset': 16.0, 'z': 3.96}]}},
         'spike': {'caseDepth': 'pass', 'caseHeight': 'pass', 'palFront': 'between pass and stop'},
         'widthCrossCheck': {'againstPublishedMidpointPct': -1.96},
-        'profileCheck': {'endsMm': {'min': 12.86, 'max': 17.71}, 'errMm': 0.71, 'limitMm': 2.0, 'passes': True, 'fallbackUsed': False, 'endsWhat': 'the average, good to about 2.5 mm. The rest'},
+        'profileCheck': {'endsMm': {'min': 12.86, 'max': 17.71}, 'errMm': 0.71, 'limitMm': 2.0, 'passes': True, 'fallbackUsed': False, 'endsWhat': 'the average. The rest', 'goodToMm': 2.4, 'goodToWhy': 'half the range'},
         'rear': {
             'ntsc': [{'face': 'rear', 'checked': True}, {'face': 'right', 'checked': False}],
             'pal': [{'face': 'rear', 'checked': False}],
@@ -95,8 +95,8 @@ def made_up_case():
 
 def test_the_case_figures_are_case_jsons_own():
     out = results.case_results(*made_up_case())
-    assert out['size'] == {'widthMm': 254.0, 'depthMm': 203.2, 'heightMm': 88.9, 'from': 'published', 'notNintendos': True, 'goodToPct': 3.0, 'feetMm': 3.96}
-    assert out['profile'] == {'insetMm': 16.0, 'endsMm': {'min': 12.86, 'max': 17.71}, 'heldOutMm': 0.71, 'limitMm': 2.0, 'passes': True, 'fallbackUsed': False, 'goodToMm': 2.5}
+    assert out['size'] == {'widthMm': 254.0, 'depthMm': 203.2, 'heightMm': 88.9, 'from': 'published', 'notNintendos': True, 'goodToPct': 3, 'feetMm': 3.96}
+    assert out['profile'] == {'insetMm': 16.0, 'endsMm': {'min': 12.86, 'max': 17.71}, 'heldOutMm': 0.71, 'limitMm': 2.0, 'passes': True, 'fallbackUsed': False, 'goodToMm': 2.4}
     assert out['rear'] == {'checked': 3, 'within': 1, 'limitMm': 2.0, 'worstMm': 5.16, 'placesUsedMm': 1.3, 'boardMissMm': 5.16, 'words': 'the check failed as measured', 'avChecked': False, 'palChecked': False, 'windowSetBackMm': 4.39}
     assert out['boardInCase'] == {'uncertaintyMm': 2.0, 'sharedMoulding': True}
     assert out['buttons'] == {'travelMm': 3.0, 'travelFrom': 'typical'}
@@ -106,9 +106,15 @@ def test_the_case_figures_are_case_jsons_own():
 
 
 def test_the_case_half_stops_on_words_it_cannot_read_or_a_lens_it_does_not_have():
+    # Since the final fix wave (6 Oct 2026) how well the size and the profile are known are numbers in case.json,
+    # not words to parse: one missing stops the run, and a profile figure that is not half the ends' range does too.
     case, sources = made_up_case()
-    case['profileCheck']['endsWhat'] = 'the average'
-    with pytest.raises(SystemExit, match='good to about'):
+    del case['footprint']['goodToPct']
+    with pytest.raises(SystemExit, match='goodToPct'):
+        results.case_results(case, sources)
+    case, sources = made_up_case()
+    case['profileCheck']['goodToMm'] = 2.5
+    with pytest.raises(SystemExit, match='half the range'):
         results.case_results(case, sources)
     case, sources = made_up_case()
     del sources[2]['focalLengthMm']

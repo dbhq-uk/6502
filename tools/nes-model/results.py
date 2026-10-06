@@ -109,14 +109,23 @@ def with_addresses(ids, sources):
     return [{'id': i, 'url': by_id[i]['url'], 'page': by_id[i]['page'], 'sha256': by_id[i]['sha256'], 'kind': by_id[i]['kind']} for i in ids]
 
 
-def about(text, unit):
-    """The figure a sentence of case.json's gives as "good to about N <unit>":
-    the words were written by case_measure.py beside the figures they sum up,
-    so the page quotes them from there rather than typing them again."""
-    m = re.search(r'good to about ([0-9.]+) ' + re.escape(unit), text)
-    if not m:
-        raise SystemExit(f'case.json no longer says "good to about ... {unit}" in: {text}')
-    return float(m.group(1))
+def figure(record, key, where):
+    """A number case.json gives, with its reason beside it, by key: since the
+    final fix wave of 6 October 2026 how well the size and the profile are known
+    are numbers that case_measure.py computes, not words to parse."""
+    v = record.get(key)
+    if not isinstance(v, (int, float)) or isinstance(v, bool) or not record.get('goodToWhy'):
+        raise SystemExit(f'case.json has no number {key}, with its goodToWhy, in {where}')
+    return v
+
+
+def profile_good_to(profile):
+    """The profile's figure, which must be half the range of its four ends, to one place."""
+    v = figure(profile, 'goodToMm', 'profileCheck')
+    want = round((profile['endsMm']['max'] - profile['endsMm']['min']) / 2, 1)
+    if abs(v - want) > 1e-9:
+        raise SystemExit(f'profileCheck.goodToMm is {v}, not half the range of the ends, {want}')
+    return v
 
 
 def shared_moulding(text):
@@ -150,7 +159,7 @@ def case_results(case, sources):
         'size': {
             'widthMm': case['footprint']['widthMm'], 'depthMm': case['footprint']['depthMm'], 'heightMm': case['heightMm'],
             'from': case['heightFrom'], 'notNintendos': case['footprint']['notNintendos'],
-            'goodToPct': about(case['footprint']['widthSource'], 'per cent'),
+            'goodToPct': figure(case['footprint'], 'goodToPct', 'footprint'),
             'feetMm': case['model']['CASE']['feet'],
         },
         # task 0's checks of the proportions on the patent's views, and the width cross-check on O9
@@ -161,7 +170,7 @@ def case_results(case, sources):
             'insetMm': case['model']['PROFILE']['points'][-1]['inset'],
             'endsMm': profile['endsMm'], 'heldOutMm': profile['errMm'], 'limitMm': profile['limitMm'],
             'passes': profile['passes'], 'fallbackUsed': profile['fallbackUsed'],
-            'goodToMm': about(profile['endsWhat'], 'mm'),
+            'goodToMm': profile_good_to(profile),
         },
         # the rear connectors: placed from O2-BR; the board's places, the check, failed as measured
         'rear': {

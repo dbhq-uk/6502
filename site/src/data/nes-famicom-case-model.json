@@ -17,7 +17,7 @@
    "min": 12.86
   },
   "fallbackUsed": false,
-  "goodToMm": 2.5,
+  "goodToMm": 2.4,
   "heldOutMm": 0.71,
   "insetMm": 16.0,
   "limitMm": 2.0,
@@ -39,7 +39,7 @@
   "depthMm": 203.2,
   "feetMm": 3.96,
   "from": "published",
-  "goodToPct": 3.0,
+  "goodToPct": 3,
   "heightMm": 88.9,
   "notNintendos": true,
   "widthMm": 254.0

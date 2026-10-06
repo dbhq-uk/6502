@@ -12,9 +12,10 @@ The case frame is millimetres from the case's left rear corner at table
 level, x to the right as seen from the front, y towards the front, z up.
 
 1. The size is the published 254 by 203.2 by 88.9 mm (docs/nes/facts/models.md,
-   D1 and D2), which are not Nintendo's figures and are good to about 3 per
-   cent; task 0 checked the patent's proportions against them within 5. The
-   corner photographs give features only: their camera failed its own check
+   D1 and D2), which are not Nintendo's figures; how well they are known is
+   case.json's footprint.goodToPct, with its reason beside it; task 0 checked
+   the patent's proportions against them within 5. The corner photographs
+   give features only: their camera failed its own check
    in task 0, so nothing here relates two of a photograph's planes through a
    camera. Each face is rectified on its own, by the homography that takes
    the four lines bounding it to the published rectangle, which any camera,
@@ -770,8 +771,8 @@ def build(parts):
     built = [{'inset': 0.0, 'z': HEIGHT_MM}, {'inset': 0.0, 'z': seam}, {'inset': 0.0, 'z': brk}, {'inset': inset, 'z': 0.0}]
     check_pt = {'inset': float(np.mean([br['left']['inset'], br['right']['inset']])), 'z': 0.0}
     # FIG 3's first row, at the base itself, is the bottom corner's rounded
-    # edge, not the end's lean (it reads 17.62 where the row 0.88 mm up reads
-    # about 15.5): left out of the patent's profile, and said so
+    # edge, not the end's lean (it reads 17.62, where the next row kept, 2.0 mm
+    # up, reads 14.63): left out of the patent's profile, and said so
     patent_prof = [{'inset': p['inset'], 'z': p['z']} for p in pat['profile'] if p['z'] > 0]
     patent_dropped = [{'inset': p['inset'], 'z': p['z']} for p in pat['profile'] if p['z'] <= 0]
     choice = profile_choice(built, check_pt, patent_prof)
@@ -887,6 +888,14 @@ def build(parts):
     feet_list = [{'x': f['x'], 'y': f['y'], 'd': f['d'], 'h': _r(feet)} for f in under_common['feet']]
 
     verdicts = {v['check']: v['verdict'] for v in spk['verdicts']}
+    # How well the size and the profile are known, as numbers beside their reasons, not words for results.py to parse
+    # (the final fix wave, 6 Oct 2026). The size: the largest disagreement between the published proportions and the
+    # patent's drawings, task 0's judged figures, to a whole per cent. The profile: half the range of the four ends.
+    pat_err = spk['case']['patent']
+    size_err = max(abs(v) for v in [*pat_err['depthToWidthErrPctEach'].values(), *pat_err['heightToWidthErrPctEach'].values()])
+    good_to_pct = int(round(size_err))
+    half_range = (_r(max(ends)) - _r(min(ends))) / 2
+    good_to_mm = round(half_range, 1)
     pal_diff = [
         'The front label adds a third line, "EUROPEAN VERSION", under "ENTERTAINMENT SYSTEM" (O4); the words above it sit higher on the band.',
         'The rear\'s words are German: "ANSCHLUSS NETZGERAT/ ADAPTER", "KANAL 3 / KANAL 4", "ANSCHLUSS ANTENNE" (O10), where the NTSC console\'s say "AC ADAPTER", "CH3-CH4", "RF SWITCH" (O2-BR).',
@@ -897,8 +906,10 @@ def build(parts):
         'about': ('The NES-001 and NESE-001 cases, measured by tools/nes-model/case_measure.py (task 8 of the NES models plan). '
                   'Millimetres in the case frame: from the case\'s left rear corner at table level, x to the right as seen from the front, y towards the front, z up.'),
         'footprint': {'widthMm': WIDTH_MM, 'depthMm': DEPTH_MM, 'depthFrom': 'published',
-                      'widthSource': 'published, not Nintendo\'s: 10 by 8 by 3.5 inches (the NES Fandom wiki, and Thingiverse 243385\'s "254 X 203 X 89 mm", D2) and 10.1 by 8 by 3.5 inches (dimensions.com, D1); good to about 3 per cent',
-                      'notNintendos': True},
+                      'widthSource': 'published, not Nintendo\'s: 10 by 8 by 3.5 inches (the NES Fandom wiki, and Thingiverse 243385\'s "254 X 203 X 89 mm", D2) and 10.1 by 8 by 3.5 inches (dimensions.com, D1); good to about ' + str(good_to_pct) + ' per cent',
+                      'notNintendos': True, 'goodToPct': good_to_pct,
+                      'goodToWhy': (f'the largest disagreement between the published size\'s proportions and the design patent\'s drawings, task 0\'s judged '
+                                    f'figures in spike.json case.patent ({size_err:.2f} per cent), to a whole per cent')},
         'heightMm': HEIGHT_MM, 'heightFrom': 'published',
         'heightWhat': 'the body without its feet: the patent\'s height to width without its feet (FIG 3 and FIG 7) is within 1.4 per cent of 88.9 over 254 and 255, and with them 4.6 to 6.4 per cent over',
         'feetMm': _r(feet), 'feetFrom': 'O1 FIG 3, the feet below the body, scaled with its height',
@@ -914,8 +925,9 @@ def build(parts):
         'profileCheck': {'what': 'the bottom shell\'s inset at the base, read on O2-BR\'s rear face (both ends averaged), held out of the profile built on O2-FL\'s front',
                          'endsMm': {'min': _r(min(ends)), 'max': _r(max(ends))},
                          'endsWhat': (f'the four ends read at the base {min(ends):.2f} to {max(ends):.2f} mm (the silhouettes {fl["left"]["inset"]:.2f} and {br["left"]["inset"]:.2f}, the ends turning away '
-                                      f'{fl["right"]["inset"]:.2f} and {br["right"]["inset"]:.2f}; the patent about 15.5); the profile\'s {inset:.1f} is O2-FL\'s two ends averaged (all four average {np.mean(ends):.1f}), good to about 2.5 mm. '
+                                      f'{fl["right"]["inset"]:.2f} and {br["right"]["inset"]:.2f}; the patent about 15.5); the profile\'s {inset:.1f} is O2-FL\'s two ends averaged (all four average {np.mean(ends):.1f}), good to about {good_to_mm} mm, half the four ends\' range. '
                                       'The held-out figure shows that the averaging repeats on a second photograph, not that the average is the true inset'),
+                         'goodToMm': good_to_mm, 'goodToWhy': f'half the range of the four ends, ({_r(max(ends))} - {_r(min(ends))}) / 2 = {half_range:.3f} mm, to one place',
                          'errMm': _r(choice['check']['errMm']), 'limitMm': PROFILE_LIMIT_MM, 'passes': choice['check']['passes'],
                          'fallback': 'O1 FIG 3\'s outline, scaled to the case', 'fallbackUsed': choice['from'] == 'patent'},
         'profileEachEnd': {'O2-FL': {'left': {k: _r(v) for k, v in fl['left'].items()}, 'right': {k: _r(v) for k, v in fl['right'].items()}},
@@ -985,7 +997,7 @@ def module_exports(c):
                  'width': c['footprint']['widthMm'], 'depth': c['footprint']['depthMm'], 'height': c['heightMm'], 'feet': c['feetMm'],
                  'seamZ': c['seamZ'], 'outline': c['outline'], 'band': c['band'], 'panel': c['panel'], 'notch': c['notch'], 'rearWindow': c['rearWindow']},
         'PROFILE': {'note': (f"the end seen from the front, from {c['profileFrom']}; its inset at the base is O2-FL's two ends averaged, of four ends that read "
-                             f"{c['profileCheck']['endsMm']['min']} to {c['profileCheck']['endsMm']['max']} mm, good to about 2.5 mm; its held-out check, "
+                             f"{c['profileCheck']['endsMm']['min']} to {c['profileCheck']['endsMm']['max']} mm, good to about {c['profileCheck']['goodToMm']} mm; its held-out check, "
                              f"{c['profileCheck']['errMm']} mm against {c['profileCheck']['limitMm']}, shows the averaging repeats, not that it is the true inset"),
                     'points': c['profile'], 'from': c['profileFrom']},
         'DOOR': {'note': c['door']['from'], 'front': c['door']['front'], 'top': c['door']['top'], 'lip': c['door']['lip']},

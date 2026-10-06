@@ -1201,7 +1201,9 @@ under "What it does not show, or shows less well".
 88.9 mm high (`tools/nes-model/data/case.json`, `footprint.widthMm`,
 `footprint.depthMm`, `heightMm`, with `heightFrom` "published"), from the NES
 Fandom wiki, Thingiverse 243385 and dimensions.com, which disagree with each
-other a little, so it is "good to about 3 per cent" (`footprint.widthSource`).
+other a little. It is good to about 3 per cent (`footprint.goodToPct`, with
+its reason: the patent's drawings' largest disagreement with the published
+proportions, 3.08 per cent).
 The height is the published one, not read from the photographs.
 
 **The case's checks were revised twice, after the patent's figures were
@@ -1246,9 +1248,12 @@ parts were read off an NES-CPU-07 (I4, I5) and placed on the scanned
 NES-CPU-10's footprints, each within 0.432 mm at the worst against a 2 mm limit
 (`parts.json`, `sitsOn`). The PAL parts were read off an NES-CPU-11 (I3) and
 drawn on the same CPU-10 layout. No bare PAL board was scanned, so the PAL
-board's copper is the NTSC board's, on task 0's evidence that the two layouts
-match: I3's part centres against I1's, held out one at a time, median 0.148 mm
-and worst 0.386 mm (`spike.json`, `palLayout.heldOutMm`).
+board's copper is the NTSC board's. Task 0's evidence is that the two boards'
+chips sit in the same places: the ten chips' centres on I3 against I1's, held
+out one at a time, median 0.148 mm and worst 0.386 mm (`spike.json`,
+`palLayout.heldOutMm`); the connectors P1 to P3 could not be measured on I3
+(`palLayout.notMeasured`), and the copper itself was not compared, so that it
+is the same is an inference.
 
 **What the chips do is read, not traced.** Which controller port each buffer
 serves, U7 port 1 and U8 port 2, is by the board's print, checked against the
@@ -1272,8 +1277,9 @@ good to about 2 mm (`case.json`, `boardInCase.uncertaintyMm`) and was measured
 in a PAL case (O9), so it assumes the PAL and NTSC cases share one moulding, an
 inference (`boardInCase.from`). The bottom shell's ends lean in below a break;
 the four ends read on two photographs run from 12.86 to 17.71 mm at the base, so
-the model's inset is an average good to about 2.5 mm (`profileCheck.endsMm`,
-`profileCheck.endsWhat`); the held-out figure, 0.71 mm, shows the averaging
+the model's inset is an average good to about 2.4 mm, half that range
+(`profileCheck.endsMm`, `profileCheck.goodToMm`; until the final fix wave of 6
+October 2026 a sentence gave "about 2.5 mm"); the held-out figure, 0.71 mm, shows the averaging
 repeats, not that it is the true inset.
 
 **The machine's state, where the console's is not known or not emulated.**

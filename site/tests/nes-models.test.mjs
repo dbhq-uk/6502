@@ -824,7 +824,11 @@ test('the profile\'s held-out check passes within 2 mm, or the patent\'s fallbac
   const ends = [each['O2-FL'].left.inset, each['O2-FL'].right.inset, each['O2-BR'].caseRight.inset, each['O2-BR'].caseLeft.inset];
   assert.equal(p.endsMm.min, Math.min(...ends));
   assert.equal(p.endsMm.max, Math.max(...ends));
-  assert.match(p.endsWhat, /good to about 2\.5 mm/);
+  // How well the average is known: half the four ends' range, to one place, a number beside its reason since the final
+  // fix wave (6 Oct 2026); it was the words "about 2.5 mm" until then.
+  assert.equal(p.goodToMm, Math.round(((p.endsMm.max - p.endsMm.min) / 2) * 10) / 10);
+  assert.match(p.goodToWhy, /half the range of the four ends/);
+  assert.ok(p.endsWhat.includes(`good to about ${p.goodToMm} mm`));
   assert.match(caseData.model.PROFILE.note, /not that it is the true inset/);
   assert.ok(caseData.profilePatent.every((q) => q.z > caseData.feetMm), 'the patent profile\'s row at the base is left out');
   const zs = caseData.profile.map((q) => q.z);
@@ -1034,8 +1038,10 @@ test('each console\'s caption starts by saying it is a model of that console, an
     assert.match(about, /to look at: the copper's connections are not verified/);
   }
   // Each console's board: the NTSC parts on the scanned NES-CPU-10, the PAL parts read off an NES-CPU-11 and drawn on
-  // the CPU-10's layout, which the PAL board was checked to share (fix round 1, 6 Oct 2026).
-  assert.match(layout.describe('pal'), /drawn on an NES-CPU-10, whose layout the PAL console's NES-CPU-11 was checked to share/);
+  // the CPU-10's layout, which the PAL board was checked to share (fix round 1, 6 Oct 2026). Since the final fix wave
+  // (6 Oct 2026) it says what was checked: the chips' places, not the connectors or the copper.
+  assert.match(layout.describe('pal'), /drawn on an NES-CPU-10, whose chips' places the PAL console's NES-CPU-11 was checked to share/);
+  assert.doesNotMatch(layout.describe('pal') + notes.made(boardFigures, 'pal').paragraphs.join(' '), /whose layout|one layout/);
   assert.doesNotMatch(layout.describe('ntsc'), /CPU-11/);
   assert.match(layout.describe('ntsc'), /three\.js, an NES-CPU-10, /);
   // Every height the parts file gives is typical, so the caption may say all of them are.
@@ -1215,10 +1221,16 @@ test('the case\'s sizes are case.json\'s, and its results file is case.json\'s f
   assert.deepEqual([caseLayout.CASE.width, caseLayout.CASE.depth, caseLayout.CASE.height], [caseData.footprint.widthMm, caseData.footprint.depthMm, caseData.heightMm]);
   const f = caseFigures;
   assert.deepEqual([f.size.widthMm, f.size.depthMm, f.size.heightMm, f.size.from, f.size.notNintendos], [caseData.footprint.widthMm, caseData.footprint.depthMm, caseData.heightMm, caseData.heightFrom, true]);
+  // A number in case.json beside its reason since the final fix wave (6 Oct 2026): the patent's largest disagreement with
+  // the published proportions, task 0's judged figures, to a whole per cent.
+  const patentErr = spike.case.patent;
+  assert.equal(caseData.footprint.goodToPct, Math.round(Math.max(...[...Object.values(patentErr.depthToWidthErrPctEach), ...Object.values(patentErr.heightToWidthErrPctEach)].map(Math.abs))));
+  assert.equal(f.size.goodToPct, caseData.footprint.goodToPct);
   assert.match(caseData.footprint.widthSource, new RegExp(`good to about ${f.size.goodToPct} per cent`));
   assert.deepEqual(f.profile.endsMm, caseData.profileCheck.endsMm);
   assert.equal(f.profile.heldOutMm, caseData.profileCheck.errMm);
   assert.equal(f.profile.insetMm, caseLayout.PROFILE.points.at(-1).inset);
+  assert.equal(f.profile.goodToMm, caseData.profileCheck.goodToMm);
   assert.match(caseData.profileCheck.endsWhat, new RegExp(`good to about ${f.profile.goodToMm} mm`));
   assert.deepEqual([f.rear.placesUsedMm, f.rear.boardMissMm, f.rear.within, f.rear.checked, f.rear.worstMm, f.rear.words], [caseData.rearCheck.uncertaintyMm.placesUsed, caseData.rearCheck.uncertaintyMm.boardMiss, caseData.rearCheck.within, caseData.rearCheck.checked, caseData.rearCheck.worstMm, caseData.rearCheck.words]);
   assert.deepEqual([f.rear.placesUsedMm, f.rear.boardMissMm], [1.3, 5.16], 'the rear check is not as measured on 5 October 2026');
@@ -1376,7 +1388,7 @@ test('the outside\'s note states every uncertainty plainly, with its figures rea
     assert.ok(all.includes(`published ${mm2(f.size.widthMm)} by ${mm2(f.size.depthMm)} mm and ${mm2(f.size.heightMm)} mm high`), 'the published size');
     assert.match(all, /none of them Nintendo's/);
     assert.ok(all.includes(`good to about ${mm2(f.size.goodToPct)} per cent`));
-    // The profile: an average, good to about 2.5 mm, of ends from 12.86 to 17.71 mm.
+    // The profile: an average, good to about half the ends' range, of ends from 12.86 to 17.71 mm.
     assert.ok(all.includes(`range from ${mm2(f.profile.endsMm.min)} to ${mm2(f.profile.endsMm.max)} mm, so the inset is an average good to about ${mm2(f.profile.goodToMm)} mm`));
     // The rear: placed from a photograph that agrees with the patent within 1.3 mm; the board's places missed by up to 5.16; failed.
     assert.ok(all.includes(caseNotes.rearSentence(f)));
@@ -1416,8 +1428,18 @@ const COMMITTED = { 'O2-BR': 'nes-rear-right.webp', O4: 'nes-pal-front.webp', O5
 test('the photographs committed for the outside model are in the folder, credited by author, address and licence, listed as `committed` in sources.json, and match the hashes their README gives', () => {
   const photosDir = path.join(process.cwd(), 'src', 'assets', 'photos');
   const readme = fs.readFileSync(path.join(photosDir, 'README.md'), 'utf8');
-  // Nothing else is marked committed, and every one marked is a photograph the registry names.
-  assert.deepEqual(Object.fromEntries(sources.filter((x) => x.committed !== null).map((x) => [x.id, x.committed])), COMMITTED);
+  // Nothing else is marked committed, and every one marked is a photograph the registry names. O2-FL is marked too
+  // since the final fix wave of 6 Oct 2026: `nes.webp`, the main photograph, is its resized copy (its own checks below).
+  assert.deepEqual(Object.fromEntries(sources.filter((x) => x.committed !== null).map((x) => [x.id, x.committed])), { 'O2-FL': 'nes.webp', ...COMMITTED });
+  const head = sources.find((x) => x.id === 'O2-FL');
+  const headCopy = fs.readFileSync(path.join(photosDir, 'nes.webp'));
+  const headSha = crypto.createHash('sha256').update(headCopy).digest('hex');
+  assert.notEqual(headSha, head.sha256, 'nes.webp is the original of O2-FL');
+  assert.equal(nesRow.photos[0].file, 'nes.webp');
+  assert.equal(nesRow.photos[0].sourceUrl, head.page);
+  const headSection = readme.slice(readme.indexOf('## nes.webp\n'), readme.indexOf('\n## ', readme.indexOf('## nes.webp\n') + 1));
+  assert.match(headSection, new RegExp(`Fetched\\b[^\\n]*SHA-256 \`${head.sha256}\``), 'the README does not give O2-FL\'s original SHA-256 for nes.webp');
+  assert.match(headSection, new RegExp(`This copy\\b[^\\n]*SHA-256 \`${headSha}\``), 'the README\'s SHA-256 for nes.webp is not the file\'s');
   for (const [id, file] of Object.entries(COMMITTED)) {
     const src = sources.find((x) => x.id === id);
     assert.equal(src.kind, 'photograph', `${id}: kind`);
