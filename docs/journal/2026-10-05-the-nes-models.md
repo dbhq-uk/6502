@@ -1942,3 +1942,15 @@ jack's figures edited to a consistent pass (its board place moved so that
 every recomputation agreed), only the pin failed; with the plan's sentence
 changed, it failed; with `endsMm` changed, the profile test failed. Each file
 was restored and compared (`cmp`).
+
+## The machine's id changes, 6 October 2026
+
+The session doing the NES machine told this one that the registry id will be
+`nes`, not `nes-famicom` (the planned row is replaced in that track's task 15),
+and that a model module must be `nes` or start with `nes-`. The module names
+here, `nes-famicom-case` and `nes-famicom-board`, start with `nes-`, so they
+stay: renaming the committed files would touch about a dozen of them for no
+gain. The plan now says the page is `/machines/nes/` and a model's `machine` is
+`nes`, with a dated note under "Facts every task relies on". The approved design
+still names `/machines/nes-famicom/` in two places; it is not edited, and Dan can
+fold the change in. The made-up machine in task 1's test keeps its own id.
