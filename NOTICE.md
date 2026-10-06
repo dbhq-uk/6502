@@ -1,8 +1,9 @@
 # Notices
 
 This repository is MIT (see `LICENSE`). One thing in it was taken from outside
-under different terms, and is recorded here. The system ROMs are recorded
-separately, in [`roms/README.md`](roms/README.md).
+under different terms, and is recorded here. The system ROMs, and the NES's
+bundled homebrew, Lan Master, which its author released into the public domain,
+are recorded separately, in [`roms/README.md`](roms/README.md).
 
 ## The SAA5050 teletext glyph table, from Bedstead
 

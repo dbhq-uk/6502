@@ -218,4 +218,13 @@ public static class Pins
     public const string BbcBasicSha256 = "45bd55dc0f6f0f8f1fe9e2481de7def206565eec8f600ba3068b849ca4132079";
     public const string BbcDfsPath = "roms/bbc-micro/DFS-1.2.rom";
     public const string BbcDfsSha256 = "e745e34895225a6650b712c1dd0656cb0b0b15f072a8ae6d9ea8d1ac257eb3d6";
+
+    // The NES's bundled homebrew: Lan Master, by Shiru, released by him into the public
+    // domain (its manual and its title screen say so). Taken from the Internet Archive's
+    // copy of his lan_master.zip and committed under roms/nes/, with where it came from
+    // and its rights in roms/README.md (AGENTS.md rules 3 and 4). The NES has no system
+    // ROM. The path is repository-relative and the hash is checked every time the file
+    // is read.
+    public const string NesHomebrewPath = "roms/nes/Lan_Master.nes";
+    public const string NesHomebrewSha256 = "becfeafb80479c330333c9e9385417f68f3c88e85443dfb37b05ae9283f3ea45";
 }

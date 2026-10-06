@@ -54,3 +54,52 @@ now was not established. No licence or permission from any holder was found. The
 ROMs are here because Dan decided on 1 October 2026 that a ROM is used when its
 position is documented, and this is that document. If a rights holder asks for
 them to be removed, they will be.
+
+## NES: the bundled homebrew, Lan Master
+
+The NES has no system ROM. What is here is the one title its page runs before a
+visitor loads their own: a game, not a system ROM, chosen by a rights pass for
+being released by its author in words that allow it to be copied here. The
+candidates and why each was or was not taken are in
+`docs/journal/2026-10-06-the-nes-homebrew.md`.
+
+| File | SHA-256 | What it is |
+|---|---|---|
+| `nes/Lan_Master.nes` | `becfeafb80479c330333c9e9385417f68f3c88e85443dfb37b05ae9283f3ea45` | Lan Master, the 2015 update of the 2011 game: an iNES file, mapper 0 (NROM), 32 KB PRG ROM and 8 KB CHR ROM, vertical mirroring, no battery |
+| `nes/Lan_Master-manual.pdf` | `5d47e2e28e768de7d11ab50abb5bdbf909449032f74e994c90a67361d0c53a42` | The game's manual from the same archive, kept because it carries the licence |
+
+**Who made it.** Shiru, who wrote the code, drew the graphics and made the
+music, as his development notes in the archive say. The notes date it: begun
+about November 2010, released in 2011, and fixed in 2015. His notes for Lawn
+Mower add that Lan Master was made for the NES Coding Competition of 2011. A
+routing puzzle: turn the pieces of wire until every computer is connected.
+
+**Where it came from.** Shiru's own site lists it on its software page,
+`https://shiru.untergrund.net/software.shtml`, as
+`https://shiru.untergrund.net/files/nes/lan_master.zip`. On 6 October 2026 the
+site's files answered `403 Forbidden` over `https` and refused connections over
+`http`, so the copy taken here is the Internet Archive's capture of that file
+from 27 March 2016, fetched raw with `curl` on 6 October 2026:
+
+- `https://web.archive.org/web/20160327132502id_/http://shiru.untergrund.net/files/nes/lan_master.zip`
+  (1,126,553 bytes, SHA-256
+  `79410cc133f1100d2fe5409fd49297a62afc748aeeb5faccb8fe69c68c16e6aa`)
+
+The archive holds `Lan_Master.nes`, `manual.pdf`, `notes.txt` and two label
+pictures. The ROM is committed as it came out of the archive, and the manual
+too, under a name that says whose manual it is. The software page as archived on 17 September 2026
+still lists the same 1.07 MB file.
+
+**Rights.** The author released it into the public domain, and says so in three
+places:
+
+- The manual, in English: "The game is not licensed or endorsed by Nintendo
+  company in any way. It is free of charge, released into Public Domain, and
+  provided "as is", without warranty or responsibility of any kind." Its cover
+  reads "PD 2011 Shiru".
+- The game's own title screen, under the name: "PD2011 Shiru".
+- Nothing in the archive or on the software page says otherwise.
+
+A public-domain release asks for nothing in return, so no notice is owed. The
+credit is given anyway, here and on the page. Dan can overrule the choice
+before the work is merged.
