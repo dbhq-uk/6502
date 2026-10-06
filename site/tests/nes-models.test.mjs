@@ -1111,10 +1111,13 @@ test('every sentence on the page about the copper says it is traced to look at a
   for (const x of said) assert.match(x, /to look at[\s\S]*not verified/, x);
 });
 
-test('every source the board used is credited in the registry by its address, and every reference the NES has is one the board used', () => {
-  const refs = nesRow.references ?? [];
+test('every source the board used is credited in the registry by its address, and every reference the NES has is one the board or the case used', () => {
+  // Since task 9 the NES's references are the board's and then the case's; each view credits its own (its own test below).
   const board = boardFigures.sources;
   const of = (r) => board.find((x) => r.sourceUrl === x.url || r.sourceUrl === x.page);
+  const ofCase = (r) => caseSources().find((x) => r.sourceUrl === x.url || r.sourceUrl === x.page);
+  for (const r of nesRow.references ?? []) assert.ok(of(r) || ofCase(r), `the reference ${r.sourceUrl} is not a source of the board or the case`);
+  const refs = (nesRow.references ?? []).filter(of);
   for (const r of refs) {
     const x = of(r);
     assert.ok(x, `the reference ${r.sourceUrl} is not a source of the board`);
@@ -1171,6 +1174,7 @@ test('the model reads the machine through panel.nes, takes a fresh baseline on n
 // --- task 9: the outside model, and both models as views ------------------------------------
 
 const CASE_ID = 'nes-famicom-case';
+function caseSources() { return JSON.parse(fs.readFileSync(path.join(process.cwd(), 'src', 'data', `${CASE_ID}-model.json`), 'utf8')).sources; }
 const caseEntry = MODELS[CASE_ID];
 const caseLayout = await import('../src/models/nes-famicom-case-layout.mjs');
 const caseNotes = await import('../src/models/nes-famicom-case-notes.mjs');
@@ -1388,4 +1392,35 @@ test('the outside\'s note states every uncertainty plainly, with its figures rea
   assert.ok(caseText.includes(caseLayout.HELP));
   assert.match(caseLayout.HELP, /The page has no power-off/);
   assert.match(caseLayout.HELP, /the light never blinks/);
+});
+
+test('every source the case used is credited by its address, once, with its own licence, SHA-256 and day, and the outside credits exactly those', () => {
+  const credited = [...nesRow.photos, ...(nesRow.drawings ?? []), ...(nesRow.references ?? [])];
+  const of = (x) => credited.filter((r) => r.sourceUrl === x.url || r.sourceUrl === x.page);
+  for (const x of caseFigures.sources) {
+    const s = sources.find((y) => y.id === x.id);
+    const found = of(x);
+    assert.equal(found.length, 1, `${x.id} is credited ${found.length} times`);
+    const r = found[0];
+    assert.equal(r.licence, s.licence, `${x.id}: the licence is not as sources.json records it`);
+    if (r.sha256) assert.equal(r.sha256, s.sha256, `${x.id}: the SHA-256 is not the original's`);
+    assert.equal(r.fetched, nesRow.photos.includes(r) ? r.fetched : s.fetched, `${x.id}: fetched`);
+    if (s.licence === 'CC BY 4.0') assert.equal(r.licenceUrl, 'https://creativecommons.org/licenses/by/4.0/', `${x.id}: no link to its licence`);
+  }
+  // The photograph at the head of the page is O2-FL, which the case was measured on, and it says so.
+  assert.equal(nesRow.photos[0].sourceUrl, sources.find((y) => y.id === 'O2-FL').page);
+  assert.match(nesRow.photos[0].used, /^the outside model's front/);
+  // The rear check's photograph says the check failed; nothing credited says O2-BL, which was not read.
+  assert.match(of(caseFigures.sources.find((x) => x.id === 'I7-FL'))[0].used, /failed as measured/);
+  assert.equal(caseFigures.sources.some((x) => x.id === 'O2-BL'), false);
+  // On the page: each note under the outside credits exactly the case's sources, in the registry's order, and not the board's.
+  const want = credited.filter((r) => caseFigures.sources.some((x) => r.sourceUrl === x.url || r.sourceUrl === x.page));
+  const notes = [...caseSection.matchAll(/<div class="model-made prose" data-model-made data-model-region="([a-z]+)"[^>]*>([\s\S]*?)<\/div>/g)];
+  assert.equal(notes.length, 2);
+  for (const [, , note] of notes) {
+    const items = [...note.matchAll(/<li data-model-source>([\s\S]*?)<\/li>/g)].map((m) => m[1]);
+    assert.deepEqual(items.map((i) => /href="([^"]+)"/.exec(i)[1]), want.map((r) => r.sourceUrl));
+    for (const r of want) assert.ok(note.includes(`by ${r.author}`), `${r.sourceUrl}: its author`);
+    for (const b of boardFigures.sources) assert.ok(!note.includes(`href="${b.url}"`) && !note.includes(`href="${b.page}"`), `the outside credits ${b.id}, a source of the board`);
+  }
 });

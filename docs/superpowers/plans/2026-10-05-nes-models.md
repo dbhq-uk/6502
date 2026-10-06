@@ -1227,6 +1227,14 @@ The largest task. If its first review sends it back more than twice, split it at
 - [ ] **Step 6: Provenance on the page.** The credits under each view list exactly the sources it used, by URL, with what each gave; `DESIGN.md` gets "The NES's 3D models". Raise the floors.
 - [ ] **Step 7: Journal and commit.** `feat(models): the NES's outside model, and both models as views of either console`.
 
+**Notes added 6 Oct 2026, during task 9.**
+
+- **Committed in three stages, each green** (the controller's ruling, after a rate limit cut a first attempt off before it wrote anything): (a) the views' markup, styles and loader with their tests, the inside working in a tab; (b) the outside model; (c) the rule, the references, the browser check and the documents. Two items moved between stages, because a stage with them where first listed would not have been green: the registry's claim of both views with `"case": true` went into (b), since `model.test.mjs` fails a `MODELS` entry no machine claims and the cased rule fails the outside without the inside; and the rule that a machine claiming a model states `case` went into (c), since the NES row as task 7 left it (the inside, no `case`) fails it.
+- **The page offers views as tabs for any machine whose models are not a single board**, not only for one with two models: in stage (a) the NES had the inside alone, and its page showed one tab, Inside, which proved the inside in a tab panel before the outside existed. A machine with a board alone (the KIM-1) keeps its section, identical in markup.
+- **The markup.** The panel's content is `site/src/components/ModelPanel.astro`, used once by a single model's section and once by each view's panel; the tab list carries `data-model-tabs` for the loader; ids are suffixed by the view, then by the console (`model-about-inside-pal`). A model's entry may carry `help` (the case's: what a click on its buttons does), said in its panel; the controls, the same for both views, are said once after the panels. The board module found its caption by the id `model-about-<region>`; it now finds it by its console and uses the id it has (fixed in stage (a)).
+- **The PAL photographs' lens** (20 mm, which the page quotes) is recorded in `tools/nes-model/data/sources.json` for O4, O9 and O10, from each file's own XMP, read on 6 October 2026; `results.py` reads it from there. O5, the PAL underside, is a phone's photograph, not the same camera.
+- **Review Focus 5** is held by `shownFor(entry, region)` in `models.mjs` and its test with a made-up NTSC-only entry; both NES modules draw both consoles, so on the page it never fires, and neither module calls it.
+
 ---
 
 ### Task 10: The final pass

@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { MODELS, wordsFor, regionProblems, regionViews } from '../src/models/models.mjs';
+import { MODELS, wordsFor, regionProblems, regionViews, shownFor } from '../src/models/models.mjs';
 import { page, visibleText, modelPanel } from './helpers.mjs';
 
 const made = () => 'note';
@@ -95,4 +95,21 @@ test('on the NES\'s page each console has one caption, one note and one hidden n
     for (const r of entry.regions) assert.equal(marked.filter((t) => regionOf(t) === r).length, marked.length / entry.regions.length, `${r} has not as many marked parts as the others`);
     assert.ok(marked.every((t) => hidden(t) === (regionOf(t) !== entry.regions[0])), 'a part marked for a console other than the first is shown, or the first\'s is hidden');
   }
+});
+
+// Review Focus 5 of the NES models plan: a model that draws the NTSC console only, on a page set to PAL.
+test('a model that does not draw the page\'s console shows its own first console, labelled as that, and says there is no model of the page\'s and why', () => {
+  const ntscOnly = { ...both, regions: ['ntsc'], label: { ntsc: 'NTSC label' }, about: { ntsc: 'NTSC caption' }, made: { ntsc: made }, missing: { pal: 'the PAL board could not be shown to share the NTSC board\'s layout' } };
+  assert.deepEqual(regionProblems('m', { ...ntscOnly, missing: undefined }), []);
+  const shown = shownFor(ntscOnly, 'pal');
+  assert.equal(shown.region, 'ntsc');
+  assert.equal(shown.label, 'NTSC label');
+  assert.equal(shown.missing, 'There is no model of the PAL console, because the PAL board could not be shown to share the NTSC board\'s layout, so this is the NTSC console\'s.');
+  assert.match(shownFor({ ...ntscOnly, missing: undefined }, 'pal').missing, /no model of the PAL console, because none was built/);
+  // The console the page names, when the model draws it, with nothing to say; and a one-console model, whatever the page says.
+  assert.deepEqual(shownFor(both, 'pal'), { region: 'pal', label: 'PAL label', missing: null });
+  assert.deepEqual(shownFor(ntscOnly, 'ntsc'), { region: 'ntsc', label: 'NTSC label', missing: null });
+  assert.deepEqual(shownFor(MODELS['kim-1'], 'pal'), { region: null, label: MODELS['kim-1'].label, missing: null });
+  // Both NES models draw both consoles, so neither page console is ever missing.
+  for (const [module, e] of Object.entries(MODELS).filter(([, x]) => x.regions)) for (const r of e.regions) assert.equal(shownFor(e, r).missing, null, `${module}: ${r}`);
 });

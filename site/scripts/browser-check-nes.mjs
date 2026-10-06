@@ -6,7 +6,13 @@
 //
 // On /machines/nes/: nothing of the machine is fetched before Start is pressed,
 // and a file dropped then is refused with a message rather than the browser
-// leaving the page. Start downloads it and puts the bundled game in. Then, for
+// leaving the page. Then the outside 3D model, before Start (plan task 9): nothing
+// under /models/ was fetched before the visitor scrolled to the models, and
+// scrolling fetches the outside's bundle and not the inside's; it draws; its
+// power light is dark and POWER out; a click on its RESET leaves the machine
+// stopped, fetches nothing and says on the status line that the machine is not
+// running. A click on its POWER is the Start: it downloads the machine and puts
+// the bundled game in, and then the light is lit and POWER in. Then, for
 // each region, the page's test hook runs the machine from power on to exactly
 // the frame machines/nes/expected-frames.json records (read here, not copied),
 // and the canvas's bytes must hash to the recorded SHA-256 and must not be
@@ -16,9 +22,15 @@
 // the picture, the counters the board model reads (panel.nes.accessCounts())
 // must be four numbers with the PPU's moving, the headroom line must appear,
 // and the sound turns on and off.
-// Then the board's 3D model, with the game running: nothing under /models/ was
-// fetched before the visitor scrolled to it, and scrolling loads its bundle and
-// track map; its canvas draws; pointing at the PPU names it on the status line
+// Then the outside again, with the game running: the page's Reset puts the
+// model's RESET down and back up; a click on the model's RESET resets the
+// machine (its nes:reset, and the page's own line); a click on POWER changes
+// nothing and says the page has no power-off; from below, the case is drawn.
+// Then the views and the region (Review Focus 3): with the inside not yet
+// loaded, the page goes to the other region, and choosing Inside loads it
+// drawing that region, its panel alone shown.
+// Then the board's 3D model, in its panel, with the game running: it has its
+// bundle and track map; its canvas draws; pointing at the PPU names it on the status line
 // and lights its legend row; the PPU (U5) and controller port 1's buffer (U7)
 // are marked, looked at every 50 ms for up to five seconds (a timeout, not a
 // judged figure), and their legend rates are above zero; switching the region to PAL switches the model
@@ -27,10 +39,15 @@
 // nothing for a sample, then come back; switching back, the same; Show tracks
 // and Show tracks only work; and from below, the board shows its solder side's
 // copper where the map has it.
+// Then the tabs from the keyboard: Left on Inside selects Outside and Right
+// selects Inside again, each view keeping its camera, and Tab goes from the
+// selected tab into its stage and on out of the section.
 // Then the cartridge picker: a tiny NROM test cartridge, built here from bytes
 // (never a game), goes in and the screen turns its colour; a file of text and a
 // file over the size limit are each refused with a plain sentence, and the
 // machine carries on as it was. Every image on the page loads, from this site.
+// Last, in a second browser context that asks for reduced motion, both views
+// load and switch with no error.
 import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
@@ -39,6 +56,9 @@ import sharp from 'sharp';
 import { BOARD, TRACKS } from '../src/models/nes-famicom-board-layout.mjs';
 
 const TIMEOUT = 120_000;
+// The two views' panels (src/components/MachineModel.astro), each its own model's root.
+const OUTSIDE = '#model-panel-outside';
+const INSIDE = '#model-panel-inside';
 const here = path.dirname(fileURLToPath(import.meta.url));
 const EXPECTED = path.resolve(here, '..', '..', 'machines', 'nes', 'expected-frames.json');
 
@@ -106,9 +126,14 @@ export async function checkNes({ browser, watch, problems, origin }) {
   console.log(`nes: a file dropped before Start: default prevented ${dropped.prevented}, status "${dropped.status}"`);
   if (!dropped.prevented || !/Press Start first/.test(dropped.status)) problems.push(`nes: a file dropped before Start gave ${JSON.stringify(dropped)}`);
 
-  // Start: the download, the bundled game, and the machine running.
+  // The outside model, before Start: nothing of it until the visitor scrolls to it, then its bundle alone; its light
+  // dark and POWER out; a click on its RESET leaves the machine stopped and says so.
+  await checkOutsideBeforeStart({ page, problems, requested });
+
+  // Start, by a click on POWER on the outside model, which presses the page's Start: the download, the bundled game,
+  // and the machine running.
   const t0 = Date.now();
-  await page.locator('[data-nes-start]').click();
+  await clickButton(page, 'POWER');
   await page.waitForFunction(() => ['running', 'failed', 'waiting'].includes(document.querySelector('[data-nes]')?.dataset.state), null, { timeout: TIMEOUT });
   const state = await panel.getAttribute('data-state');
   console.log(`nes: ${state} in ${Date.now() - t0} ms: "${await page.locator('[data-nes-status]').innerText()}"`);
@@ -119,6 +144,7 @@ export async function checkNes({ browser, watch, problems, origin }) {
   const line = () => page.locator('[data-nes-region-line]').innerText();
   console.log(`nes: cartridge "${cartridge}"; "${await page.locator('[data-nes-cartridge]').innerText()}"; region ${await panel.getAttribute('data-region')}: "${await line()}"`);
   if (cartridge !== 'Lan Master') problems.push(`nes: Start put in "${cartridge}", not Lan Master`);
+  await checkOutsideStarted({ page, problems });
 
   // The canvas: its bytes' SHA-256, how many colours, and the size it is shown at.
   const canvas = () => page.evaluate(async () => {
@@ -225,7 +251,10 @@ export async function checkNes({ browser, watch, problems, origin }) {
   if (on.state !== 'on' || on.button !== 'Turn sound off' || on.line !== 'Sound is on.') problems.push(`nes: turning the sound on gave ${JSON.stringify(on)}`);
   if (off.state !== 'off' || off.button !== 'Turn sound on' || off.line !== 'Sound is off.') problems.push(`nes: turning the sound off gave ${JSON.stringify(off)}`);
 
+  await checkOutsideRunning({ page, problems });
+  await checkViews({ page, problems, requested, choose, region, other });
   await checkBoardModel({ page, problems, requested, choose, region, other });
+  await checkTabs({ page, problems });
 
   // The picker: a test cartridge built here, and the screen turns its one colour.
   await page.locator('[data-nes-file]').setInputFiles({ name: 'test.nes', mimeType: 'application/octet-stream', buffer: testCartridge() });
@@ -264,6 +293,207 @@ export async function checkNes({ browser, watch, problems, origin }) {
   for (const i of images) if (!i.ok || !i.local) problems.push(`nes: the image ${i.src} did not load from this site`);
   console.log(`nes: the recorded frames are from ${path.relative(path.resolve(here, '..', '..'), EXPECTED)}, sha256 of the file ${crypto.createHash('sha256').update(fs.readFileSync(EXPECTED)).digest('hex')}`);
   await page.close();
+  await checkReducedMotion({ browser, watch, problems, origin });
+}
+
+/** Where a button of the outside model is on the screen, and a click there, as a visitor's mouse makes it. */
+async function clickButton(page, name) {
+  await page.locator(`${OUTSIDE} [data-model-stage]`).scrollIntoViewIfNeeded();
+  const at = await page.locator(OUTSIDE).evaluate((m, n) => m.modelButtonPoint(n), name);
+  await page.mouse.click(at.x, at.y);
+  return at;
+}
+
+/** The share of a model's canvas that is drawn, not the black canvas. */
+async function drawn(page, root) {
+  const { data, info } = await sharp(await page.screenshot({ clip: await page.locator(`${root} [data-model-canvas]`).boundingBox(), timeout: TIMEOUT })).removeAlpha().raw().toBuffer({ resolveWithObject: true });
+  let lit = 0;
+  for (let i = 0; i < data.length; i += info.channels) if (data[i] + data[i + 1] + data[i + 2] > 30) lit++;
+  return { share: lit / (info.width * info.height), size: `${info.width}x${info.height}` };
+}
+
+const outsideState = (page) => page.locator(OUTSIDE).evaluate((m) => ({ state: m.dataset.state, region: m.dataset.modelRegion, led: m.dataset.modelLed, power: m.dataset.modelPower, presses: m.dataset.modelPresses, status: m.querySelector('[data-model-status]').textContent }));
+const settled = async (page, root) => {
+  await page.waitForFunction((id) => !document.getElementById(id).modelView().moving, root.slice(1), { timeout: 30_000 }).catch(() => {});
+  await page.waitForTimeout(300);
+  return page.locator(root).evaluate((m) => m.modelView());
+};
+
+/** The outside model before Start (plan task 9, step 5). */
+async function checkOutsideBeforeStart({ page, problems, requested }) {
+  const models = () => requested.filter((r) => r.startsWith('/models/'));
+  const early = models();
+  console.log(`nes: model files requested before scrolling to the models: ${early.length === 0 ? 'none' : early.join(', ')}`);
+  if (early.length > 0) problems.push(`nes: a model was fetched before the visitor reached it: ${early.join(', ')}`);
+  const t0 = Date.now();
+  await page.locator(`${OUTSIDE} [data-model-stage]`).scrollIntoViewIfNeeded();
+  await page.waitForFunction(() => ['running', 'no-webgl', 'failed'].includes(document.getElementById('model-panel-outside')?.dataset.state), null, { timeout: TIMEOUT });
+  const loaded = models();
+  const before = await outsideState(page);
+  console.log(`nes: outside model ${before.state} in ${Date.now() - t0} ms after scrolling to it, fetched ${loaded.join(', ')}; region ${before.region}, light ${before.led}, POWER ${before.power}; status "${before.status}"`);
+  if (before.state !== 'running') throw new Error(`nes: the outside model did not start (state ${before.state})`);
+  if (!loaded.includes('/models/nes-famicom-case.js')) problems.push('nes: scrolling to the models did not fetch the outside\'s bundle');
+  if (loaded.some((f) => f.startsWith('/models/nes-famicom-board'))) problems.push(`nes: scrolling to the models fetched the inside's files too: ${loaded.join(', ')}`);
+  if (await page.locator(INSIDE).isVisible()) problems.push('nes: the inside\'s panel is shown before its tab is chosen');
+  await settled(page, OUTSIDE);
+  const d = await drawn(page, OUTSIDE);
+  console.log(`nes: outside canvas ${d.size}, ${(d.share * 100).toFixed(1)}% drawn`);
+  if (d.share < 0.05) problems.push(`nes: the outside model's canvas is blank (${(d.share * 100).toFixed(1)}% drawn)`);
+  if (before.led !== 'dark' || before.power !== 'out') problems.push(`nes: before Start the light is ${before.led} and POWER ${before.power}, not dark and out`);
+  // RESET on the model before Start: nothing happens to any machine, and the status line says why (Review Focus 4).
+  const fetchedBefore = requested.length;
+  await clickButton(page, 'RESET');
+  await page.waitForTimeout(500);
+  const after = await outsideState(page);
+  const panelState = await page.locator('[data-nes]').getAttribute('data-state');
+  const fetchedSince = requested.slice(fetchedBefore).filter((r) => r.startsWith('/machines/nes/'));
+  console.log(`nes: a click on the model's RESET before Start: the machine is ${panelState}, fetched ${fetchedSince.length === 0 ? 'nothing' : fetchedSince.join(', ')}; RESET went down ${after.presses} times; status "${after.status}"`);
+  if (panelState !== 'ready' || fetchedSince.length > 0 || after.presses !== '0') problems.push(`nes: a click on RESET before Start did something (machine ${panelState}, fetched ${fetchedSince.join(', ')}, presses ${after.presses})`);
+  if (!/not running/.test(after.status)) problems.push(`nes: a click on RESET before Start did not say the machine is not running ("${after.status}")`);
+}
+
+/** The outside once POWER has started the machine. */
+async function checkOutsideStarted({ page, problems }) {
+  await page.waitForFunction(() => document.getElementById('model-panel-outside').dataset.modelLed === 'lit', null, { timeout: 10_000 }).catch(() => {});
+  const on = await outsideState(page);
+  console.log(`nes: started by POWER on the model: light ${on.led}, POWER ${on.power}; status "${on.status}"`);
+  if (on.led !== 'lit' || on.power !== 'in') problems.push(`nes: with the machine running the light is ${on.led} and POWER ${on.power}, not lit and in`);
+}
+
+/** The outside with the machine running: the page's reset and the model's RESET; and from below. */
+async function checkOutsideRunning({ page, problems }) {
+  const watchResets = () => page.evaluate(() => {
+    window.nesResets = [];
+    const m = document.getElementById('model-panel-outside');
+    if (!window.nesResetsWired) document.querySelector('[data-nes]').addEventListener('nes:reset', () => window.nesResets.push({ event: 'nes:reset', presses: m.dataset.modelPresses }));
+    window.nesResetsWired = true;
+    window.nesPressWatch?.disconnect();
+    window.nesPressWatch = new MutationObserver(() => window.nesResets.push({ pressed: m.dataset.modelPressed ?? null, presses: m.dataset.modelPresses }));
+    window.nesPressWatch.observe(m, { attributes: true, attributeFilter: ['data-model-pressed'] });
+  });
+  // The page's own Reset puts the model's RESET down, for a moment.
+  await watchResets();
+  const before = await outsideState(page);
+  await page.locator('[data-nes-reset]').click();
+  await page.waitForTimeout(600);
+  const seen = await page.evaluate(() => window.nesResets);
+  const after = await outsideState(page);
+  console.log(`nes: the page's Reset: RESET went ${seen.map((e) => e.event ?? (e.pressed ? 'down' : 'up')).join(', ')}; presses ${before.presses} then ${after.presses}`);
+  if (!(Number(after.presses) === Number(before.presses) + 1 && seen.some((e) => e.pressed === 'RESET') && seen.at(-1).pressed === null)) problems.push(`nes: the page's Reset did not put RESET down and back up (${JSON.stringify(seen)})`);
+  // A click on the model's RESET resets the machine: the machine's own reset, which announces nes:reset and writes the page's line.
+  await page.evaluate(() => { document.querySelector('[data-nes-power-line]').textContent = ''; });
+  await watchResets();
+  await clickButton(page, 'RESET');
+  await page.waitForTimeout(600);
+  const line = await page.locator('[data-nes-power-line]').innerText();
+  const events = await page.evaluate(() => window.nesResets);
+  const now = await outsideState(page);
+  console.log(`nes: a click on the model's RESET: ${events.filter((e) => e.event).length} nes:reset; the page's line "${line}"; presses ${now.presses}; status "${now.status}"`);
+  if (!events.some((e) => e.event === 'nes:reset') || !line.startsWith('Reset: the game started again')) problems.push(`nes: a click on the model's RESET did not reset the machine (line "${line}")`);
+  // POWER once the machine runs: nothing changes, and the status line says the page has no power-off.
+  const frames = Number(await page.locator('[data-nes]').getAttribute('data-frames'));
+  await clickButton(page, 'POWER');
+  await page.waitForTimeout(300);
+  const power = await outsideState(page);
+  console.log(`nes: a click on POWER while it runs: POWER ${power.power}, light ${power.led}; status "${power.status}"`);
+  if (power.power !== 'in' || !/no power-off/.test(power.status) || !(Number(await page.locator('[data-nes]').getAttribute('data-frames')) > frames)) problems.push(`nes: POWER while running did not leave the machine as it was and say so ("${power.status}")`);
+  // From below: the camera goes under the case, and the underside is drawn.
+  await page.locator(`${OUTSIDE} [data-model-stage]`).focus();
+  await page.keyboard.press('Home');
+  await settled(page, OUTSIDE);
+  for (let i = 0; i < 14; i++) await page.keyboard.press('ArrowDown');
+  const below = await settled(page, OUTSIDE);
+  const d = await drawn(page, OUTSIDE);
+  console.log(`nes: under the case, polar ${below.polar.toFixed(3)}: ${(d.share * 100).toFixed(1)}% of the canvas drawn`);
+  if (!(below.polar > Math.PI - 0.05)) problems.push(`nes: the camera did not get under the case (polar ${below.polar.toFixed(3)})`);
+  if (d.share < 0.05) problems.push(`nes: from below, the case's canvas is blank (${(d.share * 100).toFixed(1)}%)`);
+  await page.keyboard.press('Home');
+  await settled(page, OUTSIDE);
+  await page.evaluate(() => document.activeElement?.blur());
+}
+
+/**
+ * The views and the region (Review Focus 3): with the inside not yet loaded, the page goes to the other region; then
+ * Inside is chosen, and it loads drawing the region the page has now. Then back to the first region, for the board's
+ * own checks.
+ */
+async function checkViews({ page, problems, requested, choose, region, other }) {
+  const board = () => requested.filter((r) => r.startsWith('/models/nes-famicom-board'));
+  if (board().length > 0) problems.push(`nes: the inside was fetched before its tab was chosen: ${board().join(', ')}`);
+  await choose(other);
+  await page.waitForFunction((r) => document.getElementById('model-panel-outside').dataset.modelRegion === r, other.toLowerCase(), { timeout: 10_000 }).catch(() => {});
+  const outside = await outsideState(page);
+  const stillNot = board().length === 0;
+  await page.locator('#model-tab-inside').scrollIntoViewIfNeeded();
+  await page.locator('#model-tab-inside').click();
+  await page.waitForFunction(() => ['running', 'no-webgl', 'failed'].includes(document.getElementById('model-panel-inside')?.dataset.state), null, { timeout: TIMEOUT });
+  const inside = await page.locator(INSIDE).evaluate((m) => ({ state: m.dataset.state, region: m.dataset.modelRegion, describedby: m.querySelector('[data-model-stage]').getAttribute('aria-describedby') }));
+  const shown = { outside: await page.locator(OUTSIDE).isVisible(), inside: await page.locator(INSIDE).isVisible() };
+  console.log(`nes: the page to ${other} with the inside not loaded (${stillNot ? 'nothing of it fetched' : 'ALREADY FETCHED'}): the outside drew ${outside.region}; Inside chosen: it ${inside.state}, drawing ${inside.region}, described by ${inside.describedby}; fetched ${board().join(', ')}; panels shown ${JSON.stringify(shown)}`);
+  if (!stillNot) problems.push('nes: the inside was fetched before its tab was chosen');
+  if (outside.region !== other.toLowerCase()) problems.push(`nes: the outside did not follow the region to ${other} (${outside.region})`);
+  if (inside.region !== other.toLowerCase() || inside.describedby !== `model-about-inside-${other.toLowerCase()}`) problems.push(`nes: the inside, loaded after the region changed to ${other}, draws ${inside.region} (Review Focus 3)`);
+  if (shown.outside || !shown.inside) problems.push(`nes: choosing Inside did not show its panel alone (${JSON.stringify(shown)})`);
+  await choose(region);
+  await page.waitForFunction((r) => document.getElementById('model-panel-inside').dataset.modelRegion === r, region.toLowerCase(), { timeout: 10_000 }).catch(() => {});
+}
+
+/** The tab list from the keyboard: Left and Right move and select, each view keeps its camera, and Tab leaves the section. */
+async function checkTabs({ page, problems }) {
+  // Turn the inside a little so its camera is its own, then go to Outside and back by the keyboard.
+  await page.locator(`${INSIDE} [data-model-stage]`).focus();
+  await page.keyboard.press('ArrowRight');
+  await page.keyboard.press('ArrowUp');
+  const insideView = await settled(page, INSIDE);
+  await page.locator('#model-tab-inside').focus();
+  await page.keyboard.press('ArrowLeft');
+  await page.waitForTimeout(500);
+  const left = await page.evaluate(() => ({ focused: document.activeElement?.id, selected: [...document.querySelectorAll('[role="tab"]')].filter((t) => t.getAttribute('aria-selected') === 'true').map((t) => t.id), outside: !document.getElementById('model-panel-outside').hidden, inside: !document.getElementById('model-panel-inside').hidden }));
+  const outsideView = await settled(page, OUTSIDE);
+  await page.keyboard.press('ArrowRight');
+  await page.waitForTimeout(500);
+  const right = await page.evaluate(() => ({ focused: document.activeElement?.id, selected: [...document.querySelectorAll('[role="tab"]')].filter((t) => t.getAttribute('aria-selected') === 'true').map((t) => t.id) }));
+  const insideAgain = await settled(page, INSIDE);
+  await page.keyboard.press('ArrowLeft');
+  const outsideAgain = await settled(page, OUTSIDE);
+  const same = (a, b) => Math.abs(a.polar - b.polar) + Math.abs(a.azimuth - b.azimuth) + Math.abs(a.distance - b.distance) < 1e-3;
+  console.log(`nes: Left from Inside: focus ${left.focused}, selected ${left.selected}, outside shown ${left.outside}, inside shown ${left.inside}; Right: focus ${right.focused}, selected ${right.selected}; the inside's camera kept ${same(insideView, insideAgain)} (azimuth ${insideView.azimuth.toFixed(3)} then ${insideAgain.azimuth.toFixed(3)}), the outside's ${same(outsideView, outsideAgain)}`);
+  if (left.focused !== 'model-tab-outside' || left.selected.join() !== 'model-tab-outside' || !left.outside || left.inside) problems.push(`nes: Left on the Inside tab did not move to Outside and select it (${JSON.stringify(left)})`);
+  if (right.focused !== 'model-tab-inside' || right.selected.join() !== 'model-tab-inside') problems.push(`nes: Right on the Outside tab did not move to Inside and select it (${JSON.stringify(right)})`);
+  if (!same(insideView, insideAgain) || !same(outsideView, outsideAgain)) problems.push('nes: a view did not keep its camera when switched away and back');
+  // Tab from the selected tab goes into its panel's stage, and on out of the section: no trap.
+  const path_ = [];
+  for (let i = 0; i < 20; i++) {
+    await page.keyboard.press('Tab');
+    const where = await page.evaluate(() => ({ id: document.activeElement?.id || document.activeElement?.tagName, stage: document.activeElement?.hasAttribute('data-model-stage') ?? false, inSection: Boolean(document.activeElement?.closest('[data-model-section]')) }));
+    path_.push(where);
+    if (!where.inSection) break;
+  }
+  console.log(`nes: Tab from the Outside tab: ${path_.map((w) => (w.stage ? 'the stage' : w.inSection ? w.id : `${w.id}, out of the section`)).join(', ')}`);
+  if (!path_[0]?.stage) problems.push('nes: Tab from the selected tab did not go to its panel\'s stage');
+  if (path_.at(-1).inSection) problems.push('nes: Tab never left the models\' section');
+  await page.evaluate(() => document.activeElement?.blur());
+}
+
+/** A visitor who asks for reduced motion: both views load and switch, with no error. */
+async function checkReducedMotion({ browser, watch, problems, origin }) {
+  const context = await browser.newContext({ reducedMotion: 'reduce' });
+  const page = await context.newPage();
+  await watch(page, 'nes (reduced motion): ');
+  await page.goto(`${origin}/machines/nes/`);
+  const reduced = await page.evaluate(() => matchMedia('(prefers-reduced-motion: reduce)').matches);
+  await page.locator(`${OUTSIDE} [data-model-stage]`).scrollIntoViewIfNeeded();
+  await page.waitForFunction(() => ['running', 'no-webgl', 'failed'].includes(document.getElementById('model-panel-outside')?.dataset.state), null, { timeout: TIMEOUT });
+  await page.locator('#model-tab-inside').click();
+  await page.waitForFunction(() => ['running', 'no-webgl', 'failed'].includes(document.getElementById('model-panel-inside')?.dataset.state), null, { timeout: TIMEOUT });
+  await page.locator('#model-tab-inside').focus();
+  await page.keyboard.press('ArrowLeft');
+  await page.waitForTimeout(300);
+  const states = await page.evaluate(() => ['outside', 'inside'].map((v) => document.getElementById(`model-panel-${v}`).dataset.state));
+  const selected = await page.evaluate(() => document.querySelector('[role="tab"][aria-selected="true"]').id);
+  console.log(`nes: reduced motion (${reduced ? 'asked for' : 'NOT ASKED FOR'}): the views ${states.join(' and ')}, switched back to ${selected}`);
+  if (!reduced || states.some((x) => x !== 'running') || selected !== 'model-tab-outside') problems.push(`nes: with reduced motion the views did not load and switch (${states.join(', ')}, ${selected})`);
+  await context.close();
 }
 
 /** Whether a board point in mm is inside the board's measured outline. */
@@ -283,30 +513,25 @@ function onBoard(x, y) {
  * step 5). `choose` switches the page's region control and checks its line.
  */
 async function checkBoardModel({ page, problems, requested, choose, region, other }) {
-  const model = page.locator('[data-model]');
-  const stage = page.locator('[data-model-stage]');
-  const status = () => page.locator('[data-model-status]').innerText();
+  const model = page.locator(INSIDE);
+  const stage = page.locator(`${INSIDE} [data-model-stage]`);
+  const status = () => page.locator(`${INSIDE} [data-model-status]`).innerText();
   const models = () => requested.filter((r) => r.startsWith('/models/'));
-  const shot = async () => page.screenshot({ clip: await page.locator('[data-model-canvas]').boundingBox(), timeout: TIMEOUT });
+  const shot = async () => page.screenshot({ clip: await page.locator(`${INSIDE} [data-model-canvas]`).boundingBox(), timeout: TIMEOUT });
   const settle = async () => {
-    await page.waitForFunction(() => !document.querySelector('[data-model]').modelView().moving, null, { timeout: 30_000 }).catch(() => {});
+    await page.waitForFunction(() => !document.getElementById('model-panel-inside').modelView().moving, null, { timeout: 30_000 }).catch(() => {});
     await page.waitForTimeout(300);
     return model.evaluate((m) => m.modelView());
   };
 
-  // Nothing of the model until the visitor reaches it; then its bundle and its map.
-  const early = models();
-  console.log(`nes: model files requested before scrolling to the model: ${early.length === 0 ? 'none' : early.join(', ')}`);
-  if (early.length > 0) problems.push(`nes: the board model was fetched before the visitor reached it: ${early.join(', ')}`);
-  const t0 = Date.now();
+  // The inside was loaded by choosing its tab (checkViews, before this): its bundle and its map, and it runs.
   await stage.scrollIntoViewIfNeeded();
-  await page.waitForFunction(() => ['running', 'no-webgl', 'failed'].includes(document.querySelector('[data-model]')?.dataset.state), null, { timeout: TIMEOUT });
   const state = await model.getAttribute('data-state');
   const loaded = models();
-  console.log(`nes: model ${state} in ${Date.now() - t0} ms after scrolling to it, fetched ${loaded.join(', ')}; status "${await status()}"`);
+  console.log(`nes: board model ${state}, fetched ${loaded.join(', ')}; status "${await status()}"`);
   if (state !== 'running') throw new Error(`nes: the board model did not start (state ${state})`);
-  for (const f of ['/models/nes-famicom-board.js', TRACKS.src]) if (!loaded.includes(f)) problems.push(`nes: scrolling to the model did not fetch ${f}`);
-  await page.waitForFunction(() => document.querySelector('[data-model]').modelLayers?.().tracksLoaded !== undefined, null, { timeout: TIMEOUT });
+  for (const f of ['/models/nes-famicom-board.js', TRACKS.src]) if (!loaded.includes(f)) problems.push(`nes: choosing Inside did not fetch ${f}`);
+  await page.waitForFunction(() => document.getElementById('model-panel-inside').modelLayers?.().tracksLoaded !== undefined, null, { timeout: TIMEOUT });
 
   // The canvas draws the board: the share of its pixels that are not the black canvas.
   await settle();
@@ -361,7 +586,7 @@ async function checkBoardModel({ page, problems, requested, choose, region, othe
   const switchTo = async (value) => {
     const before = models().length;
     await page.evaluate(() => {
-      const m = document.querySelector('[data-model]');
+      const m = document.getElementById('model-panel-inside');
       window.nesRates = [];
       window.nesRatesWatch?.disconnect();
       window.nesRatesWatch = new MutationObserver(() => window.nesRates.push({ at: performance.now(), rates: m.dataset.modelRates }));
@@ -370,14 +595,14 @@ async function checkBoardModel({ page, problems, requested, choose, region, othe
     });
     await choose(value);
     const want = value.toLowerCase();
-    await page.waitForFunction((r) => document.querySelector('[data-model]').dataset.modelRegion === r, want, { timeout: 30_000 }).catch(() => {});
+    await page.waitForFunction((r) => document.getElementById('model-panel-inside').dataset.modelRegion === r, want, { timeout: 30_000 }).catch(() => {});
     await page.waitForTimeout(2000);
     const got = {
       region: await model.getAttribute('data-model-region'),
       label: await stage.getAttribute('aria-label'),
       describedby: await stage.getAttribute('aria-describedby'),
       ppu: (await page.locator('[data-legend-ref="U5"] td').first().innerText()).trim(),
-      caption: await page.locator(`#model-about-${want}`).isVisible(),
+      caption: await page.locator(`#model-about-inside-${want}`).isVisible(),
       fetched: models().slice(before),
       sequence: await page.evaluate(() => window.nesRates),
     };
@@ -385,7 +610,7 @@ async function checkBoardModel({ page, problems, requested, choose, region, othe
     const firstEmpty = after.findIndex((e) => e.rates === 'null');
     const back = firstEmpty >= 0 ? after.slice(firstEmpty).find((e) => e.rates !== 'null') : null;
     console.log(`nes: region to ${value}: model region ${got.region}, its caption shown ${got.caption}, described by ${got.describedby}, named "${got.label}"; U5's part in the legend ${got.ppu}; fetched since ${got.fetched.length === 0 ? 'nothing' : got.fetched.join(', ')}; the rates after nes:region: ${after.map((e) => (e.rates === 'null' ? 'none' : JSON.parse(e.rates).ppu.perSecond)).join(', ')}`);
-    if (got.region !== want || got.describedby !== `model-about-${want}` || !got.caption) problems.push(`nes: switching to ${value}, the model's region, caption or description did not follow (${JSON.stringify({ region: got.region, describedby: got.describedby, caption: got.caption })})`);
+    if (got.region !== want || got.describedby !== `model-about-inside-${want}` || !got.caption) problems.push(`nes: switching to ${value}, the model's region, caption or description did not follow (${JSON.stringify({ region: got.region, describedby: got.describedby, caption: got.caption })})`);
     if (!got.label?.includes(`${value} console`)) problems.push(`nes: switching to ${value}, the model's name did not follow ("${got.label}")`);
     if (got.fetched.length > 0) problems.push(`nes: switching to ${value} fetched ${got.fetched.join(', ')}`);
     if (firstEmpty < 0 || !back) problems.push(`nes: switching to ${value}, the rates did not show nothing for a sample and then come back`);
@@ -411,11 +636,11 @@ async function checkBoardModel({ page, problems, requested, choose, region, othe
   const t1 = await model.getAttribute('data-model-tracks');
   await tracks.click();
   await only.click();
-  await page.waitForFunction(() => document.querySelector('[data-model]').modelLayers().partsLevel === 0, null, { timeout: 10_000 }).catch(() => {});
+  await page.waitForFunction(() => document.getElementById('model-panel-inside').modelLayers().partsLevel === 0, null, { timeout: 10_000 }).catch(() => {});
   const l2 = await layers();
   const p2 = await model.getAttribute('data-model-parts');
   await only.click();
-  await page.waitForFunction(() => document.querySelector('[data-model]').modelLayers().partsLevel === 1, null, { timeout: 10_000 }).catch(() => {});
+  await page.waitForFunction(() => document.getElementById('model-panel-inside').modelLayers().partsLevel === 1, null, { timeout: 10_000 }).catch(() => {});
   const l3 = await layers();
   console.log(`nes: tracks at the start ${JSON.stringify({ loaded: l0.tracksLoaded, tracks: l0.tracks, underside: l0.underside })}; Show tracks: ${t1}, ${JSON.stringify({ tracks: l1.tracks, underside: l1.underside })}; Show tracks only: parts ${p2}, ${JSON.stringify({ visible: l2.partsVisible, tracks: l2.tracks })}; and back: ${JSON.stringify({ visible: l3.partsVisible, level: l3.partsLevel, tracks: l3.tracks })}`);
   if (!l0.tracksLoaded || !l0.tracks || !l0.underside) problems.push('nes: the board model\'s tracks are not on both faces at the start');
@@ -454,7 +679,7 @@ async function checkBoardModel({ page, problems, requested, choose, region, othe
     return out;
   };
   const sample = async (pts) => {
-    const box = await page.locator('[data-model-canvas]').boundingBox();
+    const box = await page.locator(`${INSIDE} [data-model-canvas]`).boundingBox();
     const screen = await model.evaluate((m, list) => list.map(([x, y]) => m.modelBoardPoint(x, y, true)), pts);
     const { data, info } = await sharp(await shot()).removeAlpha().raw().toBuffer({ resolveWithObject: true });
     const sum = [0, 0, 0];

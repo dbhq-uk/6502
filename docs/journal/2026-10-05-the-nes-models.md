@@ -2481,3 +2481,244 @@ not figures about the project: they differ from run to run.
   in markup, once the inlined `<style>` is left out. Task 9's Modify list now
   names the two tests that assert `case` undefined, which flip when it comes
   back.
+
+## Task 9: the outside model, and both models as views of either console, 6 October 2026
+
+The NES's page now has both its models: the outside, the case, and the
+inside, the board, as two views of the same console in one section, each
+drawn for the NTSC NES-001 and the PAL NESE-001 and following the page's
+region. The work went in as three commits, each green: the views' section
+and loader, then the outside model, then the registry's rule, the credits,
+the browser check and these words.
+
+A first attempt at this task was cut off by an API rate limit at about 13:51
+UTC, before it had written anything; it was started again at 18:18 UTC from a
+clean worktree.
+
+### The views
+
+- **One section, a tab a view.** A machine with a case gets one section,
+  "Models of the machine", with a WAI-ARIA tab list named "Views of the
+  model": Outside, then Inside, in the registry's order. Each tab controls a
+  panel that holds everything the KIM-1's single section holds (the stage,
+  Reset the view, the status line, the caption, the note and its credits),
+  its ids suffixed by the view and then the console (`model-about-inside-pal`).
+  The paragraph of controls, the same for both views, is said once under the
+  panels. Each panel is its model's root, so the modules mount in it exactly as
+  they would in a section of their own.
+- **Chosen over** the BBC Micro's models building it first (Dan, 6 October
+  2026: they hold only their first tasks), and over two sections one under the
+  other, which the design had already turned down: a visitor would scroll past
+  a second canvas and three.js would load twice for anyone who scrolled on.
+- **The KIM-1 keeps its section.** The panel's content moved into
+  `ModelPanel.astro`, used once by a single model's section and once by each
+  view's panel. `dist/machines/kim-1/index.html` and
+  `dist/machines/bbc-micro/index.html`, built at `af3835d` and after the first
+  stage, are identical once the `<style>` element is left out of both
+  (`cmp`, 6 October 2026); the stylesheet gained only the four tab rules.
+- **The loader** shows the section, leaves a hidden panel hidden, and loads
+  each view as before: when its panel nears the screen or its Load button is
+  pressed. A hidden panel never nears the screen, so the inside is fetched
+  only once its tab is chosen. The tabs select on a click, Enter and Space;
+  Left and Right move and select, round the ends; Home and End go to the ends;
+  only the selected tab is in the Tab order, and Tab is never taken, so focus
+  goes from the tab into the panel's stage and on out. A view keeps its camera
+  when switched away and back, because its stage is never torn down; a hidden
+  stage does not draw, because its own observer says it is off screen. The
+  loader is 3,357 bytes, under its 4,000 (1,679 before).
+- **The tabs' look.** An unselected tab is `--moss-80` on the black canvas,
+  `--white` when hovered; the selected one `--white` on `--veil`, with a bar
+  under it in its own colour, so it is told by a shape as well as a colour. No
+  lime and no transition, so reduced motion has nothing to stop.
+- **Changed on contact.** The page offers tabs for any machine whose models
+  are not a board alone, not only for one with two: in the first stage the NES
+  claimed the inside alone, and its page showed one tab, which proved the
+  inside working in a panel before the outside existed (a smoke check in
+  Chrome: it ran, drawing NTSC, described by `model-about-inside-ntsc`, and
+  fetched its bundle and map only when scrolled to). The board module found its
+  caption by the id `model-about-<console>`, which a panel's ids no longer
+  are; it now finds the caption by its console and takes its id.
+
+### The outside model
+
+- **The case**, from `nes-famicom-case-parts.mjs` (task 8's measurements): the
+  two shells, split at the seam, the lower one's ends leaning in below their
+  break by the measured profile; the black band down the front, over the top's
+  two ends and down the rear; the slats of the top vents and the slots
+  underneath; the cartridge door over the front's top edge and its lip; the
+  line round the buttons' panel; POWER and RESET; the power light; the two
+  controller ports; the rear's window with the power jack, the channel switch
+  and the RF jack, and the video and audio jacks on the right end; the
+  underside, with its expansion cover, its moulded ribs and panels as lines,
+  its screw holes, and the feet. Start view three quarters from the front;
+  the camera may go all the way round, under the case too, its target held in
+  the case plus two centimetres.
+- **Its words are ours.** Every word on either console (the front's label,
+  the buttons', the ports' numbers, the rear's, and the PAL console's two
+  labels underneath) is drawn by the model, in the site's own type once
+  `document.fonts.load` has it, into one canvas. No Nintendo lettering, no
+  image, no path: a test fails any of the NES's model modules that names a
+  logo, loads an image but the board's track map, or holds an SVG path.
+- **The greys are the case as made.** Six tokens of its own (the upper shell,
+  the lower shell, the band, the buttons, the printed ink and the labels'
+  paper), the two shells' greys checked to be greys by a test; the light is
+  the KIM-1's `--model-led` and `--model-led-off`. The PAL console
+  photographed has yellowed; the model has not.
+- **Its state.** The light is lit and POWER in while `panel.nes.running()`,
+  read every frame; RESET goes down for 140 ms on `nes:reset`, however the
+  reset came. A click on POWER presses the page's own Start button, so it does
+  exactly what Start does; once the machine runs it changes nothing, and the
+  status line says the page has no power-off. A click on RESET calls
+  `panel.nes.reset()` while the machine runs; before Start it does nothing to
+  any machine and the status line says the machine is not running (Review
+  Focus 4). That choice is one function, `press(name, panel)` in the layout,
+  tested on a made-up panel. With no easing on the buttons, reduced motion
+  changes nothing there.
+- **The region.** The model reads `panel.nes.region().toLowerCase()` when it
+  mounts, so a view loaded after a change of region draws the region the page
+  has then (Review Focus 3), and on `nes:region` it swaps the words, the rear
+  and the underside, all built at mount, with nothing downloaded.
+- **What the page says, every figure from `nes-famicom-case-model.json`**,
+  which `results.py`'s case half writes from `case.json`: the size is the
+  published 254 by 203.2 by 88.9 mm, none of it Nintendo's, good to about 3
+  per cent; the lower shell's lean is an average good to about 2.5 mm, of four
+  ends reading 12.86 to 17.71 mm; the rear connectors are placed from a
+  photograph that agrees with the patent's rear view within 1.3 mm, while the
+  places worked out from the board missed by up to 5.16 mm, one of three
+  within the 2 mm limit, so the check failed as measured; the board's place in
+  the case is good to about 2 mm and assumes the PAL and NTSC cases share one
+  moulding; the buttons' travel, 3 mm, is typical; whether POWER latches is
+  not known, and the model shows it in while running, as designed; the side
+  jacks and the PAL rear are not checked against the board; the PAL words and
+  rear were read from photographs taken at 20 mm, with strong perspective; and
+  the light never blinks, because the lockout chip is not emulated. The
+  "about 3 per cent" and "about 2.5 mm" are read by `results.py` from the
+  sentences `case_measure.py` wrote beside the figures in `case.json`, so they
+  are not typed again.
+- **The PAL lens** was not in any data file. It was read on 6 October 2026
+  from each file's own XMP (`exif:FocalLength 200/10` on an ILCE-7RM4 for O4,
+  O9 and O10; O5, the PAL underside, is a phone's, at 19 mm on a small sensor)
+  and recorded in `sources.json` as `focalLengthMm`, where `results.py` reads
+  it. Command: `head -c 3000000 <file> | strings -n 8 | grep FocalLength`.
+- **Credits by view.** The NES's references gained the eight sources the case
+  used besides its head photograph (O1, O2-BR, O3-01, O4, O5, O9, O10 and
+  I7-FL), each with its licence, day and SHA-256 from `sources.json`. The head
+  photograph is O2-FL, which the case was measured on, so its `used` now says
+  what the outside took from it, and the board still takes nothing. Each
+  view's note credits exactly the sources in its own results file, matched by
+  address, so neither credits the other's. O2-BL was not read and is not
+  credited.
+
+### The registry
+
+- **`"case": true` is back on the NES**, with both views claimed, the outside
+  first; the two assertions task 7 had changed (`nes.test.mjs` and the claim
+  test in `nes-models.test.mjs`) say so again. It went in with the outside
+  model's commit rather than the last, because `model.test.mjs` fails an entry
+  in `MODELS` that no machine claims, and the cased rule fails the outside
+  without the inside.
+- **The new rule: a machine that claims a model states `case`.** Tried on a
+  made-up registry: the NES as task 7 left it (the inside, no `case`) now
+  fails, as does any claim with no `case`; stated either way, a claim passes
+  the new rule and the old rules judge it as before; the KIM-1 (`case: false`,
+  its board) and the NES pass. Shown failing first, with the rule's line taken
+  out: the test failed, and passed with it back.
+
+### Tests
+
+Red first, then green, each with its command (`cd site`, `results.json` from
+CI run 37419286133 copied in for the build and deleted before each commit):
+
+- **The loader**, `node --test tests/model-loader.test.mjs`, on a made-up page
+  with a stand-in for the DOM: against `af3835d`'s loader, 3 of 4 failed (the
+  section stayed hidden, nothing switched); with the new one, 4 pass.
+- **The views' markup**, `node --test tests/model.test.mjs`, on the build of
+  `af3835d`: the new test of the section failed; after the build, it passes.
+- **The rule that a machine claiming a model states `case`**, `node --test
+  tests/registry.test.mjs`: with the rule's line taken out of
+  `src/lib/registry.mjs`, 1 failed; with it, 25 pass.
+- **The case half of `results.py`**, `/tmp/nesvenv/bin/python -m pytest
+  tools/nes-model/tests/test_results.py -q`: against the old `results.py`, 2
+  failed; with the case half, 5 pass. The whole tool suite: 106 passed.
+  `results.py` rewrote the board's results file byte for byte (`cmp`).
+- **The outside's tests in `nes-models.test.mjs`** that read the built page
+  failed on the old build (the entry's panel, the note on the page). The rest
+  were written beside the code, so each was shown failing by a hand edit, then
+  put back and checked with `cmp`: the rear sentence without "the check failed
+  as measured" (the uncertainty test failed); `boardMissMm` 4.0 in the results
+  file (the results-file test failed); RESET before Start calling
+  `nes.reset()` (the Review Focus 4 test failed); the upper shell's token made
+  a yellowed `#d8cf9a` (the machine-state test failed on "not a grey"); the
+  region set to NTSC at mount whatever the page says (the same test failed).
+- **The whole site suite**, `nice -n 10 node --test tests/*.test.mjs` after
+  the build: 466 tests, 465 pass, 0 fail, 1 todo (the BBC Micro's). The floors
+  in both workflows went from 447 to 453, 462 and 465, one step a commit.
+
+### Page weight
+
+`node scripts/page-weight.mjs /machines/nes/`, gzipped at level 9, before
+(the build of `af3835d`) and after (this task's build), 6 October 2026:
+
+| | Before | After |
+|---|---|---|
+| First load, total | 47,767 | 51,025 |
+| The page's HTML | 17,194 | 19,794 |
+| `model-loader.js` | 807 | 1,465 |
+| Later: the outside's bundle, when the section is reached | none | 166,055 |
+| Later: the inside's bundle, when its tab is chosen | 162,969 | 162,977 |
+| Later: the inside's track map, with its bundle | 144,726 | 144,726 |
+
+Nothing under `/models/` is in the first load. Each bundle is inside its
+200,000 bytes. The HTML grew by the outside's caption, help and notes for both
+consoles and their credits, and the tabs.
+
+### The browser check
+
+`cd site && nice -n 10 node scripts/browser-check.mjs`, Chrome 153 with
+software WebGL, on the shared host, run twice as the brief allowed, 6 October
+2026:
+
+- **Run 1** (load about 5 to 33): every KIM-1 step and every NES step passed;
+  one problem, in the BBC Micro's part, "the picture is not being redrawn
+  (fields 129856 then 129861)", the same failure as in task 7's fix round
+  under the same load. Nothing in this task touches the BBC Micro's machine,
+  and its page is identical in markup. The NES's model lines:
+
+  ```text
+  nes: model files requested before scrolling to the models: none
+  nes: outside model running in 3205 ms after scrolling to it, fetched /models/nes-famicom-case.js; region ntsc, light dark, POWER out; status "The model is running. The machine above is not running: click POWER on the model, or press Start above, to start it."
+  nes: outside canvas 778x458, 28.6% drawn
+  nes: a click on the model's RESET before Start: the machine is ready, fetched nothing; RESET went down 0 times; status "The machine is not running, so RESET did nothing: click POWER, or press Start above, first."
+  nes: started by POWER on the model: light lit, POWER in; status "The model is running, and so is the machine: the power light is lit and POWER is in."
+  nes: the page's Reset: RESET went nes:reset, down, up; presses 0 then 1
+  nes: a click on the model's RESET: 1 nes:reset; the page's line "Reset: the game started again, and the cartridge's RAM was kept."; presses 2; status "RESET reset the machine, as the page's Reset does: the game started again."
+  nes: a click on POWER while it runs: POWER in, light lit; status "The machine is already on, and this page has no power-off: POWER stays in. The page's Power off and on button starts the game again."
+  nes: under the case, polar 3.142: 31.3% of the canvas drawn
+  nes: the page to PAL with the inside not loaded (nothing of it fetched): the outside drew pal; Inside chosen: it running, drawing pal, described by model-about-inside-pal; fetched /models/nes-famicom-board.js, /models/nes-famicom-board-tracks.webp; panels shown {"outside":false,"inside":true}
+  nes: Left from Inside: focus model-tab-outside, selected model-tab-outside, outside shown true, inside shown false; Right: focus model-tab-inside, selected model-tab-inside; the inside's camera kept true (azimuth 0.262 then 0.262), the outside's true
+  nes: Tab from the Outside tab: the stage, BUTTON, A, A, A, A, A, A, A, A, A, A, A, A, A, A, out of the section
+  nes: reduced motion (asked for): the views running and running, switched back to model-tab-outside
+  ```
+
+- **Run 2** (load about 10 to 31): it stopped in the KIM-1's part, on "the
+  camera never came to rest", which throws and ends the run before the BBC
+  Micro and the NES. The KIM-1's page is identical in markup, its bundle and
+  the shared stage are unchanged, and run 1 passed that step; read as the
+  host's load, not the change. Not run a third time.
+
+The NES's part alone, through a harness kept outside the repository that
+calls `checkNes` with the same server headers and watch, also passed once
+before run 1, with no problems. A whole run on a quiet host, with every part
+passing, is still owed.
+
+Before Start the light is dark and POWER out; Start, by a click on the model's
+POWER, lit the light and put POWER in, as the lines above show.
+
+### Surprising
+
+- **The stage's light is green.** The shared stage lights every model with the
+  site's `--white`, which is the phosphor green's white, and a moss-green
+  ground light, so the case's greys come out a little green on the canvas. The
+  KIM-1's board has always been lit that way. Left as it is: changing the
+  shared stage would change the KIM-1's model, and the case's tokens are
+  greys.

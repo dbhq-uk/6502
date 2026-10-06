@@ -680,6 +680,82 @@
           "fetched": "2026-10-05",
           "sha256": "64d52d1dbedfd123a56780def11821ef4157694e4d88d701924d567e2cb1ae10",
           "used": "a check, from below, that the NTSC console's parts sit on the scanned board's footprints"
+        },
+        {
+          "title": "the design patent for the NES-001's case, US D299,726: its front, rear, top, bottom and side views",
+          "author": "Masayuki Yukawa, for Nintendo Co., Ltd.",
+          "sourceUrl": "https://patentimages.storage.googleapis.com/pdfs/USD299726.pdf",
+          "licence": "Public domain (a United States design patent; Commons tags its copy of sheet 1 PD-US-Patent)",
+          "fetched": "2026-10-05",
+          "sha256": "4c699b1b31a40ddf4a80f9827b7c927058dd54979acdd1988aa94c3060775f3d",
+          "used": "the underside, its expansion cover, its vents and its feet, the feet's height, the AV jacks' places on the side, and checks on the case's proportions and on the rear connectors' places"
+        },
+        {
+          "title": "a photograph of an NTSC NES-001 from the rear right",
+          "author": "Evan-Amos",
+          "sourceUrl": "https://commons.wikimedia.org/wiki/File:Nintendo-Entertainment-System-NES-Console-BR.jpg",
+          "licence": "Public domain",
+          "fetched": "2026-10-05",
+          "sha256": "0681170937ae3af9db3fc8898e155792e295dacb5cb73942f8d2371c8733907f",
+          "used": "the rear: its window, the places of the connectors and their words, and the notch; and the lean of the lower shell, held out as a check"
+        },
+        {
+          "title": "a photograph of an NES-001's lower shell, empty, from the rear right",
+          "author": "Evan-Amos",
+          "sourceUrl": "https://commons.wikimedia.org/wiki/File:Nintendo-Entertainment-System-NES-Deconstruction-01.jpg",
+          "licence": "Public domain",
+          "fetched": "2026-10-05",
+          "sha256": "48b896dac434f458094aadbc62cc6145b9ce091850c0cc8ec3123f505f8c270e",
+          "used": "looked at for whether POWER latches in when pressed, which it does not show"
+        },
+        {
+          "title": "a photograph of a PAL NESE-001's upper shell, straight on from the front",
+          "author": "PantheraLeo1359531",
+          "sourceUrl": "https://commons.wikimedia.org/wiki/File:Ge%C3%B6ffnetes_deutsches_NES_20221102_HOF06342_RAW-Export.png",
+          "licence": "CC BY 4.0",
+          "licenceUrl": "https://creativecommons.org/licenses/by/4.0/",
+          "fetched": "2026-10-05",
+          "sha256": "3cf7eca8f43bafd3a8f341127d6c6f728acd2da3d2deb2464d93b66681b913d6",
+          "used": "the PAL console's front words, and a check of its front against the NTSC console's"
+        },
+        {
+          "title": "a photograph of a PAL NESE-001's underside",
+          "author": "PantheraLeo1359531",
+          "sourceUrl": "https://commons.wikimedia.org/wiki/File:Unterseite_NES_NESE-001_20221102_132229.jpg",
+          "licence": "CC BY 4.0",
+          "licenceUrl": "https://creativecommons.org/licenses/by/4.0/",
+          "fetched": "2026-10-05",
+          "sha256": "a8e10ed2cf0148beccab8f7979f0a92497b01846df684e6c5260c56d4c9a4c27",
+          "used": "the PAL console's two labels underneath and their words, and a check on its feet and screw holes"
+        },
+        {
+          "title": "a photograph of a PAL NESE-001's lower shell from above, with its board in it",
+          "author": "PantheraLeo1359531",
+          "sourceUrl": "https://commons.wikimedia.org/wiki/File:Ge%C3%B6ffnetes_deutsches_NES_20221102_HOF06601_RAW-Export.png",
+          "licence": "CC BY 4.0",
+          "licenceUrl": "https://creativecommons.org/licenses/by/4.0/",
+          "fetched": "2026-10-05",
+          "sha256": "b3add1f8480e6afb1a89a11e1aa447f1a195c1e5752bb7dbce08cc2a269d03df",
+          "used": "where the board lies in the case, for the check of the rear connectors' places against the board"
+        },
+        {
+          "title": "a photograph of a PAL NESE-001's lower shell from the rear",
+          "author": "PantheraLeo1359531",
+          "sourceUrl": "https://commons.wikimedia.org/wiki/File:Ge%C3%B6ffnetes_deutsches_NES_20221102_HOF06440_RAW-Export.png",
+          "licence": "CC BY 4.0",
+          "licenceUrl": "https://creativecommons.org/licenses/by/4.0/",
+          "fetched": "2026-10-05",
+          "sha256": "15a62769d03497da6f09a0ab6351c8d00167acb63d4af4a1ba18048df1e7be10",
+          "used": "the words on the PAL console's rear"
+        },
+        {
+          "title": "a photograph of an NTSC board with its RF modulator, from beyond the edge fingers",
+          "author": "Evan-Amos",
+          "sourceUrl": "https://commons.wikimedia.org/wiki/File:Nintendo-Entertainment-System-NES-Motherboard-FL.jpg",
+          "licence": "Public domain",
+          "fetched": "2026-10-05",
+          "sha256": "8b6bc5f4e49dada4f550436e4fbdadf778f5f04540dd708fa43ac6e80b180ed7",
+          "used": "the modulator's rear face, for the check of the rear connectors' places against the board, which failed as measured"
         }
       ]
     },

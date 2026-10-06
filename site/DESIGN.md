@@ -312,6 +312,66 @@ same black canvas, using the stage every machine's model shares
   brings the parts back, and Show tracks only turns them on. No lime: the
   buttons spend none of it. The pressed colour pair is in the contrast table.
 
+## The NES's 3D models
+
+Two models of the NES on its page, the outside and the inside (the case and
+its main board), each drawn for the NTSC NES-001 and the PAL NESE-001 and
+following the page's region, on the same black canvas and the same shared
+stage as the KIM-1's.
+
+- **Two views of one machine, as tabs.** A machine with a case offers its
+  models in one section, "Models of the machine", with a tab list named
+  "Views of the model": Outside, then Inside, the registry's order. Each tab
+  controls a panel that holds everything the KIM-1's single section holds, its
+  stage, Reset the view, status line, caption and note, with its ids suffixed
+  by the view; the paragraph of controls, the same for both, is said once
+  under the panels. A machine with one model, the KIM-1, keeps the section it
+  always had. Built for the NES on 6 October 2026 to the BBC Micro's models
+  design, for the BBC Micro to take up.
+- **The tabs are the site's quiet text, and the selected one is a shape as
+  well as a colour.** An unselected tab is `--moss-80` on the black canvas,
+  `--white` when hovered; the selected tab is `--white` on `--veil` with a bar
+  of its own colour under it, the pair a pressed toggle uses. No lime. No
+  transition, so there is nothing to ease with reduced motion. The three colour
+  rules are in the contrast table in `tests/design.test.mjs`.
+- **The keys are WAI-ARIA's.** A click, Enter or Space selects a tab; Left and
+  Right move to the next and select it, round the ends; Home and End go to the
+  ends. Only the selected tab is in the Tab order, and Tab goes from it into its
+  panel's stage and on out of the section: nothing traps the focus, and Escape
+  on a stage lets go of it as on the KIM-1's.
+- **Each view loads late, on its own.** The loader shows the section and loads
+  a view's bundle only when its panel nears the screen or its Load button is
+  pressed. A hidden panel never nears the screen, so the inside's bundle and
+  track map are fetched only once its tab is chosen. A view keeps its camera
+  when the visitor switches away and back, and a hidden stage does not draw.
+- **The outside is the case as made, in greys.** Its colours are tokens of its
+  own: the upper shell and the door `--model-nes-case`, the lower shell
+  `--model-nes-case-dark`, the black band `--model-nes-band`, POWER and RESET
+  `--model-nes-button`, its printed words `--model-nes-ink` and the paper of the
+  PAL console's labels underneath `--model-nes-sticker`; its power light the
+  KIM-1's `--model-led` lit and `--model-led-off` dark. None is a text colour.
+  The PAL console photographed has yellowed; the model is not.
+- **Its words are ours.** Every word on the case is drawn by the model, in the
+  site's own type once it has loaded, into one canvas: no image, no outline of
+  Nintendo's lettering. The photograph at the head of the page shows the real
+  one.
+- **It shows the machine's state.** The power light is lit, and POWER in, while
+  the machine runs; RESET goes down for a moment whenever the machine is reset,
+  by the page's button or the model's. A click on POWER does what the page's
+  Start does, and a click on RESET resets the running machine; before Start,
+  RESET does nothing and the status line says why.
+- **The inside is the board with its chips marked.** As task 7 built it: the
+  board's copper and print, traced to look at, its chips with their parts for
+  the console shown, an amber mark (`--model-active`, not the lime) on a chip
+  the processor read or wrote in the last quarter second, and a legend under
+  it with each counted chip's rate.
+- **Each view says how it was made, and what is uncertain.** Under each, a
+  caption that starts "Model, not a photograph, of" the console, and a note
+  whose every figure is read from the view's results file
+  (`src/data/nes-famicom-case-model.json` and
+  `src/data/nes-famicom-board-model.json`), with the credits of exactly the
+  sources that view was made from.
+
 ## The chip page
 
 `/inside/` is a 3D diagram of the chip, drawn in three.js, on the same black canvas.

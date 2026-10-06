@@ -188,7 +188,9 @@ jobs:
           PASS=$(count pass); FAILED=$(count fail)
           echo "pass=${PASS:-unread} fail=${FAILED:-unread}"
           [ "${FAILED:-1}" = "0" ]
-          # 462 tests as at 6 Oct 2026, with task 9's second stage of the NES models (the
+          # 465 tests as at 6 Oct 2026, with task 9 of the NES models done (the rule that
+          # a machine claiming a model states case, the case's credits, a console the model
+          # does not draw); 462 with task 9's second stage of the NES models (the
           # outside model: its entry, sizes, features, words, buttons and notes); 453 with
           # task 9's first stage (the
           # views of a cased machine as tabs: their markup, styles and loader); 447 after
@@ -205,7 +207,7 @@ jobs:
           # Adding tests is expected; losing them is the failure this floor catches.
           # Raise the number when the suite grows, here and in the same step of
           # validate.yml, which must hold the same number.
-          [ "${PASS:-0}" -ge 462 ]
+          [ "${PASS:-0}" -ge 465 ]
 
       # The same floor as "Every machine file must be serving" below, checked on
       # the build itself, so a build that is missing a machine fails here and
