@@ -1,3 +1,5 @@
+using System.Runtime.CompilerServices;
+
 namespace Dbhq.Cpu6502;
 
 /// <summary>
@@ -137,6 +139,7 @@ public partial class Cpu<TBus> : CpuBase
         PC = ReadVector(0xFFFC);
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private byte Read(ushort address)
     {
         byte value = _bus.Read(address);
@@ -144,6 +147,7 @@ public partial class Cpu<TBus> : CpuBase
         return value;
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private void Write(ushort address, byte value)
     {
         _bus.Write(address, value);

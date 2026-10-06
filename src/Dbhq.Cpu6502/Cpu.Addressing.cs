@@ -1,3 +1,5 @@
+using System.Runtime.CompilerServices;
+
 namespace Dbhq.Cpu6502;
 
 public partial class Cpu<TBus>
@@ -23,6 +25,7 @@ public partial class Cpu<TBus>
 
     private ushort StackAddress => (ushort)(0x0100 | S);
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private ushort FetchWord()
     {
         byte lo = Read(PC++);
@@ -38,6 +41,7 @@ public partial class Cpu<TBus>
     }
 
     /// <summary>Reads a pointer from zero page. The high byte wraps within zero page.</summary>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private ushort PointerAt(byte zeroPage)
     {
         byte lo = Read(zeroPage);
@@ -45,8 +49,10 @@ public partial class Cpu<TBus>
         return (ushort)(lo | hi << 8);
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private ushort Zp() => Read(PC++);
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private ushort ZpX()
     {
         byte zeroPage = Read(PC++);
@@ -54,6 +60,7 @@ public partial class Cpu<TBus>
         return (byte)(zeroPage + X);
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private ushort ZpY()
     {
         byte zeroPage = Read(PC++);
@@ -61,12 +68,16 @@ public partial class Cpu<TBus>
         return (byte)(zeroPage + Y);
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private ushort Abs() => FetchWord();
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private ushort AbsX(Access access) => Indexed(FetchWord(), X, access);
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private ushort AbsY(Access access) => Indexed(FetchWord(), Y, access);
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private ushort IzX()
     {
         byte zeroPage = Read(PC++);
@@ -74,6 +85,7 @@ public partial class Cpu<TBus>
         return PointerAt((byte)(zeroPage + X));
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private ushort IzY(Access access) => Indexed(PointerAt(Read(PC++)), Y, access);
 
     /// <summary>The 65C02's (zp) mode.</summary>
@@ -88,6 +100,7 @@ public partial class Cpu<TBus>
     /// the base's high byte. The 65C02 re-reads the last byte of the
     /// instruction instead, which is the byte before PC.
     /// </remarks>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private ushort Indexed(ushort baseAddress, byte index, Access access)
     {
         ushort address = (ushort)(baseAddress + index);
@@ -110,6 +123,7 @@ public partial class Cpu<TBus>
     /// The first two cycles of a read-modify-write. The NMOS chip writes the
     /// old value back before the new one; the 65C02 reads it a second time.
     /// </summary>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private byte ReadForModify(ushort address)
     {
         byte value = Read(address);
@@ -125,12 +139,14 @@ public partial class Cpu<TBus>
         return value;
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private void Push(byte value)
     {
         Write(StackAddress, value);
         S--;
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private byte Pull()
     {
         S++;
