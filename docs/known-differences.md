@@ -107,7 +107,9 @@ temperature.
 
 **How the tests treat it.** The core matches Harte's data, which fixes the
 `ANE` and `LXA` constant at `$EE`. That is one answer, not every
-chip's.
+chip's. One exception, since 6 October 2026: `LXA` on the Ricoh 2A03 variant
+uses `$FF`, the value Blargg's `instr_test-v5` passes with, and its Harte run
+leaves `$AB` out (the community test ROMs section of the NES, below).
 
 ## The KIM-1: reading the 6530 timer after it has passed zero
 
@@ -1094,27 +1096,29 @@ of a one-bank program is that bank.
 result a test can read, on the regions each ROM's readme or source gives. The
 table is in the journal entry of 5 October 2026, task 12.
 
-**`instr_test-v5` 03-immediate and `all_instrs` fail on opcode `$AB`.** `LXA`
-(the ROM's `ATX #n`) sets A and X to (A OR a constant) AND the operand, and the
-constant differs between chips. The core takes `$EE` from Harte's `nes6502`
-data, which the core's own tests pin (the "Unstable NMOS opcodes" entry above).
-The ROM's checksum was made on a console; with `$FF` in the core, tried once,
-03-immediate passes, and with `$00` it fails. So the console Blargg used had
-`$FF`. The two references disagree, and the core keeps Harte's, because a
-change would take an exception into the core's reference tests.
-`TestRomTable.RamReportingKnownFailures` holds both ROMs on both regions and
-their output (status 1, `AB ATX #n`); every other instruction in the
-suite passes.
+**`LXA` (`$AB`) on the Ricoh 2A03 variant uses `$FF`, and the Harte run leaves
+it out: resolved, 6 October 2026.** `LXA` (the ROM's `ATX #n`) sets A and X to
+(A OR a constant) AND the operand, and the constant differs between chips.
+Until 6 October the core took `$EE` for every NMOS variant, from Harte's data,
+and `instr_test-v5` `03-immediate` and `all_instrs` failed on `$AB` on both
+regions (status 1, `AB ATX #n`), the only instruction in the suite that did.
+The ROM's checksum was made on a console: with `$FF`, tried once in task 12,
+03-immediate passed, and with `$00` it failed, so Blargg's console had `$FF`.
+Harte's `nes6502` data has `$EE`. The two references disagree.
 
-**Decided, 5 October 2026:** LXA (`$AB`) on the Ricoh2A03 stays as the core has
-it (`$EE`, from Harte's `nes6502` data), because changing it would override a
-pinned core reference and would break that data unless `$AB` were excluded from
-the `nes6502` set. The two `instr_test-v5` ROMs (`03-immediate` and
-`all_instrs`, both regions) stay as known failures, with this cause. The road
-not taken is to use `$FF` for the Ricoh2A03, the console-calibrated value the ROM
-passes with, and exclude `$AB` from the `nes6502` Harte set; that is left for the
-project owner to choose.
-
+**Decided by Dan, 6 October 2026:** the Ricoh 2A03 variant uses `$FF`, the
+console-calibrated value, and the NMOS 6502 and the other variants keep `$EE`
+(`Cpu.Nmos.cs`, a constant set once in the constructor). The `nes6502` Harte
+set leaves out `$AB`, and only that: `Coverage.Excluded` gives the reason, and
+`CoverageTests` prints each variant's count of opcodes run and excluded, and runs
+the `nes6502` `$AB` file on the NMOS variant, where it passes, so every part of
+the instruction but the constant is still checked against Harte's data, and on
+the Ricoh 2A03 variant, where it fails, so the exclusion is still needed. The
+`6502` set keeps `$AB` at `$EE`.
+`CpuTests.LxaOrsAWithTheVariantsConstantAndAndsTheOperand` holds both constants. Both ROMs now pass on both regions and are in the passing
+table (`TestRomTable.RamReportingRoms` and `CombinedMmc1Roms`). The decision
+of 5 October, to keep `$EE` and the two known failures, is replaced by this one;
+it is in the journal entry of 5 October 2026, task 12.
 
 **Not run, and why.** Two folders of the fork are not pinned and not run, as
 the journal entry of 5 October 2026, task 12, records. `nmi_sync` (`demo_ntsc`
@@ -1128,8 +1132,7 @@ sure yet".
 
 **Every known failure, in one place.** `TestRomTable` holds each with what it
 prints now, and `BlarggTests` and `NesAcceptanceTests` check that it still
-fails as written down, so a fix shows: `instr_test-v5` `03-immediate` and
-`all_instrs` on NTSC and on PAL (the `$AB` entry above);
+fails as written down, so a fix shows:
 `dmc_dma_during_read4/double_2007_read` (the DMC section); and
 `mmc3_test_2/rom_singles/6-MMC3_alt` and `mmc3_irq_tests/5.MMC3_rev_A` (the
 MMC3 section). Every other pinned ROM passes.

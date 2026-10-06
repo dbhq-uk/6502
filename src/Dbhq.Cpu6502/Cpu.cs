@@ -18,6 +18,9 @@ public sealed partial class Cpu
     private readonly bool _bitInstructions;
     private readonly bool _waitAndStop;
 
+    // LXA's constant (opcode $AB, Cpu.Nmos.cs), worked out once so the instruction tests no variant.
+    private readonly byte _lxaConstant;
+
     public Cpu(IBus bus, CpuVariant variant)
     {
         _bus = bus as Bus ?? new InterfaceBus(bus);
@@ -26,6 +29,7 @@ public sealed partial class Cpu
         _decimal = variant != CpuVariant.Ricoh2A03;
         _bitInstructions = variant is CpuVariant.Rockwell65C02 or CpuVariant.Wdc65C02;
         _waitAndStop = variant == CpuVariant.Wdc65C02;
+        _lxaConstant = variant == CpuVariant.Ricoh2A03 ? (byte)0xFF : (byte)0xEE;
         P = I | U;
     }
 

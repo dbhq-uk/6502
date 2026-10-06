@@ -159,8 +159,9 @@ public static class TestRomTable
     // power on to its report through $6000: status 0 and the text "All N tests passed" its shell
     // prints at the end. Task 10 added the first two; task 12 added official_only, every
     // instr_test-v5 single's official instructions in one ROM, on both regions as the singles, and
-    // instr_timing's and cpu_interrupts_v2's, NTSC as theirs (all_instrs is a known failure). The
-    // fourth column is the budget in millions of cycles, a hang guard about three times what the
+    // instr_timing's and cpu_interrupts_v2's, NTSC as theirs. all_instrs, every single in one ROM,
+    // was a known failure on opcode $AB until the Ricoh 2A03 variant's LXA took the constant $FF
+    // (6 October 2026, docs/known-differences.md); it now passes on both regions. The fourth column is the budget in millions of cycles, a hang guard about three times what the
     // ROM needed (the journal, tasks 10 and 12).
     public static TheoryData<string, string, Region, int> CombinedMmc1Roms() => new()
     {
@@ -168,6 +169,8 @@ public static class TestRomTable
         { "apu_test/apu_test.nes", "All 8 tests passed", Region.Ntsc, 72 },
         { "instr_test-v5/official_only.nes", "All 16 tests passed", Region.Ntsc, 180 },
         { "instr_test-v5/official_only.nes", "All 16 tests passed", Region.Pal, 180 },
+        { "instr_test-v5/all_instrs.nes", "All 16 tests passed", Region.Ntsc, 180 },
+        { "instr_test-v5/all_instrs.nes", "All 16 tests passed", Region.Pal, 180 },
         { "instr_timing/instr_timing.nes", "All 2 tests passed", Region.Ntsc, 120 },
         { "cpu_interrupts_v2/cpu_interrupts.nes", "All 5 tests passed", Region.Ntsc, 72 },
     };
@@ -176,8 +179,9 @@ public static class TestRomTable
     // millions of cycles (a hang guard, about three times what it needed; the journal, task 12).
     // instr_test-v5's singles build with REGION_FREE, so they run on both, except 01-basics and
     // 16-special, which do not and print "This test is meant for NTSC NES only" on PAL. 03-immediate
-    // is in RamReportingKnownFailures. instr_timing and cpu_interrupts_v2 time against the NTSC frame
-    // counter (29830 in their sources; cpu_interrupts_v2 builds NTSC_ONLY), and apu_reset builds
+    // was a known failure on opcode $AB until 6 October 2026 (see CombinedMmc1Roms). instr_timing
+    // and cpu_interrupts_v2 time against the NTSC frame counter (29830 in their sources;
+    // cpu_interrupts_v2 builds NTSC_ONLY), and apu_reset builds
     // NTSC_ONLY: NTSC. cpu_reset, cpu_dummy_writes, ppu_open_bus, oam_read, oam_stress and
     // ppu_read_buffer name no region and their sources hold no frame timing: both. The cpu_reset
     // and apu_reset ROMs ask for the reset button, which the runner presses.
@@ -186,7 +190,7 @@ public static class TestRomTable
         var data = new TheoryData<string, Region, int>();
         string[] regionFree =
         [
-            "02-implied", "04-zero_page", "05-zp_xy", "06-absolute", "07-abs_xy", "08-ind_x", "09-ind_y",
+            "02-implied", "03-immediate", "04-zero_page", "05-zp_xy", "06-absolute", "07-abs_xy", "08-ind_x", "09-ind_y",
             "10-branches", "11-stack", "12-jmp_jsr", "13-rts", "14-rti", "15-brk",
         ];
         data.Add("instr_test-v5/rom_singles/01-basics.nes", Region.Ntsc, 30);
@@ -219,23 +223,6 @@ public static class TestRomTable
             data.Add("oam_read/oam_read.nes", region, 18);
             data.Add("oam_stress/oam_stress.nes", region, 150);
             data.Add("ppu_read_buffer/test_ppu_read_buffer.nes", region, 120);
-        }
-
-        return data;
-    }
-
-    // The known failures among the ROMs that report through $6000. Each runs as the others do and
-    // is not skipped: the test holds the status and text it gives now, so a change shows. Columns:
-    // the ROM, the region, the status now, text it prints now, the budget in millions of cycles,
-    // and the cause, which docs/known-differences.md also gives.
-    public static TheoryData<string, Region, int, string, int, string> RamReportingKnownFailures()
-    {
-        const string lxa = "opcode $AB (LXA, which the ROM calls ATX #n) is A = X = (A | magic) AND the operand, with a magic constant that differs between chips; the core takes $EE from Harte's nes6502 data, which its own tests pin, and the ROM's checksum, made on a console, is matched by $FF (tried once in task 12: $FF passes, $00 fails)";
-        var data = new TheoryData<string, Region, int, string, int, string>();
-        foreach (Region region in new[] { Region.Ntsc, Region.Pal })
-        {
-            data.Add("instr_test-v5/rom_singles/03-immediate.nes", region, 1, "AB ATX #n", 30, lxa);
-            data.Add("instr_test-v5/all_instrs.nes", region, 1, "AB ATX #n", 180, lxa);
         }
 
         return data;
@@ -429,17 +416,6 @@ public static class TestRomTable
         Assert.True(result.Status == 0, $"{pinnedName} reported status {result.Status} after {result.Cycles} cycles. Its text:\n{result.Text}");
     }
 
-    public static void AssertRamReportingKnownFailureStillFailsAsWrittenDown(string pinnedName, Region region, int statusNow, string printsNow, int millions, string cause, Action<string> log)
-    {
-        long budget = millions * 1_000_000L;
-        BlarggResult result = Run(pinnedName, region, budget);
-        log($"{pinnedName}: known failure, because {cause}. Its text:\n{result.Text}");
-
-        Assert.False(result.TimedOut, $"{pinnedName} gave no result in {budget} cycles. Its text:\n{result.Text}");
-        Assert.False(result.Status == 0, $"{pinnedName} now passes: move it out of the known failures and its known-differences entry. Its text:\n{result.Text}");
-        Assert.True(result.Status == statusNow && result.Text.Contains(printsNow, StringComparison.Ordinal), $"{pinnedName} fails differently from the record (status {statusNow}, {printsNow}): status {result.Status}. Its text:\n{result.Text}");
-    }
-
     public static void AssertBlarggApu2005RomPrintsResultCode1(string rom)
     {
         string pinnedName = $"blargg_apu_2005.07.30/{rom}.nes";
@@ -579,12 +555,6 @@ public static class TestRomTable
         {
             (string rom, string printsNow, string[] accepted, string cause) = ((string)row[0], (string)row[1], (string[])row[2], (string)row[3]);
             checks.Add($"{rom}.nes, NTSC", log => AssertDmcDmaKnownFailureStillFailsAsWrittenDown(rom, printsNow, accepted, cause, log));
-        }
-
-        foreach (object[] row in RamReportingKnownFailures())
-        {
-            (string pinnedName, Region region, int statusNow, string printsNow, int millions, string cause) = ((string)row[0], (Region)row[1], (int)row[2], (string)row[3], (int)row[4], (string)row[5]);
-            checks.Add($"{pinnedName}, {region.Name}", log => AssertRamReportingKnownFailureStillFailsAsWrittenDown(pinnedName, region, statusNow, printsNow, millions, cause, log));
         }
 
         foreach (object[] row in Mmc3OtherRevision())

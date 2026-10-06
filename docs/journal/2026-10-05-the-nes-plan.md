@@ -1414,6 +1414,12 @@ not taken is to use `$FF` for the Ricoh2A03, the console-calibrated value the RO
 passes with, and exclude `$AB` from the `nes6502` Harte set; that is left for the
 project owner to choose.
 
+**Superseded, 6 October 2026.** Dan chose the road not taken: the Ricoh 2A03
+variant's `LXA` uses `$FF`, the `nes6502` Harte run leaves out `$AB` and says so,
+and both ROMs pass on both regions. The change and its checks are in the
+journal entry of 6 October 2026,
+[the NES's mutation pass](2026-10-06-the-nes-mutation-pass.md), last section.
+
 **`double_2007_read`, looked at again and left.** The model prints `33 44 55 66
 77` for the double read; the source's four console outputs begin `22 44`,
 `22 33`, `02 44` and `32 44`. In all four the second read does not get the byte
