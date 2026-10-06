@@ -9,4 +9,13 @@ public sealed class NesOptions
     /// machine's constructor throws <see cref="ArgumentOutOfRangeException"/> otherwise.
     /// </summary>
     public int SampleRate { get; init; } = 48_000;
+
+    /// <summary>
+    /// True to advance the PPU and the sound unit inside every bus call, dot by dot and cycle by
+    /// cycle, even in a build that otherwise brings them up to date only when something can see
+    /// them: the per-dot reference ("oracle") that the lazy build is checked against, kept for the
+    /// tests and the benches, and slower. False by default. In this build the chips are always
+    /// advanced inside every call, so it changes nothing yet.
+    /// </summary>
+    public bool PerDotReference { get; init; }
 }

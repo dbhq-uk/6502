@@ -1,0 +1,287 @@
+---
+title: "The NES's lazy chips: the gate first"
+date: 2026-10-06
+summary: "Dan chose to let the NES's PPU and sound unit be brought up to date only when something can see them, on one condition: the lazy build must give bit for bit what the per-dot build gives at every point where a chip can be seen. Before any chip changes, the differential was extended to be that test. The bus now tells an observer of each such point, every chip reports its whole state, a reflection test fails if a field is left out, and the per-ROM output of the build before the work is committed as the baseline. Ten deliberate one-dot or one-cycle faults in the parts the work will touch, planted one at a time in a scratch copy, each changed the output, from 4 runs to all 256; one, a fetch a dot late that leaves the picture alone, was seen only by the new state hashes."
+order: 36
+---
+
+# 6 October 2026: the NES's lazy chips, the gate first
+
+The NES runs at about 2 to 2.5 times real time in the browser on the
+development machine, and slower on a laptop or a phone. On 6 October Dan
+approved the design in
+[`docs/superpowers/specs/2026-10-06-nes-lazy-chips-design.md`](../superpowers/specs/2026-10-06-nes-lazy-chips-design.md):
+the PPU and the sound unit are advanced lazily, in batches, and brought up to
+date ("caught up") only where something outside them can see them. The
+condition is a rule with a test: **the lazy build must give bit for bit what the
+per-dot build gives, at every point where a chip can be seen.** The plan is
+[`docs/superpowers/plans/2026-10-06-nes-lazy-chips.md`](../superpowers/plans/2026-10-06-nes-lazy-chips.md).
+
+This entry is kept as the work goes, one section a task. Task 1 builds the test
+before anything changes: the differential in `bench/nes-speed/differential`,
+extended, and its output from the code as it stood recorded as the baseline.
+
+## Task 1: the gate
+
+### What was there
+
+The differential written in task 6b of the NES work (see
+[the NES speed entry](2026-10-05-the-nes-speed.md)) runs the 127 pinned test
+ROMs in both regions and writes one line of hashes a run: after every
+instruction the CPU's registers, the cycle count and the PPU's line and dot; at
+every frame end the pixels, `v`, `t`, fine X, the dot count, OAM, the interrupt
+lines and the samples; at the end RAM, the PPU's registers, VRAM and OAM. That
+covers the CPU completely, but the chips only once a frame and through a few of
+their fields. A lazy PPU that left `_attributeBits` or the sprite buffers
+different at a `$2002` read, and got the picture right by luck, would pass it.
+
+### The observation points
+
+The bus now tells an observer (`INesObserver`, internal) of each point where a
+chip can be seen, which is each point where a lazy build must have caught it
+up:
+
+- **after each CPU access to `$2000` to `$401F`**, read or write, with the value
+  a read gave, and before the dots of the cycle that come after the access.
+  OAM DMA's writes to `$2004` are such accesses, and so are the repeated reads a
+  DMA's halt cycles make;
+- **after each write to the board's registers, `$8000` to `$FFFF`.** The design
+  does not list this one, and it must: a board write can move the pattern banks
+  or the nametable layout (MMC1, CNROM, AxROM's mirroring), and the PPU reads
+  them on every fetch. A PPU caught up after the write instead of before would
+  draw the dots between with the new banks. So the lazy build must catch the PPU
+  up before a board write, and the differential hashes the PPU there. PRG RAM
+  writes at `$6000` to `$7FFF` change nothing the PPU reads and are not points;
+- **after each DMC fetch**, once the byte is in the channel;
+- **at each frame end**, from inside the PPU's dot that ends the frame, so the
+  state is the frame's last whatever the bus is doing in that cycle;
+- **at power on and the reset button**, after the chips are reset and before the
+  CPU's reset sequence runs. A lazy build must catch up before it resets a chip;
+- **at the end of every cycle**, with the NMI and IRQ lines the CPU was given.
+  These are not catch-up points; they are there because the lines must be exact
+  on every cycle in a lazy build too.
+
+The harness adds one of its own: after it reads the samples at each frame's end,
+which is where the page reads them, so the sound unit must be caught up there.
+
+**What it costs when nobody listens.** Each call is behind
+`NesBus.Observable`, a `static readonly` flag read once from the runtime option
+`Dbhq.Machines.Nes.Observable`, which only the differential's and the NES
+tests' project files set. With it off, .NET's tiered JIT treats the flag as a
+constant and drops the calls: the disassembly of `NesBus.Cycle` at tier 1 with
+the flag off has no call to the observer, and with it on it has the null checks
+and the two calls (`DOTNET_JitDisasm="Cycle" dotnet <bench>/Dbhq.Machines.ThreadTime.dll ntsc 1`,
+6 October 2026, 19:05 UTC). In the browser's AOT build the flag is a load and a
+branch that always goes the same way. The thread-time bench was run alternately
+on the baseline (`5e48505`, exported with `git archive`), this build, and this
+build with the flag switched on in its `runtimeconfig.json` and no observer set,
+four rounds of five runs of SNOW each region, 6 October 2026 from 19:03 UTC, at
+loads (one-minute average) falling from 19.1 to 3.8:
+
+| Build | NTSC medians, ns a cycle | Median of the four | PAL medians | Median of the four |
+| --- | --- | --- | --- | --- |
+| `5e48505` | 179.69, 170.09, 151.70, 162.48 | 166.3 | 160.72, 158.41, 166.55, 189.02 | 163.6 |
+| this build | 164.33, 163.36, 162.28, 191.91 | 163.8 | 159.56, 152.56, 167.31, 171.94 | 163.4 |
+| this build, flag on | 164.57, 182.77, 166.16, 166.24 | 166.2 | 170.79, 172.08, 161.69, 166.81 | 168.8 |
+
+```
+for round in 1 2 3 4; do for b in <base>/out <after>/out <after>/out-on; do
+  for w in ntsc pal; do dotnet $b/Dbhq.Machines.ThreadTime.dll $w 5; done; done; done
+```
+
+The three are within the bench's noise, which task 17 measured at 10 to 20
+percent from one launch to the next on this shared machine: the cycle path did
+not get measurably slower.
+
+### The per-dot reference
+
+`NesOptions.PerDotReference` is the switch Dan's design keeps for good: a
+build that is otherwise lazy advances the chips inside every call, as now, and
+that is the oracle the lazy build is compared with, in the tests and in the
+benches. In this build it changes nothing. The differential takes `--oracle`,
+so the baseline can be made again from a lazy build in that mode and compared
+with the committed file: run on this build on 6 October at 18:53 UTC, it gave
+the same 256 lines.
+
+### The state list
+
+Every class with state now reports it (`IReportsState.ReportState`, internal):
+each field by name, in a fixed order, or skipped with the reason. The list was
+written from the code, field by field. `StateReportTests` reads the reports of
+a machine built on each of the six boards, with CHR ROM and with CHR RAM, and
+compares the names with the fields each class declares by reflection: a field
+that is neither reported nor skipped fails it, naming the field, and so does a
+name that is no field. The differential runs the same check
+(`StateCompleteness`, one file shared by both) before it runs anything, and
+stops if a field is missing. So the list cannot fall behind the code without a
+test failing: a field a later task adds must be reported or skipped with its
+reason.
+
+Reported, and so hashed wherever the chip is hashed:
+
+| Part | Fields |
+| --- | --- |
+| PPU registers | `_ctrl`, `_mask`, `_status` (VBlank, sprite 0 hit, overflow), `_oamAddress`, the I/O latch `_latch` and when each bit was driven `_latchDriven`, the time base `_timeBase` the decay is measured in, the read buffer `_readBuffer` |
+| PPU scroll | `_v`, `_t`, `_x`, `_w` |
+| PPU position | `_line`, `_dot`, `_oddFrame`, `_frame`, the VBlank suppression `_suppressVblank`, the odd frame's dropped dot `_dropDot`, and `CpuCycle`, the cycle given to the board with each address |
+| PPU mask caches | `_emphasis`, `_greyscaleMask`, the 32 entries' colours `_entryColours`, `_backgroundFrom`, `_spritesFrom` |
+| PPU memory | the palette `_palette`, the nametable RAM `_nametables` (4 KB, the four-screen half too), `Oam` |
+| PPU background | the latches `_nametableByte`, `_attributeBits`, `_patternLowByte`, `_patternHighByte`, the pattern address `_patternAddress`, the shifters `_backgroundPixels` |
+| PPU sprite evaluation | secondary OAM `_secondaryOam`, `_evaluationN`, `_evaluationM`, `_oamLatch`, `_secondaryIndex`, `_found`, `_secondaryFull`, `_evaluationDone`, `_sprite0Found` |
+| PPU sprites on the line | the line buffer `_spriteLine` and its extent `_spriteLeft`, `_spriteWidth`, `_spriteCount`, `_sprite0OnLine`, and the slot being fetched `_fetchY`, `_fetchTile`, `_fetchAttributes`, `_fetchX`, `_fetchLow`, `_spriteAddress` |
+| The picture | `Screen.Pixels` and `Screen.Frame` |
+| Sound unit | the cycle count `_cycles`; the frame counter `_fiveStepMode`, `_irqInhibit`, `_frameIrq`, which table `_steps` and `_actions` are, `_stepIndex`, `_frameCycle`, `_nextStep`, the `$4017` write delay `_resetIn` and `_pendingFiveStepMode`; `_lengthWritten`; the mixer's `_output`, `_pulseMix`, `_tndMix` |
+| Pulses | `_timer`, `_period`, `_step`, `_duty`, `_muted`, the sweep's `_sweepEnabled`, `_sweepPeriod`, `_sweepNegate`, `_sweepShift`, `_sweepDivider`, `_sweepReload`, the envelope, the length counter |
+| Triangle | `_timer`, `_period`, `_step`, the linear counter `_linear`, `_linearReloadValue`, `_linearReload`, `_control`, the length counter |
+| Noise | `_timer`, `_reload`, `_periodIndex`, the LFSR `_shiftRegister`, `_feedbackBit`, the envelope, the length counter |
+| DMC | `_rateIndex`, `_timer`, the output level `_level`, `_irqEnabled`, `_loop`, `_irqFlag`, `_sampleAddress`, `_sampleLength`, the reader's `_currentAddress`, `_bytesRemaining`, `_buffer`, `_bufferFull`, when the next fetch may halt `_fetchFrom`, the output unit's `_shift`, `_bitsRemaining`, `_silent` |
+| Envelope | `_start`, `_divider`, `_decay`, `Loop`, `Constant`, `V` |
+| Length counter | `Value`, `Halt`, `Enabled`, and the write-in-the-clock's-cycle flags `_haltWritten`, `_haltBefore`, `_loaded`, `_valueBefore` |
+| Sample buffer | the block `_blockSum`, `_blockLeft`, the level `_level`, the running sum `_output`, the instant `_instant` and phase `_fraction`, the pending steps `_pending`, the filters `_hp90Out`, `_hp90In`, `_hp440Out`, `_hp440In`, `_lpOut`, the ring's `_read`, `_count`, `_dropped`, and the samples waiting in it |
+| Bus | RAM `_ram`, the open bus `_openBus`, the dot accumulator `_dotAccumulator`, `_cycles`, `_ppuDots`, the DMA page waiting `_dmaPage`, the last read address `_lastReadAddress` (the pads' clock) |
+| Pads | `_strobe`, `_latched`, `_reads`, `Buttons` |
+| Every board | the PRG and CHR windows `PrgBase`, `ChrBase`, `PrgRamEnabled`, `PrgRamWritable`, the mirroring and its page table, PRG RAM, and CHR RAM where the board has it |
+| MMC1 | the shift register `_shift` and its count `_count`, `_control`, `_chr0`, `_chr1`, `_prg`, the cycles since a write `_sinceWrite` |
+| MMC3 | the banks `_banks`, `_select`, the IRQ latch `_latch`, counter `_counter`, reload `_reload`, enable `_irqEnabled`, line `_irq`, and A12's filter `_a12Low`, `_lowSince` |
+
+Skipped, with the reason each report gives: every field fixed when its object is
+made (the region's tables and counts, the board's flags, the decay time, the
+palette's colours, the dot ratio's parts, the sweep's negate, the bus-conflict
+flags, the NROM masks); the PRG ROM and CHR ROM, which never change; the copies
+of another part's arrays the PPU and the bus hold to read without a call (the
+board's pattern memory, windows and page table, and its PRG), which that part
+reports; `_pixels`, the same array as `Screen.Pixels`; the CPU, whose registers
+are hashed after each instruction and whose lines every cycle; the observer
+itself; and one cache flag, the sound unit's `_mixStale`. The mixer's three values
+are reported as `Output` would make them, worked out in the report when they are
+stale, so a report changes nothing and a batch that leaves the flag the other way
+round with the same values is not a difference, while one with different values
+is.
+
+### What is hashed where
+
+At a point where one chip can be seen the other is not hashed, because a lazy
+build need not have caught it up there, and a difference would be a false alarm
+that pushed the design into catching up for nothing:
+
+| Point | Hashed |
+| --- | --- |
+| a PPU register access, OAM DMA's writes among them, or a board write | the point and the access, the logical position (the bus's cycle and dot counts, `Ppu.Line` and `Ppu.Dot`), and the PPU's whole state but the picture; the bus's, the pads' and the board's state |
+| a sound register or pad access, `$4000` to `$401F` | the point and the access, the bus's counts, the sound unit's and the sample buffer's whole state; the bus's, the pads' and the board's |
+| a DMC fetch | the same as a sound register access |
+| a frame end | the bus's counts and the PPU's whole state with the picture |
+| after the samples are read at a frame's end | the sound unit, the sample buffer, the bus, the pads and the board |
+| power on and reset | all of it |
+| every cycle | the NMI and IRQ lines the CPU was given |
+| every instruction, as before | the registers, the cycle count, and the PPU's line and dot |
+
+Three choices in that table. **The position is the logical one.**
+`Ppu.Line` and `Ppu.Dot` will report the dot the bus says the PPU is on,
+without a catch-up, so hashing them beside the PPU's own `_line` and `_dot`
+checks that the PPU was caught up at the point; at a frame end only the state's
+own is hashed, because the dot that ends a frame can be run before the bus is
+done with its cycle. **The picture is hashed at frame ends, not at every
+access.** Each pixel is written once a frame, on its own dot, so a wrong one
+stays wrong until the frame end hashes it, and hashing 61,440 pixels at each of
+a few thousand accesses a frame would make a run hours long. **A frame end
+hashes only the PPU and the cycle count:** the frame can end in the dots before
+or after the cycle's access, so RAM, the board and the sound unit there could
+differ by an access between two correct builds.
+
+The homebrew is run too, which the old tool did not: Lan Master, the game the
+page starts, from `roms/nes/`, for four times the frames, with a fixed round of
+buttons (Start on the title, then moves and turns, one button 3 frames in 6), so
+the gate covers a game's play and not only the test ROMs. Its picture was looked
+at in a scratch copy at frame 280: the first level, with pieces turned.
+
+The six hashes of the old tool are made as it made them, so its files and the
+new ones agree on them. They use FNV-1a over 64-bit words, and that has a weak
+spot found while writing this: a word's high bits only reach the hash's high bits,
+so two differences in, say, bit 63 cancel exactly. The new hashes mix each word
+first (splitmix64's finaliser), and the per-instruction words are hashed again
+that way as `cpu`. The program's opening comment says what each hash covers, and
+the file's first line names the format and the frame count, so two files are
+comparable only when their first lines match. `--check <file>` runs, compares,
+prints the first run that differs and which of its hashes, and exits 1, so each
+later task's gate is one command:
+
+```
+dotnet run -c Release --project bench/nes-speed/differential -- --check bench/nes-speed/differential/baseline/5e48505.txt
+```
+
+### The baseline
+
+First, that the hook changes nothing: the old tool, built from the tree before
+any of this, was run on 6 October between 18:19 and 18:24 UTC, and this build's output was
+compared with it on the six hashes they share: all 254 lines the same. Then the
+baseline, from this build, whose `src/` differs from `5e48505` only in the
+observer, the option and the state reports:
+
+```
+dotnet run -c Release --project bench/nes-speed/differential -- bench/nes-speed/differential/baseline/5e48505.txt
+```
+
+6 October 2026, 18:44:59 to 18:53:33 UTC, load (one-minute average) 25.7 at the
+start and 31.8 at the end, 8 minutes 34 seconds. It is 256 runs, the 127 ROMs
+and the homebrew in both regions, and the file is 70,451 bytes. It was the same,
+byte for byte, as a first run made between 18:34 and 18:41 UTC (6 minutes 53
+seconds, at loads of 17.2 to 1.9), and `--check` with `--oracle` from 18:53 to
+19:01 UTC (loads 31.8 to 32.9) printed `IDENTICAL: all 256 runs match`.
+
+### Showing that it fails
+
+The plan's step 4: a deliberate fault in each part the lazy work will touch
+must change the output, or the state list or the ROMs miss something. In a
+scratch copy outside the repository (the working tree copied with `rsync` to
+`/tmp/lazy-faults`, `.testdata` linked in, removed afterwards), a script applied
+one exact replacement at a time, built the differential, ran `--check` against
+the baseline with `--out`, counted the lines that differ and which hashes, and
+put the file back. 6 October 2026, 19:04 to 20:02 UTC, loads 0.7 to 23.6.
+
+| Fault (one edit each) | Runs changed, of 256 | ROMs | Of those, seen only by the new state hashes |
+| --- | --- | --- | --- |
+| The background's nametable byte fetched a dot late (the third dot of each 8 on the visible lines instead of the second) | 222 | 114 | 222 |
+| The background's shifters reloaded a dot late | 211 | 109 | 5 |
+| Sprite evaluation's first OAM read a dot late (secondary OAM cleared up to dot 65) | 115 | 58 | 68 |
+| Sprite 0 hit tested against the next column's background pixel | 4 | 2 | 0 |
+| The VBlank flag set on dot 2 of line 241 instead of dot 1 | 121 | 83 | 10 |
+| A CPU access to the PPU made after three of its cycle's dots instead of two, which is what a catch-up one dot short would do | 256 | 128 | 58 |
+| Every step of the sound unit's frame counter a cycle late | 256 | 128 | 197 |
+| A DMC reload's fetch allowed to halt the CPU a cycle later | 57 | 29 | 39 |
+| The sprite fetch's pattern address put on the PPU's bus a dot late, so MMC3 sees A12 rise a dot later | 4 | 3 | 2 |
+| MMC1 ignoring a write two cycles after a write, not only one | 12 | 6 | 0 |
+
+"Seen only by the new state hashes" counts the runs where none of the old tool's
+six hashes changed, nor `cpu`. The first fault is the one the old tool could not
+see: the byte is the same, because `v` does not move between the two dots, so
+the picture is the same, but a `$2002` read on that dot sees the latch hold the
+old byte, and a lazy PPU could get it wrong in the same way.
+
+So every fault was seen, and none left the state list or the ROMs needing a fix.
+Two were seen by few ROMs: sprite 0 hit by the two `sprite_hit_tests` that test
+its alignment and corners, and the MMC3 fault by the three scanline-timing ROMs.
+The test ROMs are the only programs that look at those dots, so the scene tests
+the plan gives tasks 4 and 2 (sprite 0 at the line's ends, the NMI around
+VBlank) are needed beside the differential, not instead of it. The completeness
+check was shown to fail as well: with one field's line taken out of the PPU's
+report in the scratch copy, `StateReportTests` failed on every board naming
+`Ppu._fetchLow`, and the differential stopped before running, naming it too.
+
+### For the tasks that follow
+
+What the gate asks of a lazy build, from the points above:
+
+- catch the PPU up before a CPU access to `$2000` to `$3FFF`, before each OAM
+  DMA write, and also **before a write to the board's registers**, which the
+  design does not list;
+- catch the sound unit up before an access to `$4000` to `$401F`, before the
+  DMC's byte is handed to the channel, and when the samples are read;
+- end each frame in the cycle it ends in, from inside the catch-up, so the frame
+  end sees the same cycle count;
+- catch both up before power on or the reset button changes them;
+- keep `Ppu.Line` and `Ppu.Dot` logical, and every other public read of a chip's
+  state (Ruling R of the plan's ledger) caught up when read;
+- a new field must be reported or skipped with its reason, or
+  `StateReportTests` fails. A lazy build's bookkeeping, such as the dots
+  delivered and the dots caught up to, is skipped with that reason: the
+  logical position is hashed through `Line`, `Dot` and the bus's counts.

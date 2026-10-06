@@ -21,7 +21,7 @@ namespace Dbhq.Machines.Nes;
 /// impossible mask on purpose, so nothing here filters it.
 /// </para>
 /// </remarks>
-public sealed class Controller
+public sealed class Controller : IReportsState
 {
     private bool _strobe;
     private byte _latched;
@@ -83,5 +83,14 @@ public sealed class Controller
         _strobe = false;
         _latched = 0;
         _reads = 0;
+    }
+
+    /// <inheritdoc />
+    void IReportsState.ReportState(IStateSink sink)
+    {
+        sink.Add(nameof(_strobe), _strobe);
+        sink.Add(nameof(_latched), _latched);
+        sink.Add(nameof(_reads), _reads);
+        sink.Add(nameof(Buttons), Buttons);
     }
 }

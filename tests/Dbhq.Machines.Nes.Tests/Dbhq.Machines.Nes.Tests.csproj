@@ -9,6 +9,11 @@
     <PackageReference Include="xunit.runner.visualstudio" Version="4.0.0" />
   </ItemGroup>
 
+  <!-- Lets the tests set an observer on the bus (NesBus.Observable); without it the observer is never called. -->
+  <ItemGroup>
+    <RuntimeHostConfigurationOption Include="Dbhq.Machines.Nes.Observable" Value="true" />
+  </ItemGroup>
+
   <ItemGroup>
     <ProjectReference Include="../../src/Dbhq.Cpu6502/Dbhq.Cpu6502.csproj" />
     <ProjectReference Include="../../src/Dbhq.Machines.Nes/Dbhq.Machines.Nes.csproj" />

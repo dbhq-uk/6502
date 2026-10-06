@@ -19,7 +19,8 @@ below says which code it measured.
 | `index.html`, `main.js` | The page. It fetches the ROM, boots it, then times the runs. |
 | `run-in-browser.mjs`, `package.json` | Fetches the ROM from the pinned fork, checks it against its SHA-256 in `Pins.cs`, serves it with the page and a published copy of the app on `127.0.0.1`, and runs it in a headless Chrome, a fresh launch each time. |
 | `native/` | The same workload as a console program, in the solution so CI builds it. |
-| `differential/` | The check that a change for speed changed nothing else: it runs every pinned NES test ROM in both regions and writes one line of hashes for each (every instruction's registers, cycle and PPU position, every frame's pixels, the sound, the end state). In the solution too. |
+| `differential/` | The check that a change for speed changed nothing else: it runs every pinned NES test ROM, and the bundled homebrew with a fixed round of button presses, in both regions and writes one line of hashes for each (every instruction's registers, cycle and PPU position, every cycle's interrupt lines, every frame's pixels, the sound, the end state, and each chip's whole state at every point where it can be seen). In the solution too. |
+| `differential/baseline/` | The differential's output from the code before the lazy chips (`5e48505`), which every step of that work is checked against. |
 
 ## The workload
 
@@ -68,6 +69,25 @@ dotnet run -c Release --project differential -- before.txt      # on the code be
 dotnet run -c Release --project differential -- after.txt       # on the code after
 cmp before.txt after.txt
 ```
+
+Or check against the committed baseline in one command. It prints the first run that differs and
+which of its hashes do, and exits 1 on any difference:
+
+```sh
+dotnet run -c Release --project differential -- --check differential/baseline/5e48505.txt
+dotnet run -c Release --project differential -- --check differential/baseline/5e48505.txt --oracle
+```
+
+`--oracle` builds the machine with `NesOptions.PerDotReference`, the per-dot reference that a
+lazy build keeps, so the baseline can be made again from a later build and compared. `--only
+<text>` runs only the ROMs whose name contains the text (and `--check` then compares those
+lines), and `--out <file>` keeps a check's output. The program's opening comment says what each
+hash in a line covers, and the file's first line names the format and the frame count, so two
+files are comparable only when their first lines are the same. Before it runs anything it checks
+by reflection that every field of every chip is in the chips' state reports, and stops, naming
+the field, if one is not. It runs four ROMs at a time; the journal entry
+[`docs/journal/2026-10-06-the-nes-lazy-chips.md`](../../docs/journal/2026-10-06-the-nes-lazy-chips.md)
+has how long a run took, dated.
 
 To run it on a baseline that is older than the tool, export that commit with `git archive`
 into a folder of its own, copy `bench/nes-speed/differential/` into the same place in the

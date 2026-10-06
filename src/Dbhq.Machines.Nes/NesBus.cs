@@ -62,7 +62,7 @@ namespace Dbhq.Machines.Nes;
 /// the DMC's DMA is task 9.
 /// </para>
 /// </remarks>
-public sealed class NesBus : Bus
+public sealed class NesBus : Bus, IReportsState
 {
     private readonly byte[] _ram = new byte[0x800];
     private readonly IMapper _mapper;
@@ -111,6 +111,12 @@ public sealed class NesBus : Bus
     // The page a write to $4014 asked OAM DMA to copy, or -1 when none is waiting.
     private int _dmaPage = -1;
 
+    // NesOptions.PerDotReference, kept for the build that advances the chips lazily.
+    private readonly bool _perDotReference;
+
+    // Told of each point where a chip can be seen (Observer), or null.
+    private INesObserver? _observer;
+
     /// <summary>
     /// A bus with the cartridge's board fitted. The board is made here, so a cartridge for a mapper
     /// this machine does not model throws.
@@ -125,7 +131,9 @@ public sealed class NesBus : Bus
         _mapper = cartridge.CreateMapper();
         _ppu = new Ppu(region, _mapper);
         _apu = new Apu(region);
-        int sampleRate = (options ?? new NesOptions()).SampleRate;
+        options ??= new NesOptions();
+        _perDotReference = options.PerDotReference;
+        int sampleRate = options.SampleRate;
         _sound = new SampleBuffer(sampleRate, region.CpuHz, Math.Max(1, sampleRate / 4));
         _dmcRepeatsHaltedRead = region.DmcDmaRepeatsHaltedRead;
         _mapperCountsCycles = _mapper.CountsCpuCycles;
@@ -165,6 +173,35 @@ public sealed class NesBus : Bus
         }
 
         return _controllers[pad];
+    }
+
+    /// <summary>
+    /// True when the process has switched observation on, with the runtime option
+    /// <c>Dbhq.Machines.Nes.Observable</c> (the differential's and the tests' project files set
+    /// it). Read once, so when it is off the JIT drops the observer's calls from the cycle and the
+    /// cycle pays nothing for them; when it is on each costs a null check until an
+    /// <see cref="Observer"/> is set.
+    /// </summary>
+    internal static readonly bool Observable = AppContext.TryGetSwitch("Dbhq.Machines.Nes.Observable", out bool on) && on;
+
+    /// <summary>
+    /// <see cref="NesOptions.PerDotReference"/>: the chips are advanced inside every call, the
+    /// reference a lazy build is checked against. In this build they always are.
+    /// </summary>
+    internal bool PerDotReference => _perDotReference;
+
+    /// <summary>
+    /// Told of each point where a chip can be seen (<see cref="INesObserver"/>), when
+    /// <see cref="Observable"/> is on; otherwise it is never called. Null for none.
+    /// </summary>
+    internal INesObserver? Observer
+    {
+        get => _observer;
+        set
+        {
+            _observer = value;
+            _ppu.Observer = value;
+        }
     }
 
     /// <summary>The CPU whose NMI and IRQ lines the bus sets at the end of each cycle.</summary>
@@ -265,6 +302,11 @@ public sealed class NesBus : Bus
             _cpu.Nmi = false;
             _cpu.Irq = false;
         }
+
+        if (Observable && _observer is not null)
+        {
+            _observer.ChipsReset(true);
+        }
     }
 
     /// <summary>
@@ -281,6 +323,10 @@ public sealed class NesBus : Bus
         _mapper.Reset(false);
         _ppu.Reset();
         _apu.Reset();
+        if (Observable && _observer is not null)
+        {
+            _observer.ChipsReset(false);
+        }
     }
 
     /// <summary>
@@ -329,6 +375,11 @@ public sealed class NesBus : Bus
             _lastReadAddress = address;
         }
 
+        if (Observable && _observer is not null)
+        {
+            ObserveAccess(write, address, value);
+        }
+
         for (int i = before; i < dots; i++)
         {
             _ppu.Tick();
@@ -342,7 +393,21 @@ public sealed class NesBus : Bus
             _cpu.Irq = irq;
         }
 
+        if (Observable && _observer is not null)
+        {
+            _observer.CycleEnded(nmi, irq);
+        }
+
         return value;
+    }
+
+    // An access the observer is told of: $2000 to $401F, and a write to the board's registers.
+    private void ObserveAccess(bool write, ushort address, byte value)
+    {
+        if ((uint)(address - 0x2000) < 0x2020 || (write && address >= 0x8000))
+        {
+            _observer!.Accessed(address, write, value);
+        }
     }
 
     /// <summary>
@@ -407,6 +472,10 @@ public sealed class NesBus : Bus
             {
                 _apu.Dmc.CompleteFetch(Cycle(false, _apu.Dmc.FetchAddress, 0));
                 dmc = 0;
+                if (Observable && _observer is not null)
+                {
+                    _observer.DmcFetched();
+                }
             }
             else if (oam && oamHalted && get && !holding)
             {
@@ -524,5 +593,35 @@ public sealed class NesBus : Bus
         {
             _mapper.CpuWrite(address, value);
         }
+    }
+
+    /// <inheritdoc />
+    void IReportsState.ReportState(IStateSink sink)
+    {
+        sink.Add(nameof(_ram), _ram);
+        sink.Add(nameof(_mapper), _mapper as IReportsState ?? throw new InvalidOperationException("the board does not report its state"));
+        sink.Add(nameof(_ppu), _ppu);
+        sink.Add(nameof(_apu), _apu);
+        sink.Add(nameof(_sound), _sound);
+        sink.Skip(nameof(_dmcRepeatsHaltedRead), StateReport.Fixed);
+        sink.Skip(nameof(_cpu), "the core's registers are hashed after each instruction, and its lines every cycle");
+        sink.Add(nameof(_openBus), _openBus);
+        sink.Add(nameof(_dotAccumulator), _dotAccumulator);
+        sink.Skip(nameof(_wholeDots), StateReport.Fixed);
+        sink.Skip(nameof(_dotRemainder), StateReport.Fixed);
+        sink.Skip(nameof(_dotDenominator), StateReport.Fixed);
+        sink.Skip(nameof(_mapperCountsCycles), StateReport.Fixed);
+        sink.Skip(nameof(_mapperCanInterrupt), StateReport.Fixed);
+        sink.Skip(nameof(_prg), "the board's own PRG ROM, which it reports");
+        sink.Skip(nameof(_prgWindows), "the board's own PRG windows, which it reports");
+        sink.Add(nameof(_cycles), _cycles);
+        sink.Add(nameof(_ppuDots), _ppuDots);
+        sink.Add("_controllers[0]", _controllers[0]);
+        sink.Add("_controllers[1]", _controllers[1]);
+        sink.Add(nameof(_lastReadAddress), _lastReadAddress);
+        sink.Add(nameof(_dmaPage), _dmaPage);
+        sink.Skip(nameof(_perDotReference), StateReport.Fixed);
+        sink.Skip(nameof(_observer), "the observer itself");
+        sink.Skip(nameof(Region), StateReport.Fixed);
     }
 }

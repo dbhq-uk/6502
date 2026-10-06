@@ -89,7 +89,7 @@ namespace Dbhq.Machines.Nes;
 /// Nothing on the per-dot path allocates: every buffer is made with the PPU.
 /// </para>
 /// </remarks>
-public sealed partial class Ppu
+public sealed partial class Ppu : IReportsState
 {
     // The line at whose dot 1 the VBlank flag is set, on both regions (timing.md 2).
     private const int VblankLine = 241;
@@ -305,6 +305,9 @@ public sealed partial class Ppu
     /// dots; alone the PPU reports cycle 0.
     /// </summary>
     internal long CpuCycle { get; set; }
+
+    /// <summary>Told when a frame ends, while <see cref="NesBus.Observable"/> is on; the bus sets it with its own.</summary>
+    internal INesObserver? Observer { get; set; }
 
     // Rendering is on and the PPU is on a line that renders: the visible lines and the pre-render line.
     private bool Rendering => RenderingEnabled && (_line < 240 || _line == _preRenderLine);
@@ -664,6 +667,10 @@ public sealed partial class Ppu
         _frame++;
         _oddFrame = !_oddFrame;
         Screen.EndFrame();
+        if (NesBus.Observable && Observer is not null)
+        {
+            Observer.FrameEnded();
+        }
     }
 
     private byte ReadPalette(ushort address)
