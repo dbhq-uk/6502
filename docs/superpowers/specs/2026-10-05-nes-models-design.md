@@ -85,9 +85,10 @@ The models follow it.
 As the BBC Micro's design says, with nothing new: one section, a tab list named
 "Views of the model" with tabs "Outside" and "Inside", each panel with its own
 stage, reset button, status line, caption and note, loaded only when its view is
-shown, each keeping its camera. Outside is shown first. The NES reuses the
-BBC Micro's markup, loader and styles; it does not build its own (see
-"What this waits for").
+shown, each keeping its camera. Outside is shown first. The BBC Micro's models
+are not built (only their design, plan and registry rules are), so the NES
+builds this section, its loader and its styles to that design, for the BBC Micro
+to adopt later (Dan, 6 October 2026; see "What this waits for").
 
 ## What state each model shows
 
@@ -245,11 +246,10 @@ figure; only Chrome with software WebGL is checked.
 - **The machine's pull request, merged.** The NES row running, its page, its
   region control and its panel script. Tasks that only measure (the tools) do
   not wait; the counters and everything on the page do.
-- **The BBC Micro's models, merged at least to its two-view task.** The tabs,
-  the per-view loader and the rule that a machine claiming a model states
-  `case` come from there. The NES does not build a second version: if the BBC
-  Micro's work has not reached its task 9 when the NES's page work is ready,
-  the NES work waits and Dan is told.
+- **Not the BBC Micro's models.** They hold only their first tasks, and #55
+  already carries the registry rules they added. Dan decided on 6 October 2026
+  that the NES builds the two-view tabs, the per-view loader, the legend table
+  and the rule that a machine claiming a model states `case` itself.
 - **Its own fork.** OpenTendo in `dbhq-uk`, before task 0 reads the scans.
 
 ## Not in scope
@@ -280,5 +280,5 @@ with what it was chosen over.
 | The console as made, in the site's grey tokens | As yellowed in the PAL photographs | The model shows the design, not one console's age; the photographs show the age |
 | OpenTendo forked into `dbhq-uk` and pinned; the track map carries the TAPR OHL's terms | Reading the upstream repository; leaving the map's terms unstated | Rule 3; the map is traced from the scans, so their terms travel with it |
 | Inside first | Outside first | It gives the outside its port positions |
-| Reuse the BBC Micro's tabs and loader, and wait for them | Building the NES's own | One way to offer two views; a second would drift from the first |
+| The NES builds the shared two-view tabs, loader and legend table, to the BBC Micro's design (Dan, 6 October 2026) | Waiting for the BBC Micro's models to build them; shipping the inside alone first | The BBC Micro's models hold only their first tasks and nobody is building the rest; the NES is ready sooner, and the BBC Micro adopts the same section later |
 | A feasibility task first, with stop thresholds, including the PAL layout | Building the pipeline and finding out at the end | Scale, registration, the PAL reuse and the case proportions are what everything rests on |

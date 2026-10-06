@@ -1959,3 +1959,27 @@ Dan then asked for the wording to be fixed where needed, so the approved design
 now says `/machines/nes/` (it had that path once, not twice as the note above
 said) and its legend sentence names the hex inverter, U9, beside the other
 chips that are never marked, with its jobs credited to the redrawing's nets.
+
+## The tabs: the NES builds them itself, 6 October 2026
+
+Dan asked what was needed to go on. Checked on 6 October 2026 with `gh pr view`,
+`git log` and `git grep`:
+
+- **#55 (the NES machine)** is a draft, mergeable, with green CI (dashes,
+  machines, site and test), "Not for merge until Dan says". Its 16 tasks are
+  done. It already holds the 11 commits of the BBC Micro models branch, so the
+  registry's `case` and `models` rules arrive with it.
+- **#48 (the BBC Micro's models)** is a draft, conflicting with `main`, last
+  updated 4 October. It holds its tasks 0 to 3 only. `git grep tablist` finds no
+  tab markup on that branch or on #55. So the plan's rule that the NES waits for
+  the BBC Micro's tabs would have waited for work that nobody had started.
+
+Decision, Dan's, from a question with three options: the NES builds the shared
+two-view section itself (the tab list, the per-view loader, the legend table and
+the rule that a machine claiming a model states `case`), to the BBC Micro's
+design, chosen over waiting for the BBC Micro (open-ended) and over shipping the
+inside alone first. The BBC Micro can adopt the same section later. The plan
+(Global Constraints, tasks 7 and 9) and the design (the views section, "What this
+waits for" and the decisions table) now say so. Cost if wrong: if the BBC Micro's
+models are later built with different tabs, the two have to be reconciled; the
+design says the NES's is built to its design to avoid that.
