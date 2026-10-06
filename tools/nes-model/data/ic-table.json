@@ -136,7 +136,7 @@
    "port": {
     "value": 1,
     "inferred": true,
-    "why": "U7 is pad1 and U8 pad2 by the board's print, \"40H368(CI)\" and \"40H368(CII)\"; that CI and CII are controller ports one and two, so the reads of $4016 and $4017, is inferred from the names, and task 6 checks it against the nesdev wiki"
+    "why": "U7 is pad1 and U8 pad2 by the board's print, \"40H368(CI)\" and \"40H368(CII)\"; checked on 6 October 2026: the nesdev wiki gives the read of $4016 /OE1 and of $4017 /OE2 (Input devices, CPU pinout), and the KiCad redrawing (I2) puts U7's enables on /OE1 and U8's on /OE2; still inferred, as it is not traced on the scan"
    }
   },
   {
@@ -160,7 +160,7 @@
    "port": {
     "value": 2,
     "inferred": true,
-    "why": "U7 is pad1 and U8 pad2 by the board's print, \"40H368(CI)\" and \"40H368(CII)\"; that CI and CII are controller ports one and two, so the reads of $4016 and $4017, is inferred from the names, and task 6 checks it against the nesdev wiki"
+    "why": "U7 is pad1 and U8 pad2 by the board's print, \"40H368(CI)\" and \"40H368(CII)\"; checked on 6 October 2026: the nesdev wiki gives the read of $4016 /OE1 and of $4017 /OE2 (Input devices, CPU pinout), and the KiCad redrawing (I2) puts U7's enables on /OE1 and U8's on /OE2; still inferred, as it is not traced on the scan"
    }
   },
   {

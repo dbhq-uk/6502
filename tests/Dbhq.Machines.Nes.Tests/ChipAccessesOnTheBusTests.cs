@@ -96,6 +96,39 @@ public class ChipAccessesOnTheBusTests
         Assert.InRange(nes.Bus.Cycles - cycles, 2 + 513, 2 + 514);
     }
 
+    // The CPU halted by OAM DMA on a read of a counted address: the halt cycle, and the alignment
+    // cycle when there is one, repeat that read on the bus (bus.md 6), so each counts, and then the
+    // CPU's own read counts. A write landing on an even cycle costs 513 cycles (one halted read),
+    // on an odd one 514 (two). A pad sees the run of reads as one clock; the counter sees each.
+    [Theory]
+    [InlineData(0x2002, 0)]
+    [InlineData(0x2002, 1)]
+    [InlineData(0x4016, 0)]
+    [InlineData(0x4016, 1)]
+    public void A_read_the_dma_repeats_while_the_cpu_is_halted_on_it_counts_once_for_each_repeat(int address, int parity)
+    {
+        Nes nes = IdleMachine();
+        while ((nes.Bus.Cycles + 1) % 2 != parity)
+        {
+            nes.Bus.Read(0x0000);
+        }
+
+        long cycles = 0;
+        int[] added = Added(nes, () =>
+        {
+            nes.Bus.Write(0x4014, 0x02);
+            long start = nes.Bus.Cycles;
+            nes.Bus.Read((ushort)address);
+            cycles = nes.Bus.Cycles - start;
+        });
+
+        int halted = parity == 0 ? 1 : 2;
+        Assert.Equal(512 + halted + 1, cycles);
+        int reads = halted + 1;
+        int[] expected = address == 0x2002 ? [256 + reads, 1, 0, 0] : [256, 1, reads, 0];
+        Assert.Equal(expected, added);
+    }
+
     [Fact]
     public void Inc_4016_reads_pad_1_once_and_writes_the_strobe_twice()
     {

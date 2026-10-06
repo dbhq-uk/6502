@@ -595,7 +595,7 @@ test('each console\'s part is the one ic-table.json gives, read off its own phot
   assert.deepEqual([x1.parts.ntsc.seen, x1.parts.pal.seen], ['I4', 'I3']);
 });
 
-test('every IC has a chip or an always, never both; every chip is one of COUNTED; U7 is pad1 and U8 pad2, inferred from the print', async () => {
+test('every IC has a chip or an always, never both; every chip is one of COUNTED; U7 is pad1 and U8 pad2, by the print, checked in task 6', async () => {
   for (const ic of ics) {
     assert.ok((ic.chip === null) !== (ic.always === null), `${ic.ref}: chip ${ic.chip}, always ${ic.always}`);
     if (ic.chip !== null) assert.ok(COUNTED.includes(ic.chip), `${ic.ref}: ${ic.chip}`);
@@ -606,7 +606,7 @@ test('every IC has a chip or an always, never both; every chip is one of COUNTED
   assert.deepEqual(ics.filter((i) => i.chip).map((i) => i.chip).sort(), [...COUNTED].sort(), 'each counter marks one IC');
   for (const ref of ['U7', 'U8']) {
     const t = icTable.ics.find((i) => i.ref === ref);
-    assert.equal(t.port.inferred, true, `${ref}: the port it serves is inferred, and task 6 checks it`);
+    assert.equal(t.port.inferred, true, `${ref}: the port it serves is inferred: checked against the wiki and the redrawing in task 6, not traced on the scan`);
     assert.equal(t.port.value, ref === 'U7' ? 1 : 2);
   }
   assert.match(parts.chipInferred, /inferred/);

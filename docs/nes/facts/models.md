@@ -152,8 +152,9 @@ the PAL CPU also on I6. The marking is the part's top line; date codes left out.
 - **U7 and U8 on the CPU-07 are MN74HC368s** (Panasonic's, by the MN prefix [inferring]), where the CPU-10's
   print and the redrawing say 40H368 (ic-table.json's pinout source is
   Toshiba's TC40H368, the 74LS368's pinout). Which controller port each serves
-  is still inferred from the print, "CI" and "CII"; task 6 checks it (it
-  did, on 6 October 2026: "What the counters count", below).
+  was inferred from the print, "CI" and "CII", and was checked in task 6, on
+  6 October 2026, against the nesdev wiki and the KiCad redrawing's nets
+  ("What the counters count", below); it is not traced on the scan.
 - **The CPU-07 differs from the CPU-10 in its passives, not its chips.** Every
   IC and connector of the CPU-07 sits on the CPU-10 footprint of the same
   reference (each IC within 0.44 mm, held out, on I4 and on I5). Printed on

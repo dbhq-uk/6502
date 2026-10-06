@@ -2017,7 +2017,11 @@ The OpenTendo redrawing (I2) joins the two: U7's two enables are on the net
 35. So U7 is `Pad1` and U8 `Pad2`, as inferred. The wiki does not contradict
 it, so `ChipAt`, the plan's mapping and `parts.json`'s `chip` stand. The nets
 are the redrawing's, a cross-check, not traced on the scan, so the `inferred`
-flag in `parts.json` and `ic-table.json` stays.
+flag in `parts.json` and `ic-table.json` stays. After review its sentence,
+`CHIP_INFERRED` in `tools/nes-model/board_parts.py`, says it was checked and
+how, and the two files were written again by
+`cd tools/nes-model && NES_MODEL_INPUTS=/tmp/nes-inputs nice -n 10 /tmp/nesvenv/bin/python board_parts.py`;
+only that sentence changed in them.
 
 ### How it went in
 
@@ -2049,7 +2053,11 @@ flag in `parts.json` and `ic-table.json` stays.
   adds no cycle; two frames of the bundled homebrew talk to the PPU, in both
   regions. Red: first the build failed for want of `NesChip`; then, with
   `NesBus.Accesses` in place and no `Note` yet, 7 of the 30 failed. Green:
-  all 30, then the NES project's 1,533.
+  all 30, then the NES project's 1,533. After review, one more, in four
+  cases: the CPU halted by OAM DMA on a read of `$2002` or `$4016` counts
+  once for each repeat of that read (one or two, by the cycle the DMA
+  starts on) and once for its own. A mutation that counted a repeated read
+  once failed it in the two cases with two repeats; restored, 1,537 pass.
 - The page: six tests drive `nes.js` from `prepare` to running, in a fake
   browser with a fake .NET runtime and the panel test's made-up host. Red
   against the script as it was: all six failed. Green: 33 of 33 in the file.
@@ -2103,15 +2111,29 @@ a load average of 8 or less, in times real time:
 | NTSC | 2.12 | 2.09 | 1.000 | 8 of 20 | 09:03 to 09:05, 2.86 to 7.39 |
 
 Four other sets, whose loads went over 8 (to 8.4, 11.4, 11.1 and 21), are
-not used; their per-round medians were 1.015, 1.009, 1.014 and 1.026. **No
-slowdown is measurable**: half the rounds go each way, and the medians are
-within the noise of a round, about 3 to 5 per cent either way. That is what
-the code predicts: the counting runs only on an access to a counted chip,
-about 108 thousand of SNOW's 1.79 million cycles in a timed run, a few
-nanoseconds each, well under a tenth of a per cent. The absolute figures are
-half those of a quiet day (native NTSC 4.00 on 5 October), which is the
-host's load, not the code. The browser builds were not timed: the change is
-the same C# in both, and the browser would add the same noise.
+not used; their per-round medians were 1.015, 1.009, 1.014 and 1.026.
+
+**The per-round ratio is the measure, not the medians.** In each round the two
+builds ran at once on the same host, so the load that slowed one slowed the
+other, and the ratio of the round's two medians takes it out. The medians over
+all of a set's runs do not: their difference, 2.19 to 2.14 on PAL, is minus
+2.3 per cent, past the plan's 2 per cent bar, but it mixes rounds run under
+different loads, and the ratios of single rounds run from 0.84 to 1.61 (PAL)
+and 0.89 to 1.08 (NTSC). The review took bootstrap 90 per cent intervals for
+the median ratio, after over before: PAL alone 0.967 to 1.013, so PAL alone
+cannot rule out a slowdown of 3 per cent; NTSC 0.987 to 1.012; the 40 rounds
+used 0.983 to 1.010; all 120 rounds 1.000 to 1.015.
+
+So: **no slowdown measurable, to within about 2 per cent, paired under load.**
+That is what the code predicts: the counting runs only on an access to a
+counted chip, about 108 thousand of SNOW's 1.79 million cycles in a timed run,
+a few nanoseconds each, well under a tenth of a per cent. The absolute figures
+are half those of a quiet day (native NTSC 4.00 on 5 October), which is the
+host's load, not the code. The browser builds were not timed.
+
+**Owed.** Task 6's step 5 asks for the README's method on a quiet machine, and
+this is not that. It is owed before the pull request merges: the plan's
+Deferred list and its final pass (task 10, step 3) now carry it, dated.
 
 The machine's headroom is unchanged by this: its quiet figure is 2.82 times
 real time on NTSC and 3.24 on PAL in the browser compiled ahead of time (5
@@ -2146,7 +2168,15 @@ and added to rather than renamed:
   again), and after a new cartridge goes in while the machine runs (a new
   machine), with `nes:region` first when the new cartridge's file names the
   other region. Without that the model's next difference would be negative
-  (Review Focus 1).
+  (Review Focus 1). After review, `nes:start` also follows a change of
+  region from the control, after its `nes:region`: a region change builds a
+  new machine, and without it a model taking its baseline on `nes:start`
+  kept a stale one. The order is the region first, so the model redraws,
+  then the start, as for a new cartridge; the test checks the order both
+  ways, NTSC to PAL and back. A cartridge that Start puts in may name the
+  other region from the one the control showed before Start, and no
+  `nes:region` is sent for that; the script's header says a model reads
+  `region()` again on `nes:start`, which was simpler than a second event.
 - **`reset()` and the Reset button are one function**, so each does what the
   other does, and both dispatch `nes:reset`.
 

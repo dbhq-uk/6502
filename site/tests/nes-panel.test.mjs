@@ -558,7 +558,7 @@ test('Power switches the machine off and on, which starts its counters again, so
   assert.equal(panel.nes.running(), true);
 });
 
-test('a region change dispatches nes:region in lower case once the new machine runs, and region() follows', async (t) => {
+test('a region change dispatches nes:region in lower case once the new machine runs, then nes:start, as its counters start from zero; region() follows', async (t) => {
   const host = pageHost();
   const { panel, events, radios, start } = await nesPage(t, host);
   await start();
@@ -566,14 +566,15 @@ test('a region change dispatches nes:region in lower case once the new machine r
   radios[0].checked = false;
   radios[1].checked = true;
   radios[1].dispatchEvent(new Event('change'));
-  // The event came after the host had loaded the machine in PAL.
-  assert.deepEqual(events, [['nes:region', { region: 'pal' }, 'PAL']]);
+  // The events came after the host had loaded the machine in PAL: the region first, so a model
+  // redraws, then the start, so it takes its baseline from the new machine's counters.
+  assert.deepEqual(events, [['nes:region', { region: 'pal' }, 'PAL'], ['nes:start', null, 'PAL']]);
   assert.deepEqual(host.calls.filter((c) => c[0] === 'Load').at(-1), ['Load', 'PAL', 48_000]);
   assert.equal(panel.nes.region(), 'PAL');
   radios[1].checked = false;
   radios[0].checked = true;
   radios[0].dispatchEvent(new Event('change'));
-  assert.deepEqual(events.at(-1), ['nes:region', { region: 'ntsc' }, 'NTSC']);
+  assert.deepEqual(events.slice(2), [['nes:region', { region: 'ntsc' }, 'NTSC'], ['nes:start', null, 'NTSC']]);
 });
 
 test('a new cartridge while the machine runs is a new machine: nes:start, and nes:region first when its region is the other', async (t) => {

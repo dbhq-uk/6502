@@ -98,14 +98,18 @@
 //   nes:ready      once running, as panel.nes gains host, stepTo and play.
 //   nes:start      a machine is running with its counters from zero: after
 //                  Start, after Power and stepTo (both switch it off and on),
-//                  and after a new cartridge goes in while it runs. A model
-//                  takes a fresh baseline for accessCounts() on it.
+//                  after a new cartridge goes in while it runs, and after a
+//                  change of region (after its nes:region). A model takes a
+//                  fresh baseline for accessCounts() on it, and reads
+//                  region() again: the cartridge Start puts in may name the
+//                  other region from the one the control showed before, and
+//                  no nes:region is sent for that.
 //   nes:reset      after every reset, the Reset button's and reset()'s alike.
 //                  The counters carry on.
 //   nes:region     detail { region: 'ntsc' | 'pal' }, lower case: after a
 //                  change of region has restarted the machine and it runs,
 //                  from the control or a new cartridge whose file names the
-//                  other region. Its counters start from zero, as on nes:start.
+//                  other region. nes:start follows it.
 import { startMachine } from '/machine-host.js';
 import { BUTTONS, KEYS, GAMEPAD_BUTTONS } from '/nes-keys.js';
 
@@ -484,7 +488,9 @@ async function run(panel, say) {
       }
       loaded(result);
       regionLine.textContent = regionChangeLine(result);
+      // A new machine: the region first, so a model redraws, then its counters from zero.
       announceRegion(panel, region);
+      announce(panel, 'start');
     });
   }
   const line = panel.querySelector('[data-nes-power-line]');

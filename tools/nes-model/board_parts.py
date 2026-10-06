@@ -677,8 +677,9 @@ PASSIVE_MM = {
 # `chip` names the counter (task 6's NesChip, in COUNTED's order) that marks it;
 # `always` says why an IC is never marked. U7 and U8 are the controller ports'
 # buffers by the board's print, "40H368(CI)" and "40H368(CII)"; that CI and CII
-# are ports one and two, so $4016 and $4017, is inferred from the names, and
-# task 6 checks it against the nesdev wiki. U9 is the hex inverter that, by the
+# are ports one and two, so $4016 and $4017, was checked in task 6 (6 October
+# 2026) against the nesdev wiki and the KiCad redrawing's nets, and is still
+# inferred, as it is not traced on the scan. U9 is the hex inverter that, by the
 # KiCad redrawing's nets (read 5 October 2026, a cross-check, not the scan),
 # runs the lockout chips' 4 MHz clock with X2 and buffers it to U10 and the
 # cartridge, inverts the PPU's address line A13 for the cartridge and the reset
@@ -689,8 +690,9 @@ PASSIVE_MM = {
 CHIP = {'U6': 'apu', 'U5': 'ppu', 'U7': 'pad1', 'U8': 'pad2'}
 ALWAYS_OF = {'U1': 'ram', 'U4': 'ram', 'U2': 'latch', 'U3': 'decoder', 'U10': 'lockout', 'U9': 'inverter'}
 ALWAYS = ALWAYS + ('inverter',)
-CHIP_INFERRED = ('U7 is pad1 and U8 pad2 by the board\'s print, "40H368(CI)" and "40H368(CII)"; that CI and CII are controller ports one '
-                 'and two, so the reads of $4016 and $4017, is inferred from the names, and task 6 checks it against the nesdev wiki')
+CHIP_INFERRED = ('U7 is pad1 and U8 pad2 by the board\'s print, "40H368(CI)" and "40H368(CII)"; checked on 6 October 2026: the nesdev '
+                 'wiki gives the read of $4016 /OE1 and of $4017 /OE2 (Input devices, CPU pinout), and the KiCad redrawing (I2) puts '
+                 'U7\'s enables on /OE1 and U8\'s on /OE2; still inferred, as it is not traced on the scan')
 
 # Each IC's part on each console, read off the photographs on 5 October 2026,
 # each a crop of the part looked at (the journal lists the crops): NTSC on I4,
