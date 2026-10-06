@@ -125,7 +125,7 @@ outside's, which takes from `nes.webp`, `nes-rear-right.webp`, `nes-pal-front.we
 
 | | |
 |---|---|
-| What | An original Nintendo Entertainment System, the North American console, seen from above and behind and a little from the right on white: the rear with its three connectors in a recess at the lower left, the top shell's black band of vents and the cartridge slot's lid |
+| What | An original Nintendo Entertainment System, the North American console, seen from above and behind and a little from the right on white: the rear with its three connectors in a recess at the lower left, the top shell's block of vents between two black end blocks and the cartridge slot's lid |
 | Source | Wikimedia Commons, [`File:Nintendo-Entertainment-System-NES-Console-BR.jpg`](https://commons.wikimedia.org/wiki/File:Nintendo-Entertainment-System-NES-Console-BR.jpg), the photographer's own work |
 | Author | Evan-Amos, as the file page names him |
 | Licence | Public domain, as the file page states it: the photographer's `{{PD-self}}` release ("I, the copyright holder of this work, release this work into the public domain. This applies worldwide."). Checked on Commons' API on 6 October 2026 (`LicenseShortName` is `Public domain`). No credit is owed; the page gives one anyway |
