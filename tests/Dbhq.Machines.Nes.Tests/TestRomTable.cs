@@ -318,13 +318,7 @@ public static class TestRomTable
         },
     };
 
-    public static void AssertPpuVblNmiSinglePasses(string single)
-    {
-        BlarggResult result = Run($"ppu_vbl_nmi/rom_singles/{single}.nes", Region.Ntsc, Budget);
-
-        Assert.False(result.TimedOut, $"{single} gave no result in {Budget} cycles (status {result.Status}). Its text:\n{result.Text}");
-        Assert.True(result.Status == 0, $"{single} reported status {result.Status} after {result.Cycles} cycles. Its text:\n{result.Text}");
-    }
+    public static void AssertPpuVblNmiSinglePasses(string single) => AssertNtscSingleReportsAPass("ppu_vbl_nmi", single);
 
     // The 2005 ROMs that report in $F8 and print PASSED. The readmes of sprite_hit_tests and
     // sprite_overflow_tests say both folders test "the NTSC NES PPU", so they run on NTSC;
@@ -343,13 +337,7 @@ public static class TestRomTable
 
     // apu_test's readme does not name a region; its timings (29831 in 6-irq_flag_timing) are the
     // NTSC frame counter's, so it runs on NTSC.
-    public static void AssertApuTestSinglePasses(string single)
-    {
-        BlarggResult result = Run($"apu_test/rom_singles/{single}.nes", Region.Ntsc, Budget);
-
-        Assert.False(result.TimedOut, $"{single} gave no result in {Budget} cycles (status {result.Status}). Its text:\n{result.Text}");
-        Assert.True(result.Status == 0, $"{single} reported status {result.Status} after {result.Cycles} cycles. Its text:\n{result.Text}");
-    }
+    public static void AssertApuTestSinglePasses(string single) => AssertNtscSingleReportsAPass("apu_test", single);
 
     public static void AssertDmcDmaDuringRead4RomPrintsAnOutputItsSourceAccepts(string rom, string[] accepted)
     {
@@ -472,13 +460,7 @@ public static class TestRomTable
         Assert.Equal("cpu_dummy_reads\nPassed", result.Text);
     }
 
-    public static void AssertMmc3Test2SinglePasses(string single)
-    {
-        BlarggResult result = Run($"mmc3_test_2/rom_singles/{single}.nes", Region.Ntsc, Budget);
-
-        Assert.False(result.TimedOut, $"{single} gave no result in {Budget} cycles (status {result.Status}). Its text:\n{result.Text}");
-        Assert.True(result.Status == 0, $"{single} reported status {result.Status} after {result.Cycles} cycles. Its text:\n{result.Text}");
-    }
+    public static void AssertMmc3Test2SinglePasses(string single) => AssertNtscSingleReportsAPass("mmc3_test_2", single);
 
     public static void AssertMmc3RomOfTheOtherRevisionStillFailsAsWrittenDown(string rom, bool screen, int statusNow, string printsNow, string cause, Action<string> log)
     {
@@ -491,6 +473,16 @@ public static class TestRomTable
         Assert.False(result.TimedOut, $"{rom} gave no result in {Budget} cycles. Its text:\n{result.Text}");
         Assert.False(result.Status == (screen ? 1 : 0), $"{rom} now passes: move it out of the known failures and its known-differences entry. Its text:\n{result.Text}");
         Assert.True(result.Status == statusNow && result.Text.Contains(printsNow, StringComparison.Ordinal), $"{rom} fails differently from the record (status {statusNow}, {printsNow}): status {result.Status}. Its text:\n{result.Text}");
+    }
+
+    // A single from a folder's rom_singles/, run on NTSC by the $6000 protocol: it must give a
+    // result within the budget, and the result must be status 0.
+    private static void AssertNtscSingleReportsAPass(string folder, string single)
+    {
+        BlarggResult result = Run($"{folder}/rom_singles/{single}.nes", Region.Ntsc, Budget);
+
+        Assert.False(result.TimedOut, $"{single} gave no result in {Budget} cycles (status {result.Status}). Its text:\n{result.Text}");
+        Assert.True(result.Status == 0, $"{single} reported status {result.Status} after {result.Cycles} cycles. Its text:\n{result.Text}");
     }
 
     // Every passing row of every table above, named by its file and region, each with the check

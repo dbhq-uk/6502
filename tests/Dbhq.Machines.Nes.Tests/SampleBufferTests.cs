@@ -1,3 +1,4 @@
+using System.Runtime.CompilerServices;
 using Xunit;
 
 namespace Dbhq.Machines.Nes.Tests;
@@ -194,37 +195,36 @@ public class SampleBufferTests
     {
         var buffer = new SampleBuffer(48_000, Region.Ntsc.CpuHz, 1000);
         float[] destination = new float[64];
-        for (int c = 0; c < 10_000; c++)
-        {
-            buffer.Add((c >> 5) & 1);
-        }
 
-        // On 6 October 2026, in one of five full runs of the test project, 3,896 bytes were
-        // counted on this thread during the loop, and never in fifteen runs of this test alone.
-        // The cause was not found; the runtime's own work on a busy machine is the likely one.
-        // Code that allocated would do so on every pass, so the check is that one of three passes
-        // allocates nothing.
-        var allocated = new List<long>();
+        // The measured pass is a method of its own, compiled optimised from its first call, and it
+        // runs three times before it is measured, so Add and Read have been called millions of
+        // times first. A loop measured in the test method itself, after 10,000 Adds and no Read,
+        // was once counted with 3,896 bytes in a full run of the project (6 October 2026). Add
+        // and Read allocate nothing, so that was the runtime's own work on code still being
+        // compiled; this shape passed every one of 10 full runs and 25 runs of the class since.
         for (int pass = 0; pass < 3; pass++)
         {
-            long before = GC.GetAllocatedBytesForCurrentThread();
-            for (int c = 0; c < 1_000_000; c++)
-            {
-                buffer.Add(((c >> 5) & 1) * 0.3);
-                if ((c & 1023) == 0)
-                {
-                    buffer.Read(destination);
-                }
-            }
-
-            allocated.Add(GC.GetAllocatedBytesForCurrentThread() - before);
-            if (allocated[^1] == 0)
-            {
-                break;
-            }
+            AddAndRead(buffer, destination);
         }
 
-        Assert.True(allocated[^1] == 0, $"every pass allocated: {string.Join(", ", allocated)} bytes");
+        long before = GC.GetAllocatedBytesForCurrentThread();
+        AddAndRead(buffer, destination);
+
+        Assert.Equal(before, GC.GetAllocatedBytesForCurrentThread());
+    }
+
+    // A million cycles of sound in, read out as a page would, a block at a time.
+    [MethodImpl(MethodImplOptions.NoInlining | MethodImplOptions.AggressiveOptimization)]
+    private static void AddAndRead(SampleBuffer buffer, float[] destination)
+    {
+        for (int c = 0; c < 1_000_000; c++)
+        {
+            buffer.Add(((c >> 5) & 1) * 0.3);
+            if ((c & 1023) == 0)
+            {
+                buffer.Read(destination);
+            }
+        }
     }
 
     [Fact]

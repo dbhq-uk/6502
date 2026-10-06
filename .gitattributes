@@ -1,2 +1,4 @@
 * text=auto eol=lf
 roms/** binary
+# The provenance and rights of the ROMs are text, and their changes should show in a diff.
+roms/README.md -binary diff text

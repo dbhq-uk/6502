@@ -74,6 +74,12 @@ about November 2010, released in 2011, and fixed in 2015. His notes for Lawn
 Mower add that Lan Master was made for the NES Coding Competition of 2011. A
 routing puzzle: turn the pieces of wire until every computer is connected.
 
+**The 2015 fix is rainwarrior's.** The notes say: "In 2015 rainwarrior reported
+a bug with entering the pause mode that could bring ocassional on-screen
+garbage, and provided a fix, so the game and the source code was updated." The
+file here is that fixed build, which Shiru shipped in his own archive beside the
+same public-domain manual.
+
 **Where it came from.** Shiru's own site lists it on its software page,
 `https://shiru.untergrund.net/software.shtml`, as
 `https://shiru.untergrund.net/files/nes/lan_master.zip`. On 6 October 2026 the

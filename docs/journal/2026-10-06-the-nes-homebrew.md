@@ -56,7 +56,7 @@ Neither summary was used.
 | Zooming Secretary | Shiru and PinWizz | 0 | The manual: "released under Creative Commons Attribution license", "CC BY 2011 Alexei Bespalko and Shiru" | Qualifies, with a credit to both authors. Runner-up |
 | SNOW (`other/snow.nes`) | Repulse (Tennessee Carmel-Veilleux) | 0 | `other/snow.txt`, "Distribution License": "You can distribute this intro far and wide in both ROM and Cartridge form. HOWEVER, you cannot sell the data itself, you can only sell the medium." | Qualifies as "free to distribute", with a no-selling term. Not chosen (below) |
 | Duelito (The Duel) | Hassán Hernández Benítez | 0 | Both readmes give the copyright, how to play and thanks, and nothing about copying | Does not qualify |
-| Blade Buster | High Level Challenge | 4 | Its readme (OpenEmu's copy of `BladeBuster.txt`) under "紹介、転載について": "ファイルへの直接リンクや、ファイルの転載はご遠慮ください" (please do not link to the file directly or repost it), and "無許可での商用利用・転用を禁じます" | Does not qualify: reposting is refused |
+| Blade Buster | High Level Challenge | 4 | Its readme (OpenEmu's copy of `BladeBuster.txt`) under "紹介、転載について": "ファイルへの直接リンクや、ファイルの転載はご遠慮ください" (please do not link to the file directly or repost it), and "無許可での商用利用・転用を禁じます" (commercial use or reuse without permission is forbidden) | Does not qualify: reposting is refused |
 | CMC'80s, Sayoonara!, and Chris Covell's other demos | Chris Covell | 0 and 3 | Both readmes describe the demo and ask for e-mail; neither says anything about copying. Sayoonara's music is "ripped from Ferrari Grand Prix" | Do not qualify |
 | Years Behind | Retrocoders | 1 | The scene.org archive holds the ROM and scene.org's own text, no readme | Does not qualify |
 | Quantum Disco Brothers | wAMMA | 3 | `wamma.nfo` in the archive: credits and thanks, nothing about copying | Does not qualify |
@@ -133,7 +133,11 @@ turn one way, B the other way, Select half way round.
 `NES_RECORD=1` is set, and then writes `machines/nes/expected-frames.json`
 (the ROM's path, N, and each region's SHA-256 of the frame's bytes in the order
 a canvas holds them: red, green, blue, alpha, row by row) and a PNG of each
-region's frame to `TestResults/nes/`. The file is never edited by hand.
+region's frame to `TestResults/nes/`. The file is never edited by hand, and
+the recorder checks that: run without the variable, it compares the committed
+file byte for byte with what it would write, and fails on any difference. It
+does that rather than skip itself, because the site's results refuse any
+skipped test (`validateResults` in `site/src/lib/results.mjs`).
 
 Recorded on 6 October 2026 at about 00:39 UTC with
 
@@ -176,6 +180,11 @@ run is made once per region and kept, since the machine is deterministic.
   silent side with nestest and prints both
   (`dotnet test ... --filter "FullyQualifiedName~BootTests" --logger
   "console;verbosity=detailed"`).
+- **The sample count is the regions' timing check.** The two recorded hashes
+  are equal, because both regions show the same picture at frame 120, so the
+  picture does not tell them apart. The count does: 120 frames are about 95.8
+  thousand samples at 48 kHz on NTSC and 115.2 thousand on PAL, each within one
+  frame's samples, so a region that ran at the other's frame rate fails it.
 
 The first run of the frame tests, before the recording, failed as it should,
 saying the expected file does not exist and how to make it.
@@ -225,11 +234,26 @@ now share the ROM runs across two threads.
 In the first full run after the change, `SampleBufferTests.AddingAllocatesNothing`
 (task 9) failed: 3,896 bytes were counted on its thread during a loop that
 allocates nothing. It passed in the next three full runs and in fifteen runs on
-its own. The cause was not found; the runtime's own work on a busy machine is
-the likely one, and the new parallel work in the suite made it more likely to
-show. Code that allocated would allocate on every pass, so the test now makes up
-to three passes and asserts that one of them allocated nothing, printing all of
-them if none did.
+its own. `Add` and `Read` allocate nothing, so the bytes were the runtime's own
+work: the measured loop was in the test method itself, after only 10,000 calls
+to `Add` and none to `Read`, so it ran while that code was still being compiled
+and recompiled, and the busier suite made that more likely to land inside the
+measurement.
+
+My first change made the test pass if one of three passes allocated nothing. The
+review rightly called that a retry. The test now warms `Add` and `Read` in the
+same loop as the measurement, three passes of a million cycles, and measures one
+more pass in a method of its own, marked `NoInlining` and
+`AggressiveOptimization` so that it is compiled optimised once, before it runs;
+the check is strict again (`Assert.Equal` of the counts before and after). I did
+not reproduce the original failure on purpose: in a scratch program, the old
+loop counted 0 bytes in 20 runs out of 20 with three other threads compiling
+code beside it, and 0 in 20 with tiered compilation off. So the cause is a
+reasoned one, not a proven one. What was checked is the new shape, on 6 October
+2026: 10 full runs of the NES test project (`dotnet test
+tests/Dbhq.Machines.Nes.Tests -c Release --no-build`, each 1,461 passed), 10
+runs of `SampleBufferTests` alone, 10 beside a run of `BlarggTests` in another
+process, and 5 with `DOTNET_TieredCompilation=0`, all passed.
 
 ## Left for task 15
 

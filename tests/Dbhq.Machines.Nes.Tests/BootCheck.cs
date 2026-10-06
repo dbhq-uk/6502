@@ -120,7 +120,10 @@ public static class BootCheck
 
         // The run is the time from power on to the end of the frame, which is the frames at the
         // region's rate. The tolerance is one frame's samples: power on starts a few dots into
-        // the first frame, and the resampler holds back its latency.
+        // the first frame, and the resampler holds back its latency. This count is the check that
+        // each region ran at its own frame rate (about 95.8 thousand samples on NTSC against 115.2
+        // thousand on PAL for the same 120 frames), which the recorded picture cannot be: the two
+        // regions' frames at N are the same picture, so their hashes are equal.
         double perFrame = new NesOptions().SampleRate / region.FramesPerSecond;
         long expected = (long)Math.Round(Frames * perFrame);
         long tolerance = (long)Math.Ceiling(perFrame);

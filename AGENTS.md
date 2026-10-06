@@ -27,7 +27,7 @@ tools/                      # scripts that make test data and check assumptions
   Dbhq.Cpu6502.ChipTrace/   # records the core's bus cycles for the site's chip page
   probes/                   # scripts that check assumptions against test data
   kim1-model/               # offline Python that measures the KIM-1's 3D model from photographs; its outputs are committed
-roms/                       # system ROMs with their provenance and rights in roms/README.md: kim-1/, bbc-micro/, and nes/, the NES's bundled homebrew, and nes/ for the bundled homebrew (the NES's task 13)
+roms/                       # system ROMs with their provenance and rights in roms/README.md: kim-1/, bbc-micro/, and nes/ (the NES's bundled homebrew, Lan Master)
 NOTICE.md                   # anything else taken from outside under other terms: the teletext glyph table (CC0)
 docs/bbc-micro/facts/       # the BBC Micro's fact sheets, written before its code
 docs/nes/facts/             # the NES's fact sheets, from the nesdev wiki, written before its code

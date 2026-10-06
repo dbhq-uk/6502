@@ -48,6 +48,9 @@ public sealed class BootTests(ITestOutputHelper output)
         BootCheck.AssertPictureIsNotBlank(BootCheck.RegionNamed(region));
     }
 
+    // The sample count after N frames is the regions' timing check: 120 frames are about 95.8
+    // thousand samples on NTSC and 115.2 thousand on PAL. The recorded hashes are equal, because
+    // both regions show the same picture at N, so they do not tell the regions apart; this does.
     [Theory]
     [MemberData(nameof(BootCheck.Regions), MemberType = typeof(BootCheck))]
     public void TheTitleMakesSoundAtTheSampleRate(string region)
@@ -74,27 +77,20 @@ public sealed class BootTests(ITestOutputHelper output)
     /// The recorder. With <c>NES_RECORD=1</c> it writes <c>machines/nes/expected-frames.json</c>
     /// from the machine's own frames, and a PNG of each region's frame to <c>TestResults/nes/</c>
     /// for a person to look at before the file is committed: if the picture is wrong, the machine
-    /// is wrong. Without it, it does nothing. Run: <c>NES_RECORD=1 dotnet test --filter Record</c>.
+    /// is wrong. Run: <c>NES_RECORD=1 dotnet test --filter Record</c>.
     /// </summary>
+    /// <remarks>
+    /// Without the variable it checks that the committed file is, byte for byte, what it would
+    /// write, so the file was made by the recorder and not edited by hand (AGENTS.md rule 5). It
+    /// is not skipped instead: the site's results refuse any skipped test.
+    /// </remarks>
     [Fact]
     public void RecordTheBootFrames()
     {
-        if (Environment.GetEnvironmentVariable("NES_RECORD") != "1")
-        {
-            output.WriteLine("NES_RECORD is not 1, so nothing was recorded.");
-            return;
-        }
-
-        string pictures = Path.Combine(RepoPaths.Root, "TestResults", "nes");
-        Directory.CreateDirectory(pictures);
         var hashes = new JsonObject();
         foreach (Region region in new[] { Region.Ntsc, Region.Pal })
         {
-            BootRun run = BootCheck.Run(region);
-            hashes[region.Name] = run.FrameSha256;
-            string png = Path.Combine(pictures, $"boot-{region.Name}-frame-{BootCheck.Frames}.png");
-            Png.Write(png, run.Pixels, FrameBuffer.Width, FrameBuffer.Height);
-            output.WriteLine($"{region.Name}: {run.FrameSha256}, the picture in {png}");
+            hashes[region.Name] = BootCheck.Run(region).FrameSha256;
         }
 
         var file = new JsonObject
@@ -103,7 +99,26 @@ public sealed class BootTests(ITestOutputHelper output)
             ["frames"] = BootCheck.Frames,
             ["hashes"] = hashes,
         };
-        File.WriteAllText(BootCheck.ExpectedPath, file.ToJsonString(new JsonSerializerOptions { WriteIndented = true }) + "\n");
+        string text = file.ToJsonString(new JsonSerializerOptions { WriteIndented = true }) + "\n";
+
+        if (Environment.GetEnvironmentVariable("NES_RECORD") != "1")
+        {
+            Assert.True(File.Exists(BootCheck.ExpectedPath), $"{BootCheck.ExpectedPath} does not exist: record it with NES_RECORD=1 dotnet test --filter Record");
+            Assert.Equal(text, File.ReadAllText(BootCheck.ExpectedPath));
+            return;
+        }
+
+        string pictures = Path.Combine(RepoPaths.Root, "TestResults", "nes");
+        Directory.CreateDirectory(pictures);
+        foreach (Region region in new[] { Region.Ntsc, Region.Pal })
+        {
+            BootRun run = BootCheck.Run(region);
+            string png = Path.Combine(pictures, $"boot-{region.Name}-frame-{BootCheck.Frames}.png");
+            Png.Write(png, run.Pixels, FrameBuffer.Width, FrameBuffer.Height);
+            output.WriteLine($"{region.Name}: {run.FrameSha256}, the picture in {png}");
+        }
+
+        File.WriteAllText(BootCheck.ExpectedPath, text);
         output.WriteLine($"wrote {BootCheck.ExpectedPath}");
     }
 }
