@@ -1,7 +1,7 @@
 ---
 title: "The reset button in the middle of sprite evaluation"
 date: 2026-10-06
-summary: "A fault pass in the lazy chips work found a crash that has been in the NES's PPU since it was built: press reset in the middle of sprite evaluation, switch rendering on after dot 1 of a line with sprites in range, and evaluation writes past the 32 bytes of secondary OAM and stops the machine. The test came first and failed with the exception. The fix wraps the place in secondary OAM at 32, as the chip's 5-bit counter does, rather than clearing evaluation in the reset, which the sheet does not say. Nothing else changed: the whole NES project, the community ROMs and the differential's output are as they were."
+summary: "A fault pass in the lazy chips work found a crash that has been in the NES's PPU since it was built: press reset in the middle of sprite evaluation, switch rendering on after dot 1 of a line with sprites in range, and evaluation writes past the end of secondary OAM and stops the machine. The test came first and failed with the exception. The fix wraps the place in secondary OAM, as the chip's counter does, rather than clearing evaluation in the reset, which the sheet does not say. Nothing else changed: the whole NES project, the community ROMs and the differential's output are as they were."
 order: 37
 ---
 
