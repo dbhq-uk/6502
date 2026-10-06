@@ -99,7 +99,7 @@ live rates inside.
 
 | Part | Shows | Source |
 |---|---|---|
-| Power LED | lit while the machine runs | the page's running state, `panel.nes.running`; no host call |
+| Power LED | lit while the machine runs | the page's running state, `panel.nes.running()`; no host call |
 | POWER button | in while the machine runs, out before Start; the NES-001's button latches [guessing - verify against the photographs in task 8] | the same |
 | RESET button | goes down for 140 ms on `nes:reset` | the page |
 
@@ -122,8 +122,10 @@ apart by address, and the model shows them. `NesBus` gains one counter per
 
 `Peek` counts nothing and no cycle is added. The host gains `AccessCounts()`
 (wrapping counters, so a reader takes differences); `panel.nes` gains
-`accessCounts()`, `running`, `region` (so a view loaded after a region change
-draws the region the page has now) and `reset()`, and the page announces
+`accessCounts()`, `running()`, `region()` (so a view loaded after a region change
+draws the region the page has now) and `reset()`, all functions (revised 6 Oct
+2026, after the machine's script was read: `region()` gives `'NTSC'` or `'PAL'`
+as the host does, and a view lower-cases it), and the page announces
 `nes:start`, `nes:reset` and `nes:region`. Every quarter second the model marks each chip whose count
 moved, and the legend shows each counted chip's accesses per second, read from
 the same differences. The words say what a mark means: "read or written by the

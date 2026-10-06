@@ -1983,3 +1983,183 @@ inside alone first. The BBC Micro can adopt the same section later. The plan
 waits for" and the decisions table) now say so. Cost if wrong: if the BBC Micro's
 models are later built with different tabs, the two have to be reconciled; the
 design says the NES's is built to its design to avoid that.
+
+## Task 6: the machine counts which chips the processor talks to, 6 October 2026
+
+The machine's pull request (#55) is merged into this branch, so the inside
+model's live state could be built: the machine counts the CPU's reads and
+writes of each chip it can tell apart by address, and the page hands the counts
+to the model. The plan's code for the counter (`NesChip`, `ChipAccesses` and
+their 19 tests) went in as written.
+
+### The address map, and where each line comes from
+
+Read on 6 October 2026 from the nesdev wiki, each page fetched that day; the
+table, with a source on every row, is in
+[`../nes/facts/models.md`](../nes/facts/models.md), "What the counters count".
+In short: `$2000-$3FFF` is the PPU (the CPU memory map page); `$4000-$4015`
+is the sound unit and OAM DMA on the CPU's own die (the APU registers page and
+the 2A03 page); a write to `$4016` is the CPU's own output latch, OUT0 to OUT2,
+whose OUT0 is the strobe (the CPU pinout page), so it counts as the CPU's, not
+a buffer's; a write to `$4017` is the frame counter; reads of `$4016` and
+`$4017` assert /OE1 and /OE2, controller ports one and two (the Input devices
+and CPU pinout pages). RAM, `$4018-$401F` and the cartridge are not counted.
+
+### Which buffer is which port
+
+The design inferred from the board's print that "40H368(CI)" (U7) is port 1
+and "40H368(CII)" (U8) port 2, and left task 6 to check it against the wiki.
+None of the five wiki pages read names a chip on the board for the ports, so
+the wiki cannot settle it by itself; it does say which CPU pin is which port.
+The OpenTendo redrawing (I2) joins the two: U7's two enables are on the net
+`/~{OE1}` with its inputs on `/4016-D0` to `D4`, U8's on `/~{OE2}` with
+`/4017-D0` to `D4`, and the CPU has `/~{OE1}` on pin 36 and `/~{OE2}` on pin
+35. So U7 is `Pad1` and U8 `Pad2`, as inferred. The wiki does not contradict
+it, so `ChipAt`, the plan's mapping and `parts.json`'s `chip` stand. The nets
+are the redrawing's, a cross-check, not traced on the scan, so the `inferred`
+flag in `parts.json` and `ic-table.json` stays.
+
+### How it went in
+
+- **One place, the I/O decode.** `NesBus.ReadAccess` and `WriteAccess` call
+  `Note` in their two branches for `$2000-$3FFF` and `$4000-$401F`, and
+  nowhere else. RAM and the cartridge, most cycles, pass no new code. The read
+  branch notes before the switch, because the `$4015` case returns early.
+- **OAM DMA needed nothing of its own.** Its 256 writes to `$2004` are made
+  through `Cycle`, so they pass the same decode and count as the PPU's. A read
+  the DMA units repeat while the CPU is halted on it counts each time, as each
+  is a read on the bus.
+- **Power on starts the counters again.** `PowerOn` puts a new `ChipAccesses`
+  on the bus rather than clearing the old one, so the plan's class stayed as
+  written. The reset button keeps them. The host builds a new machine for a
+  new cartridge or a region change, which starts them again too.
+- **The host** gains `[JSExport] int[] AccessCounts()`, the bus's snapshot.
+  In the browser it arrives as an `Int32Array`, a copy, not a JavaScript
+  array: the browser check found that, when its first version asked for an
+  array and failed.
+
+### Tests, red then green
+
+- C#: the 19 tests of the plan, and 11 of the bus: one read of `$2002` adds
+  one to the PPU and nothing else; a peek adds nothing; RAM, the cartridge
+  and the test registers add nothing; OAM DMA from page `$02` adds 256 to
+  `Ppu` and one to `Apu`; `INC $4016` adds one to `Pad1` and two to `Apu`
+  (the NMOS core's two writes); reads of `$4017` are `Pad2` and its write
+  `Apu`; reset keeps the counters and power on starts them at zero; counting
+  adds no cycle; two frames of the bundled homebrew talk to the PPU, in both
+  regions. Red: first the build failed for want of `NesChip`; then, with
+  `NesBus.Accesses` in place and no `Note` yet, 7 of the 30 failed. Green:
+  all 30, then the NES project's 1,533.
+- The page: six tests drive `nes.js` from `prepare` to running, in a fake
+  browser with a fake .NET runtime and the panel test's made-up host. Red
+  against the script as it was: all six failed. Green: 33 of 33 in the file.
+- The browser check now asks the running page for `accessCounts()` twice,
+  half a second apart: four signed 32-bit counters, the PPU's moving.
+
+### Nothing else changed: the fingerprint
+
+The machine's differential check (`bench/nes-speed/differential`, which hashes
+every instruction's registers, cycle and PPU position, every frame's pixels
+and the sound, for every pinned NES test ROM in both regions) on the code
+before, `f9e84b0` exported with `git archive`, and after:
+
+```
+cd bench/nes-speed
+dotnet run -c Release --project differential -- before.txt   # in the export of f9e84b0
+dotnet run -c Release --project differential -- after.txt    # in the worktree
+cmp before.txt after.txt
+```
+
+254 runs each, identical; both files hash to SHA-256
+`ee3d6fca0d9aa82cedd2dd67080ca7ae987b81966e2c00608fda79bbffded918`. The boot
+check's recorded frames (`BootTests`, and the browser check's canvas against
+`machines/nes/expected-frames.json`) match in both regions.
+
+### The speed
+
+No quiet window came. Through the morning of 6 October the host's other
+sessions kept 40 to 50 per cent of its eight CPUs busy (`vmstat`) even when
+the load average read 2 or 3, and it rose past 8 several times. The README's
+method, launches of the native bench run one after another, alternating the
+code before (the `git archive` export of `f9e84b0`) and after, three launches
+of five timed runs each per region, was swamped: one set gave the code after
+27 per cent slower on NTSC and 27 per cent faster on PAL, a few minutes apart.
+
+So the two builds were run **at the same time**, each pinned to its own CPU,
+the CPUs swapped every round, so that both saw the same load:
+
+```
+# each round, from each build's bench/nes-speed, the two at once:
+taskset -c 2 dotnet native/bin/Release/net10.0/Dbhq.Machines.Nes.SpeedNative.dll 5 1790000 <ntsc|pal>   # before
+taskset -c 5 dotnet native/bin/Release/net10.0/Dbhq.Machines.Nes.SpeedNative.dll 5 1790000 <ntsc|pal>   # after
+```
+
+Twenty rounds of five timed runs per set. The sets whose rounds all began at
+a load average of 8 or less, in times real time:
+
+| Region | Before, median | After, median | After over before, per round, median | Rounds the code after was faster | When (UTC), load average |
+|---|---|---|---|---|---|
+| PAL | 2.19 | 2.14 | 0.997 | 10 of 20 | 07:57 to 07:59, 2.09 to 7.96 |
+| NTSC | 2.12 | 2.09 | 1.000 | 8 of 20 | 09:03 to 09:05, 2.86 to 7.39 |
+
+Four other sets, whose loads went over 8 (to 8.4, 11.4, 11.1 and 21), are
+not used; their per-round medians were 1.015, 1.009, 1.014 and 1.026. **No
+slowdown is measurable**: half the rounds go each way, and the medians are
+within the noise of a round, about 3 to 5 per cent either way. That is what
+the code predicts: the counting runs only on an access to a counted chip,
+about 108 thousand of SNOW's 1.79 million cycles in a timed run, a few
+nanoseconds each, well under a tenth of a per cent. The absolute figures are
+half those of a quiet day (native NTSC 4.00 on 5 October), which is the
+host's load, not the code. The browser builds were not timed: the change is
+the same C# in both, and the browser would add the same noise.
+
+The machine's headroom is unchanged by this: its quiet figure is 2.82 times
+real time on NTSC and 3.24 on PAL in the browser compiled ahead of time (5
+October, the speed entry). Under today's load the browser check's speed line
+read "with little to spare in this browser", capacity 1.87 MHz against the
+NES's 1.79, which is the shared host, not the counters.
+
+### How the page's interface was adapted
+
+The plan was written before the machine's panel script existed. Read, it
+already carried `panel.nes = { host, stepTo(n), play(), region() }`, with
+`region()` a function giving `'NTSC'` or `'PAL'` as the host does. Kept so,
+and added to rather than renamed:
+
+- `running()` and `region()` are functions, not the properties the plan
+  named, to match what was there. The plan and the design now say so, dated.
+- **Lower case in one place.** `nes:region`'s detail is `'ntsc'` or `'pal'`,
+  lowered by one function, `announceRegion`. `region()` stays upper case, and
+  a model takes `panel.nes.region().toLowerCase()`.
+- **`panel.nes` exists before Start.** The script set it only once running,
+  so `running()` could not be false before Start, and a model loaded before
+  Start (they load when scrolled to) could not ask the region. Now `prepare`
+  sets `running()` false, `region()` from the region control, `accessCounts()`
+  null and `reset()` doing nothing; Start fills in the rest on the same object.
+- **What "running" means.** True from the moment Start has the machine
+  running. The script never stops it: the page has no power-off, Power and
+  Reset restart the game, a hidden tab only pauses the loop and `stepTo` only
+  holds it, and in each the machine stays on. So once true it stays true
+  until the page is left.
+- **`nes:start` after every fresh set of counters**, not only Start: after the
+  Power button and `stepTo` (both call `PowerCycle`, which starts the counters
+  again), and after a new cartridge goes in while the machine runs (a new
+  machine), with `nes:region` first when the new cartridge's file names the
+  other region. Without that the model's next difference would be negative
+  (Review Focus 1).
+- **`reset()` and the Reset button are one function**, so each does what the
+  other does, and both dispatch `nes:reset`.
+
+### Surprising
+
+- The wiki says which CPU pin is which port but not which chip on the board;
+  the redrawing's nets had to join them.
+- SNOW, the speed workload, reaches a counted chip in about 6 per cent of its
+  cycles, nearly all of them writes to the sound unit (91,011 to `Apu` and
+  16,226 to `Ppu` in 1.79 million NTSC cycles after 5 million to boot, read
+  with the counters themselves on 6 October 2026). Lan Master reads pad 1
+  more often than it touches the sound unit.
+- The JIT's optimised code for `NesBus.Cycle` differs from launch to launch
+  of the same build (6,442 to 7,602 bytes over three launches of the code
+  before, `DOTNET_JitDisasm=Cycle`), which is one reason single launches of
+  the speed bench disagree by a fifth.

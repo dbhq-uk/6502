@@ -152,7 +152,8 @@ the PAL CPU also on I6. The marking is the part's top line; date codes left out.
 - **U7 and U8 on the CPU-07 are MN74HC368s** (Panasonic's, by the MN prefix [inferring]), where the CPU-10's
   print and the redrawing say 40H368 (ic-table.json's pinout source is
   Toshiba's TC40H368, the 74LS368's pinout). Which controller port each serves
-  is still inferred from the print, "CI" and "CII"; task 6 checks it.
+  is still inferred from the print, "CI" and "CII"; task 6 checks it (it
+  did, on 6 October 2026: "What the counters count", below).
 - **The CPU-07 differs from the CPU-10 in its passives, not its chips.** Every
   IC and connector of the CPU-07 sits on the CPU-10 footprint of the same
   reference (each IC within 0.44 mm, held out, on I4 and on I5). Printed on
@@ -218,6 +219,58 @@ day has the command); each is a measurement of that day.
   the oval recess near them show (they are near the rear on O2-FL), and its
   FIG 6 is the case turned over about its left to right axis, the front at
   the top [from O1, O2-FL, O5].
+
+## What the counters count
+
+Read on 6 October 2026 for task 6, from the nesdev wiki's pages named in each
+row, fetched that day. The machine counts the CPU's reads and writes of each
+chip it can be told to reach by address (`NesChip` and `ChipAccesses` in
+`src/Dbhq.Machines.Nes/ChipAccesses.cs`), so the inside model can mark them.
+
+| Address | Access | What it reaches | Counted as | Source |
+|---|---|---|---|---|
+| `$0000-$1FFF` | read, write | the 2 KB of work RAM, and its three mirrors | nothing: in use all the time | [from https://www.nesdev.org/wiki/CPU_memory_map] |
+| `$2000-$2007`, repeated every 8 bytes to `$3FFF` | read, write | the PPU's eight registers | `Ppu` | [from https://www.nesdev.org/wiki/CPU_memory_map] |
+| `$4000-$4013` | read, write | the sound unit's channel registers, on the CPU's own die | `Apu` | [from https://www.nesdev.org/wiki/APU_registers ; https://www.nesdev.org/wiki/CPU_memory_map gives `$4000-$4017` as "APU and I/O registers"] |
+| `$4014` | write | OAM DMA, on the CPU's own die; its 256 writes to `$2004` then reach the PPU | `Apu` for the write, `Ppu` for each of the 256 | [from https://www.nesdev.org/wiki/2A03 , "OAMDMA"] |
+| `$4015` | read, write | the sound unit's status and enables | `Apu` | [from https://www.nesdev.org/wiki/APU_registers] |
+| `$4016` | write | the CPU's output latch, OUT0 to OUT2; OUT0 is the strobe on both controller ports | `Apu` | [from https://www.nesdev.org/wiki/CPU_pinout , OUT0..OUT2; https://www.nesdev.org/wiki/Standard_controller] |
+| `$4016` | read | controller port 1: the read asserts the CPU's /OE1 | `Pad1` | [from https://www.nesdev.org/wiki/Input_devices ; https://www.nesdev.org/wiki/CPU_pinout , /OE1 and /OE2] |
+| `$4017` | write | the sound unit's frame counter | `Apu` | [from https://www.nesdev.org/wiki/APU_registers ; https://www.nesdev.org/wiki/2A03] |
+| `$4017` | read | controller port 2: the read asserts /OE2 | `Pad2` | [from https://www.nesdev.org/wiki/Input_devices ; https://www.nesdev.org/wiki/CPU_pinout] |
+| `$4018-$401F` | read, write | test functions that are normally disabled | nothing | [from https://www.nesdev.org/wiki/CPU_memory_map ; https://www.nesdev.org/wiki/2A03] |
+| `$4020-$FFFF` | read, write | the cartridge | nothing: in use all the time | [from https://www.nesdev.org/wiki/CPU_memory_map] |
+
+- **A read of a write-only register counts.** A read of `$4000-$4014`
+  returns open bus (`bus.md` 3), but its address is on the bus and it is the
+  CPU's own register block, so it counts as `Apu` [inferring]. Programs
+  rarely do it.
+- **What the bus does is what counts.** The bus notes each access in its I/O
+  decode, the one every cycle's access passes through, the DMA units'
+  included. So OAM DMA's writes to `$2004` count as the PPU's, and a read the
+  DMA units repeat while the CPU is halted on it (`bus.md` 6) counts each
+  time, as each is a read on the bus. A peek counts nothing.
+- **Power on starts the counters again; the reset button does not.** The
+  host builds a new machine for a new cartridge or a region change, which
+  starts them again too.
+
+**Which 74HC368 serves which port.** None of the wiki pages read names a chip
+on the board for the ports: the Controller port pinout, Standard controller,
+Controller reading, CPU pinout and Input devices pages say nothing of the
+74HC368 or of U7 and U8 [from those pages, 6 October 2026]. What the wiki does
+say is that reading `$4016` asserts /OE1 and reading `$4017` /OE2, and that
+/OE1 and /OE2 are the controller ports "#1 and #2 respectively" [from
+https://www.nesdev.org/wiki/Input_devices and
+https://www.nesdev.org/wiki/CPU_pinout]. The KiCad redrawing (I2, the SHA-256
+above) joins the two: both enables of U7, printed "40H368(CI)", pins 1 and 15,
+are on the net `/~{OE1}`, its inputs on `/4016-D0` to `/4016-D4` and its
+outputs on `CPU-D0` to `CPU-D4`; U8, "40H368(CII)", has `/~{OE2}` and
+`/4017-D0` to `/4017-D4`; and the CPU, U6, has `/~{OE1}` on pin 36 and
+`/~{OE2}` on pin 35 [from I2, its pads' nets read with a script on 6 October
+2026]. So **U7 serves port 1, the reads of `$4016`, and U8 port 2, the reads
+of `$4017`**, as the print's "CI" and "CII" suggested. The wiki does not
+contradict it, so `ChipAt`, the plan's U7 and U8 and `parts.json`'s `chip`
+stand. The nets are the redrawing's, a cross-check, not traced on the scan.
 
 ## Downloaded for the work
 

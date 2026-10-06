@@ -13,7 +13,9 @@
 // blank; switching the region control says so in the line under it, and the
 // same frame must match again. Then the loop runs on its own: Start pressed
 // through the page's keyboard handling (Enter on the focused screen) must change
-// the picture, the headroom line must appear, and the sound turns on and off.
+// the picture, the counters the board model reads (panel.nes.accessCounts())
+// must be four numbers with the PPU's moving, the headroom line must appear,
+// and the sound turns on and off.
 // Then the cartridge picker: a tiny NROM test cartridge, built here from bytes
 // (never a game), goes in and the screen turns its colour; a file of text and a
 // file over the size limit are each refused with a plain sentence, and the
@@ -172,6 +174,22 @@ export async function checkNes({ browser, watch, problems, origin }) {
   console.log(`nes: frames ${waiting.frames} then ${pressed.frames}; pixels changed while waiting ${byItself}, after Start on the keyboard ${byKey} of ${256 * 240}`);
   if (!(pressed.frames > waiting.frames + 30)) problems.push(`nes: the picture is not being redrawn (frames ${waiting.frames} then ${pressed.frames})`);
   if (!(byKey > 5000 && byKey > 4 * byItself)) problems.push(`nes: pressing Start on the keyboard did not change the picture (${byKey} pixels, ${byItself} by itself)`);
+
+  // The counters the board model reads: four numbers from the machine itself, the PPU's moving
+  // while the game runs, and the page says it runs.
+  const counts = await page.evaluate(async () => {
+    const nes = document.querySelector('[data-nes]').nes;
+    const first = nes.accessCounts();
+    await new Promise((resolve) => setTimeout(resolve, 500));
+    const second = nes.accessCounts();
+    // JSExport hands an int[] over as an Int32Array, a copy: signed 32-bit, as the counters wrap.
+    return { kind: second?.constructor?.name, first: Array.from(first ?? []), second: Array.from(second ?? []), running: nes.running(), region: nes.region() };
+  });
+  const ppuMoved = (counts.second[0] - counts.first[0]) | 0;
+  console.log(`nes: accessCounts, an ${counts.kind}, ${JSON.stringify(counts.first)} then ${JSON.stringify(counts.second)} half a second later; running() ${counts.running}, region() ${counts.region}`);
+  if (counts.kind !== 'Int32Array' || counts.second.length !== 4) problems.push(`nes: accessCounts() gave an ${counts.kind} of ${JSON.stringify(counts.second)}, not four signed 32-bit counters`);
+  if (!(ppuMoved > 0)) problems.push('nes: the PPU\'s access count did not move while the game ran');
+  if (counts.running !== true) problems.push('nes: running() is not true while the machine runs');
 
   // The headroom line, once a second, from a fresh second after play().
   await page.waitForTimeout(2500);

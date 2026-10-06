@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
+import os from 'node:os';
 import path from 'node:path';
 import { register } from 'node:module';
 import { pathToFileURL } from 'node:url';
@@ -403,4 +404,196 @@ test('the ring plays what it was given in order, then fades to silence when it r
   for (let i = 1; i < tail.length; i++) assert.ok(tail[i] <= tail[i - 1] + 1e-9, 'the fade is not smooth');
   ring.flush();
   assert.equal(ring.queued, 0);
+});
+
+// ---- The page: panel.nes and its events, for the models ----
+//
+// The page script run as the browser runs it, from its own `prepare` to the
+// machine running, in a fake browser just big enough for it: a panel whose
+// controls are made-up elements, a fake .NET runtime at <base>_framework/dotnet.js
+// that hands over a made-up NesHost, and a fetch that gives the bundled
+// cartridge. The run loop's animation frames are never turned: nothing here
+// needs the machine to run, only the page's wiring around it.
+
+const pageDir = fs.mkdtempSync(path.join(os.tmpdir(), 'nes-page-'));
+fs.mkdirSync(path.join(pageDir, '_framework'), { recursive: true });
+fs.writeFileSync(path.join(pageDir, '_framework', 'dotnet.js'), 'export const dotnet = { create: () => globalThis.fakeNesDotnet.create() };\n');
+const PAGE_BASE = `${pathToFileURL(pageDir).href}/`;
+test.after(() => fs.rmSync(pageDir, { recursive: true, force: true }));
+
+/** A made-up element: listeners, a dataset, and click() dispatching a click. */
+class FakeElement extends EventTarget {
+  constructor(props = {}) {
+    super();
+    Object.assign(this, { dataset: {}, style: {}, disabled: true, hidden: false, textContent: '' }, props);
+  }
+  focus() {}
+  blur() {}
+  click() { this.dispatchEvent(new Event('click')); }
+  setAttribute(name, value) { this[name] = value; }
+}
+
+/** A NesHost for the whole page: fakeHost's cartridge rules, and the calls the run loop and the buttons make. */
+function pageHost() {
+  const host = fakeHost();
+  Object.assign(host, {
+    counts: [3, 2, 1, 0],
+    CpuHz: () => 1_789_773,
+    MaxRomBytes: () => 1 << 20,
+    Cycles: () => 0,
+    Run: () => 0,
+    Frames: () => 0,
+    RunFrames: (n) => n,
+    Picture: () => 0,
+    Sound: () => 0,
+    DropSound: () => 0,
+    SetButtons() {},
+    Reset() { host.calls.push(['Reset']); },
+    PowerCycle() { host.calls.push(['PowerCycle']); },
+    AccessCounts() { host.calls.push(['AccessCounts']); return host.counts; },
+  });
+  return host;
+}
+
+let pages = 0;
+
+/**
+ * The NES page with one panel and `host` as its machine, the script loaded
+ * fresh. Returns the panel, its elements by selector, the events it dispatched
+ * as [type, detail, the host's region when it came], and start(), which
+ * presses Start and waits until the panel says it runs.
+ */
+async function nesPage(t, host) {
+  const saved = ['document', 'window', 'fetch', 'requestAnimationFrame', 'cancelAnimationFrame'].map((k) => [k, Object.getOwnPropertyDescriptor(globalThis, k)]);
+  t.after(() => {
+    for (const [k, d] of saved) {
+      if (d) Object.defineProperty(globalThis, k, d);
+      else delete globalThis[k];
+    }
+    delete globalThis.fakeNesDotnet;
+  });
+  const radios = ['NTSC', 'PAL'].map((value) => new FakeElement({ value, checked: value === 'NTSC' }));
+  const elements = new Map();
+  const panel = new FakeElement({ dataset: { download: '2.9 MB', base: PAGE_BASE, rom: 'game.nes', romTitle: 'The Game' } });
+  panel.querySelectorAll = (selector) => (selector === '[data-nes-region]' ? radios : []);
+  panel.querySelector = (selector) => {
+    if (selector === '[data-nes-region]:checked') return radios.find((r) => r.checked) ?? null;
+    if (!elements.has(selector)) {
+      elements.set(selector, new FakeElement(selector === '[data-nes-canvas]'
+        ? { getContext: () => ({ createImageData: (w, h) => ({ data: new Uint8ClampedArray(w * h * 4) }), putImageData() {} }) }
+        : {}));
+    }
+    return elements.get(selector);
+  };
+  const events = [];
+  for (const type of ['nes:ready', 'nes:start', 'nes:reset', 'nes:region']) {
+    panel.addEventListener(type, (event) => events.push([type, event.detail ?? null, host.running]));
+  }
+  const define = (k, value) => Object.defineProperty(globalThis, k, { value, configurable: true, writable: true });
+  define('document', { hidden: false, querySelectorAll: (s) => (s === '[data-nes]' ? [panel] : []), addEventListener() {}, removeEventListener() {} });
+  define('window', { addEventListener() {} });
+  define('fetch', async () => ({ ok: true, arrayBuffer: async () => new ArrayBuffer(16) }));
+  define('requestAnimationFrame', () => 1);
+  define('cancelAnimationFrame', () => {});
+  globalThis.fakeNesDotnet = {
+    create: async () => ({ getAssemblyExports: async () => ({ NesHost: host }), setModuleImports() {} }),
+  };
+  await import(`${pathToFileURL(path.join(PUBLIC, 'nes.js')).href}?page=${++pages}`);
+  const start = async () => {
+    panel.querySelector('[data-nes-start]').click();
+    for (let i = 0; i < 1000 && panel.dataset.state !== 'running'; i++) await new Promise((resolve) => setImmediate(resolve));
+    assert.equal(panel.dataset.state, 'running', `the page did not start: ${panel.querySelector('[data-nes-status]').textContent}`);
+  };
+  return { panel, radios, events, start, el: (selector) => panel.querySelector(selector) };
+}
+
+test('before Start panel.nes says the machine is not running, gives the region control\'s region, no counts, and reset() does nothing', async (t) => {
+  const host = pageHost();
+  const { panel, events } = await nesPage(t, host);
+  assert.equal(panel.nes.running(), false);
+  assert.equal(panel.nes.region(), 'NTSC');
+  assert.equal(panel.nes.accessCounts(), null);
+  panel.nes.reset();
+  assert.deepEqual(host.calls, [], 'the page asked the host for something before Start');
+  assert.deepEqual(events, []);
+});
+
+test('Start puts the machine running and dispatches nes:start; accessCounts() is the host\'s array', async (t) => {
+  const host = pageHost();
+  const { panel, events, start } = await nesPage(t, host);
+  await start();
+  assert.equal(panel.nes.running(), true);
+  assert.deepEqual(events.map((e) => e[0]), ['nes:ready', 'nes:start']);
+  assert.equal(panel.nes.accessCounts(), host.counts);
+  assert.deepEqual(panel.nes.accessCounts(), [3, 2, 1, 0]);
+  assert.equal(panel.nes.region(), 'NTSC');
+});
+
+test('reset() does what the Reset button does and dispatches nes:reset; so does the button; neither restarts the counters', async (t) => {
+  const host = pageHost();
+  const { panel, events, start, el } = await nesPage(t, host);
+  await start();
+  events.length = 0;
+  panel.nes.reset();
+  const line = el('[data-nes-power-line]').textContent;
+  assert.match(line, /^Reset: the game started again/);
+  el('[data-nes-power-line]').textContent = '';
+  el('[data-nes-reset]').click();
+  assert.equal(el('[data-nes-power-line]').textContent, line, 'reset() and the button did different things');
+  assert.deepEqual(host.calls.filter((c) => c[0] === 'Reset' || c[0] === 'PowerCycle'), [['Reset'], ['Reset']]);
+  assert.deepEqual(events.map((e) => e[0]), ['nes:reset', 'nes:reset']);
+  assert.equal(panel.nes.running(), true);
+});
+
+test('Power switches the machine off and on, which starts its counters again, so it dispatches nes:start; so does the test hook stepTo', async (t) => {
+  const host = pageHost();
+  const { panel, events, start, el } = await nesPage(t, host);
+  await start();
+  events.length = 0;
+  el('[data-nes-power]').click();
+  assert.deepEqual(host.calls.at(-1), ['PowerCycle']);
+  assert.deepEqual(events.map((e) => e[0]), ['nes:start']);
+  panel.nes.stepTo(120);
+  assert.deepEqual(events.map((e) => e[0]), ['nes:start', 'nes:start']);
+  assert.equal(panel.nes.running(), true);
+});
+
+test('a region change dispatches nes:region in lower case once the new machine runs, and region() follows', async (t) => {
+  const host = pageHost();
+  const { panel, events, radios, start } = await nesPage(t, host);
+  await start();
+  events.length = 0;
+  radios[0].checked = false;
+  radios[1].checked = true;
+  radios[1].dispatchEvent(new Event('change'));
+  // The event came after the host had loaded the machine in PAL.
+  assert.deepEqual(events, [['nes:region', { region: 'pal' }, 'PAL']]);
+  assert.deepEqual(host.calls.filter((c) => c[0] === 'Load').at(-1), ['Load', 'PAL', 48_000]);
+  assert.equal(panel.nes.region(), 'PAL');
+  radios[1].checked = false;
+  radios[0].checked = true;
+  radios[0].dispatchEvent(new Event('change'));
+  assert.deepEqual(events.at(-1), ['nes:region', { region: 'ntsc' }, 'NTSC']);
+});
+
+test('a new cartridge while the machine runs is a new machine: nes:start, and nes:region first when its region is the other', async (t) => {
+  const host = pageHost();
+  const { panel, events, radios, start, el } = await nesPage(t, host);
+  await start();
+  radios[0].checked = false;
+  radios[1].checked = true;
+  radios[1].dispatchEvent(new Event('change'));
+  events.length = 0;
+  // The file says nothing of its region, so it runs as NTSC, the other region from PAL.
+  const file = el('[data-nes-file]');
+  file.files = [new File([new Uint8Array(16)], 'other.nes')];
+  file.dispatchEvent(new Event('change'));
+  for (let i = 0; i < 100 && events.length < 2; i++) await new Promise((resolve) => setImmediate(resolve));
+  assert.deepEqual(events, [['nes:region', { region: 'ntsc' }, 'NTSC'], ['nes:start', null, 'NTSC']]);
+  assert.equal(panel.dataset.cartridge, 'other.nes');
+});
+
+test('the host hands the page its counters: AccessCounts is exported, the bus\'s snapshot', () => {
+  const source = fs.readFileSync(path.join(REPO_ROOT, 'src', 'Dbhq.Machines.Nes.Wasm', 'Program.cs'), 'utf8');
+  assert.match(source, /\[JSExport\]\s+public static int\[\] AccessCounts\(\) => Machine\.Bus\.Accesses\.Snapshot\(\);/);
 });
