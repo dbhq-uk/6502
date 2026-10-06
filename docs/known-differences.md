@@ -747,6 +747,14 @@ power on; the model makes the even ones gets, so a write in an even cycle
 costs 513 and one in an odd cycle 514. The sprite ROMs pass with either choice
 (measured in task 5 by swapping it), so nothing pinned settles which.
 
+**The reset button drops a copy that was waiting.** A write to `$4014` starts
+OAM DMA on the CPU's next read. If the reset button is pressed between the two,
+the model forgets the page, so no copy runs in the reset's first read, after the
+PPU has been reset (`NesBus.Reset`). `bus.md` does not say what a console does
+here; the reset stops the CPU, and the model takes it that the copy goes with
+it. `OamDmaTests.TheResetButtonDropsACopyThatWasWaiting` holds it: the reset
+takes its seven cycles and the next read one.
+
 **A halt on a pad read clocks the pad once, on both chips.** The halt and the
 alignment cycle repeat the CPU's read in consecutive cycles, and the pad sees
 one clock for the run (`bus.md` 7). The model does this for the 2A07 too. The
@@ -1138,6 +1146,15 @@ visitor chooses PAL; the page says which it chose and why. Only NES 2.0 byte 12
 is read: 0 NTSC, 1 PAL, 2 (either) NTSC.
 `CartridgeTests.AnInesFileNamesNoRegionWhateverItsTvSystemBitsSay` and
 `NesBusTests.TheMachineTakesTheHeadersRegionUnlessTheCallerNamesOne` hold it.
+
+**A trainer is skipped, not loaded.** A file with flags 6 bit 2 set carries
+512 bytes that a copier once loaded at `$7000-$71FF`. They are not on unmodified
+dumps of real cartridges (`cartridge.md` section 1), and the sheet left skipping
+or refusing them to the model (section 4). The model skips them, so the program starts 512
+bytes later and nothing is put at `$7000`. A hacked dump that needs its trainer
+there to run will not run.
+`CartridgeTests.ATrainerIsSkippedSoPrgStarts512BytesLater` and
+`ATrainerThatRunsPastTheEndOfTheFileIsRefused` hold it.
 
 **The Dendy is refused.** A NES 2.0 file whose byte 12 says Dendy (3) is
 refused with a sentence that names it

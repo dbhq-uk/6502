@@ -25,7 +25,8 @@ namespace Dbhq.Machines.Nes;
 /// every second one, made a step in nearly every cycle, about 120 to 200 ns more a cycle. Every
 /// pulse period (16 (t + 1) cycles) and triangle period (32 (t + 1)) is a whole number of blocks,
 /// so a note's block means repeat exactly with the note and anything the blocks fold can only land
-/// on the note's own harmonics; the 8-cycle mean is down by under 0.25 dB at 20 kHz. Steps come at
+/// on the note's own harmonics. The 8-cycle mean droops a little towards the top of the band, by
+/// the gain of an 8-point mean, sin 8x / (8 sin x) with x = pi f over the CPU clock. Steps come at
 /// most once a block, an eighth of the cycles.
 /// </para>
 /// <para>
@@ -57,8 +58,11 @@ public sealed class SampleBuffer
     // The kernel: half-width in samples, the cut-off as a fraction of the sample rate, the Kaiser
     // window's beta, and the phases an edge is placed to within a sample. With 512 phases an
     // ultrasonic triangle's eight-level block steps were placed coarsely enough to leave it at
-    // -55 dB; with 4096 it is -72 dB or under (the journal, task 9). The table is 4096 x 33
-    // floats, 540 KB, of which a step reads one row.
+    // -55.0 to -63.8 dB; with 4096, -72.4 to -76.1 dB (the journal entry of 5 October 2026, task
+    // 9, from `dotnet test tests/Dbhq.Machines.Nes.Tests -c Release --filter
+    // FullyQualifiedName~ResamplerTests --logger "console;verbosity=detailed"`). ResamplerTests
+    // holds it more than 65 dB under a full triangle. The table is 4096 x 33 floats, 540 KB, of
+    // which a step reads one row.
     private const int HalfWidth = 16;
     private const double Cutoff = 0.42;
     private const double Beta = 9;
@@ -105,14 +109,14 @@ public sealed class SampleBuffer
     /// <paramref name="cpuHz"/>, holding up to <paramref name="capacity"/>, with the console's
     /// filters.
     /// </summary>
-    /// <exception cref="ArgumentOutOfRangeException">A rate or the capacity is not above 0, or the sample rate is above the CPU clock.</exception>
+    /// <exception cref="ArgumentOutOfRangeException">A rate or the capacity is not above 0, or the sample rate is above an eighth of the CPU clock.</exception>
     public SampleBuffer(int sampleRate, double cpuHz, int capacity)
         : this(sampleRate, cpuHz, capacity, consoleFilters: true)
     {
     }
 
     /// <summary>A buffer as above, with the console's filters or without them.</summary>
-    /// <exception cref="ArgumentOutOfRangeException">A rate or the capacity is not above 0, or the sample rate is above the CPU clock.</exception>
+    /// <exception cref="ArgumentOutOfRangeException">A rate or the capacity is not above 0, or the sample rate is above an eighth of the CPU clock.</exception>
     public SampleBuffer(int sampleRate, double cpuHz, int capacity, bool consoleFilters)
     {
         ArgumentOutOfRangeException.ThrowIfNegativeOrZero(sampleRate);

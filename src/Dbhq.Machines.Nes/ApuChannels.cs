@@ -338,7 +338,8 @@ public sealed class PulseChannel
 /// <remarks>
 /// Periods 0 and 1 are not halted. The sheet says they give an ultrasonic wave, which some
 /// emulators halt instead. The sample buffer's resampler does not need them halted: an ultrasonic
-/// triangle comes out of it at 72 dB or more under a full one (task 9, <c>ResamplerTests</c>).
+/// triangle comes out of it more than 65 dB under a full one, the line <c>ResamplerTests</c> holds
+/// (the run of 6 October 2026 printed -72.4 dB).
 /// </remarks>
 public sealed class TriangleChannel
 {

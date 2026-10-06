@@ -44,13 +44,12 @@ failed, so the table says which ROMs see each fault as well as which unit tests.
 fault after another. The one-minute load at the start and end of each fault's
 run was between 0.47 and 27.40; it was over 6 only while faults 26 and 27a ran
 (27.40 at 04:16 and 9.31 at 04:19), when another job took the machine for a
-few minutes. The load
-changes how long a run takes, not what it finds, since the machine is
-deterministic.
+few minutes. The load changes how long a run takes, not what it finds, since
+the machine is deterministic.
 
-**The table.** Each fault is one change; "before" and "after" are the line as
-it was and as the fault made it, in `src/Dbhq.Machines.Nes/` at commit
-`d70aedf`. "Unit" and "ROM" are the failing tests of each half. Where a theory
+**The table.** Each fault is one change; the third column gives the line and
+the change, or its location where the change is a value in a table, in
+`src/Dbhq.Machines.Nes/` at commit `d70aedf`. "Unit" and "ROM" are the failing tests of each half. Where a theory
 has a row per region or parameter, each row counts.
 
 | # | Fault planted | Where, before, after | Unit | ROM | Unit tests that caught it | ROMs that caught it |
@@ -122,6 +121,10 @@ PAL's fourth dot, but on NTSC the accumulator's denominator is 1 and the code
 counts on it staying under that, so it broke NTSC too, which is what the unit
 tests caught. 28b is the fault as it was meant, PAL only.
 
+**The totals.** Of the 56 faults, 52 were caught by the unit tests: 51, and
+fault 28, the faulty one above. One more, 28b, was caught only by a ROM, and
+three by nothing.
+
 **Four were not caught by the unit tests.**
 
 - **28b, the PAL power-on phase,** was seen only by `nestest`'s log on PAL. The
@@ -164,23 +167,24 @@ PAL's 25683. It also fails on fault 3, the flag a dot early.
 PAL, and none by a Blargg ROM alone. The other way round is the more telling:
 22 of the 56 faults (2a, 5, 6, 7, 8b, 9, 10b, 12, 13, 17, 21a, 22, 23, 27a, 27b,
 30, 35, 41, 43, 44, 45, 46) were caught by the project's own tests and by no
-ROM. The ROMs do not read the pads, do not
-run PPU timing on PAL, do not reach the PAL tables, and do not test the boards'
+ROM. The ROMs do not read the pads, do not run PPU timing on PAL, do not reach the PAL tables, and do not test the boards'
 smaller rules; for those the chip tests from the fact sheets are the only
 guard. Several of those are held by a single test: the PAL tables only by
 `RegionTests`' comparison with the sheet, the odd-frame decision dot only by
 `TheDroppedDotIsDecidedWhenDot338OfThePreRenderLineRuns` and `ppu_vbl_nmi` 10.
 
 **A finding about the code: none.** No fault survived because the code was
-wrong in the same way, and the pass found no defect in the machine. No line in
-`src/` was changed.
+wrong in the same way, and the pass found no defect in the machine. The pass
+changed no line in `src/`; the final fix wave later corrected comments there,
+below.
 
 ## The known differences, checked
 
 `docs/known-differences.md` was read against the list the plan's task gives
 and the list the controller's brief added, and every `[guessing - verify]` left
 in `docs/nes/facts/` was followed to an entry or a stated resolution
-(`grep -rn -i "guessing" docs/nes/facts/*.md`, 24 lines).
+(`grep -rn -i "guessing" docs/nes/facts/*.md`: 24 lines when the check ran,
+23 once `cartridge.md`'s settled open item lost its tag).
 
 **Already there, with a cause and a test or ROM:** RAM at power on and the
 PPU's power-on alignment; the PAL fourth dot's power-on phase; the latch's one
@@ -217,13 +221,20 @@ and the DMC section's "89.6 dB" to what `ResamplerTests` holds, more than 65 dB,
 with the figures it printed this morning quoted with the date and the command;
 the mixer's "within 1e-7" corrected to the 1e-6 that `MixerTests` holds; and
 the 8-cycle mean's "under 0.25 dB at 20 kHz" replaced by the formula it follows
-from.
+from. Four comments in the source carried the same figures: `ApuMixer.cs` (the
+1e-7), `TriangleChannel` in `ApuChannels.cs` (the 72 dB), and `SampleBuffer.cs`
+(the 0.25 dB, and the -55 and -72 dB of the kernel's phases). In the final fix
+wave of 6 October 2026 each was put right the same way: the line a test holds,
+or the dated task 9 run and its command, or the formula. In the same wave the
+sample buffer's exception notes were corrected to the rule its code applies, a
+sample rate no higher than an eighth of the CPU clock.
 
-**Every guess in the fact sheets has an entry or a resolution.** Of the 24
+**Every guess in the fact sheets has an entry or a resolution.** Of the 23
 lines, one is the README's definition of the tag. The rest: `cartridge.md`'s
 "which ROMs run on PAL" was settled in task 12 by each ROM's readme or source
-(the journal entry of 5 October), and its open item now says so; `ppu.md`'s rendering toggle delay, the
-evaluation's start at sprite 0 and greyscale have entries; `apu.md`'s PAL pulse
+(the journal entry of 5 October), and its open item now says so; `ppu.md`'s
+rendering toggle delay, the evaluation's start at sprite 0 and greyscale have
+entries; `apu.md`'s PAL pulse
 under 8 has one; `timing.md`'s first VBlank, the PAL fourth dot and now the PAL
 clear have them; `bus.md`'s 2A07 DMA has one; and every `mappers.md` guess
 (MMC1's PRG RAM, CNROM, the boards' reset, MMC3's power on, the bus after

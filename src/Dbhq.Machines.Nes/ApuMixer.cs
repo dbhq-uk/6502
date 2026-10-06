@@ -16,7 +16,7 @@ namespace Dbhq.Machines.Nes;
 /// two tables: 31 entries for the pulses' sum, and one for every triangle, noise and DMC level
 /// together, 16 x 16 x 128 = 32,768 entries, so the TND group is exact for each triple and not the
 /// page's 4 % linear-index approximation. A mix is then two loads and an add. The TND table is
-/// single precision (128 KB), which keeps every entry within 1e-7 of the formula.
+/// single precision (128 KB); <c>MixerTests</c> holds every entry within 1e-6 of the formula.
 /// </remarks>
 public static class ApuMixer
 {

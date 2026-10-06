@@ -233,7 +233,8 @@ public class SampleBufferTests
         Assert.Throws<ArgumentOutOfRangeException>(() => new SampleBuffer(0, Region.Ntsc.CpuHz, 10));
         Assert.Throws<ArgumentOutOfRangeException>(() => new SampleBuffer(48_000, 0, 10));
         Assert.Throws<ArgumentOutOfRangeException>(() => new SampleBuffer(48_000, Region.Ntsc.CpuHz, 0));
-        // A sample rate above the CPU's clock would need more than one sample from a cycle.
+        // A sample rate above an eighth of the CPU's clock would need more than one sample from a
+        // block of 8 cycles.
         Assert.Throws<ArgumentOutOfRangeException>(() => new SampleBuffer(2_000_000, Region.Ntsc.CpuHz, 10));
     }
 
