@@ -54,6 +54,9 @@ public sealed partial class Ppu
     }
 
     // What an even dot from 65 does with the byte the odd dot before it read, until the search ends.
+    // The place in secondary OAM is a 5-bit counter that wraps, as the chip's does, so a search
+    // that starts from a place a reset left (Ppu.Reset clears the count found, not the place) can
+    // never write outside the 32 bytes.
     private void EvaluationStep()
     {
         int row = _line - _oamLatch;
@@ -83,7 +86,7 @@ public sealed partial class Ppu
             if (inRange)
             {
                 _sprite0Found |= _evaluationN == 0;
-                _secondaryIndex++;
+                _secondaryIndex = (_secondaryIndex + 1) & 31;
                 _evaluationM = 1;
             }
             else
@@ -94,7 +97,8 @@ public sealed partial class Ppu
             return;
         }
 
-        _secondaryOam[_secondaryIndex++] = _oamLatch;
+        _secondaryOam[_secondaryIndex] = _oamLatch;
+        _secondaryIndex = (_secondaryIndex + 1) & 31;
         if (++_evaluationM == 4)
         {
             _evaluationM = 0;
