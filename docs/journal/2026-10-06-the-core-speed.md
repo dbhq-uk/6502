@@ -21,9 +21,10 @@ one cycle, every dummy read and write still happens (AGENTS.md rule 1), and the
 core still names no machine (rule 2).
 
 **What was reached.** Two changes were kept. In the browser's AOT build the BBC
-Micro at its prompt got about 17 % faster. Natively the core alone on Dormann's
-test got about 13 % faster and the BBC Micro 6 to 24 % (two measures, below); the
-KIM-1 and the NES stayed within noise in both. Ten times real time for the NES was
+Micro at its prompt got about 17 % faster. Natively, in thread CPU time, the core
+alone on Dormann's test got about 13 % faster and the BBC Micro about 6 %; the NES
+stayed within noise natively and in the browser, and the KIM-1, measured natively
+only, within noise. Ten times real time for the NES was
 not reached: SNOW still runs at about 2.5 times in the main thread's CPU time. The
 reason is below: in the NES's AOT build the core is about a tenth of the time, so
 even a free core would give about 12 %.
@@ -35,14 +36,17 @@ cores went from 1 to 78, and Chrome once failed to start in three minutes. Wall
 clock figures were not usable for a 5 % decision, so I measured CPU time instead,
 in two ways:
 
-- **Natively**, a scratch program (not committed, so these are estimates) that
-  timed each run in the thread's own CPU time (`clock_gettime` with
-  `CLOCK_THREAD_CPUTIME_ID`) and printed nanoseconds a cycle. It ran four
-  workloads: the core alone on Dormann's functional test on a flat bus, the BBC
-  Micro at its prompt, the KIM-1 monitor after RS, and the NES running SNOW. Each
-  comparison ran the builds in turn, four processes each, five runs a process,
-  and took the median of the medians. The baseline was `18cc4ec`, exported with
-  `git archive`.
+- **Natively**, `bench/thread-time`, which times each run in the thread's own CPU
+  time (`clock_gettime` with `CLOCK_THREAD_CPUTIME_ID`) and prints nanoseconds a
+  cycle. It has five workloads: `core` (Dormann's functional test on a flat bus),
+  `bbc` (the BBC Micro at its prompt), `kim` (the KIM-1 monitor after RS), and
+  `ntsc` and `pal` (the NES running SNOW). Each comparison built it into the
+  baseline export and into the work, and ran `dotnet <build>/Dbhq.Machines.ThreadTime.dll
+  <workload> 5` for each build in turn, four processes each (eight where said),
+  taking the median of each build's medians. The baseline was `18cc4ec`, exported
+  with `git archive`. It was a scratch program while the work was done and was
+  committed afterwards, in the review; the committed code is the code that gave
+  every figure here, with comments added and nothing else changed.
 - **In the browser**, a new option in both browser benches: `THREAD_TIME=<n>`
   makes n more timed runs after the page's own, each read with the DevTools
   protocol's `ThreadTime` metric, the CPU time of the page's main thread. Under
@@ -77,6 +81,36 @@ At every kept commit:
   run on the baseline export too, it prints the same six lines. With a scratch
   fault, the NMI edge never latched, three of its six lines change, from the
   first ST on.
+
+After the review, one more check, on the work as finished. The poll change rests
+on a rule that no test names for an instruction not yet written: one that changes
+the I flag after its last bus access must call `FreezePoll` first. The review wrote
+a randomised differential for it, now `bench/interrupt-differential`: random memory
+run as code on every CPU variant, the IRQ and NMI lines toggled at random inside
+bus accesses and between steps, and resets, with every bus access and every step's
+state hashed. Its README says how to run it against a `git archive` export. Run on
+6 October at 13:03 UTC (load 16.7 to 13.0) as `dotnet run -c Release --project
+bench/interrupt-differential -- 3000000` (60 configurations of 3 million steps, 180
+million in all), on `18cc4ec` and on `4533f1b`: the two outputs, 61 lines each, are
+identical, and the same as the review's own run. With SEI's `FreezePoll` taken out
+of a scratch copy of the core, 18 of the 60 configuration lines and the total
+change, on all five variants, so the check can fail. (The committed file differs
+from the review's in one place: a cast in the step hash goes through `uint` first,
+because warnings are errors here. The step count it casts is never negative, so no
+hash changes.)
+
+### The buses left on the wrapper
+
+The abstract class is for speed, and every bus whose speed is measured now derives
+from it: the three machines', `FlatBus` in the test support, the core speed
+benches' two, and, after the review, the bare-CPU bus of the BBC Micro bench's
+`--profile` mode, which until then compared a faster machine with a bare CPU still
+on the wrapper. The `IBus` implementers that stay on the wrapper are all in tests
+or tools, where speed is not measured: `ScheduledBus` (the transistor model's
+interrupt runs), `ReferenceBbcBus` and the two `Recorder`s (the BBC Micro's
+equivalence tests), `RecordingBus` in `tools/Dbhq.Cpu6502.ChipTrace`, and the
+interrupt differential's `RandBus`, which has to build on commits from before
+`Bus` existed. Keeping them on `IBus` also keeps the wrapper itself under test.
 
 ## Where the time goes
 
@@ -123,8 +157,10 @@ Each of the three freezes was taken out in turn and the interrupt tests run
 cases fail; without PLP's, 10 fail; without SEI's, 2 fail. So the tests pin all
 three.
 
-Natively, about 08:30 UTC, load about 7: the core 11.44 to 10.76 ns a cycle, the
-BBC Micro 17.53 to 16.16, the KIM-1 16.34 to 15.84, the NES 159.6 to 156.9 (noise).
+Natively (`dotnet <build>/Dbhq.Machines.ThreadTime.dll <workload> 5`, four
+alternated processes each, about 08:30 UTC, load about 7): the core 11.44 to 10.76
+ns a cycle, the BBC Micro 17.53 to 16.16, the KIM-1 16.34 to 15.84, the NES 159.6 to
+156.9 (noise).
 In the browser the BBC Micro did not move: 20.68 against 20.44 MHz, thread-time
 medians of 60 runs each, alternated (09:00 UTC, load 8.5 to 11.8). It is kept for
 the native gain and because it does less.
@@ -175,23 +211,32 @@ wall-clock runs in the same launches gave the NES 1.1 to 1.5 times real time,
 because the load took the processor from the page; a quiet machine's wall clock
 is about its thread time.
 
-**Natively**, the committed benches, wall clock (12:27 to 12:29 UTC, load 8.6 to
-13.7): `dotnet <build>/Dbhq.Machines.Nes.SpeedNative.dll 5 1790000 <region>`,
-three runs of five each, alternated: NTSC median 1.92 before and 2.07 after, PAL
-2.15 and 2.11 times real time, within noise. `./alternate.sh native 3 <before>
-<after>` in `bench/bbc-micro-speed`: the BBC Micro's median 22.42 MHz before and
-27.84 after (11.21 and 13.92 times 2 MHz), best 56.53 and 69.25.
-
-The scratch harness, thread CPU time, 12:10 to 12:15 UTC, load 10 to 17 with an
-AOT publish running, medians of four alternated processes (eight for the KIM-1):
+**Natively**, thread CPU time: `dotnet <build>/Dbhq.Machines.ThreadTime.dll
+<workload> 5` from `bench/thread-time`, built into the baseline export and into the
+work, the builds run in turn, the median of four processes' medians each (eight for
+the KIM-1), 12:10 to 12:15 UTC, load 10 to 17 with an AOT publish running:
 
 | Workload | Before | After |
 | --- | --- | --- |
-| The core alone, Dormann's functional test | 11.91 ns a cycle | 10.40 |
-| BBC Micro at the prompt | 17.98 | 16.93 |
-| KIM-1 monitor after RS | 18.57 | 18.42 |
-| NES SNOW, NTSC | 169.2 | 165.9 |
-| NES SNOW, PAL | 151.8 | 140.7 |
+| `core`: the core alone, Dormann's functional test | 11.91 ns a cycle | 10.40 |
+| `bbc`: BBC Micro at the prompt | 17.98 | 16.93 |
+| `kim`: KIM-1 monitor after RS | 18.57 | 18.42 |
+| `ntsc`: NES SNOW, NTSC | 169.2 | 165.9 |
+| `pal`: NES SNOW, PAL | 151.8 | 140.7 |
+
+That is about 13 % for the core alone and about 6 % for the BBC Micro. The KIM-1
+and the NES moved by less than their noise; the PAL figure is inside the spread
+the same workload showed between sessions.
+
+For the record, the committed native benches were also run, wall clock, at a load
+of 8.6 to 13.7 (12:27 to 12:29 UTC). `dotnet <build>/Dbhq.Machines.Nes.SpeedNative.dll
+5 1790000 <region>`, three runs of five each, alternated: NTSC median 1.92 before
+and 2.07 after, PAL 2.15 and 2.11 times real time. `./alternate.sh native 3
+<before> <after>` in `bench/bbc-micro-speed`: the BBC Micro's median 22.42 MHz
+before and 27.84 after, best 56.53 and 69.25, with the slowest and fastest runs of
+each build three to five times apart. These are loaded readings, not a measure of the
+gain: at that load the wall clock is the reading this entry says cannot settle a 5 %
+question, and the thread-time figures above are the ones to use.
 
 ### Tried and dropped: a CPU made for each bus, `Cpu<TBus>`
 
@@ -201,8 +246,9 @@ bus directly. I built it in full (a `CpuBase` with the registers and the lines, 
 `Cpu<TBus>`, and `Cpu` kept as `Cpu<AnyBus>` so tests and tools did not change)
 and measured it on all three machines.
 
-- Natively it gained nothing (SNOW 162.8 against 173.9 ns a cycle, 07:10 UTC, load
-  13 to 17): dynamic PGO had already done the same.
+- Natively it gained nothing (SNOW 162.8 against 173.9 ns a cycle, `ntsc 5` of
+  `bench/thread-time`, three alternated processes each, 07:10 UTC, load 13 to 17):
+  dynamic PGO had already done the same.
 - In the first AOT build it made the NES less than half as fast (0.70 against 1.61
   times real time). Mono's AOT compiler had made only the constructor of
   `Cpu<NesBus.CpuPort>`: `Step` was a virtual method of the base class, C# names
@@ -228,14 +274,16 @@ runtime. It was not kept.
 `Read`, `Write`, `EndCycle`, the flag helpers, the addressing modes, the stack
 and the logic operations. In the browser it moved nothing (the NES 2.52 against
 2.60 times real time, 07:35 UTC, load 5 to 10); natively it made the core slower,
-12.77 against 10.78 ns a cycle (07:45 UTC), because the opcode switch grew.
+12.77 against 10.78 ns a cycle (`core 5` of `bench/thread-time`, three alternated
+processes each, 07:45 UTC, load 7 to 10), because the opcode switch grew.
 
 ### Tried and dropped: flags set in one write
 
 `NZ`, `Compare`, the shifts, `BIT` and binary `ADC` set N, Z, C and V in one
 write of P with no branch, and `Step` tested its three rare states with one test.
-Natively within noise (the core 10.36 against 10.54 ns, the BBC Micro 16.88
-against 15.97, the KIM-1 16.81 against 16.86); in the browser the BBC Micro 20.79
+Natively within noise (`bench/thread-time`, four alternated processes each, about
+08:50 UTC: the core 10.36 against 10.54 ns, the BBC Micro 16.88 against 15.97, the
+KIM-1 16.81 against 16.86); in the browser the BBC Micro 20.79
 against 20.44 MHz. Not measurable, so not kept.
 
 ## What was not tried, and why
@@ -257,7 +305,7 @@ against 20.44 MHz. Not measurable, so not kept.
   running, but not the slowdown from sharing a core's caches with other work, so
   figures from different sessions are not comparable, only figures alternated in
   the same session.
-- That the scratch native harness measures what the committed benches do. The
-  workloads are the same (SNOW after a five million cycle boot, the BBC Micro at
-  the prompt after six million), but the KIM-1 and the core-alone workloads are
-  the scratch program's own.
+- That `bench/thread-time` measures what the other native benches do. The NES and
+  BBC Micro workloads are theirs (SNOW after a five million cycle boot, the BBC
+  Micro at the prompt after six million), but the KIM-1 and the core-alone
+  workloads are its own.
