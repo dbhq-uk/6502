@@ -1387,7 +1387,11 @@ test('the outside\'s note states every uncertainty plainly, with its figures rea
     // The size: published, not Nintendo's, good to about 3 per cent.
     assert.ok(all.includes(`published ${mm2(f.size.widthMm)} by ${mm2(f.size.depthMm)} mm and ${mm2(f.size.heightMm)} mm high`), 'the published size');
     assert.match(all, /none of them Nintendo's/);
-    assert.ok(all.includes(`good to about ${mm2(f.size.goodToPct)} per cent`));
+    // The reason is the patent's drawings, not the published sources' small disagreement (reworded 6 Oct 2026, after the
+    // re-review of the final fix wave), as case.json's goodToWhy says.
+    assert.ok(all.includes(`none of them Nintendo's; against the design patent's drawings it is good to about ${mm2(f.size.goodToPct)} per cent`));
+    assert.match(caseData.footprint.goodToWhy, /design patent's drawings/);
+    assert.doesNotMatch(all, /Nintendo's, so it is good to about/);
     // The profile: an average, good to about half the ends' range, of ends from 12.86 to 17.71 mm.
     assert.ok(all.includes(`range from ${mm2(f.profile.endsMm.min)} to ${mm2(f.profile.endsMm.max)} mm, so the inset is an average good to about ${mm2(f.profile.goodToMm)} mm`));
     // The rear: placed from a photograph that agrees with the patent within 1.3 mm; the board's places missed by up to 5.16; failed.

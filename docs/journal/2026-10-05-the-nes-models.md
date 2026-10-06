@@ -3261,3 +3261,10 @@ with CI's results file and the machines built:
 tests, 475 pass, 0 fail, 1 todo. Its first run had failed one test, "the README
 lists every test file", until the new test file was listed in
 `site/README.md`'s table. Both floors raised from 473 to 475.
+
+After the fix wave's re-review, two more: the case's note gave the published
+sources' small disagreement as the reason the size is good to about 3 per
+cent, and now says "against the design patent's drawings it is good to about 3
+per cent", the reason `goodToWhy` records (`case.json`'s `widthSource` gives
+no reason, so it and `case.json` were left as they were); and a paragraph of
+`docs/known-differences.md` was rewrapped to the file's width.

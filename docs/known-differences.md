@@ -1279,8 +1279,8 @@ inference (`boardInCase.from`). The bottom shell's ends lean in below a break;
 the four ends read on two photographs run from 12.86 to 17.71 mm at the base, so
 the model's inset is an average good to about 2.4 mm, half that range
 (`profileCheck.endsMm`, `profileCheck.goodToMm`; until the final fix wave of 6
-October 2026 a sentence gave "about 2.5 mm"); the held-out figure, 0.71 mm, shows the averaging
-repeats, not that it is the true inset.
+October 2026 a sentence gave "about 2.5 mm"); the held-out figure, 0.71 mm,
+shows the averaging repeats, not that it is the true inset.
 
 **The machine's state, where the console's is not known or not emulated.**
 Whether POWER latches in on a real console is not known: no photograph shows it

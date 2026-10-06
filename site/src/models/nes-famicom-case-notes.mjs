@@ -17,7 +17,7 @@ const pc = (v) => Math.abs(v).toLocaleString('en-GB', { maximumFractionDigits: 2
 /** The sentence on the case's size: published, not Nintendo's, and how well it is known. */
 export function sizeSentence(f) {
   const s = f.size;
-  return `The case's size is the published ${mm(s.widthMm)} by ${mm(s.depthMm)} mm and ${mm(s.heightMm)} mm high, from more than one published source, none of them Nintendo's, so it is good to about ${mm(s.goodToPct)} per cent.`;
+  return `The case's size is the published ${mm(s.widthMm)} by ${mm(s.depthMm)} mm and ${mm(s.heightMm)} mm high, from more than one published source, none of them Nintendo's; against the design patent's drawings it is good to about ${mm(s.goodToPct)} per cent.`;
 }
 
 /** The sentence on the rear connectors: where they were placed from, and the check that failed. */
