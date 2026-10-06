@@ -27,8 +27,10 @@ export const REGIONS = ['ntsc', 'pal'];
 
 /** Each console, as the caption names it. */
 export const CONSOLES = {
-  ntsc: { name: 'an NTSC NES-001', sold: 'North America', short: 'NTSC', a: 'an NTSC console' },
-  pal: { name: 'a PAL NESE-001', sold: 'Europe', short: 'PAL', a: 'a PAL console' },
+  // `board` is the board the caption says the console's parts are drawn on: the NTSC parts are on the scanned
+  // NES-CPU-10's own layout; the PAL parts were read off an NES-CPU-11, whose layout task 0 checked against the scan.
+  ntsc: { name: 'an NTSC NES-001', sold: 'North America', short: 'NTSC', a: 'an NTSC console', board: 'an NES-CPU-10' },
+  pal: { name: 'a PAL NESE-001', sold: 'Europe', short: 'PAL', a: 'a PAL console', board: 'drawn on an NES-CPU-10, whose layout the PAL console\'s NES-CPU-11 was checked to share' },
 };
 
 /**
@@ -74,7 +76,7 @@ export const NEVER = {
 
 /** What a legend row's mark column says for a chip the machine counts. */
 export const COUNTED_WORDS = {
-  apu: 'when the processor uses the sound and input registers on its own chip',
+  apu: 'when the processor uses the sound, sprite-copy and controller registers on its own chip',
   ppu: 'when the processor reads or writes it',
   pad1: 'when the processor reads controller port 1',
   pad2: 'when the processor reads controller port 2',
@@ -90,7 +92,7 @@ export const neverWords = (row) => (row.always === 'ram' && /video/.test(row.rol
  */
 export const LEGEND_WORDS = [
   'A mark on a chip, on the model and in its row here, means the chip was read or written by the processor in the last quarter second. The rate beside it is how many times a second, over that quarter second, while the machine above runs. A mark says the processor talked to the chip, not that the chip is working: the PPU draws every picture whether it is marked or not.',
-  'Some chips are never marked. The CPU, the work RAM, the address decoder and the cartridge are in use all the time; the video RAM and the address latch are the PPU\'s own, in use whenever it draws; and the lockout chip is not emulated. The CPU\'s row is marked only when the processor uses the sound and input registers on its own chip, which the machine counts apart.',
+  'The CPU, the work RAM, the address decoder and the cartridge are in use all the time; the video RAM and the address latch are the PPU\'s own, in use whenever it draws; and the lockout chip is not emulated. So none of them is marked for being in use, and all but the CPU are never marked. The CPU\'s row is marked only when the processor uses the sound, sprite-copy and controller registers on its own chip ($4000 to $4015, and the writes to $4016 and $4017), which the machine counts apart.',
   'By the redrawing\'s nets, U9, the hex inverter, inverts the PPU\'s address line A13 and the reset line and clocks the lockout chip, so it is in use all the time and is never marked. Those jobs are read from OpenTendo\'s KiCad redrawing of the board, a cross-check, and are not traced on the scan.',
   'U7 and U8 are the controller ports\' buffers. Which serves which port is by the board\'s print, 40H368(CI) and 40H368(CII): U7 is port 1, read at $4016, and U8 port 2, read at $4017. That was checked against the nesdev wiki and the KiCad redrawing, and is not traced on the scan.',
   'The copper on the board is traced to look at from the scans, and its connections are not verified, so the model cannot show which chip a track joins. The heights of the parts are typical ones, not measured.',
@@ -118,5 +120,5 @@ export function describe(region) {
   if (!c) throw new Error(`the board model draws ${REGIONS.join(' and ')}, not ${region}`);
   const typical = Object.entries(HEIGHTS).filter(([k, h]) => k !== 'board' && !h.measured).length;
   const heights = typical === Object.keys(HEIGHTS).length - 1 ? 'the heights of the parts are typical ones, not measured' : 'some heights of the parts are typical ones, not measured';
-  return `Model, not a photograph, of ${c.name}, the front-loading console sold in ${c.sold}: a drawing of its main board in three.js, an NES-CPU-10, ${cm(BOARD.width)} by ${cm(BOARD.depth)} cm, with the copper of both faces and the printed legend traced from flatbed scans of a bare board, to look at: the copper's connections are not verified. On it are the ${count(ICS.length)} chips, with this console's parts: the CPU, ${part('U6', region)}, the PPU, ${part('U5', region)}, and the lockout chip, ${part('U10', region)}; ${connector('P1')}, ${connector('P2')}, the two controller ports' headers and ${connector('P6')}; ${count(PASSIVES.length)} resistors, capacitors and other small parts; the crystal, ${other(region, 'crystal').part}, and the RF modulator. The places are the scan's; the parts were read off photographs of populated boards and placed on the scan's footprints, so this is the scanned board with ${c.a}'s parts, not one real board; ${heights}. While the machine above runs, a chip the processor read or wrote in the last quarter second is marked.`;
+  return `Model, not a photograph, of ${c.name}, the front-loading console sold in ${c.sold}: a drawing of its main board in three.js, ${c.board}, ${cm(BOARD.width)} by ${cm(BOARD.depth)} cm, with the copper of both faces and the printed legend traced from flatbed scans of a bare board, to look at: the copper's connections are not verified. On it are the ${count(ICS.length)} chips, with this console's parts: the CPU, ${part('U6', region)}, the PPU, ${part('U5', region)}, and the lockout chip, ${part('U10', region)}; ${connector('P1')}, ${connector('P2')}, the two controller ports' headers and ${connector('P6')}; ${count(PASSIVES.length)} resistors, capacitors and other small parts; the crystal, ${other(region, 'crystal').part}, and the RF modulator. The places are the scan's; the parts were read off photographs of populated boards and placed on the scan's footprints, so this is the scanned board with ${c.a}'s parts, not one real board; ${heights}. While the machine above runs, a chip the processor read or wrote in the last quarter second is marked.`;
 }

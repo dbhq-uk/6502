@@ -646,7 +646,7 @@
           "licence": "TAPR Open Hardware License (the repository's README)",
           "fetched": "2026-10-05",
           "sha256": "9cce8323c9c18f0c583f99d1e07d7650f85858ca2599cbf52b2c75f384e8224a",
-          "used": "a cross-check only, from which nothing is drawn: the board's outline and the chips' places compared with the scan's, and U9's jobs and which buffer serves which controller port read from its nets"
+          "used": "a cross-check only, from which nothing is drawn: the board's outline and the chips' places compared with the scan's, U9's jobs read from its nets, and which buffer serves which controller port checked against them"
         },
         {
           "title": "a photograph of a populated PAL board, an NES-CPU-11, from above",

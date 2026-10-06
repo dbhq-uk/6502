@@ -73,3 +73,26 @@ test('the sampler takes the page\'s Int32Array, and a machine with no counters y
   t += 250; c = Int32Array.from([30, 0, 0, 0]);
   assert.equal(s.sample().ppu.perSecond, 80);
 });
+
+test('a count that goes down is a new machine: no rate, and the new counts are the baseline, never billions a second', async () => {
+  // Fix round 1 of task 7, 6 Oct 2026: the page announces every new machine (nes:start, nes:region), but should one
+  // ever come without, its counters start again from zero and the difference is negative.
+  assert.equal(accessRates([100, 50, 0, 0], [40, 60, 0, 0], 0.25), null, 'a negative difference gives no rate');
+  const { createSampler } = await import('../src/models/nes-famicom-access.mjs');
+  let t = 0;
+  let c = [90000, 4000, 300, 0];
+  const s = createSampler({ counts: () => c, now: () => t });
+  s.sample();
+  t += 250; c = [10, 2, 1, 0];              // a new machine with no reset
+  assert.equal(s.sample(), null, 'no rate across two machines');
+  t += 250; c = [110, 2, 3, 0];
+  assert.deepEqual(s.sample(), { ppu: { moved: true, perSecond: 400 }, apu: { moved: false, perSecond: 0 }, pad1: { moved: true, perSecond: 8 }, pad2: { moved: false, perSecond: 0 } });
+});
+
+test('the difference is taken as a signed 32-bit number, (b - a) | 0, as the page\'s script says a reader takes it', async () => {
+  const fs = await import('node:fs');
+  const src = fs.readFileSync(new URL('../src/models/nes-famicom-access.mjs', import.meta.url), 'utf8');
+  assert.match(src, /\(after\[i\] - before\[i\]\) \| 0/);
+  assert.doesNotMatch(src, />>> 0/);
+  assert.match(fs.readFileSync(new URL('../public/nes.js', import.meta.url), 'utf8'), /\(b - a\) \| 0/);
+});

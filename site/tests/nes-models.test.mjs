@@ -1001,6 +1001,13 @@ test('the legend says in words what a mark means, why some chips are never marke
   assert.match(words, /read or written by the processor in the last quarter second/);
   assert.match(words, /not that the chip is working/);
   assert.match(words, /The CPU, the work RAM, the address decoder and the cartridge are in use all the time; the video RAM and the address latch are the PPU's own, in use whenever it draws; and the lockout chip is not emulated/);
+  // The CPU's row is the one of them that is marked, for the registers on its own chip that ChipAccesses counts as Apu
+  // ($4000 to $4015, the sprite copy's $4014 among them, and the writes to $4016 and $4017): fix round 1, 6 Oct 2026.
+  assert.doesNotMatch(words, /Some chips are never marked\. The CPU/);
+  assert.match(words, /all but the CPU are never marked\. The CPU's row is marked only when the processor uses the sound, sprite-copy and controller registers on its own chip \(\$4000 to \$4015, and the writes to \$4016 and \$4017\)/);
+  const cs = fs.readFileSync(path.join(REPO_ROOT, 'src', 'Dbhq.Machines.Nes', 'ChipAccesses.cs'), 'utf8');
+  assert.match(cs, />= 0x4000 and <= 0x4015 => NesChip\.Apu/);
+  assert.equal(layout.COUNTED_WORDS.apu, 'when the processor uses the sound, sprite-copy and controller registers on its own chip');
   assert.match(words, /By the redrawing's nets, U9, the hex inverter, inverts the PPU's address line A13 and the reset line and clocks the lockout chip, so it is in use all the time and is never marked/);
   assert.match(words, /OpenTendo's KiCad redrawing of the board, a cross-check, and are not traced on the scan/);
   assert.match(words, /U7 and U8 are the controller ports' buffers\. Which serves which port is by the board's print/);
@@ -1028,6 +1035,11 @@ test('each console\'s caption starts by saying it is a model of that console, an
     assert.match(about, /the heights of the parts are typical ones, not measured/);
     assert.match(about, /to look at: the copper's connections are not verified/);
   }
+  // Each console's board: the NTSC parts on the scanned NES-CPU-10, the PAL parts read off an NES-CPU-11 and drawn on
+  // the CPU-10's layout, which the PAL board was checked to share (fix round 1, 6 Oct 2026).
+  assert.match(layout.describe('pal'), /drawn on an NES-CPU-10, whose layout the PAL console's NES-CPU-11 was checked to share/);
+  assert.doesNotMatch(layout.describe('ntsc'), /CPU-11/);
+  assert.match(layout.describe('ntsc'), /three\.js, an NES-CPU-10, /);
   // Every height the parts file gives is typical, so the caption may say all of them are.
   assert.ok(Object.entries(parts.model.heights).every(([k, h]) => k === 'board' || h.measured === false));
 });
@@ -1119,6 +1131,10 @@ test('every source the board used is credited in the registry by its address, an
     }
   }
   assert.deepEqual(board.map((x) => refs.filter((r) => of(r) === x).length), board.map(() => 1), 'a source of the board is credited not once');
+  // Which buffer serves which port is by the board's print, checked against the wiki and the redrawing, never read
+  // from the redrawing (the controller's ruling; fix round 1, 6 Oct 2026).
+  assert.match('U9\'s jobs and which buffer serves which controller port read from its nets', /(buffer|port)[^.;,]*read from/, 'the check would not catch the old words');
+  for (const r of refs) assert.doesNotMatch(r.used, /(buffer|port)[^.;,]*read from|read from[^.;,]*(buffer|port)/, `${r.title}: ${r.used}`);
   // On the page, the note credits exactly those, in the registry's order, and not the photograph at the head of the page.
   for (const [, , note] of boardSection.matchAll(/<div class="model-made prose" data-model-made data-model-region="([a-z]+)"[^>]*>([\s\S]*?)<\/div>/g)) {
     const items = [...note.matchAll(/<li data-model-source>([\s\S]*?)<\/li>/g)].map((m) => m[1]);

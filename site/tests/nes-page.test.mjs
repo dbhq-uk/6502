@@ -10,6 +10,7 @@ import { nesRoms } from '../src/lib/pins.mjs';
 import { issueUrl, megabytes } from '../src/lib/bbc-micro.mjs';
 import { NOT_MODELLED, ELSEWHERE } from '../src/lib/nes.mjs';
 import { KEYS, KEY_NAMES } from '../public/nes-keys.js';
+import { OTHERS as BOARD_OTHERS } from '../src/models/nes-famicom-board-layout.mjs';
 
 // The NES's page, as the site that deploys builds it: the registry says the
 // machine runs, so it has a page, linked from the machines table, with its
@@ -171,11 +172,17 @@ test('the page says the NES needs a fast computer, gives no speed of its own, an
   assert.match(text, /The line under the screen says how fast this browser runs it, measured while it runs/);
   assert.ok(section('run').includes(`<a href="${issueUrl(ELSEWHERE.speed)}">issue ${ELSEWHERE.speed}</a>`));
   // The live headroom line is the only speed: nothing on the page is a typed multiple or rate of its own. The board
-  // model's section is left out: it names each console's crystal by its marking (21.47727 MHz on the NTSC board), which
-  // is a part, read off a photograph, not a speed (tests/nes-models.test.mjs holds it to the parts file).
-  const outsideModel = html.replace(/<section class="model"[\s\S]*?(?=<section class="photos")/, '');
-  assert.ok(outsideModel.length < html.length, 'the page has no model section to leave out');
-  assert.doesNotMatch(visibleText(outsideModel), /\d+(\.\d+)? times|times as fast|\d+(\.\d+)? MHz(?! \((NTSC|PAL)\))/);
+  // model names each console's crystal by its marking (21.47727 MHz on the NTSC board), a part read off a photograph,
+  // not a speed: those two markings, from the parts file (tests/nes-models.test.mjs holds them to it), are taken out
+  // first, and nothing else (fix round 1, 6 Oct 2026).
+  const crystals = Object.values(BOARD_OTHERS).flat().filter((o) => o.kind === 'crystal').map((o) => o.part);
+  assert.equal(crystals.length, 2);
+  let shown = visibleText(html);
+  for (const part of crystals) {
+    assert.ok(shown.includes(part), `the page does not name the crystal ${part}`);
+    shown = shown.replaceAll(part, '');
+  }
+  assert.doesNotMatch(shown, /\d+(\.\d+)? times|times as fast|\d+(\.\d+)? MHz(?! \((NTSC|PAL)\))/);
 });
 
 test('the page lists the parts left out, each linked to its issue, and the 3D models\' issue', () => {

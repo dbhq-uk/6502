@@ -20,8 +20,8 @@
 // fetched before the visitor scrolled to it, and scrolling loads its bundle and
 // track map; its canvas draws; pointing at the PPU names it on the status line
 // and lights its legend row; the PPU (U5) and controller port 1's buffer (U7)
-// are marked at least once in two seconds of looking every 50 ms, and their
-// legend rates are above zero; switching the region to PAL switches the model
+// are marked, looked at every 50 ms for up to five seconds (a timeout, not a
+// judged figure), and their legend rates are above zero; switching the region to PAL switches the model
 // to the PAL console (its region, its accessible name and description, the
 // PPU's part in the legend) with nothing more fetched, and the rates show
 // nothing for a sample, then come back; switching back, the same; Show tracks
@@ -329,25 +329,31 @@ async function checkBoardModel({ page, problems, requested, choose, region, othe
   if (!named.startsWith('U5, the picture processing unit') || pointedRows.join() !== 'U5') problems.push(`nes: pointing at the PPU did not name it and light its row ("${named}", rows ${pointedRows.join(', ')})`);
   await page.mouse.move(5, 5);
 
-  // Marks and rates: two seconds, looked at every 50 ms.
+  // Marks and rates, looked at every 50 ms until U5 and U7 have each been marked, on the model and in the legend, with
+  // a rate above zero, for at most five seconds. The five seconds are a timeout for the chips to show up, not a judged
+  // figure: on a busy machine the page runs the game in bursts, and a quarter second can pass with no frame run at
+  // all (fix round 1, 6 Oct 2026; the first version looked for 2 s on NTSC and 5 s on PAL).
+  const LOOK_MS = 5000;
   const rateOf = (chip) => page.locator(`[data-legend-rate="${chip}"]`).innerText().then((t) => Number(t.replace(/,/g, '')));
-  const look = async (ms) => {
+  const look = async () => {
     const seen = new Set();
     const rates = { ppu: 0, pad1: 0 };
-    let accessedRows = new Set();
-    for (const end = Date.now() + ms; Date.now() < end;) {
+    const accessedRows = new Set();
+    const t0 = Date.now();
+    const done = () => ['U5', 'U7'].every((r) => seen.has(r) && accessedRows.has(r)) && rates.ppu > 0 && rates.pad1 > 0;
+    while (Date.now() - t0 < LOOK_MS && !done()) {
       for (const ref of ((await model.getAttribute('data-model-accessed')) ?? '').split(' ').filter(Boolean)) seen.add(ref);
       for (const r of await page.$$eval('[data-legend-ref][data-accessed]', (rows) => rows.map((x) => x.dataset.legendRef))) accessedRows.add(r);
       for (const chip of Object.keys(rates)) rates[chip] = Math.max(rates[chip], (await rateOf(chip)) || 0);
-      await page.waitForTimeout(50);
+      if (!done()) await page.waitForTimeout(50);
     }
-    return { seen: [...seen].sort(), rows: [...accessedRows].sort(), rates };
+    return { seen: [...seen].sort(), rows: [...accessedRows].sort(), rates, ms: Date.now() - t0 };
   };
-  const ntsc = await look(2000);
-  console.log(`nes: in 2 s on ${region}, chips marked ${ntsc.seen.join(' ') || 'none'}, legend rows marked ${ntsc.rows.join(' ') || 'none'}; highest legend rates: U5 ${ntsc.rates.ppu} and U7 ${ntsc.rates.pad1} a second`);
+  const ntsc = await look();
+  console.log(`nes: on ${region}, after ${ntsc.ms} ms, chips marked ${ntsc.seen.join(' ') || 'none'}, legend rows marked ${ntsc.rows.join(' ') || 'none'}; highest legend rates: U5 ${ntsc.rates.ppu} and U7 ${ntsc.rates.pad1} a second`);
   for (const ref of ['U5', 'U7']) {
-    if (!ntsc.seen.includes(ref)) problems.push(`nes: ${ref} was never marked in 2 s with the game running`);
-    if (!ntsc.rows.includes(ref)) problems.push(`nes: ${ref}'s legend row was never marked in 2 s`);
+    if (!ntsc.seen.includes(ref)) problems.push(`nes: ${ref} was never marked in ${LOOK_MS / 1000} s with the game running`);
+    if (!ntsc.rows.includes(ref)) problems.push(`nes: ${ref}'s legend row was never marked in ${LOOK_MS / 1000} s`);
   }
   if (!(ntsc.rates.ppu > 0 && ntsc.rates.pad1 > 0)) problems.push(`nes: the legend's rates for U5 and U7 did not rise above zero (${JSON.stringify(ntsc.rates)})`);
 
@@ -388,11 +394,9 @@ async function checkBoardModel({ page, problems, requested, choose, region, othe
   const pal = await switchTo(other);
   const wantPpu = other === 'PAL' ? 'RP2C07-0' : 'RP2C02G-0';
   if (pal.ppu !== wantPpu) problems.push(`nes: with ${other} chosen, the PPU's part in the legend is ${pal.ppu}, not ${wantPpu}`);
-  // On a busy machine the page runs the game in bursts, and a quarter second can pass with no frame run at all,
-  // so the new machine is given up to five seconds to touch the PPU.
-  const palLook = await look(5000);
-  console.log(`nes: in 5 s on ${other}, chips marked ${palLook.seen.join(' ') || 'none'}; highest legend rates: U5 ${palLook.rates.ppu}, U7 ${palLook.rates.pad1}`);
-  if (!palLook.seen.includes('U5') || !(palLook.rates.ppu > 0)) problems.push(`nes: on ${other} the PPU was not marked in 5 s, or its rate did not come back`);
+  const palLook = await look();
+  console.log(`nes: on ${other}, after ${palLook.ms} ms, chips marked ${palLook.seen.join(' ') || 'none'}; highest legend rates: U5 ${palLook.rates.ppu}, U7 ${palLook.rates.pad1}`);
+  if (!palLook.seen.includes('U5') || !(palLook.rates.ppu > 0)) problems.push(`nes: on ${other} the PPU was not marked in ${LOOK_MS / 1000} s, or its rate did not come back`);
   const back = await switchTo(region);
   if (back.ppu !== (region === 'PAL' ? 'RP2C07-0' : 'RP2C02G-0')) problems.push(`nes: back on ${region}, the PPU's part in the legend is ${back.ppu}`);
 

@@ -2421,3 +2421,63 @@ not figures about the project: they differ from run to run.
   sample read 32,311 PPU accesses a second), most likely the page catching
   up on frames just after the restart; not checked. The baseline is the new
   machine's, so it is not a difference across two machines.
+
+### After review, the same day
+
+- **Corrected 6 October 2026, after review: the very high first rate after a
+  region change is the game, not the page catching up.** The entry above
+  says the 32,311 PPU accesses a second were "most likely the page catching
+  up on frames", and the bullet before it gives that sample as an example of
+  the bursts. Both are wrong about the cause. The run loop never catches up:
+  `site/public/machine-host.js` runs each animation frame for the real time
+  since the last, capped at `MAX_FRAME_MS`, 100 ms of machine time, and drops
+  the rest. The cause is Lan Master's reset code. Checked in
+  `roms/nes/Lan_Master.nes` (40,976 bytes, SHA-256
+  `becfeafb80479c330333c9e9385417f68f3c88e85443dfb37b05ae9283f3ea45`, NROM, two
+  16 KB banks) with a short Python read of the file, 6 October 2026: the reset
+  vector is `$8000`; the code there calls `$8A0D` twice, `JSR $8A0D` at
+  `$8013` and at `$803C`; and `$8A0D` is `2c 02 20 2c 02 20 10 fb 60`, `BIT
+  $2002; BIT $2002; BPL` back to the second `BIT`, then `RTS`: a wait for
+  vblank. Its loop reads the PPU once every 7 cycles (`BIT` absolute 4, a
+  taken `BPL` 3), so about 4,250 reads a frame on NTSC (29,781 CPU cycles) and
+  4,750 on PAL (33,248). Two waits, the first starting part way into a frame,
+  are up to about 8,500 reads on NTSC and 9,500 on PAL; 32,311 a second over
+  a 250 ms sample would be about 8,080. The sample's own length was not
+  recorded, so this agrees with the figure rather than proving it. The
+  bursts themselves (whole quarter seconds with no frame run, on a busy
+  host) are as described.
+- **The PAL caption** said the PAL console's board was "an NES-CPU-10". The
+  PAL parts were read off an NES-CPU-11 and drawn on the CPU-10's layout, so
+  each console now has its own words: "an NES-CPU-10" for NTSC, and "drawn on
+  an NES-CPU-10, whose layout the PAL console's NES-CPU-11 was checked to
+  share" for PAL. A test holds both.
+- **The KiCad redrawing's credit** said which buffer serves which controller
+  port was read from its nets. It was not: that is by the board's print,
+  checked against the wiki and the redrawing. The credit now says the ports
+  were "checked against them", and a test fails a credit that says a port was
+  read from a source.
+- **The legend's second paragraph** began "Some chips are never marked. The
+  CPU..." and then said the CPU's row is marked. It now says all but the CPU
+  are never marked, and that the CPU's row is marked for the registers on its
+  own chip that the machine counts as the sound unit's: `$4000` to `$4015`,
+  the sprite copy's `$4014` among them, and the writes to `$4016` and
+  `$4017` (`ChipAccesses.ChipAt`).
+- **The access module** takes differences as `(b - a) | 0`, as
+  `public/nes.js` tells a reader to, not `>>> 0`. A difference below zero now
+  gives no rate and keeps the new counts as the baseline: should a new machine
+  ever come without its `nes:start`, the old way read a fall of a few
+  thousand as about 17 billion accesses a second. Two tests, red then green.
+  The site suite after the round: 448 tests, 447 pass, 0 fail, 1 todo
+  (`cd site && npm run build && node --test tests/*.test.mjs`, 6 October
+  2026); both floors raised from 445 to 447.
+- **The NES page's speed test** now takes out only the two crystals'
+  markings, read from the parts file, rather than the whole model section,
+  so a typed speed anywhere else in the section is still caught.
+- **The browser check** looks for the marks for up to five seconds on each
+  region, stopping when U5 and U7 have each been marked with a rate above
+  zero: a timeout for the chips to show up, not a judged figure.
+- **The plan's rule that the KIM-1's and the BBC Micro's pages stay
+  identical** is revised in place, dated, with the old words kept: identical
+  in markup, once the inlined `<style>` is left out. Task 9's Modify list now
+  names the two tests that assert `case` undefined, which flip when it comes
+  back.
