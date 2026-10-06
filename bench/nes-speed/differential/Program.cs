@@ -167,7 +167,17 @@ var dots = new ConcurrentDictionary<string, string>();
 Parallel.ForEach(runs, new ParallelOptions { MaxDegreeOfParallelism = threads }, run =>
 {
     string key = $"{run.Job.Name} {run.Region.Name}";
-    results[key] = Run(run.Job, run.Region, frames, oracle, coverage && run.Job.Name.StartsWith("synthetic/", StringComparison.Ordinal) ? report => dots[key] = report : null);
+    try
+    {
+        results[key] = Run(run.Job, run.Region, frames, oracle, coverage && run.Job.Name.StartsWith("synthetic/", StringComparison.Ordinal) ? report => dots[key] = report : null);
+    }
+    catch (Exception e) when (e is not OutOfMemoryException)
+    {
+        // A build that throws on one run still writes the others, and the line says what was
+        // thrown and where, so --check reports it as that run's difference.
+        var where = new System.Diagnostics.StackTrace(e).GetFrames().Select(f => f.GetMethod()).FirstOrDefault(m => m?.DeclaringType?.Namespace?.StartsWith("Dbhq", StringComparison.Ordinal) == true);
+        results[key] = $"crashed: {e.GetType().Name}: {e.Message} in {where?.DeclaringType?.Name}.{where?.Name}";
+    }
 });
 if (coverage)
 {

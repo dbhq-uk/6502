@@ -1,7 +1,7 @@
 ---
 title: "The NES's lazy chips: the gate first"
 date: 2026-10-06
-summary: "Dan chose to let the NES's PPU and sound unit be brought up to date only when something can see them, on one condition: the lazy build must give bit for bit what the per-dot build gives at every point where a chip can be seen. Before any chip changes, the differential was extended to be that test. The bus now tells an observer of each such point, every chip reports its whole state, a reflection test fails if a field is left out, and the per-ROM output of the build before the work is committed as the baseline. Ten deliberate one-dot or one-cycle faults in the parts the work will touch, planted one at a time in a scratch copy, each changed the output, from 4 runs to all 256; one, a fetch a dot late that leaves the picture alone, was seen only by the new state hashes."
+summary: "Dan chose to let the NES's PPU and sound unit be brought up to date only when something can see them, on one condition: the lazy build must give bit for bit what the per-dot build gives at every point where a chip can be seen. Before any chip changes, the differential was extended to be that test. The bus now tells an observer of each such point, every chip reports its whole state, a reflection test fails if a field is left out, and the per-ROM output of the build before the work is committed as the baseline. Ten deliberate one-dot or one-cycle faults in the parts the work will touch, planted one at a time in a scratch copy, each changed the output. The review found the gate's real gap: the test ROMs hardly touch the chips while a line is drawn, which is what the lazy work will change. So the differential now also builds 38 small cartridges of its own, whose register writes sweep across the dots of the lines frame by frame, and with them every fault changes at least 20 runs. A fault also turned up a crash in the PPU that has been there since the NES was built: the reset button in the middle of sprite evaluation can leave it writing past secondary OAM."
 order: 36
 ---
 
@@ -71,8 +71,10 @@ tests' project files set. With it off, .NET's tiered JIT treats the flag as a
 constant and drops the calls: the disassembly of `NesBus.Cycle` at tier 1 with
 the flag off has no call to the observer, and with it on it has the null checks
 and the two calls (`DOTNET_JitDisasm="Cycle" dotnet <bench>/Dbhq.Machines.ThreadTime.dll ntsc 1`,
-6 October 2026, 19:05 UTC). In the browser's AOT build the flag is a load and a
-branch that always goes the same way. The thread-time bench was run alternately
+6 October 2026, 19:05 UTC). In the browser's AOT build the flag should be a load
+and a branch that always goes the same way, since Mono's AOT compiler builds the
+code before the class is set up and cannot treat the field as a constant; that is
+reasoned, not measured, as no browser round was run for it. The thread-time bench was run alternately
 on the baseline (`5e48505`, exported with `git archive`), this build, and this
 build with the flag switched on in its `runtimeconfig.json` and no observer set,
 four rounds of five runs of SNOW each region, 6 October 2026 from 19:03 UTC, at
@@ -206,7 +208,7 @@ prints the first run that differs and which of its hashes, and exits 1, so each
 later task's gate is one command:
 
 ```
-dotnet run -c Release --project bench/nes-speed/differential -- --check bench/nes-speed/differential/baseline/5e48505.txt
+dotnet run -c Release --project bench/nes-speed/differential -- --check bench/nes-speed/differential/baseline/4e9b92b.txt
 ```
 
 ### The baseline
@@ -227,6 +229,24 @@ and the homebrew in both regions, and the file is 70,451 bytes. It was the same,
 byte for byte, as a first run made between 18:34 and 18:41 UTC (6 minutes 53
 seconds, at loads of 17.2 to 1.9), and `--check` with `--oracle` from 18:53 to
 19:01 UTC (loads 31.8 to 32.9) printed `IDENTICAL: all 256 runs match`.
+
+**That file was replaced after the review** by one with the synthetic runs,
+`bench/nes-speed/differential/baseline/4e9b92b.txt`, named for the commit it was
+recorded at. That commit's `src/` still differs from `5e48505` only in the
+observer, the option, the state reports and the reports' skip reasons (`git diff
+5e48505 4e9b92b -- src`); the harness changed, not the machine.
+
+```
+dotnet run -c Release --project bench/nes-speed/differential -- bench/nes-speed/differential/baseline/4e9b92b.txt
+```
+
+6 October 2026, 21:41:12 to 21:45:30 UTC, 4 minutes 18 seconds of wall clock and
+10 minutes 47 seconds of CPU, at loads of 4.7 to 1.4: 332 runs, the 127 ROMs, the
+homebrew and the 38 synthetic cartridges in both regions, 90,387 bytes. Its 256
+ROM and homebrew lines agree with the first file on every hash but `ppu`, `apu` and
+`board`, whose memories are now hashed in four lanes (above), so the first file
+was dropped rather than kept beside it. `--check` with `--oracle`, 21:45:30 to
+21:49:00 UTC, printed `IDENTICAL: all 332 runs match`.
 
 ### Showing that it fails
 
@@ -257,15 +277,163 @@ see: the byte is the same, because `v` does not move between the two dots, so
 the picture is the same, but a `$2002` read on that dot sees the latch hold the
 old byte, and a lazy PPU could get it wrong in the same way.
 
-So every fault was seen, and none left the state list or the ROMs needing a fix.
-Two were seen by few ROMs: sprite 0 hit by the two `sprite_hit_tests` that test
-its alignment and corners, and the MMC3 fault by the three scanline-timing ROMs.
-The test ROMs are the only programs that look at those dots, so the scene tests
-the plan gives tasks 4 and 2 (sprite 0 at the line's ends, the NMI around
-VBlank) are needed beside the differential, not instead of it. The completeness
+So every fault was seen. Two were seen by few ROMs: sprite 0 hit by the two
+`sprite_hit_tests` that test its alignment and corners, and the MMC3 fault by the
+three scanline-timing ROMs. The review took that further (below). The completeness
 check was shown to fail as well: with one field's line taken out of the PPU's
 report in the scratch copy, `StateReportTests` failed on every board naming
 `Ppu._fetchLow`, and the differential stopped before running, naming it too.
+
+### After the review: synthetic cartridges
+
+The review of task 1 found the gate's real gap, which was the plan's, not the
+code's: almost every one of the 127 ROMs draws a still screen with rendering off,
+or works in VBlank. The fast scanline renderer of tasks 3 to 5 exists to skip
+exactly the lines those ROMs never exercise, so a fast path wrong only there would
+pass. So the differential now builds its own cartridges, from bytes, each a small
+6502 program assembled by a tiny assembler in the harness (`Asm.cs`, `Synthetic.cs`;
+never a game), and runs 38 of them in both regions beside the ROMs. Each is a
+workload on a board, and each keeps rendering on and moves its timing frame by
+frame:
+
+| Workload | What it does |
+| --- | --- |
+| fuzz | an LFSR picks a register (`$2000` to `$2007`, `$4014`, `$4015`, `$4016`, `$4017`), a value and a read or a write, then a delay; now and then the board's write and a wait for sprite 0; the DMC plays and IRQs are taken; eight seeds on five boards |
+| sprite0 | `BIT $2002` / `BVC` waits for sprite 0 hit, with sprite 0 at x = 0, 1, 7, 8, 128, 248, 254 and 255, its y swept, its flips and priority varied, the left clips on and off; after the hit, a delay a cycle longer each frame, a `$2005` and `$2006` split, and the board's write; on all six boards |
+| scroll | from the NMI, a delay a cycle longer each frame, then `$2006`, `$2006`, `$2005`, `$2005` and `$2000` |
+| mask | the same delay, then `$2001` with bit 1, 2, 3 or 4 cleared, or greyscale, or emphasis, put back 7 cycles later |
+| sprites | 64 sprites in clusters, more than eight on many lines, moving at four speeds (the overflow flag's false positives and negatives come and go), 8 by 16 with both flips on some boards; after the delay, `$2003` and `$2004` writes and an OAM DMA during rendering |
+| nmi | VBlank found by polling, then a delay to just before the next, then a burst of `$2000` bit 7 on and off and `$2002` reads across the dot the flag is set, for NTSC and PAL frame lengths |
+| apu | length counters loaded in 8 frames of 64 and left to run out through the silent rest, the DMC looping one frame and ending with an IRQ the next, and after the delay a `$4017` write (the delay's single cycles put it on odd and even cycles), a `$4015` read and a `$4015` write |
+
+The boards each add a write of their own, mid-frame: MMC1 a read-modify-write to
+the board, whose second write the chip ignores, then a CHR bank by its serial
+port; CNROM a CHR bank, through a table so the bus conflict changes nothing; AxROM
+its single screen, the two screens different; UxROM a PRG bank, with CHR RAM
+written in VBlank; MMC3 a CHR bank from the main loop, and its IRQ, a number of
+lines down that changes every frame, switching another bank under the sprites and
+toggling greyscale, with 8 by 16 sprites or 8 by 8 from `$1000` so A12 rises each
+line.
+
+**The sweep.** The timed workloads run in the NMI handler, after its OAM DMA, so
+the delay starts a fixed time after VBlank begins. A count goes up a cycle each
+frame to 120, then starts again in the next of three windows: just before NTSC's
+pre-render line, just before PAL's, and the middle of the picture. A clockslide (a
+run of `CMP #$C9` entered n bytes from its end) gives single cycles. On NTSC a cycle
+is three dots, so a cycle a frame alone reaches only the dots in step with the
+frame; rendering is switched off in one frame in four, at random, so that odd
+frames sometimes keep their last dot and the phase moves. `--coverage` prints, for
+each synthetic run, the dots its PPU register writes landed on with rendering on,
+and changes no hash (its output's lines were the baseline's). Run on 6 October,
+21:52 to 21:54 UTC, at loads of 1.0 to 5.1, as `dotnet
+bench/nes-speed/differential/bin/Release/net10.0/Dbhq.Machines.Nes.Differential.dll
+/tmp/cov.txt --only synthetic/ --coverage --threads 6`:
+
+| Runs | Visible lines' dots reached, each run | Pre-render line's dots reached, each run | Of the review's dots (0, 1, 2, 255, 256, 257, 258, 320, 337, 338, 339, 340), on the pre-render line, reached by none |
+| --- | --- | --- | --- |
+| NTSC scroll | 341 | 306 to 320 | none |
+| NTSC mask | 340 to 341 | 202 to 274 | none |
+| NTSC sprites | 341 | 334 to 338 | none |
+| PAL scroll | 304 to 339 | 208 to 211 | 1, 257, 337, 340 |
+| PAL mask | 304 to 331 | 193 to 204 | 1, 257, 337, 340 |
+| PAL sprites | 341 | 212 to 213 | 1, 257, 337, 340 |
+
+The sprite0, fuzz and nmi runs reach 333 to 341 of the visible lines' dots each,
+and the nmi runs put `$2000` writes and `$2002` reads on each of dots 0 to 3 of
+line 241, in both regions. **PAL's pre-render line cannot be covered this way.**
+PAL's CPU cycle is 3.2 dots, 16 dots every 5 cycles, and its frame of 106,392 dots
+is 8 more than a multiple of 16, so a program whose timing follows the frame can
+put an access on only 10 of every 16 dots of any one line, about 62 percent, which
+is what the runs reach. On another line the 10 are other dots, which is why the
+visible lines are covered; the pre-render line is one line, and dots 1, 257, 337
+and 340 of it are among those no program here can reach on PAL. It is a property
+of the model's fixed power-on alignment; a later task that wants those dots needs a
+scene test that sets the PPU's position directly.
+
+The synthetic runs are four times the frames, 600 at the default 150, like the
+homebrew. Before the memories' hash was given four lanes, which halved a sprite-0
+run's time, the whole differential took 18 minutes of wall clock and about 20 of
+CPU at loads of 10 to 23; the baseline's figure is below.
+
+### After the review: the fault pass again
+
+The same faults, against the new baseline, with the script now committed as
+[`bench/nes-speed/differential/faults.py`](../../bench/nes-speed/differential/faults.py),
+which takes the path of a scratch copy (here `git archive 4e9b92b` into
+`/tmp/nes-faults`, `.testdata` linked, removed afterwards; for the last five
+faults, the harness's handling of a crash, below, was copied in first):
+
+```
+python3 bench/nes-speed/differential/faults.py /tmp/nes-faults bench/nes-speed/differential/baseline/4e9b92b.txt --threads 6
+```
+
+6 October 2026, 21:54 to 23:01 UTC, loads 1.4 to 15.8. Of 332 runs (the first
+pass's figure, of 256, in brackets):
+
+| Fault | Runs changed | Of them synthetic | Seen only by the new state hashes |
+| --- | --- | --- | --- |
+| The background's nametable byte fetched a dot late | 298 (222) | 76 | 226 |
+| The background's shifters reloaded a dot late | 287 (211) | 76 | 5 |
+| Sprite evaluation's first OAM read a dot late | 191 (115) | 76 | 68 |
+| Sprite 0 hit tested against the next column's background pixel | 42 (4) | 38 | 7 |
+| The VBlank flag set on dot 2 of line 241 | 174 (121) | 53 | 10 |
+| A CPU access to the PPU made after three of its cycle's dots | 332 (256) | 76 | 58 |
+| Every frame counter step a cycle late | 332 (256) | 76 | 249 |
+| A DMC reload's fetch allowed to halt the CPU a cycle later | 81 (57) | 24 | 39 |
+| The sprite fetch's address on the PPU's bus a dot late (MMC3's A12) | 26 (4) | 22 | 2 |
+| MMC1 taking the write on the cycle straight after a write | 20 | 20 | 0 |
+
+Sprite 0 and MMC3, seen by 4 runs each before, are now seen by 42 and 26. The last
+row is a different fault from the first pass's, which was wrong: it made MMC1
+ignore a write two cycles after the last, but the count it tested stops at 2, so
+it ignored almost every write, and was not the one-cycle fault it was meant to
+be. No 6502 instruction writes twice two cycles apart; a read-modify-write writes
+on two cycles in a row, and the chip ignores the second. Taking that second write
+is now the fault. No test ROM writes to MMC1 that way, so only the synthetic
+MMC1 runs, whose board write is an `INC` of a ROM byte, see it: 20 runs, on all
+ten of them in both regions.
+
+**A crash found on the way.** With the fault that makes PPU accesses a dot late,
+one synthetic run (`fuzz-mmc3-3`, NTSC) threw `IndexOutOfRangeException` in
+`Ppu.EvaluationStep`, which stopped the whole differential. It is not the fault's:
+the code at `5e48505` does it too. `Ppu.Reset` clears `_found` but not the rest of
+sprite evaluation (`_secondaryIndex`, `_evaluationN`, `_evaluationM`,
+`_secondaryFull`, `_evaluationDone`). If the reset button lands in the middle of
+evaluation, and rendering is next switched on after dot 1 of a visible line (so
+the line's own reset at dot 1 does not happen) with sprites in range, evaluation
+goes on from the old index with the count at 0, and writes past the 32 bytes of
+secondary OAM. A scratch test on `5e48505` showed it in a few lines: sprites at
+y = 0, 8 by 16, rendering on, the PPU reset at line 10 dot 105, ten dots, `$2001`
+written with `$18`, then on to line 20: it throws. The fault only moved a write
+onto a dot where the fuzz cartridge could reach it. This task changes no
+behaviour, so it is not fixed here; the fix, for its own change with that test, is
+to put evaluation back with the rest in `Ppu.Reset`, or to wrap the index at 32 as
+the chip's 5-bit counter does. The differential now writes a run that throws as
+that run's line (`crashed: <exception> in <method>`) and goes on with the others,
+so a crash is reported like any other difference.
+
+### After the review: the reports checked by value
+
+`StateCompleteness` checks the reports by name. Three more tests in
+`StateReportTests` check them by value, on each board with CHR ROM and CHR RAM,
+after three frames:
+
+- every reported field, changed alone by reflection (its low bit, an array's first
+  element, an enum's next value; the frame counter's table, which is reported as
+  which one, swapped for the other; the sample ring's first waiting sample), changes
+  the whole report, and put back, puts it back;
+- every field skipped as fixed is read-only (`IsInitOnly`);
+- every field skipped as another part's own is that part's: the PPU's board, its
+  pattern memory, windows and nametable layout and the bus's PRG and windows are the
+  board's own objects, and `_pixels` is `Screen.Pixels`. NROM keeps no windows, so
+  for it the PPU's and the bus's are checked to be the fixed layout, and the skip
+  reasons now say so.
+
+Two observer tests were added: an OAM DMA is told as 256 writes to `$2004`, and
+reads at `$8000` and up and accesses to `$6000` to `$7FFF` are not told. The test
+`WithNoObserverNothingIsCalled` could not see a call with no observer set, so it
+is renamed for what it does check. A malformed baseline line now stops `--check` with a
+message.
 
 ### For the tasks that follow
 
@@ -281,6 +449,13 @@ What the gate asks of a lazy build, from the points above:
 - catch both up before power on or the reset button changes them;
 - keep `Ppu.Line` and `Ppu.Dot` logical, and every other public read of a chip's
   state (Ruling R of the plan's ledger) caught up when read;
+- the board's state that the PPU drives, MMC3's `_counter`, `_irq`, `_a12Low`
+  and `_lowSince`, is hashed at the sound unit's points too, with the rest of the
+  board. That is right only because a board that watches the PPU's address bus
+  stays on the per-dot path, so the PPU has run its dots before the access as now.
+  If MMC3's clock is ever scheduled, those four fields must move to the PPU's
+  points. (The choice was between this note and having MMC3 report them only at the
+  PPU's points; the note keeps the stricter hash while it is true.)
 - a new field must be reported or skipped with its reason, or
   `StateReportTests` fails. A lazy build's bookkeeping, such as the dots
   delivered and the dots caught up to, is skipped with that reason: the

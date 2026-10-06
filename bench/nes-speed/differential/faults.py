@@ -120,7 +120,11 @@ def main():
             if built.returncode != 0:
                 sys.exit(f'{name}: the build failed\n{built.stdout[-3000:]}')
             out = root / f'faults-{name}.txt'
-            subprocess.run(['dotnet', str(dll), '--check', str(baseline), '--out', str(out), '--threads', threads], cwd=root, capture_output=True, text=True)
+            if out.exists():
+                out.unlink()
+            ran = subprocess.run(['dotnet', str(dll), '--check', str(baseline), '--out', str(out), '--threads', threads], cwd=root, capture_output=True, text=True)
+            if not out.exists():
+                sys.exit(f'{name}: the differential wrote nothing\n{ran.stdout[-2000:]}{ran.stderr[-3000:]}')
             got = dict(fields(l) for l in out.read_text().splitlines()[1:])
             differ = [k for k in base if base[k] != got.get(k)]
             by = collections.Counter()
@@ -132,9 +136,12 @@ def main():
                 only_new += not (set(changed) & OLD)
                 synthetic += k.startswith('synthetic/')
             roms = sorted({k.rsplit(' ', 1)[0] for k in differ})
+            crashed = sorted(k for k in differ if 'result' in got[k] and got[k]['result'].startswith('crashed'))
             print(f'{name} ({what}): {len(differ)} of {len(base)} runs, {len(roms)} ROMs, {synthetic} of the runs synthetic; '
                   f'only the new state hashes: {only_new}; by hash: {dict(sorted(by.items()))}', flush=True)
             print('   e.g. ' + ', '.join(roms[:10]), flush=True)
+            for k in crashed:
+                print(f'   {k}: {got[k]["result"]}', flush=True)
         finally:
             path.write_text(text)
 

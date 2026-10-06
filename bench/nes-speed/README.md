@@ -19,7 +19,7 @@ below says which code it measured.
 | `index.html`, `main.js` | The page. It fetches the ROM, boots it, then times the runs. |
 | `run-in-browser.mjs`, `package.json` | Fetches the ROM from the pinned fork, checks it against its SHA-256 in `Pins.cs`, serves it with the page and a published copy of the app on `127.0.0.1`, and runs it in a headless Chrome, a fresh launch each time. |
 | `native/` | The same workload as a console program, in the solution so CI builds it. |
-| `differential/` | The check that a change for speed changed nothing else: it runs every pinned NES test ROM, and the bundled homebrew with a fixed round of button presses, in both regions and writes one line of hashes for each (every instruction's registers, cycle and PPU position, every cycle's interrupt lines, every frame's pixels, the sound, the end state, and each chip's whole state at every point where it can be seen). In the solution too. |
+| `differential/` | The check that a change for speed changed nothing else: it runs every pinned NES test ROM, the bundled homebrew with a fixed round of button presses, and synthetic cartridges it assembles itself, which keep rendering on and touch the chips at moving dots, in both regions and writes one line of hashes for each (every instruction's registers, cycle and PPU position, every cycle's interrupt lines, every frame's pixels, the sound, the end state, and each chip's whole state at every point where it can be seen). In the solution too. |
 | `differential/baseline/` | The differential's output from the code before the lazy chips (behaving as `5e48505`), which every step of that work is checked against; the file is named for the commit it was recorded at. |
 | `differential/faults.py` | Shows the differential can fail: in a scratch copy of the repository, whose path it takes, it plants one fault at a time, runs `--check` against a baseline, and counts the runs each changes. |
 
@@ -75,8 +75,8 @@ Or check against the committed baseline in one command. It prints the first run 
 which of its hashes do, and exits 1 on any difference:
 
 ```sh
-dotnet run -c Release --project differential -- --check differential/baseline/5e48505.txt
-dotnet run -c Release --project differential -- --check differential/baseline/5e48505.txt --oracle
+dotnet run -c Release --project differential -- --check differential/baseline/4e9b92b.txt
+dotnet run -c Release --project differential -- --check differential/baseline/4e9b92b.txt --oracle
 ```
 
 `--oracle` builds the machine with `NesOptions.PerDotReference`, the per-dot reference that a
@@ -86,7 +86,8 @@ lines), and `--out <file>` keeps a check's output. The program's opening comment
 hash in a line covers, and the file's first line names the format and the frame count, so two
 files are comparable only when their first lines are the same. Before it runs anything it checks
 by reflection that every field of every chip is in the chips' state reports, and stops, naming
-the field, if one is not. It runs four ROMs at a time; the journal entry
+the field, if one is not. A run that throws is written as `crashed: <exception> in <method>`
+and the others go on. It runs four ROMs at a time; the journal entry
 [`docs/journal/2026-10-06-the-nes-lazy-chips.md`](../../docs/journal/2026-10-06-the-nes-lazy-chips.md)
 has how long a run took, dated.
 
