@@ -61,7 +61,7 @@
       "width": 4020,
       "height": 2880,
       "sha256": "0681170937ae3af9db3fc8898e155792e295dacb5cb73942f8d2371c8733907f",
-      "committed": null,
+      "committed": "nes-rear-right.webp",
       "use": "The NTSC NES-001 from the rear right: the case's proportions with FL, the rear and the right side"
     },
     {
@@ -77,7 +77,7 @@
       "width": 8606,
       "height": 2253,
       "sha256": "3cf7eca8f43bafd3a8f341127d6c6f728acd2da3d2deb2464d93b66681b913d6",
-      "committed": null,
+      "committed": "nes-pal-front.webp",
       "use": "The PAL NESE-001's top shell, straight on from the front: its label, and its front face against the NTSC case's",
       "focalLengthMm": 20,
       "focalLengthFrom": "the file's own XMP, exif:FocalLength 200/10 on an ILCE-7RM4, read on 6 October 2026"
@@ -95,7 +95,7 @@
       "width": 4000,
       "height": 3000,
       "sha256": "a8e10ed2cf0148beccab8f7979f0a92497b01846df684e6c5260c56d4c9a4c27",
-      "committed": null,
+      "committed": "nes-pal-underside.webp",
       "use": "The PAL NESE-001's underside: the expansion port cover, the feet and the rating label"
     },
     {

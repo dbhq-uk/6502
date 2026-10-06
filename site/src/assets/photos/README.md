@@ -22,9 +22,11 @@ resized copy of the source, which is a derivative under that licence.
 is in its section below and on the page. The analysis that does it is in
 `tools/kim1-model/` (its `README.md` says how to run it), and the journal for 2
 October 2026 has every figure. The BBC Micro has no model, so its photograph is
-shown and nothing is taken from it. The NES has its board's model, which takes
-nothing from the NES's photograph here: the board is measured from scans and
-photographs that are not committed, listed in their own section below.
+shown and nothing is taken from it. The NES has two: its board's model,
+which takes nothing from the photographs here, being measured from scans and
+photographs that are not committed, listed in their own section below; and its
+outside's, which takes from `nes.webp`, `nes-rear-right.webp`, `nes-pal-front.webp` and
+`nes-pal-underside.webp`, each measured on its full-size original.
 
 ## kim-1.webp
 
@@ -118,6 +120,48 @@ photographs that are not committed, listed in their own section below.
 | Fetched | 6 October 2026, from `upload.wikimedia.org/wikipedia/commons/8/82/Nintendo-Entertainment-System-NES-Console-FL.jpg`: 4020 by 2880 pixels, 2,193,817 bytes, SHA-1 `339e959bbdb741c24a7f00e4256152b00e5c802c` (the SHA-1 Commons records for the file), SHA-256 `53c4ff11da6ba56bc2d9d8138dd585d126e08fe22350e8e0363003f9ddb8ab3c` |
 | This copy | Not cropped: the console already sits in an even margin of about 240 pixels of white on every side (ImageMagick's trim box at 2 % fuzz is 3520 by 2395 at 243, 249). Resized only: `cwebp -q 82 -resize 1600 0 -metadata none`: 1600 by 1147 pixels, 32,014 bytes, SHA-256 `4325012461f3919fc899d0a9adca509d5f5f09d14833905c076c0cc1e6335f55`. Colours are the source's. The original is not committed, being over 1.5 MB; the line above is enough to fetch it again and check it |
 | Used for | The photograph of the machine at the head of its page, and, measured on its full-size original, the outside model's front, top and left end: the cartridge door, the vents, the buttons, the power light, the controller ports and the lean of the lower shell (task 9 of the NES models plan, 6 October 2026; the measuring is task 8's). The board's model takes nothing from it |
+
+## nes-rear-right.webp
+
+| | |
+|---|---|
+| What | An original Nintendo Entertainment System, the North American console, seen from above and behind and a little from the right on white: the rear with its three connectors in a recess at the lower left, the top shell's black band of vents and the cartridge slot's lid |
+| Source | Wikimedia Commons, [`File:Nintendo-Entertainment-System-NES-Console-BR.jpg`](https://commons.wikimedia.org/wiki/File:Nintendo-Entertainment-System-NES-Console-BR.jpg), the photographer's own work |
+| Author | Evan-Amos, as the file page names him |
+| Licence | Public domain, as the file page states it: the photographer's `{{PD-self}}` release ("I, the copyright holder of this work, release this work into the public domain. This applies worldwide."). Checked on Commons' API on 6 October 2026 (`LicenseShortName` is `Public domain`). No credit is owed; the page gives one anyway |
+| Which console | The file page describes it as showing "a DC in, channel 3/4 selector and RF A/V out", so the North American NES, the NTSC console. The same console as `nes.webp`, from the other side |
+| Taken | 27 July 2016 (`DateTimeOriginal`: Nikon D7000). The file page's own date, 29 July 2016, is when it was uploaded |
+| Fetched | 5 October 2026, from `upload.wikimedia.org/wikipedia/commons/c/cf/Nintendo-Entertainment-System-NES-Console-BR.jpg`: 4020 by 2880 pixels, 2,230,258 bytes, SHA-1 `ec812d15b0117d144825bf214b0eedab1f34aa90` (the SHA-1 Commons records for the file; the file here matches it), SHA-256 `0681170937ae3af9db3fc8898e155792e295dacb5cb73942f8d2371c8733907f` |
+| This copy | Not cropped. Resized only: `cwebp -q 82 -resize 1600 0 -metadata none`: 1600 by 1147 pixels, 26,862 bytes, SHA-256 `2db816d995fdcba4b6d4492a4a92a74dfb7e0d9b1de723c513f5c6130bf41b19`. Colours are the source's. The original is not committed, being over 1.5 MB; the line above is enough to fetch it again and check it |
+| Used for | The outside model's rear, measured on the full-size original with the rear face rectified: its window, the places of the three connectors and their words, and the notch; and the lean of the lower shell, held out as a check (task 8 of the NES models plan; the credit is moved here from the registry's references, where it stood until 6 October 2026) |
+
+## nes-pal-front.webp
+
+| | |
+|---|---|
+| What | The front of the top shell of a PAL Nintendo Entertainment System, a European console whose plastic has yellowed, seen straight on from the front against a pale ground: the cartridge slot's lid with its red words, including EUROPEAN VERSION, and the black band at the right. A wide, shallow strip |
+| Source | Wikimedia Commons, [`File:Geöffnetes_deutsches_NES_20221102_HOF06342_RAW-Export.png`](https://commons.wikimedia.org/wiki/File:Ge%C3%B6ffnetes_deutsches_NES_20221102_HOF06342_RAW-Export.png), the photographer's own work |
+| Author | PantheraLeo1359531, as the file page names the user |
+| Licence | CC BY 4.0, as the file page states it ([deed](https://creativecommons.org/licenses/by/4.0/)), checked on Commons' API on 6 October 2026 (`LicenseShortName` is `CC BY 4.0`, `AttributionRequired` is true). The credit above, with the licence's name and link, is the attribution; the copy here is resized, which is a change, and this file says so (the page's credit line does not yet say it: see the journal's task 8 follow-up) |
+| Which console | The file page is titled "Geöffnetes deutsches NES" and describes a German Nintendo Entertainment System, so the PAL console; its label underneath, in `nes-pal-underside.webp`, is NESE-001 |
+| Taken | 2 November 2022 (the file page's `DateTimeOriginal`; the page's `DateTime`, 5 April 2023, is when the file was exported). The camera is a Sony ILCE-7RM4 at 20 mm, as `tools/nes-model/data/sources.json` records |
+| Fetched | 5 October 2026, from `upload.wikimedia.org/wikipedia/commons/d/d0/Ge%C3%B6ffnetes_deutsches_NES_20221102_HOF06342_RAW-Export.png`: 8606 by 2253 pixels, 92,882,699 bytes, SHA-1 `be7b9617e71ce915a27b0b1950f53150bba1a1e5` (the SHA-1 Commons records for the file; the file here matches it), SHA-256 `3cf7eca8f43bafd3a8f341127d6c6f728acd2da3d2deb2464d93b66681b913d6` |
+| This copy | Not cropped. Resized only: `cwebp -q 82 -resize 1600 0 -metadata none`, which reads the PNG as it is: 1600 by 419 pixels, 18,370 bytes, SHA-256 `0853dfe7e4545574ca4fe83b2c3283a6debc2ce5ae9606e12ee769aff57e3f08`. The original is not committed, being 93 MB; the line above is enough to fetch it again and check it |
+| Used for | The outside model's PAL console: its front words, including the line EUROPEAN VERSION, and a check of its front against the NTSC console's, measured on the full-size original (task 8 of the NES models plan; the credit is moved here from the registry's references, where it stood until 6 October 2026) |
+
+## nes-pal-underside.webp
+
+| | |
+|---|---|
+| What | The underside of a PAL Nintendo Entertainment System, a NESE-001, photographed from above on a patterned carpet: its two labels, four feet, two vent grilles, the cover of the expansion port and a black plate with two screws |
+| Source | Wikimedia Commons, [`File:Unterseite_NES_NESE-001_20221102_132229.jpg`](https://commons.wikimedia.org/wiki/File:Unterseite_NES_NESE-001_20221102_132229.jpg), the photographer's own work |
+| Author | PantheraLeo1359531, as the file page names the user |
+| Licence | CC BY 4.0, as the file page states it ([deed](https://creativecommons.org/licenses/by/4.0/)), checked on Commons' API on 6 October 2026 (`LicenseShortName` is `CC BY 4.0`, `AttributionRequired` is true). The credit above, with the licence's name and link, is the attribution; the copy here is resized, which is a change, and this file says so (the page's credit line does not yet say it: see the journal's task 8 follow-up) |
+| Which console | The file page says "Bottom of the model NESE-001 of the Nintendo Entertainment System", and the labels in it are German, so the PAL console |
+| Taken | 2 November 2022, 13:22 (`DateTimeOriginal`: a Samsung SM-G988B, a phone, so not the camera of `nes-pal-front.webp`) |
+| Fetched | 5 October 2026, from `upload.wikimedia.org/wikipedia/commons/2/23/Unterseite_NES_NESE-001_20221102_132229.jpg`: 4000 by 3000 pixels, 3,025,854 bytes, SHA-1 `15faa3996e91bd7f0c9433c7baf3e64ae51c655f` (the SHA-1 Commons records for the file; the file here matches it), SHA-256 `a8e10ed2cf0148beccab8f7979f0a92497b01846df684e6c5260c56d4c9a4c27` |
+| This copy | Not cropped. Resized only: `cwebp -q 82 -resize 1600 0 -metadata none`: 1600 by 1200 pixels, 244,400 bytes, SHA-256 `466c1ae3cb419ee6dfa5422f3546cebe5d731acf3aa3437f91ec12ba6a4b0c8b`. The original is not committed, being over 1.5 MB; the line above is enough to fetch it again and check it |
+| Used for | The outside model's PAL underside, measured on the full-size original rectified on its six screw holes: the two labels and their words, the feet and the expansion port's cover (task 8 of the NES models plan; the credit is moved here from the registry's references, where it stood until 6 October 2026) |
 
 The site builds AVIF and WebP copies of each file here at build time
 (`astro:assets`), so a page never loads a 1600 pixel master.

@@ -1406,6 +1406,47 @@ test('the outside\'s note states every uncertainty plainly, with its figures rea
   assert.match(caseLayout.HELP, /the light never blinks/);
 });
 
+// Task 8's follow-up (6 Oct 2026): the photographs committed for the outside model, resized, as the
+// three the case used besides its head photograph and whose licence lets a copy be kept. Not O2-BL,
+// which was not read, nor the head photograph O2-FL, which is `nes.webp` and has its own credit.
+const COMMITTED = { 'O2-BR': 'nes-rear-right.webp', O4: 'nes-pal-front.webp', O5: 'nes-pal-underside.webp' };
+
+test('the photographs committed for the outside model are in the folder, credited by author, address and licence, listed as `committed` in sources.json, and match the hashes their README gives', () => {
+  const photosDir = path.join(process.cwd(), 'src', 'assets', 'photos');
+  const readme = fs.readFileSync(path.join(photosDir, 'README.md'), 'utf8');
+  // Nothing else is marked committed, and every one marked is a photograph the registry names.
+  assert.deepEqual(Object.fromEntries(sources.filter((x) => x.committed !== null).map((x) => [x.id, x.committed])), COMMITTED);
+  for (const [id, file] of Object.entries(COMMITTED)) {
+    const src = sources.find((x) => x.id === id);
+    assert.equal(src.kind, 'photograph', `${id}: kind`);
+    assert.ok(src.licence === 'Public domain' || src.licence === 'CC BY 4.0', `${id}: ${src.licence} is not a licence a copy may be kept under`);
+    const full = path.join(photosDir, file);
+    assert.ok(fs.existsSync(full), `${file} is not in src/assets/photos`);
+    const copy = fs.readFileSync(full);
+    const sha = crypto.createHash('sha256').update(copy).digest('hex');
+    assert.notEqual(sha, src.sha256, `${file} is the original of ${id}`);
+    assert.ok(copy.length < 1.5 * 1024 * 1024 && copy.length < src.bytes, `${file} is not a resized copy`);
+    // Credited in the registry, after the main photograph, by the source's author, page and licence.
+    const credit = nesRow.photos.find((r) => r.file === file);
+    assert.ok(credit, `the NES's photos has no entry for ${file}`);
+    assert.ok(nesRow.photos.indexOf(credit) > 0, `${file} is before the main photograph`);
+    assert.equal(credit.author, src.author, `${file}: author`);
+    assert.equal(credit.sourceUrl, src.page, `${file}: source`);
+    assert.equal(credit.licence, src.licence, `${file}: licence`);
+    if (src.licence === 'CC BY 4.0') assert.equal(credit.licenceUrl, 'https://creativecommons.org/licenses/by/4.0/', `${file}: no link to its licence`);
+    assert.match(credit.used, /^the outside model's/, `${file}: used`);
+    // Credited once: not again as a reference.
+    assert.equal((nesRow.references ?? []).filter((r) => r.sourceUrl === src.page || r.sourceUrl === src.url).length, 0, `${file} is also a reference`);
+    // The README section gives the original's hash, and the committed copy's, which is the file's.
+    const at = readme.indexOf(`## ${file}\n`);
+    assert.ok(at >= 0, `the photographs' README has no section for ${file}`);
+    const section = readme.slice(at, readme.indexOf('\n## ', at + 1));
+    assert.match(section, new RegExp(`Fetched\\b[^\\n]*SHA-256 \`${src.sha256}\``), `${file}: the README does not give ${id}'s original SHA-256`);
+    assert.match(section, new RegExp(`This copy\\b[^\\n]*SHA-256 \`${sha}\``), `${file}: the README's SHA-256 is not the committed file's (${sha})`);
+    assert.ok(section.includes(src.page), `${file}: the README does not give its source`);
+  }
+});
+
 test('every source the case used is credited by its address, once, with its own licence, SHA-256 and day, and the outside credits exactly those', () => {
   const credited = [...nesRow.photos, ...(nesRow.drawings ?? []), ...(nesRow.references ?? [])];
   const of = (x) => credited.filter((r) => r.sourceUrl === x.url || r.sourceUrl === x.page);

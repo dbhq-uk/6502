@@ -623,6 +623,41 @@
           "alt": "An original Nintendo Entertainment System seen from the front left and a little above on a white background: a light grey box with a darker grey lower half, the lid of the cartridge slot on top with the red Nintendo Entertainment System name on its front, the power light and the POWER and RESET buttons at the front left, and the two controller ports, numbered 1 and 2, at the foot of the black band on the right.",
           "fetched": "2026-10-06",
           "used": "the outside model's front, top and left end, measured on the full-size original: the cartridge door, the vents, the buttons, the power light, the controller ports and the lean of the lower shell; the board model takes nothing from it"
+        },
+        {
+          "file": "nes-rear-right.webp",
+          "author": "Evan-Amos",
+          "sourceUrl": "https://commons.wikimedia.org/wiki/File:Nintendo-Entertainment-System-NES-Console-BR.jpg",
+          "licence": "Public domain",
+          "date": "2016-07-27",
+          "caption": "the same North American console from above and behind, at its rear connectors",
+          "alt": "An original Nintendo Entertainment System seen from above and behind on a white background: a light grey top shell with a black band of slotted vents across its left part and the flat lid of the cartridge slot to the right of it, over a darker grey lower shell. In a recess at the lower left of the rear are three connectors with short red words beneath them: a round power socket, a small slide switch and a round socket with a white ring.",
+          "fetched": "2026-10-05",
+          "used": "the outside model's rear, measured on the full-size original: its window, the places of the three connectors and their words, and the notch; and the lean of the lower shell, held out as a check"
+        },
+        {
+          "file": "nes-pal-front.webp",
+          "author": "PantheraLeo1359531",
+          "sourceUrl": "https://commons.wikimedia.org/wiki/File:Ge%C3%B6ffnetes_deutsches_NES_20221102_HOF06342_RAW-Export.png",
+          "licence": "CC BY 4.0",
+          "licenceUrl": "https://creativecommons.org/licenses/by/4.0/",
+          "date": "2022-11-02",
+          "caption": "the top shell of a German (PAL) console, straight on from the front: its case has yellowed",
+          "alt": "The front of the top shell of a PAL Nintendo Entertainment System, a yellowed beige, seen straight on against a pale background: a long cartridge slot lid at the left with the red words Nintendo and ENTERTAINMENT SYSTEM and, below them in italics, EUROPEAN VERSION, and at the right a black band. The picture is a wide, shallow strip.",
+          "fetched": "2026-10-05",
+          "used": "the outside model's PAL console: its front words, including the line EUROPEAN VERSION, and a check of its front against the NTSC console's, measured on the full-size original"
+        },
+        {
+          "file": "nes-pal-underside.webp",
+          "author": "PantheraLeo1359531",
+          "sourceUrl": "https://commons.wikimedia.org/wiki/File:Unterseite_NES_NESE-001_20221102_132229.jpg",
+          "licence": "CC BY 4.0",
+          "licenceUrl": "https://creativecommons.org/licenses/by/4.0/",
+          "date": "2022-11-02",
+          "caption": "the underside of a German (PAL) console, the NESE-001, with its two labels",
+          "alt": "The underside of a grey PAL Nintendo Entertainment System, model NESE-001, lying on an orange speckled carpet: a larger white label at the upper left with the Nintendo Entertainment System name, German rating text and two approval marks, and a smaller white label at the right with the model, brand and serial number. There are four round dark feet near the corners, two slotted vent grilles, a rectangular cover for the expansion port in the middle and a black plate held by two screws at the bottom left.",
+          "fetched": "2026-10-05",
+          "used": "the outside model's PAL underside, measured on the full-size original rectified on its screw holes: its two labels and their words, the feet and the expansion port's cover"
         }
       ],
       "references": [
@@ -691,15 +726,6 @@
           "used": "the underside, its expansion cover, its vents and its feet, the feet's height, the AV jacks' places on the side, and checks on the case's proportions and on the rear connectors' places"
         },
         {
-          "title": "a photograph of an NTSC NES-001 from the rear right",
-          "author": "Evan-Amos",
-          "sourceUrl": "https://commons.wikimedia.org/wiki/File:Nintendo-Entertainment-System-NES-Console-BR.jpg",
-          "licence": "Public domain",
-          "fetched": "2026-10-05",
-          "sha256": "0681170937ae3af9db3fc8898e155792e295dacb5cb73942f8d2371c8733907f",
-          "used": "the rear: its window, the places of the connectors and their words, and the notch; and the lean of the lower shell, held out as a check"
-        },
-        {
           "title": "a photograph of an NES-001's lower shell, empty, from the rear right",
           "author": "Evan-Amos",
           "sourceUrl": "https://commons.wikimedia.org/wiki/File:Nintendo-Entertainment-System-NES-Deconstruction-01.jpg",
@@ -707,26 +733,6 @@
           "fetched": "2026-10-05",
           "sha256": "48b896dac434f458094aadbc62cc6145b9ce091850c0cc8ec3123f505f8c270e",
           "used": "looked at for whether POWER latches in when pressed, which it does not show"
-        },
-        {
-          "title": "a photograph of a PAL NESE-001's upper shell, straight on from the front",
-          "author": "PantheraLeo1359531",
-          "sourceUrl": "https://commons.wikimedia.org/wiki/File:Ge%C3%B6ffnetes_deutsches_NES_20221102_HOF06342_RAW-Export.png",
-          "licence": "CC BY 4.0",
-          "licenceUrl": "https://creativecommons.org/licenses/by/4.0/",
-          "fetched": "2026-10-05",
-          "sha256": "3cf7eca8f43bafd3a8f341127d6c6f728acd2da3d2deb2464d93b66681b913d6",
-          "used": "the PAL console's front words, and a check of its front against the NTSC console's"
-        },
-        {
-          "title": "a photograph of a PAL NESE-001's underside",
-          "author": "PantheraLeo1359531",
-          "sourceUrl": "https://commons.wikimedia.org/wiki/File:Unterseite_NES_NESE-001_20221102_132229.jpg",
-          "licence": "CC BY 4.0",
-          "licenceUrl": "https://creativecommons.org/licenses/by/4.0/",
-          "fetched": "2026-10-05",
-          "sha256": "a8e10ed2cf0148beccab8f7979f0a92497b01846df684e6c5260c56d4c9a4c27",
-          "used": "the PAL console's two labels underneath and their words, and a check on its feet and screw holes"
         },
         {
           "title": "a photograph of a PAL NESE-001's lower shell from above, with its board in it",

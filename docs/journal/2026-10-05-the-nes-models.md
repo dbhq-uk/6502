@@ -1888,6 +1888,8 @@ pull request (#55) has not merged and edits the NES row of
 
 The same list is in the plan, under task 8.
 
+**Done 6 Oct 2026**, once #55 had merged into this branch: see "Task 8 follow-up" at the end of this entry. Three photographs, not the two NTSC and one PAL the list names, and why is there.
+
 ### After review, the same day
 
 The review found the work sound and asked for the uncertainty to be said
@@ -2770,3 +2772,72 @@ and the one-model pages sound, and asked for these, all done:
   Alt and Left still goes back with a tab focused; the loader is 3,491 bytes.
 - **`MachineModel.astro`** imports from `models.mjs` once.
 
+### Task 8 follow-up: the NES's photographs, resized and credited (6 October 2026)
+
+The NES row now exists in `machines/registry.json`, so the steps task 8 left
+are done.
+
+**Which three, and why not the three named.** The list named O2-FL, O2-BR and
+one PAL photograph. The NES row's main photograph, `nes.webp`, is already
+O2-FL (its entry and README section say so), so O2-FL is not committed twice.
+The plan's other choice was O2-BL, but this entry's own record says O2-BL was
+not read and is not credited, and a test pins that no credited source is
+O2-BL: crediting it with a "used" would say something false. So the three are
+the photographs the case did use:
+
+- **O2-BR**, `nes-rear-right.webp` (Evan-Amos, public domain): the rear, the
+  places of its three connectors, and the lean of the lower shell held out as
+  a check.
+- **O4**, `nes-pal-front.webp` (PantheraLeo1359531, CC BY 4.0): the PAL
+  console's front words and the check of its front against the NTSC console's.
+  Its original is 93 MB; a strip of 1600 by 419 pixels is what it gives.
+- **O5**, `nes-pal-underside.webp` (PantheraLeo1359531, CC BY 4.0): the PAL
+  underside, rectified on its six screw holes: its labels, feet and the
+  expansion port's cover.
+
+That is two PAL photographs, not one. O4 shows the PAL console's face and
+O5 its underside, and each carries something the model took from it that the
+other does not. Both were already credited as references; each moved to
+`photos`, because the credits test requires a source to be credited once.
+
+**Licences.** Checked on Commons' API on 6 October 2026 (`prop=imageinfo`,
+`iiprop=extmetadata`): O2-BR `LicenseShortName` Public domain; O4 and O5 CC BY
+4.0, `AttributionRequired` true, Artist PantheraLeo1359531, `Credit` Own work.
+Each file's SHA-1 is also the one Commons records, and its SHA-256 is
+`sources.json`'s. The dates are `DateTimeOriginal`: 2016-07-27 for O2-BR,
+2022-11-02 for O4 and O5. `fetched` is 5 October 2026, the day the originals
+were downloaded, since they were not fetched again.
+
+**Commands.** From `~/dbhq-previews/nes-model-research/full/`, for each
+original: `cwebp -q 82 -resize 1600 0 -metadata none <original> -o
+site/src/assets/photos/<name>.webp`. `cwebp` 1.3.2 read the PNG and the JPEGs
+as they are; no conversion first. The copies are 26,862, 18,370 and 244,400
+bytes. Not one original is committed.
+
+**Where the hashes are.** `site/src/assets/photos/README.md` has a section
+for each file with both SHA-256, the original's and the copy's; the originals'
+are also in `tools/nes-model/data/sources.json`, where `committed` is now set
+for these three and for nothing else. (O2-FL's `committed` is still null
+although `nes.webp` is its resized copy: it was left alone as outside this
+step. It is a one-word change if Dan wants it.)
+
+**Tests and floors.** One test added in `site/tests/nes-models.test.mjs`: the
+three files exist and are resized copies, none is an original's hash, each is
+credited in the NES's `photos` by author, address and licence (and the CC BY
+link), none is also a reference, each is `committed` in `sources.json` (and
+nothing else is), and the README gives the original's SHA-256 and the
+copy's, which is the file's. Shown able to fail by hand: one digit of a README
+hash changed, `committed` set to null, and a licence changed in the registry
+each failed it and the files were restored. No existing test counted the NES's
+photographs; the "credited once" test passes because the three references
+moved. The registry's, `site.test.mjs`' and the README tests read the list as
+it stands. The floors in `validate.yml` and `deploy-site.yml` are 468, from
+the full suite's output on this branch (469 tests, 468 passing, one `todo` that
+is the BBC Micro's known frame check). The page lists all four photographs.
+
+**One thing the page does not do.** CC BY 4.0 asks that a change be
+indicated. The photographs' credit line says author, source and licence but
+not that the copy is resized, and that is the same for the KIM-1's CC BY-SA
+photographs. The README says it. Adding the words to `MachinePhoto.astro`
+changes every machine page, so it is not done here; it is a one-line change
+for a later pass.
