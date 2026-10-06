@@ -16,7 +16,7 @@ them, and its registry row claims no model until both views are built.
 
 ## What is built
 
-Two model modules on `/machines/nes-famicom/`, both ours, built in three.js on
+Two model modules on `/machines/nes/`, both ours, built in three.js on
 the shared stage (`site/src/models/stage.mjs`). No downloaded model is used.
 **Each module draws two consoles,** the NTSC NES-001 and the PAL NESE-001, and
 draws the one the page's region names (Dan, 5 October 2026: "NTSC and PAL, both
@@ -129,8 +129,11 @@ the same differences. The words say what a mark means: "read or written by the
 processor in the last quarter second", not "working". The legend says in words
 that the CPU, the work RAM, the address decoder and the cartridge are in use all
 the time, that the video RAM and the address latch are the PPU's own and in use
-whenever it draws, and that the lockout chip is not emulated: none of them is
-marked. The rates are live readings of the running machine, not figures about
+whenever it draws, that the hex inverter (U9) inverts the PPU's address line
+A13 and the reset line and clocks the lockout chip, so it is in use all the
+time, and that the lockout chip is not emulated: none of them is marked. (The
+inverter's jobs are read from OpenTendo's KiCad redrawing, a cross-check, not
+traced on the scan, and the page says so.) The rates are live readings of the running machine, not figures about
 the project, so rule 5 is met by reading them from the machine.
 
 **Region.** On `nes:region` the page restarts the machine (the machine's

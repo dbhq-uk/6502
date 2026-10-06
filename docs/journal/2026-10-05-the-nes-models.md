@@ -1954,3 +1954,8 @@ gain. The plan now says the page is `/machines/nes/` and a model's `machine` is
 `nes`, with a dated note under "Facts every task relies on". The approved design
 still names `/machines/nes-famicom/` in two places; it is not edited, and Dan can
 fold the change in. The made-up machine in task 1's test keeps its own id.
+
+Dan then asked for the wording to be fixed where needed, so the approved design
+now says `/machines/nes/` (it had that path once, not twice as the note above
+said) and its legend sentence names the hex inverter, U9, beside the other
+chips that are never marked, with its jobs credited to the redrawing's nets.
