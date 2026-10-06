@@ -11,6 +11,18 @@
 // at /rom. It is never copied into the published app and never committed. A ROM that does not
 // match its pin stops the run.
 //
+// With PROFILE=<n> in the environment, each launch is also recorded with the DevTools protocol's
+// sampling profiler (200 microsecond interval), and the n functions with the most self time are
+// printed with their share of all the samples: of the whole page, boot included, or with
+// THREAD_TIME (below) of the driver's runs alone. Publish with
+// -p:WasmNativeStrip=false so the WebAssembly keeps its function names.
+//
+// With THREAD_TIME=<n> in the environment, after the page's own runs the driver makes n more runs
+// of the timed cycles itself, each read with the DevTools protocol's ThreadTime metric (the CPU
+// time of the page's main thread) before and after, and prints each as
+// `thread <i> cycles=<n> thread_ms=<ms> mhz=<x> times_real=<x>`. On a shared machine the main
+// thread's CPU time moves less with the load than the wall-clock time does.
+//
 // Local measurement only: the server binds to loopback and serves one folder.
 import http from 'node:http';
 import fs from 'node:fs';
@@ -95,6 +107,15 @@ try {
     page.on('response', response => {
       if (response.status() >= 400) fail(new Error(`HTTP ${response.status()}: ${response.url()}`));
     });
+    const profileTop = Number(process.env.PROFILE ?? 0);
+    const threadRuns = Number(process.env.THREAD_TIME ?? 0);
+    const cdp = profileTop > 0 ? await page.context().newCDPSession(page) : null;
+    const startProfile = async () => {
+      await cdp.send('Profiler.enable');
+      await cdp.send('Profiler.setSamplingInterval', { interval: 200 });
+      await cdp.send('Profiler.start');
+    };
+    if (cdp && threadRuns === 0) await startProfile();
     try {
       await page.goto(`${base}?cycles=${cyclesArg}&boot=${bootArg}&runs=${runsArg}&region=${regionArg}`);
       await Promise.race([
@@ -107,8 +128,45 @@ try {
     }
     const text = await page.locator('#log').innerText();
     for (const line of text.split('\n')) console.log(`launch ${launch} ${line}`);
+    if (cdp && threadRuns > 0) await startProfile();
+    if (threadRuns > 0) await threadTimes(page, launch, threadRuns, Number(cyclesArg));
+    if (cdp) printProfile(launch, (await cdp.send('Profiler.stop')).profile, profileTop);
     await browser.close();
   }
 } finally {
   server.close();
+}
+
+// Self time by function name, summed over every node of that name, as a share of all samples.
+function printProfile(launch, profile, top) {
+  const byId = new Map(profile.nodes.map(node => [node.id, node]));
+  const self = new Map();
+  let total = 0;
+  profile.samples.forEach((id, i) => {
+    const dt = profile.timeDeltas[i] ?? 0;
+    const name = byId.get(id).callFrame.functionName || '(anonymous)';
+    self.set(name, (self.get(name) ?? 0) + dt);
+    total += dt;
+  });
+  const rows = [...self].sort((a, b) => b[1] - a[1]).slice(0, top);
+  for (const [name, t] of rows) console.log(`launch ${launch} profile ${(100 * t / total).toFixed(1)}% ${name}`);
+}
+
+// More timed runs, driven from here, each measured in the main thread's CPU time.
+async function threadTimes(page, launch, runs, cycles) {
+  const session = await page.context().newCDPSession(page);
+  await session.send('Performance.enable', { timeDomain: 'threadTicks' });
+  await page.evaluate(async () => {
+    const runtime = globalThis.getDotnetRuntime(0);
+    globalThis.benchNes = (await runtime.getAssemblyExports(runtime.getConfig().mainAssemblyName)).NesHost;
+  });
+  const cpuHz = await page.evaluate(() => globalThis.benchNes.CpuHz());
+  const threadMs = async () => (await session.send('Performance.getMetrics')).metrics.find(m => m.name === 'ThreadTime').value * 1000;
+  for (let i = 1; i <= runs; i++) {
+    const before = await threadMs();
+    const ran = await page.evaluate(n => { const c = globalThis.benchNes.Cycles(); globalThis.benchNes.Run(n); return globalThis.benchNes.Cycles() - c; }, cycles);
+    const ms = await threadMs() - before;
+    const perSecond = ran / (ms / 1000);
+    console.log(`launch ${launch} thread ${i} cycles=${ran} thread_ms=${ms.toFixed(3)} mhz=${(perSecond / 1e6).toFixed(3)} times_real=${(perSecond / cpuHz).toFixed(2)}`);
+  }
 }

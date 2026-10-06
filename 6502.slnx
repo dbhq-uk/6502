@@ -4,6 +4,7 @@
     <Project Path="bench/Dbhq.Cpu6502.SpeedNative/Dbhq.Cpu6502.SpeedNative.csproj" />
     <Project Path="bench/Dbhq.Cpu6502.WasmBench/Dbhq.Cpu6502.WasmBench.csproj" />
     <Project Path="bench/bbc-micro-speed/native/Dbhq.Machines.BbcMicro.SpeedNative.csproj" />
+    <Project Path="bench/kim-1-differential/Dbhq.Machines.Kim1.Differential.csproj" />
     <Project Path="bench/nes-speed/differential/Dbhq.Machines.Nes.Differential.csproj" />
     <Project Path="bench/nes-speed/native/Dbhq.Machines.Nes.SpeedNative.csproj" />
   </Folder>

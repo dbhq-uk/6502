@@ -75,7 +75,16 @@ export, link or copy `.testdata/` there so the ROMs are not fetched again, and r
 export's `bench/nes-speed` as above.
 
 For a profile of the WebAssembly build, publish it with `-p:WasmNativeStrip=false`, which keeps
-the function names, and record a CPU profile in Chrome (the journal entry says how).
+the function names, and give `PROFILE=<n>` to `run-in-browser.mjs`: it records the run with
+Chrome's sampling profiler and prints the n functions with the most self time (added in task 17,
+the core's speed work; before that the profile was taken with an uncommitted copy of the script).
+
+On a shared machine, `THREAD_TIME=<n>` makes n more timed runs after the page's own, driven
+from the script and each measured in the CPU time of the page's main thread (the DevTools
+protocol's `ThreadTime`), printed as `thread <i> ... times_real=<x>`. The wall-clock figure falls
+when other work takes the processor from the page; the thread's CPU time much less. With both
+set, the profile covers only those runs. The same two options work in
+[`../bbc-micro-speed/`](../bbc-micro-speed/README.md).
 
 `publish/` is git-ignored. `run-in-browser.mjs` uses `/usr/bin/google-chrome`; set
 `CHROME_PATH` to use another. Run one build at a time, leave the machine otherwise idle, and
