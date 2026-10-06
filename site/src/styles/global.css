@@ -214,7 +214,7 @@ footer .linkbtn:hover { color: var(--white); }
 .bbc-preset-disc b { color: var(--white); font-weight: 500; }
 .bbc-preset-note { color: var(--white); border-left: 2px solid var(--white); padding-left: 10px; }
 .bbc-program code { white-space: pre; }
-.bbc-symbols caption { text-align: left; padding: 0 0 8px; color: var(--white); font-weight: 500; }
+.bbc-symbols caption, .nes-pad-table caption { text-align: left; padding: 0 0 8px; color: var(--white); font-weight: 500; }
 /* The machine's keys as buttons, in its own layout, a row at a time; a row wraps on a narrow screen rather than shrink a key under 44 pixels. Latched SHIFT and CTRL show as a filled key with a bright edge, a shape and not only a colour. No lime: no key matters more than another. */
 .bbc-keys { display: grid; gap: 3px; }
 .bbc-keys-row { display: flex; flex-wrap: wrap; justify-content: center; gap: 3px; }

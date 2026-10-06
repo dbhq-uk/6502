@@ -152,7 +152,7 @@ const ON = {
   '.bbc-preset-about': ['iron'],
   '.bbc-preset-disc b': ['iron'],
   '.bbc-preset-note': ['iron'],
-  '.bbc-symbols caption': ['void'],
+  '.bbc-symbols caption, .nes-pad-table caption': ['void'],
   // The on-screen keys: veil, card when hovered or latched, the black canvas
   // while pressed; disabled, before the machine runs, iron.
   '.bbc-key': ['veil', 'card', 'void'],
