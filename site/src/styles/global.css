@@ -313,6 +313,11 @@ footer .linkbtn:hover { color: var(--white); }
 .model-legend tr[data-accessed] .model-mark { background: var(--model-active); border-color: var(--model-active); }
 .model-legend tr[data-pointed] { background: var(--veil); }
 [data-model]:not([data-state="running"]) .model-legend [data-legend-rate] { visibility: hidden; }
+/* A machine with a case: its models are views, as tabs above one panel each (MachineModel.astro). The selected tab is --white on --veil with a bar under it, so it is told by a shape as well as a colour; no lime, and no transition, so with reduced motion nothing eases either. */
+.model-tabs { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 24px; border-bottom: 1px solid var(--circuit); }
+.model-tab { font: inherit; font-size: 15px; color: var(--moss-80); background: none; border: 0; border-bottom: 3px solid transparent; border-radius: 6px 6px 0 0; padding: 8px 18px 6px; cursor: pointer; }
+.model-tab:hover { color: var(--white); }
+.model-tab[aria-selected="true"] { color: var(--white); background: var(--veil); border-bottom-color: currentColor; }
 .machine-run h2 + .kim1, .wrap > h2 + .prose { margin-top: 24px; }
 /* The chip page (/inside/): a 3D view beside a tour. The view's own colours are
    these same tokens, read by src/chip/main.js at run time. Without JavaScript

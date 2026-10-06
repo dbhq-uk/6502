@@ -1,134 +1,66 @@
 ---
-// One of a machine's 3D models: a module the machine claims in the registry,
-// whose entry is in src/models/models.mjs. The section is hidden in the
-// markup: public/model-loader.js shows it, and loads
-// the model's bundle only when the section nears the screen or the visitor
-// presses the button. Without JavaScript it never shows, and the photograph
-// and the machine's own panel are the page.
+// A machine's 3D models: the modules it claims in the registry, whose entries
+// are in src/models/models.mjs. The section is hidden in the markup:
+// public/model-loader.js shows it, and loads a model's bundle only when the
+// model nears the screen or the visitor presses its Load button. Without
+// JavaScript it never shows, and the photograph and the machine's own panel are
+// the page.
 //
-// A model that draws more than one console (`regions` in its entry) shows each
-// console's caption and note in an element of its own, carrying
-// data-model-region, and all but the first region's are hidden: the model
-// switches them when the region changes. Each console's accessible name is kept
-// beside them, in a hidden element that carries the same attribute and
-// data-model-label, because a name is an attribute and cannot be hidden. A
-// model with one console renders as it always did.
+// A machine with no case has one model, its board, and its section is as it
+// always was: one model, its id the section's own (data-model on the section).
 //
-// A model with a track map (a `texture` in its entry) gets two toggle buttons,
-// Show tracks (on to start with) and Show tracks only, and the help says what
-// they do: CONTROLS.tracks, or the entry's own `tracksHelp`.
-//
-// Under it, how the model was made: what it was measured from, with the
-// figures that say how well (from src/data/<id>-model.json, which the
-// measuring scripts write, so nothing here is typed by hand), what it still
-// does not show, and a credit for every photograph, drawing and reference it
-// was traced or measured from, saying what it took from each. The credit is
-// built from the machine's registry entry, the same `photos`, `drawings` and
-// `references` the photographs section and the registry check read, so they
-// cannot disagree. A reference is a source that is not committed (a flatbed
-// scan, a photograph whose source states no licence); it is credited as a
-// drawing is, after the drawings. A model whose results file lists the
-// `sources` it was made from (the NES's board: each with its address and its
-// page) is credited with those alone, so a photograph the page shows for
-// another reason (the NES's at the head of its page) is not credited as one the
-// model was traced from.
-//
-// A model whose entry has a `legend` (the NES's board) gets a table of its
-// chips under the caption: one row a chip, its part in each console the model
-// draws (switched by data-model-region, as the captions are), what it is, when
-// it is marked, and the rate the model writes into it while the machine runs;
-// then the entry's `legendWords`, which say what a mark means.
-import { MODELS, CONTROLS, CONTROLS_DESCRIPTION, TRACK_BUTTONS, modelSrc, regionProblems, regionViews } from '../models/models.mjs';
+// A machine with a case offers its models as views of the same machine (the
+// BBC Micro's models design, "How the page offers the two views", built here for
+// the NES on 6 October 2026, for the BBC Micro to take up): one section, headed
+// "Models of the machine", with a WAI-ARIA tab list named "Views of the model",
+// a tab for each view in the registry's order (Outside, then Inside), and a tab
+// panel for each, which is that model's root (data-model on the panel) and holds
+// everything a single model's section holds, ModelPanel.astro, with its ids
+// suffixed by the view. The first tab is selected and the other panels are
+// hidden; the loader switches them. A hidden panel never nears the screen, so a
+// view's bundle is fetched only once its tab is chosen. The controls are the
+// same for every view, so they are said once, after the panels.
+import ModelPanel from './ModelPanel.astro';
+import { CONTROLS, modelSrc } from '../models/models.mjs';
+import { MODELS } from '../models/models.mjs';
 
 interface Source { author: string; sourceUrl: string; licence: string | null; licenceUrl?: string; used: string; caption?: string; title?: string; sha256?: string }
 interface Props {
-  /** The model's module, as the machine claims it in the registry. */
-  module: string;
+  /** The models the machine claims in the registry, { view, module }, in its order. */
+  models: { view: string; module: string }[];
   /** The machine's photographs, drawings and references, from the registry. */
   photos: Source[];
   drawings?: Source[];
   references?: Source[];
 }
-const { module: id, photos, drawings = [], references = [] } = Astro.props;
-const model = MODELS[id];
-if (!model) throw new Error(`model ${id} has no entry in src/models/models.mjs`);
-const problems = regionProblems(id, model);
-if (problems.length) throw new Error(problems.join('; '));
-const views = regionViews(model);
-const first = views[0];
-const tracks = Boolean(model.texture);
-const help = [CONTROLS.pointer, CONTROLS.touch, CONTROLS.keys, ...(tracks ? [model.tracksHelp ?? CONTROLS.tracks] : [])].join(' ');
-const measured = import.meta.glob<{ default: object }>('../data/*-model.json', { eager: true });
-const figures = measured[`../data/${id}-model.json`]?.default;
-if (views.some((v) => v.made) && !figures) throw new Error(`model ${id} describes how it was made, but src/data/${id}-model.json is missing`);
-// Each console's note on how it was made, from the same measurements.
-for (const v of views) v.note = v.made ? v.made(figures) : null;
-const madeFrom = figures?.sources ? new Set(figures.sources.flatMap((s) => [s.url, s.page])) : null;
-const sources = [
-  ...photos.map((p) => ({ ...p, what: `the photograph of ${p.caption ?? 'the original'}` })),
-  ...drawings.map((d) => ({ ...d, what: d.title })),
-  ...references.map((r) => ({ ...r, what: r.title })),
-].filter((s) => !madeFrom || madeFrom.has(s.sourceUrl));
-// The chip legend, one list of rows for each console the model draws, in the same order.
-const legends = model.legend ? views.map((v) => model.legend(v.region ?? undefined)) : null;
-const consoles = views.length > 1;
+const { models, photos, drawings = [], references = [] } = Astro.props;
+for (const m of models) if (!MODELS[m.module]) throw new Error(`model ${m.module} has no entry in src/models/models.mjs`);
+/** A view's tab label: the view's own name, capitalised. A label: no full stop. */
+const tabLabel = (view: string) => view.charAt(0).toUpperCase() + view.slice(1);
+const one = models.length === 1 && models[0].view === 'board' ? models[0] : null;
+const credits = { photos, drawings, references };
 ---
 
-<section class="model" aria-labelledby="model" data-model={id} data-model-src={modelSrc(id)} data-model-texture={model.texture} data-state="idle" hidden>
+{one ? (
+<section class="model" aria-labelledby="model" data-model={one.module} data-model-src={modelSrc(one.module)} data-model-texture={MODELS[one.module].texture} data-state="idle" hidden>
   <div class="wrap narrow">
     <h2 id="model">A model of the board</h2>
-    <section class="model-stage" data-model-stage tabindex="0" aria-label={first.label} aria-description={CONTROLS_DESCRIPTION} aria-describedby={`model-about${first.suffix}`}>
-      {first.region && views.map((v) => <span data-model-region={v.region} data-model-label hidden>{v.label}</span>)}
-      <span class="model-tag" aria-hidden="true">Model, not a photograph</span>
-      <span class="model-hint" aria-hidden="true"><span class="hint-pointer">{CONTROLS.hint}</span><span class="hint-touch">{CONTROLS.hintTouch}</span></span>
-      <button type="button" class="btn small model-load" data-model-load>Load the 3D model</button>
-    </section>
-    <div class="model-controls">
-      <button type="button" class="btn small" data-model-reset>Reset the view</button>
-      {tracks && (
-        <div class="model-toggles" role="group" aria-label="Tracks">
-          <button type="button" class="btn small model-toggle" data-toggle-tracks aria-pressed="true">{TRACK_BUTTONS.tracks}</button>
-          <button type="button" class="btn small model-toggle" data-toggle-tracks-only aria-pressed="false">{TRACK_BUTTONS.only}</button>
-        </div>
-      )}
-      <p class="model-status" role="status" data-model-status>The 3D model loads when you scroll to it.</p>
-    </div>
-    <p class="model-help" id="model-help">{help}</p>
-    {views.map((v) => <p class="figure-caption model-about" id={`model-about${v.suffix}`} data-model-region={v.region} hidden={v.hidden}>{v.about}</p>)}
-    {legends && (
-      <div class="model-legend prose" data-model-legend>
-        <table>
-          <caption>The chips on the board, and which of them the processor is talking to</caption>
-          <thead><tr><th scope="col">Chip</th><th scope="col">{consoles ? 'Its part in this console' : 'Its part'}</th>{consoles && <th scope="col">In the other console</th>}<th scope="col">What it is</th><th scope="col">Marked</th><th scope="col">Reads and writes a second</th></tr></thead>
-          <tbody>
-            {legends[0].map((row, i) => (
-              <tr data-legend-ref={row.ref} data-legend-chip={row.chip ?? undefined}>
-                <th scope="row">{row.ref}</th>
-                <td>{views.map((v, k) => <span data-model-region={v.region} hidden={v.hidden}>{legends[k][i].part}</span>)}</td>
-                {consoles && <td>{views.map((v, k) => <span data-model-region={v.region} hidden={v.hidden}>{legends[k][i].otherPart}</span>)}</td>}
-                <td>{row.role}</td>
-                <td>{row.chip ? <><span class="model-mark" aria-hidden="true"></span>{row.mark}</> : row.mark}</td>
-                <td data-legend-rate={row.chip ?? undefined}>{row.chip ? 'not running' : 'not counted'}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-        {model.legendWords?.map((w: string) => <p>{w}</p>)}
-      </div>
-    )}
-    {views.map((v) => v.note && (
-      <div class="model-made prose" data-model-made data-model-region={v.region} hidden={v.hidden}>
-        <h3 id={`model-made${v.suffix}`}>How the model was made</h3>
-        {v.note.paragraphs.map((p) => <p>{p}</p>)}
-        <p>What it was traced and measured from:</p>
-        <ul class="model-credit" data-model-credit>
-          {sources.map((s) => <li data-model-source>{s.used.charAt(0).toUpperCase() + s.used.slice(1)}: from <a href={s.sourceUrl}>{s.what}</a>, by {s.author}, {s.licence === null ? 'no licence stated' : s.licenceUrl ? <a href={s.licenceUrl}>{s.licence}</a> : s.licence}.</li>)}
-        </ul>
-        <p>What it does not show, or shows less well:</p>
-        <ul class="model-limits" data-model-limits>
-          {v.note.limits.map((l) => <li>{l}</li>)}
-        </ul>
-      </div>
-    ))}
+    <ModelPanel module={one.module} suffix="" {...credits} />
   </div>
 </section>
+) : (
+<section class="model" aria-labelledby="model" data-model-section hidden>
+  <div class="wrap narrow">
+    <h2 id="model">Models of the machine</h2>
+    <div class="model-tabs" role="tablist" aria-label="Views of the model" data-model-tabs>
+      {models.map((m, i) => <button type="button" class="model-tab" role="tab" id={`model-tab-${m.view}`} aria-selected={String(i === 0)} aria-controls={`model-panel-${m.view}`} tabindex={i === 0 ? '0' : '-1'}>{tabLabel(m.view)}</button>)}
+    </div>
+    {models.map((m, i) => (
+      <div class="model-panel" role="tabpanel" id={`model-panel-${m.view}`} aria-labelledby={`model-tab-${m.view}`} data-model={m.module} data-model-src={modelSrc(m.module)} data-model-texture={MODELS[m.module].texture} data-state="idle" hidden={i > 0}>
+        <ModelPanel module={m.module} suffix={`-${m.view}`} {...credits} />
+      </div>
+    ))}
+    <p class="model-help" id="model-help">{[CONTROLS.pointer, CONTROLS.touch, CONTROLS.keys].join(' ')}</p>
+  </div>
+</section>
+)}

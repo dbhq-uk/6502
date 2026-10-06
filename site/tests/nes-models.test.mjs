@@ -5,7 +5,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { REPO_ROOT } from '../src/lib/registry.mjs';
 import { MIN, PASS, STOP, verdicts } from './nes-spike-verdicts.mjs';
-import { page, visibleText } from './helpers.mjs';
+import { page, visibleText, modelPanel } from './helpers.mjs';
 
 // The NES's two 3D models, each drawn for the NTSC and the PAL console: their
 // inputs and the measurements they rest on. The tools in tools/nes-model/ run
@@ -899,10 +899,8 @@ const boardFigures = JSON.parse(fs.readFileSync(path.join(process.cwd(), 'src', 
 const boardModule = fs.readFileSync(path.join(process.cwd(), 'src', 'models', `${BOARD_ID}.js`), 'utf8');
 const nesRow = registry.machines.find((m) => m.id === 'nes');
 const nesHtml = page('/machines/nes/')?.html ?? '';
-const boardSection = (() => {
-  const at = nesHtml.indexOf('<section class="model"');
-  return at < 0 ? '' : nesHtml.slice(at, nesHtml.indexOf('<section class="photos"', at));
-})();
+// The board's part of the page: its view's tab panel since task 9 (helpers.mjs, modelPanel).
+const boardSection = modelPanel(nesHtml, BOARD_ID);
 const frameJson = frame;
 const WORD = ['no', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten'];
 
@@ -1161,7 +1159,8 @@ test('the model reads the machine through panel.nes, takes a fresh baseline on n
   // The caption, the note and the legend's parts switch together, the names stay hidden, and the stage's name and description follow.
   assert.match(boardModule, /for \(const el of root\.querySelectorAll\('\[data-model-region\]'\)\) if \(!el\.hasAttribute\('data-model-label'\)\) el\.hidden = el\.dataset\.modelRegion !== region;/);
   assert.match(boardModule, /stage\.setAttribute\('aria-label', name\)/);
-  assert.match(boardModule, /stage\.setAttribute\('aria-describedby', `model-about-\$\{region\}`\)/);
+  // The caption's own id, which carries the view's suffix in a tab panel (task 9): found by its console, not built.
+  assert.match(boardModule, /const about = root\.querySelector\(`\.model-about\[data-model-region="\$\{region\}"\]`\);\s*if \(about\) stage\.setAttribute\('aria-describedby', about\.id\);/);
   // The test hooks the browser check reads.
   for (const hook of ['root.dataset.modelRegion', 'root.dataset.modelAccessed', 'root.dataset.modelRates', 'root.dataset.modelTracks', 'root.dataset.modelParts', 'root.modelChipPoint = ', 'root.modelBoardPoint = (x, y, below = false) =>']) assert.ok(boardModule.includes(hook), hook);
   // Pointing at a chip names it and marks its row.

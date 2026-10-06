@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
 import zlib from 'node:zlib';
-import { page, visibleText, DIST } from './helpers.mjs';
+import { page, visibleText, DIST, modelPanel } from './helpers.mjs';
 import { KIM1_KEYS } from '../src/lib/machines.mjs';
 import { REPO_ROOT } from '../src/lib/registry.mjs';
 import { MODELS, CONTROLS, CONTROLS_DESCRIPTION, TRACK_BUTTONS, modelSrc } from '../src/models/models.mjs';
@@ -497,8 +497,79 @@ test('a machine\'s page shows the model section exactly when the machine claims 
   for (const m of running) {
     const built = page(`/machines/${m.id}/`)?.html ?? '';
     assert.ok(built, `/machines/${m.id}/ was not built`);
-    const sections = [...built.matchAll(/<section class="model"[^>]*\bdata-model="([^"]+)"/g)].map((x) => x[1]);
+    // A model's root is the section for a machine's one model, or a view's tab panel for a machine with a case.
+    const sections = [...built.matchAll(/<(?:section class="model"|div class="model-panel" role="tabpanel")[^>]*\bdata-model="([^"]+)"/g)].map((x) => x[1]);
     assert.deepEqual(sections, modelsOf(m).map((c) => c.module), `${m.id}'s page shows models ${sections.join(', ') || 'none'}`);
+    assert.equal([...built.matchAll(/<section class="model"/g)].length, modelsOf(m).length > 0 ? 1 : 0, `${m.id}'s page has not one model section`);
     assert.equal(/src="\/model-loader\.js"/.test(built), modelsOf(m).length > 0, `${m.id}'s page loads the model loader exactly when it has a model`);
   }
+});
+
+// A machine with a case offers its models as views of the same machine (the
+// BBC Micro's models design, "How the page offers the two views", built for the
+// NES on 6 October 2026): one section, a WAI-ARIA tab list, a panel a view.
+const tabbed = registry.machines.filter((m) => m.status === 'running' && modelsOf(m).length > 0 && !(modelsOf(m).length === 1 && modelsOf(m)[0].view === 'board'));
+
+test('a machine with a case has one model section: a tab list named Views of the model, a tab a view in the registry\'s order, the first selected, each controlling its own panel', () => {
+  assert.ok(tabbed.some((m) => m.id === 'nes'), 'the NES does not offer its models as views');
+  for (const m of tabbed) {
+    const built = page(`/machines/${m.id}/`)?.html ?? '';
+    const at = built.indexOf('<section class="model"');
+    const section = built.slice(at, built.indexOf('<section class="photos"', at));
+    const views = modelsOf(m).map((c) => c.view);
+    assert.match(section, /^<section class="model" aria-labelledby="model" data-model-section hidden>/, `${m.id}: the section is not hidden in the markup, or not the views' section`);
+    assert.match(section, /<h2 id="model">Models of the machine<\/h2>/);
+    const list = /<div class="model-tabs" role="tablist" aria-label="Views of the model"[^>]*>([\s\S]*?)<\/div>/.exec(section)?.[1] ?? '';
+    const tabs = [...list.matchAll(/<button\b[^>]*>[^<]*<\/button>/g)].map((t) => t[0]);
+    assert.deepEqual(tabs.map((t) => /\bid="model-tab-([a-z]+)"/.exec(t)?.[1]), views, `${m.id}: a tab a view, in the registry's order`);
+    tabs.forEach((t, i) => {
+      const view = views[i];
+      assert.match(t, /\brole="tab"/);
+      assert.match(t, new RegExp(`aria-controls="model-panel-${view}"`));
+      assert.match(t, new RegExp(`aria-selected="${i === 0}"`), `${view}: only the first tab is selected`);
+      assert.match(t, new RegExp(`tabindex="${i === 0 ? 0 : -1}"`), `${view}: only the selected tab is in the Tab order`);
+      // Its label is the view, capitalised, with no full stop: Outside, Inside.
+      assert.equal(visibleText(t), view[0].toUpperCase() + view.slice(1));
+      assert.doesNotMatch(t, /pill/, 'a tab spends the page\'s lime');
+    });
+    const panels = [...section.matchAll(/<div class="model-panel" role="tabpanel"[^>]*>/g)].map((x) => x[0]);
+    assert.equal(panels.length, views.length);
+    panels.forEach((p, i) => {
+      const view = views[i];
+      const module = modelsOf(m)[i].module;
+      assert.match(p, new RegExp(`id="model-panel-${view}" aria-labelledby="model-tab-${view}" data-model="${module}" data-model-src="${modelSrc(module)}"`));
+      assert.equal(/\shidden(?=[\s>])/.test(p), i > 0, `${view}: only the first panel is shown`);
+      // Everything a single model's section holds, in its own panel.
+      const own = modelPanel(built, module);
+      assert.equal((own.match(/<section class="model-stage" data-model-stage tabindex="0"/g) ?? []).length, 1, `${view}: not one stage`);
+      assert.equal((own.match(/data-model-reset>Reset the view</g) ?? []).length, 1, `${view}: not one reset button`);
+      assert.equal((own.match(/role="status" data-model-status/g) ?? []).length, 1, `${view}: not one status line`);
+      assert.equal((own.match(/data-model-load>Load the 3D model</g) ?? []).length, 1, `${view}: not one load button`);
+      assert.ok((own.match(/<p class="figure-caption model-about"/g) ?? []).length >= 1, `${view}: no caption`);
+      assert.ok((own.match(/<div class="model-made prose" data-model-made/g) ?? []).length >= 1, `${view}: no note on how it was made`);
+      assert.match(own, new RegExp(`aria-describedby="model-about-${view}[-"]`), `${view}: the stage is not described by its own caption`);
+      assert.match(own, /<span class="model-tag" aria-hidden="true">Model, not a photograph<\/span>/);
+    });
+    // The controls are the same for every view: said once, after the panels, and to a screen reader on each stage.
+    const help = [...section.matchAll(/<p class="model-help" id="model-help">([\s\S]*?)<\/p>/g)];
+    assert.equal(help.length, 1, 'the controls are not said once');
+    assert.equal(visibleText(help[0][1]), `${CONTROLS.pointer} ${CONTROLS.touch} ${CONTROLS.keys}`);
+    assert.ok(section.lastIndexOf('role="tabpanel"') < section.indexOf('id="model-help"'), 'the controls come before a panel');
+    assert.equal((section.match(new RegExp(`aria-description="${CONTROLS_DESCRIPTION}"`, 'g')) ?? []).length, views.length);
+    // Every id on the page once.
+    const ids = [...built.matchAll(/\sid="([^"]+)"/g)].map((x) => x[1]);
+    assert.deepEqual(ids.filter((id, i) => ids.indexOf(id) !== i), [], `${m.id}: an id is used twice on the page`);
+    assert.doesNotMatch(section, /class="[^"]*\bpill\b/, 'the section spends the page\'s lime');
+  }
+});
+
+test('the tabs\' styles: the selected tab white on veil with a bar under it, a shape as well as a colour, no lime and no transition', () => {
+  const css = fs.readFileSync(path.join(process.cwd(), 'src', 'styles', 'global.css'), 'utf8');
+  const rule = (sel) => new RegExp(`(^|\\n)${sel.replace(/[[\]().*+?^$|]/g, '\\$&')} \\{([^}]*)\\}`).exec(css)?.[2] ?? '';
+  const selected = rule('.model-tab[aria-selected="true"]');
+  assert.match(selected, /color: var\(--white\)/);
+  assert.match(selected, /background: var\(--veil\)/);
+  assert.match(selected, /border-bottom-color: currentColor/, 'the selected tab has no bar under it');
+  assert.match(rule('.model-tab'), /border-bottom: 3px solid transparent/);
+  assert.doesNotMatch(css.split('\n').filter((l) => l.startsWith('.model-tab')).join('\n'), /lime|transition|animation/);
 });

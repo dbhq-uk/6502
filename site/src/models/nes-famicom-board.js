@@ -378,7 +378,9 @@ export async function mount(root) {
     for (const el of root.querySelectorAll('[data-model-region]')) if (!el.hasAttribute('data-model-label')) el.hidden = el.dataset.modelRegion !== region;
     const name = root.querySelector(`[data-model-label][data-model-region="${region}"]`)?.textContent;
     if (name) stage.setAttribute('aria-label', name);
-    if (root.querySelector(`#model-about-${region}`)) stage.setAttribute('aria-describedby', `model-about-${region}`);
+    // The caption's id carries the view's suffix when the model is one of a case's views (model-about-inside-pal).
+    const about = root.querySelector(`.model-about[data-model-region="${region}"]`);
+    if (about) stage.setAttribute('aria-describedby', about.id);
   };
 
   // ---- The machine: the panel on the same page runs it ----

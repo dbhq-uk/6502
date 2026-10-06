@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { MODELS, wordsFor, regionProblems, regionViews } from '../src/models/models.mjs';
-import { page, visibleText } from './helpers.mjs';
+import { page, visibleText, modelPanel } from './helpers.mjs';
 
 const made = () => 'note';
 const both = {
@@ -45,48 +45,54 @@ test('the page draws every console\'s words, the first shown and the rest hidden
 
 test('the model component reads its words through the regions, never from the entry\'s fields', async () => {
   const fs = await import('node:fs');
-  const src = fs.readFileSync(new URL('../src/components/MachineModel.astro', import.meta.url), 'utf8');
+  const src = fs.readFileSync(new URL('../src/components/ModelPanel.astro', import.meta.url), 'utf8');
   assert.match(src, /regionViews\(model\)/);
   assert.doesNotMatch(src, /model\.(label|about|made)\b/);
 });
 
-// The regions as the built page has them, on the one page whose model draws two
+// The regions as the built page has them, on the one page whose models draw two
 // consoles: the NES's (this replaced a test of the component's source, 6 Oct 2026,
-// after the review of task 1 found no test rendered the regions at all).
-test('on the NES\'s page each console has one caption, one note and one hidden name, only the first console\'s shown, every id once', () => {
-  const [module, entry] = Object.entries(MODELS).find(([, e]) => e.regions?.length > 1);
-  const html = page(`/machines/${entry.machine}/`)?.html ?? '';
-  const at = html.indexOf('<section class="model"');
-  assert.ok(at >= 0, `/machines/${entry.machine}/ has no model section`);
-  const section = html.slice(at, html.indexOf('<section class="photos"', at));
-  assert.match(section, new RegExp(`data-model="${module}"`));
-  const tags = (re) => [...section.matchAll(re)].map((m) => m[0]);
-  const regionOf = (tag) => /data-model-region="([a-z]+)"/.exec(tag)?.[1];
-  const hidden = (tag) => /\shidden(?=[\s>])/.test(tag);
-  const captions = tags(/<p class="figure-caption model-about"[^>]*>/g);
-  const notes = tags(/<div class="model-made prose"[^>]*>/g);
-  const names = tags(/<span [^>]*data-model-label[^>]*>/g);
-  for (const [what, list] of [['caption', captions], ['note', notes], ['name', names]]) {
-    assert.deepEqual(list.map(regionOf), entry.regions, `one ${what} for each console, in the entry's order`);
+// after the review of task 1 found no test rendered the regions at all). Since
+// task 9 each model is a view in its own tab panel, so its ids carry the view
+// as well as the console (model-about-inside-pal).
+test('on the NES\'s page each console has one caption, one note and one hidden name in each model, only the first console\'s shown, every id once', () => {
+  const entries = Object.entries(MODELS).filter(([, e]) => e.regions?.length > 1);
+  assert.ok(entries.length > 0, 'no model draws two consoles');
+  for (const [module, entry] of entries) {
+    const html = page(`/machines/${entry.machine}/`)?.html ?? '';
+    const section = modelPanel(html, module);
+    assert.ok(section, `/machines/${entry.machine}/ has no model ${module}`);
+    const tabbed = section.startsWith('<div class="model-panel"');
+    const ids = (what, r) => `${what}${tabbed ? `-${entry.view}` : ''}-${r}`;
+    const tags = (re) => [...section.matchAll(re)].map((m) => m[0]);
+    const regionOf = (tag) => /data-model-region="([a-z]+)"/.exec(tag)?.[1];
+    const hidden = (tag) => /\shidden(?=[\s>])/.test(tag);
+    const captions = tags(/<p class="figure-caption model-about"[^>]*>/g);
+    const notes = tags(/<div class="model-made prose"[^>]*>/g);
+    const names = tags(/<span [^>]*data-model-label[^>]*>/g);
+    for (const [what, list] of [['caption', captions], ['note', notes], ['name', names]]) {
+      assert.deepEqual(list.map(regionOf), entry.regions, `${module}: one ${what} for each console, in the entry's order`);
+    }
+    assert.deepEqual(captions.map(hidden), entry.regions.map((_, i) => i > 0), `${module}: only the first console's caption is shown`);
+    assert.deepEqual(notes.map(hidden), entry.regions.map((_, i) => i > 0), `${module}: only the first console's note is shown`);
+    assert.ok(names.every(hidden), 'a console\'s accessible name is shown as text');
+    // Each console's words are its own, and the stage is named and described by the first's.
+    entry.regions.forEach((r, i) => {
+      const words = wordsFor(entry, r);
+      assert.ok(section.includes(`id="${ids('model-about', r)}"`), `no caption with the id ${ids('model-about', r)}`);
+      assert.ok(section.includes(`id="${ids('model-made', r)}"`), `no note with the id ${ids('model-made', r)}`);
+      assert.ok(visibleText(section).includes(visibleText(words.about)), `${r}'s caption is not its own`);
+      assert.equal(visibleText(names[i] + section.slice(section.indexOf(names[i]) + names[i].length).split('</span>')[0]), words.label);
+    });
+    const stage = /<section class="model-stage"[^>]*>/.exec(section)?.[0] ?? '';
+    assert.ok(stage.includes(`aria-describedby="${ids('model-about', entry.regions[0])}"`));
+    assert.ok(stage.includes(`aria-label="${wordsFor(entry).label.replaceAll("'", '&#39;')}"`) || stage.includes(`aria-label="${wordsFor(entry).label}"`));
+    // Every id on the page is used once.
+    const all = [...html.matchAll(/\sid="([^"]+)"/g)].map((m) => m[1]);
+    assert.deepEqual(all.filter((id, i) => all.indexOf(id) !== i), [], 'an id is used twice on the page');
+    // Whatever else is marked for a console (the legend's parts) is marked for each, the first shown.
+    const marked = tags(/<[a-z]+ [^>]*data-model-region="[a-z]+"[^>]*>/g).filter((t) => !/data-model-label|model-about|model-made/.test(t));
+    for (const r of entry.regions) assert.equal(marked.filter((t) => regionOf(t) === r).length, marked.length / entry.regions.length, `${r} has not as many marked parts as the others`);
+    assert.ok(marked.every((t) => hidden(t) === (regionOf(t) !== entry.regions[0])), 'a part marked for a console other than the first is shown, or the first\'s is hidden');
   }
-  assert.deepEqual(captions.map(hidden), entry.regions.map((_, i) => i > 0), 'only the first console\'s caption is shown');
-  assert.deepEqual(notes.map(hidden), entry.regions.map((_, i) => i > 0), 'only the first console\'s note is shown');
-  assert.ok(names.every(hidden), 'a console\'s accessible name is shown as text');
-  // Each console's words are its own, and the stage is named and described by the first's.
-  entry.regions.forEach((r, i) => {
-    const words = wordsFor(entry, r);
-    assert.ok(section.includes(`id="model-about-${r}"`), `no caption with the id model-about-${r}`);
-    assert.ok(visibleText(section).includes(visibleText(words.about)), `${r}'s caption is not its own`);
-    assert.equal(visibleText(names[i] + section.slice(section.indexOf(names[i]) + names[i].length).split('</span>')[0]), words.label);
-  });
-  const stage = /<section class="model-stage"[^>]*>/.exec(section)?.[0] ?? '';
-  assert.ok(stage.includes(`aria-describedby="model-about-${entry.regions[0]}"`));
-  assert.ok(stage.includes(`aria-label="${wordsFor(entry).label.replaceAll("'", '&#39;')}"`) || stage.includes(`aria-label="${wordsFor(entry).label}"`));
-  // Every id on the page is used once.
-  const ids = [...html.matchAll(/\sid="([^"]+)"/g)].map((m) => m[1]);
-  assert.deepEqual(ids.filter((id, i) => ids.indexOf(id) !== i), [], 'an id is used twice on the page');
-  // Whatever else is marked for a console (the legend's parts) is marked for each, the first shown.
-  const marked = tags(/<[a-z]+ [^>]*data-model-region="[a-z]+"[^>]*>/g).filter((t) => !/data-model-label|model-about|model-made/.test(t));
-  for (const r of entry.regions) assert.equal(marked.filter((t) => regionOf(t) === r).length, marked.length / entry.regions.length, `${r} has not as many marked parts as the others`);
-  assert.ok(marked.every((t) => hidden(t) === (regionOf(t) !== entry.regions[0])), 'a part marked for a console other than the first is shown, or the first\'s is hidden');
 });

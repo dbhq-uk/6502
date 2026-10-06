@@ -180,6 +180,10 @@ const ON = {
   '.model-toggle[aria-pressed="true"]': ['veil'],
   // The chip legend's caption, on the black canvas, as the other tables' captions.
   '.model-legend caption': ['void'],
+  // A cased machine's views as tabs, on the black canvas; the selected one white on veil, as a pressed toggle.
+  '.model-tab': ['void'],
+  '.model-tab:hover': ['void'],
+  '.model-tab[aria-selected="true"]': ['veil'],
 };
 
 test('every text colour rule is placed on a surface, and reaches AA on each one it is set on', () => {
