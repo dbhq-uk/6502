@@ -1269,6 +1269,8 @@ test('the case\'s words are words: no module of the NES\'s models names a logo, 
     const src = fs.readFileSync(path.join(dir, f), 'utf8');
     assert.doesNotMatch(src, /logo/i, `${f} names a logo`);
     assert.doesNotMatch(src, /<path\b|Path2D|SVGLoader|\bd="M|\.svg\b/i, `${f} holds an SVG path`);
+    // Added in task 10 (6 Oct 2026): a path's data as a string, with no Path2D or d=" by it, passed the line above.
+    assert.doesNotMatch(src, /['"`]\s*M\s*-?\d[\d.\s,-]*[LHVCSQTAZ]/i, `${f} holds an SVG path's data`);
     const images = [...src.matchAll(/new Image\(|TextureLoader|ImageLoader|ImageBitmapLoader|fetch\(/g)].map((m) => m[0]);
     if (f === 'nes-famicom-board.js') assert.deepEqual(images, ['new Image('], 'the board loads an image other than its track map');
     else assert.deepEqual(images, [], `${f} loads an image`);
@@ -1475,5 +1477,64 @@ test('every source the case used is credited by its address, once, with its own 
     assert.deepEqual(items.map((i) => /href="([^"]+)"/.exec(i)[1]), want.map((r) => r.sourceUrl));
     for (const r of want) assert.ok(note.includes(`by ${r.author}`), `${r.sourceUrl}: its author`);
     for (const b of boardFigures.sources) assert.ok(!note.includes(`href="${b.url}"`) && !note.includes(`href="${b.page}"`), `the outside credits ${b.id}, a source of the board`);
+  }
+});
+
+// --- task 10: what the mutation pass found no test for (6 Oct 2026) -------------------------
+// Each test below was written after its mutation had passed every focused test file, in a scratch
+// copy of the branch, and was shown failing on that mutation before it was kept. The journal's
+// "Task 10, the final pass" has the table of every mutation and the test that caught it.
+
+test('each console\'s part in ic-table.json is the one the fact sheet\'s table records, and the crystal\'s too', () => {
+  // A part swapped between the consoles in ic-table.json, parts.json and the parts module together passed: the other
+  // tests compare those files with each other. The fact sheet's table, written as each crop was read, is the record.
+  const md = fs.readFileSync(path.join(REPO_ROOT, 'docs', 'nes', 'facts', 'models.md'), 'utf8');
+  const section = md.split(/^## What task 5 found: each console's parts$/m)[1]?.split(/^## /m)[0];
+  assert.ok(section, 'models.md has no "What task 5 found: each console\'s parts" section');
+  const rows = new Map([...section.matchAll(/^\| (U\d+|X1) \| [^|]+ \| ([^|]+) \| ([^|]+) \|$/gm)].map(([, ref, ntsc, pal]) => [ref, { ntsc, pal }]));
+  const marking = (cell) => cell.trim().split(/[\s,]/)[0];
+  for (const ic of icTable.ics) {
+    assert.ok(rows.has(ic.ref), `${ic.ref} is not in the fact sheet's table`);
+    for (const r of ['ntsc', 'pal']) assert.equal(ic.parts[r].part, marking(rows.get(ic.ref)[r]), `${ic.ref}, ${r}`);
+  }
+  assert.equal(rows.size, icTable.ics.length + 1, 'the table has a part ic-table.json does not');
+  const x1 = icTable.crystals.find((c) => c.ref === 'X1');
+  for (const r of ['ntsc', 'pal']) assert.equal(x1.parts[r].part, `${marking(rows.get('X1')[r])} MHz`, `X1, ${r}`);
+});
+
+test('a change of console leaves nothing of the other console on either model: only its own parts shown, each chip printed with its part', () => {
+  // The PAL crystal and modulator left showing after a change to NTSC, or a chip left printed with the PAL part, passed:
+  // the browser check reads the legend, which followRegion switches, and not the scene.
+  assert.match(boardModule, /const setRegion = \(next\) => \{\s*const was = region;\s*region = followRegion\(root, REGIONS, next, region\);\s*if \(region === was\) return;\s*for \(const r of REGIONS\) consoles\[r\]\.visible = r === region;\s*for \(const \{ ic, label \} of chips\.values\(\)\) label\.print\(ic\.parts\[region\]\);\s*\};/);
+  assert.match(caseModule, /const setRegion = \(next\) => \{\s*const was = region;\s*region = followRegion\(root, REGIONS, next, region\);\s*if \(region === was\) return;\s*for \(const r of REGIONS\) consoles\[r\]\.visible = words\[r\]\.visible = r === region;\s*for \(const button of buttons\.values\(\)\) for \(const child of button\.children\) if \(child\.userData\.region\) child\.visible = child\.userData\.region === region;\s*\};/);
+});
+
+test('the board model draws the console the page has when it mounts, not the first one (Review Focus 3)', () => {
+  // The board drawing NTSC at mount whatever the page said passed: the outside's test held its own mount, not the board's.
+  assert.match(boardModule, /const regionNow = \(\) => nes\(\)\?\.region\?\.\(\)\?\.toLowerCase\(\) \?\? REGIONS\[0\];\s*setRegion\(regionNow\(\)\);/);
+});
+
+test('the case module types none of the case\'s sizes: each is read from CASE, which case.json gives', () => {
+  // The case's height typed as 89 in the module passed: the size tests read the parts module, not the code that draws.
+  const code = caseModule.replace(/\/\*[\s\S]*?\*\//g, '').replace(/^\s*\/\/.*$/gm, '');
+  const sizes = [caseData.footprint.widthMm, caseData.footprint.depthMm, caseData.heightMm];
+  const typed = new Set(sizes.flatMap((v) => [v, Math.round(v), v / 10]).map(String));
+  const numbers = [...code.matchAll(/(?<![\w.])\d+(?:\.\d+)?(?![\w.])/g)].map((m) => m[0]);
+  assert.ok(numbers.length > 20, `only ${numbers.length} numbers read from the module`);
+  assert.deepEqual(numbers.filter((n) => typed.has(n)), [], 'a size of the case is typed in the module');
+  assert.match(code, /const TOP = CASE\.height \+ CASE\.feet;/);
+});
+
+test('each console\'s caption on the case gives the case\'s size from case.json, and no figure typed by hand', () => {
+  // A width typed into the caption passed: the caption test compared the caption with the layout's own describe().
+  const cm = (mm) => (mm / 10).toLocaleString('en-GB', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+  const want = [caseData.footprint.widthMm, caseData.footprint.depthMm, caseData.heightMm].map(cm);
+  for (const r of caseEntry.regions) {
+    const about = caseLayout.describe(r);
+    assert.ok(about.includes(`${want[0]} by ${want[1]} cm and ${want[2]} cm high`), `${r}: the size is not case.json's`);
+    // Any other number is part of a console's name or of the words the case carries.
+    const words = caseLayout.LABELS[r].map((l) => l.words).join(' ');
+    const rest = about.replace(/\bNESE?-001\b/g, '').replace(/\bthree\.js\b/g, '');
+    for (const n of rest.match(/\d+(?:\.\d+)?/g) ?? []) assert.ok(want.includes(n) || words.includes(n), `${r}: ${n} is typed in the caption`);
   }
 });
