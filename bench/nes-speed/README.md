@@ -20,7 +20,8 @@ below says which code it measured.
 | `run-in-browser.mjs`, `package.json` | Fetches the ROM from the pinned fork, checks it against its SHA-256 in `Pins.cs`, serves it with the page and a published copy of the app on `127.0.0.1`, and runs it in a headless Chrome, a fresh launch each time. |
 | `native/` | The same workload as a console program, in the solution so CI builds it. |
 | `differential/` | The check that a change for speed changed nothing else: it runs every pinned NES test ROM, and the bundled homebrew with a fixed round of button presses, in both regions and writes one line of hashes for each (every instruction's registers, cycle and PPU position, every cycle's interrupt lines, every frame's pixels, the sound, the end state, and each chip's whole state at every point where it can be seen). In the solution too. |
-| `differential/baseline/` | The differential's output from the code before the lazy chips (`5e48505`), which every step of that work is checked against. |
+| `differential/baseline/` | The differential's output from the code before the lazy chips (behaving as `5e48505`), which every step of that work is checked against; the file is named for the commit it was recorded at. |
+| `differential/faults.py` | Shows the differential can fail: in a scratch copy of the repository, whose path it takes, it plants one fault at a time, runs `--check` against a baseline, and counts the runs each changes. |
 
 ## The workload
 

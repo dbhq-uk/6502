@@ -15,9 +15,9 @@ public sealed partial class Ppu
         sink.Skip(nameof(_region), StateReport.Fixed);
         sink.Skip(nameof(_mapper), "the board, which the bus reports");
         sink.Skip(nameof(_watchesAddresses), StateReport.Fixed);
-        sink.Skip(nameof(_chr), "the board's pattern memory, which it reports");
-        sink.Skip(nameof(_chrWindows), "the board's pattern windows, which it reports");
-        sink.Skip(nameof(_nametablePages), "the board's nametable layout, which it reports");
+        sink.Skip(nameof(_chr), "the board's pattern memory, which it reports where it is RAM; ROM never changes");
+        sink.Skip(nameof(_chrWindows), "the board's pattern windows: a board reports its own, and NROM's are fixed when it is made");
+        sink.Skip(nameof(_nametablePages), "the board's nametable layout: a board reports its own, and NROM's is fixed when it is made");
         sink.Skip(nameof(_preRenderLine), StateReport.Fixed);
         sink.Skip(nameof(_lines), StateReport.Fixed);
         sink.Skip(nameof(_oddFrameSkipsADot), StateReport.Fixed);

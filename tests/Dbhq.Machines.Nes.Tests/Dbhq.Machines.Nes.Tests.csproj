@@ -9,7 +9,11 @@
     <PackageReference Include="xunit.runner.visualstudio" Version="4.0.0" />
   </ItemGroup>
 
-  <!-- Lets the tests set an observer on the bus (NesBus.Observable); without it the observer is never called. -->
+  <!-- Lets the tests set an observer on the bus (NesBus.Observable); without it the observer is never called.
+       It is on for every test in this project, so CI never runs the shape the page runs, with the
+       flag off and the observer's calls dropped by the JIT. That shape has nothing else in it: the
+       calls are each behind the flag and a null check, and the differential's old hashes, made
+       with observation on, matched the first tool's, made without (the lazy chips journal). -->
   <ItemGroup>
     <RuntimeHostConfigurationOption Include="Dbhq.Machines.Nes.Observable" Value="true" />
   </ItemGroup>

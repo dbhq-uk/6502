@@ -612,8 +612,8 @@ public sealed class NesBus : Bus, IReportsState
         sink.Skip(nameof(_dotDenominator), StateReport.Fixed);
         sink.Skip(nameof(_mapperCountsCycles), StateReport.Fixed);
         sink.Skip(nameof(_mapperCanInterrupt), StateReport.Fixed);
-        sink.Skip(nameof(_prg), "the board's own PRG ROM, which it reports");
-        sink.Skip(nameof(_prgWindows), "the board's own PRG windows, which it reports");
+        sink.Skip(nameof(_prg), "the board's PRG ROM, which never changes");
+        sink.Skip(nameof(_prgWindows), "the board's PRG windows: a board reports its own, and NROM's are fixed when it is made");
         sink.Add(nameof(_cycles), _cycles);
         sink.Add(nameof(_ppuDots), _ppuDots);
         sink.Add("_controllers[0]", _controllers[0]);

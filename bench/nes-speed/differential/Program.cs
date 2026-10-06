@@ -5,22 +5,27 @@ using Dbhq.Machines.Nes;
 using Dbhq.Machines.Nes.Tests;
 
 // The NES differential check, for work that must not change behaviour, such as making the machine
-// faster or its chips lazy: every pinned NES test ROM, and the bundled homebrew with a fixed round
-// of button presses, is run in both regions, and for each the program writes one line of hashes
-// of what the machine did. Two builds that behave the same write the same file.
+// faster or its chips lazy: every pinned NES test ROM, the bundled homebrew with a fixed round of
+// button presses, and the synthetic cartridges assembled here (Synthetic.cs), which keep rendering
+// on and touch the chips at dots that move frame by frame, are run in both regions, and for each
+// the program writes one line of hashes of what the machine did. Two builds that behave the same
+// write the same file.
 //
-//   dotnet run -c Release --project bench/nes-speed/differential -- <output file> [frames] [--oracle] [--only <text>]
-//   dotnet run -c Release --project bench/nes-speed/differential -- --check <baseline file> [frames] [--oracle] [--only <text>] [--out <file>]
+//   dotnet run -c Release --project bench/nes-speed/differential -- <output file> [frames] [options]
+//   dotnet run -c Release --project bench/nes-speed/differential -- --check <baseline file> [frames] [options] [--out <file>]
+//       options: --oracle, --only <text>, --threads <n> (4 by default), --coverage
 //
 // The first writes the file. The second runs, compares with a baseline file written by the first
 // (bench/nes-speed/differential/baseline/), prints the first run that differs and which of its
 // hashes do, and exits 1 on any difference, 0 when every line is the same. --oracle builds the
 // machine with NesOptions.PerDotReference, the per-dot reference of the lazy chips; --only runs
-// the ROMs whose name contains the text, and --check then compares those lines alone.
+// the ROMs whose name contains the text, and --check then compares those lines alone; --threads
+// runs that many at once, which changes no hash; --coverage prints, for each synthetic run, the
+// dots its PPU register writes landed on with rendering on, which changes no hash either.
 //
 // Each run powers on, runs the frames given (150 by default; six times that for SNOW and the MMC3
-// ROMs, whose work is in the picture and the scanline counter; four times for the homebrew), and
-// presses reset once half way. The file's first line names the format and the frames; then one
+// ROMs, whose work is in the picture and the scanline counter; four times for the homebrew and the
+// synthetic cartridges), and presses reset once half way. The file's first line names the format and the frames; then one
 // line a run, "<rom> <region>: " and these, in this order:
 //
 //   steps, cycles  instructions run and CPU cycles at the end
@@ -57,7 +62,8 @@ using Dbhq.Machines.Nes.Tests;
 // Before anything runs, the program checks by reflection that every field of every chip is
 // reported or skipped (StateCompleteness, shared with StateReportTests), and stops if one is not.
 // The ROMs come from the pinned fork, checked against their hashes (NesTestRoms.Read), and are
-// never committed; the homebrew is the committed one, checked against its hash.
+// never committed; the homebrew is the committed one, checked against its hash; the synthetic
+// cartridges are made from bytes each run, the same each time.
 const string Format = "# nes-differential format 2";
 
 string? outFile = null;
@@ -65,6 +71,8 @@ string? baseline = null;
 string? only = null;
 int frames = 150;
 bool oracle = false;
+bool coverage = false;
+int threads = 4;
 for (int i = 0; i < args.Length; i++)
 {
     switch (args[i])
@@ -80,6 +88,12 @@ for (int i = 0; i < args.Length; i++)
             break;
         case "--oracle":
             oracle = true;
+            break;
+        case "--coverage":
+            coverage = true;
+            break;
+        case "--threads":
+            threads = int.Parse(args[++i]);
             break;
         default:
             if (int.TryParse(args[i], out int n))
@@ -114,6 +128,7 @@ if (!NesBus.Observable)
 var jobs = Pins.NesTestRomHashes.Keys.Order(StringComparer.Ordinal)
     .Select(name => new Job(name, NesTestRoms.Read(name), name.Contains("snow", StringComparison.Ordinal) || name.Contains("mmc3", StringComparison.Ordinal) ? 6 : 1, Scripted: false))
     .Append(new Job("homebrew/" + Path.GetFileName(Pins.NesHomebrewPath), RepoPaths.ReadChecked(Pins.NesHomebrewPath, Pins.NesHomebrewSha256), 4, Scripted: true))
+    .Concat(Synthetic.Jobs().Select(job => new Job(job.Name, job.Bytes, Synthetic.Times, Scripted: false)))
     .Where(job => only is null || job.Name.Contains(only, StringComparison.Ordinal))
     .ToList();
 
@@ -148,7 +163,20 @@ if (problems.Count > 0)
 
 var results = new ConcurrentDictionary<string, string>();
 var runs = jobs.SelectMany(job => new[] { (Job: job, Region: Region.Ntsc), (Job: job, Region: Region.Pal) });
-Parallel.ForEach(runs, new ParallelOptions { MaxDegreeOfParallelism = 4 }, run => results[$"{run.Job.Name} {run.Region.Name}"] = Run(run.Job, run.Region, frames, oracle));
+var dots = new ConcurrentDictionary<string, string>();
+Parallel.ForEach(runs, new ParallelOptions { MaxDegreeOfParallelism = threads }, run =>
+{
+    string key = $"{run.Job.Name} {run.Region.Name}";
+    results[key] = Run(run.Job, run.Region, frames, oracle, coverage && run.Job.Name.StartsWith("synthetic/", StringComparison.Ordinal) ? report => dots[key] = report : null);
+});
+if (coverage)
+{
+    foreach (var (key, report) in dots.OrderBy(d => d.Key, StringComparer.Ordinal))
+    {
+        Console.WriteLine($"{key}: {report}");
+    }
+}
+
 var lines = new List<string> { $"{Format} frames={frames}" };
 lines.AddRange(results.OrderBy(result => result.Key, StringComparer.Ordinal).Select(result => $"{result.Key}: {result.Value}"));
 if (outFile is not null)
@@ -218,6 +246,11 @@ static int Compare(string baseline, List<string> lines, string? only, bool oracl
 static KeyValuePair<string, string> Split(string line)
 {
     int colon = line.IndexOf(": ", StringComparison.Ordinal);
+    if (colon < 0)
+    {
+        throw new FormatException($"not a line this tool writes, \"<rom> <region>: <hashes>\": \"{line}\"");
+    }
+
     return new(line[..colon], line[(colon + 2)..]);
 }
 
@@ -247,7 +280,7 @@ static Type BoardOf(Nes nes)
     return finder.Board!.GetType();
 }
 
-static string Run(Job job, Region region, int frames, bool oracle)
+static string Run(Job job, Region region, int frames, bool oracle, Action<string>? coverage)
 {
     Nes nes;
     try
@@ -262,7 +295,7 @@ static string Run(Job job, Region region, int frames, bool oracle)
     int want = frames * job.Times;
     var trace = new Fnv();
     var sound = new Fnv();
-    var watch = new Watch(nes);
+    var watch = new Watch(nes) { Coverage = coverage is null ? null : new DotCoverage() };
     var samples = new float[4096];
     var ppu = nes.Bus.Ppu;
     var cpu = nes.Cpu;
@@ -334,6 +367,7 @@ static string Run(Job job, Region region, int frames, bool oracle)
 
     AddOam(memory, ppu);
     memory.Add(Lines(nes));
+    coverage?.Invoke(watch.Coverage!.Report());
 
     return $"steps={steps} cycles={nes.Bus.Cycles} trace={trace.Value:X16} sound={sound.Value:X16} dropped={nes.Sound.Dropped} memory={memory.Value:X16}"
         + $" cpu={watch.Cpu.Value:X16} points={watch.Points} ppu={watch.Ppu.Value:X16} apu={watch.Apu.Value:X16} board={watch.Board.Value:X16} lines={watch.Lines.Value:X16}";
@@ -403,26 +437,40 @@ internal sealed class Mixed
         Value = (Value ^ value) * 1099511628211UL;
     }
 
-    // The bytes as little-endian 64-bit words, the last padded with zeros, after their count.
+    // The bytes as little-endian 64-bit words, the last padded with zeros, after their count. A
+    // memory is most of what a point hashes, so its words go through four lanes at once, each a
+    // multiply, a rotate and an add of the next word, which are bijections, so a change in any one
+    // word changes its lane; the lanes then go through Add, mixed.
     public void Add(ReadOnlySpan<byte> bytes)
     {
         Add((ulong)bytes.Length);
         ReadOnlySpan<ulong> words = MemoryMarshal.Cast<byte, ulong>(bytes);
-        foreach (ulong word in words)
+        ulong a = 0x243F6A8885A308D3UL, b = 0x13198A2E03707344UL, c = 0xA4093822299F31D0UL, d = 0x082EFA98EC4E6C89UL;
+        int i = 0;
+        for (; i + 4 <= words.Length; i += 4)
         {
-            Add(word);
+            a = (System.Numerics.BitOperations.RotateLeft(a * 0x9E3779B97F4A7C15UL, 31)) + words[i];
+            b = (System.Numerics.BitOperations.RotateLeft(b * 0x9E3779B97F4A7C15UL, 31)) + words[i + 1];
+            c = (System.Numerics.BitOperations.RotateLeft(c * 0x9E3779B97F4A7C15UL, 31)) + words[i + 2];
+            d = (System.Numerics.BitOperations.RotateLeft(d * 0x9E3779B97F4A7C15UL, 31)) + words[i + 3];
+        }
+
+        for (; i < words.Length; i++)
+        {
+            a = (System.Numerics.BitOperations.RotateLeft(a * 0x9E3779B97F4A7C15UL, 31)) + words[i];
         }
 
         ulong tail = 0;
-        for (int i = words.Length * 8; i < bytes.Length; i++)
+        for (int j = words.Length * 8; j < bytes.Length; j++)
         {
-            tail |= (ulong)bytes[i] << ((i & 7) * 8);
+            tail |= (ulong)bytes[j] << ((j & 7) * 8);
         }
 
-        if ((bytes.Length & 7) != 0)
-        {
-            Add(tail);
-        }
+        Add(a);
+        Add(b);
+        Add(c);
+        Add(d);
+        Add(tail);
     }
 }
 
@@ -581,8 +629,16 @@ internal sealed class Watch : INesObserver
 
     public long Points { get; private set; }
 
+    // Where the PPU register writes landed, for --coverage; null otherwise.
+    public DotCoverage? Coverage { get; init; }
+
     public void Accessed(ushort address, bool write, byte value)
     {
+        if (Coverage is not null && address < 0x4000)
+        {
+            Coverage.Note(write, address, _bus.Ppu);
+        }
+
         ulong access = ((ulong)address << 8) | (write ? 1UL << 24 : 0) | ((ulong)value << 32);
         ulong point;
         if (address < 0x4000)
@@ -670,5 +726,46 @@ internal sealed class Watch : INesObserver
         Board.Add(point);
         Board.Add((ulong)_bus.Cycles);
         _busReport.ReportState(_boardSink);
+    }
+}
+
+// For --coverage: the dots at which a write to a PPU register landed with rendering on, on the
+// visible lines and on the pre-render line, and the dots of line 241 at which a $2000 write or a
+// $2002 read landed, so the synthetic jobs' sweeps can be seen to reach every dot.
+internal sealed class DotCoverage
+{
+    private static readonly int[] Key = [0, 1, 2, 255, 256, 257, 258, 320, 337, 338, 339, 340];
+    private readonly bool[] _visible = new bool[341];
+    private readonly bool[] _preRender = new bool[341];
+    private readonly bool[] _vblank = new bool[341];
+
+    public void Note(bool write, ushort address, Ppu ppu)
+    {
+        int line = ppu.Line;
+        int dot = ppu.Dot;
+        if (line == 241 && (write ? (address & 7) == 0 : (address & 7) == 2))
+        {
+            _vblank[dot] = true;
+        }
+
+        if (!write || !ppu.RenderingEnabled)
+        {
+            return;
+        }
+
+        if (line < 240)
+        {
+            _visible[dot] = true;
+        }
+        else if (line == ppu.Region.PreRenderLine)
+        {
+            _preRender[dot] = true;
+        }
+    }
+
+    public string Report()
+    {
+        string Of(bool[] hit) => $"{hit.Count(h => h)}/341 (key dots missing: {string.Join(",", Key.Where(d => !hit[d]))})";
+        return $"visible {Of(_visible)}, pre-render {Of(_preRender)}; line 241, $2000 writes and $2002 reads, dots 0 to 3: {string.Join(",", Enumerable.Range(0, 4).Where(d => _vblank[d]))}";
     }
 }
