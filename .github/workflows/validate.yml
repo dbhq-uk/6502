@@ -175,7 +175,9 @@ jobs:
           PASS=$(count pass); FAILED=$(count fail)
           echo "pass=${PASS:-unread} fail=${FAILED:-unread}"
           [ "${FAILED:-1}" = "0" ]
-          # 465 tests as at 6 Oct 2026, with task 9 of the NES models done (the rule that
+          # 467 tests as at 6 Oct 2026, after task 9's fix round (a model's region path on
+          # a console it does not draw; tab keys with Alt, Ctrl or Meta left to the browser);
+          # 465 with task 9 of the NES models done (the rule that
           # a machine claiming a model states case, the case's credits, a console the model
           # does not draw); 462 with task 9's second stage of the NES models (the
           # outside model: its entry, sizes, features, words, buttons and notes); 453 with
@@ -194,7 +196,7 @@ jobs:
           # Adding tests is expected; losing them is the failure this floor catches.
           # Raise the number when the suite grows, here and in the same step of
           # deploy-site.yml, which must hold the same number.
-          [ "${PASS:-0}" -ge 465 ]
+          [ "${PASS:-0}" -ge 467 ]
       # The KIM-1 page in a real browser: the built site served on 127.0.0.1
       # with its own CSP, the try-it program clicked in through the page's own
       # keypad, and the digits read back. Then the page's photograph loads, and

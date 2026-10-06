@@ -79,6 +79,7 @@ def made_up_case():
         },
         'rearCheck': {'checked': 3, 'within': 1, 'limitMm': 2.0, 'worstMm': 5.16, 'uncertaintyMm': {'placesUsed': 1.3, 'boardMiss': 5.16}, 'words': 'the check failed as measured'},
         'boardInCase': {'uncertaintyMm': 2.0, 'from': 'O9; the shells the moulding [inferring]'},
+        'rearWindow': {'setBackReadMm': 4.39},
         'buttons': [{'travelMm': 3.0, 'travelFrom': 'typical'}, {'travelMm': 3.0, 'travelFrom': 'typical'}],
         'powerLatch': {'seen': False},
         'palDifferences': ['a', 'b'],
@@ -96,7 +97,7 @@ def test_the_case_figures_are_case_jsons_own():
     out = results.case_results(*made_up_case())
     assert out['size'] == {'widthMm': 254.0, 'depthMm': 203.2, 'heightMm': 88.9, 'from': 'published', 'notNintendos': True, 'goodToPct': 3.0, 'feetMm': 3.96}
     assert out['profile'] == {'insetMm': 16.0, 'endsMm': {'min': 12.86, 'max': 17.71}, 'heldOutMm': 0.71, 'limitMm': 2.0, 'passes': True, 'fallbackUsed': False, 'goodToMm': 2.5}
-    assert out['rear'] == {'checked': 3, 'within': 1, 'limitMm': 2.0, 'worstMm': 5.16, 'placesUsedMm': 1.3, 'boardMissMm': 5.16, 'words': 'the check failed as measured', 'avChecked': False, 'palChecked': False}
+    assert out['rear'] == {'checked': 3, 'within': 1, 'limitMm': 2.0, 'worstMm': 5.16, 'placesUsedMm': 1.3, 'boardMissMm': 5.16, 'words': 'the check failed as measured', 'avChecked': False, 'palChecked': False, 'windowSetBackMm': 4.39}
     assert out['boardInCase'] == {'uncertaintyMm': 2.0, 'sharedMoulding': True}
     assert out['buttons'] == {'travelMm': 3.0, 'travelFrom': 'typical'}
     assert (out['powerLatchSeen'], out['palLensMm'], out['palDifferences']) == (False, 20, 2)
@@ -117,3 +118,10 @@ def test_the_case_half_stops_on_words_it_cannot_read_or_a_lens_it_does_not_have(
     case['sources'].append('O9')
     with pytest.raises(SystemExit, match='O9'):
         results.case_results(case, sources)
+
+
+def test_the_shared_moulding_is_read_from_its_own_tag_and_nothing_else():
+    assert results.shared_moulding('O9; the PAL and NTSC boards share the layout (task 0) and the shells the moulding [inferring]') is True
+    assert results.shared_moulding('O9, through the camera its XMP records') is False
+    with pytest.raises(SystemExit, match='moulding'):
+        results.shared_moulding('O9; the shells do not share the moulding')

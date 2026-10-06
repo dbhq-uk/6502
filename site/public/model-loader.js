@@ -10,7 +10,8 @@
 // and keeps its camera for when the view comes back. The tabs are WAI-ARIA's:
 // a click, Enter or Space selects one; Left and Right move to the next and
 // select it, Home and End to the ends; only the selected tab is in the Tab
-// order, and Tab goes on from it into the panel and out of the section.
+// order, and Tab goes on from it into the panel and out of the section. A key
+// with Alt, Ctrl or Meta held is the browser's (Alt and Left goes back).
 //
 // Without JavaScript none of this runs and the section stays hidden: the
 // photograph and the page's own keypad are the machine without it.
@@ -66,6 +67,7 @@ function tabs(list) {
   for (const tab of all) {
     tab.addEventListener('click', () => select(tab));
     tab.addEventListener('keydown', (e) => {
+      if (e.altKey || e.ctrlKey || e.metaKey) return;
       const i = all.indexOf(tab);
       const to = { ArrowLeft: all[(i + all.length - 1) % all.length], ArrowRight: all[(i + 1) % all.length], Home: all[0], End: all.at(-1), Enter: tab, ' ': tab }[e.key];
       if (!to) return;

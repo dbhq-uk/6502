@@ -113,3 +113,59 @@ test('a model that does not draw the page\'s console shows its own first console
   // Both NES models draw both consoles, so neither page console is ever missing.
   for (const [module, e] of Object.entries(MODELS).filter(([, x]) => x.regions)) for (const r of e.regions) assert.equal(shownFor(e, r).missing, null, `${module}: ${r}`);
 });
+
+// Review Focus 5, on the page: a model's region path (followRegion, which both NES modules call from their setRegion)
+// driven on a stand-in for a model's panel that draws the NTSC console alone, with the page set to PAL (fix round 1 of
+// task 9, 6 Oct 2026: the helper alone was tested before, and no module called it).
+class Node_ {
+  constructor(tag, attrs = {}, text = '') { this.tag = tag; this.attrs = { ...attrs }; this.textContent = text; this.children = []; this.dataset = {}; for (const [k, v] of Object.entries(attrs)) if (k.startsWith('data-')) this.dataset[k.slice(5).replace(/-([a-z])/g, (_, c) => c.toUpperCase())] = v; }
+  add(...c) { this.children.push(...c); return this; }
+  get hidden() { return 'hidden' in this.attrs; }
+  set hidden(on) { if (on) this.attrs.hidden = ''; else delete this.attrs.hidden; }
+  get id() { return this.attrs.id ?? ''; }
+  hasAttribute(n) { return n in this.attrs; }
+  getAttribute(n) { return this.attrs[n] ?? null; }
+  setAttribute(n, v) { this.attrs[n] = String(v); }
+  /** Compound selectors of classes and attributes, as followRegion uses them: .a[b][c="d"]. */
+  matches(sel) {
+    const parts = sel.match(/\.[\w-]+|\[[\w-]+(?:="[^"]*")?\]/g);
+    if (!parts || parts.join('') !== sel) throw new Error(`the stand-in does not know ${sel}`);
+    return parts.every((p) => {
+      if (p.startsWith('.')) return (this.attrs.class ?? '').split(' ').includes(p.slice(1));
+      const [, n, v] = /^\[([\w-]+)(?:="([^"]*)")?\]$/.exec(p);
+      return n in this.attrs && (v === undefined || this.attrs[n] === v);
+    });
+  }
+  *all() { for (const c of this.children) { yield c; yield* c.all(); } }
+  querySelectorAll(sel) { return [...this.all()].filter((e) => e.matches(sel)); }
+  querySelector(sel) { return this.querySelectorAll(sel)[0] ?? null; }
+}
+
+test('a model that does not draw the page\'s console, on the page: its first console stays drawn and named, and the status line says there is no model of the page\'s', async () => {
+  const { followRegion } = await import('../src/models/regions.mjs');
+  const stage = new Node_('section', { 'data-model-stage': '' }).add(new Node_('span', { 'data-model-region': 'ntsc', 'data-model-label': '', hidden: '' }, 'NTSC label'));
+  const status = new Node_('p', { 'data-model-status': '' }, 'The model is running.');
+  const caption = new Node_('p', { class: 'figure-caption model-about', id: 'model-about-outside-ntsc', 'data-model-region': 'ntsc' }, 'NTSC caption');
+  const root = new Node_('div', { 'data-model': 'm' }).add(stage, status, caption);
+  // Mounting with the page on PAL: the NTSC console is drawn, named and described, and the line says why.
+  assert.equal(followRegion(root, ['ntsc'], 'pal', null), 'ntsc');
+  assert.equal(root.dataset.modelRegion, 'ntsc');
+  assert.equal(stage.getAttribute('aria-label'), 'NTSC label');
+  assert.equal(stage.getAttribute('aria-describedby'), 'model-about-outside-ntsc');
+  assert.equal(caption.hidden, false);
+  assert.match(status.textContent, /^There is no model of the PAL console, because none was built, so this is the NTSC console's\.$/);
+  assert.equal(root.dataset.modelMissing, 'pal');
+  // Back to NTSC: the sentence's flag goes, and nothing else moves.
+  assert.equal(followRegion(root, ['ntsc'], 'ntsc', 'ntsc'), 'ntsc');
+  assert.equal(root.dataset.modelMissing, undefined);
+  // An event with no region changes nothing.
+  assert.equal(followRegion(root, ['ntsc'], undefined, 'ntsc'), 'ntsc');
+  // Both NES modules go through it, in their setRegion, and do not write over its sentence when they start.
+  const fs = await import('node:fs');
+  for (const f of ['nes-famicom-case.js', 'nes-famicom-board.js']) {
+    const src = fs.readFileSync(new URL(`../src/models/${f}`, import.meta.url), 'utf8');
+    assert.match(src, /import \{ followRegion \} from '\.\/regions\.mjs';/, f);
+    assert.match(src, /region = followRegion\(root, REGIONS, next, region\);/, f);
+    assert.match(src, /if \(!root\.dataset\.modelMissing\) status\.textContent = /, f);
+  }
+});

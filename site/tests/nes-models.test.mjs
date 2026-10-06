@@ -1154,18 +1154,21 @@ test('the model reads the machine through panel.nes, takes a fresh baseline on n
   assert.equal([...boardModule.matchAll(/toLowerCase\(\)/g)].length, 1);
   assert.match(boardModule, /const regionNow = \(\) => nes\(\)\?\.region\?\.\(\)\?\.toLowerCase\(\) \?\? REGIONS\[0\];/);
   assert.match(boardModule, /createSampler\(\{ counts: \(\) => nes\(\)\?\.accessCounts\?\.\(\) \?\? null, now: \(\) => performance\.now\(\) \}\)/);
-  assert.match(boardModule, /panel\?\.addEventListener\('nes:start', \(\) => \{\s*running = true;\s*setRegion\(regionNow\(\)\);\s*restart\(\);/);
+  assert.match(boardModule, /panel\?\.addEventListener\('nes:start', \(\) => \{\s*running = true;\s*status\.textContent = words\.running;\s*setRegion\(regionNow\(\)\);\s*restart\(\);/);
   assert.match(boardModule, /panel\?\.addEventListener\('nes:region', \(e\) => \{\s*setRegion\(e\.detail\?\.region\);\s*restart\(\);/);
   assert.match(boardModule, /const restart = \(\) => \{\s*sampler\.reset\(\);\s*show\(null\);/);
   assert.match(boardModule, /setInterval\(\(\) => \{\s*if \(!running\) return;\s*show\(sampler\.sample\(\)\);\s*\}, SAMPLE_MS\);/);
   assert.match(boardModule, /const SAMPLE_MS = 250;/);
   // The caption, the note and the legend's parts switch together, the names stay hidden, and the stage's name and description follow.
-  assert.match(boardModule, /for \(const el of root\.querySelectorAll\('\[data-model-region\]'\)\) if \(!el\.hasAttribute\('data-model-label'\)\) el\.hidden = el\.dataset\.modelRegion !== region;/);
-  assert.match(boardModule, /stage\.setAttribute\('aria-label', name\)/);
+  // Since fix round 1 of task 9 this is followRegion, in ./regions.mjs, which both NES models call.
+  const regionsSrc = fs.readFileSync(path.join(process.cwd(), 'src', 'models', 'regions.mjs'), 'utf8');
+  assert.match(boardModule, /region = followRegion\(root, REGIONS, next, region\);/);
+  assert.match(regionsSrc, /for \(const el of root\.querySelectorAll\('\[data-model-region\]'\)\) if \(!el\.hasAttribute\('data-model-label'\)\) el\.hidden = el\.dataset\.modelRegion !== region;/);
+  assert.match(regionsSrc, /stage\.setAttribute\('aria-label', name\)/);
   // The caption's own id, which carries the view's suffix in a tab panel (task 9): found by its console, not built.
-  assert.match(boardModule, /const about = root\.querySelector\(`\.model-about\[data-model-region="\$\{region\}"\]`\);\s*if \(about\) stage\.setAttribute\('aria-describedby', about\.id\);/);
+  assert.match(regionsSrc, /const about = root\.querySelector\(`\.model-about\[data-model-region="\$\{region\}"\]`\);\s*if \(about\) stage\.setAttribute\('aria-describedby', about\.id\);/);
   // The test hooks the browser check reads.
-  for (const hook of ['root.dataset.modelRegion', 'root.dataset.modelAccessed', 'root.dataset.modelRates', 'root.dataset.modelTracks', 'root.dataset.modelParts', 'root.modelChipPoint = ', 'root.modelBoardPoint = (x, y, below = false) =>']) assert.ok(boardModule.includes(hook), hook);
+  for (const hook of ['root.dataset.modelRegion', 'root.dataset.modelAccessed', 'root.dataset.modelRates', 'root.dataset.modelTracks', 'root.dataset.modelParts', 'root.modelChipPoint = ', 'root.modelBoardPoint = (x, y, below = false) =>']) assert.ok((boardModule + regionsSrc).includes(hook), hook);
   // Pointing at a chip names it and marks its row.
   assert.match(boardModule, /row\.toggleAttribute\('data-pointed', r === ref\)/);
   assert.match(boardModule, /row\.toggleAttribute\('data-accessed', refs\.includes\(ref\)\)/);
@@ -1282,7 +1285,8 @@ test('the outside model follows the machine: the light and POWER from panel.nes.
   assert.equal(caseLayout.PRESS_MS, 140);
   assert.match(caseModule, /const running = \(\) => nes\(\)\?\.running\?\.\(\) === true;/);
   // The region the page has when the view mounts, not when the page loaded (Review Focus 3).
-  assert.match(caseModule, /const regionNow = \(\) => nes\(\)\?\.region\?\.\(\)\?\.toLowerCase\(\) \?\? REGIONS\[0\];\s*setRegion\(REGIONS\.includes\(regionNow\(\)\) \? regionNow\(\) : REGIONS\[0\]\);/);
+  assert.match(caseModule, /const regionNow = \(\) => nes\(\)\?\.region\?\.\(\)\?\.toLowerCase\(\) \?\? REGIONS\[0\];\s*setRegion\(regionNow\(\)\);/);
+  assert.match(caseModule, /region = followRegion\(root, REGIONS, next, region\);/);
   assert.match(caseModule, /panel\?\.addEventListener\('nes:region', \(e\) => setRegion\(e\.detail\?\.region\)\);/);
   assert.match(caseModule, /panel\?\.addEventListener\('nes:reset', \(\) => \{/);
   assert.match(caseModule, /setTimeout\(\(\) => \{ reset\.position\.z = reset\.userData\.out;[^}]*\}, PRESS_MS\)/);
@@ -1291,7 +1295,8 @@ test('the outside model follows the machine: the light and POWER from panel.nes.
   assert.match(caseModule, /ledOn: new MeshBasicMaterial\(\{ color: token\('model-led'\)/);
   assert.match(caseModule, /ledOff: standard\('model-led-off'/);
   assert.match(caseModule, /in: out - S\(b\.travelMm\)/);
-  for (const hook of ['root.dataset.modelRegion', 'root.dataset.modelLed', 'root.dataset.modelPower', 'root.dataset.modelPresses', 'root.modelButtonPoint = ']) assert.ok(caseModule.includes(hook), hook);
+  const regionsSrc = fs.readFileSync(path.join(process.cwd(), 'src', 'models', 'regions.mjs'), 'utf8');
+  for (const hook of ['root.dataset.modelRegion', 'root.dataset.modelLed', 'root.dataset.modelPower', 'root.dataset.modelPresses', 'root.modelButtonPoint = ']) assert.ok((caseModule + regionsSrc).includes(hook), hook);
   // The camera may go under the case: the stage's full orbit, and the bounds the case plus two centimetres.
   assert.match(caseModule, /const margin = 2;/);
   assert.match(caseModule, /createStage\(root, \{ view: \[[^\]]*\], bounds, minDistance: 3, maxDistance: 150 \}\)/);
@@ -1383,7 +1388,14 @@ test('the outside\'s note states every uncertainty plainly, with its figures rea
     // The jacks on the side and the PAL rear: not checked against the board.
     assert.match(all, /The video and audio jacks on the side are not checked against the board, and neither is the PAL console's rear/);
     // The PAL words: a 20 mm lens, strong perspective.
-    assert.ok(all.includes(`taken with a ${mm2(f.palLensMm)} mm lens, with strong perspective`));
+    assert.ok(all.includes(`The PAL console's front words and rear were read from photographs taken with a ${mm2(f.palLensMm)} mm lens, with strong perspective`));
+    // The rear's window, drawn flat, and how far it is set in on the console, from case.json (fix round 1 of task 9).
+    assert.equal(f.rear.windowSetBackMm, caseData.rearWindow.setBackReadMm);
+    assert.ok(all.includes(`The rear's window is drawn flat on the rear face; on the console it is set in, by about ${f.rear.windowSetBackMm.toLocaleString('en-GB', { maximumFractionDigits: 1 })} mm.`));
+    assert.match(all, /The underside's ribs are drawn as lines\./);
+    assert.match(all, /The stage's light, the same for every model on this site, tints the greys a little green\./);
+    // The PAL rear's words: three lines on the case, drawn on one, squeezed; spelt as printed (O10, read 6 Oct 2026).
+    assert.equal(/printed on three lines, NETZGERAT without its umlaut as the case has it; the model draws each on one line, squeezed/.test(all), region === 'pal');
     // The lockout chip is not emulated, so the light never blinks.
     assert.match(all, /lockout chip is not emulated, so the power light never blinks/);
   }

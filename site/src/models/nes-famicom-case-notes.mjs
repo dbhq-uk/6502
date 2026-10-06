@@ -11,6 +11,7 @@
 const WORDS = ['no', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten'];
 const count = (n) => WORDS[n] ?? n.toLocaleString('en-GB');
 const mm = (v) => v.toLocaleString('en-GB', { maximumFractionDigits: 2 });
+const mm1 = (v) => v.toLocaleString('en-GB', { maximumFractionDigits: 1 });
 const pc = (v) => Math.abs(v).toLocaleString('en-GB', { maximumFractionDigits: 2 });
 
 /** The sentence on the case's size: published, not Nintendo's, and how well it is known. */
@@ -44,9 +45,13 @@ export function made(f, region) {
     `The buttons' travel, ${mm(f.buttons.travelMm)} mm, is a ${f.buttons.travelFrom} one, not measured.`,
     `Whether POWER latches in on a real console is not known${f.powerLatchSeen ? '' : ': no photograph shows it pressed'}. The model shows it in while the machine runs, as the design chose.`,
     `The video and audio jacks on the side${f.rear.avChecked ? ' are' : ' are not'} checked against the board, and ${f.rear.palChecked ? 'the PAL console\'s rear is' : 'neither is the PAL console\'s rear'}.`,
-    `The PAL console's words and rear were read from photographs taken with a ${mm(f.palLensMm)} mm lens, with strong perspective.`,
+    `The PAL console's front words and rear were read from photographs taken with a ${mm(f.palLensMm)} mm lens, with strong perspective.`,
     'The lockout chip is not emulated, so the power light never blinks as a real console\'s does when it refuses a cartridge.',
+    `The rear's window is drawn flat on the rear face; on the console it is set in, by about ${mm1(f.rear.windowSetBackMm)} mm.`,
+    'The underside\'s ribs are drawn as lines.',
+    'The stage\'s light, the same for every model on this site, tints the greys a little green.',
     'The cartridge door does not open, and the inside of the case is the other view: the board.',
+    ...(pal ? ['The PAL console\'s rear words are printed on three lines, NETZGERAT without its umlaut as the case has it; the model draws each on one line, squeezed into the box the NTSC console\'s words take.'] : []),
   ];
   return { paragraphs, limits };
 }

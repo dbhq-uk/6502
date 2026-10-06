@@ -2722,3 +2722,51 @@ POWER, lit the light and put POWER in, as the lines above show.
   KIM-1's board has always been lit that way. Left as it is: changing the
   shared stage would change the KIM-1's model, and the case's tokens are
   greys.
+
+### Simplified
+
+- **The rear's window is drawn flat** on the rear face. On the console it is
+  set in, by about 4.4 mm as `case.json` read it on O2-BR (its
+  `rearWindow.setBackReadMm`, 4.39); the note under the model says so, from the
+  results file.
+- **The underside's ribs and panels are drawn as lines**, its screw holes as
+  dark discs, and where the leaning ends reach under the case, both sit on the
+  lean. The case's corners are square where the console's are rounded.
+- **The PAL console's rear words** are printed on three lines on the case
+  (O10, looked at full size on 6 October 2026: "ANSCHLUSS / NETZGERAT/ /
+  ADAPTER", "KANAL3", a rule, "KANAL4", and "ANSCHLUSS / ANTENNE"); NETZGERAT
+  is printed without its umlaut. The model draws each on one line, squeezed
+  into the box the NTSC console's words take, and the note says so. The words
+  and their boxes are task 8's, unchanged.
+
+### After review, the same day
+
+The review found the tabs, the registry, the state, the region, the credits
+and the one-model pages sound, and asked for these, all done:
+
+- **The rear's window and the ribs** are now in the note's limits, the window's
+  set-in read by `results.py` from `case.json` (`rear.windowSetBackMm`), with a
+  test that ties the sentence to it.
+- **Review Focus 5 is wired.** `shownFor` and the page's region path moved into
+  `site/src/models/regions.mjs`, which has no Node imports, so the browser
+  bundles can import it (`models.mjs` re-exports `shownFor`). Both modules'
+  `setRegion` call `followRegion`: a region a model does not draw keeps its
+  first console drawn, named and described, and the status line says there is
+  no model of the page's console and why; the modules no longer write over that
+  sentence when they start. A test drives `followRegion` on a stand-in for a
+  model's panel with a region it does not draw: red while the modules did not
+  call it, green once they did.
+- **The light's tint** is said in the note's limits and in `DESIGN.md`: the
+  stage's light, the same for every model, tints the greys a little green.
+- **The lens** sentence says the PAL console's front words and rear: the labels
+  underneath are from O5, a phone's photograph.
+- **The shared moulding** is no longer read from the word "moulding" in
+  `boardInCase.from`, which a sentence denying it would also hold: `results.py`
+  matches `case_measure.py`'s own tag, "the shells the moulding [inferring]",
+  and stops on any other words about the moulding. `case.json` was not
+  regenerated; `results.py` rewrote the board's results file byte for byte and
+  the case's with only `windowSetBackMm` added.
+- **The tab keys** leave a key with Alt, Ctrl or Meta held to the browser, so
+  Alt and Left still goes back with a tab focused; the loader is 3,491 bytes.
+- **`MachineModel.astro`** imports from `models.mjs` once.
+

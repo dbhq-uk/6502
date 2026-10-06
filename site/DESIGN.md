@@ -338,7 +338,8 @@ stage as the KIM-1's.
   Right move to the next and select it, round the ends; Home and End go to the
   ends. Only the selected tab is in the Tab order, and Tab goes from it into its
   panel's stage and on out of the section: nothing traps the focus, and Escape
-  on a stage lets go of it as on the KIM-1's.
+  on a stage lets go of it as on the KIM-1's. A key with Alt, Ctrl or Meta
+  held is left to the browser, so Alt and Left still goes back.
 - **Each view loads late, on its own.** The loader shows the section and loads
   a view's bundle only when its panel nears the screen or its Load button is
   pressed. A hidden panel never nears the screen, so the inside's bundle and
@@ -351,6 +352,9 @@ stage as the KIM-1's.
   PAL console's labels underneath `--model-nes-sticker`; its power light the
   KIM-1's `--model-led` lit and `--model-led-off` dark. None is a text colour.
   The PAL console photographed has yellowed; the model is not.
+  On the canvas the stage's light, the same for every model on this site
+  (`--white`, the phosphor's, and a moss ground light), tints the greys a
+  little green; the note under the model says so.
 - **Its words are ours.** Every word on the case is drawn by the model, in the
   site's own type once it has loaded, into one canvas: no image, no outline of
   Nintendo's lettering. The photograph at the head of the page shows the real

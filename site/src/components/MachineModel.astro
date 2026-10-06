@@ -21,8 +21,7 @@
 // view's bundle is fetched only once its tab is chosen. The controls are the
 // same for every view, so they are said once, after the panels.
 import ModelPanel from './ModelPanel.astro';
-import { CONTROLS, modelSrc } from '../models/models.mjs';
-import { MODELS } from '../models/models.mjs';
+import { CONTROLS, MODELS, modelSrc } from '../models/models.mjs';
 
 interface Source { author: string; sourceUrl: string; licence: string | null; licenceUrl?: string; used: string; caption?: string; title?: string; sha256?: string }
 interface Props {

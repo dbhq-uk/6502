@@ -30,6 +30,7 @@
   "limitMm": 2.0,
   "palChecked": false,
   "placesUsedMm": 1.3,
+  "windowSetBackMm": 4.39,
   "within": 1,
   "words": "O2-BR and the patent's rear view agree within 1.3 mm; the board's places miss by up to 5.2 mm; the check failed as measured",
   "worstMm": 5.16

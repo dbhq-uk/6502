@@ -119,6 +119,18 @@ def about(text, unit):
     return float(m.group(1))
 
 
+def shared_moulding(text):
+    """Whether the board's place in the case rests on the PAL and NTSC shells
+    being one moulding: case_measure.py says so with its own tag, "the shells
+    the moulding [inferring]". Any other words about the moulding stop the run,
+    rather than be read as yes (a sentence denying it also names the moulding)."""
+    if re.search(r'the shells the moulding \[inferring\]', text):
+        return True
+    if 'moulding' in text:
+        raise SystemExit(f'case.json says something else about the moulding: {text}')
+    return False
+
+
 def case_results(case, sources):
     """The case model's figures, each read from case.json (or, for the PAL
     photographs' lens, from sources.json, which records it from each file's XMP)."""
@@ -156,11 +168,13 @@ def case_results(case, sources):
             'checked': check['checked'], 'within': check['within'], 'limitMm': check['limitMm'], 'worstMm': check['worstMm'],
             'placesUsedMm': check['uncertaintyMm']['placesUsed'], 'boardMissMm': check['uncertaintyMm']['boardMiss'],
             'words': check['words'],
+            # how far the rear's window is set in, as read on O2-BR; the model draws it flat on the face
+            'windowSetBackMm': case['rearWindow']['setBackReadMm'],
             'avChecked': any(r['checked'] for r in rear['ntsc'] if r['face'] != 'rear'),
             'palChecked': any(r['checked'] for r in rear['pal']),
         },
         # the board's place in the case, from O9
-        'boardInCase': {'uncertaintyMm': board['uncertaintyMm'], 'sharedMoulding': 'moulding' in board['from']},
+        'boardInCase': {'uncertaintyMm': board['uncertaintyMm'], 'sharedMoulding': shared_moulding(board['from'])},
         'buttons': {'travelMm': buttons[0]['travelMm'], 'travelFrom': buttons[0]['travelFrom']},
         'powerLatchSeen': case['powerLatch']['seen'],
         'palLensMm': next(iter(pal_lens.values())),

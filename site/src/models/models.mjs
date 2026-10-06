@@ -159,20 +159,7 @@ export function regionViews(entry) {
   return entry.regions.map((region, i) => ({ region, hidden: i > 0, suffix: `-${region}`, ...wordsFor(entry, region) }));
 }
 
-/**
- * Which console a model shows when the page's region is `region` (lower case),
- * and what it says about it (Review Focus 5 of the NES models plan): the
- * region's own console if the model draws it; otherwise its first console,
- * labelled as that console, and a sentence that there is no model of the
- * page's console, and why (the entry's `missing[region]`, or that none was
- * built). A model with no `regions` draws one console whatever the page says.
- * Both NES models draw both consoles, so on the NES's page the sentence is
- * never needed; it is here for a model that stops short of one.
- */
-export function shownFor(entry, region) {
-  if (!entry.regions) return { region: null, label: entry.label, missing: null };
-  if (entry.regions.includes(region)) return { region, label: entry.label[region], missing: null };
-  const first = entry.regions[0];
-  const why = entry.missing?.[region] ?? 'none was built';
-  return { region: first, label: entry.label[first], missing: `There is no model of the ${region.toUpperCase()} console, because ${why}, so this is the ${first.toUpperCase()} console's.` };
-}
+
+// Which console a model shows for the page's region, and the sentence when it does not draw it: ./regions.mjs, which
+// the models' browser bundles import too.
+export { shownFor } from './regions.mjs';

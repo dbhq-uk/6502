@@ -47,6 +47,7 @@ import {
 } from 'three';
 import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
 import { createStage } from './stage.mjs';
+import { followRegion } from './regions.mjs';
 import { BOARD, ICS, CONNECTORS, PASSIVES, OTHERS, HEIGHTS, REGIONS, CONSOLES, TRACKS } from './nes-famicom-board-layout.mjs';
 import { COUNTED, createSampler } from './nes-famicom-access.mjs';
 
@@ -362,32 +363,26 @@ export async function mount(root) {
   }
 
   // ---- The console, and the page's words for it ----
-  const stage = root.querySelector('[data-model-stage]');
   const status = root.querySelector('[data-model-status]');
   const rows = new Map([...root.querySelectorAll('[data-legend-ref]')].map((r) => [r.dataset.legendRef, r]));
   const rateCells = new Map([...root.querySelectorAll('[data-legend-rate]')].map((c) => [c.dataset.legendRate, c]));
   let region = null;
+  // The caption, the note, the legend's parts and the stage's name and description follow the page's region
+  // (followRegion, in ./regions.mjs); a region this model does not draw keeps the first console and says so on the
+  // status line. Then the scene: the console's own crystal and modulator, and each chip's part printed on it.
   const setRegion = (next) => {
-    if (!REGIONS.includes(next) || next === region) return;
-    region = next;
-    root.dataset.modelRegion = region;
+    const was = region;
+    region = followRegion(root, REGIONS, next, region);
+    if (region === was) return;
     for (const r of REGIONS) consoles[r].visible = r === region;
     for (const { ic, label } of chips.values()) label.print(ic.parts[region]);
-    // The caption, the note and the legend's parts: every element marked for a
-    // console, but the accessible names, which stay hidden.
-    for (const el of root.querySelectorAll('[data-model-region]')) if (!el.hasAttribute('data-model-label')) el.hidden = el.dataset.modelRegion !== region;
-    const name = root.querySelector(`[data-model-label][data-model-region="${region}"]`)?.textContent;
-    if (name) stage.setAttribute('aria-label', name);
-    // The caption's id carries the view's suffix when the model is one of a case's views (model-about-inside-pal).
-    const about = root.querySelector(`.model-about[data-model-region="${region}"]`);
-    if (about) stage.setAttribute('aria-describedby', about.id);
   };
 
   // ---- The machine: the panel on the same page runs it ----
   const panel = document.querySelector('[data-nes]');
   const nes = () => panel?.nes ?? null;
   const regionNow = () => nes()?.region?.()?.toLowerCase() ?? REGIONS[0];
-  setRegion(REGIONS.includes(regionNow()) ? regionNow() : REGIONS[0]);
+  setRegion(regionNow());
   let running = Boolean(nes()?.running?.());
   const sampler = createSampler({ counts: () => nes()?.accessCounts?.() ?? null, now: () => performance.now() });
   const words = {
@@ -415,9 +410,9 @@ export async function mount(root) {
   };
   panel?.addEventListener('nes:start', () => {
     running = true;
+    status.textContent = words.running;
     setRegion(regionNow());
     restart();
-    status.textContent = words.running;
   });
   panel?.addEventListener('nes:region', (e) => {
     setRegion(e.detail?.region);
@@ -555,7 +550,7 @@ export async function mount(root) {
   /** Where a point on the board, in mm as the layout has it, is on the screen: on the top face, or the underside when `below`. */
   root.modelBoardPoint = (x, y, below = false) => onScreen(new Vector3(X(x), below ? -T : 0, Z(y)));
 
-  status.textContent = tracksError
+  if (!root.dataset.modelMissing) status.textContent = tracksError
     ? `The model is running, without its tracks, which could not load: ${tracksError.message}`
     : running ? words.running : words.idle;
   s.start();

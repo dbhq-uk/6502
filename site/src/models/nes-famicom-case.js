@@ -42,6 +42,7 @@ import {
   Mesh, Group, MeshStandardMaterial, MeshBasicMaterial, CanvasTexture, SRGBColorSpace, Vector3,
 } from 'three';
 import { createStage } from './stage.mjs';
+import { followRegion } from './regions.mjs';
 import { CASE, PROFILE, DOOR, VENTS, BUTTONS, LED, PORTS, REAR, LABELS, UNDERSIDE, FEET, REGIONS, PRESS_MS, STATUS, press } from './nes-famicom-case-layout.mjs';
 
 // The case frame (mm, from the left rear corner at table level, x right, y to
@@ -348,21 +349,16 @@ export async function mount(root) {
   function under0(x, y) { return new Vector3(X(x), Y(bottomAt(x)) - S(0.5), Z(y)); }
 
   // ---- The console, and the page's words for it ----
-  const stage = root.querySelector('[data-model-stage]');
   const status = root.querySelector('[data-model-status]');
   let region = null;
+  // The caption, the note, the stage's name and description follow the page's region (followRegion, in ./regions.mjs);
+  // a region this model does not draw keeps the first console and says so on the status line. Then the scene.
   const setRegion = (next) => {
-    if (!REGIONS.includes(next) || next === region) return;
-    region = next;
-    root.dataset.modelRegion = region;
+    const was = region;
+    region = followRegion(root, REGIONS, next, region);
+    if (region === was) return;
     for (const r of REGIONS) consoles[r].visible = words[r].visible = r === region;
     for (const button of buttons.values()) for (const child of button.children) if (child.userData.region) child.visible = child.userData.region === region;
-    // The caption and the note: every element marked for a console, but the accessible names, which stay hidden.
-    for (const el of root.querySelectorAll('[data-model-region]')) if (!el.hasAttribute('data-model-label')) el.hidden = el.dataset.modelRegion !== region;
-    const name = root.querySelector(`[data-model-label][data-model-region="${region}"]`)?.textContent;
-    if (name) stage.setAttribute('aria-label', name);
-    const about = root.querySelector(`.model-about[data-model-region="${region}"]`);
-    if (about) stage.setAttribute('aria-describedby', about.id);
   };
 
   // ---- The machine: the panel on the same page runs it ----
@@ -370,7 +366,7 @@ export async function mount(root) {
   const nes = () => panel?.nes ?? null;
   const running = () => nes()?.running?.() === true;
   const regionNow = () => nes()?.region?.()?.toLowerCase() ?? REGIONS[0];
-  setRegion(REGIONS.includes(regionNow()) ? regionNow() : REGIONS[0]);
+  setRegion(regionNow());
 
   // The light and POWER follow the machine, read every frame.
   let on = null;
@@ -385,7 +381,7 @@ export async function mount(root) {
   };
   show(running());
   every(() => show(running()));
-  panel?.addEventListener('nes:start', () => { show(running()); setRegion(regionNow()); status.textContent = STATUS.running; });
+  panel?.addEventListener('nes:start', () => { show(running()); status.textContent = STATUS.running; setRegion(regionNow()); });
   panel?.addEventListener('nes:region', (e) => setRegion(e.detail?.region));
 
   // RESET goes down for PRESS_MS whenever the machine is reset, by the page's
@@ -420,6 +416,6 @@ export async function mount(root) {
     return { x: rect.left + ((v.x + 1) / 2) * rect.width, y: rect.top + ((1 - v.y) / 2) * rect.height };
   };
 
-  status.textContent = running() ? STATUS.running : STATUS.idle;
+  if (!root.dataset.modelMissing) status.textContent = running() ? STATUS.running : STATUS.idle;
   s.start();
 }

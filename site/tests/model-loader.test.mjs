@@ -158,3 +158,15 @@ test('the loader stays small, and imports nothing when the page opens', () => {
   // No focus trap: the loader never takes Tab, and never moves the focus but on an arrow, Home or End.
   assert.doesNotMatch(SOURCE, /'Tab'|Escape/);
 });
+
+test('a tab key with Alt, Ctrl or Meta held is the browser\'s: Alt and Left goes back, and the tabs do not move', () => {
+  makePage();
+  const [a] = page.tabs;
+  for (const mod of ['altKey', 'ctrlKey', 'metaKey']) {
+    for (const k of ['ArrowRight', 'ArrowLeft', 'Home', 'End', 'Enter', ' ']) {
+      const e = a.fire('keydown', { key: k, [mod]: true });
+      assert.equal(e.defaultPrevented, false, `${mod} and ${k} was taken`);
+      assert.deepEqual(selected(), [true, false], `${mod} and ${k} moved the tabs`);
+    }
+  }
+});
