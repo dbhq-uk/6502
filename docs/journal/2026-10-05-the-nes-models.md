@@ -2841,3 +2841,338 @@ not that the copy is resized, and that is the same for the KIM-1's CC BY-SA
 photographs. The README says it. Adding the words to `MachinePhoto.astro`
 changes every machine page, so it is not done here; it is a one-line change
 for a later pass.
+
+## Task 10, the final pass, 6 October 2026
+
+The last task of the plan: break the models on purpose to see that the tests
+notice, write down where the models stop, record what the page weighs and
+how fast the machine runs, and bring the documents up to date. There is no
+pull request for this branch and none is to be opened (Dan), so the plan's
+step 6, marking it ready, does not apply. The final whole-branch review is
+the controller's; this task wrote, for it, a list of every claim the page and
+the documents make about the models and what shows each
+(`.superpowers/sdd/2026-10-05-nes-models/final-claims-check.md`, kept out of
+the repository with the other working files).
+
+### The mutation pass
+
+In a scratch copy of the branch outside the repository (`git archive HEAD`
+into `/tmp/t10-mut`, made a git repository so each mutation could be undone
+with `git checkout`, `node_modules` linked, `src/data/results.json` from CI
+run 37419286133, the site built once with `npm run build`), one thing was
+broken at a time and only the test files that should catch it were run, with
+`nice -n 10 node --test <files>`, because the host is shared. C# mutations
+ran `nice -n 10 dotnet test tests/Dbhq.Machines.Nes.Tests -c Release --filter
+ChipAccesses`. A mutation of a sentence the page shows was followed by
+`npx astro build`, so that the built page and the module agreed and only the
+test's own check could catch it. Mutation 2 was run for real: the solder
+side's script on the real inputs, in a second copy, `/tmp/t10-mut2`.
+
+| Mutation | What was broken | Caught by |
+|---|---|---|
+| 1 | x and y scales swapped in `frame.json` | "frame.json records the verdicts its figures give, and its figures are the ones its rows give" (its ratio is no longer x over y) |
+| 1b | `board_frame.py`'s `fit_scale` returning y then x | pytest `tests/test_board_frame.py`: 7 of 14 failed, among them `test_the_scale_comes_from_rows_across_and_spacings_down` and `test_the_scale_and_turn_come_back` |
+| 2 | `board_register.py` reading I1-back unflipped, run on the real inputs | the script itself: 139 holes, held-out median 0.457 mm, 90th percentile 0.918: STOP, exit 3; then 7 site tests, among them "registration.json passes the plan's solder row". pytest does not reach `main()`, which reads the real inputs |
+| 3a | U2's two parts swapped between the consoles in `ic-table.json` | "each console's part is the one ic-table.json gives" and the legend's test |
+| 3b | the same swap in `ic-table.json`, `parts.json` and the parts module together | **survived**; now "each console's part in ic-table.json is the one the fact sheet's table records" |
+| 4 | U7 pad 2 and U8 pad 1 in `parts.json` and the module | "every IC has a chip or an always ... U7 is pad1 and U8 pad2" and the legend's test |
+| 5 | `ChipAt` sending writes to `$4016` to `Pad1` | C#: `An_access_reaches_the_chip_its_address_decodes_to(16406, write, Apu)`, `Each_access_adds_one_to_its_chip_and_nothing_to_the_others`, `Inc_4016_reads_pad_1_once_and_writes_the_strobe_twice` (3 of 34) |
+| 6 | `NesBus.Peek` calling `Note` | C#: `A_peek_adds_nothing` |
+| 7 | the sampler dividing by 0.25 s, not the time measured | `nes-famicom-access.test.mjs`: "the sampler divides by the time it measured, not the time it was asked to wait" |
+| 8a, 8b | no fresh baseline on `nes:region`, then on `nes:start` | "the model reads the machine through panel.nes, takes a fresh baseline on nes:start and nes:region" |
+| 9a | the PAL crystal and modulator left showing after a change to NTSC | **survived**; now "a change of console leaves nothing of the other console on either model" |
+| 9b | U5 left printed with its PAL part after a change | **survived**; the same new test |
+| 10a | the board drawing NTSC at mount, whatever the page says | **survived**; now "the board model draws the console the page has when it mounts, not the first one (Review Focus 3)" |
+| 10b | the case doing the same | "the outside model follows the machine: ... the region at mount and on nes:region" |
+| 11a | the case's height 89 in the generated parts module | "the case parts module is generated from case.json" and "the case's sizes are case.json's" |
+| 11b | 89 in the module, `case.json` and the results file together | "case.json's size is the published figures ... agrees with spike.json", the parts module's, the note's and the profile's tests |
+| 11c | 89 typed into the case model's own code (`const TOP = 89 + CASE.feet`) | **survived**; now "the case module types none of the case's sizes"; it also fails on 203.2 typed for the depth |
+| 12a | the rear check recorded as passing, three of three | "each rear connector's place ... judged at 2 mm as measured" and "the case's sizes are case.json's" |
+| 12b | the rear check's limit widened to 6 mm | "each rear connector's place ... judged at 2 mm as measured" |
+| 13 | the nets verdict `pass` in `copper.json` | four tests, among them "copper.json passes the plan's coverage and drills rows, and its nets row stays the FAIL" |
+| 14a, 14b | a colour literal in the case module (`'#c8c4b8'`), in the board module (`0xc8c4b8`) | `model.test.mjs`: "the model and its stage hold no colour of their own" |
+| 15 | the track map padded to 600,001 bytes, `copper.json`'s size and hash made to match | `model.test.mjs` "every model with a track map has it committed, inside the budget its plan set" and "the NES board's track map is committed ... inside its budget", both on the budget's own message |
+| 16 | the rule that a machine claiming a model states `case` taken out | `registry.test.mjs`: "a machine that claims a model states case" |
+| 17 | the NES claiming only the inside, with `case` true | `registry.test.mjs` "the real registry is valid", two of `nes.test.mjs`, and `model.test.mjs` and `nes-models.test.mjs` failing to load |
+| 18a, 18b | the word "logo" in a comment, a `Path2D` in the case module | "the case's words are words: no module ... names a logo ... or holds an SVG path" |
+| 18c | a path's data as a string, `{ d: 'M0 0 L10 0 L10 4 Z' }` | **survived**; the same test now also refuses a string of path data |
+| 19 | the patent's PDF copied into `tools/nes-model/data/` | "no original NES input is committed" |
+| 20a | 5.2 typed for the rear's miss in the note (5.16 in `case.json`) | "the outside's note states every uncertainty plainly" |
+| 20b | 25.6 typed for the width in the case's caption (25.4) | **survived**; now "each console's caption on the case gives the case's size from case.json, and no figure typed by hand" |
+
+**Seven survived, and each now has a test.** Each new test was run on its
+mutation, red, and on the unmutated tree, green, in the scratch copy (`node
+--test tests/nes-models.test.mjs`: 67 tests, 67 pass unmutated; one failing,
+the new one, on each of 3b, 9a, 9b, 10a, 11c, 18c and 20b). Why they had
+survived: the parts were compared only file with file, so a swap made in all
+three passed (the fact sheet's table, written as each crop was read on 5
+October, is now the record); the scene's half of a region change was in no
+test and the browser check reads the legend, which `followRegion` switches,
+not the scene; the board's mount was not pinned where the case's was; the
+case tests read the parts module, not the code that draws; the path test
+looked for `Path2D` and `d="M` only; and the caption test compared the
+caption with the layout's own `describe()`. The tests that pin source text
+with a regular expression follow the file's existing ones (the board's wiring
+test); they catch these mutations, not every way of writing the same fault,
+and the browser check remains the test of the scene.
+
+### Where the models stop
+
+`docs/known-differences.md` has a new section, "The NES: its two 3D models,
+where they stop". Every figure in it is quoted with the data file and key it
+was read from, not from memory: the case's published size and how well it is
+known (`case.json`); the case checks' two revisions and what they now catch, a
+gross error of scale and not one of 3 per cent, with every earlier stop
+(`spike.json`); the rear connectors' failed check and its three misses, and
+the 1.3 mm agreement with the patent the model's places rest on
+(`case.json` `rearCheck`); the copper's failed nets check, one of ten ground
+pins and two of ten +5V pins in their largest nets, the two touching
+(`copper.json`), with the re-trace still open; the NTSC parts read off a
+CPU-07 and placed on the CPU-10's footprints, and the PAL board drawn on the
+NTSC board's copper on task 0's layout check (`parts.json`, `spike.json`);
+the buffers' ports by the print and U9's jobs from the redrawing's nets;
+typical heights; the PAL modulator's shift and short crystal; the board's
+place in the case (about 2 mm, one moulding assumed) and the profile's spread
+(about 2.5 mm); POWER's latch unknown; the lockout chip not emulated, so the
+light never blinks; and what is drawn simply (square corners, a flat rear
+window set in about 4.4 mm on the console, ribs as lines, no opening door,
+the stage's green-white light).
+
+**The page's lists against that section**, checked by hand, item by item: the
+outside's limits each have their line there, and so do the inside's. Two
+things the section said were not on the page, the PAL modulator's shift and
+the PAL crystal's size, so the PAL board's limits now say them, in words with
+no figure (the figures are `parts.json`'s, in the section). What the section
+says beyond the page is the history of the checks, which the page needs only
+in short.
+
+**Three sentences on the page said more than their evidence, and were
+changed** (6 October 2026, from the claims list):
+
+- The case's note said the patent's proportions "were checked against it, and
+  the depth and the height passed", which read as a tight check. It now goes
+  on: "on limits widened after the drawings were measured, so that the check
+  catches a gross error of scale and not a small one (two earlier checks, on
+  photographs and then on the drawings with tighter limits, stopped, and stay
+  on record)".
+- The board's note said "of the board's 480 drilled holes". 480 is the number
+  `registration.json` found drilled, of 511 holes matched, not a count of the
+  board's holes. It now says "of the 480 drilled holes found on both scans".
+- The PAL board's limits gained the modulator and crystal sentence above.
+
+### What the documents now say
+
+- **`README.md`**: under "Where it stands", that the NES's page has two 3D
+  models, the outside and the inside, each for both consoles, measured from
+  photographs, a design patent and bare board scans, with a note under each
+  saying how well each part is known. In the licences: the NES's photographs,
+  public domain for the NTSC console's two and CC BY 4.0 for the PAL
+  console's two, and the board's track map, traced from OpenTendo's scans,
+  read from the `dbhq-uk` fork, and so on the TAPR Open Hardware License's
+  terms, with `NOTICE.md` saying what is derived. No figure.
+- **`AGENTS.md`**'s layout: `site/src/models/` with the NES's two modules,
+  `tools/nes-model/`, `NOTICE.md`'s three entries, and `docs/nes/facts/`'s
+  `models.md`.
+- **`docs/the-6502-family.md`** is unchanged: its KIM-1 and BBC Micro lines do
+  not mention their models either, so the NES's does not.
+- **`site/DESIGN.md`**'s "The NES's 3D models", from task 9, was read against
+  the page and is still true; unchanged.
+- **`site/README.md`** says the NES's models are measured offline by
+  `tools/nes-model/`, as the KIM-1's are by its tool.
+- **`tools/nes-model/README.md`** no longer says "so far": it lists every
+  script, the run order, the fetch table with the fork's addresses, `pdfimages`
+  and the venv, and now points at the journal and at the known-differences
+  section, and says what the mutation pass saw `board_register.py` do on an
+  unflipped back scan.
+
+### What the page weighs
+
+`cd site && node scripts/page-weight.mjs /machines/nes/` (and `/machines/kim-1/`,
+`/machines/bbc-micro/`), on the scratch copy's build of this task's code with
+CI's results file (run 37419286133), 6 October 2026, 20:27 UTC. Bytes gzipped
+at level 9:
+
+| | NES | KIM-1 | BBC Micro |
+|---|---|---|---|
+| When the page opens, total | 52,643 | 114,635 | 58,330 |
+| of which the HTML | 21,347 | 14,454 | 16,872 |
+| of which `model-loader.js` | 1,530 | 1,530 | none |
+| of which the main photograph | 10,812 | 87,072 | 22,030 |
+| When scrolled to, the other photographs | 82,776 | 301,442 | none |
+| Later, the outside's bundle, when the models are reached | 166,237 | | |
+| Later, the inside's bundle and track map, when its tab is chosen | 163,161 and 144,726 | 163,048 and 314,732 (the board, the KIM-1's only model) | |
+
+Nothing under `/models/` is in any page's first load. Each bundle is inside
+its 200,000 bytes, and the NES's track map inside its 600,000. Since task 9's
+record (51,025 at first load), the NES page has gained the photographs
+section of task 8's follow-up, task 9's fix round and this task's three
+sentences; the growth is not split by commit. The machines' WebAssembly is
+fetched on Start and is not counted by the script.
+
+### The speed: the README's method, the native half
+
+The plan owed the README's method (`bench/nes-speed/README.md`), the native
+bench and the browser build compiled ahead of time, alternating the code
+before task 6 (`f9e84b0`) and after, on a quiet machine. The controller's
+ruling for this task: run it only while the one-minute load average is under
+about 4, checking between rounds, and otherwise record that it was not
+measured.
+
+The native half ran in a window of 6 October 2026, 20:28:03 to 20:29:05 UTC,
+when the load average fell from 3.98 to 1.53 (checked before each round and
+each launch). Both trees were `git archive` exports outside the repository
+(`/tmp/t10-before` at `f9e84b0`, `/tmp/t10-after` at this branch's head),
+each built with `dotnet build -c Release bench/nes-speed/native`, then, three
+rounds, NTSC and PAL, the order swapped each round:
+
+```
+cd /tmp/t10-<before|after>/bench/nes-speed
+dotnet native/bin/Release/net10.0/Dbhq.Machines.Nes.SpeedNative.dll 5 1790000 <ntsc|pal>
+```
+
+Every launch printed `rendering yes` and `picture changes yes`. In times real
+time, 15 timed runs a side:
+
+| Region | Before, median | After, median | After over before | Per launch, after over before |
+|---|---|---|---|---|
+| NTSC | 1.73 | 1.74 | 1.006 | 0.902, 0.977, 1.093 |
+| PAL | 1.88 | 2.11 | 1.122 | 1.043, 1.162, 0.963 |
+
+**No slowdown is seen, and the method cannot show one of 2 per cent here.**
+Single runs went from 1.39 to 2.46 times real time, and launch against launch
+by up to 16 per cent either way. The load average was low, but the host was
+not quiet: these figures are under half the quiet native figure of 5 October
+(4.00 on NTSC, the task 6 entry), and `vmstat` straight after showed about
+half the CPUs busy and the load back at 19 within a minute. Task 6's paired
+runs, both builds at once on swapped CPUs, remain the better evidence: no
+slowdown to within about 2 per cent, with PAL alone unable to rule out 3.
+
+### The speed: the browser half, compiled ahead of time
+
+The load stayed high for an hour after the native half (19.17 at 20:29 UTC,
+swinging between 4 and 51, 33.02 at 21:12), so the browser half waited for
+the browser check below. Then both trees were published as the README says,
+`dotnet publish src/Dbhq.Machines.Nes.Wasm -c Release -p:RunAOTCompilation=true
+-o bench/nes-speed/publish/aot` (with `obj/Release` cleared first) and `npm ci`
+in `bench/nes-speed`, and run one launch at a time, alternated as before:
+
+```
+cd /tmp/t10-<before|after>/bench/nes-speed
+node run-in-browser.mjs publish/aot 1 1790000 5000000 5 <0 for NTSC|1 for PAL>
+```
+
+Set 1 ran from 21:43:32 to 21:45:00 UTC, the load average falling from 3.75 to
+1.28; set 2 started at 21:45:50 at 2.14 and stopped itself after two rounds,
+the load having reached 5.58 at the third. Chrome 153, every launch's ROM
+hash checked. In times real time:
+
+| Region | Set | Before, median | After, median | After over before | Per launch |
+|---|---|---|---|---|---|
+| NTSC | 1 (15 runs a side) | 1.85 | 1.78 | 0.962 | 0.971, 0.915, 1.108 |
+| NTSC | 2 (10 runs a side) | 2.01 | 1.83 | 0.910 | 0.868, 0.951 |
+| PAL | 1 | 2.19 | 2.01 | 0.918 | 0.915, 0.866, 1.356 |
+| PAL | 2 | 1.85 | 2.18 | 1.178 | 1.244, 1.106 |
+
+Over both sets, 25 runs a side: NTSC 1.89 before and 1.78 after (0.942), PAL
+2.11 and 2.13 (1.010). **This does not settle it.** PAL changes sign from set
+to set, and single launches differ by up to a third (0.87 to 1.36). NTSC is
+lower after in both sets, so a slowdown of a few per cent in the browser on
+NTSC cannot be ruled out. The host was not quiet even then: `vmstat` read
+about half the CPUs busy at a load average of 1.4, and these figures are
+below the quiet ones of 5 October (NTSC 2.09 to 2.82, PAL 2.44 to 3.24 times
+real time in the browser, the NES speed entry). For scale: a timed run lasts
+about half a second and reaches a counted chip about 107 thousand times (task
+6's count of SNOW), so 4 per cent of it would be about 200 ns a count, far
+more than an increment and a switch on an address should cost. That is
+arithmetic, not a measurement. **The headroom**, if NTSC lost 6 per cent, would
+still be about twice real time on a quiet machine, by the 5 October figures;
+it was not measured again. The measurement on a quiet host stays owed, in the
+plan's Deferred list.
+
+### The whole browser check: run 1 failed outside the NES, run 2 passed whole
+
+`cd site && nice -n 10 node scripts/browser-check.mjs`, Chrome 153 with
+software WebGL, in the scratch copy with the NES machine built again from
+this branch (`node scripts/build-machines.mjs nes`, compiled ahead of time; the
+copy's earlier build predated task 6's `AccessCounts`). Started at 20:51:58
+UTC, when the load average was 7.76, under the ruling's 8; ended at 21:12:52,
+load 33.02, having risen past 40 on the way. **Run 1** failed in two parts,
+both outside the NES:
+
+- **The KIM-1's phone steps**: "a finger on the focused model scrolled the
+  page", the page moving 19 pixels (scrollY 3241 to 3222) while one finger
+  turned the focused model. The same step, the same 19 pixels, failed once in
+  task 7's third run at a load of about 21, and passed in the other runs on the
+  same markup. Task 10 changed nothing the KIM-1's page or model runs.
+- **The BBC Micro**: "the picture is not being redrawn (fields 129853 then
+  129873)", 20 fields in a second where a quiet run gives about 50, with its
+  speed line "Running at 0.55 MHz, slower than the BBC Micro's 2 MHz: this
+  browser cannot keep up". The same failure as in tasks 7 and 9 under load.
+
+**Every NES step passed**, among them: nothing under `/models/` before
+scrolling; the outside alone fetched when the models are reached; RESET before
+Start doing nothing; POWER starting the machine, the light lit and POWER in;
+the page's Reset and the model's RESET each putting RESET down; under the
+case drawn; the page to PAL with the inside not loaded, then Inside chosen,
+drawing PAL; U5, U6 and U7 marked with rates on NTSC and on PAL; the region
+switched with nothing downloaded; the tracks buttons; the solder side's
+copper under the board; the tabs' keys and cameras; Tab leaving the section;
+the recorded frames' hashes in both regions; reduced motion. Its model lines:
+
+```text
+nes: model files requested before scrolling to the models: none
+nes: outside model running in 3082 ms after scrolling to it, fetched /models/nes-famicom-case.js; region ntsc, light dark, POWER out
+nes: a click on the model's RESET before Start: the machine is ready, fetched nothing; RESET went down 0 times
+nes: started by POWER on the model: light lit, POWER in
+nes: accessCounts, an Int32Array, [58883,7476,8928,0] then [64298,7825,9384,0] half a second later; running() true, region() NTSC
+nes: the page's Reset: RESET went nes:reset, down, up; presses 0 then 1
+nes: under the case, polar 3.142: 31.3% of the canvas drawn
+nes: the page to PAL with the inside not loaded (nothing of it fetched): the outside drew pal; Inside chosen: it running, drawing pal, described by model-about-inside-pal; fetched /models/nes-famicom-board.js, /models/nes-famicom-board-tracks.webp
+nes: on NTSC, after 198 ms, chips marked U5 U6 U7, legend rows marked U5 U6 U7; highest legend rates: U5 532 and U7 440 a second
+nes: on PAL, after 92 ms, chips marked U5 U6 U7; highest legend rates: U5 1463, U7 1141
+nes: under the board, polar 3.142: the map's solder-side copper at 300 points is 110,95,34, its bare board at 300 points 28,73,23, 85.6 apart; the same points mirrored side to side 9.9 apart
+nes: reduced motion (asked for): the views running and running, switched back to model-tab-outside
+```
+
+**Run 2**, the one retry the ruling allowed, the same command on the same
+build, started at 21:18:14 UTC at a load of 6.75 and ended at 21:35:29 at
+1.75, though the load went to 48.91 in between. **It passed every part**: the
+KIM-1's, the phone step with it (one finger on the focused model moved the
+page not at all, scrollY 3241 to 3241); the BBC Micro's, its picture redrawn
+(fields 129858 then 129914 a second later) at its own 2 MHz; and every NES
+step, ending "no console errors, no failed requests, no CSP violations". Its
+NES model lines, in short: nothing under `/models/` before scrolling; the
+outside running in 622 ms with only its own bundle fetched; started by POWER,
+the light lit and POWER in; on NTSC, U5, U6 and U7 marked within 602 ms, and
+on PAL within 84 ms; the inside loaded after the page went to PAL, drawing
+PAL; reduced motion switching both views. The NES's speed line read "Running
+at the NES's own 1.79 MHz, with little to spare in this browser", capacity
+2.58 MHz.
+
+So the two runs differ only in what the host was doing: the two parts that
+failed in run 1 passed in run 2 with no change between them. The rates are
+live readings on a busy host and differ from run to run.
+
+### Tests and floors
+
+- **Five tests added** to `site/tests/nes-models.test.mjs`, and one assertion
+  to the existing test of the case's words, each for a mutation that had
+  survived (the table above).
+- **The whole site suite**, in the scratch copy with this task's changes, after
+  `npm run build` with the NES machine built and CI's results file:
+  `nice -n 10 node --test tests/*.test.mjs`, 6 October 2026, 20:49 UTC: 474
+  tests, 473 pass, 0 fail, 1 todo (the BBC Micro's known frame check). Both
+  floors raised from 468 to 473, with a dated comment.
+- **Not re-run here**: the C# suite as a whole (no C# changed in this task; the
+  two C# mutations ran the NES project's `ChipAccesses` tests, 34 of them,
+  which pass unmutated) and the tools' pytest suite (no tool changed; the scale
+  mutation ran `tests/test_board_frame.py`).
+
+### Left open
+
+- The README's speed method on a quiet host: both halves ran, the native one
+  at a load of 1.5 to 4 and the browser one at 1.3 to 5.6, but neither could
+  resolve 2 per cent on this host (the plan's Deferred list).
+- The rear connectors' recheck and the copper's re-trace, as before (the plan's
+  Deferred list), and the site-wide question of saying on the page that a
+  photograph's copy is resized, which CC BY asks (task 8's follow-up).
