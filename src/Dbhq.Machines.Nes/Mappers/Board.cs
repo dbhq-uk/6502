@@ -1,3 +1,5 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace Dbhq.Machines.Nes.Mappers;
 
 /// <summary>
@@ -126,7 +128,7 @@ public abstract class Board : IMapper
 
     /// <inheritdoc />
     /// <remarks>Always true: <see cref="Chr"/> and <see cref="ChrBase"/> are the board's for good, and its banks move only the offsets.</remarks>
-    public bool TryGetPatternWindows([System.Diagnostics.CodeAnalysis.NotNullWhen(true)] out byte[]? chr, [System.Diagnostics.CodeAnalysis.NotNullWhen(true)] out int[]? windows)
+    public bool TryGetPatternWindows([NotNullWhen(true)] out byte[]? chr, [NotNullWhen(true)] out int[]? windows)
     {
         chr = Chr;
         windows = ChrBase;
@@ -135,7 +137,7 @@ public abstract class Board : IMapper
 
     /// <inheritdoc />
     /// <remarks>Always true: <see cref="Prg"/> and <see cref="PrgBase"/> are the board's for good, and its banks move only the offsets.</remarks>
-    public bool TryGetPrgWindows([System.Diagnostics.CodeAnalysis.NotNullWhen(true)] out byte[]? prg, [System.Diagnostics.CodeAnalysis.NotNullWhen(true)] out int[]? windows)
+    public bool TryGetPrgWindows([NotNullWhen(true)] out byte[]? prg, [NotNullWhen(true)] out int[]? windows)
     {
         prg = Prg;
         windows = PrgBase;

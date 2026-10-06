@@ -1,3 +1,5 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace Dbhq.Machines.Nes.Mappers;
 
 /// <summary>
@@ -114,7 +116,7 @@ public sealed class Nrom : IMapper
     /// <see cref="CpuRead"/>'s remainder lands each 8 KB window on a whole bank, 16 KB repeating
     /// at <c>$C000</c>. Any other length is false, and the bus calls.
     /// </remarks>
-    public bool TryGetPrgWindows([System.Diagnostics.CodeAnalysis.NotNullWhen(true)] out byte[]? prg, [System.Diagnostics.CodeAnalysis.NotNullWhen(true)] out int[]? windows)
+    public bool TryGetPrgWindows([NotNullWhen(true)] out byte[]? prg, [NotNullWhen(true)] out int[]? windows)
     {
         if (_prg.Length == 0 || _prg.Length % 0x2000 != 0)
         {
@@ -139,7 +141,7 @@ public sealed class Nrom : IMapper
     /// remainder never wraps and the windows are the first 8 KB in order. A smaller CHR wraps
     /// inside 8 KB, which the windows cannot say, so it is false and the PPU calls.
     /// </remarks>
-    public bool TryGetPatternWindows([System.Diagnostics.CodeAnalysis.NotNullWhen(true)] out byte[]? chr, [System.Diagnostics.CodeAnalysis.NotNullWhen(true)] out int[]? windows)
+    public bool TryGetPatternWindows([NotNullWhen(true)] out byte[]? chr, [NotNullWhen(true)] out int[]? windows)
     {
         if (_chr.Length < 0x2000)
         {

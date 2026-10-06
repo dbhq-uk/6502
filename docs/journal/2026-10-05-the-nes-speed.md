@@ -1,7 +1,7 @@
 ---
 title: "The NES's speed in a browser, with the bus and the PPU"
 date: 2026-10-05
-summary: "The NES as built so far, with its bus and a PPU that draws the background and sprites, runs at about two times real time in a browser compiled ahead of time, on a machine that was busy, and about a fifth of the BBC Micro's rate on the same machine at the same time. The plan's rule says under ten times is a stop before the sound is built. The loaded figures alone do not make it a stop, but the estimate for a quiet machine is about three times, so the stop is almost certain, and the decision is Dan's. Task 6b, later that day, made it about a third faster, to 2.82 times real time on NTSC and 3.24 on PAL on a quiet machine, and measured that ten times is out of reach without changing the design."
+summary: "The NES as built so far, with its bus and a PPU that draws the background and sprites, runs at about two times real time in a browser compiled ahead of time, on a machine that was busy, and about a fifth of the BBC Micro's rate on the same machine at the same time. The plan's rule says under ten times is a stop before the sound is built. The loaded figures alone do not make it a stop, but the estimate for a quiet machine is about three times, so the stop is almost certain, and the decision is Dan's. Task 6b, later that day, made it about a third faster, to 2.82 times real time on NTSC and 3.24 on PAL on a quiet machine, and estimated that ten times is out of reach without changing the core, the runtime or the design."
 order: 30
 ---
 
@@ -323,8 +323,8 @@ PPU, which Dan turned down on 5 October, was not built. The aim was the plan's
 line of ten times real time in the browser's AOT build on a quiet machine.
 **It was not reached: the final build runs SNOW at 2.82 times real time on
 NTSC and 3.24 on PAL, about a third faster than before.** The reasons are
-below, with a measurement that shows ten times is out of reach inside this
-design.
+below, with two estimates that put ten times out of reach without a change to
+the core, the runtime or the design.
 
 ### How behaviour was kept
 
@@ -335,11 +335,35 @@ commit:
 - a differential run, now `bench/nes-speed/differential/`: every pinned NES test
   ROM (127) in both regions, hashing after every instruction the CPU's
   registers, the cycle count and the PPU's line and dot, at every frame end all
-  the pixels, `v`, `t`, fine X and the dot count, the sound samples, and at the
-  end RAM, the PPU registers and VRAM, with a reset half way. The file from
-  `f97483d` (before) and from `5021298` (after) are identical, 254 lines;
-- that the differential notices a change: one pixel's colour moved by one
-  palette entry at line 100, column 100 changed 35 of the 254 lines.
+  the pixels, `v`, `t`, fine X, the dot count, OAM and the interrupt lines, the
+  sound samples, and at the end RAM, the PPU registers, VRAM, OAM and the
+  interrupt lines, with a reset half way. The bus does not show the board, so
+  the board's IRQ line is hashed as the CPU's IRQ line, beside the sound unit's
+  own. The file from `f97483d` (before) and from the code after are identical,
+  254 lines;
+- that the differential notices a change, two scratch mutations each run once
+  and put back: one pixel's colour moved by one palette entry at line 100,
+  column 100 changed 35 of the 254 lines; the bus taking the PPU's NMI line one
+  dot later changed 15, all ROMs that use the NMI (`ppu_vbl_nmi`, nestest and
+  SNOW, `branch_timing_tests`, `cpu_interrupts_v2`, `mmc3_test_2`). Most test
+  ROMs poll instead, and a dot's move shifts the NMI by a CPU cycle only when
+  the flag falls on the first dot of one.
+
+The intermediate commits were checked with a scratch version of the
+differential (outside the repository), which ran all 131 cached ROM files
+found by a directory scan, unpinned ones included. The committed tool, which
+runs the 127 pinned ones through their hash check, was written at the end and
+run on `f97483d` against the final code; then, after the review, it gained
+OAM and the interrupt lines and was run on both sides again (identical).
+
+Two tests guard what the speed work relies on (`BoardContractTests`): every
+board that overrides `PpuAddressChanged`, `CpuCycle` or `Irq` says so in the
+matching flag (checked by reflection over every `Board` in the assembly; with
+MMC3's `WatchesPpuAddresses` cleared it fails, naming MMC3), and for every
+board, PRG of 8, 16, 24 and 32 KB and CHR of 0, 4, 8 and 16 KB, after 400
+random writes to the board's registers, the PRG and pattern windows read what
+`CpuRead` and `PpuRead` do at every address and the page table matches
+`Mirroring` (with the page table no longer filled, 73 of its 97 cases fail).
 
 `dotnet test tests/Dbhq.Cpu6502.Tests -c Release --filter Nestest` passes (2),
 and `dotnet build 6502.slnx -c Release` has no warnings. The core was not
@@ -347,12 +371,17 @@ touched.
 
 ### Where the time went
 
-**Natively**, with a scratch program that timed thread CPU time (the machine
-was shared, at a load of 2 to 45, and wall time was meaningless) and a scratch
-build of the bus that could leave out the PPU's or the sound unit's ticks: a
-CPU cycle of SNOW on NTSC cost about 210 ns, of which the CPU and the bus about
-30, the sound unit about 27 and the PPU about 120 to 130, about 40 ns a dot.
-The PPU ticked on its own, with nothing between dots, cost 20 to 22 ns a dot.
+**Natively.** These figures are estimates from an uncommitted scratch program,
+so no command here repeats them; so are the nanosecond figures in the commit
+messages (`face357` and `c21ba08`). The program timed thread CPU time over
+`Run(1_790_000)` after a 5 million cycle boot, median of five, because the
+machine was shared (a load of 2 to 45) and wall time was meaningless; with a
+scratch build of the bus that could leave out the PPU's or the sound unit's
+ticks, a CPU cycle of SNOW on NTSC cost about 210 ns, of which the CPU and the
+bus about 30, the sound unit about 27 and the PPU about 120 to 130, about 40 ns
+a dot. The PPU ticked on its own, with nothing between dots, cost 20 to 22 ns a
+dot. The committed bench's figures for the work as a whole are under "The
+figures".
 
 The difference is branch prediction. The PPU's per-dot branches follow the
 dot's place in its 8-dot fetch (a switch on `dot & 7`, a test of odd and even
@@ -361,11 +390,18 @@ learns the pattern from the branches just taken; with the 6502's code running
 between dots it cannot. Measured: the PPU ticked with six random branches
 between dots cost 36 ns a dot more than the two separately.
 
-**In the browser**, with Chrome's CPU profiler over the DevTools protocol and a
-build published with `-p:WasmNativeStrip=false` so the WebAssembly keeps its
-function names, after the first two commits, as shares of all the samples: the
-PPU about 40 %, `NesBus.Cycle` on its own 16 %, the sound unit 11 %, the CPU
-core about 10 %, and the rest the runtime and the page. The
+**In the browser.** Also from an uncommitted script, so estimates: a copy of
+`run-in-browser.mjs` that wraps the page's run in the DevTools protocol's
+`Profiler.start` and `Profiler.stop` (200 microsecond sampling), run as
+`node profile-in-browser.mjs <folder> 1 1790000 5000000 5 0` on a build
+published with `-p:WasmNativeStrip=false`, so the WebAssembly keeps its function
+names; each function's self time summed by name, over the whole page run with
+the boot. Shares are of all the samples, so the load moves them less than it
+moves the speed. After the first two commits (22:36 UTC, load 19.08): the PPU
+about 40 %, `NesBus.Cycle` on its own 16 %, the sound unit 11 %, the CPU core
+about 10 %, and the rest the runtime and the page. On the code before the last
+commit (23:16 UTC, load 10.59): the PPU about 37 %, the cycle 15 %, the sound
+unit 12 %, the CPU core about 11 %. The
 disassembled WebAssembly (`wasm-dis` from the Emscripten pack) shows what Mono's
 AOT adds: every load of an object reference is null-checked and stored to a
 shadow stack for the garbage collector, every array read is bounds-checked, an
@@ -391,22 +427,37 @@ the whole set.
 
 ### The ceiling: the CPU and the bus alone
 
-A scratch build of the code as it stood after the first three commits' changes,
-with the bus ticking neither the PPU nor the sound unit, was published for AOT
-and run in the same minute as the full build of the same code (22:57 UTC, at a
-load of 1.47 to 0.95 but with an AOT publish running alongside; the BBC Micro
-bench gave 11.53 MHz, so the browser was at about 0.42 of a quiet machine). The
-medians were 3.33 times real time against 1.02, 3.26 times the full machine.
-The full build of that code had run at 2.29 on a quiet machine earlier, so the
-CPU and the bus alone would run at about 7.5 times real time on a quiet
-machine **with the PPU and the sound unit costing nothing**. In that build no DMC IRQ
-comes, so the CPU spends its time in SNOW's `JMP $845F`, reading ROM: the
-cheapest work it does. So ten times real time in AOT is out of reach by making
-the PPU and the sound unit cheaper; the CPU's own per-cycle path through the
-bus (the core's interface call to `IBus.Read`, the bus's cycle, Mono's checks)
-would also have to get faster, and the core is shared with the BBC Micro and
-the KIM-1. The BBC Micro bench, the same core on a simpler bus, reaches about
-15 times the NES's clock, which is the other bound.
+Two estimates of how fast the machine could get with the PPU and the sound unit
+costing nothing; neither is a measurement of a build that could ship.
+
+**From the profile.** In the profile of the code before the last commit the
+PPU was about 37 % of the samples and the sound unit about 12 %, 49 % together.
+Taking all of that away speeds the run up by at most 1 / (1 - 0.49), about
+1.96 times (Amdahl's law), so from the final 2.82 times real time on NTSC to
+about 5.5 times.
+
+**From a scratch build.** A build of the code as it stood after the first three
+commits' changes, with the bus ticking neither the PPU nor the sound unit, was
+published for AOT and run in the same minute as the full build of the same
+code (22:57 UTC, at a load of 1.47 to 0.95 but with an AOT publish running
+alongside; the BBC Micro bench gave 11.53 MHz, so the browser was at about 0.42
+of a quiet machine). The medians were 3.33 times real time against 1.02, 3.26
+times the full machine. The anchor for a quiet machine is the full build's own
+first launch in an earlier pair, at 22:49:35 UTC (load 2.96), run as
+`node run-in-browser.mjs <folder> 1 1790000 5000000 5 0` alternated with the
+baseline: median 2.29 times real time (2.29, 2.21, 1.90, 2.41, 2.46), with the
+BBC Micro bench at 26.63 MHz half a minute before (load 3.03), about a quiet
+machine's 27.24; the load rose within the minute, so the pair's later runs are
+not used. 2.29 times 3.26 is about 7.5 times. In that build no DMC IRQ comes,
+so the CPU spends its time in SNOW's `JMP $845F`, reading ROM: the cheapest
+work it does.
+
+So the ceiling is **about 5.5 to 7.5 times real time**, by the two estimates.
+Either way, ten times in AOT is out of reach by making the PPU and the sound
+unit cheaper: it needs a change to the core (whose interface call to
+`IBus.Read` every cycle is shared with the BBC Micro and the KIM-1), to the
+runtime, or to the design. The BBC Micro bench, the same core on a simpler bus,
+reaches about 15 times the NES's clock, which is the other bound.
 
 ### The figures
 
@@ -454,7 +505,8 @@ run again at the times above.
 - **Why it stops here:** in a profile of the code before the last commit, the
   PPU is about 37 % of the browser's samples, the bus's cycle 15 %, the sound
   unit 12 %, the CPU core about 11 %. With the PPU and the sound unit free, the
-  CPU and the bus alone would run at about 7.5 times. Each idea left (below) is worth an estimated 1 to 4 %.
+  CPU and the bus alone would run at about 5.5 to 7.5 times (two estimates,
+  above). Each idea left (below) is worth an estimated 1 to 4 %.
 - **The decision is Dan's.** Three ways on: accept about three times as the
   NES's figure (a page can run in real time with that margin on this machine,
   less on a slow phone); change the design (a catch-up PPU alone would not

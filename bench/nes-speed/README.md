@@ -69,6 +69,11 @@ dotnet run -c Release --project differential -- after.txt       # on the code af
 cmp before.txt after.txt
 ```
 
+To run it on a baseline that is older than the tool, export that commit with `git archive`
+into a folder of its own, copy `bench/nes-speed/differential/` into the same place in the
+export, link or copy `.testdata/` there so the ROMs are not fetched again, and run it from the
+export's `bench/nes-speed` as above.
+
 For a profile of the WebAssembly build, publish it with `-p:WasmNativeStrip=false`, which keeps
 the function names, and record a CPU profile in Chrome (the journal entry says how).
 

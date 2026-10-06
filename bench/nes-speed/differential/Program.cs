@@ -12,8 +12,10 @@ using Dbhq.Machines.Nes;
 // ROMs, whose work is in the picture and the scanline counter), and presses reset once half way.
 // Hashed: after every instruction, the CPU's registers, the cycle count and the PPU's line and
 // dot (so every interrupt and every dot is in place); at the end of every frame, all the pixels,
-// v, t, fine X and the dot count, and the sound samples made so far; at the end, RAM, what the
-// PPU's registers would read, and VRAM. The ROMs come from the pinned fork, checked against their
+// v, t, fine X and the dot count, OAM, the interrupt lines, and the sound samples made so far; at
+// the end, RAM, what the PPU's registers would read, VRAM, OAM and the interrupt lines. The bus
+// does not show the board, so its IRQ line is hashed as the CPU's IRQ line, which is the board's
+// or the sound unit's, beside the sound unit's own. The ROMs come from the pinned fork, checked against their
 // hashes (NesTestRoms.Read), and are never committed.
 string outFile = args.Length > 0 ? args[0] : throw new ArgumentException("usage: <output file> [frames]");
 int frames = args.Length > 1 ? int.Parse(args[1]) : 150;
@@ -66,6 +68,8 @@ static string Run(string name, byte[] bytes, Region region, int frames)
         }
 
         trace.Add((ulong)ppu.V | ((ulong)ppu.T << 16) | ((ulong)ppu.FineX << 32) | ((ulong)nes.Bus.PpuDots << 36));
+        AddOam(trace, ppu);
+        trace.Add(Lines(nes));
         int read;
         while ((read = nes.Sound.Read(samples)) > 0)
         {
@@ -97,8 +101,23 @@ static string Run(string name, byte[] bytes, Region region, int frames)
         memory.Add(ppu.PeekVram(address));
     }
 
+    AddOam(memory, ppu);
+    memory.Add(Lines(nes));
+
     return $"steps={steps} cycles={nes.Bus.Cycles} trace={trace.Value:X16} sound={sound.Value:X16} dropped={nes.Sound.Dropped} memory={memory.Value:X16}";
 }
+
+static void AddOam(Fnv hash, Ppu ppu)
+{
+    foreach (byte value in ppu.Oam)
+    {
+        hash.Add(value);
+    }
+}
+
+// The interrupt lines: the CPU's NMI and IRQ inputs, the PPU's NMI output and the sound unit's IRQ.
+static ulong Lines(Nes nes) =>
+    (nes.Cpu.Nmi ? 1UL : 0) | (nes.Cpu.Irq ? 2UL : 0) | (nes.Bus.Ppu.Nmi ? 4UL : 0) | (nes.Bus.Apu.Irq ? 8UL : 0);
 
 // FNV-1a over 64-bit values.
 internal sealed class Fnv

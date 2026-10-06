@@ -1,3 +1,5 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace Dbhq.Machines.Nes;
 
 /// <summary>
@@ -54,20 +56,27 @@ public interface IMapper
     /// <summary>
     /// True when the board needs <see cref="PpuAddressChanged"/>: false lets the PPU skip the call,
     /// about 90 a line while it renders. It must not change after the board is made. A board that
-    /// does not say is told, so leaving it out is never wrong, only slower.
+    /// implements this interface itself and does not say is told, so for it leaving this out is
+    /// never wrong, only slower. <see cref="Mappers.Board"/> says false for all three of these
+    /// flags, so a board built on it that overrides <see cref="PpuAddressChanged"/>,
+    /// <see cref="CpuCycle"/> or <see cref="Irq"/> must override the matching flag too, or the
+    /// call is skipped; a test checks every board for it.
     /// </summary>
     bool WatchesPpuAddresses => true;
 
     /// <summary>
     /// True when the board needs <see cref="CpuCycle"/>: false lets the bus skip the call each
-    /// cycle. It must not change after the board is made. A board that does not say is called.
+    /// cycle. It must not change after the board is made. A board that implements this interface
+    /// itself and does not say is called; a <see cref="Mappers.Board"/> must say (see
+    /// <see cref="WatchesPpuAddresses"/>).
     /// </summary>
     bool CountsCpuCycles => true;
 
     /// <summary>
     /// True when the board can ever hold the IRQ line: false lets the bus skip reading
-    /// <see cref="Irq"/> each cycle. It must not change after the board is made. A board that does
-    /// not say is read.
+    /// <see cref="Irq"/> each cycle. It must not change after the board is made. A board that
+    /// implements this interface itself and does not say is read; a <see cref="Mappers.Board"/>
+    /// must say (see <see cref="WatchesPpuAddresses"/>).
     /// </summary>
     bool CanInterrupt => true;
 
@@ -80,7 +89,7 @@ public interface IMapper
     /// window offsets, in place, when it switches banks. A board that does not keep its pattern
     /// tables that way returns false, and the PPU calls <see cref="PpuRead"/>.
     /// </summary>
-    bool TryGetPatternWindows([System.Diagnostics.CodeAnalysis.NotNullWhen(true)] out byte[]? chr, [System.Diagnostics.CodeAnalysis.NotNullWhen(true)] out int[]? windows)
+    bool TryGetPatternWindows([NotNullWhen(true)] out byte[]? chr, [NotNullWhen(true)] out int[]? windows)
     {
         chr = null;
         windows = null;
@@ -96,7 +105,7 @@ public interface IMapper
     /// and change only the offsets, in place, when it switches banks. A board that does not keep
     /// its PRG that way returns false, and the bus calls <see cref="CpuRead"/>.
     /// </summary>
-    bool TryGetPrgWindows([System.Diagnostics.CodeAnalysis.NotNullWhen(true)] out byte[]? prg, [System.Diagnostics.CodeAnalysis.NotNullWhen(true)] out int[]? windows)
+    bool TryGetPrgWindows([NotNullWhen(true)] out byte[]? prg, [NotNullWhen(true)] out int[]? windows)
     {
         prg = null;
         windows = null;

@@ -901,6 +901,9 @@ public sealed partial class Ppu
 
         if (dot <= 256)
         {
+            // On a visible line only dots 0 and 1 come here: dots 2 to 256 go through
+            // RenderVisibleDot, which does the same work in its own order, so a change to the
+            // order of the fetches, the shift or the evaluation must be made in both.
             if (dot >= 2)
             {
                 // Column dot - 2 is decided from the shifters as they stand, then they shift.
@@ -917,6 +920,7 @@ public sealed partial class Ppu
                 Reload();
             }
 
+            // Visible dots 2 to 256 evaluate and fetch in RenderVisibleDot (see above).
             if (visible)
             {
                 Evaluate(dot);
