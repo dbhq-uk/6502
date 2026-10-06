@@ -222,7 +222,7 @@ from.
 **Every guess in the fact sheets has an entry or a resolution.** Of the 24
 lines, one is the README's definition of the tag. The rest: `cartridge.md`'s
 "which ROMs run on PAL" was settled in task 12 by each ROM's readme or source
-(the journal entry of 5 October); `ppu.md`'s rendering toggle delay, the
+(the journal entry of 5 October), and its open item now says so; `ppu.md`'s rendering toggle delay, the
 evaluation's start at sprite 0 and greyscale have entries; `apu.md`'s PAL pulse
 under 8 has one; `timing.md`'s first VBlank, the PAL fourth dot and now the PAL
 clear have them; `bus.md`'s 2A07 DMA has one; and every `mappers.md` guess

@@ -166,4 +166,6 @@ not on the pages read [guessing - verify: the plan's task for each ROM says].
 ## 6. Open items
 
 1. The `$6001-$6003` signature's third byte (5): settled in task 4, `$61`.
-2. Which test ROMs are meaningful on PAL (5) [guessing - verify].
+2. Which test ROMs are meaningful on PAL (5): settled in task 12, from each
+   ROM's readme or source, quoted in the journal entry of 5 October 2026;
+   `TestRomTable` gives the regions each runs on.
