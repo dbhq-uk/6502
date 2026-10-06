@@ -23,11 +23,13 @@
 // an unmodelled board, the Dendy) is refused with the cartridge's own
 // sentence, and the machine running carries on as it was: RegionOf checks the
 // file before Load is asked, and Load replaces the machine only once the new
-// one is built.
+// one is built. The picker opens only once the bundled cartridge has been
+// tried, so a file the visitor chooses is never replaced by it.
 //
 // THE REGION. Each new cartridge starts in the region its header names, or
 // NTSC when it does not say, and the line under the control says which and why
-// (the sentence is the machine's, NesHost.Load). Changing the control restarts
+// (the sentence is the machine's, NesHost.Load, and so is the region the
+// control shows, NesHost.Region). Changing the control restarts
 // the machine in that region and says so. The run loop's clock follows: it is
 // the region's own, from NesHost.CpuHz, read after every load.
 //
@@ -120,23 +122,34 @@ export function padMasks({ keys, touch }, gamepads) {
   return [keys | touch | gamepadMask(gamepads[0]), gamepadMask(gamepads[1])];
 }
 
-/** The region a cartridge starts in: the one its header names, else NTSC. */
-export const startingRegion = (header) => (header === 'PAL' || header === 'NTSC' ? header : 'NTSC');
-
 /**
- * Puts a cartridge in: asks the host which region the header names (which
- * also refuses a file it cannot run, before anything changes), then loads it
- * in `region` ("" for the header's). Returns { ok, region, sentence }, or
- * { ok: false, message } with the cartridge's sentence, never throwing.
+ * Puts a cartridge in: asks the host to check the file (RegionOf refuses one
+ * it cannot run, before anything changes), then loads it in `region` ("" for
+ * the header's, else NTSC, which is the host's rule) and reads back the region
+ * it chose, so the page never works one out. Returns { ok, region, sentence },
+ * or { ok: false, message } with the cartridge's sentence, never throwing.
  */
 export function loadCartridge(host, bytes, region, sampleRate) {
   try {
-    const header = host.RegionOf(bytes);
+    host.RegionOf(bytes);
     const sentence = host.Load(bytes, region, sampleRate);
-    return { ok: true, region: region || startingRegion(header), sentence };
+    return { ok: true, region: host.Region(), sentence };
   } catch (error) {
     return { ok: false, message: messageOf(error) };
   }
+}
+
+/**
+ * The first cartridge: the bundled one, `bundled` (a promise of its bytes, or
+ * of null), is tried with `use` before `openPicker` opens the picker, so a
+ * file the visitor chooses is never replaced by it. Without one, or if it will
+ * not load, the picker opens and `waitForFile` waits for the visitor's.
+ */
+export async function firstCartridge(bundled, use, openPicker, waitForFile) {
+  const data = await bundled;
+  const loaded = Boolean(data) && use(data);
+  openPicker();
+  if (!loaded) await waitForFile();
 }
 
 /** The line for a cartridge put in; the line under the region control is the host's sentence. */
@@ -314,7 +327,7 @@ async function run(panel, say) {
   let rom = null;
   let region = 'NTSC';
   let running = false;
-  let firstCartridge = null;
+  let cartridgeArrived = null;
 
   const paint = () => {
     shown = host.Picture();
@@ -358,8 +371,8 @@ async function run(panel, say) {
     cartLine.textContent = cartridgeLine(name);
     regionLine.textContent = result.sentence;
     panel.dataset.cartridge = name;
-    firstCartridge?.();
-    firstCartridge = null;
+    cartridgeArrived?.();
+    cartridgeArrived = null;
     return true;
   };
   const put = async (file) => {
@@ -383,12 +396,10 @@ async function run(panel, say) {
         sound: (view) => sound.play(view),
       });
       host = nes;
-      picker(panel, put);
-      const data = await bundled;
-      if (!(data && use(data, bundledName))) {
+      await firstCartridge(bundled, (data) => use(data, bundledName), () => picker(panel, put), () => {
         say('Choose a .nes file, or drop one on the page: the NES starts once it has a cartridge.', 'waiting');
-        await new Promise((resolve) => { firstCartridge = resolve; });
-      }
+        return new Promise((resolve) => { cartridgeArrived = resolve; });
+      });
     },
     clockMhz: () => clockMhz,
     clockOf: "the NES's",

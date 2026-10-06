@@ -56,7 +56,7 @@ const pad = [
     <button type="button" class="btn pill" data-nes-start disabled>Start the NES{download !== null && `, a download of up to ${megabytes(download)} MB`}</button>
     <button type="button" class="btn small" data-nes-reset disabled>Reset</button>
     <button type="button" class="btn small" data-nes-power disabled>Power off and on</button>
-    <button type="button" class="btn small" data-nes-sound disabled>Turn sound on</button>
+    <button type="button" class="btn small" data-nes-sound aria-pressed="false" disabled>Turn sound on</button>
   </div>
   <p class="nes-status" role="status" data-nes-status>The NES runs in your browser, and it needs JavaScript to do that. With JavaScript off, the page is shown, but nothing runs.</p>
   <p class="nes-line" data-nes-sound-status aria-live="polite">Sound is off.</p>

@@ -26,7 +26,7 @@ register(`data:text/javascript,${encodeURIComponent(`
 const nes = await import(pathToFileURL(path.join(PUBLIC, 'nes.js')).href);
 const { KEY_NAMES } = await import(pathToFileURL(path.join(PUBLIC, 'nes-keys.js')).href);
 const audio = await import(pathToFileURL(path.join(PUBLIC, 'nes-audio.js')).href);
-const { BUTTONS, KEYS, GAMEPAD_BUTTONS, keyboard, touchPad, gamepadMask, padMasks, startingRegion, loadCartridge, cartridgeLine, regionChangeLine, badFileLine, pictureShape, showShape, sizeRefusal, readRom } = nes;
+const { BUTTONS, KEYS, GAMEPAD_BUTTONS, keyboard, touchPad, gamepadMask, padMasks, loadCartridge, firstCartridge, cartridgeLine, regionChangeLine, badFileLine, pictureShape, showShape, sizeRefusal, readRom } = nes;
 
 // ---- The buttons, the keys and the pads ----
 
@@ -175,17 +175,20 @@ test('the on-screen pad: a button is held while a finger is on it, two at once i
 
 // ---- The region, and a file that is not a cartridge ----
 
-test('the region control starts from the header: PAL where it says PAL, NTSC where it says NTSC or nothing', () => {
-  assert.equal(startingRegion('PAL'), 'PAL');
-  assert.equal(startingRegion('NTSC'), 'NTSC');
-  assert.equal(startingRegion(''), 'NTSC');
-});
-
-/** A made-up NesHost: RegionOf and Load as the C# has them (NesLoaderTests), and a record of what was loaded. */
+/**
+ * A made-up NesHost: RegionOf and Load as the C# has them (NesLoaderTests), Region the region of the
+ * machine running, and a record of what was loaded. The region rule is the host's: the page reads
+ * the region back with Region() and never works it out.
+ */
 function fakeHost({ header = '', refuse = null, refuseBoard = null } = {}) {
   const host = {
     loaded: 'the machine before',
+    running: 'PAL',
     calls: [],
+    Region() {
+      host.calls.push(['Region']);
+      return host.running;
+    },
     RegionOf(bytes) {
       host.calls.push(['RegionOf', bytes.length]);
       if (refuse) throw new Error(refuse);
@@ -198,6 +201,7 @@ function fakeHost({ header = '', refuse = null, refuseBoard = null } = {}) {
       if (refuseBoard) throw new Error(refuseBoard);
       const chosen = region || header || 'NTSC';
       host.loaded = chosen;
+      host.running = chosen;
       if (!region) return header ? `Running as ${chosen}: the file says ${chosen}.` : 'Running as NTSC: the file does not say, so NTSC.';
       if (!header) return `Running as ${chosen}, as chosen here: the file does not say which.`;
       return header === chosen ? `Running as ${chosen}, as chosen here, which is what the file says.` : `Running as ${chosen}, as chosen here, though the file says ${header}, so it may run at the wrong speed.`;
@@ -212,7 +216,7 @@ test('a file that says PAL runs as PAL with no choice made, and the region line 
   const host = fakeHost({ header: 'PAL' });
   const result = loadCartridge(host, ROM, '', 48_000);
   assert.deepEqual(result, { ok: true, region: 'PAL', sentence: 'Running as PAL: the file says PAL.' });
-  assert.deepEqual(host.calls, [['RegionOf', ROM.length], ['Load', '', 48_000]]);
+  assert.deepEqual(host.calls, [['RegionOf', ROM.length], ['Load', '', 48_000], ['Region']]);
   // The line under the region control is the host's sentence as it stands; the cartridge's line names the file.
   assert.equal(cartridgeLine('snow.nes'), 'snow.nes is in.');
 });
@@ -226,9 +230,18 @@ test('a file that does not say runs as NTSC, and the region line says the file d
 test('changing the region against the file restarts the machine in that region, and the line says so and why', () => {
   const host = fakeHost({ header: 'PAL' });
   const result = loadCartridge(host, ROM, 'NTSC', 48_000);
-  assert.deepEqual(host.calls.at(-1), ['Load', 'NTSC', 48_000]);
+  assert.deepEqual(host.calls.slice(-2), [['Load', 'NTSC', 48_000], ['Region']]);
   assert.equal(result.region, 'NTSC');
   assert.equal(regionChangeLine(result), 'The region changed, so the machine restarted. Running as NTSC, as chosen here, though the file says PAL, so it may run at the wrong speed.');
+});
+
+test('the region the panel shows is the host\'s, read back after Load, not worked out in the page', () => {
+  const host = fakeHost({ header: 'PAL' });
+  // A host whose rule differs from the page's old copy of it: the page follows the host.
+  host.Load = (bytes, region) => { host.running = 'NTSC'; return 'Running as NTSC: made up.'; };
+  assert.equal(loadCartridge(host, ROM, '', 48_000).region, 'NTSC');
+  const source = fs.readFileSync(path.join(PUBLIC, 'nes.js'), 'utf8');
+  assert.doesNotMatch(source, /\|\| 'NTSC'|\? header : 'NTSC'/, 'nes.js works out a region itself');
 });
 
 test('a bad file shows the cartridge\'s own sentence, and the machine stays as it was: Load is never asked', () => {
@@ -255,6 +268,26 @@ test('an error that is not a sentence still gives a line, never an exception', (
   assert.equal(result.ok, false);
   assert.equal(typeof result.message, 'string');
   assert.ok(result.message.length > 0);
+});
+
+test('the bundled cartridge is tried before the picker opens, so a file chosen is never replaced by it', async () => {
+  const order = [];
+  let release;
+  const bundled = new Promise((resolve) => { release = resolve; });
+  const going = firstCartridge(bundled, () => { order.push('bundled'); return true; }, () => order.push('picker'), async () => order.push('wait'));
+  await Promise.resolve();
+  assert.deepEqual(order, [], 'the picker opened before the bundled cartridge was tried');
+  release(new Uint8Array(16));
+  await going;
+  assert.deepEqual(order, ['bundled', 'picker']);
+});
+
+test('with no bundled cartridge, or one that will not load, the picker opens and the machine waits for a file', async () => {
+  for (const [bundled, loads] of [[null, true], [new Uint8Array(16), false]]) {
+    const order = [];
+    await firstCartridge(Promise.resolve(bundled), () => { order.push('bundled'); return loads; }, () => order.push('picker'), async () => order.push('wait'));
+    assert.deepEqual(order, bundled ? ['bundled', 'picker', 'wait'] : ['picker', 'wait']);
+  }
 });
 
 // ---- The picture's shape ----

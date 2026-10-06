@@ -105,6 +105,13 @@ public static partial class NesHost
         return Frames();
     }
 
+    /// <summary>
+    /// The region the machine runs in, "NTSC" or "PAL": what <see cref="Load"/> chose, which the
+    /// page reads back rather than working it out, so its state and the sentence cannot differ.
+    /// </summary>
+    [JSExport]
+    public static string Region() => Machine.Region.Name;
+
     /// <summary>The region's CPU clock in hertz, <see cref="Region.CpuHz"/>, so a page never types a rate.</summary>
     [JSExport]
     public static double CpuHz() => Machine.Region.CpuHz;

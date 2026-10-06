@@ -198,3 +198,31 @@ On 6 October 2026, in this worktree:
   page, carried two speed figures the home page cannot generate; and
   `known-differences.md` quoted the wiki's US spelling. Each was reworded
   without changing what it records.
+
+## The review's corrections
+
+The task's review found one thing that mattered and four smaller ones, all
+fixed the same day.
+
+- **The speed after `stepTo` was overstated.** Letting go of a hold resumed the
+  loop without reading the machine's cycle count again, so the millions of
+  cycles `stepTo` runs outside the loop were counted as the first frame's, and
+  the next second's capacity figure and headroom sentence were too high. The
+  shared host now reads `Cycles()` whenever it resumes. Nothing runs the KIM-1
+  or the BBC Micro while they are paused, so for them it reads the count they
+  already had. A `machine-host.test.mjs` test adds cycles while held and
+  failed before the change.
+- **`machine-host.js` said `Cycles()` is the cycles since power on.** It now
+  says what the host needs: a count that never goes back, which a machine whose
+  power cycle resets its bus's count keeps as a running total, as `NesHost`
+  does.
+- **The page worked out the region itself** ("the header's, else NTSC"), a copy
+  of the library's rule. `NesHost.Region()` now says which region the machine
+  runs in, and the page reads it back after every `Load`.
+- **A file chosen while the bundled cartridge was still arriving was replaced
+  by it**, because the picker opened first. The picker now opens once the
+  bundled cartridge has been tried (`firstCartridge`, tested with made-up
+  promises).
+- **The sound button now starts with `aria-pressed="false"`**, as it has after
+  its first use.
+

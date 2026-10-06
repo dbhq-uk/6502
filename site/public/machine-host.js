@@ -20,9 +20,13 @@
 //   assembly   The WebAssembly assembly to ask for, for example
 //              'Dbhq.Machines.Kim1.Wasm'.
 //   hostClass  The [JSExport] class in it that is the machine, for example
-//              'Kim1Host'. It must have Cycles(), the cycles since power on, and
+//              'Kim1Host'. It must have Cycles(), the cycles it has run, and
 //              Run(cycles), which runs at least that many (cycles is an int)
-//              and returns the cycles since power on.
+//              and returns Cycles(). The host takes each frame's cycles as the
+//              difference between two readings, so the count must never go
+//              back: a machine whose power cycle sets its bus's count to 0
+//              keeps a running total across it, as NesHost.Cycles does. For
+//              the KIM-1 and the BBC Micro it is the cycles since power on.
 //   load       Called as load(host, runtime) once the runtime is up, to give the
 //              machine its ROMs and switch it on: host is that class, and
 //              runtime the .NET runtime's API, for a machine that hands the
@@ -148,6 +152,10 @@ export async function startMachine({ panel, base, name, assembly, hostClass, loa
   // From now: the time a hidden page was away is not run, and not counted.
   const resume = () => {
     last = performance.now();
+    // The machine may have run outside the loop while it was paused (the NES's
+    // test hook runs it to an exact frame while held): those cycles are not
+    // the next frame's, nor counted in the speed.
+    cycles = host.Cycles();
     busyMs = busyCycles = wallMs = wallCycles = 0;
     if (pending === null) pending = requestAnimationFrame(frame);
     if (paused) {

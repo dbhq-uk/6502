@@ -436,3 +436,18 @@ test('hold() stops running the machine until it is let go, and a hidden page sho
   result.hold(false);
   assert.equal(browser.pending(), 0);
 });
+
+test('cycles the machine runs outside the loop while held are not counted as the next frame\'s, nor in the speed', async (t) => {
+  const browser = fakeBrowser(t);
+  const machine = fakeMachine(browser, 5);
+  const { result, frames, panel } = await start(browser, { exports: { FakeHost: machine } });
+  browser.frame(16);
+  result.hold(true);
+  // The NES's stepTo: millions of cycles run by the page itself, not by the loop, taking no loop time.
+  machine.cycles += 3_600_000;
+  result.hold(false);
+  browser.frame(16);
+  assert.equal(frames.at(-1).cycles, machine.runs.at(-1) + OVERRUN, 'the first frame after the hold counted the cycles run while held');
+  untilReport(browser, panel);
+  assert.equal(panel.dataset.capacityMhz, '5.00', 'the cycles run while held inflated the speed');
+});
