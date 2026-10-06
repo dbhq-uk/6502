@@ -119,8 +119,17 @@ export async function checkNes({ browser, watch, problems, origin }) {
   };
 
   // Each region, from power on to the recorded frame, through the page's test hook.
+  // The canvas is cleared first, to transparent black, which the machine's
+  // picture never is (every pixel it paints is opaque), so a stepTo that runs
+  // but does not paint leaves a blank canvas and fails, rather than passing on
+  // the last frame painted (the title is nearly still, and the two regions'
+  // recorded hashes are the same).
   const frameIn = async (region) => {
-    const n = await page.evaluate((frames) => document.querySelector('[data-nes]').nes.stepTo(frames), expected.frames);
+    const n = await page.evaluate((frames) => {
+      const c = document.querySelector('[data-nes-canvas]');
+      c.getContext('2d').clearRect(0, 0, c.width, c.height);
+      return document.querySelector('[data-nes]').nes.stepTo(frames);
+    }, expected.frames);
     const got = await canvas();
     const want = expected.hashes[region];
     console.log(`nes: ${region}, ${n} frames from power on: canvas ${got.shown}, ${got.colours} colours, SHA-256 ${got.hash} ${got.hash === want ? 'matches' : 'DOES NOT MATCH'} the recorded ${want}`);

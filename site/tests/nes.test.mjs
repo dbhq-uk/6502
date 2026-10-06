@@ -97,6 +97,24 @@ test('the notes say what is modelled and every part left out, and the page lists
   assert.equal(issueUrl(61), 'https://github.com/dbhq-uk/6502/issues/61');
 });
 
+test('every place that says how many cartridge boards are modelled says as many as Cartridge.SupportedMappers holds, and the notes name each', () => {
+  const source = fs.readFileSync(path.join(REPO_ROOT, 'src', 'Dbhq.Machines.Nes', 'Cartridge.cs'), 'utf8');
+  const list = /SupportedMappers \{ get; \} = \[([\d,\s]+)\];/.exec(source);
+  assert.ok(list, 'Cartridge.cs no longer declares SupportedMappers as a list of numbers');
+  const n = list[1].split(',').map((x) => x.trim()).filter(Boolean).length;
+  const word = ['no', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten', 'eleven', 'twelve'][n];
+  // The registry's notes: "<n> cartridge boards: A, B, ... and Z."
+  const named = new RegExp(`${word} cartridge boards: ([^.]+)\\.`).exec(nes.notes);
+  assert.ok(named, `the notes do not say "${word} cartridge boards"`);
+  assert.equal(named[1].split(/, | and /).length, n, `the notes name ${named[1]}, not ${n} boards`);
+  const sources = {
+    'README.md': [fs.readFileSync(path.join(REPO_ROOT, 'README.md'), 'utf8').replace(/\s+/g, ' '), `${word} cartridge boards`],
+    'src/pages/machines/[id].astro': [fs.readFileSync(path.join(process.cwd(), 'src', 'pages', 'machines', '[id].astro'), 'utf8'), `on the ${word} boards`],
+    'src/lib/nes.mjs': [fs.readFileSync(path.join(process.cwd(), 'src', 'lib', 'nes.mjs'), 'utf8'), `beyond these ${word}`],
+  };
+  for (const [file, [text, phrase]] of Object.entries(sources)) assert.ok(text.includes(phrase), `${file} does not say "${phrase}"`);
+});
+
 test('the try-it file is the bundled game, its steps and its controls, and the game is the pinned file', () => {
   assert.equal(tryIt.rom, pin('NesHomebrewPath'));
   assert.equal(tryIt.title, 'Lan Master');

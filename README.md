@@ -68,9 +68,9 @@ map, `site/src/assets/tracks/kim-1.webp`, traced from those photographs and
 from a replica of the board's layout, whose channels carry those terms and
 CC BY-NC 4.0 (the photographs' README says which); and the files in
 [`tools/kim1-model/data/`](tools/kim1-model/data/README.md) drawn from that
-replica, which are CC BY-NC 4.0. No commercial game and no third-party test
-program is committed: the games that are, the BBC Micro's preset discs and the
-NES's Lan Master, are free software and homebrew whose authors let them be shared, each with its
-licence recorded beside it ([`NOTICE.md`](NOTICE.md),
-[`roms/README.md`](roms/README.md)). The tests download what they need, pinned
-by hash.
+replica, which are CC BY-NC 4.0. No commercial game is committed. What is
+committed, the BBC Micro's preset discs (games, demos and tools, one of them a
+disc of Dormann's and Clark's tests) and the NES's Lan Master, is free software
+and homebrew whose authors let it be shared, each with its licence recorded
+beside it ([`NOTICE.md`](NOTICE.md), [`roms/README.md`](roms/README.md)). The
+tests download the test programs they run, pinned by hash.

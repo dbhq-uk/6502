@@ -230,6 +230,37 @@ All on 6 October 2026, on the dev machine.
   read "about 2 times as fast" for eight seconds, capacity 3.67 to 4.91 MHz. Both
   are this machine on this day; the page states neither.
 
+## The review's corrections
+
+The task's review, the same day, found one sentence still false and two checks
+that could not fail.
+
+- **"No third-party test program is committed" was false,** in the README and on
+  the About page alike, which I had reworded for the games and not checked
+  further: one of main's preset discs, `beeb-6502-test`, is a GPL-3.0 disc of
+  Klaus Dormann's and Bruce Clark's 6502 tests, and six of the seventeen discs
+  are demos or tools, not games. Both copies now say no commercial game is
+  committed, and that what is (the discs, games, demos and tools, one of them
+  that test disc, and Lan Master) is free software and homebrew whose authors
+  let it be shared, with its licence beside it; and that the tests download the
+  test programs they run. No site test pinned the old sentence, and the family
+  document and the BBC Micro's page made no such claim.
+- **The browser check's frame compare could not see a run that does not
+  paint.** The title screen is nearly still and the two regions' recorded
+  hashes are the same, so the last frame painted would have matched. The check
+  now clears the canvas to transparent black, which the picture never is,
+  before each run. Checked by breaking it: with `stepTo` made to skip painting
+  (in `public/nes.js`, then restored), all three runs failed as blank and
+  mismatched.
+- **"Six" boards was typed in four places,** the notes, the README, the page and
+  the left-out list. A test now reads `Cartridge.SupportedMappers` from
+  `Cartridge.cs`, as other tests read `Pins.cs`, and requires each place to give
+  that number in words and the notes to name that many boards. Checked by adding
+  a seventh mapper number to the list, which failed the test, then restoring it.
+
+After them, `npm test` gave 370 tests, 369 pass, 1 todo, and both floors are
+369; the browser check passed for all three machines in 4 minutes 1 second.
+
 ## Mistakes
 
 - **I trusted the task reports' "CI is the real check" until I went to read the
