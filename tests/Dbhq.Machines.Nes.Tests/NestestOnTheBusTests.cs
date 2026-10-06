@@ -19,12 +19,22 @@ public sealed partial class NestestOnTheBusTests
     [MemberData(nameof(Regions))]
     public void EveryLineOfTheLogMatchesThroughTheRealBus(string regionName)
     {
-        bool pal = regionName == "PAL";
+        AssertEveryLineMatches(regionName == "PAL" ? Region.Pal : Region.Ntsc);
+    }
+
+    /// <summary>
+    /// Runs nestest from <c>$C000</c> on <paramref name="region"/> and checks every line of the
+    /// log against the CPU, the bus's cycle count and the dot counter, then nestest's own error
+    /// codes. <see cref="NesAcceptanceTests"/> calls this too.
+    /// </summary>
+    internal static void AssertEveryLineMatches(Region region)
+    {
+        bool pal = region == Region.Pal;
         string[] log = File.ReadAllLines(PinnedFiles.Fetch(
             LogBase + "nestest.log",
             Path.Combine("nestest", "nestest.log"),
             PinnedFiles.Sha256(Pins.NestestLogSha256)));
-        var nes = new Nes(Cartridge.Load(NesTestRoms.Read("other/nestest.nes")), pal ? Region.Pal : Region.Ntsc);
+        var nes = new Nes(Cartridge.Load(NesTestRoms.Read("other/nestest.nes")), region);
         nes.PowerOn();
 
         // The ROM's automation entry, as the CPU-only test does. Reset leaves S and P as the log has them.

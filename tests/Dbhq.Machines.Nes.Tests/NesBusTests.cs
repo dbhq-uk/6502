@@ -342,6 +342,13 @@ public class NesBusTests
         Assert.Equal(0, nes.Bus.Peek(0x6000));
     }
 
+    [Theory]
+    [MemberData(nameof(PrgRamRule.Mappers), MemberType = typeof(PrgRamRule))]
+    public void ABatteryBackedCartridgeKeepsItsPrgRamThroughTheResetButtonAndLosesItAtPowerOn(int mapper)
+    {
+        PrgRamRule.AssertResetKeepsItAndAPowerCycleClearsIt(mapper);
+    }
+
     [Fact]
     public void StepReturnsTheCyclesTheInstructionTookAndRunPassesTheCount()
     {

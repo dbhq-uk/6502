@@ -905,7 +905,8 @@ dummy read is `$2007` and whose real one `$2107`), with no DMC in it. Its source
 lists four outputs a console gives, by the CPU and PPU alignment, all of which
 treat the second read oddly ("sometimes ignores extra read, and puts odd things
 into buffer"). The model's PPU makes two whole reads and prints CRC `D84F6815`.
-`BlarggTests.KnownFailures` runs it and holds that output, so a fix shows.
+`TestRomTable.DmcDmaKnownFailures` holds that output, and `BlarggTests` and
+`NesAcceptanceTests` run it, so a fix shows.
 Task 12 looked again. The model prints `33 44 55 66 77` for the double read,
 where the source's four console outputs begin `22 44`, `22 33`, `02 44` and
 `32 44`: in each, the second read does not return the byte the first read put
@@ -1003,7 +1004,7 @@ Sharp ("new") chip, which raises the IRQ whenever a clock leaves the counter at
 0; the sheet chooses it because games rely on it. The other chip, Crystalis's in
 the fork's readmes, raises it only when the counter changes to 0 or is reloaded
 by request. So the two ROMs that test that chip fail, and are kept in
-`BlarggTests` as known failures with what they print:
+`TestRomTable` as known failures with what they print:
 `mmc3_test_2/rom_singles/6-MMC3_alt` (status 2, "IRQ shouldn't be set when
 reloading to 0 due to counter naturally reaching 0 previously"; both its
 sub-tests are the other chip's rule, and it stops at the first, so its test 3
@@ -1054,8 +1055,8 @@ The ROM's checksum was made on a console; with `$FF` in the core, tried once,
 03-immediate passes, and with `$00` it fails. So the console Blargg used had
 `$FF`. The two references disagree, and the core keeps Harte's, because a
 change would take an exception into the core's reference tests.
-`BlarggTests.RamReportingKnownFailures` runs both ROMs on both regions and
-holds their output (status 1, `AB ATX #n`); every other instruction in the
+`TestRomTable.RamReportingKnownFailures` holds both ROMs on both regions and
+their output (status 1, `AB ATX #n`); every other instruction in the
 suite passes.
 
 **Decided, 5 October 2026:** LXA (`$AB`) on the Ricoh2A03 stays as the core has

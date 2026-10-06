@@ -199,17 +199,32 @@ public class SampleBufferTests
             buffer.Add((c >> 5) & 1);
         }
 
-        long before = GC.GetAllocatedBytesForCurrentThread();
-        for (int c = 0; c < 1_000_000; c++)
+        // On 6 October 2026, in one of five full runs of the test project, 3,896 bytes were
+        // counted on this thread during the loop, and never in fifteen runs of this test alone.
+        // The cause was not found; the runtime's own work on a busy machine is the likely one.
+        // Code that allocated would do so on every pass, so the check is that one of three passes
+        // allocates nothing.
+        var allocated = new List<long>();
+        for (int pass = 0; pass < 3; pass++)
         {
-            buffer.Add(((c >> 5) & 1) * 0.3);
-            if ((c & 1023) == 0)
+            long before = GC.GetAllocatedBytesForCurrentThread();
+            for (int c = 0; c < 1_000_000; c++)
             {
-                buffer.Read(destination);
+                buffer.Add(((c >> 5) & 1) * 0.3);
+                if ((c & 1023) == 0)
+                {
+                    buffer.Read(destination);
+                }
+            }
+
+            allocated.Add(GC.GetAllocatedBytesForCurrentThread() - before);
+            if (allocated[^1] == 0)
+            {
+                break;
             }
         }
 
-        Assert.Equal(before, GC.GetAllocatedBytesForCurrentThread());
+        Assert.True(allocated[^1] == 0, $"every pass allocated: {string.Join(", ", allocated)} bytes");
     }
 
     [Fact]

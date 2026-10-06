@@ -19,7 +19,7 @@ src/Dbhq.Machines.BbcMicro/  # the BBC Micro Model B: its chips, keyboard, scree
 src/Dbhq.Machines.BbcMicro.Wasm/  # the BBC Micro as .NET WebAssembly; the ROMs are given to it as bytes
 src/Dbhq.Machines.Nes/      # the NES, NTSC and PAL, on the core; its chips arrive task by task
 src/Dbhq.Machines.Nes.Wasm/  # the NES as .NET WebAssembly (arrives with task 6 of its plan)
-machines/                   # registry.json, and per machine its "try it" program, which the page shows and the acceptance test runs (machines/nes/ from the NES's task 13)
+machines/                   # registry.json, and per machine its "try it" program, which the page shows and the acceptance test runs (machines/nes/ holds the NES's, and its recorded frame hashes)
 site/                       # 6502.dbhq.uk: the Astro site, its tests, and the scripts that build the machines into it
 tests/                      # the tests and the library they share, one project per machine
 bench/                      # the speed benchmarks (native, and the browser speed checks), run locally and never in CI; the .NET ones are in the solution, so CI builds them (bench/nes-speed/ from the NES's task 6)
@@ -27,7 +27,7 @@ tools/                      # scripts that make test data and check assumptions
   Dbhq.Cpu6502.ChipTrace/   # records the core's bus cycles for the site's chip page
   probes/                   # scripts that check assumptions against test data
   kim1-model/               # offline Python that measures the KIM-1's 3D model from photographs; its outputs are committed
-roms/                       # system ROMs with their provenance and rights in roms/README.md: kim-1/, bbc-micro/, and nes/ for the bundled homebrew (the NES's task 13)
+roms/                       # system ROMs with their provenance and rights in roms/README.md: kim-1/, bbc-micro/, and nes/, the NES's bundled homebrew, and nes/ for the bundled homebrew (the NES's task 13)
 NOTICE.md                   # anything else taken from outside under other terms: the teletext glyph table (CC0)
 docs/bbc-micro/facts/       # the BBC Micro's fact sheets, written before its code
 docs/nes/facts/             # the NES's fact sheets, from the nesdev wiki, written before its code

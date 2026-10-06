@@ -78,19 +78,23 @@ routing puzzle: turn the pieces of wire until every computer is connected.
 `https://shiru.untergrund.net/software.shtml`, as
 `https://shiru.untergrund.net/files/nes/lan_master.zip`. On 6 October 2026 the
 site's files answered `403 Forbidden` over `https` and refused connections over
-`http`, so the copy taken here is the Internet Archive's capture of that file
-from 27 March 2016, fetched raw with `curl` on 6 October 2026:
+`http`, so the copy taken here is the Internet Archive's. The archive holds the
+file with one content digest in every capture from 27 March 2016 to 16 September
+2025, so it did not change in that time. The capture of 27 March 2016 was fetched
+raw with `curl` on 6 October 2026, and the capture of 15 August 2025 the same day
+as a check, byte for byte the same:
 
 - `https://web.archive.org/web/20160327132502id_/http://shiru.untergrund.net/files/nes/lan_master.zip`
   (1,126,553 bytes, SHA-256
   `79410cc133f1100d2fe5409fd49297a62afc748aeeb5faccb8fe69c68c16e6aa`)
+- `https://web.archive.org/web/20250815233727id_/https://shiru.untergrund.net/files/nes/lan_master.zip`
 
 The archive holds `Lan_Master.nes`, `manual.pdf`, `notes.txt` and two label
 pictures. The ROM is committed as it came out of the archive, and the manual
-too, under a name that says whose manual it is. The software page as archived on 17 September 2026
-still lists the same 1.07 MB file.
+too, under a name that says whose manual it is. The software page as archived on
+17 September 2026 still lists the same 1.07 MB file.
 
-**Rights.** The author released it into the public domain, and says so in three
+**Rights.** The author released it into the public domain, and says so in two
 places:
 
 - The manual, in English: "The game is not licensed or endorsed by Nintendo
@@ -98,8 +102,8 @@ places:
   provided "as is", without warranty or responsibility of any kind." Its cover
   reads "PD 2011 Shiru".
 - The game's own title screen, under the name: "PD2011 Shiru".
-- Nothing in the archive or on the software page says otherwise.
 
-A public-domain release asks for nothing in return, so no notice is owed. The
-credit is given anyway, here and on the page. Dan can overrule the choice
+Nothing in the archive or on the software page says otherwise. A public-domain
+release asks for nothing in return, so no notice is owed. The credit is given
+anyway, here, and the page is to give it too. Dan can overrule the choice
 before the work is merged.
