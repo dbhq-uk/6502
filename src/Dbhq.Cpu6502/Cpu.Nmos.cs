@@ -1,6 +1,6 @@
 namespace Dbhq.Cpu6502;
 
-public sealed partial class Cpu
+public partial class Cpu<TBus>
 {
     /// <summary>The 105 opcodes the NMOS chip was never documented to have.</summary>
     private void ExecuteNmos(byte opcode)

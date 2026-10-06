@@ -11,7 +11,7 @@ public sealed record TraceLine(ushort PC, byte[] Bytes, OpcodeInfo Opcode, strin
 public static class Tracer
 {
     /// <summary>Captures the CPU's state and the instruction about to run.</summary>
-    public static TraceLine Capture(Cpu cpu, Func<ushort, byte> peek)
+    public static TraceLine Capture(CpuBase cpu, Func<ushort, byte> peek)
     {
         OpcodeInfo info = OpcodeTable.Get(cpu.Variant, peek(cpu.PC));
         byte[] bytes = new byte[info.Length];

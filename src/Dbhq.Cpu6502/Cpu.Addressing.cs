@@ -1,6 +1,6 @@
 namespace Dbhq.Cpu6502;
 
-public sealed partial class Cpu
+public partial class Cpu<TBus>
 {
     /// <summary>
     /// What an indexed instruction does with its address, which decides

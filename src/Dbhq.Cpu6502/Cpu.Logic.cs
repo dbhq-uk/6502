@@ -1,6 +1,6 @@
 namespace Dbhq.Cpu6502;
 
-public sealed partial class Cpu
+public partial class Cpu<TBus>
 {
     private byte Asl(byte value)
     {

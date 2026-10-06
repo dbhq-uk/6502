@@ -1,6 +1,6 @@
 namespace Dbhq.Cpu6502;
 
-public sealed partial class Cpu
+public partial class Cpu<TBus>
 {
     private const byte C = 0x01;
     private const byte Z = 0x02;

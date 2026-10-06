@@ -1,6 +1,6 @@
 namespace Dbhq.Cpu6502;
 
-public sealed partial class Cpu
+public partial class Cpu<TBus>
 {
     /// <summary>
     /// The 151 opcodes every member of the family shares. Where the NMOS chip

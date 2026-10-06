@@ -1,6 +1,6 @@
 namespace Dbhq.Cpu6502;
 
-public sealed partial class Cpu
+public partial class Cpu<TBus>
 {
     /// <summary>The 65C02's additions, and its defined no-ops, which differ by variant.</summary>
     private void ExecuteCmos(byte opcode)

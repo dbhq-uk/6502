@@ -70,7 +70,7 @@ public sealed class NesBus : IBus
     private readonly Apu _apu;
     private readonly SampleBuffer _sound;
     private readonly bool _dmcRepeatsHaltedRead;
-    private Cpu? _cpu;
+    private CpuBase? _cpu;
 
     // The value last on the CPU's data bus.
     private byte _openBus;
@@ -168,7 +168,7 @@ public sealed class NesBus : IBus
     }
 
     /// <summary>The CPU whose NMI and IRQ lines the bus sets at the end of each cycle.</summary>
-    public Cpu? Cpu
+    public CpuBase? Cpu
     {
         get => _cpu;
         set => _cpu = value;
@@ -182,6 +182,18 @@ public sealed class NesBus : IBus
     /// PPU of task 4 can count its own position and this stays the total.
     /// </summary>
     public long PpuDots => _ppuDots;
+
+    /// <summary>
+    /// The bus as the CPU's type argument: a struct that calls this bus, so the CPU made on it,
+    /// <see cref="Cpu{TBus}"/>, calls <see cref="Read"/> and <see cref="Write"/> directly rather
+    /// than through <see cref="IBus"/> (task 17).
+    /// </summary>
+    public readonly struct CpuPort(NesBus bus) : IBus
+    {
+        public byte Read(ushort address) => bus.Read(address);
+
+        public void Write(ushort address, byte value) => bus.Write(address, value);
+    }
 
     /// <summary>
     /// One CPU read: one cycle. If a write to <c>$4014</c> is waiting, or the DMC wants a sample

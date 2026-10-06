@@ -1,6 +1,33 @@
 namespace Dbhq.Cpu6502;
 
 /// <summary>
+/// A 6502-family CPU in which every bus access is one cycle, on any <see cref="IBus"/>.
+/// </summary>
+/// <remarks>
+/// The same CPU as <see cref="Cpu{TBus}"/>, cycle for cycle, with the bus reached
+/// through the interface. Tests and tools use it; a machine that wants speed
+/// builds <see cref="Cpu{TBus}"/> on a struct of its own.
+/// </remarks>
+public sealed class Cpu : Cpu<AnyBus>
+{
+    public Cpu(IBus bus, CpuVariant variant)
+        : base(new AnyBus(bus), variant)
+    {
+    }
+}
+
+/// <summary>
+/// Any <see cref="IBus"/>, as a struct, so that <see cref="Cpu"/> can be a
+/// <see cref="Cpu{TBus}"/>.
+/// </summary>
+public readonly struct AnyBus(IBus bus) : IBus
+{
+    public byte Read(ushort address) => bus.Read(address);
+
+    public void Write(ushort address, byte value) => bus.Write(address, value);
+}
+
+/// <summary>
 /// A 6502-family CPU in which every bus access is one cycle.
 /// </summary>
 /// <remarks>
@@ -9,61 +36,34 @@ namespace Dbhq.Cpu6502;
 /// counted by counting its bus accesses. The code for each instruction does its
 /// throwaway reads and writes explicitly, because on real hardware they reach
 /// the bus and a hardware register can react to them.
+/// <para>
+/// The bus is a type argument, a struct, so that the compiler makes a copy of
+/// this code for each machine's bus and can call, or inline, the bus's own
+/// methods directly (task 17). <see cref="Cpu"/> is this class on any
+/// <see cref="IBus"/>.
+/// </para>
 /// </remarks>
-public sealed partial class Cpu
+/// <typeparam name="TBus">The machine's bus: a struct, usually holding a reference to the bus object.</typeparam>
+public partial class Cpu<TBus> : CpuBase
+    where TBus : struct, IBus
 {
-    private readonly IBus _bus;
+    // Not readonly: a call on a readonly field of an unknown struct type would copy it first.
+    private TBus _bus;
     private readonly bool _cmos;
     private readonly bool _decimal;
     private readonly bool _bitInstructions;
     private readonly bool _waitAndStop;
 
-    public Cpu(IBus bus, CpuVariant variant)
+    public Cpu(TBus bus, CpuVariant variant)
+        : base(variant)
     {
         _bus = bus;
-        Variant = variant;
         _cmos = variant is CpuVariant.Synertek65C02 or CpuVariant.Rockwell65C02 or CpuVariant.Wdc65C02;
         _decimal = variant != CpuVariant.Ricoh2A03;
         _bitInstructions = variant is CpuVariant.Rockwell65C02 or CpuVariant.Wdc65C02;
         _waitAndStop = variant == CpuVariant.Wdc65C02;
         P = I | U;
     }
-
-    public CpuVariant Variant { get; }
-
-    public byte A { get; set; }
-
-    public byte X { get; set; }
-
-    public byte Y { get; set; }
-
-    public byte S { get; set; }
-
-    /// <summary>
-    /// The status register. Bits 4 and 5 hold whatever was last loaded into
-    /// them; PLP and RTI clear bit 4 and set bit 5, as the chip does.
-    /// </summary>
-    public byte P { get; set; }
-
-    public ushort PC { get; set; }
-
-    /// <summary>Bus accesses made so far. One per cycle.</summary>
-    public long Cycles { get; set; }
-
-    /// <summary>True while the IRQ line is held active.</summary>
-    public bool Irq { get; set; }
-
-    /// <summary>True while the NMI line is held active. An NMI fires on the change to active.</summary>
-    public bool Nmi { get; set; }
-
-    /// <summary>An NMOS JAM opcode has locked the CPU until <see cref="Reset"/>.</summary>
-    public bool IsJammed { get; private set; }
-
-    /// <summary>A WDC WAI is waiting for an interrupt.</summary>
-    public bool IsWaiting { get; private set; }
-
-    /// <summary>A WDC STP has stopped the clock until <see cref="Reset"/>.</summary>
-    public bool IsStopped { get; private set; }
 
     /// <summary>
     /// Runs one instruction, or one interrupt sequence, and returns the number

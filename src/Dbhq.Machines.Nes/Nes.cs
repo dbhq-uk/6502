@@ -25,13 +25,16 @@ public sealed class Nes
         ArgumentNullException.ThrowIfNull(cartridge);
         Region = region ?? cartridge.HeaderRegion ?? Region.Ntsc;
         Bus = new NesBus(cartridge, Region, options);
-        Cpu = new Cpu(Bus, CpuVariant.Ricoh2A03);
-        Bus.Cpu = Cpu;
+        _cpu = new Cpu<NesBus.CpuPort>(new NesBus.CpuPort(Bus), CpuVariant.Ricoh2A03);
+        Bus.Cpu = _cpu;
     }
+
+    // The CPU made for this bus's type, so its calls to the bus are direct (task 17).
+    private readonly Cpu<NesBus.CpuPort> _cpu;
 
     public NesBus Bus { get; }
 
-    public Cpu Cpu { get; }
+    public CpuBase Cpu => _cpu;
 
     public Region Region { get; }
 
@@ -46,21 +49,21 @@ public sealed class Nes
     public void PowerOn()
     {
         Bus.PowerOn();
-        Cpu.A = 0;
-        Cpu.X = 0;
-        Cpu.Y = 0;
-        Cpu.S = 0;
-        Cpu.P = 0x24;
-        Cpu.PC = 0;
-        Cpu.Cycles = 0;
-        Cpu.Reset();
+        _cpu.A = 0;
+        _cpu.X = 0;
+        _cpu.Y = 0;
+        _cpu.S = 0;
+        _cpu.P = 0x24;
+        _cpu.PC = 0;
+        _cpu.Cycles = 0;
+        _cpu.Reset();
     }
 
     /// <summary>The reset button: the CPU resets, and RAM and PRG RAM are kept.</summary>
     public void Reset()
     {
         Bus.Reset();
-        Cpu.Reset();
+        _cpu.Reset();
     }
 
     /// <summary>
@@ -79,7 +82,7 @@ public sealed class Nes
     public int Step()
     {
         long start = Bus.Cycles;
-        Cpu.Step();
+        _cpu.Step();
         return (int)(Bus.Cycles - start);
     }
 
