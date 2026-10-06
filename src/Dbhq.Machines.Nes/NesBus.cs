@@ -62,7 +62,7 @@ namespace Dbhq.Machines.Nes;
 /// the DMC's DMA is task 9.
 /// </para>
 /// </remarks>
-public sealed class NesBus : IBus
+public sealed class NesBus : Bus
 {
     private readonly byte[] _ram = new byte[0x800];
     private readonly IMapper _mapper;
@@ -187,7 +187,7 @@ public sealed class NesBus : IBus
     /// One CPU read: one cycle. If a write to <c>$4014</c> is waiting, or the DMC wants a sample
     /// byte, the DMA runs first, halting the CPU on this read (<see cref="RunDma"/>).
     /// </summary>
-    public byte Read(ushort address)
+    public override byte Read(ushort address)
     {
         if (_dmaPage >= 0 || _apu.Dmc.WantsHalt(_cycles + 1))
         {
@@ -198,7 +198,7 @@ public sealed class NesBus : IBus
     }
 
     /// <summary>One CPU write: one cycle.</summary>
-    public void Write(ushort address, byte value)
+    public override void Write(ushort address, byte value)
     {
         Cycle(true, address, value);
     }

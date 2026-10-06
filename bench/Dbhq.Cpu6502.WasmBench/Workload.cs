@@ -94,13 +94,13 @@ public static class Workload
     public static ushort ProgramStart => Start;
 
     /// <summary>A plain 64 KB of RAM. No logging, no other devices.</summary>
-    private sealed class Ram : IBus
+    private sealed class Ram : Bus
     {
         public readonly byte[] Memory = new byte[0x10000];
 
-        public byte Read(ushort address) => Memory[address];
+        public override byte Read(ushort address) => Memory[address];
 
-        public void Write(ushort address, byte value) => Memory[address] = value;
+        public override void Write(ushort address, byte value) => Memory[address] = value;
     }
 
     /// <summary>What one run reports.</summary>

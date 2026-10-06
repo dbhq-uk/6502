@@ -12,7 +12,7 @@ namespace Dbhq.Cpu6502;
 /// </remarks>
 public sealed partial class Cpu
 {
-    private readonly IBus _bus;
+    private readonly Bus _bus;
     private readonly bool _cmos;
     private readonly bool _decimal;
     private readonly bool _bitInstructions;
@@ -20,7 +20,7 @@ public sealed partial class Cpu
 
     public Cpu(IBus bus, CpuVariant variant)
     {
-        _bus = bus;
+        _bus = bus as Bus ?? new InterfaceBus(bus);
         Variant = variant;
         _cmos = variant is CpuVariant.Synertek65C02 or CpuVariant.Rockwell65C02 or CpuVariant.Wdc65C02;
         _decimal = variant != CpuVariant.Ricoh2A03;
@@ -163,5 +163,13 @@ public sealed partial class Cpu
                 ExecuteNmos(opcode);
             }
         }
+    }
+
+    /// <summary>A bus that is only an <see cref="IBus"/>, called through the interface.</summary>
+    private sealed class InterfaceBus(IBus bus) : Bus
+    {
+        public override byte Read(ushort address) => bus.Read(address);
+
+        public override void Write(ushort address, byte value) => bus.Write(address, value);
     }
 }
