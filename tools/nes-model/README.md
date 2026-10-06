@@ -18,7 +18,7 @@ outside the repository, and every script refuses an input whose SHA-256 is not
 the one in [`data/sources.json`](data/sources.json). No input is committed,
 not even resized.
 
-So far (tasks 0 to 5, and 8) it holds:
+It holds (tasks 0 to 9 of the plan; task 10 changed none of it):
 
 | File | What it does |
 |---|---|
@@ -32,7 +32,7 @@ So far (tasks 0 to 5, and 8) it holds:
 | `case_measure.py` | Task 8: the case, both consoles. The size is the published 254 by 203.2 by 88.9 mm (not Nintendo's); every face of a photograph is rectified on its own four bounding lines (O2-FL's front and top, O2-BR's rear, the set-back of the rear's window panel taken off), so no camera relates two of its planes; the patent's views (O1) scaled to the case for what the photographs cannot show (the underside, the AV jacks' side, the feet) and recorded beside the rest; the end profile built on O2-FL and checked on a point of O2-BR held out of it; the board's place in the case from O9, the board and the bottom shell in one view, through the camera its XMP records; the rear connectors' board places (I7-FL's modulator face) against O2-BR; the PAL console's words (O4, O10) and underside labels (O5). Writes `data/case.json` and `site/src/models/nes-famicom-case-parts.mjs`; `--look` draws the rectified faces, with what was read off them, in `out/` |
 | `run-case.sh` | The outside model's measurements: `verify.py` on its inputs, then `case_measure.py`. It reads `parts.json` and `registration.json`, so `run-board.sh` comes first |
 | `results.py` | The figures the NES page quotes, so none is typed there: the board half (task 7) writes `site/src/data/nes-famicom-board-model.json` from `frame.json`, `registration.json`, `copper.json` and `parts.json`; the case half (task 9) writes `site/src/data/nes-famicom-case-model.json` from `case.json`, with the PAL photographs' lens from `sources.json`. Each lists the sources its model was made from, with their addresses, so each view credits its own. Reads no input and fetches nothing |
-| `run-board.sh` | The inside model's measurements in order (so far: `verify.py I1-front I1-back I2`, `board_frame.py`, `board_register.py`, `board_trace.py --map-ppm 10`, `verify.py I3 I4 I5`, `board_parts.py`); stops at the first that crosses a STOP |
+| `run-board.sh` | The inside model's measurements in order (`verify.py I1-front I1-back I2`, `board_frame.py`, `board_register.py`, `board_trace.py --map-ppm 10`, `verify.py I3 I4 I5`, `board_parts.py`); stops at the first that crosses a STOP |
 | `tests/test_common.py`, `tests/test_board_frame.py`, `tests/test_board_register.py`, `tests/test_board_trace.py`, `tests/test_board_parts.py`, `tests/test_case.py`, `tests/test_results.py` | pytest, on made-up inputs |
 | `data/` | See [`data/README.md`](data/README.md) |
 
@@ -101,11 +101,16 @@ thresholds. As the plan was revised twice on 5 October 2026 none does; the
 earlier stops are kept in `data/spike.json`'s `revision`. `board_frame.py`
 takes about a minute and exits 3 if the scale crosses a STOP;
 `board_register.py` takes about eight minutes on a busy machine and exits 3
-if the solder side crosses its STOP. `case_measure.py` takes about two
+if the solder side crosses its STOP (task 10's mutation pass ran it on I1-back
+left unflipped, 6 October 2026: it matched too few holes, crossed the STOP and
+exited 3). `case_measure.py` takes about two
 minutes; none of its checks stops anything, and it prints each. `out/` is git-ignored.
 
 The versions it was run with, and every figure it printed, are in the journal
-for 5 October 2026.
+entry of 5 October 2026, `docs/journal/2026-10-05-the-nes-models.md`, which
+also records each later task's runs. What the models still do not show, and
+why, is in `docs/known-differences.md`, "The NES: its two 3D models, where they
+stop".
 
 ## Licences
 

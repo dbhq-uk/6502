@@ -19,7 +19,8 @@ node scripts/measure-kim1-photo.mjs <photo>     # the KIM-1 board's scale and si
 
 The KIM-1 model's measurements are made offline, in Python, by
 `tools/kim1-model/` at the repository root (its README says how to run them);
-their outputs are committed and the build never runs them.
+their outputs are committed and the build never runs them. The NES's two
+models are measured the same way, by `tools/nes-model/`.
 
 Needs Node 22.22 or later (`engines` in `package.json`). `dev` and `preview` serve
 on `127.0.0.1`. To reach them from another machine, set `SITE_HOST` to the address
