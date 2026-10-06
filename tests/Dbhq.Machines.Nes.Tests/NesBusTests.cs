@@ -106,6 +106,20 @@ public class NesBusTests
 
     [Theory]
     [MemberData(nameof(Regions))]
+    public void AReadOf4015LeavesTheOpenBusAsItWas(string region)
+    {
+        // bus.md 3: every read and write updates the bus's value except a read of $4015, which is
+        // internal to the CPU; bit 5 of that read is the bus's. Nothing in the sound unit is set,
+        // so the status bits are 0: a bus of $25 reads $20, and the bus still holds $25 after it.
+        (NesBus bus, _) = Build(region);
+        bus.Write(0x0000, 0x25);
+
+        Assert.Equal(0x20, bus.Read(0x4015));
+        Assert.Equal(0x25, bus.Read(0x4018));
+    }
+
+    [Theory]
+    [MemberData(nameof(Regions))]
     public void TheControllerPortsDriveOnlyBitZeroAndTheTopThreeBitsAreOpenBus(string region)
     {
         (NesBus bus, _) = Build(region);
@@ -272,6 +286,30 @@ public class NesBusTests
         }
 
         Assert.Equal(new long[] { 3, 3, 3, 3, 4, 3, 3, 3, 3, 4 }, pattern);
+    }
+
+    [Fact]
+    public void PowerOnPutsThePalFourthDotInEveryFifthCycleCountedFromPowerOn()
+    {
+        // timing.md 3, the model's choice: the accumulator is zero at power on, so the fourth dot
+        // falls in cycles 5, 10, 15 ... from power on. The reset's 7 cycles have run, so the
+        // next ones are cycles 8 to 17. A bus that was never powered on starts at zero too, which
+        // is all ThePalDotsRunThreeThreeThreeThreeFour sees.
+        var nes = IdleMachine(Region.Pal);
+        nes.Bus.Read(0x0000);
+        nes.PowerOn();
+        Assert.Equal(7, nes.Bus.Cycles);
+
+        var pattern = new List<long>();
+
+        for (int i = 0; i < 10; i++)
+        {
+            long before = nes.Bus.PpuDots;
+            nes.Bus.Read(0x0000);
+            pattern.Add(nes.Bus.PpuDots - before);
+        }
+
+        Assert.Equal(new long[] { 3, 3, 4, 3, 3, 3, 3, 4, 3, 3 }, pattern);
     }
 
     [Fact]
@@ -553,6 +591,30 @@ public class NesBusTests
         }
 
         Assert.Equal(3, ppu.Frame);
+    }
+
+    [Theory]
+    [InlineData("NTSC", 27395)]
+    [InlineData("PAL", 25683)]
+    public void TheFirstVblankFlagIsSetInTheCycleThatRunsLine241Dot1(string region, long cycle)
+    {
+        // timing.md 2 and 4: power on is line 0 dot 0 with nothing ticked, and the flag is set as
+        // the dot at line 241 dot 1 runs, the dot numbered 241 x 341 + 1 = 82182 from 0. On NTSC
+        // cycle n runs dots 3(n - 1) to 3n - 1, so dot 82182 is the first of cycle 27395; the
+        // wiki's PPU power up state says "around 27384" (known-differences.md). On PAL, after n
+        // cycles 16n / 5 dots have run, rounded down, so dot 82182 runs in the first cycle after
+        // which more than 82182 have run, cycle 25683.
+        Region r = RegionNamed(region);
+        int dot = (241 * Region.DotsPerLine) + 1;
+        Assert.Equal(cycle, ((((long)dot + 1) * r.DotsDenominator) + r.DotsNumerator - 1) / r.DotsNumerator);
+
+        var nes = IdleMachine(r);
+        while ((nes.Bus.Peek(0x2002) & 0x80) == 0 && nes.Bus.Cycles < 2 * cycle)
+        {
+            nes.Bus.Read(0x0000);
+        }
+
+        Assert.Equal(cycle, nes.Bus.Cycles);
     }
 
     public static TheoryData<string, int, bool> RegionsAndSuppressionDots()

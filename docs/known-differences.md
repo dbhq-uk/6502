@@ -699,7 +699,21 @@ and some games read it. The model clears it to zeros so a run is repeatable.
 **The PAL fourth dot falls in the fifth cycle of every five.** The accumulator
 starts at zero at power on and gives 3, 3, 3, 3, 4. A real console may start
 in any of the five phases (`timing.md` section 3), and the pages do not say
-which is common. The tests check the sum, 16 dots in 5 cycles, and this phase.
+which is common. The tests check the sum, 16 dots in 5 cycles, and this phase:
+`NesBusTests.ThePalDotsRunThreeThreeThreeThreeFour` on a bus that was never
+powered on, `PowerOnPutsThePalFourthDotInEveryFifthCycleCountedFromPowerOn`
+through a power on, and `nestest`'s log on PAL. Before the mutation pass of 6
+October 2026 only `nestest` saw the power-on phase, and nothing saw a second
+power on that left the accumulator where it was.
+
+**The reset button leaves the PAL phase where it was.** `Reset` puts the PPU
+back at line 0 dot 0 and does not touch the accumulator, so after a reset the
+fourth dot can fall in any of the five cycles counted from the PPU's new line 0
+dot 0, depending on how many cycles ran before the button. The pages read do
+not say what a console's reset does to the two dividers; this is the model's
+choice, not a fact (`timing.md` open item 2). `NesBusTests`'
+`AStatusReadOnTheDotTheFlagIsSetOrTheNextReadsItAndStopsTheNmi` uses it on
+purpose, to move the cycles' starts against the PPU's dots on PAL.
 
 **The order of the dots and the access inside a cycle** was measured in task 4
 against the ten `ppu_vbl_nmi` singles: two dots before the access, the rest
@@ -711,8 +725,10 @@ rule, and task 8 checked it with `pal_apu_tests` 08.irq_timing, which fails a
 cycle either side of it (`timing.md` section 3).
 
 **Open bus is the last value that crossed the bus.** A read of `$4015` leaves
-it alone. Nothing else drives the bus in the model: there is no decay, and no
-bus conflicts between the cartridge and the CPU.
+it alone (`NesBusTests.AReadOf4015LeavesTheOpenBusAsItWas`, added when the
+mutation pass of 6 October 2026 found nothing held it). Nothing else drives the
+bus in the model: there is no decay, and the only bus conflicts are the boards'
+own AND on a register write (the section on the simple boards below).
 
 **A mapper sees only `$4020` to `$FFFF`.** The sheet says a board sees every CPU
 access except reads of `$4015`, so a board could put a register in the PPU or
@@ -748,8 +764,18 @@ same instant as the CPU's first reset cycle, which is what `nestest.log` needs.
 A real console powers up with the CPU and PPU in one of several alignments, and
 the `ppu_vbl_nmi` readme says some of them fail its tests (`timing.md` section
 4). The model has one, the one the tests are written for. Its first VBlank is
-set in cycle 27395 from power on; the wiki says "around 27384", and nothing
-pinned settles which.
+set in cycle 27395 from power on on NTSC (25683 on PAL), which
+`NesBusTests.TheFirstVblankFlagIsSetInTheCycleThatRunsLine241Dot1` holds; the
+wiki says "around 27384", and nothing pinned settles which (`timing.md` open
+item 4).
+
+**On PAL the flags clear at dot 1 of line 311.** The pages give the clear at
+dot 1 of the pre-render line on NTSC, and on PAL only imply it, from the 70
+lines of VBlank; the PPU frame timing page says the PAL clear time awaits
+confirmation (`timing.md` open item 1). The model clears VBlank, sprite 0 hit
+and overflow at dot 1 of line 311.
+`PpuTimingTests.TheVblankFlagIsSetAtLine241Dot1AndClearedAtDot1OfThePreRenderLine`
+checks that the model does so on both; no pinned ROM times it on PAL.
 
 **Power on is zeros.** VBlank is often set at power on and OAM, the palette and
 the nametables are unspecified (`ppu.md` section 12). The model clears all of
@@ -802,7 +828,10 @@ licence is not stated.
 
 **PAL uses the NTSC colours.** The 2C07's own decode is about 15 degrees of hue
 away (`ppu.md` section 10). The model swaps the 2C07's red and green emphasis
-bits, and nothing else about its colour.
+bits, and nothing else about its colour. The colours were never compared with a
+real PAL television, or a capture of one: `PpuPaletteTests` checks the decode
+against the rules of the NTSC video page, and
+`OnPalTheRedAndGreenEmphasisBitsAreSwapped` the one PAL rule the model has.
 
 **The 2C07's border is not drawn.** The 2C07 blacks out columns 0, 1, 254 and
 255 and line 0 of the picture (`ppu.md` section 10). The model draws them as the
@@ -869,8 +898,11 @@ leaves PAL's behaviour as an open question, and no pinned ROM checks it
 **The triangle's periods 0 and 1 are not halted.** They give the ultrasonic wave
 the sheet describes, a step every CPU cycle or every second one. Some emulators
 halt them to avoid the noise this makes in a sampled output. Task 9's resampler
-does not need it: an ultrasonic triangle comes out of it 72 dB or more under a
-full one.
+does not need it: `ResamplerTests` holds an ultrasonic triangle more than 65 dB
+under a full one, on both regions. On 6 October 2026 (03:32 UTC, load 2.4)
+`dotnet test tests/Dbhq.Machines.Nes.Tests -c Release --filter
+"FullyQualifiedName~ResamplerTests" --logger "console;verbosity=detailed"`
+printed -72.4 dB at worst, the NTSC triangle at period 0.
 
 **The triangle starts at step 0 at power on.** The sheet gives step 0 after a
 reset and an unknown phase at power on.
@@ -889,7 +921,8 @@ pinned ROM is known to depend on it.
 
 **The output is the sheet's mixer formulas** with every channel, the DMC
 included, through tables built from them at start-up (task 9). The triangle,
-noise and DMC table is single precision, within 1e-7 of the formula.
+noise and DMC table is single precision; `MixerTests` holds every entry of both
+tables within 1e-6 of the formula.
 
 ## The NES: the DMC, its DMA and the sound out, where the model stops
 
@@ -925,7 +958,10 @@ late 2A03G and 2A03H's extra fetch do not happen. No pinned ROM tests them.
 The page says a reload halts on a put. The model's output unit clocks on the
 puts, and a reload may halt from the next put, two cycles later. Halting at the
 put after that passes every ROM too: they synchronise themselves to the DMC, so
-they test the parity and the cost, not the delay.
+they test the parity and the cost, not the delay. The mutation pass of 6
+October 2026 made the halt two cycles later and no test failed, so
+`DmcDmaTests.AReloadHaltsOnTheNextPutAfterTheOutputClockThatEmptiedTheBuffer`
+now pins the model's choice; it pins the choice, not the chip.
 
 **The 2A07's DMC fetch reads its own address on its idle cycles.** The page
 says the 2A07 has no extra reads by a mechanism "not yet understood", and
@@ -943,10 +979,12 @@ reads only the sample address.
 averaged over blocks of 8 CPU cycles, and each change of a block's mean is added
 as a band-limited step (a Kaiser-windowed sinc, 16 samples each side, placed to
 1/4096 of a sample); then high-passes at 90 Hz and 440 Hz and a low-pass at 14
-kHz, first order each. The 8-cycle mean is down by under 0.25 dB at 20 kHz.
-Measured on pulses, the worst alias under the Nyquist is 89.6 dB under the note
-or better (`ResamplerTests`). The order and the form of the filters are not on
-the page.
+kHz, first order each. The 8-cycle mean loses a fraction of a decibel at 20
+kHz, which follows from its length (an 8-point mean's gain is sin 8x / (8 sin
+x), with x = pi f over the CPU clock). `ResamplerTests` holds the worst alias
+under the Nyquist, measured on pulses, more than 65 dB under the note; the run
+of 6 October 2026 quoted for the triangle above printed -89.6 dB at worst. The
+order and the form of the filters are not on the page.
 
 **The sample buffer drops the oldest samples** when its reader falls behind
 (the plan's Review Focus 3). The machine's holds a quarter of a second.
@@ -1069,3 +1107,63 @@ not taken is to use `$FF` for the Ricoh2A03, the console-calibrated value the RO
 passes with, and exclude `$AB` from the `nes6502` Harte set; that is left for the
 project owner to choose.
 
+
+**Not run, and why.** Two folders of the fork are not pinned and not run, as
+the journal entry of 5 October 2026, task 12, records. `nmi_sync` (`demo_ntsc`
+and `demo_pal`) draws a line with timed `$2001` writes, and its readme says to
+look at the picture ("the left pixel of the middle line will be darker");
+nothing in RAM or on the nametable says pass or fail, and no frame check was
+written for it later. `dmc_tests` has four ROMs with no readme and no source;
+run, they leave nothing on the screen, in `$6000` or in zero page, and their
+result is a sound to listen to. The fork's own `status.txt` marks all four "Not
+sure yet".
+
+**Every known failure, in one place.** `TestRomTable` holds each with what it
+prints now, and `BlarggTests` and `NesAcceptanceTests` check that it still
+fails as written down, so a fix shows: `instr_test-v5` `03-immediate` and
+`all_instrs` on NTSC and on PAL (the `$AB` entry above);
+`dmc_dma_during_read4/double_2007_read` (the DMC section); and
+`mmc3_test_2/rom_singles/6-MMC3_alt` and `mmc3_irq_tests/5.MMC3_rev_A` (the
+MMC3 section). Every other pinned ROM passes.
+
+## The NES: the cartridge file and the page, where the model stops
+
+**What.** `Cartridge`, `NesLoader` and the page's panel (`site/public/nes.js`).
+The source is `docs/nes/facts/cartridge.md`.
+
+**The iNES TV system bit is not read.** Byte 9 bit 0 of an iNES 1 header, and
+the unofficial byte 10, name a region, but the sheet's source says almost no
+file sets them, so an iNES file names no region and runs as NTSC unless the
+visitor chooses PAL; the page says which it chose and why. Only NES 2.0 byte 12
+is read: 0 NTSC, 1 PAL, 2 (either) NTSC.
+`CartridgeTests.AnInesFileNamesNoRegionWhateverItsTvSystemBitsSay` and
+`NesBusTests.TheMachineTakesTheHeadersRegionUnlessTheCallerNamesOne` hold it.
+
+**The Dendy is refused.** A NES 2.0 file whose byte 12 says Dendy (3) is
+refused with a sentence that names it
+(`CartridgeTests.ANes20FileForTheDendyIsRefusedByName`), and the page offers
+only NTSC and PAL. The Dendy runs the PAL frame at three dots a cycle with its
+own VBlank timing; it is left out and has its issue
+([#61](https://github.com/dbhq-uk/6502/issues/61)).
+
+**The file and its RAM have caps.** A file over `Cartridge.MaxFileSize` (4 MB)
+is refused before its header is read, and the page refuses it before reading it
+at all, with the host's own limit (`NesHost.MaxRomBytes`). A header may ask for
+at most `Cartridge.MaxRamSize` (64 KB) of PRG RAM and of CHR RAM: a NES 2.0
+header that asks for more is refused, and an iNES byte 8 over it is clamped.
+No board this machine models needs more, and a header must not make the page
+allocate megabytes for a small file. `CartridgeTests`
+(`AFileOverTheSizeLimitIsRefusedBeforeItsHeaderIsRead`,
+`ANes20HeaderAskingForMegabytesOfRamIsRefusedWithoutAllocatingIt`,
+`AnInesByte8Of255IsClampedToTheCapAndTheFileStillLoads`) and the page's
+`nes-panel.test.mjs` hold them.
+
+**The picture is the PPU's 256 by 240, shown in the region's pixel shape.** The
+page shows all 240 lines, where a television hides some at the top and bottom
+(overscan), and shows each pixel 8:7 on NTSC, so the 256 columns are as wide as
+256 x 8/7 square pixels, and about 1.386:1 on PAL (`ppu.md` section 10, from
+the Overscan page). The bleeding and crawl of a composite picture are not
+modelled (the PPU section above; issue
+[#69](https://github.com/dbhq-uk/6502/issues/69)). `nes-panel.test.mjs` ("the
+picture is 256 by 240 pixels shown in the region's pixel shape") holds the
+shape.

@@ -60,6 +60,47 @@ public class DmcDmaTests
 
     [Theory]
     [MemberData(nameof(Regions))]
+    public void AReloadHaltsOnTheNextPutAfterTheOutputClockThatEmptiedTheBuffer(string region)
+    {
+        // apu.md 8 and bus.md 6: a reload "may halt on the next put" after the output unit empties
+        // the buffer. The unit clocks on the puts (odd cycles), so the halt comes 2 cycles after
+        // the clock that ended a byte. When in that APU cycle the hardware schedules it is not on
+        // the sheet and the pinned ROMs pass with a later put too (known-differences.md), so this
+        // pins the model's choice. Bytes of $AA from a level of 64 move the level on every clock,
+        // which shows when each clock came; the first byte plays silent, so its reload is skipped.
+        Nes nes = Machine(region, 0xAA);
+        nes.Bus.Write(0x4011, 64);
+        Start(nes, 15, 0x00, 0x10, parity: 0, loop: true);
+        RunUntilAStall(nes, 10);
+        RunUntilAStall(nes, 20 * 54);
+
+        for (int fetch = 0; fetch < 5; fetch++)
+        {
+            long lastClock = -1;
+            long halt = -1;
+            int level = nes.Bus.Apu.Dmc.Level;
+            long end = nes.Bus.Cycles + (20 * 54);
+            while (halt < 0 && nes.Bus.Cycles < end)
+            {
+                long cycle = nes.Bus.Cycles + 1;
+                if (IdleRead(nes) > 1)
+                {
+                    halt = cycle;
+                }
+                else if (nes.Bus.Apu.Dmc.Level != level)
+                {
+                    lastClock = cycle;
+                    level = nes.Bus.Apu.Dmc.Level;
+                }
+            }
+
+            Assert.Equal(1, lastClock % 2);
+            Assert.Equal(lastClock + 2, halt);
+        }
+    }
+
+    [Theory]
+    [MemberData(nameof(Regions))]
     public void ReloadsComeOncePerByteAtTheRate(string region)
     {
         // A byte lasts 8 output clocks: at rate $F that is 8 x 54 cycles on NTSC, 8 x 50 on PAL.
