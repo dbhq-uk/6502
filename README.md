@@ -31,9 +31,14 @@ with its keyboard, sound and a disc drive, so it counts too. Its page offers a
 library of homebrew and freely licensed discs to start with one click, each
 kept in [`machines/bbc-micro/discs/`](machines/bbc-micro/discs/) with its
 author's licence and, where the licence asks for it, its source; a disc image
-of your own goes in as before. The Acorn Electron, the Atari 2600, the NES and
-the Commodore 64 come next, one at a time and smallest first; the NES, NTSC and
-PAL, is being built task by task. The programme's design is in
+of your own goes in as before. The NES, the third, NTSC and PAL, passes its
+acceptance test and runs in the browser at
+[6502.dbhq.uk/machines/nes/](https://6502.dbhq.uk/machines/nes/), with its
+picture, sound, two controllers and six cartridge boards, starting with a
+public-domain game, Lan Master, so it counts as well; a game of your own goes
+in as a file and is never uploaded. The Acorn Electron, the Atari 2600 and the
+Commodore 64 come next, one at a time and smallest first. The programme's
+design is in
 [`docs/superpowers/specs/2026-09-30-machines-and-site-design.md`](docs/superpowers/specs/2026-09-30-machines-and-site-design.md).
 
 ## What "cycle-accurate" means here
@@ -57,11 +62,15 @@ from somebody else's, and keep their own terms: the system ROMs in
 [`roms/`](roms/README.md); the photographs of the original machines in
 [`site/src/assets/photos/`](site/src/assets/photos/README.md), each under the
 licence its source gives it (CC BY-SA 2.0 fr, share-alike, for the Musée Bolo's
-KIM-1, none stated for the two from Hans Otten's site, and CC BY 2.0 for the
-BBC Micro); the KIM-1 model's track
+KIM-1, none stated for the two from Hans Otten's site, CC BY 2.0 for the
+BBC Micro, and public domain for the NES); the KIM-1 model's track
 map, `site/src/assets/tracks/kim-1.webp`, traced from those photographs and
 from a replica of the board's layout, whose channels carry those terms and
 CC BY-NC 4.0 (the photographs' README says which); and the files in
 [`tools/kim1-model/data/`](tools/kim1-model/data/README.md) drawn from that
-replica, which are CC BY-NC 4.0. No game and no third-party test program is
-committed; the tests download what they need, pinned by hash.
+replica, which are CC BY-NC 4.0. No commercial game and no third-party test
+program is committed: the games that are, the BBC Micro's preset discs and the
+NES's Lan Master, are free software and homebrew whose authors let them be shared, each with its
+licence recorded beside it ([`NOTICE.md`](NOTICE.md),
+[`roms/README.md`](roms/README.md)). The tests download what they need, pinned
+by hash.

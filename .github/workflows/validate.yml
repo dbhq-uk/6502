@@ -175,14 +175,14 @@ jobs:
           PASS=$(count pass); FAILED=$(count fail)
           echo "pass=${PASS:-unread} fail=${FAILED:-unread}"
           [ "${FAILED:-1}" = "0" ]
-          # 351 tests as at 6 Oct 2026, with the NES's registry record, its try-it
-          # file and its build (342 before them that day, with main's preset
-          # discs merged into the NES's branch; 282 on main after the discs'
-          # second review, 292 on the branch).
+          # 368 tests as at 6 Oct 2026, with the NES's page and the NES counting
+          # (351 with its registry record, try-it file and build, 342 before
+          # them that day with main's preset discs merged into the NES's branch;
+          # 282 on main after the discs' second review, 292 on the branch).
           # Adding tests is expected; losing them is the failure this floor catches.
           # Raise the number when the suite grows, here and in the same step of
           # deploy-site.yml, which must hold the same number.
-          [ "${PASS:-0}" -ge 351 ]
+          [ "${PASS:-0}" -ge 368 ]
       # The KIM-1 page in a real browser: the built site served on 127.0.0.1
       # with its own CSP, the try-it program clicked in through the page's own
       # keypad, and the digits read back. Then the page's photograph loads, and
@@ -195,7 +195,12 @@ jobs:
       # turns on and off, a disc lists with *CAT and saves, Break restarts it,
       # and a preset disc from the library starts with Insert and run while the
       # visitor's own file still goes in after it (scripts/browser-check-bbc.mjs).
-      - name: The KIM-1 and the BBC Micro run in a browser
+      # Then the NES's page: Start puts its game in, the frame recorded in
+      # machines/nes/expected-frames.json is on the canvas to the pixel in both
+      # regions, Start on the keyboard changes the picture, a test cartridge
+      # built from bytes goes in through the picker, and a bad file and one too
+      # big are refused with the machine carrying on (scripts/browser-check-nes.mjs).
+      - name: The KIM-1, the BBC Micro and the NES run in a browser
         working-directory: site
         run: node scripts/browser-check.mjs
 

@@ -191,7 +191,7 @@ the NES for North America in 1985 and then Europe and Australia, where the PAL
 console has the 2A07. Famicom clones, such as the Dendy that was widely sold in
 Russia from 1992, and the NES-on-a-chip plug-and-play TV games carry
 2A03-compatible CPUs. The NES, in both its NTSC and PAL forms, is the third
-machine this project builds.
+machine this project built, and it runs in the browser.
 
 ## Arcade
 
