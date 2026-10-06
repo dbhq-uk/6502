@@ -5,6 +5,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { REPO_ROOT } from '../src/lib/registry.mjs';
 import { MIN, PASS, STOP, verdicts } from './nes-spike-verdicts.mjs';
+import { page, visibleText } from './helpers.mjs';
 
 // The NES's two 3D models, each drawn for the NTSC and the PAL console: their
 // inputs and the measurements they rest on. The tools in tools/nes-model/ run
@@ -883,4 +884,271 @@ test('the case parts module is generated from case.json, names its sources, and 
   assert.equal(m.CASE.depth, caseData.footprint.depthMm);
   assert.equal(m.CASE.height, caseData.heightMm);
   for (const s of caseData.sources) assert.ok(sources.some((x) => x.id === s), `${s} is in sources.json`);
+});
+
+// --- task 7: the inside model on the page --------------------------------------------------
+
+const BOARD_ID = 'nes-famicom-board';
+const { MODELS, wordsFor } = await import('../src/models/models.mjs');
+const layout = await import('../src/models/nes-famicom-board-layout.mjs');
+const notes = await import('../src/models/nes-famicom-board-notes.mjs');
+const access = await import('../src/models/nes-famicom-access.mjs');
+const { registry } = await import('../src/lib/data.mjs');
+const boardEntry = MODELS[BOARD_ID];
+const boardFigures = JSON.parse(fs.readFileSync(path.join(process.cwd(), 'src', 'data', `${BOARD_ID}-model.json`), 'utf8'));
+const boardModule = fs.readFileSync(path.join(process.cwd(), 'src', 'models', `${BOARD_ID}.js`), 'utf8');
+const nesRow = registry.machines.find((m) => m.id === 'nes');
+const nesHtml = page('/machines/nes/')?.html ?? '';
+const boardSection = (() => {
+  const at = nesHtml.indexOf('<section class="model"');
+  return at < 0 ? '' : nesHtml.slice(at, nesHtml.indexOf('<section class="photos"', at));
+})();
+const frameJson = frame;
+const WORD = ['no', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten'];
+
+test('the NES claims the inside model, and the entry is the plan\'s: the machine, the view, both consoles, the track map and the legend', () => {
+  assert.deepEqual(nesRow.models, [{ view: 'inside', module: BOARD_ID }]);
+  // Task 7 of the plan: no case until task 9 claims the outside with it (6 Oct 2026).
+  assert.equal(nesRow.case, undefined);
+  assert.equal(boardEntry.machine, 'nes');
+  assert.equal(boardEntry.view, 'inside');
+  assert.deepEqual(boardEntry.regions, ['ntsc', 'pal']);
+  assert.equal(boardEntry.texture, layout.TRACKS.src);
+  assert.equal(boardEntry.legend, layout.chipLegend);
+  for (const r of boardEntry.regions) assert.equal(typeof boardEntry.made[r], 'function', r);
+});
+
+test('the regions the board model draws are the regions the NES page offers, both ways', () => {
+  // The region control in the machine's panel (src/components/NesPanel.astro): input[name="nes-region"][data-nes-region].
+  const controls = [...nesHtml.matchAll(/<input\b[^>]*\bname="nes-region"[^>]*>/g)].map((m) => m[0]);
+  assert.ok(controls.length > 0, 'the NES page has no region control');
+  assert.ok(controls.every((c) => /\bdata-nes-region\b/.test(c)));
+  const values = controls.map((c) => /\bvalue="([^"]+)"/.exec(c)[1].toLowerCase());
+  assert.deepEqual([...values].sort(), [...boardEntry.regions].sort());
+  assert.deepEqual(values, boardEntry.regions, 'the first region is the one the page starts on');
+});
+
+test('the model draws every IC, connector, passive and both consoles\' crystal and modulator from the parts file', () => {
+  assert.deepEqual(layout.ICS, parts.model.ics);
+  assert.deepEqual(layout.CONNECTORS, parts.model.connectors);
+  assert.deepEqual(layout.PASSIVES, parts.model.passives);
+  assert.deepEqual(layout.OTHERS, parts.model.others);
+  assert.match(boardModule, /for \(const ic of ICS\) \{/);
+  assert.match(boardModule, /for \(const c of CONNECTORS\) \{/);
+  assert.match(boardModule, /for \(const p of PASSIVES\) \{/);
+  assert.match(boardModule, /for \(const region of REGIONS\) \{\s*const group = new Group\(\);\s*for \(const o of OTHERS\[region\]\)/);
+  // The ICs are soldered in: drawn as bodies on their legs, with no sockets.
+  assert.doesNotMatch(boardModule, /socket/i);
+  // The board is its measured outline with its holes, not a box.
+  assert.match(boardModule, /ring\(BOARD\.outline\)/);
+  assert.match(boardModule, /BOARD\.holes\.map/);
+});
+
+test('the track map is copper.json\'s, read as the component side\'s copper in red, the solder side\'s in green and the print in blue', () => {
+  assert.equal(layout.TRACKS.src, `/models/${BOARD_ID}-tracks.webp`);
+  assert.deepEqual([layout.TRACKS.width, layout.TRACKS.height, layout.TRACKS.pxPerMm], [copper.map.width, copper.map.height, copper.mapPxPerMm]);
+  assert.deepEqual(layout.TRACKS.originMm, copper.map.originMm);
+  assert.match(boardModule, /top: \{ copperOf: \(d, i\) => d\[i\], printOf: \(d, i\) => d\[i \+ 2\], mask: token\('model-nes-pcb'\), copper: token\('model-copper'\), print: token\('model-nes-print'\) \}/);
+  assert.match(boardModule, /bottom: \{ copperOf: \(d, i\) => d\[i \+ 1\], printOf: null, mask: token\('model-nes-pcb-under'\)/);
+  assert.match(boardModule, /new MeshStandardMaterial\(\{ map: texture\(m\.colour, true\), roughnessMap: surface, metalnessMap: surface, roughness: 1, metalness: 1, bumpMap: texture\(m\.relief, false\), bumpScale: RELIEF \}\)/);
+  assert.doesNotMatch(boardModule, /emissive/, 'the tracks glow');
+});
+
+test('the access mark and the board\'s colours are tokens of their own, and the mark is not the lime', () => {
+  const tokens = fs.readFileSync(path.join(process.cwd(), 'src', 'styles', 'tokens.css'), 'utf8');
+  const value = (name) => new RegExp(`--${name}:\\s*(#[0-9a-f]{6});`).exec(tokens)?.[1];
+  for (const name of ['model-nes-pcb', 'model-nes-pcb-under', 'model-nes-print', 'model-active']) assert.ok(value(name), `tokens.css has no --${name}`);
+  assert.notEqual(value('model-active'), value('lime'));
+  assert.match(boardModule, /token\('model-active'\)/);
+});
+
+test('the legend lists every IC once, in reference order, with both consoles\' parts from ic-table.json', () => {
+  const refs = icTable.ics.map((i) => i.ref).sort((a, b) => Number(a.slice(1)) - Number(b.slice(1)));
+  for (const region of boardEntry.regions) {
+    const other = boardEntry.regions.find((r) => r !== region);
+    const rows = layout.chipLegend(region);
+    assert.deepEqual(rows.map((r) => r.ref), refs, region);
+    for (const row of rows) {
+      const t = icTable.ics.find((i) => i.ref === row.ref);
+      assert.equal(row.part, t.parts[region].part, `${row.ref} ${region}`);
+      assert.equal(row.otherPart, t.parts[other].part, `${row.ref} in the other console`);
+      assert.equal(row.role, t.role);
+      const ic = parts.model.ics.find((i) => i.ref === row.ref);
+      assert.deepEqual([row.chip, row.always], [ic.chip, ic.always]);
+      assert.ok(row.chip ? /^when the processor/.test(row.mark) : /^never: /.test(row.mark), `${row.ref}: ${row.mark}`);
+    }
+  }
+  // On the page: one row a chip, each console's part in it, the first console's shown.
+  const legend = /<div class="model-legend prose" data-model-legend>([\s\S]*?)<\/div>/.exec(boardSection)?.[1] ?? '';
+  assert.ok(legend, 'the NES page has no chip legend');
+  const rows = [...legend.matchAll(/<tr data-legend-ref="(U\d+)"[^>]*>([\s\S]*?)<\/tr>/g)];
+  assert.deepEqual(rows.map((m) => m[1]), refs);
+  for (const [, ref, cells] of rows) {
+    for (const region of boardEntry.regions) {
+      const part = icTable.ics.find((i) => i.ref === ref).parts[region].part;
+      assert.ok(cells.includes(`<span data-model-region="${region}"${region === boardEntry.regions[0] ? '' : ' hidden'}>${part}</span>`), `${ref}: ${region}'s part`);
+    }
+    const chip = parts.model.ics.find((i) => i.ref === ref).chip;
+    assert.equal(/data-legend-rate="(\w+)"/.exec(cells)?.[1] ?? null, chip, `${ref}: its rate cell`);
+  }
+  // Each counted chip has exactly one row to take its rate, in the machine's order.
+  assert.deepEqual(access.COUNTED.map((c) => rows.filter(([, , cells]) => cells.includes(`data-legend-rate="${c}"`)).length), [1, 1, 1, 1]);
+});
+
+test('the legend says in words what a mark means, why some chips are never marked, where U9\'s jobs and U7\'s and U8\'s ports come from, and that the heights are typical', () => {
+  const words = layout.LEGEND_WORDS.join(' ');
+  assert.deepEqual(boardEntry.legendWords, layout.LEGEND_WORDS);
+  assert.match(words, /read or written by the processor in the last quarter second/);
+  assert.match(words, /not that the chip is working/);
+  assert.match(words, /The CPU, the work RAM, the address decoder and the cartridge are in use all the time; the video RAM and the address latch are the PPU's own, in use whenever it draws; and the lockout chip is not emulated/);
+  assert.match(words, /By the redrawing's nets, U9, the hex inverter, inverts the PPU's address line A13 and the reset line and clocks the lockout chip, so it is in use all the time and is never marked/);
+  assert.match(words, /OpenTendo's KiCad redrawing of the board, a cross-check, and are not traced on the scan/);
+  assert.match(words, /U7 and U8 are the controller ports' buffers\. Which serves which port is by the board's print/);
+  assert.match(words, /checked against the nesdev wiki and the KiCad redrawing, and is not traced on the scan/);
+  assert.match(words, /The heights of the parts are typical ones, not measured/);
+  // U7 is port 1 and U8 port 2 in the legend as in ic-table.json.
+  for (const ref of ['U7', 'U8']) assert.match(words, new RegExp(`${ref} (is )?port ${icTable.ics.find((i) => i.ref === ref).port.value}`));
+  // Every reason an IC is never marked has its words, and the page shows them all.
+  for (const ic of parts.model.ics.filter((i) => i.always)) assert.ok(layout.NEVER[ic.always], ic.always);
+  const text = visibleText(boardSection);
+  for (const w of layout.LEGEND_WORDS) assert.ok(text.includes(visibleText(w)), `the page does not say: ${w}`);
+});
+
+test('each console\'s caption starts by saying it is a model of that console, and every figure in it is the layout\'s', () => {
+  const cm = (mm) => (mm / 10).toLocaleString('en-GB', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+  const start = { ntsc: 'Model, not a photograph, of an NTSC NES-001, the front-loading console sold in North America', pal: 'Model, not a photograph, of a PAL NESE-001, the front-loading console sold in Europe' };
+  for (const region of boardEntry.regions) {
+    const about = wordsFor(boardEntry, region).about;
+    assert.equal(about, layout.describe(region));
+    assert.ok(about.startsWith(start[region]), `${region}: ${about.slice(0, 90)}`);
+    assert.ok(about.includes(`${cm(parts.model.board.width)} by ${cm(parts.model.board.depth)} cm`));
+    for (const ref of ['U6', 'U5', 'U10']) assert.ok(about.includes(parts.model.ics.find((i) => i.ref === ref).parts[region]), `${region}: ${ref}`);
+    assert.ok(about.includes(parts.model.others[region].find((o) => o.kind === 'crystal').part));
+    assert.match(about, /not one real board/);
+    assert.match(about, /the heights of the parts are typical ones, not measured/);
+    assert.match(about, /to look at: the copper's connections are not verified/);
+  }
+  // Every height the parts file gives is typical, so the caption may say all of them are.
+  assert.ok(Object.entries(parts.model.heights).every(([k, h]) => k === 'board' || h.measured === false));
+});
+
+test('the results file is written from frame.json, registration.json, copper.json and parts.json, and agrees with them', () => {
+  const f = boardFigures;
+  assert.deepEqual(f.board, { widthMm: frameJson.board.widthMm, depthMm: frameJson.board.depthMm, dpi: frameJson.statedDpi });
+  assert.deepEqual(f.scale, { xMedianMm: frameJson.heldOutX.scaledErrMm.median, xRows: frameJson.heldOutX.n, yMedianPct: frameJson.heldOutY.errPct.median, yFootprints: frameJson.heldOutY.footprints.length, xyPct: frameJson.ratioPct, verdicts: frameJson.verdicts.map((v) => v.verdict) });
+  assert.deepEqual(f.solder, { holes: registration.solder.holes, heldOutMedianMm: registration.solder.heldOutMm.median, heldOutP90Mm: registration.solder.heldOutMm.p90, verdict: registration.solder.verdict });
+  assert.deepEqual(f.copper, {
+    top: copper.coverage.top, bottom: copper.coverage.bottom, drillsTop: copper.drillsInCopper.top, drillsBottom: copper.drillsInCopper.bottom, drills: copper.drills.n, mapPxPerMm: copper.mapPxPerMm,
+    nets: { chips: copper.nets.chips, gndPins: copper.nets.gnd.pins, gndInLargest: copper.nets.gnd.inLargest, vccPins: copper.nets.vcc.pins, vccInLargest: copper.nets.vcc.inLargest, touching: copper.nets.touching, verdict: copper.verdicts.nets },
+  });
+  const sits = Object.values(parts.sitsOn.ics);
+  const heights = Object.entries(parts.model.heights).filter(([k]) => k !== 'board').map(([, h]) => h);
+  assert.deepEqual(f.parts, {
+    ics: parts.model.ics.length, passives: parts.model.passives.length, kicadMaxMm: parts.kicad.maxMm, kicadMedianMm: parts.kicad.medianMm,
+    ntscWorstMm: Math.max(...sits.map((x) => Math.max(x.I4, x.I5))), palWorstMm: Math.max(...sits.map((x) => x.I3)), sitsOnLimitMm: parts.sitsOn.limitMm,
+    heightsTypical: heights.filter((h) => !h.measured).length, heightsMeasured: heights.filter((h) => h.measured).length,
+  });
+  assert.deepEqual(f.sources.map((x) => x.id), [...parts.model.sources, 'I2']);
+  for (const x of f.sources) {
+    const s = sources.find((y) => y.id === x.id);
+    assert.deepEqual(x, { id: s.id, url: s.url, page: s.page, sha256: s.sha256, kind: s.kind });
+  }
+  // results.py writes it; no URL is in the tool's code but in comments.
+  assert.match(fs.readFileSync(path.join(TOOL, 'results.py'), 'utf8'), /nes-famicom-board-model\.json/);
+});
+
+test('each console\'s note is made() from the results file, word for word on the page, and states the nets check\'s failure as copper.json has it', () => {
+  const text = visibleText(boardSection);
+  const notesOnPage = [...boardSection.matchAll(/<div class="model-made prose" data-model-made data-model-region="([a-z]+)"[^>]*>([\s\S]*?)<\/div>/g)];
+  assert.deepEqual(notesOnPage.map((m) => m[1]), boardEntry.regions);
+  for (const [, region, note] of notesOnPage) {
+    const { paragraphs, limits } = notes.made(boardFigures, region);
+    assert.deepEqual(boardEntry.made[region](boardFigures), { paragraphs, limits });
+    const t = visibleText(note);
+    for (const p of [...paragraphs, ...limits]) assert.ok(t.includes(visibleText(p)), `${region}: the page does not say: ${p}`);
+  }
+  // The nets result, from copper.json itself, and that the copper is not a netlist.
+  const n = copper.nets;
+  const sentence = notes.copperSentence(boardFigures);
+  assert.ok(sentence.includes(`${WORD[n.gnd.inLargest]} of ${WORD[n.gnd.pins]} ground pins fell in the largest ground net`));
+  assert.ok(sentence.includes(`${WORD[n.vcc.inLargest]} of ${WORD[n.vcc.pins]} +5V pins in the largest +5V net`));
+  assert.equal(copper.verdicts.nets, 'fail');
+  assert.match(sentence, /failed/);
+  assert.match(sentence, /not a netlist/);
+  assert.ok(n.touching && /a ground pin and a \+5V pin came out in the same net/.test(sentence));
+  assert.ok(text.includes(visibleText(sentence)));
+  // A figure the note gives is one the results file holds.
+  const pct = (v) => `${Math.round(v * 100)}%`;
+  for (const v of [boardFigures.copper.top, boardFigures.copper.bottom]) assert.ok(text.includes(pct(v)), `${pct(v)} is not on the page`);
+  for (const v of [boardFigures.solder.heldOutMedianMm, boardFigures.solder.heldOutP90Mm, boardFigures.parts.kicadMaxMm, boardFigures.parts.ntscWorstMm, boardFigures.parts.palWorstMm]) assert.ok(text.includes(`${v.toLocaleString('en-GB', { maximumFractionDigits: 3 })} mm`), `${v} mm is not on the page`);
+});
+
+test('every sentence on the page about the copper says it is traced to look at and its connections are not verified', () => {
+  // The caption, the help, the legend's words, the notes and their limits: the words the section shows.
+  const blocks = [
+    ...[...boardSection.matchAll(/<p class="figure-caption model-about"[^>]*>([\s\S]*?)<\/p>/g)].map((m) => m[1]),
+    /<p class="model-help"[^>]*>([\s\S]*?)<\/p>/.exec(boardSection)?.[1] ?? '',
+    ...[...boardSection.matchAll(/<(?:p|li)>([\s\S]*?)<\/(?:p|li)>/g)].map((m) => m[1]),
+  ].map(visibleText);
+  const sentences = blocks.flatMap((b) => b.split(/(?<=\.)\s+(?=[A-Z])/)).filter((x) => /copper/i.test(x));
+  assert.ok(sentences.length >= 6, `only ${sentences.length} sentences about the copper were found`);
+  for (const x of sentences) assert.ok(/to look at|not a netlist/.test(x) && /not verified|failed/.test(x), `a sentence about the copper does not say it is traced to look at and not verified: ${x}`);
+  // So do the status lines the model writes about the tracks.
+  const code = boardModule.replace(/^\s*\/\/.*$/gm, '');
+  // Its sentences: a capital to a full stop, in quotes on one line.
+  const said = [...code.matchAll(/'([A-Z][^'\n]*\.)'/g)].map((m) => m[1]).filter((x) => /copper/i.test(x));
+  assert.ok(said.length > 0, 'the model says nothing about the copper on its status line');
+  for (const x of said) assert.match(x, /to look at[\s\S]*not verified/, x);
+});
+
+test('every source the board used is credited in the registry by its address, and every reference the NES has is one the board used', () => {
+  const refs = nesRow.references ?? [];
+  const board = boardFigures.sources;
+  const of = (r) => board.find((x) => r.sourceUrl === x.url || r.sourceUrl === x.page);
+  for (const r of refs) {
+    const x = of(r);
+    assert.ok(x, `the reference ${r.sourceUrl} is not a source of the board`);
+    const s = sources.find((y) => y.id === x.id);
+    assert.equal(r.sha256, s.sha256, `${x.id}: the SHA-256 is not the original's`);
+    assert.equal(r.licence, s.licence, `${x.id}: the licence is not as sources.json records it`);
+    assert.equal(r.fetched, s.fetched, `${x.id}: fetched`);
+    // OpenTendo's are credited at the fork this project read them from, and name OpenTendo.
+    if (x.url.includes('/dbhq-uk/OpenTendo/')) {
+      assert.equal(r.sourceUrl, x.url);
+      assert.match(`${r.title} ${r.author}`, /OpenTendo/);
+    }
+  }
+  assert.deepEqual(board.map((x) => refs.filter((r) => of(r) === x).length), board.map(() => 1), 'a source of the board is credited not once');
+  // On the page, the note credits exactly those, in the registry's order, and not the photograph at the head of the page.
+  for (const [, , note] of boardSection.matchAll(/<div class="model-made prose" data-model-made data-model-region="([a-z]+)"[^>]*>([\s\S]*?)<\/div>/g)) {
+    const items = [...note.matchAll(/<li data-model-source>([\s\S]*?)<\/li>/g)].map((m) => m[1]);
+    assert.equal(items.length, refs.length);
+    refs.forEach((r, i) => {
+      assert.ok(items[i].includes(`href="${r.sourceUrl}"`), `credit ${i + 1} does not link ${r.sourceUrl}`);
+      assert.ok(visibleText(items[i]).includes(`by ${r.author}`));
+    });
+    assert.ok(!note.includes(nesRow.photos[0].sourceUrl), 'the photograph at the head of the page is credited as a source of the board');
+  }
+});
+
+test('the model reads the machine through panel.nes, takes a fresh baseline on nes:start and nes:region, and swaps every console\'s words together', () => {
+  assert.match(boardModule, /document\.querySelector\('\[data-nes\]'\)/);
+  // The region, upper case as the host gives it, lower-cased in one place.
+  assert.equal([...boardModule.matchAll(/toLowerCase\(\)/g)].length, 1);
+  assert.match(boardModule, /const regionNow = \(\) => nes\(\)\?\.region\?\.\(\)\?\.toLowerCase\(\) \?\? REGIONS\[0\];/);
+  assert.match(boardModule, /createSampler\(\{ counts: \(\) => nes\(\)\?\.accessCounts\?\.\(\) \?\? null, now: \(\) => performance\.now\(\) \}\)/);
+  assert.match(boardModule, /panel\?\.addEventListener\('nes:start', \(\) => \{\s*running = true;\s*setRegion\(regionNow\(\)\);\s*restart\(\);/);
+  assert.match(boardModule, /panel\?\.addEventListener\('nes:region', \(e\) => \{\s*setRegion\(e\.detail\?\.region\);\s*restart\(\);/);
+  assert.match(boardModule, /const restart = \(\) => \{\s*sampler\.reset\(\);\s*show\(null\);/);
+  assert.match(boardModule, /setInterval\(\(\) => \{\s*if \(!running\) return;\s*show\(sampler\.sample\(\)\);\s*\}, SAMPLE_MS\);/);
+  assert.match(boardModule, /const SAMPLE_MS = 250;/);
+  // The caption, the note and the legend's parts switch together, the names stay hidden, and the stage's name and description follow.
+  assert.match(boardModule, /for \(const el of root\.querySelectorAll\('\[data-model-region\]'\)\) if \(!el\.hasAttribute\('data-model-label'\)\) el\.hidden = el\.dataset\.modelRegion !== region;/);
+  assert.match(boardModule, /stage\.setAttribute\('aria-label', name\)/);
+  assert.match(boardModule, /stage\.setAttribute\('aria-describedby', `model-about-\$\{region\}`\)/);
+  // The test hooks the browser check reads.
+  for (const hook of ['root.dataset.modelRegion', 'root.dataset.modelAccessed', 'root.dataset.modelRates', 'root.dataset.modelTracks', 'root.dataset.modelParts', 'root.modelChipPoint = ', 'root.modelBoardPoint = (x, y, below = false) =>']) assert.ok(boardModule.includes(hook), hook);
+  // Pointing at a chip names it and marks its row.
+  assert.match(boardModule, /row\.toggleAttribute\('data-pointed', r === ref\)/);
+  assert.match(boardModule, /row\.toggleAttribute\('data-accessed', refs\.includes\(ref\)\)/);
 });

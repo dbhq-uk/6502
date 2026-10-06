@@ -234,7 +234,7 @@ const notOnAPc = Object.entries(NOT_ON_A_PC).reduce((groups, [key, why]) => grou
         <ul>
           {NES_NOT_MODELLED.map((m) => <li>{m.part[0].toUpperCase() + m.part.slice(1)}: <a href={issueUrl(m.issue)}>issue {m.issue}</a></li>)}
         </ul>
-        <p>Saving is not built, so a page reload loses battery RAM: a game that saves its progress on the cartridge loses it when the page is reloaded or closed. The NES's 3D models, the outside and the board, are a project of their own: <a href={issueUrl(NES_ISSUES.models)}>issue {NES_ISSUES.models}</a>.</p>
+        <p>Saving is not built, so a page reload loses battery RAM: a game that saves its progress on the cartridge loses it when the page is reloaded or closed. The NES's 3D models, the outside and the board, are a project of their own: <a href={issueUrl(NES_ISSUES.models)}>issue {NES_ISSUES.models}</a>. The board's model is below; the outside's is still to come.</p>
         </div>
       </div>
     </section>

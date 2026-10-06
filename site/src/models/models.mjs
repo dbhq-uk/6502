@@ -5,7 +5,7 @@
 // ways (tests/model.test.mjs). A machine has at most one model per view:
 // `board` for a machine with no case, `outside` and `inside` for one with a case.
 //
-// To add a model (the BBC Micro's two are next):
+// To add a model (the NES's outside and the BBC Micro's two are next):
 //   1. Write src/models/<module>.js, a browser module that exports
 //      `mount(root)`. It builds the scene with createStage() from ./stage.mjs,
 //      which every model shares (renderer, camera controls and their keyboard,
@@ -34,6 +34,8 @@
 // different matter: that is required of every running machine, in the registry.
 import { describe as describeKim1, TRACKS as KIM1_TRACKS } from './kim-1-layout.mjs';
 import { made as madeKim1 } from './kim-1-notes.mjs';
+import { describe as describeBoard, chipLegend, LABELS as BOARD_LABELS, LEGEND_WORDS, REGIONS as BOARD_REGIONS, TRACKS as BOARD_TRACKS, TRACKS_HELP as BOARD_TRACKS_HELP } from './nes-famicom-board-layout.mjs';
+import { made as madeBoard } from './nes-famicom-board-notes.mjs';
 
 /**
  * What the visitor is told about the controls, once, so the visible text under
@@ -72,6 +74,21 @@ export const MODELS = {
     texture: KIM1_TRACKS.src,
     /** How it was made, from its measurements (src/data/kim-1-model.json): the note under it. */
     made: madeKim1,
+  },
+  'nes-famicom-board': {
+    machine: 'nes',
+    view: 'inside',
+    /** It draws both consoles' boards, NTSC first; the page's region control names the one shown. */
+    regions: [...BOARD_REGIONS],
+    label: { ntsc: BOARD_LABELS.ntsc, pal: BOARD_LABELS.pal },
+    about: { ntsc: describeBoard('ntsc'), pal: describeBoard('pal') },
+    texture: BOARD_TRACKS.src,
+    /** What its track buttons do, in place of CONTROLS.tracks: its copper is traced to look at. */
+    tracksHelp: BOARD_TRACKS_HELP,
+    made: { ntsc: (f) => madeBoard(f, 'ntsc'), pal: (f) => madeBoard(f, 'pal') },
+    /** The chip legend under the model: chipLegend(region) gives its rows, and these words follow it. */
+    legend: chipLegend,
+    legendWords: LEGEND_WORDS,
   },
 };
 

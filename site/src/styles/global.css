@@ -306,6 +306,13 @@ footer .linkbtn:hover { color: var(--white); }
 /* How the model was made: its sources, its measured figures and its limits, under the caption. */
 .model-made { margin: 8px 0 0; }
 .model-made h3 { margin-top: 0; }
+/* The chip legend under a model with one (the NES's board): a mark shape in each counted chip's row, an empty square, filled with the access colour while the chip is marked; the row the pointer is on is lit. */
+.model-legend { margin: 8px 0 0; }
+.model-legend caption { text-align: left; padding: 0 0 8px; color: var(--white); font-weight: 500; }
+.model-mark { display: inline-block; width: 10px; height: 10px; margin-right: 8px; border: 1px solid currentColor; border-radius: 2px; }
+.model-legend tr[data-accessed] .model-mark { background: var(--model-active); border-color: var(--model-active); }
+.model-legend tr[data-pointed] { background: var(--veil); }
+[data-model]:not([data-state="running"]) .model-legend [data-legend-rate] { visibility: hidden; }
 .machine-run h2 + .kim1, .wrap > h2 + .prose { margin-top: 24px; }
 /* The chip page (/inside/): a 3D view beside a tour. The view's own colours are
    these same tokens, read by src/chip/main.js at run time. Without JavaScript

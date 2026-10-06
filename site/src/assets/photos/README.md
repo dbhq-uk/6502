@@ -21,8 +21,10 @@ resized copy of the source, which is a derivative under that licence.
 **What the 3D model takes from each**, for a machine that has one (the KIM-1),
 is in its section below and on the page. The analysis that does it is in
 `tools/kim1-model/` (its `README.md` says how to run it), and the journal for 2
-October 2026 has every figure. The BBC Micro and the NES have no model, so their
-photographs are shown and nothing is taken from them.
+October 2026 has every figure. The BBC Micro has no model, so its photograph is
+shown and nothing is taken from it. The NES has its board's model, which takes
+nothing from the NES's photograph here: the board is measured from scans and
+photographs that are not committed, listed in their own section below.
 
 ## kim-1.webp
 
@@ -115,7 +117,7 @@ photographs are shown and nothing is taken from them.
 | Taken | 27 July 2016, 21:32 (`DateTimeOriginal`: Nikon D7000). Uploaded to Commons on 29 July 2016, by the photographer, over two earlier photographs of 2011 under the same name; the file used is the current one, whose SHA-1 is below |
 | Fetched | 6 October 2026, from `upload.wikimedia.org/wikipedia/commons/8/82/Nintendo-Entertainment-System-NES-Console-FL.jpg`: 4020 by 2880 pixels, 2,193,817 bytes, SHA-1 `339e959bbdb741c24a7f00e4256152b00e5c802c` (the SHA-1 Commons records for the file), SHA-256 `53c4ff11da6ba56bc2d9d8138dd585d126e08fe22350e8e0363003f9ddb8ab3c` |
 | This copy | Not cropped: the console already sits in an even margin of about 240 pixels of white on every side (ImageMagick's trim box at 2 % fuzz is 3520 by 2395 at 243, 249). Resized only: `cwebp -q 82 -resize 1600 0 -metadata none`: 1600 by 1147 pixels, 32,014 bytes, SHA-256 `4325012461f3919fc899d0a9adca509d5f5f09d14833905c076c0cc1e6335f55`. Colours are the source's. The original is not committed, being over 1.5 MB; the line above is enough to fetch it again and check it |
-| Used for | The photograph of the machine at the head of its page. Nothing is traced or measured from it: the NES's 3D models are their own project (issue 68) |
+| Used for | The photograph of the machine at the head of its page. Nothing is traced or measured from it: the board's model takes nothing from it, and the case's model is still to come (issue 68) |
 
 The site builds AVIF and WebP copies of each file here at build time
 (`astro:assets`), so a page never loads a 1600 pixel master.
@@ -187,4 +189,25 @@ Hardware License (www.tapr.org/OHL).
 | Terms | The TAPR Open Hardware License's, credited to OpenTendo and its authors; `NOTICE.md` says what is derived from the scans |
 
 The build does not run the analysis, and nothing in the tests or the build
-fetches a scan. The inside model that draws the map comes later.
+fetches a scan. The NES board's model draws the map, served as
+`/models/nes-famicom-board-tracks.webp` beside its bundle by
+`scripts/build-models.mjs` and fetched with the model, never with the page.
+
+## The NES board's sources, which are not committed
+
+The NES board's model is measured from these, and none of them is in the
+repository: the scans state no licence of their own, and the photographs are
+large originals that are not shown on the page. Each is credited under the
+model, from the NES's `references` in `machines/registry.json`, which give the
+same address and SHA-256; `tools/nes-model/data/sources.json` has every input,
+and the tools check each against its SHA-256 before reading it. Fetched on 5
+October 2026.
+
+| Id | What | Address | Author | Licence, as stated | SHA-256 of the original | Used for |
+|---|---|---|---|---|---|---|
+| I1-front | A flatbed scan of a bare NES-CPU-10, its component side, at 300 dots an inch, in OpenTendo, as this project's fork of it holds it | <https://github.com/dbhq-uk/OpenTendo/raw/3bd0b0be5c9ed6fc6a36d9e458bc58d9976b2009/Scans/NES-CPU-10_front_300dpi.png> | The OpenTendo project, by Redherring32 and its contributors (the scans added by Kamoteshake; the scanner is not named) | None stated | `fd41c714258a4d379d034eaf39cdcfcc7aab5273f4dafb74ff8517b55c88ab3a` | The board's outline, holes, pads and scale, the component side's copper and the printed legend, traced to look at, and the place of every part |
+| I1-back | The same board's solder side, scanned the same way, in OpenTendo, as this project's fork of it holds it | <https://github.com/dbhq-uk/OpenTendo/raw/3bd0b0be5c9ed6fc6a36d9e458bc58d9976b2009/Scans/NES-CPU-10_back_300dpi.png> | The OpenTendo project, by Redherring32 and its contributors (the scans added by Kamoteshake; the scanner is not named) | None stated | `fa15ea9e5a57c8621932fa4cbd8b8121feba82a746cc996627f95b6d12b8a0a5` | The solder side's copper, traced to look at after the scan was turned over and fitted to the component side by its drilled holes |
+| I3 | A photograph of a populated PAL board, an NES-CPU-11, from above | <https://commons.wikimedia.org/wiki/File:Frontalansicht_Mainboard_NES_NESE-001_HOF06378.png> | PantheraLeo1359531 | CC BY 4.0 | `e9f606535f4b01507a62f185ce38aa3403862bb82f434cc51f148a90088ea8cd` | The PAL console's parts and their markings, and a check that each sits on the scanned board's footprint of the same name |
+| I4 | A photograph of a populated NES-CPU-07, from above | <https://commons.wikimedia.org/wiki/File:Nintendo-NES-Mk1-Motherboard-Top.jpg> | Evan-Amos | Public domain | `2158318ca6e7c913fce4220e8763dc8df4b37e70fea50cf29a1c975556a5b46c` | The NTSC console's parts and their markings, the chips' bodies, and a check that each sits on the scanned board's footprint of the same name |
+| I5 | A photograph of the same NES-CPU-07's solder side | <https://commons.wikimedia.org/wiki/File:Nintendo-NES-Mk1-Motherboard-Bottom.jpg> | Evan-Amos | Public domain | `64d52d1dbedfd123a56780def11821ef4157694e4d88d701924d567e2cb1ae10` | A check, from below, that the NTSC console's parts sit on the scanned board's footprints |
+| I2 | OpenTendo's redrawing of the front-loader's main board in KiCad, as this project's fork of it holds it | <https://github.com/dbhq-uk/OpenTendo/raw/3bd0b0be5c9ed6fc6a36d9e458bc58d9976b2009/Board%20Files/Motherboard.kicad_pcb> | Redherring32 and the OpenTendo contributors | TAPR Open Hardware License (the repository's README) | `9cce8323c9c18f0c583f99d1e07d7650f85858ca2599cbf52b2c75f384e8224a` | A cross-check only, from which nothing is drawn: the board's outline and the chips' places compared with the scan's, and U9's jobs and which buffer serves which controller port read from its nets |

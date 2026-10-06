@@ -170,8 +170,12 @@ test('the page says the NES needs a fast computer, gives no speed of its own, an
   assert.match(text, /it needs a fast computer to run at full speed/);
   assert.match(text, /The line under the screen says how fast this browser runs it, measured while it runs/);
   assert.ok(section('run').includes(`<a href="${issueUrl(ELSEWHERE.speed)}">issue ${ELSEWHERE.speed}</a>`));
-  // The live headroom line is the only speed: nothing on the page is a typed multiple or rate of its own.
-  assert.doesNotMatch(visibleText(html), /\d+(\.\d+)? times|times as fast|\d+(\.\d+)? MHz(?! \((NTSC|PAL)\))/);
+  // The live headroom line is the only speed: nothing on the page is a typed multiple or rate of its own. The board
+  // model's section is left out: it names each console's crystal by its marking (21.47727 MHz on the NTSC board), which
+  // is a part, read off a photograph, not a speed (tests/nes-models.test.mjs holds it to the parts file).
+  const outsideModel = html.replace(/<section class="model"[\s\S]*?(?=<section class="photos")/, '');
+  assert.ok(outsideModel.length < html.length, 'the page has no model section to leave out');
+  assert.doesNotMatch(visibleText(outsideModel), /\d+(\.\d+)? times|times as fast|\d+(\.\d+)? MHz(?! \((NTSC|PAL)\))/);
 });
 
 test('the page lists the parts left out, each linked to its issue, and the 3D models\' issue', () => {

@@ -53,6 +53,16 @@
   --model-capacitor: #ddd29a;
   --model-resistor: #b48f63;
   --model-wire: #9c2a20;
+  /* the NES's main board (its inside model): the lacquer of the component
+     side and of the solder side, lighter and yellower than the KIM-1's, and
+     the white of its printed legend; its copper is --model-copper, as the
+     KIM-1's. --model-active is the mark on a chip the processor read or wrote
+     in the last quarter second, on the model and in its legend: an amber, not
+     the lime, which stays the page's own accent. None is a text colour. */
+  --model-nes-pcb: #3a5a2c;
+  --model-nes-pcb-under: #476b36;
+  --model-nes-print: #e4e8d6;
+  --model-active: #f2b33d;
 
   /* type */
   --font-head: "Inter Tight Variable", "Inter Tight", system-ui, sans-serif;

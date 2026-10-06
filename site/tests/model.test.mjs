@@ -355,6 +355,28 @@ test('the track map is loaded with the model, never with the page, and the deplo
   assert.match(fs.readFileSync(path.join(process.cwd(), 'scripts', 'build-models.mjs'), 'utf8'), /fs\.copyFileSync\(tracks, `public\$\{MODELS\[id\]\.texture\}`\)/);
 });
 
+test('every model with a track map has it committed, inside the budget its plan set, and built beside its bundle byte for byte, where its entry says', () => {
+  // The KIM-1's map's budget is the test above's; the NES board's, set before it was traced, is 600,000 bytes (its plan's budgets).
+  const BUDGETS = { 'kim-1': TRACK_BUDGET, 'nes-famicom-board': 600_000 };
+  const textured = Object.entries(MODELS).filter(([, m]) => m.texture);
+  assert.ok(textured.length >= 2, 'fewer than two models have a track map');
+  for (const [id, m] of textured) {
+    const committed = path.join(process.cwd(), 'src', 'assets', 'tracks', `${id}.webp`);
+    assert.ok(fs.existsSync(committed), `src/assets/tracks/${id}.webp is missing`);
+    const bytes = fs.readFileSync(committed);
+    assert.ok(id in BUDGETS, `${id}'s track map has no budget here`);
+    assert.ok(bytes.length <= BUDGETS[id], `${id}'s track map is ${bytes.length} bytes, over its ${BUDGETS[id]} budget`);
+    assert.equal(m.texture, `/models/${id}-tracks.webp`);
+    const built = path.join(DIST, m.texture);
+    assert.ok(fs.existsSync(built), `${m.texture} was not built into dist`);
+    assert.ok(fs.readFileSync(built).equals(bytes), `${m.texture} is not the committed map`);
+    // The page names it for the loader, and nothing else on the page loads it.
+    const machinePage = page(`/machines/${m.machine}/`)?.html ?? '';
+    assert.match(machinePage, new RegExp(`data-model-texture="${m.texture}"`));
+    assert.doesNotMatch(machinePage.replace(/data-model-texture="[^"]*"/, ''), new RegExp(`${id}-tracks`));
+  }
+});
+
 test('both faces take their tracks as colour, shine and relief, from tokens, with no glow: the top from red or green, the underside from blue', () => {
   const model = fs.readFileSync(path.join(models, 'kim-1.js'), 'utf8');
   const tokens = fs.readFileSync(path.join(process.cwd(), 'src', 'styles', 'tokens.css'), 'utf8');
