@@ -1,7 +1,7 @@
 ---
 title: "The NES's speed in a browser, with the bus and the PPU"
 date: 2026-10-05
-summary: "The NES as built so far, with its bus and a PPU that draws the background and sprites, runs at about two times real time in a browser compiled ahead of time, on a machine that was busy, and about a fifth of the BBC Micro's rate on the same machine at the same time. The plan's rule says under ten times is a stop before the sound is built. The loaded figures alone do not make it a stop, but the estimate for a quiet machine is about three times, so the stop is almost certain, and the decision is Dan's. Task 6b, later that day, made it about a third faster, to 2.82 times real time on NTSC and 3.24 on PAL on a quiet machine, and estimated that ten times is out of reach without changing the core, the runtime or the design."
+summary: "The NES as built so far, with its bus and a PPU that draws the background and sprites, runs at about two times real time in a browser compiled ahead of time, on a machine that was busy, and about a fifth of the BBC Micro's rate on the same machine at the same time. The plan's rule says under ten times is a stop before the sound is built. The loaded figures alone do not make it a stop, but the estimate for a quiet machine is about three times, so the stop is almost certain, and the decision is Dan's. Task 6b, later that day, made it about a third faster on a quiet machine (the figures are in the entry), and estimated that ten times is out of reach without changing the core, the runtime or the design."
 order: 30
 ---
 

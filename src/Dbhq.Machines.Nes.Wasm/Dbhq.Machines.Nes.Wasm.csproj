@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk.WebAssembly">
   <!--
-    The NES as .NET WebAssembly, first for the browser speed check in bench/nes-speed/ and
-    later for its page on 6502.dbhq.uk. A plain WebAssembly app, not Blazor, in the shape of
+    The NES as .NET WebAssembly, for its page on 6502.dbhq.uk (site/public/nes.js) and for the
+    browser speed check in bench/nes-speed/. A plain WebAssembly app, not Blazor, in the shape of
     Dbhq.Machines.BbcMicro.Wasm. The cartridge is not in here: the caller gives it to Load as
     bytes (AGENTS.md rules 3 and 4).
   -->

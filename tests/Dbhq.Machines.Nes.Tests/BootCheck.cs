@@ -88,14 +88,21 @@ public static class BootCheck
     /// <summary>The frame after <see cref="Frames"/> frames hashes to the recorded hash for its region.</summary>
     public static void AssertFrameIsTheRecordedOne(Region region)
     {
+        Assert.Equal(ExpectedHash(region), Run(region).FrameSha256);
+    }
+
+    /// <summary>
+    /// The recorded hash of the frame after <see cref="Frames"/> frames on <paramref name="region"/>,
+    /// read from <see cref="ExpectedPath"/> once it is checked to be for this ROM and this count.
+    /// </summary>
+    public static string ExpectedHash(Region region)
+    {
         Assert.True(File.Exists(ExpectedPath), $"{ExpectedPath} does not exist. Record it with NES_RECORD=1 dotnet test --filter Record, look at the pictures it writes, and commit it.");
         using JsonDocument file = JsonDocument.Parse(File.ReadAllText(ExpectedPath));
         JsonElement root = file.RootElement;
         Assert.Equal(Pins.NesHomebrewPath, root.GetProperty("rom").GetString());
         Assert.True(root.GetProperty("frames").GetInt32() == Frames, $"the recording is of frame {root.GetProperty("frames").GetInt32()} and the check runs {Frames}: record it again");
-
-        string expected = root.GetProperty("hashes").GetProperty(region.Name).GetString()!;
-        Assert.Equal(expected, Run(region).FrameSha256);
+        return root.GetProperty("hashes").GetProperty(region.Name).GetString()!;
     }
 
     /// <summary>The picture has more than one colour, and more than a sliver of it is not the backdrop.</summary>

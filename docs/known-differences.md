@@ -862,8 +862,9 @@ PAL; the model applies it on NTSC too. The fork's `blargg_apu_2005.07.30` has
 the NTSC tests of the same name, and task 12 runs them: both pass with the rule,
 and both fail with it taken out (`apu.md` open item 5).
 
-**A pulse with a period under 8 is silent on PAL too.** The APU Pulse page asks
-"PAL behavior?" and no pinned ROM checks it (`apu.md` open item 3).
+**A pulse with a period under 8 is silent on PAL too.** The APU Pulse page
+leaves PAL's behaviour as an open question, and no pinned ROM checks it
+(`apu.md` open item 3).
 
 **The triangle's periods 0 and 1 are not halted.** They give the ultrasonic wave
 the sheet describes, a step every CPU cycle or every second one. Some emulators

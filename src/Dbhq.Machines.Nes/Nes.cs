@@ -92,4 +92,21 @@ public sealed class Nes
             Step();
         }
     }
+
+    /// <summary>
+    /// Runs whole instructions until <paramref name="frames"/> more frames have completed, and
+    /// stops at the instruction that completes the last: from power on, <c>RunFrames(n)</c> leaves
+    /// the picture of frame n, as the boot check takes it. A frame is tens of thousands of
+    /// cycles and an instruction a handful, so the count moves on one at a time.
+    /// </summary>
+    /// <exception cref="ArgumentOutOfRangeException"><paramref name="frames"/> is negative.</exception>
+    public void RunFrames(int frames)
+    {
+        ArgumentOutOfRangeException.ThrowIfNegative(frames);
+        long end = Bus.Ppu.Frame + frames;
+        while (Bus.Ppu.Frame < end)
+        {
+            Step();
+        }
+    }
 }

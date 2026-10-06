@@ -15,7 +15,7 @@ below says which code it measured.
 
 | Path | What it is |
 | --- | --- |
-| `../../src/Dbhq.Machines.Nes.Wasm/` | The machine as a WebAssembly app. The bench calls `Load` (the cartridge as bytes, the region, 0 NTSC or 1 PAL, and the sample rate), `Run`, `Cycles`, `Frames` and `CpuHz`. It holds no ROM. |
+| `../../src/Dbhq.Machines.Nes.Wasm/` | The machine as a WebAssembly app. The bench calls `Load` (the cartridge as bytes, the region by name, "NTSC" or "PAL", and the sample rate; it returns the sentence the page shows, which the bench prints), `Run`, `Cycles`, `Frames` and `CpuHz`. The page uses the same class (task 14 of the NES plan gave `Load` its region by name). It holds no ROM. |
 | `index.html`, `main.js` | The page. It fetches the ROM, boots it, then times the runs. |
 | `run-in-browser.mjs`, `package.json` | Fetches the ROM from the pinned fork, checks it against its SHA-256 in `Pins.cs`, serves it with the page and a published copy of the app on `127.0.0.1`, and runs it in a headless Chrome, a fresh launch each time. |
 | `native/` | The same workload as a console program, in the solution so CI builds it. |

@@ -46,7 +46,7 @@ bus, and its log also checks the PPU's dot counter. Task 6 measures the speed in
 a browser before the sound and the mappers exist, because a PPU stepped one dot
 at a time inside every CPU cycle is about 5.4 million dots a second and the
 browser has to keep up. A draft pull request opens after this task so that CI
-runs on every push.
+checks the branch as it grows.
 
 ## The fact sheets
 
