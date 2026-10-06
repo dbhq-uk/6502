@@ -313,8 +313,17 @@ async function drawn(page, root) {
 }
 
 const outsideState = (page) => page.locator(OUTSIDE).evaluate((m) => ({ state: m.dataset.state, region: m.dataset.modelRegion, led: m.dataset.modelLed, power: m.dataset.modelPower, presses: m.dataset.modelPresses, status: m.querySelector('[data-model-status]').textContent }));
-const settled = async (page, root) => {
-  await page.waitForFunction((id) => !document.getElementById(id).modelView().moving, root.slice(1), { timeout: 30_000 }).catch(() => {});
+/**
+ * A view's camera once it has come to rest: its modelView(), or null when it never came to rest within the wait, which
+ * is a problem, as the KIM-1's check makes it ("the camera never came to rest"). A caller compares nothing after a null:
+ * a camera still moving could match or miss by chance (the final review of 6 Oct 2026). Exported for its test.
+ */
+export const settled = async (page, root, problems) => {
+  const rested = await page.waitForFunction((id) => !document.getElementById(id).modelView().moving, root.slice(1), { timeout: 30_000 }).then(() => true, () => false);
+  if (!rested) {
+    problems.push(`nes: the camera never came to rest in ${root}`);
+    return null;
+  }
   await page.waitForTimeout(300);
   return page.locator(root).evaluate((m) => m.modelView());
 };
@@ -335,7 +344,7 @@ async function checkOutsideBeforeStart({ page, problems, requested }) {
   if (!loaded.includes('/models/nes-famicom-case.js')) problems.push('nes: scrolling to the models did not fetch the outside\'s bundle');
   if (loaded.some((f) => f.startsWith('/models/nes-famicom-board'))) problems.push(`nes: scrolling to the models fetched the inside's files too: ${loaded.join(', ')}`);
   if (await page.locator(INSIDE).isVisible()) problems.push('nes: the inside\'s panel is shown before its tab is chosen');
-  await settled(page, OUTSIDE);
+  await settled(page, OUTSIDE, problems);
   const d = await drawn(page, OUTSIDE);
   console.log(`nes: outside canvas ${d.size}, ${(d.share * 100).toFixed(1)}% drawn`);
   if (d.share < 0.05) problems.push(`nes: the outside model's canvas is blank (${(d.share * 100).toFixed(1)}% drawn)`);
@@ -400,15 +409,17 @@ async function checkOutsideRunning({ page, problems }) {
   // From below: the camera goes under the case, and the underside is drawn.
   await page.locator(`${OUTSIDE} [data-model-stage]`).focus();
   await page.keyboard.press('Home');
-  await settled(page, OUTSIDE);
+  await settled(page, OUTSIDE, problems);
   for (let i = 0; i < 14; i++) await page.keyboard.press('ArrowDown');
-  const below = await settled(page, OUTSIDE);
-  const d = await drawn(page, OUTSIDE);
-  console.log(`nes: under the case, polar ${below.polar.toFixed(3)}: ${(d.share * 100).toFixed(1)}% of the canvas drawn`);
-  if (!(below.polar > Math.PI - 0.05)) problems.push(`nes: the camera did not get under the case (polar ${below.polar.toFixed(3)})`);
-  if (d.share < 0.05) problems.push(`nes: from below, the case's canvas is blank (${(d.share * 100).toFixed(1)}%)`);
+  const below = await settled(page, OUTSIDE, problems);
+  if (below) {
+    const d = await drawn(page, OUTSIDE);
+    console.log(`nes: under the case, polar ${below.polar.toFixed(3)}: ${(d.share * 100).toFixed(1)}% of the canvas drawn`);
+    if (!(below.polar > Math.PI - 0.05)) problems.push(`nes: the camera did not get under the case (polar ${below.polar.toFixed(3)})`);
+    if (d.share < 0.05) problems.push(`nes: from below, the case's canvas is blank (${(d.share * 100).toFixed(1)}%)`);
+  }
   await page.keyboard.press('Home');
-  await settled(page, OUTSIDE);
+  await settled(page, OUTSIDE, problems);
   await page.evaluate(() => document.activeElement?.blur());
 }
 
@@ -444,23 +455,26 @@ async function checkTabs({ page, problems }) {
   await page.locator(`${INSIDE} [data-model-stage]`).focus();
   await page.keyboard.press('ArrowRight');
   await page.keyboard.press('ArrowUp');
-  const insideView = await settled(page, INSIDE);
+  const insideView = await settled(page, INSIDE, problems);
   await page.locator('#model-tab-inside').focus();
   await page.keyboard.press('ArrowLeft');
   await page.waitForTimeout(500);
   const left = await page.evaluate(() => ({ focused: document.activeElement?.id, selected: [...document.querySelectorAll('[role="tab"]')].filter((t) => t.getAttribute('aria-selected') === 'true').map((t) => t.id), outside: !document.getElementById('model-panel-outside').hidden, inside: !document.getElementById('model-panel-inside').hidden }));
-  const outsideView = await settled(page, OUTSIDE);
+  const outsideView = await settled(page, OUTSIDE, problems);
   await page.keyboard.press('ArrowRight');
   await page.waitForTimeout(500);
   const right = await page.evaluate(() => ({ focused: document.activeElement?.id, selected: [...document.querySelectorAll('[role="tab"]')].filter((t) => t.getAttribute('aria-selected') === 'true').map((t) => t.id) }));
-  const insideAgain = await settled(page, INSIDE);
+  const insideAgain = await settled(page, INSIDE, problems);
   await page.keyboard.press('ArrowLeft');
-  const outsideAgain = await settled(page, OUTSIDE);
+  const outsideAgain = await settled(page, OUTSIDE, problems);
   const same = (a, b) => Math.abs(a.polar - b.polar) + Math.abs(a.azimuth - b.azimuth) + Math.abs(a.distance - b.distance) < 1e-3;
-  console.log(`nes: Left from Inside: focus ${left.focused}, selected ${left.selected}, outside shown ${left.outside}, inside shown ${left.inside}; Right: focus ${right.focused}, selected ${right.selected}; the inside's camera kept ${same(insideView, insideAgain)} (azimuth ${insideView.azimuth.toFixed(3)} then ${insideAgain.azimuth.toFixed(3)}), the outside's ${same(outsideView, outsideAgain)}`);
+  // A camera that never came to rest is a problem already, and nothing is compared after it.
+  const compared = [insideView, outsideView, insideAgain, outsideAgain].every(Boolean);
+  const kept = compared ? `the inside's camera kept ${same(insideView, insideAgain)} (azimuth ${insideView.azimuth.toFixed(3)} then ${insideAgain.azimuth.toFixed(3)}), the outside's ${same(outsideView, outsideAgain)}` : 'the cameras not compared: one never came to rest';
+  console.log(`nes: Left from Inside: focus ${left.focused}, selected ${left.selected}, outside shown ${left.outside}, inside shown ${left.inside}; Right: focus ${right.focused}, selected ${right.selected}; ${kept}`);
   if (left.focused !== 'model-tab-outside' || left.selected.join() !== 'model-tab-outside' || !left.outside || left.inside) problems.push(`nes: Left on the Inside tab did not move to Outside and select it (${JSON.stringify(left)})`);
   if (right.focused !== 'model-tab-inside' || right.selected.join() !== 'model-tab-inside') problems.push(`nes: Right on the Outside tab did not move to Inside and select it (${JSON.stringify(right)})`);
-  if (!same(insideView, insideAgain) || !same(outsideView, outsideAgain)) problems.push('nes: a view did not keep its camera when switched away and back');
+  if (compared && (!same(insideView, insideAgain) || !same(outsideView, outsideAgain))) problems.push('nes: a view did not keep its camera when switched away and back');
   // Tab from the selected tab goes into its panel's stage, and on out of the section: no trap.
   const path_ = [];
   for (let i = 0; i < 20; i++) {
