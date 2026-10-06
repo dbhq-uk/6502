@@ -1,3 +1,5 @@
+using System.Runtime.CompilerServices;
+
 namespace Dbhq.Cpu6502;
 
 public sealed partial class Cpu
@@ -11,11 +13,14 @@ public sealed partial class Cpu
     private const byte V = 0x40;
     private const byte N = 0x80;
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private bool Flag(byte flag) => (P & flag) != 0;
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private void SetFlag(byte flag, bool on) => P = on ? (byte)(P | flag) : (byte)(P & ~flag);
 
     /// <summary>Sets N and Z from a result and returns it.</summary>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private byte NZ(byte value)
     {
         SetFlag(Z, value == 0);

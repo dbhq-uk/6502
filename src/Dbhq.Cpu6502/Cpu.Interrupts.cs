@@ -1,3 +1,5 @@
+using System.Runtime.CompilerServices;
+
 namespace Dbhq.Cpu6502;
 
 public sealed partial class Cpu
@@ -20,6 +22,7 @@ public sealed partial class Cpu
     /// or lost. The poll snapshot is what Step decides from; a taken branch
     /// that stays on its page freezes it after its operand cycle.
     /// </remarks>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private void EndCycle()
     {
         Cycles++;

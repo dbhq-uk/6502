@@ -1,7 +1,10 @@
+using System.Runtime.CompilerServices;
+
 namespace Dbhq.Cpu6502;
 
 public sealed partial class Cpu
 {
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private void Branch(bool taken)
     {
         sbyte offset = (sbyte)Read(PC++);
