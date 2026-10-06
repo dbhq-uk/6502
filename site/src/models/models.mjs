@@ -18,7 +18,9 @@
 //      claimed model must have) giving the note on how it was made. A model
 //      that draws more than one console (the NES's, NTSC and PAL) lists them in
 //      `regions` and keys `label`, `about` and `made` by region; read the words
-//      through wordsFor(entry), never from the fields directly. It is here and
+//      through wordsFor(entry), never from the fields directly. A model may add
+//      `help`, a sentence on what clicking it does, which the page puts with
+//      its controls. It is here and
 //      not in the registry because the regions are a fact about what the module
 //      draws, and the registry's claim stays one module for one view.
 //   3. Claim it in the machine's registry entry. src/lib/registry.mjs refuses a
@@ -36,6 +38,8 @@ import { describe as describeKim1, TRACKS as KIM1_TRACKS } from './kim-1-layout.
 import { made as madeKim1 } from './kim-1-notes.mjs';
 import { describe as describeBoard, chipLegend, LABELS as BOARD_LABELS, LEGEND_WORDS, REGIONS as BOARD_REGIONS, TRACKS as BOARD_TRACKS, TRACKS_HELP as BOARD_TRACKS_HELP } from './nes-famicom-board-layout.mjs';
 import { made as madeBoard } from './nes-famicom-board-notes.mjs';
+import { describe as describeCase, LABELS_FOR as CASE_LABELS, HELP as CASE_HELP, REGIONS as CASE_REGIONS } from './nes-famicom-case-layout.mjs';
+import { made as madeCase } from './nes-famicom-case-notes.mjs';
 
 /**
  * What the visitor is told about the controls, once, so the visible text under
@@ -74,6 +78,17 @@ export const MODELS = {
     texture: KIM1_TRACKS.src,
     /** How it was made, from its measurements (src/data/kim-1-model.json): the note under it. */
     made: madeKim1,
+  },
+  'nes-famicom-case': {
+    machine: 'nes',
+    view: 'outside',
+    /** It draws both consoles' cases, NTSC first; the page's region control names the one shown. */
+    regions: [...CASE_REGIONS],
+    label: { ntsc: CASE_LABELS.ntsc, pal: CASE_LABELS.pal },
+    about: { ntsc: describeCase('ntsc'), pal: describeCase('pal') },
+    /** What a click on its POWER and RESET does, said under it. */
+    help: CASE_HELP,
+    made: { ntsc: (f) => madeCase(f, 'ntsc'), pal: (f) => madeCase(f, 'pal') },
   },
   'nes-famicom-board': {
     machine: 'nes',

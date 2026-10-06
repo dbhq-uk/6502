@@ -78,7 +78,9 @@
       "height": 2253,
       "sha256": "3cf7eca8f43bafd3a8f341127d6c6f728acd2da3d2deb2464d93b66681b913d6",
       "committed": null,
-      "use": "The PAL NESE-001's top shell, straight on from the front: its label, and its front face against the NTSC case's"
+      "use": "The PAL NESE-001's top shell, straight on from the front: its label, and its front face against the NTSC case's",
+      "focalLengthMm": 20,
+      "focalLengthFrom": "the file's own XMP, exif:FocalLength 200/10 on an ILCE-7RM4, read on 6 October 2026"
     },
     {
       "id": "O5",
@@ -334,7 +336,9 @@
       "height": 4861,
       "sha256": "b3add1f8480e6afb1a89a11e1aa447f1a195c1e5752bb7dbce08cc2a269d03df",
       "committed": null,
-      "use": "The PAL NESE-001's bottom shell from above with the board in it, solder side up: the board's place in the case (by its holes and pins against the rim, through the camera its XMP records)"
+      "use": "The PAL NESE-001's bottom shell from above with the board in it, solder side up: the board's place in the case (by its holes and pins against the rim, through the camera its XMP records)",
+      "focalLengthMm": 20,
+      "focalLengthFrom": "the file's own XMP, exif:FocalLength 200/10 on an ILCE-7RM4, read on 6 October 2026"
     },
     {
       "id": "O10",
@@ -350,7 +354,9 @@
       "height": 3839,
       "sha256": "15a62769d03497da6f09a0ab6351c8d00167acb63d4af4a1ba18048df1e7be10",
       "committed": null,
-      "use": "The PAL NESE-001's bottom shell from the rear: the words on its rear window"
+      "use": "The PAL NESE-001's bottom shell from the rear: the words on its rear window",
+      "focalLengthMm": 20,
+      "focalLengthFrom": "the file's own XMP, exif:FocalLength 200/10 on an ILCE-7RM4, read on 6 October 2026"
     }
   ]
 }

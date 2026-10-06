@@ -905,9 +905,9 @@ const frameJson = frame;
 const WORD = ['no', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten'];
 
 test('the NES claims the inside model, and the entry is the plan\'s: the machine, the view, both consoles, the track map and the legend', () => {
-  assert.deepEqual(nesRow.models, [{ view: 'inside', module: BOARD_ID }]);
-  // Task 7 of the plan: no case until task 9 claims the outside with it (6 Oct 2026).
-  assert.equal(nesRow.case, undefined);
+  // Task 9 of the plan: case is back, with both views, the outside first (6 Oct 2026; task 7 had the inside alone).
+  assert.deepEqual(nesRow.models, [{ view: 'outside', module: 'nes-famicom-case' }, { view: 'inside', module: BOARD_ID }]);
+  assert.equal(nesRow.case, true);
   assert.equal(boardEntry.machine, 'nes');
   assert.equal(boardEntry.view, 'inside');
   assert.deepEqual(boardEntry.regions, ['ntsc', 'pal']);
@@ -1166,4 +1166,226 @@ test('the model reads the machine through panel.nes, takes a fresh baseline on n
   // Pointing at a chip names it and marks its row.
   assert.match(boardModule, /row\.toggleAttribute\('data-pointed', r === ref\)/);
   assert.match(boardModule, /row\.toggleAttribute\('data-accessed', refs\.includes\(ref\)\)/);
+});
+
+// --- task 9: the outside model, and both models as views ------------------------------------
+
+const CASE_ID = 'nes-famicom-case';
+const caseEntry = MODELS[CASE_ID];
+const caseLayout = await import('../src/models/nes-famicom-case-layout.mjs');
+const caseNotes = await import('../src/models/nes-famicom-case-notes.mjs');
+const caseFigures = JSON.parse(fs.readFileSync(path.join(process.cwd(), 'src', 'data', `${CASE_ID}-model.json`), 'utf8'));
+const caseModule = fs.readFileSync(path.join(process.cwd(), 'src', 'models', `${CASE_ID}.js`), 'utf8');
+const caseSection = modelPanel(nesHtml, CASE_ID);
+const caseText = visibleText(caseSection);
+const mm2 = (v) => v.toLocaleString('en-GB', { maximumFractionDigits: 2 });
+
+test('the outside model\'s entry is the plan\'s: the NES, the outside view, both consoles, each caption naming its console first', () => {
+  assert.equal(caseEntry.machine, 'nes');
+  assert.equal(caseEntry.view, 'outside');
+  assert.deepEqual(caseEntry.regions, ['ntsc', 'pal']);
+  assert.ok(caseSection.startsWith('<div class="model-panel" role="tabpanel" id="model-panel-outside"'), 'the outside is not the first view\'s panel');
+  const start = { ntsc: 'Model, not a photograph, of an NTSC NES-001, the front-loading console sold in North America', pal: 'Model, not a photograph, of a PAL NESE-001, the front-loading console sold in Europe' };
+  for (const r of caseEntry.regions) {
+    const { about, label } = wordsFor(caseEntry, r);
+    assert.equal(about, caseLayout.describe(r));
+    assert.ok(about.startsWith(start[r]), `${r}: ${about.slice(0, 90)}`);
+    assert.match(about, /the published size, which is not Nintendo's own/);
+    assert.match(label, new RegExp(`${r === 'pal' ? 'a PAL NESE-001' : 'an NTSC NES-001'}\\. Click POWER`));
+    assert.equal(typeof caseEntry.made[r], 'function');
+  }
+  assert.match(caseLayout.describe('pal'), /own words, read from photographs of a PAL console: EUROPEAN VERSION, /);
+  assert.match(caseLayout.describe('pal'), /yellowed; the model draws it as made/);
+});
+
+test('the regions the outside model draws are the regions the NES page offers, both ways', () => {
+  const values = [...nesHtml.matchAll(/<input\b[^>]*\bname="nes-region"[^>]*>/g)].map((m) => /\bvalue="([^"]+)"/.exec(m[0])[1].toLowerCase());
+  assert.deepEqual(values, caseEntry.regions, 'the first region is the one the page starts on');
+  assert.deepEqual(caseLayout.REGIONS, caseEntry.regions);
+});
+
+test('the case\'s sizes are case.json\'s, and its results file is case.json\'s figures and its sources', () => {
+  assert.deepEqual([caseLayout.CASE.width, caseLayout.CASE.depth, caseLayout.CASE.height], [caseData.footprint.widthMm, caseData.footprint.depthMm, caseData.heightMm]);
+  const f = caseFigures;
+  assert.deepEqual([f.size.widthMm, f.size.depthMm, f.size.heightMm, f.size.from, f.size.notNintendos], [caseData.footprint.widthMm, caseData.footprint.depthMm, caseData.heightMm, caseData.heightFrom, true]);
+  assert.match(caseData.footprint.widthSource, new RegExp(`good to about ${f.size.goodToPct} per cent`));
+  assert.deepEqual(f.profile.endsMm, caseData.profileCheck.endsMm);
+  assert.equal(f.profile.heldOutMm, caseData.profileCheck.errMm);
+  assert.equal(f.profile.insetMm, caseLayout.PROFILE.points.at(-1).inset);
+  assert.match(caseData.profileCheck.endsWhat, new RegExp(`good to about ${f.profile.goodToMm} mm`));
+  assert.deepEqual([f.rear.placesUsedMm, f.rear.boardMissMm, f.rear.within, f.rear.checked, f.rear.worstMm, f.rear.words], [caseData.rearCheck.uncertaintyMm.placesUsed, caseData.rearCheck.uncertaintyMm.boardMiss, caseData.rearCheck.within, caseData.rearCheck.checked, caseData.rearCheck.worstMm, caseData.rearCheck.words]);
+  assert.deepEqual([f.rear.placesUsedMm, f.rear.boardMissMm], [1.3, 5.16], 'the rear check is not as measured on 5 October 2026');
+  assert.equal(f.boardInCase.uncertaintyMm, caseData.boardInCase.uncertaintyMm);
+  assert.equal(f.boardInCase.sharedMoulding, true);
+  assert.deepEqual([f.buttons.travelMm, f.buttons.travelFrom], [caseData.buttons[0].travelMm, 'typical']);
+  assert.equal(f.powerLatchSeen, caseData.powerLatch.seen);
+  for (const id of ['O4', 'O10']) assert.equal(sources.find((s) => s.id === id).focalLengthMm, f.palLensMm, id);
+  // O9's own XMP, in case.json, is the same camera at the same focal length.
+  assert.equal(caseData.boardInCase.o9.xmp['exif:FocalLength'], `${f.palLensMm * 10}/10`);
+  assert.deepEqual(f.sources.map((x) => x.id), caseData.sources);
+  for (const x of f.sources) {
+    const s = sources.find((y) => y.id === x.id);
+    assert.deepEqual(x, { id: s.id, url: s.url, page: s.page, sha256: s.sha256, kind: s.kind });
+  }
+  assert.match(fs.readFileSync(path.join(TOOL, 'results.py'), 'utf8'), /nes-famicom-case-model\.json/);
+});
+
+test('every feature of the case lies on it: on its faces, inside its footprint and its height', () => {
+  const { CASE, DOOR, BUTTONS, LED, PORTS, REAR, LABELS, UNDERSIDE, FEET, VENTS } = caseLayout;
+  const top = CASE.height + CASE.feet;
+  const across = (x, w, what) => assert.ok(x >= 0 && x + w <= CASE.width, `${what}: x ${x} to ${x + w} is off the case`);
+  const up = (z, h, what) => assert.ok(z >= CASE.feet - 1e-9 && z + h <= top + 1e-9, `${what}: z ${z} to ${z + h} is off the case`);
+  const along = (y, d, what) => assert.ok(y >= 0 && y + d <= CASE.depth + 1e-9, `${what}: y ${y} to ${y + d} is off the case`);
+  for (const [what, f] of [['the door', DOOR.front], ['the LED', LED], ...BUTTONS.list.map((b) => [b.name, b]), ...PORTS.list.map((p) => [`port ${p.name}`, p])]) { across(f.x, f.w, what); up(f.z, f.h, what); }
+  across(DOOR.top.x, DOOR.top.w, 'the door\'s top'); along(DOOR.top.y, DOOR.top.d, 'the door\'s top');
+  for (const v of VENTS.list) { across(v.x, v.w, 'a vent'); along(v.y, v.d, 'a vent'); }
+  for (const r of caseLayout.REGIONS) {
+    for (const c of REAR[r]) {
+      if (c.face === 'rear') { across(c.x, c.w, c.label); up(c.z, c.h, c.label); } else { across(c.x, 0, c.label); up(c.z, 0, c.label); along(c.y, 0, c.label); }
+    }
+    for (const l of LABELS[r]) {
+      const [x, a, w, b] = l.box;
+      across(x, w, l.words);
+      if (l.face === 'bottom') along(a, b, l.words); else up(a, b, l.words);
+    }
+    const u = UNDERSIDE[r];
+    for (const p of [u.cover, u.coverInner, ...u.panels]) { across(p.x, p.w, 'an underside panel'); along(p.y, p.d, 'an underside panel'); }
+  }
+  for (const f of FEET.list) { across(f.x - f.d / 2, f.d, 'a foot'); along(f.y - f.d / 2, f.d, 'a foot'); }
+  // The buttons are on the case's front face, and the front words on the door or the front.
+  for (const b of BUTTONS.list) assert.equal(b.y, CASE.depth);
+});
+
+test('the case\'s words are words: no module of the NES\'s models names a logo, loads an image but its own drawn words and the track map, or holds an SVG path', () => {
+  const dir = path.join(process.cwd(), 'src', 'models');
+  for (const f of fs.readdirSync(dir).filter((x) => x.startsWith('nes-famicom-'))) {
+    const src = fs.readFileSync(path.join(dir, f), 'utf8');
+    assert.doesNotMatch(src, /logo/i, `${f} names a logo`);
+    assert.doesNotMatch(src, /<path\b|Path2D|SVGLoader|\bd="M|\.svg\b/i, `${f} holds an SVG path`);
+    const images = [...src.matchAll(/new Image\(|TextureLoader|ImageLoader|ImageBitmapLoader|fetch\(/g)].map((m) => m[0]);
+    if (f === 'nes-famicom-board.js') assert.deepEqual(images, ['new Image('], 'the board loads an image other than its track map');
+    else assert.deepEqual(images, [], `${f} loads an image`);
+  }
+  // The case's words are drawn from text, in the site's own type, after it has loaded, into one canvas.
+  assert.equal([...caseModule.matchAll(/document\.createElement\('canvas'\)/g)].length, 1, 'the case draws its words into more than one canvas');
+  assert.match(caseModule, /document\.fonts\?\.load\(f\)/);
+  assert.match(caseModule, /css\.getPropertyValue\('--font-head'\)/);
+  assert.match(caseModule, /g\.fillText\(line, 0, 0\)/);
+  for (const r of caseLayout.REGIONS) for (const l of caseLayout.LABELS[r]) assert.ok(typeof l.words === 'string' && /\w/.test(l.words), `${r}: a label is not words`);
+});
+
+test('the outside model follows the machine: the light and POWER from panel.nes.running(), RESET down on nes:reset, the region at mount and on nes:region', () => {
+  assert.equal(caseLayout.PRESS_MS, 140);
+  assert.match(caseModule, /const running = \(\) => nes\(\)\?\.running\?\.\(\) === true;/);
+  // The region the page has when the view mounts, not when the page loaded (Review Focus 3).
+  assert.match(caseModule, /const regionNow = \(\) => nes\(\)\?\.region\?\.\(\)\?\.toLowerCase\(\) \?\? REGIONS\[0\];\s*setRegion\(REGIONS\.includes\(regionNow\(\)\) \? regionNow\(\) : REGIONS\[0\]\);/);
+  assert.match(caseModule, /panel\?\.addEventListener\('nes:region', \(e\) => setRegion\(e\.detail\?\.region\)\);/);
+  assert.match(caseModule, /panel\?\.addEventListener\('nes:reset', \(\) => \{/);
+  assert.match(caseModule, /setTimeout\(\(\) => \{ reset\.position\.z = reset\.userData\.out;[^}]*\}, PRESS_MS\)/);
+  assert.match(caseModule, /every\(\(\) => show\(running\(\)\)\);/);
+  assert.match(caseModule, /led\.material = on \? M\.ledOn : M\.ledOff;/);
+  assert.match(caseModule, /ledOn: new MeshBasicMaterial\(\{ color: token\('model-led'\)/);
+  assert.match(caseModule, /ledOff: standard\('model-led-off'/);
+  assert.match(caseModule, /in: out - S\(b\.travelMm\)/);
+  for (const hook of ['root.dataset.modelRegion', 'root.dataset.modelLed', 'root.dataset.modelPower', 'root.dataset.modelPresses', 'root.modelButtonPoint = ']) assert.ok(caseModule.includes(hook), hook);
+  // The camera may go under the case: the stage's full orbit, and the bounds the case plus two centimetres.
+  assert.match(caseModule, /const margin = 2;/);
+  assert.match(caseModule, /createStage\(root, \{ view: \[[^\]]*\], bounds, minDistance: 3, maxDistance: 150 \}\)/);
+  // Its colours, the case as made in greys, are tokens of its own, and none is the lime.
+  const tokens = fs.readFileSync(path.join(process.cwd(), 'src', 'styles', 'tokens.css'), 'utf8');
+  const value = (name) => new RegExp(`--${name}:\\s*(#[0-9a-f]{6});`).exec(tokens)?.[1];
+  for (const name of ['model-nes-case', 'model-nes-case-dark', 'model-nes-band', 'model-nes-button', 'model-nes-ink', 'model-nes-sticker']) {
+    assert.ok(value(name), `tokens.css has no --${name}`);
+    assert.notEqual(value(name), value('lime'));
+  }
+  for (const grey of ['model-nes-case', 'model-nes-case-dark']) {
+    const [r, g, b] = value(grey).slice(1).match(/../g).map((h) => parseInt(h, 16));
+    assert.ok(Math.max(r, g, b) - Math.min(r, g, b) <= 8, `--${grey} is not a grey: the case is drawn as made, not yellowed`);
+  }
+});
+
+/** A made-up machine panel: Start, its state, and panel.nes as public/nes.js gives it before and after Start. */
+function fakePanel({ running = false, startDisabled = false, state = 'ready' } = {}) {
+  const calls = { start: 0, reset: 0 };
+  const start = { disabled: startDisabled, hidden: running, click: () => { calls.start++; } };
+  const panel = {
+    dataset: { state },
+    querySelector: (s) => (s === '[data-nes-start]' ? start : null),
+    nes: { running: () => running, region: () => 'NTSC', reset: () => { calls.reset++; } },
+  };
+  return { panel, calls };
+}
+
+test('a click on the model\'s buttons before Start: POWER does what Start does, RESET does nothing and the status says the machine is not running (Review Focus 4)', () => {
+  const { STATUS, press } = caseLayout;
+  let p = fakePanel();
+  assert.equal(press('POWER', p.panel), STATUS.starting);
+  assert.deepEqual(p.calls, { start: 1, reset: 0 }, 'POWER did not press Start');
+  p = fakePanel();
+  assert.equal(press('RESET', p.panel), STATUS.notRunning);
+  assert.deepEqual(p.calls, { start: 0, reset: 0 }, 'RESET did something before Start');
+  assert.match(STATUS.notRunning, /not running/);
+  // While Start's download runs, and on a page that cannot start the machine, POWER says so and presses nothing.
+  p = fakePanel({ startDisabled: true, state: 'loading' });
+  assert.equal(press('POWER', p.panel), STATUS.loading);
+  p = fakePanel({ startDisabled: true, state: 'missing' });
+  assert.equal(press('POWER', p.panel), STATUS.cannot);
+  assert.deepEqual(p.calls, { start: 0, reset: 0 });
+  // With no machine panel on the page at all, nothing is called and nothing throws.
+  assert.equal(press('RESET', null), STATUS.notRunning);
+  assert.equal(press('POWER', null), STATUS.cannot);
+});
+
+test('a click on the model\'s buttons once the machine runs: RESET resets it through panel.nes.reset(), POWER changes nothing and says there is no power-off', () => {
+  const { STATUS, press } = caseLayout;
+  const p = fakePanel({ running: true });
+  assert.equal(press('RESET', p.panel), STATUS.reset);
+  assert.equal(press('POWER', p.panel), STATUS.noPowerOff);
+  assert.deepEqual(p.calls, { start: 0, reset: 1 });
+  assert.match(STATUS.noPowerOff, /no power-off/);
+  // The model's click goes through press(), with the page's panel.
+  assert.match(caseModule, /status\.textContent = press\(o\.userData\.button, panel\)/);
+  // POWER presses the page's own Start button, the one public/nes.js wires to run().
+  const driver = fs.readFileSync(path.join(process.cwd(), 'public', 'nes.js'), 'utf8');
+  assert.match(driver, /start\.addEventListener\('click', \(\) => run\(panel, say\), \{ once: true \}\);/);
+  assert.match(fs.readFileSync(path.join(process.cwd(), 'src', 'models', 'nes-famicom-case-layout.mjs'), 'utf8'), /panel\?\.querySelector\('\[data-nes-start\]'\)/);
+});
+
+test('the outside\'s note states every uncertainty plainly, with its figures read from the results file, and the page shows it word for word', () => {
+  const f = caseFigures;
+  const notes = [...caseSection.matchAll(/<div class="model-made prose" data-model-made data-model-region="([a-z]+)"[^>]*>([\s\S]*?)<\/div>/g)];
+  assert.deepEqual(notes.map((m) => m[1]), caseEntry.regions);
+  for (const [, region, note] of notes) {
+    const { paragraphs, limits } = caseNotes.made(f, region);
+    assert.deepEqual(caseEntry.made[region](f), { paragraphs, limits });
+    const t = visibleText(note);
+    for (const x of [...paragraphs, ...limits]) assert.ok(t.includes(visibleText(x)), `${region}: the page does not say: ${x}`);
+    const all = [...paragraphs, ...limits].join(' ');
+    // The size: published, not Nintendo's, good to about 3 per cent.
+    assert.ok(all.includes(`published ${mm2(f.size.widthMm)} by ${mm2(f.size.depthMm)} mm and ${mm2(f.size.heightMm)} mm high`), 'the published size');
+    assert.match(all, /none of them Nintendo's/);
+    assert.ok(all.includes(`good to about ${mm2(f.size.goodToPct)} per cent`));
+    // The profile: an average, good to about 2.5 mm, of ends from 12.86 to 17.71 mm.
+    assert.ok(all.includes(`range from ${mm2(f.profile.endsMm.min)} to ${mm2(f.profile.endsMm.max)} mm, so the inset is an average good to about ${mm2(f.profile.goodToMm)} mm`));
+    // The rear: placed from a photograph that agrees with the patent within 1.3 mm; the board's places missed by up to 5.16; failed.
+    assert.ok(all.includes(caseNotes.rearSentence(f)));
+    assert.ok(all.includes(`within ${mm2(f.rear.placesUsedMm)} mm`) && all.includes(`missed by up to ${mm2(f.rear.boardMissMm)} mm`));
+    assert.match(all, /the check failed as measured/);
+    // The board's place: about 2 mm, assuming one moulding.
+    assert.ok(all.includes(`good to about ${mm2(f.boardInCase.uncertaintyMm)} mm, and assumes that the PAL and NTSC cases share one moulding`));
+    // The buttons' travel, typical; POWER's latch, not known.
+    assert.ok(all.includes(`The buttons' travel, ${mm2(f.buttons.travelMm)} mm, is a typical one, not measured`));
+    assert.match(all, /Whether POWER latches in on a real console is not known/);
+    // The jacks on the side and the PAL rear: not checked against the board.
+    assert.match(all, /The video and audio jacks on the side are not checked against the board, and neither is the PAL console's rear/);
+    // The PAL words: a 20 mm lens, strong perspective.
+    assert.ok(all.includes(`taken with a ${mm2(f.palLensMm)} mm lens, with strong perspective`));
+    // The lockout chip is not emulated, so the light never blinks.
+    assert.match(all, /lockout chip is not emulated, so the power light never blinks/);
+  }
+  // The caption says the size is not Nintendo's; the help, under the model, what its buttons do and that the light never blinks.
+  assert.match(caseText, /the published size, which is not Nintendo's own/);
+  assert.ok(caseText.includes(caseLayout.HELP));
+  assert.match(caseLayout.HELP, /The page has no power-off/);
+  assert.match(caseLayout.HELP, /the light never blinks/);
 });

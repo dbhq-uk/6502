@@ -63,6 +63,18 @@
   --model-nes-pcb-under: #476b36;
   --model-nes-print: #e4e8d6;
   --model-active: #f2b33d;
+  /* the NES's case (its outside model), as made and not yellowed: the light
+     grey of the upper shell and the cartridge door, the darker grey of the lower
+     shell, the black band over the right, the grey of POWER and RESET, the red
+     of the words printed on it, and the paper of the labels underneath. Its
+     power light is --model-led, lit, and --model-led-off, dark, as the KIM-1's
+     LEDs. None is a text colour on the page. */
+  --model-nes-case: #c7c7c2;
+  --model-nes-case-dark: #8d8d8a;
+  --model-nes-band: #1e1e1e;
+  --model-nes-button: #a3a39f;
+  --model-nes-ink: #c63a2f;
+  --model-nes-sticker: #e6e3d6;
 
   /* type */
   --font-head: "Inter Tight Variable", "Inter Tight", system-ui, sans-serif;
