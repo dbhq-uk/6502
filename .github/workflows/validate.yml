@@ -58,10 +58,11 @@ jobs:
           path: site/src/data/results.json
           if-no-files-found: error
 
-  # The machines' browser builds, alongside the tests: the KIM-1 and the BBC
-  # Micro as .NET WebAssembly, compiled ahead of time, and their ROMs, read from
-  # roms/ and checked against the pins in Pins.cs. The site job below puts them
-  # where the Astro build copies them into dist. Nothing here is committed.
+  # The machines' browser builds, alongside the tests: the KIM-1, the BBC
+  # Micro and the NES as .NET WebAssembly, compiled ahead of time, and their
+  # ROMs (for the NES, its bundled game), read from roms/ and checked against
+  # the pins in Pins.cs. The site job below puts them where the Astro build
+  # copies them into dist. Nothing here is committed.
   machines:
     runs-on: ubuntu-latest
     timeout-minutes: 30
@@ -73,7 +74,7 @@ jobs:
       # is restored rather than compiled again: AOT takes minutes. Each machine
       # has its own cache, keyed on the core, its own two projects and what the
       # build reads, so a change to one machine rebuilds that machine alone. The
-      # workload version is in the keys, so moving the pin rebuilds both. The
+      # workload version is in the keys, so moving the pin rebuilds every one. The
       # BBC Micro's build also publishes its preset discs, so its key hashes
       # machines/bbc-micro/discs/ too: a disc added or changed is never served
       # from a stale cache.
@@ -89,17 +90,25 @@ jobs:
         with:
           path: site/public/machines/bbc-micro
           key: machine-bbc-micro-sdk-10.0.400-wasm-tools-10.0.401-${{ hashFiles('src/Dbhq.Machines.BbcMicro/**', 'src/Dbhq.Machines.BbcMicro.Wasm/**', 'src/Dbhq.Cpu6502/**', 'Directory.Build.props', 'tests/Dbhq.Cpu6502.TestSupport/Pins.cs', 'site/scripts/build-machines.mjs', 'site/src/lib/pins.mjs', 'site/src/lib/machines.mjs', 'site/src/lib/bbc-discs.mjs', 'machines/bbc-micro/discs/**') }}
+      - name: Cache the NES's browser build
+        id: nes
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
+        with:
+          path: site/public/machines/nes
+          key: machine-nes-sdk-10.0.400-wasm-tools-10.0.401-${{ hashFiles('src/Dbhq.Machines.Nes/**', 'src/Dbhq.Machines.Nes.Wasm/**', 'src/Dbhq.Cpu6502/**', 'Directory.Build.props', 'tests/Dbhq.Cpu6502.TestSupport/Pins.cs', 'site/scripts/build-machines.mjs', 'site/src/lib/pins.mjs', 'site/src/lib/machines.mjs') }}
       # The machines whose cache missed, by registry id, for the build below.
       - name: Which machines to build
         id: which
         env:
           KIM1_HIT: ${{ steps.kim-1.outputs.cache-hit }}
           BBC_HIT: ${{ steps.bbc-micro.outputs.cache-hit }}
+          NES_HIT: ${{ steps.nes.outputs.cache-hit }}
         run: |
           IDS=""
           [ "$KIM1_HIT" = "true" ] || IDS="$IDS kim-1"
           [ "$BBC_HIT" = "true" ] || IDS="$IDS bbc-micro"
-          echo "building:${IDS:- none, both restored}"
+          [ "$NES_HIT" = "true" ] || IDS="$IDS nes"
+          echo "building:${IDS:- none, all restored}"
           echo "ids=${IDS# }" >> "$GITHUB_OUTPUT"
       # The SDK is pinned here, not left at 10.0.x, because a workload version
       # belongs to one SDK feature band: 10.0.401 is a 10.0.400 band set.
@@ -114,8 +123,9 @@ jobs:
         uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
           node-version: '22.22'
-      # Both machines: the KIM-1, and the BBC Micro, whose files are published
-      # with the site but linked from no page until the registry says it runs.
+      # Every machine whose cache missed: the KIM-1, the BBC Micro and the NES.
+      # A machine's files are published with the site, but linked from no page
+      # until the registry says it runs.
       - if: steps.which.outputs.ids != ''
         name: Build the machines and fetch their ROMs
         env:
@@ -165,14 +175,14 @@ jobs:
           PASS=$(count pass); FAILED=$(count fail)
           echo "pass=${PASS:-unread} fail=${FAILED:-unread}"
           [ "${FAILED:-1}" = "0" ]
-          # 342 tests as at 6 Oct 2026, with main's preset discs merged into the
-          # NES's branch (282 on main after the discs' second review, 292 on the
-          # branch; the BBC Micro solder side's registration, pads, drills and
-          # footprints came on 4 Oct 2026).
+          # 351 tests as at 6 Oct 2026, with the NES's registry record, its try-it
+          # file and its build (342 before them that day, with main's preset
+          # discs merged into the NES's branch; 282 on main after the discs'
+          # second review, 292 on the branch).
           # Adding tests is expected; losing them is the failure this floor catches.
           # Raise the number when the suite grows, here and in the same step of
           # deploy-site.yml, which must hold the same number.
-          [ "${PASS:-0}" -ge 342 ]
+          [ "${PASS:-0}" -ge 351 ]
       # The KIM-1 page in a real browser: the built site served on 127.0.0.1
       # with its own CSP, the try-it program clicked in through the page's own
       # keypad, and the digits read back. Then the page's photograph loads, and
