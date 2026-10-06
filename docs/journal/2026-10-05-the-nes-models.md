@@ -2127,6 +2127,7 @@ cannot rule out a slowdown of 3 per cent; NTSC 0.987 to 1.012; the 40 rounds
 used 0.983 to 1.010; all 120 rounds 1.000 to 1.015.
 
 So: **no slowdown measurable, to within about 2 per cent, paired under load.**
+(task 10's README-method run, below, did not settle it)
 That is what the code predicts: the counting runs only on an access to a
 counted chip, about 108 thousand of SNOW's 1.79 million cycles in a timed run,
 a few nanoseconds each, well under a tenth of a per cent. The absolute figures
@@ -3176,3 +3177,87 @@ live readings on a busy host and differ from run to run.
 - The rear connectors' recheck and the copper's re-trace, as before (the plan's
   Deferred list), and the site-wide question of saying on the page that a
   photograph's copy is resized, which CC BY asks (task 8's follow-up).
+
+## Final fix wave, 6 October 2026
+
+The final whole-branch review (the controller's) found no overclaim and no
+blocker, and asked for one fix wave: one important item and six minor ones.
+All are done.
+
+- **The NES browser check's wait for a camera** (important).
+  `settled()` in `site/scripts/browser-check-nes.mjs` caught its own 30 s
+  timeout and carried on, so a view whose camera never came to rest was still
+  read, and "a view kept its camera" could pass by chance. The KIM-1's check
+  throws "the camera never came to rest". Now a timeout is a problem, "nes:
+  the camera never came to rest in" the view, `settled()` gives null, and no
+  caller compares after a null: the view from under the case is not judged,
+  and the tabs' camera check is not made, its line saying so. `settled()` is
+  exported, and `site/tests/browser-check-nes.test.mjs` tests it on a made-up
+  page: two tests, one failing against the old wait (the problem was not
+  pushed), both passing on the new. `node --check` passes on the script. The
+  NES part of the browser check alone, through the harness task 9 kept outside
+  the repository (`/tmp/t9smoke/nesonly.mjs`), ran once on the scratch copy's
+  build, from 22:01:53 to 22:05:18 UTC, the load average 1.87 at the start:
+  no problems; the cameras came to rest and were compared ("the inside's
+  camera kept true").
+- **O2-FL is marked committed**: `tools/nes-model/data/sources.json` gives
+  `committed: "nes.webp"`, the main photograph, its resized copy. The
+  photographs' test now expects it among the committed and checks
+  `nes.webp` itself: not the original's hash, the main photograph credited at
+  O2-FL's page, and the README's section giving the original's SHA-256 and the
+  copy's, which is the file's.
+- **The PAL board's caption and note say what was checked.** Task 0's check
+  compared the ten chips' places on the PAL board with the scan's (P1 to P3
+  could not be measured on I3, and no copper was compared). The caption said
+  the CPU-10's "layout" was checked to be shared; it now says "whose chips'
+  places the PAL console's NES-CPU-11 was checked to share". The PAL note
+  said the check "found the two boards to be one layout"; it now says it
+  "found the PAL board's chips where the scanned board's are, within its
+  limits; the two boards' copper was not compared". A test pins the caption
+  and fails on "whose layout" or "one layout" in the caption or the note. The
+  legend says nothing of the layout. `docs/known-differences.md` says the same.
+- **How well the size and the profile are known are numbers now**, not words
+  for `results.py` to parse. `case_measure.py` writes `footprint.goodToPct`,
+  the largest disagreement between the published proportions and the patent's
+  drawings in task 0's judged figures (3.08 per cent) to a whole per cent, and
+  `profileCheck.goodToMm`, half the range of the four ends, (17.71 - 12.86) /
+  2 = 2.425 mm to one place, each with a `goodToWhy` beside it; its sentences
+  are built from them. `results.py` reads the numbers, stops if one is missing
+  or the profile's is not half the ends' range, and no longer parses "good to
+  about". Run once each, 6 October 2026:
+  `cd tools/nes-model && NES_MODEL_INPUTS=/tmp/nes-inputs nice -n 10 /tmp/nesvenv/bin/python case_measure.py`
+  (21:58:46 to 21:59:41 UTC) and
+  `nice -n 10 /tmp/nesvenv/bin/python tools/nes-model/results.py`. Nothing
+  measured moved: in `case.json` the four new fields were added and two
+  sentences changed, "good to about 2.5 mm" to "good to about 2.4 mm" (one of
+  them gaining "half the four ends' range"); in the case parts module only
+  `PROFILE`'s note changed, the same way; the case's results file changed
+  `goodToMm` 2.5 to 2.4 and `goodToPct` 3.0 to 3; the board's results file
+  came out byte for byte the same. pytest `tests/test_results.py` was changed
+  first and failed 2 of 6, then passed 6 of 6 with the new `results.py`;
+  `tests/test_case.py` passes too (19 in the two files).
+- **The journal's task 6 speed sentence** keeps its dated bold "no slowdown
+  measurable, to within about 2 per cent, paired under load" and now points
+  on: "(task 10's README-method run, below, did not settle it)".
+- **`case_measure.py`'s comment** on the patent profile's first row said the
+  row 0.88 mm up reads about 15.5; the data's next row kept is 2.0 mm up, at
+  14.63, and the comment now says that. Comment only.
+- **"task 6 checks it"** in the design (the controller ports' mapping) and in
+  the plan's task 5 is history: each now adds "(it did, 6 Oct 2026)".
+
+**What changed on the page**, compared sentence by sentence (every caption,
+note, limit, legend line, help and status line made from the modules, before
+and after, with `diff`): on the case's note, for both consoles, "an average
+good to about 2.5 mm" became "2.4 mm", in the paragraph on the profile and in
+the limit "The bottom shell's lean is an average, good to about 2.4 mm"; the
+PAL board's caption and its note's last sentence, as above. Nothing else on
+the page changed; the "about 3 per cent" still reads 3.
+
+**Tests.** The covering files (`nes-models`, `model-regions`, `nes-panel`,
+`nes-page`, `model`, `registry` and the new `browser-check-nes`): 183 tests,
+183 pass. The whole site suite, in the scratch copy after `npm run build`
+with CI's results file and the machines built:
+`nice -n 10 node --test tests/*.test.mjs`, 6 October 2026, 22:05 UTC: 476
+tests, 475 pass, 0 fail, 1 todo. Its first run had failed one test, "the README
+lists every test file", until the new test file was listed in
+`site/README.md`'s table. Both floors raised from 473 to 475.
