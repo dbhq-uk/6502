@@ -1167,6 +1167,15 @@ Waits for the machine's pull request (#55) to merge, not for the BBC Micro's (se
 - [ ] **Step 6: Credits, the KIM-1 and BBC Micro unchanged** (the `cmp` in the Global Constraints), the photographs README's table of uncommitted sources. Raise the floors.
 - [ ] **Step 7: Journal and commit.** `feat(models): the NES's inside model, its copper, its chips for both consoles and what the processor is talking to`.
 
+**Notes added 6 Oct 2026, during task 7.**
+
+- **The registry (the controller's ruling of 6 Oct 2026).** The NES row arrived from the machine's pull request with `"case": true`; with `inside` alone claimed it fails the rule that a cased machine claims both views, so `case` came off the row, as the BBC Micro's task 7 planned, and task 9 puts it back with the outside. Two assertions in `site/tests/nes.test.mjs` depended on the row: `nes.case === true` and `'models' in nes === false`; both now say what the row is until task 9. No other file reads the NES's `case`.
+- **The KIM-1's and the BBC Micro's pages are not byte-identical, and cannot be.** Every stylesheet is inlined into every page (`build: { inlineStylesheets: 'always' }` in `site/astro.config.mjs`), so the new tokens and the legend's styles reach every page's one `<style>`. With the `<style>` element left out, both pages are byte for byte the previous commit's, and the stylesheet only gains lines. The Global Constraints' `cmp` is met in that form for this task; task 9 will meet the same.
+- **The entry's shape.** `chipLegend(region)` rows carry `mark` beside the plan's fields (the words of the row's Marked column). The entry carries `legendWords` (the words under the legend) and `tracksHelp` (what the track buttons do, said for a board whose copper is traced to look at, in place of `CONTROLS.tracks`, which the KIM-1's page keeps).
+- **The credits.** A model whose results file lists its `sources` is credited with those alone, matched by address, so the NES's main photograph, which the board takes nothing from, is not credited under the board. The NES's `references` hold I1-front, I1-back, I2, I3, I4 and I5: I4 as well as the five the Files list named, since the NTSC parts were read off it.
+- **The NES page's speed test** (`site/tests/nes-page.test.mjs`) leaves out the model section: the caption names each console's crystal by its marking, a frequency, which is a part and not a speed of the page's.
+- **The browser check's model steps run before the cartridge picker's**, with Lan Master still in: the picker's test cartridge ends in a loop that touches no chip the machine counts.
+
 ---
 
 ### Task 8: The outside measured, for both consoles

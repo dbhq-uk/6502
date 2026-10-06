@@ -2193,3 +2193,231 @@ and added to rather than renamed:
   of the same build (6,442 to 7,602 bytes over three launches of the code
   before, `DOTNET_JitDisasm=Cycle`), which is one reason single launches of
   the speed bench disagree by a fifth.
+
+## Task 7: the board's inside model on the page, 6 October 2026
+
+The NES's page now has its first 3D model: the main board, under "What is not
+modelled", loaded only when the visitor scrolls to it. It is the NES-CPU-10 of
+the bare scans, with each console's parts, and it shows which chips the
+processor is talking to while the machine above runs.
+
+### What the visitor sees
+
+- **The board**, cut from the scan's measured outline with its twelve mounting
+  holes, both faces carrying the track map: the component side's copper and
+  its white printed legend on top, the solder side's copper underneath, as
+  colour, shine and relief, the way the KIM-1's does. Show tracks takes them
+  off and Show tracks only fades the parts out. The camera goes all the way
+  round, under the board too.
+- **The parts**: the ten chips as black bodies on their legs (all are
+  soldered in, so no sockets), each with this console's part printed on its
+  top; the cartridge connector over the edge fingers, the expansion socket,
+  the two controller headers and the POWER and RESET header as plain boxes;
+  the 71 resistors, capacitors and other small parts, three instanced meshes;
+  and each console's crystal (its frequency printed on its can) and RF
+  modulator.
+- **The console** is the page's region. The model reads `panel.nes.region()`
+  when it loads, so a model loaded after a change of region draws the region
+  the page has, and on `nes:region` it swaps the chips' printed parts, the
+  crystal and the modulator, the caption, the note, the legend's parts, the
+  stage's accessible name and its `aria-describedby`, all at once, with
+  nothing downloaded.
+- **The marks.** Every quarter second, once the machine runs, the model reads
+  `panel.nes.accessCounts()` through `createSampler`, tints the top of each
+  chip whose count moved, marks its legend row and writes each counted chip's
+  rate into its row. Before Start nothing is marked, the rate cells say "not
+  running" and the status line says the machine is not running. On
+  `nes:start` and `nes:region` it takes a fresh baseline and the cells say
+  "measuring" until the next sample (Review Focus 1); the rates are divided by
+  the time measured between samples (Review Focus 2).
+- **Pointing at a chip** names it on the status line, with its part in this
+  console and the other, and lights its legend row; a click or a tap does the
+  same, for a screen with no pointer to hover.
+- **The legend**, under the caption: one row a chip, U1 to U10, with its part
+  in this console, in the other, what it is, when it is marked and its rate,
+  and under it the words the plan asked for: what a mark means ("read or
+  written by the processor in the last quarter second", not "working"); that
+  the CPU, the work RAM, the address decoder and the cartridge are in use all
+  the time, the video RAM and the latch are the PPU's own and the lockout chip
+  is not emulated, so none is marked, and that the CPU's row is marked only
+  for the sound and input registers on its own chip; U9's jobs "by the
+  redrawing's nets", not traced on the scan; U7's and U8's ports by the
+  board's print, checked against the nesdev wiki and the KiCad redrawing in
+  task 6 and not traced; and that the copper is traced to look at and the
+  heights are typical.
+- **The caption** for each console starts "Model, not a photograph, of an
+  NTSC NES-001, the front-loading console sold in North America" or "of a PAL
+  NESE-001, the front-loading console sold in Europe", says the copper is
+  traced to look at with its connections not verified, that the board is the
+  scanned one with that console's parts and not one real board, and that the
+  heights are typical; its sizes, counts and parts are read from the layout.
+- **The note** for each console, made by `nes-famicom-board-notes.mjs` from
+  `site/src/data/nes-famicom-board-model.json`: the scale, the solder side's
+  registration, the copper's coverage and the nets check's failure as
+  `copper.json` has it (one of ten ground pins in the largest ground net, two
+  of ten +5V pins in the largest +5V net, a ground and a +5V pin in one net),
+  saying the copper is not a netlist; the places against the KiCad
+  redrawing; and the parts' photographs, the NES-CPU-07's for NTSC and the
+  NES-CPU-11's for PAL, each with its worst distance from the scanned board's
+  footprints. Then what it does not show.
+
+### Decisions
+
+- **The results file.** `tools/nes-model/results.py` (the board half; the
+  case half comes with task 9) reads `frame.json`, `registration.json`,
+  `copper.json`, `parts.json` and `sources.json` and writes only the figures
+  the page quotes, and the six sources the board was made from (the parts
+  module's five and the KiCad redrawing). Run with
+  `/tmp/nesvenv/bin/python tools/nes-model/results.py`; three pytest tests on
+  made-up data files. A site test recomputes every figure from the data
+  files.
+- **The tokens**, in `tokens.css`: `--model-nes-pcb` and `--model-nes-pcb-under`
+  for the lacquer, a little lighter and yellower than the KIM-1's, chosen by
+  eye and not measured; `--model-nes-print` for the white legend; `--model-active`, an
+  amber, for the access mark, on the model and in the legend, chosen over the
+  lime, which stays the page's own accent and is spent on nothing new, and
+  over the KIM-1's lit-LED red, which on a chip reads as a fault. The copper
+  is `--model-copper`, as the KIM-1's. None is a text colour. The legend's
+  caption is the one new text colour rule, white on black, in the contrast
+  table. No socket token: the NES's chips are soldered in.
+- **The legend in `MachineModel.astro`**, built from the entry's `legend`
+  (`chipLegend(region)`) and `legendWords`, for any model that has one; each
+  console's part is a span with `data-model-region`, switched as the captions
+  are. A row's `mark` words come from the layout, beside the plan's fields.
+- **The credits.** A model whose results file lists its sources is credited
+  with those alone, matched by address. Without that the NES's main
+  photograph, which the board takes nothing from, would have been credited
+  under the board as a source. The registry's `references` hold the six, each
+  with its title, author, address, licence as `sources.json` records it,
+  fetched date, SHA-256 and what was used; OpenTendo's are credited at the
+  `dbhq-uk` fork the tools read, naming OpenTendo and its authors. The main
+  photograph's `used` now says the board takes nothing from it.
+- **The track buttons' help** says the tracks are traced to look at, with
+  their connections not verified, through the entry's `tracksHelp`; the
+  KIM-1's keeps `CONTROLS.tracks`.
+- **The registry** (the controller's ruling of 6 October 2026): the NES row
+  came from the machine's pull request with `"case": true`, which fails the
+  cased rule with `inside` alone claimed, so `case` came off and `models`
+  claims `inside` only, as the BBC Micro's plan did; task 9 puts `case` back
+  with the outside. `git grep` found two assertions that read the row,
+  `nes.case === true` and `'models' in nes === false`, both in
+  `site/tests/nes.test.mjs`; both now say what the row is until task 9, with a
+  dated comment. Nothing else reads the NES's `case`.
+
+### What changed on contact
+
+- **The KIM-1's and the BBC Micro's pages are not byte-identical.** Every
+  stylesheet is inlined into every page (`inlineStylesheets: 'always'`), so
+  the four tokens and the legend's six rules reach both pages' `<style>`. The
+  plan's `cmp` cannot hold for a task that adds a token. Built from 4a96b7e
+  (in a copy of the tree from `git archive`) and from this work, with the
+  `<style>` element left out both pages are identical, and the stylesheet's
+  only changes are two insertions, 30,899 to 31,480 bytes. Recorded in the
+  plan, dated.
+- **The NES page's speed test** forbade any "number MHz" on the page; the
+  caption names each crystal by its marking, 21.47727 MHz on the NTSC board.
+  The test now leaves the model section out, with a comment: a part's
+  marking is not a speed.
+- **The access module's sampler** also takes a machine with no counters yet
+  (`accessCounts()` is null before Start) and leaves no baseline behind; one
+  test more than the plan's five, and one that hands it the page's
+  `Int32Array` across the 2^31 and 2^32 wraps. `(b - a) >>> 0` is right for
+  an `Int32Array` input: its values are the same signed numbers as the plain
+  list's, and the test holds it.
+- **The built-page test for the regions**, owed since task 1's review,
+  replaced the test of the component's source that matched
+  `data-model-region={v.region} hidden={v.hidden}`: on the NES's page each
+  console has one caption, one note and one hidden name, only the first
+  shown, each console's words its own, every id on the page used once, and
+  every other part marked for a console (the legend's) marked for each.
+- **The browser check's model steps run before the cartridge picker's**, with
+  Lan Master still in: the picker's test cartridge ends in a loop that
+  touches no counted chip.
+- **A busy host runs the game in bursts.** Under load, a quarter second can
+  pass with no frame run, so the rates jump about (one sample read 32,311 PPU
+  accesses a second and the next none, in the second run below, load average
+  about 20); the check of the PAL machine's marks waits up to five seconds,
+  having failed once at one and a half.
+
+### Tests
+
+- `site/tests/nes-famicom-access.test.mjs`: red first (the module missing),
+  then 7 pass: the plan's five and two more.
+- `site/tests/nes-models.test.mjs`, twelve for the board: the claim and the
+  entry; the regions against the page's region control, read from the built
+  `dist/machines/nes/index.html` (`input[name="nes-region"][data-nes-region]`),
+  both ways; every part drawn from the parts file; the map read as
+  `copper.json` gives it; the tokens; the legend against `ic-table.json`, on
+  the page too; the legend's words; the captions; the results file against
+  the four data files; each note word for word, with the nets result read
+  from `copper.json`; every sentence about the copper saying it is traced to
+  look at and not verified (it caught a sentence of the PAL note on its first run, and a limit worded like it was changed with it);
+  the credits both ways; the model's wiring to `panel.nes`.
+- `site/tests/model.test.mjs`: every model with a track map has it committed
+  inside its budget and built beside its bundle byte for byte, named on its
+  page for the loader alone; the deploy's serving list names
+  `models/nes-famicom-board.js` and `models/nes-famicom-board-tracks.webp`
+  (the existing tests now cover both).
+- The site suite, built from this commit with the machines built and CI's
+  results file (run 37419286133): 446 tests, 445 pass, 0 fail, 1 todo
+  (`cd site && npm run build && node --test tests/*.test.mjs`, 6 October 2026).
+  Both floors raised from 423 to 445.
+
+### Page weight
+
+`cd site && node scripts/page-weight.mjs /machines/nes/`, 6 October 2026,
+before (4a96b7e, built from a copy) and after:
+
+| | Before, bytes gzipped | After |
+|---|---|---|
+| The page when it opens (HTML, scripts, the photograph) | 41,817 | 47,677 |
+| of which the HTML | 12,051 | 17,104 |
+| of which the model loader | none | 807 |
+| Later, when the visitor reaches the model: the bundle | none | 162,898 |
+| Later: the track map | none | 144,726 |
+
+Nothing under `/models/` is in the first load. The bundle is 161,772 bytes
+gzipped at level 9 as `model.test.mjs` measures it, inside its 200,000; the
+map is 144,774 bytes, inside its 600,000. The HTML grew by the two captions,
+the two notes and the legend.
+
+### The browser check
+
+`cd site && node scripts/browser-check.mjs`, Chrome 153 with software WebGL,
+on the shared host, 6 October 2026. The board's steps are in
+`scripts/browser-check-nes.mjs`, after the NES's own and before the cartridge
+picker's. Four whole runs: the first passed (load average about 9); the second
+failed only the PAL marks, then judged over 1.5 s (load about 20), which led
+to five seconds; the third passed every NES step and failed once in the
+KIM-1's phone steps, a finger on the focused model moving the page 19 pixels
+(load about 21), a step that passed in the other three runs on the same
+markup, the KIM-1's page differing only by the inert new rules in its
+stylesheet; the fourth, on this commit's code, passed whole, with "no console
+errors, no failed requests, no CSP violations". Its board lines:
+
+```
+nes: model files requested before scrolling to the model: none
+nes: model running in 1833 ms after scrolling to it, fetched /models/nes-famicom-board.js, /models/nes-famicom-board-tracks.webp; status "The model is running, and so is the machine: a marked chip was read or written by the processor in the last quarter second."
+nes: model canvas 778x458, 26.6% of its pixels drawn; region ntsc, tracks on
+nes: pointing at U5 at 657,355: status "U5, the picture processing unit (RP2C02): RP2C02G-0 in this console, RP2C07-0 in a PAL console. Marked: the processor read or wrote it in the last quarter second."; rows lit U5
+nes: in 2 s on NTSC, chips marked U5 U6 U7, legend rows marked U5 U6 U7; highest legend rates: U5 12128 and U7 1021 a second
+nes: region to PAL: model region pal, its caption shown true, described by model-about-pal, named "3D model of the NES's main board, with a PAL console's chips. Point at a chip to name it."; U5's part in the legend RP2C07-0; fetched since nothing; the rates after nes:region: none, none, 733, 1492, 1507, 1392, 1511, 1380, 1509, 1391, 1530
+nes: in 5 s on PAL, chips marked U5 U6 U7; highest legend rates: U5 1641, U7 1358
+nes: region to NTSC: model region ntsc, its caption shown true, described by model-about-ntsc, named "3D model of the NES's main board, with an NTSC console's chips. Point at a chip to name it."; U5's part in the legend RP2C02G-0; fetched since nothing; the rates after nes:region: none, none, 3628, 1024, 1392, 1391, 1393, 1392, 1409, 1359
+nes: tracks at the start {"loaded":true,"tracks":true,"underside":true}; Show tracks: off, {"tracks":false,"underside":false}; Show tracks only: parts hidden, {"visible":false,"tracks":true}; and back: {"visible":true,"level":1,"tracks":true}
+nes: under the board, polar 3.142: the map's solder-side copper at 300 points is 111,97,36, its bare board at 300 points 28,73,23, 86.7 apart; the same points mirrored side to side 8.9 apart
+```
+
+The rates are live readings of a machine in software WebGL on a busy host,
+not figures about the project: they differ from run to run.
+
+### Surprising
+
+- The game reads controller port 1 several hundred to about a thousand
+  times a second, and the
+  PPU's rate jumps by thousands between quarter seconds, as the page runs
+  the machine in bursts to keep up with the clock.
+- A new machine after a region change can show one very high first rate (one
+  sample read 32,311 PPU accesses a second), most likely the page catching
+  up on frames just after the restart; not checked. The baseline is the new
+  machine's, so it is not a difference across two machines.

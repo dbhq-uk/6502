@@ -178,7 +178,7 @@ export async function mount(root) {
   const margin = 2;
   const far = Math.max(BOARD.depth, ...REGIONS.flatMap((r) => OTHERS[r].map((o) => o.y + o.l / 2)), ...CONNECTORS.map((c) => c.y + c.w / 2));
   const bounds = [X(0) - margin, -2, Z(0) - margin, X(BOARD.width) + margin, 2, Z(far) + margin];
-  const s = createStage(root, { view: [0, 21, 21, 0, -0.5, 1.2], bounds, minDistance: 3, maxDistance: 150 });
+  const s = createStage(root, { view: [1.2, 27, 23, 1.2, -0.5, 2], bounds, minDistance: 3, maxDistance: 150 });
   if (!s) return;
   const { scene, token, reduced, every } = s;
   const css = getComputedStyle(document.documentElement);
