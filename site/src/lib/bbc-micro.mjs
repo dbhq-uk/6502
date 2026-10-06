@@ -1,8 +1,6 @@
-import fs from 'node:fs';
-import path from 'node:path';
 import { SITE_ROOT } from './registry.mjs';
 import { bbcRoms } from './pins.mjs';
-import { readRom } from './machines.mjs';
+import { machineDownloadBytes, readRom } from './machines.mjs';
 import { DISCS_FOLDER } from './bbc-discs.mjs';
 import { PC_LABELS, bbcCharacters, legend, pcKeysFor } from '../../public/bbc-keys.js';
 
@@ -27,27 +25,13 @@ export const issueUrl = (n) => `https://github.com/dbhq-uk/6502/issues/${n}`;
 
 /**
  * How many bytes the Start button downloads: every file the build put in
- * public/machines/bbc-micro/, the WebAssembly and the ROMs, as built (the edge
- * may compress them on the way, so this is the most it can be). The preset
- * discs in discs/ are not counted: Start fetches none of them, and each is
- * fetched only when the visitor inserts it. Null when the machine was not
- * built into this copy of the site, which the page says.
+ * public/machines/bbc-micro/, the WebAssembly and the ROMs, as built. The
+ * preset discs in discs/ are not counted: Start fetches none of them, and each
+ * is fetched only when the visitor inserts it. Null when the machine was not
+ * built into this copy of the site, which the page says. The rule is every
+ * machine's, machineDownloadBytes in src/lib/machines.mjs.
  */
-export function downloadBytes(root = SITE_ROOT) {
-  const dir = path.join(root, 'public', 'machines', 'bbc-micro');
-  if (!fs.existsSync(path.join(dir, '_framework'))) return null;
-  let total = 0;
-  const walk = (d) => {
-    for (const e of fs.readdirSync(d, { withFileTypes: true })) {
-      if (d === dir && e.name === DISCS_FOLDER) continue;
-      const full = path.join(d, e.name);
-      if (e.isDirectory()) walk(full);
-      else total += fs.statSync(full).size;
-    }
-  };
-  walk(dir);
-  return total;
-}
+export const downloadBytes = (root = SITE_ROOT) => machineDownloadBytes('bbc-micro', root, [DISCS_FOLDER]);
 
 /** Megabytes, one decimal place, the British way: 12.3. */
 export const megabytes = (bytes) => (bytes / 1e6).toLocaleString('en-GB', { minimumFractionDigits: 1, maximumFractionDigits: 1 });

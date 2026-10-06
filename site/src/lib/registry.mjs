@@ -18,6 +18,25 @@ export const CORES = ['nmos', '2a03', '65c02', 'none'];
 export const PHOTOS_DIR = path.join(SITE_ROOT, 'src', 'assets', 'photos');
 const photoOnDisk = (file) => fs.existsSync(path.join(PHOTOS_DIR, file));
 
+/**
+ * The views a machine's model can be: `board` for a machine with no case (the
+ * board is the whole machine), `outside` and `inside` for a machine with one.
+ */
+export const VIEWS = ['board', 'outside', 'inside'];
+/** Where a model's browser module is (`<module>.js`) and where its results file is (`<module>-model.json`). */
+export const MODELS_DIR = path.join(SITE_ROOT, 'src', 'models');
+export const DATA_DIR = path.join(SITE_ROOT, 'src', 'data');
+/** What is on disk for one model: its module, whether that exports mount(root), and its results file. */
+function modelOnDisk(module) {
+  const file = path.join(MODELS_DIR, `${module}.js`);
+  const there = fs.existsSync(file);
+  return {
+    module: there,
+    exportsMount: there && /export async function mount\(root\)/.test(fs.readFileSync(file, 'utf8')),
+    results: fs.existsSync(path.join(DATA_DIR, `${module}-model.json`)),
+  };
+}
+
 const REGISTRY_FILE = path.join(REPO_ROOT, 'machines', 'registry.json');
 
 /** The registry: machines/registry.json, or another file in its shape (the tests use made-up ones). */
@@ -71,14 +90,68 @@ export function drawingProblems(drawing, where) {
 }
 
 /**
+ * What is wrong with one of a model's references: a source it was measured
+ * from that is not committed (a flatbed scan, or a photograph whose source
+ * states no licence). It is credited like a drawing, and names the SHA-256 of
+ * the original that was measured, so the credit says which file it was.
+ */
+export function referenceProblems(reference, where) {
+  if (typeof reference !== 'object' || reference === null) return [`${where}: a reference must be an object`];
+  const errors = text(reference.title) ? [] : [`${where}: must say what it is (title)`];
+  errors.push(...creditProblems(reference, where));
+  if (!/^[0-9a-f]{64}$/.test(String(reference.sha256 ?? ''))) errors.push(`${where}: sha256 must be the SHA-256 of the original, 64 hex digits in lower case`);
+  return errors;
+}
+
+/**
+ * What is wrong with a machine's `case` and `models`, as sentences (design,
+ * "The registry's models field"). Both are optional: a running machine is never
+ * required to claim a model (Dan, 2 October 2026), but a model it claims must
+ * be built, and a machine with a case that claims a model claims both the
+ * outside and the inside. `modelFiles(module)` says what is on disk for a
+ * module; the tests replace it to try made-up registries. That a module is
+ * claimed once in the whole registry is checked by validateRegistry, which sees
+ * every machine.
+ */
+export function modelProblems(machine, where, { modelFiles = modelOnDisk } = {}) {
+  const errors = [];
+  const hasCase = machine.case;
+  if (hasCase !== undefined && typeof hasCase !== 'boolean') errors.push(`${where}: case, when given, must be true or false`);
+  if (machine.models === undefined) return errors;
+  if (!Array.isArray(machine.models) || machine.models.length === 0) return [...errors, `${where}: models, when given, must be a non-empty list of { view, module }`];
+  const views = [];
+  machine.models.forEach((model, i) => {
+    const at = `${where}: models[${i}]`;
+    if (typeof model !== 'object' || model === null) { errors.push(`${at}: a model must be an object, { view, module }`); return; }
+    const { view, module } = model;
+    if (!VIEWS.includes(view)) errors.push(`${at}: view "${view}" is not one of ${VIEWS.join(', ')}`);
+    else if (views.includes(view)) errors.push(`${where}: the view ${view} is claimed twice`);
+    views.push(view);
+    if (hasCase === false && (view === 'outside' || view === 'inside')) errors.push(`${at}: the machine has no case, so it cannot claim the ${view} view (its model is the board)`);
+    if (hasCase === true && view === 'board') errors.push(`${at}: the machine has a case, so it claims outside and inside, not board`);
+    // Named for its machine, so the name alone says whose it is. A name that is not is never looked for on disk.
+    const named = typeof module === 'string' && /^[a-z0-9]+(-[a-z0-9]+)*$/.test(module) && (module === machine.id || module.startsWith(`${machine.id}-`));
+    if (!named) { errors.push(`${at}: module "${module}" must be the machine's id, ${machine.id}, or start with ${machine.id}- (lower-case words joined by hyphens)`); return; }
+    const files = modelFiles(module);
+    if (!files.module) errors.push(`${at}: site/src/models/${module}.js is missing`);
+    else if (!files.exportsMount) errors.push(`${at}: site/src/models/${module}.js does not export mount(root)`);
+    if (!files.results) errors.push(`${at}: site/src/data/${module}-model.json is missing: a model's results file says how it was made`);
+  });
+  if (hasCase === true && !(views.includes('outside') && views.includes('inside'))) errors.push(`${where}: the machine has a case and claims a model, so it must claim both outside and inside`);
+  return errors;
+}
+
+/**
  * Everything wrong with a registry, as a list of sentences. An empty list is a
  * valid registry. `results` is optional: when given, a running machine's
  * acceptance test must be in it, and passing. `photoExists` says whether a
- * photograph's file is on disk; the tests replace it to try made-up registries.
+ * photograph's file is on disk, and `modelFiles` what is on disk for a model's
+ * module; the tests replace them to try made-up registries.
  */
-export function validateRegistry(registry, results = null, { photoExists = photoOnDisk } = {}) {
+export function validateRegistry(registry, results = null, { photoExists = photoOnDisk, modelFiles = modelOnDisk } = {}) {
   const errors = [];
   const ids = new Set();
+  const modules = new Set();
   for (const m of registry.machines) {
     const where = `machine ${m.id ?? m.name}`;
     if (!/^[a-z0-9]+(-[a-z0-9]+)*$/.test(m.id ?? '')) errors.push(`${where}: id must be lower-case words joined by hyphens`);
@@ -108,6 +181,14 @@ export function validateRegistry(registry, results = null, { photoExists = photo
     }
     if (m.drawings !== undefined && !Array.isArray(m.drawings)) errors.push(`${where}: drawings must be a list`);
     if (Array.isArray(m.drawings)) m.drawings.forEach((d, i) => errors.push(...drawingProblems(d, `${where}: drawings[${i}]`)));
+    if (m.references !== undefined && !Array.isArray(m.references)) errors.push(`${where}: references must be a list`);
+    if (Array.isArray(m.references)) m.references.forEach((r, i) => errors.push(...referenceProblems(r, `${where}: references[${i}]`)));
+    errors.push(...modelProblems(m, where, { modelFiles }));
+    for (const model of Array.isArray(m.models) ? m.models : []) {
+      if (typeof model?.module !== 'string') continue;
+      if (modules.has(model.module)) errors.push(`${where}: module ${model.module} is claimed twice in the registry`);
+      modules.add(model.module);
+    }
   }
   for (const c of registry.chips) {
     if (!c.name) errors.push('a chip has no name');

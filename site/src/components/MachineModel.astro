@@ -1,6 +1,7 @@
 ---
-// A machine's 3D model, for the machines in src/models/models.mjs. The
-// section is hidden in the markup: public/model-loader.js shows it, and loads
+// One of a machine's 3D models: a module the machine claims in the registry,
+// whose entry is in src/models/models.mjs. The section is hidden in the
+// markup: public/model-loader.js shows it, and loads
 // the model's bundle only when the section nears the screen or the visitor
 // presses the button. Without JavaScript it never shows, and the photograph
 // and the machine's own panel are the page.
@@ -11,31 +12,37 @@
 // Under it, how the model was made: what it was measured from, with the
 // figures that say how well (from src/data/<id>-model.json, which the
 // measuring scripts write, so nothing here is typed by hand), what it still
-// does not show, and a credit for every photograph and drawing it was traced
-// or measured from, saying what it took from each. The credit is built from
-// the machine's registry entry, the same `photos` and `drawings` the
-// photographs section and the registry check read, so they cannot disagree.
+// does not show, and a credit for every photograph, drawing and reference it
+// was traced or measured from, saying what it took from each. The credit is
+// built from the machine's registry entry, the same `photos`, `drawings` and
+// `references` the photographs section and the registry check read, so they
+// cannot disagree. A reference is a source that is not committed (a flatbed
+// scan, a photograph whose source states no licence); it is credited as a
+// drawing is, after the drawings.
 import { MODELS, CONTROLS, CONTROLS_DESCRIPTION, TRACK_BUTTONS, modelSrc } from '../models/models.mjs';
 
-interface Source { author: string; sourceUrl: string; licence: string | null; licenceUrl?: string; used: string; caption?: string; title?: string }
+interface Source { author: string; sourceUrl: string; licence: string | null; licenceUrl?: string; used: string; caption?: string; title?: string; sha256?: string }
 interface Props {
-  id: string;
-  /** The machine's photographs and drawings, from the registry. */
+  /** The model's module, as the machine claims it in the registry. */
+  module: string;
+  /** The machine's photographs, drawings and references, from the registry. */
   photos: Source[];
   drawings?: Source[];
+  references?: Source[];
 }
-const { id, photos, drawings = [] } = Astro.props;
+const { module: id, photos, drawings = [], references = [] } = Astro.props;
 const model = MODELS[id];
-if (!model) throw new Error(`machine ${id} has no entry in src/models/models.mjs`);
+if (!model) throw new Error(`model ${id} has no entry in src/models/models.mjs`);
 const tracks = Boolean(model.texture);
 const help = [CONTROLS.pointer, CONTROLS.touch, CONTROLS.keys, ...(tracks ? [CONTROLS.tracks] : [])].join(' ');
 const measured = import.meta.glob<{ default: object }>('../data/*-model.json', { eager: true });
 const figures = measured[`../data/${id}-model.json`]?.default;
-if (model.made && !figures) throw new Error(`machine ${id}'s model describes how it was made, but src/data/${id}-model.json is missing`);
+if (model.made && !figures) throw new Error(`model ${id} describes how it was made, but src/data/${id}-model.json is missing`);
 const made = model.made ? model.made(figures) : null;
 const sources = [
   ...photos.map((p) => ({ ...p, what: `the photograph of ${p.caption ?? 'the original'}` })),
   ...drawings.map((d) => ({ ...d, what: d.title })),
+  ...references.map((r) => ({ ...r, what: r.title })),
 ];
 ---
 

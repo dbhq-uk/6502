@@ -119,6 +119,42 @@ disc drive in a hairline box of its own.
   without loading anything.
 - The new text colours are in the contrast table in `tests/design.test.mjs`.
 
+## The NES page
+
+The third machine page, built on 6 October 2026: the panel on 6 October in
+task 14 of the NES plan, the page around it in task 15, shown once the registry
+says the NES runs. The same iron panel with a hairline border as the BBC
+Micro's, holding the screen on the black canvas, the controls below it, the
+controller as buttons, and the region and the cartridge in hairline boxes of
+their own.
+
+- **The screen is a canvas, and it is the machine's own picture,** 256 by 240
+  pixels as the PPU draws them, scaled up with `image-rendering: pixelated` so
+  each pixel stays square-edged, and shown in the region's pixel shape: 8:7 on
+  NTSC, wider on PAL. Nothing is added, no scan lines, glow, curve or colour
+  bleed, and a line under it says it models the picture, not a television. It is
+  not recoloured: the NES's palette is the thing the page shows.
+- **Start is the page's one lime fill,** as on the BBC Micro's page: the one
+  thing to do first, saying how much it downloads, read from the built files,
+  and gone once pressed. Reset, Power and the sound are the site's small
+  buttons; disabled, they have a dashed edge and a dimmer label.
+- **The controller is real buttons under the screen,** for a phone or a mouse:
+  the d-pad as a cross on the left, Select and Start in the middle, and B and A
+  as circles on the right, as on the pad, at least 44 pixels each, `--veil` with
+  a `--circuit` edge like the BBC Micro's keys. On a narrow screen Select and
+  Start drop below. Held while a finger is on them, several at once.
+- **Focus on the screen is the keyboard,** so the screen shows the lime focus
+  ring whenever it has it, as the BBC Micro's does. Escape lets go and Tab moves
+  on.
+- **The region and the cartridge** are fieldsets with a hairline edge and a
+  white legend: two radio buttons, each saying which console it is, and the
+  picker with the sentence about what is in and the note that saving is not
+  built.
+- **The rest of the page uses the site's prose:** the try-it steps as the
+  KIM-1's steps without key caps, the controls as a prose table whose caption is
+  the BBC Micro's symbols table's, and the not-modelled list with its issues.
+- The new text colours are in the contrast table in `tests/design.test.mjs`.
+
 ## The imagery
 
 Three generated images, made with the `imager` skill on 30 September 2026 with

@@ -11,29 +11,52 @@ public sealed partial class Cpu
     private bool _interruptPending;
 
     /// <summary>
-    /// The end of every cycle: count it, and sample the interrupt lines.
+    /// The end of every cycle: count it, and sample the NMI line.
     /// </summary>
     /// <remarks>
     /// Checked against the transistor-level model: a line active during an
     /// instruction's last cycle is seen when that instruction ends. NMI is an
     /// edge, latched from the cycle the line becomes active until it is taken
-    /// or lost. The poll snapshot is what Step decides from; a taken branch
-    /// that stays on its page freezes it after its operand cycle.
+    /// or lost, so it is sampled here every cycle; in most cycles the line has
+    /// not moved and nothing is stored.
+    /// <para>
+    /// The poll snapshot, what Step decides from, is the IRQ line, the I flag
+    /// and the latched NMI as they stood at the end of the instruction's last
+    /// cycle. Until task 17 it was taken here at every cycle. It is now taken
+    /// once, in <see cref="Poll"/>, which gives the same values: after an
+    /// instruction's last bus access nothing changes the lines (a bus sets
+    /// them only inside an access) or the latch (except in
+    /// <see cref="EnterHandler"/>, whose poll is suppressed), and the three
+    /// instructions that change the I flag after their last access, CLI, SEI
+    /// and PLP, freeze the snapshot first (<see cref="FreezePoll"/>), as a
+    /// taken branch that stays on its page does after its operand cycle.
+    /// </para>
     /// </remarks>
     private void EndCycle()
     {
         Cycles++;
-        if (Nmi && !_nmiLineLastCycle)
+        bool nmi = Nmi;
+        if (nmi != _nmiLineLastCycle)
         {
-            _needNmi = true;
-        }
+            if (nmi)
+            {
+                _needNmi = true;
+            }
 
-        _nmiLineLastCycle = Nmi;
-        if (!_pollFrozen)
-        {
-            _pollIrq = Irq && !Flag(I);
-            _pollNmi = _needNmi;
+            _nmiLineLastCycle = nmi;
         }
+    }
+
+    /// <summary>
+    /// Takes the poll snapshot now, as it stands at the end of the cycle just
+    /// made, and keeps it for <see cref="Poll"/> whatever the rest of the
+    /// instruction does.
+    /// </summary>
+    private void FreezePoll()
+    {
+        _pollIrq = Irq && !Flag(I);
+        _pollNmi = _needNmi;
+        _pollFrozen = true;
     }
 
     /// <summary>
@@ -42,7 +65,8 @@ public sealed partial class Cpu
     /// </summary>
     private void Poll()
     {
-        _interruptPending = !_pollSuppressed && (_pollIrq || _pollNmi);
+        bool pending = _pollFrozen ? _pollIrq || _pollNmi : (Irq && !Flag(I)) || _needNmi;
+        _interruptPending = !_pollSuppressed && pending;
         _pollFrozen = false;
         _pollSuppressed = false;
     }

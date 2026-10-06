@@ -2,8 +2,9 @@
 
 This repository is MIT (see `LICENSE`). Two things in it were taken from
 outside under different terms, and are recorded here: the teletext glyph table,
-and the BBC Micro's preset discs. The system ROMs are recorded separately, in
-[`roms/README.md`](roms/README.md).
+and the BBC Micro's preset discs. The system ROMs, and the NES's bundled
+homebrew, Lan Master, which its author released into the public domain, are
+recorded separately, in [`roms/README.md`](roms/README.md).
 
 ## The SAA5050 teletext glyph table, from Bedstead
 

@@ -76,13 +76,18 @@ public sealed partial class Cpu
             case 0xA3: A = X = NZ(Read(IzX())); break;
             case 0xB3: A = X = NZ(Read(IzY(Access.Read))); break;
 
-            // Immediate oddities. ANE and LXA use the constant $EE, as Harte's
-            // data does; real chips vary. See docs/known-differences.md.
+            // Immediate oddities. ANE uses the constant $EE, as Harte's data does;
+            // real chips vary. LXA uses $EE too, except on the Ricoh 2A03 variant,
+            // which uses $FF: Blargg's instr_test-v5, whose checksums were made on
+            // a 2A03, passes with $FF and fails with $EE or $00, while Harte's
+            // nes6502 data has $EE. Decided 6 October 2026 for the console's
+            // value; the nes6502 Harte run leaves out $AB, and says so (Coverage).
+            // See docs/known-differences.md.
             case 0x0B: case 0x2B: Anc(Read(PC++)); break;
             case 0x4B: Alr(Read(PC++)); break;
             case 0x6B: Arr(Read(PC++)); break;
             case 0x8B: A = NZ((byte)((A | 0xEE) & X & Read(PC++))); break;
-            case 0xAB: A = X = NZ((byte)((A | 0xEE) & Read(PC++))); break;
+            case 0xAB: A = X = NZ((byte)((A | _lxaConstant) & Read(PC++))); break;
             case 0xCB: Sbx(Read(PC++)); break;
             case 0xEB: SbcAt(PC++); break;
 

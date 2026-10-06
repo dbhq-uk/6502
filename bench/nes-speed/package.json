@@ -1,0 +1,9 @@
+{
+  "name": "dbhq-nes-speed-driver",
+  "private": true,
+  "description": "Drives the NES's browser speed check in a real Chrome. Local measurement only.",
+  "type": "module",
+  "dependencies": {
+    "playwright-core": "1.63.0"
+  }
+}

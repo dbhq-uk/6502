@@ -1,0 +1,373 @@
+# NES APU: the channels, the frame counter, the mixer
+
+Written 5 October 2026 for the NES plan, task 1. Tags and page revisions are in
+[`README.md`](README.md). Used by tasks 8 (the channels and frame counter) and 9
+(the DMC, its DMA and the samples). The DMA cycle costs are in
+[`bus.md`](bus.md) section 6.
+
+## 1. Clocking
+
+- The APU is in the 2A03 (NTSC) and the 2A07 (PAL); its registers are
+  `$4000-$4013`, `$4015` and `$4017` [from APU].
+- One **APU cycle** is two CPU cycles [from APU Frame Counter]. The pulse,
+  noise and DMC timers count APU cycles, so their periods are even in CPU
+  cycles; the triangle's timer counts CPU cycles [from APU].
+- A **divider** with period P counts P, P-1, ... 0, and on the clock after 0
+  reloads P and outputs a clock, so its period is P + 1 [from APU, glossary].
+- The two halves of an APU cycle are the DMA's get and put cycles (`bus.md` 5)
+  [from DMA].
+
+## 2. Pulse 1 and 2 (`$4000-$4007`)
+
+| Register | Bits | Source |
+|---|---|---|
+| `$4000`/`$4004` | `DDLC VVVV`: duty, length halt and envelope loop, constant volume, volume or envelope period | [from APU Pulse] |
+| `$4001`/`$4005` | `EPPP NSSS`: sweep (section 3) | [from APU Sweep] |
+| `$4002`/`$4006` | timer low 8 bits | [from APU Pulse] |
+| `$4003`/`$4007` | `LLLL LTTT`: length load, timer high 3 bits | [from APU Pulse] |
+
+- A `$4003`/`$4007` write loads the length counter (if the channel is enabled),
+  restarts the sequencer at its first step and restarts the envelope; it does
+  not reset the timer's divider [from APU Pulse; APU Length Counter].
+- A `$4000` write changes the duty but not the sequencer's position [from APU
+  Pulse].
+- The 11-bit timer `t` counts in APU cycles; the 8-step sequencer advances when
+  it passes 0, so a period is `16 x (t + 1)` CPU cycles, `f = fCPU / (16 x (t +
+  1))` [from APU Pulse].
+- **Duty sequences**, as the output steps after a restart [from APU Pulse]:
+
+| Duty | Output | |
+|---|---|---|
+| 0 | `0 1 0 0 0 0 0 0` | 12.5% |
+| 1 | `0 1 1 0 0 0 0 0` | 25% |
+| 2 | `0 1 1 1 1 0 0 0` | 50% |
+| 3 | `1 0 0 1 1 1 1 1` | 25% negated |
+
+  The sequencer counts down from 0, so it reads its table in the order 0, 7, 6,
+  ... 1 [from APU Pulse].
+
+### Worked example 0: the 12.5% duty after a `$4003` write
+
+Duty 0, constant volume 15, `t` = 100, length counter loaded, sweep muting
+nothing. The `$4003` write puts the sequencer at its first step [from APU Pulse].
+The duty 0 lookup table is `0 0 0 0 0 0 0 1` (entries 0 to 7), read in the order
+0, 7, 6, 5, 4, 3, 2, 1, so the first 8 outputs, one per sequencer step, are:
+
+| Step after the write | 1st | 2nd | 3rd | 4th | 5th | 6th | 7th | 8th |
+|---|---|---|---|---|---|---|---|---|
+| Table entry | 0 | 7 | 6 | 5 | 4 | 3 | 2 | 1 |
+| Sequencer bit | 0 | 1 | 0 | 0 | 0 | 0 | 0 | 0 |
+| To the mixer | 0 | 15 | 0 | 0 | 0 | 0 | 0 | 0 |
+
+[from APU Pulse: the two duty tables and "reads the sequence lookup table in the
+order 0, 7, 6, 5, 4, 3, 2, 1"]. Each step lasts `t + 1` = 101 APU cycles, 202
+CPU cycles, except the first: the write does not reset the timer's divider
+[from APU Pulse], so the first step ends when the divider next passes 0, which
+can be sooner [inferring]. Whether the first output sample is taken before or
+after the first advance from entry 0 is not said on the page. Task 8 takes the
+output at entry 0 from the write until the first advance, which gives the row
+above; no pinned ROM reads it, so it stays a choice [inferring; `PulseTests`].
+- **Output** is the envelope volume, or 0 when the sequencer output is 0, the
+  sweep mutes, the length counter is 0, or `t < 8` [from APU Pulse].
+- The two channels differ only in the sweep's negate (section 3) [from APU
+  Pulse].
+
+## 3. Sweep
+
+- `$4001`/`$4005` `EPPP NSSS`: enabled, divider period P (P + 1 half frames),
+  negate, shift. A write sets the reload flag [from APU Sweep].
+- **Target period**, computed all the time: `change = t >> S`; negated, pulse 1
+  adds `-change - 1` (ones' complement) and pulse 2 adds `-change`; a negative
+  sum clamps to 0 [from APU Sweep].
+- **Muting**, whether or not the sweep is enabled: when `t < 8` or the target is
+  over `$7FF` [from APU Sweep].
+- **On each half-frame clock:** if the divider is 0, the sweep is enabled, S is
+  not 0 and the channel is not muted, `t` = target. Then, if the divider is 0 or
+  the reload flag is set, the divider = P and the reload flag clears; otherwise
+  the divider counts down [from APU Sweep].
+
+### Worked example 1: the sweep's negate
+
+`t` = 20, S = 0 so `change` = 20, negate on: pulse 1's target is 20 - 21 = -1,
+clamped to 0; pulse 2's is 0 [from APU Sweep: "Making 20 negative produces a
+change amount of -21" and "-20"]. With negate off and S = 0, `t` = `$400` gives a
+target of `$800`, over `$7FF`, so the channel is muted even with the sweep
+disabled [from APU Sweep].
+
+## 4. Envelope (pulses and noise)
+
+- Each has a start flag, a divider and a decay level [from APU Envelope].
+- A write to the channel's fourth register sets the start flag [from APU
+  Envelope].
+- **On each quarter-frame clock:** if the start flag is set, clear it, set decay
+  to 15 and reload the divider with V; otherwise clock the divider. When the
+  divider passes 0 it reloads V and clocks the decay: decay counts down to 0,
+  and at 0 goes back to 15 if the loop flag is set [from APU Envelope].
+- **Output** is V if the constant-volume flag is set, else the decay level; the
+  decay keeps running either way [from APU Envelope].
+
+## 5. Length counter
+
+- On the pulses, triangle and noise. Writing the channel's length register
+  loads entry `L` (bits 7 to 3) of this table, if the channel is enabled in
+  `$4015` [from APU Length Counter]:
+
+```
+     0   1   2   3   4   5   6   7   8   9   A   B   C   D   E   F
+00: 10,254, 20,  2, 40,  4, 80,  6,160,  8, 60, 10, 14, 12, 26, 14
+10: 12, 16, 24, 18, 48, 20, 96, 22,192, 24, 72, 26, 16, 28, 32, 30
+```
+
+- Clearing the channel's bit in `$4015` sets the counter to 0 and holds it there
+  [from APU Length Counter].
+- **On each half-frame clock** it counts down unless it is 0 or the halt flag is
+  set [from APU Length Counter]. The channel is silent while it is 0 [from APU
+  Length Counter].
+- The table is the length plus one, for the model where a channel stops when the
+  counter **becomes** 0 [from APU Length Counter].
+- **A write that meets a half-frame clock.** "Changes to length counter halt
+  occur after clocking length, not before", and a "write to length counter
+  reload should be ignored when made during length counter clocking and the
+  length counter is not zero" [from the fork: pal_apu_tests/readme.txt, tests 10
+  and 11]. In task 8's model, which clocks in the tick that begins a cycle, the
+  write that is "during" the clock is the one in the cycle before it: test 10
+  passes a halt written at 16628 cycles after the `$4017` write as taking effect
+  first and one at 16629 as too late, and the half frame lands at 16630
+  [inferring, from the ROM's cycle counts; both ROMs fail without the rule].
+
+## 6. Triangle (`$4008-$400B`)
+
+- `$4008` `CRRR RRRR`: control flag (also length halt), linear counter reload
+  value. `$400A` timer low. `$400B` `LLLL LTTT`: length load, timer high, and it
+  sets the linear counter's reload flag [from APU Triangle].
+- The timer counts CPU cycles, so `f = fCPU / (32 x (t + 1))` [from APU
+  Triangle].
+- **On each quarter-frame clock:** if the reload flag is set, linear counter =
+  R, else if it is not 0 it counts down; then if the control flag is clear the
+  reload flag clears [from APU Triangle].
+- The sequencer advances only while both the linear counter and the length
+  counter are not 0 [from APU Triangle]. Its 32 steps are `15 14 ... 1 0 0 1
+  ... 14 15` [from APU Triangle].
+- Silenced, it holds its last value, not 0 [from APU]. Periods 0 and 1 give an
+  ultrasonic wave, which some emulators halt instead [from APU Triangle]. Task 8
+  keeps the real behaviour: period 0 steps every CPU cycle and period 1 every
+  second. Task 9's resampler does not need it halted: through it, periods 0 and
+  1 come out 72 dB or more under a full triangle, measured on both regions
+  (`ResamplerTests`) [measured in task 9].
+
+## 7. Noise (`$400C-$400F`)
+
+- `$400C` `--LC VVVV` as the pulse; `$400E` `M--- PPPP`: mode and period index;
+  `$400F` `LLLL L---`: length load and envelope restart [from APU Noise].
+- **Periods** in CPU cycles [from APU Noise]:
+
+| Index | 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | A | B | C | D | E | F |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| NTSC | 4 | 8 | 16 | 32 | 64 | 96 | 128 | 160 | 202 | 254 | 380 | 508 | 762 | 1016 | 2034 | 4068 |
+| PAL | 4 | 8 | 14 | 30 | 60 | 88 | 118 | 148 | 188 | 236 | 354 | 472 | 708 | 944 | 1890 | 3778 |
+
+- **The shift register** is 15 bits. On each timer clock: feedback = bit 0 XOR
+  bit 6 (mode set) or bit 1 (mode clear); shift right one; bit 14 = feedback
+  [from APU Noise].
+- **Output** is the envelope volume, or 0 when bit 0 is set or the length
+  counter is 0 [from APU Noise].
+- **At power-up** the register is 1 [from APU Noise]. CPU power up state says
+  `$0000` with the first clock shifting in a 1. The two disagree; APU Noise is
+  trusted because a register of 0 with the feedback rule above stays 0 for ever
+  [inferring].
+
+### Worked example 2: the noise register
+
+From 1 in mode 0: feedback = bit 0 (1) XOR bit 1 (0) = 1; shift right gives 0;
+bit 14 set gives `$4000`. Next: bit 0 = 0, bit 1 = 0, feedback 0, result
+`$2000` [inferring from the rule on APU Noise].
+
+The first 16 values in each mode, from 1, by the same rule [inferring, computed
+in task 8]. The two modes part at the 10th clock, where mode 1 sees bit 6 of
+`$0040` set:
+
+| Clock | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13 | 14 | 15 | 16 |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| Mode 0 | `4000` | `2000` | `1000` | `0800` | `0400` | `0200` | `0100` | `0080` | `0040` | `0020` | `0010` | `0008` | `0004` | `0002` | `4001` | `6000` |
+| Mode 1 | `4000` | `2000` | `1000` | `0800` | `0400` | `0200` | `0100` | `0080` | `0040` | `4020` | `2010` | `1008` | `0804` | `0402` | `0201` | `4100` |
+
+The output bit is bit 0: in both modes the first 14 are 0 (the channel sounds)
+and the 15th is 1. So the first ten output bits cannot tell the modes apart; the
+register values can.
+
+## 8. DMC (`$4010-$4013`)
+
+| Register | Bits | Source |
+|---|---|---|
+| `$4010` | `IL-- RRRR`: IRQ enable (clearing it clears the flag), loop, rate index | [from APU DMC] |
+| `$4011` | `-DDD DDDD`: output level, loaded at once | [from APU DMC] |
+| `$4012` | sample address = `$C000 + A x 64` | [from APU DMC] |
+| `$4013` | sample length = `L x 16 + 1` bytes | [from APU DMC] |
+
+**Rates** in CPU cycles between output changes [from APU DMC]:
+
+| Index | 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | A | B | C | D | E | F |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| NTSC | 428 | 380 | 340 | 320 | 286 | 254 | 226 | 214 | 190 | 160 | 142 | 128 | 106 | 84 | 72 | 54 |
+| PAL | 398 | 354 | 316 | 298 | 276 | 236 | 210 | 198 | 176 | 148 | 132 | 118 | 98 | 78 | 66 | 50 |
+
+- **The reader.** When the sample buffer is empty and bytes remain, a DMA
+  fetches the next byte (`bus.md` 6) into the buffer; the address goes up,
+  wrapping `$FFFF` to `$8000`; bytes remaining goes down, and at 0 the sample
+  restarts if loop is set, or else the IRQ flag is set if IRQ is enabled [from
+  APU DMC].
+- **The output unit** has an 8-bit shift register, a bits-remaining counter and
+  a silence flag. When the counter reaches 0 an output cycle ends: the counter
+  reloads 8, and the buffer, if full, moves into the shift register and clears
+  the silence flag; if empty, the silence flag is set [from APU DMC].
+- **On each timer clock:** if not silent, bit 0 of the shift register adds 2 to
+  the level (if the level is 125 or less) or takes 2 (if it is 2 or more); the
+  register shifts right; the bits-remaining counter counts down [from APU DMC].
+- The level (0 to 127) always goes to the mixer, enabled or not; it is 0 at
+  power-up [from APU DMC].
+- The IRQ flag holds IRQ low until it is cleared [from APU DMC].
+
+### Worked example 3: a DMC byte
+
+Level 64, the byte `$0F` (bits 0 to 3 set) in the shift register. Eight timer
+clocks give 66, 68, 70, 72, then 70, 68, 66, 64 [inferring from the rule on APU
+DMC]. At rate index `$F` on NTSC that byte lasts 8 x 54 = 432 CPU cycles [from
+APU DMC: "432 CPU cycles ... between boundaries"].
+
+## 9. Status (`$4015`)
+
+- **Write** `---D NT21`: each 0 bit silences that channel and zeroes its length
+  counter. D = 0 sets the DMC's bytes remaining to 0; D = 1 restarts the sample
+  only if bytes remaining is 0. The write clears the DMC IRQ flag [from APU].
+- **Read** `IF-D NT21`: DMC IRQ, frame IRQ, DMC bytes remaining over 0, length
+  counters over 0. The read clears the frame IRQ flag but not the DMC's; a flag
+  set on the same cycle as the read reads 1 and is not cleared [from APU].
+  Task 8's model does not add that last rule: the flag is set on three cycles in
+  a row (section 10), and with the rule applied to the third, `apu_test`
+  6-irq_flag_timing and `pal_apu_tests` 07.irq_flag_timing both fail their
+  "last set too late" check; without it both pass [inferring, measured in task
+  8]. The three sets are what the rule looks like from the CPU.
+- Bit 5 is open bus, and the read does not drive the external bus (`bus.md` 3)
+  [from APU].
+
+## 10. The frame counter (`$4017`)
+
+- `$4017` write `MI-- ----`: mode (0 = 4-step, 1 = 5-step), IRQ inhibit. Setting
+  I clears the frame IRQ flag [from APU Frame Counter].
+- After a write the sequencer is reset 3 CPU cycles later if the write is
+  during an APU cycle and 4 if between, and with M = 1 a quarter and a half
+  frame clock happen at once [from APU Frame Counter]. "PAL behavior is currently
+  assumed to be the same" [from APU Frame Counter].
+- Task 8 reads "during" as a put and "between" as a get: 3 from a put and 4 from
+  a get, so the reset always lands on a get and the steps below land on the puts
+  the table names [inferring]. `apu_test` 4-jitter and `pal_apu_tests`
+  04.clock_jitter fail with a fixed delay of 3 and pass with the parity rule
+  either way round, so the ROMs confirm that the delay depends on parity, and on
+  PAL too, but not which parity gets 3 [measured in task 8].
+- The IRQ inhibit acts at the write; the mode at the reset [inferring: the page
+  says setting I clears the flag, and the reset is when the sequence restarts].
+- At power and reset the APU acts as if `$4017` was written 10 cycles before the
+  first instruction; at power `$4017` is 0, so the frame IRQ is enabled [from
+  PPU power up state; CPU power up state]. At reset the last value written to
+  `$4017` is written again, and the frame IRQ flag is clear [from the fork:
+  apu_reset/readme.txt].
+
+**The steps in APU cycles** [from APU Frame Counter], and in CPU cycles taking a
+put as `2n + 1` and a get as `2n` [inferring; the NTSC results agree with the
+CPU-cycle figures the plan remembered from the older version of the page; task
+8's model counts them from the reset and passes `apu_test` 3 to 6 on NTSC and
+every `pal_apu_tests` ROM on PAL with them]:
+
+| Step | Quarter | Half | IRQ (4-step, I clear) | NTSC APU | NTSC CPU | PAL APU | PAL CPU |
+|---|---|---|---|---|---|---|---|
+| 1 | yes | | | 3728 put | 7457 | 4156 put | 8313 |
+| 2 | yes | yes | | 7456 put | 14913 | 8313 put | 16627 |
+| 3 | yes | | | 11185 put | 22371 | 12469 put | 24939 |
+| 4 (4-step) | | | set | 14914 get | 29828 | 16626 get | 33252 |
+| | yes | yes | set | 14914 put | 29829 | 16626 put | 33253 |
+| | | | set | 0 (14915) get | 29830 | 0 (16627) get | 33254 |
+| 4 (5-step) | | | | 14914 put | 29829 | 16626 put | 33253 |
+| 5 (5-step) | yes | yes | | 18640 put | 37281 | 20782 put | 41565 |
+| | | | | 0 (18641) get | 37282 | 0 (20783) get | 41566 |
+
+- In 4-step mode the IRQ flag is set every 29830 CPU cycles on NTSC and 33254 on
+  PAL [from APU Frame Counter]. In 5-step mode it is never set [from APU Frame
+  Counter].
+- Quarter-frame clocks drive the envelopes and the triangle's linear counter;
+  half-frame clocks the length counters and sweeps [from APU Frame Counter].
+
+## 11. The mixer
+
+The output, 0.0 to 1.0, is [from APU Mixer]:
+
+```
+pulse_out = 95.88 / (8128 / (pulse1 + pulse2) + 100)
+tnd_out   = 159.79 / (1 / (triangle / 8227 + noise / 12241 + dmc / 22638) + 100)
+output    = pulse_out + tnd_out
+```
+
+with each group 0 when its inputs are all 0. Pulse, triangle and noise are 0 to
+15 and the DMC 0 to 127 [from APU Mixer]. The wiki also gives a lookup-table form
+within 4% [from APU Mixer].
+
+After the DACs the NES has high-pass filters at 90 Hz and 440 Hz and a low-pass
+at 14 kHz [from APU Mixer]. Task 9 applies them, first order each, after the
+resampler (`SampleBuffer`) [inferring the order from the page, which gives the
+filters and not their form].
+
+The formulas are the model's, through tables built from them at start-up. The
+fork's `apu_mixer` ROMs (dmc, noise, square, triangle) play a tone and cancel it
+with the inverse on the DMC's DAC; with the formulas the tone in the machine's
+own sound is 32 to 38 dB under the ROMs' short tone (the 90th percentile block),
+and with the page's linear approximation put in for one run, 9.5 to 25.7 dB
+[measured in task 9].
+
+### Worked example 4: the mixer
+
+- Both pulses at 15: `pulse_out = 95.88 / (8128 / 30 + 100) = 95.88 / 370.93 =
+  0.2585` [inferring, computed].
+- Triangle 15, noise 0, DMC 0: `tnd_out = 159.79 / (8227 / 15 + 100) = 159.79 /
+  648.47 = 0.2464` [inferring, computed].
+- DMC 127 alone: `tnd_out = 159.79 / (22638 / 127 + 100) = 159.79 / 278.25 =
+  0.5743` [inferring, computed].
+
+## 12. What differs by region
+
+| | NTSC | PAL | Source |
+|---|---|---|---|
+| CPU clock | 1.789773 MHz | 1.662607 MHz | [from APU Pulse; Cycle reference chart] |
+| Noise periods | section 7 | section 7 | [from APU Noise] |
+| DMC rates | section 8 | section 8 | [from APU DMC] |
+| Frame counter steps | section 10 | section 10 | [from APU Frame Counter; `pal_apu_tests` passes on the PAL figures in task 8] |
+| Length table, duty, envelope, sweep, mixer | same | same | [inferring: the pages give one table each] |
+| DMC DMA register conflicts | yes | no | [from DMA] |
+
+## 13. Power-up
+
+| What | At power | After reset | Source |
+|---|---|---|---|
+| `$4000-$4013` | 0 | unchanged (`$4011` keeps bit 0 only) | [from CPU power up state] |
+| `$4015` | 0 | 0 | [from CPU power up state; APU] |
+| `$4017` | 0, IRQ enabled | written again with its last value | [from CPU power up state; the fork: apu_reset/readme.txt] |
+| Frame IRQ flag | clear | clear | [from the fork: apu_reset/readme.txt] |
+| Triangle phase | unknown | step 0, output 15 | [from CPU power up state] |
+| Noise register | 1 (section 7) | unchanged | [from APU Noise] |
+| DMC level | 0 | `&= 1` | [from APU DMC; CPU power up state] |
+
+## 14. Open items
+
+1. Closed in task 8: the PAL `$4017` write delay is the NTSC rule;
+   `pal_apu_tests` 04.clock_jitter passes with it and fails without the parity.
+2. Closed in task 8: the CPU-cycle conversion of the step table (10) passes
+   `apu_test` 3 to 6 and every `pal_apu_tests` ROM.
+3. Whether `t < 8` silences a PAL pulse ("TODO: PAL behavior?" on APU Pulse)
+   [guessing - verify]. Task 8 silences it on both; no pinned ROM checks it.
+4. Which parity of CPU cycle gets the 3-cycle `$4017` delay (section 10): the
+   ROMs pass either way. Task 9 ran `sprdma_and_dmc_dma`, its `_512` variant,
+   `apu_test` and `pal_apu_tests` with the parity swapped: all pass, so it is
+   still open [measured in task 9].
+5. Closed in task 12: the length counter's write rule (section 5) on NTSC. Its
+   source is `pal_apu_tests`' readme, and task 8 applied it to NTSC with no ROM
+   to check it. The fork's `blargg_apu_2005.07.30` 10.len_halt_timing and
+   11.len_reload_timing are the NTSC tests of the same name and pass with it;
+   with the rule taken out once they print `$03` and `$04` [measured in task 12].

@@ -6,7 +6,7 @@ import path from 'node:path';
 import crypto from 'node:crypto';
 import { spawnSync } from 'node:child_process';
 import { MACHINE_BUILDS, machineBuilds, readRom } from '../src/lib/machines.mjs';
-import { bbcRoms, kim1Roms, pin } from '../src/lib/pins.mjs';
+import { bbcRoms, kim1Roms, nesRoms, pin } from '../src/lib/pins.mjs';
 import { REPO_ROOT } from '../src/lib/registry.mjs';
 
 // scripts/build-machines.mjs publishes a machine by its registry id, with the
@@ -16,13 +16,29 @@ import { REPO_ROOT } from '../src/lib/registry.mjs';
 
 const sha256 = (bytes) => crypto.createHash('sha256').update(bytes).digest('hex');
 
-test('the builds are the KIM-1 and the BBC Micro, each from its own WebAssembly project, by its registry id', () => {
-  assert.deepEqual(Object.keys(MACHINE_BUILDS), ['kim-1', 'bbc-micro']);
+test('the builds are the KIM-1, the BBC Micro and the NES, each from its own WebAssembly project, by its registry id', () => {
+  assert.deepEqual(Object.keys(MACHINE_BUILDS), ['kim-1', 'bbc-micro', 'nes']);
   for (const { project } of Object.values(MACHINE_BUILDS)) assert.ok(fs.existsSync(path.join(REPO_ROOT, 'src', project, `${project}.csproj`)), `no project ${project}`);
   const ids = JSON.parse(fs.readFileSync(path.join(REPO_ROOT, 'machines', 'registry.json'), 'utf8')).machines.map((m) => m.id);
   for (const id of Object.keys(MACHINE_BUILDS)) assert.ok(ids.includes(id), `${id} is not a registry id`);
   assert.equal(MACHINE_BUILDS['kim-1'].roms, kim1Roms);
   assert.equal(MACHINE_BUILDS['bbc-micro'].roms, bbcRoms);
+  assert.equal(MACHINE_BUILDS.nes.roms, nesRoms);
+});
+
+test('the NES\'s one file is its bundled game, the pin in Pins.cs, which NesHost.Load takes, and the file in roms/ matches its pin', () => {
+  const roms = nesRoms();
+  assert.equal(roms.length, 1, 'the NES has no system ROM: its one file is the game Start puts in');
+  const [game] = roms;
+  assert.equal(game.path, pin('NesHomebrewPath'));
+  assert.equal(game.sha256, pin('NesHomebrewSha256'));
+  assert.equal(game.file, path.basename(game.path));
+  assert.equal(game.url, `https://github.com/dbhq-uk/6502/blob/main/${game.path}`);
+  const host = fs.readFileSync(path.join(REPO_ROOT, 'src', 'Dbhq.Machines.Nes.Wasm', 'Program.cs'), 'utf8');
+  assert.match(host, /public static string Load\(byte\[\] rom, string region, int sampleRate\)/);
+  const bytes = readRom(game);
+  assert.deepEqual([...bytes.subarray(0, 4)], [0x4e, 0x45, 0x53, 0x1a], 'the game is not an iNES file');
+  assert.equal(sha256(bytes), game.sha256);
 });
 
 test('the BBC Micro\'s ROMs are its three pins in Pins.cs, in the order BbcHost.Load takes them, and each file in roms/ matches its pin', () => {
@@ -59,7 +75,8 @@ test('the machines to build are named, each once, and a name with no build is re
   assert.deepEqual(machineBuilds(['kim-1']).map((b) => b.id), ['kim-1']);
   assert.deepEqual(machineBuilds(['bbc-micro', 'kim-1', 'bbc-micro']).map((b) => b.id), ['bbc-micro', 'kim-1']);
   assert.throws(() => machineBuilds([]), /name the machines to build/);
-  assert.throws(() => machineBuilds(['nes']), /no build for "nes"/);
+  assert.deepEqual(machineBuilds(['nes']).map((b) => b.id), ['nes']);
+  assert.throws(() => machineBuilds(['apple-ii']), /no build for "apple-ii"/);
 });
 
 /**
@@ -88,7 +105,7 @@ function scratchRepo(spoil = () => {}) {
 test('the script stops before publishing anything when the machine, or an option, is not one it knows', () => {
   const { root, run, dotnetRan } = scratchRepo();
   try {
-    for (const args of [[], ['nes'], ['kim-1', '--aot']]) {
+    for (const args of [[], ['apple-ii'], ['kim-1', '--aot']]) {
       const result = run(args);
       assert.notEqual(result.status, 0, `build-machines.mjs ${args.join(' ')} succeeded`);
       assert.doesNotMatch(result.stdout, /dotnet publish/);
@@ -119,7 +136,7 @@ test('every ROM of every machine named is read and checked before the first publ
   }
 });
 
-test('CI and npm run machines publish both machines, each cached on its own inputs, so a change to one rebuilds that one', () => {
+test('CI and npm run machines publish every machine, each cached on its own inputs, so a change to one rebuilds that one', () => {
   const root = path.resolve(process.cwd(), '..');
   for (const name of ['validate.yml', 'deploy-site.yml']) {
     const text = fs.readFileSync(path.join(root, '.github', 'workflows', name), 'utf8');
