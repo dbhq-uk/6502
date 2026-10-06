@@ -61,6 +61,14 @@ namespace Dbhq.Machines.Nes;
 /// 5, because the sprite test ROMs need it; the controllers and the audit of OAM DMA are task 7;
 /// the DMC's DMA is task 9.
 /// </para>
+/// <para>
+/// <b>The chips' access counters</b> (<see cref="Accesses"/>, for the board model) are noted in the
+/// I/O decode of <see cref="ReadAccess"/> and <see cref="WriteAccess"/>, the two branches for
+/// <c>$2000-$401F</c> and nowhere else, so RAM and the cartridge, most cycles, pass no new code.
+/// Every cycle's access goes through that decode, the DMA units' included: OAM DMA's writes to
+/// <c>$2004</c> count as the PPU's, and a halted read the DMA repeats counts each time, as each is
+/// a read on the bus. Counting changes no value, no latch and no cycle.
+/// </para>
 /// </remarks>
 public sealed class NesBus : IBus
 {
@@ -110,6 +118,9 @@ public sealed class NesBus : IBus
 
     // The page a write to $4014 asked OAM DMA to copy, or -1 when none is waiting.
     private int _dmaPage = -1;
+
+    // The CPU's accesses to each chip, for the board model; a new one at each power on.
+    private ChipAccesses _accesses = new();
 
     /// <summary>
     /// A bus with the cartridge's board fitted. The board is made here, so a cartridge for a mapper
@@ -173,6 +184,14 @@ public sealed class NesBus : IBus
         get => _cpu;
         set => _cpu = value;
     }
+
+    /// <summary>
+    /// The CPU's reads and writes of each chip it can be told to reach by address, since power on
+    /// (<see cref="ChipAccesses"/>): counted in the I/O decode of <c>$2000-$401F</c>, OAM DMA's
+    /// writes to <c>$2004</c> included, and never by <see cref="Peek"/>. Power on puts a new one
+    /// here, counting from zero; the reset button keeps it.
+    /// </summary>
+    public ChipAccesses Accesses => _accesses;
 
     /// <summary>CPU cycles since power on, DMA stalls included.</summary>
     public long Cycles => _cycles;
@@ -242,11 +261,13 @@ public sealed class NesBus : IBus
     /// <summary>
     /// The power-on state of the chips: RAM zero (a real console's pattern is undefined, so zeros
     /// are the choice, a known difference), the counters and the open bus at zero, the board's
-    /// registers and PRG RAM cleared, the PPU and the sound unit reset.
+    /// registers and PRG RAM cleared, the PPU and the sound unit reset, and the chips' access
+    /// counters started again.
     /// </summary>
     internal void PowerOn()
     {
         Array.Clear(_ram);
+        _accesses = new ChipAccesses();
         _mapper.Reset(true);
         _mapper.ClearPrgRam();
         _openBus = 0;
@@ -445,10 +466,12 @@ public sealed class NesBus : IBus
         }
         else if (address < 0x4000)
         {
+            _accesses.Note(address, false);
             value = _ppu.ReadRegister(address & 7);
         }
         else if (address < 0x4020)
         {
+            _accesses.Note(address, false);
             switch (address)
             {
                 case 0x4015:
@@ -499,10 +522,13 @@ public sealed class NesBus : IBus
         }
         else if (address < 0x4000)
         {
+            // OAM DMA's writes to $2004 come through here too, as Cycle's writes.
+            _accesses.Note(address, true);
             _ppu.WriteRegister(address & 7, value);
         }
         else if (address < 0x4020)
         {
+            _accesses.Note(address, true);
             if (address == 0x4016)
             {
                 // Both pads see bit 0 (bus.md section 7).
