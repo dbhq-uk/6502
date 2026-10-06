@@ -16,13 +16,16 @@ public sealed class BbcMachine
     public BbcMachine(BbcRoms roms, BbcOptions? options = null)
     {
         Bus = new BbcBus(roms, options);
-        Cpu = new Cpu(Bus, CpuVariant.Nmos6502);
-        Bus.Cpu = Cpu;
+        _cpu = new Cpu<BbcBus.CpuPort>(new BbcBus.CpuPort(Bus), CpuVariant.Nmos6502);
+        Bus.Cpu = _cpu;
     }
+
+    // The CPU made for this bus's type, so its calls to the bus are direct (task 17).
+    private readonly Cpu<BbcBus.CpuPort> _cpu;
 
     public BbcBus Bus { get; }
 
-    public Cpu Cpu { get; }
+    public CpuBase Cpu => _cpu;
 
     /// <summary>The keyboard, with its start-up links set from the options.</summary>
     public BbcKeyboard Keyboard => Bus.Keyboard;
@@ -61,7 +64,7 @@ public sealed class BbcMachine
     public void PowerOn()
     {
         Bus.PowerOnReset();
-        Cpu.Reset();
+        _cpu.Reset();
     }
 
     /// <summary>
@@ -71,14 +74,14 @@ public sealed class BbcMachine
     public void PressBreak()
     {
         Bus.BreakReset();
-        Cpu.Reset();
+        _cpu.Reset();
     }
 
     /// <summary>Runs one instruction, or one interrupt sequence, and returns the CPU cycles it took.</summary>
     public int Step()
     {
         long start = Bus.Cycles;
-        Cpu.Step();
+        _cpu.Step();
         return (int)(Bus.Cycles - start);
     }
 

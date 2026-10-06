@@ -18,13 +18,16 @@ public sealed class Kim1Machine
     public Kim1Machine(ReadOnlySpan<byte> rom002, ReadOnlySpan<byte> rom003)
     {
         Bus = new Kim1Bus(rom002, rom003);
-        Cpu = new Cpu(Bus, CpuVariant.Nmos6502);
-        Bus.Cpu = Cpu;
+        _cpu = new Cpu<Kim1Bus.CpuPort>(new Kim1Bus.CpuPort(Bus), CpuVariant.Nmos6502);
+        Bus.Cpu = _cpu;
     }
+
+    // The CPU made for this bus's type, so its calls to the bus are direct (task 17).
+    private readonly Cpu<Kim1Bus.CpuPort> _cpu;
 
     public Kim1Bus Bus { get; }
 
-    public Cpu Cpu { get; }
+    public CpuBase Cpu => _cpu;
 
     public Kim1Keypad Keypad => Bus.Keypad;
 
@@ -49,14 +52,14 @@ public sealed class Kim1Machine
     public void PressReset()
     {
         Bus.ResetChips();
-        Cpu.Reset();
+        _cpu.Reset();
     }
 
     /// <summary>Runs one instruction, or one interrupt sequence, and returns its cycles.</summary>
     public int Step()
     {
         Bus.BeginInstruction();
-        return Cpu.Step();
+        return _cpu.Step();
     }
 
     /// <summary>Runs whole instructions until at least <paramref name="cycles"/> more bus cycles have passed.</summary>

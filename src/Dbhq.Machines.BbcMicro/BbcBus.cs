@@ -98,7 +98,7 @@ public sealed class BbcBus : IBus
     // The paged ROM the latch chose: BASIC, the DFS or EmptySlot. Set only when the latch is.
     private byte[] _paged = EmptySlot;
     private readonly BbcClock _clock = new();
-    private Cpu? _cpu;
+    private CpuBase? _cpu;
 
     // The video ULA's next line end, as it was when the bus last looked: a write that moves it (a
     // CRTC register, the ULA's clock bit) is a chip access, so the bus looks again at its end.
@@ -166,7 +166,7 @@ public sealed class BbcBus : IBus
     public Fdc8271 Fdc { get; }
 
     /// <summary>The CPU whose IRQ line the VIAs drive, and whose NMI line the 8271 drives. The lines are set at the end of the next access.</summary>
-    public Cpu? Cpu
+    public CpuBase? Cpu
     {
         get => _cpu;
         set
@@ -184,6 +184,18 @@ public sealed class BbcBus : IBus
 
     /// <summary>The paged ROM latch, 0 to 15. Slot 15 is BASIC and slot 14 the DFS.</summary>
     public int RomSlot { get; private set; }
+
+    /// <summary>
+    /// The bus as the CPU's type argument: a struct that calls this bus, so the CPU made on it,
+    /// <see cref="Cpu{TBus}"/>, calls <see cref="Read"/> and <see cref="Write"/> directly rather
+    /// than through <see cref="IBus"/> (task 17).
+    /// </summary>
+    public readonly struct CpuPort(BbcBus bus) : IBus
+    {
+        public byte Read(ushort address) => bus.Read(address);
+
+        public void Write(ushort address, byte value) => bus.Write(address, value);
+    }
 
     public byte Read(ushort address)
     {

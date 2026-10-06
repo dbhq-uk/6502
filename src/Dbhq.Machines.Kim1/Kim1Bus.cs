@@ -57,7 +57,7 @@ public sealed class Kim1Bus : IBus
     public long Cycles { get; private set; }
 
     /// <summary>The CPU whose NMI line the ST key and the single-step logic drive.</summary>
-    public Cpu? Cpu { get; set; }
+    public CpuBase? Cpu { get; set; }
 
     /// <summary>The SST slide switch.</summary>
     public bool SingleStep { get; set; }
@@ -77,6 +77,18 @@ public sealed class Kim1Bus : IBus
     /// high. The machine calls it before each instruction.
     /// </summary>
     public void BeginInstruction() => _syncNext = true;
+
+    /// <summary>
+    /// The bus as the CPU's type argument: a struct that calls this bus, so the CPU made on it,
+    /// <see cref="Cpu{TBus}"/>, calls <see cref="Read"/> and <see cref="Write"/> directly rather
+    /// than through <see cref="IBus"/> (task 17).
+    /// </summary>
+    public readonly struct CpuPort(Kim1Bus bus) : IBus
+    {
+        public byte Read(ushort address) => bus.Read(address);
+
+        public void Write(ushort address, byte value) => bus.Write(address, value);
+    }
 
     public byte Read(ushort address)
     {
