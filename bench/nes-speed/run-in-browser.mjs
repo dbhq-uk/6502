@@ -13,7 +13,8 @@
 //
 // With PROFILE=<n> in the environment, each launch is also recorded with the DevTools protocol's
 // sampling profiler (200 microsecond interval), and the n functions with the most self time are
-// printed with their share of all the samples, boot included. Publish with
+// printed with their share of all the samples: of the whole page, boot included, or with
+// THREAD_TIME (below) of the driver's runs alone. Publish with
 // -p:WasmNativeStrip=false so the WebAssembly keeps its function names.
 //
 // With THREAD_TIME=<n> in the environment, after the page's own runs the driver makes n more runs
@@ -107,12 +108,14 @@ try {
       if (response.status() >= 400) fail(new Error(`HTTP ${response.status()}: ${response.url()}`));
     });
     const profileTop = Number(process.env.PROFILE ?? 0);
+    const threadRuns = Number(process.env.THREAD_TIME ?? 0);
     const cdp = profileTop > 0 ? await page.context().newCDPSession(page) : null;
-    if (cdp) {
+    const startProfile = async () => {
       await cdp.send('Profiler.enable');
       await cdp.send('Profiler.setSamplingInterval', { interval: 200 });
       await cdp.send('Profiler.start');
-    }
+    };
+    if (cdp && threadRuns === 0) await startProfile();
     try {
       await page.goto(`${base}?cycles=${cyclesArg}&boot=${bootArg}&runs=${runsArg}&region=${regionArg}`);
       await Promise.race([
@@ -125,7 +128,7 @@ try {
     }
     const text = await page.locator('#log').innerText();
     for (const line of text.split('\n')) console.log(`launch ${launch} ${line}`);
-    const threadRuns = Number(process.env.THREAD_TIME ?? 0);
+    if (cdp && threadRuns > 0) await startProfile();
     if (threadRuns > 0) await threadTimes(page, launch, threadRuns, Number(cyclesArg));
     if (cdp) printProfile(launch, (await cdp.send('Profiler.stop')).profile, profileTop);
     await browser.close();
