@@ -144,11 +144,32 @@ const ON = {
   '.bbc-speed': ['iron'],
   '.bbc-disc legend': ['iron'],
   '.bbc-protect': ['iron'],
-  '.bbc-symbols caption': ['void'],
+  // The library of discs: the list, its label and the chosen disc's credit sit on the
+  // iron panel; the photosensitivity note is white with a white rule, so it is read first.
+  '.bbc-preset-label': ['iron'],
+  '.bbc-presets select': ['iron'],
+  '.bbc-presets select:disabled': ['iron'],
+  '.bbc-preset-about': ['iron'],
+  '.bbc-preset-disc b': ['iron'],
+  '.bbc-preset-note': ['iron'],
+  '.bbc-symbols caption, .nes-pad-table caption': ['void'],
   // The on-screen keys: veil, card when hovered or latched, the black canvas
   // while pressed; disabled, before the machine runs, iron.
   '.bbc-key': ['veil', 'card', 'void'],
   '.bbc-key:disabled': ['iron'],
+  // The NES's page, as the BBC Micro's: its lines on the iron panel, a disabled
+  // button iron, the region's and the cartridge's legends and choices on iron.
+  '.nes .btn:disabled': ['iron'],
+  '.nes-status': ['iron'],
+  '.nes-line': ['iron'],
+  '.nes-note': ['iron'],
+  '.nes-speed': ['iron'],
+  '.nes-region legend, .nes-cartridge legend': ['iron'],
+  '.nes-choice': ['iron'],
+  // Controller 1's buttons: veil, card when hovered, the black canvas while
+  // pressed; disabled, before the machine runs, iron.
+  '.nes-button': ['veil', 'card', 'void'],
+  '.nes-button:disabled': ['iron'],
   // The machine page's 3D model: its label sits on an iron tag over the canvas,
   // and its status line on the black canvas.
   '.model-tag': ['iron'],

@@ -686,3 +686,501 @@ front of the model. Where that differs from sitting at a Model B:
   after the last disc command, or until `*CAT`. The page says so, and does not
   make DFS read the new disc when it goes in (`DiscTests` shows the old
   catalogue until DFS reads it again).
+
+## The NES: the bus, where the model stops
+
+**What.** Task 3 of the NES plan, `NesBus` and `Nes`. The sources are
+`docs/nes/facts/bus.md` and `timing.md`.
+
+**RAM at power on is zero.** A real console's RAM holds an undefined pattern,
+and some games read it. The model clears it to zeros so a run is repeatable.
+`PowerOn` does it, and `Reset` does not touch RAM.
+
+**The PAL fourth dot falls in the fifth cycle of every five.** The accumulator
+starts at zero at power on and gives 3, 3, 3, 3, 4. A real console may start
+in any of the five phases (`timing.md` section 3), and the pages do not say
+which is common. The tests check the sum, 16 dots in 5 cycles, and this phase:
+`NesBusTests.ThePalDotsRunThreeThreeThreeThreeFour` on a bus that was never
+powered on, `PowerOnPutsThePalFourthDotInEveryFifthCycleCountedFromPowerOn`
+through a power on, and `nestest`'s log on PAL. Before the mutation pass of 6
+October 2026 only `nestest` saw the power-on phase, and nothing saw a second
+power on that left the accumulator where it was.
+
+**The reset button leaves the PAL phase where it was.** `Reset` puts the PPU
+back at line 0 dot 0 and does not touch the accumulator, so after a reset the
+fourth dot can fall in any of the five cycles counted from the PPU's new line 0
+dot 0, depending on how many cycles ran before the button. The pages read do
+not say what a console's reset does to the two dividers; this is the model's
+choice, not a fact (`timing.md` open item 2). `NesBusTests`'
+`AStatusReadOnTheDotTheFlagIsSetOrTheNextReadsItAndStopsTheNmi` uses it on
+purpose, to move the cycles' starts against the PPU's dots on PAL.
+
+**The order of the dots and the access inside a cycle** was measured in task 4
+against the ten `ppu_vbl_nmi` singles: two dots before the access, the rest
+after, and the CPU sees the interrupt lines as the chips held them when the
+cycle began. It is one alignment of the several a real console can power up in
+(`timing.md` section 4), the one the test ROMs are written for. On PAL the same
+rule is applied with no test to check it. The IRQ line follows the NMI line's
+rule, and task 8 checked it with `pal_apu_tests` 08.irq_timing, which fails a
+cycle either side of it (`timing.md` section 3).
+
+**Open bus is the last value that crossed the bus.** A read of `$4015` leaves
+it alone (`NesBusTests.AReadOf4015LeavesTheOpenBusAsItWas`, added when the
+mutation pass of 6 October 2026 found nothing held it). Nothing else drives the
+bus in the model: there is no decay, and the only bus conflicts are the boards'
+own AND on a register write (the section on the simple boards below).
+
+**A mapper sees only `$4020` to `$FFFF`.** The sheet says a board sees every CPU
+access except reads of `$4015`, so a board could put a register in the PPU or
+sound range. The interface has no such board, so the bus does not pass those
+addresses on.
+
+**The controllers** are real (task 7): a read of a port gives the pad in bit
+0, the open bus in bits 7 to 5 and zeros in bits 4 to 1. The DMC and its DMA
+came in task 9; where they stop is the section on them below.
+
+**OAM DMA came early, and its parity is a choice.** Task 5 built OAM DMA,
+because the sprite test ROMs load OAM with it; task 7 owns it. A write to
+`$4014` halts the CPU on its next read, and the copy takes 513 or 514 cycles
+(`bus.md` section 5). Which CPU cycles are get cycles is random on a console at
+power on; the model makes the even ones gets, so a write in an even cycle
+costs 513 and one in an odd cycle 514. The sprite ROMs pass with either choice
+(measured in task 5 by swapping it), so nothing pinned settles which.
+
+**The reset button drops a copy that was waiting.** A write to `$4014` starts
+OAM DMA on the CPU's next read. If the reset button is pressed between the two,
+the model forgets the page, so no copy runs in the reset's first read, after the
+PPU has been reset (`NesBus.Reset`). `bus.md` does not say what a console does
+here; the reset stops the CPU, and the model takes it that the copy goes with
+it. `OamDmaTests.TheResetButtonDropsACopyThatWasWaiting` holds it: the reset
+takes its seven cycles and the next read one.
+
+**A halt on a pad read clocks the pad once, on both chips.** The halt and the
+alignment cycle repeat the CPU's read in consecutive cycles, and the pad sees
+one clock for the run (`bus.md` 7). The model does this for the 2A07 too. The
+sheet says the 2A07 lacks the extra reads of DMC DMA and does not say whether
+OAM DMA differs there, so this is a guess for PAL (`bus.md` open item 2).
+
+## The NES: the PPU's registers and timing, where the model stops
+
+**What.** Task 4 of the NES plan, `Ppu`. The sources are
+`docs/nes/facts/ppu.md` sections 1 to 5 and 12 and `timing.md` section 2. It
+passes the ten `ppu_vbl_nmi` singles on NTSC. It draws nothing yet (task 5).
+
+**The power-on alignment is a choice.** The PPU starts at line 0 dot 0 in the
+same instant as the CPU's first reset cycle, which is what `nestest.log` needs.
+A real console powers up with the CPU and PPU in one of several alignments, and
+the `ppu_vbl_nmi` readme says some of them fail its tests (`timing.md` section
+4). The model has one, the one the tests are written for. Its first VBlank is
+set in cycle 27395 from power on on NTSC (25683 on PAL), which
+`NesBusTests.TheFirstVblankFlagIsSetInTheCycleThatRunsLine241Dot1` holds; the
+wiki says "around 27384", and nothing pinned settles which (`timing.md` open
+item 4).
+
+**On PAL the flags clear at dot 1 of line 311.** The pages give the clear at
+dot 1 of the pre-render line on NTSC, and on PAL only imply it, from the 70
+lines of VBlank; the PPU frame timing page says the PAL clear time awaits
+confirmation (`timing.md` open item 1). The model clears VBlank, sprite 0 hit
+and overflow at dot 1 of line 311.
+`PpuTimingTests.TheVblankFlagIsSetAtLine241Dot1AndClearedAtDot1OfThePreRenderLine`
+checks that the model does so on both; no pinned ROM times it on PAL.
+
+**Power on is zeros.** VBlank is often set at power on and OAM, the palette and
+the nametables are unspecified (`ppu.md` section 12). The model clears all of
+them so a run is repeatable.
+
+**The I/O latch decays at one fixed time.** Each bit reads 0 once it has gone
+600 ms without being driven, the time the fork's `ppu_open_bus/readme.txt`
+measured on a console. The wiki says at least one bit goes after 3 to 30 ms,
+faster when the PPU is warm, and the readme says some decay sooner, depending
+on the console and the temperature. The model gives every bit the same time on
+every console. Which accesses drive which bits follows `ppu.md` section 1, and
+`ppu_open_bus` passes (task 12).
+
+**Writes are not ignored after power on or reset.** The chip ignores writes to
+`$2000`, `$2001`, `$2005` and `$2006` until the end of the first VBlank
+(`ppu.md` section 1). The model takes them at once. Games wait for VBlank first,
+so this shows only for a program that does not.
+
+**Two small delays are not modelled.** The second `$2006` write copies `t` to
+`v` at once, where the chip takes 1 to 1.5 dots, and a `$2001` write switches
+rendering at once, where the chip takes 3 to 4 dots (`ppu.md` sections 1 and
+2). The odd-frame dot is sampled at dot 338, measured against `ppu_vbl_nmi`
+test 10. That is the model's cutoff in its own alignment of CPU and PPU. Against
+the wiki's dot 339, where the skip happens, it is an effective delay of one dot
+for the `$2001` write, not the 3 to 4 the sheet gives, and why the two differ is
+open (`timing.md` section 2).
+
+**Left for the drawing PPU (task 5), and done there.** A `$2004` read during
+rendering on a visible line returns what evaluation and the sprite fetches are
+reading, OAMADDR is cleared on dots 257 to 320, and the pipeline moves `v`. The
+next section says where the drawing stops.
+
+## The NES: the PPU's picture, where the model stops
+
+**What.** Task 5 of the NES plan: the background pipeline, the sprites, sprite 0
+hit, the overflow flag, `PpuPalette` and `FrameBuffer`. The sources are
+`docs/nes/facts/ppu.md` sections 2 and 6 to 11 and the wiki's NTSC video page.
+`BlarggTests` runs every ROM of `sprite_hit_tests_2005.10.05` and of
+`sprite_overflow_tests` on NTSC, and none is a known failure.
+
+**The colours are one decode, computed.** The PPU makes a composite signal and a
+television decodes it. `PpuPalette` makes the signal from the wiki's measured
+voltages and decodes each colour alone, from one whole colour cycle, with black
+at `$1D` (no 7.5 IRE setup) and white at `$20` (`ppu.md` section 11). A real
+picture differs: colours bleed into their neighbours and crawl from line to line
+and frame to frame, the hues of the brighter rows turn by the differential
+phase distortion, and each television decodes and filters in its own way. None
+of that is modelled. The wiki's Pally tables were not used, because their
+licence is not stated.
+
+**PAL uses the NTSC colours.** The 2C07's own decode is about 15 degrees of hue
+away (`ppu.md` section 10). The model swaps the 2C07's red and green emphasis
+bits, and nothing else about its colour. The colours were never compared with a
+real PAL television, or a capture of one: `PpuPaletteTests` checks the decode
+against the rules of the NTSC video page, and
+`OnPalTheRedAndGreenEmphasisBitsAreSwapped` the one PAL rule the model has.
+
+**The 2C07's border is not drawn.** The 2C07 blacks out columns 0, 1, 254 and
+255 and line 0 of the picture (`ppu.md` section 10). The model draws them as the
+2C02 does.
+
+**The 2C07's OAM refresh is not modelled.** It refreshes OAM itself on lines 265
+to 310, so OAM can be written only in the first 24 lines of its VBlank, and its
+sprite evaluation cannot be fully turned off (`ppu.md` section 4). The model
+lets OAM be written all through VBlank on both.
+
+**The column a dot decides is bounded, not pinned.** Column `X` is decided on
+dot `X + 2`, which is what the wiki's "sprite 0 hit acts as if the image starts
+at cycle 2" says. The sprite 0 timing ROMs pass with the hit on any dot from
+`X + 1` to `X + 4`, so they do not settle it. The first pixel leaving the chip
+during dot 4, the analogue delay after that, is not modelled.
+
+**Greyscale follows one page of two.** PPU registers says greyscale ANDs the
+colour with `$30`; NTSC video says colours `$x1` to `$xD` become `$x0`, and says
+nothing of `$xE` and `$xF`, which the AND turns grey. The model ANDs. No pinned
+test reads the difference.
+
+**Evaluation starts at sprite 0.** On the chip, an OAMADDR that is not 0 at dot
+65 makes evaluation start elsewhere and treat another sprite as sprite 0
+(`ppu.md` section 8). The model always starts at sprite 0. The `$2004` reads
+during rendering show the bytes evaluation and the fetches read, one a dot,
+which is close to what the sheet says but not checked against a ROM:
+`oam_read` and `oam_stress` are task 12's.
+
+**OAM does not decay**, and the 2C02G's OAM corruption on some OAMADDR writes
+is not modelled (`ppu.md` section 4).
+
+## The NES: the sound unit, where the model stops
+
+**What.** Task 8 of the NES plan, `Apu` and its channels in `ApuChannels.cs`:
+the two pulses, the triangle, the noise and the frame counter. The source is
+`docs/nes/facts/apu.md`. Every pinned sound ROM that needs no DMC passes:
+`apu_test` singles 1 to 6 on NTSC and all ten `pal_apu_tests` on PAL.
+
+**Which parity takes the 3-cycle `$4017` delay is a choice.** The page says 3
+cycles "during an APU cycle" and 4 "between". The model gives 3 to a write on an
+odd cycle, which the bus counts as a put, so the reset lands on a get and the
+steps on the puts the sheet's table names. The jitter ROMs on both regions fail
+with a fixed delay and pass with the rule either way round, so they do not say
+which (`apu.md` open item 4).
+
+**A flag set in the cycle of a `$4015` read is cleared by it.** The APU page says
+such a read returns 1 and does not clear the flag. With that rule on the third
+of the frame counter's three sets, `apu_test` 6-irq_flag_timing and
+`pal_apu_tests` 07.irq_flag_timing fail their "last set too late" check. The
+model sets the flag on three cycles in a row, as the sheet's table has it, and
+lets every read clear it; both ROMs pass.
+
+**A length write in the cycle before a half frame meets the clock.** The halt
+then takes effect after the clock, and a reload is dropped if the counter was
+not 0. The rule is from `pal_apu_tests`' readme, tests 10 and 11, which pass on
+PAL; the model applies it on NTSC too. The fork's `blargg_apu_2005.07.30` has
+the NTSC tests of the same name, and task 12 runs them: both pass with the rule,
+and both fail with it taken out (`apu.md` open item 5).
+
+**A pulse with a period under 8 is silent on PAL too.** The APU Pulse page
+leaves PAL's behaviour as an open question, and no pinned ROM checks it
+(`apu.md` open item 3).
+
+**The triangle's periods 0 and 1 are not halted.** They give the ultrasonic wave
+the sheet describes, a step every CPU cycle or every second one. Some emulators
+halt them to avoid the noise this makes in a sampled output. Task 9's resampler
+does not need it: `ResamplerTests` holds an ultrasonic triangle more than 65 dB
+under a full one, on both regions. On 6 October 2026 (03:32 UTC, load 2.4)
+`dotnet test tests/Dbhq.Machines.Nes.Tests -c Release --filter
+"FullyQualifiedName~ResamplerTests" --logger "console;verbosity=detailed"`
+printed -72.4 dB at worst, the NTSC triangle at period 0.
+
+**The triangle starts at step 0 at power on.** The sheet gives step 0 after a
+reset and an unknown phase at power on.
+
+**The reset keeps the IRQ inhibit bit.** The fork's `apu_reset` readme says the
+mode is written again at reset "but IRQ inhibit flag is sometimes cleared". The
+model writes the last mode and keeps the inhibit bit. All six `apu_reset` ROMs
+pass (task 12); `4017_written` checks the mode after each reset and not the
+inhibit bit, so it does not choose between "kept" and "sometimes cleared".
+
+**A pulse gives table entry 0 from a `$4003` or `$4007` write until its first
+advance.** The APU Pulse page gives the order the sequencer reads its table in,
+and not whether the first output is taken before or after the first advance
+from entry 0. The model outputs entry 0 until then (`apu.md` section 2). No
+pinned ROM is known to depend on it.
+
+**The output is the sheet's mixer formulas** with every channel, the DMC
+included, through tables built from them at start-up (task 9). The triangle,
+noise and DMC table is single precision; `MixerTests` holds every entry of both
+tables within 1e-6 of the formula.
+
+## The NES: the DMC, its DMA and the sound out, where the model stops
+
+**What.** Task 9 of the NES plan: the DMC in `ApuChannels.cs`, its DMA in
+`NesBus.RunDma`, the mixer's tables in `ApuMixer.cs`, and `SampleBuffer`. The
+sources are `docs/nes/facts/apu.md` sections 8 and 11 and `bus.md` section 6,
+with the DMA page itself (revision 23450). Every pinned DMC ROM passes but one:
+`apu_test` 7-dmc_basics and 8-dmc_rates, both `sprdma_and_dmc_dma` ROMs, and
+four of `dmc_dma_during_read4`'s five, on NTSC.
+
+**`dmc_dma_during_read4/double_2007_read` fails, and it is the PPU's.** It
+reads `$2007` twice in adjacent cycles (`LDA $20F7,X` with X = `$10`, whose
+dummy read is `$2007` and whose real one `$2107`), with no DMC in it. Its source
+lists four outputs a console gives, by the CPU and PPU alignment, all of which
+treat the second read oddly ("sometimes ignores extra read, and puts odd things
+into buffer"). The model's PPU makes two whole reads and prints CRC `D84F6815`.
+`TestRomTable.DmcDmaKnownFailures` holds that output, and `BlarggTests` and
+`NesAcceptanceTests` run it, so a fix shows.
+Task 12 looked again. The model prints `33 44 55 66 77` for the double read,
+where the source's four console outputs begin `22 44`, `22 33`, `02 44` and
+`32 44`: in each, the second read does not return the byte the first read put
+in the buffer, so on the chip the buffer is filled some dots after the read and
+not at once. The wiki's PPU registers page says only that the buffer is updated
+"after the previous contents have been returned to the CPU", with no number of
+dots, and the four outputs depend on the alignment. A refill delay chosen to
+make one of them come out would be a guess at the chip, so it stays as it is.
+
+**The DMA bugs are not modelled.** The DMA page's aborted one-cycle DMA (a
+sample stopped in the APU cycle before a reload would be scheduled) and the
+late 2A03G and 2A03H's extra fetch do not happen. No pinned ROM tests them.
+
+**When a reload halts after the output unit empties the buffer is a choice.**
+The page says a reload halts on a put. The model's output unit clocks on the
+puts, and a reload may halt from the next put, two cycles later. Halting at the
+put after that passes every ROM too: they synchronise themselves to the DMC, so
+they test the parity and the cost, not the delay. The mutation pass of 6
+October 2026 made the halt two cycles later and no test failed, so
+`DmcDmaTests.AReloadHaltsOnTheNextPutAfterTheOutputClockThatEmptiedTheBuffer`
+now pins the model's choice; it pins the choice, not the chip.
+
+**The 2A07's DMC fetch reads its own address on its idle cycles.** The page
+says the 2A07 has no extra reads by a mechanism "not yet understood", and
+suspects the DMA's address is on the bus. On PAL the model reads the sample
+address on the halt, dummy and alignment cycles of a DMC fetch, so no register
+is read again; OAM DMA alone still repeats the halted read there, as task 7 left
+it. A guess: no pinned ROM tests the 2A07's DMA.
+
+**The 2A03's register select during a fetch is not modelled.** On the 2A03 a
+DMC fetch while the CPU is halted on a read of `$4000-$401F` can select a
+register by the sample address's low five bits (`bus.md` open item 3). The model
+reads only the sample address.
+
+**The sound is resampled, and the console's filters follow.** The level is
+averaged over blocks of 8 CPU cycles, and each change of a block's mean is added
+as a band-limited step (a Kaiser-windowed sinc, 16 samples each side, placed to
+1/4096 of a sample); then high-passes at 90 Hz and 440 Hz and a low-pass at 14
+kHz, first order each. The 8-cycle mean loses a fraction of a decibel at 20
+kHz, which follows from its length (an 8-point mean's gain is sin 8x / (8 sin
+x), with x = pi f over the CPU clock). `ResamplerTests` holds the worst alias
+under the Nyquist, measured on pulses, more than 65 dB under the note; the run
+of 6 October 2026 quoted for the triangle above printed -89.6 dB at worst. The
+order and the form of the filters are not on the page.
+
+**The sample buffer drops the oldest samples** when its reader falls behind
+(the plan's Review Focus 3). The machine's holds a quarter of a second.
+
+## The NES: the simple boards and MMC1, where the model stops
+
+**What.** Task 10 of the NES plan: `Mmc1`, `Uxrom`, `Cnrom` and `Axrom` in
+`src/Dbhq.Machines.Nes/Mappers/`, on a shared `Board`. The source is
+`docs/nes/facts/mappers.md` sections 3 to 5. Both combined MMC1 test ROMs pass:
+`ppu_vbl_nmi/ppu_vbl_nmi.nes` and `apu_test/apu_test.nes`.
+
+**The reset button leaves the boards alone.** None of these chips has a reset
+line, so `Reset(false)` changes nothing in them, MMC1's shift register and
+control register included; only a power-on (`Reset(true)`) puts them back. The
+sheet gives only MMC1's power-on state. That the button does nothing is from the
+chips' having no reset pin, not from a page that says so (the nesdev MMC1 page
+does not mention the console's reset). A program that is reset in PRG mode 2 or 0
+therefore starts in the wrong place, as it would on a console, and a ROM must
+write `$80` itself, as the pinned test ROMs' shells do.
+
+**Bus conflicts follow the NES 2.0 submapper.** The sheet says to model none for
+UxROM and AxROM and the AND for CNROM unless submapper 1. The model also takes
+submapper 2 of mapper 2 and of mapper 7 as "AND-type bus conflicts" (the
+nesdev UxROM and AxROM pages list it so), because a file that says it has them
+should not be run without. An iNES file, and submappers 0 and 1, have none.
+CNROM keeps the sheet's rule, which the sheet marks as a guess; nothing pinned
+writes a value that differs from the ROM byte. The road not taken for UxROM and
+AxROM is the sheet read strictly, no conflicts for any submapper. CNROM's risk
+runs the other way: the AND is applied to iNES files and submapper 0, so a CNROM
+game made for a board without conflicts would switch to the wrong bank
+(`mappers.md` open items 2 and 5). The two CNROM test ROMs of task 12 pass with
+the AND or without it (tried once, with the AND taken out), so they do not
+settle this.
+
+**Only the plain MMC1 boards.** SOROM, SUROM, SXROM and SZROM, which bank PRG
+RAM or more PRG through the CHR registers, are not modelled, so a 512 KB MMC1
+cartridge reads only its first 256 KB, as the PRG register's four bits reach.
+PRG RAM is whatever the header says, repeated through `$6000` to `$7FFF`.
+Bit 4 of the PRG register switches it off (the MMC1B's behaviour; the MMC1A has
+no such bit).
+
+**A file smaller than the registers can name wraps.** A bank number is taken
+modulo the banks in the file, and a size that is not a whole bank (a NES 2.0
+exponent size) is padded to one by repeating its bytes, so no register value
+reads outside the file. A real board's chips would show open bus or mirrors;
+which is board by board and no pinned file depends on it.
+
+## The NES: MMC3, where the model stops
+
+**What.** Task 11 of the NES plan: `Mmc3` in `src/Dbhq.Machines.Nes/Mappers/`,
+mapper 4, from `docs/nes/facts/mappers.md` section 6. Of the pinned MMC3 test
+ROMs, `mmc3_test_2`'s singles 1 to 5 and `mmc3_irq_tests` 1 to 4 and 6 pass.
+
+**One revision of the chip.** MMC3 chips differ at latch 0. The model is the
+Sharp ("new") chip, which raises the IRQ whenever a clock leaves the counter at
+0; the sheet chooses it because games rely on it. The other chip, Crystalis's in
+the fork's readmes, raises it only when the counter changes to 0 or is reloaded
+by request. So the two ROMs that test that chip fail, and are kept in
+`TestRomTable` as known failures with what they print:
+`mmc3_test_2/rom_singles/6-MMC3_alt` (status 2, "IRQ shouldn't be set when
+reloading to 0 due to counter naturally reaching 0 previously"; both its
+sub-tests are the other chip's rule, and it stops at the first, so its test 3
+never runs) and `mmc3_irq_tests/5.MMC3_rev_A` (failed test 3; its test 2, which
+both chips share, passes). The readme of the second says at
+most one of its last two ROMs can pass on any emulator.
+
+**What is not modelled.** The "pathological" behaviour the readmes describe
+(a `$C001` write, a clock and another `$C001` write make the next clock OR the
+counter with `$80` or freeze it); the readme advises against it and no game it
+tried needs it. MMC6 (StarTropics), which shares mapper 4: it runs as an MMC3,
+whose `$A001` means something else, so its battery RAM may read as switched off.
+"The pre-render line clocks twice every other frame" with the background at
+`$1000`: the model clocks once on every rendering line there.
+
+**The PPU's address bus is told in part.** The board is told of every pattern
+fetch, each sprite slot's first nametable fetch, and, outside rendering only,
+`v` when a `$2006` write or a `$2007` access moves it (during rendering the bus
+carries the fetches, so those accesses are not told). The background's nametable and attribute fetches are
+not told (their A12 is 0, and told they would give a second clock a line with
+the background at `$1000`, where the sheet says one). The bus's `v` on the
+post-render line, or when rendering is switched off mid-frame, is not told
+until the program moves it, so a `v` with bit 12 set left by rendering is no
+rise until then. Both are open items in the sheet.
+
+**Power on.** The sheet leaves R6, R7 and the bank select unspecified. The model
+starts R0 to R7 at 0, 2, 4, 5, 6, 7, 0, 1, so the first 32 KB of PRG and 8 KB of
+CHR read in order, and PRG RAM on and writable. The test ROMs need both. A real
+chip's power-on state may differ; a program that relies on it would also fail
+on some consoles. The reset button changes nothing in the board, as for the
+other boards.
+
+**A file smaller than the registers can name wraps.** Bank numbers are taken
+modulo the 8 KB PRG and 1 KB CHR banks in the file; the fixed second-last bank
+of a one-bank program is that bank.
+
+## The NES: the community test ROMs, where the model stops
+
+**What.** Task 12 of the NES plan ran every ROM the plan lists that reports a
+result a test can read, on the regions each ROM's readme or source gives. The
+table is in the journal entry of 5 October 2026, task 12.
+
+**`instr_test-v5` 03-immediate and `all_instrs` fail on opcode `$AB`.** `LXA`
+(the ROM's `ATX #n`) sets A and X to (A OR a constant) AND the operand, and the
+constant differs between chips. The core takes `$EE` from Harte's `nes6502`
+data, which the core's own tests pin (the "Unstable NMOS opcodes" entry above).
+The ROM's checksum was made on a console; with `$FF` in the core, tried once,
+03-immediate passes, and with `$00` it fails. So the console Blargg used had
+`$FF`. The two references disagree, and the core keeps Harte's, because a
+change would take an exception into the core's reference tests.
+`TestRomTable.RamReportingKnownFailures` holds both ROMs on both regions and
+their output (status 1, `AB ATX #n`); every other instruction in the
+suite passes.
+
+**Decided, 5 October 2026:** LXA (`$AB`) on the Ricoh2A03 stays as the core has
+it (`$EE`, from Harte's `nes6502` data), because changing it would override a
+pinned core reference and would break that data unless `$AB` were excluded from
+the `nes6502` set. The two `instr_test-v5` ROMs (`03-immediate` and
+`all_instrs`, both regions) stay as known failures, with this cause. The road
+not taken is to use `$FF` for the Ricoh2A03, the console-calibrated value the ROM
+passes with, and exclude `$AB` from the `nes6502` Harte set; that is left for the
+project owner to choose.
+
+
+**Not run, and why.** Two folders of the fork are not pinned and not run, as
+the journal entry of 5 October 2026, task 12, records. `nmi_sync` (`demo_ntsc`
+and `demo_pal`) draws a line with timed `$2001` writes, and its readme says to
+look at the picture ("the left pixel of the middle line will be darker");
+nothing in RAM or on the nametable says pass or fail, and no frame check was
+written for it later. `dmc_tests` has four ROMs with no readme and no source;
+run, they leave nothing on the screen, in `$6000` or in zero page, and their
+result is a sound to listen to. The fork's own `status.txt` marks all four "Not
+sure yet".
+
+**Every known failure, in one place.** `TestRomTable` holds each with what it
+prints now, and `BlarggTests` and `NesAcceptanceTests` check that it still
+fails as written down, so a fix shows: `instr_test-v5` `03-immediate` and
+`all_instrs` on NTSC and on PAL (the `$AB` entry above);
+`dmc_dma_during_read4/double_2007_read` (the DMC section); and
+`mmc3_test_2/rom_singles/6-MMC3_alt` and `mmc3_irq_tests/5.MMC3_rev_A` (the
+MMC3 section). Every other pinned ROM passes.
+
+## The NES: the cartridge file and the page, where the model stops
+
+**What.** `Cartridge`, `NesLoader` and the page's panel (`site/public/nes.js`).
+The source is `docs/nes/facts/cartridge.md`.
+
+**The iNES TV system bit is not read.** Byte 9 bit 0 of an iNES 1 header, and
+the unofficial byte 10, name a region, but the sheet's source says almost no
+file sets them, so an iNES file names no region and runs as NTSC unless the
+visitor chooses PAL; the page says which it chose and why. Only NES 2.0 byte 12
+is read: 0 NTSC, 1 PAL, 2 (either) NTSC.
+`CartridgeTests.AnInesFileNamesNoRegionWhateverItsTvSystemBitsSay` and
+`NesBusTests.TheMachineTakesTheHeadersRegionUnlessTheCallerNamesOne` hold it.
+
+**A trainer is skipped, not loaded.** A file with flags 6 bit 2 set carries
+512 bytes that a copier once loaded at `$7000-$71FF`. They are not on unmodified
+dumps of real cartridges (`cartridge.md` section 1), and the sheet left skipping
+or refusing them to the model (section 4). The model skips them, so the program starts 512
+bytes later and nothing is put at `$7000`. A hacked dump that needs its trainer
+there to run will not run.
+`CartridgeTests.ATrainerIsSkippedSoPrgStarts512BytesLater` and
+`ATrainerThatRunsPastTheEndOfTheFileIsRefused` hold it.
+
+**The Dendy is refused.** A NES 2.0 file whose byte 12 says Dendy (3) is
+refused with a sentence that names it
+(`CartridgeTests.ANes20FileForTheDendyIsRefusedByName`), and the page offers
+only NTSC and PAL. The Dendy runs the PAL frame at three dots a cycle with its
+own VBlank timing; it is left out and has its issue
+([#61](https://github.com/dbhq-uk/6502/issues/61)).
+
+**The file and its RAM have caps.** A file over `Cartridge.MaxFileSize` (4 MB)
+is refused before its header is read, and the page refuses it before reading it
+at all, with the host's own limit (`NesHost.MaxRomBytes`). A header may ask for
+at most `Cartridge.MaxRamSize` (64 KB) of PRG RAM and of CHR RAM: a NES 2.0
+header that asks for more is refused, and an iNES byte 8 over it is clamped.
+No board this machine models needs more, and a header must not make the page
+allocate megabytes for a small file. `CartridgeTests`
+(`AFileOverTheSizeLimitIsRefusedBeforeItsHeaderIsRead`,
+`ANes20HeaderAskingForMegabytesOfRamIsRefusedWithoutAllocatingIt`,
+`AnInesByte8Of255IsClampedToTheCapAndTheFileStillLoads`) and the page's
+`nes-panel.test.mjs` hold them.
+
+**The picture is the PPU's 256 by 240, shown in the region's pixel shape.** The
+page shows all 240 lines, where a television hides some at the top and bottom
+(overscan), and shows each pixel 8:7 on NTSC, so the 256 columns are as wide as
+256 x 8/7 square pixels, and about 1.386:1 on PAL (`ppu.md` section 10, from
+the Overscan page). The bleeding and crawl of a composite picture are not
+modelled (the PPU section above; issue
+[#69](https://github.com/dbhq-uk/6502/issues/69)). `nes-panel.test.mjs` ("the
+picture is 256 by 240 pixels shown in the region's pixel shape") holds the
+shape.

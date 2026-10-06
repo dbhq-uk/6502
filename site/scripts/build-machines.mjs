@@ -4,12 +4,13 @@
 //
 //   node scripts/build-machines.mjs <id>... [--interpreter]
 //
-// One machine or several, by registry id: kim-1, bbc-micro. The machines it
-// knows, their projects and their ROMs are MACHINE_BUILDS in
+// One machine or several, by registry id: kim-1, bbc-micro, nes. The machines
+// it knows, their projects and their ROMs are MACHINE_BUILDS in
 // src/lib/machines.mjs. For each one named that is two things:
 //
 //   1. The machine as .NET WebAssembly (src/Dbhq.Machines.Kim1.Wasm for the
-//      KIM-1, src/Dbhq.Machines.BbcMicro.Wasm for the BBC Micro), published
+//      KIM-1, src/Dbhq.Machines.BbcMicro.Wasm for the BBC Micro,
+//      src/Dbhq.Machines.Nes.Wasm for the NES), published
 //      and its _framework folder copied across. It is compiled ahead of time
 //      (AOT), which needs the wasm-tools workload; --interpreter publishes it
 //      without AOT instead, for comparison. The journal entry "The KIM-1 in the
@@ -17,10 +18,17 @@
 //   2. Its ROMs, read from roms/ in this repository and checked against the
 //      SHA-256 pinned in tests/Dbhq.Cpu6502.TestSupport/Pins.cs (AGENTS.md
 //      rules 3 and 4): the KIM-1's monitor ROM, the two 1 KB halves; the BBC
-//      Micro's operating system, BASIC and DFS, 16 KB each.
+//      Micro's operating system, BASIC and DFS, 16 KB each; and for the NES,
+//      which has no system ROM, the game its page puts in, Lan Master.
+//   3. For the BBC Micro, its preset discs: each image listed in
+//      machines/bbc-micro/discs/manifest.json, read from its folder, checked
+//      against the manifest's size and SHA-256, and written to discs/<slug>.ssd.
+//      Nothing else of the discs' folders is published: their licences and
+//      source are for the repository, and the page links to them there.
 //
-// Every ROM of every machine named is read and checked before anything is
-// published, so a ROM that fails its hash stops the build before the slow part.
+// Every ROM and disc of every machine named is read and checked before
+// anything is published, so a file that fails its hash stops the build before
+// the slow part.
 //
 // Needs the .NET 10 SDK and Node 22.22 or later.
 import fs from 'node:fs';
@@ -29,6 +37,7 @@ import path from 'node:path';
 import { execFileSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { machineBuilds, readRom } from '../src/lib/machines.mjs';
+import { DISCS_FOLDER, discProblems, loadDiscs, readDisc } from '../src/lib/bbc-discs.mjs';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const site = path.resolve(here, '..');
@@ -46,17 +55,26 @@ const list = (items) => (items.length < 2 ? items.join('') : `${items.slice(0, -
 // would look for Pins.cs in the wrong place.
 if (process.cwd() !== site) throw new Error(`run this from ${path.relative(process.cwd(), site) || '.'}: cd site && node scripts/build-machines.mjs <id>`);
 
-// Read first: a ROM that fails its hash should stop the build before the
-// slow publish, not after it.
+// Read first: a ROM or a disc that fails its hash should stop the build before
+// the slow publish, not after it.
 for (const build of builds) {
   build.roms = build.roms().map((r) => {
     const bytes = readRom(r, repo);
     console.log(`${build.id} ${r.file}: read from ${r.path}, hash checked`);
     return { ...r, bytes };
   });
+  const hasDiscs = build.discs;
+  build.discs = [];
+  if (hasDiscs) {
+    const discs = loadDiscs(repo);
+    const problems = discProblems(discs, repo);
+    if (problems.length > 0) throw new Error(`${build.id}'s discs cannot be published:\n- ${problems.join('\n- ')}`);
+    build.discs = discs.map((d) => ({ slug: d.slug, bytes: readDisc(d, repo) }));
+    console.log(`${build.id} discs: ${build.discs.length} read from machines/${build.id}/discs/, hash checked`);
+  }
 }
 
-for (const { id, project: name, roms } of builds) {
+for (const { id, project: name, roms, discs } of builds) {
   const out = path.join(site, 'public', 'machines', id);
 
   // A clean build every time. The WebAssembly publish keeps its AOT output in
@@ -81,8 +99,10 @@ for (const { id, project: name, roms } of builds) {
     const files = fs.readdirSync(framework).filter((f) => !/\.(br|gz)$/.test(f));
     for (const f of files) fs.copyFileSync(path.join(framework, f), path.join(out, '_framework', f));
     for (const r of roms) fs.writeFileSync(path.join(out, r.file), r.bytes);
+    if (discs.length > 0) fs.mkdirSync(path.join(out, DISCS_FOLDER));
+    for (const d of discs) fs.writeFileSync(path.join(out, DISCS_FOLDER, `${d.slug}.ssd`), d.bytes);
     const bytes = files.reduce((sum, f) => sum + fs.statSync(path.join(out, '_framework', f)).size, 0);
-    console.log(`${path.relative(repo, out)}: ${files.length} framework files, ${bytes} bytes, ${aot ? 'compiled ahead of time' : 'interpreter'}; ${list(roms.map((r) => r.file))}`);
+    console.log(`${path.relative(repo, out)}: ${files.length} framework files, ${bytes} bytes, ${aot ? 'compiled ahead of time' : 'interpreter'}; ${list(roms.map((r) => r.file))}${discs.length > 0 ? `; ${discs.length} discs in ${DISCS_FOLDER}/` : ''}`);
   } finally {
     fs.rmSync(publish, { recursive: true, force: true });
   }

@@ -49,10 +49,10 @@ permissions:
 
 jobs:
   # The machines' browser builds, in a job of their own that holds no token:
-  # the KIM-1 and the BBC Micro as .NET WebAssembly, compiled ahead of time, and
-  # their ROMs, read from roms/ and checked against the pins in Pins.cs. The
-  # same job as validate.yml's. The deploy job puts its output where the Astro build copies
-  # it into dist.
+  # the KIM-1, the BBC Micro and the NES as .NET WebAssembly, compiled ahead of
+  # time, and their ROMs (for the NES, its bundled game), read from roms/ and
+  # checked against the pins in Pins.cs. The same job as validate.yml's. The
+  # deploy job puts its output where the Astro build copies it into dist.
   machines:
     if: vars.SITE_DEPLOY == 'true' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
@@ -65,7 +65,10 @@ jobs:
       # is restored rather than compiled again: AOT takes minutes. Each machine
       # has its own cache, keyed on the core, its own two projects and what the
       # build reads, so a change to one machine rebuilds that machine alone. The
-      # workload version is in the keys, so moving the pin rebuilds both.
+      # workload version is in the keys, so moving the pin rebuilds every one. The
+      # BBC Micro's build also publishes its preset discs, so its key hashes
+      # machines/bbc-micro/discs/ too: a disc added or changed is never served
+      # from a stale cache.
       - name: Cache the KIM-1's browser build
         id: kim-1
         uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
@@ -77,18 +80,26 @@ jobs:
         uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
         with:
           path: site/public/machines/bbc-micro
-          key: machine-bbc-micro-sdk-10.0.400-wasm-tools-10.0.401-${{ hashFiles('src/Dbhq.Machines.BbcMicro/**', 'src/Dbhq.Machines.BbcMicro.Wasm/**', 'src/Dbhq.Cpu6502/**', 'Directory.Build.props', 'tests/Dbhq.Cpu6502.TestSupport/Pins.cs', 'site/scripts/build-machines.mjs', 'site/src/lib/pins.mjs', 'site/src/lib/machines.mjs') }}
+          key: machine-bbc-micro-sdk-10.0.400-wasm-tools-10.0.401-${{ hashFiles('src/Dbhq.Machines.BbcMicro/**', 'src/Dbhq.Machines.BbcMicro.Wasm/**', 'src/Dbhq.Cpu6502/**', 'Directory.Build.props', 'tests/Dbhq.Cpu6502.TestSupport/Pins.cs', 'site/scripts/build-machines.mjs', 'site/src/lib/pins.mjs', 'site/src/lib/machines.mjs', 'site/src/lib/bbc-discs.mjs', 'machines/bbc-micro/discs/**') }}
+      - name: Cache the NES's browser build
+        id: nes
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
+        with:
+          path: site/public/machines/nes
+          key: machine-nes-sdk-10.0.400-wasm-tools-10.0.401-${{ hashFiles('src/Dbhq.Machines.Nes/**', 'src/Dbhq.Machines.Nes.Wasm/**', 'src/Dbhq.Cpu6502/**', 'Directory.Build.props', 'tests/Dbhq.Cpu6502.TestSupport/Pins.cs', 'site/scripts/build-machines.mjs', 'site/src/lib/pins.mjs', 'site/src/lib/machines.mjs') }}
       # The machines whose cache missed, by registry id, for the build below.
       - name: Which machines to build
         id: which
         env:
           KIM1_HIT: ${{ steps.kim-1.outputs.cache-hit }}
           BBC_HIT: ${{ steps.bbc-micro.outputs.cache-hit }}
+          NES_HIT: ${{ steps.nes.outputs.cache-hit }}
         run: |
           IDS=""
           [ "$KIM1_HIT" = "true" ] || IDS="$IDS kim-1"
           [ "$BBC_HIT" = "true" ] || IDS="$IDS bbc-micro"
-          echo "building:${IDS:- none, both restored}"
+          [ "$NES_HIT" = "true" ] || IDS="$IDS nes"
+          echo "building:${IDS:- none, all restored}"
           echo "ids=${IDS# }" >> "$GITHUB_OUTPUT"
       # The SDK is pinned here, not left at 10.0.x, because a workload version
       # belongs to one SDK feature band: 10.0.401 is a 10.0.400 band set.
@@ -103,8 +114,9 @@ jobs:
         uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
           node-version: '22.22'
-      # Both machines: the KIM-1, and the BBC Micro, whose files are published
-      # with the site but linked from no page until the registry says it runs.
+      # Every machine whose cache missed: the KIM-1, the BBC Micro and the NES.
+      # A machine's files are published with the site, but linked from no page
+      # until the registry says it runs.
       - if: steps.which.outputs.ids != ''
         name: Build the machines and fetch their ROMs
         env:
@@ -176,23 +188,32 @@ jobs:
           PASS=$(count pass); FAILED=$(count fail)
           echo "pass=${PASS:-unread} fail=${FAILED:-unread}"
           [ "${FAILED:-1}" = "0" ]
-          # 339 tests as at 5 Oct 2026 (with the NES models' task 8, the case measured for both consoles; 330 with task 5, 322 with task 4, 317 with task 3, 312 with task 2, 308 with task 1, 303 with task 0).
+          # 369 tests as at 6 Oct 2026, after the review of the NES's page (368
+          # with the page and the NES counting, 351 with its registry record, try-it file and build, 342 before
+          # them that day with main's preset discs merged into the NES's branch;
+          # 282 on main after the discs' second review, 292 on the branch).
           # Adding tests is expected; losing them is the failure this floor catches.
           # Raise the number when the suite grows, here and in the same step of
           # validate.yml, which must hold the same number.
-          [ "${PASS:-0}" -ge 339 ]
+          [ "${PASS:-0}" -ge 369 ]
 
       # The same floor as "Every machine file must be serving" below, checked on
       # the build itself, so a build that is missing a machine fails here and
       # not after it has gone live. The check after the deploy stays: only the
       # edge shows the content types.
-      - name: Both machines must be in the build
+      # The BBC Micro's preset discs are counted from the manifest, not typed:
+      # every one must be in the build, and the floor rises by one for each.
+      - name: Every machine must be in the build
         working-directory: site
         run: |
           set -euo pipefail
+          DISCS=$(node -p "require('../machines/bbc-micro/discs/manifest.json').discs.length")
+          BUILT=$(find dist/machines/bbc-micro/discs -type f -name '*.ssd' | wc -l)
+          echo "preset discs: ${DISCS} in the manifest, ${BUILT} in the build"
+          [ "$BUILT" -eq "$DISCS" ] || { echo "the build has ${BUILT} of the ${DISCS} preset discs"; exit 1; }
           COUNT=$(find dist/machines -type f ! -name index.html | wc -l)
           echo "machine files in the build: ${COUNT}"
-          [ "$COUNT" -ge 21 ] || { echo "only $COUNT machine files in the build - a machine is missing"; exit 1; }
+          [ "$COUNT" -ge $((30 + DISCS)) ] || { echo "only $COUNT machine files in the build - a machine is missing"; exit 1; }
 
       - name: Deploy to Cloudflare Pages
         working-directory: site
@@ -265,7 +286,8 @@ jobs:
       # a 404 on it and the machine never starts. bbc-micro.js, bbc-keys.js and
       # bbc-audio.js are the BBC Micro's page: its driver, the key table the
       # driver imports, and the sound worklet it loads with addModule, which no
-      # import names.
+      # import names. nes.js, nes-keys.js and nes-audio.js are the NES's page,
+      # the same three for the same reasons.
       # site/tests/build.test.mjs derives the required list from the built pages.
       # analytics.js and consent.js are in this list for a sharp reason. A 404 on
       # analytics.js means no analytics and nothing to opt out of. A 404 on
@@ -278,8 +300,21 @@ jobs:
       - name: The machine-readable files must be serving
         run: |
           set -euo pipefail
-          for f in sitemap-index.xml sitemap-0.xml robots.txt analytics.js consent.js machines-table.js table-sort.js chip.js kim-1.js machine-host.js bbc-micro.js bbc-keys.js bbc-audio.js model-loader.js models/kim-1.js models/kim-1-tracks.webp; do
-            CODE=$(curl -s --max-time 20 --retry 3 --retry-delay 5 -o /dev/null -w "%{http_code}" "https://6502.dbhq.uk/${f}?cb=${GITHUB_SHA}")
+          # A file that is not 200 is tried again for about 90 seconds first: the
+          # deploy step returns before the new version has reached the edge, and
+          # a file new in this deploy can answer 404 for a few seconds (the BBC
+          # Micro's two merges on 4 Oct 2026 both met it). Each try has its own
+          # cache-buster. A file that never reaches 200 still fails.
+          for f in sitemap-index.xml sitemap-0.xml robots.txt analytics.js consent.js machines-table.js table-sort.js chip.js kim-1.js machine-host.js bbc-micro.js bbc-keys.js bbc-audio.js nes.js nes-keys.js nes-audio.js model-loader.js models/kim-1.js models/kim-1-tracks.webp; do
+            TRY=0
+            while :; do
+              CODE=$(curl -s --max-time 20 --retry 3 --retry-delay 5 -o /dev/null -w "%{http_code}" "https://6502.dbhq.uk/${f}?cb=${GITHUB_SHA}-${TRY}")
+              [ "$CODE" = "200" ] && break
+              TRY=$((TRY + 1))
+              [ "$TRY" -le 18 ] || break
+              echo "${f} -> ${CODE}, trying again in 5 seconds (${TRY} of 18)"
+              sleep 5
+            done
             echo "${f} -> ${CODE}"
             [ "$CODE" = "200" ]
           done
@@ -295,11 +330,29 @@ jobs:
           FILES=$(find machines -type f ! -name index.html | sort)
           COUNT=0
           FAIL=0
+          # A file is tried again for about 90 seconds until it answers 200 with
+          # the right content type (see "The machine-readable files" above for
+          # why); each try has its own cache-buster. A file that never gets
+          # there still fails, exactly as before.
           for f in $FILES; do
-            OUT=$(curl -s --max-time 20 --retry 3 --retry-delay 5 -o /dev/null -w "%{http_code} %{content_type}" "https://6502.dbhq.uk/${f}?cb=${GITHUB_SHA}")
+            TRY=0
+            while :; do
+              OUT=$(curl -s --max-time 20 --retry 3 --retry-delay 5 -o /dev/null -w "%{http_code} %{content_type}" "https://6502.dbhq.uk/${f}?cb=${GITHUB_SHA}-${TRY}")
+              CODE=${OUT%% *}
+              TYPE=${OUT#* }
+              GOOD=1
+              [ "$CODE" = "200" ] || GOOD=0
+              case "$f" in
+                *.wasm) [[ "$TYPE" == application/wasm* ]] || GOOD=0 ;;
+                *.js) [[ "$TYPE" == *javascript* ]] || GOOD=0 ;;
+              esac
+              [ "$GOOD" = "1" ] && break
+              TRY=$((TRY + 1))
+              [ "$TRY" -le 18 ] || break
+              echo "${f} -> ${OUT}, trying again in 5 seconds (${TRY} of 18)"
+              sleep 5
+            done
             echo "${f} -> ${OUT}"
-            CODE=${OUT%% *}
-            TYPE=${OUT#* }
             [ "$CODE" = "200" ] || FAIL=1
             case "$f" in
               *.wasm) [[ "$TYPE" == application/wasm* ]] || { echo "  ${f} is not served as application/wasm"; FAIL=1; } ;;
@@ -307,14 +360,22 @@ jobs:
             esac
             COUNT=$((COUNT + 1))
           done
-          # 26 files as at 4 Oct 2026, 13 for each machine. The floor is what the
-          # two must publish at the least: their ROMs (two halves for the KIM-1,
-          # three for the BBC Micro) and, for each, the four runtime files
-          # (dotnet.js, dotnet.native's .js and .wasm, dotnet.runtime.js),
-          # CoreLib, the core, the machine and its host, which is 21. The KIM-1's
-          # 13 alone cannot meet it, so a missing BBC Micro fails here. (It was
-          # 6, set for the KIM-1 alone.)
-          [ "$COUNT" -ge 21 ] || { echo "only $COUNT machine files found - the derivation is broken"; exit 1; }
+          # 43 files as at 4 Oct 2026, with the preset discs: the KIM-1's 13 and
+          # the BBC Micro's 30 (three ROMs, ten framework files and 17 discs);
+          # 26 before the discs, 13 for each machine. The floor is what the
+          # machines must publish at the least: their ROMs (two halves for the
+          # KIM-1, three for the BBC Micro, and the NES's bundled game) and, for
+          # each, the four runtime files (dotnet.js, dotnet.native's .js and
+          # .wasm, dotnet.runtime.js), CoreLib, the core, the machine and its
+          # host, which is 30 with the NES (6 Oct 2026; 21 for the first two).
+          # Two machines' files alone cannot meet it, so a missing machine fails
+          # here. (It was 6, set for the KIM-1 alone.) Since 4 Oct 2026 the BBC
+          # Micro also publishes its preset discs, one .ssd each, served as
+          # plain bytes; the floor adds one for each disc in the manifest, read
+          # here rather than typed, so a missing disc fails as a missing machine
+          # does.
+          DISCS=$(node -p "require('../../machines/bbc-micro/discs/manifest.json').discs.length")
+          [ "$COUNT" -ge $((30 + DISCS)) ] || { echo "only $COUNT machine files found, fewer than 30 and ${DISCS} discs - the derivation is broken"; exit 1; }
           [ "$FAIL" = "0" ]
 
       # Headers only apply at the Cloudflare edge, so they can only be checked
@@ -322,7 +383,17 @@ jobs:
       - name: The response headers must be applied at the edge
         run: |
           set -euo pipefail
-          H=$(curl -sI --max-time 20 --retry 3 --retry-delay 5 "https://6502.dbhq.uk/?cb=${GITHUB_SHA}" | tr -d '\r')
+          # Tried again for about 90 seconds until the three headers are there:
+          # the new version, and its _headers, may not be at the edge yet.
+          TRY=0
+          while :; do
+            H=$(curl -sI --max-time 20 --retry 3 --retry-delay 5 "https://6502.dbhq.uk/?cb=${GITHUB_SHA}-${TRY}" | tr -d '\r')
+            if grep -qi '^strict-transport-security:' <<<"$H" && grep -qi '^content-security-policy:' <<<"$H" && grep -qi '^x-content-type-options: nosniff' <<<"$H"; then break; fi
+            TRY=$((TRY + 1))
+            [ "$TRY" -le 18 ] || break
+            echo "headers not all there yet, trying again in 5 seconds (${TRY} of 18)"
+            sleep 5
+          done
           echo "$H"
           grep -qi '^strict-transport-security:' <<<"$H"
           grep -qi '^content-security-policy:' <<<"$H"

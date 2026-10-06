@@ -2,16 +2,20 @@
 import Base from '../../layouts/Base.astro';
 import Kim1Panel from '../../components/Kim1Panel.astro';
 import BbcPanel from '../../components/BbcPanel.astro';
+import NesPanel from '../../components/NesPanel.astro';
 import MachinePhoto from '../../components/MachinePhoto.astro';
 import MachineModel from '../../components/MachineModel.astro';
 import MachinePhotos from '../../components/MachinePhotos.astro';
 import { modelsOf } from '../../models/models.mjs';
 import { registry, results } from '../../lib/data.mjs';
 import { fmt } from '../../lib/figures.mjs';
-import { acceptanceSummary, loadTryIt, parseKeys, runningMachines } from '../../lib/machines.mjs';
-import { bbcRoms, kim1Roms } from '../../lib/pins.mjs';
+import { acceptanceSummary, loadTryIt, machineDownloadBytes, parseKeys, runningMachines } from '../../lib/machines.mjs';
+import { bbcRoms, kim1Roms, nesRoms } from '../../lib/pins.mjs';
 import { NOT_MODELLED, downloadBytes, issueUrl, symbolTable } from '../../lib/bbc-micro.mjs';
+import { discFolderUrl, discLibrary, discLicenceUrl, discSourceUrl, needsSource } from '../../lib/bbc-discs.mjs';
 import { NOT_ON_A_PC, legend } from '../../../public/bbc-keys.js';
+import { NOT_MODELLED as NES_NOT_MODELLED, ELSEWHERE as NES_ISSUES } from '../../lib/nes.mjs';
+import { KEYS as NES_KEYS, KEY_NAMES as NES_KEY_NAMES } from '../../../public/nes-keys.js';
 
 // One page for each machine that runs, and only those. "Running" means it runs
 // in the browser, so a running machine with no panel to run it in stops the
@@ -20,7 +24,7 @@ export function getStaticPaths() {
   return runningMachines(registry).map((m) => ({ params: { id: m.id }, props: { machine: m } }));
 }
 const { machine } = Astro.props;
-const Panel = { 'kim-1': Kim1Panel, 'bbc-micro': BbcPanel }[machine.id];
+const Panel = { 'kim-1': Kim1Panel, 'bbc-micro': BbcPanel, nes: NesPanel }[machine.id];
 if (!Panel) throw new Error(`machine ${machine.id} is running but has no panel in src/pages/machines/[id].astro, so its page could not run it`);
 // The photograph is required of every running machine (the registry check
 // stops the build without one). The 3D model is shown for a machine that claims
@@ -34,19 +38,39 @@ const hasModels = models.length > 0;
 // come with the outside model (plan task 9): until then a page with two would
 // show one and drop the other without saying so, so the build stops instead.
 if (models.length > 1) throw new Error(`machine ${machine.id} claims ${models.length} models, and the page offers one until the two views land as tabs`);
-const scripts = [...({ 'kim-1': ['/kim-1.js'], 'bbc-micro': ['/bbc-micro.js'] }[machine.id] ?? []), ...(hasModels ? ['/model-loader.js'] : [])];
+const scripts = [...({ 'kim-1': ['/kim-1.js'], 'bbc-micro': ['/bbc-micro.js'], nes: ['/nes.js'] }[machine.id] ?? []), ...(hasModels ? ['/model-loader.js'] : [])];
 const base = `/machines/${machine.id}/`;
 const clockMhz = Number(/([\d.]+) MHz/.exec(machine.cpu ?? '')?.[1]);
 if (!(clockMhz > 0)) throw new Error(`machine ${machine.id}: its cpu field names no clock in MHz, and the page runs it at that clock`);
 const program = loadTryIt(machine.id);
+const kim = machine.id === 'kim-1';
 const bbc = machine.id === 'bbc-micro';
-const roms = machine.id === 'kim-1' ? kim1Roms() : bbc ? bbcRoms() : [];
-// The BBC Micro's panel is given its ROM files and the size of its download,
-// read from the build (src/lib/bbc-micro.mjs). The KIM-1's takes neither.
-const panelProps = bbc ? { roms: roms.map((r) => r.file), download: downloadBytes() } : {};
+const nes = machine.id === 'nes';
+const roms = kim ? kim1Roms() : bbc ? bbcRoms() : nes ? nesRoms() : [];
+// The KIM-1's and the BBC Micro's panels run at the clock above. The BBC
+// Micro's is also given its ROM files and the size of its download, read from
+// the build (src/lib/bbc-micro.mjs), and its preset discs, read from
+// machines/bbc-micro/discs/manifest.json and checked (src/lib/bbc-discs.mjs).
+// The NES's takes its clock from the machine, which changes with the region
+// (NesHost.CpuHz), so it is given only the cartridge Start puts in, with its
+// title from the try-it file, and the size of its download, read from the
+// build the same way.
+const library = bbc ? discLibrary() : null;
+const panelProps = bbc ? { clockMhz, roms: roms.map((r) => r.file), download: downloadBytes(), library }
+  : nes ? { rom: { file: roms[0].file, title: program.title }, download: machineDownloadBytes('nes') }
+  : { clockMhz };
 const description = bbc
   ? `${machine.name}, running on the 6502 core in the browser, with its own ROMs. Type BBC BASIC in on its keyboard and run it.`
-  : `${machine.name}, running on the 6502 core in the browser, with its own ROM. Type a program in on its keypad and run it.`;
+  : nes
+    ? `${machine.name}, running on the 6502 core in the browser, NTSC or PAL, with a public-domain game in it. Play it with the keyboard, a gamepad or the on-screen pad, or load your own cartridge.`
+    : `${machine.name}, running on the 6502 core in the browser, with its own ROM. Type a program in on its keypad and run it.`;
+// The keys that press a button of the NES pad, from the map the page script uses.
+const nesKeysFor = (button: string) => {
+  const buttons = button === 'D-pad' ? ['Up', 'Down', 'Left', 'Right'] : [button];
+  const names = buttons.flatMap((b) => Object.entries(NES_KEYS).filter(([, to]) => to === b).map(([code]) => NES_KEY_NAMES[code as keyof typeof NES_KEY_NAMES]));
+  return names.length < 2 ? names.join('') : `${names.slice(0, -1).join(', ')} and ${names.at(-1)}`;
+};
+const romLabel = (r: { chip?: string; name?: string; file: string }) => r.chip ?? r.name ?? `${program.title}, by ${program.author}`;
 const symbols = bbc ? symbolTable() : [];
 const notOnAPc = Object.entries(NOT_ON_A_PC).reduce((groups, [key, why]) => groups.set(why, [...(groups.get(why) ?? []), legend(key)]), new Map());
 ---
@@ -68,11 +92,17 @@ const notOnAPc = Object.entries(NOT_ON_A_PC).reduce((groups, [key, why]) => grou
   <section class="machine-run" aria-labelledby="run">
     <div class="wrap narrow">
       <h2 id="run">The machine</h2>
-      <Panel base={base} clockMhz={clockMhz} {...panelProps} />
+      <Panel base={base} {...panelProps} />
+      {nes && (
+        <div class="prose">
+        <p>The NES was sold in two kinds, and both are here: NTSC, the console of North America and Japan, and PAL, the console of Europe and Australia, whose CPU runs slower and which draws 50 pictures a second rather than about 60. Each cartridge starts in the region its file names, or NTSC when the file does not say, and the line under the region control says which and why.</p>
+        <p>The NES takes more work to run than the KIM-1 or the BBC Micro: its picture chip is run one dot at a time, three dots for every CPU cycle on NTSC, so it needs a fast computer to run at full speed. The line under the screen says how fast this browser runs it, measured while it runs, and a computer that cannot keep up runs it slower than the real console and says so. Making it faster is <a href={issueUrl(NES_ISSUES.speed)}>issue {NES_ISSUES.speed}</a>.</p>
+        </div>
+      )}
     </div>
   </section>
 
-  {program && !bbc && (
+  {program && kim && (
     <section aria-labelledby="try">
       <div class="wrap narrow">
         <h2 id="try">Try it</h2>
@@ -108,6 +138,35 @@ const notOnAPc = Object.entries(NOT_ON_A_PC).reduce((groups, [key, why]) => grou
     </section>
   )}
 
+  {program && nes && (
+    <section aria-labelledby="try">
+      <div class="wrap narrow">
+        <h2 id="try">Try it</h2>
+        <div class="prose">
+        <p>Start puts {program.title}, by {program.author}, in the console and switches it on. This is the cartridge the acceptance test boots, from the same file, and its first picture is checked against the one recorded.</p>
+        <ol class="steps">
+          {program.steps.map((step) => (
+            <li>
+              <p>{step.do}</p>
+              <p>{step.says}</p>
+            </li>
+          ))}
+        </ol>
+        <table class="nes-pad-table">
+          <caption>The controls in {program.title}</caption>
+          <thead><tr><th scope="col">On the pad</th><th scope="col">What it does</th><th scope="col">On your keyboard</th></tr></thead>
+          <tbody>
+            {program.controls.map((c) => (
+              <tr><td>{c.button}</td><td>{c.does[0].toUpperCase() + c.does.slice(1)}</td><td>{nesKeysFor(c.button)}</td></tr>
+            ))}
+          </tbody>
+        </table>
+        <p>To play something else, load your own .nes file with the button under the screen, or drop it on the page. It is read in this tab and not uploaded. The machine runs cartridges on the six boards most of the library used; a file it cannot run is refused with a sentence saying why, and the game already in carries on.</p>
+        </div>
+      </div>
+    </section>
+  )}
+
   {bbc && (
     <section aria-labelledby="keyboard">
       <div class="wrap narrow">
@@ -134,6 +193,25 @@ const notOnAPc = Object.entries(NOT_ON_A_PC).reduce((groups, [key, why]) => grou
   )}
 
   {bbc && (
+    <section aria-labelledby="discs">
+      <div class="wrap narrow">
+        <h2 id="discs">Credits and licences for the discs</h2>
+        <div class="prose">
+        <p>The discs in the library are other people's software. Each is shared here under its author's own licence, not under this project's MIT licence, and each is credited below with a link to its licence and to its author. Each disc's folder in the repository keeps its licence text, a note of where the image came from and its SHA-256, and, where the licence asks for it, its source.</p>
+        <p>Only discs whose authors have written down that they may be shared are in the library. Commercial games are not, because nobody who holds their rights has said so. A disc image of your own, of anything, goes in with Insert a disc.</p>
+        <ul class="bbc-credits">
+          {library.discs.map((d) => (
+            <li data-bbc-credit={d.slug}>
+              <b>{d.title}</b>, {d.author}, {d.year}. Licence: <a href={discLicenceUrl(d)}>{d.licence}</a>. <a href={d.sourceUrl}>The author's page</a>{needsSource(d) && <>; <a href={discSourceUrl(d)}>the source</a></>}; <a href={discFolderUrl(d)}>the disc's folder</a>.{d.note && <> {d.note}</>}
+            </li>
+          ))}
+        </ul>
+        </div>
+      </div>
+    </section>
+  )}
+
+  {bbc && (
     <section aria-labelledby="left-out">
       <div class="wrap narrow">
         <h2 id="left-out">What is not modelled</h2>
@@ -147,22 +225,39 @@ const notOnAPc = Object.entries(NOT_ON_A_PC).reduce((groups, [key, why]) => grou
     </section>
   )}
 
+  {nes && (
+    <section aria-labelledby="left-out">
+      <div class="wrap narrow">
+        <h2 id="left-out">What is not modelled</h2>
+        <div class="prose">
+        <p>These parts of the NES and the Famicom are left out. Each has an issue that says what it would take.</p>
+        <ul>
+          {NES_NOT_MODELLED.map((m) => <li>{m.part[0].toUpperCase() + m.part.slice(1)}: <a href={issueUrl(m.issue)}>issue {m.issue}</a></li>)}
+        </ul>
+        <p>Saving is not built, so a page reload loses battery RAM: a game that saves its progress on the cartridge loses it when the page is reloaded or closed. The NES's 3D models, the outside and the board, are a project of their own: <a href={issueUrl(NES_ISSUES.models)}>issue {NES_ISSUES.models}</a>.</p>
+        </div>
+      </div>
+    </section>
+  )}
+
   {models.map((m) => <MachineModel module={m.module} photos={machine.photos} drawings={machine.drawings} references={machine.references} />)}
 
   <MachinePhotos machine={machine} model={hasModels} />
 
   <section aria-labelledby="rom">
     <div class="wrap narrow">
-      <h2 id="rom">{bbc ? 'Whose ROMs these are' : 'Whose ROM this is'}</h2>
+      <h2 id="rom">{bbc ? 'Whose ROMs these are' : nes ? 'Whose game this is' : 'Whose ROM this is'}</h2>
       <div class="prose">
       <p>{machine.rights}</p>
       {roms.length > 0 && (
         <ul class="roms">
-          {roms.map((r) => <li>{r.chip ?? r.name}: <a href={r.url}>the copy in the repository</a>, SHA-256 <code>{r.sha256}</code></li>)}
+          {roms.map((r) => <li>{romLabel(r)}: <a href={r.url}>the copy in the repository</a>, SHA-256 <code>{r.sha256}</code></li>)}
         </ul>
       )}
       {bbc
         ? <p>The ROMs are kept in the repository, in <code>roms/</code>, with where they came from. Each is checked against its hash when the site is built, and served from this site beside the emulator.</p>
+        : nes
+        ? <p>The game is kept in the repository, in <code>roms/</code>, with where it came from. It is checked against its hash when the site is built, and served from this site beside the emulator.</p>
         : <p>The ROM is kept in the repository, in <code>roms/</code>, with where it came from. It is checked against its hash when the site is built, and served from this site beside the emulator.</p>}
       </div>
     </div>

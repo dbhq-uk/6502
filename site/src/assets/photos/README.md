@@ -21,8 +21,8 @@ resized copy of the source, which is a derivative under that licence.
 **What the 3D model takes from each**, for a machine that has one (the KIM-1),
 is in its section below and on the page. The analysis that does it is in
 `tools/kim1-model/` (its `README.md` says how to run it), and the journal for 2
-October 2026 has every figure. The BBC Micro has no model, so its photograph is
-shown and nothing is taken from it.
+October 2026 has every figure. The BBC Micro and the NES have no model, so their
+photographs are shown and nothing is taken from them.
 
 ## kim-1.webp
 
@@ -102,6 +102,20 @@ shown and nothing is taken from it.
 | Fetched | 4 October 2026, from `upload.wikimedia.org/wikipedia/commons/e/e7/Acorn_BBC_Micro.jpg`: 5195 by 3463 pixels, 2,257,642 bytes, SHA-1 `71f6dfdfee2a4a43d207936c310a57b30e0b4b39` (the SHA-1 Commons records for the file), SHA-256 `2329615eda5436b6836132a4f08ba46be18ea30df990866d3c9ac69d9006ca91` |
 | This copy | Cropped to the machine and a margin of 110 pixels of cloth on every side, then resized: `cwebp -q 82 -crop 152 60 4991 3342 -resize 1600 0 -metadata none`: 1600 by 1072 pixels, 88,150 bytes, SHA-256 `8796aa341c38d9399788f5d86b4a7e720c8334b331772405a0c093ee33416bfb`. Colours are the source's. The original is not committed, being over 1.5 MB; the line above is enough to fetch it again and check it |
 | Used for | The photograph of the machine at the head of its page. Nothing is traced or measured from it |
+
+## nes.webp
+
+| | |
+|---|---|
+| What | An original Nintendo Entertainment System, the North American console, seen from the front left and a little above on white: the whole case, the cartridge slot's lid with the red name on its front, the POWER and RESET buttons and the power light, and the two controller ports. The main photograph |
+| Source | Wikimedia Commons, [`File:Nintendo-Entertainment-System-NES-Console-FL.jpg`](https://commons.wikimedia.org/wiki/File:Nintendo-Entertainment-System-NES-Console-FL.jpg), the photographer's own work |
+| Author | Evan-Amos, as the file page names him |
+| Licence | Public domain, as the file page states it: the photographer's `{{PD-self}}` release ("I, the copyright holder of this work, release this work into the public domain. This applies worldwide."). No credit is owed; the page gives one anyway |
+| Which console | The file page describes it as "the first game console released in America by Nintendo", so the North American NES, the NTSC console with the 2A03. The picture alone cannot tell it from a PAL console, whose case is the same; the difference is the label underneath and the chips inside, which the photograph does not show |
+| Taken | 27 July 2016, 21:32 (`DateTimeOriginal`: Nikon D7000). Uploaded to Commons on 29 July 2016, by the photographer, over two earlier photographs of 2011 under the same name; the file used is the current one, whose SHA-1 is below |
+| Fetched | 6 October 2026, from `upload.wikimedia.org/wikipedia/commons/8/82/Nintendo-Entertainment-System-NES-Console-FL.jpg`: 4020 by 2880 pixels, 2,193,817 bytes, SHA-1 `339e959bbdb741c24a7f00e4256152b00e5c802c` (the SHA-1 Commons records for the file), SHA-256 `53c4ff11da6ba56bc2d9d8138dd585d126e08fe22350e8e0363003f9ddb8ab3c` |
+| This copy | Not cropped: the console already sits in an even margin of about 240 pixels of white on every side (ImageMagick's trim box at 2 % fuzz is 3520 by 2395 at 243, 249). Resized only: `cwebp -q 82 -resize 1600 0 -metadata none`: 1600 by 1147 pixels, 32,014 bytes, SHA-256 `4325012461f3919fc899d0a9adca509d5f5f09d14833905c076c0cc1e6335f55`. Colours are the source's. The original is not committed, being over 1.5 MB; the line above is enough to fetch it again and check it |
+| Used for | The photograph of the machine at the head of its page. Nothing is traced or measured from it: the NES's 3D models are their own project (issue 68) |
 
 The site builds AVIF and WebP copies of each file here at build time
 (`astro:assets`), so a page never loads a 1600 pixel master.

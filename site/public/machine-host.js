@@ -20,9 +20,13 @@
 //   assembly   The WebAssembly assembly to ask for, for example
 //              'Dbhq.Machines.Kim1.Wasm'.
 //   hostClass  The [JSExport] class in it that is the machine, for example
-//              'Kim1Host'. It must have Cycles(), the cycles since power on, and
+//              'Kim1Host'. It must have Cycles(), the cycles it has run, and
 //              Run(cycles), which runs at least that many (cycles is an int)
-//              and returns the cycles since power on.
+//              and returns Cycles(). The host takes each frame's cycles as the
+//              difference between two readings, so the count must never go
+//              back: a machine whose power cycle sets its bus's count to 0
+//              keeps a running total across it, as NesHost.Cycles does. For
+//              the KIM-1 and the BBC Micro it is the cycles since power on.
 //   load       Called as load(host, runtime) once the runtime is up, to give the
 //              machine its ROMs and switch it on: host is that class, and
 //              runtime the .NET runtime's API, for a machine that hands the
@@ -31,7 +35,9 @@
 //              It may be async; its errors are the host's failed load. The
 //              machine does not run until it returns.
 //   clockMhz   The machine's CPU clock, which every budget is counted in: 1 for
-//              the KIM-1, 2 for the BBC Micro.
+//              the KIM-1, 2 for the BBC Micro. Or a function that returns it,
+//              read every frame and every report, for a machine whose clock
+//              changes as it runs (the NES's, with its region).
 //   clockOf    Whose clock the sentences name; "the board's" unless given.
 //   onFrame    Called after every frame's run as onFrame(host, cycles, now):
 //              cycles is what the machine really ran this frame (it can pass
@@ -48,11 +54,14 @@
 //              reason>", with state "failed".
 //   speedEl    Where the headroom sentence goes, once a second.
 //
-//   It resolves to { host, stop }, host being the class above, or to null when
-//   the machine could not start. It resolves before the first frame runs, so
-//   whatever the caller does after its await (wiring keys, saying it is
+//   It resolves to { host, stop, hold }, host being the class above, or to null
+//   when the machine could not start. It resolves before the first frame runs,
+//   so whatever the caller does after its await (wiring keys, saying it is
 //   running) is done before onFrame is first called. stop() ends the loop for
-//   good.
+//   good. hold(true) stops running the machine until hold(false), as a hidden
+//   page does (onPause and onResume are called), and a hidden page shown again
+//   while held stays held: the NES's test hook holds the loop while it runs the
+//   machine to an exact frame.
 //
 // TIMING. Each animation frame runs as many machine cycles as real time has
 // passed since the last one, at clockMhz, up to MAX_FRAME_MS of machine time:
@@ -73,6 +82,7 @@
 export const MAX_FRAME_MS = 100;
 
 export async function startMachine({ panel, base, name, assembly, hostClass, load, clockMhz, clockOf = "the board's", onFrame, onPause, onResume, say, speedEl }) {
+  const clock = typeof clockMhz === 'function' ? clockMhz : () => clockMhz;
   let host;
   try {
     const { dotnet } = await import(`${base}_framework/dotnet.js`);
@@ -96,13 +106,15 @@ export async function startMachine({ panel, base, name, assembly, hostClass, loa
   let stopped = false;
   // True once the loop has stopped running the machine, so onResume follows only an onPause.
   let paused = false;
+  // True while the page holds the machine (hold), so showing a hidden page does not run it.
+  let held = false;
 
   const frame = (now) => {
     pending = null;
     const real = now - last;
     const elapsed = Math.min(real, MAX_FRAME_MS);
     last = now;
-    const want = Math.max(1, Math.round(elapsed * clockMhz * 1000));
+    const want = Math.max(1, Math.round(elapsed * clock() * 1000));
     const before = performance.now();
     const after = host.Run(want);
     busyMs += performance.now() - before;
@@ -118,7 +130,7 @@ export async function startMachine({ panel, base, name, assembly, hostClass, loa
       report(busyCycles / busyMs / 1000, wallCycles / wallMs / 1000);
       busyMs = busyCycles = wallMs = wallCycles = 0;
     }
-    if (!stopped && !document.hidden) pending = requestAnimationFrame(frame);
+    if (!stopped && !held && !document.hidden) pending = requestAnimationFrame(frame);
   };
 
   // capacity: how fast this browser runs the machine flat out, in MHz, from
@@ -126,6 +138,7 @@ export async function startMachine({ panel, base, name, assembly, hostClass, loa
   // real time that passed, so a browser that cannot keep up reports less than
   // the machine's clock.
   const report = (capacity, actual) => {
+    const clockMhz = clock();
     panel.dataset.capacityMhz = capacity.toFixed(2);
     panel.dataset.actualMhz = actual.toFixed(2);
     const times = Math.floor(capacity / clockMhz);
@@ -139,6 +152,10 @@ export async function startMachine({ panel, base, name, assembly, hostClass, loa
   // From now: the time a hidden page was away is not run, and not counted.
   const resume = () => {
     last = performance.now();
+    // The machine may have run outside the loop while it was paused (the NES's
+    // test hook runs it to an exact frame while held): those cycles are not
+    // the next frame's, nor counted in the speed.
+    cycles = host.Cycles();
     busyMs = busyCycles = wallMs = wallCycles = 0;
     if (pending === null) pending = requestAnimationFrame(frame);
     if (paused) {
@@ -157,7 +174,13 @@ export async function startMachine({ panel, base, name, assembly, hostClass, loa
   const visibility = () => {
     if (stopped) return;
     if (document.hidden) pause();
-    else resume();
+    else if (!held) resume();
+  };
+  const hold = (on) => {
+    if (stopped) return;
+    held = on;
+    if (on) pause();
+    else if (!document.hidden) resume();
   };
   document.addEventListener('visibilitychange', visibility);
 
@@ -168,7 +191,7 @@ export async function startMachine({ panel, base, name, assembly, hostClass, loa
   };
 
   if (!document.hidden) resume();
-  return { host, stop };
+  return { host, stop, hold };
 }
 
 const fmt = (n) => n.toLocaleString('en-GB');

@@ -133,7 +133,7 @@ test('the symbol table says where each symbol is on a PC keyboard, from the key 
 const savedDocument = Object.getOwnPropertyDescriptor(globalThis, 'document');
 const listeners = [];
 Object.defineProperty(globalThis, 'document', { configurable: true, writable: true, value: { querySelectorAll: () => [], hidden: false, addEventListener: (t, f) => listeners.push([t, f]) } });
-const { keyboard, onScreenKeys } = await import(pathToFileURL(path.join(PUBLIC, 'bbc-micro.js')).href);
+const { keyboard, onScreenKeys, disc } = await import(pathToFileURL(path.join(PUBLIC, 'bbc-micro.js')).href);
 test.after(() => {
   if (savedDocument) Object.defineProperty(globalThis, 'document', savedDocument);
   else delete globalThis.document;
@@ -368,4 +368,111 @@ test('megabytes are one decimal place, the British way', () => {
   assert.equal(megabytes(12_345_678), '12.3');
   assert.equal(megabytes(1_000_000), '1.0');
   assert.equal(megabytes(1_234_567_890), '1,234.6');
+});
+
+// ---- The page script's disc drive ----
+
+/**
+ * The disc drive's controls as plain objects, a machine that records what goes in the drive,
+ * and a fetch that answers only when the test says so, so a library disc can be caught in
+ * the middle of its download.
+ */
+function drive() {
+  const element = (extra = {}) => {
+    const on = {};
+    return { disabled: true, hidden: false, textContent: '', dataset: {}, checked: false, value: '', files: [], on, addEventListener: (type, fn) => { on[type] = fn; }, click() { on.click?.(); }, ...extra };
+  };
+  const els = {
+    '[data-bbc-insert]': element(), '[data-bbc-file]': element(), '[data-bbc-blank]': element(), '[data-bbc-save]': element(),
+    '[data-bbc-eject]': element(), '[data-bbc-protect]': element(), '[data-bbc-drive]': element(),
+    '[data-bbc-preset]': element({ value: 'onslaught' }), '[data-bbc-preset-run]': element(), '[data-bbc-preset-insert]': element(),
+    '[data-bbc-preset-disc="onslaught"]': element({ dataset: { title: 'Onslaught', licence: 'MIT' } }),
+  };
+  const panel = { dataset: { base: '/machines/bbc-micro/' }, querySelector: (q) => els[q] };
+  const inserted = [];
+  const calls = [];
+  const bbc = {
+    InsertDisc: (drive, data, dsd, readOnly) => { inserted.push([...data]); return 40; },
+    BlankDisc: () => inserted.push('blank'),
+    SetDiscReadOnly: () => {}, EjectDisc: () => inserted.push('eject'), ShiftBreak: () => calls.push('shift-break'),
+  };
+  const screen = { focus: (o) => calls.push(['focus', o]), scrollIntoView: (o) => calls.push(['scroll', o]) };
+  const fetches = [];
+  globalThis.fetch = (url) => new Promise((resolve) => fetches.push({ url, answer: (bytes) => resolve({ ok: true, arrayBuffer: async () => new Uint8Array(bytes).buffer }) }));
+  disc(panel, bbc, { screen, letGo: () => calls.push('let-go') });
+  const file = (name, bytes) => ({ name, size: bytes.length, arrayBuffer: async () => new Uint8Array(bytes).buffer });
+  const settle = () => new Promise((r) => setTimeout(r, 0));
+  return { els, inserted, calls, fetches, file, settle, panel };
+}
+
+test('Insert and run puts the library disc in, starts it with SHIFT and BREAK, and brings the screen into view', async () => {
+  const { els, inserted, calls, fetches, settle, panel } = drive();
+  els['[data-bbc-preset-run]'].click();
+  assert.equal(fetches.length, 1);
+  assert.equal(fetches[0].url, '/machines/bbc-micro/discs/onslaught.ssd');
+  fetches[0].answer([1, 2, 3]);
+  await settle();
+  assert.deepEqual(inserted, [[1, 2, 3]]);
+  assert.equal(panel.dataset.disc, 'onslaught.ssd');
+  assert.match(els['[data-bbc-drive]'].textContent, /^In drive 0: Onslaught \(MIT\), 40 tracks/);
+  // Focus without a jump, then into view only as far as needed, at the page's own scroll speed.
+  assert.deepEqual(calls, ['let-go', 'shift-break', ['focus', { preventScroll: true }], ['scroll', { block: 'nearest', behavior: 'auto' }]]);
+});
+
+test('Insert in drive 0 puts the library disc in and starts nothing', async () => {
+  const { els, inserted, calls, fetches, settle } = drive();
+  els['[data-bbc-preset-insert]'].click();
+  fetches[0].answer([9]);
+  await settle();
+  assert.deepEqual(inserted, [[9]]);
+  assert.deepEqual(calls, []);
+  assert.match(els['[data-bbc-drive]'].textContent, /type \*CAT to list it/);
+});
+
+test('a file chosen while a library disc downloads stays in the drive: the download that finishes later is dropped', async () => {
+  const { els, inserted, fetches, file, settle, panel } = drive();
+  els['[data-bbc-preset-run]'].click();
+  // The visitor picks a file of their own before the library disc arrives.
+  els['[data-bbc-file]'].files = [file('mine.ssd', [7, 7])];
+  els['[data-bbc-file]'].on.change();
+  await settle();
+  fetches[0].answer([1, 2, 3]);
+  await settle();
+  assert.deepEqual(inserted, [[7, 7]], 'the library disc replaced the visitor\'s file');
+  assert.equal(panel.dataset.disc, 'mine.ssd');
+  assert.match(els['[data-bbc-drive]'].textContent, /^In drive 0: mine\.ssd/);
+});
+
+test('a blank disc made while a library disc downloads stays in the drive, and a refused file cancels nothing', async () => {
+  const { els, inserted, fetches, file, settle, panel } = drive();
+  els['[data-bbc-preset-run]'].click();
+  els['[data-bbc-blank]'].click();
+  fetches[0].answer([1]);
+  await settle();
+  assert.deepEqual(inserted, ['blank']);
+  assert.equal(panel.dataset.disc, 'blank.ssd');
+  // A file the drive refuses (not a disc image) does not stop a library disc already on its way.
+  els['[data-bbc-preset-run]'].click();
+  els['[data-bbc-file]'].files = [file('notes.txt', [0])];
+  els['[data-bbc-file]'].on.change();
+  fetches[1].answer([5]);
+  await settle();
+  assert.deepEqual(inserted, ['blank', [5]]);
+  assert.equal(panel.dataset.disc, 'onslaught.ssd');
+});
+
+test('a file read that fails after a later insert has started says nothing: the later disc keeps the status line', async () => {
+  const { els, inserted, file, settle, panel } = drive();
+  let fail;
+  const slow = { name: 'slow.ssd', size: 2, arrayBuffer: () => new Promise((_, reject) => { fail = reject; }) };
+  els['[data-bbc-file]'].files = [slow];
+  els['[data-bbc-file]'].on.change();
+  els['[data-bbc-file]'].files = [file('fast.ssd', [3, 3])];
+  els['[data-bbc-file]'].on.change();
+  await settle();
+  fail(new Error('the read failed'));
+  await settle();
+  assert.deepEqual(inserted, [[3, 3]]);
+  assert.equal(panel.dataset.disc, 'fast.ssd');
+  assert.match(els['[data-bbc-drive]'].textContent, /^In drive 0: fast\.ssd/);
 });

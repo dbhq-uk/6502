@@ -125,4 +125,44 @@ public class BbcKeyPressesTests
         Assert.Throws<ArgumentOutOfRangeException>(() => keys.Down((BbcKey)0x0A));
         Assert.Throws<ArgumentOutOfRangeException>(() => keys.Up((BbcKey)0x7A));
     }
+
+    [Fact]
+    public void ShiftBreakHoldsShiftThroughAResetAndLetsGoAfterItsHold()
+    {
+        var (machine, keys) = Booted();
+        keys.ShiftBreak();
+        Assert.Equal(3, keys.Pending);
+
+        // The reset comes with SHIFT already down: one instruction later the 6502 is at the
+        // start of the OS's reset code ($D9CD, bus.md section 5), not where BASIC was waiting.
+        keys.Run(1);
+        Assert.True(machine.Keyboard.IsDown(BbcKey.Shift), "SHIFT was not down for the reset");
+        Assert.InRange(machine.Cpu.PC, 0xD9CD, 0xD9D5);
+        Assert.Equal(1, keys.Pending);
+
+        keys.Run(BbcKeyPresses.ShiftBreakHoldCycles - Slack);
+        Assert.True(machine.Keyboard.IsDown(BbcKey.Shift), "SHIFT came up before its hold was over");
+
+        keys.Run(2 * Slack);
+        Assert.False(machine.Keyboard.IsDown(BbcKey.Shift), "SHIFT was still down after its hold");
+        Assert.Equal(0, keys.Pending);
+    }
+
+    [Fact]
+    public void ShiftBreakWaitsForKeysQueuedBeforeIt()
+    {
+        var (machine, keys) = Booted();
+        keys.Down(BbcKey.A);
+        keys.Up(BbcKey.A);
+        keys.ShiftBreak();
+
+        // The A is held for its 40 ms first; only then do SHIFT and the reset come.
+        keys.Run(BbcKeyPresses.HoldCycles - Slack);
+        Assert.True(machine.Keyboard.IsDown(BbcKey.A));
+        Assert.False(machine.Keyboard.IsDown(BbcKey.Shift), "SHIFT and BREAK jumped the queue");
+
+        keys.Run(2 * Slack);
+        Assert.False(machine.Keyboard.IsDown(BbcKey.A));
+        Assert.True(machine.Keyboard.IsDown(BbcKey.Shift), "SHIFT and BREAK did not follow the A");
+    }
 }

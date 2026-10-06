@@ -204,8 +204,17 @@ footer .linkbtn:hover { color: var(--white); }
 .bbc-disc legend { padding: 0 6px; color: var(--white); font-weight: 500; }
 .bbc-protect { display: inline-flex; align-items: center; gap: 8px; color: var(--white); font-size: 14px; }
 .bbc-protect input { width: 16px; height: 16px; margin: 0; }
+.bbc-presets { display: grid; gap: 10px; padding-bottom: 14px; border-bottom: 1px solid var(--hairline); }
+.bbc-preset-label { color: var(--white); font-size: 14px; }
+.bbc-presets select { justify-self: start; max-width: 100%; min-height: 44px; font: inherit; font-size: 14px; color: var(--white); background: var(--iron); border: 1px solid var(--circuit); border-radius: 8px; padding: 8px 12px; }
+.bbc-presets select:disabled { border-style: dashed; color: var(--moss-70); }
+.bbc-preset-about { color: var(--moss-80); font-size: 14px; max-width: 72ch; }
+.bbc-preset-disc { display: grid; gap: 6px; }
+.bbc-preset-disc[hidden] { display: none; }
+.bbc-preset-disc b { color: var(--white); font-weight: 500; }
+.bbc-preset-note { color: var(--white); border-left: 2px solid var(--white); padding-left: 10px; }
 .bbc-program code { white-space: pre; }
-.bbc-symbols caption { text-align: left; padding: 0 0 8px; color: var(--white); font-weight: 500; }
+.bbc-symbols caption, .nes-pad-table caption { text-align: left; padding: 0 0 8px; color: var(--white); font-weight: 500; }
 /* The machine's keys as buttons, in its own layout, a row at a time; a row wraps on a narrow screen rather than shrink a key under 44 pixels. Latched SHIFT and CTRL show as a filled key with a bright edge, a shape and not only a colour. No lime: no key matters more than another. */
 .bbc-keys { display: grid; gap: 3px; }
 .bbc-keys-row { display: flex; flex-wrap: wrap; justify-content: center; gap: 3px; }
@@ -218,6 +227,36 @@ footer .linkbtn:hover { color: var(--white); }
 .bbc-key[aria-pressed="true"] { background: var(--card); border-color: var(--white); }
 .bbc-key:disabled { cursor: default; border-style: dashed; background: var(--iron); color: var(--moss-70); }
 @media (prefers-reduced-motion: reduce) { .bbc-key { transition: none; } }
+/* The NES's page: the screen on the black canvas, its controls, controller 1 as buttons, the region and the cartridge below, on an iron panel like the BBC Micro's. No lime but Start, the page's one fill, and the screen's focus ring. */
+.nes { margin-top: 24px; padding: clamp(16px, 4vw, 32px); display: grid; gap: 14px; background: var(--iron); border: 1px solid var(--circuit); border-radius: var(--r-window); }
+.nes-screen { background: var(--void); border: 1px solid var(--hairline); border-radius: var(--r-card); padding: clamp(6px, 1.5vw, 14px); outline-offset: 3px; }
+/* The picture is 256 by 240; NTSC's pixels are 8:7, so it shows 2048 by 1680 in shape, and public/nes.js sets the region's own (PAL's are wider). Square pixels stay square when scaled up. */
+.nes-screen canvas { display: block; width: 100%; max-width: 900px; margin: 0 auto; height: auto; aspect-ratio: 2048 / 1680; background: var(--void); image-rendering: pixelated; }
+/* Focus is what hands the keyboard to the machine, so a mouse click, which does not raise :focus-visible, shows the ring too. */
+.nes-screen:focus { outline: 2px solid var(--lime); }
+.nes-controls { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; }
+.nes .btn:disabled { cursor: default; border-style: dashed; background: var(--iron); color: var(--moss-70); }
+.nes .btn[hidden] { display: none; }
+.nes-status { color: var(--moss-80); }
+.nes-line { color: var(--moss-80); font-size: 14px; }
+.nes-line:empty { display: none; }
+.nes-note { color: var(--sage-60); font-size: 14px; max-width: 72ch; }
+.nes-speed { color: var(--sage-60); font-family: var(--font-mono); font-size: 12.5px; letter-spacing: 0; max-width: 60ch; }
+.nes-speed:empty { display: none; }
+.nes-region, .nes-cartridge { margin: 0; padding: 14px 16px 16px; display: grid; gap: 12px; border: 1px solid var(--hairline); border-radius: var(--r-card); }
+.nes-region legend, .nes-cartridge legend { padding: 0 6px; color: var(--white); font-weight: 500; }
+.nes-choice { display: inline-flex; align-items: center; gap: 8px; color: var(--white); font-size: 14px; }
+.nes-choice input { width: 16px; height: 16px; margin: 0; }
+/* Controller 1 for touch: the d-pad on the left, Select and Start in the middle, B and A on the right, as on the pad. Each button at least 44 pixels; touch-action none so a held finger neither scrolls nor zooms. No lime: no button matters more than another. */
+.nes-pad { display: grid; grid-template-columns: repeat(3, 52px) 1fr repeat(2, 72px) 1fr repeat(2, 60px); grid-template-areas: ". up . . . . . . ." "left . right . select start . b a" ". down . . . . . . ."; gap: 6px; justify-content: center; align-items: center; }
+.nes-button { min-width: 44px; min-height: 44px; padding: 0 6px; font-family: var(--font-mono); font-size: 13px; letter-spacing: 0; color: var(--white); background: var(--veil); border: 1px solid var(--circuit); border-radius: 8px; cursor: pointer; touch-action: none; user-select: none; -webkit-user-select: none; transition: background 0.15s ease-out; }
+.nes-button:hover { background: var(--card); }
+.nes-button:active { background: var(--void); }
+.nes-button:disabled { cursor: default; border-style: dashed; background: var(--iron); color: var(--moss-70); }
+.nes-up { grid-area: up; } .nes-down { grid-area: down; } .nes-left { grid-area: left; } .nes-right { grid-area: right; }
+.nes-select { grid-area: select; } .nes-start { grid-area: start; } .nes-b { grid-area: b; border-radius: 50%; } .nes-a { grid-area: a; border-radius: 50%; }
+@media (max-width: 560px) { .nes-pad { grid-template-columns: repeat(3, 48px) repeat(2, 1fr) repeat(2, 52px); grid-template-areas: ". up . . . . ." "left . right . . b a" ". down . select start . ."; } }
+@media (prefers-reduced-motion: reduce) { .nes-button { transition: none; } }
 .prose .steps { display: grid; gap: 18px; }
 .prose .steps li + li { margin-top: 0; }
 .steps p { margin: 0; }

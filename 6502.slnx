@@ -4,6 +4,8 @@
     <Project Path="bench/Dbhq.Cpu6502.SpeedNative/Dbhq.Cpu6502.SpeedNative.csproj" />
     <Project Path="bench/Dbhq.Cpu6502.WasmBench/Dbhq.Cpu6502.WasmBench.csproj" />
     <Project Path="bench/bbc-micro-speed/native/Dbhq.Machines.BbcMicro.SpeedNative.csproj" />
+    <Project Path="bench/nes-speed/differential/Dbhq.Machines.Nes.Differential.csproj" />
+    <Project Path="bench/nes-speed/native/Dbhq.Machines.Nes.SpeedNative.csproj" />
   </Folder>
   <Folder Name="/src/">
     <Project Path="src/Dbhq.Cpu6502/Dbhq.Cpu6502.csproj" />
@@ -11,6 +13,8 @@
     <Project Path="src/Dbhq.Machines.BbcMicro/Dbhq.Machines.BbcMicro.csproj" />
     <Project Path="src/Dbhq.Machines.Kim1.Wasm/Dbhq.Machines.Kim1.Wasm.csproj" />
     <Project Path="src/Dbhq.Machines.Kim1/Dbhq.Machines.Kim1.csproj" />
+    <Project Path="src/Dbhq.Machines.Nes.Wasm/Dbhq.Machines.Nes.Wasm.csproj" />
+    <Project Path="src/Dbhq.Machines.Nes/Dbhq.Machines.Nes.csproj" />
   </Folder>
   <Folder Name="/tools/">
     <Project Path="tools/Dbhq.Cpu6502.ChipTrace/Dbhq.Cpu6502.ChipTrace.csproj" />
@@ -20,5 +24,6 @@
     <Project Path="tests/Dbhq.Cpu6502.TestSupport/Dbhq.Cpu6502.TestSupport.csproj" />
     <Project Path="tests/Dbhq.Machines.BbcMicro.Tests/Dbhq.Machines.BbcMicro.Tests.csproj" />
     <Project Path="tests/Dbhq.Machines.Kim1.Tests/Dbhq.Machines.Kim1.Tests.csproj" />
+    <Project Path="tests/Dbhq.Machines.Nes.Tests/Dbhq.Machines.Nes.Tests.csproj" />
   </Folder>
 </Solution>
