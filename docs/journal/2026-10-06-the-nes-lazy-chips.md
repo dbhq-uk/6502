@@ -1,7 +1,7 @@
 ---
 title: "The NES's lazy chips: the gate first"
 date: 2026-10-06
-summary: "Dan chose to let the NES's PPU and sound unit be brought up to date only when something can see them, on one condition: the lazy build must give bit for bit what the per-dot build gives at every point where a chip can be seen. Before any chip changes, the differential was extended to be that test. The bus now tells an observer of each such point, every chip reports its whole state, a reflection test fails if a field is left out, and the per-ROM output of the build before the work is committed as the baseline. Ten deliberate one-dot or one-cycle faults in the parts the work will touch, planted one at a time in a scratch copy, each changed the output. The review found the gate's real gap: the test ROMs hardly touch the chips while a line is drawn, which is what the lazy work will change. So the differential now also builds 38 small cartridges of its own, whose register writes sweep across the dots of the lines frame by frame, and with them every fault changes at least 20 runs. A fault also turned up a crash in the PPU that has been there since the NES was built: the reset button in the middle of sprite evaluation can leave it writing past secondary OAM. The second task made the PPU lazy: the bus gives it its dots, and it runs them, with the same per-dot code, only where something can see it. The gate gave output identical to the baseline on every run, the old faults are still seen, and so is each of four new faults planted in the catch-up. Natively, a cycle of the benchmark ROM takes about half the time it did. In the browser, the build the live page runs, the gain is smaller, about a third more speed, because the part of the cycle the change did not touch costs more there."
+summary: "Dan chose to let the NES's PPU and sound unit be brought up to date only when something can see them, on one condition: the lazy build must give bit for bit what the per-dot build gives at every point where a chip can be seen. Before any chip changes, the differential was extended to be that test. The bus now tells an observer of each such point, every chip reports its whole state, a reflection test fails if a field is left out, and the per-ROM output of the build before the work is committed as the baseline. Ten deliberate one-dot or one-cycle faults in the parts the work will touch, planted one at a time in a scratch copy, each changed the output. The review found the gate's real gap: the test ROMs hardly touch the chips while a line is drawn, which is what the lazy work will change. So the differential now also builds 38 small cartridges of its own, whose register writes sweep across the dots of the lines frame by frame, and with them every fault changes at least 20 runs. A fault also turned up a crash in the PPU that has been there since the NES was built: the reset button in the middle of sprite evaluation can leave it writing past secondary OAM. The second task made the PPU lazy: the bus gives it its dots, and it runs them, with the same per-dot code, only where something can see it. The gate gave output identical to the baseline on every run, the old faults are still seen, and so is each of four new faults planted in the catch-up. Natively, a cycle of the benchmark ROM takes about half the time it did. In the browser, the build the live page runs, the gain is smaller, about a third more speed, because the part of the cycle the change did not touch costs more there. A profile of the lazy build in the browser shows the PPU's per-dot work is still the largest part of the time, ahead of the bus's cycle, the CPU core and the sound unit, and a fast scanline renderer is the one option the profile says is worth more than a small gain."
 order: 36
 ---
 
@@ -900,3 +900,304 @@ margin the page has is smaller than these.
 - The fast scanline renderer of tasks 3 and 4 goes into `CatchUp`. Whatever it
   gains should be measured in the browser too, not only natively, since the two
   have differed by this much once already.
+
+## Task 2c: where the browser's time goes with the PPU lazy
+
+Task 2b measured how much faster the browser got. This section says where the
+time goes now, so that the next step is chosen on evidence: a fast scanline
+renderer for the PPU, a lazy sound unit, a cheaper bus cycle, or something else.
+Nothing in `src/` changed for it. The one change to the harness is
+`PROFILE_OUT` in `bench/nes-speed/run-in-browser.mjs`, which writes each
+launch's whole profile to a file, and a script that groups the profiles,
+`bench/nes-speed/lazy-chips/profile-groups.mjs`.
+
+### How it was measured
+
+- The build is `6a98780` (the lazy PPU; `src/` is as at `3fa4146`). It was
+  published ahead of time (AOT) with the function names kept, after deleting
+  `obj/Release`:
+  `dotnet publish src/Dbhq.Machines.Nes.Wasm -c Release -p:RunAOTCompilation=true
+  -p:WasmNativeStrip=false -o bench/nes-speed/publish/aot-prof`.
+- The baseline for the comparison is `5e48505`, the build before the lazy
+  chips, in `/tmp/nes-base` (a `git archive` export), published the same way,
+  with this tree's `run-in-browser.mjs` copied in so that it has `PROFILE_OUT`.
+- Chrome 153.0.8010.47, headless, on the 8-core development machine. The
+  profiler is the DevTools protocol's `Profiler`, sampling every 200
+  microseconds. The workload is SNOW, as in task 2b.
+- Two kinds of profile, three of each in each region, one fresh Chrome launch
+  each:
+  - **Runs only**: `PROFILE=5 THREAD_TIME=8 PROFILE_OUT=<path> node
+    run-in-browser.mjs publish/aot-prof 1 1790000 5000000 5 <region>`. The
+    profile covers only the eight driver runs, so the boot, the runtime start
+    and the page's own runs are left out. This is the steady state of the
+    emulation, and it is the one the table below uses.
+  - **Whole page**: the same without `THREAD_TIME`. It covers the boot (the
+    runtime and the module starting) and the page's five runs. It is the method
+    of the profile in
+    [the speed entry](2026-10-05-the-nes-speed.md), so it is what to compare
+    with that.
+- Each profile's samples are summed by function name and then by group with
+  `node lazy-chips/profile-groups.mjs <profile.json>...`. Every figure below is
+  a share of all the samples of one profile, and the number given is the median
+  of the three. The groups are a regular expression on the AOT method's name;
+  they are in the script. The profiles themselves are 13 MB and are not
+  committed; the tables they made are
+  [`bench/nes-speed/lazy-chips/task-2c-profile-groups.txt`](../../bench/nes-speed/lazy-chips/task-2c-profile-groups.txt)
+  and the runs' lines are in `task-2c-lazy-run.txt` and
+  `task-2c-baseline-run.txt` in the same folder.
+- The loop that ran them was `/tmp/p2c/run.sh`: for each of three rounds and
+  each region, a whole-page profile and a runs-only profile, then an unprofiled
+  `THREAD_TIME=8` launch of each region, with `uptime` before and after each,
+  and the BBC gauge (`THREAD_TIME=10 node run-in-browser.mjs publish/aot-gauge
+  1 2000000 6000000 1` in `bench/bbc-micro-speed`) at the start and the end.
+
+### Load
+
+- This build: 7 October 2026, 02:37:18 to 02:38:55 UTC. The one-minute load
+  average was 1.09 to 2.06 (`uptime` read 1.09, 1.42, 1.57 at the start and
+  1.71, 1.59, 1.62 at the end). The BBC gauge (median of ten runs, thread CPU
+  time) read 19.96 MHz before and 26.89 after.
+- The baseline: 02:42:10 to 02:43:35 UTC, load 1.87 to 3.52 (another process
+  was running part of the time). The gauge read 21.40 MHz before and, run by hand
+  at 02:43:49 UTC, 27.56 after.
+- So the machine ran about a third faster at the end of each batch than at the
+  start (the gauge's first runs in a launch are the slowest; why the machine
+  sped up is not known), and the baseline batch had more load. The shares of a profile
+  move less with the load than the speed does, and every comparison below uses
+  shares, but the nanoseconds a cycle derived from them carry that noise, and
+  the baseline's more.
+
+### The speed under the profiler
+
+The medians of the runs the profiled launches made, `times_real` in thread CPU
+time (24 runs each; the page's own wall-clock lines are in the files):
+
+| Region | Baseline `5e48505` | This build | Unprofiled, this build (8 runs) |
+| --- | --- | --- | --- |
+| NTSC | 2.50 | 3.17 | 3.50 |
+| PAL | 2.65 | 3.51 | 3.23 |
+
+The profiler costs little (NTSC about a tenth, PAL none that shows in noise), and
+the ratio under it, 1.27 for NTSC and 1.32 for PAL, is task 2b's (1.39 and 1.31)
+within its noise. So the profile describes the build that was timed in 2b.
+
+### Where the samples are, with the PPU lazy
+
+Runs-only profiles, share of all samples, median of three profiles. The two
+columns are NTSC then PAL.
+
+| Group (what the AOT names put in it) | NTSC % | PAL % |
+| --- | --- | --- |
+| `Ppu.RunDot`, its own code | 26.0 | 24.8 |
+| `Ppu.CatchUp` (the loop that calls it, and what is inlined in it) | 4.6 | 5.1 |
+| `Ppu.RenderDot` | 2.8 | 2.4 |
+| Sprite evaluation (`EvaluationStep`, `Evaluate`) | 2.7 | 2.6 |
+| Sprite fetch and laying (`FetchSprite`, `LaySprite`) | 2.9 | 2.4 |
+| `Ppu.FetchBackground` | 0.7 | 0.7 |
+| PPU registers and the rest | 0.4 | 0.4 |
+| **PPU, all** | **40.2** | **38.5** |
+| `NesBus.Cycle`, its own code | 18.7 | 19.5 |
+| `NesBus` reads and writes (`ReadAccess`, `WriteAccess`, DMA) | 4.3 | 4.0 |
+| `Nes.Run` and `Nes.Step` (the machine's loop) | 2.4 | 2.3 |
+| **Bus and loop** | **25.5** | **25.9** |
+| `Apu.Tick` | 10.8 | 11.6 |
+| `Apu` rest (`Remix`, `Write`, the channels) | 1.6 | 1.7 |
+| `SampleBuffer` (`Step`, `Impulse`, `Emit`, the kernel) | 1.1 | 1.2 |
+| **Sound unit** | **13.5** | **14.6** |
+| **CPU core** (`Cpu.*`, of which `Cpu.Read` about 5 and `Cpu.Step` about 4.7) | **14.5** | **14.3** |
+| Mapper (`Nrom`, `Board`) | 0.0 | 0.0 |
+| `(program)`: the browser outside JS and WebAssembly | 3.8 | 4.2 |
+| `(idle)` (the gaps between the driver's calls) | 2.4 | 2.4 |
+| Garbage collector, JS glue, the .NET runtime and libc | 0.2 | 0.2 |
+
+The three profiles of a region agree to within 1 point on every row, except the
+CPU core by 0.5 and `NesBus.Cycle` by 0.8.
+
+The same, as a whole-page profile (the boot and the page's own runs included),
+the one to compare with the earlier entry:
+
+| Group | NTSC % | PAL % |
+| --- | --- | --- |
+| PPU, all | 31.7 | 30.4 |
+| Bus and loop (of which `NesBus.Cycle` 14.6 and 14.9) | 20.0 | 20.5 |
+| Sound unit (of which `Apu.Tick` 12.0 and 11.5) | 14.8 | 15.0 |
+| CPU core | 11.1 | 11.4 |
+| Browser outside JS and WebAssembly (`(program)`), JS glue, the .NET runtime, idle | 22.7 | 22.6 |
+
+The browser's own share is large here, 12 points of it `(program)`, because the
+profile includes the boot: V8 compiling and starting the large WebAssembly
+module, and the page's own set-up. In steady state it is 4 to 6 points
+(runs-only table).
+
+### Against the profile before the lazy PPU
+
+The earlier entry's profile was of the page, boot included, from an uncommitted
+script: PPU about 37 to 40 %, `NesBus.Cycle` 15 to 16, sound unit 11 to 12 (that
+was `Apu.Tick` and what it inlined), CPU core 10 to 11. To check it, the same
+script and the same method were run on `5e48505` in this task. That gave, as a
+whole-page profile: PPU 35.7 (NTSC) and 34.7 (PAL), `NesBus.Cycle` 14.6 and
+16.2, `Apu.Tick` 13.0 and 12.8, CPU core 10.4 and 10.3. The method reproduces
+the earlier entry's shares within a few points (the PPU a little lower).
+
+With the lazy PPU, in the same whole-page method: PPU 31.7 and 30.4,
+`NesBus.Cycle` 14.6 and 14.9, `Apu.Tick` 12.0 and 11.5, CPU core 11.1 and 11.4.
+In the runs-only method, baseline against lazy: PPU 43.0 against 40.2 (NTSC) and
+41.0 against 38.5 (PAL).
+
+So the PPU's share fell only 2 to 4 points, though the build is about 1.3 times as
+fast. That is not a contradiction. A cycle's cost in nanoseconds is the
+region's cycle period divided by `times_real`, and a share of it is that cost
+divided out. For the runs-only profiles, with the cycle period from `CpuHz`
+(about 559 ns for NTSC and 602 for PAL):
+
+| Group, ns a CPU cycle | NTSC baseline | NTSC lazy | PAL baseline | PAL lazy |
+| --- | --- | --- | --- | --- |
+| Whole cycle (period over `times_real`) | 224 | 176 | 227 | 171 |
+| PPU | 96 | 71 | 93 | 66 |
+| Bus and loop | 54 | 45 | 59 | 44 |
+| Sound unit | 34 | 24 | 35 | 25 |
+| CPU core | 28 | 26 | 28 | 25 |
+| Browser, idle and the rest | 12 | 11 | 13 | 12 |
+
+This is arithmetic on medians from two batches at different loads, so it is an
+estimate good to perhaps 10 percent a row. It says that the PPU's own functions
+went from about 95 ns to about 70 ns a cycle, which is about 25 ns of the
+roughly 50 ns saved, and that the other half of the saving is in code the change
+did not touch: the bus, the sound unit and the CPU core each got cheaper (by 9,
+10 and 2 ns). That fits the speed entry's finding that the per-dot code runs dearer with
+the CPU's code running between its dots (the branch predictor), and the
+CPU's code and the sound unit's are likewise cheaper without the PPU's code
+running between their cycles.
+It also means the saving did not all come from the PPU's dot count.
+
+### What the profile can and cannot resolve
+
+- **It resolves methods by name.** With `WasmNativeStrip=false` the AOT code
+  keeps its names, and every sample of the NES's code lands in a named method
+  (`Dbhq_Machines_Nes_..._Ppu_RunDot` and the like). There was no function
+  that appeared only as a number. The share of `(program)` and `(idle)`,
+  though, has no function: `(program)` is time in the browser outside JS and
+  WebAssembly (in the whole-page profile probably V8 compiling and starting the
+  module, and in both the profiler's own work; not checked), and `(idle)` is the
+  gaps.
+- **It cannot see inside a method that was inlined.** AOT inlines small methods,
+  and this code marks many as inlining. `Ppu.RunDot` shows as 26 % because the
+  visible-dot path (`RenderVisibleDot`: the dot's fetch switch, the shift of the
+  background shifters, the reload, the pixel decision from the shifters and the
+  sprite line, the VBlank flag) is inlined into it. The profile has a position
+  for each sample, but for WebAssembly it is always line 1, so nothing splits
+  it. The same goes for the sound unit's per-cycle part (`_sound.Add` and
+  `Apu.Output`, marked for inlining) in `NesBus.Cycle`, so the sound unit's true
+  share is somewhere above the 13.5 and 14.6 of its own rows. The mapper has no
+  row because, for NROM, the bus and the PPU read the board's arrays directly
+  (task 6b), and the boards that do not watch the PPU's address bus are not
+  called at all. For a board that does (the MMC3, say) the mapper's address
+  reports would appear. SNOW is the only ROM the browser bench can run, so they
+  are not measured.
+- **It cannot see the live page.** The bench page has no canvas, no audio and no
+  frame scheduling. The live page's own costs (drawing the frame, filling and
+  playing the audio buffers, the JS and WebAssembly interop for each frame) are
+  not in these profiles. The 4 to 6 points of browser time in the steady state is
+  the most the bench can say about it.
+- **A sampling profiler at 200 microseconds** has an error of its own on short
+  functions, and the share of a method that is called a hundred thousand times a
+  second is approximate; this is why the three profiles of a region are given and
+  their medians.
+
+### Which would pay most
+
+Fractions are the runs-only shares above. The speed-up of removing a fraction f
+of the run time is 1 / (1 - f) (Amdahl). Everything from here is an estimate,
+not a measurement: it assumes the rest of the cost does not change when one part
+does, which the last section shows is not quite true.
+
+**1. A fast scanline renderer: the most, about 1.1 to 1.5 times, about 1.3 as the
+middle estimate.** The PPU's per-dot work that a per-line loop would replace is
+`RunDot`, `CatchUp`, `RenderDot`, sprite evaluation, sprite fetch and laying and
+`FetchBackground`: 39.8 % of the samples for NTSC and 38.1 % for PAL (the PPU's
+registers and the rest, 0.4, stay). A scanline loop does not make that work
+vanish: it still fetches the tiles of a line, evaluates its sprites and decides
+its 256 pixels, and it must fall back to the per-dot code on any line where a
+register is written mid-line, or the differential check fails. Call h the share
+of the work handled by the fast path and k what that work costs there, as a
+fraction of what it cost per dot. Three cases, with the speed-up as
+1 / (1 - f x h x (1 - k)):
+
+| Case | h | k | NTSC | PAL |
+| --- | --- | --- | --- | --- |
+| Low | 0.5 | 0.5 | 1.11 | 1.11 |
+| Middle | 0.8 | 0.3 | 1.29 | 1.27 |
+| High | 1.0 | 0.15 | 1.51 | 1.48 |
+| Ceiling: the PPU free | 1.0 | 0 | 1.66 | 1.62 |
+
+On task 2b's medians (3.13 NTSC and 3.33 PAL times real) the middle case is
+about 4.0 and 4.2, the low about 3.5 and 3.7, the high about 4.7 and 4.9, and
+the ceiling about 5.2 and 5.4. The h and k are guesses; the profile gives f, not
+them. The per-line loop's own cost can be found by building it, and h by
+counting, in SNOW and in the other ROMs, the lines on which a register is
+written while the line is drawn.
+
+**2. A cheaper bus cycle: about 1.05 to 1.1 times.** The bus and the loop are
+25.5 and 25.9 %, of which `NesBus.Cycle`'s own code is 18.7 and 19.5. Each cycle
+does a dot accumulator, two `Owe` calls, the interrupt line read, two catch-up
+tests, the sound unit's tick and sample add, a board test, the access, an
+observer test twice and the hand-off of the lines to the CPU. Constraint 1 (one
+bus access is one cycle) means the call per cycle stays, so the saving would
+come from doing less inside it. Cutting a fifth of the bus's share gives 1.05; cutting 40 %
+gives 1.11 (NTSC) and 1.12 (PAL).
+
+**3. A lazy sound unit: about 1.04 to 1.1 times.** The sound unit is 13.5 and
+14.6 % of its own rows, and more with what `Cycle` inlines. If batching gave its
+own code the saving the lazy PPU gave the PPU's (about a quarter, 96 to 71 ns),
+it gains about 1.04. If it also skipped work in a closed form (silent
+channels, a whole frame-counter step at once), at 0.3 of its cost, about 1.10. It
+is the same batching that was worth most for the PPU, but it has little left to
+batch: the PPU's gain came largely from the dot work moving out of the CPU's way,
+and the sound unit's code is small.
+
+**4. A cheaper CPU core in AOT: about 1.02 to 1.08 times.** The core is 14.5 and
+14.3 %, of which `Cpu.Read` is about 5 (it is the call into the bus, an
+indirect call in Mono's AOT). Task 17 made the core's changes for the browser and
+could not show a gain within noise, so the low end is the likelier. A quarter off
+gives 1.04 and a half off 1.08. The core is shared with the KIM-1 and the BBC
+Micro.
+
+**5. The runtime and the page: at most about 1.04 times, as measured here.** In
+steady state the browser outside the emulation is 3.8 and 4.2 % (`(program)`)
+and nearly nothing for the garbage collector, the JS glue or the runtime. Taking all of
+it away gives 1.04. The bench cannot see the live page's drawing and audio (above),
+so this is the one estimate with a gap: a profile of the live page's frame loop is
+cheap to take and should come before any work on this.
+
+**All of them together**, at the middle estimates (1.29, 1.08, 1.07, 1.04 and
+1.02), multiply to about 1.6, about 5 times real time on this machine. With the
+PPU free and the rest 30 % cheaper, the arithmetic gives 1 / (0.602 x 0.7) = 2.4,
+about 7.4 times (NTSC). So no one of these, and not all of them, reaches the
+ten times that the speed entry aimed for; the PPU is the only one worth more
+than 1.15.
+
+### What this means for the next step
+
+The scanline renderer is what the profile supports as the next step: it is the
+only option with an estimate above 1.15, and its low case is about the best
+of the others. It is also the most uncertain, because it depends on how many
+lines can take the fast path. The cheaper steps are small and can follow: a trim
+of `NesBus.Cycle` (the estimate for the least work and the least risk) and a
+look at the sound unit's per-cycle code. The first thing the renderer's task
+should do is count the mid-line register writes, so that h is known before the
+work.
+
+### Honest limits
+
+- One machine, one ROM (SNOW, NROM), one Chrome. A game that writes registers
+  mid-line, or uses a board that watches the PPU's bus, has a different profile.
+- Three profiles of each kind in each region, one launch each. The groups agree
+  within 1 point, but they are of one machine at a load of 1 to 3.5.
+- The baseline was profiled in a batch with more load than this build, and the
+  nanosecond table mixes the two; it is an estimate.
+- Self time only. A share is the code's own time with whatever the compiler
+  inlined into it. Inclusive shares were not taken: the call tree under
+  `NesBus.Cycle` is shallow (`RunDot` is called from `CatchUp` and from `Cycle`
+  directly) and the inlining makes the split by caller unreliable.
+- The estimates in "Which would pay most" are Amdahl arithmetic with assumed
+  inputs (h and k, the trims). They are for choosing, not for quoting.

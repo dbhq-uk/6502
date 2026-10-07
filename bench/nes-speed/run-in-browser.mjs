@@ -17,6 +17,9 @@
 // THREAD_TIME (below) of the driver's runs alone. Publish with
 // -p:WasmNativeStrip=false so the WebAssembly keeps its function names.
 //
+// With PROFILE_OUT=<path> as well, each launch's whole profile is written to <path>.<launch>.json
+// (the protocol's Profile object: nodes, samples and timeDeltas), for lazy-chips/profile-groups.mjs.
+//
 // With THREAD_TIME=<n> in the environment, after the page's own runs the driver makes n more runs
 // of the timed cycles itself, each read with the DevTools protocol's ThreadTime metric (the CPU
 // time of the page's main thread) before and after, and prints each as
@@ -130,7 +133,11 @@ try {
     for (const line of text.split('\n')) console.log(`launch ${launch} ${line}`);
     if (cdp && threadRuns > 0) await startProfile();
     if (threadRuns > 0) await threadTimes(page, launch, threadRuns, Number(cyclesArg));
-    if (cdp) printProfile(launch, (await cdp.send('Profiler.stop')).profile, profileTop);
+    if (cdp) {
+      const { profile } = await cdp.send('Profiler.stop');
+      if (process.env.PROFILE_OUT) fs.writeFileSync(`${process.env.PROFILE_OUT}.${launch}.json`, JSON.stringify(profile));
+      printProfile(launch, profile, profileTop);
+    }
     await browser.close();
   }
 } finally {
