@@ -698,7 +698,7 @@ the frame end fault leaves alone are the 23 MMC3 cartridges and ROMs in both
 regions, which are caught up every cycle, so they never wait for an event; the
 same is why the cartridge write and `NextEventDot` faults do not reach them.
 The log is committed as
-[`bench/nes-speed/lazy-chips/task-2-faults.log`](../../bench/nes-speed/lazy-chips/task-2-faults.log).
+[`bench/nes-speed/lazy-chips/task-2-faults.txt`](../../bench/nes-speed/lazy-chips/task-2-faults.txt).
 
 ### The mutation pass, the PPU's rows
 
