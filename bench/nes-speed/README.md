@@ -87,9 +87,19 @@ hash in a line covers, and the file's first line names the format and the frame 
 files are comparable only when their first lines are the same. Before it runs anything it checks
 by reflection that every field of every chip is in the chips' state reports, and stops, naming
 the field, if one is not. A run that throws is written as `crashed: <exception> in <method>`
-and the others go on. It runs four ROMs at a time; the journal entry
+and the others go on. It runs four ROMs at a time (`--threads <n>` for another number), and
+`--coverage` prints, for each synthetic run, the dots its PPU register writes landed on with
+rendering on; the journal entry
 [`docs/journal/2026-10-06-the-nes-lazy-chips.md`](../../docs/journal/2026-10-06-the-nes-lazy-chips.md)
 has how long a run took, dated.
+
+**The baseline changes when the reset fix lands.** Pull request #71 (the reset button in the
+middle of sprite evaluation) makes the PPU's place in secondary OAM wrap at 32. That place is in
+the PPU's state report, so once #71 is in the tree `--check differential/baseline/4e9b92b.txt`
+fails on the PPU's hash, with no difference in behaviour behind it: the value the report holds
+when secondary OAM is full is 0 where it was 32. Then re-record the baseline from the merged tree
+with `--oracle` (the per-dot reference), name the file for that commit, `--check` the lazy build
+against it, and say in the journal why the file changed (issue #74).
 
 To run it on a baseline that is older than the tool, export that commit with `git archive`
 into a folder of its own, copy `bench/nes-speed/differential/` into the same place in the

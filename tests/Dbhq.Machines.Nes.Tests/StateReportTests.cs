@@ -152,22 +152,30 @@ public class StateReportTests
             {
                 FieldInfo field = FieldOf(part.GetType(), name);
                 object? value = field.GetValue(part);
-                if (!Perturb(part, field, value))
-                {
-                    problems.Add($"{part.GetType().Name}.{name}: no way to change it ({field.FieldType.Name})");
-                    continue;
-                }
 
-                if (Values(root).SequenceEqual(before))
+                // An array is changed at its first element and, apart, at its last, so a report
+                // that leaves out the end of an array fails as well as one that leaves out its start.
+                int[] elements = value is Array { Length: > 1 } array && !IsMapped(part, field) ? [0, array.Length - 1] : [0];
+                foreach (int element in elements)
                 {
-                    problems.Add($"{part.GetType().Name}.{name}: changed, and the report did not change");
-                }
+                    string what = elements.Length > 1 ? $"{name}[{element}]" : name;
+                    if (!Perturb(part, field, value, element))
+                    {
+                        problems.Add($"{part.GetType().Name}.{what}: no way to change it ({field.FieldType.Name})");
+                        continue;
+                    }
 
-                Restore(part, field, value);
-                changed++;
-                if (!Values(root).SequenceEqual(before))
-                {
-                    problems.Add($"{part.GetType().Name}.{name}: put back, and the report did not come back");
+                    if (Values(root).SequenceEqual(before))
+                    {
+                        problems.Add($"{part.GetType().Name}.{what}: changed, and the report did not change");
+                    }
+
+                    Restore(part, field, value, element);
+                    changed++;
+                    if (!Values(root).SequenceEqual(before))
+                    {
+                        problems.Add($"{part.GetType().Name}.{what}: put back, and the report did not come back");
+                    }
                 }
             }
         }
@@ -292,8 +300,12 @@ public class StateReportTests
         return field is not null ? field.GetValue(target) : target.GetType().GetProperty(name, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic)!.GetValue(target);
     }
 
-    // Changes the field's value, or one element of an array, in place; false if it cannot.
-    private static bool Perturb(object part, FieldInfo field, object? value)
+    // The two fields reported in a mapped form, which Perturb changes in their own way.
+    private static bool IsMapped(object part, FieldInfo field) =>
+        (part is Apu && field.Name is "_steps" or "_actions") || (part is SampleBuffer && field.Name == "_ring");
+
+    // Changes the field's value, or the given element of an array, in place; false if it cannot.
+    private static bool Perturb(object part, FieldInfo field, object? value, int element)
     {
         // The two fields reported in a mapped form: which frame counter table is in use (the
         // other table), and the sample ring, of which the waiting samples are reported (the first).
@@ -321,9 +333,8 @@ public class StateReportTests
 
         switch (value)
         {
-            case Array array when array.Length > 0:
-                object first = array.GetValue(0)!;
-                array.SetValue(Changed(first), 0);
+            case Array array when array.Length > element:
+                array.SetValue(Changed(array.GetValue(element)!), element);
                 return true;
             case Array:
                 return false;
@@ -335,7 +346,7 @@ public class StateReportTests
         }
     }
 
-    private static void Restore(object part, FieldInfo field, object? value)
+    private static void Restore(object part, FieldInfo field, object? value, int element)
     {
         if (part is SampleBuffer && field.Name == "_ring")
         {
@@ -347,8 +358,7 @@ public class StateReportTests
 
         if (value is Array array && !(part is Apu && field.Name is "_steps" or "_actions"))
         {
-            object first = array.GetValue(0)!;
-            array.SetValue(Changed(first), 0);
+            array.SetValue(Changed(array.GetValue(element)!), element);
             return;
         }
 

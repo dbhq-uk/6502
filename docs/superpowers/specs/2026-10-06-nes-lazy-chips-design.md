@@ -26,8 +26,10 @@ APU's batch at 1.04 to 1.1; all the options together give about 1.6 times, and
 none reaches 10 times. The fast path is a second implementation of the PPU's
 line, and the batch a second loop over the APU's timers, each to be held equal
 to the first by the gate, for those gains. So they remain as designed below,
-specified and unstarted, to be raised as issues and built only on an order from
-Dan. The figures were measured on 7 October 2026; the commands and the full
+specified and unstarted, as issues
+[#72](https://github.com/dbhq-uk/6502/issues/72) (the fast path) and
+[#73](https://github.com/dbhq-uk/6502/issues/73) (the APU's batch), to be built
+only on an order from Dan. The figures were measured on 7 October 2026; the commands and the full
 tables are in the journal,
 [`../../journal/2026-10-06-the-nes-lazy-chips.md`](../../journal/2026-10-06-the-nes-lazy-chips.md),
 sections "Task 2b" and "Task 2c", and the plan's "What was built" says the same.
@@ -35,6 +37,15 @@ sections "Task 2b" and "Task 2c", and the plan's "What was built" says the same.
 The speed target below, 1.5 times, was met natively on the benchmark ROM and
 about met on the homebrew (the journal's task 2, "Speed"), and not met in the
 browser (task 2b).
+
+The baseline changes when the reset fix lands. Pull request #71 makes the PPU's
+place in secondary OAM wrap at 32, and that place is in the PPU's state report,
+so once #71 is in the tree the check against
+`bench/nes-speed/differential/baseline/4e9b92b.txt` fails on the PPU's hash with
+no difference in behaviour behind it. Then the baseline is re-recorded from the
+merged tree with the per-dot reference (`--oracle`), named for that commit, the
+lazy build is checked against it, and the journal says why the file changed
+([#74](https://github.com/dbhq-uk/6502/issues/74)).
 
 ## Why
 
@@ -54,9 +65,10 @@ advances the PPU by its dots and the APU by one cycle, then does its access. It
 rejected catch-up scheduling because it is "easy to get wrong near NMI, sprite-0
 and the MMC3 A12 edge, which is where the proof looks".
 
-That reason was about accuracy, and accuracy can now be held to a measure. There
-are 1,503 tests, about 140 pinned test ROMs, a 56-mutation pass and a differential
-tool that compares two builds instruction by instruction over 127 ROMs. So Dan
+That reason was about accuracy, and accuracy can now be held to a measure. On 6
+October 2026 there were the NES's tests (1,503 that day), its pinned test ROMs
+(about 140), a mutation pass (56 mutations) and a differential tool that compares
+two builds instruction by instruction over the test ROMs (127 that day). So Dan
 chose, on 6 October 2026, to make the PPU and APU lazy **on one condition:
 the lazy build must give bit for bit what the per-dot build gives, at every
 point where anything can see the chip.** That is a rule with a test, and the
@@ -133,12 +145,14 @@ chips, to record at every point where anything can see a chip (each PPU or APU
 register access, each OAM DMA write, each frame end) the chip's full state, and,
 at each frame end, a hash of the picture and the samples. The baseline output is
 recorded from the current `main`. Every change that follows must give identical
-output over the 127 ROMs in both regions, or it is not kept. As before the
+output over the differential's ROMs (127 on 6 October 2026) in both regions, or
+it is not kept. As before the
 harness is shown to fail: a deliberate one-dot fault in each new path must change
 its output.
 
-On top of that: all 1,503 NES tests, the core's tests, the KIM-1 and BBC tests,
-the 56 mutations re-run on the new paths (a mutation in the fast path must be
+On top of that: all the NES tests (1,503 on 6 October 2026), the core's tests,
+the KIM-1 and BBC tests, the mutation pass's mutations (56 on 6 October 2026)
+re-run on the new paths (a mutation in the fast path must be
 caught by a unit test, not only by the differential), and new unit tests that
 drive the fast path and the exact path on the same scenes (a table of scenes:
 scroll splits, sprite 0 near the line's ends, rendering toggled at the line

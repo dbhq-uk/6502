@@ -1013,7 +1013,7 @@ internal sealed class ProgramBuilder(Workload workload, BoardKind board, int see
         }
     }
 
-    // The DMC looping a 257-byte sample from $C000 at the slowest rate.
+    // The DMC looping a 257-byte sample from $C000 at the fastest rate (rate 15).
     private void DmcLoop()
     {
         Asm a = _a;

@@ -351,9 +351,10 @@ of the model's fixed power-on alignment; a later task that wants those dots need
 scene test that sets the PPU's position directly.
 
 The synthetic runs are four times the frames, 600 at the default 150, like the
-homebrew. Before the memories' hash was given four lanes, which halved a sprite-0
-run's time, the whole differential took 18 minutes of wall clock and about 20 of
-CPU at loads of 10 to 23; the baseline's figure is below.
+homebrew. The memories' hash was given four lanes, which halved a sprite-0 run's
+time. How long the whole differential takes is in "The baseline" above, timed
+with its command; an earlier figure, from before the four lanes, was dropped
+because it had no time of day or command recorded with it.
 
 ### After the review: the fault pass again
 
@@ -419,7 +420,7 @@ so a crash is reported like any other difference.
 after three frames:
 
 - every reported field, changed alone by reflection (its low bit, an array's first
-  element, an enum's next value; the frame counter's table, which is reported as
+  element and, apart, its last (the last added in the final review), an enum's next value; the frame counter's table, which is reported as
   which one, swapped for the other; the sample ring's first waiting sample), changes
   the whole report, and put back, puts it back;
 - every field skipped as fixed is read-only (`IsInitOnly`);
@@ -1235,7 +1236,7 @@ estimated 1.3 times; the sound unit's batch is a second loop over its timers for
 1.04 to 1.1 times. Dan was asked whether to go on to them, and no answer came
 before the session ended. The recommended path was taken: stop with what is
 built, and keep tasks 3 to 5 as the plan writes them, specified and unstarted,
-to be raised as issues and built only on an order from Dan. It was chosen over
+raised as issues (below) and built only on an order from Dan. It was chosen over
 building the renderer now. If that was the wrong call, the plan, the gate and
 the profile are ready for it, and the first thing its task should do is count
 the lines on which a register is written mid-line. The spec and the plan each
@@ -1252,8 +1253,31 @@ button in the middle of sprite evaluation can leave the PPU writing past
 secondary OAM. It is on `main` and was there before this work. It is fixed in its
 own pull request against `main`, #71 (branch `fix/nes-reset-evaluation`), which
 is not merged. **This branch does not contain the fix**: the differential still
-reports the one fault run that throws, as in "The faults pass again". When #71 is
-merged, merging `main` into this branch brings the fix in.
+reports the one fault run that throws, as in "The faults pass again".
+
+**The baseline must be re-recorded after #71.** The fix makes the PPU's place in
+secondary OAM, `_secondaryIndex`, wrap at 32, and that field is in the PPU's
+state report, which the differential hashes at every PPU point. So once #71 is in
+the same tree as this branch's differential, `--check
+bench/nes-speed/differential/baseline/4e9b92b.txt` fails on the PPU's hash with
+no difference in behaviour behind it: when secondary OAM is full the index reads
+0 where it read 32. The final review found this; neither this entry nor #71's
+had seen it. After #71 lands, re-record the baseline from the merged tree with
+`--oracle` (the per-dot reference, Ruling S's mechanism), name the file for that
+commit, `--check` the lazy build against it, and say in the journal why the file
+changed. The recommended merge order is this pull request (#70) first, then #71,
+then one small follow-up on `main` that re-records the baseline.
+
+**The issues.** Tasks 3 and 4 are
+[#72, a fast scanline renderer for the lazy PPU](https://github.com/dbhq-uk/6502/issues/72),
+with the gaps in the gate the final review found (the pixels hashed at register
+points, the sprite-0 sweep's lower half, PAL's pre-render dots that only scene
+tests can reach, MMC3 on the per-dot path). Task 5 is
+[#73, a lazy APU batch](https://github.com/dbhq-uk/6502/issues/73). The
+baseline after the reset fix is
+[#74](https://github.com/dbhq-uk/6502/issues/74). All three are part of the
+speed issue, #67. They are work not done, not features left out, so the NES
+page's list of what is not modelled does not name them.
 
 **Rule 1.** `AGENTS.md` rule 1 now carries the wording Dan approved with the
 design on 6 October: the machine advances its other chips as of each call, and a

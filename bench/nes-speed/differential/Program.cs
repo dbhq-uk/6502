@@ -106,7 +106,7 @@ for (int i = 0; i < args.Length; i++)
             }
             else
             {
-                throw new ArgumentException($"what is {args[i]}? usage: <output file> [frames] [--oracle] [--only <text>], or --check <baseline file> [frames] [--oracle] [--only <text>] [--out <file>]");
+                throw new ArgumentException($"what is {args[i]}? usage: <output file> [frames] [--oracle] [--only <text>] [--threads <n>] [--coverage], or --check <baseline file> [frames] [--oracle] [--only <text>] [--threads <n>] [--coverage] [--out <file>]");
             }
 
             break;
@@ -115,7 +115,7 @@ for (int i = 0; i < args.Length; i++)
 
 if (outFile is null && baseline is null)
 {
-    throw new ArgumentException("usage: <output file> [frames] [--oracle] [--only <text>], or --check <baseline file> [frames] [--oracle] [--only <text>] [--out <file>]");
+    throw new ArgumentException("usage: <output file> [frames] [--oracle] [--only <text>] [--threads <n>] [--coverage], or --check <baseline file> [frames] [--oracle] [--only <text>] [--threads <n>] [--coverage] [--out <file>]");
 }
 
 if (!NesBus.Observable)
