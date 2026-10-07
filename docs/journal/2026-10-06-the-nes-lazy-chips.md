@@ -1,7 +1,7 @@
 ---
 title: "The NES's lazy chips: the gate first"
 date: 2026-10-06
-summary: "Dan chose to let the NES's PPU and sound unit be brought up to date only when something can see them, on one condition: the lazy build must give bit for bit what the per-dot build gives at every point where a chip can be seen. Before any chip changes, the differential was extended to be that test. The bus now tells an observer of each such point, every chip reports its whole state, a reflection test fails if a field is left out, and the per-ROM output of the build before the work is committed as the baseline. Ten deliberate one-dot or one-cycle faults in the parts the work will touch, planted one at a time in a scratch copy, each changed the output. The review found the gate's real gap: the test ROMs hardly touch the chips while a line is drawn, which is what the lazy work will change. So the differential now also builds 38 small cartridges of its own, whose register writes sweep across the dots of the lines frame by frame, and with them every fault changes at least 20 runs. A fault also turned up a crash in the PPU that has been there since the NES was built: the reset button in the middle of sprite evaluation can leave it writing past secondary OAM. The second task made the PPU lazy: the bus gives it its dots, and it runs them, with the same per-dot code, only where something can see it. The gate gave output identical to the baseline on every run, the old faults are still seen, and so is each of four new faults planted in the catch-up. Natively, a cycle of the benchmark ROM takes about half the time it did."
+summary: "Dan chose to let the NES's PPU and sound unit be brought up to date only when something can see them, on one condition: the lazy build must give bit for bit what the per-dot build gives at every point where a chip can be seen. Before any chip changes, the differential was extended to be that test. The bus now tells an observer of each such point, every chip reports its whole state, a reflection test fails if a field is left out, and the per-ROM output of the build before the work is committed as the baseline. Ten deliberate one-dot or one-cycle faults in the parts the work will touch, planted one at a time in a scratch copy, each changed the output. The review found the gate's real gap: the test ROMs hardly touch the chips while a line is drawn, which is what the lazy work will change. So the differential now also builds 38 small cartridges of its own, whose register writes sweep across the dots of the lines frame by frame, and with them every fault changes at least 20 runs. A fault also turned up a crash in the PPU that has been there since the NES was built: the reset button in the middle of sprite evaluation can leave it writing past secondary OAM. The second task made the PPU lazy: the bus gives it its dots, and it runs them, with the same per-dot code, only where something can see it. The gate gave output identical to the baseline on every run, the old faults are still seen, and so is each of four new faults planted in the catch-up. Natively, a cycle of the benchmark ROM takes about half the time it did. In the browser, the build the live page runs, the gain is smaller, about a third more speed, because the part of the cycle the change did not touch costs more there."
 order: 36
 ---
 
@@ -785,3 +785,118 @@ AOT) is task 6's, and may differ.
 - MMC3 and any board that watches is still per-dot, so it does not gain. The
   board fields the PPU drives are still hashed at the sound unit's points
   (task 1's note stands).
+
+## Task 2b: the browser figure after the PPU is lazy
+
+Task 2's native figure was about twice as fast, and it said the browser (Mono's
+ahead-of-time build) "may differ". This section measures the browser, the build
+the live page runs. Nothing in `src/` changed for it.
+
+### How it was measured
+
+Both builds are the NES as .NET WebAssembly compiled ahead of time, in the
+headless Chrome 153.0.8010.47 on the 8-core development machine, .NET SDK
+10.0.400, Node v24.21.0.
+
+- This build is `3fa4146`. The baseline is `5e48505`, exported with `git archive`
+  into `/tmp/nes-base`. Its `bench/nes-speed` already holds the harness (the
+  harness and the WebAssembly project did not change between the two commits,
+  checked with `git diff 5e48505 HEAD`), so nothing was copied in. `.testdata/`
+  is linked, so SNOW is not fetched again.
+- Each was published with `dotnet publish src/Dbhq.Machines.Nes.Wasm -c Release
+  -p:RunAOTCompilation=true -o <folder>`, after deleting `obj/Release` in this
+  tree.
+- A set is four rounds. A round is one fresh Chrome launch of the baseline, then
+  one of this build, each `THREAD_TIME=8 node run-in-browser.mjs <folder> 1
+  1790000 5000000 5 <region>`: the page's five timed runs, then eight runs timed
+  in the CPU time of the page's main thread (task 17's option). Region 0 is NTSC
+  and 1 is PAL. The script that ran the rounds was
+  `/tmp/alt.sh <region> <launches>`, which is only that loop and `uptime`
+  before and after each set.
+- `times_real` is the cycles a second divided by the region's `CpuHz`, which the
+  page reads from the machine. No clock rate is typed here.
+- The gauge is the BBC Micro bench (`bench/bbc-micro-speed`, AOT, published the
+  same way from this tree), `THREAD_TIME=10 node run-in-browser.mjs
+  publish/aot-gauge 1 2000000 6000000 1`, run after each NES set. It runs the
+  same BBC Micro code in both builds, so it only says how fast the machine
+  was that minute.
+- The bench's whole output, every launch, is committed as
+  [`bench/nes-speed/lazy-chips/task-2b-browser.txt`](../../bench/nes-speed/lazy-chips/task-2b-browser.txt).
+
+The browser bench runs SNOW only. It has no way to load the homebrew, so the
+homebrew has no browser figure here; natively it gained about a third (task 2).
+
+### Load
+
+The machine was quiet, so no wait was needed. On 7 October 2026 the first set
+(NTSC then PAL) ran 02:20:20 to 02:22:37 UTC and the second 02:22:50 to
+02:25:03 UTC. The one-minute load average was 1.3 to 1.8 throughout: `uptime`
+read 1.34, 1.81, 2.00 at the start and 1.49, 1.66, 1.88 at the end. Never
+above 2. The BBC gauge (the median of ten runs in the main thread's CPU time)
+read 21.16, 21.92 and 22.61 MHz in the three gauge runs, at
+02:21, 02:22 and 02:25 UTC. Task 17 saw 21.99 to 25.72 MHz in the same bench, so
+this was a normal minute for the machine and neither build was favoured by the
+hour.
+
+### The figures
+
+Median `times_real` of the 64 main-thread CPU time runs of each build in each
+region (two sets of four launches of eight runs), and of the 40 wall-clock runs
+the page made itself, which at this load are also valid:
+
+| Region | Baseline `5e48505` | Lazy PPU `3fa4146` | Ratio | Wall clock, baseline to lazy |
+| --- | --- | --- | --- | --- |
+| NTSC | 2.25 | 3.13 | 1.39 | 2.33 to 3.15 |
+| PAL | 2.54 | 3.33 | 1.31 | 2.52 to 3.50 |
+
+The two sets agree within the noise. By set (thread time): NTSC 2.17 to 3.23 in
+the first and 2.38 to 2.98 in the second; PAL 2.53 to 3.22 and 2.59 to 3.38. The
+median of each launch's eight runs had the lazy build ahead in all eight
+baseline and lazy pairs of rounds, in both regions (NTSC launches 2.0 to 2.52
+for the baseline and 2.57 to 3.53 for this build; PAL 2.25 to 2.83 and 2.90 to
+3.69). The runs inside one launch vary by about 10 to 25 percent, so a single
+figure should not be read finer than that.
+
+So in the browser the lazy PPU runs the NES about 1.3 to 1.4 times as fast, not
+2 times as fast as it did natively.
+
+### Why it is less than natively
+
+The saving per cycle is about the same, and the rest is bigger. From the medians
+above, a baseline NTSC cycle takes about 248 ns in the browser and a lazy one
+about 179 ns, a saving of about 70 ns. Task 2's native figures for SNOW were
+150.5 and 78.6 ns, a saving of 72 ns. For PAL the browser's saving is about 56
+ns (237 and 181) and the native one 71 (150.8 and 79.7). So the batching takes
+about the same time out in both, but ahead-of-time WebAssembly code runs the
+rest of the cycle (the CPU core, the bus, the APU) at about 2.3 times the native
+cost, and that part is now most of what is left. This is arithmetic on the
+medians, not a profile: no profile was taken of the lazy build in the browser,
+and the saving is itself uncertain by the noise above (the PAL saving by more).
+
+### What it means for a slower device
+
+A device that is 2 times slower than this machine, in the same browser build,
+gets half of each figure, for the emulation alone:
+
+| Region | Baseline | Lazy PPU |
+| --- | --- | --- |
+| NTSC | about 1.13 times real time | about 1.57 |
+| PAL | about 1.27 | about 1.67 |
+
+Before the lazy PPU such a device was barely at real time on NTSC, with nothing
+spare for drawing the picture and playing the sound, which the page also has to
+do; now it has a margin of more than half again. At 3 times slower the baseline is
+under real time in both regions (about 0.75 NTSC, 0.85 PAL) and the lazy
+build is about at it (about 1.04 and 1.11). The figures are the machine core
+alone: the page's drawing, audio and frame scheduling come on top, so the
+margin the page has is smaller than these.
+
+### Honest limits
+
+- One machine, one ROM, one Chrome.
+- Two sets of four launches. The ratio's spread between the sets (1.25 to 1.49
+  by set and region) is the real uncertainty, about plus or minus 0.1.
+- The BBC gauge ran once per set, not in every round.
+- The fast scanline renderer of tasks 3 and 4 goes into `CatchUp`. Whatever it
+  gains should be measured in the browser too, not only natively, since the two
+  have differed by this much once already.
