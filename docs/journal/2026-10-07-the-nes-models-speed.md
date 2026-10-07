@@ -127,3 +127,32 @@ It would need that setting lowered on a host that is meant for it.
   thirty-two a side for an interval half as wide) or the instruction count
   would do it. If the slowdown is ever suspected, the next step is to profile
   `ChipAccesses.Note` in the compiled-ahead-of-time build.
+
+## The merged tree, checked the same day
+
+Pull requests 55 (the NES machine) and 48 (the BBC Micro models' design) had both
+merged into `main` on 6 October 2026 at 14:37 UTC. `origin/main` was merged into
+`feat/nes-models` (`95d40f7`) with no conflicts. The one change that touches this
+work: the machines' buses now derive from an abstract `Bus` class (`3e52229`),
+`NesBus` among them; the four `Note` calls are intact. On 7 October 2026, in one
+run, one step after another, with the load average read at the start of each
+(`/tmp/nes-verify.sh`, its log kept outside the repository):
+
+| Step | Command | Result | Load at start |
+|---|---|---|---|
+| Build, warnings as errors | `dotnet build -c Release 6502.slnx` | exit 0 | 36 |
+| NES tests | `dotnet test tests/Dbhq.Machines.Nes.Tests -c Release --no-build` | 1537 passed, 0 failed | 13 |
+| Site suite | `cd site && npm test` | 476 tests, 475 passed, 0 failed, 1 to-do (the BBC Micro's, already there) | 13 |
+| Whole browser check, first run | `node scripts/browser-check.mjs` | exit 1: "phone: a finger on the focused model scrolled the page" (the KIM-1's phone step; scrollY 3222 to 3241, 19 px) | 18 to 27 |
+| Whole browser check, second run | the same | exit 0: no console errors, no failed requests, no CSP violations | 4.9 at start |
+
+The failing step is in `browser-check.mjs`, the KIM-1's part, not the NES's. It
+moved by the same 19 px when it failed once before, on 6 October 2026 at a load
+of about 21, and it passed in the clean whole run of the final pass (load 6.75)
+and in this second run. So it has now failed in two of the whole runs made at a
+load above 18 and passed in the two made below 8. That fits a layout that moves
+while a loaded host is still loading, but no run on `main` under the same load
+was made to show the same flake there, so this is a fit, not a proof. If it
+fails again on a quiet host, it is a defect to chase.
+
+Nothing was changed because of it.
