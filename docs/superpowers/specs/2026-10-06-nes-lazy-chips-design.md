@@ -4,6 +4,38 @@ Written 6 October 2026, after the NES went live and Dan found it slow. It amends
 one decision in [the NES design](2026-10-05-nes-design.md) and one sentence of
 rule 1 in `AGENTS.md`. Everything else in that design stands.
 
+## What was built
+
+7 October 2026. The plan's tasks 1 and 2 were built: the gate (the extended
+differential and its baseline) and the lazy PPU. The PPU is caught up before a
+CPU access to `$2000` to `$3FFF`, before each OAM DMA write, at its next event,
+at each frame end, and every cycle for a board that watches its address bus, as
+below, and also before every CPU write to `$4020` to `$FFFF`, which this design's
+list missed: a board's register can switch the PPU's pattern banks or nametable
+layout. The gate's output was identical to the baseline on every run. Rule 1's
+new wording, which Dan approved with this design on 6 October 2026, is now in
+`AGENTS.md`.
+
+The fast path and the APU's batch below (the plan's tasks 3 to 5) were **not
+built**. In the browser, the lazy PPU alone made the benchmark ROM about 1.3 to
+1.4 times as fast (natively about 2 times), and a profile of that build put
+about 40 percent of the time still in the PPU, about 26 in the bus and loop and
+about 14 each in the sound unit and the CPU core. From those shares the fast
+path is estimated at 1.1 to 1.5 times (about 1.3 in the middle case) and the
+APU's batch at 1.04 to 1.1; all the options together give about 1.6 times, and
+none reaches 10 times. The fast path is a second implementation of the PPU's
+line, and the batch a second loop over the APU's timers, each to be held equal
+to the first by the gate, for those gains. So they remain as designed below,
+specified and unstarted, to be raised as issues and built only on an order from
+Dan. The figures were measured on 7 October 2026; the commands and the full
+tables are in the journal,
+[`../../journal/2026-10-06-the-nes-lazy-chips.md`](../../journal/2026-10-06-the-nes-lazy-chips.md),
+sections "Task 2b" and "Task 2c", and the plan's "What was built" says the same.
+
+The speed target below, 1.5 times, was met natively on the benchmark ROM and
+about met on the homebrew (the journal's task 2, "Speed"), and not met in the
+browser (task 2b).
+
 ## Why
 
 The NES runs at about 2 to 2.5 times real time in the browser on the dev
@@ -46,7 +78,10 @@ The new wording, which Dan is asked to approve with this design:
 The cycle count, the dot count and every interrupt line stay exact. Only the
 moment at which a chip's own state is brought up to date moves.
 
-## What is built
+## What it builds
+
+As designed on 6 October 2026. The PPU's catch-up was built; the APU's
+catch-up, the fast path and the APU's batch were not ("What was built", above).
 
 **Catch-up.** The PPU keeps a logical position (the dot the bus says it is on)
 and a physical position (the dot its state is computed to). The bus adds dots to
@@ -61,7 +96,7 @@ to date, with `CatchUp`, only:
    today), which therefore stays on the exact per-dot path. A later change may
    schedule MMC3's clock; this one does not.
 
-The APU is the same: caught up before a CPU access to `$4000` to `$4017`, at its
+The APU is the same (not built): caught up before a CPU access to `$4000` to `$4017`, at its
 next event (frame-counter IRQ, DMC fetch, DMC IRQ), and when the page reads the
 samples.
 
@@ -69,7 +104,7 @@ samples.
 what every catch-up does when it cannot do better, and it is what the
 differential compares against. It is not removed.
 
-**The fast path.** A catch-up that covers whole scanlines may render each one in
+**The fast path** (not built). A catch-up that covers whole scanlines may render each one in
 a tight loop instead of dot by dot, when the PPU can show that nothing in the
 line is observable: no register access inside it (the catch-up's own length
 tells us), rendering state fixed for the line, and no board that watches the
@@ -80,7 +115,7 @@ toggle, the shifters, the sprite buffers, OAM and secondary OAM, the flags
 built in steps, each gated by the differential: lines with rendering off, then
 the background, then sprites, sprite 0 and overflow.
 
-**The APU's batch.** A catch-up over `n` cycles runs a tight loop over the
+**The APU's batch** (not built). A catch-up over `n` cycles runs a tight loop over the
 channels' timers with no bus call, skipping silent channels, and gives the
 sample buffer the same samples as per-cycle stepping.
 

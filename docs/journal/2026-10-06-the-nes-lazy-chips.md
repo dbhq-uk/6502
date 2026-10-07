@@ -1,7 +1,7 @@
 ---
 title: "The NES's lazy chips: the gate first"
 date: 2026-10-06
-summary: "Dan chose to let the NES's PPU and sound unit be brought up to date only when something can see them, on one condition: the lazy build must give bit for bit what the per-dot build gives at every point where a chip can be seen. Before any chip changes, the differential was extended to be that test. The bus now tells an observer of each such point, every chip reports its whole state, a reflection test fails if a field is left out, and the per-ROM output of the build before the work is committed as the baseline. Ten deliberate one-dot or one-cycle faults in the parts the work will touch, planted one at a time in a scratch copy, each changed the output. The review found the gate's real gap: the test ROMs hardly touch the chips while a line is drawn, which is what the lazy work will change. So the differential now also builds 38 small cartridges of its own, whose register writes sweep across the dots of the lines frame by frame, and with them every fault changes at least 20 runs. A fault also turned up a crash in the PPU that has been there since the NES was built: the reset button in the middle of sprite evaluation can leave it writing past secondary OAM. The second task made the PPU lazy: the bus gives it its dots, and it runs them, with the same per-dot code, only where something can see it. The gate gave output identical to the baseline on every run, the old faults are still seen, and so is each of four new faults planted in the catch-up. Natively, a cycle of the benchmark ROM takes about half the time it did. In the browser, the build the live page runs, the gain is smaller, about a third more speed, because the part of the cycle the change did not touch costs more there. A profile of the lazy build in the browser shows the PPU's per-dot work is still the largest part of the time, ahead of the bus's cycle, the CPU core and the sound unit, and a fast scanline renderer is the one option the profile says is worth more than a small gain."
+summary: "Dan chose to let the NES's PPU and sound unit be brought up to date only when something can see them, on one condition: the lazy build must give bit for bit what the per-dot build gives at every point where a chip can be seen. Before any chip changes, the differential was extended to be that test. The bus now tells an observer of each such point, every chip reports its whole state, a reflection test fails if a field is left out, and the per-ROM output of the build before the work is committed as the baseline. Ten deliberate one-dot or one-cycle faults in the parts the work will touch, planted one at a time in a scratch copy, each changed the output. The review found the gate's real gap: the test ROMs hardly touch the chips while a line is drawn, which is what the lazy work will change. So the differential now also builds 38 small cartridges of its own, whose register writes sweep across the dots of the lines frame by frame, and with them every fault changes at least 20 runs. A fault also turned up a crash in the PPU that has been there since the NES was built: the reset button in the middle of sprite evaluation can leave it writing past secondary OAM. The second task made the PPU lazy: the bus gives it its dots, and it runs them, with the same per-dot code, only where something can see it. The gate gave output identical to the baseline on every run, the old faults are still seen, and so is each of four new faults planted in the catch-up. Natively, a cycle of the benchmark ROM takes about half the time it did. In the browser, the build the live page runs, the gain is smaller, about a third more speed, because the part of the cycle the change did not touch costs more there. A profile of the lazy build in the browser shows the PPU's per-dot work is still the largest part of the time, ahead of the bus's cycle, the CPU core and the sound unit, and a fast scanline renderer is the one option the profile says is worth more than a small gain. Even so, by the profile's own estimates neither the renderer nor a lazy sound unit, nor every option together, reaches the speed the work set out for, and each is a second implementation for the gate to hold equal to the first. So they were not built: they stay in the plan, specified and unstarted, for Dan to order. The crash the gate found is fixed in a pull request of its own."
 order: 36
 ---
 
@@ -1201,3 +1201,64 @@ work.
   directly) and the inlining makes the split by caller unreliable.
 - The estimates in "Which would pay most" are Amdahl arithmetic with assumed
   inputs (h and k, the trims). They are for choosing, not for quoting.
+
+## What was built and what was not
+
+7 October 2026, the end of the work on this branch.
+
+**Built.** Task 1, the gate: the differential extended to hash every chip's
+whole state at every point where it can be seen, its synthetic cartridges, the
+baseline `bench/nes-speed/differential/baseline/4e9b92b.txt`, and the faults
+that show it can fail. Task 2, the PPU caught up on demand, with the same per-dot
+code, at the points in the table under "Where the bus catches it up". The gate
+gave output identical to the baseline, lazy and with the per-dot reference ("The
+gate", under task 2).
+
+**Not built.** Tasks 3 and 4 (the fast scanline renderer) and task 5 (the sound
+unit's batch). The evidence is in the sections above, with their commands and
+dates:
+
+- "The figures", under task 2b: in the browser, the lazy PPU alone took SNOW from
+  2.25 to 3.13 times real time on NTSC and from 2.54 to 3.33 on PAL, where
+  natively it halved the time a cycle takes.
+- "Where the samples are, with the PPU lazy", under task 2c: the PPU is still
+  the largest share of the browser's time, then the bus and the machine's loop,
+  then the sound unit and the CPU core.
+- "Which would pay most", under task 2c: the renderer is estimated at 1.1 to 1.5
+  times, about 1.3 in the middle case; the sound unit's batch at 1.04 to 1.1;
+  all the options together at about 1.6, about 5 times real time on this
+  machine. None of them reaches the ten times the speed entry aimed for.
+
+**Why.** The renderer is a second implementation of the PPU's line, which the
+gate would have to hold equal to the first on every line it takes, for an
+estimated 1.3 times; the sound unit's batch is a second loop over its timers for
+1.04 to 1.1 times. Dan was asked whether to go on to them, and no answer came
+before the session ended. The recommended path was taken: stop with what is
+built, and keep tasks 3 to 5 as the plan writes them, specified and unstarted,
+to be raised as issues and built only on an order from Dan. It was chosen over
+building the renderer now. If that was the wrong call, the plan, the gate and
+the profile are ready for it, and the first thing its task should do is count
+the lines on which a register is written mid-line. The spec and the plan each
+now open with what was built and what was not.
+
+**What the lazy PPU does not reach.** MMC3, the one board here that watches the
+PPU's address bus, stays on the per-dot path, so its games gain nothing yet. A
+game that polls `$2002` in a loop mid-frame gains less, because each read is a
+catch-up. The sound unit is still stepped every cycle. `docs/known-differences.md`
+has a section on it, "The NES: the PPU caught up lazily".
+
+**The crash the gate found** (task 1, "A crash found on the way"): the reset
+button in the middle of sprite evaluation can leave the PPU writing past
+secondary OAM. It is on `main` and was there before this work. It is fixed in its
+own pull request against `main`, #71 (branch `fix/nes-reset-evaluation`), which
+is not merged. **This branch does not contain the fix**: the differential still
+reports the one fault run that throws, as in "The faults pass again". When #71 is
+merged, merging `main` into this branch brings the fix in.
+
+**Rule 1.** `AGENTS.md` rule 1 now carries the wording Dan approved with the
+design on 6 October: the machine advances its other chips as of each call, and a
+chip may be advanced lazily only where nothing can see it in between and its
+state at each catch-up is exactly what advancing it every call would give, which
+a differential test over real programs proves. `docs/superpowers/specs/2026-10-05-nes-design.md`
+says, under its decisions, that "tick inside every bus call" no longer holds for
+the PPU.

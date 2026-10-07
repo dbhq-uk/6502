@@ -37,6 +37,12 @@ These are Dan's calls, 5 October 2026, each with what it was chosen over.
 | PAL is in this machine, with NTSC | NTSC only | Dan's call, 5 October, after the first draft. The PAL PPU runs 3.2 dots to a CPU cycle, so the bus's tick is a ratio per region and not a fixed three |
 | The 3D models are in scope, and are handed to another agent as their own project, in a second pull request | Models in this spec; models left out | Dan's call, 5 October. The BBC Micro's models were their own spec and plan, and Dan ruled on 2 October that models never hold up a count. The NES is cased, so it must claim both models or none |
 
+Amended 6 and 7 October 2026 by
+[the lazy chips design](2026-10-06-nes-lazy-chips-design.md): "tick inside every
+bus call" no longer holds for the PPU. The bus now gives it its dots, and it is
+caught up on demand, wherever something can see it, with the same per-dot code.
+The sound unit is still stepped inside every bus call.
+
 Dendy (the Russian Famicom clone, 50 Hz with 3 dots to a cycle) is a third
 timing and stays out of scope. A NES 2.0 header that says Dendy is refused with
 a plain message.

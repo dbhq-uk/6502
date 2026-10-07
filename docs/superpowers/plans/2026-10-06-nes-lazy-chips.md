@@ -1,5 +1,17 @@
 # The NES's lazy chips: implementation plan
 
+## What was built, 7 October 2026
+
+**Tasks 1 and 2 were built and reviewed.** Task 1 is the gate: the extended differential, its baseline (`bench/nes-speed/differential/baseline/4e9b92b.txt`, which adds 38 synthetic cartridges to the test ROMs), the deliberate faults, the chips' state reports and the bus's observer. Task 2 made the PPU lazy: `Deliver`, `CatchUp` and `NextEventDot`, with the PPU caught up before a CPU access to `$2000` to `$3FFF`, before every CPU write to `$4020` to `$FFFF` (a point the spec's list missed: a board's register can switch the PPU's banks or nametable layout), before each OAM DMA write, at `NextEventDot`, at each frame end, and every cycle for a board that watches the PPU's address bus (MMC3) and in the per-dot reference mode. The gate's output was identical to the baseline on every run, lazy and per-dot. The journal, [`../../journal/2026-10-06-the-nes-lazy-chips.md`](../../journal/2026-10-06-the-nes-lazy-chips.md), has the commands and the results.
+
+**Tasks 3, 4 and 5 were not built.** The evidence, measured on 7 October 2026 and recorded with its commands in the journal's sections "Task 2b" and "Task 2c":
+
+- In the browser, the build the live page runs, the lazy PPU alone took the benchmark ROM from 2.25 to 3.13 times real time on NTSC and from 2.54 to 3.33 on PAL: about 1.3 to 1.4 times as fast, where natively it was about 2 times.
+- A profile of that build in the browser puts about 40 percent of the time in the PPU, about 26 in the bus and the machine's loop, about 14 in the sound unit and about 14 in the CPU core.
+- The Amdahl estimates from those shares: a fast scanline renderer (tasks 3 and 4) 1.1 to 1.5 times, about 1.3 as the middle case; a lazy APU (task 5) 1.04 to 1.1; a cheaper bus cycle 1.05 to 1.12; a cheaper CPU core in AOT 1.02 to 1.08. All five together give about 1.6 times, about 5 times real time on the development machine. None of them reaches 10 times, alone or together.
+
+So tasks 3 and 4 would be a second implementation of the PPU's line, which the gate must hold equal to the first on every line it takes, for an estimated 1.3 times, and task 5 a batch for the APU for 1.04 to 1.1 times. Dan was asked whether to go on; no answer came, and the recommended path was taken: stop with what is built. Tasks 3 to 5 stay below as written, specified and unstarted. They are to be raised as issues, and built only on an order from Dan; the gate, the profile and this plan are ready for them. Task 6 was done in a reduced form: its browser figure is task 2b's, and its full run was repeated on the final tree.
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** Make the NES's PPU and APU lazy, so the page runs faster on slow devices, with the lazy build bit for bit equal to the per-dot build at every point where a chip can be seen, as the design in [`../specs/2026-10-06-nes-lazy-chips-design.md`](../specs/2026-10-06-nes-lazy-chips-design.md) says.
