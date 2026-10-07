@@ -140,9 +140,10 @@ def main():
             path = src / file
             text = path.read_text()
             if text.count(old) != 1:
-                for path, text in reversed(saved):
-                    path.write_text(text)
-                sys.exit(f'{name}: the text matches {text.count(old)} times in {file}, not once')
+                matches = text.count(old)
+                for done, original in reversed(saved):
+                    done.write_text(original)
+                sys.exit(f'{name}: the text matches {matches} times in {file}, not once')
             saved.append((path, text))
             path.write_text(text.replace(old, new))
         try:
@@ -173,8 +174,8 @@ def main():
             for k in crashed:
                 print(f'   {k}: {got[k]["result"]}', flush=True)
         finally:
-            for path, text in reversed(saved):
-                path.write_text(text)
+            for done, original in reversed(saved):
+                done.write_text(original)
 
 
 main()

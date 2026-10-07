@@ -564,7 +564,10 @@ Written first, then run against an eager stub of the same members (`Deliver`
 ran the dots at once, `NextEventDot` was always none): 56 of the 62 new tests
 failed. The six that passed are the ones an eager PPU meets as well: `Tick`,
 reset and power on catching up, and the MMC3 scene, which is caught up every
-cycle anyway. Then built.
+cycle anyway. That shows only that the stub was not lazy: the scene rows failed
+on their check that some dots were owed at a cycle's end, not on a difference in
+state. It does not show that the tests catch a timing fault in the catch-up;
+the planted faults below are the evidence for that. Then built.
 
 - `PpuCatchUpTests`, the PPU alone: `Deliver` moves only the logical position;
   chunks of every size from 1 up, across frame ends and the dropped dot, give
@@ -605,16 +608,58 @@ before power on, 2.
 NES tests: 1,621 passed, none failed (1,557 before, 64 new), 7 October 00:04
 UTC. `dotnet build 6502.slnx -c Release`: no warnings, no errors.
 
+After the review, three more checks, each shown to fail with its fault planted:
+
+- `ACatchUpOverSeveralFramesEndsEachFrame` now delivers its four frames in
+  pieces with nothing caught up and compares `Line` and `Dot` with the ticked
+  PPU's after each, with rendering on, so the walk over whole frames in the
+  logical position and the odd frames' dropped dot are pinned. Starting the walk
+  on the wrong frame parity, or leaving the dropped dot out, fails it on NTSC.
+- A scene row with a `$2002` read and two `$2000` writes on the pre-render line's
+  dots 335 to 340, rendering on, over twelve frames, so the events are worked
+  out on odd frames on both sides of dot 338.
+- That row cannot see a wrong boundary at dot 338 (`_dot >= DropDecidedDot` for
+  `_dot > DropDecidedDot` in `ScheduleEvents`), and the fault passed it. The
+  access sees dot 338 after its cycle's first two dots, and the frame's true last
+  dot and the wrong one then both fall in the next cycle, which catches up at its
+  end either way, so nothing the bus does shows it. It does show in the logical
+  position and `Frame` read between the dots, so a PPU-level test
+  (`AnAccessOnThePreRenderLinesLastDotsKnowsWhetherTheFrameDropsItsLastDot`)
+  writes `$2000` at each of the pre-render line's dots 335 to 340 on even and odd
+  frames, then delivers four dots one at a time and compares the position and
+  the frame count with the ticked PPU's. The fault fails it on NTSC.
+
+The "PRG RAM writes mid-line" row has no point at its writes: the bus tells the
+observer of cartridge writes at `$8000` and up only, as the differential hashes
+them. It checks that the catch-up those writes cause changes nothing seen after.
+
+**The observer's order.** When a frame's last dot is one of the two before a
+cycle's access and the access does not catch the PPU up, the lazy build ends the
+frame at the end of the cycle, after the observer has been told of the access;
+the per-dot reference tells it of the frame end first. The state and the bus's
+counts the frame end sees are the same, which is what the differential hashes;
+`INesObserver.FrameEnded` says so.
+
+**A board's per-cycle call.** For a board that does not watch the address bus,
+the PPU's dots of a cycle can now run after `IMapper.CpuCycle` and after the
+access. No board here changes what the PPU reads in that call (MMC1 counts
+cycles since a write), but one that did would have to say it watches, or the bus
+would have to catch up before the call; `IMapper.CpuCycle` says so.
+
 ### The gate
 
 ```
-dotnet run -c Release --project bench/nes-speed/differential -- --check bench/nes-speed/differential/baseline/4e9b92b.txt --out /tmp/t2/gate-lazy.txt
-dotnet run -c Release --project bench/nes-speed/differential -- --check bench/nes-speed/differential/baseline/4e9b92b.txt --oracle --out /tmp/t2/gate-oracle.txt
+dotnet run -c Release --project bench/nes-speed/differential -- --check bench/nes-speed/differential/baseline/4e9b92b.txt
+dotnet run -c Release --project bench/nes-speed/differential -- --check bench/nes-speed/differential/baseline/4e9b92b.txt --oracle
 ```
 
 The lazy build, 7 October 2026, 00:06:01 to 00:11:22 UTC, loads 3.05 to 10.33:
 `IDENTICAL: all 332 runs match`. The per-dot reference, 00:11:25 to 00:17:56
-UTC, loads 10.38 to 7.75: `IDENTICAL: all 332 runs match`.
+UTC, loads 10.38 to 7.75: `IDENTICAL: all 332 runs match`. Again after the
+review's fixes, once at the end: the lazy build 01:53:16 to 01:56:48 UTC, loads
+2.13 to 2.84, and the per-dot reference 01:56:48 to 02:00:44 UTC, loads 2.84 to
+3.69, both `IDENTICAL: all 332 runs match`. NES tests then: 1,625 passed, none
+failed (four more: the pre-render row and the drop test, each in both regions).
 
 ### The faults pass again
 
@@ -652,49 +697,83 @@ the reset bug of task 1 (Ruling U, fixed in its own pull request). The 46 runs
 the frame end fault leaves alone are the 23 MMC3 cartridges and ROMs in both
 regions, which are caught up every cycle, so they never wait for an event; the
 same is why the cartridge write and `NextEventDot` faults do not reach them.
-The log is `faults-task-2.log` beside the task's report.
+The log is committed as
+[`bench/nes-speed/lazy-chips/task-2-faults.log`](../../bench/nes-speed/lazy-chips/task-2-faults.log).
+
+### The mutation pass, the PPU's rows
+
+The plan's step 5 asks for the 56 mutations of the NES's mutation pass that
+touch the PPU to be run again. Their script was a scratch one, never committed,
+and it was still on this machine (`/tmp/nes-mut/mutations.py`). Of its 56 rows,
+29 touch the PPU or how it is clocked: every row in `Ppu.cs`, `PpuSprites.cs`
+and `PpuBackground.cs`, the bus's rows on the dot ratio, the power-on dot phase,
+the dots before the access, the NMI line and OAM DMA, PAL's emphasis swap, and
+MMC3's A12 rows. Each was applied alone to a scratch copy of this build (row 36
+reading `_oam` for `Oam`, after the rename), and the NES tests' unit half was
+run (the test ROMs left out, as the pass ran them), 7 October 2026, 01:33 to
+01:48 UTC, loads 0.4 to 5.1. **Every one was caught by a unit test; none
+survived.** The tests that caught each are committed as
+[`bench/nes-speed/lazy-chips/task-2-mutations.txt`](../../bench/nes-speed/lazy-chips/task-2-mutations.txt)
+(the row, what it does, the file, failed of 1,301, when, and the tests). Rows 28b
+and 28c, the PAL power-on dot phase, are caught by one test each; 32 (the drop
+decided at dot 337), 19, 20 and 13 by one or two. The scratch copy was taken
+before the review's three new checks, so they are not among the catchers.
 
 ### Speed
 
-The thread-time bench (`bench/thread-time`, its README), SNOW after 5 million
-cycles, 5 timed runs of 1.79 million cycles, alternated in four rounds with
-`5e48505` (exported with `git archive`) and with this build's own per-dot
-reference (a scratch copy of the bench with an `-oracle` workload that sets
-`PerDotReference`), 7 October 2026, 01:05:42 to 01:06:36 UTC, loads 2.1 to 2.8.
-Nanoseconds of thread time a cycle, median of the four medians (the medians
-worked out by a script from the bench's lines, which are kept beside the task's
-report as `thread-time-task-2.txt`):
-
-| Build | NTSC | PAL |
-| --- | --- | --- |
-| `5e48505` | 146.2 | 142.6 |
-| this build | 75.2 | 71.9 |
-| this build, per-dot reference | 151.0 | 141.4 |
-
-A first round of base and this build alone, 01:04:43 to 01:05:17 UTC, loads 1.4
-to 1.6, gave 153.3 and 78.8 on NTSC and 142.8 and 80.7 on PAL. The homebrew Lan
-Master, the same way through a scratch `lan` workload in both copies, 01:07:55
-to 01:08:23 UTC, loads 2.5 to 2.7: `5e48505` 97.6 NTSC and 107.5 PAL, this build
-70.6 and 67.5.
+The thread-time bench (`bench/thread-time`, its README), with three NES
+workloads added for this: `ntsc-oracle` and `pal-oracle`, SNOW with
+`NesOptions.PerDotReference`, and `lan-ntsc` and `lan-pal`, the homebrew at its
+title. Each runs 5 million cycles, then 5 timed runs of 1.79 million. The
+baseline is `5e48505`, exported with `git archive` with this bench folder copied
+in, as the README says (the `-oracle` workloads stop there with a message, since
+the option did not exist). Alternated in four rounds, 7 October 2026, 01:49:24
+to 01:50:54 UTC, loads 3.1 to 2.0:
 
 ```
-for round in 1 2 3 4; do for bw in "base ntsc" "after ntsc" "after ntsc-oracle" "base pal" "after pal" "after pal-oracle"; do
-  set -- $bw; dotnet /tmp/t2/$1/out/Dbhq.Machines.ThreadTime.dll $2 5; done; done
+git archive 5e48505 | tar -x -C <base>; cp -r bench/thread-time <base>/bench/; ln -s "$PWD/.testdata" <base>/.testdata
+(cd <base> && dotnet build bench/thread-time -c Release -o <base>/out)
+dotnet build bench/thread-time -c Release -o <after>/out
+for round in 1 2 3 4; do
+  for bw in "base ntsc" "after ntsc" "after ntsc-oracle" "base pal" "after pal" "after pal-oracle" \
+            "base lan-ntsc" "after lan-ntsc" "base lan-pal" "after lan-pal"; do
+    set -- $bw; dotnet <$1>/out/Dbhq.Machines.ThreadTime.dll $2 5
+  done
+done
 ```
 
-So on SNOW this build takes about half the time a cycle, and on the homebrew
-about 0.7 of it on NTSC and 0.6 on PAL, natively. That is far more than the plan
-expected ("the speed gain is small"). The per-dot reference of the same build
-is as slow as `5e48505`, so the gain is the batching, not some other change. It
-is the same dots: at the end of a SNOW run the PPU had run all but the last 159
-dots delivered, with rendering on and the same frame count as the reference
-(checked with a scratch print). Why batching is worth so much is reasoned, not
-measured (`perf` is not allowed on this machine): a dot's code dispatches on the
-dot's place in its 8-dot fetch and on the line, and run between the CPU core's
-own dispatch, three times a cycle, those branches are hard to predict; run in a
-loop they follow a fixed pattern. The comment on `RenderVisibleDot` already
-blamed the 6502's code between two dots for mispredictions. The browser figure
-(Mono's AOT) is task 6's, and may differ.
+Nanoseconds of thread time a cycle, the median of the four runs' medians,
+worked out by a script from the bench's lines, which are committed as
+[`bench/nes-speed/lazy-chips/task-2-thread-time.txt`](../../bench/nes-speed/lazy-chips/task-2-thread-time.txt):
+
+| Workload | `5e48505` | this build | this build, per-dot reference |
+| --- | --- | --- | --- |
+| SNOW, NTSC | 150.5 | 78.6 | 165.8 |
+| SNOW, PAL | 150.8 | 79.7 | 165.0 |
+| Lan Master, NTSC | 104.3 | 69.9 | |
+| Lan Master, PAL | 113.5 | 70.9 | |
+
+Earlier sets the same evening, run with the same workloads in scratch copies of
+the bench before they were committed (their lines are in the same file), gave
+SNOW 146.2 and 75.2 on NTSC, 142.6 and 71.9 on PAL, the per-dot reference 151.0
+and 141.4, and Lan Master 97.6 and 70.6 on NTSC, 107.5 and 67.5 on PAL. The two
+sets agree within the bench's noise, which task 17 put at 10 to 20 percent from
+one launch to the next; the per-dot reference came out about a tenth slower in
+the second.
+
+So natively a cycle of SNOW takes about half the time it did, and of the
+homebrew about two thirds. That is far more than the plan expected ("the speed
+gain is small"). The per-dot reference of the same build is no faster than
+`5e48505`, so the gain is the batching, not some other change. It is the same
+dots: at the end of a SNOW run the PPU had run all but the last 159 dots
+delivered, with rendering on and the same frame count as the reference (checked
+with a scratch print). Why batching is worth so much is reasoned, not measured
+(`perf` is not allowed on this machine): a dot's code dispatches on the dot's
+place in its 8-dot fetch and on the line, and run between the CPU core's own
+dispatch, three times a cycle, those branches are hard to predict; run in a loop
+they follow a fixed pattern. The comment on `RenderVisibleDot` already blamed
+the 6502's code between two dots for mispredictions. The browser figure (Mono's
+AOT) is task 6's, and may differ.
 
 ### For the tasks that follow
 

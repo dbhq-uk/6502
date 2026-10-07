@@ -127,12 +127,24 @@ public class PpuCatchUpTests
         long dots = (4 * FrameDots(RegionNamed(region))) + 1234;
         long frame = lazy.Frame;
 
-        for (long i = 0; i < dots; i++)
+        // Delivered in pieces with nothing caught up, the position read between them is the
+        // ticked PPU's: across several frame ends, with rendering on, so on NTSC the odd frames
+        // drop their last dot (the multi-frame walk of the logical position and its parity).
+        long caught = lazy.CaughtUpDots;
+        for (long done = 0; done < dots;)
         {
-            ticked.Tick();
+            int piece = (int)Math.Min(30_011, dots - done);
+            for (int i = 0; i < piece; i++)
+            {
+                ticked.Tick();
+            }
+
+            lazy.Deliver(piece);
+            done += piece;
+            Assert.Equal((ticked.Line, ticked.Dot), (lazy.Line, lazy.Dot));
         }
 
-        lazy.Deliver((int)dots);
+        Assert.Equal(caught, lazy.CaughtUpDots);
         Assert.Empty(lazyFrames);
         lazy.CatchUp();
 
@@ -254,6 +266,50 @@ public class PpuCatchUpTests
             ppu.Deliver((int)FrameDots(r));
             Assert.Equal(read(ticked), read(ppu));
             Assert.Equal(ppu.LogicalDots, ppu.CaughtUpDots);
+        }
+    }
+
+    // An access on the pre-render line's last dots works the frame's end out again: before dot 338
+    // has run, from the rendering switch; after, from the decision dot 338 made. On an odd NTSC
+    // frame with rendering on the frame drops its last dot, so the logical position and the frame
+    // count after the access must follow the ticked PPU's through the frame's end. Through the bus
+    // this cannot be seen (the access sees dot 338 after its cycle's first two dots, and the true
+    // and a wrong end then fall in the same next cycle), so it is pinned here.
+    [Theory]
+    [MemberData(nameof(Regions))]
+    public void AnAccessOnThePreRenderLinesLastDotsKnowsWhetherTheFrameDropsItsLastDot(string region)
+    {
+        Region r = RegionNamed(region);
+        foreach (bool odd in new[] { false, true })
+        {
+            for (int dot = 335; dot <= 340; dot++)
+            {
+                if (odd && dot == 340 && r.OddFrameSkipsADot)
+                {
+                    // The odd frame's dropped dot: the PPU is never there.
+                    continue;
+                }
+
+                Ppu ticked = Busy(r);
+                Ppu lazy = Busy(r);
+                foreach (Ppu ppu in new[] { ticked, lazy })
+                {
+                    while (ppu.OddFrame != odd || ppu.Line != r.PreRenderLine || ppu.Dot != dot)
+                    {
+                        ppu.Tick();
+                    }
+
+                    ppu.WriteRegister(0, 0x80);
+                }
+
+                for (int i = 0; i < 4; i++)
+                {
+                    ticked.Tick();
+                    lazy.Deliver(1);
+                    Assert.Equal((ticked.Line, ticked.Dot), (lazy.Line, lazy.Dot));
+                    Assert.Equal(ticked.Frame, lazy.Frame);
+                }
+            }
         }
     }
 

@@ -79,6 +79,16 @@ internal static class CatchUpScenes
         ["$2002 read at line 241 dot 1"] = new(Nrom, 0x80, 0x1E, (_, _) => [Act.Read(241, 1, 0x2002)], 6),
         ["$2002 read at line 241 dot 2"] = new(Nrom, 0x80, 0x1E, (_, _) => [Act.Read(241, 2, 0x2002)], 6),
 
+        // The odd frame's dropped dot: a $2002 read and $2000 writes on the pre-render line's last
+        // dots with rendering left on, so on odd NTSC frames the event dots are worked out on both
+        // sides of dot 338, where the drop is decided; twelve frames move the phase over them.
+        ["$2002 and $2000 on the pre-render line's last dots"] = new(Nrom, 0x80, 0x1E, (f, r) =>
+        [
+            Act.Read(r.PreRenderLine, 335 + (f % 6), 0x2002),
+            Act.Write(r.PreRenderLine, 335 + (f % 6), 0x2000, 0x80),
+            Act.Write(r.PreRenderLine, 335 + (f % 6), 0x2000, 0x80),
+        ], 12),
+
         // Review Focus 4: $2000 bit 7 on and off through VBlank, and a $2002 read between.
         ["$2000 bit 7 toggled in VBlank"] = new(Nrom, 0x00, 0x1E, (f, r) =>
         [
@@ -127,6 +137,10 @@ internal static class CatchUpScenes
             Act.Write(200, 3 * f, 0x8000, (byte)((f + 2) % 4)),
             Act.Write(r.PreRenderLine, 330, 0x8000, 0x00),
         ], 4),
+        // The bus tells the observer of cartridge writes at $8000 and up only (as the differential
+        // hashes them), so these PRG RAM writes are no point of their own: the row checks that the
+        // catch-up they cause changes nothing seen afterwards, at the frame ends, the later
+        // accesses and the lines.
         ["PRG RAM writes mid-line"] = new(Cnrom, 0x80, 0x1E, (f, _) => [Act.Write(100, 130, 0x6000, (byte)f), Act.Write(101, 0, 0x6001, (byte)f)], 3),
 
         // A board that watches the PPU's address bus: MMC3's scanline IRQ, caught up every cycle.

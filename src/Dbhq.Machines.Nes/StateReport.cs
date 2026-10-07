@@ -68,7 +68,15 @@ internal interface INesObserver
     /// <summary>The DMC's DMA has read its sample byte and handed it to the channel.</summary>
     void DmcFetched();
 
-    /// <summary>The PPU has finished a frame: called from inside the dot that ends it, with the PPU at line 0 dot 0.</summary>
+    /// <summary>
+    /// The PPU has finished a frame: called from inside the dot that ends it, with the PPU at line 0
+    /// dot 0, in the cycle that delivers that dot. The PPU runs its dots when it is caught up, so
+    /// when the frame's last dot is one of the two before a cycle's access and the access is not
+    /// one that catches the PPU up (not a PPU register, not a write to the cartridge), the frame
+    /// ends at the end of the cycle, after that cycle's <see cref="Accessed"/> call; the per-dot
+    /// reference calls it before. Either way the PPU's state and the bus's counts it sees are the
+    /// same.
+    /// </summary>
     void FrameEnded();
 
     /// <summary>A cycle is over and the CPU has been given these lines for the next one.</summary>

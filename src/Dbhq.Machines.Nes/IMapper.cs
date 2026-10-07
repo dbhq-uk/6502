@@ -49,7 +49,12 @@ public interface IMapper
     /// <summary>
     /// Called once a CPU cycle, before that cycle's access, for a board that must tell one cycle from
     /// the next (MMC1 ignores a write the cycle after a write). It runs for every cycle, so it must
-    /// be trivial and allocate nothing.
+    /// be trivial and allocate nothing. The PPU's dots of the cycle, the two before the access too,
+    /// run when the PPU is caught up, so for a board that does not watch the PPU's address bus they
+    /// may run after this call and after the access. So a board whose call here changes anything
+    /// the PPU reads (its pattern banks, its nametable layout) must say
+    /// <see cref="WatchesPpuAddresses"/>, which keeps the PPU's dots in their place, or the bus must
+    /// catch the PPU up before the call.
     /// </summary>
     void CpuCycle();
 

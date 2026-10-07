@@ -1,0 +1,99 @@
+# The lazy chips, task 2: thread-time lines (bench/thread-time). Columns: round, build, workload, UTC time, one-minute load, the bench's line.
+# The set the journal's figures come from, 7 October 2026, with the committed workloads (base = 5e48505 with this bench folder copied in, after = b1f1f27 plus the review fixes):
+1 base ntsc 2026-10-07 01:49:24 load=3.07 ntsc ns/cycle best=145.93 median=152.94 all=145.93,147.41,152.94,154.79,167.91
+1 after ntsc 2026-10-07 01:49:27 load=3.06 ntsc ns/cycle best=74.04 median=77.88 all=74.04,74.28,77.88,86.14,87.86
+1 after ntsc-oracle 2026-10-07 01:49:29 load=3.06 ntsc-oracle ns/cycle best=154.38 median=164.72 all=154.38,159.08,164.72,194.51,207.80
+1 base pal 2026-10-07 01:49:32 load=2.97 pal ns/cycle best=137.90 median=145.78 all=137.90,140.82,145.78,148.55,153.37
+1 after pal 2026-10-07 01:49:34 load=2.82 pal ns/cycle best=75.65 median=80.33 all=75.65,78.97,80.33,81.39,82.74
+1 after pal-oracle 2026-10-07 01:49:36 load=2.82 pal-oracle ns/cycle best=143.05 median=152.28 all=143.05,146.61,152.28,153.58,154.45
+1 base lan-ntsc 2026-10-07 01:49:39 load=2.82 lan-ntsc ns/cycle best=103.28 median=104.43 all=103.28,103.77,104.43,107.10,131.40
+1 after lan-ntsc 2026-10-07 01:49:41 load=2.75 lan-ntsc ns/cycle best=68.26 median=69.87 all=68.26,69.78,69.87,73.46,78.92
+1 base lan-pal 2026-10-07 01:49:42 load=2.75 lan-pal ns/cycle best=100.87 median=103.22 all=100.87,103.09,103.22,117.03,120.17
+1 after lan-pal 2026-10-07 01:49:45 load=2.61 lan-pal ns/cycle best=68.47 median=69.07 all=68.47,69.03,69.07,70.43,71.80
+2 base ntsc 2026-10-07 01:49:46 load=2.61 ntsc ns/cycle best=140.73 median=143.04 all=140.73,141.17,143.04,143.13,156.25
+2 after ntsc 2026-10-07 01:49:49 load=2.61 ntsc ns/cycle best=73.30 median=75.60 all=73.30,73.98,75.60,75.83,77.85
+2 after ntsc-oracle 2026-10-07 01:49:51 load=2.48 ntsc-oracle ns/cycle best=156.16 median=168.96 all=156.16,167.95,168.96,170.34,203.81
+2 base pal 2026-10-07 01:49:54 load=2.48 pal ns/cycle best=142.19 median=151.59 all=142.19,149.83,151.59,152.13,153.48
+2 after pal 2026-10-07 01:49:57 load=2.36 pal ns/cycle best=72.18 median=73.77 all=72.18,73.36,73.77,80.48,95.71
+2 after pal-oracle 2026-10-07 01:49:58 load=2.36 pal-oracle ns/cycle best=163.79 median=166.88 all=163.79,164.19,166.88,170.89,177.46
+2 base lan-ntsc 2026-10-07 01:50:01 load=2.25 lan-ntsc ns/cycle best=109.41 median=125.48 all=109.41,121.98,125.48,126.06,153.35
+2 after lan-ntsc 2026-10-07 01:50:04 load=2.25 lan-ntsc ns/cycle best=71.69 median=73.10 all=71.69,71.80,73.10,76.40,81.12
+2 base lan-pal 2026-10-07 01:50:05 load=2.15 lan-pal ns/cycle best=111.17 median=114.22 all=111.17,113.91,114.22,114.35,117.17
+2 after lan-pal 2026-10-07 01:50:08 load=2.15 lan-pal ns/cycle best=72.58 median=75.27 all=72.58,73.31,75.27,86.04,111.31
+3 base ntsc 2026-10-07 01:50:10 load=2.06 ntsc ns/cycle best=151.99 median=183.21 all=151.99,181.66,183.21,199.17,202.12
+3 after ntsc 2026-10-07 01:50:13 load=2.06 ntsc ns/cycle best=78.97 median=80.88 all=78.97,79.75,80.88,81.76,81.86
+3 after ntsc-oracle 2026-10-07 01:50:14 load=1.97 ntsc-oracle ns/cycle best=165.45 median=166.88 all=165.45,166.21,166.88,172.34,174.41
+3 base pal 2026-10-07 01:50:17 load=1.97 pal ns/cycle best=146.00 median=150.01 all=146.00,149.80,150.01,153.38,163.10
+3 after pal 2026-10-07 01:50:20 load=1.90 pal ns/cycle best=77.41 median=81.64 all=77.41,81.05,81.64,82.57,82.70
+3 after pal-oracle 2026-10-07 01:50:22 load=1.90 pal-oracle ns/cycle best=158.70 median=163.06 all=158.70,160.97,163.06,164.01,164.96
+3 base lan-ntsc 2026-10-07 01:50:25 load=1.91 lan-ntsc ns/cycle best=99.28 median=101.73 all=99.28,101.46,101.73,117.13,119.71
+3 after lan-ntsc 2026-10-07 01:50:27 load=1.91 lan-ntsc ns/cycle best=63.48 median=68.02 all=63.48,67.43,68.02,74.83,75.76
+3 base lan-pal 2026-10-07 01:50:29 load=1.91 lan-pal ns/cycle best=120.60 median=122.65 all=120.60,122.06,122.65,127.21,131.96
+3 after lan-pal 2026-10-07 01:50:31 load=1.83 lan-pal ns/cycle best=67.84 median=71.72 all=67.84,69.26,71.72,73.06,74.71
+4 base ntsc 2026-10-07 01:50:33 load=1.83 ntsc ns/cycle best=144.93 median=148.01 all=144.93,145.53,148.01,148.02,153.91
+4 after ntsc 2026-10-07 01:50:35 load=1.77 ntsc ns/cycle best=76.52 median=79.24 all=76.52,77.29,79.24,88.12,96.47
+4 after ntsc-oracle 2026-10-07 01:50:37 load=1.77 ntsc-oracle ns/cycle best=158.15 median=161.49 all=158.15,159.77,161.49,168.47,169.98
+4 base pal 2026-10-07 01:50:40 load=1.86 pal ns/cycle best=145.35 median=153.44 all=145.35,150.22,153.44,154.33,160.02
+4 after pal 2026-10-07 01:50:43 load=1.86 pal ns/cycle best=75.97 median=79.13 all=75.97,77.34,79.13,79.56,91.59
+4 after pal-oracle 2026-10-07 01:50:45 load=1.96 pal-oracle ns/cycle best=150.35 median=170.85 all=150.35,154.79,170.85,178.94,179.53
+4 base lan-ntsc 2026-10-07 01:50:48 load=1.96 lan-ntsc ns/cycle best=100.87 median=104.17 all=100.87,102.76,104.17,106.36,106.37
+4 after lan-ntsc 2026-10-07 01:50:50 load=2.04 lan-ntsc ns/cycle best=65.45 median=69.96 all=65.45,66.28,69.96,77.99,86.97
+4 base lan-pal 2026-10-07 01:50:51 load=2.04 lan-pal ns/cycle best=101.87 median=112.70 all=101.87,112.44,112.70,113.70,114.90
+4 after lan-pal 2026-10-07 01:50:54 load=2.04 lan-pal ns/cycle best=65.71 median=70.12 all=65.71,67.11,70.12,77.46,91.07
+# The earlier sets, 7 October 2026 from 01:04 UTC, run before the oracle and lan workloads were committed (the same code, in scratch copies of the bench); no date on their lines:
+1 base ntsc 01:04:43 load=1.49 ntsc ns/cycle best=145.78 median=147.41 all=145.78,146.87,147.41,147.62,158.96
+1 base pal 01:04:46 load=1.45 pal ns/cycle best=130.68 median=134.80 all=130.68,131.14,134.80,146.26,153.29
+1 after ntsc 01:04:49 load=1.45 ntsc ns/cycle best=70.73 median=75.19 all=70.73,74.91,75.19,77.43,90.30
+1 after pal 01:04:50 load=1.50 pal ns/cycle best=70.73 median=75.57 all=70.73,71.57,75.57,79.75,80.78
+2 base ntsc 01:04:52 load=1.50 ntsc ns/cycle best=136.21 median=138.56 all=136.21,137.71,138.56,139.75,142.27
+2 base pal 01:04:54 load=1.46 pal ns/cycle best=129.89 median=133.51 all=129.89,131.32,133.51,135.88,140.60
+2 after ntsc 01:04:57 load=1.46 ntsc ns/cycle best=75.86 median=84.00 all=75.86,79.67,84.00,84.83,97.58
+2 after pal 01:04:58 load=1.46 pal ns/cycle best=73.61 median=76.96 all=73.61,73.76,76.96,79.92,100.32
+3 base ntsc 01:05:00 load=1.42 ntsc ns/cycle best=159.29 median=168.36 all=159.29,162.05,168.36,181.56,187.48
+3 base pal 01:05:03 load=1.42 pal ns/cycle best=153.82 median=163.57 all=153.82,161.38,163.57,165.54,173.21
+3 after ntsc 01:05:06 load=1.55 ntsc ns/cycle best=76.76 median=81.20 all=76.76,81.07,81.20,84.90,93.23
+3 after pal 01:05:08 load=1.55 pal ns/cycle best=86.71 median=106.83 all=86.71,95.87,106.83,107.42,108.12
+4 base ntsc 01:05:10 load=1.50 ntsc ns/cycle best=154.53 median=159.14 all=154.53,158.28,159.14,163.49,167.43
+4 base pal 01:05:13 load=1.50 pal ns/cycle best=142.40 median=150.87 all=142.40,146.22,150.87,153.06,172.19
+4 after ntsc 01:05:15 load=1.46 ntsc ns/cycle best=73.66 median=76.43 all=73.66,75.91,76.43,84.33,89.01
+4 after pal 01:05:17 load=1.46 pal ns/cycle best=77.02 median=84.39 all=77.02,78.12,84.39,87.41,92.20
+1 base ntsc 01:05:42 load=2.48 ntsc ns/cycle best=137.74 median=146.20 all=137.74,141.98,146.20,148.33,150.22
+1 after ntsc 01:05:45 load=2.53 ntsc ns/cycle best=71.70 median=72.33 all=71.70,72.18,72.33,74.09,75.07
+1 after ntsc-oracle 01:05:47 load=2.53 ntsc-oracle ns/cycle best=141.07 median=147.94 all=141.07,147.59,147.94,155.05,162.56
+1 base pal 01:05:49 load=2.64 pal ns/cycle best=134.54 median=145.31 all=134.54,142.47,145.31,149.70,150.84
+1 after pal 01:05:52 load=2.64 pal ns/cycle best=69.45 median=71.72 all=69.45,71.61,71.72,72.71,73.45
+1 after pal-oracle 01:05:53 load=2.64 pal-oracle ns/cycle best=132.42 median=139.89 all=132.42,136.74,139.89,140.43,142.19
+2 base ntsc 01:05:56 load=2.75 ntsc ns/cycle best=151.88 median=153.03 all=151.88,152.69,153.03,154.14,162.85
+2 after ntsc 01:05:59 load=2.75 ntsc ns/cycle best=83.35 median=86.31 all=83.35,83.93,86.31,86.42,89.52
+2 after ntsc-oracle 01:06:01 load=2.77 ntsc-oracle ns/cycle best=167.23 median=175.31 all=167.23,171.08,175.31,177.35,182.84
+2 base pal 01:06:04 load=2.77 pal ns/cycle best=143.86 median=148.10 all=143.86,146.15,148.10,151.87,153.95
+2 after pal 01:06:07 load=2.63 pal ns/cycle best=73.60 median=75.95 all=73.60,75.52,75.95,76.24,81.91
+2 after pal-oracle 01:06:09 load=2.63 pal-oracle ns/cycle best=144.43 median=154.77 all=144.43,151.73,154.77,155.33,155.67
+3 base ntsc 01:06:11 load=2.66 ntsc ns/cycle best=138.76 median=144.20 all=138.76,141.92,144.20,148.92,154.34
+3 after ntsc 01:06:14 load=2.53 ntsc ns/cycle best=73.75 median=77.99 all=73.75,76.11,77.99,81.05,81.28
+3 after ntsc-oracle 01:06:16 load=2.53 ntsc-oracle ns/cycle best=145.09 median=151.99 all=145.09,147.42,151.99,153.44,162.37
+3 base pal 01:06:18 load=2.53 pal ns/cycle best=130.14 median=137.65 all=130.14,130.21,137.65,137.96,140.32
+3 after pal 01:06:21 load=2.40 pal ns/cycle best=66.23 median=71.00 all=66.23,68.99,71.00,71.77,72.22
+3 after pal-oracle 01:06:22 load=2.40 pal-oracle ns/cycle best=137.41 median=142.97 all=137.41,138.92,142.97,143.31,148.81
+4 base ntsc 01:06:25 load=2.29 ntsc ns/cycle best=137.57 median=146.29 all=137.57,142.08,146.29,146.88,154.55
+4 after ntsc 01:06:27 load=2.29 ntsc ns/cycle best=68.60 median=71.02 all=68.60,70.65,71.02,71.04,71.90
+4 after ntsc-oracle 01:06:29 load=2.19 ntsc-oracle ns/cycle best=142.77 median=150.03 all=142.77,146.65,150.03,150.92,151.23
+4 base pal 01:06:32 load=2.19 pal ns/cycle best=132.38 median=139.90 all=132.38,133.17,139.90,140.64,147.74
+4 after pal 01:06:34 load=2.09 pal ns/cycle best=69.53 median=72.12 all=69.53,71.79,72.12,73.43,86.22
+4 after pal-oracle 01:06:36 load=2.09 pal-oracle ns/cycle best=133.56 median=137.06 all=133.56,135.86,137.06,137.38,137.61
+1 base lan-ntsc 01:07:55 load=2.70 lan-ntsc ns/cycle best=97.44 median=98.36 all=97.44,98.22,98.36,99.44,99.81
+1 after lan-ntsc 01:07:57 load=2.70 lan-ntsc ns/cycle best=69.15 median=71.51 all=69.15,69.89,71.51,74.03,74.17
+1 base lan-pal 01:07:59 load=2.70 lan-pal ns/cycle best=102.07 median=105.64 all=102.07,103.69,105.64,114.75,132.02
+1 after lan-pal 01:08:01 load=2.57 lan-pal ns/cycle best=70.68 median=81.58 all=70.68,79.53,81.58,83.17,96.45
+2 base lan-ntsc 01:08:03 load=2.57 lan-ntsc ns/cycle best=109.73 median=113.81 all=109.73,111.86,113.81,120.18,125.23
+2 after lan-ntsc 01:08:05 load=2.52 lan-ntsc ns/cycle best=68.08 median=69.69 all=68.08,68.85,69.69,70.11,75.13
+2 base lan-pal 01:08:07 load=2.52 lan-pal ns/cycle best=110.12 median=111.14 all=110.12,111.02,111.14,114.00,115.30
+2 after lan-pal 01:08:09 load=2.52 lan-pal ns/cycle best=65.57 median=68.33 all=65.57,66.21,68.33,68.58,77.98
+3 base lan-ntsc 01:08:10 load=2.64 lan-ntsc ns/cycle best=94.58 median=96.79 all=94.58,94.87,96.79,97.29,97.96
+3 after lan-ntsc 01:08:12 load=2.64 lan-ntsc ns/cycle best=63.68 median=93.21 all=63.68,91.68,93.21,100.64,101.24
+3 base lan-pal 01:08:14 load=2.59 lan-pal ns/cycle best=97.39 median=103.05 all=97.39,99.02,103.05,105.47,114.50
+3 after lan-pal 01:08:16 load=2.59 lan-pal ns/cycle best=57.99 median=64.94 all=57.99,60.12,64.94,65.45,67.96
+4 base lan-ntsc 01:08:17 load=2.59 lan-ntsc ns/cycle best=92.19 median=95.93 all=92.19,93.50,95.93,97.02,98.04
+4 after lan-ntsc 01:08:19 load=2.46 lan-ntsc ns/cycle best=66.43 median=68.57 all=66.43,68.08,68.57,69.14,73.52
+4 base lan-pal 01:08:21 load=2.46 lan-pal ns/cycle best=107.20 median=109.31 all=107.20,108.73,109.31,110.95,117.74
+4 after lan-pal 01:08:23 load=2.46 lan-pal ns/cycle best=61.77 median=66.75 all=61.77,62.38,66.75,70.95,73.64

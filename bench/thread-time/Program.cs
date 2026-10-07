@@ -13,7 +13,10 @@ using Dbhq.Machines.Kim1;
 //       workload: core (Dormann's functional test on a flat bus, NMOS, run to its trap each run),
 //       bbc (the BBC Micro at the prompt after 6 million cycles, 4 million a run), kim (the KIM-1
 //       monitor after RS and 2 million cycles, 10 million a run), ntsc or pal (the NES running
-//       SNOW after 5 million cycles, 1.79 million a run)
+//       SNOW after 5 million cycles, 1.79 million a run), ntsc-oracle or pal-oracle (the same with
+//       NesOptions.PerDotReference, the PPU caught up every cycle as the per-dot build ran it),
+//       lan-ntsc or lan-pal (the NES running the bundled homebrew, Lan Master, at its title,
+//       after 5 million cycles, 1.79 million a run)
 //
 // One untimed run first, then the runs (5 by default). Prints one line: the best, the median and
 // every run, in nanoseconds a cycle. Linux only: it reads CLOCK_THREAD_CPUTIME_ID. The README
@@ -27,8 +30,16 @@ switch (mode)
 {
     case "ntsc":
     case "pal":
+    case "ntsc-oracle":
+    case "pal-oracle":
+    case "lan-ntsc":
+    case "lan-pal":
     {
-        var nes = new Nes(Cartridge.Load(NesTestRoms.Read("other/snow.nes")), mode == "ntsc" ? Region.Ntsc : Region.Pal);
+        byte[] rom = mode.StartsWith("lan", StringComparison.Ordinal)
+            ? RepoPaths.ReadChecked(Pins.NesHomebrewPath, Pins.NesHomebrewSha256)
+            : NesTestRoms.Read("other/snow.nes");
+        Region region = mode.Contains("ntsc", StringComparison.Ordinal) ? Region.Ntsc : Region.Pal;
+        var nes = new Nes(Cartridge.Load(rom), region, NesOptionsFor(perDot: mode.EndsWith("-oracle", StringComparison.Ordinal)));
         nes.PowerOn();
         nes.Run(5_000_000);
         run = c => nes.Run((int)c);
@@ -88,6 +99,23 @@ for (int i = 0; i < runs; i++)
 }
 ns.Sort();
 Console.WriteLine($"{mode} ns/cycle best={ns[0]:F2} median={ns[ns.Count / 2]:F2} all={string.Join(",", ns.Select(x => x.ToString("F2")))}");
+
+// The options, with NesOptions.PerDotReference set for the per-dot reference. Set by reflection
+// so this folder still builds when it is copied into an export of a commit from before the option
+// (5e48505, the lazy chips' baseline), as the README's comparison does; there the -oracle
+// workloads stop with a message and the rest run.
+static NesOptions NesOptionsFor(bool perDot)
+{
+    var options = new NesOptions();
+    if (perDot)
+    {
+        System.Reflection.PropertyInfo option = typeof(NesOptions).GetProperty("PerDotReference")
+            ?? throw new InvalidOperationException("this build has no NesOptions.PerDotReference, so no per-dot reference to run");
+        option.SetValue(options, true);
+    }
+
+    return options;
+}
 
 // This thread's CPU time, from clock_gettime(CLOCK_THREAD_CPUTIME_ID), which is clock 3 on Linux.
 static long ThreadNs()
