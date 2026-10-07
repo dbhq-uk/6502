@@ -20,9 +20,11 @@ namespace Dbhq.Machines.Nes;
 /// <para>
 /// <b>One place runs a cycle: <see cref="Cycle"/>.</b> It is the only code that counts a cycle, so a
 /// cycle never passes without an access and an access never happens outside one (AGENTS.md rule 1).
-/// It advances the dot accumulator, notes the chips' interrupt lines, runs two of the cycle's dots,
-/// ticks the sound unit, makes the access, runs the rest of the dots, and hands the CPU the lines it
-/// noted.
+/// It advances the dot accumulator, notes the chips' interrupt lines, gives the PPU two of the
+/// cycle's dots, ticks the sound unit, makes the access, gives the PPU the rest of the dots, and
+/// hands the CPU the lines it noted. The PPU runs the dots it is given when something can see it,
+/// which keeps every dot in its place in the order (the lazy chips plan, task 2; see
+/// <see cref="Cycle"/>).
 /// </para>
 /// <para>
 /// <b>The order inside a cycle was measured</b> against Blargg's <c>ppu_vbl_nmi</c> singles (task 4
@@ -111,8 +113,13 @@ public sealed class NesBus : Bus, IReportsState
     // The page a write to $4014 asked OAM DMA to copy, or -1 when none is waiting.
     private int _dmaPage = -1;
 
-    // NesOptions.PerDotReference, kept for the build that advances the chips lazily.
+    // NesOptions.PerDotReference: the PPU is caught up inside every cycle, as the per-dot build ran it.
     private readonly bool _perDotReference;
+
+    // The PPU is caught up twice every cycle, at the access and at the end, as the per-dot build
+    // ran its dots: for the per-dot reference, and for a board that watches the PPU's address bus,
+    // which must be told each address in the cycle it is put out (MMC3's A12).
+    private readonly bool _ppuEveryCycle;
 
     // Told of each point where a chip can be seen (Observer), or null.
     private INesObserver? _observer;
@@ -124,11 +131,16 @@ public sealed class NesBus : Bus, IReportsState
     /// <exception cref="NesFormatException">The cartridge needs a mapper this machine does not model.</exception>
     /// <exception cref="ArgumentOutOfRangeException">The options' sample rate is not above 0, or is above an eighth of the CPU clock.</exception>
     public NesBus(Cartridge cartridge, Region region, NesOptions? options = null)
+        : this(MapperOf(cartridge), region, options)
     {
-        ArgumentNullException.ThrowIfNull(cartridge);
+    }
+
+    internal NesBus(IMapper mapper, Region region, NesOptions? options = null)
+    {
+        ArgumentNullException.ThrowIfNull(mapper);
         ArgumentNullException.ThrowIfNull(region);
         Region = region;
-        _mapper = cartridge.CreateMapper();
+        _mapper = mapper;
         _ppu = new Ppu(region, _mapper);
         _apu = new Apu(region);
         options ??= new NesOptions();
@@ -136,6 +148,7 @@ public sealed class NesBus : Bus, IReportsState
         int sampleRate = options.SampleRate;
         _sound = new SampleBuffer(sampleRate, region.CpuHz, Math.Max(1, sampleRate / 4));
         _dmcRepeatsHaltedRead = region.DmcDmaRepeatsHaltedRead;
+        _ppuEveryCycle = _perDotReference || _mapper.WatchesPpuAddresses;
         _mapperCountsCycles = _mapper.CountsCpuCycles;
         _mapperCanInterrupt = _mapper.CanInterrupt;
         if (_mapper.TryGetPrgWindows(out byte[]? prg, out int[]? windows))
@@ -146,6 +159,12 @@ public sealed class NesBus : Bus, IReportsState
         _wholeDots = region.DotsNumerator / region.DotsDenominator;
         _dotRemainder = region.DotsNumerator % region.DotsDenominator;
         _dotDenominator = region.DotsDenominator;
+    }
+
+    private static IMapper MapperOf(Cartridge cartridge)
+    {
+        ArgumentNullException.ThrowIfNull(cartridge);
+        return cartridge.CreateMapper();
     }
 
     /// <summary>The PPU, whose registers sit at <c>$2000</c> to <c>$3FFF</c>.</summary>
@@ -186,7 +205,8 @@ public sealed class NesBus : Bus, IReportsState
 
     /// <summary>
     /// <see cref="NesOptions.PerDotReference"/>: the chips are advanced inside every call, the
-    /// reference a lazy build is checked against. In this build they always are.
+    /// reference a lazy build is checked against. The PPU is then caught up in every cycle; the
+    /// sound unit is ticked in every cycle in any case, for now.
     /// </summary>
     internal bool PerDotReference => _perDotReference;
 
@@ -283,6 +303,8 @@ public sealed class NesBus : Bus, IReportsState
     /// </summary>
     internal void PowerOn()
     {
+        // The PPU runs the dots it is owed with the board as it was, before either is reset.
+        _ppu.CatchUp();
         Array.Clear(_ram);
         _mapper.Reset(true);
         _mapper.ClearPrgRam();
@@ -320,6 +342,7 @@ public sealed class NesBus : Bus, IReportsState
         // reset button stops the CPU, so the copy that was asked for is dropped.
         _dmaPage = -1;
         _lastReadAddress = -1;
+        _ppu.CatchUp();
         _mapper.Reset(false);
         _ppu.Reset();
         _apu.Reset();
@@ -330,18 +353,30 @@ public sealed class NesBus : Bus, IReportsState
     }
 
     /// <summary>
-    /// The one cycle. Counts it, notes the interrupt lines the chips hold as it begins, runs two of
-    /// the dots the region owes, ticks the sound unit and the board, makes the access, runs the rest
-    /// of the dots, then hands the CPU the lines it noted. Returns the byte a read gave, and
-    /// <paramref name="value"/> for a write.
+    /// The one cycle. Counts it, notes the interrupt lines the chips hold as it begins, gives the
+    /// PPU two of the dots the region owes, ticks the sound unit and the board, makes the access,
+    /// gives the PPU the rest of the dots, then hands the CPU the lines it noted. Returns the byte a
+    /// read gave, and <paramref name="value"/> for a write.
     /// </summary>
+    /// <remarks>
+    /// The PPU's dots are delivered, not run (<see cref="Ppu.CatchUp"/>, <c>PpuCatchUp.cs</c>). It
+    /// runs them, with the same per-dot code, where something can see it: after the two dots
+    /// before the access, when the access is to its registers or a write to the cartridge (which
+    /// can switch the pattern banks or the nametable layout under it); and at the end of the
+    /// cycle, when the dots have reached the next dot that changes its NMI output or the frame's
+    /// end, so the output read as the next cycle begins and the frame end, with its cycle count,
+    /// are the per-dot build's. With the per-dot reference, or a board that watches the PPU's
+    /// address bus, it runs them at both places every cycle, which is the per-dot build's order.
+    /// </remarks>
     private byte Cycle(bool write, ushort address, byte value)
     {
         _cycles++;
         _ppu.CpuCycle = _cycles;
 
         // The lines as the cycle begins: a change made during this cycle is the CPU's next cycle's.
-        bool nmi = _ppu.Nmi;
+        // The PPU has run every dot up to here that changes its NMI output (the end of the cycle
+        // before catches it up when one is due), so its state, read without a catch-up, is right.
+        bool nmi = _ppu.NmiOutput;
         bool irq = _apu.Irq || (_mapperCanInterrupt && _mapper.Irq);
 
         // The accumulator stays under the denominator, so adding the remainder passes it at most
@@ -352,9 +387,10 @@ public sealed class NesBus : Bus, IReportsState
         int dots = _wholeDots + carry;
 
         int before = Math.Min(DotsBeforeAccess, dots);
-        for (int i = 0; i < before; i++)
+        _ppu.Owe(before);
+        if (_ppuEveryCycle || (uint)(address - 0x2000) < 0x2000u || (write && address >= 0x4020))
         {
-            _ppu.Tick();
+            _ppu.CatchUp();
         }
 
         _apu.Tick();
@@ -380,9 +416,10 @@ public sealed class NesBus : Bus, IReportsState
             ObserveAccess(write, address, value);
         }
 
-        for (int i = before; i < dots; i++)
+        _ppu.Owe(dots - before);
+        if (_ppuEveryCycle || _ppu.EventDue)
         {
-            _ppu.Tick();
+            _ppu.CatchUp();
         }
 
         _ppuDots += dots;
@@ -621,6 +658,7 @@ public sealed class NesBus : Bus, IReportsState
         sink.Add(nameof(_lastReadAddress), _lastReadAddress);
         sink.Add(nameof(_dmaPage), _dmaPage);
         sink.Skip(nameof(_perDotReference), StateReport.Fixed);
+        sink.Skip(nameof(_ppuEveryCycle), StateReport.Fixed);
         sink.Skip(nameof(_observer), "the observer itself");
         sink.Skip(nameof(Region), StateReport.Fixed);
     }

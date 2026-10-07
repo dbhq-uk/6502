@@ -59,7 +59,7 @@ public sealed partial class Ppu
         // The memories.
         sink.Add(nameof(_palette), _palette);
         sink.Add(nameof(_nametables), _nametables);
-        sink.Add(nameof(Oam), Oam);
+        sink.Add(nameof(_oam), _oam);
 
         // The background.
         sink.Add(nameof(_nametableByte), _nametableByte);
@@ -95,7 +95,16 @@ public sealed partial class Ppu
 
         // The picture, last: it is the largest.
         sink.Skip(nameof(_pixels), "the same array as Screen.Pixels, reported with Screen");
-        sink.Add(nameof(Screen), Screen);
+        sink.Add(nameof(_screen), _screen);
         sink.Skip(nameof(Observer), "the observer itself");
+
+        // The lazy build's bookkeeping: the logical position is hashed through Line, Dot and the
+        // bus's counts, and at a point where the PPU can be seen the two counts are equal.
+        const string Bookkeeping = "the catch-up's bookkeeping, not the chip's state: the logical position is hashed through Line, Dot and the bus's counts";
+        sink.Skip(nameof(_logicalDots), Bookkeeping);
+        sink.Skip(nameof(_caughtUpDots), Bookkeeping);
+        sink.Skip(nameof(_nextEventDot), "worked out from the state (ScheduleEvents)");
+        sink.Skip(nameof(_frameEndDot), "worked out from the state (ScheduleEvents)");
+        sink.Skip(nameof(_catchUpAt), "worked out from the state (ScheduleEvents)");
     }
 }

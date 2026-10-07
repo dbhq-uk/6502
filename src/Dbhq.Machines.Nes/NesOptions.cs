@@ -14,8 +14,8 @@ public sealed class NesOptions
     /// True to advance the PPU and the sound unit inside every bus call, dot by dot and cycle by
     /// cycle, even in a build that otherwise brings them up to date only when something can see
     /// them: the per-dot reference ("oracle") that the lazy build is checked against, kept for the
-    /// tests and the benches, and slower. False by default. In this build the chips are always
-    /// advanced inside every call, so it changes nothing yet.
+    /// tests and the benches, and slower. False by default. In this build it is the PPU that is
+    /// lazy (caught up where it can be seen); the sound unit is still ticked every cycle.
     /// </summary>
     public bool PerDotReference { get; init; }
 }

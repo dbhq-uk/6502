@@ -8,14 +8,16 @@ that differ and which hashes, and puts the file back.
 The scratch copy is a copy of the repository outside it, so the repository is never changed, for
 example `rsync -a --exclude bin --exclude obj --exclude .git --exclude site --exclude node_modules
 --exclude .testdata ./ /tmp/nes-faults/` and `ln -s "$PWD/.testdata" /tmp/nes-faults/.testdata`.
-With fault names, only those run. Each fault is one exact replacement, which must match once.
+With fault names, only those run. Each fault is one exact replacement, or a list of them, each of
+which must match once.
 """
 import collections
 import pathlib
 import subprocess
 import sys
 
-# Name, file under src/Dbhq.Machines.Nes, the text, its replacement, and what it does.
+# Name, file under src/Dbhq.Machines.Nes, the text, its replacement, and what it does; or name, a
+# list of (file, text, replacement), and what it does.
 FAULTS = [
     ('bg-nametable-late', 'Ppu.cs', """            case 2:
                 EvaluateEvenDot(dot);
@@ -49,8 +51,8 @@ FAULTS = [
                 Reload();
                 EvaluateEvenDot(dot);
 """, "the background's shifters reloaded a dot late"),
-    ('sprite-eval-late', 'PpuSprites.cs', """        _oamLatch = dot <= 64 ? (byte)0xFF : Oam[(_evaluationN << 2) | _evaluationM];""",
-     """        _oamLatch = dot <= 65 ? (byte)0xFF : Oam[(_evaluationN << 2) | _evaluationM];""",
+    ('sprite-eval-late', 'PpuSprites.cs', """        _oamLatch = dot <= 64 ? (byte)0xFF : _oam[(_evaluationN << 2) | _evaluationM];""",
+     """        _oamLatch = dot <= 65 ? (byte)0xFF : _oam[(_evaluationN << 2) | _evaluationM];""",
      "sprite evaluation's first OAM read a dot late"),
     ('sprite0-hit-next-dot', 'Ppu.cs', """            if ((sprite & SpriteIsSprite0) != 0 && pixel != 0 && x != 255)""",
      """            if ((sprite & SpriteIsSprite0) != 0 && x >= _backgroundFrom && ((int)(_backgroundPixels >> ((14 - _x) << 2)) & 0xF) != 0 && x != 255)""",
@@ -84,6 +86,27 @@ FAULTS = [
 """, "the sprite fetch's pattern address put on the PPU's bus a dot late, so MMC3 sees A12 rise a dot later"),
     ('mmc1-second-write-taken', 'Mappers/Mmc1.cs', """        bool consecutive = _sinceWrite == 1;""", """        bool consecutive = false;""",
      "MMC1 taking the write on the cycle straight after a write, which the chip ignores"),
+
+    # The lazy PPU's own machinery (task 2 of the lazy chips plan).
+    ('no-catch-up-before-cartridge-write', 'NesBus.cs', """|| (write && address >= 0x4020))""", """/* no cartridge writes */)""",
+     "the PPU not caught up before a CPU write to the cartridge, $4020 to $FFFF (Ruling T)"),
+    ('no-catch-up-before-2002-read', [
+        ('NesBus.cs', """|| (uint)(address - 0x2000) < 0x2000u ||""", """|| ((uint)(address - 0x2000) < 0x2000u && (write || (address & 7) != 2)) ||"""),
+        ('Ppu.cs', """    public byte ReadRegister(int register)
+    {
+        CatchUp();""", """    public byte ReadRegister(int register)
+    {
+        if ((register & 7) != 2)
+        {
+            CatchUp();
+        }
+"""),
+    ], "the PPU not caught up before a $2002 read, by the bus or by the register read itself"),
+    ('next-event-one-dot-late', 'PpuCatchUp.cs', """            next = _caughtUpDots + (target >= index ? target - index + 1 : toEnd + target + 1);""",
+     """            next = _caughtUpDots + (target >= index ? target - index + 1 : toEnd + target + 1) + 1;""",
+     "NextEventDot one dot late, so the bus may catch up for the NMI output a cycle late"),
+    ('no-frame-end-event', 'PpuCatchUp.cs', """        _catchUpAt = Math.Min(next, _frameEndDot);""", """        _catchUpAt = next;""",
+     "the frame end not an event, so a frame ends at the next catch-up rather than in its own cycle"),
 ]
 
 OLD = {'steps', 'cycles', 'trace', 'sound', 'dropped', 'memory', 'cpu', 'result'}
@@ -107,14 +130,21 @@ def main():
     src = root / 'src/Dbhq.Machines.Nes'
     dll = root / 'bench/nes-speed/differential/bin/Release/net10.0/Dbhq.Machines.Nes.Differential.dll'
     base = dict(fields(l) for l in baseline.read_text().splitlines()[1:])
-    for name, file, old, new, what in FAULTS:
+    for fault in FAULTS:
+        name, what = fault[0], fault[-1]
+        edits = fault[1] if isinstance(fault[1], list) else [fault[1:4]]
         if only and name not in only:
             continue
-        path = src / file
-        text = path.read_text()
-        if text.count(old) != 1:
-            sys.exit(f'{name}: the text matches {text.count(old)} times in {file}, not once')
-        path.write_text(text.replace(old, new))
+        saved = []
+        for file, old, new in edits:
+            path = src / file
+            text = path.read_text()
+            if text.count(old) != 1:
+                for path, text in reversed(saved):
+                    path.write_text(text)
+                sys.exit(f'{name}: the text matches {text.count(old)} times in {file}, not once')
+            saved.append((path, text))
+            path.write_text(text.replace(old, new))
         try:
             built = subprocess.run(['dotnet', 'build', 'bench/nes-speed/differential', '-c', 'Release'], cwd=root, capture_output=True, text=True)
             if built.returncode != 0:
@@ -143,7 +173,8 @@ def main():
             for k in crashed:
                 print(f'   {k}: {got[k]["result"]}', flush=True)
         finally:
-            path.write_text(text)
+            for path, text in reversed(saved):
+                path.write_text(text)
 
 
 main()

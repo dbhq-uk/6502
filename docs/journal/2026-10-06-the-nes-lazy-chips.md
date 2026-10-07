@@ -1,7 +1,7 @@
 ---
 title: "The NES's lazy chips: the gate first"
 date: 2026-10-06
-summary: "Dan chose to let the NES's PPU and sound unit be brought up to date only when something can see them, on one condition: the lazy build must give bit for bit what the per-dot build gives at every point where a chip can be seen. Before any chip changes, the differential was extended to be that test. The bus now tells an observer of each such point, every chip reports its whole state, a reflection test fails if a field is left out, and the per-ROM output of the build before the work is committed as the baseline. Ten deliberate one-dot or one-cycle faults in the parts the work will touch, planted one at a time in a scratch copy, each changed the output. The review found the gate's real gap: the test ROMs hardly touch the chips while a line is drawn, which is what the lazy work will change. So the differential now also builds 38 small cartridges of its own, whose register writes sweep across the dots of the lines frame by frame, and with them every fault changes at least 20 runs. A fault also turned up a crash in the PPU that has been there since the NES was built: the reset button in the middle of sprite evaluation can leave it writing past secondary OAM."
+summary: "Dan chose to let the NES's PPU and sound unit be brought up to date only when something can see them, on one condition: the lazy build must give bit for bit what the per-dot build gives at every point where a chip can be seen. Before any chip changes, the differential was extended to be that test. The bus now tells an observer of each such point, every chip reports its whole state, a reflection test fails if a field is left out, and the per-ROM output of the build before the work is committed as the baseline. Ten deliberate one-dot or one-cycle faults in the parts the work will touch, planted one at a time in a scratch copy, each changed the output. The review found the gate's real gap: the test ROMs hardly touch the chips while a line is drawn, which is what the lazy work will change. So the differential now also builds 38 small cartridges of its own, whose register writes sweep across the dots of the lines frame by frame, and with them every fault changes at least 20 runs. A fault also turned up a crash in the PPU that has been there since the NES was built: the reset button in the middle of sprite evaluation can leave it writing past secondary OAM. Task 2 made the PPU lazy: the bus gives it its dots, and it runs them, with the same per-dot code, only where something can see it. The gate gave output identical to the baseline over all 332 runs, the old faults are still seen, and four new faults in the catch-up are each seen by at least 54 runs. Natively the cycle takes about half the time on the benchmark ROM."
 order: 36
 ---
 
@@ -460,3 +460,249 @@ What the gate asks of a lazy build, from the points above:
   `StateReportTests` fails. A lazy build's bookkeeping, such as the dots
   delivered and the dots caught up to, is skipped with that reason: the
   logical position is hashed through `Line`, `Dot` and the bus's counts.
+
+## Task 2: the PPU caught up on demand
+
+The bus no longer runs the PPU's dots inside each cycle. It gives them to the
+PPU, which runs them when something can see it. The dots are run by the same
+per-dot code as before, one at a time, so the work is the same; only the moment
+it is done moves. 7 October 2026.
+
+### What was built
+
+**Two positions** (`PpuCatchUp.cs`). `Ppu.LogicalDots` counts the dots the bus
+has delivered, `Ppu.CaughtUpDots` the dots the state has been run to. `Deliver`
+adds to the first and runs nothing. `CatchUp` runs the owed dots through the old
+`Tick` body, now the private `RunDot`, until the two are equal. `Tick` is one dot
+delivered and caught up, so the tests that drive a PPU alone work as before. A
+catch-up that spans frame ends runs each one in turn, with its observer call.
+
+**Where the bus catches it up** (`NesBus.Cycle`). The cycle's first two dots are
+delivered before the access and the rest after, as the per-dot build ran them.
+Then:
+
+| Where in the cycle | When |
+| --- | --- |
+| after the first two dots, before the sound unit, the board and the access | a CPU access to `$2000` to `$3FFF` (OAM DMA's writes to `$2004` among them), and a CPU write to the cartridge, `$4020` to `$FFFF` (Ruling T: a write there can switch the pattern banks or the nametable layout) |
+| at the end, before the bus adds the cycle's dots to its count | when the delivered dots reach `NextEventDot` or the frame's end |
+| both places, every cycle | with `NesOptions.PerDotReference`, and for a board that watches the PPU's address bus (MMC3), so it is told each address in the cycle it is put out |
+| before power on and the reset button | always, before the board is reset |
+
+The frame end is an event of its own, so a frame ends in the cycle it ends in,
+from inside the catch-up, and the frame end's hash of the cycle count and the
+picture is the per-dot build's. `Ppu.ReadRegister`, `WriteRegister` and the
+peeks also catch up themselves, so a caller that is not the bus gets the right
+state too; the bus's own check before a register access is then a second guard.
+
+**`NextEventDot`** is the value `LogicalDots` has once the dot that next changes
+the NMI output has been delivered:
+
+- PPUCTRL bit 7 clear: none (`long.MaxValue`). No dot can change the output.
+- bit 7 set and the VBlank flag clear: the dot at line 241 dot 1.
+- bit 7 set and the flag set: the pre-render line's dot 1, which clears it.
+
+It is worked out again (`ScheduleEvents`) when the dots pass it or the frame
+end, after a `$2000` write (bit 7), a `$2001` write (rendering decides whether
+the odd frame drops its last dot, which moves the frame end), a `$2002` read
+(it clears the flag, and on the dot before the flag it stops it), the reset
+button and power on. Each of those accesses comes after a catch-up, so the new
+event is worked out from the state the access left. After a read that stops
+the flag, the event stays on line 241 dot 1: the catch-up there finds the flag
+not set and works the next one out, which costs a catch-up and nothing else.
+
+So the NMI output, which the bus reads at the start of every cycle, is right
+without a catch-up: every dot that could change it has been run by the end of
+the cycle before. A `$2002` read on the VBlank dot comes after a catch-up to the
+dot it sees, so it sees the flag and stops it as before; a `$2000` write that
+turns NMI on in VBlank comes after a catch-up, so the line rises at that
+cycle's end, as before.
+
+**The reads** (Ruling R). `Line` and `Dot` give the logical position without a
+catch-up: the caught-up one moved on by the dots owed, and past a frame end by
+whole frames less the odd frame's dropped dot, which only a `$2001` write could
+change. `LogicalDots`, `NextEventDot` and `RenderingEnabled` do not catch up
+either. `Frame` and `OddFrame` change only at a frame end, so they catch up
+only when one is owed: `Nes.RunFrames`, the page's loop, reads `Frame` after
+every instruction, and a full catch-up there would make the build per-dot
+again. `V`, `T`, `FineX`, `WriteToggle`, `Oam`, `Screen`, `Nmi`,
+`PeekRegister` and `PeekVram` catch up. `Oam` and `Screen` were properties
+with hidden fields; they are now `_oam` and `_screen` with a property in front,
+because the dots read them and must not catch up from inside a dot. The bus
+reads the NMI output through an internal `NmiOutput` that does not catch up.
+
+**The state report.** The five new fields are skipped with their reason: the
+two counts are the catch-up's bookkeeping (the logical position is hashed
+through `Line`, `Dot` and the bus's counts), and the three event dots are
+worked out from the state.
+
+**A seam for tests.** `NesBus` has an internal constructor that takes a board,
+so a test can fit a stub board that does or does not watch the address bus.
+
+### Decisions, and what they were chosen over
+
+- **The frame end as an event**, over working `Frame` out from the logical
+  position. The frame end's hash has the cycle count in it, and the page reads
+  the picture when `Frame` moves on, so the frame must really end in its cycle.
+- **Every write to the cartridge**, `$6000` to `$7FFF` included, over the
+  board's registers alone. Ruling T names the whole space. PRG RAM writes move
+  nothing the PPU reads today, so for them the catch-up is only a cost; a game
+  that writes PRG RAM often pays it. Narrowing it is a later choice, with a
+  board flag for "this write can move the PPU's banks".
+- **The register methods catch up themselves**, as well as the bus. It costs
+  one compare, and a test or a tool that writes a register directly gets the
+  per-dot answer. It means that a fault that takes out only the bus's catch-up
+  before a `$2002` read changes nothing; the fault below takes out both.
+- **The catch-up before the reset button's board reset** is a guard. No board
+  here changes anything the PPU reads at the reset button, so no test can see
+  it go. The one before power on is needed: power on clears a board's CHR RAM,
+  and a test (`PowerOnAndResetCatchThePpuUpBeforeTheBoardIsReset`) fails
+  without it.
+
+### The tests
+
+Written first, then run against an eager stub of the same members (`Deliver`
+ran the dots at once, `NextEventDot` was always none): 56 of the 62 new tests
+failed. The six that passed are the ones an eager PPU meets as well: `Tick`,
+reset and power on catching up, and the MMC3 scene, which is caught up every
+cycle anyway. Then built.
+
+- `PpuCatchUpTests`, the PPU alone: `Deliver` moves only the logical position;
+  chunks of every size from 1 up, across frame ends and the dropped dot, give
+  the position the ticks give and the same state when caught up; a catch-up over
+  four frames ends each (Review Focus 5); `NextEventDot` is the VBlank dot with
+  bit 7 on and none with it off, moves to the clear with the flag set, and to
+  the next frame after a `$2002` read; a `$2000` write catches up first; which
+  reads catch up and which do not; `Tick` is one dot delivered and caught up;
+  reset and power on catch up first.
+- The scene table (`CatchUpScenes.cs`): 20 scenes, each in both regions, run on
+  the per-dot reference and the lazy build. Every access to the PPU or write to
+  the cartridge, with the logical position, the PPU's whole state and the bus's;
+  every frame end with the picture; the reset; and the NMI and IRQ lines every
+  cycle: all equal. The lazy build must also leave dots owed at some cycle's end,
+  so the test is not passing on a build that is not lazy. The rows: no access at
+  all with NMI on, off and rendering off (Review Focus 5); `$2005` and `$2006` on
+  the line's key dots; `$2000` mid-line; `$2001` at the line edges and on the
+  pre-render line's dots 333 to 340 (Review Focus 2); `$2002` read at line 240
+  dot 340 and line 241 dots 0, 1 and 2, and `$2000` bit 7 on and off through
+  VBlank, with rendering on and off (Review Focus 4); OAM DMA and `$2003` and
+  `$2004` while rendering; `$2007` while rendering; `$2002` polled through sprite
+  0, 8 by 8 and 8 by 16; CNROM bank writes and PRG RAM writes mid-line; MMC3's
+  scanline IRQ; the reset button mid-frame.
+- `NesBusTests`: a stub board that watches has the PPU caught up at every
+  cycle's end and is told the same addresses in the same cycles as on the
+  reference, and one that does not watch leaves dots owed; a CNROM bank switch
+  at line 100 dot 130 draws the old bank before the write and the new one after,
+  on both builds (Ruling T); the bus catches up in the cycle that reaches
+  `NextEventDot`, not before, and a `$2000` write moves it; power on and the
+  reset catch up before the board is reset.
+
+Each new fault was planted in turn and the new tests run (a scratch script,
+`/tmp/t2/unitfaults.py`, not kept): the catch-up before cartridge writes taken
+out, 4 tests failed; before `$2002` reads (bus and register read), 44;
+`NextEventDot` a dot late, 23; the frame end not an event, 39; the catch-up
+before power on, 2.
+
+NES tests: 1,621 passed, none failed (1,557 before, 64 new), 7 October 00:04
+UTC. `dotnet build 6502.slnx -c Release`: no warnings, no errors.
+
+### The gate
+
+```
+dotnet run -c Release --project bench/nes-speed/differential -- --check bench/nes-speed/differential/baseline/4e9b92b.txt --out /tmp/t2/gate-lazy.txt
+dotnet run -c Release --project bench/nes-speed/differential -- --check bench/nes-speed/differential/baseline/4e9b92b.txt --oracle --out /tmp/t2/gate-oracle.txt
+```
+
+The lazy build, 7 October 2026, 00:06:01 to 00:11:22 UTC, loads 3.05 to 10.33:
+`IDENTICAL: all 332 runs match`. The per-dot reference, 00:11:25 to 00:17:56
+UTC, loads 10.38 to 7.75: `IDENTICAL: all 332 runs match`.
+
+### The faults pass again
+
+The PPU's faults from task 1 and four new ones in the catch-up, in a scratch
+copy (`rsync` of the working tree to `/tmp/nes-faults`, `.testdata` linked).
+`faults.py` now takes a fault made of several replacements, and the sprite
+evaluation fault reads `_oam`.
+
+```
+python3 bench/nes-speed/differential/faults.py /tmp/nes-faults bench/nes-speed/differential/baseline/4e9b92b.txt --threads 7 bg-nametable-late bg-reload-late sprite-eval-late sprite0-hit-next-dot vblank-late ppu-access-dot-late mmc3-a12-late no-catch-up-before-cartridge-write no-catch-up-before-2002-read next-event-one-dot-late no-frame-end-event
+```
+
+7 October 2026, 00:18 to 01:04 UTC, loads 4.8 to 2.7. Of 332 runs:
+
+| Fault | Runs changed | Of them synthetic | Only the new state hashes | Task 1's figure |
+| --- | --- | --- | --- | --- |
+| The background's nametable byte fetched a dot late | 298 | 76 | 226 | 298 |
+| The background's shifters reloaded a dot late | 287 | 76 | 5 | 287 |
+| Sprite evaluation's first OAM read a dot late | 191 | 76 | 68 | 191 |
+| Sprite 0 hit tested against the next column | 42 | 38 | 7 | 42 |
+| The VBlank flag set on dot 2 of line 241 | 174 | 53 | 8 | 174 |
+| A CPU access to the PPU after three of its cycle's dots | 332 | 76 | 58 | 332 |
+| The sprite fetch's address a dot late (MMC3's A12) | 26 | 22 | 2 | 26 |
+| New: no catch-up before a write to the cartridge | 54 | 38 | 22 | |
+| New: no catch-up before a `$2002` read, by the bus or the read | 284 | 54 | 0 | |
+| New: `NextEventDot` a dot late | 54 | 38 | 16 | |
+| New: the frame end not an event | 286 | 54 | 199 | |
+
+Every fault is seen by more than 10 runs, so no workload was added. The old
+faults change exactly the runs they changed before. The VBlank fault's "only
+the new hashes" went from 10 to 8 because on the lazy build it also moves when
+the NMI line rises: the catch-up at the predicted dot finds no flag. The
+`PPU access` fault still makes `fuzz-mmc3-3` throw in `Ppu.EvaluationStep`,
+the reset bug of task 1 (Ruling U, fixed in its own pull request). The 46 runs
+the frame end fault leaves alone are the 23 MMC3 cartridges and ROMs in both
+regions, which are caught up every cycle, so they never wait for an event; the
+same is why the cartridge write and `NextEventDot` faults do not reach them.
+The log is `faults-task-2.log` beside the task's report.
+
+### Speed
+
+The thread-time bench (`bench/thread-time`, its README), SNOW after 5 million
+cycles, 5 timed runs of 1.79 million cycles, alternated in four rounds with
+`5e48505` (exported with `git archive`) and with this build's own per-dot
+reference (a scratch copy of the bench with an `-oracle` workload that sets
+`PerDotReference`), 7 October 2026, 01:05:42 to 01:06:36 UTC, loads 2.1 to 2.8.
+Nanoseconds of thread time a cycle, median of the four medians (the medians
+worked out by a script from the bench's lines, which are kept beside the task's
+report as `thread-time-task-2.txt`):
+
+| Build | NTSC | PAL |
+| --- | --- | --- |
+| `5e48505` | 146.2 | 142.6 |
+| this build | 75.2 | 71.9 |
+| this build, per-dot reference | 151.0 | 141.4 |
+
+A first round of base and this build alone, 01:04:43 to 01:05:17 UTC, loads 1.4
+to 1.6, gave 153.3 and 78.8 on NTSC and 142.8 and 80.7 on PAL. The homebrew Lan
+Master, the same way through a scratch `lan` workload in both copies, 01:07:55
+to 01:08:23 UTC, loads 2.5 to 2.7: `5e48505` 97.6 NTSC and 107.5 PAL, this build
+70.6 and 67.5.
+
+```
+for round in 1 2 3 4; do for bw in "base ntsc" "after ntsc" "after ntsc-oracle" "base pal" "after pal" "after pal-oracle"; do
+  set -- $bw; dotnet /tmp/t2/$1/out/Dbhq.Machines.ThreadTime.dll $2 5; done; done
+```
+
+So on SNOW this build takes about half the time a cycle, and on the homebrew
+about 0.7 of it on NTSC and 0.6 on PAL, natively. That is far more than the plan
+expected ("the speed gain is small"). The per-dot reference of the same build
+is as slow as `5e48505`, so the gain is the batching, not some other change. It
+is the same dots: at the end of a SNOW run the PPU had run all but the last 159
+dots delivered, with rendering on and the same frame count as the reference
+(checked with a scratch print). Why batching is worth so much is reasoned, not
+measured (`perf` is not allowed on this machine): a dot's code dispatches on the
+dot's place in its 8-dot fetch and on the line, and run between the CPU core's
+own dispatch, three times a cycle, those branches are hard to predict; run in a
+loop they follow a fixed pattern. The comment on `RenderVisibleDot` already
+blamed the 6502's code between two dots for mispredictions. The browser figure
+(Mono's AOT) is task 6's, and may differ.
+
+### For the tasks that follow
+
+- The fast scanline renderer of tasks 3 and 4 goes inside `CatchUp`: the loop
+  there knows how many dots it owes and that no access falls inside them.
+- `LogicalPosition` assumes rendering cannot change while dots are owed. A
+  later change that lets anything but a `$2001` write change PPUMASK must catch
+  up first.
+- MMC3 and any board that watches is still per-dot, so it does not gain. The
+  board fields the PPU drives are still hashed at the sound unit's points
+  (task 1's note stands).

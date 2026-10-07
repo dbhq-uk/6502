@@ -15,7 +15,9 @@ namespace Dbhq.Machines.Nes;
 /// <para>
 /// <b>The position.</b> <see cref="Line"/> and <see cref="Dot"/> name the dot the PPU runs next.
 /// <see cref="Tick"/> runs that dot's events and moves on, so a register access between two ticks
-/// happens before the dot the position names. Power on puts the PPU at line 0 dot 0 (timing.md 4),
+/// happens before the dot the position names. The bus delivers dots without running them and the
+/// PPU runs them when something can see it (<c>PpuCatchUp.cs</c>); the position is the logical
+/// one, the dots delivered. Power on puts the PPU at line 0 dot 0 (timing.md 4),
 /// so after 21 ticks it is at line 0 dot 21, as <c>nestest.log</c>'s first line has it.
 /// </para>
 /// <para>
@@ -171,8 +173,12 @@ public sealed partial class Ppu : IReportsState
     private int _backgroundFrom = 256;
     private int _spritesFrom = 256;
 
-    // The picture's pixels: Screen.Pixels, which is made once with the frame buffer.
+    // The picture, and its pixels, which are made once with the frame buffer.
+    private readonly FrameBuffer _screen = new();
     private readonly uint[] _pixels;
+
+    // The 256 bytes of OAM (Oam).
+    private readonly byte[] _oam = new byte[256];
 
     // The background: the bytes the 8-dot fetch has read, the pattern address it put out, and the
     // shifters (ppu.md 6). The chip's four 16-bit shifters, two of pattern bits and two of
@@ -245,9 +251,10 @@ public sealed partial class Ppu : IReportsState
         _lines = region.Lines;
         _oddFrameSkipsADot = region.OddFrameSkipsADot;
         _colours = PpuPalette.Table(region.EmphasisSwapsRedAndGreen);
-        _pixels = Screen.Pixels;
+        _pixels = _screen.Pixels;
         RefreshColours();
         _latchDecayDots = (long)(LatchDecaySeconds * region.CpuHz * region.DotsNumerator / region.DotsDenominator);
+        ScheduleEvents();
     }
 
     /// <summary>
@@ -257,46 +264,156 @@ public sealed partial class Ppu : IReportsState
     /// </summary>
     public const double LatchDecaySeconds = 0.6;
 
-    /// <summary>The picture, written a pixel a dot.</summary>
-    public FrameBuffer Screen { get; } = new();
+    /// <summary>The picture, written a pixel a dot. Reading it catches the PPU up.</summary>
+    public FrameBuffer Screen
+    {
+        get
+        {
+            CatchUp();
+            return _screen;
+        }
+    }
 
     /// <summary>The region this PPU is: the 2C02 for NTSC, the 2C07 for PAL.</summary>
     public Region Region => _region;
 
     /// <summary>
     /// The NMI output: true while the VBlank flag and PPUCTRL bit 7 are both set (ppu.md 5). The
-    /// CPU takes an NMI on its change to true.
+    /// CPU takes an NMI on its change to true. Reading it catches the PPU up.
     /// </summary>
-    public bool Nmi => (_status & StatusVblank) != 0 && (_ctrl & 0x80) != 0;
+    public bool Nmi
+    {
+        get
+        {
+            CatchUp();
+            return NmiOutput;
+        }
+    }
 
-    /// <summary>The line of the dot the PPU runs next, 0 to <see cref="Region.PreRenderLine"/>.</summary>
-    public int Line => _line;
+    /// <summary>
+    /// The line of the dot the PPU runs next, 0 to <see cref="Region.PreRenderLine"/>: the logical
+    /// position, the dots delivered, worked out without a catch-up.
+    /// </summary>
+    public int Line
+    {
+        get
+        {
+            if (_logicalDots == _caughtUpDots)
+            {
+                return _line;
+            }
 
-    /// <summary>The dot the PPU runs next, 0 to 340.</summary>
-    public int Dot => _dot;
+            LogicalPosition(out int line, out _);
+            return line;
+        }
+    }
 
-    /// <summary>Frames completed since power on.</summary>
-    public long Frame => _frame;
+    /// <summary>The dot the PPU runs next, 0 to 340: the logical position, worked out without a catch-up.</summary>
+    public int Dot
+    {
+        get
+        {
+            if (_logicalDots == _caughtUpDots)
+            {
+                return _dot;
+            }
 
-    /// <summary>True while the frame the PPU is in is an odd one, the frames that can drop a dot.</summary>
-    public bool OddFrame => _oddFrame;
+            LogicalPosition(out _, out int dot);
+            return dot;
+        }
+    }
 
-    /// <summary>The 256 bytes of sprite memory: 64 sprites of Y, tile, attributes and X (ppu.md 4).</summary>
-    public byte[] Oam { get; } = new byte[256];
+    /// <summary>Frames completed since power on. Reading it catches the PPU up only when a frame end is owed.</summary>
+    public long Frame
+    {
+        get
+        {
+            if (_logicalDots >= _frameEndDot)
+            {
+                CatchUp();
+            }
 
-    /// <summary>The current VRAM address <c>v</c>, 15 bits (ppu.md 2). For tests and a debugger.</summary>
-    public ushort V => _v;
+            return _frame;
+        }
+    }
 
-    /// <summary>The waiting address <c>t</c>, 15 bits (ppu.md 2). For tests and a debugger.</summary>
-    public ushort T => _t;
+    /// <summary>
+    /// True while the frame the PPU is in is an odd one, the frames that can drop a dot. Reading it
+    /// catches the PPU up only when a frame end is owed.
+    /// </summary>
+    public bool OddFrame
+    {
+        get
+        {
+            if (_logicalDots >= _frameEndDot)
+            {
+                CatchUp();
+            }
 
-    /// <summary>The fine X scroll <c>x</c>, 3 bits (ppu.md 2). For tests and a debugger.</summary>
-    public byte FineX => _x;
+            return _oddFrame;
+        }
+    }
 
-    /// <summary>The write toggle <c>w</c>: true after the first write of a <c>$2005</c> or <c>$2006</c> pair (ppu.md 2).</summary>
-    public bool WriteToggle => _w;
+    /// <summary>
+    /// The 256 bytes of sprite memory: 64 sprites of Y, tile, attributes and X (ppu.md 4). Reading
+    /// it catches the PPU up.
+    /// </summary>
+    public byte[] Oam
+    {
+        get
+        {
+            CatchUp();
+            return _oam;
+        }
+    }
 
-    /// <summary>True while either layer is switched on in PPUMASK (bits 3 and 4).</summary>
+    /// <summary>The current VRAM address <c>v</c>, 15 bits (ppu.md 2). For tests and a debugger. Reading it catches the PPU up.</summary>
+    public ushort V
+    {
+        get
+        {
+            CatchUp();
+            return _v;
+        }
+    }
+
+    /// <summary>The waiting address <c>t</c>, 15 bits (ppu.md 2). For tests and a debugger. Reading it catches the PPU up.</summary>
+    public ushort T
+    {
+        get
+        {
+            CatchUp();
+            return _t;
+        }
+    }
+
+    /// <summary>The fine X scroll <c>x</c>, 3 bits (ppu.md 2). For tests and a debugger. Reading it catches the PPU up.</summary>
+    public byte FineX
+    {
+        get
+        {
+            CatchUp();
+            return _x;
+        }
+    }
+
+    /// <summary>
+    /// The write toggle <c>w</c>: true after the first write of a <c>$2005</c> or <c>$2006</c> pair
+    /// (ppu.md 2). Reading it catches the PPU up.
+    /// </summary>
+    public bool WriteToggle
+    {
+        get
+        {
+            CatchUp();
+            return _w;
+        }
+    }
+
+    /// <summary>
+    /// True while either layer is switched on in PPUMASK (bits 3 and 4). Only a register write
+    /// changes it, so it needs no catch-up.
+    /// </summary>
     public bool RenderingEnabled => (_mask & 0x18) != 0;
 
     /// <summary>
@@ -320,6 +437,7 @@ public sealed partial class Ppu : IReportsState
     /// </summary>
     public void PowerOn()
     {
+        CatchUp();
         _status = 0;
         _oamAddress = 0;
         _latch = 0;
@@ -327,11 +445,11 @@ public sealed partial class Ppu : IReportsState
         Array.Clear(_latchDriven);
         _v = 0;
         _frame = 0;
-        Array.Clear(Oam);
+        Array.Clear(_oam);
         Array.Clear(_palette);
         RefreshColours();
         Array.Clear(_nametables);
-        Screen.PowerOn();
+        _screen.PowerOn();
         Reset();
     }
 
@@ -339,10 +457,12 @@ public sealed partial class Ppu : IReportsState
     /// The reset button (ppu.md 12; timing.md 4: the NES-001 resets the PPU with the CPU).
     /// PPUCTRL, PPUMASK, <c>w</c>, <c>t</c>, <c>x</c> and the read buffer go to zero, the frame is
     /// even again and the PPU starts at the top of the picture. The VBlank flag, OAMADDR,
-    /// <c>v</c> and the memories are kept.
+    /// <c>v</c> and the memories are kept. The dots owed are run first.
     /// </summary>
     public void Reset()
     {
+        CatchUp();
+
         // The position goes back to the top; the time the latch's bits are measured in does not.
         _timeBase += (_line * Region.DotsPerLine) + _dot;
         _ctrl = 0;
@@ -362,10 +482,22 @@ public sealed partial class Ppu : IReportsState
         _found = 0;
         _sprite0Found = false;
         ClearSpriteLine();
+        ScheduleEvents();
     }
 
-    /// <summary>Runs one dot: the dot <see cref="Line"/> and <see cref="Dot"/> name, then moves on.</summary>
+    /// <summary>
+    /// Runs one dot: the dot <see cref="Line"/> and <see cref="Dot"/> name, then moves on. It is
+    /// one dot delivered and caught up, so any dots owed run first.
+    /// </summary>
     public void Tick()
+    {
+        _logicalDots++;
+        CatchUp();
+    }
+
+    // The per-dot reference: the dot the caught-up position names, then on to the next. Every
+    // catch-up runs its dots through here, so the lazy build does the same work in the same order.
+    private void RunDot()
     {
         if (_line < 240)
         {
@@ -443,9 +575,13 @@ public sealed partial class Ppu : IReportsState
         }
     }
 
-    /// <summary>A CPU read of register <paramref name="register"/> (0 to 7) at the PPU's present dot, with its side effects.</summary>
+    /// <summary>
+    /// A CPU read of register <paramref name="register"/> (0 to 7) at the PPU's present dot, with
+    /// its side effects. The dots owed are run first.
+    /// </summary>
     public byte ReadRegister(int register)
     {
+        CatchUp();
         switch (register & 7)
         {
             case 2:
@@ -460,6 +596,8 @@ public sealed partial class Ppu : IReportsState
                     _suppressVblank = true;
                 }
 
+                // The flag is clear: the NMI output's next change is another frame's.
+                ScheduleEvents();
                 return value;
             }
 
@@ -499,19 +637,28 @@ public sealed partial class Ppu : IReportsState
         }
     }
 
-    /// <summary>A CPU write of <paramref name="value"/> to register <paramref name="register"/> (0 to 7), with its side effects.</summary>
+    /// <summary>
+    /// A CPU write of <paramref name="value"/> to register <paramref name="register"/> (0 to 7),
+    /// with its side effects. The dots owed are run first.
+    /// </summary>
     public void WriteRegister(int register, byte value)
     {
+        CatchUp();
         Drive(value, 0xFF);
         switch (register & 7)
         {
             case 0:
                 _ctrl = value;
                 _t = (ushort)((_t & ~0x0C00) | ((value & 0x03) << 10));
+
+                // Bit 7 decides whether a dot can change the NMI output.
+                ScheduleEvents();
                 break;
 
             case 1:
+                // Rendering decides whether the odd frame drops its last dot, which moves its end.
                 SetMask(value);
+                ScheduleEvents();
                 break;
 
             case 2:
@@ -531,7 +678,7 @@ public sealed partial class Ppu : IReportsState
                 else
                 {
                     // Bits 4 to 2 of a sprite's attribute byte do not exist (ppu.md 4).
-                    Oam[_oamAddress] = (_oamAddress & 3) == 2 ? (byte)(value & 0xE3) : value;
+                    _oam[_oamAddress] = (_oamAddress & 3) == 2 ? (byte)(value & 0xE3) : value;
                     _oamAddress++;
                 }
 
@@ -581,9 +728,11 @@ public sealed partial class Ppu : IReportsState
     /// <summary>
     /// What a read of register <paramref name="register"/> would return now, with no side effect:
     /// no flag is cleared, the read buffer and <c>v</c> do not move, and the latch is not changed.
+    /// The dots owed are run first.
     /// </summary>
     public byte PeekRegister(int register)
     {
+        CatchUp();
         switch (register & 7)
         {
             case 2:
@@ -601,9 +750,10 @@ public sealed partial class Ppu : IReportsState
         }
     }
 
-    /// <summary>The byte at PPU address <paramref name="address"/>, with no side effect, for tests.</summary>
+    /// <summary>The byte at PPU address <paramref name="address"/>, with no side effect, for tests. The dots owed are run first.</summary>
     public byte PeekVram(ushort address)
     {
+        CatchUp();
         address &= 0x3FFF;
         return address >= 0x3F00 ? _palette[PaletteIndex(address)] : ReadVram(address);
     }
@@ -666,7 +816,7 @@ public sealed partial class Ppu : IReportsState
         _timeBase += dots;
         _frame++;
         _oddFrame = !_oddFrame;
-        Screen.EndFrame();
+        _screen.EndFrame();
         if (NesBus.Observable && Observer is not null)
         {
             Observer.FrameEnded();
@@ -828,7 +978,7 @@ public sealed partial class Ppu : IReportsState
     // sprite fetches are reading ($FF while secondary OAM is cleared, ppu.md 1); otherwise OAM.
     private byte OamData()
     {
-        return _line < 240 && RenderingEnabled ? _oamLatch : Oam[_oamAddress];
+        return _line < 240 && RenderingEnabled ? _oamLatch : _oam[_oamAddress];
     }
 
     // One dot of a visible line with rendering on. Dots 2 to 256, three quarters of the dots, take

@@ -60,7 +60,11 @@ public interface IMapper
     /// never wrong, only slower. <see cref="Mappers.Board"/> says false for all three of these
     /// flags, so a board built on it that overrides <see cref="PpuAddressChanged"/>,
     /// <see cref="CpuCycle"/> or <see cref="Irq"/> must override the matching flag too, or the
-    /// call is skipped; a test checks every board for it.
+    /// call is skipped; a test checks every board for it. It also keeps the PPU exact for the
+    /// board: the bus catches the PPU up every cycle for a board that watches, so each address
+    /// reaches it in the cycle it is put out, where for the others the PPU runs its dots only when
+    /// something can see it. So a board whose PPU-side calls change anything the CPU can see, an
+    /// IRQ counted from the PPU's fetches for one, must say true.
     /// </summary>
     bool WatchesPpuAddresses => true;
 
