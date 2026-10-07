@@ -75,7 +75,16 @@ export, link or copy `.testdata/` there so the ROMs are not fetched again, and r
 export's `bench/nes-speed` as above.
 
 For a profile of the WebAssembly build, publish it with `-p:WasmNativeStrip=false`, which keeps
-the function names, and record a CPU profile in Chrome (the journal entry says how).
+the function names, and give `PROFILE=<n>` to `run-in-browser.mjs`: it records the run with
+Chrome's sampling profiler and prints the n functions with the most self time (added in task 17,
+the core's speed work; before that the profile was taken with an uncommitted copy of the script).
+
+On a shared machine, `THREAD_TIME=<n>` makes n more timed runs after the page's own, driven
+from the script and each measured in the CPU time of the page's main thread (the DevTools
+protocol's `ThreadTime`), printed as `thread <i> ... times_real=<x>`. The wall-clock figure falls
+when other work takes the processor from the page; the thread's CPU time much less. With both
+set, the profile covers only those runs. The same two options work in
+[`../bbc-micro-speed/`](../bbc-micro-speed/README.md).
 
 `publish/` is git-ignored. `run-in-browser.mjs` uses `/usr/bin/google-chrome`; set
 `CHROME_PATH` to use another. Run one build at a time, leave the machine otherwise idle, and
@@ -90,5 +99,6 @@ Dated, with the command that made them; the journal entry has the full output.
 
 | Date | Code | AOT median | Interpreter median | Where |
 | --- | --- | --- | --- | --- |
+| 6 October 2026 | task 17, the shared core (`3e52229` against `18cc4ec`, alternated), timed in the main thread's CPU time (`THREAD_TIME=8`) | NTSC 2.21 to 2.50 in one set and 2.48 to 2.46 in another, PAL 2.50 to 2.50 and 2.50 to 2.47 times real time: within noise; the page's wall clock gave 1.1 to 1.5 at loads of 2 to 50 | not measured | [the core speed entry](../../docs/journal/2026-10-06-the-core-speed.md) |
 | 5 October 2026, late | task 6b, the speed work (`f97483d` against `5021298`, alternated) | NTSC 2.09 to 2.82 and PAL 2.44 to 3.24 times real time, at a load of about 2, the BBC Micro bench at 29.0 to 29.5 MHz in the same minutes (a quiet machine) | NTSC 0.26 to 0.39 and PAL 0.30 to 0.49 times real time, at a load of 2 to 3 | [the speed entry](../../docs/journal/2026-10-05-the-nes-speed.md), task 6b |
 | 5 October 2026 | task 6, the bus and the PPU drawing the background and sprites (`47e72ee` and the `Ppu` split) | NTSC 1.94 and PAL 1.71 times real time at a load of 6 to 8 (0.92 and 1.04 in a later set at a load of 3 to 36); the BBC Micro bench in the same sets gave 9.17 and 5.32 times 2 MHz; a quiet machine is estimated at 2.4 to 2.9 times | NTSC 0.18 and PAL 0.24 times real time, at a load of about 20 | [the speed entry](../../docs/journal/2026-10-05-the-nes-speed.md) |

@@ -8,6 +8,11 @@ namespace Dbhq.Cpu6502;
 /// other chips by one cycle inside each call, so the CPU never needs a clock
 /// of its own. A slow device or a DMA stall is the machine taking more than
 /// one cycle inside a call before it returns.
+/// <para>
+/// A machine's bus derives from <see cref="Bus"/>, which is this as an
+/// abstract class, so the CPU reaches it with a virtual call rather than an
+/// interface call. Any other implementation works as it is.
+/// </para>
 /// </remarks>
 public interface IBus
 {

@@ -82,13 +82,6 @@ public class BlarggTests(ITestOutputHelper output)
     }
 
     [Theory]
-    [MemberData(nameof(TestRomTable.RamReportingKnownFailures), MemberType = typeof(TestRomTable))]
-    public void EachRamReportingKnownFailureStillFailsAsWrittenDown(string pinnedName, Region region, int statusNow, string printsNow, int millions, string cause)
-    {
-        TestRomTable.AssertRamReportingKnownFailureStillFailsAsWrittenDown(pinnedName, region, statusNow, printsNow, millions, cause, output.WriteLine);
-    }
-
-    [Theory]
     [MemberData(nameof(TestRomTable.BranchTimingTests), MemberType = typeof(TestRomTable))]
     public void EachBranchTimingTestPasses(string rom)
     {

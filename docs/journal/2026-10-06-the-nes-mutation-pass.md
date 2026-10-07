@@ -1,7 +1,7 @@
 ---
 title: "The NES's mutation pass, and the known differences checked"
 date: 2026-10-06
-summary: "Task 16 of the NES plan, its first two steps. Faults were planted one at a time in a scratch copy of the NES, the plan's list, the further ones the task named and some of the pass's own, and the whole NES test project was run after each. Almost all were caught by the project's own tests, and many by those alone, since the community ROMs miss the tables, the boards' details and the controllers. One was seen only by nestest's log on PAL and three by nothing; each of the four now has a test that fails on it. Then docs/known-differences.md was checked against the plan's list and the fact sheets' open guesses, and what it did not say was added."
+summary: "Task 16 of the NES plan, its first two steps. Faults were planted one at a time in a scratch copy of the NES, the plan's list, the further ones the task named and some of the pass's own, and the whole NES test project was run after each. Almost all were caught by the project's own tests, and many by those alone, since the community ROMs miss the tables, the boards' details and the controllers. One was seen only by nestest's log on PAL and three by nothing; each of the four now has a test that fails on it. Then docs/known-differences.md was checked against the plan's list and the fact sheets' open guesses, and what it did not say was added. Later the same day, Dan decided that the Ricoh 2A03's LXA uses $FF, so the two instr_test-v5 ROMs that failed on it now pass, and its Harte run leaves that opcode out and says so."
 order: 34
 ---
 
@@ -248,3 +248,45 @@ System (#62), expansion audio (#63), the Zapper and other peripherals (#64),
 unlicensed mappers (#65), the battery-RAM save (#66), the picture's analogue
 quirks (#69); the speed (#67) and the 3D models (#68, which names the branch
 `feat/nes-models`) are linked from the page's text. None is missing.
+
+## After the review: LXA on the Ricoh 2A03 is `$FF`
+
+**Decided by Dan, 6 October 2026,** after the final report: the Ricoh 2A03
+variant's `LXA` (`$AB`) uses `$FF`, the console-calibrated value Blargg's
+`instr_test-v5` passes with, and `$AB` is left out of the `nes6502` Harte run.
+The NMOS 6502 and the other variants keep `$EE`, as Harte's data has it. This is
+the road the decision of 5 October left open (the entry of that day, task 12).
+
+**The change.** One constant in the core, `_lxaConstant`, set in `Cpu`'s
+constructor from the variant, so the instruction reads a field and tests no
+variant; `Cpu.Nmos.cs` says why `LXA` differs from `ANE` there. The core's
+tests: `CpuTests.LxaOrsAWithTheVariantsConstantAndAndsTheOperand`, five values
+of A and the operand on each of the two NMOS variants, failed in three of its
+Ricoh 2A03 cases before the change and passes after it. The Harte exclusion is
+a list with reasons, `Coverage.Excluded`, beside the two WDC opcodes whose files
+are empty, and `CoverageTests` prints each variant's count of opcodes run and
+excluded, so it is not a silent skip. It also runs the `nes6502` `$AB` file on
+the NMOS variant: all 10,000 cases pass there, so the cycles, the bus accesses
+and the flags of the 2A03's `LXA` are still checked against Harte's data, and
+only the constant is not. On the NES side, the two ROMs moved from the known
+failures to the passing table, and `all_instrs` prints "All 16 tests passed" on
+both regions. Three known failures remain: `double_2007_read` and the two MMC3
+ROMs of the other revision.
+
+**The checks** (6 October 2026, 13:45 to 14:16 UTC, load 2.4 to 38):
+
+- `cd site && npm run results`, which runs `dotnet test --configuration Release`
+  over the solution: the core 1,608 passed, the KIM-1 39, the BBC Micro 980,
+  the NES 1,503, none failed. The Harte suites: `Nmos6502Harte`,
+  `Synertek65C02Harte` and `Rockwell65C02Harte` 256 each, `Ricoh2A03Harte` 255
+  (one fewer than before, the exclusion), `Wdc65C02Harte` 254.
+- The NES differential (`bench/nes-speed/differential`) on `18cc4ec`, exported,
+  and on the change: of the 254 runs, every one is identical but
+  `instr_test-v5/rom_singles/03-immediate` on each region, the ROM that now
+  passes. `all_instrs` does not reach `$AB` in the differential's 150 frames.
+- The core's speed, `bench/thread-time` `core 5` (Dormann's test on the NMOS
+  variant), the baseline export and the change in turn, eight processes each
+  (13:40 to 13:46 UTC, load 5 to 45): median of the medians 10.97 ns a cycle
+  before and 11.11 after, with the processes' medians from 10.0 to 12.0 before
+  and 9.4 to 12.9 after. That is inside the noise; Dormann's test never runs `$AB`, so the field the change
+  added is never read on that path.
