@@ -514,5 +514,46 @@ public class PpuSpriteTests
 
         Assert.Equal([(ushort)0x0021], scene.Mapper.Reported.Select(r => r.Address));
     }
-}
 
+    [Theory]
+    [MemberData(nameof(Regions))]
+    public void TheResetButtonInTheMiddleOfEvaluationLeavesItSafeAndTheNextLineClean(string region)
+    {
+        // All 64 sprites are at Y = 0, 8 by 16, so on line 10 every one is in range and evaluation
+        // is copying them when the reset button is pressed (line 10, dot 105: five sprites in).
+        // Reset clears the count of sprites found but kept the place in secondary OAM and the
+        // sprite being read. Rendering is then switched on again after dot 1 of line 0, so line 0
+        // does not start evaluation afresh, and with every sprite in range evaluation went on from
+        // the old place and wrote past the 32 bytes of secondary OAM (ppu.md 7: 8 sprites, 32 bytes).
+        PpuScene scene = Scene(region);
+        for (int i = 0; i < 64; i++)
+        {
+            Sprite(scene, i, 0, 2, 0, i < 8 ? 16 + (i * 16) : 200);
+        }
+
+        scene.Scroll(0, 0, ctrl: 0x20);
+        scene.Ppu.WriteRegister(1, 0x18);
+        scene.TickTo(10, 105);
+
+        scene.Ppu.Reset();
+        for (int i = 0; i < 10; i++)
+        {
+            scene.Ppu.Tick();
+        }
+
+        Assert.Equal(0, scene.Ppu.Line);
+        Assert.Equal(10, scene.Ppu.Dot);
+        scene.Ppu.WriteRegister(1, 0x18);
+        scene.TickTo(20, 0);
+
+        // Line 1 starts evaluation afresh at its dot 1 and finds the first eight sprites in range
+        // (8 by 8 now, since the reset cleared PPUCTRL; Y = 0 is in range on line 1), so line 2
+        // shows sprites 0 to 7 and not the ninth.
+        for (int i = 0; i < 8; i++)
+        {
+            Assert.Equal(SpriteColour(scene, 1), scene.Pixel(16 + (i * 16), 2));
+        }
+
+        Assert.Equal(SpriteColour(scene, 0), scene.Pixel(200, 2));
+    }
+}
