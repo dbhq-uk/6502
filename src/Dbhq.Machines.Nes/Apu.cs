@@ -39,7 +39,7 @@ namespace Dbhq.Machines.Nes;
 /// through the mixer's tables (<see cref="ApuMixer"/>) only when something feeding it moved.
 /// </para>
 /// </remarks>
-public sealed class Apu
+public sealed class Apu : IReportsState
 {
     // Which actions each of the six steps takes, by mode (apu.md 10, ruling I).
     private const int Quarter = 1;
@@ -407,5 +407,44 @@ public sealed class Apu
         Pulse2.ClockHalf();
         Triangle.ClockHalf();
         Noise.ClockHalf();
+    }
+
+    /// <summary>
+    /// Every field of the unit, as <see cref="IReportsState"/> asks: the cycle count, the frame
+    /// counter, the length write flag, the channels, and the mixer. The mixer's three values are
+    /// reported as <see cref="Output"/> would make them, worked out here when they are stale and
+    /// nothing stored, so a report changes nothing; whether they were stale is a cache's own
+    /// bookkeeping, which a batch may leave either way with the same values.
+    /// </summary>
+    void IReportsState.ReportState(IStateSink sink)
+    {
+        sink.Skip(nameof(_fourStep), StateReport.Fixed);
+        sink.Skip(nameof(_fiveStep), StateReport.Fixed);
+        sink.Skip(nameof(Region), StateReport.Fixed);
+        sink.Add(nameof(_cycles), _cycles);
+
+        double pulseMix = _mixStale ? ApuMixer.Pulse(Pulse1.Output, Pulse2.Output) : _pulseMix;
+        double tndMix = _mixStale ? ApuMixer.Tnd(Triangle.Output, Noise.Output, Dmc.Level) : _tndMix;
+        sink.Add(nameof(_output), _mixStale ? pulseMix + tndMix : _output);
+        sink.Add(nameof(_pulseMix), pulseMix);
+        sink.Add(nameof(_tndMix), tndMix);
+        sink.Skip(nameof(_mixStale), "whether the three values above were stale: they are reported as they would be worked out");
+
+        sink.Add(nameof(_fiveStepMode), _fiveStepMode);
+        sink.Add(nameof(_irqInhibit), _irqInhibit);
+        sink.Add(nameof(_frameIrq), _frameIrq);
+        sink.Add(nameof(_steps), _steps == _fiveStep ? 5L : 4L);
+        sink.Add(nameof(_actions), _actions == FiveStepActions ? 5L : 4L);
+        sink.Add(nameof(_stepIndex), _stepIndex);
+        sink.Add(nameof(_frameCycle), _frameCycle);
+        sink.Add(nameof(_nextStep), _nextStep);
+        sink.Add(nameof(_resetIn), _resetIn);
+        sink.Add(nameof(_pendingFiveStepMode), _pendingFiveStepMode);
+        sink.Add(nameof(_lengthWritten), _lengthWritten);
+        sink.Add(nameof(Pulse1), Pulse1);
+        sink.Add(nameof(Pulse2), Pulse2);
+        sink.Add(nameof(Triangle), Triangle);
+        sink.Add(nameof(Noise), Noise);
+        sink.Add(nameof(Dmc), Dmc);
     }
 }

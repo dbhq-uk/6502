@@ -178,6 +178,22 @@ public sealed class Mmc3 : Board
         }
     }
 
+    /// <inheritdoc />
+    private protected override void ReportState(IStateSink sink)
+    {
+        base.ReportState(sink);
+        sink.Add(nameof(_banks), _banks);
+        sink.Skip(nameof(_headerMirroring), StateReport.Fixed);
+        sink.Add(nameof(_select), _select);
+        sink.Add(nameof(_latch), _latch);
+        sink.Add(nameof(_counter), _counter);
+        sink.Add(nameof(_reload), _reload);
+        sink.Add(nameof(_irqEnabled), _irqEnabled);
+        sink.Add(nameof(_irq), _irq);
+        sink.Add(nameof(_a12Low), _a12Low);
+        sink.Add(nameof(_lowSince), _lowSince);
+    }
+
     private void PowerOn()
     {
         PowerOnBanks.CopyTo(_banks, 0);

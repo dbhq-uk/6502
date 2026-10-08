@@ -19,9 +19,12 @@ builds run in turn, can be compared.
 | `bbc` | the BBC Micro, mode 7, at the prompt after 6 million cycles | 4 million |
 | `kim` | the KIM-1 monitor after RS and 2 million cycles | 10 million |
 | `ntsc`, `pal` | the NES running SNOW after 5 million cycles | 1.79 million |
+| `ntsc-oracle`, `pal-oracle` | the same with `NesOptions.PerDotReference`: the PPU caught up every cycle, as the per-dot build ran it (the lazy chips, task 2); it stops with a message on a commit from before the option | 1.79 million |
+| `lan-ntsc`, `lan-pal` | the NES running the bundled homebrew, Lan Master, from `roms/nes/`, at its title after 5 million cycles | 1.79 million |
 
 Dormann's test and SNOW come from the pinned forks and are checked against their hashes; the
-ROMs of the BBC Micro and the KIM-1 are the committed ones. One untimed run comes first. The
+ROMs of the BBC Micro and the KIM-1, and Lan Master, are the committed ones, Lan Master checked
+against its hash. One untimed run comes first. The
 line printed is:
 
 ```

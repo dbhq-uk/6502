@@ -49,7 +49,12 @@ public interface IMapper
     /// <summary>
     /// Called once a CPU cycle, before that cycle's access, for a board that must tell one cycle from
     /// the next (MMC1 ignores a write the cycle after a write). It runs for every cycle, so it must
-    /// be trivial and allocate nothing.
+    /// be trivial and allocate nothing. The PPU's dots of the cycle, the two before the access too,
+    /// run when the PPU is caught up, so for a board that does not watch the PPU's address bus they
+    /// may run after this call and after the access. So a board whose call here changes anything
+    /// the PPU reads (its pattern banks, its nametable layout) must say
+    /// <see cref="WatchesPpuAddresses"/>, which keeps the PPU's dots in their place, or the bus must
+    /// catch the PPU up before the call.
     /// </summary>
     void CpuCycle();
 
@@ -60,7 +65,11 @@ public interface IMapper
     /// never wrong, only slower. <see cref="Mappers.Board"/> says false for all three of these
     /// flags, so a board built on it that overrides <see cref="PpuAddressChanged"/>,
     /// <see cref="CpuCycle"/> or <see cref="Irq"/> must override the matching flag too, or the
-    /// call is skipped; a test checks every board for it.
+    /// call is skipped; a test checks every board for it. It also keeps the PPU exact for the
+    /// board: the bus catches the PPU up every cycle for a board that watches, so each address
+    /// reaches it in the cycle it is put out, where for the others the PPU runs its dots only when
+    /// something can see it. So a board whose PPU-side calls change anything the CPU can see, an
+    /// IRQ counted from the PPU's fetches for one, must say true.
     /// </summary>
     bool WatchesPpuAddresses => true;
 

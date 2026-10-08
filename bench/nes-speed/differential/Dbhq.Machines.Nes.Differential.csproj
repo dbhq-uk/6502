@@ -4,8 +4,18 @@
     <IsPackable>false</IsPackable>
   </PropertyGroup>
 
+  <!-- Switches the bus's observer on (NesBus.Observable): the hashes at each point where a chip can be seen. -->
+  <ItemGroup>
+    <RuntimeHostConfigurationOption Include="Dbhq.Machines.Nes.Observable" Value="true" />
+  </ItemGroup>
+
   <ItemGroup>
     <ProjectReference Include="../../../src/Dbhq.Machines.Nes/Dbhq.Machines.Nes.csproj" />
     <ProjectReference Include="../../../tests/Dbhq.Cpu6502.TestSupport/Dbhq.Cpu6502.TestSupport.csproj" />
+  </ItemGroup>
+
+  <!-- The check that every field of every chip is reported, shared with StateReportTests. -->
+  <ItemGroup>
+    <Compile Include="../../../tests/Dbhq.Machines.Nes.Tests/StateCompleteness.cs" Link="StateCompleteness.cs" />
   </ItemGroup>
 </Project>

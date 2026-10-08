@@ -760,4 +760,278 @@ public class NesBusTests
         nes.Bus.Read(0x0000);
         Assert.True(nes.Cpu.Irq);
     }
+
+    // The lazy PPU (the lazy chips plan, task 2). A board that watches the PPU's address bus is
+    // told each address in the cycle it is put out, so the PPU is caught up every cycle for it,
+    // and the addresses reach it with the same cycles as on the per-dot reference.
+    [Theory]
+    [MemberData(nameof(Regions))]
+    public void ABoardThatWatchesThePpusAddressesHasThePpuCaughtUpEveryCycle(string region)
+    {
+        foreach (bool watches in new[] { true, false })
+        {
+            var lazyBoard = new StubBoard(watches);
+            var referenceBoard = new StubBoard(watches);
+            var lazy = new NesBus(lazyBoard, RegionNamed(region));
+            var reference = new NesBus(referenceBoard, RegionNamed(region), new NesOptions { PerDotReference = true });
+            var owed = new OwedDots(lazy);
+            lazy.Observer = owed;
+            foreach (NesBus bus in new[] { lazy, reference })
+            {
+                bus.PowerOn();
+                bus.Write(0x2001, 0x1E);
+                for (int i = 0; i < 70_000; i++)
+                {
+                    bus.Read(0x0000);
+                }
+
+                bus.Write(0x2000, 0x18);
+                for (int i = 0; i < 40_000; i++)
+                {
+                    bus.Read(0x0000);
+                }
+            }
+
+            if (watches)
+            {
+                Assert.Equal(0, owed.Most);
+                Assert.True(referenceBoard.Reported.Count > 1000);
+            }
+            else
+            {
+                Assert.True(owed.Most > 0, "a board that does not watch had the PPU caught up every cycle");
+                Assert.Empty(referenceBoard.Reported);
+            }
+
+            Assert.Equal(referenceBoard.Reported, lazyBoard.Reported);
+            lazy.Ppu.CatchUp();
+            Assert.Equal(CatchUpScenes.Hash(reference.Ppu, picture: true), CatchUpScenes.Hash(lazy.Ppu, picture: true));
+        }
+    }
+
+    // Ruling T: a write to the cartridge can switch the pattern banks under the PPU, so the PPU is
+    // caught up before it. A CNROM bank switch in the middle of a line is seen by the fetches of the
+    // dots after the write and not by those before, in the lazy build as in the per-dot one.
+    [Theory]
+    [MemberData(nameof(Regions))]
+    public void ACartridgeWriteMidLineIsSeenOnlyByTheDotsAfterIt(string region)
+    {
+        uint[]? referencePicture = null;
+        foreach (bool oracle in new[] { true, false })
+        {
+            var bus = new NesBus(Cartridge.Load(CatchUpScenes.Cnrom()), RegionNamed(region), new NesOptions { PerDotReference = oracle });
+            bus.PowerOn();
+
+            // Every pattern byte of bank b is b: bank 0 draws the backdrop, and bank 3, $03 in both
+            // planes, colour 3 in the last two columns of each tile and the backdrop in the rest.
+            bus.Write(0x2006, 0x3F);
+            bus.Write(0x2006, 0x00);
+            foreach (byte colour in new byte[] { 0x0F, 0x16, 0x2A, 0x12 })
+            {
+                bus.Write(0x2007, colour);
+            }
+
+            bus.Write(0x2001, 0x0A);
+            while (bus.Ppu.Frame < 1)
+            {
+                bus.Read(0x0000);
+            }
+
+            // No PPU access and no NMI in frame 1 before the write, so the lazy PPU owes it every
+            // dot of the frame so far.
+            while (bus.Ppu.Line < 100 || bus.Ppu.Dot < 128)
+            {
+                bus.Read(0x0000);
+            }
+
+            if (!oracle)
+            {
+                Assert.True(bus.Ppu.LogicalDots - bus.Ppu.CaughtUpDots > 100 * Region.DotsPerLine);
+            }
+
+            bus.Write(0x8000, 3);
+            while (bus.Ppu.Frame < 2)
+            {
+                bus.Read(0x0000);
+            }
+
+            uint[] pixels = bus.Ppu.Screen.Pixels;
+            uint backdrop = PpuPalette.Colour(0x0F, 0, RegionNamed(region).EmphasisSwapsRedAndGreen, false);
+            uint three = PpuPalette.Colour(0x12, 0, RegionNamed(region).EmphasisSwapsRedAndGreen, false);
+            Assert.All(Enumerable.Range(99 * 256, 256), i => Assert.Equal(backdrop, pixels[i]));
+            Assert.All(Enumerable.Range(100 * 256, 100), i => Assert.Equal(backdrop, pixels[i]));
+            Assert.All(Enumerable.Range((100 * 256) + 160, 96), i => Assert.Equal((i & 7) >= 6 ? three : backdrop, pixels[i]));
+            Assert.All(Enumerable.Range(101 * 256, 139 * 256), i => Assert.Equal((i & 7) >= 6 ? three : backdrop, pixels[i]));
+            if (referencePicture is null)
+            {
+                referencePicture = (uint[])pixels.Clone();
+            }
+            else
+            {
+                Assert.Equal(referencePicture, pixels);
+            }
+        }
+    }
+
+    // The bus catches the PPU up in the cycle whose dots reach NextEventDot, so the NMI line is
+    // raised at that cycle's end, as the per-dot build raises it, and not before.
+    [Theory]
+    [MemberData(nameof(Regions))]
+    public void TheBusCatchesThePpuUpInTheCycleThatReachesNextEventDot(string region)
+    {
+        var bus = new NesBus(Cartridge.Load(CatchUpScenes.Nrom()), RegionNamed(region));
+        bus.PowerOn();
+        Assert.Equal(long.MaxValue, bus.Ppu.NextEventDot);
+        bus.Write(0x2000, 0x80);
+        long vblank = bus.Ppu.NextEventDot;
+        Assert.Equal(bus.Ppu.LogicalDots + (241 * Region.DotsPerLine) + 1 - ((bus.Ppu.Line * Region.DotsPerLine) + bus.Ppu.Dot) + 1, vblank);
+
+        while (bus.Ppu.LogicalDots < vblank)
+        {
+            bus.Read(0x0000);
+            if (bus.Ppu.LogicalDots < vblank)
+            {
+                Assert.True(bus.Ppu.CaughtUpDots < bus.Ppu.LogicalDots, "the PPU was caught up before its event");
+            }
+        }
+
+        Assert.Equal(bus.Ppu.LogicalDots, bus.Ppu.CaughtUpDots);
+        Assert.True(bus.Ppu.Nmi);
+        Assert.NotEqual(vblank, bus.Ppu.NextEventDot);
+
+        // Writing $2000 moves it: off, none; on again, the flag's clearing.
+        bus.Write(0x2000, 0x00);
+        Assert.Equal(long.MaxValue, bus.Ppu.NextEventDot);
+        bus.Write(0x2000, 0x80);
+        Assert.Equal(bus.Ppu.LogicalDots + (RegionNamed(region).PreRenderLine * Region.DotsPerLine) + 1 - ((bus.Ppu.Line * Region.DotsPerLine) + bus.Ppu.Dot) + 1, bus.Ppu.NextEventDot);
+    }
+
+    // Power on clears a board's CHR RAM, so the PPU runs the dots it is owed before the board is
+    // reset, with the pattern bytes it would have fetched; the reset button too, before the chips.
+    [Theory]
+    [MemberData(nameof(Regions))]
+    public void PowerOnAndResetCatchThePpuUpBeforeTheBoardIsReset(string region)
+    {
+        string? reference = null;
+        foreach (bool oracle in new[] { true, false })
+        {
+            var bus = new NesBus(Cartridge.Load(TestCartridge.Banked(2, prgBanks: 2)), RegionNamed(region), new NesOptions { PerDotReference = oracle });
+            var recorder = new CatchUpRecorder(bus);
+            bus.Observer = recorder;
+            bus.PowerOn();
+            bus.Write(0x2006, 0x00);
+            bus.Write(0x2006, 0x00);
+            for (int i = 0; i < 0x2000; i++)
+            {
+                bus.Write(0x2007, (byte)((i * 13) + 5));
+            }
+
+            bus.Write(0x2001, 0x1E);
+            while (bus.Ppu.Frame < 1 || bus.Ppu.Line < 100)
+            {
+                bus.Read(0x0000);
+            }
+
+            bus.Reset();
+            while (bus.Ppu.Line < RegionNamed(region).PreRenderLine)
+            {
+                bus.Read(0x0000);
+            }
+
+            bus.Write(0x2001, 0x1E);
+            while (bus.Ppu.Frame < 2 || bus.Ppu.Line < 120 || bus.Ppu.Dot < 100)
+            {
+                bus.Read(0x0000);
+            }
+
+            if (!oracle)
+            {
+                Assert.True(bus.Ppu.LogicalDots - bus.Ppu.CaughtUpDots > 1000);
+            }
+
+            bus.PowerOn();
+            string record = string.Join("\n", recorder.Points);
+            if (reference is null)
+            {
+                reference = record;
+            }
+            else
+            {
+                Assert.Equal(reference, record);
+            }
+        }
+    }
+
+    // A board for the bus alone: no PRG, 8 KB of pattern RAM, and a record of the addresses the PPU
+    // tells it, if it says it watches.
+    private sealed class StubBoard(bool watches) : IMapper
+    {
+        private readonly byte[] _chr = new byte[0x2000];
+
+        public List<(ushort Address, long CpuCycle)> Reported { get; } = [];
+
+        public Mirroring Mirroring => Mirroring.Vertical;
+
+        public bool Irq => false;
+
+        public bool WatchesPpuAddresses => watches;
+
+        public bool CountsCpuCycles => false;
+
+        public bool CanInterrupt => false;
+
+        public byte[] PrgRam { get; } = [];
+
+        public byte CpuRead(ushort address, byte openBus) => openBus;
+
+        public void CpuWrite(ushort address, byte value)
+        {
+        }
+
+        public byte PpuRead(ushort address) => (byte)(address * 7);
+
+        public void PpuWrite(ushort address, byte value) => _chr[address & 0x1FFF] = value;
+
+        public void PpuAddressChanged(ushort address, long cpuCycle) => Reported.Add((address, cpuCycle));
+
+        public void CpuCycle()
+        {
+        }
+
+        public void Reset(bool power)
+        {
+        }
+
+        public void ClearPrgRam()
+        {
+        }
+    }
+
+    // The most dots the PPU was owed at a cycle's end, and at an access that sees it.
+    private sealed class OwedDots(NesBus bus) : INesObserver
+    {
+        public long Most { get; private set; }
+
+        public void Accessed(ushort address, bool write, byte value)
+        {
+            if (address < 0x4000)
+            {
+                Assert.Equal(bus.Ppu.LogicalDots, bus.Ppu.CaughtUpDots);
+            }
+        }
+
+        public void CycleEnded(bool nmi, bool irq) => Most = Math.Max(Most, bus.Ppu.LogicalDots - bus.Ppu.CaughtUpDots);
+
+        public void ChipsReset(bool power)
+        {
+        }
+
+        public void DmcFetched()
+        {
+        }
+
+        public void FrameEnded()
+        {
+        }
+    }
 }

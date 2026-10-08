@@ -13,7 +13,7 @@ namespace Dbhq.Machines.Nes.Mappers;
 /// KB. The sheet says only Family BASIC has any on a real NROM board, and that most emulators give
 /// 8 KB; the header decides here, so the test ROMs, which report through <c>$6000</c>, work.
 /// </remarks>
-public sealed class Nrom : IMapper
+public sealed class Nrom : IMapper, IReportsState
 {
     private readonly byte[] _prg;
     private readonly byte[] _chr;
@@ -168,6 +168,28 @@ public sealed class Nrom : IMapper
     public void ClearPrgRam()
     {
         Array.Clear(PrgRam);
+    }
+
+    /// <inheritdoc />
+    void IReportsState.ReportState(IStateSink sink)
+    {
+        sink.Skip(nameof(_prg), "ROM");
+        if (_chrIsRam)
+        {
+            sink.Add(nameof(_chr), _chr);
+        }
+        else
+        {
+            sink.Skip(nameof(_chr), "ROM");
+        }
+
+        sink.Skip(nameof(_chrIsRam), StateReport.Fixed);
+        sink.Skip(nameof(_prgMask), StateReport.Fixed);
+        sink.Skip(nameof(_chrMask), StateReport.Fixed);
+        sink.Skip(nameof(_prgRamMask), StateReport.Fixed);
+        sink.Skip(nameof(Mirroring), StateReport.Fixed);
+        sink.Skip(nameof(NametablePageTable), StateReport.Fixed);
+        sink.Add(nameof(PrgRam), PrgRam);
     }
 
     // The length less one for a power of two, else -1 (and -1 for an empty memory, never read).

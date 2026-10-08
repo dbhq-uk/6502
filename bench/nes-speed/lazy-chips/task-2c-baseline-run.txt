@@ -1,0 +1,154 @@
+== start 2026-10-07T02:42:10Z  02:42:10 up 10 days, 12:11,  3 users,  load average: 1.87, 2.11, 1.85
+-- gauge before
+browser 153.0.8010.47
+launch 1 thread 1 cycles=2000003 thread_ms=92.765 mhz=21.560
+launch 1 thread 2 cycles=2000000 thread_ms=95.481 mhz=20.947
+launch 1 thread 3 cycles=2000000 thread_ms=94.070 mhz=21.261
+launch 1 thread 4 cycles=2000005 thread_ms=93.211 mhz=21.457
+launch 1 thread 5 cycles=2000001 thread_ms=97.289 mhz=20.557
+launch 1 thread 6 cycles=2000002 thread_ms=96.989 mhz=20.621
+launch 1 thread 7 cycles=2000002 thread_ms=93.666 mhz=21.352
+launch 1 thread 8 cycles=2000000 thread_ms=92.623 mhz=21.593
+launch 1 thread 9 cycles=2000000 thread_ms=69.515 mhz=28.771
+launch 1 thread 10 cycles=2000001 thread_ms=73.226 mhz=27.313
+== round 1 region 0 page profile 2026-10-07T02:42:14Z  02:42:14 up 10 days, 12:11,  3 users,  load average: 1.87, 2.11, 1.85
+launch 1 region 0 NTSC
+launch 1 boot cycles=5000000 frames=167 ms=1172.100 cycles_per_second=4265848 mhz=4.266 times_real=2.38
+launch 1 timed 1 cycles=1790000 frames=61 ms=433.000 cycles_per_second=4133949 mhz=4.134 times_real=2.31
+launch 1 timed 2 cycles=1790003 frames=60 ms=443.200 cycles_per_second=4038815 mhz=4.039 times_real=2.26
+launch 1 timed 3 cycles=1790001 frames=60 ms=391.200 cycles_per_second=4575667 mhz=4.576 times_real=2.56
+launch 1 timed 4 cycles=1790000 frames=60 ms=412.700 cycles_per_second=4337291 mhz=4.337 times_real=2.42
+launch 1 timed 5 cycles=1790002 frames=60 ms=385.800 cycles_per_second=4639715 mhz=4.640 times_real=2.59
+== round 1 region 0 runs-only profile 2026-10-07T02:42:19Z  02:42:19 up 10 days, 12:11,  3 users,  load average: 2.36, 2.21, 1.88
+launch 1 region 0 NTSC
+launch 1 timed 1 cycles=1790000 frames=61 ms=413.200 cycles_per_second=4332043 mhz=4.332 times_real=2.42
+launch 1 timed 2 cycles=1790003 frames=60 ms=392.700 cycles_per_second=4558195 mhz=4.558 times_real=2.55
+launch 1 timed 3 cycles=1790001 frames=60 ms=390.200 cycles_per_second=4587394 mhz=4.587 times_real=2.56
+launch 1 timed 4 cycles=1790000 frames=60 ms=425.300 cycles_per_second=4208794 mhz=4.209 times_real=2.35
+launch 1 timed 5 cycles=1790002 frames=60 ms=399.000 cycles_per_second=4486221 mhz=4.486 times_real=2.51
+launch 1 thread 1 cycles=1790001 thread_ms=406.228 mhz=4.406 times_real=2.46
+launch 1 thread 2 cycles=1790000 thread_ms=394.735 mhz=4.535 times_real=2.53
+launch 1 thread 3 cycles=1790002 thread_ms=437.279 mhz=4.094 times_real=2.29
+launch 1 thread 4 cycles=1790002 thread_ms=382.741 mhz=4.677 times_real=2.61
+launch 1 thread 5 cycles=1790002 thread_ms=483.183 mhz=3.705 times_real=2.07
+launch 1 thread 6 cycles=1790002 thread_ms=497.064 mhz=3.601 times_real=2.01
+launch 1 thread 7 cycles=1790001 thread_ms=488.124 mhz=3.667 times_real=2.05
+launch 1 thread 8 cycles=1790003 thread_ms=464.302 mhz=3.855 times_real=2.15
+== round 1 region 1 page profile 2026-10-07T02:42:28Z  02:42:28 up 10 days, 12:11,  3 users,  load average: 2.31, 2.20, 1.88
+launch 1 region 1 PAL
+launch 1 boot cycles=5000001 frames=150 ms=1357.900 cycles_per_second=3682157 mhz=3.682 times_real=2.21
+launch 1 timed 1 cycles=1790002 frames=54 ms=389.200 cycles_per_second=4599183 mhz=4.599 times_real=2.77
+launch 1 timed 2 cycles=1790000 frames=54 ms=453.700 cycles_per_second=3945338 mhz=3.945 times_real=2.37
+launch 1 timed 3 cycles=1790000 frames=53 ms=415.000 cycles_per_second=4313253 mhz=4.313 times_real=2.59
+launch 1 timed 4 cycles=1790001 frames=54 ms=428.400 cycles_per_second=4178340 mhz=4.178 times_real=2.51
+launch 1 timed 5 cycles=1790001 frames=54 ms=456.300 cycles_per_second=3922860 mhz=3.923 times_real=2.36
+== round 1 region 1 runs-only profile 2026-10-07T02:42:34Z  02:42:34 up 10 days, 12:11,  3 users,  load average: 2.68, 2.28, 1.91
+launch 1 region 1 PAL
+launch 1 timed 1 cycles=1790002 frames=54 ms=459.700 cycles_per_second=3893848 mhz=3.894 times_real=2.34
+launch 1 timed 2 cycles=1790000 frames=54 ms=441.100 cycles_per_second=4058037 mhz=4.058 times_real=2.44
+launch 1 timed 3 cycles=1790000 frames=53 ms=543.600 cycles_per_second=3292862 mhz=3.293 times_real=1.98
+launch 1 timed 4 cycles=1790001 frames=54 ms=541.800 cycles_per_second=3303804 mhz=3.304 times_real=1.99
+launch 1 timed 5 cycles=1790001 frames=54 ms=418.900 cycles_per_second=4273099 mhz=4.273 times_real=2.57
+launch 1 thread 1 cycles=1790004 thread_ms=410.064 mhz=4.365 times_real=2.63
+launch 1 thread 2 cycles=1790003 thread_ms=415.391 mhz=4.309 times_real=2.59
+launch 1 thread 3 cycles=1790000 thread_ms=395.734 mhz=4.523 times_real=2.72
+launch 1 thread 4 cycles=1790001 thread_ms=425.385 mhz=4.208 times_real=2.53
+launch 1 thread 5 cycles=1790004 thread_ms=393.590 mhz=4.548 times_real=2.74
+launch 1 thread 6 cycles=1790003 thread_ms=412.805 mhz=4.336 times_real=2.61
+launch 1 thread 7 cycles=1790003 thread_ms=407.655 mhz=4.391 times_real=2.64
+launch 1 thread 8 cycles=1790003 thread_ms=400.094 mhz=4.474 times_real=2.69
+== round 2 region 0 page profile 2026-10-07T02:42:44Z  02:42:44 up 10 days, 12:11,  3 users,  load average: 2.50, 2.26, 1.90
+launch 1 region 0 NTSC
+launch 1 boot cycles=5000000 frames=167 ms=1302.200 cycles_per_second=3839656 mhz=3.840 times_real=2.15
+launch 1 timed 1 cycles=1790000 frames=61 ms=398.600 cycles_per_second=4490718 mhz=4.491 times_real=2.51
+launch 1 timed 2 cycles=1790003 frames=60 ms=403.800 cycles_per_second=4432895 mhz=4.433 times_real=2.48
+launch 1 timed 3 cycles=1790001 frames=60 ms=417.200 cycles_per_second=4290511 mhz=4.291 times_real=2.40
+launch 1 timed 4 cycles=1790000 frames=60 ms=394.900 cycles_per_second=4532793 mhz=4.533 times_real=2.53
+launch 1 timed 5 cycles=1790002 frames=60 ms=403.800 cycles_per_second=4432893 mhz=4.433 times_real=2.48
+== round 2 region 0 runs-only profile 2026-10-07T02:42:49Z  02:42:49 up 10 days, 12:11,  4 users,  load average: 2.54, 2.27, 1.91
+launch 1 region 0 NTSC
+launch 1 timed 1 cycles=1790000 frames=61 ms=464.400 cycles_per_second=3854436 mhz=3.854 times_real=2.15
+launch 1 timed 2 cycles=1790003 frames=60 ms=475.900 cycles_per_second=3761301 mhz=3.761 times_real=2.10
+launch 1 timed 3 cycles=1790001 frames=60 ms=531.500 cycles_per_second=3367829 mhz=3.368 times_real=1.88
+launch 1 timed 4 cycles=1790000 frames=60 ms=552.000 cycles_per_second=3242754 mhz=3.243 times_real=1.81
+launch 1 timed 5 cycles=1790002 frames=60 ms=510.000 cycles_per_second=3509808 mhz=3.510 times_real=1.96
+launch 1 thread 1 cycles=1790001 thread_ms=428.658 mhz=4.176 times_real=2.33
+launch 1 thread 2 cycles=1790000 thread_ms=397.934 mhz=4.498 times_real=2.51
+launch 1 thread 3 cycles=1790002 thread_ms=415.612 mhz=4.307 times_real=2.41
+launch 1 thread 4 cycles=1790002 thread_ms=412.322 mhz=4.341 times_real=2.43
+launch 1 thread 5 cycles=1790002 thread_ms=413.274 mhz=4.331 times_real=2.42
+launch 1 thread 6 cycles=1790002 thread_ms=398.132 mhz=4.496 times_real=2.51
+launch 1 thread 7 cycles=1790001 thread_ms=397.318 mhz=4.505 times_real=2.52
+launch 1 thread 8 cycles=1790003 thread_ms=395.030 mhz=4.531 times_real=2.53
+== round 2 region 1 page profile 2026-10-07T02:42:59Z  02:42:59 up 10 days, 12:11,  4 users,  load average: 2.52, 2.28, 1.92
+launch 1 region 1 PAL
+launch 1 boot cycles=5000001 frames=150 ms=1791.400 cycles_per_second=2791114 mhz=2.791 times_real=1.68
+launch 1 timed 1 cycles=1790002 frames=54 ms=558.000 cycles_per_second=3207889 mhz=3.208 times_real=1.93
+launch 1 timed 2 cycles=1790000 frames=54 ms=509.700 cycles_per_second=3511870 mhz=3.512 times_real=2.11
+launch 1 timed 3 cycles=1790000 frames=53 ms=463.200 cycles_per_second=3864421 mhz=3.864 times_real=2.32
+launch 1 timed 4 cycles=1790001 frames=54 ms=480.100 cycles_per_second=3728392 mhz=3.728 times_real=2.24
+launch 1 timed 5 cycles=1790001 frames=54 ms=434.600 cycles_per_second=4118732 mhz=4.119 times_real=2.48
+== round 2 region 1 runs-only profile 2026-10-07T02:43:06Z  02:43:06 up 10 days, 12:11,  4 users,  load average: 3.41, 2.48, 1.99
+launch 1 region 1 PAL
+launch 1 timed 1 cycles=1790002 frames=54 ms=366.400 cycles_per_second=4885377 mhz=4.885 times_real=2.94
+launch 1 timed 2 cycles=1790000 frames=54 ms=387.100 cycles_per_second=4624128 mhz=4.624 times_real=2.78
+launch 1 timed 3 cycles=1790000 frames=53 ms=397.700 cycles_per_second=4500880 mhz=4.501 times_real=2.71
+launch 1 timed 4 cycles=1790001 frames=54 ms=375.000 cycles_per_second=4773336 mhz=4.773 times_real=2.87
+launch 1 timed 5 cycles=1790001 frames=54 ms=359.400 cycles_per_second=4980526 mhz=4.981 times_real=3.00
+launch 1 thread 1 cycles=1790004 thread_ms=447.618 mhz=3.999 times_real=2.41
+launch 1 thread 2 cycles=1790003 thread_ms=389.908 mhz=4.591 times_real=2.76
+launch 1 thread 3 cycles=1790000 thread_ms=439.760 mhz=4.070 times_real=2.45
+launch 1 thread 4 cycles=1790001 thread_ms=403.493 mhz=4.436 times_real=2.67
+launch 1 thread 5 cycles=1790004 thread_ms=406.941 mhz=4.399 times_real=2.65
+launch 1 thread 6 cycles=1790003 thread_ms=428.877 mhz=4.174 times_real=2.51
+launch 1 thread 7 cycles=1790003 thread_ms=424.193 mhz=4.220 times_real=2.54
+launch 1 thread 8 cycles=1790003 thread_ms=420.897 mhz=4.253 times_real=2.56
+== round 3 region 0 page profile 2026-10-07T02:43:14Z  02:43:14 up 10 days, 12:12,  4 users,  load average: 3.30, 2.47, 1.99
+launch 1 region 0 NTSC
+launch 1 boot cycles=5000000 frames=167 ms=1197.500 cycles_per_second=4175365 mhz=4.175 times_real=2.33
+launch 1 timed 1 cycles=1790000 frames=61 ms=504.300 cycles_per_second=3549475 mhz=3.549 times_real=1.98
+launch 1 timed 2 cycles=1790003 frames=60 ms=405.500 cycles_per_second=4414311 mhz=4.414 times_real=2.47
+launch 1 timed 3 cycles=1790001 frames=60 ms=407.600 cycles_per_second=4391563 mhz=4.392 times_real=2.45
+launch 1 timed 4 cycles=1790000 frames=60 ms=383.400 cycles_per_second=4668753 mhz=4.669 times_real=2.61
+launch 1 timed 5 cycles=1790002 frames=60 ms=398.300 cycles_per_second=4494105 mhz=4.494 times_real=2.51
+== round 3 region 0 runs-only profile 2026-10-07T02:43:20Z  02:43:20 up 10 days, 12:12,  4 users,  load average: 3.52, 2.53, 2.01
+launch 1 region 0 NTSC
+launch 1 timed 1 cycles=1790000 frames=61 ms=376.200 cycles_per_second=4758107 mhz=4.758 times_real=2.66
+launch 1 timed 2 cycles=1790003 frames=60 ms=387.500 cycles_per_second=4619363 mhz=4.619 times_real=2.58
+launch 1 timed 3 cycles=1790001 frames=60 ms=388.600 cycles_per_second=4606282 mhz=4.606 times_real=2.57
+launch 1 timed 4 cycles=1790000 frames=60 ms=367.700 cycles_per_second=4868099 mhz=4.868 times_real=2.72
+launch 1 timed 5 cycles=1790002 frames=60 ms=391.900 cycles_per_second=4567497 mhz=4.567 times_real=2.55
+launch 1 thread 1 cycles=1790001 thread_ms=405.324 mhz=4.416 times_real=2.47
+launch 1 thread 2 cycles=1790000 thread_ms=390.154 mhz=4.588 times_real=2.56
+launch 1 thread 3 cycles=1790002 thread_ms=396.073 mhz=4.519 times_real=2.53
+launch 1 thread 4 cycles=1790002 thread_ms=398.882 mhz=4.488 times_real=2.51
+launch 1 thread 5 cycles=1790002 thread_ms=391.082 mhz=4.577 times_real=2.56
+launch 1 thread 6 cycles=1790002 thread_ms=400.007 mhz=4.475 times_real=2.50
+launch 1 thread 7 cycles=1790001 thread_ms=401.196 mhz=4.462 times_real=2.49
+launch 1 thread 8 cycles=1790003 thread_ms=391.289 mhz=4.575 times_real=2.56
+== round 3 region 1 page profile 2026-10-07T02:43:29Z  02:43:29 up 10 days, 12:12,  4 users,  load average: 3.13, 2.48, 2.00
+launch 1 region 1 PAL
+launch 1 boot cycles=5000001 frames=150 ms=1223.500 cycles_per_second=4086638 mhz=4.087 times_real=2.46
+launch 1 timed 1 cycles=1790002 frames=54 ms=384.400 cycles_per_second=4656613 mhz=4.657 times_real=2.80
+launch 1 timed 2 cycles=1790000 frames=54 ms=379.700 cycles_per_second=4714248 mhz=4.714 times_real=2.84
+launch 1 timed 3 cycles=1790000 frames=53 ms=463.200 cycles_per_second=3864421 mhz=3.864 times_real=2.32
+launch 1 timed 4 cycles=1790001 frames=54 ms=570.100 cycles_per_second=3139802 mhz=3.140 times_real=1.89
+launch 1 timed 5 cycles=1790001 frames=54 ms=570.500 cycles_per_second=3137600 mhz=3.138 times_real=1.89
+== round 3 region 1 runs-only profile 2026-10-07T02:43:35Z  02:43:35 up 10 days, 12:12,  4 users,  load average: 3.12, 2.49, 2.00
+launch 1 region 1 PAL
+launch 1 timed 1 cycles=1790002 frames=54 ms=400.600 cycles_per_second=4468303 mhz=4.468 times_real=2.69
+launch 1 timed 2 cycles=1790000 frames=54 ms=390.400 cycles_per_second=4585041 mhz=4.585 times_real=2.76
+launch 1 timed 3 cycles=1790000 frames=53 ms=380.700 cycles_per_second=4701865 mhz=4.702 times_real=2.83
+launch 1 timed 4 cycles=1790001 frames=54 ms=366.800 cycles_per_second=4880046 mhz=4.880 times_real=2.94
+launch 1 timed 5 cycles=1790001 frames=54 ms=381.600 cycles_per_second=4690778 mhz=4.691 times_real=2.82
+launch 1 thread 1 cycles=1790004 thread_ms=395.903 mhz=4.521 times_real=2.72
+launch 1 thread 2 cycles=1790003 thread_ms=445.354 mhz=4.019 times_real=2.42
+launch 1 thread 3 cycles=1790000 thread_ms=420.008 mhz=4.262 times_real=2.56
+launch 1 thread 4 cycles=1790001 thread_ms=401.139 mhz=4.462 times_real=2.68
+launch 1 thread 5 cycles=1790004 thread_ms=370.875 mhz=4.826 times_real=2.90
+launch 1 thread 6 cycles=1790003 thread_ms=369.268 mhz=4.847 times_real=2.92
+launch 1 thread 7 cycles=1790003 thread_ms=361.865 mhz=4.947 times_real=2.98
+launch 1 thread 8 cycles=1790003 thread_ms=404.885 mhz=4.421 times_real=2.66
+/tmp/p2c/run-base.sh: line 18: syntax error: unexpected end of file
+(the script's last lines were lost to a sed mistake, hence the error above; the profiles had all run. The gauge after, run by hand at 2026-10-07T02:43:49Z, load 2.57 2.40 1.98:)
+launch 1 thread 1..10 mhz=26.912 29.091 26.440 27.103 23.995 28.021 28.043 28.269 28.959 26.543 (median 27.56)

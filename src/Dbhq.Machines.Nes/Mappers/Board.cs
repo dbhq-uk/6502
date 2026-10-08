@@ -18,7 +18,7 @@ namespace Dbhq.Machines.Nes.Mappers;
 /// nothing in the board), as <see cref="IMapper.CpuRead"/> asks.
 /// </para>
 /// </remarks>
-public abstract class Board : IMapper
+public abstract class Board : IMapper, IReportsState
 {
     private const int PrgWindow = 0x2000;
     private const int ChrWindow = 0x400;
@@ -299,6 +299,40 @@ public abstract class Board : IMapper
         {
             ChrBase[firstWindow + i] = offset + (i * ChrWindow);
         }
+    }
+
+    /// <inheritdoc />
+    void IReportsState.ReportState(IStateSink sink)
+    {
+        ReportState(sink);
+    }
+
+    /// <summary>
+    /// The board's state for <see cref="IReportsState"/>: what every board shares, then, in a
+    /// board that overrides this, its own registers. The PRG ROM never changes, and neither does
+    /// CHR ROM; CHR RAM is reported.
+    /// </summary>
+    private protected virtual void ReportState(IStateSink sink)
+    {
+        sink.Skip(nameof(_prgRamMask), StateReport.Fixed);
+        sink.Skip(nameof(Prg), "ROM");
+        if (_chrIsRam)
+        {
+            sink.Add(nameof(Chr), Chr);
+        }
+        else
+        {
+            sink.Skip(nameof(Chr), "ROM");
+        }
+
+        sink.Skip(nameof(_chrIsRam), StateReport.Fixed);
+        sink.Add(nameof(PrgBase), PrgBase);
+        sink.Add(nameof(ChrBase), ChrBase);
+        sink.Add(nameof(PrgRamEnabled), PrgRamEnabled);
+        sink.Add(nameof(PrgRamWritable), PrgRamWritable);
+        sink.Add(nameof(_mirroring), (int)_mirroring);
+        sink.Add(nameof(NametablePageTable), NametablePageTable);
+        sink.Add(nameof(PrgRam), PrgRam);
     }
 
     // Where in PrgRam an address from $6000 falls; RAM smaller than the 8 KB window repeats in it.
