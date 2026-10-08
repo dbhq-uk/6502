@@ -20,7 +20,7 @@ below says which code it measured.
 | `run-in-browser.mjs`, `package.json` | Fetches the ROM from the pinned fork, checks it against its SHA-256 in `Pins.cs`, serves it with the page and a published copy of the app on `127.0.0.1`, and runs it in a headless Chrome, a fresh launch each time. |
 | `native/` | The same workload as a console program, in the solution so CI builds it. |
 | `differential/` | The check that a change for speed changed nothing else: it runs every pinned NES test ROM, the bundled homebrew with a fixed round of button presses, and synthetic cartridges it assembles itself, which keep rendering on and touch the chips at moving dots, in both regions and writes one line of hashes for each (every instruction's registers, cycle and PPU position, every cycle's interrupt lines, every frame's pixels, the sound, the end state, and each chip's whole state at every point where it can be seen). In the solution too. |
-| `differential/baseline/` | The differential's output from the code before the lazy chips (behaving as `5e48505`), which every step of that work is checked against; the file is named for the commit it was recorded at. |
+| `differential/baseline/` | The differential's output with the per-dot reference (`--oracle`), which the lazy build is checked against; the file is named for the commit it was recorded at (`38c5544.txt`, after the reset fix). It replaced `4e9b92b.txt`, which was recorded from the code before the lazy chips, behaving as `5e48505`; the two differ only in the PPU's hash, on 116 of the 332 runs (below). |
 | `differential/faults.py` | Shows the differential can fail: in a scratch copy of the repository, whose path it takes, it plants one fault at a time, runs `--check` against a baseline, and counts the runs each changes. |
 
 ## The workload
@@ -75,8 +75,8 @@ Or check against the committed baseline in one command. It prints the first run 
 which of its hashes do, and exits 1 on any difference:
 
 ```sh
-dotnet run -c Release --project differential -- --check differential/baseline/4e9b92b.txt
-dotnet run -c Release --project differential -- --check differential/baseline/4e9b92b.txt --oracle
+dotnet run -c Release --project differential -- --check differential/baseline/38c5544.txt
+dotnet run -c Release --project differential -- --check differential/baseline/38c5544.txt --oracle
 ```
 
 `--oracle` builds the machine with `NesOptions.PerDotReference`, the per-dot reference that a
@@ -93,13 +93,16 @@ rendering on; the journal entry
 [`docs/journal/2026-10-06-the-nes-lazy-chips.md`](../../docs/journal/2026-10-06-the-nes-lazy-chips.md)
 has how long a run took, dated.
 
-**The baseline changes when the reset fix lands.** Pull request #71 (the reset button in the
-middle of sprite evaluation) makes the PPU's place in secondary OAM wrap at 32. That place is in
-the PPU's state report, so once #71 is in the tree `--check differential/baseline/4e9b92b.txt`
-fails on the PPU's hash, with no difference in behaviour behind it: the value the report holds
-when secondary OAM is full is 0 where it was 32. Then re-record the baseline from the merged tree
-with `--oracle` (the per-dot reference), name the file for that commit, `--check` the lazy build
-against it, and say in the journal why the file changed (issue #74).
+**The baseline changed when the reset fix landed.** Pull request #71 (the reset button in the
+middle of sprite evaluation) made the PPU's place in secondary OAM wrap at 32. That place is in
+the PPU's state report, so with #71 in the tree `--check differential/baseline/4e9b92b.txt`
+failed on the PPU's hash, with no difference in behaviour behind it: the value the report holds
+when secondary OAM is full is 0 where it was 32. On 8 October 2026 the baseline was re-recorded
+from the merged tree (`38c5544`) with `--oracle` (the per-dot reference), the lazy build was
+checked against it, and the old file was removed (issue #74). The new file differs from the old
+in the `ppu` hash alone, on 116 of the 332 runs, and in no other hash; the journal entry
+([the lazy chips](../../docs/journal/2026-10-06-the-nes-lazy-chips.md), "The baseline after the
+reset fix") has the commands, the date and the counts.
 
 To run it on a baseline that is older than the tool, export that commit with `git archive`
 into a folder of its own, copy `bench/nes-speed/differential/` into the same place in the
