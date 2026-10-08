@@ -37,13 +37,17 @@ public sealed partial class Ppu
     /// <summary>
     /// A test hook: runs the dots owed, then puts the PPU at <paramref name="line"/>,
     /// <paramref name="dot"/> of an odd or an even frame, with the VBlank, sprite 0 and overflow
-    /// flags of <paramref name="status"/> (its bits 7 to 5), so a scene can start at any dot
-    /// without running the frame up to it. Everything else is left as it is: the scroll
-    /// registers, the shifters, sprite evaluation, the picture and the memories, and the frame
-    /// count. Whether the odd frame drops its last dot is worked out as dot 338 would have, when
-    /// the position is past it. No program can do this; the scene tests use it to place an
-    /// access on every dot of a line, in both regions, which a program timed from the frame
-    /// cannot (PAL's 3.2 dots a cycle reach only 10 of every 16 dots of a line).
+    /// flags of <paramref name="status"/> (its bits 7 to 5), and no sprite fetched for the line it
+    /// is put on (as <see cref="Reset"/> leaves it), so a scene can start at any dot without
+    /// running the frame up to it and without the sprites the last scene fetched for another
+    /// line. Everything else is left as it is: the scroll registers, the shifters, sprite
+    /// evaluation, the picture and the memories, the frame count, and the time the I/O latch's
+    /// decay is measured in (<c>_timeBase</c>), so the time jumps with the position; two PPUs
+    /// moved the same way jump the same. Whether the odd frame drops its last dot is worked out
+    /// as dot 338 would have, when the position is past it. No program can do this; the scene
+    /// tests use it to place an access on every dot of a line, in both regions, which a program
+    /// cannot on PAL: on one of PAL's dot phases an access reaches only 10 of every 16 dots of
+    /// a line, and only the reset button changes the phase.
     /// </summary>
     /// <exception cref="ArgumentOutOfRangeException">The line or the dot is outside the region's frame.</exception>
     internal void MoveTo(int line, int dot, bool oddFrame, byte status)
@@ -58,6 +62,9 @@ public sealed partial class Ppu
         _oddFrame = oddFrame;
         _status = (byte)((_status & 0x1F) | (status & 0xE0));
         _suppressVblank = false;
+        _spriteCount = 0;
+        _sprite0OnLine = false;
+        ClearSpriteLine();
         _dropDot = line == _preRenderLine && dot > DropDecidedDot && oddFrame && _oddFrameSkipsADot && RenderingEnabled;
         ScheduleEvents();
     }

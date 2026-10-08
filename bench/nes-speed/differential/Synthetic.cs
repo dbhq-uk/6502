@@ -38,12 +38,13 @@
 // and a CHR bank switch from the main loop mid-frame).
 //
 // The delay: the timed workloads run in the NMI handler, after its OAM DMA, so the delay starts a
-// fixed time after VBlank begins. The frame counts up to 200 then starts again in the next of
+// fixed time after VBlank begins. The frame counts up to 120 then starts again in the next of
 // three windows, and the delay is the window's base plus the count, in single cycles (a
 // clockslide). The windows start just before NTSC's pre-render line, just before PAL's, and in
 // the middle of the picture, so in 600 frames a write lands on each dot of those lines and the
 // next in turn, both regions (--coverage prints where they landed). The counts live in RAM, which
-// the reset button keeps, so the second half of a run goes on from the first.
+// the reset button keeps, so a run goes on from where it was; but at the third start, after the
+// differential's second reset, the window before PAL's pre-render line begins again at once.
 internal enum Workload
 {
     Fuzz,
@@ -123,6 +124,9 @@ internal sealed class ProgramBuilder(Workload workload, BoardKind board, int see
     private const int Sprite0X = 0x19;
     private const int Sprite0Clip = 0x1A;
     private const int Drawn = 0x1B;
+
+    // How many times the program has started: power on, then each press of the reset button.
+    private const int Starts = 0x1C;
     private const int Oam = 0x0200;
 
     // The windows' bases, in cycles of delay: the first write lands about 20 cycles before NTSC's
@@ -249,6 +253,22 @@ internal sealed class ProgramBuilder(Workload workload, BoardKind board, int see
         }
 
         a.Label("seeded");
+        if (workload is Workload.Scroll or Workload.Mask or Workload.Sprites or Workload.Apu)
+        {
+            // The differential's second reset puts PAL's PPU on a dot phase chosen for the run;
+            // the window just before PAL's pre-render line starts at once after it, so the run's
+            // writes sweep that line on that phase.
+            a.Inc(Starts);
+            a.Lda(Starts);
+            a.CmpI(3);
+            a.Bne("third_start");
+            a.LdaI(1);
+            a.Sta(Window);
+            a.LdaI(0);
+            a.Sta(Fine);
+            a.Label("third_start");
+        }
+
         if (workload == Workload.Sprite0)
         {
             // The reset button comes after a frame end, before the place the last NMI set is

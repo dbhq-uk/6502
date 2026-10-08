@@ -19,10 +19,16 @@ internal enum DotAccessKind
 /// <summary>
 /// One access of a dot scene, made once the scene's start has been moved on by
 /// <paramref name="Offset"/> dots: the PPU's next dot is the one <paramref name="Offset"/> dots
-/// after the start, so the access comes before that dot runs.
+/// after the start, so the access comes before that dot runs. With <paramref name="Line"/> and
+/// <paramref name="Dot"/> given (<see cref="At"/>), the driver checks that the offset puts the
+/// PPU there, so a scene whose offsets are wrong (across an odd frame's dropped dot, say) fails
+/// rather than testing another dot than it names.
 /// </summary>
-internal readonly record struct DotAccess(int Offset, DotAccessKind Kind, int Register = 0, byte Value = 0)
+internal readonly record struct DotAccess(int Offset, DotAccessKind Kind, int Register = 0, byte Value = 0, int Line = -1, int Dot = -1)
 {
+    /// <summary>The same access, with the position the PPU must be at when it is made.</summary>
+    public DotAccess At(int line, int dot) => this with { Line = line, Dot = dot };
+
     public static DotAccess Write(int offset, int register, byte value) => new(offset, DotAccessKind.Write, register, value);
 
     public static DotAccess Read(int offset, int register) => new(offset, DotAccessKind.Read, register);
@@ -63,6 +69,13 @@ internal sealed record DotScene(string Name, int Line, int Dot, bool OddFrame, b
 /// </remarks>
 internal sealed class DotScenePair
 {
+    /// <summary>
+    /// What every pixel is set to as each scene starts: no colour the PPU draws (its alpha is 0),
+    /// so a pixel the scene should draw and does not is seen, and none is left right by the scene
+    /// before.
+    /// </summary>
+    public const uint Unpainted = 0x00FF00FF;
+
     private readonly StateBytes _reference = new();
     private readonly StateBytes _lazy = new();
     private readonly FrameEnds _referenceFrames;
@@ -89,12 +102,17 @@ internal sealed class DotScenePair
     /// <summary>How many accesses and scene ends were checked.</summary>
     public int Checks { get; private set; }
 
+    /// <summary>Called with the reference after each dot it runs, for a test that watches a scene from inside; null for none.</summary>
+    public Action<Ppu>? EachDot { get; set; }
+
     /// <summary>Runs <paramref name="scene"/> on both and checks them after each access and at its end.</summary>
     public void Run(DotScene scene)
     {
         ArgumentNullException.ThrowIfNull(scene);
         Reference.MoveTo(scene.Line, scene.Dot, scene.OddFrame, scene.Status);
         Lazy.MoveTo(scene.Line, scene.Dot, scene.OddFrame, scene.Status);
+        Array.Fill(Reference.PixelsAsRun, Unpainted);
+        Array.Fill(Lazy.PixelsAsRun, Unpainted);
         int at = 0;
         foreach (DotAccess access in scene.Accesses)
         {
@@ -107,6 +125,11 @@ internal sealed class DotScenePair
             at = access.Offset;
             int line = Reference.Line;
             int dot = Reference.Dot;
+            if (access.Line >= 0 && (line, dot) != (access.Line, access.Dot))
+            {
+                Assert.Fail($"{scene.Name}: the {access.Kind} at {access.Offset} dots was meant for line {access.Line} dot {access.Dot}, and the PPU is at line {line} dot {dot}");
+            }
+
             if ((line, dot) != (Lazy.Line, Lazy.Dot))
             {
                 Assert.Fail($"{scene.Name}: before the {access.Kind} at {access.Offset} dots the reference is at line {line} dot {dot} and the lazy PPU at line {Lazy.Line} dot {Lazy.Dot}");
@@ -129,9 +152,11 @@ internal sealed class DotScenePair
 
     private void MoveOn(int dots)
     {
+        Action<Ppu>? each = EachDot;
         for (int i = 0; i < dots; i++)
         {
             Reference.Tick();
+            each?.Invoke(Reference);
         }
 
         Lazy.Deliver(dots);

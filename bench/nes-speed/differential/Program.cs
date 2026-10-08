@@ -27,7 +27,16 @@ using Dbhq.Machines.Nes.Tests;
 // Each run powers on, runs the frames given (150 by default; six times that for SNOW and the MMC3
 // ROMs, whose work is in the picture and the scanline counter; four times for the homebrew and the
 // synthetic cartridges, but six for the sprite0 ones, whose sweep is longest), and presses reset
-// once half way. The file's first line names the format and the frames; then one
+// half way. The homebrew and the synthetic runs press it again at three quarters; on PAL first
+// stepping instructions until the bus's dot count (NesBus.PpuDots) is, mod 16, the run's class,
+// one of 0, 3, 6, 9 and 12 in turn by the run's place in the list. PAL's cycle is 3.2 dots, 16
+// in 5 cycles, so at the end of an instruction the count is one of those five mod 16, and the
+// reset, which puts the PPU at line 0 dot 0 while the bus counts on, starts it on that phase: a
+// program reaches only 10 of each 16 dots of a line on one phase, so across the runs every dot
+// of PAL's pre-render line is reached. On NTSC a cycle is 3 whole dots and a reset cannot move
+// the phase, so it is pressed at once. The pinned ROMs' runs press reset once, as before. That
+// second reset is format 4; the fields are format 3's. The file's first line names the format
+// and the frames; then one
 // line a run, "<rom> <region>: " and these, in this order:
 //
 //   steps, cycles  instructions run and CPU cycles at the end
@@ -72,7 +81,7 @@ using Dbhq.Machines.Nes.Tests;
 // The ROMs come from the pinned fork, checked against their hashes (NesTestRoms.Read), and are
 // never committed; the homebrew is the committed one, checked against its hash; the synthetic
 // cartridges are made from bytes each run, the same each time.
-const string Format = "# nes-differential format 3";
+const string Format = "# nes-differential format 4";
 
 string? outFile = null;
 string? baseline = null;
@@ -134,9 +143,9 @@ if (!NesBus.Observable)
 
 // Read first, one at a time, so the downloads of a first run do not race.
 var jobs = Pins.NesTestRomHashes.Keys.Order(StringComparer.Ordinal)
-    .Select(name => new Job(name, NesTestRoms.Read(name), name.Contains("snow", StringComparison.Ordinal) || name.Contains("mmc3", StringComparison.Ordinal) ? 6 : 1, Scripted: false))
-    .Append(new Job("homebrew/" + Path.GetFileName(Pins.NesHomebrewPath), RepoPaths.ReadChecked(Pins.NesHomebrewPath, Pins.NesHomebrewSha256), 4, Scripted: true))
-    .Concat(Synthetic.Jobs().Select(job => new Job(job.Name, job.Bytes, job.Times, Scripted: false)))
+    .Select(name => new Job(name, NesTestRoms.Read(name), name.Contains("snow", StringComparison.Ordinal) || name.Contains("mmc3", StringComparison.Ordinal) ? 6 : 1, Scripted: false, Phase: -1))
+    .Append(new Job("homebrew/" + Path.GetFileName(Pins.NesHomebrewPath), RepoPaths.ReadChecked(Pins.NesHomebrewPath, Pins.NesHomebrewSha256), 4, Scripted: true, Phase: 0))
+    .Concat(Synthetic.Jobs().Select((job, i) => new Job(job.Name, job.Bytes, job.Times, Scripted: false, Phase: i + 1)))
     .Where(job => only is null || job.Name.Contains(only, StringComparison.Ordinal))
     .ToList();
 
@@ -196,6 +205,12 @@ if (coverage)
 
     foreach (Region region in new[] { Region.Ntsc, Region.Pal })
     {
+        var all = dots.Where(d => d.Key.EndsWith(" " + region.Name, StringComparison.Ordinal)).Select(d => d.Value).ToList();
+        if (all.Count > 0)
+        {
+            Console.WriteLine($"synthetic runs, {region.Name}, all together: {DotCoverage.PreRenderReport(all)}");
+        }
+
         var drawn = dots.Where(d => d.Key.StartsWith("synthetic/sprite0-", StringComparison.Ordinal) && d.Key.EndsWith(" " + region.Name, StringComparison.Ordinal)).Select(d => d.Value).ToList();
         if (drawn.Count > 0)
         {
@@ -320,6 +335,13 @@ static string Run(Job job, Region region, int frames, bool oracle, Action<DotCov
     }
 
     int want = frames * job.Times;
+
+    // The second reset's dot phase on PAL (see the top of the file), and whether instructions are
+    // being stepped until the bus comes to it.
+    // PAL's bus ends an instruction on a dot count of 0, 3, 6, 9 or 12 mod 16.
+    int phase = job.Phase >= 0 ? 3 * (job.Phase % 5) : -1;
+    bool stepping = false;
+    int stepped = 0;
     var trace = new Fnv();
     var sound = new Fnv();
     var watch = new Watch(nes) { Coverage = coverage is null ? null : new DotCoverage() };
@@ -340,6 +362,19 @@ static string Run(Job job, Region region, int frames, bool oracle, Action<DotCov
         trace.Add(position);
         watch.Cpu.Add(registers);
         watch.Cpu.Add(position);
+        if (stepping)
+        {
+            if ((nes.Bus.PpuDots & 15) == phase)
+            {
+                nes.Reset();
+                stepping = false;
+            }
+            else if (++stepped > 1000)
+            {
+                throw new InvalidOperationException($"the bus's dot count did not come to {phase} mod 16 in 1000 instructions");
+            }
+        }
+
         if (ppu.Frame == lastFrame)
         {
             continue;
@@ -373,6 +408,18 @@ static string Run(Job job, Region region, int frames, bool oracle, Action<DotCov
         if (lastFrame == want / 2)
         {
             nes.Reset();
+        }
+
+        if (job.Phase >= 0 && lastFrame == want * 3 / 4)
+        {
+            if (region.DotsNumerator % region.DotsDenominator == 0)
+            {
+                nes.Reset();
+            }
+            else
+            {
+                stepping = true;
+            }
         }
     }
 
@@ -434,9 +481,10 @@ static void AddOam(Fnv hash, Ppu ppu)
 static ulong Lines(Nes nes) =>
     (nes.Cpu.Nmi ? 1UL : 0) | (nes.Cpu.Irq ? 2UL : 0) | (nes.Bus.Ppu.Nmi ? 4UL : 0) | (nes.Bus.Apu.Irq ? 8UL : 0);
 
-// A ROM to run: its name, its bytes, how many times the frames given it runs for, and whether it
-// gets the homebrew's button presses.
-internal sealed record Job(string Name, byte[] Bytes, int Times, bool Scripted);
+// A ROM to run: its name, its bytes, how many times the frames given it runs for, whether it gets
+// the homebrew's button presses, and its place among the runs that press reset a second time, or
+// -1 for a pinned ROM, which does not.
+internal sealed record Job(string Name, byte[] Bytes, int Times, bool Scripted, int Phase);
 
 // FNV-1a over 64-bit words, as the first version of the tool hashed.
 internal sealed class Fnv
@@ -786,6 +834,10 @@ internal sealed class DotCoverage
     private readonly bool[] _preRender = new bool[341];
     private readonly bool[] _vblank = new bool[341];
 
+    // The dots of the pre-render line at which any PPU access, a read or a write, landed with
+    // rendering on: what a fault visible only at one of them needs.
+    private readonly bool[] _preRenderAny = new bool[341];
+
     // By y (0 to 239), the x's place in Sprite0X and the clip: drawn, and a hit read.
     private readonly bool[] _sprite0Drawn = new bool[240 * 8 * 2];
     private readonly bool[] _sprite0Hit = new bool[240 * 8 * 2];
@@ -812,6 +864,11 @@ internal sealed class DotCoverage
             _vblank[dot] = true;
         }
 
+        if (line == ppu.Region.PreRenderLine && ppu.RenderingEnabled)
+        {
+            _preRenderAny[dot] = true;
+        }
+
         if (!write || !ppu.RenderingEnabled)
         {
             return;
@@ -831,6 +888,23 @@ internal sealed class DotCoverage
     {
         string Of(bool[] hit) => $"{hit.Count(h => h)}/341 (key dots missing: {string.Join(",", Key.Where(d => !hit[d]))})";
         return $"visible {Of(_visible)}, pre-render {Of(_preRender)}; line 241, $2000 writes and $2002 reads, dots 0 to 3: {string.Join(",", Enumerable.Range(0, 4).Where(d => _vblank[d]))}";
+    }
+
+    // The runs of one region together: how many reach each of the pre-render line's key dots, and
+    // the dots of that line no run reaches, by any access with rendering on.
+    public static string PreRenderReport(IReadOnlyList<DotCoverage> runs)
+    {
+        int[] reached = new int[341];
+        foreach (DotCoverage run in runs)
+        {
+            for (int d = 0; d < 341; d++)
+            {
+                reached[d] += run._preRenderAny[d] ? 1 : 0;
+            }
+        }
+
+        var none = Enumerable.Range(0, 341).Where(d => reached[d] == 0).ToList();
+        return $"pre-render line, any access with rendering on: runs reaching dot {string.Join(", ", Key.Select(d => $"{d}: {reached[d]}"))}; dots no run reaches: {(none.Count == 0 ? "none" : string.Join(",", none))}";
     }
 
     // The sprite0 runs of one region together: how many of the (y, x, clip) places were drawn and
