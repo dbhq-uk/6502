@@ -114,6 +114,19 @@ public sealed class Mmc1 : Board
         ApplyRegisters();
     }
 
+    /// <inheritdoc />
+    private protected override void ReportState(IStateSink sink)
+    {
+        base.ReportState(sink);
+        sink.Add(nameof(_shift), _shift);
+        sink.Add(nameof(_count), _count);
+        sink.Add(nameof(_control), _control);
+        sink.Add(nameof(_chr0), _chr0);
+        sink.Add(nameof(_chr1), _chr1);
+        sink.Add(nameof(_prg), _prg);
+        sink.Add(nameof(_sinceWrite), _sinceWrite);
+    }
+
     private void PowerOn()
     {
         _shift = 0;

@@ -35,7 +35,7 @@ public sealed partial class Ppu
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private void EvaluateOddDot(int dot)
     {
-        _oamLatch = dot <= 64 ? (byte)0xFF : Oam[(_evaluationN << 2) | _evaluationM];
+        _oamLatch = dot <= 64 ? (byte)0xFF : _oam[(_evaluationN << 2) | _evaluationM];
     }
 
     // An even dot: secondary OAM is being cleared to $FF up to dot 64, and after it the byte the

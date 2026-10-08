@@ -46,7 +46,7 @@ namespace Dbhq.Machines.Nes;
 /// reading loses old sound and no memory. Nothing allocates after construction.
 /// </para>
 /// </remarks>
-public sealed class SampleBuffer
+public sealed class SampleBuffer : IReportsState
 {
     // The level is averaged over blocks of this many cycles before it is resampled.
     private const int BlockCycles = 8;
@@ -260,6 +260,41 @@ public sealed class SampleBuffer
         {
             _count++;
         }
+    }
+
+    /// <summary>
+    /// Every field, as <see cref="IReportsState"/> asks: the resampler's block and step state, the
+    /// filters, the ring's place and count, and the samples waiting in it, oldest first.
+    /// </summary>
+    void IReportsState.ReportState(IStateSink sink)
+    {
+        sink.Skip(nameof(_blockIncrement), StateReport.Fixed);
+        sink.Skip(nameof(_consoleFilters), StateReport.Fixed);
+        sink.Skip(nameof(_highPass90), StateReport.Fixed);
+        sink.Skip(nameof(_highPass440), StateReport.Fixed);
+        sink.Skip(nameof(_lowPass14k), StateReport.Fixed);
+        sink.Skip(nameof(SampleRate), StateReport.Fixed);
+        sink.Skip(nameof(Capacity), StateReport.Fixed);
+        sink.Add(nameof(_pending), _pending);
+        sink.Add(nameof(_hp90Out), _hp90Out);
+        sink.Add(nameof(_hp90In), _hp90In);
+        sink.Add(nameof(_hp440Out), _hp440Out);
+        sink.Add(nameof(_hp440In), _hp440In);
+        sink.Add(nameof(_lpOut), _lpOut);
+        sink.Add(nameof(_blockSum), _blockSum);
+        sink.Add(nameof(_blockLeft), _blockLeft);
+        sink.Add(nameof(_level), _level);
+        sink.Add(nameof(_output), _output);
+        sink.Add(nameof(_instant), _instant);
+        sink.Add(nameof(_fraction), _fraction);
+        sink.Add(nameof(_read), _read);
+        sink.Add(nameof(_count), _count);
+        sink.Add(nameof(_dropped), _dropped);
+
+        // The waiting samples in the order Read gives them; the rest of the ring is old.
+        int first = Math.Min(_count, Capacity - _read);
+        sink.Add(nameof(_ring), _ring.AsSpan(_read, first));
+        sink.Add("_ring (wrapped)", _ring.AsSpan(0, _count - first));
     }
 
     private static double HighPass(double hertz, double dt)

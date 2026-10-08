@@ -2,4 +2,10 @@
   <ItemGroup>
     <ProjectReference Include="../Dbhq.Cpu6502/Dbhq.Cpu6502.csproj" />
   </ItemGroup>
+
+  <!-- The state reports and the observer (StateReport.cs) are internal: for the tests and the differential only. -->
+  <ItemGroup>
+    <InternalsVisibleTo Include="Dbhq.Machines.Nes.Tests" />
+    <InternalsVisibleTo Include="Dbhq.Machines.Nes.Differential" />
+  </ItemGroup>
 </Project>

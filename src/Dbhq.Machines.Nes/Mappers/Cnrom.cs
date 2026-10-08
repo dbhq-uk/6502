@@ -34,6 +34,13 @@ public sealed class Cnrom : Board
         }
     }
 
+    /// <inheritdoc />
+    private protected override void ReportState(IStateSink sink)
+    {
+        base.ReportState(sink);
+        sink.Skip(nameof(_busConflicts), StateReport.Fixed);
+    }
+
     private protected override void WriteRegister(ushort address, byte value)
     {
         SetChr8(_busConflicts ? value & RomByte(address) : value);

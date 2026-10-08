@@ -1,0 +1,527 @@
+== NES region 0 set start 02:20:20 UTC uptime: 02:20:20 up 10 days, 11:49,  4 users,  load average: 1.34, 1.81, 2.00
+-- base round 1 02:20:20 load 1.34
+base launch 1 boot cycles=5000000 frames=167 ms=1427.200 cycles_per_second=3503363 mhz=3.503 times_real=1.96
+base launch 1 timed 1 cycles=1790000 frames=61 ms=453.100 cycles_per_second=3950563 mhz=3.951 times_real=2.21
+base launch 1 timed 2 cycles=1790003 frames=60 ms=476.000 cycles_per_second=3760511 mhz=3.761 times_real=2.10
+base launch 1 timed 3 cycles=1790001 frames=60 ms=437.600 cycles_per_second=4090496 mhz=4.090 times_real=2.29
+base launch 1 timed 4 cycles=1790000 frames=60 ms=438.700 cycles_per_second=4080237 mhz=4.080 times_real=2.28
+base launch 1 timed 5 cycles=1790002 frames=60 ms=438.200 cycles_per_second=4084897 mhz=4.085 times_real=2.28
+base launch 1 thread 1 cycles=1790001 thread_ms=434.115 mhz=4.123 times_real=2.30
+base launch 1 thread 2 cycles=1790000 thread_ms=457.666 mhz=3.911 times_real=2.19
+base launch 1 thread 3 cycles=1790002 thread_ms=459.501 mhz=3.896 times_real=2.18
+base launch 1 thread 4 cycles=1790002 thread_ms=405.850 mhz=4.411 times_real=2.46
+base launch 1 thread 5 cycles=1790002 thread_ms=475.619 mhz=3.764 times_real=2.10
+base launch 1 thread 6 cycles=1790002 thread_ms=487.540 mhz=3.671 times_real=2.05
+base launch 1 thread 7 cycles=1790001 thread_ms=437.587 mhz=4.091 times_real=2.29
+base launch 1 thread 8 cycles=1790003 thread_ms=403.569 mhz=4.435 times_real=2.48
+-- lazy round 1 02:20:30 load 1.39
+lazy launch 1 boot cycles=5000000 frames=167 ms=884.500 cycles_per_second=5652911 mhz=5.653 times_real=3.16
+lazy launch 1 timed 1 cycles=1790000 frames=61 ms=310.900 cycles_per_second=5757478 mhz=5.757 times_real=3.22
+lazy launch 1 timed 2 cycles=1790003 frames=60 ms=321.900 cycles_per_second=5560742 mhz=5.561 times_real=3.11
+lazy launch 1 timed 3 cycles=1790001 frames=60 ms=291.200 cycles_per_second=6146981 mhz=6.147 times_real=3.43
+lazy launch 1 timed 4 cycles=1790000 frames=60 ms=291.000 cycles_per_second=6151203 mhz=6.151 times_real=3.44
+lazy launch 1 timed 5 cycles=1790002 frames=60 ms=298.600 cycles_per_second=5994648 mhz=5.995 times_real=3.35
+lazy launch 1 thread 1 cycles=1790001 thread_ms=323.550 mhz=5.532 times_real=3.09
+lazy launch 1 thread 2 cycles=1790000 thread_ms=319.531 mhz=5.602 times_real=3.13
+lazy launch 1 thread 3 cycles=1790002 thread_ms=290.521 mhz=6.161 times_real=3.44
+lazy launch 1 thread 4 cycles=1790002 thread_ms=283.964 mhz=6.304 times_real=3.52
+lazy launch 1 thread 5 cycles=1790002 thread_ms=328.860 mhz=5.443 times_real=3.04
+lazy launch 1 thread 6 cycles=1790002 thread_ms=280.854 mhz=6.373 times_real=3.56
+lazy launch 1 thread 7 cycles=1790001 thread_ms=274.364 mhz=6.524 times_real=3.65
+lazy launch 1 thread 8 cycles=1790003 thread_ms=280.957 mhz=6.371 times_real=3.56
+-- base round 2 02:20:37 load 1.48
+base launch 1 boot cycles=5000000 frames=167 ms=1219.500 cycles_per_second=4100041 mhz=4.100 times_real=2.29
+base launch 1 timed 1 cycles=1790000 frames=61 ms=409.100 cycles_per_second=4375458 mhz=4.375 times_real=2.44
+base launch 1 timed 2 cycles=1790003 frames=60 ms=426.100 cycles_per_second=4200899 mhz=4.201 times_real=2.35
+base launch 1 timed 3 cycles=1790001 frames=60 ms=456.900 cycles_per_second=3917708 mhz=3.918 times_real=2.19
+base launch 1 timed 4 cycles=1790000 frames=60 ms=540.700 cycles_per_second=3310523 mhz=3.311 times_real=1.85
+base launch 1 timed 5 cycles=1790002 frames=60 ms=459.600 cycles_per_second=3894695 mhz=3.895 times_real=2.18
+base launch 1 thread 1 cycles=1790001 thread_ms=496.457 mhz=3.606 times_real=2.01
+base launch 1 thread 2 cycles=1790000 thread_ms=441.718 mhz=4.052 times_real=2.26
+base launch 1 thread 3 cycles=1790002 thread_ms=444.436 mhz=4.028 times_real=2.25
+base launch 1 thread 4 cycles=1790002 thread_ms=447.361 mhz=4.001 times_real=2.24
+base launch 1 thread 5 cycles=1790002 thread_ms=426.722 mhz=4.195 times_real=2.34
+base launch 1 thread 6 cycles=1790002 thread_ms=406.530 mhz=4.403 times_real=2.46
+base launch 1 thread 7 cycles=1790001 thread_ms=438.884 mhz=4.079 times_real=2.28
+base launch 1 thread 8 cycles=1790003 thread_ms=416.738 mhz=4.295 times_real=2.40
+-- lazy round 2 02:20:46 load 1.64
+lazy launch 1 boot cycles=5000000 frames=167 ms=919.900 cycles_per_second=5435373 mhz=5.435 times_real=3.04
+lazy launch 1 timed 1 cycles=1790000 frames=61 ms=304.500 cycles_per_second=5878489 mhz=5.878 times_real=3.28
+lazy launch 1 timed 2 cycles=1790003 frames=60 ms=313.100 cycles_per_second=5717033 mhz=5.717 times_real=3.19
+lazy launch 1 timed 3 cycles=1790001 frames=60 ms=315.100 cycles_per_second=5680739 mhz=5.681 times_real=3.17
+lazy launch 1 timed 4 cycles=1790000 frames=60 ms=349.300 cycles_per_second=5124535 mhz=5.125 times_real=2.86
+lazy launch 1 timed 5 cycles=1790002 frames=60 ms=334.100 cycles_per_second=5357683 mhz=5.358 times_real=2.99
+lazy launch 1 thread 1 cycles=1790001 thread_ms=367.394 mhz=4.872 times_real=2.72
+lazy launch 1 thread 2 cycles=1790000 thread_ms=367.900 mhz=4.865 times_real=2.72
+lazy launch 1 thread 3 cycles=1790002 thread_ms=371.344 mhz=4.820 times_real=2.69
+lazy launch 1 thread 4 cycles=1790002 thread_ms=304.846 mhz=5.872 times_real=3.28
+lazy launch 1 thread 5 cycles=1790002 thread_ms=305.162 mhz=5.866 times_real=3.28
+lazy launch 1 thread 6 cycles=1790002 thread_ms=319.593 mhz=5.601 times_real=3.13
+lazy launch 1 thread 7 cycles=1790001 thread_ms=319.701 mhz=5.599 times_real=3.13
+lazy launch 1 thread 8 cycles=1790003 thread_ms=292.133 mhz=6.127 times_real=3.42
+-- base round 3 02:20:53 load 1.67
+base launch 1 boot cycles=5000000 frames=167 ms=1186.900 cycles_per_second=4212655 mhz=4.213 times_real=2.35
+base launch 1 timed 1 cycles=1790000 frames=61 ms=479.200 cycles_per_second=3735392 mhz=3.735 times_real=2.09
+base launch 1 timed 2 cycles=1790003 frames=60 ms=433.000 cycles_per_second=4133956 mhz=4.134 times_real=2.31
+base launch 1 timed 3 cycles=1790001 frames=60 ms=418.000 cycles_per_second=4282299 mhz=4.282 times_real=2.39
+base launch 1 timed 4 cycles=1790000 frames=60 ms=413.700 cycles_per_second=4326807 mhz=4.327 times_real=2.42
+base launch 1 timed 5 cycles=1790002 frames=60 ms=413.300 cycles_per_second=4330999 mhz=4.331 times_real=2.42
+base launch 1 thread 1 cycles=1790001 thread_ms=438.215 mhz=4.085 times_real=2.28
+base launch 1 thread 2 cycles=1790000 thread_ms=404.585 mhz=4.424 times_real=2.47
+base launch 1 thread 3 cycles=1790002 thread_ms=515.520 mhz=3.472 times_real=1.94
+base launch 1 thread 4 cycles=1790002 thread_ms=465.704 mhz=3.844 times_real=2.15
+base launch 1 thread 5 cycles=1790002 thread_ms=430.999 mhz=4.153 times_real=2.32
+base launch 1 thread 6 cycles=1790002 thread_ms=463.807 mhz=3.859 times_real=2.16
+base launch 1 thread 7 cycles=1790001 thread_ms=548.195 mhz=3.265 times_real=1.82
+base launch 1 thread 8 cycles=1790003 thread_ms=534.024 mhz=3.352 times_real=1.87
+-- lazy round 3 02:21:02 load 1.72
+lazy launch 1 boot cycles=5000000 frames=167 ms=1202.000 cycles_per_second=4159734 mhz=4.160 times_real=2.32
+lazy launch 1 timed 1 cycles=1790000 frames=61 ms=430.400 cycles_per_second=4158922 mhz=4.159 times_real=2.32
+lazy launch 1 timed 2 cycles=1790003 frames=60 ms=393.700 cycles_per_second=4546617 mhz=4.547 times_real=2.54
+lazy launch 1 timed 3 cycles=1790001 frames=60 ms=319.500 cycles_per_second=5602507 mhz=5.603 times_real=3.13
+lazy launch 1 timed 4 cycles=1790000 frames=60 ms=316.000 cycles_per_second=5664557 mhz=5.665 times_real=3.16
+lazy launch 1 timed 5 cycles=1790002 frames=60 ms=311.300 cycles_per_second=5750087 mhz=5.750 times_real=3.21
+lazy launch 1 thread 1 cycles=1790001 thread_ms=330.194 mhz=5.421 times_real=3.03
+lazy launch 1 thread 2 cycles=1790000 thread_ms=311.179 mhz=5.752 times_real=3.21
+lazy launch 1 thread 3 cycles=1790002 thread_ms=302.301 mhz=5.921 times_real=3.31
+lazy launch 1 thread 4 cycles=1790002 thread_ms=308.056 mhz=5.811 times_real=3.25
+lazy launch 1 thread 5 cycles=1790002 thread_ms=319.274 mhz=5.606 times_real=3.13
+lazy launch 1 thread 6 cycles=1790002 thread_ms=418.952 mhz=4.273 times_real=2.39
+lazy launch 1 thread 7 cycles=1790001 thread_ms=363.357 mhz=4.926 times_real=2.75
+lazy launch 1 thread 8 cycles=1790003 thread_ms=340.030 mhz=5.264 times_real=2.94
+-- base round 4 02:21:10 load 1.76
+base launch 1 boot cycles=5000000 frames=167 ms=1335.800 cycles_per_second=3743075 mhz=3.743 times_real=2.09
+base launch 1 timed 1 cycles=1790000 frames=61 ms=398.500 cycles_per_second=4491844 mhz=4.492 times_real=2.51
+base launch 1 timed 2 cycles=1790003 frames=60 ms=392.000 cycles_per_second=4566334 mhz=4.566 times_real=2.55
+base launch 1 timed 3 cycles=1790001 frames=60 ms=409.800 cycles_per_second=4367987 mhz=4.368 times_real=2.44
+base launch 1 timed 4 cycles=1790000 frames=60 ms=409.300 cycles_per_second=4373320 mhz=4.373 times_real=2.44
+base launch 1 timed 5 cycles=1790002 frames=60 ms=453.300 cycles_per_second=3948824 mhz=3.949 times_real=2.21
+base launch 1 thread 1 cycles=1790001 thread_ms=530.224 mhz=3.376 times_real=1.89
+base launch 1 thread 2 cycles=1790000 thread_ms=500.117 mhz=3.579 times_real=2.00
+base launch 1 thread 3 cycles=1790002 thread_ms=490.913 mhz=3.646 times_real=2.04
+base launch 1 thread 4 cycles=1790002 thread_ms=473.645 mhz=3.779 times_real=2.11
+base launch 1 thread 5 cycles=1790002 thread_ms=517.403 mhz=3.460 times_real=1.93
+base launch 1 thread 6 cycles=1790002 thread_ms=494.724 mhz=3.618 times_real=2.02
+base launch 1 thread 7 cycles=1790001 thread_ms=498.975 mhz=3.587 times_real=2.00
+base launch 1 thread 8 cycles=1790003 thread_ms=500.436 mhz=3.577 times_real=2.00
+-- lazy round 4 02:21:20 load 1.80
+lazy launch 1 boot cycles=5000000 frames=167 ms=859.400 cycles_per_second=5818013 mhz=5.818 times_real=3.25
+lazy launch 1 timed 1 cycles=1790000 frames=61 ms=286.500 cycles_per_second=6247818 mhz=6.248 times_real=3.49
+lazy launch 1 timed 2 cycles=1790003 frames=60 ms=318.300 cycles_per_second=5623635 mhz=5.624 times_real=3.14
+lazy launch 1 timed 3 cycles=1790001 frames=60 ms=368.500 cycles_per_second=4857533 mhz=4.858 times_real=2.71
+lazy launch 1 timed 4 cycles=1790000 frames=60 ms=338.400 cycles_per_second=5289598 mhz=5.290 times_real=2.96
+lazy launch 1 timed 5 cycles=1790002 frames=60 ms=315.200 cycles_per_second=5678940 mhz=5.679 times_real=3.17
+lazy launch 1 thread 1 cycles=1790001 thread_ms=354.482 mhz=5.050 times_real=2.82
+lazy launch 1 thread 2 cycles=1790000 thread_ms=281.052 mhz=6.369 times_real=3.56
+lazy launch 1 thread 3 cycles=1790002 thread_ms=273.599 mhz=6.542 times_real=3.66
+lazy launch 1 thread 4 cycles=1790002 thread_ms=281.024 mhz=6.370 times_real=3.56
+lazy launch 1 thread 5 cycles=1790002 thread_ms=285.544 mhz=6.269 times_real=3.50
+lazy launch 1 thread 6 cycles=1790002 thread_ms=277.478 mhz=6.451 times_real=3.60
+lazy launch 1 thread 7 cycles=1790001 thread_ms=319.937 mhz=5.595 times_real=3.13
+lazy launch 1 thread 8 cycles=1790003 thread_ms=292.322 mhz=6.123 times_real=3.42
+== NES region 0 set end 02:21:27 UTC uptime: 02:21:27 up 10 days, 11:50,  3 users,  load average: 1.74, 1.85, 1.99
+== BBC gauge 02:21:27 UTC load 1.74 1.85 1.99
+launch 1 prompt yes
+launch 1 timed 1 cycles=2000000 ms=81.300 cycles_per_second=24600246 mhz=24.600
+launch 1 thread 1 cycles=2000003 thread_ms=77.948 mhz=25.658
+launch 1 thread 2 cycles=2000000 thread_ms=106.639 mhz=18.755
+launch 1 thread 3 cycles=2000000 thread_ms=105.796 mhz=18.904
+launch 1 thread 4 cycles=2000005 thread_ms=104.527 mhz=19.134
+launch 1 thread 5 cycles=2000001 thread_ms=107.735 mhz=18.564
+launch 1 thread 6 cycles=2000002 thread_ms=94.567 mhz=21.149
+launch 1 thread 7 cycles=2000002 thread_ms=94.434 mhz=21.179
+launch 1 thread 8 cycles=2000000 thread_ms=93.248 mhz=21.448
+launch 1 thread 9 cycles=2000000 thread_ms=93.811 mhz=21.319
+launch 1 thread 10 cycles=2000001 thread_ms=92.202 mhz=21.692
+== NES region 1 set start 02:21:30 UTC uptime: 02:21:30 up 10 days, 11:50,  3 users,  load average: 1.68, 1.83, 1.99
+-- base round 1 02:21:30 load 1.68
+base launch 1 boot cycles=5000001 frames=150 ms=1170.200 cycles_per_second=4272775 mhz=4.273 times_real=2.57
+base launch 1 timed 1 cycles=1790002 frames=54 ms=431.700 cycles_per_second=4146403 mhz=4.146 times_real=2.49
+base launch 1 timed 2 cycles=1790000 frames=54 ms=373.600 cycles_per_second=4791221 mhz=4.791 times_real=2.88
+base launch 1 timed 3 cycles=1790000 frames=53 ms=484.700 cycles_per_second=3693006 mhz=3.693 times_real=2.22
+base launch 1 timed 4 cycles=1790001 frames=54 ms=525.000 cycles_per_second=3409526 mhz=3.410 times_real=2.05
+base launch 1 timed 5 cycles=1790001 frames=54 ms=395.000 cycles_per_second=4531648 mhz=4.532 times_real=2.73
+base launch 1 thread 1 cycles=1790004 thread_ms=411.801 mhz=4.347 times_real=2.61
+base launch 1 thread 2 cycles=1790003 thread_ms=405.247 mhz=4.417 times_real=2.66
+base launch 1 thread 3 cycles=1790000 thread_ms=457.752 mhz=3.910 times_real=2.35
+base launch 1 thread 4 cycles=1790001 thread_ms=401.815 mhz=4.455 times_real=2.68
+base launch 1 thread 5 cycles=1790004 thread_ms=371.128 mhz=4.823 times_real=2.90
+base launch 1 thread 6 cycles=1790003 thread_ms=352.876 mhz=5.073 times_real=3.05
+base launch 1 thread 7 cycles=1790003 thread_ms=369.776 mhz=4.841 times_real=2.91
+base launch 1 thread 8 cycles=1790003 thread_ms=395.443 mhz=4.527 times_real=2.72
+-- lazy round 1 02:21:39 load 1.62
+lazy launch 1 boot cycles=5000001 frames=150 ms=1014.100 cycles_per_second=4930481 mhz=4.930 times_real=2.97
+lazy launch 1 timed 1 cycles=1790002 frames=54 ms=281.700 cycles_per_second=6354285 mhz=6.354 times_real=3.82
+lazy launch 1 timed 2 cycles=1790000 frames=54 ms=281.100 cycles_per_second=6367841 mhz=6.368 times_real=3.83
+lazy launch 1 timed 3 cycles=1790000 frames=53 ms=297.900 cycles_per_second=6008728 mhz=6.009 times_real=3.61
+lazy launch 1 timed 4 cycles=1790001 frames=54 ms=300.900 cycles_per_second=5948824 mhz=5.949 times_real=3.58
+lazy launch 1 timed 5 cycles=1790001 frames=54 ms=315.200 cycles_per_second=5678937 mhz=5.679 times_real=3.42
+lazy launch 1 thread 1 cycles=1790004 thread_ms=403.636 mhz=4.435 times_real=2.67
+lazy launch 1 thread 2 cycles=1790003 thread_ms=398.135 mhz=4.496 times_real=2.70
+lazy launch 1 thread 3 cycles=1790000 thread_ms=301.925 mhz=5.929 times_real=3.57
+lazy launch 1 thread 4 cycles=1790001 thread_ms=299.308 mhz=5.980 times_real=3.60
+lazy launch 1 thread 5 cycles=1790004 thread_ms=302.641 mhz=5.915 times_real=3.56
+lazy launch 1 thread 6 cycles=1790003 thread_ms=315.880 mhz=5.667 times_real=3.41
+lazy launch 1 thread 7 cycles=1790003 thread_ms=408.738 mhz=4.379 times_real=2.63
+lazy launch 1 thread 8 cycles=1790003 thread_ms=353.117 mhz=5.069 times_real=3.05
+-- base round 2 02:21:46 load 1.67
+base launch 1 boot cycles=5000001 frames=150 ms=1169.200 cycles_per_second=4276429 mhz=4.276 times_real=2.57
+base launch 1 timed 1 cycles=1790002 frames=54 ms=422.200 cycles_per_second=4239702 mhz=4.240 times_real=2.55
+base launch 1 timed 2 cycles=1790000 frames=54 ms=391.500 cycles_per_second=4572158 mhz=4.572 times_real=2.75
+base launch 1 timed 3 cycles=1790000 frames=53 ms=394.900 cycles_per_second=4532793 mhz=4.533 times_real=2.73
+base launch 1 timed 4 cycles=1790001 frames=54 ms=433.900 cycles_per_second=4125377 mhz=4.125 times_real=2.48
+base launch 1 timed 5 cycles=1790001 frames=54 ms=396.900 cycles_per_second=4509955 mhz=4.510 times_real=2.71
+base launch 1 thread 1 cycles=1790004 thread_ms=511.691 mhz=3.498 times_real=2.10
+base launch 1 thread 2 cycles=1790003 thread_ms=451.157 mhz=3.968 times_real=2.39
+base launch 1 thread 3 cycles=1790000 thread_ms=427.289 mhz=4.189 times_real=2.52
+base launch 1 thread 4 cycles=1790001 thread_ms=465.550 mhz=3.845 times_real=2.31
+base launch 1 thread 5 cycles=1790004 thread_ms=387.363 mhz=4.621 times_real=2.78
+base launch 1 thread 6 cycles=1790003 thread_ms=354.682 mhz=5.047 times_real=3.04
+base launch 1 thread 7 cycles=1790003 thread_ms=350.560 mhz=5.106 times_real=3.07
+base launch 1 thread 8 cycles=1790003 thread_ms=375.323 mhz=4.769 times_real=2.87
+-- lazy round 2 02:21:55 load 1.65
+lazy launch 1 boot cycles=5000001 frames=150 ms=819.400 cycles_per_second=6102027 mhz=6.102 times_real=3.67
+lazy launch 1 timed 1 cycles=1790002 frames=54 ms=289.900 cycles_per_second=6174550 mhz=6.175 times_real=3.71
+lazy launch 1 timed 2 cycles=1790000 frames=54 ms=293.400 cycles_per_second=6100886 mhz=6.101 times_real=3.67
+lazy launch 1 timed 3 cycles=1790000 frames=53 ms=307.600 cycles_per_second=5819246 mhz=5.819 times_real=3.50
+lazy launch 1 timed 4 cycles=1790001 frames=54 ms=298.500 cycles_per_second=5996653 mhz=5.997 times_real=3.61
+lazy launch 1 timed 5 cycles=1790001 frames=54 ms=332.700 cycles_per_second=5380225 mhz=5.380 times_real=3.24
+lazy launch 1 thread 1 cycles=1790004 thread_ms=294.838 mhz=6.071 times_real=3.65
+lazy launch 1 thread 2 cycles=1790003 thread_ms=366.073 mhz=4.890 times_real=2.94
+lazy launch 1 thread 3 cycles=1790000 thread_ms=310.838 mhz=5.759 times_real=3.46
+lazy launch 1 thread 4 cycles=1790001 thread_ms=302.173 mhz=5.924 times_real=3.56
+lazy launch 1 thread 5 cycles=1790004 thread_ms=376.961 mhz=4.749 times_real=2.86
+lazy launch 1 thread 6 cycles=1790003 thread_ms=380.526 mhz=4.704 times_real=2.83
+lazy launch 1 thread 7 cycles=1790003 thread_ms=430.401 mhz=4.159 times_real=2.50
+lazy launch 1 thread 8 cycles=1790003 thread_ms=419.148 mhz=4.271 times_real=2.57
+-- base round 3 02:22:02 load 1.60
+base launch 1 boot cycles=5000001 frames=150 ms=1332.900 cycles_per_second=3751220 mhz=3.751 times_real=2.26
+base launch 1 timed 1 cycles=1790002 frames=54 ms=486.300 cycles_per_second=3680860 mhz=3.681 times_real=2.21
+base launch 1 timed 2 cycles=1790000 frames=54 ms=457.900 cycles_per_second=3909150 mhz=3.909 times_real=2.35
+base launch 1 timed 3 cycles=1790000 frames=53 ms=430.300 cycles_per_second=4159888 mhz=4.160 times_real=2.50
+base launch 1 timed 4 cycles=1790001 frames=54 ms=613.000 cycles_per_second=2920067 mhz=2.920 times_real=1.76
+base launch 1 timed 5 cycles=1790001 frames=54 ms=430.400 cycles_per_second=4158924 mhz=4.159 times_real=2.50
+base launch 1 thread 1 cycles=1790004 thread_ms=512.001 mhz=3.496 times_real=2.10
+base launch 1 thread 2 cycles=1790003 thread_ms=446.297 mhz=4.011 times_real=2.41
+base launch 1 thread 3 cycles=1790000 thread_ms=434.177 mhz=4.123 times_real=2.48
+base launch 1 thread 4 cycles=1790001 thread_ms=424.236 mhz=4.219 times_real=2.54
+base launch 1 thread 5 cycles=1790004 thread_ms=401.330 mhz=4.460 times_real=2.68
+base launch 1 thread 6 cycles=1790003 thread_ms=556.452 mhz=3.217 times_real=1.93
+base launch 1 thread 7 cycles=1790003 thread_ms=537.464 mhz=3.330 times_real=2.00
+base launch 1 thread 8 cycles=1790003 thread_ms=543.418 mhz=3.294 times_real=1.98
+-- lazy round 3 02:22:12 load 1.59
+lazy launch 1 boot cycles=5000001 frames=150 ms=1057.600 cycles_per_second=4727686 mhz=4.728 times_real=2.84
+lazy launch 1 timed 1 cycles=1790002 frames=54 ms=366.200 cycles_per_second=4888045 mhz=4.888 times_real=2.94
+lazy launch 1 timed 2 cycles=1790000 frames=54 ms=363.300 cycles_per_second=4927058 mhz=4.927 times_real=2.96
+lazy launch 1 timed 3 cycles=1790000 frames=53 ms=361.200 cycles_per_second=4955703 mhz=4.956 times_real=2.98
+lazy launch 1 timed 4 cycles=1790001 frames=54 ms=366.500 cycles_per_second=4884041 mhz=4.884 times_real=2.94
+lazy launch 1 timed 5 cycles=1790001 frames=54 ms=364.900 cycles_per_second=4905456 mhz=4.905 times_real=2.95
+lazy launch 1 thread 1 cycles=1790004 thread_ms=384.251 mhz=4.658 times_real=2.80
+lazy launch 1 thread 2 cycles=1790003 thread_ms=376.191 mhz=4.758 times_real=2.86
+lazy launch 1 thread 3 cycles=1790000 thread_ms=374.611 mhz=4.778 times_real=2.87
+lazy launch 1 thread 4 cycles=1790001 thread_ms=363.029 mhz=4.931 times_real=2.97
+lazy launch 1 thread 5 cycles=1790004 thread_ms=271.664 mhz=6.589 times_real=3.96
+lazy launch 1 thread 6 cycles=1790003 thread_ms=284.464 mhz=6.293 times_real=3.78
+lazy launch 1 thread 7 cycles=1790003 thread_ms=288.073 mhz=6.214 times_real=3.74
+lazy launch 1 thread 8 cycles=1790003 thread_ms=288.120 mhz=6.213 times_real=3.74
+-- base round 4 02:22:20 load 1.50
+base launch 1 boot cycles=5000001 frames=150 ms=1228.800 cycles_per_second=4069011 mhz=4.069 times_real=2.45
+base launch 1 timed 1 cycles=1790002 frames=54 ms=407.700 cycles_per_second=4390488 mhz=4.390 times_real=2.64
+base launch 1 timed 2 cycles=1790000 frames=54 ms=389.000 cycles_per_second=4601542 mhz=4.602 times_real=2.77
+base launch 1 timed 3 cycles=1790000 frames=53 ms=429.500 cycles_per_second=4167637 mhz=4.168 times_real=2.51
+base launch 1 timed 4 cycles=1790001 frames=54 ms=454.600 cycles_per_second=3937530 mhz=3.938 times_real=2.37
+base launch 1 timed 5 cycles=1790001 frames=54 ms=518.300 cycles_per_second=3453600 mhz=3.454 times_real=2.08
+base launch 1 thread 1 cycles=1790004 thread_ms=474.729 mhz=3.771 times_real=2.27
+base launch 1 thread 2 cycles=1790003 thread_ms=422.931 mhz=4.232 times_real=2.55
+base launch 1 thread 3 cycles=1790000 thread_ms=462.398 mhz=3.871 times_real=2.33
+base launch 1 thread 4 cycles=1790001 thread_ms=455.897 mhz=3.926 times_real=2.36
+base launch 1 thread 5 cycles=1790004 thread_ms=565.152 mhz=3.167 times_real=1.91
+base launch 1 thread 6 cycles=1790003 thread_ms=436.610 mhz=4.100 times_real=2.47
+base launch 1 thread 7 cycles=1790003 thread_ms=407.818 mhz=4.389 times_real=2.64
+base launch 1 thread 8 cycles=1790003 thread_ms=423.779 mhz=4.224 times_real=2.54
+-- lazy round 4 02:22:29 load 1.46
+lazy launch 1 boot cycles=5000001 frames=150 ms=997.600 cycles_per_second=5012030 mhz=5.012 times_real=3.01
+lazy launch 1 timed 1 cycles=1790002 frames=54 ms=301.900 cycles_per_second=5929122 mhz=5.929 times_real=3.57
+lazy launch 1 timed 2 cycles=1790000 frames=54 ms=308.900 cycles_per_second=5794756 mhz=5.795 times_real=3.49
+lazy launch 1 timed 3 cycles=1790000 frames=53 ms=343.300 cycles_per_second=5214098 mhz=5.214 times_real=3.14
+lazy launch 1 timed 4 cycles=1790001 frames=54 ms=307.500 cycles_per_second=5821141 mhz=5.821 times_real=3.50
+lazy launch 1 timed 5 cycles=1790001 frames=54 ms=298.300 cycles_per_second=6000674 mhz=6.001 times_real=3.61
+lazy launch 1 thread 1 cycles=1790004 thread_ms=342.040 mhz=5.233 times_real=3.15
+lazy launch 1 thread 2 cycles=1790003 thread_ms=289.386 mhz=6.186 times_real=3.72
+lazy launch 1 thread 3 cycles=1790000 thread_ms=349.166 mhz=5.127 times_real=3.08
+lazy launch 1 thread 4 cycles=1790001 thread_ms=322.979 mhz=5.542 times_real=3.33
+lazy launch 1 thread 5 cycles=1790004 thread_ms=353.763 mhz=5.060 times_real=3.04
+lazy launch 1 thread 6 cycles=1790003 thread_ms=326.711 mhz=5.479 times_real=3.30
+lazy launch 1 thread 7 cycles=1790003 thread_ms=286.676 mhz=6.244 times_real=3.76
+lazy launch 1 thread 8 cycles=1790003 thread_ms=280.975 mhz=6.371 times_real=3.83
+== NES region 1 set end 02:22:37 UTC uptime: 02:22:37 up 10 days, 11:51,  4 users,  load average: 1.46, 1.74, 1.95
+== BBC gauge 02:22:37 UTC load 1.46 1.74 1.95
+launch 1 prompt yes
+launch 1 timed 1 cycles=2000000 ms=85.200 cycles_per_second=23474178 mhz=23.474
+launch 1 thread 1 cycles=2000003 thread_ms=77.371 mhz=25.850
+launch 1 thread 2 cycles=2000000 thread_ms=90.065 mhz=22.206
+launch 1 thread 3 cycles=2000000 thread_ms=93.515 mhz=21.387
+launch 1 thread 4 cycles=2000005 thread_ms=92.443 mhz=21.635
+launch 1 thread 5 cycles=2000001 thread_ms=92.555 mhz=21.609
+launch 1 thread 6 cycles=2000002 thread_ms=90.599 mhz=22.075
+launch 1 thread 7 cycles=2000002 thread_ms=80.443 mhz=24.862
+launch 1 thread 8 cycles=2000000 thread_ms=92.971 mhz=21.512
+launch 1 thread 9 cycles=2000000 thread_ms=91.857 mhz=21.773
+launch 1 thread 10 cycles=2000001 thread_ms=87.961 mhz=22.737
+== NES region 0 set start 02:22:50 UTC uptime: 02:22:50 up 10 days, 11:51,  4 users,  load average: 1.28, 1.69, 1.93
+-- base round 1 02:22:50 load 1.28
+base launch 1 boot cycles=5000000 frames=167 ms=1180.800 cycles_per_second=4234417 mhz=4.234 times_real=2.37
+base launch 1 timed 1 cycles=1790000 frames=61 ms=402.800 cycles_per_second=4443893 mhz=4.444 times_real=2.48
+base launch 1 timed 2 cycles=1790003 frames=60 ms=447.900 cycles_per_second=3996434 mhz=3.996 times_real=2.23
+base launch 1 timed 3 cycles=1790001 frames=60 ms=394.800 cycles_per_second=4533944 mhz=4.534 times_real=2.53
+base launch 1 timed 4 cycles=1790000 frames=60 ms=482.600 cycles_per_second=3709076 mhz=3.709 times_real=2.07
+base launch 1 timed 5 cycles=1790002 frames=60 ms=529.700 cycles_per_second=3379275 mhz=3.379 times_real=1.89
+base launch 1 thread 1 cycles=1790001 thread_ms=486.968 mhz=3.676 times_real=2.05
+base launch 1 thread 2 cycles=1790000 thread_ms=417.392 mhz=4.289 times_real=2.40
+base launch 1 thread 3 cycles=1790002 thread_ms=398.445 mhz=4.492 times_real=2.51
+base launch 1 thread 4 cycles=1790002 thread_ms=388.636 mhz=4.606 times_real=2.57
+base launch 1 thread 5 cycles=1790002 thread_ms=406.691 mhz=4.401 times_real=2.46
+base launch 1 thread 6 cycles=1790002 thread_ms=427.484 mhz=4.187 times_real=2.34
+base launch 1 thread 7 cycles=1790001 thread_ms=393.257 mhz=4.552 times_real=2.54
+base launch 1 thread 8 cycles=1790003 thread_ms=392.448 mhz=4.561 times_real=2.55
+-- lazy round 1 02:22:59 load 1.26
+lazy launch 1 boot cycles=5000000 frames=167 ms=1075.300 cycles_per_second=4649865 mhz=4.650 times_real=2.60
+lazy launch 1 timed 1 cycles=1790000 frames=61 ms=428.600 cycles_per_second=4176388 mhz=4.176 times_real=2.33
+lazy launch 1 timed 2 cycles=1790003 frames=60 ms=436.000 cycles_per_second=4105511 mhz=4.106 times_real=2.29
+lazy launch 1 timed 3 cycles=1790001 frames=60 ms=390.000 cycles_per_second=4589746 mhz=4.590 times_real=2.56
+lazy launch 1 timed 4 cycles=1790000 frames=60 ms=456.800 cycles_per_second=3918564 mhz=3.919 times_real=2.19
+lazy launch 1 timed 5 cycles=1790002 frames=60 ms=416.900 cycles_per_second=4293600 mhz=4.294 times_real=2.40
+lazy launch 1 thread 1 cycles=1790001 thread_ms=392.407 mhz=4.562 times_real=2.55
+lazy launch 1 thread 2 cycles=1790000 thread_ms=385.761 mhz=4.640 times_real=2.59
+lazy launch 1 thread 3 cycles=1790002 thread_ms=405.987 mhz=4.409 times_real=2.46
+lazy launch 1 thread 4 cycles=1790002 thread_ms=407.919 mhz=4.388 times_real=2.45
+lazy launch 1 thread 5 cycles=1790002 thread_ms=400.282 mhz=4.472 times_real=2.50
+lazy launch 1 thread 6 cycles=1790002 thread_ms=329.582 mhz=5.431 times_real=3.03
+lazy launch 1 thread 7 cycles=1790001 thread_ms=304.584 mhz=5.877 times_real=3.28
+lazy launch 1 thread 8 cycles=1790003 thread_ms=317.930 mhz=5.630 times_real=3.15
+-- base round 2 02:23:08 load 1.45
+base launch 1 boot cycles=5000000 frames=167 ms=1178.100 cycles_per_second=4244122 mhz=4.244 times_real=2.37
+base launch 1 timed 1 cycles=1790000 frames=61 ms=456.100 cycles_per_second=3924578 mhz=3.925 times_real=2.19
+base launch 1 timed 2 cycles=1790003 frames=60 ms=434.000 cycles_per_second=4124431 mhz=4.124 times_real=2.30
+base launch 1 timed 3 cycles=1790001 frames=60 ms=416.200 cycles_per_second=4300819 mhz=4.301 times_real=2.40
+base launch 1 timed 4 cycles=1790000 frames=60 ms=477.800 cycles_per_second=3746337 mhz=3.746 times_real=2.09
+base launch 1 timed 5 cycles=1790002 frames=60 ms=422.400 cycles_per_second=4237694 mhz=4.238 times_real=2.37
+base launch 1 thread 1 cycles=1790001 thread_ms=414.936 mhz=4.314 times_real=2.41
+base launch 1 thread 2 cycles=1790000 thread_ms=452.038 mhz=3.960 times_real=2.21
+base launch 1 thread 3 cycles=1790002 thread_ms=557.084 mhz=3.213 times_real=1.80
+base launch 1 thread 4 cycles=1790002 thread_ms=458.501 mhz=3.904 times_real=2.18
+base launch 1 thread 5 cycles=1790002 thread_ms=367.864 mhz=4.866 times_real=2.72
+base launch 1 thread 6 cycles=1790002 thread_ms=445.056 mhz=4.022 times_real=2.25
+base launch 1 thread 7 cycles=1790001 thread_ms=396.351 mhz=4.516 times_real=2.52
+base launch 1 thread 8 cycles=1790003 thread_ms=487.842 mhz=3.669 times_real=2.05
+-- lazy round 2 02:23:17 load 1.53
+lazy launch 1 boot cycles=5000000 frames=167 ms=820.600 cycles_per_second=6093103 mhz=6.093 times_real=3.40
+lazy launch 1 timed 1 cycles=1790000 frames=61 ms=292.600 cycles_per_second=6117567 mhz=6.118 times_real=3.42
+lazy launch 1 timed 2 cycles=1790003 frames=60 ms=271.400 cycles_per_second=6595442 mhz=6.595 times_real=3.69
+lazy launch 1 timed 3 cycles=1790001 frames=60 ms=312.800 cycles_per_second=5722510 mhz=5.723 times_real=3.20
+lazy launch 1 timed 4 cycles=1790000 frames=60 ms=287.600 cycles_per_second=6223922 mhz=6.224 times_real=3.48
+lazy launch 1 timed 5 cycles=1790002 frames=60 ms=308.900 cycles_per_second=5794762 mhz=5.795 times_real=3.24
+lazy launch 1 thread 1 cycles=1790001 thread_ms=413.993 mhz=4.324 times_real=2.42
+lazy launch 1 thread 2 cycles=1790000 thread_ms=416.991 mhz=4.293 times_real=2.40
+lazy launch 1 thread 3 cycles=1790002 thread_ms=375.262 mhz=4.770 times_real=2.67
+lazy launch 1 thread 4 cycles=1790002 thread_ms=341.456 mhz=5.242 times_real=2.93
+lazy launch 1 thread 5 cycles=1790002 thread_ms=324.579 mhz=5.515 times_real=3.08
+lazy launch 1 thread 6 cycles=1790002 thread_ms=310.955 mhz=5.756 times_real=3.22
+lazy launch 1 thread 7 cycles=1790001 thread_ms=281.586 mhz=6.357 times_real=3.55
+lazy launch 1 thread 8 cycles=1790003 thread_ms=277.892 mhz=6.441 times_real=3.60
+-- base round 3 02:23:24 load 1.49
+base launch 1 boot cycles=5000000 frames=167 ms=1179.100 cycles_per_second=4240522 mhz=4.241 times_real=2.37
+base launch 1 timed 1 cycles=1790000 frames=61 ms=413.500 cycles_per_second=4328900 mhz=4.329 times_real=2.42
+base launch 1 timed 2 cycles=1790003 frames=60 ms=468.000 cycles_per_second=3824793 mhz=3.825 times_real=2.14
+base launch 1 timed 3 cycles=1790001 frames=60 ms=405.800 cycles_per_second=4411042 mhz=4.411 times_real=2.46
+base launch 1 timed 4 cycles=1790000 frames=60 ms=423.500 cycles_per_second=4226682 mhz=4.227 times_real=2.36
+base launch 1 timed 5 cycles=1790002 frames=60 ms=422.300 cycles_per_second=4238698 mhz=4.239 times_real=2.37
+base launch 1 thread 1 cycles=1790001 thread_ms=492.699 mhz=3.633 times_real=2.03
+base launch 1 thread 2 cycles=1790000 thread_ms=486.085 mhz=3.682 times_real=2.06
+base launch 1 thread 3 cycles=1790002 thread_ms=417.280 mhz=4.290 times_real=2.40
+base launch 1 thread 4 cycles=1790002 thread_ms=399.719 mhz=4.478 times_real=2.50
+base launch 1 thread 5 cycles=1790002 thread_ms=467.824 mhz=3.826 times_real=2.14
+base launch 1 thread 6 cycles=1790002 thread_ms=535.147 mhz=3.345 times_real=1.87
+base launch 1 thread 7 cycles=1790001 thread_ms=538.704 mhz=3.323 times_real=1.86
+base launch 1 thread 8 cycles=1790003 thread_ms=432.463 mhz=4.139 times_real=2.31
+-- lazy round 3 02:23:33 load 1.57
+lazy launch 1 boot cycles=5000000 frames=167 ms=948.000 cycles_per_second=5274262 mhz=5.274 times_real=2.95
+lazy launch 1 timed 1 cycles=1790000 frames=61 ms=384.900 cycles_per_second=4650559 mhz=4.651 times_real=2.60
+lazy launch 1 timed 2 cycles=1790003 frames=60 ms=357.000 cycles_per_second=5014014 mhz=5.014 times_real=2.80
+lazy launch 1 timed 3 cycles=1790001 frames=60 ms=329.800 cycles_per_second=5427535 mhz=5.428 times_real=3.03
+lazy launch 1 timed 4 cycles=1790000 frames=60 ms=389.600 cycles_per_second=4594456 mhz=4.594 times_real=2.57
+lazy launch 1 timed 5 cycles=1790002 frames=60 ms=371.400 cycles_per_second=4819607 mhz=4.820 times_real=2.69
+lazy launch 1 thread 1 cycles=1790001 thread_ms=379.893 mhz=4.712 times_real=2.63
+lazy launch 1 thread 2 cycles=1790000 thread_ms=414.544 mhz=4.318 times_real=2.41
+lazy launch 1 thread 3 cycles=1790002 thread_ms=339.720 mhz=5.269 times_real=2.94
+lazy launch 1 thread 4 cycles=1790002 thread_ms=318.721 mhz=5.616 times_real=3.14
+lazy launch 1 thread 5 cycles=1790002 thread_ms=302.521 mhz=5.917 times_real=3.31
+lazy launch 1 thread 6 cycles=1790002 thread_ms=296.275 mhz=6.042 times_real=3.38
+lazy launch 1 thread 7 cycles=1790001 thread_ms=382.176 mhz=4.684 times_real=2.62
+lazy launch 1 thread 8 cycles=1790003 thread_ms=352.501 mhz=5.078 times_real=2.84
+-- base round 4 02:23:41 load 1.55
+base launch 1 boot cycles=5000000 frames=167 ms=1409.700 cycles_per_second=3546854 mhz=3.547 times_real=1.98
+base launch 1 timed 1 cycles=1790000 frames=61 ms=413.000 cycles_per_second=4334140 mhz=4.334 times_real=2.42
+base launch 1 timed 2 cycles=1790003 frames=60 ms=406.800 cycles_per_second=4400204 mhz=4.400 times_real=2.46
+base launch 1 timed 3 cycles=1790001 frames=60 ms=436.400 cycles_per_second=4101744 mhz=4.102 times_real=2.29
+base launch 1 timed 4 cycles=1790000 frames=60 ms=450.900 cycles_per_second=3969838 mhz=3.970 times_real=2.22
+base launch 1 timed 5 cycles=1790002 frames=60 ms=404.700 cycles_per_second=4423034 mhz=4.423 times_real=2.47
+base launch 1 thread 1 cycles=1790001 thread_ms=422.833 mhz=4.233 times_real=2.37
+base launch 1 thread 2 cycles=1790000 thread_ms=401.765 mhz=4.455 times_real=2.49
+base launch 1 thread 3 cycles=1790002 thread_ms=394.507 mhz=4.537 times_real=2.54
+base launch 1 thread 4 cycles=1790002 thread_ms=375.747 mhz=4.764 times_real=2.66
+base launch 1 thread 5 cycles=1790002 thread_ms=385.803 mhz=4.640 times_real=2.59
+base launch 1 thread 6 cycles=1790002 thread_ms=454.081 mhz=3.942 times_real=2.20
+base launch 1 thread 7 cycles=1790001 thread_ms=391.846 mhz=4.568 times_real=2.55
+base launch 1 thread 8 cycles=1790003 thread_ms=430.104 mhz=4.162 times_real=2.33
+-- lazy round 4 02:23:50 load 1.47
+lazy launch 1 boot cycles=5000000 frames=167 ms=923.700 cycles_per_second=5413013 mhz=5.413 times_real=3.02
+lazy launch 1 timed 1 cycles=1790000 frames=61 ms=278.600 cycles_per_second=6424982 mhz=6.425 times_real=3.59
+lazy launch 1 timed 2 cycles=1790003 frames=60 ms=334.000 cycles_per_second=5359290 mhz=5.359 times_real=2.99
+lazy launch 1 timed 3 cycles=1790001 frames=60 ms=311.400 cycles_per_second=5748237 mhz=5.748 times_real=3.21
+lazy launch 1 timed 4 cycles=1790000 frames=60 ms=284.500 cycles_per_second=6291740 mhz=6.292 times_real=3.52
+lazy launch 1 timed 5 cycles=1790002 frames=60 ms=300.200 cycles_per_second=5962698 mhz=5.963 times_real=3.33
+lazy launch 1 thread 1 cycles=1790001 thread_ms=290.110 mhz=6.170 times_real=3.45
+lazy launch 1 thread 2 cycles=1790000 thread_ms=292.107 mhz=6.128 times_real=3.42
+lazy launch 1 thread 3 cycles=1790002 thread_ms=291.487 mhz=6.141 times_real=3.43
+lazy launch 1 thread 4 cycles=1790002 thread_ms=293.629 mhz=6.096 times_real=3.41
+lazy launch 1 thread 5 cycles=1790002 thread_ms=361.291 mhz=4.954 times_real=2.77
+lazy launch 1 thread 6 cycles=1790002 thread_ms=398.693 mhz=4.490 times_real=2.51
+lazy launch 1 thread 7 cycles=1790001 thread_ms=310.785 mhz=5.760 times_real=3.22
+lazy launch 1 thread 8 cycles=1790003 thread_ms=302.794 mhz=5.912 times_real=3.30
+== NES region 0 set end 02:23:57 UTC uptime: 02:23:57 up 10 days, 11:52,  3 users,  load average: 1.43, 1.67, 1.90
+== NES region 1 set start 02:23:57 UTC uptime: 02:23:57 up 10 days, 11:52,  3 users,  load average: 1.43, 1.67, 1.90
+-- base round 1 02:23:57 load 1.43
+base launch 1 boot cycles=5000001 frames=150 ms=1370.900 cycles_per_second=3647240 mhz=3.647 times_real=2.19
+base launch 1 timed 1 cycles=1790002 frames=54 ms=452.100 cycles_per_second=3959305 mhz=3.959 times_real=2.38
+base launch 1 timed 2 cycles=1790000 frames=54 ms=463.000 cycles_per_second=3866091 mhz=3.866 times_real=2.33
+base launch 1 timed 3 cycles=1790000 frames=53 ms=550.400 cycles_per_second=3252180 mhz=3.252 times_real=1.96
+base launch 1 timed 4 cycles=1790001 frames=54 ms=481.700 cycles_per_second=3716008 mhz=3.716 times_real=2.24
+base launch 1 timed 5 cycles=1790001 frames=54 ms=499.400 cycles_per_second=3584303 mhz=3.584 times_real=2.16
+base launch 1 thread 1 cycles=1790004 thread_ms=527.495 mhz=3.393 times_real=2.04
+base launch 1 thread 2 cycles=1790003 thread_ms=423.582 mhz=4.226 times_real=2.54
+base launch 1 thread 3 cycles=1790000 thread_ms=511.372 mhz=3.500 times_real=2.11
+base launch 1 thread 4 cycles=1790001 thread_ms=520.783 mhz=3.437 times_real=2.07
+base launch 1 thread 5 cycles=1790004 thread_ms=423.882 mhz=4.223 times_real=2.54
+base launch 1 thread 6 cycles=1790003 thread_ms=411.414 mhz=4.351 times_real=2.62
+base launch 1 thread 7 cycles=1790003 thread_ms=418.122 mhz=4.281 times_real=2.57
+base launch 1 thread 8 cycles=1790003 thread_ms=455.704 mhz=3.928 times_real=2.36
+-- lazy round 1 02:24:07 load 1.45
+lazy launch 1 boot cycles=5000001 frames=150 ms=908.400 cycles_per_second=5504184 mhz=5.504 times_real=3.31
+lazy launch 1 timed 1 cycles=1790002 frames=54 ms=336.600 cycles_per_second=5317891 mhz=5.318 times_real=3.20
+lazy launch 1 timed 2 cycles=1790000 frames=54 ms=391.300 cycles_per_second=4574495 mhz=4.574 times_real=2.75
+lazy launch 1 timed 3 cycles=1790000 frames=53 ms=380.100 cycles_per_second=4709287 mhz=4.709 times_real=2.83
+lazy launch 1 timed 4 cycles=1790001 frames=54 ms=310.900 cycles_per_second=5757482 mhz=5.757 times_real=3.46
+lazy launch 1 timed 5 cycles=1790001 frames=54 ms=307.900 cycles_per_second=5813579 mhz=5.814 times_real=3.50
+lazy launch 1 thread 1 cycles=1790004 thread_ms=347.965 mhz=5.144 times_real=3.09
+lazy launch 1 thread 2 cycles=1790003 thread_ms=351.195 mhz=5.097 times_real=3.07
+lazy launch 1 thread 3 cycles=1790000 thread_ms=288.296 mhz=6.209 times_real=3.73
+lazy launch 1 thread 4 cycles=1790001 thread_ms=311.072 mhz=5.754 times_real=3.46
+lazy launch 1 thread 5 cycles=1790004 thread_ms=323.239 mhz=5.538 times_real=3.33
+lazy launch 1 thread 6 cycles=1790003 thread_ms=284.363 mhz=6.295 times_real=3.79
+lazy launch 1 thread 7 cycles=1790003 thread_ms=419.257 mhz=4.269 times_real=2.57
+lazy launch 1 thread 8 cycles=1790003 thread_ms=368.413 mhz=4.859 times_real=2.92
+-- base round 2 02:24:14 load 1.49
+base launch 1 boot cycles=5000001 frames=150 ms=1198.000 cycles_per_second=4173624 mhz=4.174 times_real=2.51
+base launch 1 timed 1 cycles=1790002 frames=54 ms=390.500 cycles_per_second=4583872 mhz=4.584 times_real=2.76
+base launch 1 timed 2 cycles=1790000 frames=54 ms=486.600 cycles_per_second=3678586 mhz=3.679 times_real=2.21
+base launch 1 timed 3 cycles=1790000 frames=53 ms=413.700 cycles_per_second=4326807 mhz=4.327 times_real=2.60
+base launch 1 timed 4 cycles=1790001 frames=54 ms=402.800 cycles_per_second=4443895 mhz=4.444 times_real=2.67
+base launch 1 timed 5 cycles=1790001 frames=54 ms=424.500 cycles_per_second=4216728 mhz=4.217 times_real=2.54
+base launch 1 thread 1 cycles=1790004 thread_ms=453.987 mhz=3.943 times_real=2.37
+base launch 1 thread 2 cycles=1790003 thread_ms=395.097 mhz=4.531 times_real=2.72
+base launch 1 thread 3 cycles=1790000 thread_ms=397.938 mhz=4.498 times_real=2.71
+base launch 1 thread 4 cycles=1790001 thread_ms=381.180 mhz=4.696 times_real=2.82
+base launch 1 thread 5 cycles=1790004 thread_ms=426.619 mhz=4.196 times_real=2.52
+base launch 1 thread 6 cycles=1790003 thread_ms=407.605 mhz=4.392 times_real=2.64
+base launch 1 thread 7 cycles=1790003 thread_ms=386.179 mhz=4.635 times_real=2.79
+base launch 1 thread 8 cycles=1790003 thread_ms=414.606 mhz=4.317 times_real=2.60
+-- lazy round 2 02:24:23 load 1.65
+lazy launch 1 boot cycles=5000001 frames=150 ms=1001.700 cycles_per_second=4991515 mhz=4.992 times_real=3.00
+lazy launch 1 timed 1 cycles=1790002 frames=54 ms=384.700 cycles_per_second=4652982 mhz=4.653 times_real=2.80
+lazy launch 1 timed 2 cycles=1790000 frames=54 ms=339.500 cycles_per_second=5272459 mhz=5.272 times_real=3.17
+lazy launch 1 timed 3 cycles=1790000 frames=53 ms=301.700 cycles_per_second=5933046 mhz=5.933 times_real=3.57
+lazy launch 1 timed 4 cycles=1790001 frames=54 ms=298.600 cycles_per_second=5994645 mhz=5.995 times_real=3.61
+lazy launch 1 timed 5 cycles=1790001 frames=54 ms=292.700 cycles_per_second=6115480 mhz=6.115 times_real=3.68
+lazy launch 1 thread 1 cycles=1790004 thread_ms=388.086 mhz=4.612 times_real=2.77
+lazy launch 1 thread 2 cycles=1790003 thread_ms=391.860 mhz=4.568 times_real=2.75
+lazy launch 1 thread 3 cycles=1790000 thread_ms=373.926 mhz=4.787 times_real=2.88
+lazy launch 1 thread 4 cycles=1790001 thread_ms=407.931 mhz=4.388 times_real=2.64
+lazy launch 1 thread 5 cycles=1790004 thread_ms=308.383 mhz=5.804 times_real=3.49
+lazy launch 1 thread 6 cycles=1790003 thread_ms=329.571 mhz=5.431 times_real=3.27
+lazy launch 1 thread 7 cycles=1790003 thread_ms=302.882 mhz=5.910 times_real=3.55
+lazy launch 1 thread 8 cycles=1790003 thread_ms=310.737 mhz=5.761 times_real=3.46
+-- base round 3 02:24:31 load 1.70
+base launch 1 boot cycles=5000001 frames=150 ms=1296.200 cycles_per_second=3857430 mhz=3.857 times_real=2.32
+base launch 1 timed 1 cycles=1790002 frames=54 ms=429.700 cycles_per_second=4165702 mhz=4.166 times_real=2.51
+base launch 1 timed 2 cycles=1790000 frames=54 ms=416.200 cycles_per_second=4300817 mhz=4.301 times_real=2.59
+base launch 1 timed 3 cycles=1790000 frames=53 ms=424.300 cycles_per_second=4218713 mhz=4.219 times_real=2.54
+base launch 1 timed 4 cycles=1790001 frames=54 ms=422.300 cycles_per_second=4238695 mhz=4.239 times_real=2.55
+base launch 1 timed 5 cycles=1790001 frames=54 ms=428.400 cycles_per_second=4178340 mhz=4.178 times_real=2.51
+base launch 1 thread 1 cycles=1790004 thread_ms=435.971 mhz=4.106 times_real=2.47
+base launch 1 thread 2 cycles=1790003 thread_ms=417.432 mhz=4.288 times_real=2.58
+base launch 1 thread 3 cycles=1790000 thread_ms=454.996 mhz=3.934 times_real=2.37
+base launch 1 thread 4 cycles=1790001 thread_ms=444.929 mhz=4.023 times_real=2.42
+base launch 1 thread 5 cycles=1790004 thread_ms=463.026 mhz=3.866 times_real=2.33
+base launch 1 thread 6 cycles=1790003 thread_ms=401.447 mhz=4.459 times_real=2.68
+base launch 1 thread 7 cycles=1790003 thread_ms=411.684 mhz=4.348 times_real=2.62
+base launch 1 thread 8 cycles=1790003 thread_ms=501.299 mhz=3.571 times_real=2.15
+-- lazy round 3 02:24:40 load 1.59
+lazy launch 1 boot cycles=5000001 frames=150 ms=991.200 cycles_per_second=5044392 mhz=5.044 times_real=3.03
+lazy launch 1 timed 1 cycles=1790002 frames=54 ms=305.100 cycles_per_second=5866935 mhz=5.867 times_real=3.53
+lazy launch 1 timed 2 cycles=1790000 frames=54 ms=306.200 cycles_per_second=5845852 mhz=5.846 times_real=3.52
+lazy launch 1 timed 3 cycles=1790000 frames=53 ms=318.000 cycles_per_second=5628931 mhz=5.629 times_real=3.39
+lazy launch 1 timed 4 cycles=1790001 frames=54 ms=307.000 cycles_per_second=5830622 mhz=5.831 times_real=3.51
+lazy launch 1 timed 5 cycles=1790001 frames=54 ms=307.700 cycles_per_second=5817358 mhz=5.817 times_real=3.50
+lazy launch 1 thread 1 cycles=1790004 thread_ms=453.494 mhz=3.947 times_real=2.37
+lazy launch 1 thread 2 cycles=1790003 thread_ms=306.114 mhz=5.848 times_real=3.52
+lazy launch 1 thread 3 cycles=1790000 thread_ms=281.655 mhz=6.355 times_real=3.82
+lazy launch 1 thread 4 cycles=1790001 thread_ms=285.065 mhz=6.279 times_real=3.78
+lazy launch 1 thread 5 cycles=1790004 thread_ms=271.304 mhz=6.598 times_real=3.97
+lazy launch 1 thread 6 cycles=1790003 thread_ms=284.096 mhz=6.301 times_real=3.79
+lazy launch 1 thread 7 cycles=1790003 thread_ms=315.964 mhz=5.665 times_real=3.41
+lazy launch 1 thread 8 cycles=1790003 thread_ms=299.251 mhz=5.982 times_real=3.60
+-- base round 4 02:24:47 load 1.55
+base launch 1 boot cycles=5000001 frames=150 ms=1143.000 cycles_per_second=4374454 mhz=4.374 times_real=2.63
+base launch 1 timed 1 cycles=1790002 frames=54 ms=395.800 cycles_per_second=4522491 mhz=4.522 times_real=2.72
+base launch 1 timed 2 cycles=1790000 frames=54 ms=394.700 cycles_per_second=4535090 mhz=4.535 times_real=2.73
+base launch 1 timed 3 cycles=1790000 frames=53 ms=390.500 cycles_per_second=4583867 mhz=4.584 times_real=2.76
+base launch 1 timed 4 cycles=1790001 frames=54 ms=377.500 cycles_per_second=4741725 mhz=4.742 times_real=2.85
+base launch 1 timed 5 cycles=1790001 frames=54 ms=387.800 cycles_per_second=4615784 mhz=4.616 times_real=2.78
+base launch 1 thread 1 cycles=1790004 thread_ms=438.235 mhz=4.085 times_real=2.46
+base launch 1 thread 2 cycles=1790003 thread_ms=386.298 mhz=4.634 times_real=2.79
+base launch 1 thread 3 cycles=1790000 thread_ms=378.273 mhz=4.732 times_real=2.85
+base launch 1 thread 4 cycles=1790001 thread_ms=365.255 mhz=4.901 times_real=2.95
+base launch 1 thread 5 cycles=1790004 thread_ms=381.782 mhz=4.689 times_real=2.82
+base launch 1 thread 6 cycles=1790003 thread_ms=367.782 mhz=4.867 times_real=2.93
+base launch 1 thread 7 cycles=1790003 thread_ms=377.636 mhz=4.740 times_real=2.85
+base launch 1 thread 8 cycles=1790003 thread_ms=381.144 mhz=4.696 times_real=2.82
+-- lazy round 4 02:24:55 load 1.54
+lazy launch 1 boot cycles=5000001 frames=150 ms=850.700 cycles_per_second=5877514 mhz=5.878 times_real=3.54
+lazy launch 1 timed 1 cycles=1790002 frames=54 ms=294.700 cycles_per_second=6073980 mhz=6.074 times_real=3.65
+lazy launch 1 timed 2 cycles=1790000 frames=54 ms=299.000 cycles_per_second=5986622 mhz=5.987 times_real=3.60
+lazy launch 1 timed 3 cycles=1790000 frames=53 ms=315.600 cycles_per_second=5671736 mhz=5.672 times_real=3.41
+lazy launch 1 timed 4 cycles=1790001 frames=54 ms=281.500 cycles_per_second=6358796 mhz=6.359 times_real=3.82
+lazy launch 1 timed 5 cycles=1790001 frames=54 ms=274.400 cycles_per_second=6523327 mhz=6.523 times_real=3.92
+lazy launch 1 thread 1 cycles=1790004 thread_ms=314.269 mhz=5.696 times_real=3.43
+lazy launch 1 thread 2 cycles=1790003 thread_ms=321.989 mhz=5.559 times_real=3.34
+lazy launch 1 thread 3 cycles=1790000 thread_ms=314.528 mhz=5.691 times_real=3.42
+lazy launch 1 thread 4 cycles=1790001 thread_ms=303.373 mhz=5.900 times_real=3.55
+lazy launch 1 thread 5 cycles=1790004 thread_ms=326.681 mhz=5.479 times_real=3.30
+lazy launch 1 thread 6 cycles=1790003 thread_ms=418.689 mhz=4.275 times_real=2.57
+lazy launch 1 thread 7 cycles=1790003 thread_ms=402.217 mhz=4.450 times_real=2.68
+lazy launch 1 thread 8 cycles=1790003 thread_ms=359.371 mhz=4.981 times_real=3.00
+== NES region 1 set end 02:25:03 UTC uptime: 02:25:03 up 10 days, 11:53,  3 users,  load average: 1.49, 1.66, 1.88
+== BBC gauge 02:25:03 UTC load 1.49 1.66 1.88
+launch 1 prompt yes
+launch 1 timed 1 cycles=2000000 ms=102.300 cycles_per_second=19550342 mhz=19.550
+launch 1 thread 1 cycles=2000003 thread_ms=94.465 mhz=21.172
+launch 1 thread 2 cycles=2000000 thread_ms=88.633 mhz=22.565
+launch 1 thread 3 cycles=2000000 thread_ms=110.562 mhz=18.089
+launch 1 thread 4 cycles=2000005 thread_ms=103.825 mhz=19.263
+launch 1 thread 5 cycles=2000001 thread_ms=111.570 mhz=17.926
+launch 1 thread 6 cycles=2000002 thread_ms=77.692 mhz=25.743
+launch 1 thread 7 cycles=2000002 thread_ms=86.141 mhz=23.218
+launch 1 thread 8 cycles=2000000 thread_ms=80.698 mhz=24.784
+launch 1 thread 9 cycles=2000000 thread_ms=80.251 mhz=24.922
+launch 1 thread 10 cycles=2000001 thread_ms=88.303 mhz=22.649

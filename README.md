@@ -50,7 +50,11 @@ smallest first. The programme's design is in
 The 6502 does exactly one read or one write on its bus every clock cycle. The
 core reproduces every one of them, in order, including the reads whose result
 the chip throws away. The other chips in a machine run in step with it, one
-cycle at a time.
+cycle at a time. A chip may be run in a batch instead, brought up to date only
+where something can see it, when a test shows that its state there is exactly
+what running it a cycle at a time would give: the NES's picture chip is run
+that way, and the differential that holds it equal is in
+[`bench/nes-speed/differential/`](bench/nes-speed/differential/).
 Where a machine's model is deliberately coarser than a cycle (the BBC Micro's
 video path reads screen memory a line at a time and applies a register write
 from the next character clocked), [`docs/known-differences.md`](docs/known-differences.md)
