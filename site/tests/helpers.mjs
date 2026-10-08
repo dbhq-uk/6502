@@ -38,3 +38,19 @@ export function visibleText(html) {
 }
 
 export const page = (url) => pages().find((p) => p.url === url);
+
+/**
+ * One model's part of a machine page, by its module: the whole model section
+ * for a machine with one model, or that view's tab panel for a machine with a
+ * case (src/components/MachineModel.astro). '' when the page has no such model.
+ */
+export function modelPanel(html, module) {
+  const tab = html.search(new RegExp(`<div class="model-panel" role="tabpanel"[^>]*\\bdata-model="${module}"`));
+  if (tab >= 0) {
+    const rest = html.slice(tab + 1);
+    const end = Math.min(...[rest.search(/<div class="model-panel" role="tabpanel"/), rest.indexOf('<p class="model-help" id="model-help">')].filter((i) => i >= 0));
+    return html.slice(tab, tab + 1 + end);
+  }
+  const at = html.search(new RegExp(`<section class="model"[^>]*\\bdata-model="${module}"`));
+  return at < 0 ? '' : html.slice(at, html.indexOf('<section class="photos"', at));
+}

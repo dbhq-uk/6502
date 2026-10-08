@@ -151,7 +151,8 @@ test('every photograph in the folder is written up in its README: its author, it
 // registry's models field"). A made-up module is present or absent through an
 // injected modelFiles, as a photograph is through photoExists.
 const built = (over = {}) => ({ modelFiles: () => ({ module: true, exportsMount: true, results: true, ...over }), ...onDisk });
-const claims = (models, over = {}) => registry(machine({ models, ...over }));
+// A machine that claims a model states its case (6 Oct 2026), so a made-up claim has none unless a test says otherwise.
+const claims = (models, over = {}) => registry(machine({ case: false, models, ...over }));
 const check = (reg, files = built()) => validateRegistry(reg, null, files).join('\n');
 
 test('a machine with no models and no case is valid, running or not: models never hold up a machine counting', () => {
@@ -235,8 +236,27 @@ test('a machine with a case that claims a model claims both, the outside and the
   assert.equal(check(claims(both, { case: true })), '');
   assert.match(check(claims([both[1]], { case: true })), /has a case and claims a model, so it must claim both outside and inside/);
   assert.match(check(claims([both[0]], { case: true })), /must claim both outside and inside/);
-  // The rule fires only when case is stated: until task 9 a machine may claim the inside alone with no case.
-  assert.equal(check(claims([both[1]])), '');
+});
+
+test('a machine that claims a model states case: a claim with no case fails, and the other rules still hold', () => {
+  const both = [{ view: 'outside', module: 'kim-1-case' }, { view: 'inside', module: 'kim-1-board' }];
+  const none = (models) => registry(machine({ models }));
+  const rule = /a machine that claims a model must state case, true or false/;
+  // The NES as task 7 left it: the inside alone, and no case. Until task 9 that passed; now it fails.
+  assert.match(check(none([both[1]])), rule);
+  assert.match(check(none(both)), rule);
+  assert.match(check(none([{ view: 'board', module: 'kim-1' }])), rule);
+  // Stated either way, the claim passes the new rule, and the old rules judge it as before.
+  assert.equal(check(claims([{ view: 'board', module: 'kim-1' }], { case: false })), '');
+  assert.equal(check(claims(both, { case: true })), '');
+  assert.doesNotMatch(check(claims([both[1]], { case: true })), rule);
+  assert.match(check(claims([both[1]], { case: true })), /must claim both outside and inside/);
+  // A machine that claims no model need not state its case.
+  assert.equal(check(registry(machine())), '');
+  // The real registry: the KIM-1 states no case and claims its board; the NES states its case and claims both views.
+  const reg = loadRegistry();
+  for (const id of ['kim-1', 'nes']) assert.deepEqual(modelProblems(reg.machines.find((m) => m.id === id), `machine ${id}`), [], id);
+  for (const m of reg.machines) if (m.models) assert.equal(typeof m.case, 'boolean', `${m.id} claims a model and does not state case`);
 });
 
 test('a reference the model was measured from, kept out of the repository, is credited like a drawing and names the SHA-256 of what was measured', () => {

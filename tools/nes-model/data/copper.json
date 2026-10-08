@@ -1,0 +1,253 @@
+{
+ "about": "Task 4 of the NES models plan: the copper on both faces of the NES-CPU-10 board and its printed legend, traced from the bare scans I1-front and I1-back (OpenTendo, read from the dbhq-uk fork at commit 3bd0b0be5c9ed6fc6a36d9e458bc58d9976b2009) in the board frame of frame.json; the plan's checks on them; and the track map. Written by board_trace.py; every figure here is a measurement made on the date of the journal entry that quotes it.",
+ "coverage": {
+  "bottom": 0.3122,
+  "print": 0.091,
+  "top": 0.4581
+ },
+ "drills": {
+  "n": 480,
+  "notInCopper": {
+   "bottom": [
+    1,
+    184,
+    332,
+    464,
+    470
+   ],
+   "top": [
+    332,
+    464
+   ]
+  }
+ },
+ "drillsInCopper": {
+  "bottom": 0.9896,
+  "top": 0.9958
+ },
+ "grid": {
+  "height": 1433,
+  "originMm": [
+   -0.1465,
+   -0.1119
+  ],
+  "pxPerMm": 12,
+  "what": "The traced grid: pixel (u, v)'s centre is board millimetre (originMm + ((u + 0.5) / pxPerMm, (v + 0.5) / pxPerMm))",
+  "width": 2351
+ },
+ "map": {
+  "budget": 600000,
+  "bytes": 144774,
+  "choice": "the highest of 10, 9, 8, 7 or 6 px/mm inside the budget, chosen from --look before this run",
+  "file": "site/src/assets/tracks/nes-famicom-board.webp",
+  "height": 1194,
+  "originMm": [
+   -0.1465,
+   -0.1119
+  ],
+  "sha256": "f78d9a5408de8227e9abd9603d5f461d3671d6ba3c9c7d9db4434e612b76144e",
+  "what": "Red the component side's copper, green the solder side's, blue the print, each 255 or 0; pixel (u, v)'s centre is board millimetre (originMm + ((u + 0.5) / mapPxPerMm, (v + 0.5) / mapPxPerMm)); lossless WebP",
+  "width": 1959
+ },
+ "mapPxPerMm": 10,
+ "nets": {
+  "chips": 10,
+  "excluded": [],
+  "gnd": {
+   "inLargest": 1,
+   "pins": 10
+  },
+  "touching": true,
+  "vcc": {
+   "inLargest": 2,
+   "pins": 10
+  }
+ },
+ "netsChips": [
+  "U6",
+  "U5",
+  "U1",
+  "U4",
+  "U2",
+  "U3",
+  "U7",
+  "U8",
+  "U9",
+  "U10"
+ ],
+ "netsExcluded": [],
+ "pinNets": {
+  "gnd": [
+   [
+    "U6",
+    "bottom:795"
+   ],
+   [
+    "U5",
+    "bottom:464"
+   ],
+   [
+    "U1",
+    "bottom:733"
+   ],
+   [
+    "U4",
+    "bottom:754"
+   ],
+   [
+    "U2",
+    "bottom:633"
+   ],
+   [
+    "U3",
+    "bottom:351"
+   ],
+   [
+    "U7",
+    "bottom:147"
+   ],
+   [
+    "U8",
+    "bottom:233"
+   ],
+   [
+    "U9",
+    "bottom:491"
+   ],
+   [
+    "U10",
+    "bottom:618"
+   ]
+  ],
+  "vcc": [
+   [
+    "U6",
+    "bottom:434"
+   ],
+   [
+    "U5",
+    "bottom:401"
+   ],
+   [
+    "U1",
+    "bottom:795"
+   ],
+   [
+    "U4",
+    "bottom:700"
+   ],
+   [
+    "U2",
+    "bottom:401"
+   ],
+   [
+    "U3",
+    "bottom:273"
+   ],
+   [
+    "U7",
+    "bottom:83"
+   ],
+   [
+    "U8",
+    "bottom:196"
+   ],
+   [
+    "U9",
+    "bottom:348"
+   ],
+   [
+    "U10",
+    "bottom:578"
+   ]
+  ]
+ },
+ "print": {
+  "areaMm2": 2048.6736,
+  "hiddenByStickerMm2": 157.0,
+  "recoveredMm2": 240.5625,
+  "recoveredShare": 0.1174
+ },
+ "thresholds": {
+  "coverage": "each face's copper 10 to 50 per cent of the board",
+  "drillsInCopper": "at least 95 per cent on each face",
+  "nets": "at least 8 ICs; at least 90 per cent of their GND pins in one net and of their +5V pins in another; the two never connected"
+ },
+ "trace": {
+  "bottom": {
+   "hysteresisHigh": 0.0849,
+   "laminateMedianDL": -0.0016,
+   "level": {
+    "blocks": 842,
+    "firstSplit": 0.0643,
+    "kept": 832,
+    "robustSd": 0.0109
+   },
+   "otsuDL": 0.0416,
+   "rim": {
+    "medianL": {
+     "1": 0.2811,
+     "10": 0.1667,
+     "11": 0.1645,
+     "12": 0.1625,
+     "2": 0.2305,
+     "3": 0.2116,
+     "4": 0.1942,
+     "5": 0.1838,
+     "6": 0.1778,
+     "7": 0.1735,
+     "8": 0.1706,
+     "9": 0.1686
+    },
+    "plateau": 0.1645,
+    "px": 9,
+    "takenOffMm2": 1905.6319
+   },
+   "shares": {
+    "lacquerAsCopper": 0.2259,
+    "tin": 0.1843,
+    "underLacquer": 0.1285
+   }
+  },
+  "top": {
+   "hysteresisHigh": 0.0674,
+   "laminateMedianDL": -0.002,
+   "level": {
+    "blocks": 739,
+    "firstSplit": 0.0533,
+    "kept": 734,
+    "robustSd": 0.0103
+   },
+   "otsuDL": 0.0327,
+   "rim": {
+    "medianL": {
+     "1": 0.2704,
+     "10": 0.167,
+     "11": 0.1664,
+     "12": 0.166,
+     "2": 0.2091,
+     "3": 0.1889,
+     "4": 0.1746,
+     "5": 0.1686,
+     "6": 0.1679,
+     "7": 0.1673,
+     "8": 0.167,
+     "9": 0.167
+    },
+    "plateau": 0.1664,
+    "px": 5,
+    "takenOffMm2": 1036.5972
+   },
+   "shares": {
+    "lacquerAsCopper": 0.2925,
+    "tin": 0.2845,
+    "underLacquer": 0.1649
+   }
+  }
+ },
+ "verdicts": {
+  "coverage": "pass",
+  "drillsInCopper": "pass",
+  "nets": "fail"
+ }
+}

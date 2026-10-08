@@ -22,16 +22,18 @@ src/Dbhq.Machines.Nes.Wasm/  # the NES as .NET WebAssembly: NesHost, for its pag
 machines/                   # registry.json, and per machine its "try it" program, which the page shows and the acceptance test runs (machines/nes/ holds the NES's, and its recorded frame hashes)
   bbc-micro/discs/          # the BBC Micro page's preset discs: one folder each with its image, licence, README and (if copyleft) source; manifest.json lists them
 site/                       # 6502.dbhq.uk: the Astro site, its tests, and the scripts that build the machines into it
+  src/models/               # the 3D models, one browser module each with its layout, generated parts and notes: kim-1, and the NES's nes-famicom-case (outside) and nes-famicom-board (inside)
 tests/                      # the tests and the library they share, one project per machine
 bench/                      # the speed benchmarks (native, and the browser speed checks), run locally and never in CI; the .NET ones are in the solution, so CI builds them (bench/nes-speed/ from the NES's task 6; in it, differential/ is the gate for the NES's lazy chips, and lazy-chips/ their measurements)
 tools/                      # scripts that make test data and check assumptions
   Dbhq.Cpu6502.ChipTrace/   # records the core's bus cycles for the site's chip page
   probes/                   # scripts that check assumptions against test data
   kim1-model/               # offline Python that measures the KIM-1's 3D model from photographs; its outputs are committed
+  nes-model/                # offline Python that measures the NES's two 3D models from bare board scans, photographs and a design patent; its outputs are committed, its inputs never
 roms/                       # system ROMs with their provenance and rights in roms/README.md: kim-1/, bbc-micro/, and nes/ (the NES's bundled homebrew, Lan Master)
-NOTICE.md                   # anything else taken from outside under other terms: the teletext glyph table (CC0)
+NOTICE.md                   # anything else taken from outside under other terms: the teletext glyph table (CC0), the BBC Micro's preset discs, and the NES board's track map (the TAPR Open Hardware License's terms)
 docs/bbc-micro/facts/       # the BBC Micro's fact sheets, written before its code
-docs/nes/facts/             # the NES's fact sheets, from the nesdev wiki, written before its code
+docs/nes/facts/             # the NES's fact sheets, from the nesdev wiki, written before its code; models.md, the 3D models' sources, licences and findings
 docs/superpowers/specs/     # the design; each stage gets its own spec here
 docs/superpowers/plans/     # the plan for each spec
 docs/journal/               # the record of how it was built; the site's source

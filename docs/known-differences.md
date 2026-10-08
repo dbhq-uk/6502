@@ -1241,3 +1241,129 @@ modelled (the PPU section above; issue
 [#69](https://github.com/dbhq-uk/6502/issues/69)). `nes-panel.test.mjs` ("the
 picture is 256 by 240 pixels shown in the region's pixel shape") holds the
 shape.
+
+## The NES: its two 3D models, where they stop
+
+**What.** The outside model (`site/src/models/nes-famicom-case.js`) and the
+inside model (`nes-famicom-board.js`) on the NES's page, each drawn for the
+NTSC NES-001 and the PAL NESE-001. They are measured by the offline tools in
+`tools/nes-model/` from photographs, a design patent and bare board scans,
+none of them Nintendo's own drawings. Every figure below is read from the data
+file named beside it, measured on the day the journal
+(`docs/journal/2026-10-05-the-nes-models.md`) gives, and the tests named hold
+it. Each limit a visitor would notice is also said in the note under its model,
+under "What it does not show, or shows less well".
+
+**The case's size is not Nintendo's.** It is the published 254 by 203.2 mm and
+88.9 mm high (`tools/nes-model/data/case.json`, `footprint.widthMm`,
+`footprint.depthMm`, `heightMm`, with `heightFrom` "published"), from the NES
+Fandom wiki, Thingiverse 243385 and dimensions.com, which disagree with each
+other a little. It is good to about 3 per cent (`footprint.goodToPct`, with
+its reason: the patent's drawings' largest disagreement with the published
+proportions, 3.08 per cent).
+The height is the published one, not read from the photographs.
+
+**The case's checks were revised twice, after the patent's figures were
+seen.** As first written, depth to width and height to width were read from
+two corner photographs and the depth stopped, at -8.77 per cent on O2-BR
+(`spike.json`, `case.depthToWidthErrPctEach.br`); review found that measured
+the camera, not the case. The first revision judged the design patent's
+drawings against 203.2 / 254 within 1.5 per cent, stop over 3, and the top view
+stopped at -3.46 per cent (`case.patent.firstRevisionAgainst254Mm`). The
+sources disagree with each other by more than those limits can resolve, so the
+second revision judges the patent's views against the published ratios'
+midpoints, 0.797 and 0.349, within 5 per cent and stop over 8. On that, depth to
+width reads -3.08, -2.64 and -0.68 per cent on the top, the bottom and the side
+over the front, and height to width +1.12 and +1.37 per cent
+(`case.patent.depthToWidthErrPctEach`, `heightToWidthErrPctEach`). What the
+checks catch now is a gross error of scale, not an error of 3 per cent; every
+earlier stop stays recorded in `spike.json`. The PAL front lies between pass
+and stop: its label band is -3.49 per cent against the NTSC front's, against a
+2 per cent pass and a 4 per cent stop (`palFront.ratioErrPct`).
+
+**The rear connectors' check failed, and is accepted as measured.** Their
+places worked out from the board plus the board's place in the case missed
+where a photograph (O2-BR) shows them by 5.16, 3.5 and 0.85 mm, one of three
+within the 2 mm limit (`case.json`, `rearCheck.within`, `rearCheck.worstMm`,
+each connector's `checkMm`). The model keeps the photograph's places, which
+agree with the patent's rear view within 1.3 mm
+(`rearCheck.uncertaintyMm.placesUsed`). A recheck needs the RF modulator's face
+measured on its own first, with its limit fixed before it runs; it is an open
+item in the plan's Deferred list.
+
+**The copper is traced to look at, and its connections are not verified.**
+The check that would have shown them, that the ten chips' ground pins join in
+one net and their +5V pins in another, failed: 1 of 10 ground pins fell in the
+largest ground net, 2 of 10 +5V pins in the largest +5V net, and a ground and a
++5V pin came out in one net (`copper.json`, `nets`, and `verdicts.nets`
+"fail"). The track map is kept to look at. A re-trace, judged by a new check
+fixed before it runs, is an open item in the plan's Deferred list, for Dan to
+decide.
+
+**Each console's parts come from a photograph of another board.** The NTSC
+parts were read off an NES-CPU-07 (I4, I5) and placed on the scanned
+NES-CPU-10's footprints, each within 0.432 mm at the worst against a 2 mm limit
+(`parts.json`, `sitsOn`). The PAL parts were read off an NES-CPU-11 (I3) and
+drawn on the same CPU-10 layout. No bare PAL board was scanned, so the PAL
+board's copper is the NTSC board's. Task 0's evidence is that the two boards'
+chips sit in the same places: the ten chips' centres on I3 against I1's, held
+out one at a time, median 0.148 mm and worst 0.386 mm (`spike.json`,
+`palLayout.heldOutMm`); the connectors P1 to P3 could not be measured on I3
+(`palLayout.notMeasured`), and the copper itself was not compared, so that it
+is the same is an inference.
+
+**What the chips do is read, not traced.** Which controller port each buffer
+serves, U7 port 1 and U8 port 2, is by the board's print, checked against the
+nesdev wiki and the KiCad redrawing's nets in task 6, not traced on the scan
+(`ic-table.json`, `port.inferred` true on both). U9's jobs, inverting the PPU's
+A13 and the reset line and clocking the lockout chip, are read from the
+redrawing's nets.
+
+**Heights are typical.** Every part's height is a typical one for its package,
+none measured (`parts.json`, `model.heights`, each `measured` false).
+
+**The PAL modulator and crystal.** The PAL modulator's can is drawn about 4 mm
+to the right of the NTSC modulator's place (`parts.json`, `model.others`, x
+193.674 against 189.656 mm), as I3 shows it; I3 was taken with a 20 mm lens, and
+the photograph cannot say how much of the shift is perspective. The PAL crystal
+is drawn as seen on I3, partly hidden by the expansion socket, so it is shorter
+across the board than the NTSC one (8.899 against 11.512 mm, the same entries).
+
+**The board's place in the case and the case's profile.** The board's place is
+good to about 2 mm (`case.json`, `boardInCase.uncertaintyMm`) and was measured
+in a PAL case (O9), so it assumes the PAL and NTSC cases share one moulding, an
+inference (`boardInCase.from`). The bottom shell's ends lean in below a break;
+the four ends read on two photographs run from 12.86 to 17.71 mm at the base, so
+the model's inset is an average good to about 2.4 mm, half that range
+(`profileCheck.endsMm`, `profileCheck.goodToMm`; until the final fix wave of 6
+October 2026 a sentence gave "about 2.5 mm"); the held-out figure, 0.71 mm,
+shows the averaging repeats, not that it is the true inset.
+
+**The machine's state, where the console's is not known or not emulated.**
+Whether POWER latches in on a real console is not known: no photograph shows it
+pressed (`case.json`, `powerLatch.seen` false). The model shows it in while the
+machine runs, as the design chose. The lockout chip is not emulated, so the
+power light never blinks as a real console's does when it refuses a cartridge,
+and the inside model never marks U10. The buttons' travel, 3 mm, is a typical
+one (`buttons[0].travelMm`, `travelFrom` "typical").
+
+**What is simplified.** The case's corners are drawn square, where the
+console's are rounded. The rear's window is drawn flat on the rear face; on the
+console it is set in by about 4.4 mm (`case.json`,
+`rearWindow.setBackReadMm`, 4.39). The underside's ribs and panels are drawn as
+lines. The cartridge door does not open. The video and audio jacks on the side
+and the PAL console's rear are not checked against the board. The PAL
+console's words were read from photographs taken with a 20 mm lens
+(`sources.json`, `focalLengthMm` on O4 and O10), and its rear words, printed on
+three lines, are drawn on one. The resistors, capacitors and connectors are
+plain shapes, and the track map has 10 pixels to the millimetre
+(`copper.json`, `mapPxPerMm`). The site's shared stage lights every model with
+its green-white, so the case's greys come out a little green.
+
+**How the tests treat it.** `site/tests/nes-models.test.mjs` pins each figure
+above to its data file: the rear check's failure and its three misses, the
+nets check's FAIL, the case's published size and its checks' verdicts, the
+parts' places and identities (against `docs/nes/facts/models.md`'s table since
+task 10), the profile's spread, and every sentence of both notes against the
+results files that `tools/nes-model/results.py` writes. A re-run of the tools
+that moves any of them fails until the words move too.

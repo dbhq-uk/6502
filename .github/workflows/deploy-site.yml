@@ -188,14 +188,35 @@ jobs:
           PASS=$(count pass); FAILED=$(count fail)
           echo "pass=${PASS:-unread} fail=${FAILED:-unread}"
           [ "${FAILED:-1}" = "0" ]
-          # 369 tests as at 6 Oct 2026, after the review of the NES's page (368
-          # with the page and the NES counting, 351 with its registry record, try-it file and build, 342 before
-          # them that day with main's preset discs merged into the NES's branch;
+          # 475 as at 6 Oct 2026, after the NES models' final fix wave (two tests of the
+          # NES browser check's wait for a camera to come to rest);
+          # 473 as at 6 Oct 2026, with task 10 of the NES models (five tests for
+          # mutations that had survived: the parts against the fact sheet, a change of
+          # console in the scene, the board's mount, the case's sizes in its code and caption);
+          # 468 tests as at 6 Oct 2026, with task 8's follow-up (the photographs
+          # committed for the NES's outside model: credited, listed and hashed);
+          # 467 as at 6 Oct 2026, after task 9's fix round (a model's region path on
+          # a console it does not draw; tab keys with Alt, Ctrl or Meta left to the browser);
+          # 465 with task 9 of the NES models done (the rule that
+          # a machine claiming a model states case, the case's credits, a console the model
+          # does not draw); 462 with task 9's second stage of the NES models (the
+          # outside model: its entry, sizes, features, words, buttons and notes); 453 with
+          # task 9's first stage (the
+          # views of a cased machine as tabs: their markup, styles and loader); 447 after
+          # task 7's fix round of the NES models (two
+          # access tests: a count that falls is a new machine; 445 with task 7, the
+          # board's inside model on the page, its legend, rates, results file and
+          # credits; 423 with
+          # task 6, the page's panel.nes
+          # and its events; 416 with tasks 0 to 5 and 8 merged onto the NES's branch,
+          # 369 before them, after the review of the NES's page; 368 with the page and
+          # the NES counting, 351 with its registry record, try-it file and build, 342
+          # before them that day with main's preset discs merged into the NES's branch;
           # 282 on main after the discs' second review, 292 on the branch).
           # Adding tests is expected; losing them is the failure this floor catches.
           # Raise the number when the suite grows, here and in the same step of
           # validate.yml, which must hold the same number.
-          [ "${PASS:-0}" -ge 369 ]
+          [ "${PASS:-0}" -ge 475 ]
 
       # The same floor as "Every machine file must be serving" below, checked on
       # the build itself, so a build that is missing a machine fails here and
@@ -305,7 +326,7 @@ jobs:
           # a file new in this deploy can answer 404 for a few seconds (the BBC
           # Micro's two merges on 4 Oct 2026 both met it). Each try has its own
           # cache-buster. A file that never reaches 200 still fails.
-          for f in sitemap-index.xml sitemap-0.xml robots.txt analytics.js consent.js machines-table.js table-sort.js chip.js kim-1.js machine-host.js bbc-micro.js bbc-keys.js bbc-audio.js nes.js nes-keys.js nes-audio.js model-loader.js models/kim-1.js models/kim-1-tracks.webp; do
+          for f in sitemap-index.xml sitemap-0.xml robots.txt analytics.js consent.js machines-table.js table-sort.js chip.js kim-1.js machine-host.js bbc-micro.js bbc-keys.js bbc-audio.js nes.js nes-keys.js nes-audio.js model-loader.js models/kim-1.js models/kim-1-tracks.webp models/nes-famicom-case.js models/nes-famicom-board.js models/nes-famicom-board-tracks.webp; do
             TRY=0
             while :; do
               CODE=$(curl -s --max-time 20 --retry 3 --retry-delay 5 -o /dev/null -w "%{http_code}" "https://6502.dbhq.uk/${f}?cb=${GITHUB_SHA}-${TRY}")

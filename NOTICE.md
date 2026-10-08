@@ -1,10 +1,12 @@
 # Notices
 
-This repository is MIT (see `LICENSE`). Two things in it were taken from
+This repository is MIT (see `LICENSE`). Three things in it were taken from
 outside under different terms, and are recorded here: the teletext glyph table,
-and the BBC Micro's preset discs. The system ROMs, and the NES's bundled
-homebrew, Lan Master, which its author released into the public domain, are
-recorded separately, in [`roms/README.md`](roms/README.md).
+the BBC Micro's preset discs, and the NES board's track map, traced from
+OpenTendo's scans of a bare board under the TAPR Open Hardware License. The
+system ROMs, and the NES's bundled homebrew, Lan Master, which its author
+released into the public domain, are recorded separately, in
+[`roms/README.md`](roms/README.md).
 
 ## The SAA5050 teletext glyph table, from Bedstead
 
@@ -114,3 +116,36 @@ lists them all with their authors, SPDX licence ids and hashes, and the page
 credits each one. Why each was chosen, and the titles that were not, are in
 [`docs/bbc-micro/facts/discs.md`](docs/bbc-micro/facts/discs.md). If an author
 asks for a disc to be removed, it will be.
+
+## The NES board's track map, traced from OpenTendo's scans
+
+**What.** `site/src/assets/tracks/nes-famicom-board.webp`: the copper on both
+faces of the NES's main board, NES-CPU-10, and its printed legend, as one
+lossless WebP, 10 pixels to the millimetre, edge to edge in the board frame.
+Red is the component side's copper, green the solder side's, blue the print.
+The copper is traced to look at: its connectivity is not verified (the
+check on its known nets failed, 5 October 2026).
+It is ours in the sense that our code traced it (`tools/nes-model/board_trace.py`,
+5 October 2026), but **the map is traced from OpenTendo's scans**, so it is a
+derivative of them and is not MIT.
+
+**Where it came from.** The bare board scans `Scans/NES-CPU-10_front_300dpi.png`
+and `Scans/NES-CPU-10_back_300dpi.png` in OpenTendo, by Redherring32 and others
+(the scans added by Kamoteshake in August 2024), read from our fork,
+[dbhq-uk/OpenTendo](https://github.com/dbhq-uk/OpenTendo), at commit
+`3bd0b0be5c9ed6fc6a36d9e458bc58d9976b2009`, which is the upstream
+[Redherring32/OpenTendo](https://github.com/Redherring32/OpenTendo) as it stood
+on 5 October 2026. The scans are not committed here; their sizes and SHA-256
+are in `tools/nes-model/data/sources.json`.
+
+**Rights.** OpenTendo's README says the repository is "Licensed under the TAPR
+Open Hardware License (www.tapr.org/OHL)". The scans state no licence of their
+own; that the README's covers them is inferred. So the track map is offered on
+the TAPR Open Hardware License's terms, as they are published at
+<https://www.tapr.org/OHL>, with OpenTendo and its authors credited. The
+licence's text is not copied here: its terms are the ones at that address.
+What is derived from the scans is the map's pixels: which parts of each face
+are copper and which are print. Everything else in the NES models (the code,
+the measurements in `tools/nes-model/data/`, the generated parts) is ours and
+MIT, and the KiCad redrawing in OpenTendo is only compared with, never drawn
+from.

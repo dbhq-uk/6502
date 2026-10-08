@@ -40,9 +40,11 @@ test('the record mirrors the BBC Micro\'s, field for field, with the values the 
   assert.equal(nes.category, 'console');
   assert.equal(nes.core, '2a03');
   assert.equal(nes.acceptance, 'NesAcceptanceTests');
-  // A cased machine that claims no model yet: the models are their own pull request (issue 68).
+  // The models are their own pull request (issue 68). The NES has a case, and claims both its views, the outside
+  // first: task 9 of the models plan put case back with the outside, 6 Oct 2026 (task 7 had taken it off while the
+  // inside was the only view).
   assert.equal(nes.case, true);
-  assert.equal('models' in nes, false);
+  assert.deepEqual(nes.models, [{ view: 'outside', module: 'nes-famicom-case' }, { view: 'inside', module: 'nes-famicom-board' }]);
 });
 
 /** A region's CPU clock in MHz, from its `cpuHz:` in Region.cs, worked out as the C# does. */
