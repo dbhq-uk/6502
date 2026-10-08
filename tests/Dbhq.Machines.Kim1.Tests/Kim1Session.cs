@@ -56,6 +56,11 @@ public sealed class Kim1Session
     {
         Keystrokes.Type(keys);
         Keystrokes.RunUntilIdle();
+        if (Machine.Mode == Kim1Mode.Teletype)
+        {
+            RunTeletype();
+        }
+
         return this;
     }
 
@@ -69,6 +74,54 @@ public sealed class Kim1Session
         _ => ((int)key).ToString("X"),
     });
 
+    /// <summary>The teletype's paper: everything printed since the session began.</summary>
+    public TeletypePaper Paper { get; } = new();
+
+    /// <summary>Everything printed since the session began, as it came off the line.</summary>
+    public string Printed { get; private set; } = "";
+
+    /// <summary>Closes the TTY/KB switch, presses RS and types RUB OUT, as the User Manual's section 2.6 says to.</summary>
+    public Kim1Session LogOn()
+    {
+        Machine.Mode = Kim1Mode.Teletype;
+        Keys("[RS]");
+        return Type("[RUBOUT]");
+    }
+
+    /// <summary>
+    /// Types at the teletype, written as the User Manual writes it: [SPACE],
+    /// [CR], [LF] and [RUBOUT] in brackets, other characters as themselves.
+    /// Runs until the keys have all gone and the monitor has finished
+    /// answering, then puts what was printed on the paper.
+    /// </summary>
+    public Kim1Session Type(string keys)
+    {
+        Machine.Teletype.Send(Kim1Teletype.Parse(keys));
+        return RunTeletype();
+    }
+
+    /// <summary>Runs until the teletype is idle, or for at most <paramref name="limit"/> cycles, and prints what came.</summary>
+    public Kim1Session RunTeletype(long limit = 120_000_000)
+    {
+        long end = Machine.Cycles + limit;
+        do
+        {
+            Machine.Run(10_000);
+        }
+        while (!Machine.Teletype.Idle(Machine.Cycles) && Machine.Cycles < end);
+
+        Print();
+        return this;
+    }
+
+    /// <summary>Moves what the teletype has printed onto the paper.</summary>
+    public void Print()
+    {
+        string text = Machine.ReadTeletype();
+        Printed += text;
+        Paper.Print(text);
+    }
+
     /// <summary>Holds ST for 40 ms and lets go, as a finger does.</summary>
     public void Stop() => Keys("[ST]");
 
@@ -77,6 +130,10 @@ public sealed class Kim1Session
     /// An x in the expectation is the manual's "don't care": any lit hex
     /// digit, but not a dark one.
     /// </summary>
+    /// <summary>Whether each of <paramref name="shown"/> lines matches its line of <paramref name="expected"/>, as <see cref="Matches(string, string)"/> matches.</summary>
+    public static bool Matches(IReadOnlyList<string> expected, IReadOnlyList<string> shown) =>
+        expected.Count == shown.Count && expected.Zip(shown).All(p => Matches(p.First, p.Second));
+
     public static bool Matches(string expected, string shown) =>
         expected.Length == shown.Length && expected.Zip(shown).All(p => p.First == 'x' ? Uri.IsHexDigit(p.Second) : p.First == p.Second);
 }

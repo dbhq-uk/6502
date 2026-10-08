@@ -7,9 +7,11 @@ namespace Dbhq.Machines.Kim1;
 /// RAM, a 23-key keypad and six LED digits.
 /// </summary>
 /// <remarks>
-/// The teletype interface, the cassette interface and the expansion bus are
-/// not modelled. The machine starts powered on and idle; press RS, as the
-/// User Manual says to, to start the monitor. RAM starts as zeros.
+/// The teletype interface is modelled (<see cref="Kim1Teletype"/>), behind
+/// the TTY/KB switch, which starts at KB. The cassette interface and the
+/// expansion bus are not modelled. The machine starts powered on and idle;
+/// press RS, as the User Manual says to, to start the monitor. RAM starts as
+/// zeros.
 /// </remarks>
 public sealed class Kim1Machine
 {
@@ -27,6 +29,20 @@ public sealed class Kim1Machine
     public Cpu Cpu { get; }
 
     public Kim1Keypad Keypad => Bus.Keypad;
+
+    /// <summary>The terminal on the teletype loops. See <see cref="Kim1Bus.Teletype"/>.</summary>
+    public Kim1Teletype Teletype
+    {
+        get => Bus.Teletype;
+        set => Bus.Teletype = value;
+    }
+
+    /// <summary>The TTY/KB switch. The monitor reads it at reset, and again each time round its keypad loop.</summary>
+    public Kim1Mode Mode
+    {
+        get => Bus.Mode;
+        set => Bus.Mode = value;
+    }
 
     /// <summary>Bus cycles since power on: microseconds, at the KIM-1's 1 MHz.</summary>
     public long Cycles => Bus.Cycles;
@@ -67,6 +83,17 @@ public sealed class Kim1Machine
         {
             Step();
         }
+    }
+
+    /// <summary>
+    /// Everything the teletype has printed since the last call, as it came
+    /// off the line. The printer is brought up to the cycle the machine is on
+    /// first, so a character whose stop bit has been read is in it.
+    /// </summary>
+    public string ReadTeletype()
+    {
+        Bus.Teletype.Advance(Bus.Cycles);
+        return Bus.Teletype.Drain();
     }
 
     /// <summary>The six digits as they look now. See <see cref="Kim1Display.Read"/>.</summary>
