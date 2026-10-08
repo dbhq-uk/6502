@@ -24,8 +24,11 @@ extended, and its output from the code as it stood recorded as the baseline.
 **Note, 8 October 2026.** The baseline file this entry names, `4e9b92b.txt`, was
 replaced by `38c5544.txt` after the reset fix (#71) changed one field in the PPU's
 state report; the section "The baseline after the reset fix", at the end, says how
-and why. The commands in the sections written on 6 and 7 October keep the name of
-the file as it was on the day they were run; to run one now, use the new name.
+and why. Later the same day it was replaced again, by `acf9748.txt`, when the
+differential's output became format 3 for the fast scanline renderer
+([that entry](2026-10-08-the-nes-scanline-renderer.md), task 3a). The commands in
+the sections written on 6, 7 and 8 October keep the name of the file as it was
+on the day they were run; to run one now, use the newest name.
 
 ## Task 1: the gate
 
@@ -214,10 +217,11 @@ prints the first run that differs and which of its hashes, and exits 1, so each
 later task's gate is one command:
 
 ```
-dotnet run -c Release --project bench/nes-speed/differential -- --check bench/nes-speed/differential/baseline/38c5544.txt
+dotnet run -c Release --project bench/nes-speed/differential -- --check bench/nes-speed/differential/baseline/acf9748.txt
 ```
 
-(On 6 October the file was `4e9b92b.txt`; see the note at the top.)
+(On 6 October the file was `4e9b92b.txt`, and until task 3a of the renderer on 8
+October `38c5544.txt`; see the note at the top.)
 
 ### The baseline
 

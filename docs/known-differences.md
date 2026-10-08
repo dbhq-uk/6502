@@ -851,9 +851,12 @@ cost. This is reasoned, not measured: the browser bench runs one game only.
 (`bench/nes-speed/differential`, its README) compares the lazy build with the
 build before the work at every point where a chip can be seen, over the pinned
 test ROMs and its own synthetic cartridges in both regions, against
-`baseline/38c5544.txt`. `NesOptions.PerDotReference` catches the PPU up every
-cycle; `PpuCatchUpTests`, `CatchUpScenes` and `NesBusTests` use it as the
-oracle for the lazy build.
+`baseline/acf9748.txt` (format 3, which also hashes the picture as far as it is
+drawn at every point where the PPU can be seen). `NesOptions.PerDotReference`
+catches the PPU up every cycle; `PpuCatchUpTests`, `CatchUpScenes` and
+`NesBusTests` use it as the oracle for the lazy build, and `PpuDotSceneTests`
+holds the lazy PPU to the per-dot one with a register access on every dot of a
+line.
 
 ## The NES: the PPU's picture, where the model stops
 

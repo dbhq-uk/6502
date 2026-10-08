@@ -45,7 +45,12 @@ PPU's hash with no difference in behaviour behind it. On 8 October 2026 the
 baseline was re-recorded from the merged tree with the per-dot reference
 (`--oracle`) as `bench/nes-speed/differential/baseline/38c5544.txt`, the lazy
 build was checked against it, and the old file was removed. The journal says why
-the file changed ([#74](https://github.com/dbhq-uk/6502/issues/74)).
+the file changed ([#74](https://github.com/dbhq-uk/6502/issues/74)). On the same
+day the gate was extended for the fast scanline renderer (format 3: the picture as
+far as it is drawn at every point, the sprite 0 sweep over the whole picture, and
+scene tests on every dot of a line) and its baseline recorded again as
+`bench/nes-speed/differential/baseline/acf9748.txt`
+([the scanline renderer entry](../../journal/2026-10-08-the-nes-scanline-renderer.md), task 3a).
 
 ## Why
 

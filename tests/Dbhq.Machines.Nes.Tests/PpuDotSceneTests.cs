@@ -107,13 +107,17 @@ public class PpuDotSceneTests
     // The scenes for one place and one access: the target on each dot 0 to 340 of `line`, each
     // scene from dot 0 of the line before to dot 0 of the line after the next, so the catch-up to
     // the access covers a whole line and the dots of the line before the target, and the one
-    // after it the rest of the line and a whole line more.
+    // after it the rest of the line and a whole line more. The scenes run one after another on
+    // one pair, so each starts by writing its PPUCTRL and PPUMASK: an access that changed them in
+    // the scene before (rendering switched off, say) would otherwise carry over, and the access
+    // would change nothing.
     internal static IEnumerable<DotScene> AtEveryDot(string kind, int line, bool odd, byte status, byte ctrl, byte mask)
     {
         for (int dot = 0; dot < Region.DotsPerLine; dot++)
         {
             int target = Region.DotsPerLine + dot;
-            yield return new DotScene($"{kind} at line {line} dot {dot} of an {(odd ? "odd" : "even")} frame, PPUMASK ${mask:X2}", line - 1, 0, odd, status, Kinds[kind](target, ctrl, mask), 3 * Region.DotsPerLine);
+            DotAccess[] accesses = [DotAccess.Write(0, 0, ctrl), DotAccess.Write(0, 1, mask), .. Kinds[kind](target, ctrl, mask)];
+            yield return new DotScene($"{kind} at line {line} dot {dot} of an {(odd ? "odd" : "even")} frame, PPUMASK ${mask:X2}", line - 1, 0, odd, status, accesses, 3 * Region.DotsPerLine);
         }
     }
 

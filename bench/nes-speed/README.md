@@ -19,9 +19,9 @@ below says which code it measured.
 | `index.html`, `main.js` | The page. It fetches the ROM, boots it, then times the runs. |
 | `run-in-browser.mjs`, `package.json` | Fetches the ROM from the pinned fork, checks it against its SHA-256 in `Pins.cs`, serves it with the page and a published copy of the app on `127.0.0.1`, and runs it in a headless Chrome, a fresh launch each time. |
 | `native/` | The same workload as a console program, in the solution so CI builds it. |
-| `differential/` | The check that a change for speed changed nothing else: it runs every pinned NES test ROM, the bundled homebrew with a fixed round of button presses, and synthetic cartridges it assembles itself, which keep rendering on and touch the chips at moving dots, in both regions and writes one line of hashes for each (every instruction's registers, cycle and PPU position, every cycle's interrupt lines, every frame's pixels, the sound, the end state, and each chip's whole state at every point where it can be seen). In the solution too. |
-| `differential/baseline/` | The differential's output with the per-dot reference (`--oracle`), which the lazy build is checked against; the file is named for the commit it was recorded at (`38c5544.txt`, after the reset fix). It replaced `4e9b92b.txt`, which was recorded from the code before the lazy chips, behaving as `5e48505`; the two differ only in the PPU's hash, on 116 of the 332 runs (below). |
-| `differential/faults.py` | Shows the differential can fail: in a scratch copy of the repository, whose path it takes, it plants one fault at a time, runs `--check` against a baseline, and counts the runs each changes. |
+| `differential/` | The check that a change for speed changed nothing else: it runs every pinned NES test ROM, the bundled homebrew with a fixed round of button presses, and synthetic cartridges it assembles itself, which keep rendering on and touch the chips at moving dots, in both regions and writes one line of hashes for each (every instruction's registers, cycle and PPU position, every cycle's interrupt lines, every frame's pixels, the sound, the end state, each chip's whole state at every point where it can be seen, and, since format 3, the picture as far as it is drawn at each of those points). In the solution too. |
+| `differential/baseline/` | The differential's output with the per-dot reference (`--oracle`), which the lazy build is checked against; the file is named for the commit it was recorded at (`acf9748.txt`, format 3, from 8 October 2026). It replaced `38c5544.txt` (format 2, after the reset fix), which had replaced `4e9b92b.txt`, recorded from the code before the lazy chips, behaving as `5e48505` (below). |
+| `differential/faults.py` | Shows the differential can fail: in a scratch copy of the repository, whose path it takes, it plants one fault at a time, runs `--check` against a baseline, and counts the runs each changes; with `--tests <filter>` it also runs the NES tests that match with each fault in, and with `--no-differential` only those. |
 
 ## The workload
 
@@ -75,8 +75,8 @@ Or check against the committed baseline in one command. It prints the first run 
 which of its hashes do, and exits 1 on any difference:
 
 ```sh
-dotnet run -c Release --project differential -- --check differential/baseline/38c5544.txt
-dotnet run -c Release --project differential -- --check differential/baseline/38c5544.txt --oracle
+dotnet run -c Release --project differential -- --check differential/baseline/acf9748.txt
+dotnet run -c Release --project differential -- --check differential/baseline/acf9748.txt --oracle
 ```
 
 `--oracle` builds the machine with `NesOptions.PerDotReference`, the per-dot reference that a
@@ -89,7 +89,8 @@ by reflection that every field of every chip is in the chips' state reports, and
 the field, if one is not. A run that throws is written as `crashed: <exception> in <method>`
 and the others go on. It runs four ROMs at a time (`--threads <n>` for another number), and
 `--coverage` prints, for each synthetic run, the dots its PPU register writes landed on with
-rendering on; the journal entry
+rendering on, and for the sprite0 runs of each region together how many of the places sprite 0's
+sweep sets (y 0 to 239, eight x's, a left clip on and off) were drawn; the journal entry
 [`docs/journal/2026-10-06-the-nes-lazy-chips.md`](../../docs/journal/2026-10-06-the-nes-lazy-chips.md)
 has how long a run took, dated.
 
@@ -103,6 +104,19 @@ checked against it, and the old file was removed (issue #74). The new file diffe
 in the `ppu` hash alone, on 116 of the 332 runs, and in no other hash; the journal entry
 ([the lazy chips](../../docs/journal/2026-10-06-the-nes-lazy-chips.md), "The baseline after the
 reset fix") has the commands, the date and the counts.
+
+**Format 3, 8 October 2026.** Task 3a of the scanline renderer work (issue #72) closed three gaps
+in the gate before the renderer is written. A `pixels` hash was added: at each point where the PPU
+can be seen, other than a frame end, power on and the reset button (where the whole picture is
+already in the `ppu` hash), the point and the picture as far as it is drawn in the frame, each
+finished row hashed once and the row the PPU is on whole. The sprite0 cartridges now sweep sprite 0
+over the whole picture and run 900 frames. And scene tests in `tests/Dbhq.Machines.Nes.Tests`
+(`PpuDotSceneTests`) put a register access on every dot of a line, which no program timed from the
+frame can do on PAL. A new field is a new format, so the baseline was recorded again from `acf9748`
+with `--oracle`, the lazy build checked against it, and `38c5544.txt` removed. The runs that are not
+sprite0 runs keep every hash of format 2 as `38c5544.txt` had it; the journal entry
+([the scanline renderer](../../docs/journal/2026-10-08-the-nes-scanline-renderer.md), "Task 3a")
+has the commands, the dates and the counts.
 
 To run it on a baseline that is older than the tool, export that commit with `git archive`
 into a folder of its own, copy `bench/nes-speed/differential/` into the same place in the
