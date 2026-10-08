@@ -14,7 +14,7 @@ namespace Dbhq.Machines.Nes;
 /// unit clocks in the tick that begins a cycle, so a write in the cycle before is the one the readme
 /// calls "during" the clock. The two flags that hold this last one cycle.
 /// </remarks>
-internal sealed class LengthCounter
+internal sealed class LengthCounter : IReportsState
 {
     // apu.md 5.
     private static readonly byte[] Table =
@@ -104,12 +104,23 @@ internal sealed class LengthCounter
         _haltWritten = false;
         _loaded = false;
     }
+
+    void IReportsState.ReportState(IStateSink sink)
+    {
+        sink.Add(nameof(_haltWritten), _haltWritten);
+        sink.Add(nameof(_haltBefore), _haltBefore);
+        sink.Add(nameof(_loaded), _loaded);
+        sink.Add(nameof(_valueBefore), _valueBefore);
+        sink.Add(nameof(Value), Value);
+        sink.Add(nameof(Halt), Halt);
+        sink.Add(nameof(Enabled), Enabled);
+    }
 }
 
 /// <summary>
 /// The envelope of a pulse or the noise, <c>docs/nes/facts/apu.md</c> section 4.
 /// </summary>
-internal sealed class Envelope
+internal sealed class Envelope : IReportsState
 {
     private bool _start;
     private int _divider;
@@ -164,6 +175,16 @@ internal sealed class Envelope
             _decay = 15;
         }
     }
+
+    void IReportsState.ReportState(IStateSink sink)
+    {
+        sink.Add(nameof(_start), _start);
+        sink.Add(nameof(_divider), _divider);
+        sink.Add(nameof(_decay), _decay);
+        sink.Add(nameof(Loop), Loop);
+        sink.Add(nameof(Constant), Constant);
+        sink.Add(nameof(V), V);
+    }
 }
 
 /// <summary>
@@ -171,7 +192,7 @@ internal sealed class Envelope
 /// an 8-step duty sequencer, the sweep, the envelope and the length counter. The two channels
 /// differ only in the sweep's negate.
 /// </summary>
-public sealed class PulseChannel
+public sealed class PulseChannel : IReportsState
 {
     // apu.md 2, the duty table as the output steps after a restart: bit s is step s.
     private static readonly byte[] Duties = [0x02, 0x06, 0x1E, 0xF9];
@@ -328,6 +349,24 @@ public sealed class PulseChannel
     {
         _muted = _period < 8 || SweepTarget > 0x7FF;
     }
+
+    void IReportsState.ReportState(IStateSink sink)
+    {
+        sink.Skip(nameof(_onesComplement), StateReport.Fixed);
+        sink.Add(nameof(_envelope), _envelope);
+        sink.Add(nameof(_length), _length);
+        sink.Add(nameof(_timer), _timer);
+        sink.Add(nameof(_period), _period);
+        sink.Add(nameof(_step), _step);
+        sink.Add(nameof(_duty), _duty);
+        sink.Add(nameof(_muted), _muted);
+        sink.Add(nameof(_sweepEnabled), _sweepEnabled);
+        sink.Add(nameof(_sweepPeriod), _sweepPeriod);
+        sink.Add(nameof(_sweepNegate), _sweepNegate);
+        sink.Add(nameof(_sweepShift), _sweepShift);
+        sink.Add(nameof(_sweepDivider), _sweepDivider);
+        sink.Add(nameof(_sweepReload), _sweepReload);
+    }
 }
 
 /// <summary>
@@ -341,7 +380,7 @@ public sealed class PulseChannel
 /// triangle comes out of it more than 65 dB under a full one, the line <c>ResamplerTests</c> holds
 /// (the run of 6 October 2026 printed -72.4 dB).
 /// </remarks>
-public sealed class TriangleChannel
+public sealed class TriangleChannel : IReportsState
 {
     private readonly LengthCounter _length = new();
 
@@ -456,13 +495,25 @@ public sealed class TriangleChannel
     }
 
     internal void ClockHalf() => _length.Clock();
+
+    void IReportsState.ReportState(IStateSink sink)
+    {
+        sink.Add(nameof(_length), _length);
+        sink.Add(nameof(_timer), _timer);
+        sink.Add(nameof(_period), _period);
+        sink.Add(nameof(_step), _step);
+        sink.Add(nameof(_linear), _linear);
+        sink.Add(nameof(_linearReloadValue), _linearReloadValue);
+        sink.Add(nameof(_linearReload), _linearReload);
+        sink.Add(nameof(_control), _control);
+    }
 }
 
 /// <summary>
 /// The noise channel, <c>docs/nes/facts/apu.md</c> section 7: a 15-bit shift register clocked by a
 /// timer whose period is the region's, the envelope and the length counter.
 /// </summary>
-public sealed class NoiseChannel
+public sealed class NoiseChannel : IReportsState
 {
     private readonly int[] _periods;
     private readonly Envelope _envelope = new();
@@ -560,6 +611,18 @@ public sealed class NoiseChannel
     internal void ClockHalf() => _length.Clock();
 
     private int ReloadFor(int index) => (_periods[index] / 2) - 1;
+
+    void IReportsState.ReportState(IStateSink sink)
+    {
+        sink.Skip(nameof(_periods), StateReport.Fixed);
+        sink.Add(nameof(_envelope), _envelope);
+        sink.Add(nameof(_length), _length);
+        sink.Add(nameof(_timer), _timer);
+        sink.Add(nameof(_reload), _reload);
+        sink.Add(nameof(_periodIndex), _periodIndex);
+        sink.Add(nameof(_shiftRegister), _shiftRegister);
+        sink.Add(nameof(_feedbackBit), _feedbackBit);
+    }
 }
 
 /// <summary>
@@ -587,7 +650,7 @@ public sealed class NoiseChannel
 /// extra fetch does not happen.
 /// </para>
 /// </remarks>
-public sealed class DmcChannel
+public sealed class DmcChannel : IReportsState
 {
     private readonly int[] _rates;
 
@@ -804,4 +867,25 @@ public sealed class DmcChannel
     }
 
     private int Reload(int index) => (_rates[index] / 2) - 1;
+
+    void IReportsState.ReportState(IStateSink sink)
+    {
+        sink.Skip(nameof(_rates), StateReport.Fixed);
+        sink.Add(nameof(_rateIndex), _rateIndex);
+        sink.Add(nameof(_timer), _timer);
+        sink.Add(nameof(_level), _level);
+        sink.Add(nameof(_irqEnabled), _irqEnabled);
+        sink.Add(nameof(_loop), _loop);
+        sink.Add(nameof(_irqFlag), _irqFlag);
+        sink.Add(nameof(_sampleAddress), _sampleAddress);
+        sink.Add(nameof(_sampleLength), _sampleLength);
+        sink.Add(nameof(_currentAddress), _currentAddress);
+        sink.Add(nameof(_bytesRemaining), _bytesRemaining);
+        sink.Add(nameof(_buffer), _buffer);
+        sink.Add(nameof(_bufferFull), _bufferFull);
+        sink.Add(nameof(_fetchFrom), _fetchFrom);
+        sink.Add(nameof(_shift), _shift);
+        sink.Add(nameof(_bitsRemaining), _bitsRemaining);
+        sink.Add(nameof(_silent), _silent);
+    }
 }

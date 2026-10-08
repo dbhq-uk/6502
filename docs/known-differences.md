@@ -818,6 +818,43 @@ rendering on a visible line returns what evaluation and the sprite fetches are
 reading, OAMADDR is cleared on dots 257 to 320, and the pipeline moves `v`. The
 next section says where the drawing stops.
 
+## The NES: the PPU caught up lazily
+
+**What.** Task 2 of the lazy chips work, 7 October 2026
+(`docs/journal/2026-10-06-the-nes-lazy-chips.md`). The bus no longer runs the PPU's dots inside each cycle. It gives them to the PPU, which
+runs them with the same per-dot code when it is caught up. Nothing that can be
+seen differs from running each dot in its cycle; this section says where that
+is held, and where the gain stops.
+
+**It is caught up at every point where something can see it:** before a CPU
+access to `$2000` to `$3FFF` (OAM DMA's writes to `$2004` among them), before
+every CPU write to `$4020` to `$FFFF` (a board's register can switch the
+pattern banks or the nametable layout), when the dots given reach the next dot
+that changes the NMI line or the frame's end, before power on and the reset
+button, and when a test, a tool or the page reads the PPU's state. `Ppu.Line`
+and `Ppu.Dot` give the position the bus has reached without a catch-up. Writes
+to PRG RAM catch it up too, though no board here moves anything the PPU reads
+there; for them the catch-up is only a cost.
+
+**A board that watches the PPU's address bus stays on the per-dot path.** MMC3
+is the one such board here. Its PPU is caught up every cycle, so the board is
+told each address in the cycle it is put out, and MMC3 games gain nothing from
+the lazy PPU yet. Scheduling MMC3's clock was out of scope.
+
+**A game that polls `$2002` in a loop mid-frame gains less.** Each read is a
+catch-up, so a sprite-0 wait runs the PPU in short batches, nearer the per-dot
+cost. This is reasoned, not measured: the browser bench runs one game only.
+
+**The sound unit is not lazy.** It is still stepped inside every bus call.
+
+**How the tests treat it.** The extended differential
+(`bench/nes-speed/differential`, its README) compares the lazy build with the
+build before the work at every point where a chip can be seen, over the pinned
+test ROMs and its own synthetic cartridges in both regions, against
+`baseline/4e9b92b.txt`. `NesOptions.PerDotReference` catches the PPU up every
+cycle; `PpuCatchUpTests`, `CatchUpScenes` and `NesBusTests` use it as the
+oracle for the lazy build.
+
 ## The NES: the PPU's picture, where the model stops
 
 **What.** Task 5 of the NES plan: the background pipeline, the sprites, sprite 0

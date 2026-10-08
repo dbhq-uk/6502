@@ -18,7 +18,7 @@ namespace Dbhq.Machines.Nes;
 /// 239 is whole when it does.
 /// </para>
 /// </remarks>
-public sealed class FrameBuffer
+public sealed class FrameBuffer : IReportsState
 {
     /// <summary>Pixels across.</summary>
     public const int Width = 256;
@@ -49,5 +49,12 @@ public sealed class FrameBuffer
     {
         Frame = 0;
         Array.Fill(Pixels, Black);
+    }
+
+    /// <inheritdoc />
+    void IReportsState.ReportState(IStateSink sink)
+    {
+        sink.Add(nameof(Frame), Frame);
+        sink.Add(nameof(Pixels), Pixels);
     }
 }

@@ -19,7 +19,9 @@ below says which code it measured.
 | `index.html`, `main.js` | The page. It fetches the ROM, boots it, then times the runs. |
 | `run-in-browser.mjs`, `package.json` | Fetches the ROM from the pinned fork, checks it against its SHA-256 in `Pins.cs`, serves it with the page and a published copy of the app on `127.0.0.1`, and runs it in a headless Chrome, a fresh launch each time. |
 | `native/` | The same workload as a console program, in the solution so CI builds it. |
-| `differential/` | The check that a change for speed changed nothing else: it runs every pinned NES test ROM in both regions and writes one line of hashes for each (every instruction's registers, cycle and PPU position, every frame's pixels, the sound, the end state). In the solution too. |
+| `differential/` | The check that a change for speed changed nothing else: it runs every pinned NES test ROM, the bundled homebrew with a fixed round of button presses, and synthetic cartridges it assembles itself, which keep rendering on and touch the chips at moving dots, in both regions and writes one line of hashes for each (every instruction's registers, cycle and PPU position, every cycle's interrupt lines, every frame's pixels, the sound, the end state, and each chip's whole state at every point where it can be seen). In the solution too. |
+| `differential/baseline/` | The differential's output from the code before the lazy chips (behaving as `5e48505`), which every step of that work is checked against; the file is named for the commit it was recorded at. |
+| `differential/faults.py` | Shows the differential can fail: in a scratch copy of the repository, whose path it takes, it plants one fault at a time, runs `--check` against a baseline, and counts the runs each changes. |
 
 ## The workload
 
@@ -69,6 +71,36 @@ dotnet run -c Release --project differential -- after.txt       # on the code af
 cmp before.txt after.txt
 ```
 
+Or check against the committed baseline in one command. It prints the first run that differs and
+which of its hashes do, and exits 1 on any difference:
+
+```sh
+dotnet run -c Release --project differential -- --check differential/baseline/4e9b92b.txt
+dotnet run -c Release --project differential -- --check differential/baseline/4e9b92b.txt --oracle
+```
+
+`--oracle` builds the machine with `NesOptions.PerDotReference`, the per-dot reference that a
+lazy build keeps, so the baseline can be made again from a later build and compared. `--only
+<text>` runs only the ROMs whose name contains the text (and `--check` then compares those
+lines), and `--out <file>` keeps a check's output. The program's opening comment says what each
+hash in a line covers, and the file's first line names the format and the frame count, so two
+files are comparable only when their first lines are the same. Before it runs anything it checks
+by reflection that every field of every chip is in the chips' state reports, and stops, naming
+the field, if one is not. A run that throws is written as `crashed: <exception> in <method>`
+and the others go on. It runs four ROMs at a time (`--threads <n>` for another number), and
+`--coverage` prints, for each synthetic run, the dots its PPU register writes landed on with
+rendering on; the journal entry
+[`docs/journal/2026-10-06-the-nes-lazy-chips.md`](../../docs/journal/2026-10-06-the-nes-lazy-chips.md)
+has how long a run took, dated.
+
+**The baseline changes when the reset fix lands.** Pull request #71 (the reset button in the
+middle of sprite evaluation) makes the PPU's place in secondary OAM wrap at 32. That place is in
+the PPU's state report, so once #71 is in the tree `--check differential/baseline/4e9b92b.txt`
+fails on the PPU's hash, with no difference in behaviour behind it: the value the report holds
+when secondary OAM is full is 0 where it was 32. Then re-record the baseline from the merged tree
+with `--oracle` (the per-dot reference), name the file for that commit, `--check` the lazy build
+against it, and say in the journal why the file changed (issue #74).
+
 To run it on a baseline that is older than the tool, export that commit with `git archive`
 into a folder of its own, copy `bench/nes-speed/differential/` into the same place in the
 export, link or copy `.testdata/` there so the ROMs are not fetched again, and run it from the
@@ -83,7 +115,10 @@ On a shared machine, `THREAD_TIME=<n>` makes n more timed runs after the page's 
 from the script and each measured in the CPU time of the page's main thread (the DevTools
 protocol's `ThreadTime`), printed as `thread <i> ... times_real=<x>`. The wall-clock figure falls
 when other work takes the processor from the page; the thread's CPU time much less. With both
-set, the profile covers only those runs. The same two options work in
+set, the profile covers only those runs. With `PROFILE_OUT=<path>` as well, each launch's whole profile is written to `<path>.<launch>.json`, and
+`node lazy-chips/profile-groups.mjs <profile.json>...` sums the samples by function and by group
+(the PPU's per-dot work, the bus, the sound unit, the CPU core, the browser) and prints each group's
+share, per profile and the median (task 2c). The same two options work in
 [`../bbc-micro-speed/`](../bbc-micro-speed/README.md).
 
 `publish/` is git-ignored. `run-in-browser.mjs` uses `/usr/bin/google-chrome`; set
@@ -99,6 +134,8 @@ Dated, with the command that made them; the journal entry has the full output.
 
 | Date | Code | AOT median | Interpreter median | Where |
 | --- | --- | --- | --- | --- |
+| 7 October 2026, 02:37 to 02:44 UTC | task 2c, a profile of the lazy build (`6a98780`) and of `5e48505`, three profiles of each kind in each region, load 1.1 to 3.5, the BBC Micro bench at 20.0 to 27.6 MHz | the PPU's per-dot work is 38 to 40 percent of the samples in steady state, the bus 26, the sound unit 14, the CPU core 14, the browser 6 to 7 | not measured | [the lazy chips entry](../../docs/journal/2026-10-06-the-nes-lazy-chips.md), task 2c; tables in `lazy-chips/task-2c-profile-groups.txt` |
+| 7 October 2026 | the lazy PPU (`3fa4146` against `5e48505`, alternated, two sets of four launches), main-thread CPU time (`THREAD_TIME=8`), load 1.3 to 1.8, the BBC Micro bench at 21.2 to 22.6 MHz in the same minutes | NTSC 2.25 to 3.13 and PAL 2.54 to 3.33 times real time (ratios 1.39 and 1.31) | not measured | [the lazy chips entry](../../docs/journal/2026-10-06-the-nes-lazy-chips.md), task 2b; every line in `lazy-chips/task-2b-browser.txt` |
 | 6 October 2026 | task 17, the shared core (`3e52229` against `18cc4ec`, alternated), timed in the main thread's CPU time (`THREAD_TIME=8`) | NTSC 2.21 to 2.50 in one set and 2.48 to 2.46 in another, PAL 2.50 to 2.50 and 2.50 to 2.47 times real time: within noise; the page's wall clock gave 1.1 to 1.5 at loads of 2 to 50 | not measured | [the core speed entry](../../docs/journal/2026-10-06-the-core-speed.md) |
 | 5 October 2026, late | task 6b, the speed work (`f97483d` against `5021298`, alternated) | NTSC 2.09 to 2.82 and PAL 2.44 to 3.24 times real time, at a load of about 2, the BBC Micro bench at 29.0 to 29.5 MHz in the same minutes (a quiet machine) | NTSC 0.26 to 0.39 and PAL 0.30 to 0.49 times real time, at a load of 2 to 3 | [the speed entry](../../docs/journal/2026-10-05-the-nes-speed.md), task 6b |
 | 5 October 2026 | task 6, the bus and the PPU drawing the background and sprites (`47e72ee` and the `Ppu` split) | NTSC 1.94 and PAL 1.71 times real time at a load of 6 to 8 (0.92 and 1.04 in a later set at a load of 3 to 36); the BBC Micro bench in the same sets gave 9.17 and 5.32 times 2 MHz; a quiet machine is estimated at 2.4 to 2.9 times | NTSC 0.18 and PAL 0.24 times real time, at a load of about 20 | [the speed entry](../../docs/journal/2026-10-05-the-nes-speed.md) |
