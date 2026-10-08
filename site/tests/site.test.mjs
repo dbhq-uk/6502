@@ -118,6 +118,8 @@ test('every photograph is captioned as a photograph, never an illustration, and 
         assert.match(caption, /^Photograph: /, `${p.url}: the photograph ${name} is not captioned as a photograph`);
         assert.doesNotMatch(caption, /illustration/i, `${p.url}: the photograph ${name} is captioned as an illustration`);
         assert.match(caption, /\bBy .+\. Source: .+\. Licence: .+\./, `${p.url}: the photograph ${name} is not credited`);
+        // CC BY and CC BY-SA ask that a change is indicated; every photograph here is a resized copy (7 Oct 2026).
+        assert.match(caption, /\bLicence: .+\. Changes: resized and converted to WebP for this page\./, `${p.url}: the credit for ${name} does not say it is a resized copy`);
       }
     }
     assert.ok(shown > 0, `the photograph ${name} is in src/assets/photos/ but no page shows it`);
