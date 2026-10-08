@@ -416,12 +416,15 @@ internal static class CatchUpScenes
 
 /// <summary>
 /// Records, for a scene, every point where the PPU can be seen (each access to its registers or a
-/// write to the cartridge, with the logical position and the PPU's and the bus's state; each frame
-/// end with the picture; the reset button), the bus's counts at each, the interrupt lines every
-/// cycle, and the most dots the PPU was owed at a cycle's end. It reads only, so it catches nothing up.
+/// write to the cartridge, with the logical position, the PPU's and the bus's state and the
+/// picture as far as it is drawn in the frame (<see cref="DrawnRows"/>); each frame end with the
+/// picture; the reset button), the bus's counts at each, the interrupt lines every cycle, and the
+/// most dots the PPU was owed at a cycle's end. It reads only, so it catches nothing up.
 /// </summary>
 internal sealed class CatchUpRecorder(NesBus bus) : INesObserver
 {
+    private readonly DrawnRows _rows = new();
+
     public List<string> Points { get; } = [];
 
     public List<byte> Lines { get; } = [];
@@ -432,7 +435,7 @@ internal sealed class CatchUpRecorder(NesBus bus) : INesObserver
     {
         string what = $"{(write ? "write" : "read")} ${address:X4} {value:X2} cycle {bus.Cycles} dots {bus.PpuDots} bus {CatchUpScenes.Hash(bus, picture: false):X16}";
         Points.Add(address is < 0x4000 or >= 0x4020
-            ? $"{what} at line {bus.Ppu.Line} dot {bus.Ppu.Dot} ppu {CatchUpScenes.Hash(bus.Ppu, picture: false):X16}"
+            ? $"{what} at line {bus.Ppu.Line} dot {bus.Ppu.Dot} ppu {CatchUpScenes.Hash(bus.Ppu, picture: false):X16} drawn {_rows.Hash(bus.Ppu):X16}"
             : what);
     }
 
@@ -444,7 +447,15 @@ internal sealed class CatchUpRecorder(NesBus bus) : INesObserver
         MostOwed = Math.Max(MostOwed, bus.Ppu.LogicalDots - bus.Ppu.CaughtUpDots);
     }
 
-    public void ChipsReset(bool power) => Points.Add($"{(power ? "power on" : "reset")} cycle {bus.Cycles} ppu {CatchUpScenes.Hash(bus.Ppu, picture: true):X16}");
+    public void ChipsReset(bool power)
+    {
+        if (power)
+        {
+            _rows.Restart();
+        }
+
+        Points.Add($"{(power ? "power on" : "reset")} cycle {bus.Cycles} ppu {CatchUpScenes.Hash(bus.Ppu, picture: true):X16}");
+    }
 
     public void DmcFetched()
     {

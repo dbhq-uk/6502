@@ -7,10 +7,13 @@
 //   fuzz     an LFSR picks a register ($2000-$2007, $4014, $4015, $4016, $4017), a value and a
 //            read or a write, then a delay; now and then the board's own write and a wait for
 //            sprite 0; the DMC plays and IRQs are taken. Different seeds are different jobs
-//   sprite0  BIT $2002 / BVC waits for sprite 0 hit, with sprite 0 at x = 0, 1, 7, 8, 128, 248,
-//            254, 255, its y swept down the screen, its flips and priority varied and the left
-//            clips on and off; after the hit a delay that grows a cycle a frame, then a $2005 and
-//            $2006 split and the board's write
+//   sprite0  BIT $2002 / BVC waits for sprite 0 hit, with sprite 0 swept over the whole picture:
+//            its y from 0 to 239, at each x of 0, 1, 7, 8, 128, 248, 254 and 255, with the left
+//            clips off and on (both, or the background's or the sprites' alone), one place a
+//            frame that draws it, its flips and priority varied by the frame; the eight sprite0
+//            cartridges each take an eighth of the 3,840 places, so together they cover them all
+//            in each region (--coverage counts them); after the hit a delay that grows a cycle a
+//            frame, then a $2005 and $2006 split and the board's write
 //   scroll   from the NMI, a delay that grows a cycle a frame (below), then $2006, $2006, $2005,
 //            $2005 and $2000 writes
 //   mask     the same delay, then $2001 with one of bits 1 to 4 cleared, greyscale or emphasis, and
@@ -67,7 +70,12 @@ internal static class Synthetic
     // How many times the frames given a run the synthetic jobs run: 600 at the default 150.
     public const int Times = 4;
 
-    public static IEnumerable<(string Name, byte[] Bytes)> Jobs()
+    // The sprite0 jobs run longer, 900 frames at the default 150: each takes 480 places of sprite
+    // 0's sweep, one a frame that draws it, and one frame in four is not drawn (frame_setup), so
+    // 600 frames, less the start and the reset half way, are not enough.
+    public const int Sprite0Times = 6;
+
+    public static IEnumerable<(string Name, byte[] Bytes, int Times)> Jobs()
     {
         (Workload, BoardKind, int)[] list =
         [
@@ -83,14 +91,17 @@ internal static class Synthetic
             (Workload.Nmi, BoardKind.Nrom, 1), (Workload.Nmi, BoardKind.Mmc1, 1), (Workload.Nmi, BoardKind.Mmc3, 1),
             (Workload.Apu, BoardKind.Nrom, 1), (Workload.Apu, BoardKind.Uxrom, 1), (Workload.Apu, BoardKind.Mmc3, 1), (Workload.Apu, BoardKind.Mmc1, 1),
         ];
+        int sprite0Part = 0;
         foreach (var (workload, board, seed) in list)
         {
-            yield return ($"synthetic/{workload.ToString().ToLowerInvariant()}-{board.ToString().ToLowerInvariant()}-{seed}", new ProgramBuilder(workload, board, seed).Cartridge());
+            int part = workload == Workload.Sprite0 ? sprite0Part++ : 0;
+            yield return ($"synthetic/{workload.ToString().ToLowerInvariant()}-{board.ToString().ToLowerInvariant()}-{seed}", new ProgramBuilder(workload, board, seed, part).Cartridge(), workload == Workload.Sprite0 ? Sprite0Times : Times);
         }
     }
 }
 
-internal sealed class ProgramBuilder(Workload workload, BoardKind board, int seed)
+// `part` is which eighth of sprite 0's sweep a sprite0 cartridge takes (0 to 7); the others ignore it.
+internal sealed class ProgramBuilder(Workload workload, BoardKind board, int seed, int part = 0)
 {
     // Zero page.
     private const int Frame = 0x00;
@@ -105,6 +116,13 @@ internal sealed class ProgramBuilder(Workload workload, BoardKind board, int see
     private const int Fine = 0x12;
     private const int Window = 0x13;
     private const int Ptr = 0x14;
+
+    // The sprite0 workload's sweep: sprite 0's y, its x's place in the table, whether a left
+    // clip is on, and whether the last frame_setup left rendering on, so the place it set was drawn.
+    private const int Sprite0Y = 0x18;
+    private const int Sprite0X = 0x19;
+    private const int Sprite0Clip = 0x1A;
+    private const int Drawn = 0x1B;
     private const int Oam = 0x0200;
 
     // The windows' bases, in cycles of delay: the first write lands about 20 cycles before NTSC's
@@ -217,7 +235,28 @@ internal sealed class ProgramBuilder(Workload workload, BoardKind board, int see
         a.Sta(Rng);
         a.LdaI(0xC3 + seed);
         a.Sta(Rng + 1);
+        if (workload == Workload.Sprite0)
+        {
+            // This cartridge's eighth of the sweep: 480 places from place 480 x part, which is y
+            // 0, the x 2 x part places on, and the clip on for the second four.
+            a.LdaI(0);
+            a.Sta(Sprite0Y);
+            a.Sta(Drawn);
+            a.LdaI((2 * part) & 7);
+            a.Sta(Sprite0X);
+            a.LdaI(part / 4);
+            a.Sta(Sprite0Clip);
+        }
+
         a.Label("seeded");
+        if (workload == Workload.Sprite0)
+        {
+            // The reset button comes after a frame end, before the place the last NMI set is
+            // drawn: so after any reset that place is shown again, not passed over.
+            a.LdaI(0);
+            a.Sta(Drawn);
+        }
+
         a.Jsr("board_init");
         a.Jsr("palette");
         a.Jsr("fill_nt");
@@ -597,6 +636,13 @@ internal sealed class ProgramBuilder(Workload workload, BoardKind board, int see
         a.AndI(0xE7);
         a.Label("frame_setup_on");
         a.Sta(0x2001);
+        if (workload == Workload.Sprite0)
+        {
+            // Whether this frame draws the place workload_frame put sprite 0 at.
+            a.AndI(0x18);
+            a.Sta(Drawn);
+        }
+
         a.Rts();
 
         // DelayHi x 256 cycles, then DelayLo single cycles down a clockslide: CMP #$C9 takes 2
@@ -864,26 +910,62 @@ internal sealed class ProgramBuilder(Workload workload, BoardKind board, int see
         switch (workload)
         {
             case Workload.Sprite0:
-                // x from a table by the frame, y down the screen with the sweep, flips and
-                // priority from the frame, and the left clips from the frame's bits 4 and 5.
-                a.Lda(Frame);
-                a.AndI(7);
-                a.Tax();
+                // The next place, if the last was drawn: y down the picture, then the next x,
+                // then the clip the other way.
+                a.Lda(Drawn);
+                a.Beq("s0_same");
+                a.Inc(Sprite0Y);
+                a.Lda(Sprite0Y);
+                a.CmpI(240);
+                a.Bne("s0_same");
+                a.LdaI(0);
+                a.Sta(Sprite0Y);
+                a.Inc(Sprite0X);
+                a.Lda(Sprite0X);
+                a.CmpI(8);
+                a.Bne("s0_same");
+                a.LdaI(0);
+                a.Sta(Sprite0X);
+                a.Lda(Sprite0Clip);
+                a.EorI(1);
+                a.Sta(Sprite0Clip);
+                a.Label("s0_same");
+
+                // Sprite 0 there, tile 0, flips and priority from the frame, written to OAM now,
+                // in VBlank, so the frame after it shows it (the next NMI's DMA would be a frame
+                // late), with OAMADDR back at 0.
+                a.Ldx(Sprite0X);
                 a.LdaX("sprite0_x");
                 a.Sta(Oam + 3);
-                a.Lda(Fine);
+                a.Lda(Sprite0Y);
                 a.Sta(Oam);
                 a.LdaI(0);
                 a.Sta(Oam + 1);
                 a.Lda(Frame);
                 a.AndI(0xE3);
                 a.Sta(Oam + 2);
+                a.LdaI(0);
+                a.Sta(0x2003);
+                for (int i = 0; i < 4; i++)
+                {
+                    a.Lda(Oam + i);
+                    a.Sta(0x2004);
+                }
+
+                a.LdaI(0);
+                a.Sta(0x2003);
+
+                // The left clips: off, or on, both or one, by the frame.
+                a.Lda(Sprite0Clip);
+                a.Beq("s0_clip_off");
                 a.Lda(Frame);
-                a.LsrA();
-                a.LsrA();
-                a.LsrA();
-                a.AndI(0x06);
-                a.OraI(0x18);
+                a.AndI(3);
+                a.Tax();
+                a.LdaX("sprite0_clip_on");
+                a.Jmp("s0_clip_done");
+                a.Label("s0_clip_off");
+                a.LdaI(0x1E);
+                a.Label("s0_clip_done");
                 a.Sta(Mask);
                 break;
             case Workload.Sprites:
@@ -1004,6 +1086,12 @@ internal sealed class ProgramBuilder(Workload workload, BoardKind board, int see
         a.Rts();
 
         Table("sprite0_x", [0, 1, 7, 8, 128, 248, 254, 255]);
+        if (workload == Workload.Sprite0)
+        {
+            // PPUMASK with a left clip on: both, the sprites' alone, both, the background's alone.
+            Table("sprite0_clip_on", [0x18, 0x1A, 0x18, 0x1C]);
+        }
+
         Table("mask_values", [0x16, 0x0E, 0x1C, 0x1A, 0x06, 0x18, 0x1F, 0xFE]);
         Table("frame_counter_values", [0x00, 0x40, 0x80, 0xC0]);
         if (workload == Workload.Sprites)

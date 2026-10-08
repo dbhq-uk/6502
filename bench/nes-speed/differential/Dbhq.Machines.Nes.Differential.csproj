@@ -14,8 +14,10 @@
     <ProjectReference Include="../../../tests/Dbhq.Cpu6502.TestSupport/Dbhq.Cpu6502.TestSupport.csproj" />
   </ItemGroup>
 
-  <!-- The check that every field of every chip is reported, shared with StateReportTests. -->
+  <!-- The check that every field of every chip is reported, shared with StateReportTests, and the
+       hash of the picture as far as it is drawn, shared with the scene tests' recorder. -->
   <ItemGroup>
     <Compile Include="../../../tests/Dbhq.Machines.Nes.Tests/StateCompleteness.cs" Link="StateCompleteness.cs" />
+    <Compile Include="../../../tests/Dbhq.Machines.Nes.Tests/DrawnRows.cs" Link="DrawnRows.cs" />
   </ItemGroup>
 </Project>

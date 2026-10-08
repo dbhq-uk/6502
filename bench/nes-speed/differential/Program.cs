@@ -21,11 +21,13 @@ using Dbhq.Machines.Nes.Tests;
 // machine with NesOptions.PerDotReference, the per-dot reference of the lazy chips; --only runs
 // the ROMs whose name contains the text, and --check then compares those lines alone; --threads
 // runs that many at once, which changes no hash; --coverage prints, for each synthetic run, the
-// dots its PPU register writes landed on with rendering on, which changes no hash either.
+// dots its PPU register writes landed on with rendering on, and for the sprite0 runs of each
+// region together the places sprite 0 was drawn at, which changes no hash either.
 //
 // Each run powers on, runs the frames given (150 by default; six times that for SNOW and the MMC3
 // ROMs, whose work is in the picture and the scanline counter; four times for the homebrew and the
-// synthetic cartridges), and presses reset once half way. The file's first line names the format and the frames; then one
+// synthetic cartridges, but six for the sprite0 ones, whose sweep is longest), and presses reset
+// once half way. The file's first line names the format and the frames; then one
 // line a run, "<rom> <region>: " and these, in this order:
 //
 //   steps, cycles  instructions run and CPU cycles at the end
@@ -38,8 +40,8 @@ using Dbhq.Machines.Nes.Tests;
 //   memory         at the end: RAM, what the PPU's registers would read, VRAM, OAM and the lines
 //
 // Those six are hashed as the first version of this tool hashed them (FNV-1a over 64-bit words),
-// so its files and these agree on them. The rest are new in format 2, hashed with each word mixed
-// first so that two differences cannot cancel:
+// so its files and these agree on them. The rest are new in formats 2 and 3, hashed with each word
+// mixed first so that two differences cannot cancel:
 //
 //   cpu      the per-instruction words of trace again, in the stronger hash
 //   points   how many observation points there were (below)
@@ -48,6 +50,12 @@ using Dbhq.Machines.Nes.Tests;
 //            OAM DMA's writes among them, and each write to the board's registers ($8000-$FFFF),
 //            with the picture left out; each frame end, from inside the dot that ends it, with the
 //            picture; and power on and the reset button
+//   pixels   new in format 3: at each of those points but the frame ends, power on and reset
+//            (whose ppu hash has the whole picture), the point and the picture as far as it is
+//            drawn in the frame: each row finished in the frame, hashed once at the first point
+//            after it is finished, and the row the PPU is on, whole (DrawnRows, shared with the
+//            tests), so a pixel written at another moment than the per-dot build writes it is
+//            seen at a register access, not only if it is still wrong at the frame's end
 //   apu      the same for the sound unit and the sample buffer: each CPU access to $4000-$401F,
 //            each DMC fetch, after the samples are read at each frame's end, power on and reset
 //   board    at each of those points but the frame ends, the bus's own state, the controllers and
@@ -64,7 +72,7 @@ using Dbhq.Machines.Nes.Tests;
 // The ROMs come from the pinned fork, checked against their hashes (NesTestRoms.Read), and are
 // never committed; the homebrew is the committed one, checked against its hash; the synthetic
 // cartridges are made from bytes each run, the same each time.
-const string Format = "# nes-differential format 2";
+const string Format = "# nes-differential format 3";
 
 string? outFile = null;
 string? baseline = null;
@@ -128,7 +136,7 @@ if (!NesBus.Observable)
 var jobs = Pins.NesTestRomHashes.Keys.Order(StringComparer.Ordinal)
     .Select(name => new Job(name, NesTestRoms.Read(name), name.Contains("snow", StringComparison.Ordinal) || name.Contains("mmc3", StringComparison.Ordinal) ? 6 : 1, Scripted: false))
     .Append(new Job("homebrew/" + Path.GetFileName(Pins.NesHomebrewPath), RepoPaths.ReadChecked(Pins.NesHomebrewPath, Pins.NesHomebrewSha256), 4, Scripted: true))
-    .Concat(Synthetic.Jobs().Select(job => new Job(job.Name, job.Bytes, Synthetic.Times, Scripted: false)))
+    .Concat(Synthetic.Jobs().Select(job => new Job(job.Name, job.Bytes, job.Times, Scripted: false)))
     .Where(job => only is null || job.Name.Contains(only, StringComparison.Ordinal))
     .ToList();
 
@@ -163,7 +171,7 @@ if (problems.Count > 0)
 
 var results = new ConcurrentDictionary<string, string>();
 var runs = jobs.SelectMany(job => new[] { (Job: job, Region: Region.Ntsc), (Job: job, Region: Region.Pal) });
-var dots = new ConcurrentDictionary<string, string>();
+var dots = new ConcurrentDictionary<string, DotCoverage>();
 Parallel.ForEach(runs, new ParallelOptions { MaxDegreeOfParallelism = threads }, run =>
 {
     string key = $"{run.Job.Name} {run.Region.Name}";
@@ -183,7 +191,16 @@ if (coverage)
 {
     foreach (var (key, report) in dots.OrderBy(d => d.Key, StringComparer.Ordinal))
     {
-        Console.WriteLine($"{key}: {report}");
+        Console.WriteLine($"{key}: {report.Report()}");
+    }
+
+    foreach (Region region in new[] { Region.Ntsc, Region.Pal })
+    {
+        var drawn = dots.Where(d => d.Key.StartsWith("synthetic/sprite0-", StringComparison.Ordinal) && d.Key.EndsWith(" " + region.Name, StringComparison.Ordinal)).Select(d => d.Value).ToList();
+        if (drawn.Count > 0)
+        {
+            Console.WriteLine($"sprite0 runs, {region.Name}, all together: {DotCoverage.Sprite0Report(drawn)}");
+        }
     }
 }
 
@@ -290,7 +307,7 @@ static Type BoardOf(Nes nes)
     return finder.Board!.GetType();
 }
 
-static string Run(Job job, Region region, int frames, bool oracle, Action<string>? coverage)
+static string Run(Job job, Region region, int frames, bool oracle, Action<DotCoverage>? coverage)
 {
     Nes nes;
     try
@@ -377,10 +394,10 @@ static string Run(Job job, Region region, int frames, bool oracle, Action<string
 
     AddOam(memory, ppu);
     memory.Add(Lines(nes));
-    coverage?.Invoke(watch.Coverage!.Report());
+    coverage?.Invoke(watch.Coverage!);
 
     return $"steps={steps} cycles={nes.Bus.Cycles} trace={trace.Value:X16} sound={sound.Value:X16} dropped={nes.Sound.Dropped} memory={memory.Value:X16}"
-        + $" cpu={watch.Cpu.Value:X16} points={watch.Points} ppu={watch.Ppu.Value:X16} apu={watch.Apu.Value:X16} board={watch.Board.Value:X16} lines={watch.Lines.Value:X16}";
+        + $" cpu={watch.Cpu.Value:X16} points={watch.Points} ppu={watch.Ppu.Value:X16} pixels={watch.Pixels.Value:X16} apu={watch.Apu.Value:X16} board={watch.Board.Value:X16} lines={watch.Lines.Value:X16}";
 }
 
 // The homebrew's buttons for the frame after `frame`: the title for a second and a half, Start to
@@ -614,6 +631,7 @@ internal sealed class Watch : INesObserver
     private readonly HashSink _ppuSink;
     private readonly HashSink _apuSink;
     private readonly HashSink _boardSink;
+    private readonly DrawnRows _rows = new();
 
     public Watch(Nes nes)
     {
@@ -631,6 +649,8 @@ internal sealed class Watch : INesObserver
 
     public Mixed Ppu { get; } = new();
 
+    public Mixed Pixels { get; } = new();
+
     public Mixed Apu { get; } = new();
 
     public Mixed Board { get; } = new();
@@ -646,7 +666,7 @@ internal sealed class Watch : INesObserver
     {
         if (Coverage is not null && address < 0x4000)
         {
-            Coverage.Note(write, address, _bus.Ppu);
+            Coverage.Note(write, address, value, _bus.Ppu);
         }
 
         ulong access = ((ulong)address << 8) | (write ? 1UL << 24 : 0) | ((ulong)value << 32);
@@ -688,6 +708,11 @@ internal sealed class Watch : INesObserver
 
     public void ChipsReset(bool power)
     {
+        if (power)
+        {
+            _rows.Restart();
+        }
+
         ulong kind = power ? PowerOnPoint : ResetPoint;
         PpuPoint(kind, picture: true);
         ApuPoint(kind);
@@ -705,6 +730,8 @@ internal sealed class Watch : INesObserver
     // dot as it reports them, which a lazy PPU gives without catching up. At a frame end the line
     // and dot are not hashed: the dot that ends the frame may be run before the bus is done with
     // its cycle, so the logical position can be a dot or two on; the state has the PPU's own.
+    // Where the picture is not in the state (an access, not a frame end, power on or reset), the
+    // picture as far as it is drawn goes into its own hash, with the point.
     private void PpuPoint(ulong point, bool picture)
     {
         Points++;
@@ -718,6 +745,11 @@ internal sealed class Watch : INesObserver
 
         _ppuSink.Picture = picture;
         _ppuReport.ReportState(_ppuSink);
+        if (!picture)
+        {
+            Pixels.Add(point);
+            Pixels.Add(_rows.Hash(_bus.Ppu));
+        }
     }
 
     private void ApuPoint(ulong point)
@@ -741,18 +773,40 @@ internal sealed class Watch : INesObserver
 
 // For --coverage: the dots at which a write to a PPU register landed with rendering on, on the
 // visible lines and on the pre-render line, and the dots of line 241 at which a $2000 write or a
-// $2002 read landed, so the synthetic jobs' sweeps can be seen to reach every dot.
+// $2002 read landed, so the synthetic jobs' sweeps can be seen to reach every dot; and, from the
+// $2002 reads on the visible lines with rendering on, where sprite 0 was (its y, its x among the
+// sprite0 workload's, and whether a left clip was on) in a frame that drew it, and whether a read
+// saw it hit, so the sprite0 runs' sweep can be seen to cover the picture's height. OAM and PPUMASK
+// are read without a catch-up; at a register access the PPU is caught up.
 internal sealed class DotCoverage
 {
     private static readonly int[] Key = [0, 1, 2, 255, 256, 257, 258, 320, 337, 338, 339, 340];
+    private static readonly int[] Sprite0X = [0, 1, 7, 8, 128, 248, 254, 255];
     private readonly bool[] _visible = new bool[341];
     private readonly bool[] _preRender = new bool[341];
     private readonly bool[] _vblank = new bool[341];
 
-    public void Note(bool write, ushort address, Ppu ppu)
+    // By y (0 to 239), the x's place in Sprite0X and the clip: drawn, and a hit read.
+    private readonly bool[] _sprite0Drawn = new bool[240 * 8 * 2];
+    private readonly bool[] _sprite0Hit = new bool[240 * 8 * 2];
+
+    public void Note(bool write, ushort address, byte value, Ppu ppu)
     {
         int line = ppu.Line;
         int dot = ppu.Dot;
+        if (!write && (address & 7) == 2 && line < 240 && ppu.RenderingEnabled)
+        {
+            int y = ppu.OamAsRun[0];
+            int x = Array.IndexOf(Sprite0X, (int)ppu.OamAsRun[3]);
+            int clip = (ppu.Mask & 0x06) != 0x06 ? 1 : 0;
+            if (y < 240 && x >= 0)
+            {
+                int at = (((y * 8) + x) * 2) + clip;
+                _sprite0Drawn[at] = true;
+                _sprite0Hit[at] |= (value & 0x40) != 0;
+            }
+        }
+
         if (line == 241 && (write ? (address & 7) == 0 : (address & 7) == 2))
         {
             _vblank[dot] = true;
@@ -777,5 +831,36 @@ internal sealed class DotCoverage
     {
         string Of(bool[] hit) => $"{hit.Count(h => h)}/341 (key dots missing: {string.Join(",", Key.Where(d => !hit[d]))})";
         return $"visible {Of(_visible)}, pre-render {Of(_preRender)}; line 241, $2000 writes and $2002 reads, dots 0 to 3: {string.Join(",", Enumerable.Range(0, 4).Where(d => _vblank[d]))}";
+    }
+
+    // The sprite0 runs of one region together: how many of the (y, x, clip) places were drawn and
+    // in how many a read saw the hit, and, for each x and clip, the y's never drawn.
+    public static string Sprite0Report(IReadOnlyList<DotCoverage> runs)
+    {
+        bool[] drawn = new bool[240 * 8 * 2];
+        bool[] hit = new bool[240 * 8 * 2];
+        foreach (DotCoverage run in runs)
+        {
+            for (int i = 0; i < drawn.Length; i++)
+            {
+                drawn[i] |= run._sprite0Drawn[i];
+                hit[i] |= run._sprite0Hit[i];
+            }
+        }
+
+        var missing = new List<string>();
+        for (int x = 0; x < 8; x++)
+        {
+            for (int clip = 0; clip < 2; clip++)
+            {
+                var ys = Enumerable.Range(0, 240).Where(y => !drawn[(((y * 8) + x) * 2) + clip]).ToList();
+                if (ys.Count > 0)
+                {
+                    missing.Add($"x {Sprite0X[x]} clip {(clip == 1 ? "on" : "off")}: y {string.Join(",", ys.Take(12))}{(ys.Count > 12 ? $" and {ys.Count - 12} more" : "")}");
+                }
+            }
+        }
+
+        return $"sprite 0 drawn at {drawn.Count(d => d)} of {drawn.Length} places (y 0 to 239, x {string.Join(",", Sprite0X)}, a left clip on and off), a hit read at {hit.Count(h => h)}; never drawn: {(missing.Count == 0 ? "none" : string.Join("; ", missing))}";
     }
 }
