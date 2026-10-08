@@ -48,8 +48,9 @@ build was checked against it, and the old file was removed. The journal says why
 the file changed ([#74](https://github.com/dbhq-uk/6502/issues/74)). On the same
 day the gate was extended for the fast scanline renderer (format 3: the picture as
 far as it is drawn at every point, the sprite 0 sweep over the whole picture, and
-scene tests on every dot of a line) and its baseline recorded again as
-`bench/nes-speed/differential/baseline/acf9748.txt`
+scene tests on every dot of a line, then a second reset on a chosen PAL dot
+phase) and its baseline recorded again as
+`bench/nes-speed/differential/baseline/034b43f.txt`
 ([the scanline renderer entry](../../journal/2026-10-08-the-nes-scanline-renderer.md), task 3a).
 
 ## Why

@@ -1,7 +1,7 @@
 ---
 title: "The NES's fast scanline renderer: the gate first"
 date: 2026-10-08
-summary: "Dan said to merge the lazy PPU and continue, which was read as building the fast scanline renderer the lazy chips plan specified and left unbuilt: a second way to run a line of the PPU, used when nothing can see the line. Before any of it is written, the gate that must hold it equal to the first was made able to see it fail, closing the three gaps the last review named. The differential now hashes the picture as far as it is drawn at every point where the PPU can be seen, not only at the end of a frame. Its sprite 0 cartridges sweep sprite 0 down the whole picture, at every named x, with the left clips on and off, where before they covered the top half. And a new layer of scene tests puts the PPU at any dot directly and makes a register access on every dot of a visible line, the VBlank lines and the pre-render line, in both regions, which no program can do on PAL. Four faults of the kind a fast renderer could make were planted one at a time: the old gate saw one of them, a little; the new one sees all four, the two on PAL's pre-render line through the scene tests alone. The differential's output changed format, so its baseline was recorded again from the per-dot reference, and the lazy build matches it on every run."
+summary: "Dan said to merge the lazy PPU and continue, which was read as building the fast scanline renderer the lazy chips plan specified and left unbuilt: a second way to run a line of the PPU, used when nothing can see the line. Before any of it is written, the gate that must hold it equal to the first was made able to see it fail, closing the three gaps the last review named. The differential now hashes the picture as far as it is drawn at every point where the PPU can be seen, not only at the end of a frame. Its sprite 0 cartridges sweep sprite 0 down the whole picture, at every named x, with the left clips on and off, where before they covered the top half. A new layer of scene tests puts the PPU at any dot directly and makes register accesses on every dot of visible lines, the VBlank lines and the pre-render line, in both regions. Four faults of the kind a fast renderer could make were planted one at a time. The old differential saw each of them, two in only a handful of runs, and the old unit tests saw none. The new differential sees the pixel fault in many times as many runs and the sprite 0 fault in twice as many, and the scene tests catch all four. The review of this work found holes in the scene layer: sprite 0 hit its line a line early because the scenes kept the last scene's sprites, and the scenes left the right pixels behind. Both were fixed, the scenes were widened, and the differential now presses reset a second time on a dot phase chosen for each run, so every dot of PAL's pre-render line is reached by programs as well as by the scenes. The differential's output changed format twice, so its baseline was recorded again from the per-dot reference each time, and the lazy build matches it on every run."
 order: 38
 ---
 
@@ -251,25 +251,22 @@ What each shows:
   sprite 0 now goes below line 120, account for 12 of the 19 and 2 of the 9. The
   two MMC3 sprite0 cartridges cannot see it: a board that watches the PPU's
   address bus is caught up every cycle, so there is never a batch to be wrong
-  in. No unit test sees it: the scenes' sprite 0 is at y 99. That is left for task 4,
-  which puts sprites on the fast path and needs scenes with sprite 0 down the
-  picture.
+  in. No unit test saw it in this first version: the scenes' sprite 0 was at y
+  99. After the review the scenes cover lines 200 and 239, and catch it.
 - **The PAL pre-render faults** are the scene tests': the dot 337 fault fails all
   14 kinds on PAL's pre-render line with rendering on, and the dot 340 fault all
   28 PAL pre-render rows, rendering on and off. The old unit tests saw neither.
 - **A correction.** The lazy chips entry found that a program cannot reach dots
-  1, 257, 337 and 340 of PAL's pre-render line. That was a count of the writes
-  in the synthetic runs. The differential sees the dot 337 fault in 4 runs (8 in
-  the old gate) and the dot 340 fault in 66 (68), so programs do get there: by
-  reads, mostly of `$2002` in the test ROMs' VBlank loops for dot 340, and
-  through the reset button half way, which puts the PPU back at line 0 dot 0
-  while the bus's dot accumulator goes on, so the run after it has another of
-  PAL's dot phases. Which runs those are depends on the moment of the reset, not
-  on the program, so no workload can be written to reach them: on one dot phase
-  a program reaches the same 10 of each 16 dots of a line whatever it does. The
-  dot 337 fault is seen by fewer than ten runs of the differential, which the
-  plan's rule would answer with a new workload; here the answer is the scene
-  tests, which are the gate for those dots.
+  1, 257, 337 and 340 of PAL's pre-render line, from the writes of the
+  synthetic runs. The differential sees the dot 337 fault in 4 runs (8 in the
+  old gate) and the dot 340 fault in 66 (68), so runs do get there, and the way
+  in is the reset button half way. A read lands at the same point in its cycle
+  as a write, so reads reach no other dots; but the reset puts the PPU back at
+  line 0 dot 0 while the bus's dot count goes on, so the run after it is on
+  another of PAL's dot phases, with another 10 of each 16 dots in reach. Which
+  phase a run gets depends on the moment of the reset, not on the program. The
+  dot 337 fault was seen by fewer than ten runs, and the review asked for the
+  phase to be chosen rather than left to chance: see "After the review".
 
 **The old faults against the new gate.** The fourteen faults of task 1 and task
 2, in the same scratch copies, against `acf9748.txt`, with the unit tests above:
@@ -301,6 +298,8 @@ of task 2), shows 0 there; `sprite-eval-late`'s 2 are the scene setup's own chec
 that the overflow flag is set inside the visible line.
 
 ### The baseline, format 3
+
+(Replaced after the review by a format 4 file: see "After the review".)
 
 A new field is a new format (`# nes-differential format 3`), so the baseline was
 recorded again, as PR #82 did it: from the code at the commit that has the new
@@ -337,9 +336,11 @@ little; the CPU time is the better measure. Recording `acf9748.txt` took 14
 minutes 34 seconds of CPU, against 13 minutes 38 seconds for `38c5544.txt`
 recorded the same way: the `pixels` hash and the longer sprite0 runs cost about
 a fifteenth more. At four threads on four free processors that is about four
-minutes of wall clock. The NES tests take about two minutes more than before for
-the scene tests (the run of the filtered classes above took 1 minute 30 seconds
-alone).
+minutes of wall clock. The scene tests in this first version, with the hook's and
+the drawn rows' (182 tests, `dotnet test ... --filter
+"FullyQualifiedName~PpuDotScene|FullyQualifiedName~PpuMoveTo|FullyQualifiedName~DrawnRows"`),
+took 1 minute 30 seconds of test time at 16:53 UTC at a load of 14.7; the larger
+set after the review is timed in "After the review".
 
 ### The tests
 
@@ -354,16 +355,149 @@ loads 25.7 to 19.4: 1,809 passed, none failed. The new ones are
 `PpuMoveToTests` and `DrawnRowsTests`. `dotnet build 6502.slnx -c Release`: no
 warnings, no errors.
 
+### After the review
+
+The review of task 3a found the differential's side and the baseline sound and
+the scene layer short of what the renderer will need. Each finding, and what was
+done:
+
+- **Sprite 0 hit the scenes' line a line early.** `MoveTo` left the sprite line
+  as it was. The scene before ends at dot 0 of the line after the next, with
+  sprite 0 fetched for that line, so the next scene's start drew it on the line
+  before its line, and the hit was already set as its line began: the reviewer
+  counted 340 of the 341 scenes so, in both regions. The sanity test built a
+  fresh PPU for itself and so could not see it. `MoveTo` now leaves no sprite
+  fetched, as `Reset` does (`PpuMoveToTests.ItLeavesNoSpriteFetchedForTheLineItPutsThePpuOn`),
+  and the visible-line tests check every scene, run in sequence as the tables
+  run them: sprite 0 hit and overflow are clear as the line begins, and, for the
+  accesses that cannot change them (a `$2002`, `$2004` read, a `$2003` write, the
+  picture read), both are set inside it. **The first run of that check failed**
+  after six scenes: `v` too carried from scene to scene, so each scene drew
+  another row of the background, and on most of them sprite 0 met no opaque
+  pixel. Each visible-line scene now sets `v` first, by a mid-frame scroll's
+  writes (`$2002`, `$2006`, `$2005`, `$2005`, `$2006`), to what the frame has on
+  the line before, so every scene draws the same lines.
+- **Pixels left right by the scene before.** Each scene now starts with every
+  pixel of both PPUs set to a colour the PPU never draws (`DotScenePair.Unpainted`,
+  alpha 0), so a pixel the fast path should draw and does not is seen.
+- **Wider scenes.** The fourteen kinds now run on every dot of lines 1, 100, 200
+  and 239, and of line 150 with `v` set so that coarse Y wraps from 29 at its
+  dot 256 (`OnTheWrapLineCoarseYWrapsFrom29InsideTheLine` checks that it does),
+  on NTSC on odd frames as well as even. A `$2002` read on every dot of line 200
+  runs with sprite 0 at each of the sprite0 workload's x's (0, 1, 7, 8, 128,
+  248, 254, 255) under each of PPUMASK `$1E`, `$18`, `$1A` and `$1C`
+  (`PpuDotSceneSprite0Tests`). And each kind is made twice on line 100, on dot d
+  and on d + k for k of 1, 3, 8 and 64, so a catch-up that starts and ends inside
+  the line is tested (`PpuDotSceneTwiceTests`). `Busy` and `OamByte` take the
+  line and sprite 0's x.
+- **Offsets that check themselves.** An access can carry the position it must be
+  made at (`DotAccess.At`), and the driver fails if the offset puts the PPU
+  elsewhere. Every scene's accesses carry it. On NTSC's odd frames with rendering
+  on the pre-render line has no dot 340, and the scene for it lands on line 0 dot
+  0 of the next frame; it is now named so.
+- **`MoveTo`'s comment** says it leaves `_timeBase` alone (the time jumps with the
+  position; both PPUs jump the same), and the scene tests' comment no longer says
+  PAL's four dots are out of a program's reach.
+
+```
+dotnet test tests/Dbhq.Machines.Nes.Tests -c Release --no-build --filter "FullyQualifiedName~PpuDotScene|FullyQualifiedName~PpuMoveTo"
+```
+
+8 October 2026, 19:53:28 to 19:54:01 UTC, load 1.5: 463 passed, 29 seconds of
+test time, 1 minute 20 seconds of CPU. The whole NES project, 20:00:20 to
+20:01:46 UTC, loads 0.8 to 3.7: 2,098 passed, none failed, 1 minute 19 seconds
+of test time.
+
+**PAL's dot phase chosen, not left to chance.** The dot 337 fault was seen by 4
+runs, 8 before the sprite0 runs went to 900 frames: that moved their reset from
+frame 300 to frame 450, and with it the dot phase they had after it. The
+homebrew's and the synthetic runs now press the reset button a second time, at
+three quarters of the run. On PAL the harness first steps instructions until
+the bus's dot count (`NesBus.PpuDots`) is, mod 16, the run's class: PAL's 16 dots
+in 5 cycles leave the count on 0, 3, 6, 9 or 12 mod 16 at the end of an
+instruction, and the runs take those in turn by their place in the list. The
+reset puts the PPU at line 0 dot 0 on that phase. On NTSC a cycle is 3 whole dots,
+a reset cannot move the phase, and the button is pressed at once. The 127
+pinned ROMs' runs press it once, as before, and their lines did not change. The
+window workloads (scroll, mask, sprites, apu) also begin the window before PAL's
+pre-render line again at their third start, so that they sweep that line on the
+chosen phase; they count their starts in RAM, which the reset keeps. That is
+format 4 (`# nes-differential format 4`): the fields are format 3's.
+
+```
+dotnet bench/nes-speed/differential/bin/Release/net10.0/Dbhq.Machines.Nes.Differential.dll /tmp/t3a/cov2.txt --only synthetic/ --coverage --threads 4
+```
+
+19:55:10 to 19:56:56 UTC, loads 1.2 to 4.0, a new summary line (any access, a
+read or a write, with rendering on):
+
+```
+synthetic runs, PAL, all together: pre-render line, any access with rendering on: runs reaching dot 0: 29, 1: 15, 2: 26, 255: 31, 256: 31, 257: 19, 258: 33, 320: 31, 337: 20, 338: 33, 339: 31, 340: 23; dots no run reaches: none
+```
+
+and the same for NTSC, with no dot unreached; the sprite0 runs still draw 3,840
+of 3,840 places in each region.
+
+**The baseline, format 4**, from the commit with the code, `034b43f`, as before:
+
+```
+dotnet run -c Release --project bench/nes-speed/differential -- bench/nes-speed/differential/baseline/034b43f.txt --oracle
+```
+
+20:03:53 to 20:10:43 UTC, 6 minutes 50 seconds of wall clock and 13 minutes 59
+seconds of CPU, loads 1.1 to 1.5: 332 runs, 98,354 bytes. Against `acf9748.txt`,
+the 254 pinned ROM runs are the same line for line and the 78 homebrew and
+synthetic runs all differ. `acf9748.txt` was removed.
+
+```
+dotnet run -c Release --project bench/nes-speed/differential -- --check bench/nes-speed/differential/baseline/034b43f.txt --out /tmp/t3a/lazy4.txt
+dotnet run -c Release --project bench/nes-speed/differential -- --check bench/nes-speed/differential/baseline/034b43f.txt --oracle --out /tmp/t3a/oracle4.txt
+```
+
+The lazy build, 20:13:20 to 20:18:57 UTC, 5 minutes 37 seconds of wall clock and
+12 minutes 34 seconds of CPU, loads 0.6 to 2.9, and the per-dot reference,
+20:23:06 to 20:29:03 UTC, 5 minutes 57 seconds and 13 minutes 29 seconds, loads
+2.3 to 3.9: each `IDENTICAL: all 332 runs match`, each output the file byte for
+byte.
+
+**The batch faults again.** With the scene tests widened, each of the four is
+caught by them, the sprite 0 fault for the first time. The NES tests matching
+`PpuDotScene`, `PpuCatchUpTests`, `StateReport` and `PpuMoveTo`, 577 of them,
+with each fault in, 20:04 to 20:10 UTC:
+
+| Fault | Tests failing (of 577) | Before the review (of 284) |
+| --- | --- | --- |
+| `batch-pixel-one-off` | 320 | 26 |
+| `batch-sprite0-hit-late-low` | 114 | 0 |
+| `batch-pal-prerender-337-early` | 14 | 14 |
+| `batch-pal-prerender-340-early` | 28 | 28 |
+
+And the differential, the tree at `034b43f` with each fault planted, against
+`034b43f.txt` (`faults.py <scratch copy> bench/nes-speed/differential/baseline/034b43f.txt
+--threads 2 <the four>`), 20:13 to 20:41 UTC, loads 0.6 to 3.9. Of 332 runs:
+
+| Fault | Runs changed | Of them seen only by `pixels` | In format 3 |
+| --- | --- | --- | --- |
+| `batch-pixel-one-off` | 113 | 107 | 113 |
+| `batch-sprite0-hit-late-low` | 17 | 0 | 19 |
+| `batch-pal-prerender-337-early` | 17 | 0 | 4 |
+| `batch-pal-prerender-340-early` | 77 | 0 | 66 |
+
+The dot 337 fault, which only the phase reaches, is now seen by 17 runs, 16 of
+them synthetic, each a PAL run. The sprite 0 fault lost two runs to the new
+reset (17 against 19); its sprite0 runs still see it. Both logs are appended to
+[`bench/nes-speed/lazy-chips/task-3a-faults.txt`](../../bench/nes-speed/lazy-chips/task-3a-faults.txt).
+
 ### For the renderer tasks
 
 - Use `DotScenePair` for the fast path against the exact path: a scene is a
   start and a list of accesses at dot offsets. The fast path will run on its
   lazy side only.
-- The sprite 0 fault was seen by the differential and by no unit test: the
-  scenes' sprite 0 is at y 99. Task 4, which puts sprites on the fast path, needs
-  scenes with sprite 0 across the picture's height.
-- The PAL pre-render faults are seen by every scene test that reaches the dot,
-  and by the differential only where the reset button happens to move PAL's dot
-  phase onto it; for those dots the scene tests are the gate.
+- Every batch fault is caught by the scene tests and by the differential; keep
+  it so for each fault planted in the fast path.
+- The scenes check their own positions and, on the visible lines, that sprite 0
+  hit and overflow happen inside the line; a new family should do the same.
+- The scene tests take about half a minute of test time; a wider table should
+  say what it costs.
 - MMC3, and any board that watches the PPU's address bus, stays on the per-dot
   path; the fast path must refuse it.
