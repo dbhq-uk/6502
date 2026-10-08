@@ -83,11 +83,13 @@ public class PpuDotSceneTests
     /// A PPU with something on every line: tiles from a pattern whose bytes all differ nearby, a
     /// palette, both nametables full, sprite 0 on <paramref name="line"/> at
     /// <paramref name="sprite0X"/> and ten more on the line after (<see cref="OamByte"/>), the
-    /// rest spread down the picture with every attribute, and the scroll set.
+    /// rest spread down the picture with every attribute, and the scroll set. With
+    /// <paramref name="quiet"/> the board does not watch the PPU's address bus
+    /// (<see cref="TestMapper.Quiet"/>), so the lazy PPU may render whole lines at once.
     /// </summary>
-    internal static Ppu Busy(Region region, byte ctrl, byte mask, int line = VisibleLine, int sprite0X = 120)
+    internal static Ppu Busy(Region region, byte ctrl, byte mask, int line = VisibleLine, int sprite0X = 120, bool quiet = false)
     {
-        var scene = new PpuScene(region, Mirroring.Vertical);
+        var scene = new PpuScene(region, Mirroring.Vertical, quiet);
         TestCartridge.Pattern(0x2000).CopyTo(scene.Mapper.Chr, 0);
         for (int i = 0; i < 32; i++)
         {

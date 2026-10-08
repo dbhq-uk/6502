@@ -8,10 +8,11 @@ namespace Dbhq.Machines.Nes.Tests;
 /// </summary>
 internal sealed class PpuScene
 {
-    public PpuScene(Region region, Mirroring mirroring = Mirroring.FourScreen)
+    /// <summary>A PPU on a test board; with <paramref name="quiet"/>, one as the real boards are, which does not watch the PPU's address bus and has windows (<see cref="TestMapper.Quiet"/>, <see cref="TestMapper.Windowed"/>).</summary>
+    public PpuScene(Region region, Mirroring mirroring = Mirroring.FourScreen, bool quiet = false)
     {
         Region = region;
-        Mapper = new TestMapper { Mirroring = mirroring };
+        Mapper = new TestMapper { Mirroring = mirroring, Quiet = quiet, Windowed = quiet };
         Ppu = new Ppu(region, Mapper);
         Ppu.PowerOn();
     }

@@ -47,6 +47,11 @@ internal static class CatchUpScenes
         ["no access, NMI off"] = new(Nrom, 0x00, 0x1E, (_, _) => [], 4),
         ["no access, rendering off"] = new(Nrom, 0x80, 0x00, (_, _) => [], 3),
 
+        // The same with the background alone, whose visible lines the fast scanline renderer
+        // takes whole (PpuScanline.cs), with NMI on and off.
+        ["no access, the background alone"] = new(Nrom, 0x80, 0x0A, (_, _) => [], 4),
+        ["no access, the background alone, NMI off"] = new(Nrom, 0x00, 0x08, (_, _) => [], 4),
+
         // Review Focus 1: scroll writes on the line's key dots, a different line for each.
         ["$2005 and $2006 writes on the key dots"] = new(Nrom, 0x80, 0x1E, (f, _) => KeyDots.SelectMany((d, k) => new[]
         {
@@ -56,6 +61,13 @@ internal static class CatchUpScenes
             Act.Write(24 + (8 * k), d, 0x2006, (byte)(f + (k * 9))),
         }).ToArray(), 4),
         ["$2000 nametable writes mid-line"] = new(Nrom, 0x80, 0x1E, (f, _) => KeyDots.Select((d, k) => Act.Write(30 + (10 * k), d, 0x2000, (byte)(0x80 | ((f + k) & 3)))).ToArray(), 4),
+        ["$2005 and $2006 writes on the key dots, the background alone"] = new(Nrom, 0x80, 0x0A, (f, _) => KeyDots.SelectMany((d, k) => new[]
+        {
+            Act.Write(20 + (8 * k), d, 0x2005, (byte)((f * 13) + k)),
+            Act.Write(20 + (8 * k), d, 0x2005, (byte)((f * 7) + k)),
+            Act.Write(24 + (8 * k), d, 0x2006, (byte)(0x20 + (k & 7))),
+            Act.Write(24 + (8 * k), d, 0x2006, (byte)(f + (k * 9))),
+        }).ToArray(), 4),
 
         // Review Focus 2: rendering switched at the line's edges, and on the pre-render line's
         // dots around 338, where the odd frame's dropped dot is decided.
@@ -71,6 +83,19 @@ internal static class CatchUpScenes
             Act.Write(170, 100, 0x2001, 0xFF),
             Act.Write(170, 180, 0x2001, 0x1E),
             Act.Write(r.PreRenderLine, 333 + (f % 8), 0x2001, 0x00),
+        ], 9),
+
+        ["$2001 at the line edges, the background alone and off"] = new(Nrom, 0x80, 0x0A, (f, r) =>
+        [
+            Act.Write(10, 0, 0x2001, 0x00),
+            Act.Write(12, 0, 0x2001, 0x0A),
+            Act.Write(50, 340, 0x2001, 0x08),
+            Act.Write(80, 1, 0x2001, 0x1E),
+            Act.Write(81, 0, 0x2001, 0x0B),
+            Act.Write(120, 339, 0x2001, 0x00),
+            Act.Write(160, 0, 0x2001, 0xEA),
+            Act.Write(239, 300, 0x2001, 0x00),
+            Act.Write(r.PreRenderLine, 333 + (f % 8), 0x2001, 0x0A),
         ], 9),
 
         // Review Focus 4: $2002 read on and around the VBlank dot, with NMI on.
@@ -137,6 +162,14 @@ internal static class CatchUpScenes
             Act.Write(200, 3 * f, 0x8000, (byte)((f + 2) % 4)),
             Act.Write(r.PreRenderLine, 330, 0x8000, 0x00),
         ], 4),
+        ["CNROM bank writes at line starts, the background alone"] = new(Cnrom, 0x80, 0x0A, (f, r) =>
+        [
+            Act.Write(40, 0, 0x8000, (byte)(f % 4)),
+            Act.Write(90, 0, 0x8000, (byte)((f + 1) % 4)),
+            Act.Write(150, 200, 0x8000, (byte)((f + 2) % 4)),
+            Act.Write(r.PreRenderLine, 330, 0x8000, 0x00),
+        ], 4),
+
         // The bus tells the observer of cartridge writes at $8000 and up only (as the differential
         // hashes them), so these PRG RAM writes are no point of their own: the row checks that the
         // catch-up they cause changes nothing seen afterwards, at the frame ends, the later

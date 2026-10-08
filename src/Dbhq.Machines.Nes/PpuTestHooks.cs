@@ -34,6 +34,9 @@ public sealed partial class Ppu
     /// <summary>PPUMASK as last written. Only a register write changes it, so it needs no catch-up.</summary>
     internal byte Mask => _mask;
 
+    /// <summary>The board, for a scene that writes to it as the CPU would (after a catch-up, as the bus makes one).</summary>
+    internal IMapper Board => _mapper;
+
     /// <summary>
     /// A test hook: runs the dots owed, then puts the PPU at <paramref name="line"/>,
     /// <paramref name="dot"/> of an odd or an even frame, with the VBlank, sprite 0 and overflow

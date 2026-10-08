@@ -14,6 +14,9 @@ internal enum DotAccessKind
 
     /// <summary>A read of the picture (<see cref="Ppu.Screen"/>): a catch-up with no register access, as the page's and the tools' reads are.</summary>
     Picture,
+
+    /// <summary>A CPU write to the board at <c>$4020</c> to <c>$FFFF</c> (the access's register is the address): the PPU caught up first, as the bus does, then the board's <see cref="IMapper.CpuWrite"/>.</summary>
+    Cartridge,
 }
 
 /// <summary>
@@ -34,6 +37,8 @@ internal readonly record struct DotAccess(int Offset, DotAccessKind Kind, int Re
     public static DotAccess Read(int offset, int register) => new(offset, DotAccessKind.Read, register);
 
     public static DotAccess Picture(int offset) => new(offset, DotAccessKind.Picture);
+
+    public static DotAccess Cartridge(int offset, ushort address, byte value) => new(offset, DotAccessKind.Cartridge, address, value);
 }
 
 /// <summary>
@@ -171,6 +176,10 @@ internal sealed class DotScenePair
                 return -1;
             case DotAccessKind.Read:
                 return ppu.ReadRegister(access.Register);
+            case DotAccessKind.Cartridge:
+                ppu.CatchUp();
+                ppu.Board.CpuWrite((ushort)access.Register, access.Value);
+                return -1;
             default:
                 _ = ppu.Screen;
                 return -1;

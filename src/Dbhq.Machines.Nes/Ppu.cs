@@ -559,6 +559,7 @@ public sealed partial class Ppu : IReportsState
                 _dropDot = false;
                 _dot = 0;
                 _line = 0;
+                _exactLines++;
                 EndFrame((_lines * Region.DotsPerLine) - 1);
                 return;
             }
@@ -567,6 +568,7 @@ public sealed partial class Ppu : IReportsState
         if (++_dot == Region.DotsPerLine)
         {
             _dot = 0;
+            _exactLines++;
             if (++_line == _lines)
             {
                 _line = 0;
