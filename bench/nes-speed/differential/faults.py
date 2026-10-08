@@ -25,14 +25,10 @@ BATCH = ('PpuCatchUp.cs', """    private long _logicalDots;
 """)
 BATCH_SET = ('PpuCatchUp.cs', """        while (_caughtUpDots < _logicalDots)
         {
-            _caughtUpDots++;
-            RunDot();
-        }""", """        _batch = _logicalDots - _caughtUpDots > 4;
+            if (_dot == 0""", """        _batch = _logicalDots - _caughtUpDots > 4;
         while (_caughtUpDots < _logicalDots)
         {
-            _caughtUpDots++;
-            RunDot();
-        }""")
+            if (_dot == 0""")
 BATCH_SKIP = ('PpuState.cs', """        sink.Skip(nameof(_catchUpAt), "worked out from the state (ScheduleEvents)");""", """        sink.Skip(nameof(_catchUpAt), "worked out from the state (ScheduleEvents)");
         sink.Skip(nameof(_batch), "a planted fault's");""")
 
@@ -240,6 +236,35 @@ FAULTS = [
 """, """    private const int VblankLine = 241;
     private bool _toggled;
 """), skip('_toggled')], "in a batch, on PAL's pre-render line, the odd frame flag turned as the PPU reaches dot 340 rather than with the frame's end after it"),
+]
+
+# Faults in the fast scanline renderer itself (task 3, PpuScanline.cs): each changes only a line the
+# fast path takes, which the per-dot reference never takes, so the scene tests see them as well.
+FAULTS += [
+    ('fast-pixel-one-off', 'PpuScanline.cs', """                pixels[row | column] = colours[pixel];""",
+     """                pixels[row | (column == 128 ? 129 : column)] = colours[pixel];""",
+     "on a fast background line, column 128's pixel written into column 129, so column 128 keeps what it had"),
+    ('fast-attribute-quadrant', 'PpuScanline.cs', """        int attributes = (attribute >> (((v >> 4) & 4) | (v & 2))) & 3;""",
+     """        int attributes = (attribute >> (((v >> 3) & 4) | (v & 2))) & 3;""",
+     "on a fast background line, the attribute quadrant's bottom half picked by coarse Y bit 0, not bit 1"),
+    ('fast-fine-x', 'PpuScanline.cs', """        int top = (15 - _x) << 2;""", """        int top = (15 - (_x & 6)) << 2;""",
+     "on a fast background line, fine X's bit 0 dropped, so an odd fine X draws as the even one below it"),
+    ('fast-coarse-y-wrap', 'PpuScanline.cs', """            if (coarseY == 29)""", """            if (coarseY == 30)""",
+     "on a fast background line, coarse Y wrapping (and turning the nametable) from 30, not 29"),
+    ('fast-vertical-copy', 'PpuScanline.cs', """        v = (v & ~0x041F) | (_t & 0x041F);""", """        v = (v & ~0x7BFF) | (_t & 0x7BFF);""",
+     "on a fast background line, dot 257 copying t's vertical bits into v as well as its horizontal ones"),
+    ('fast-left-clip-off-by-one', 'PpuScanline.cs', """                int pixel = column >= from ?""", """                int pixel = column > from ?""",
+     "on a fast background line, the first column the background shows in left blank: column 8 with the left clip, column 0 without"),
+    ('fast-off-palette-v-ignored', 'PpuScanline.cs', """        int entry = (_v & 0x3F00) == 0x3F00 ? PaletteIndex(_v) : 0;""", """        int entry = 0;""",
+     "on a fast rendering-off line, the backdrop drawn even when v points into the palette"),
+    ('fast-off-emphasis-ignored', 'PpuScanline.cs', """        _pixels.AsSpan(_line << 8, FrameBuffer.Width).Fill(_entryColours[entry]);""",
+     """        _pixels.AsSpan(_line << 8, FrameBuffer.Width).Fill(_colours[_palette[entry]]);""",
+     "on a fast rendering-off line, the colour drawn without PPUMASK's greyscale and emphasis"),
+    ('fast-vblank-line-off-by-one', 'PpuScanline.cs', """            if (line == VblankLine)""", """            if (line == VblankLine - 1)""",
+     "on the fast path, the VBlank flag set by line 240 instead of line 241: a line early when 240 is fast, and not at all when 241 is fast and 240 was not"),
+    ('fast-sprites-not-evaluated', 'PpuScanline.cs', """        EvaluateLine();
+        FetchSpritesForNextLine();""", """        FetchSpritesForNextLine();""",
+     "on a fast background line, sprite evaluation left out, which runs with either layer on: secondary OAM, the overflow flag and the next line's sprites stay as they were"),
 ]
 
 OLD = {'steps', 'cycles', 'trace', 'sound', 'dropped', 'memory', 'cpu', 'result'}

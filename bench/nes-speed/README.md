@@ -91,7 +91,10 @@ and the others go on. It runs four ROMs at a time (`--threads <n>` for another n
 `--coverage` prints, for each synthetic run, the dots its PPU register writes landed on with
 rendering on, and for the runs of each region together how many reach each of the pre-render
 line's key dots by any access with rendering on, and for the sprite0 runs how many of the places
-sprite 0's sweep sets (y 0 to 239, eight x's, a left clip on and off) were drawn; the journal entry
+sprite 0's sweep sets (y 0 to 239, eight x's, a left clip on and off) were drawn, and for every
+run, then each region's runs together, the share of the PPU's lines the fast scanline renderer
+took (`Ppu.FastLines` against the lines the per-dot path finished; task 3 of the renderer work,
+issue #72), which no hash depends on; the journal entry
 [`docs/journal/2026-10-06-the-nes-lazy-chips.md`](../../docs/journal/2026-10-06-the-nes-lazy-chips.md)
 has how long a run took, dated.
 
@@ -136,6 +139,12 @@ For a profile of the WebAssembly build, publish it with `-p:WasmNativeStrip=fals
 the function names, and give `PROFILE=<n>` to `run-in-browser.mjs`: it records the run with
 Chrome's sampling profiler and prints the n functions with the most self time (added in task 17,
 the core's speed work; before that the profile was taken with an uncommitted copy of the script).
+
+`ROM=homebrew` runs the bundled homebrew, Lan Master, from `roms/nes/` (checked against its pin in
+`Pins.cs`), in place of SNOW: the program of the thread-time bench's `lan-ntsc` and `lan-pal`
+workloads, at its title after the boot cycles (task 3 of the scanline renderer work, where SNOW,
+whose every visible line has sprites, could show nothing of a renderer for the lines without
+them).
 
 On a shared machine, `THREAD_TIME=<n>` makes n more timed runs after the page's own, driven
 from the script and each measured in the CPU time of the page's main thread (the DevTools

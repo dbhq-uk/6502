@@ -22,7 +22,9 @@ using Dbhq.Machines.Nes.Tests;
 // the ROMs whose name contains the text, and --check then compares those lines alone; --threads
 // runs that many at once, which changes no hash; --coverage prints, for each synthetic run, the
 // dots its PPU register writes landed on with rendering on, and for the sprite0 runs of each
-// region together the places sprite 0 was drawn at, which changes no hash either.
+// region together the places sprite 0 was drawn at, and for every run the share of the PPU's
+// lines the fast scanline renderer took (Ppu.FastLines against the lines the per-dot path ran),
+// which changes no hash either.
 //
 // Each run powers on, runs the frames given (150 by default; six times that for SNOW and the MMC3
 // ROMs, whose work is in the picture and the scanline counter; four times for the homebrew and the
@@ -181,12 +183,13 @@ if (problems.Count > 0)
 var results = new ConcurrentDictionary<string, string>();
 var runs = jobs.SelectMany(job => new[] { (Job: job, Region: Region.Ntsc), (Job: job, Region: Region.Pal) });
 var dots = new ConcurrentDictionary<string, DotCoverage>();
+var lineCounts = new ConcurrentDictionary<string, (long Fast, long Exact)>();
 Parallel.ForEach(runs, new ParallelOptions { MaxDegreeOfParallelism = threads }, run =>
 {
     string key = $"{run.Job.Name} {run.Region.Name}";
     try
     {
-        results[key] = Run(run.Job, run.Region, frames, oracle, coverage && run.Job.Name.StartsWith("synthetic/", StringComparison.Ordinal) ? report => dots[key] = report : null);
+        results[key] = Run(run.Job, run.Region, frames, oracle, coverage && run.Job.Name.StartsWith("synthetic/", StringComparison.Ordinal) ? report => dots[key] = report : null, coverage ? counts => lineCounts[key] = counts : null);
     }
     catch (Exception e) when (e is not OutOfMemoryException)
     {
@@ -217,7 +220,30 @@ if (coverage)
             Console.WriteLine($"sprite0 runs, {region.Name}, all together: {DotCoverage.Sprite0Report(drawn)}");
         }
     }
+
+    // The fast scanline renderer's share of each run's lines, then of each region's runs.
+    foreach (var (key, (fast, exact)) in lineCounts.OrderBy(c => c.Key, StringComparer.Ordinal))
+    {
+        Console.WriteLine($"{key}: fast lines {fast} of {fast + exact} ({Share(fast, fast + exact)})");
+    }
+
+    foreach (Region region in new[] { Region.Ntsc, Region.Pal })
+    {
+        var counts = lineCounts.Where(c => c.Key.EndsWith(" " + region.Name, StringComparison.Ordinal)).Select(c => c.Value).ToList();
+        if (counts.Count == 0)
+        {
+            continue;
+        }
+
+        long fast = counts.Sum(c => c.Fast);
+        long all = counts.Sum(c => c.Fast + c.Exact);
+        var shares = counts.Select(c => c.Fast + c.Exact == 0 ? 0.0 : (double)c.Fast / (c.Fast + c.Exact)).Order().ToList();
+        Console.WriteLine($"fast lines, {region.Name}, all {counts.Count} runs together: {fast} of {all} ({Share(fast, all)}); "
+            + $"the median run's share {shares[shares.Count / 2]:P1}; runs with more than half their lines fast: {shares.Count(s => s > 0.5)}; with none: {shares.Count(s => s == 0)}");
+    }
 }
+
+static string Share(long part, long all) => all == 0 ? "no lines" : $"{(double)part / all:P1}";
 
 var lines = new List<string> { $"{Format} frames={frames}" };
 lines.AddRange(results.OrderBy(result => result.Key, StringComparer.Ordinal).Select(result => $"{result.Key}: {result.Value}"));
@@ -322,7 +348,7 @@ static Type BoardOf(Nes nes)
     return finder.Board!.GetType();
 }
 
-static string Run(Job job, Region region, int frames, bool oracle, Action<DotCoverage>? coverage)
+static string Run(Job job, Region region, int frames, bool oracle, Action<DotCoverage>? coverage, Action<(long Fast, long Exact)>? lines)
 {
     Nes nes;
     try
@@ -442,6 +468,7 @@ static string Run(Job job, Region region, int frames, bool oracle, Action<DotCov
     AddOam(memory, ppu);
     memory.Add(Lines(nes));
     coverage?.Invoke(watch.Coverage!);
+    lines?.Invoke((ppu.FastLines, ppu.ExactLines));
 
     return $"steps={steps} cycles={nes.Bus.Cycles} trace={trace.Value:X16} sound={sound.Value:X16} dropped={nes.Sound.Dropped} memory={memory.Value:X16}"
         + $" cpu={watch.Cpu.Value:X16} points={watch.Points} ppu={watch.Ppu.Value:X16} pixels={watch.Pixels.Value:X16} apu={watch.Apu.Value:X16} board={watch.Board.Value:X16} lines={watch.Lines.Value:X16}";
