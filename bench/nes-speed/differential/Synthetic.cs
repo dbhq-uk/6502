@@ -28,6 +28,17 @@
 //            the DMC looping in one frame and ending with an IRQ in the next, and after the delay a
 //            $4017 write, which the delay's single cycles put on odd and even cycles, a $4015 read
 //            and a $4015 write
+//   background  the background alone, the sprites never on, scrolled every frame, for the fast
+//            scanline renderer (task 3 of the scanline renderer work): horizontal mirroring in the
+//            header; X on by an odd step a frame, so fine X takes every value in 8 frames and coarse
+//            X goes round; Y on by a step a frame, wrapping at 240 for odd seeds (so the picture
+//            crosses coarse Y 29 into the other vertical nametable) and running on through the
+//            attribute rows 30 and 31 for even ones; the nametable select from the frame; the
+//            background's pattern table switched every 16 frames; PPUMASK from a table of the
+//            left clip on and off, greyscale and each emphasis; and v left in the palette in
+//            VBlank, which a frame with rendering off shows (one frame in four, as for all). The
+//            same delay, then the scroll workload's split writes, and the board's write. The
+//            CHR and the nametables are noise, so every tile and attribute quadrant differs.
 //
 // The boards: NROM; MMC1 (a read-modify-write to the board, whose second write the chip ignores,
 // then a CHR bank switch by its serial port mid-frame); CNROM (a CHR bank switch mid-frame,
@@ -54,6 +65,7 @@ internal enum Workload
     Sprites,
     Nmi,
     Apu,
+    Background,
 }
 
 internal enum BoardKind
@@ -91,6 +103,12 @@ internal static class Synthetic
             (Workload.Sprites, BoardKind.Nrom, 1), (Workload.Sprites, BoardKind.Mmc3, 1), (Workload.Sprites, BoardKind.Uxrom, 2), (Workload.Sprites, BoardKind.Mmc1, 2),
             (Workload.Nmi, BoardKind.Nrom, 1), (Workload.Nmi, BoardKind.Mmc1, 1), (Workload.Nmi, BoardKind.Mmc3, 1),
             (Workload.Apu, BoardKind.Nrom, 1), (Workload.Apu, BoardKind.Uxrom, 1), (Workload.Apu, BoardKind.Mmc3, 1), (Workload.Apu, BoardKind.Mmc1, 1),
+
+            // Last, so every job before keeps its place in the list, and so its PAL reset phase.
+            (Workload.Background, BoardKind.Nrom, 1), (Workload.Background, BoardKind.Nrom, 2), (Workload.Background, BoardKind.Nrom, 3),
+            (Workload.Background, BoardKind.Nrom, 4), (Workload.Background, BoardKind.Nrom, 5), (Workload.Background, BoardKind.Cnrom, 6),
+            (Workload.Background, BoardKind.Cnrom, 7), (Workload.Background, BoardKind.Cnrom, 8), (Workload.Background, BoardKind.Cnrom, 9),
+            (Workload.Background, BoardKind.Mmc1, 10), (Workload.Background, BoardKind.Mmc1, 11), (Workload.Background, BoardKind.Axrom, 12),
         ];
         int sprite0Part = 0;
         foreach (var (workload, board, seed) in list)
@@ -127,6 +145,11 @@ internal sealed class ProgramBuilder(Workload workload, BoardKind board, int see
 
     // How many times the program has started: power on, then each press of the reset button.
     private const int Starts = 0x1C;
+
+    // The background workload's scroll, and a byte to work in.
+    private const int ScrollX = 0x20;
+    private const int ScrollY = 0x21;
+    private const int Scratch = 0x22;
     private const int Oam = 0x0200;
 
     // The windows' bases, in cycles of delay: the first write lands about 20 cycles before NTSC's
@@ -199,7 +222,9 @@ internal sealed class ProgramBuilder(Workload workload, BoardKind board, int see
         }
 
         int mapper = (int)board switch { 0 => 0, 1 => 1, 2 => 2, 3 => 3, 4 => 4, _ => 7 };
-        byte[] header = [(byte)'N', (byte)'E', (byte)'S', 0x1A, 2, (byte)ChrBanks, (byte)(((mapper & 0x0F) << 4) | 1), (byte)(mapper & 0xF0), 0, 0, 0, 0, 0, 0, 0, 0];
+        // Vertical mirroring, but horizontal for the background workload.
+        int vertical = workload == Workload.Background ? 0 : 1;
+        byte[] header = [(byte)'N', (byte)'E', (byte)'S', 0x1A, 2, (byte)ChrBanks, (byte)(((mapper & 0x0F) << 4) | vertical), (byte)(mapper & 0xF0), 0, 0, 0, 0, 0, 0, 0, 0];
         return [.. header, .. prg, .. chr];
     }
 
@@ -253,7 +278,7 @@ internal sealed class ProgramBuilder(Workload workload, BoardKind board, int see
         }
 
         a.Label("seeded");
-        if (workload is Workload.Scroll or Workload.Mask or Workload.Sprites or Workload.Apu)
+        if (workload is Workload.Scroll or Workload.Mask or Workload.Sprites or Workload.Apu or Workload.Background)
         {
             // The differential's second reset puts PAL's PPU on a dot phase chosen for the run;
             // the window just before PAL's pre-render line starts at once after it, so the run's
@@ -290,7 +315,7 @@ internal sealed class ProgramBuilder(Workload workload, BoardKind board, int see
         a.Jsr("workload_init");
         a.LdaI(CtrlValue);
         a.Sta(Ctrl);
-        a.LdaI(0x1E);
+        a.LdaI(workload == Workload.Background ? 0x0A : 0x1E);
         a.Sta(Mask);
         a.Cli();
         a.Lda(Ctrl);
@@ -453,7 +478,7 @@ internal sealed class ProgramBuilder(Workload workload, BoardKind board, int see
         a.Bne("nmi_1");
         a.Inc(Frame + 1);
         a.Label("nmi_1");
-        if (workload is Workload.Scroll or Workload.Mask or Workload.Sprites or Workload.Apu)
+        if (workload is Workload.Scroll or Workload.Mask or Workload.Sprites or Workload.Apu or Workload.Background)
         {
             // From the DMA, the window's delay, the action, then the frame's setup after it.
             a.Jsr("sweep");
@@ -638,9 +663,20 @@ internal sealed class ProgramBuilder(Workload workload, BoardKind board, int see
         a.Label("frame_setup");
         a.Jsr("board_frame");
         a.Jsr("workload_frame");
-        a.LdaI(0);
-        a.Sta(0x2005);
-        a.Sta(0x2005);
+        if (workload == Workload.Background)
+        {
+            a.Lda(ScrollX);
+            a.Sta(0x2005);
+            a.Lda(ScrollY);
+            a.Sta(0x2005);
+        }
+        else
+        {
+            a.LdaI(0);
+            a.Sta(0x2005);
+            a.Sta(0x2005);
+        }
+
         a.Lda(Ctrl);
         a.Sta(0x2000);
 
@@ -1005,6 +1041,57 @@ internal sealed class ProgramBuilder(Workload workload, BoardKind board, int see
                 a.Inx();
                 a.Bne("sprites_move");
                 break;
+            case Workload.Background:
+            {
+                // X on by an odd step, so fine X takes every value in 8 frames; Y on by a step,
+                // back by 240 past 239 for odd seeds, on through the attribute rows for even ones.
+                a.Lda(ScrollX);
+                a.Clc();
+                a.AdcI((2 * seed) - 1);
+                a.Sta(ScrollX);
+                a.Lda(ScrollY);
+                a.Clc();
+                a.AdcI(new[] { 1, 2, 3, 5, 7, 11, 13, 4, 6, 9, 10, 15 }[(seed - 1) % 12]);
+                if (seed % 2 == 1)
+                {
+                    a.CmpI(240);
+                    a.Bcc("bg_y");
+                    a.SbcI(240);
+                    a.Label("bg_y");
+                }
+
+                a.Sta(ScrollY);
+
+                // PPUCTRL: NMI on, the nametable select from frame bits 2 and 3, the background's
+                // pattern table from frame bit 4.
+                a.Lda(Frame);
+                a.LsrA();
+                a.LsrA();
+                a.AndI(3);
+                a.Sta(Scratch);
+                a.Lda(Frame);
+                a.AndI(0x10);
+                a.Ora(Scratch);
+                a.OraI(0x80);
+                a.Sta(Ctrl);
+
+                // PPUMASK from the table, by the frame.
+                a.Lda(Frame);
+                a.AndI(7);
+                a.Tax();
+                a.LdaX("background_masks");
+                a.Sta(Mask);
+
+                // v into the palette, at an entry from the frame: a frame with rendering off shows
+                // it; with rendering on, the pre-render line copies t, which the scroll writes set.
+                a.LdaI(0x3F);
+                a.Sta(0x2006);
+                a.Lda(Frame);
+                a.AndI(0x1F);
+                a.Sta(0x2006);
+                break;
+            }
+
             case Workload.Apu:
                 a.Lda(Frame);
                 a.AndI(0x3F);
@@ -1056,6 +1143,7 @@ internal sealed class ProgramBuilder(Workload workload, BoardKind board, int see
         switch (workload)
         {
             case Workload.Scroll:
+            case Workload.Background:
                 a.Lda(Frame);
                 a.AndI(3);
                 a.OraI(0x20);
@@ -1113,6 +1201,12 @@ internal sealed class ProgramBuilder(Workload workload, BoardKind board, int see
         }
 
         Table("mask_values", [0x16, 0x0E, 0x1C, 0x1A, 0x06, 0x18, 0x1F, 0xFE]);
+        if (workload == Workload.Background)
+        {
+            // The background on and the sprites off: the left clip off and on, greyscale, each
+            // emphasis bit and all three, and the sprites' clip bit, which changes nothing.
+            Table("background_masks", [0x0A, 0x08, 0x0B, 0x29, 0x4A, 0x88, 0xEA, 0x0E]);
+        }
         Table("frame_counter_values", [0x00, 0x40, 0x80, 0xC0]);
         if (workload == Workload.Sprites)
         {

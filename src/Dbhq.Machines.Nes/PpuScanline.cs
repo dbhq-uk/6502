@@ -146,7 +146,7 @@ public sealed partial class Ppu
         int top = (15 - _x) << 2;
         int from = _backgroundFrom;
         int row = _line << 8;
-        int v = _v;
+        ushort v = _v;
         ulong shifters = _backgroundPixels;
         for (int x = 0; x < FrameBuffer.Width; x += 8)
         {
@@ -158,44 +158,20 @@ public sealed partial class Ppu
             }
 
             shifters = (shifters << 32) | FetchTile(v, patternTable);
-            v = CoarseXOn(v);
+            v = IncrementCoarseX(v);
         }
 
         // Dot 256's Y increment, then dot 257's copy of t's horizontal bits.
-        if ((v & 0x7000) != 0x7000)
-        {
-            v += 0x1000;
-        }
-        else
-        {
-            v &= ~0x7000;
-            int coarseY = (v >> 5) & 31;
-            if (coarseY == 29)
-            {
-                coarseY = 0;
-                v ^= 0x0800;
-            }
-            else if (coarseY == 31)
-            {
-                coarseY = 0;
-            }
-            else
-            {
-                coarseY++;
-            }
-
-            v = (v & ~0x03E0) | (coarseY << 5);
-        }
-
-        v = (v & ~0x041F) | (_t & 0x041F);
+        v = IncrementY(v);
+        v = (ushort)((v & ~0x041F) | (_t & 0x041F));
 
         // The next line's first two tiles, on dots 321 to 336: dot 329 takes the first into the
         // shifters, which by dot 337 have moved it to their high half and take the second. The
         // background's latches are left as the second's fetch leaves them.
         uint first = FetchTile(v, patternTable);
-        v = CoarseXOn(v);
+        v = IncrementCoarseX(v);
         uint second = FetchTile(v, patternTable);
-        _v = (ushort)CoarseXOn(v);
+        _v = IncrementCoarseX(v);
         _backgroundPixels = ((ulong)first << 32) | second;
 
         EvaluateLine();
@@ -228,13 +204,6 @@ public sealed partial class Ppu
         _patternLowByte = low;
         _patternHighByte = high;
         return Tile(low, high, attributes);
-    }
-
-    // The coarse X increment of a tile's eighth dot, the horizontal nametable turned at 31.
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static int CoarseXOn(int v)
-    {
-        return (v & 0x001F) == 31 ? (v & ~0x001F) ^ 0x0400 : v + 1;
     }
 
     // A tile's 8 pixels as the shifters take them (Reload): each pixel's 2 pattern bits, with

@@ -6,7 +6,9 @@ namespace Dbhq.Machines.Nes;
 public sealed partial class Ppu
 {
     // One dot of sprite evaluation on a visible line, dots 1 to 256 (ppu.md 7 and 9). The dots 2
-    // to 256 call the odd or the even half from their own dispatch (RenderVisibleDot).
+    // to 256 call the odd or the even half from their own dispatch (RenderVisibleDot). The fast
+    // scanline renderer (PpuScanline.cs, EvaluateLine) starts the search as dot 1 does and calls
+    // EvaluationStep itself, so a change here must be made there too; the gate holds the two equal.
     private void Evaluate(int dot)
     {
         if (dot == 1)
@@ -53,7 +55,8 @@ public sealed partial class Ppu
         }
     }
 
-    // What an even dot from 65 does with the byte the odd dot before it read, until the search ends.
+    // What an even dot from 65 does with the byte the odd dot before it read, until the search
+    // ends.
     // The place in secondary OAM is a 5-bit counter that wraps, as the chip's does, so a search
     // that starts from a place a reset left (Ppu.Reset clears the count found, not the place) can
     // never write outside the 32 bytes.
@@ -120,7 +123,10 @@ public sealed partial class Ppu
         }
     }
 
-    // One dot of the sprite fetches, dots 257 to 320: slot k / 8, step k % 8 (ppu.md 7).
+    // One dot of the sprite fetches, dots 257 to 320: slot k / 8, step k % 8 (ppu.md 7). The fast
+    // scanline renderer (PpuScanline.cs) calls this for whole lines, and does dot 257's own work
+    // itself (FetchSpritesForNextLine), so a change to that must be made there too; the gate
+    // (bench/nes-speed/differential) holds the two equal.
     private void FetchSprite(int k)
     {
         int slot = k >> 3;
@@ -215,7 +221,8 @@ public sealed partial class Ppu
         }
     }
 
-    // A fetched sprite's 8 pixels into the next line's columns, where no lower slot has an opaque pixel.
+    // A fetched sprite's 8 pixels into the next line's columns, where no lower slot has an opaque
+    // pixel.
     private void LaySprite(int slot, int low, int high)
     {
         if ((_fetchAttributes & 0x40) != 0)

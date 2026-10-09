@@ -226,6 +226,45 @@ public class PpuScanlineTests
         }
     }
 
+    public static TheoryData<string, Mirroring> MirroringRows()
+    {
+        var data = new TheoryData<string, Mirroring>();
+        foreach (string region in new[] { "NTSC", "PAL" })
+        {
+            foreach (Mirroring mirroring in new[] { Mirroring.Horizontal, Mirroring.SingleScreenLow, Mirroring.SingleScreenHigh, Mirroring.FourScreen, Mirroring.Vertical })
+            {
+                data.Add(region, mirroring);
+            }
+        }
+
+        return data;
+    }
+
+    // The scroll table under each nametable layout, every page of it filled with its own bytes,
+    // so a nametable fetch that picks the wrong page (one bit of the nametable select dropped,
+    // say, which vertical mirroring alone would hide) draws other tiles and attributes: each
+    // nametable select, and the coarse Y wrap from 29, which turns the vertical nametable.
+    [Theory]
+    [MemberData(nameof(MirroringRows))]
+    public void BackgroundLinesUnderEachMirroring(string region, Mirroring mirroring)
+    {
+        Region r = PpuScene.RegionNamed(region);
+        foreach (byte mask in new byte[] { 0x0A, 0x08 })
+        {
+            var pair = new DotScenePair(() => PpuDotSceneTests.Busy(r, Ctrl, mask, PpuDotSceneTests.VisibleLine, quiet: true, mirroring: mirroring));
+            foreach (int line in new[] { 1, PpuDotSceneTests.VisibleLine, 239 })
+            {
+                int i = 0;
+                foreach ((string name, int v, int fineX) in Scrolls())
+                {
+                    byte ctrl = Ctrls[i++ % Ctrls.Length];
+                    DotAccess[] setup = [DotAccess.Write(0, 0, ctrl), DotAccess.Write(0, 1, mask), .. SetScroll(0, v, fineX)];
+                    Run(pair, WholeLines($"{mirroring}, {name}, PPUCTRL ${ctrl:X2}, PPUMASK ${mask:X2}, from line {line - 1}", r, line - 1, false, 0x00, mask, setup, 3), 3);
+                }
+            }
+        }
+    }
+
     // The same on a real NROM board, its CHR ROM read through its windows.
     [Theory]
     [InlineData("NTSC")]

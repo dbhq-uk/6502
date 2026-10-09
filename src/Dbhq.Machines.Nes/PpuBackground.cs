@@ -17,7 +17,9 @@ public sealed partial class Ppu
 
     // The fetched tile into the low halves of the shifters, its attribute bits spread to 8: in the
     // combined shifter, 8 pixels into the low 32 bits, each with the attribute bits where it is
-    // not transparent.
+    // not transparent. Second implementation: the fast scanline renderer (PpuScanline.cs) does the
+    // same work for whole lines, so a change here must be made there too, and the gate (bench/nes-
+    // speed/differential) holds the two equal.
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private void Reload()
     {
@@ -42,7 +44,8 @@ public sealed partial class Ppu
     }
 
     // The 8-dot fetch of one background tile (ppu.md 6): each read on the second dot of its pair.
-    // The dots 2 to 256 of a visible line call the steps from their own dispatch (RenderVisibleDot).
+    // The dots 2 to 256 of a visible line call the steps from their own dispatch
+    // (RenderVisibleDot).
     private void FetchBackground(int dot)
     {
         switch (dot & 7)
@@ -79,6 +82,9 @@ public sealed partial class Ppu
         _nametableByte = _nametables[NametableIndex((ushort)(0x2000 | (_v & 0x0FFF)))];
     }
 
+    // Second implementation: the fast scanline renderer (PpuScanline.cs) does the same work for
+    // whole lines, so a change here must be made there too, and the gate (bench/nes-
+    // speed/differential) holds the two equal.
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private void FetchAttributeBits()
     {
@@ -108,7 +114,9 @@ public sealed partial class Ppu
         Fetching((ushort)(_patternAddress + 8));
     }
 
-    // The last read of the tile, and coarse X moves on.
+    // The last read of the tile, and coarse X moves on. Second implementation: the fast scanline
+    // renderer (PpuScanline.cs) does the same work for whole lines, so a change here must be made
+    // there too, and the gate (bench/nes-speed/differential) holds the two equal.
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private void FetchPatternHigh()
     {

@@ -85,18 +85,20 @@ public class PpuDotSceneTests
     /// <paramref name="sprite0X"/> and ten more on the line after (<see cref="OamByte"/>), the
     /// rest spread down the picture with every attribute, and the scroll set. With
     /// <paramref name="quiet"/> the board does not watch the PPU's address bus
-    /// (<see cref="TestMapper.Quiet"/>), so the lazy PPU may render whole lines at once.
+    /// (<see cref="TestMapper.Quiet"/>), so the lazy PPU may render whole lines at once. Under
+    /// another <paramref name="mirroring"/> than vertical all four nametables are filled, the
+    /// 4 KB from <c>$2000</c>, so every page the mirroring uses holds its own bytes.
     /// </summary>
-    internal static Ppu Busy(Region region, byte ctrl, byte mask, int line = VisibleLine, int sprite0X = 120, bool quiet = false)
+    internal static Ppu Busy(Region region, byte ctrl, byte mask, int line = VisibleLine, int sprite0X = 120, bool quiet = false, Mirroring mirroring = Mirroring.Vertical)
     {
-        var scene = new PpuScene(region, Mirroring.Vertical, quiet);
+        var scene = new PpuScene(region, mirroring, quiet);
         TestCartridge.Pattern(0x2000).CopyTo(scene.Mapper.Chr, 0);
         for (int i = 0; i < 32; i++)
         {
             scene.Poke((ushort)(0x3F00 + i), (byte)((i * 5) + 1));
         }
 
-        for (int i = 0; i < 0x800; i++)
+        for (int i = 0; i < (mirroring == Mirroring.Vertical ? 0x800 : 0x1000); i++)
         {
             scene.Poke((ushort)(0x2000 + i), (byte)((i * 7) + 3));
         }
