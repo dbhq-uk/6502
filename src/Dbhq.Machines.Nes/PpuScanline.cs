@@ -30,11 +30,22 @@ namespace Dbhq.Machines.Nes;
 /// with the per-dot code, for the state they leave: secondary OAM, the overflow flag, the line
 /// buffer and the fetch latches. With the sprites off no sprite pixel and no sprite 0 hit can
 /// come, so the pixel is the background's alone.</item>
+/// <item>a visible line with both layers on and no sprite fetched for it (task 4a): the same as a
+/// background line. <c>_spriteCount</c> is set only at dot 257 of the line before, where the
+/// line buffer is emptied, and the fetches lay only slots below it, so with it 0 the buffer is
+/// empty: <see cref="DrawPixel"/> reads no sprite pixel, so neither the multiplexer, nor the
+/// sprite clip (<c>_spritesFrom</c>), nor sprite 0 hit, which needs a pixel of sprite 0 in the
+/// buffer, can act, and the pixel is the background's alone. Evaluation (and its overflow bug),
+/// the 8 by 16 bit, OAMADDR held at 0 and the next line's fetches do not depend on the sprite
+/// layer, and run as on a background line.</item>
 /// </list>
 /// <para>
 /// Everything else is refused, and the per-dot path runs it: the pre-render line (its vertical
 /// copy, the flags at dot 1 and the odd frame's dropped dot), any visible line with the sprites
-/// on (task 4), a background line on a board without windows, and any line when
+/// on and a sprite fetched for it (task 4), a line with the sprites on and the background off
+/// (with no sprite it is a background line whose pixels are all the backdrop, not the
+/// rendering-off fill; no program measured needs it, so it is left to the per-dot path), a
+/// background line on a board without windows, and any line when
 /// <see cref="WholeLines"/> is off. Refusing changes nothing, so it is always safe.
 /// </para>
 /// <para>
@@ -101,7 +112,7 @@ public sealed partial class Ppu
             {
                 RenderOffLine();
             }
-            else if (layers == 0x08 && _chrWindows is not null && _nametablePages is not null)
+            else if ((layers == 0x08 || (layers == 0x18 && _spriteCount == 0)) && _chrWindows is not null && _nametablePages is not null)
             {
                 RenderBackgroundLine();
             }

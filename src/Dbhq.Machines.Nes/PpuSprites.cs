@@ -222,7 +222,9 @@ public sealed partial class Ppu
     }
 
     // A fetched sprite's 8 pixels into the next line's columns, where no lower slot has an opaque
-    // pixel.
+    // pixel. Called only for slots below _spriteCount, after ClearSpriteLine at dot 257: so with
+    // _spriteCount 0 the buffer is empty, which the fast scanline renderer (PpuScanline.cs) relies
+    // on to take a line with the sprites on and no sprite fetched for it.
     private void LaySprite(int slot, int low, int high)
     {
         if ((_fetchAttributes & 0x40) != 0)

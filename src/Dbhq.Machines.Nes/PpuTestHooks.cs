@@ -34,6 +34,12 @@ public sealed partial class Ppu
     /// <summary>PPUMASK as last written. Only a register write changes it, so it needs no catch-up.</summary>
     internal byte Mask => _mask;
 
+    /// <summary>How many sprites were fetched for the line the PPU is on (set at dot 257 of the line before), without a catch-up.</summary>
+    internal int SpritesFetchedAsRun => _spriteCount;
+
+    /// <summary>How many columns of the line buffer a sprite was laid in (0 when it is empty), without a catch-up.</summary>
+    internal int SpriteLineWidthAsRun => _spriteWidth;
+
     /// <summary>The board, for a scene that writes to it as the CPU would (after a catch-up, as the bus makes one).</summary>
     internal IMapper Board => _mapper;
 

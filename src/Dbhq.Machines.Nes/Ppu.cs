@@ -1166,6 +1166,9 @@ public sealed partial class Ppu : IReportsState
     // sprite 0 hit (ppu.md 8), and the colour. Second implementation: the fast scanline renderer
     // (PpuScanline.cs) does the same work for whole lines, so a change here must be made there too,
     // and the gate (bench/nes-speed/differential) holds the two equal.
+    // The fast path also takes a line with the sprites on when no sprite was fetched for it
+    // (_spriteCount 0), on the grounds that this method then reads no sprite pixel: keep the
+    // sprite part reading only the line buffer, and sprite 0 hit only from a pixel of it.
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private void DrawPixel(int x)
     {

@@ -271,6 +271,44 @@ FAULTS += [
      "on a fast background line, sprite evaluation left out, which runs with either layer on: secondary OAM, the overflow flag and the next line's sprites stay as they were"),
 ]
 
+# Faults in task 4a's clause: a visible line with both layers on and no sprite fetched for it.
+FAULTS += [
+    ('fast-sprite-clause-with-sprites', 'PpuScanline.cs', """(layers == 0x18 && _spriteCount == 0)""", """(layers == 0x18)""",
+     "the fast path taking a line with both layers on whether or not a sprite was fetched for it, so its sprites are not drawn"),
+    ('fast-sprite-clause-left-clip', 'PpuScanline.cs', """        int from = _backgroundFrom;""",
+     """        int from = (_mask & 0x10) != 0 ? _spritesFrom : _backgroundFrom;""",
+     "on a fast line with the sprites on, the background clipped by the sprites' left clip bit, not its own"),
+    ('fast-sprite0-hit-from-nothing', 'PpuScanline.cs', """        EvaluateLine();
+        FetchSpritesForNextLine();""", """        if ((_mask & 0x10) != 0 && _backgroundPixels != 0)
+        {
+            _status |= StatusSprite0;
+        }
+
+        EvaluateLine();
+        FetchSpritesForNextLine();""",
+     "on a fast line with the sprites on, sprite 0 hit set with no sprite on the line, from the background alone"),
+    ('fast-sprite-buffer-not-cleared', 'PpuScanline.cs', """        ClearSpriteLine();
+        _oamAddress = 0;""", """        if ((_mask & 0x10) == 0)
+        {
+            ClearSpriteLine();
+        }
+
+        _oamAddress = 0;""",
+     "on a fast line with the sprites on, the line buffer not emptied at dot 257 before the next line's sprites are laid in it"),
+    ('fast-sprite-count-not-set', 'PpuScanline.cs', """        _spriteCount = _found;""", """        _spriteCount = (_mask & 0x10) != 0 ? 0 : _found;""",
+     "on a fast line with the sprites on, the next line's sprite count left at 0, so the sprites found for it are not fetched or drawn"),
+    ('fast-sprite-overflow-not-set', 'PpuScanline.cs', """        EvaluateLine();
+        FetchSpritesForNextLine();""", """        byte kept = _status;
+        EvaluateLine();
+        if ((_mask & 0x10) != 0)
+        {
+            _status = (byte)((_status & ~StatusOverflow) | (kept & StatusOverflow));
+        }
+
+        FetchSpritesForNextLine();""",
+     "on a fast line with the sprites on, the overflow flag its own evaluation finds not set"),
+]
+
 OLD = {'steps', 'cycles', 'trace', 'sound', 'dropped', 'memory', 'cpu', 'result'}
 FORMAT_2 = OLD | {'points', 'ppu', 'apu', 'board', 'lines'}
 

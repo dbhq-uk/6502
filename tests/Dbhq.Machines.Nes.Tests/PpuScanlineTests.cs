@@ -27,7 +27,9 @@ public class PpuScanlineTests
     // Rendering off: greyscale, the clip bits, and each emphasis bit.
     internal static readonly byte[] OffMasks = [0x00, 0x01, 0x06, 0x20, 0x40, 0x80, 0xE1];
 
-    // The sprites on, with the background or without: lines the fast path must refuse.
+    // The sprites on, with the background or without: lines the fast path must refuse when a
+    // sprite was fetched for them, or the background is off; with both layers on and no sprite
+    // fetched for the line it is taken (task 4a).
     internal static readonly byte[] SpriteMasks = [0x10, 0x14, 0x18, 0x1A, 0x1C, 0x1E, 0xFF];
 
     internal static readonly int[] Lines = [1, 100, 200, 239];
@@ -39,6 +41,14 @@ public class PpuScanlineTests
     /// </summary>
     internal static bool Fast(Region region, int line, byte mask) =>
         line != region.PreRenderLine && (line >= FrameBuffer.Height || (mask & 0x10) == 0);
+
+    /// <summary>
+    /// The rule in full (task 4a): <see cref="Fast"/>, and also a visible line with both layers
+    /// on when no sprite was fetched for it (<paramref name="spritesFetched"/>, set at dot 257 of
+    /// the line before). A line with the sprites on and the background off stays refused.
+    /// </summary>
+    internal static bool Qualifies(Region region, int line, byte mask, int spritesFetched) =>
+        Fast(region, line, mask) || (line < FrameBuffer.Height && (mask & 0x18) == 0x18 && spritesFetched == 0);
 
     /// <summary>
     /// The writes that set <c>v</c> and <c>t</c> both to <paramref name="v"/> and fine X to
@@ -105,6 +115,55 @@ public class PpuScanlineTests
     /// <paramref name="fast"/> lines of it on the lazy PPU, and none ever on the reference, whose
     /// catch-ups are one dot.
     /// </summary>
+    /// <summary>
+    /// Runs <paramref name="scene"/> on <paramref name="pair"/>, where <paramref name="wholeLines"/>
+    /// are the lines (by their place in the scene, 0 its first) that a catch-up owes whole, and
+    /// checks that the fast path took exactly those of them that <see cref="Qualifies"/> on the
+    /// reference's own state as each line began (its PPUMASK after any access on its dot 0, and
+    /// the sprites fetched for it), and none ever on the reference. At each line's start it also
+    /// checks what the fast path rests on: with no sprite fetched, the line buffer is empty.
+    /// </summary>
+    internal static void Run(DotScenePair pair, DotScene scene, IReadOnlyCollection<int> wholeLines)
+    {
+        var starts = new List<(int Line, byte Mask, int Sprites)>();
+        Action<Ppu>? saved = pair.EachDot;
+        pair.EachDot = ppu =>
+        {
+            saved?.Invoke(ppu);
+            if (ppu.CaughtUpDot == 1)
+            {
+                if (ppu.SpritesFetchedAsRun == 0 && ppu.SpriteLineWidthAsRun != 0)
+                {
+                    Assert.Fail($"{scene.Name}: line {ppu.CaughtUpLine} has no sprite fetched and a line buffer {ppu.SpriteLineWidthAsRun} columns wide");
+                }
+
+                starts.Add((ppu.CaughtUpLine, ppu.Mask, ppu.SpritesFetchedAsRun));
+            }
+        };
+
+        long before = pair.Lazy.FastLines;
+        try
+        {
+            pair.Run(scene);
+        }
+        finally
+        {
+            pair.EachDot = saved;
+        }
+
+        Region region = pair.Reference.Region;
+        int fast = wholeLines.Count(i => i < starts.Count && Qualifies(region, starts[i].Line, starts[i].Mask, starts[i].Sprites));
+        Assert.True(pair.Reference.FastLines == 0, $"{scene.Name}: the reference took the fast path");
+        long taken = pair.Lazy.FastLines - before;
+        if (taken != fast)
+        {
+            Assert.Fail($"{scene.Name}: the fast path took {taken} lines, where {fast} may be taken");
+        }
+    }
+
+    /// <summary>The first <paramref name="count"/> lines of a scene, by their place in it.</summary>
+    internal static int[] First(int count) => [.. Enumerable.Range(0, count)];
+
     internal static void Run(DotScenePair pair, DotScene scene, int fast)
     {
         long before = pair.Lazy.FastLines;
@@ -310,8 +369,7 @@ public class PpuScanlineTests
         foreach ((string name, int v, int fineX) in Scrolls().Take(12))
         {
             DotAccess[] setup = [DotAccess.Write(0, 0, Ctrl), DotAccess.Write(0, 1, mask), .. SetScroll(0, v, fineX)];
-            int fast = (Fast(r, 0, mask) ? 1 : 0) + (Fast(r, 1, mask) ? 1 : 0);
-            Run(pair, WholeLines($"{name}, PPUMASK ${mask:X2}, the pre-render line of an {(odd ? "odd" : "even")} frame", r, r.PreRenderLine, odd, 0xE0, mask, setup, 3), fast);
+            Run(pair, WholeLines($"{name}, PPUMASK ${mask:X2}, the pre-render line of an {(odd ? "odd" : "even")} frame", r, r.PreRenderLine, odd, 0xE0, mask, setup, 3), First(3));
         }
     }
 
@@ -388,12 +446,11 @@ public class PpuScanlineTests
         Region r = PpuScene.RegionNamed(region);
         var pair = new DotScenePair(() => PpuDotSceneTests.Busy(r, ctrl, mask, 200, quiet: true));
         int count = r.PreRenderLine - 238 + 2;
-        int fast = Enumerable.Range(238, count).Count(l => Fast(r, l % r.Lines, mask));
         DotAccess[] setup = [DotAccess.Write(0, 0, ctrl), DotAccess.Write(0, 1, mask)];
         foreach (bool odd in new[] { false, true })
         {
-            Run(pair, WholeLines($"PPUCTRL ${ctrl:X2}, PPUMASK ${mask:X2}, {(odd ? "odd" : "even")}", r, 238, odd, 0x00, mask, setup, count), fast);
-            Run(pair, WholeLines($"PPUCTRL ${ctrl:X2}, PPUMASK ${mask:X2}, {(odd ? "odd" : "even")}, $2002 read at each line's end", r, 238, odd, 0x00, mask, setup, count, (_, offset) => [DotAccess.Read(offset, 2)]), fast);
+            Run(pair, WholeLines($"PPUCTRL ${ctrl:X2}, PPUMASK ${mask:X2}, {(odd ? "odd" : "even")}", r, 238, odd, 0x00, mask, setup, count), First(count));
+            Run(pair, WholeLines($"PPUCTRL ${ctrl:X2}, PPUMASK ${mask:X2}, {(odd ? "odd" : "even")}, $2002 read at each line's end", r, 238, odd, 0x00, mask, setup, count, (_, offset) => [DotAccess.Read(offset, 2)]), First(count));
         }
     }
 
@@ -437,18 +494,19 @@ public class PpuScanlineTests
         return data;
     }
 
-    // With the sprites on, the visible lines are refused (task 4's), and the per-dot path's
-    // state is reached all the same.
+    // With the sprites on, a visible line with a sprite fetched for it is refused (task 4's), and
+    // so is one with the background off; with both layers on and none fetched it is taken. The
+    // scene's first line, put there by MoveTo, has none; the line after it has sprite 0.
     [Theory]
     [MemberData(nameof(SpriteRows))]
-    public void SpriteLinesAreRefused(string region, byte mask, int line)
+    public void SpriteLines(string region, byte mask, int line)
     {
         Region r = PpuScene.RegionNamed(region);
         var pair = new DotScenePair(() => PpuDotSceneTests.Busy(r, Ctrl, mask, line, quiet: true));
         foreach ((string name, int v, int fineX) in Scrolls().Take(8))
         {
             DotAccess[] setup = [DotAccess.Write(0, 0, Ctrl), DotAccess.Write(0, 1, mask), .. SetScroll(0, v, fineX)];
-            Run(pair, WholeLines($"{name}, PPUMASK ${mask:X2}, from line {line - 1}", r, line - 1, false, 0x00, mask, setup, 2), 0);
+            Run(pair, WholeLines($"{name}, PPUMASK ${mask:X2}, from line {line - 1}", r, line - 1, false, 0x00, mask, setup, 2), First(2));
         }
     }
 
@@ -485,10 +543,7 @@ public class PpuScanlineTests
         int dot = 0;
         foreach (DotScene scene in PpuDotSceneTests.AtEveryDot(kind, r, line, false, 0x00, Ctrl, Mask))
         {
-            DotAccess last = scene.Accesses[^1];
-            byte after = last.Kind == DotAccessKind.Write && last.Register == 1 ? last.Value : Mask;
-            int fast = (Fast(r, line - 1, Mask) ? 1 : 0) + (dot == 0 && Fast(r, line, after) ? 1 : 0) + (Fast(r, line + 1, after) ? 1 : 0);
-            Run(pair, scene, fast);
+            Run(pair, scene, dot == 0 ? First(3) : [0, 2]);
             dot++;
         }
 
@@ -497,7 +552,7 @@ public class PpuScanlineTests
 
     // The masks rendering is switched between at a line's edge: off, the background with the
     // left clip and without, everything, and the sprites alone.
-    private static readonly byte[] EdgeMasks = [0x00, 0x08, 0x0A, 0x1E, 0x10];
+    private static readonly byte[] EdgeMasks = [0x00, 0x08, 0x0A, 0x1E, 0x10, 0x18, 0x1C];
 
     public static TheoryData<string, byte, byte> EdgeRows()
     {
@@ -537,8 +592,19 @@ public class PpuScanlineTests
                     DotAccess.Write(target, 1, to),
                 ];
                 var scene = new DotScene($"$2001 ${from:X2} to ${to:X2} at {(target < 341 ? $"line {line - 1} dot {target}" : $"line {line} dot {target - 341}")}, {r.Name}", line - 1, 0, false, 0x00, accesses, 3 * Region.DotsPerLine);
-                int fast = (target >= 341 && Fast(r, line - 1, from) ? 1 : 0) + (target <= 341 && Fast(r, line, to) ? 1 : 0) + (Fast(r, line + 1, to) ? 1 : 0);
-                Run(pair, scene, fast);
+                var whole = new List<int>();
+                if (target >= 341)
+                {
+                    whole.Add(0);
+                }
+
+                if (target <= 341)
+                {
+                    whole.Add(1);
+                }
+
+                whole.Add(2);
+                Run(pair, scene, whole);
             }
         }
 
@@ -548,7 +614,7 @@ public class PpuScanlineTests
             {
                 DotAccess[] accesses = [DotAccess.Write(0, 0, Ctrl), DotAccess.Write(0, 1, from), DotAccess.Write(target, 1, to)];
                 var scene = new DotScene($"$2001 ${from:X2} to ${to:X2} at the pre-render line's dot {target} of an {(odd ? "odd" : "even")} frame, {r.Name}", r.PreRenderLine, 0, odd, 0xE0, accesses, 3 * Region.DotsPerLine);
-                Run(pair, scene, (Fast(r, 0, to) ? 1 : 0) + (Fast(r, 1, to) ? 1 : 0));
+                Run(pair, scene, [1, 2]);
             }
         }
     }
@@ -622,7 +688,7 @@ public class PpuScanlineTests
         foreach (bool odd in new[] { false, true })
         {
             // The lines whole inside the scene, from line 0 dot 0.
-            int fast = 0;
+            int whole = 0;
             int left = length;
             int line = 0;
             bool frameOdd = odd;
@@ -635,7 +701,7 @@ public class PpuScanlineTests
                 }
 
                 left -= dots;
-                fast += Fast(r, line, mask) ? 1 : 0;
+                whole++;
                 if (++line == r.Lines)
                 {
                     line = 0;
@@ -644,8 +710,111 @@ public class PpuScanlineTests
             }
 
             var scene = new DotScene($"three frames in one catch-up, PPUMASK ${mask:X2}, from an {(odd ? "odd" : "even")} frame, {r.Name}", 0, 0, odd, 0x00, [DotAccess.Write(0, 0, Ctrl), DotAccess.Write(0, 1, mask)], length);
-            Run(pair, scene, fast);
+            Run(pair, scene, First(whole));
         }
+    }
+
+    // Task 4a: the sprite layer on, every combination of the two layers and the two left clips,
+    // with OAM holding sprites that are on no line, on line 240 only (Y 239), on the line after
+    // the line looked at, on it alone, on it and the next, more than eight on the next (the
+    // overflow flag set by the line's own evaluation), or sprite 0 alone on the next line or on
+    // this one, with 8 by 8 and 8 by 16 sprites. Each scene runs five whole lines, from two lines
+    // before the line looked at, so the line before it is evaluated whole; a line is taken only
+    // when no sprite was fetched for it, and its state, the flags and the pixels are the per-dot
+    // path's.
+    public static TheoryData<string, byte> SpriteLayerRows()
+    {
+        var data = new TheoryData<string, byte>();
+        foreach (string region in new[] { "NTSC", "PAL" })
+        {
+            for (int bits = 0; bits < 16; bits++)
+            {
+                data.Add(region, (byte)(bits << 1));
+            }
+
+            data.Add(region, 0x39);
+            data.Add(region, 0xFE);
+        }
+
+        return data;
+    }
+
+    // Sprite i's Y in each OAM case, for the line looked at, `line`, and sprites `height` tall.
+    private static readonly (string Name, Func<int, int, int, int> Y)[] SpriteCases =
+    [
+        ("no sprite on any line", (_, _, _) => 0xFF),
+        ("every sprite on line 240 only (Y 239)", (_, _, _) => 239),
+        ("four sprites on the next line only", (i, line, _) => i < 4 ? line : 0xFF),
+        ("four sprites on this line only", (i, line, height) => i < 4 ? line - height : 0xFF),
+        ("four sprites on this line and the next", (i, line, _) => i < 4 ? line - 1 : 0xFF),
+        ("ten sprites on the next line, so its evaluation sets the overflow flag", (i, line, _) => i < 10 ? line : 0xFF),
+        ("sprite 0 alone, on the next line", (i, line, _) => i == 0 ? line : 0xFF),
+        ("sprite 0 alone, on this line", (i, line, _) => i == 0 ? line - 1 : 0xFF),
+    ];
+
+    [Theory]
+    [MemberData(nameof(SpriteLayerRows))]
+    public void SpriteLayerOnLines(string region, byte mask)
+    {
+        Region r = PpuScene.RegionNamed(region);
+        int scenes = 0;
+        foreach (byte ctrl in new byte[] { 0x88, 0xA8 })
+        {
+            int height = (ctrl & 0x20) != 0 ? 16 : 8;
+            foreach ((string name, Func<int, int, int, int> y) in SpriteCases)
+            {
+                foreach (int line in new[] { 2, PpuDotSceneTests.VisibleLine, 237 })
+                {
+                    var pair = new DotScenePair(() =>
+                    {
+                        Ppu ppu = PpuDotSceneTests.Busy(r, ctrl, mask, line, quiet: true);
+                        byte[] oam = ppu.Oam;
+                        for (int i = 0; i < 64; i++)
+                        {
+                            oam[i * 4] = (byte)y(i, line, height);
+                            oam[(i * 4) + 1] = (byte)((i * 2) + 1);
+                            oam[(i * 4) + 2] = (byte)(i & 0xE3);
+                            oam[(i * 4) + 3] = (byte)(i * 4);
+                        }
+
+                        return ppu;
+                    });
+                    DotAccess[] setup = [DotAccess.Write(0, 0, ctrl), DotAccess.Write(0, 1, mask), .. SetScroll(0, PpuDotSceneTests.ScrollV(line - 2, false), 3)];
+                    Run(pair, WholeLines($"{name}, PPUCTRL ${ctrl:X2}, PPUMASK ${mask:X2}, line {line}", r, line - 2, false, 0x00, mask, setup, 5), First(5));
+                    scenes++;
+                }
+            }
+        }
+
+        Assert.Equal(2 * SpriteCases.Length * 3, scenes);
+    }
+
+    // The overflow flag is set by the evaluation of a line taken by the fast path, as the per-dot
+    // path sets it: ten sprites on line 101, evaluated on line 100, which has none fetched for it.
+    [Theory]
+    [InlineData("NTSC")]
+    [InlineData("PAL")]
+    public void AFastLinesEvaluationSetsTheOverflowFlag(string region)
+    {
+        Region r = PpuScene.RegionNamed(region);
+        const int Line = PpuDotSceneTests.VisibleLine;
+        var pair = new DotScenePair(() =>
+        {
+            Ppu ppu = PpuDotSceneTests.Busy(r, Ctrl, 0x1E, Line, quiet: true);
+            byte[] oam = ppu.Oam;
+            for (int i = 0; i < 64; i++)
+            {
+                oam[i * 4] = i < 10 ? (byte)Line : (byte)0xFF;
+            }
+
+            return ppu;
+        });
+        DotAccess[] setup = [DotAccess.Write(0, 0, Ctrl), DotAccess.Write(0, 1, 0x1E)];
+        long before = pair.Lazy.FastLines;
+        Run(pair, WholeLines("ten sprites on the next line", r, Line, false, 0x00, 0x1E, setup, 1), First(1));
+        Assert.Equal(1, pair.Lazy.FastLines - before);
+        Assert.Equal(0x20, pair.Lazy.PeekRegister(2) & 0x20);
+        Assert.Equal(0, pair.Lazy.PeekRegister(2) & 0x40);
     }
 
     // A catch-up one dot short of a line runs it on the per-dot path; the dot after it is a
