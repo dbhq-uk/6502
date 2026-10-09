@@ -20,7 +20,7 @@ below says which code it measured.
 | `run-in-browser.mjs`, `package.json` | Fetches the ROM from the pinned fork, checks it against its SHA-256 in `Pins.cs`, serves it with the page and a published copy of the app on `127.0.0.1`, and runs it in a headless Chrome, a fresh launch each time. |
 | `native/` | The same workload as a console program, in the solution so CI builds it. |
 | `differential/` | The check that a change for speed changed nothing else: it runs every pinned NES test ROM, the bundled homebrew with a fixed round of button presses, and synthetic cartridges it assembles itself, which keep rendering on and touch the chips at moving dots, in both regions and writes one line of hashes for each (every instruction's registers, cycle and PPU position, every cycle's interrupt lines, every frame's pixels, the sound, the end state, each chip's whole state at every point where it can be seen, and, since format 3, the picture as far as it is drawn at each of those points). In the solution too. |
-| `differential/baseline/` | The differential's output with the per-dot reference (`--oracle`), which the lazy build is checked against; the file is named for the commit it was recorded at (`034b43f.txt`, format 4, from 8 October 2026). It replaced `acf9748.txt` (format 3) and `38c5544.txt` (format 2, after the reset fix), which had replaced `4e9b92b.txt`, recorded from the code before the lazy chips, behaving as `5e48505` (below). |
+| `differential/baseline/` | The differential's output with the per-dot reference (`--oracle`), which the lazy build is checked against; the file is named for the commit it was recorded at (`132fd50.txt`, format 4, from 9 October 2026, with twelve more synthetic cartridges than before). It replaced `034b43f.txt` (format 4, the same runs less those twelve), `acf9748.txt` (format 3) and `38c5544.txt` (format 2, after the reset fix), which had replaced `4e9b92b.txt`, recorded from the code before the lazy chips, behaving as `5e48505` (below). |
 | `differential/faults.py` | Shows the differential can fail: in a scratch copy of the repository, whose path it takes, it plants one fault at a time, runs `--check` against a baseline, and counts the runs each changes; with `--tests <filter>` it also runs the NES tests that match with each fault in, and with `--no-differential` only those. |
 
 ## The workload
@@ -75,8 +75,8 @@ Or check against the committed baseline in one command. It prints the first run 
 which of its hashes do, and exits 1 on any difference:
 
 ```sh
-dotnet run -c Release --project differential -- --check differential/baseline/034b43f.txt
-dotnet run -c Release --project differential -- --check differential/baseline/034b43f.txt --oracle
+dotnet run -c Release --project differential -- --check differential/baseline/132fd50.txt
+dotnet run -c Release --project differential -- --check differential/baseline/132fd50.txt --oracle
 ```
 
 `--oracle` builds the machine with `NesOptions.PerDotReference`, the per-dot reference that a
@@ -129,6 +129,16 @@ baseline was recorded again from `034b43f` with `--oracle`, the lazy build check
 `acf9748.txt` removed. The journal entry
 ([the scanline renderer](../../docs/journal/2026-10-08-the-nes-scanline-renderer.md), "Task 3a" and
 its "After the review") has the commands, the dates and the counts.
+
+**Twelve background cartridges, 9 October 2026**, after the review of task 3 (the fast scanline
+renderer): the synthetic "background" cartridges, on NROM, CNROM, MMC1 and AxROM, scroll the
+background alone, the sprites never on, through every fine X, across coarse Y 29 or through the
+attribute rows, with the nametable select, the background's pattern table and PPUMASK's clip,
+greyscale and emphasis varied, so the fast renderer's background lines are seen by more than the
+fuzz cartridges. They are the last jobs in the list, so every other job kept its place. The format
+did not change; the baseline was recorded again from `132fd50` with `--oracle` (356 runs), its 332
+earlier lines identical to `034b43f.txt`'s, which was removed, and the lazy build checked against
+it. The journal entry (the scanline renderer, "Task 3", "After the review") has the commands.
 
 To run it on a baseline that is older than the tool, export that commit with `git archive`
 into a folder of its own, copy `bench/nes-speed/differential/` into the same place in the

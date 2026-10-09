@@ -341,3 +341,34 @@ IDENTICAL: all 332 runs match baseline/034b43f.txt
 real	4m7.433s
 Thu Oct  8 21:31:24 UTC 2026
  21:31:24 up 12 days,  7:00,  4 users,  load average: 2.71, 3.34, 3.41
+
+# After the review, 9 October 2026, at 132fd50's tree: the twelve background cartridges alone:
+#   dotnet run -c Release -- <file> --only synthetic/background --coverage
+Fri Oct  9 02:15:02 UTC 2026
+synthetic/background-axrom-12 NTSC: fast lines 136313 of 157200 (86.7 %)
+synthetic/background-axrom-12 PAL: fast lines 164678 of 187200 (88.0 %)
+synthetic/background-cnrom-6 NTSC: fast lines 145831 of 157200 (92.8 %)
+synthetic/background-cnrom-6 PAL: fast lines 174796 of 187200 (93.4 %)
+synthetic/background-cnrom-7 NTSC: fast lines 145809 of 157200 (92.8 %)
+synthetic/background-cnrom-7 PAL: fast lines 174788 of 187200 (93.4 %)
+synthetic/background-cnrom-8 NTSC: fast lines 145840 of 157200 (92.8 %)
+synthetic/background-cnrom-8 PAL: fast lines 174817 of 187200 (93.4 %)
+synthetic/background-cnrom-9 NTSC: fast lines 145803 of 157200 (92.7 %)
+synthetic/background-cnrom-9 PAL: fast lines 174781 of 187200 (93.4 %)
+synthetic/background-mmc1-10 NTSC: fast lines 145247 of 157200 (92.4 %)
+synthetic/background-mmc1-10 PAL: fast lines 174204 of 187200 (93.1 %)
+synthetic/background-mmc1-11 NTSC: fast lines 145235 of 157200 (92.4 %)
+synthetic/background-mmc1-11 PAL: fast lines 174191 of 187200 (93.1 %)
+synthetic/background-nrom-1 NTSC: fast lines 145918 of 157200 (92.8 %)
+synthetic/background-nrom-1 PAL: fast lines 174941 of 187200 (93.5 %)
+synthetic/background-nrom-2 NTSC: fast lines 145940 of 157200 (92.8 %)
+synthetic/background-nrom-2 PAL: fast lines 174951 of 187200 (93.5 %)
+synthetic/background-nrom-3 NTSC: fast lines 145912 of 157200 (92.8 %)
+synthetic/background-nrom-3 PAL: fast lines 174942 of 187200 (93.5 %)
+synthetic/background-nrom-4 NTSC: fast lines 145956 of 157200 (92.8 %)
+synthetic/background-nrom-4 PAL: fast lines 174948 of 187200 (93.5 %)
+synthetic/background-nrom-5 NTSC: fast lines 145922 of 157200 (92.8 %)
+synthetic/background-nrom-5 PAL: fast lines 174932 of 187200 (93.4 %)
+fast lines, NTSC, all 12 runs together: 1739726 of 1886400 (92.2 %); the median run's share 92.8 %; runs with more than half their lines fast: 12; with none: 0
+fast lines, PAL, all 12 runs together: 2086969 of 2246400 (92.9 %); the median run's share 93.4 %; runs with more than half their lines fast: 12; with none: 0
+24 runs written to /tmp/task3/bg-only-2.txt

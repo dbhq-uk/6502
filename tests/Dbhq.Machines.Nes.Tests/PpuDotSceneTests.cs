@@ -87,7 +87,8 @@ public class PpuDotSceneTests
     /// <paramref name="quiet"/> the board does not watch the PPU's address bus
     /// (<see cref="TestMapper.Quiet"/>), so the lazy PPU may render whole lines at once. Under
     /// another <paramref name="mirroring"/> than vertical all four nametables are filled, the
-    /// 4 KB from <c>$2000</c>, so every page the mirroring uses holds its own bytes.
+    /// 4 KB from <c>$2000</c>, each 1 KB with its own bytes (the vertical fill's bytes repeat
+    /// every 256, so its two pages are the same), so a fetch from the wrong page is seen.
     /// </summary>
     internal static Ppu Busy(Region region, byte ctrl, byte mask, int line = VisibleLine, int sprite0X = 120, bool quiet = false, Mirroring mirroring = Mirroring.Vertical)
     {
@@ -100,7 +101,8 @@ public class PpuDotSceneTests
 
         for (int i = 0; i < (mirroring == Mirroring.Vertical ? 0x800 : 0x1000); i++)
         {
-            scene.Poke((ushort)(0x2000 + i), (byte)((i * 7) + 3));
+            int page = mirroring == Mirroring.Vertical ? 0 : i >> 10;
+            scene.Poke((ushort)(0x2000 + i), (byte)((i * 7) + 3 + (page * 0x35)));
         }
 
         for (int i = 0; i < 256; i++)

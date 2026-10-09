@@ -1,7 +1,7 @@
 ---
 title: "The NES's fast scanline renderer: the gate first, then the lines without sprites"
 date: 2026-10-08
-summary: "Dan said to merge the lazy PPU and continue, which was read as building the fast scanline renderer the lazy chips plan specified and left unbuilt: a second way to run a line of the PPU, used when nothing can see the line. Before any of it is written, the gate that must hold it equal to the first was made able to see it fail, closing the three gaps the last review named. The differential now hashes the picture as far as it is drawn at every point where the PPU can be seen, not only at the end of a frame. Its sprite 0 cartridges sweep sprite 0 down the whole picture, at every named x, with the left clips on and off, where before they covered the top half. A new layer of scene tests puts the PPU at any dot directly and makes register accesses on every dot of visible lines, the VBlank lines and the pre-render line, in both regions. Four faults of the kind a fast renderer could make were planted one at a time. The old differential saw each of them, two in only a handful of runs, and the old unit tests saw none. The new differential sees the pixel fault in many times as many runs and the sprite 0 fault in twice as many, and the scene tests catch all four. The review of this work found holes in the scene layer: sprite 0 hit its line a line early because the scenes kept the last scene's sprites, and the scenes left the right pixels behind. Both were fixed, the scenes were widened, and the differential now presses reset a second time on a dot phase chosen for each run, so every dot of PAL's pre-render line is reached by programs as well as by the scenes. The differential's output changed format twice, so its baseline was recorded again from the per-dot reference each time, and the lazy build matches it on every run. Then the renderer itself was built for the lines that draw no sprite: the lines after the picture and in VBlank, the visible lines with rendering off, and those with the background alone, on which sprite evaluation still runs and is run with the per-dot code. The gate stayed identical to its baseline, and every fault planted in the new code was caught both by the differential and by new scene tests that also say how many lines the fast path must take. Against main, in the browser, the homebrew's title screen runs about a third faster and SNOW, whose every visible line has sprites, no faster at all, so the stopping rule set before the work was reached."
+summary: "Dan said to merge the lazy PPU and continue, which was read as building the fast scanline renderer the lazy chips plan specified and left unbuilt: a second way to run a line of the PPU, used when nothing can see the line. Before any of it is written, the gate that must hold it equal to the first was made able to see it fail, closing the three gaps the last review named. The differential now hashes the picture as far as it is drawn at every point where the PPU can be seen, not only at the end of a frame. Its sprite 0 cartridges sweep sprite 0 down the whole picture, at every named x, with the left clips on and off, where before they covered the top half. A new layer of scene tests puts the PPU at any dot directly and makes register accesses on every dot of visible lines, the VBlank lines and the pre-render line, in both regions. Four faults of the kind a fast renderer could make were planted one at a time. The old differential saw each of them, two in only a handful of runs, and the old unit tests saw none. The new differential sees the pixel fault in many times as many runs and the sprite 0 fault in twice as many, and the scene tests catch all four. The review of this work found holes in the scene layer: sprite 0 hit its line a line early because the scenes kept the last scene's sprites, and the scenes left the right pixels behind. Both were fixed, the scenes were widened, and the differential now presses reset a second time on a dot phase chosen for each run, so every dot of PAL's pre-render line is reached by programs as well as by the scenes. The differential's output changed format twice, so its baseline was recorded again from the per-dot reference each time, and the lazy build matches it on every run. Then the renderer itself was built for the lines that draw no sprite: the lines after the picture and in VBlank, the visible lines with rendering off, and those with the background alone, on which sprite evaluation still runs and is run with the per-dot code. The gate stayed identical to its baseline, and every fault planted in the new code was caught both by the differential and by new scene tests that also say how many lines the fast path must take. Against main, in the browser, the homebrew's title screen runs about a third faster and SNOW, whose every visible line has sprites, no faster at all, so the stopping rule set before the work was reached. After its review the new tests ran under every nametable layout, and the differential gained cartridges that scroll the background alone, which the renderer's faults now show in many more runs."
 order: 38
 ---
 
@@ -847,9 +847,13 @@ committed; the program, the counters and the output are in
 - Lines 241 to 246 are not whole. The NMI handler's OAM DMA makes a catch-up for
   each of its writes there.
 - Lan Master at its title has PPUMASK `$0E`, the background alone. The fast path
-  takes 239 of the 240 visible lines and the idle lines. Line 0 is never whole:
-  the catch-up at the frame's end is made at the end of the cycle that reaches
-  it, which is a dot or two into line 0.
+  takes the idle lines and 239 of the 240 visible lines on NTSC, where line 0 was
+  never whole in this window. The catch-up at the frame's end is made at the end
+  of the cycle that reaches it, which there was always a dot or two into line 0.
+  On PAL, whose cycle is 3.2 dots, that cycle ended exactly at line 0 dot 0 in
+  about half the frames, and line 0 was taken whole too: it was exact in 134 of
+  269 frames. (Corrected after the review: the first version said line 0 was
+  never whole.)
 
 So for SNOW, this task can only touch the idle lines, which were already the
 cheapest. That is what the figures show.
@@ -912,6 +916,13 @@ thread's CPU time over the three sets, with the ratio of each set beside it:
 | Lan Master, NTSC | 4.11 | 5.59 | 1.36 | 1.37, 1.38, 1.38 | 4.05 to 5.75 |
 | Lan Master, PAL | 4.31 | 5.99 | 1.39 | 1.38, 1.42, 1.34 | 4.52 to 6.21 |
 
+One cost was not isolated. With the fast path in, the per-dot loop in
+`CatchUp` compares the dot with 0 on every dot it runs, and on a workload whose
+every visible line has sprites that compare is all the fast path adds. What it
+costs in Mono's AOT build was not measured on its own in the browser. It is
+inferred only from SNOW's 0.98 and 1.00, which are within the noise of no
+change, and natively the build with the switch off ran within noise of main.
+
 ### The stopping rule
 
 Ruling Y said: if the browser AOT gain over main after this task is under about
@@ -932,11 +943,139 @@ Two facts sit beside it:
 ### For task 4, if it is built
 
 - Every visible line of SNOW, and of most game play, has the sprites on.
-- Lines 241 to 246 of SNOW are split by the NMI handler's OAM DMA, and line 0 by
-  the frame end's catch-up a dot or two into it. Both are left to the per-dot
-  path whatever task 4 does.
+- Lines 241 to 246 of SNOW are split by the NMI handler's OAM DMA, and line 0,
+  in every NTSC frame and about half of the PAL ones, by the frame end's catch-up
+  a dot or two into it. Both are left to the per-dot path whatever task 4 does.
 - The pixel faults' runs come mostly from the fuzz cartridges. A background-only
   scrolling workload would widen them, at the cost of a new baseline.
 - The families here are written to take a sprites-on line's expected count from
   `Fast`. Task 4 changes `Fast` and adds sprite families: Review Focus 3, and
   sprite 0 down the picture, which task 3a's review asked for.
+
+### After the review
+
+The review traced the fast path beside the per-dot path and found them the
+same, and found no critical fault. It asked for seven changes, all made in
+commit `132fd50`, with the baseline recorded again after it.
+
+**The scene families saw only vertical mirroring.** Every board in
+`PpuScanlineTests` was vertical. Under vertical mirroring a nametable fetch that
+uses only the select's low bit (`(v >> 10) & 1` for `& 3`) reads the right page,
+so the reviewer's planted fault failed none of the family's tests. There were
+two holes, not one:
+
+- `BackgroundLinesUnderEachMirroring` runs the scroll table (each nametable
+  select, the coarse Y wrap from 29) under horizontal, single-screen low and
+  high, four-screen and vertical mirroring, in both regions.
+- Even then the fault passed. `Busy` fills the nametables with `(i * 7) + 3`,
+  whose low byte repeats every 256 bytes, so all four 1 KB pages held the same
+  bytes and no page mix-up could show. Under the other layouts each page now
+  gets its own bytes. The vertical fill is unchanged, so the tests written
+  before see what they saw.
+
+With both fixes the fault, now in `faults.py` as `fast-nametable-page`, fails
+the horizontal and four-screen rows in both regions (single-screen and
+vertical cannot show it, by their wiring) and two CNROM bus scenes.
+
+**Five faults rested on the fuzz cartridges alone.** The fine X, attribute,
+clip and rendering-off faults were seen by 12 to 16 runs, 12 of them always the
+six fuzz cartridges. The differential gained twelve synthetic "background"
+cartridges (`Synthetic.cs`): five on NROM, four on CNROM (its banks switched in
+the frame), two on MMC1 (which also turns its mirroring each frame) and one on
+AxROM. The sprites are never on, and the header's mirroring is horizontal.
+
+- Each frame, X moves by an odd step, so fine X takes every value in 8 frames,
+  and Y moves by a step. For odd seeds Y wraps at 240, so the picture crosses
+  coarse Y 29 into the other vertical nametable. For even seeds it runs on
+  through the attribute rows 30 and 31.
+- The nametable select comes from the frame, and the background's pattern table
+  turns every 16 frames.
+- PPUMASK comes from a table: the left clip on and off, greyscale, each
+  emphasis bit and all three.
+- `v` is left in the palette in VBlank, which the one frame in four with
+  rendering off shows.
+- In the frame comes the scroll workload's split and the board's write.
+
+They are the last jobs in the list, so every earlier job kept its place and
+its PAL reset phase. On their own they run 92.2 and 92.9 percent of their lines
+fast, NTSC and PAL
+([`task-3-coverage.txt`](../../bench/nes-speed/lazy-chips/task-3-coverage.txt)).
+
+**The baseline, recorded again.** On 9 October 2026, from
+`bench/nes-speed/differential` at `132fd50`:
+
+- `dotnet run -c Release -- baseline/132fd50.txt --oracle` wrote 356 runs,
+  00:47:40 to 00:52:05 UTC, loads 2.9 to 5.4. The format did not change.
+- Its first line and all 332 lines of `034b43f.txt` are identical, the 254
+  pinned-ROM lines among them. The 24 new lines are the background runs.
+  `034b43f.txt` was removed.
+- `--check baseline/132fd50.txt`, the lazy build, gave IDENTICAL on all 356
+  runs, byte for byte, 00:52:05 to 00:56:02 UTC.
+
+**The faults again**, the eleven fast-path faults against `132fd50.txt`, 00:57
+to 01:55 UTC, then their tests alone again after the page fix
+([`task-3-review-faults.txt`](../../bench/nes-speed/lazy-chips/task-3-review-faults.txt)).
+The count before is from the first fault run, of 332:
+
+| Fault | Runs changed (of 356) | Before | Of them synthetic | Tests failing (of 1,037) |
+| --- | --- | --- | --- | --- |
+| `fast-pixel-one-off` | 75 | 51 | 36 | 256 |
+| `fast-attribute-quadrant` | 40 | 16 | 36 | 230 |
+| `fast-fine-x` | 36 | 12 | 36 | 256 |
+| `fast-coarse-y-wrap` | 157 | 133 | 36 | 96 |
+| `fast-vertical-copy` | 219 | 195 | 36 | 256 |
+| `fast-left-clip-off-by-one` | 38 | 14 | 36 | 230 |
+| `fast-off-palette-v-ignored` | 37 | 13 | 36 | 56 |
+| `fast-off-emphasis-ignored` | 40 | 16 | 36 | 60 |
+| `fast-vblank-line-off-by-one` | 20 | 20 | 7 | 140 |
+| `fast-nametable-page` (new) | 37 | | 26 | 6 |
+| `fast-sprites-not-evaluated` | 121 | 97 | 36 | 250 |
+
+Each pixel fault is now seen by at least 36 runs, 24 of them the background
+cartridges. The VBlank line fault is untouched by them (it lives on the idle
+lines) and stays at 20. `fast-coarse-y-wrap` changed with the next item: the
+fast path now calls the shared `IncrementY`. A fault there would hit both paths,
+as the old per-dot faults do. So the fault planted for this row stops the fast
+path's Y increment going from fine Y 7 and coarse Y 29 to 0, and sends it to
+coarse Y 30, in the fast path alone.
+
+**Shared increments.** `RenderBackgroundLine` repeated `IncrementY` inline, and
+its `CoarseXOn` repeated `IncrementCoarseX`. It now calls the two statics.
+Natively, in four alternated rounds (9 October 00:40:56 to 00:42:33 UTC, loads
+0.9 to 1.0), the build with its own copies against the build with the shared
+ones gave ns a cycle (the median of the four medians):
+
+- Lan Master: 49.6 against 52.6 on NTSC, and 53.9 against 53.9 on PAL;
+- SNOW: 74.2 against 73.9.
+
+The rounds' medians overlap (Lan Master NTSC 46.7 to 62.4 against 45.6 to 73.4).
+That is within noise, so the shared statics stay
+([`task-3-thread-time.txt`](../../bench/nes-speed/lazy-chips/task-3-thread-time.txt), set 3).
+
+**Back-references.** The per-dot methods the renderer repeats or calls now say
+so:
+
+- `RenderVisibleDot`, `RenderDot` (its "must be made in both" now names
+  `PpuScanline.cs` and the gate), `DrawPixel` and `DrawRenderingOff`;
+- `IncrementY` and `IncrementCoarseX`;
+- `Reload`, `FetchAttributeBits` and `FetchPatternHigh`;
+- `Evaluate` and `FetchSprite`.
+
+**A board with latching pattern reads.** `Board` now says, at its windows and at
+`WatchesPpuAddresses`, that a board whose pattern reads have side effects (MMC2
+and MMC4) must override `WatchesPpuAddresses`. By inheritance it would qualify
+for the fast path, and its latch would never move.
+
+**Two corrections** are made above. Line 0 is whole in about half the PAL
+frames, not never. The Mono AOT cost of the per-dot compare in `CatchUp` was
+not isolated in the browser.
+
+The NES tests gave 2,558 passed and 0 failed, both before and after the page fix
+(after it, 02:15:54 to 02:17:20 UTC). The source did not change after
+`132fd50`. On the final tree, from `bench/nes-speed/differential`:
+
+- `--check baseline/132fd50.txt`, 02:17:28 to 02:21:41 UTC;
+- `--check baseline/132fd50.txt --oracle`, 02:21:41 to 02:26:20 UTC, loads 2.7
+  to 5.2.
+
+Each gave IDENTICAL on all 356 runs, byte for byte.

@@ -26,7 +26,9 @@ replaced by `38c5544.txt` after the reset fix (#71) changed one field in the PPU
 state report; the section "The baseline after the reset fix", at the end, says how
 and why. Later the same day it was replaced again, by `acf9748.txt` and then
 `034b43f.txt`, when the differential's output became formats 3 and 4 for the fast
-scanline renderer ([that entry](2026-10-08-the-nes-scanline-renderer.md), task 3a). The commands in
+scanline renderer ([that entry](2026-10-08-the-nes-scanline-renderer.md), task 3a),
+and on 9 October by `132fd50.txt`, with twelve synthetic cartridges added (task 3's
+review). The commands in
 the sections written on 6, 7 and 8 October keep the name of the file as it was
 on the day they were run; to run one now, use the newest name.
 
@@ -217,11 +219,12 @@ prints the first run that differs and which of its hashes, and exits 1, so each
 later task's gate is one command:
 
 ```
-dotnet run -c Release --project bench/nes-speed/differential -- --check bench/nes-speed/differential/baseline/034b43f.txt
+dotnet run -c Release --project bench/nes-speed/differential -- --check bench/nes-speed/differential/baseline/132fd50.txt
 ```
 
 (On 6 October the file was `4e9b92b.txt`, and until task 3a of the renderer on 8
-October `38c5544.txt`, then briefly `acf9748.txt`; see the note at the top.)
+October `38c5544.txt`, then briefly `acf9748.txt`, and until 9 October `034b43f.txt`;
+see the note at the top.)
 
 ### The baseline
 

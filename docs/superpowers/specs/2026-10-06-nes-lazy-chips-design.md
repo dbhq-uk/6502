@@ -51,7 +51,9 @@ far as it is drawn at every point, the sprite 0 sweep over the whole picture, an
 scene tests on every dot of a line, then a second reset on a chosen PAL dot
 phase) and its baseline recorded again as
 `bench/nes-speed/differential/baseline/034b43f.txt`
-([the scanline renderer entry](../../journal/2026-10-08-the-nes-scanline-renderer.md), task 3a).
+([the scanline renderer entry](../../journal/2026-10-08-the-nes-scanline-renderer.md), task 3a),
+and on 9 October, with twelve background-only scrolling cartridges added after the
+review of task 3, as `bench/nes-speed/differential/baseline/132fd50.txt`.
 
 ## Why
 
