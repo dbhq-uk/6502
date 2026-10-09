@@ -39,6 +39,14 @@
 //            VBlank, which a frame with rendering off shows (one frame in four, as for all). The
 //            same delay, then the scroll workload's split writes, and the board's write. The
 //            CHR and the nametables are noise, so every tile and attribute quadrant differs.
+//   sparse   both layers on and few sprites, as a game's play has them (task 4a of the scanline
+//            renderer work): a cursor of four sprites, sprite 0 among them, and a cluster of ten
+//            on one line, so the line before it, which has none, sets the overflow flag in its
+//            evaluation; both move every frame, and the rest of OAM is off the screen. In half the
+//            frames the cluster is at Y 239, on line 240, which only line 239 evaluates. 8 by 16
+//            sprites every other 8 frames, PPUMASK from a table of both layers with the two left
+//            clips in each combination, greyscale and emphasis, X scrolled a pixel a frame; the
+//            same delay, then a $2002 read kept in RAM, and the board's write.
 //
 // The boards: NROM; MMC1 (a read-modify-write to the board, whose second write the chip ignores,
 // then a CHR bank switch by its serial port mid-frame); CNROM (a CHR bank switch mid-frame,
@@ -66,6 +74,7 @@ internal enum Workload
     Nmi,
     Apu,
     Background,
+    Sparse,
 }
 
 internal enum BoardKind
@@ -109,6 +118,10 @@ internal static class Synthetic
             (Workload.Background, BoardKind.Nrom, 4), (Workload.Background, BoardKind.Nrom, 5), (Workload.Background, BoardKind.Cnrom, 6),
             (Workload.Background, BoardKind.Cnrom, 7), (Workload.Background, BoardKind.Cnrom, 8), (Workload.Background, BoardKind.Cnrom, 9),
             (Workload.Background, BoardKind.Mmc1, 10), (Workload.Background, BoardKind.Mmc1, 11), (Workload.Background, BoardKind.Axrom, 12),
+            (Workload.Sparse, BoardKind.Nrom, 1), (Workload.Sparse, BoardKind.Nrom, 2), (Workload.Sparse, BoardKind.Nrom, 3),
+            (Workload.Sparse, BoardKind.Nrom, 4), (Workload.Sparse, BoardKind.Nrom, 5), (Workload.Sparse, BoardKind.Nrom, 6),
+            (Workload.Sparse, BoardKind.Cnrom, 7), (Workload.Sparse, BoardKind.Cnrom, 8), (Workload.Sparse, BoardKind.Mmc1, 9),
+            (Workload.Sparse, BoardKind.Mmc1, 10), (Workload.Sparse, BoardKind.Uxrom, 11), (Workload.Sparse, BoardKind.Axrom, 12),
         ];
         int sprite0Part = 0;
         foreach (var (workload, board, seed) in list)
@@ -150,6 +163,11 @@ internal sealed class ProgramBuilder(Workload workload, BoardKind board, int see
     private const int ScrollX = 0x20;
     private const int ScrollY = 0x21;
     private const int Scratch = 0x22;
+
+    // The sparse workload's cursor and cluster.
+    private const int CursorX = 0x23;
+    private const int CursorY = 0x24;
+    private const int ClusterY = 0x25;
     private const int Oam = 0x0200;
 
     // The windows' bases, in cycles of delay: the first write lands about 20 cycles before NTSC's
@@ -278,7 +296,7 @@ internal sealed class ProgramBuilder(Workload workload, BoardKind board, int see
         }
 
         a.Label("seeded");
-        if (workload is Workload.Scroll or Workload.Mask or Workload.Sprites or Workload.Apu or Workload.Background)
+        if (workload is Workload.Scroll or Workload.Mask or Workload.Sprites or Workload.Apu or Workload.Background or Workload.Sparse)
         {
             // The differential's second reset puts PAL's PPU on a dot phase chosen for the run;
             // the window just before PAL's pre-render line starts at once after it, so the run's
@@ -478,7 +496,7 @@ internal sealed class ProgramBuilder(Workload workload, BoardKind board, int see
         a.Bne("nmi_1");
         a.Inc(Frame + 1);
         a.Label("nmi_1");
-        if (workload is Workload.Scroll or Workload.Mask or Workload.Sprites or Workload.Apu or Workload.Background)
+        if (workload is Workload.Scroll or Workload.Mask or Workload.Sprites or Workload.Apu or Workload.Background or Workload.Sparse)
         {
             // From the DMA, the window's delay, the action, then the frame's setup after it.
             a.Jsr("sweep");
@@ -663,7 +681,7 @@ internal sealed class ProgramBuilder(Workload workload, BoardKind board, int see
         a.Label("frame_setup");
         a.Jsr("board_frame");
         a.Jsr("workload_frame");
-        if (workload == Workload.Background)
+        if (workload is Workload.Background or Workload.Sparse)
         {
             a.Lda(ScrollX);
             a.Sta(0x2005);
@@ -956,6 +974,15 @@ internal sealed class ProgramBuilder(Workload workload, BoardKind board, int see
                 a.LdaI(0x00);
                 a.Sta(0x4017);
                 break;
+            case Workload.Sparse:
+                // Every sprite off the screen; workload_frame places the cursor and the cluster.
+                a.LdxI(0);
+                a.LdaI(0xFF);
+                a.Label("sparse_init");
+                a.StaX(Oam);
+                a.Inx();
+                a.Bne("sparse_init");
+                break;
             default:
                 break;
         }
@@ -1092,6 +1119,99 @@ internal sealed class ProgramBuilder(Workload workload, BoardKind board, int see
                 break;
             }
 
+            case Workload.Sparse:
+            {
+                // The cursor, 3 right and 2 down a frame, within lines 20 to 219.
+                a.Lda(CursorX);
+                a.Clc();
+                a.AdcI(3);
+                a.Sta(CursorX);
+                a.Lda(CursorY);
+                a.Clc();
+                a.AdcI(2);
+                a.CmpI(220);
+                a.Bcc("sparse_cursor");
+                a.SbcI(200);
+                a.Label("sparse_cursor");
+                a.Sta(CursorY);
+
+                // Sprites 0 to 3, a square of four, tile 1 (opaque), palette and priority by the frame.
+                for (int i = 0; i < 4; i++)
+                {
+                    a.Lda(CursorY);
+                    if (i >= 2)
+                    {
+                        a.Clc();
+                        a.AdcI(8);
+                    }
+
+                    a.Sta(Oam + (4 * i));
+                    a.LdaI(1);
+                    a.Sta(Oam + (4 * i) + 1);
+                    a.Lda(Frame);
+                    a.AndI(0x23);
+                    a.Sta(Oam + (4 * i) + 2);
+                    a.Lda(CursorX);
+                    if ((i & 1) == 1)
+                    {
+                        a.Clc();
+                        a.AdcI(8);
+                    }
+
+                    a.Sta(Oam + (4 * i) + 3);
+                }
+
+                // The cluster: sprites 4 to 13 on one line, 5 down a frame, 16 apart across it.
+                a.Lda(ClusterY);
+                a.Clc();
+                a.AdcI(5);
+                a.CmpI(220);
+                a.Bcc("sparse_cluster");
+                a.SbcI(200);
+                a.Label("sparse_cluster");
+                a.Sta(ClusterY);
+
+                // In frames with bit 2 set the cluster is at Y 239, on line 240: only line 239
+                // evaluates it, so the overflow flag its evaluation sets is set by no later line.
+                a.Lda(Frame);
+                a.AndI(0x04);
+                a.Beq("sparse_moving");
+                a.LdaI(239);
+                a.Jmp("sparse_place");
+                a.Label("sparse_moving");
+                a.Lda(ClusterY);
+                a.Label("sparse_place");
+                a.Sta(Scratch);
+                for (int i = 4; i < 14; i++)
+                {
+                    a.Lda(Scratch);
+                    a.Sta(Oam + (4 * i));
+                    a.LdaI(1);
+                    a.Sta(Oam + (4 * i) + 1);
+                    a.LdaI(i & 0x23);
+                    a.Sta(Oam + (4 * i) + 2);
+                    a.LdaI((i - 4) * 16);
+                    a.Sta(Oam + (4 * i) + 3);
+                }
+
+                // PPUCTRL: NMI on, sprites from $1000, 8 by 16 when frame bit 3 is set.
+                a.Lda(Frame);
+                a.AndI(0x08);
+                a.AslA();
+                a.AslA();
+                a.OraI(0x88);
+                a.Sta(Ctrl);
+
+                // PPUMASK from the table, by the frame; X on a pixel.
+                a.Lda(Frame);
+                a.AndI(7);
+                a.Tax();
+                a.LdaX("sparse_masks");
+                a.Sta(Mask);
+                a.Inc(ScrollX);
+                break;
+            }
+
             case Workload.Apu:
                 a.Lda(Frame);
                 a.AndI(0x3F);
@@ -1159,6 +1279,11 @@ internal sealed class ProgramBuilder(Workload workload, BoardKind board, int see
                 a.Ora(Ctrl);
                 a.Sta(0x2000);
                 break;
+            case Workload.Sparse:
+                // A $2002 read in the frame, kept in RAM: the flags as the lines so far left them.
+                a.Lda(0x2002);
+                a.Sta(0x0300);
+                break;
             case Workload.Mask:
                 a.Lda(Frame);
                 a.AndI(7);
@@ -1201,6 +1326,13 @@ internal sealed class ProgramBuilder(Workload workload, BoardKind board, int see
         }
 
         Table("mask_values", [0x16, 0x0E, 0x1C, 0x1A, 0x06, 0x18, 0x1F, 0xFE]);
+        if (workload == Workload.Sparse)
+        {
+            // Both layers on: the left clips off, both, the background's alone, the sprites'
+            // alone, then greyscale and the emphasis bits with the clips varied.
+            Table("sparse_masks", [0x1E, 0x18, 0x1A, 0x1C, 0x1F, 0x3A, 0x5C, 0x9E]);
+        }
+
         if (workload == Workload.Background)
         {
             // The background on and the sprites off: the left clip off and on, greyscale, each
