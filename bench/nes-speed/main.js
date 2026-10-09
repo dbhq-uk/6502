@@ -7,6 +7,9 @@ import { dotnet } from './_framework/dotnet.js'
 // ?boot=N   cycles of machine time to run before the timed runs (default 5 million)
 // ?cycles=N cycles in each timed run (default 1.79 million, about one second of machine time on NTSC)
 // ?runs=N   timed runs (default 5)
+// ?play=1   play the bundled homebrew by the script /script (bench/nes-speed/lan-master-play.json, task 3b
+//           of the scanline renderer work): each timed run, and the boot, runs whole frames, setting
+//           controller 1 before each, until the cycles are run (the harness serves /script only with ROM=homebrew)
 const params = new URLSearchParams(location.search);
 const region = Number(params.get('region') ?? 0);
 if (region !== 0 && region !== 1) throw new Error(`region ${region}: 0 is NTSC and 1 is PAL`);
@@ -14,15 +17,49 @@ const regionName = region === 1 ? 'PAL' : 'NTSC';
 const bootCycles = Number(params.get('boot') ?? 5_000_000);
 const cycles = Number(params.get('cycles') ?? 1_790_000);
 const runs = Number(params.get('runs') ?? 5);
+const play = params.get('play') === '1';
 const log = document.getElementById('log');
 
 const response = await fetch('rom');
 if (!response.ok) throw new Error(`HTTP ${response.status}: rom`);
 const rom = new Uint8Array(await response.arrayBuffer());
 
+// The script's buttons for each frame, as the thread-time bench's PlayScript.cs reads them: a step sets
+// the buttons from its frame on, and past the region's limit nothing is held.
+let masks = [];
+let limit = 0;
+if (play) {
+  const scriptResponse = await fetch('script');
+  if (!scriptResponse.ok) throw new Error(`HTTP ${scriptResponse.status}: script`);
+  const script = await scriptResponse.json();
+  limit = script.limit[regionName];
+  masks = new Uint8Array(limit + 1);
+  let held = 0;
+  let frame = 0;
+  for (const [first, mask] of script.steps) {
+    for (; frame < first && frame < masks.length; frame++) masks[frame] = held;
+    held = mask;
+  }
+  for (; frame < masks.length; frame++) masks[frame] = held;
+}
+
 const { getAssemblyExports, getConfig } = await dotnet.create();
 const exports = await getAssemblyExports(getConfig().mainAssemblyName);
 const nes = exports.NesHost;
+
+// Runs at least n more cycles: in one call, or, when playing, in whole frames with the pad set before each.
+const runCycles = (n) => {
+  if (!play) { nes.Run(n); return; }
+  const end = nes.Cycles() + n;
+  while (nes.Cycles() < end) {
+    const frame = nes.Frames();
+    nes.SetButtons(0, frame < masks.length ? masks[frame] : 0);
+    nes.RunFrames(1);
+  }
+};
+// For the driver's THREAD_TIME runs (run-in-browser.mjs).
+globalThis.benchRun = runCycles;
+globalThis.benchPlayLimit = play ? limit : null;
 
 // Let the page paint "running" before the runs block the main thread.
 log.textContent = 'running...';
@@ -44,7 +81,7 @@ const cpuHz = nes.CpuHz();
 let t = performance.now();
 let before = nes.Cycles();
 let framesBefore = nes.Frames();
-nes.Run(bootCycles);
+runCycles(bootCycles);
 let ms = performance.now() - t;
 lines.push(line('boot', nes.Cycles() - before, nes.Frames() - framesBefore, ms));
 
@@ -52,11 +89,12 @@ for (let i = 1; i <= runs; i++) {
   t = performance.now();
   before = nes.Cycles();
   framesBefore = nes.Frames();
-  nes.Run(cycles);
+  runCycles(cycles);
   ms = performance.now() - t;
   lines.push(line(`timed ${i}`, nes.Cycles() - before, nes.Frames() - framesBefore, ms));
 }
 
+if (play) lines.push(`play frame=${nes.Frames()} limit=${limit}${nes.Frames() > limit ? ' PAST THE SCRIPT' : ''}`);
 for (const l of lines) console.log(l);
 log.textContent = lines.join('\n');
 document.body.dataset.done = 'true';

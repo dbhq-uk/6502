@@ -1,0 +1,130 @@
+# Task 3 of the scanline renderer work: thread CPU time a cycle (bench/thread-time), 8 October 2026.
+# Set 1: a copy of task-3-thread-time.sh with its folders written in (/tmp/task3/tt.sh), the same loop: main 5640a57 (base) against this build (after), four rounds.
+# Set 2: the same with a third folder (/tmp/task3/tt-off.sh), the same with a third build, 'off': this build with the fast path's switch (Ppu.WholeLines) on false by default, in a scratch copy.
+
+## Set 1
+ 22:32:31 up 12 days,  8:01,  4 users,  load average: 1.49, 3.26, 3.65
+Thu Oct  8 22:32:31 UTC 2026
+round 1 base ntsc ns/cycle best=70.67 median=71.96 all=70.67,71.86,71.96,73.39,84.63
+round 1 after ntsc ns/cycle best=67.99 median=76.86 all=67.99,71.75,76.86,80.67,81.42
+round 1 after ntsc-oracle ns/cycle best=144.16 median=150.18 all=144.16,149.78,150.18,156.25,158.16
+round 1 base pal ns/cycle best=65.86 median=69.17 all=65.86,67.65,69.17,72.18,73.00
+round 1 after pal ns/cycle best=62.66 median=63.81 all=62.66,63.01,63.81,65.32,65.86
+round 1 after pal-oracle ns/cycle best=135.94 median=141.51 all=135.94,140.28,141.51,141.72,143.58
+round 1 base lan-ntsc ns/cycle best=60.09 median=62.01 all=60.09,61.28,62.01,72.82,73.06
+round 1 after lan-ntsc ns/cycle best=49.29 median=50.85 all=49.29,50.59,50.85,51.55,56.83
+round 1 base lan-pal ns/cycle best=61.31 median=65.74 all=61.31,64.57,65.74,65.96,76.19
+round 1 after lan-pal ns/cycle best=44.36 median=54.10 all=44.36,49.68,54.10,54.30,56.47
+ 22:32:48 up 12 days,  8:01,  3 users,  load average: 1.57, 3.16, 3.61
+round 2 base ntsc ns/cycle best=69.11 median=71.14 all=69.11,69.63,71.14,75.27,75.35
+round 2 after ntsc ns/cycle best=67.84 median=75.81 all=67.84,71.25,75.81,77.97,79.48
+round 2 after ntsc-oracle ns/cycle best=146.00 median=156.22 all=146.00,146.14,156.22,157.89,163.81
+round 2 base pal ns/cycle best=76.23 median=88.26 all=76.23,86.67,88.26,89.62,91.18
+round 2 after pal ns/cycle best=66.75 median=68.91 all=66.75,67.32,68.91,74.40,77.54
+round 2 after pal-oracle ns/cycle best=144.00 median=160.95 all=144.00,152.28,160.95,164.17,172.62
+round 2 base lan-ntsc ns/cycle best=74.94 median=76.92 all=74.94,75.75,76.92,77.33,91.58
+round 2 after lan-ntsc ns/cycle best=51.79 median=56.11 all=51.79,53.79,56.11,57.23,66.42
+round 2 base lan-pal ns/cycle best=66.39 median=70.30 all=66.39,68.96,70.30,70.42,74.09
+round 2 after lan-pal ns/cycle best=51.26 median=56.67 all=51.26,54.90,56.67,57.91,63.68
+ 22:33:05 up 12 days,  8:01,  3 users,  load average: 1.99, 3.18, 3.61
+round 3 base ntsc ns/cycle best=74.33 median=76.08 all=74.33,74.56,76.08,76.74,103.38
+round 3 after ntsc ns/cycle best=72.44 median=76.31 all=72.44,75.43,76.31,77.77,79.38
+round 3 after ntsc-oracle ns/cycle best=150.17 median=160.14 all=150.17,150.71,160.14,164.91,170.85
+round 3 base pal ns/cycle best=68.85 median=71.04 all=68.85,69.72,71.04,71.34,73.83
+round 3 after pal ns/cycle best=64.59 median=66.94 all=64.59,66.62,66.94,72.99,74.01
+round 3 after pal-oracle ns/cycle best=129.11 median=131.96 all=129.11,131.89,131.96,139.62,149.46
+round 3 base lan-ntsc ns/cycle best=56.58 median=58.37 all=56.58,57.19,58.37,58.47,61.70
+round 3 after lan-ntsc ns/cycle best=46.53 median=48.10 all=46.53,46.85,48.10,48.71,48.89
+round 3 base lan-pal ns/cycle best=62.17 median=64.54 all=62.17,64.09,64.54,69.56,78.99
+round 3 after lan-pal ns/cycle best=47.25 median=50.89 all=47.25,50.19,50.89,53.30,57.91
+ 22:33:22 up 12 days,  8:02,  3 users,  load average: 1.77, 3.06, 3.56
+round 4 base ntsc ns/cycle best=67.93 median=71.32 all=67.93,71.14,71.32,71.58,74.53
+round 4 after ntsc ns/cycle best=68.32 median=73.02 all=68.32,71.07,73.02,78.15,80.33
+round 4 after ntsc-oracle ns/cycle best=149.09 median=153.48 all=149.09,151.28,153.48,159.45,172.58
+round 4 base pal ns/cycle best=68.11 median=71.60 all=68.11,70.71,71.60,71.88,71.88
+round 4 after pal ns/cycle best=67.53 median=71.42 all=67.53,70.68,71.42,73.00,73.94
+round 4 after pal-oracle ns/cycle best=130.21 median=135.55 all=130.21,132.46,135.55,137.47,137.79
+round 4 base lan-ntsc ns/cycle best=62.34 median=68.13 all=62.34,66.51,68.13,68.93,77.87
+round 4 after lan-ntsc ns/cycle best=52.06 median=54.56 all=52.06,52.66,54.56,54.76,56.04
+round 4 base lan-pal ns/cycle best=60.42 median=64.10 all=60.42,64.07,64.10,65.71,66.68
+round 4 after lan-pal ns/cycle best=47.15 median=47.52 all=47.15,47.19,47.52,48.36,49.66
+ 22:33:39 up 12 days,  8:02,  3 users,  load average: 1.89, 3.02, 3.54
+Thu Oct  8 22:33:39 UTC 2026
+ 22:33:39 up 12 days,  8:02,  3 users,  load average: 1.89, 3.02, 3.54
+
+## Set 2
+ 22:34:13 up 12 days,  8:03,  3 users,  load average: 1.40, 2.77, 3.43
+Thu Oct  8 22:34:13 UTC 2026
+round 1 base ntsc ns/cycle best=67.34 median=73.35 all=67.34,71.35,73.35,75.93,79.42
+round 1 off ntsc ns/cycle best=69.03 median=71.58 all=69.03,69.79,71.58,71.82,77.50
+round 1 after ntsc ns/cycle best=72.27 median=72.94 all=72.27,72.60,72.94,73.22,81.77
+round 1 base pal ns/cycle best=67.52 median=72.01 all=67.52,69.60,72.01,72.71,75.32
+round 1 off pal ns/cycle best=67.31 median=70.09 all=67.31,67.97,70.09,70.56,78.08
+round 1 after pal ns/cycle best=63.28 median=68.00 all=63.28,64.37,68.00,69.95,77.84
+round 1 base lan-ntsc ns/cycle best=59.29 median=59.86 all=59.29,59.82,59.86,60.67,61.43
+round 1 off lan-ntsc ns/cycle best=59.96 median=61.61 all=59.96,60.47,61.61,62.70,63.87
+round 1 after lan-ntsc ns/cycle best=43.11 median=45.38 all=43.11,43.62,45.38,46.39,59.00
+ 22:34:25 up 12 days,  8:03,  3 users,  load average: 1.34, 2.71, 3.40
+round 2 base ntsc ns/cycle best=73.69 median=76.51 all=73.69,73.95,76.51,79.01,85.44
+round 2 off ntsc ns/cycle best=73.34 median=73.70 all=73.34,73.51,73.70,73.71,77.19
+round 2 after ntsc ns/cycle best=68.83 median=72.17 all=68.83,69.10,72.17,73.40,92.79
+round 2 base pal ns/cycle best=68.16 median=70.79 all=68.16,70.10,70.79,70.79,71.72
+round 2 off pal ns/cycle best=69.62 median=74.50 all=69.62,70.78,74.50,77.14,86.91
+round 2 after pal ns/cycle best=61.28 median=64.15 all=61.28,62.69,64.15,65.24,65.64
+round 2 base lan-ntsc ns/cycle best=57.31 median=59.55 all=57.31,59.16,59.55,71.39,76.46
+round 2 off lan-ntsc ns/cycle best=60.03 median=62.41 all=60.03,61.12,62.41,62.43,67.58
+round 2 after lan-ntsc ns/cycle best=43.18 median=44.44 all=43.18,43.78,44.44,44.74,46.03
+ 22:34:38 up 12 days,  8:03,  3 users,  load average: 1.26, 2.62, 3.36
+round 3 base ntsc ns/cycle best=65.02 median=67.38 all=65.02,66.97,67.38,68.15,69.18
+round 3 off ntsc ns/cycle best=65.93 median=68.75 all=65.93,67.19,68.75,76.77,82.31
+round 3 after ntsc ns/cycle best=69.30 median=70.72 all=69.30,70.47,70.72,71.11,71.29
+round 3 base pal ns/cycle best=68.10 median=70.37 all=68.10,69.99,70.37,71.07,83.48
+round 3 off pal ns/cycle best=68.27 median=72.23 all=68.27,69.89,72.23,73.94,74.59
+round 3 after pal ns/cycle best=63.00 median=64.77 all=63.00,64.50,64.77,67.48,68.88
+round 3 base lan-ntsc ns/cycle best=57.34 median=58.66 all=57.34,57.89,58.66,61.95,64.89
+round 3 off lan-ntsc ns/cycle best=60.45 median=62.11 all=60.45,62.05,62.11,62.20,62.21
+round 3 after lan-ntsc ns/cycle best=47.46 median=50.23 all=47.46,49.97,50.23,50.46,72.00
+ 22:34:51 up 12 days,  8:03,  3 users,  load average: 1.22, 2.57, 3.34
+round 4 base ntsc ns/cycle best=66.18 median=68.17 all=66.18,67.55,68.17,69.63,74.37
+round 4 off ntsc ns/cycle best=70.66 median=74.90 all=70.66,74.86,74.90,75.26,76.79
+round 4 after ntsc ns/cycle best=65.30 median=69.53 all=65.30,67.84,69.53,71.89,76.76
+round 4 base pal ns/cycle best=64.01 median=66.90 all=64.01,66.30,66.90,67.42,68.06
+round 4 off pal ns/cycle best=64.48 median=67.91 all=64.48,67.10,67.91,68.05,68.94
+round 4 after pal ns/cycle best=67.08 median=72.80 all=67.08,67.41,72.80,75.46,83.19
+round 4 base lan-ntsc ns/cycle best=74.44 median=82.37 all=74.44,79.12,82.37,90.86,96.14
+round 4 off lan-ntsc ns/cycle best=65.93 median=68.62 all=65.93,68.36,68.62,70.06,70.29
+round 4 after lan-ntsc ns/cycle best=50.61 median=62.77 all=50.61,58.03,62.77,72.65,73.83
+ 22:35:05 up 12 days,  8:03,  3 users,  load average: 1.41, 2.54, 3.32
+Thu Oct  8 22:35:05 UTC 2026
+ 22:35:05 up 12 days,  8:03,  3 users,  load average: 1.41, 2.54, 3.32
+
+## Set 3, after the review (9 October 2026): the fast path's own increments (pre, 779523e's PpuScanline.cs, e82e846's tree) against
+## the shared IncrementY and IncrementCoarseX (post), four rounds, alternated by the same loop with the two folders
+ 00:41:59 up 12 days, 10:10,  3 users,  load average: 1.06, 0.84, 1.23
+Fri Oct  9 00:41:59 UTC 2026
+round 1 pre lan-ntsc ns/cycle best=57.43 median=62.40 all=57.43,62.36,62.40,63.65,67.94
+round 1 post lan-ntsc ns/cycle best=57.57 median=73.44 all=57.57,67.18,73.44,73.57,75.66
+round 1 pre lan-pal ns/cycle best=53.93 median=57.86 all=53.93,54.31,57.86,58.61,64.44
+round 1 post lan-pal ns/cycle best=50.62 median=54.71 all=50.62,52.60,54.71,56.49,57.74
+round 1 pre ntsc ns/cycle best=73.90 median=76.40 all=73.90,75.91,76.40,77.58,80.13
+round 1 post ntsc ns/cycle best=71.52 median=72.95 all=71.52,72.51,72.95,73.26,74.31
+round 2 pre lan-ntsc ns/cycle best=45.51 median=46.66 all=45.51,45.68,46.66,48.39,49.53
+round 2 post lan-ntsc ns/cycle best=44.30 median=45.62 all=44.30,44.96,45.62,46.08,51.17
+round 2 pre lan-pal ns/cycle best=44.92 median=52.08 all=44.92,51.96,52.08,52.20,52.29
+round 2 post lan-pal ns/cycle best=44.47 median=46.85 all=44.47,45.73,46.85,48.01,48.26
+round 2 pre ntsc ns/cycle best=69.16 median=70.57 all=69.16,69.84,70.57,71.08,81.38
+round 2 post ntsc ns/cycle best=77.16 median=78.48 all=77.16,77.61,78.48,90.99,101.02
+round 3 pre lan-ntsc ns/cycle best=47.58 median=48.04 all=47.58,47.92,48.04,48.54,48.88
+round 3 post lan-ntsc ns/cycle best=48.81 median=51.08 all=48.81,51.05,51.08,51.25,52.06
+round 3 pre lan-pal ns/cycle best=48.06 median=48.92 all=48.06,48.58,48.92,51.27,52.76
+round 3 post lan-pal ns/cycle best=49.68 median=62.19 all=49.68,52.65,62.19,62.41,64.89
+round 3 pre ntsc ns/cycle best=68.21 median=72.39 all=68.21,71.79,72.39,74.12,76.60
+round 3 post ntsc ns/cycle best=69.65 median=71.15 all=69.65,70.38,71.15,72.31,79.00
+round 4 pre lan-ntsc ns/cycle best=46.17 median=51.15 all=46.17,48.70,51.15,53.80,71.38
+round 4 post lan-ntsc ns/cycle best=51.56 median=54.05 all=51.56,51.70,54.05,55.28,63.71
+round 4 pre lan-pal ns/cycle best=52.25 median=55.72 all=52.25,54.70,55.72,60.20,61.23
+round 4 post lan-pal ns/cycle best=51.26 median=53.14 all=51.26,52.41,53.14,54.59,58.72
+round 4 pre ntsc ns/cycle best=72.72 median=75.93 all=72.72,75.07,75.93,76.37,79.69
+round 4 post ntsc ns/cycle best=72.44 median=74.89 all=72.44,74.74,74.89,76.14,80.61
+ 00:42:33 up 12 days, 10:11,  3 users,  load average: 1.03, 0.86, 1.22
+Fri Oct  9 00:42:33 UTC 2026

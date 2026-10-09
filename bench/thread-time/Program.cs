@@ -1,4 +1,5 @@
 using System.Runtime.InteropServices;
+using Dbhq.Bench;
 using Dbhq.Cpu6502;
 using Dbhq.Cpu6502.TestSupport;
 using Dbhq.Machines.Nes;
@@ -16,7 +17,10 @@ using Dbhq.Machines.Kim1;
 //       SNOW after 5 million cycles, 1.79 million a run), ntsc-oracle or pal-oracle (the same with
 //       NesOptions.PerDotReference, the PPU caught up every cycle as the per-dot build ran it),
 //       lan-ntsc or lan-pal (the NES running the bundled homebrew, Lan Master, at its title,
-//       after 5 million cycles, 1.79 million a run)
+//       after 5 million cycles, 1.79 million a run), play-ntsc or play-pal (the same game played by
+//       bench/nes-speed/lan-master-play.json: 6 million cycles to get into the first level, then 14
+//       million cycles a run, in whole frames, the pad set before each; it prints the PPU frame it
+//       ended on beside the script's last frame of play for the region, which it must not pass)
 //
 // One untimed run first, then the runs (5 by default). Prints one line: the best, the median and
 // every run, in nanoseconds a cycle. Linux only: it reads CLOCK_THREAD_CPUTIME_ID. The README
@@ -24,6 +28,8 @@ using Dbhq.Machines.Kim1;
 string mode = args[0];
 int runs = args.Length > 1 ? int.Parse(args[1]) : 5;
 Action<long> run;
+PlayScript playScript = null!;
+Dbhq.Machines.Nes.Ppu playPpu = null!;
 Func<long> cycles;
 long chunk;
 switch (mode)
@@ -45,6 +51,32 @@ switch (mode)
         run = c => nes.Run((int)c);
         cycles = () => nes.Bus.Cycles;
         chunk = 1_790_000;
+        break;
+    }
+    case "play-ntsc":
+    case "play-pal":
+    {
+        byte[] rom = RepoPaths.ReadChecked(Pins.NesHomebrewPath, Pins.NesHomebrewSha256);
+        Region region = mode == "play-ntsc" ? Region.Ntsc : Region.Pal;
+        playScript = PlayScript.Load(Path.Combine(RepoPaths.Root, "bench", "nes-speed", "lan-master-play.json"), region.Name);
+        var nes = new Nes(Cartridge.Load(rom), region, NesOptionsFor(perDot: false));
+        nes.PowerOn();
+        playPpu = nes.Bus.Ppu;
+        // Whole frames, the pad set before each, until at least this many more cycles have run.
+        void Play(long c)
+        {
+            long end = nes.Bus.Cycles + c;
+            while (nes.Bus.Cycles < end)
+            {
+                nes.SetButtons(0, playScript.MaskAt(playPpu.Frame));
+                nes.RunFrames(1);
+            }
+        }
+
+        Play(6_000_000);
+        run = Play;
+        cycles = () => nes.Bus.Cycles;
+        chunk = 14_000_000;
         break;
     }
     case "bbc":
@@ -98,7 +130,8 @@ for (int i = 0; i < runs; i++)
     ns.Add((double)(t1 - t0) / (cycles() - c0));
 }
 ns.Sort();
-Console.WriteLine($"{mode} ns/cycle best={ns[0]:F2} median={ns[ns.Count / 2]:F2} all={string.Join(",", ns.Select(x => x.ToString("F2")))}");
+string played = playScript is null ? "" : $" frame={playPpu.Frame} limit={playScript.Limit}{(playPpu.Frame > playScript.Limit ? " PAST THE SCRIPT" : "")}";
+Console.WriteLine($"{mode} ns/cycle best={ns[0]:F2} median={ns[ns.Count / 2]:F2} all={string.Join(",", ns.Select(x => x.ToString("F2")))}{played}");
 
 // The options, with NesOptions.PerDotReference set for the per-dot reference. Set by reflection
 // so this folder still builds when it is copied into an export of a commit from before the option

@@ -18,10 +18,11 @@ below says which code it measured.
 | `../../src/Dbhq.Machines.Nes.Wasm/` | The machine as a WebAssembly app. The bench calls `Load` (the cartridge as bytes, the region by name, "NTSC" or "PAL", and the sample rate; it returns the sentence the page shows, which the bench prints), `Run`, `Cycles`, `Frames` and `CpuHz`. The page uses the same class (task 14 of the NES plan gave `Load` its region by name). It holds no ROM. |
 | `index.html`, `main.js` | The page. It fetches the ROM, boots it, then times the runs. |
 | `run-in-browser.mjs`, `package.json` | Fetches the ROM from the pinned fork, checks it against its SHA-256 in `Pins.cs`, serves it with the page and a published copy of the app on `127.0.0.1`, and runs it in a headless Chrome, a fresh launch each time. |
+| `lan-master-play.json`, `play/` | A scripted play session of the bundled homebrew, Lan Master (`play/make-script.py` writes the JSON): the title, its menu, then the first level, played to 55 seconds of its clock, as the pad's buttons for each PPU frame, with a last frame of play for each region. `play/PlayScript.cs` reads it for `bench/thread-time` (`play-ntsc`, `play-pal`); `main.js` reads the same JSON for the page (`PLAY=1`, below). Task 3b of the scanline renderer work. |
 | `native/` | The same workload as a console program, in the solution so CI builds it. |
-| `differential/` | The check that a change for speed changed nothing else: it runs every pinned NES test ROM, the bundled homebrew with a fixed round of button presses, and synthetic cartridges it assembles itself, which keep rendering on and touch the chips at moving dots, in both regions and writes one line of hashes for each (every instruction's registers, cycle and PPU position, every cycle's interrupt lines, every frame's pixels, the sound, the end state, and each chip's whole state at every point where it can be seen). In the solution too. |
-| `differential/baseline/` | The differential's output with the per-dot reference (`--oracle`), which the lazy build is checked against; the file is named for the commit it was recorded at (`38c5544.txt`, after the reset fix). It replaced `4e9b92b.txt`, which was recorded from the code before the lazy chips, behaving as `5e48505`; the two differ only in the PPU's hash, on 116 of the 332 runs (below). |
-| `differential/faults.py` | Shows the differential can fail: in a scratch copy of the repository, whose path it takes, it plants one fault at a time, runs `--check` against a baseline, and counts the runs each changes. |
+| `differential/` | The check that a change for speed changed nothing else: it runs every pinned NES test ROM, the bundled homebrew with a fixed round of button presses, and synthetic cartridges it assembles itself, which keep rendering on and touch the chips at moving dots, in both regions and writes one line of hashes for each (every instruction's registers, cycle and PPU position, every cycle's interrupt lines, every frame's pixels, the sound, the end state, each chip's whole state at every point where it can be seen, and, since format 3, the picture as far as it is drawn at each of those points). In the solution too. |
+| `differential/baseline/` | The differential's output with the per-dot reference (`--oracle`), which the lazy build is checked against; the file is named for the commit it was recorded at (`132fd50.txt`, format 4, from 9 October 2026, with twelve more synthetic cartridges than before). It replaced `034b43f.txt` (format 4, the same runs less those twelve), `acf9748.txt` (format 3) and `38c5544.txt` (format 2, after the reset fix), which had replaced `4e9b92b.txt`, recorded from the code before the lazy chips, behaving as `5e48505` (below). |
+| `differential/faults.py` | Shows the differential can fail: in a scratch copy of the repository, whose path it takes, it plants one fault at a time, runs `--check` against a baseline, and counts the runs each changes; with `--tests <filter>` it also runs the NES tests that match with each fault in, and with `--no-differential` only those. |
 
 ## The workload
 
@@ -75,8 +76,8 @@ Or check against the committed baseline in one command. It prints the first run 
 which of its hashes do, and exits 1 on any difference:
 
 ```sh
-dotnet run -c Release --project differential -- --check differential/baseline/38c5544.txt
-dotnet run -c Release --project differential -- --check differential/baseline/38c5544.txt --oracle
+dotnet run -c Release --project differential -- --check differential/baseline/132fd50.txt
+dotnet run -c Release --project differential -- --check differential/baseline/132fd50.txt --oracle
 ```
 
 `--oracle` builds the machine with `NesOptions.PerDotReference`, the per-dot reference that a
@@ -89,7 +90,12 @@ by reflection that every field of every chip is in the chips' state reports, and
 the field, if one is not. A run that throws is written as `crashed: <exception> in <method>`
 and the others go on. It runs four ROMs at a time (`--threads <n>` for another number), and
 `--coverage` prints, for each synthetic run, the dots its PPU register writes landed on with
-rendering on; the journal entry
+rendering on, and for the runs of each region together how many reach each of the pre-render
+line's key dots by any access with rendering on, and for the sprite0 runs how many of the places
+sprite 0's sweep sets (y 0 to 239, eight x's, a left clip on and off) were drawn, and for every
+run, then each region's runs together, the share of the PPU's lines the fast scanline renderer
+took (`Ppu.FastLines` against the lines the per-dot path finished; task 3 of the renderer work,
+issue #72), which no hash depends on; the journal entry
 [`docs/journal/2026-10-06-the-nes-lazy-chips.md`](../../docs/journal/2026-10-06-the-nes-lazy-chips.md)
 has how long a run took, dated.
 
@@ -104,6 +110,37 @@ in the `ppu` hash alone, on 116 of the 332 runs, and in no other hash; the journ
 ([the lazy chips](../../docs/journal/2026-10-06-the-nes-lazy-chips.md), "The baseline after the
 reset fix") has the commands, the date and the counts.
 
+**Format 3, 8 October 2026.** Task 3a of the scanline renderer work (issue #72) closed three gaps
+in the gate before the renderer is written. A `pixels` hash was added: at each point where the PPU
+can be seen, other than a frame end, power on and the reset button (where the whole picture is
+already in the `ppu` hash), the point and the picture as far as it is drawn in the frame, each
+finished row hashed once and the row the PPU is on whole. The sprite0 cartridges now sweep sprite 0
+over the whole picture and run 900 frames. And scene tests in `tests/Dbhq.Machines.Nes.Tests`
+(`PpuDotSceneTests` and the classes beside it) put a register access on every dot of a line, which a
+program cannot do on PAL on one dot phase. A new field is a new format, so the baseline was recorded
+again from `acf9748` with `--oracle`, the lazy build checked against it, and `38c5544.txt` removed.
+The runs that are not sprite0 runs kept every hash of format 2 as `38c5544.txt` had it.
+
+**Format 4, the same day**, after the review of task 3a: the homebrew's and the synthetic runs press
+reset a second time, at three quarters of the run, on PAL after stepping instructions until the
+bus's dot count is, mod 16, the run's class (0, 3, 6, 9 or 12, by the run's place in the list), so
+across the runs every dot of PAL's pre-render line is reached; the window workloads sweep that line
+straight after it. The 127 pinned ROMs' runs press reset once and their lines did not change. The
+baseline was recorded again from `034b43f` with `--oracle`, the lazy build checked against it, and
+`acf9748.txt` removed. The journal entry
+([the scanline renderer](../../docs/journal/2026-10-08-the-nes-scanline-renderer.md), "Task 3a" and
+its "After the review") has the commands, the dates and the counts.
+
+**Twelve background cartridges, 9 October 2026**, after the review of task 3 (the fast scanline
+renderer): the synthetic "background" cartridges, on NROM, CNROM, MMC1 and AxROM, scroll the
+background alone, the sprites never on, through every fine X, across coarse Y 29 or through the
+attribute rows, with the nametable select, the background's pattern table and PPUMASK's clip,
+greyscale and emphasis varied, so the fast renderer's background lines are seen by more than the
+fuzz cartridges. They are the last jobs in the list, so every other job kept its place. The format
+did not change; the baseline was recorded again from `132fd50` with `--oracle` (356 runs), its 332
+earlier lines identical to `034b43f.txt`'s, which was removed, and the lazy build checked against
+it. The journal entry (the scanline renderer, "Task 3", "After the review") has the commands.
+
 To run it on a baseline that is older than the tool, export that commit with `git archive`
 into a folder of its own, copy `bench/nes-speed/differential/` into the same place in the
 export, link or copy `.testdata/` there so the ROMs are not fetched again, and run it from the
@@ -113,6 +150,14 @@ For a profile of the WebAssembly build, publish it with `-p:WasmNativeStrip=fals
 the function names, and give `PROFILE=<n>` to `run-in-browser.mjs`: it records the run with
 Chrome's sampling profiler and prints the n functions with the most self time (added in task 17,
 the core's speed work; before that the profile was taken with an uncommitted copy of the script).
+
+`ROM=homebrew` runs the bundled homebrew, Lan Master, from `roms/nes/` (checked against its pin in
+`Pins.cs`), in place of SNOW: the program of the thread-time bench's `lan-ntsc` and `lan-pal`
+workloads, at its title after the boot cycles (task 3 of the scanline renderer work, where SNOW,
+whose every visible line has sprites, could show nothing of a renderer for the lines without
+them).
+
+`PLAY=1` as well (it needs `ROM=homebrew`) plays Lan Master by `lan-master-play.json`: the page, and the `THREAD_TIME` runs, run whole frames and set the pad before each, so the boot cycles decide where in the game the timed runs start (6 million cycles is the first level; 5.37 million cycles a run, with the page's 5 runs and 8 more, ends at frame 2,555 on NTSC and 2,287 on PAL, inside the script's limit, which each launch prints). Task 3b of the scanline renderer work: `lazy-chips/task-3b-browser.sh` runs it, a baseline against this build.
 
 On a shared machine, `THREAD_TIME=<n>` makes n more timed runs after the page's own, driven
 from the script and each measured in the CPU time of the page's main thread (the DevTools
@@ -137,6 +182,7 @@ Dated, with the command that made them; the journal entry has the full output.
 
 | Date | Code | AOT median | Interpreter median | Where |
 | --- | --- | --- | --- | --- |
+| 9 October 2026, 03:04 to 03:16 UTC | task 3b, Lan Master in play (the scanline renderer, `a1b3118` against `5640a57`, alternated, three sets of four launches a region), main-thread CPU time (`PLAY=1 ROM=homebrew THREAD_TIME=8`, 6 million cycles of boot, runs of 5.37 million), load 1.2 to 1.9, the BBC Micro bench at 23.3 to 29.3 MHz | NTSC 3.42 to 3.59 and PAL 3.59 to 3.79 times real time (ratios 1.05 and 1.06); the fast path takes none of the visible lines in play (the sprite layer is on) | not measured | [the scanline renderer entry](../../docs/journal/2026-10-08-the-nes-scanline-renderer.md), task 3b; `lazy-chips/task-3b-browser.txt` |
 | 7 October 2026, 02:37 to 02:44 UTC | task 2c, a profile of the lazy build (`6a98780`) and of `5e48505`, three profiles of each kind in each region, load 1.1 to 3.5, the BBC Micro bench at 20.0 to 27.6 MHz | the PPU's per-dot work is 38 to 40 percent of the samples in steady state, the bus 26, the sound unit 14, the CPU core 14, the browser 6 to 7 | not measured | [the lazy chips entry](../../docs/journal/2026-10-06-the-nes-lazy-chips.md), task 2c; tables in `lazy-chips/task-2c-profile-groups.txt` |
 | 7 October 2026 | the lazy PPU (`3fa4146` against `5e48505`, alternated, two sets of four launches), main-thread CPU time (`THREAD_TIME=8`), load 1.3 to 1.8, the BBC Micro bench at 21.2 to 22.6 MHz in the same minutes | NTSC 2.25 to 3.13 and PAL 2.54 to 3.33 times real time (ratios 1.39 and 1.31) | not measured | [the lazy chips entry](../../docs/journal/2026-10-06-the-nes-lazy-chips.md), task 2b; every line in `lazy-chips/task-2b-browser.txt` |
 | 6 October 2026 | task 17, the shared core (`3e52229` against `18cc4ec`, alternated), timed in the main thread's CPU time (`THREAD_TIME=8`) | NTSC 2.21 to 2.50 in one set and 2.48 to 2.46 in another, PAL 2.50 to 2.50 and 2.50 to 2.47 times real time: within noise; the page's wall clock gave 1.1 to 1.5 at loads of 2 to 50 | not measured | [the core speed entry](../../docs/journal/2026-10-06-the-core-speed.md) |

@@ -110,11 +110,13 @@ public sealed partial class Ppu : IReportsState
     private readonly Region _region;
     private readonly IMapper _mapper;
 
-    // Whether the board wants the addresses on the PPU's bus, asked once (IMapper.WatchesPpuAddresses).
+    // Whether the board wants the addresses on the PPU's bus, asked once
+    // (IMapper.WatchesPpuAddresses).
     private readonly bool _watchesAddresses;
 
     // The board's pattern tables and nametable layout as it keeps them, read without a call to it
-    // (IMapper.TryGetPatternWindows and NametablePageTable), or null where it does not keep them so.
+    // (IMapper.TryGetPatternWindows and NametablePageTable), or null where it does not keep them
+    // so.
     private readonly byte[]? _chr;
     private readonly int[]? _chrWindows;
     private readonly int[]? _nametablePages;
@@ -152,7 +154,8 @@ public sealed partial class Ppu : IReportsState
     private bool _oddFrame;
     private long _frame;
 
-    // Set by a $2002 read one dot before the VBlank flag would be set: the flag is not set that frame.
+    // Set by a $2002 read one dot before the VBlank flag would be set: the flag is not set that
+    // frame.
     private bool _suppressVblank;
 
     // Decided when dot 338 of the pre-render line runs: this odd frame drops its last dot.
@@ -426,7 +429,8 @@ public sealed partial class Ppu : IReportsState
     /// <summary>Told when a frame ends, while <see cref="NesBus.Observable"/> is on; the bus sets it with its own.</summary>
     internal INesObserver? Observer { get; set; }
 
-    // Rendering is on and the PPU is on a line that renders: the visible lines and the pre-render line.
+    // Rendering is on and the PPU is on a line that renders: the visible lines and the pre-render
+    // line.
     private bool Rendering => RenderingEnabled && (_line < 240 || _line == _preRenderLine);
 
     /// <summary>
@@ -559,6 +563,7 @@ public sealed partial class Ppu : IReportsState
                 _dropDot = false;
                 _dot = 0;
                 _line = 0;
+                _exactLines++;
                 EndFrame((_lines * Region.DotsPerLine) - 1);
                 return;
             }
@@ -567,6 +572,7 @@ public sealed partial class Ppu : IReportsState
         if (++_dot == Region.DotsPerLine)
         {
             _dot = 0;
+            _exactLines++;
             if (++_line == _lines)
             {
                 _line = 0;
@@ -672,7 +678,8 @@ public sealed partial class Ppu : IReportsState
             case 4:
                 if (Rendering)
                 {
-                    // During rendering the write does not reach OAM and bumps only the high six bits.
+                    // During rendering the write does not reach OAM and bumps only the high six
+                    // bits.
                     _oamAddress = (byte)(_oamAddress + 4);
                 }
                 else
@@ -895,12 +902,14 @@ public sealed partial class Ppu : IReportsState
         }
     }
 
+    // The coarse X increment, which the fast scanline renderer (PpuScanline.cs) calls too.
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static ushort IncrementCoarseX(ushort v)
     {
         return (v & 0x001F) == 31 ? (ushort)((v & ~0x001F) ^ 0x0400) : (ushort)(v + 1);
     }
 
+    // The Y increment of dot 256, which the fast scanline renderer (PpuScanline.cs) calls too.
     private static ushort IncrementY(ushort v)
     {
         if ((v & 0x7000) != 0x7000)
@@ -982,11 +991,15 @@ public sealed partial class Ppu : IReportsState
     }
 
     // One dot of a visible line with rendering on. Dots 2 to 256, three quarters of the dots, take
-    // one dispatch on the dot's place in its 8-dot tile fetch, and each case does in a straight line
+    // one dispatch on the dot's place in its 8-dot tile fetch, and each case does in a straight
+    // line
     // what the general RenderDot does for that dot: the pixel, the shift, the reload, the half of
     // sprite evaluation the dot's parity gives (odd dots read, even dots act; the 8-dot phase has
     // the same parity) and the fetch step. A test of the dot's phase in each part would be a branch
     // the CPU's predictor gets wrong when the 6502's own code runs between two dots.
+    // Second implementation: the fast scanline renderer (PpuScanline.cs) does the same work for
+    // whole lines, so a change here must be made there too, and the gate (bench/nes-
+    // speed/differential) holds the two equal.
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private void RenderVisibleDot(int dot)
     {
@@ -1047,7 +1060,9 @@ public sealed partial class Ppu : IReportsState
         }
     }
 
-    // One dot of a line that renders, with rendering on (ppu.md 6 and 7).
+    // One dot of a line that renders, with rendering on (ppu.md 6 and 7). Second implementation:
+    // the fast scanline renderer (PpuScanline.cs) does the same work for whole lines, so a change
+    // here must be made there too, and the gate (bench/nes-speed/differential) holds the two equal.
     private void RenderDot(bool visible)
     {
         int dot = _dot;
@@ -1060,7 +1075,9 @@ public sealed partial class Ppu : IReportsState
         {
             // On a visible line only dots 0 and 1 come here: dots 2 to 256 go through
             // RenderVisibleDot, which does the same work in its own order, so a change to the
-            // order of the fetches, the shift or the evaluation must be made in both.
+            // order of the fetches, the shift or the evaluation must be made in both, and in the
+            // fast scanline renderer (PpuScanline.cs), which does it for whole lines and which the
+            // gate (bench/nes-speed/differential) holds equal to this path.
             if (dot >= 2)
             {
                 // Column dot - 2 is decided from the shifters as they stand, then they shift.
@@ -1107,7 +1124,8 @@ public sealed partial class Ppu : IReportsState
                 // t's horizontal bits: coarse X and the horizontal nametable bit.
                 _v = (ushort)((_v & ~0x041F) | (_t & 0x041F));
 
-                // The next line's sprites are the ones this line found; the pre-render line finds none.
+                // The next line's sprites are the ones this line found; the pre-render line finds
+                // none.
                 _spriteCount = visible ? _found : 0;
                 _sprite0OnLine = visible && _sprite0Found;
                 ClearSpriteLine();
@@ -1145,7 +1163,9 @@ public sealed partial class Ppu : IReportsState
     }
 
     // Column x of the line being drawn: the background, the sprites, the multiplexer (ppu.md 7),
-    // sprite 0 hit (ppu.md 8), and the colour.
+    // sprite 0 hit (ppu.md 8), and the colour. Second implementation: the fast scanline renderer
+    // (PpuScanline.cs) does the same work for whole lines, so a change here must be made there too,
+    // and the gate (bench/nes-speed/differential) holds the two equal.
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private void DrawPixel(int x)
     {
@@ -1164,7 +1184,8 @@ public sealed partial class Ppu : IReportsState
                 _status |= StatusSprite0;
             }
 
-            // The winning sprite pixel goes in front unless it is behind and the background is opaque.
+            // The winning sprite pixel goes in front unless it is behind and the background is
+            // opaque.
             if (pixel == 0 || (sprite & SpriteBehind) == 0)
             {
                 pixel = 0x10 | (sprite & 0x0F);
@@ -1175,7 +1196,11 @@ public sealed partial class Ppu : IReportsState
         _pixels[(_line << 8) | x] = _entryColours[pixel];
     }
 
-    // With rendering off the picture is the backdrop, or the entry v points at in the palette (ppu.md 10).
+    // With rendering off the picture is the backdrop, or the entry v points at in the palette
+    // (ppu.md 10).
+    // Second implementation: the fast scanline renderer (PpuScanline.cs) does the same work for
+    // whole lines, so a change here must be made there too, and the gate (bench/nes-
+    // speed/differential) holds the two equal.
     private void DrawRenderingOff()
     {
         int entry = (_v & 0x3F00) == 0x3F00 ? PaletteIndex(_v) : 0;

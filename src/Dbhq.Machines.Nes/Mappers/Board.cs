@@ -127,7 +127,12 @@ public abstract class Board : IMapper, IReportsState
     }
 
     /// <inheritdoc />
-    /// <remarks>Always true: <see cref="Chr"/> and <see cref="ChrBase"/> are the board's for good, and its banks move only the offsets.</remarks>
+    /// <remarks>
+    /// Always true: <see cref="Chr"/> and <see cref="ChrBase"/> are the board's for good, and its banks move
+    /// only the offsets. A board whose pattern reads have side effects (the MMC2 and MMC4 latches) must not
+    /// rely on these windows: the PPU would read its CHR without a call and the latch would never move. It
+    /// must override <see cref="WatchesPpuAddresses"/> as well (below).
+    /// </remarks>
     public bool TryGetPatternWindows([NotNullWhen(true)] out byte[]? chr, [NotNullWhen(true)] out int[]? windows)
     {
         chr = Chr;
@@ -170,7 +175,12 @@ public abstract class Board : IMapper, IReportsState
     }
 
     /// <inheritdoc />
-    /// <remarks>False here: a board that watches overrides <see cref="PpuAddressChanged"/> and this.</remarks>
+    /// <remarks>
+    /// False here: a board that watches overrides <see cref="PpuAddressChanged"/> and this. A board whose
+    /// pattern reads have side effects (the MMC2 and MMC4 latches) must override this too: by inheritance it
+    /// would qualify for the fast scanline renderer (PpuScanline.cs), which reads whole lines with no call
+    /// to the board, and it would lose its latch.
+    /// </remarks>
     public virtual bool WatchesPpuAddresses => false;
 
     /// <inheritdoc />
