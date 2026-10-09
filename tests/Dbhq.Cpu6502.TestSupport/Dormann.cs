@@ -1,5 +1,7 @@
+using System.ComponentModel;
 using System.Diagnostics;
 using System.IO.Compression;
+using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
 using Dbhq.Cpu6502;
 
@@ -111,18 +113,18 @@ public static partial class Dormann
         Directory.CreateDirectory(directory);
         File.WriteAllText(Path.Combine(directory, file), source);
         string[] arguments = ["-lprogram.lst", "-m", "-s2", "-w", "-h0", .. cmos ? new[] { "-x" } : [], "-oprogram.hex", file];
-        var info = new ProcessStartInfo(assembler, arguments)
-        {
-            WorkingDirectory = directory,
-            RedirectStandardOutput = true,
-            RedirectStandardError = true,
-        };
-        using var process = Process.Start(info)!;
+        var info = StartInfo(assembler, arguments);
+        info.WorkingDirectory = directory;
+        info.RedirectStandardOutput = true;
+        info.RedirectStandardError = true;
+        using var process = Start(info);
         string output = process.StandardOutput.ReadToEnd() + process.StandardError.ReadToEnd();
         process.WaitForExit();
         if (process.ExitCode != 0)
         {
-            string hint = output.Contains("error while loading shared libraries", StringComparison.Ordinal)
+            string hint = !NativeX86 && output.Contains("Could not open", StringComparison.Ordinal)
+                ? " " + QemuHint
+                : output.Contains("error while loading shared libraries", StringComparison.Ordinal)
                 ? " as65 is a 32-bit Linux program: sudo apt-get install libc6-i386 lib32stdc++6"
                 : "";
             throw new InvalidOperationException($"as65 failed on {file} with exit code {process.ExitCode}.{hint}\n{output}");
@@ -163,6 +165,43 @@ public static partial class Dormann
         }
 
         return path;
+    }
+
+    // as65 is an i386 program. An x86 or x64 Linux machine runs it directly.
+    // Anything else, such as an ARM machine, cannot, so it is run under qemu's
+    // user-mode emulator, with the i386 C and C++ libraries from Ubuntu's
+    // cross packages, or wherever QEMU_LD_PREFIX points.
+    private static bool NativeX86 =>
+        RuntimeInformation.OSArchitecture is Architecture.X86 or Architecture.X64;
+
+    private const string QemuHint =
+        "as65 is a 32-bit x86 program, so on this machine it runs under qemu: " +
+        "sudo apt-get install qemu-user libc6-i386-cross libstdc++6-i386-cross " +
+        "(or point QEMU_LD_PREFIX at another set of i386 libraries)";
+
+    private static ProcessStartInfo StartInfo(string assembler, IEnumerable<string> arguments)
+    {
+        if (NativeX86)
+        {
+            return new ProcessStartInfo(assembler, arguments);
+        }
+
+        string libraries = Environment.GetEnvironmentVariable("QEMU_LD_PREFIX") is { Length: > 0 } prefix
+            ? prefix
+            : "/usr/i686-linux-gnu";
+        return new ProcessStartInfo("qemu-i386", ["-L", libraries, assembler, .. arguments]);
+    }
+
+    private static Process Start(ProcessStartInfo info)
+    {
+        try
+        {
+            return Process.Start(info)!;
+        }
+        catch (Win32Exception e) when (!NativeX86)
+        {
+            throw new InvalidOperationException($"{info.FileName} could not be started. {QemuHint}", e);
+        }
     }
 
     [GeneratedRegex(@"(end_of_test macro[^\n]*\n)[^\n]*db\s+\$db[^\n]*")]
