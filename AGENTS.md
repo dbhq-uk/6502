@@ -17,7 +17,7 @@ src/Dbhq.Machines.Kim1/     # the KIM-1: its 6530s, keypad, display and bus, on 
 src/Dbhq.Machines.Kim1.Wasm/  # the KIM-1 as .NET WebAssembly, for its page on the site
 src/Dbhq.Machines.BbcMicro/  # the BBC Micro Model B: its chips, keyboard, screen, sound and disc drive, on the core
 src/Dbhq.Machines.BbcMicro.Wasm/  # the BBC Micro as .NET WebAssembly; the ROMs are given to it as bytes
-src/Dbhq.Machines.Nes/      # the NES, NTSC and PAL, on the core; its PPU is caught up lazily (rule 1)
+src/Dbhq.Machines.Nes/      # the NES, NTSC and PAL, on the core; its PPU is caught up lazily (rule 1), whole lines without sprites at once
 src/Dbhq.Machines.Nes.Wasm/  # the NES as .NET WebAssembly: NesHost, for its page (site/public/nes.js) and the speed bench
 machines/                   # registry.json, and per machine its "try it" program, which the page shows and the acceptance test runs (machines/nes/ holds the NES's, and its recorded frame hashes)
   bbc-micro/discs/          # the BBC Micro page's preset discs: one folder each with its image, licence, README and (if copyleft) source; manifest.json lists them
