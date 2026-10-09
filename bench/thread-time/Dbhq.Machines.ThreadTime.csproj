@@ -5,6 +5,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Include="../nes-speed/play/PlayScript.cs" Link="PlayScript.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="../../src/Dbhq.Machines.Nes/Dbhq.Machines.Nes.csproj" />
     <ProjectReference Include="../../src/Dbhq.Machines.BbcMicro/Dbhq.Machines.BbcMicro.csproj" />
     <ProjectReference Include="../../src/Dbhq.Machines.Kim1/Dbhq.Machines.Kim1.csproj" />

@@ -21,6 +21,9 @@ builds run in turn, can be compared.
 | `ntsc`, `pal` | the NES running SNOW after 5 million cycles | 1.79 million |
 | `ntsc-oracle`, `pal-oracle` | the same with `NesOptions.PerDotReference`: the PPU caught up every cycle, as the per-dot build ran it (the lazy chips, task 2); it stops with a message on a commit from before the option | 1.79 million |
 | `lan-ntsc`, `lan-pal` | the NES running the bundled homebrew, Lan Master, from `roms/nes/`, at its title after 5 million cycles | 1.79 million |
+| `play-ntsc`, `play-pal` | the same game played by `bench/nes-speed/lan-master-play.json` (task 3b of the scanline renderer work): 6 million cycles to get into the first level, then runs in whole frames with the pad set before each; the line also gives the PPU frame it ended on and the script's last frame of play, and says `PAST THE SCRIPT` if it went beyond | 14 million |
+
+The play workloads read the script with `bench/nes-speed/play/PlayScript.cs`, which this project compiles. In an export of an older commit, copy that file and the JSON in with this folder.
 
 Dormann's test and SNOW come from the pinned forks and are checked against their hashes; the
 ROMs of the BBC Micro and the KIM-1, and Lan Master, are the committed ones, Lan Master checked

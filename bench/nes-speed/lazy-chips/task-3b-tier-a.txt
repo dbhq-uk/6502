@@ -1,0 +1,35 @@
+# Task 3b of the scanline renderer work: a scratch experiment, never committed to src. A copy of a1b3118's tree (/tmp/play3b/tierA)
+# with one condition widened in Ppu.TryRenderLine, so that a visible line whose background and sprite layers are both on, and
+# which has no sprite on it (_spriteCount is 0: the previous line's evaluation found none), is rendered by RenderBackgroundLine
+# like a background-only line. Sprite evaluation and the sprite fetches still run with the per-dot code in it, and with no sprite
+# there is nothing to draw or to hit sprite 0. It is the measured ceiling of the cheapest part of a sprite fast path, and
+# the thing task 4 would build first. It is not a proposal that this change is right: it was run through the existing gate only.
+
+## The change
+--- a/src/Dbhq.Machines.Nes/PpuScanline.cs	2026-10-09 04:05:52.556507908 +0000
++++ b/src/Dbhq.Machines.Nes/PpuScanline.cs	2026-10-09 03:17:56.906744452 +0000
+@@ -101,7 +101,7 @@
+             {
+                 RenderOffLine();
+             }
+-            else if (layers == 0x08 && _chrWindows is not null && _nametablePages is not null)
++            else if ((layers == 0x08 || (layers == 0x18 && _spriteCount == 0)) && _chrWindows is not null && _nametablePages is not null)
+             {
+                 RenderBackgroundLine();
+             }
+
+## The gate: bench/nes-speed/differential, in the scratch copy, 9 October 2026, finished 03:22 UTC, load 2.4 to 4.4
+dotnet run -c Release -- --check baseline/132fd50.txt --out <file>
+356 runs written to /tmp/play3b/logs/tierA-check.txt
+IDENTICAL: all 356 runs match baseline/132fd50.txt
+
+## Did the gate use the new tier? --coverage, in the scratch copy, 9 October 2026, 04:05:58 to about 04:12 UTC, load 1.96 at the start and not recorded after
+dotnet run -c Release -- --check baseline/132fd50.txt --coverage
+fast lines, NTSC, all 178 runs together: 6488767 of 16191616 (40.1 %); the median run's share 80.0 %; runs with more than half their lines fast: 112; with none: 23
+fast lines, PAL, all 178 runs together: 7994904 of 19281600 (41.5 %); the median run's share 77.6 %; runs with more than half their lines fast: 112; with none: 23
+IDENTICAL: all 356 runs match baseline/132fd50.txt
+Lines taken in all 178 runs of each region together, this build (task-3-coverage.txt's 166 runs plus the 12 background runs):
+NTSC 4256765 + 1739726 = 5996491 of 16191616, PAL 5414090 + 2086969 = 7501059 of 19281600. The scratch tier took
+492276 more lines on NTSC and 493845 more on PAL, and the baseline still matched byte for byte.
+
+## What it measured: task-3b-thread-time.txt (native, base = this build) and task-3b-browser.txt (AOT, base = this build); lines taken: task-3b-line-probe.txt (--tier-a)

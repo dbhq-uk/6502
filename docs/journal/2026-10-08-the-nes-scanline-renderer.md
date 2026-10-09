@@ -1,7 +1,7 @@
 ---
 title: "The NES's fast scanline renderer: the gate first, then the lines without sprites"
 date: 2026-10-08
-summary: "Dan said to merge the lazy PPU and continue, which was read as building the fast scanline renderer the lazy chips plan specified and left unbuilt: a second way to run a line of the PPU, used when nothing can see the line. Before any of it is written, the gate that must hold it equal to the first was made able to see it fail, closing the three gaps the last review named. The differential now hashes the picture as far as it is drawn at every point where the PPU can be seen, not only at the end of a frame. Its sprite 0 cartridges sweep sprite 0 down the whole picture, at every named x, with the left clips on and off, where before they covered the top half. A new layer of scene tests puts the PPU at any dot directly and makes register accesses on every dot of visible lines, the VBlank lines and the pre-render line, in both regions. Four faults of the kind a fast renderer could make were planted one at a time. The old differential saw each of them, two in only a handful of runs, and the old unit tests saw none. The new differential sees the pixel fault in many times as many runs and the sprite 0 fault in twice as many, and the scene tests catch all four. The review of this work found holes in the scene layer: sprite 0 hit its line a line early because the scenes kept the last scene's sprites, and the scenes left the right pixels behind. Both were fixed, the scenes were widened, and the differential now presses reset a second time on a dot phase chosen for each run, so every dot of PAL's pre-render line is reached by programs as well as by the scenes. The differential's output changed format twice, so its baseline was recorded again from the per-dot reference each time, and the lazy build matches it on every run. Then the renderer itself was built for the lines that draw no sprite: the lines after the picture and in VBlank, the visible lines with rendering off, and those with the background alone, on which sprite evaluation still runs and is run with the per-dot code. The gate stayed identical to its baseline, and every fault planted in the new code was caught both by the differential and by new scene tests that also say how many lines the fast path must take. Against main, in the browser, the homebrew's title screen runs about a third faster and SNOW, whose every visible line has sprites, no faster at all, so the stopping rule set before the work was reached. After its review the new tests ran under every nametable layout, and the differential gained cartridges that scroll the background alone, which the renderer's faults now show in many more runs."
+summary: "Dan said to merge the lazy PPU and continue, which was read as building the fast scanline renderer the lazy chips plan specified and left unbuilt: a second way to run a line of the PPU, used when nothing can see the line. Before any of it is written, the gate that must hold it equal to the first was made able to see it fail, closing the three gaps the last review named. The differential now hashes the picture as far as it is drawn at every point where the PPU can be seen, not only at the end of a frame. Its sprite 0 cartridges sweep sprite 0 down the whole picture, at every named x, with the left clips on and off, where before they covered the top half. A new layer of scene tests puts the PPU at any dot directly and makes register accesses on every dot of visible lines, the VBlank lines and the pre-render line, in both regions. Four faults of the kind a fast renderer could make were planted one at a time. The old differential saw each of them, two in only a handful of runs, and the old unit tests saw none. The new differential sees the pixel fault in many times as many runs and the sprite 0 fault in twice as many, and the scene tests catch all four. The review of this work found holes in the scene layer: sprite 0 hit its line a line early because the scenes kept the last scene's sprites, and the scenes left the right pixels behind. Both were fixed, the scenes were widened, and the differential now presses reset a second time on a dot phase chosen for each run, so every dot of PAL's pre-render line is reached by programs as well as by the scenes. The differential's output changed format twice, so its baseline was recorded again from the per-dot reference each time, and the lazy build matches it on every run. Then the renderer itself was built for the lines that draw no sprite: the lines after the picture and in VBlank, the visible lines with rendering off, and those with the background alone, on which sprite evaluation still runs and is run with the per-dot code. The gate stayed identical to its baseline, and every fault planted in the new code was caught both by the differential and by new scene tests that also say how many lines the fast path must take. Against main, in the browser, the homebrew's title screen runs about a third faster and SNOW, whose every visible line has sprites, no faster at all, so the stopping rule set before the work was reached. After its review the new tests ran under every nametable layout, and the differential gained cartridges that scroll the background alone, which the renderer's faults now show in many more runs. Last, the bundled game was played by a script and measured in play, not only at its title: there the sprite layer is on for every visible line, so the renderer takes almost none of them and the browser gain is small. A scratch change that also takes the lines with no sprite on them, which is nearly every line in play, was measured as the cheapest part of a sprite path, and it passes the existing gate."
 order: 38
 ---
 
@@ -1079,3 +1079,293 @@ The NES tests gave 2,558 passed and 0 failed, both before and after the page fix
   to 5.2.
 
 Each gave IDENTICAL on all 356 runs, byte for byte.
+
+## Task 3b: the bundled game in play
+
+The review of task 3 made a fair point. The two gains measured so far were on
+SNOW, whose every visible line has sprites (no gain), and on Lan Master's title
+screen, which has none (1.36 times in the browser on NTSC, 1.39 on PAL). Real
+play has sprites on most lines, so the title overstates the gain. Dan needs to
+decide whether to build the sprite fast path (task 4) or stop. This task
+measures Lan Master in play. It changes nothing in `src/`. Everything it added
+is in `bench/`: a script, a workload in each speed bench, and a harness.
+
+The game's figures are quoted from this task's own logs in
+`bench/nes-speed/lazy-chips/task-3b-*.txt` (rule 5). They are of 9 October 2026
+and of this build (`a1b3118` with the bench changes of this task) against main
+at `5640a57`.
+
+### The script
+
+[`lan-master-play.json`](../../bench/nes-speed/lan-master-play.json), written by
+[`play/make-script.py`](../../bench/nes-speed/play/make-script.py), is a list of
+`[frame, buttons]` steps for controller 1, keyed on the PPU's frame count, so the
+same script plays on NTSC and PAL. `play/PlayScript.cs` reads it and both the
+thread-time bench and the line probe compile that one file; the browser page
+reads the same JSON in JavaScript. Each run is made in whole frames
+(`RunFrames(1)`), with the pad set before each, until the cycles are run.
+
+What it plays:
+
+- The title and its menu: from frame 52 Down, then Up (the square moves to CODE
+  and back), and Start at frame 90.
+- The first level, from frame 170: one button held 3 frames in 6, through a
+  fixed round of 24 buttons that moves the cursor in all four directions and
+  turns pieces with A, B and Select. The board changes as it goes: pieces connect
+  and come apart, and DONE rises and falls (21, 24, 9 and 0 per cent in the frames
+  looked at).
+- It stops at 55 seconds of the level: frame 3450 on NTSC and 2850 on PAL.
+
+**What the first version got wrong.** It played to 60 seconds, then pressed A for
+game over and Start for a second go. Looking at pictures from both regions
+showed three things it had assumed:
+
+- The level's clock is 60 seconds of game time, not a number of frames: it runs
+  out at about frame 3600 on NTSC and 3000 on PAL. A script keyed on NTSC frames
+  met PAL's game over 600 frames late.
+- Any button on the game over screen goes back to the title, and the round has
+  buttons in it, so the game went back to the title by itself.
+- Start in a level pauses the game. The second Start landed in a level and
+  paused it, and the round's A then chose RESUME.
+
+So the script never meets game over: it plays to 55 seconds and stops, and the
+limit is per region (the JSON's `limit`). The benches check it: each prints the
+PPU frame it ended on beside the limit, and says `PAST THE SCRIPT` if it went
+beyond. Contact sheets of both regions at 14 frames from 20 to the limit were
+looked at (not committed): the title fades in, the square moves, the title fades
+out, the board appears with a cursor of four corner sprites, the clock counts
+down.
+
+**What the script does not do.** It does not solve the level, and a player would.
+It is a fixed, deterministic round, not a person. What it shares with a person
+is what the PPU sees: the board is a background, the cursor is the only sprite
+and it moves, the HUD changes, and the music plays. A solved level would bring
+the next one, with more pieces on the board, but the pieces are background, not
+sprites. The one finding that matters for the decision (below) is that the sprite
+count per line is small, and that does not depend on how well the game is played.
+
+Phases, by frame: title 0 to 35 (the fade in), menu 36 to 95, transition 96 to 149
+(Start was pressed: fade out, fade in), level 150 on.
+
+### How much of play the fast path takes
+
+A scratch probe counted the lines by the path that finished them, as in task 3:
+a copy of `a1b3118`'s tree with counting added to the two places a line is
+finished (`PpuScanline.cs` for the fast path, `Ppu.cs` for the per-dot path),
+never committed, and a console program in it that plays the script from power on
+to the limit in each region. It also counts, for each visible line, the sprites
+of OAM that are on it. The program, the counting and the whole output are in
+[`task-3b-line-probe.txt`](../../bench/nes-speed/lazy-chips/task-3b-line-probe.txt).
+It ran 9 October 04:04:24 to 04:05:04 UTC at load 1.9 to 3.3. Its totals equal
+`Ppu.FastLines` and `Ppu.ExactLines`, read by reflection, in both regions.
+
+The share of the visible lines (lines 0 to 239) the fast path took, and, in
+brackets, of all lines, NTSC then PAL:
+
+| Phase | Frames | Visible lines fast | All lines fast |
+| --- | --- | --- | --- |
+| title | 36 | 91.9 / 89.7 | 90.8 / 88.8 |
+| menu | 60 | 99.6 / 99.8 | 97.7 / 98.0 |
+| transition | 54 | 82.9 / 66.5 | 82.9 / 72.8 |
+| level | 3,300 / 2,700 | 0.0 / 0.1 | 4.9 / 19.4 |
+
+All lines fast over the whole run, from power on, are 8.6 percent on NTSC and
+23.0 percent on PAL, with 96 percent of NTSC's frames and 95 percent of PAL's in
+the level. The difference between the regions is the idle lines: in the level
+60.9 percent of NTSC's and 84.9 percent of PAL's are fast, which is all the fast
+path takes there. NTSC's other idle lines are not broken down here.
+
+In the level the sprite layer and the background are both on for 100.0 percent
+of the visible lines on NTSC and 99.9 percent on PAL. That is the whole reason
+the fast path takes none of them: it refuses a line when the sprite layer is on,
+whatever is on the line. And almost nothing is:
+
+| Level, visible lines | NTSC | PAL |
+| --- | --- | --- |
+| with no sprite on the line | 93.3 percent | 93.3 percent |
+| with 2 sprites on the line | 6.7 percent | 6.7 percent |
+| with more than 2 | 0 | 0 |
+| mean sprites a line | 0.13 | 0.13 |
+
+The 6.7 percent is the cursor: four corner sprites, in two pairs, 16 lines of
+240. No sprite is on the other 224. The title's own sprite column in the probe's
+output (9 or more on 3.3 percent of lines) is OAM's contents at power on, with the
+sprite layer off, so nothing is drawn from it.
+
+### Speed in play
+
+**Natively**, thread CPU time a cycle, `bench/thread-time` with the new
+`play-ntsc` and `play-pal` workloads (6 million cycles to get into the level,
+one warm run, then 5 runs of 14 million cycles, in whole frames), main
+exported with `git archive 5640a57` and the bench folders copied in
+(`bench/thread-time`, `bench/nes-speed/play` and `lan-master-play.json`, the same
+files in both builds). Alternated in four rounds by
+[`task-3b-thread-time.sh`](../../bench/nes-speed/lazy-chips/task-3b-thread-time.sh),
+three sets: 02:51:11 to 02:53:08, 02:54:22 to 02:56:20 and 02:56:20 to 02:58:17
+UTC, one-minute loads 0.7 to 2.3. Each run is 14 million cycles, about 8 seconds of
+machine time, so the six runs span the level from about second 3 to about second
+50 after power on (the benches ended at frame 3,028 on NTSC and 2,713 on PAL).
+The figure is the median of the rounds' medians, 12 a build
+([`task-3b-thread-time.txt`](../../bench/nes-speed/lazy-chips/task-3b-thread-time.txt),
+medians by `task-3b-thread-time-medians.py`):
+
+| Workload | `5640a57` | This build | Main over this build | The three sets |
+| --- | --- | --- | --- | --- |
+| play, NTSC | 74.8 ns a cycle (7.47 times real) | 77.8 (7.18) | 0.96 | 1.05, 0.87, 0.87 |
+| play, PAL | 79.6 (7.56) | 73.2 (8.22) | 1.09 | 1.09, 1.07, 1.09 |
+
+Times real is `1e9 / (ns * Region.CpuHz)`. The bench's noise is 10 to 20 percent
+from launch to launch (task 17), and the NTSC sets swing from 1.05 to 0.87, so
+the honest reading is no gain on NTSC and at most a small one on PAL. For the
+title (task 3, another day) the same bench gave 65.1 on main and 52.7 on this
+build, so as an indication play costs about 1.5 times what the title does per
+cycle in this build, where main's play costs 1.15 times.
+
+**In the browser** (AOT), the method of task 3 with the play script.
+
+- Both builds published with `dotnet publish src/Dbhq.Machines.Nes.Wasm -c
+  Release -p:RunAOTCompilation=true -o <folder>`, from the `5640a57` export and
+  from this tree, after deleting the project's `obj/Release` in each. Both were
+  served by this tree's harness.
+- [`task-3b-browser.sh`](../../bench/nes-speed/lazy-chips/task-3b-browser.sh) ran
+  each set: NTSC then PAL, four rounds each of one fresh launch of main, then one
+  of this build. Each launch was `ROM=homebrew PLAY=1 THREAD_TIME=8 node
+  run-in-browser.mjs <folder> 1 5370000 6000000 5 <region>`: 6 million cycles of
+  boot (the title, the menu and the start of the level), then the page's five
+  timed runs and eight more timed in the main thread's CPU time, each of 5.37
+  million cycles, 3 seconds of machine time.
+- **The window is in the level.** The boot ends at frame 202 on NTSC and 181 on
+  PAL, and the 13 runs end at frame 2,555 on NTSC and 2,287 on PAL, so the
+  window is level seconds 0.9 to 40 on NTSC and 0.2 to 42 on PAL, inside the 55
+  seconds the script plays. Each launch printed its end frame beside the limit,
+  and none passed it.
+- Three sets, all between 03:04:06 and 03:15:55 UTC. One-minute loads 1.2 to 1.9.
+  Nothing else of this task ran then.
+- The BBC Micro gauge, the median of ten in the main thread's CPU time, after
+  each region of each set: 23.3 to 29.3 MHz (task 3 saw 25.5 to 33.4).
+- Chrome 153.0.8010.47. The medians are by `task-3-browser-medians.py` on the
+  whole output ([`task-3b-browser.txt`](../../bench/nes-speed/lazy-chips/task-3b-browser.txt)).
+
+`times_real`, the median of each build's 96 runs in the main thread's CPU time,
+with the ratio of each set beside it:
+
+| Workload | `5640a57` | This build | Ratio | The three sets | Wall clock, the page's 60 runs, main to this build |
+| --- | --- | --- | --- | --- | --- |
+| play, NTSC | 3.42 | 3.59 | 1.05 | 1.04, 0.99, 1.09 | 3.47 to 3.57 |
+| play, PAL | 3.59 | 3.79 | 1.06 | 1.06, 1.08, 1.05 | 3.90 to 4.06 |
+
+**The title overstated it.** On NTSC, the title was 4.11 on main and 5.59 on this
+build (1.36). In play main is 3.42 and this build 3.59 (1.05), so the gain in play
+is about one seventh of the title's, and this build in play runs at 0.64 of its
+title speed. PAL is the same: 4.31 and 5.99 at the title, 3.59 and 3.79 in play.
+
+**For a device twice as slow** the same CPU-time figures halve: NTSC 1.71 on main
+and 1.80 on this build, PAL 1.80 and 1.90. Both stay above real time with a
+margin of 70 to 90 percent. The device that falls to real time is 3.4 times
+slower than this machine on main (NTSC) and 3.6 times slower with this build,
+3.6 and 3.8 on PAL. The title would have told the owner that a device twice as slow runs this
+build on NTSC at 2.8 times real time (5.59 / 2). In play it is 1.8.
+
+### What a sprite fast path could add in play
+
+**By arithmetic** (an estimate). Let the fraction of all lines a change takes
+be `x`, the PPU's per-dot work be a share `p` of the run's time, and `e` be the
+share of a taken line's per-dot cost the fast path removes. The gain is
+`1 / (1 - p * e * x)`.
+
+- `p` is 38 to 40 percent, from task 2c's profile (the PPU's per-dot work in
+  steady state on SNOW, which also has its sprites on for every line; the
+  profile was not repeated in play).
+- `x` from the probe: the lines with no sprite on them are 93.3 percent of the
+  visible lines. The visible lines are 240 of NTSC's 262 and of PAL's 312, so
+  taking all of them is `x` = 0.855 on NTSC and 0.718 on PAL. Taking those with
+  sprites as well adds 6.7 percent of the visible lines, `x` 0.061 and 0.051.
+- `e` is calibrated on the title, where the same fast renderer took 97.8 percent
+  of NTSC's lines and 97.9 percent of PAL's (the line counts of task 3's probe,
+  `task-3-line-probe.txt`) and gave 1.36 and 1.39: `1 - 1/1.36` = 0.265 is
+  `p * e * 0.978`, so `p * e` is 0.271 on NTSC and 0.287 on PAL. With
+  `p` between 0.38 and 0.40, `e` is 0.68 to 0.75.
+
+| Change, over this build in play | `x` NTSC / PAL | Calibrated: `1/(1 - 0.271 x)` NTSC, `1/(1 - 0.287 x)` PAL | Bound if `e` were 1: `1/(1 - p x)` |
+| --- | --- | --- | --- |
+| lines with no sprite on them (sprite layer on) | 0.855 / 0.718 | 1.30 / 1.26 | 1.48 to 1.52 / 1.38 to 1.40 |
+| and the lines with sprites too | 0.916 / 0.769 | 1.33 / 1.28 | 1.53 to 1.58 / 1.41 to 1.44 |
+
+So the estimate is **1.26 to 1.33** over this build in play, with 1.4 to 1.5 as the
+most any change could give if the fast path cost nothing. **Nine tenths of it is
+the lines with no sprite on them**; the lines with sprites add about 0.03.
+Over main the same is 1.3 to 1.4, because this build already gives 1.05 there.
+
+**By measurement**, in a scratch copy (never committed): `TryRenderLine`'s
+condition for a background line widened by one clause, so that a line with both
+layers on and `_spriteCount == 0` (no sprite on it) goes down
+`RenderBackgroundLine` like a line with the sprite layer off. Sprite evaluation
+and the fetches still run, with the per-dot code, inside it, so the rules the
+fast path already keeps for them still hold, and there is no sprite to draw or
+to hit sprite 0. This is only the cheap part of a sprite path, the part that does
+not draw a sprite. The change, and the gate's result with it, are in
+[`task-3b-tier-a.txt`](../../bench/nes-speed/lazy-chips/task-3b-tier-a.txt).
+
+- **The existing gate passes with it.** `--check baseline/132fd50.txt` in the copy
+  gave IDENTICAL on all 356 runs (finished 9 October 03:22 UTC), and
+  `--coverage` showed the change was used: 492,276 more lines taken on NTSC and
+  493,845 on PAL across the gate's runs. That is not proof. No fault was planted
+  for it, so the gate was not shown able to see one in it.
+- **Natively**, this build against the scratch build, three sets of four rounds,
+  03:24:00 to 03:29:33 UTC, loads 1.2 to 2.3: play NTSC 80.0 against 62.6 ns a
+  cycle (1.28), PAL 78.4 against 63.7 (1.23); the sets 1.33, 1.25, 1.25 and
+  1.28, 1.26, 1.16.
+- **In the browser**, `task-3b-browser.sh` with this build as base: NTSC 3.46
+  against 4.25 times real (1.23), PAL 3.34 against 4.06 (1.22). Three sets,
+  03:33:18 to 03:37:43, 03:52:47 to 03:57:43 and 03:57:43 to 04:01:41 UTC, loads
+  1.4 to 5.9. The second set of the four ran while another job on the machine took the load to
+  11 (03:37:43 to 03:43:40). It is in the log and not in the figures. The wait for the load to fall was from
+  03:44 to 03:52, and two more sets ran in its place. Over
+  main, the two ratios multiplied are about 1.29 on NTSC and 1.29 on PAL (two
+  figures from separate runs, so only an estimate).
+
+The arithmetic said 1.30 and 1.26 for the same change, the measurement 1.23 and
+1.22: the right size, a little high. Whatever the real figure for a complete
+sprite path, it is between the measurement and the bound with the sprite lines
+added, about 1.25 to 1.35 over this build in play.
+
+### What this means for task 4
+
+The reviewer was right about the title, and about SNOW: in play, this build
+gives about 1.05 in the browser and the fast renderer as built takes 0.0 percent
+of the visible lines. The ceiling for a sprite path is not 1.4 over this build
+in play. It is about 1.25 to 1.35, and almost all of it is one clause: take a line
+whose sprite layer is on and which has no sprite on it. That part needs none of
+a sprite renderer, because there is nothing to draw, only the check that no
+sprite is on the line, which the PPU already knows from the line before.
+
+**Recommendation.** Do not build the full sprite renderer yet. Build the one
+clause first, as task 4a, with what the earlier tasks built for the other lines:
+scene tests on the sprite layer on with and without a sprite on the line, with a
+sprite on the line before and the line after, with sprite 0 at the edges; faults
+planted for it (the condition's `_spriteCount`, the layer bits, a sprite found by
+the line's own evaluation) run against the gate; the baseline recorded again. It
+takes about 90 percent of the visible lines in play, and the scratch run shows
+the existing gate already passes with it. Then measure again, and build task 4
+(drawing sprites) only if the remaining 7 percent of the visible lines, which a
+cursor is all of, are worth another second implementation. They are worth about
+0.03 by the arithmetic above.
+
+### What limits these figures
+
+- The script is not a person. It does not solve a level, and later levels have
+  more on the board. The finding that decides things, that the sprites on a line
+  are few, rests on a cursor of four sprites and the HUD, and Lan Master was
+  written for the NES Coding Competition of 2011 as a small game. A game with
+  many sprites, or one that moves them in the lines, would take fewer lines in
+  tier A. Only Lan Master is bundled, and this task measures only that.
+- `p` is from SNOW's profile, not from play's. A profile of play with the AOT
+  build and `-p:WasmNativeStrip=false` would give it, and was not taken. The
+  measured tier gives the same answer from the other side.
+- The phase of a line follows the harness's frame, so the lines finished by the
+  catch-up at a frame's end (a dot or two into line 0, as in task 3) are counted
+  in the frame that did the catch-up. The table's counts of lines per phase
+  therefore move by one line at most at each boundary.
+- The native bench is noisy (the NTSC ratio went from 1.05 to 0.87 between sets
+  of the same two builds). The browser figures were taken in the CPU time of the
+  page's main thread, which is quieter.

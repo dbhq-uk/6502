@@ -1,0 +1,179 @@
+# Task 3b of the scanline renderer work: which of Lan Master's lines the fast path takes, by phase of the scripted play
+# (bench/nes-speed/lan-master-play.json), from power on to the script's last frame of play in each region, 9 October 2026,
+# 04:04:24 to 04:05:04 UTC, load 1.9 to 3.3. A scratch copy of a1b3118's tree with the counting below added (never
+# committed) and a console program in it (bench/probe3b), built and run with
+#   dotnet build bench/probe3b -c Release -o <folder inside the tree> ; dotnet <folder>/Dbhq.Machines.Nes.Probe3b.dll [--tier-a]
+# The counts are of lines finished by each path, by the phase the harness was in when the line finished. A line is
+# 'visible' for lines 0 to 239, 'idle' for lines 240 to the line before pre-render. The pre-render line is always exact.
+# Phases (from the script): title = frames 0 to 35 (the fade in), menu = 36 to 95, transition = 96 to 149 (Start was
+# pressed: fade out, fade in), level = 150 on. The title's 9+ sprites column is power-on garbage in OAM with the sprite
+# layer off; it draws nothing. Checked: the probe's totals equal Ppu.FastLines and Ppu.ExactLines (read by reflection).
+
+## The output, this build
+## NTSC: from power on to frame 3450 (limit 3450); Ppu.FastLines 77880 ExactLines 826020; probe fast 77880 exact 826020 agree
+phase | frames | visible lines | fast % of visible | idle lines (VBlank, post-render) fast % | all lines fast % | mean sprites on a visible line (OAM) | visible lines with a sprite % | with 0/1/2/3-8/9+ sprites % | PPUMASK of visible lines: off / bg / sprites / both %
+title | 36 | 8640 | 91.9 | 756 82.0 | 90.8 | 0.30 | 3.3 | 96.7/0.0/0.0/0.0/3.3 | 15.4 / 84.6 / 0.0 / 0.0
+menu | 60 | 14400 | 99.6 | 1260 81.2 | 97.7 | 0.30 | 3.3 | 96.7/0.0/0.0/0.0/3.3 | 0.0 / 100.0 / 0.0 / 0.0
+transition | 54 | 12960 | 82.9 | 1134 87.1 | 82.9 | 0.28 | 3.8 | 96.2/0.0/1.0/0.0/2.8 | 3.7 / 81.5 / 0.0 / 14.8
+level | 3300 | 792000 | 0.0 | 69300 60.9 | 4.9 | 0.13 | 6.7 | 93.3/0.0/6.7/0.0/0.0 | 0.0 / 0.0 / 0.0 / 100.0
+## PAL: from power on to frame 2850 (limit 2850); Ppu.FastLines 204125 ExactLines 685075; probe fast 204125 exact 685075 agree
+phase | frames | visible lines | fast % of visible | idle lines (VBlank, post-render) fast % | all lines fast % | mean sprites on a visible line (OAM) | visible lines with a sprite % | with 0/1/2/3-8/9+ sprites % | PPUMASK of visible lines: off / bg / sprites / both %
+title | 36 | 8640 | 89.7 | 2556 87.1 | 88.8 | 0.30 | 3.3 | 96.7/0.0/0.0/0.0/3.3 | 14.9 / 85.1 / 0.0 / 0.0
+menu | 60 | 14400 | 99.8 | 4260 93.3 | 98.0 | 0.30 | 3.3 | 96.7/0.0/0.0/0.0/3.3 | 0.0 / 100.0 / 0.0 / 0.0
+transition | 54 | 12960 | 66.5 | 3834 95.0 | 72.8 | 0.25 | 4.4 | 95.6/0.0/2.1/0.0/2.3 | 3.7 / 64.8 / 0.0 / 31.5
+level | 2700 | 648000 | 0.1 | 191700 84.9 | 19.4 | 0.13 | 6.7 | 93.3/0.0/6.7/0.0/0.0 | 0.0 / 0.1 / 0.0 / 99.9
+
+## The output with the scratch change that also takes a line whose sprite layer is on and which has no sprite on it (--tier-a)
+## NTSC (scratch: also sprites-on lines with no sprite on them): from power on to frame 3450 (limit 3450); Ppu.FastLines 817218 ExactLines 86682; probe fast 817218 exact 86682 agree
+phase | frames | visible lines | fast % of visible | idle lines (VBlank, post-render) fast % | all lines fast % | mean sprites on a visible line (OAM) | visible lines with a sprite % | with 0/1/2/3-8/9+ sprites % | PPUMASK of visible lines: off / bg / sprites / both %
+title | 36 | 8640 | 91.9 | 756 82.0 | 90.8 | 0.30 | 3.3 | 96.7/0.0/0.0/0.0/3.3 | 15.4 / 84.6 / 0.0 / 0.0
+menu | 60 | 14400 | 99.6 | 1260 81.2 | 97.7 | 0.30 | 3.3 | 96.7/0.0/0.0/0.0/3.3 | 0.0 / 100.0 / 0.0 / 0.0
+transition | 54 | 12960 | 96.7 | 1134 87.1 | 95.5 | 0.28 | 3.8 | 96.2/0.0/1.0/0.0/2.8 | 3.7 / 81.5 / 0.0 / 14.8
+level | 3300 | 792000 | 93.1 | 69300 60.9 | 90.2 | 0.13 | 6.7 | 93.3/0.0/6.7/0.0/0.0 | 0.0 / 0.0 / 0.0 / 100.0
+## PAL (scratch: also sprites-on lines with no sprite on them): from power on to frame 2850 (limit 2850); Ppu.FastLines 810704 ExactLines 78496; probe fast 810704 exact 78496 agree
+phase | frames | visible lines | fast % of visible | idle lines (VBlank, post-render) fast % | all lines fast % | mean sprites on a visible line (OAM) | visible lines with a sprite % | with 0/1/2/3-8/9+ sprites % | PPUMASK of visible lines: off / bg / sprites / both %
+title | 36 | 8640 | 89.7 | 2556 87.1 | 88.8 | 0.30 | 3.3 | 96.7/0.0/0.0/0.0/3.3 | 14.9 / 85.1 / 0.0 / 0.0
+menu | 60 | 14400 | 99.8 | 4260 93.3 | 98.0 | 0.30 | 3.3 | 96.7/0.0/0.0/0.0/3.3 | 0.0 / 100.0 / 0.0 / 0.0
+transition | 54 | 12960 | 95.8 | 3834 95.0 | 95.3 | 0.25 | 4.4 | 95.6/0.0/2.1/0.0/2.3 | 3.7 / 64.8 / 0.0 / 31.5
+level | 2700 | 648000 | 93.1 | 191700 84.9 | 91.0 | 0.13 | 6.7 | 93.3/0.0/6.7/0.0/0.0 | 0.0 / 0.1 / 0.0 / 99.9
+
+## The program (bench/probe3b/Program.cs in the scratch copy; PlayScript.cs is bench/nes-speed/play/PlayScript.cs)
+using System.Reflection;
+using Dbhq.Bench;
+using Dbhq.Cpu6502.TestSupport;
+using Dbhq.Machines.Nes;
+
+// Task 3b scratch: plays Lan Master by bench/nes-speed/lan-master-play.json from power on to the script's
+// last frame of play in each region, and counts the PPU's lines by phase, path, PPUMASK and sprites.
+byte[] rom = RepoPaths.ReadChecked(Pins.NesHomebrewPath, Pins.NesHomebrewSha256);
+string scriptPath = Path.Combine(RepoPaths.Root, "bench", "nes-speed", "lan-master-play.json");
+bool oracle = args.Contains("--oracle");
+Probe.TierA = args.Contains("--tier-a");
+foreach (Region region in new[] { Region.Ntsc, Region.Pal })
+{
+    var script = PlayScript.Load(scriptPath, region.Name);
+    var names = script.PhaseNames;
+    int PhaseIndex(long frame) => names.ToList().IndexOf(script.PhaseAt(frame));
+    Probe.Reset();
+    var nes = new Nes(Cartridge.Load(rom), region, new NesOptions { PerDotReference = oracle });
+    var ppu = nes.Bus.Ppu;
+    nes.PowerOn();
+    var frames = new long[names.Count];
+    while (ppu.Frame < script.Limit)
+    {
+        int p = PhaseIndex(ppu.Frame);
+        Probe.Phase = p;
+        frames[p]++;
+        nes.SetButtons(0, script.MaskAt(ppu.Frame));
+        nes.RunFrames(1);
+    }
+
+    long fastTotal = (long)typeof(Ppu).GetProperty("FastLines", BindingFlags.NonPublic | BindingFlags.Instance)!.GetValue(ppu)!;
+    long exactTotal = (long)typeof(Ppu).GetProperty("ExactLines", BindingFlags.NonPublic | BindingFlags.Instance)!.GetValue(ppu)!;
+    long probeFast = Probe.Lines.Sum(l => l[0] + l[2]);
+    long probeExact = Probe.Lines.Sum(l => l[1] + l[3] + l[4]);
+    Console.WriteLine($"## {region.Name}{(oracle ? " (per-dot reference)" : "")}{(Probe.TierA ? " (scratch: also sprites-on lines with no sprite on them)" : "")}: from power on to frame {ppu.Frame} (limit {script.Limit}); Ppu.FastLines {fastTotal} ExactLines {exactTotal}; probe fast {probeFast} exact {probeExact} {(fastTotal == probeFast && exactTotal == probeExact ? "agree" : "DISAGREE")}");
+    Console.WriteLine("phase | frames | visible lines | fast % of visible | idle lines (VBlank, post-render) fast % | all lines fast % | mean sprites on a visible line (OAM) | visible lines with a sprite % | with 0/1/2/3-8/9+ sprites % | PPUMASK of visible lines: off / bg / sprites / both %");
+    for (int p = 0; p < names.Count; p++)
+    {
+        // Phases with the same name (none now) would be summed by the caller.
+        long[] c = Probe.Lines[p];
+        long visible = c[0] + c[1];
+        long idle = c[2] + c[3];
+        long all = visible + idle + c[4];
+        long[] s = Probe.Sprites[p];
+        long sv = s.Sum();
+        double mean = sv == 0 ? 0 : Enumerable.Range(0, 10).Sum(n => (double)s[n] * Math.Min(n, 9)) / sv;
+        long[] m = Enumerable.Range(0, 4).Select(i => Probe.ByMask[p][i][0] + Probe.ByMask[p][i][1]).ToArray();
+        string Pct(long a, long b) => b == 0 ? "-" : $"{100.0 * a / b:F1}";
+        Console.WriteLine($"{names[p]} | {frames[p]} | {visible} | {Pct(c[0], visible)} | {idle} {Pct(c[2], idle)} | {Pct(c[0] + c[2], all)} | {mean:F2} | {Pct(sv - s[0], sv)} | {Pct(s[0], sv)}/{Pct(s[1], sv)}/{Pct(s[2], sv)}/{Pct(s[3] + s[4] + s[5] + s[6] + s[7] + s[8], sv)}/{Pct(s[9], sv)} | {Pct(m[0], visible)} / {Pct(m[1], visible)} / {Pct(m[2], visible)} / {Pct(m[3], visible)}");
+    }
+}
+
+## The counting added to the scratch copy (src/Dbhq.Machines.Nes/PpuProbe.cs is new)
+namespace Dbhq.Machines.Nes;
+
+// Task 3b scratch probe, never committed to src: counts each line the PPU finishes by the path that
+// ran it, the phase of the play session (set by the harness), PPUMASK, and the sprites of OAM on it.
+public static class Probe
+{
+    public static int Phase;
+    public static bool TierA;
+    public const int Phases = 8;
+    // [phase][0 visible fast, 1 visible exact, 2 idle fast, 3 idle exact (VBlank and post-render), 4 pre-render]
+    public static readonly long[][] Lines = Enumerable.Range(0, Phases).Select(_ => new long[5]).ToArray();
+    // visible lines by PPUMASK layers (bits 3 and 4 of the mask: 0, 8, 16, 24) and path: [phase][layers/8][fast 0 or exact 1]
+    public static readonly long[][][] ByMask = Enumerable.Range(0, Phases).Select(_ => Enumerable.Range(0, 4).Select(_ => new long[2]).ToArray()).ToArray();
+    // visible lines by the sprites of OAM on the line (0 to 8, then 9 for more), whatever the mask: [phase][n]
+    public static readonly long[][] Sprites = Enumerable.Range(0, Phases).Select(_ => new long[10]).ToArray();
+    // the same, only the visible lines the sprite layer is on for
+    public static readonly long[][] SpritesOn = Enumerable.Range(0, Phases).Select(_ => new long[10]).ToArray();
+    // visible lines with the sprite layer on, by path and whether a sprite is on the line: [phase][0 none or 1 some][fast 0 or exact 1]
+    public static void Reset() { foreach (var l in Lines) Array.Clear(l); foreach (var p in ByMask) foreach (var l in p) Array.Clear(l); foreach (var l in Sprites) Array.Clear(l); foreach (var l in SpritesOn) Array.Clear(l); }
+}
+
+public sealed partial class Ppu
+{
+    internal void ProbeLine(int line, bool fast)
+    {
+        long[] c = Probe.Lines[Probe.Phase];
+        if (line >= FrameBuffer.Height)
+        {
+            if (line == _preRenderLine) c[4]++;
+            else c[fast ? 2 : 3]++;
+            return;
+        }
+
+        c[fast ? 0 : 1]++;
+        int layers = (_mask & 0x18) >> 3;
+        Probe.ByMask[Probe.Phase][layers][fast ? 0 : 1]++;
+        int height = (_ctrl & 0x20) != 0 ? 16 : 8;
+        int n = 0;
+        for (int i = 0; i < 64; i++)
+        {
+            int y = _oam[i * 4];
+            if (y < 0xF0 && line >= y + 1 && line < y + 1 + height) n++;
+        }
+
+        Probe.Sprites[Probe.Phase][Math.Min(n, 9)]++;
+        if ((_mask & 0x10) != 0) Probe.SpritesOn[Probe.Phase][Math.Min(n, 9)]++;
+    }
+}
+--- a/src/Dbhq.Machines.Nes/Ppu.cs	2026-10-09 04:05:33.558544158 +0000
++++ b/src/Dbhq.Machines.Nes/Ppu.cs	2026-10-09 02:49:00.760631398 +0000
+@@ -562,6 +562,7 @@
+                 // The odd frame's dropped dot: dot 340 of the pre-render line never runs.
+                 _dropDot = false;
+                 _dot = 0;
++                ProbeLine(_line, false);
+                 _line = 0;
+                 _exactLines++;
+                 EndFrame((_lines * Region.DotsPerLine) - 1);
+@@ -572,6 +573,7 @@
+         if (++_dot == Region.DotsPerLine)
+         {
+             _dot = 0;
++            ProbeLine(_line, false);
+             _exactLines++;
+             if (++_line == _lines)
+             {
+--- a/src/Dbhq.Machines.Nes/PpuScanline.cs	2026-10-09 04:05:33.573544919 +0000
++++ b/src/Dbhq.Machines.Nes/PpuScanline.cs	2026-10-09 04:04:11.022357637 +0000
+@@ -101,7 +101,7 @@
+             {
+                 RenderOffLine();
+             }
+-            else if (layers == 0x08 && _chrWindows is not null && _nametablePages is not null)
++            else if ((layers == 0x08 || (Probe.TierA && layers == 0x18 && _spriteCount == 0)) && _chrWindows is not null && _nametablePages is not null)
+             {
+                 RenderBackgroundLine();
+             }
+@@ -111,7 +111,7 @@
+             }
+         }
+ 
+-        // The line is not the last (the pre-render line is refused), so no frame ends here.
++        ProbeLine(line, true);
+         _line = line + 1;
+         _caughtUpDots += Region.DotsPerLine;
+         _fastLines++;
