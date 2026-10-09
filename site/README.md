@@ -71,7 +71,8 @@ stay in the repository, where the page links to them. For the NES, which has no
 system ROM, it writes the bundled game, `Lan_Master.nes`, checked against its
 pin the same way. `npm test` fails if any machine's are missing. The machines it knows,
 with their projects and ROMs, are `MACHINE_BUILDS` in `src/lib/machines.mjs`. `npm run browser-check` needs
-Google Chrome (`CHROME_PATH` to use another); it serves `dist/` on `127.0.0.1`
+Google Chrome (`CHROME_PATH` to use another, such as a Chromium on ARM, where
+there is no Chrome); it serves `dist/` on `127.0.0.1`
 with the site's own CSP and closes the server when it is done.
 
 ## Where everything comes from
