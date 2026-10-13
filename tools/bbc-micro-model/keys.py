@@ -35,9 +35,11 @@ keyboard registered to it; writes data/keys.json.
    printing. A homography from O3 to K1, each key held out in turn, on the
    same row as O1, recorded and not a stop.
 
-4. Colours, by class. Each keycap's colour on O1 is the median OKLab of a
-   disc a quarter of the pitch across round its centre (the legend's light
-   pixels lie in it, and the median stands over them), where its centre is
+4. Colours, by class. Each keycap's colour on O1 is the median OKLab of the
+   darker half of a disc a quarter of the pitch across round its centre (the
+   legend is lighter than its cap, and covers less than half the disc; changed
+   after the first run, whose median over the whole disc called 15 black keys
+   with large legends light: see the journal), where its centre is
    K1's mapped into O1 through task 0's fit. The medians are put in three
    clusters (k-means, from fixed starts); the cluster with the most red is
    "red", of the other two the lighter is "light" and the other "dark".
@@ -200,7 +202,7 @@ def judge_keys(k):
 # --- colours ----------------------------------------------------------------------------------
 
 def colour_classes(keys, H_k1_to_o1):
-    """Each keycap's median OKLab on O1 in a disc a quarter of the pitch across round its centre, put in three
+    """Each keycap's median OKLab on O1 over the darker half of a disc a quarter of the pitch across round its centre, put in three
     clusters by k-means from fixed starts (the reddest, the lightest and the darkest median); named red, light, dark."""
     rgb = common.read_rgb('O1')
     L, A, B = common.oklab(rgb)
@@ -211,7 +213,9 @@ def colour_classes(keys, H_k1_to_o1):
         r = 0.125 * np.hypot(*(e - c))
         yy, xx = np.ogrid[:L.shape[0], :L.shape[1]]
         m = (xx - c[0]) ** 2 + (yy - c[1]) ** 2 <= r * r
-        med.append([float(np.median(L[m])), float(np.median(A[m])), float(np.median(B[m]))])
+        l, a, b = L[m], A[m], B[m]
+        dark = np.argsort(l, kind='stable')[:len(l) // 2]     # the darker half by count: the cap, not its lighter legend
+        med.append([float(np.median(l[dark])), float(np.median(a[dark])), float(np.median(b[dark]))])
     X = np.array(med)
     starts = [int(np.argmax(X[:, 1])), int(np.argmax(X[:, 0])), int(np.argmin(X[:, 0]))]
     centres = X[starts].copy()

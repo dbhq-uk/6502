@@ -1641,3 +1641,17 @@ f12fe6159a9872a81cca73b0b4796db9acf515c0d19bf22c093dc32f999e4318 tools/bbc-micro
 ```
 
 `case.json` and `keys.json` carry the same hashes (`methodFixed`). These files are committed as they are before the run.
+
+### The first run, and two changes after it
+
+Run once, at 2026-10-13T22:08:29Z to 22:08:47Z, on the method committed and pushed as `5e35042` (`BBC_MODEL_INPUTS=~/bbc-model-inputs PYTHON=~/venv-models/bin/python nice -n 10 tools/bbc-micro-model/run-case.sh`). Its lines are below, under "The run", because the second run printed the same lines but one. Two things in its outputs were wrong, and neither is a check:
+
+- **Colours.** The colour classes put 15 black keys with large legends (W, R, A, S, G, K, X, V, B, N, M, 0, @, CAPS LOCK, SHIFT LOCK) in "light" with the five cursor keys and COPY: in the small disc sampled, the white legend covered over half the pixels, so the median was the legend's. Changed to the median of the darker half of the disc by count (the cap; its legend is lighter), with a new pytest that fails on the first run's sampling (a black cap whose legend covers over half the disc). Its line was `colours: red 10, light 20, dark 44`.
+- **The underside panel** is typical: a 10 mm margin round its connectors. With the board's offset from O2, PL12's right end lands 0.7 mm inside the case's right end, so the panel ran 9.3 mm past the case. It now stops at a typical 3 mm wall.
+
+Neither change touches a check: the mapping, O1, O3, the check point, d and the rear check are computed by code that did not change. `case_parts.py --hashes` printed, at 2026-10-13T22:11:37Z, before the second run (only `keys.py` and `case_parts.py` changed):
+
+```
+cf4da9c9f09781a98c50e1c89d863617a1da9cd3eb0d3f0d72257149d71b4101 tools/bbc-micro-model/keys.py
+0a36447dff0f0fe2f4691a004d996cd664b3857a29cf209424040c5d4296fc00 tools/bbc-micro-model/case_parts.py
+```

@@ -238,3 +238,21 @@ def test_the_module_exports_every_part_with_a_note():
         line = next(l for l in text.splitlines() if l.startswith(f'export const {name} = '))
         assert '"note":' in line, name
     assert 'the check failed as measured' in text
+
+
+def test_colour_classes_go_by_the_cap_not_its_legend(monkeypatch):
+    """Black caps with large white legends, red caps and light brown caps, drawn 40 px apart: each comes out its class."""
+    img = np.full((60, 40 * 12, 3), 20, np.uint8)
+    kinds = ['dark'] * 6 + ['red'] * 3 + ['light'] * 3
+    colour = {'dark': (35, 33, 32), 'red': (200, 30, 30), 'light': (110, 95, 70)}
+    for i, k in enumerate(kinds):
+        x = 20 + 40 * i
+        img[10:50, x - 18:x + 18] = colour[k]
+        if k == 'dark':
+            img[27:34, x - 3:x + 4] = 245           # a legend over more than half the sampled disc (radius 5 px) and under three quarters
+    monkeypatch.setattr(common, 'read_rgb', lambda sid: img)
+    caps = [{'x': 20 + 40 * i, 'y': 30.0} for i in range(len(kinds))]
+    H = np.array([[40 / PITCH, 0, 0], [0, 40 / PITCH, 0], [0, 0, 1.0]])     # K1 millimetres are pixels here: one pitch is 40 px
+    caps = [{'x': c['x'] * PITCH / 40, 'y': c['y'] * PITCH / 40} for c in caps]
+    classes, clusters = keys.colour_classes(caps, H)
+    assert classes == kinds

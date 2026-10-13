@@ -84,6 +84,7 @@ TYPICAL = {
     'panelBelowKeys': {'value': 8.0, 'measured': False, 'what': 'typical, used only if the side profile\'s check fails: how far the panel round the keys lies below the key tops'},
     'boardY': {'value': 4.5, 'measured': False, 'what': 'typical, not measured: the board\'s rear edge from the case\'s rear face, a 3 mm wall and the DIN sockets\' 1.5 mm overhang'},
     'boardZ': {'value': 14.0, 'measured': False, 'what': 'typical, not measured: the board\'s top face above the table'},
+    'wall': {'value': 3.0, 'measured': False, 'what': 'typical, not measured: the case\'s wall, which the underside panel stops at'},
     'undersideMargin': {'value': 10.0, 'measured': False, 'what': 'typical, not measured: the underside panel\'s margin round its connectors'},
     'portSize': {'value': {'phono': 9.0, 'bnc': 14.0, 'din': 16.0, 'dType': [39.1, 12.5]}, 'measured': False,
                  'what': 'typical, not measured: a port\'s width and height on the rear face (the D\'s width is TE\'s flange, 38.76 to 39.52 mm)'},
@@ -226,7 +227,8 @@ def measure():
         UNDER.append({'ref': c['ref'], 'label': words, 'boardLabel': c['label'], 'x': c['x'] + boardIn['x'], 'y': c['y'] + boardIn['y'],
                       'w': c['l'], 'd': c['w']})
     m = t('undersideMargin')
-    panel = {'x0': min(u['x'] - u['w'] / 2 for u in UNDER) - m, 'x1': max(u['x'] + u['w'] / 2 for u in UNDER) + m,
+    wall = TYPICAL['wall']['value']       # the panel stops at the case's walls (added after the first run, whose panel ran past the case's right end)
+    panel = {'x0': max(min(u['x'] - u['w'] / 2 for u in UNDER) - m, wall), 'x1': min(max(u['x'] + u['w'] / 2 for u in UNDER) + m, CASE_W - wall),
              'y0': min(u['y'] - u['d'] / 2 for u in UNDER) - m, 'y1': max(u['y'] + u['d'] / 2 for u in UNDER) + m}
     front = {
         'rawMm': kj['frontEdgeMm'], 'rawSeMm': kj['parallax']['rawWidthSeMm'],
