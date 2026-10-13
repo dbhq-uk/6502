@@ -1283,6 +1283,12 @@ internal sealed class ProgramBuilder(Workload workload, BoardKind board, int see
                 // A $2002 read in the frame, kept in RAM: the flags as the lines so far left them.
                 a.Lda(0x2002);
                 a.Sta(0x0300);
+
+                // And OAMADDR set, which the lines the fast path takes with the sprites on must
+                // hold at 0 again on dots 257 to 320 as the per-dot code does.
+                a.Lda(Frame);
+                a.OraI(1);
+                a.Sta(0x2003);
                 break;
             case Workload.Mask:
                 a.Lda(Frame);
