@@ -291,10 +291,17 @@ def measure():
 
 
 def width_words(case):
-    """What the module says of the case's size: the manual's, with the range the outside's three measures read it at.
-    Added after the last run, to the module's notes only (case.json is that run's): the review asked for it."""
-    r = [case['caseTop']['scale'], case['k1ToCase']['impliedScale'], case['widthOnRear']['mm'] / CASE_W]
-    return f"the Service Manual's size; the outside's measures read {min(r):.3f} to {max(r):.3f} times it, not resolved"
+    """What the module says of the case's size: the manual's, and the outside's measures, which point different ways.
+    Added after the last run, to the module's notes only (case.json is that run's): task 8's review asked for it.
+    Corrected after task 9a's review (13 October 2026): it had said the three measures read the case wider. The two
+    K1 scales are the keys' size on a frame that takes the case as 415 mm, so if K1 is true they make the case
+    narrower; only the rear's D scale makes it wider. The keys' scale on O1's top may be partly parallax, the key
+    tops standing above the plane registered (case.json caseTop.what)."""
+    top, corners, rear = case['caseTop']['scale'], case['k1ToCase']['impliedScale'], case['widthOnRear']['mm']
+    return (f"the Service Manual's size; the outside's measures point different ways, not resolved: in K1's units the keys read {top:.4f} "
+            f"and the opening's front corners {corners:.4f} times a frame that takes the case as {CASE_W:g} mm, so if K1 is true to size "
+            f"the case is narrower, about {CASE_W / max(top, corners):.0f} mm, the first perhaps partly parallax, the key tops standing "
+            f"above the plane registered; on O2's 15-way D scale it reads {rear:.1f} mm, wider")
 
 
 def module_text(case):

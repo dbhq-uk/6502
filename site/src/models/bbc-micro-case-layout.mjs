@@ -7,8 +7,9 @@
 // wrote ./bbc-micro-case-parts.mjs, which this module hands on to the model and
 // the page. The journal for 4 October 2026 (its task 8 section, 13 October) has
 // every figure. The case's size is the Service Manual's; the outside's own
-// measures read it a few per cent wider, which is not resolved, and the parts
-// module's notes and the model's note say so.
+// measures point different ways, two narrower in the keyboard drawing's units
+// and one wider on the rear's D socket scale, which is not resolved, and the
+// parts module's notes and the model's note say so.
 //
 // A key's legend is LEGENDS[name] from public/bbc-keys.js, the on-screen keys'
 // own table, so the model's legends cannot drift from the page's. Millimetres
@@ -68,7 +69,8 @@ const ACTIONS = ['down', 'up', 'tap', 'latch-on', 'latch-off'];
  * whether it was one the case has; `down(at)` gives the keycaps down then, in
  * KEYS order, SHIFT's two together; `presses` counts the events that start a
  * hold (down, tap, latch-on), and `last` names the key the last of them
- * pressed. `reset()` lets go of everything, for a new machine.
+ * pressed. `reset()`, for a new machine, lets go of everything and starts
+ * `presses` and `last` again.
  */
 export function createKeyState({ tapMs = TAP_MS } = {}) {
   const held = new Set();
@@ -98,6 +100,8 @@ export function createKeyState({ tapMs = TAP_MS } = {}) {
       held.clear();
       latched.clear();
       tapped.clear();
+      state.presses = 0;
+      state.last = null;
     },
   };
   return state;
@@ -160,5 +164,5 @@ const list = (xs) => (xs.length < 2 ? xs.join('') : `${xs.slice(0, -1).join(', '
 /** The model's text alternative and caption, with every size and count read from the layout above. */
 export function describe() {
   const machine = KEYS.keys.filter((k) => k.name !== BREAK && k.name !== SECOND_SHIFT).length;
-  return `Model, not a photograph. A drawing in three.js of the outside of the BBC Micro Model B, ${cm(CASE.width)} by ${cm(CASE.depth)} cm and ${cm(CASE.height)} cm high: the Service Manual's size, though three measures on the photographs read the case a few per cent wider, which is not resolved. On it are its ${KEYS.keys.length} keys, the machine's ${machine}, BREAK and a second SHIFT, each with its on-screen key's legend; the ${list(LEDS.leds.map((l) => l.name))} lights; the badge strip's words; the rear's ${REAR.ports.length} ports, its vents and its mains panel; and underneath, the connectors for the ${list(UNDERSIDE.connectors.map((u) => u.label).reverse())}. The keys, the lights and the opening round them were placed from photographs and an open keyboard drawing; the note below says how well each is known. While the machine above runs, a key pressed on it goes down on the model, and the lights are lit as the machine's are.`;
+  return `Model, not a photograph. A drawing in three.js of the outside of the BBC Micro Model B, ${cm(CASE.width)} by ${cm(CASE.depth)} cm and ${cm(CASE.height)} cm high: the Service Manual's size, though the photographs' measures of it point different ways, two narrower and one wider, which is not resolved. On it are its ${KEYS.keys.length} keys, the machine's ${machine}, BREAK and a second SHIFT, each with its on-screen key's legend; the ${list(LEDS.leds.map((l) => l.name))} lights; the badge strip's words; the rear's ${REAR.ports.length} ports, its vents and its mains panel; and underneath, the connectors for the ${list(UNDERSIDE.connectors.map((u) => u.label).reverse())}. The keys, the lights and the opening round them were placed from photographs and an open keyboard drawing; the note below says how well each is known. While the machine above runs, a key pressed on it goes down on the model, and the lights are lit as the machine's are.`;
 }

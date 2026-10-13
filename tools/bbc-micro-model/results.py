@@ -139,16 +139,48 @@ def board_results(frame, registration, copper, parts, sources):
     }
 
 
+# What the case model took from each of its sources, for the credits under the
+# outside view (task 9b), in words: each says only what was used.
+CASE_USED = {
+    'D1': "The case's width, depth and height, from section 3.11; facts only, no page or drawing copied",
+    'K1': "Every key's centre and size, and which key it is",
+    'O1': "The opening in the case's top, the badge strip and its words, the three lights' order, the keys' colours, and the keys registered to K1",
+    'O2': "The rear: its ports, their labels and order, the vents, the mains panel's words, and the scale the rear check used",
+    'O3': "The keys' legends' places, registered to K1 as a recorded check",
+    'O4': "The heights of the key tops, the lights and the opening's front, triangulated with O5",
+    'O5': "The heights of the key tops, the lights and the opening's front, triangulated with O4",
+    'O8-I': "The connector names only: the words beside the five connectors underneath, read in order, and that they sit in one panel; the photograph itself is not shown",
+    'P-TE_1757819': "One fact: the spacing of a 15-way D socket's two mounting posts, the rear photograph's scale",
+}
+
+
+def case_sources(ids, sources):
+    """The case's sources as with_addresses gives them, each with what the case
+    took from it (CASE_USED), and the byline Chris's Acorns asks for on one of
+    its photographs."""
+    out = []
+    for s in with_addresses(ids, sources):
+        if s['id'] not in CASE_USED:
+            raise SystemExit(f'CASE_USED has nothing for {s["id"]}')
+        s['used'] = CASE_USED[s['id']]
+        if 'chrisacorns' in (s['url'] or ''):
+            s['byline'] = "Chris's Acorns"
+        out.append(s)
+    return out
+
+
 def case_results(keys, case, sources):
     """The case model's figures, each read from keys.json or case.json as
     named beside it. The width's three measures are case_parts.py's
-    width_words(): the keys' scale on O1's case top, the scale the opening's
-    two front corners imply, and the case's width on O2's D shell scale against
-    the Service Manual's; they disagree with the manual, and nothing here
-    resolves that."""
+    width_words(): the keys' scale on O1's case top and the scale the opening's
+    two front corners imply, both K1's size on a frame that takes the case as
+    the manual's, so that if K1 is true they make the case narrower (k1Mm);
+    and the case's width on O2's D shell scale, which makes it wider. They point
+    different ways, and nothing here resolves that (corrected after task 9a's
+    review, 13 October 2026: this file had given them as one range, all wider)."""
     width = case['footprint']['widthMm']
     rear_ratio = round(case['widthOnRear']['mm'] / width, 4)
-    ratios = [case['caseTop']['scale'], case['k1ToCase']['impliedScale'], rear_ratio]
+    k1_mm = round(width / max(case['caseTop']['scale'], case['k1ToCase']['impliedScale']), 1)
     o1, o3 = keys['o1'], keys['o3']
     rear = case['rearCheck']
     worst = max(rear['errMm'], key=lambda ref: abs(rear['errMm'][ref]))
@@ -165,7 +197,7 @@ def case_results(keys, case, sources):
         # case.json: the Service Manual's size, and the three measures that disagree with it
         'size': {'widthMm': width, 'depthMm': case['footprint']['depthMm'], 'heightMm': case['heightMm'], 'from': case['footprint']['source']},
         'width': {'caseTopScale': case['caseTop']['scale'], 'cornersScale': case['k1ToCase']['impliedScale'],
-                  'rearMm': case['widthOnRear']['mm'], 'rearRatio': rear_ratio, 'low': min(ratios), 'high': max(ratios), 'resolved': False},
+                  'k1Mm': k1_mm, 'rearMm': case['widthOnRear']['mm'], 'rearRatio': rear_ratio, 'resolved': False},
         # keys.json: the keycaps, their mapping and their colours as read on O1
         'keys': {'keycaps': keys['mapping']['keys'], 'machineKeys': keys['mapping']['machineKeys'], 'mapping': keys['verdicts']['mapping'],
                  'red': colours.count('red'), 'light': colours.count('light'), 'dark': colours.count('dark'), 'coloursAgree': keys['colours']['agree']},
@@ -178,7 +210,7 @@ def case_results(keys, case, sources):
         'rear': {'n': rear['n'], 'within': rear['within'], 'worstMm': rear['worstMm'], 'worstRef': worst, 'limitMm': rear['limitMm'],
                  'verdict': case['verdicts']['rear'], 'boardOffsetMm': case['boardInCase']['x']},
         'typical': typical,
-        'sources': with_addresses(case['sources'], sources),
+        'sources': case_sources(case['sources'], sources),
     }
 
 

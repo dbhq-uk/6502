@@ -118,8 +118,9 @@ def case_data():
 def test_the_case_figures_are_the_data_files_own():
     out = results.case_results(*case_data())
     assert out['size'] == {'widthMm': 415.0, 'depthMm': 345.0, 'heightMm': 73.0, 'from': 'D1'}
-    assert out['width'] == {'caseTopScale': 1.0387, 'cornersScale': 1.0373, 'rearMm': 425.0986, 'rearRatio': 1.0243,
-                            'low': 1.0243, 'high': 1.0387, 'resolved': False}
+    # corrected after task 9a's review: the two K1 scales make the case narrower in K1's units, the rear wider
+    assert out['width'] == {'caseTopScale': 1.0387, 'cornersScale': 1.0373, 'k1Mm': 399.5, 'rearMm': 425.0986, 'rearRatio': 1.0243,
+                            'resolved': False}
     assert out['keys'] == {'keycaps': 74, 'machineKeys': 72, 'mapping': 'pass', 'red': 1, 'light': 1, 'dark': 2, 'coloursAgree': 63}
     assert out['o1'] == {'n': 50, 'medianMm': 0.395, 'p90Mm': 0.632, 'maxMm': 0.989, 'verdict': 'pass'}
     assert out['o3'] == {'n': 3, 'medianMm': 0.205, 'p90Mm': 0.329, 'maxMm': 0.588, 'verdict': 'pass'}
@@ -134,7 +135,18 @@ def test_the_case_sources_are_case_json_s_with_their_authors():
     out = results.case_results(*case_data())
     assert [s['id'] for s in out['sources']] == ['D1', 'O1']
     assert out['sources'][1] == {'id': 'O1', 'url': 'address-of-O1', 'page': 'page-of-O1', 'sha256': 'O1O1O1O1',
-                                 'kind': 'photograph', 'licence': 'Public domain', 'author': 'author-of-O1', 'fetched': '2026-10-13'}
+                                 'kind': 'photograph', 'licence': 'Public domain', 'author': 'author-of-O1', 'fetched': '2026-10-13',
+                                 'used': results.CASE_USED['O1']}
+    # every source says what the case took from it; one from Chris's Acorns carries the site's byline
+    keys, case, sources = case_data()
+    case['sources'] = ['O8-I']
+    sources.append({**sources[0], 'id': 'O8-I', 'url': 'a-chrisacorns-address'})
+    o8 = results.case_results(keys, case, sources)['sources'][0]
+    assert o8['byline'] == "Chris's Acorns" and 'connector' in o8['used'] and 'names' in o8['used']
+    sources.append({**sources[0], 'id': 'O9'})
+    case['sources'] = ['O9']
+    with pytest.raises(SystemExit, match='CASE_USED has nothing for O9'):
+        results.case_results(keys, case, sources)
 
 
 def test_a_fallback_profile_lists_its_typical_heights_and_a_missing_source_stops_the_run():

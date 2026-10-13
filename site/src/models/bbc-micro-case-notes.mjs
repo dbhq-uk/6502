@@ -11,7 +11,6 @@
 
 const mm = (v) => `${v.toLocaleString('en-GB', { maximumFractionDigits: 2 })} mm`;
 const times = (v) => v.toLocaleString('en-GB', { maximumFractionDigits: 3 });
-const pc = (ratio) => ((ratio - 1) * 100).toLocaleString('en-GB', { maximumFractionDigits: 1 });
 
 /** What each typical value in the results file is, in words. */
 const TYPICAL = {
@@ -28,10 +27,16 @@ const TYPICAL = {
 
 const list = (xs) => (xs.length < 2 ? xs.join('') : `${xs.slice(0, -1).join(', ')} and ${xs.at(-1)}`);
 
-/** The sentence on the case's size: the Service Manual's, and the three measures that disagree with it, not resolved. */
+/**
+ * The sentence on the case's size: the Service Manual's, and the photographs'
+ * measures, which point different ways, each with what it rests on; not
+ * resolved. (Corrected after task 9a's review, 13 October 2026: it had said all
+ * three read the case wider, but the first two are the keys' size against a
+ * case taken as the manual's, so they make the case narrower.)
+ */
 export function sizeSentence(f) {
   const { size: s, width: w } = f;
-  return `The case's size is the Service Manual's, ${mm(s.widthMm)} wide, ${mm(s.depthMm)} deep and ${mm(s.heightMm)} high with its feet, which the manual gives in its section on the Model B+ and is taken here to hold for the Model B. Three measures on the photographs disagree with it: on the top photograph, registered to that size on the case top's four corners, the keys read ${times(w.caseTopScale)} times the size of the keyboard drawing they come from; the opening's two front corners, placed from two other photographs, imply ${times(w.cornersScale)}; and on the rear photograph, on the scale of the 15-way D socket's two posts, the case is ${mm(w.rearMm)} wide, ${times(w.rearRatio)} times the manual's width. The first two share the drawing and the top photograph, so they are not independent of each other. Either the case is wider than the manual says, or the drawing and the socket both read small, or something common to how the case's corners and ends were marked: this is not resolved, and nothing was rescaled to fit it.`;
+  return `The case's size is the Service Manual's, ${mm(s.widthMm)} wide, ${mm(s.depthMm)} deep and ${mm(s.heightMm)} high with its feet, which the manual gives in its section on the Model B+ and is taken here to hold for the Model B. The photographs' measures of it point different ways. Two rest on the keyboard drawing's size: on the top photograph, registered to the manual's size on the case top's four corners, the keys read ${times(w.caseTopScale)} times the drawing's size, and the opening's two front corners, placed from two other photographs, imply ${times(w.cornersScale)}; if the drawing is true to size, both make the case narrower, about ${mm(w.k1Mm)} wide. They share the drawing and the top photograph, so they are not independent of each other, and the first may be partly parallax: the key tops stand above the plane the photograph was registered on, so they read large. The third rests on the rear photograph, on the scale of the 15-way D socket's two posts, and makes it wider: ${mm(w.rearMm)}, ${times(w.rearRatio)} times the manual's width. Which is right is not resolved, and nothing was rescaled to fit either.`;
 }
 
 /** The note's paragraphs, then what the model does not show. */
@@ -48,7 +53,7 @@ export function made(f) {
     `The rear's ports were placed on the rear photograph, on the D socket's scale, and checked against their sockets on the board: ${r.within} of the ${r.n} that could be checked lie within ${mm(r.limitMm)} of their socket's place plus the board's offset in the case, the worst ${mm(r.worstMm)} (${r.worstRef}), so the check passed. It tests the D socket's scale across the rear, not the offset itself: the board's left edge, ${mm(r.boardOffsetMm)} from the case's left end, is good to a few millimetres. The video socket, which is on the case, and the Econet socket, which the machine on this page does not have, were placed from the photograph alone.`,
   ];
   const limits = [
-    `The size is the Service Manual's, not measured, and the photographs' three measures read the case ${pc(f.width.low)} to ${pc(f.width.high)} per cent wider; that is not resolved.`,
+    `The size is the Service Manual's, not measured, and the photographs' measures point different ways: about ${mm(f.width.k1Mm)} wide in the keyboard drawing's units, perhaps partly parallax, and ${mm(f.width.rearMm)} on the rear's D socket scale; that is not resolved.`,
     `The front edge's check could not be measured: no camera height independent of the case's width was found.`,
     `These are typical, not measured: ${list(f.typical.map((t) => TYPICAL[t] ?? t))}; and the feet's places, the keys' travel and the keycaps' shape.`,
     'The keycaps are tapered blocks with flat tops, not sculpted row by row: the keycap model that would have given their profile could not be fetched.',

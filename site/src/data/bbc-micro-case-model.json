@@ -60,7 +60,8 @@
    "licence": "Copyright ACORN Computers Limited 1985. Neither the whole or any part of the information contained in, or the product described in, this manual may be adapted or reproduced in any material form except with the prior written approval of ACORN Computers Limited",
    "page": "https://archive.org/details/bbc-micro-service-manual",
    "sha256": "974550803fbce738b143ea0f1fdb6aa129a5c0a69c9e0072634d16f127a7fb99",
-   "url": "https://archive.org/download/bbc-micro-service-manual/BBC-Micro-Service-Manual%20Sections-1-2-3.pdf"
+   "url": "https://archive.org/download/bbc-micro-service-manual/BBC-Micro-Service-Manual%20Sections-1-2-3.pdf",
+   "used": "The case's width, depth and height, from section 3.11; facts only, no page or drawing copied"
   },
   {
    "author": "Dominic Beesley",
@@ -70,7 +71,8 @@
    "licence": "MIT License / Copyright (c) 2023 dominicbeesley",
    "page": "https://github.com/dbhq-uk/bbc-keyboard/blob/5ec53df566c77424caa6be827d0831da3916ecfa/LICENSE",
    "sha256": "35b34ac3ef0a04fb311ee1971eb9fc32cb1c323877377c4d1a74986c709b0929",
-   "url": "https://github.com/dbhq-uk/bbc-keyboard/blob/5ec53df566c77424caa6be827d0831da3916ecfa/KiCad/bbc-keyboard/bbc-keyboard.kicad_pcb"
+   "url": "https://github.com/dbhq-uk/bbc-keyboard/blob/5ec53df566c77424caa6be827d0831da3916ecfa/KiCad/bbc-keyboard/bbc-keyboard.kicad_pcb",
+   "used": "Every key's centre and size, and which key it is"
   },
   {
    "author": "Daniel Beardsmore",
@@ -80,7 +82,8 @@
    "licence": "Public domain",
    "page": "https://commons.wikimedia.org/wiki/File:Acorn_BBC_Microcomputer.jpg",
    "sha256": "a616c736c51c4bf0f796be21ba426d435acdbf2d6b692cbf0cc3256f5782949a",
-   "url": "https://upload.wikimedia.org/wikipedia/commons/f/f8/Acorn_BBC_Microcomputer.jpg"
+   "url": "https://upload.wikimedia.org/wikipedia/commons/f/f8/Acorn_BBC_Microcomputer.jpg",
+   "used": "The opening in the case's top, the badge strip and its words, the three lights' order, the keys' colours, and the keys registered to K1"
   },
   {
    "author": "Stuart Brady (assumed by Commons)",
@@ -90,7 +93,8 @@
    "licence": "Public domain",
    "page": "https://commons.wikimedia.org/wiki/File:BBC_Micro_rear.jpeg",
    "sha256": "4072a59af7f7fab834ca2b912b0f6e3449aa8bdaa01bb621d9d556579dd5937e",
-   "url": "https://upload.wikimedia.org/wikipedia/commons/2/29/BBC_Micro_rear.jpeg"
+   "url": "https://upload.wikimedia.org/wikipedia/commons/2/29/BBC_Micro_rear.jpeg",
+   "used": "The rear: its ports, their labels and order, the vents, the mains panel's words, and the scale the rear check used"
   },
   {
    "author": "Daniel Beardsmore",
@@ -100,7 +104,8 @@
    "licence": "Public domain",
    "page": "https://commons.wikimedia.org/wiki/File:BBC_Micro_Type_1.jpg",
    "sha256": "745b34357b2befd5d1bcc501bb48ad9c3e345e2b876d59b3f812cec48d2e2403",
-   "url": "https://upload.wikimedia.org/wikipedia/commons/4/41/BBC_Micro_Type_1.jpg"
+   "url": "https://upload.wikimedia.org/wikipedia/commons/4/41/BBC_Micro_Type_1.jpg",
+   "used": "The keys' legends' places, registered to K1 as a recorded check"
   },
   {
    "author": "Stuart Brady (assumed by Commons)",
@@ -110,7 +115,8 @@
    "licence": "Public domain",
    "page": "https://commons.wikimedia.org/wiki/File:BBC_Micro.jpeg",
    "sha256": "4129306b45dda6b403e4cbab6fa4e96e305e0f9eaa5eb93c223e3dc74fa968c4",
-   "url": "https://upload.wikimedia.org/wikipedia/commons/3/37/BBC_Micro.jpeg"
+   "url": "https://upload.wikimedia.org/wikipedia/commons/3/37/BBC_Micro.jpeg",
+   "used": "The heights of the key tops, the lights and the opening's front, triangulated with O5"
   },
   {
    "author": "Stuart Brady (assumed by Commons)",
@@ -120,27 +126,31 @@
    "licence": "Public domain",
    "page": "https://commons.wikimedia.org/wiki/File:BBC_Micro_left.jpeg",
    "sha256": "7370967288c56ff10355a754f5dca5f73b1caf8285749fd0deb263cde7986e94",
-   "url": "https://upload.wikimedia.org/wikipedia/commons/8/8a/BBC_Micro_left.jpeg"
+   "url": "https://upload.wikimedia.org/wikipedia/commons/8/8a/BBC_Micro_left.jpeg",
+   "used": "The heights of the key tops, the lights and the opening's front, triangulated with O4"
   },
   {
    "author": "Chris Whytehead (Chris's Acorns)",
+   "byline": "Chris's Acorns",
    "fetched": "2026-10-13",
    "id": "O8-I",
    "kind": "photograph",
    "licence": "CC BY-SA 3.0, as the site's home page states under 'License to reuse': 'Information (including text and photos) presented on Chris's Acorns may be reused under the CC-BY-SA 3.0 license unless otherwise specified'. An older paragraph on the same page says the photographs 'remain my copyright. If you want to use them please ask me first'",
    "page": "http://chrisacorns.computinghistory.org.uk/",
    "sha256": "4f1a5dbd9a698aa7445dfbacd96e47aa2260f4ad723fdf55567c9df3a9fae3bd",
-   "url": "http://chrisacorns.computinghistory.org.uk/Pics/BBCB7I.jpg"
+   "url": "http://chrisacorns.computinghistory.org.uk/Pics/BBCB7I.jpg",
+   "used": "The connector names only: the words beside the five connectors underneath, read in order, and that they sit in one panel; the photograph itself is not shown"
   },
   {
    "author": "TE Connectivity (drawing 1757819, rev. F, 2013)",
    "fetched": "2026-10-13",
    "id": "P-TE_1757819",
    "kind": "document",
-   "licence": null,
+   "licence": "none stated",
    "page": "https://www.farnell.com/datasheets/1917994.pdf",
    "sha256": "6c70fc080dafcc4dcfab667cf79beec7ce85c07fea8d78037726a1caa067a8b2",
-   "url": "https://www.farnell.com/datasheets/1917994.pdf"
+   "url": "https://www.farnell.com/datasheets/1917994.pdf",
+   "used": "One fact: the spacing of a 15-way D socket's two mounting posts, the rear photograph's scale"
   }
  ],
  "typical": [
@@ -155,8 +165,7 @@
  "width": {
   "caseTopScale": 1.0387,
   "cornersScale": 1.0373,
-  "high": 1.0387,
-  "low": 1.0243,
+  "k1Mm": 399.5,
   "rearMm": 425.0986,
   "rearRatio": 1.0243,
   "resolved": false

@@ -239,10 +239,15 @@ def test_the_module_exports_every_part_with_a_note():
         line = next(l for l in text.splitlines() if l.startswith(f'export const {name} = '))
         assert '"note":' in line, name
     assert 'the check failed as measured' in text
-    width = "the Service Manual's size; the outside's measures read 1.024 to 1.040 times it, not resolved"
+    # corrected after task 9a's review (13 October 2026): the measures point different ways, not all wider
+    width = ("the Service Manual's size; the outside's measures point different ways, not resolved: in K1's units the keys read 1.0400 "
+             "and the opening's front corners 1.0300 times a frame that takes the case as 415 mm, so if K1 is true to size the case "
+             "is narrower, about 399 mm, the first perhaps partly parallax, the key tops standing above the plane registered; "
+             "on O2's 15-way D scale it reads 425.0 mm, wider")
     for name in ('CASE', 'RECESS', 'REAR'):
         line = next(l for l in text.splitlines() if l.startswith(f'export const {name} = '))
         assert width in line, name
+    assert 'times it' not in text
     assert "the rear's x values are on the 15-way D's scale, on which the case reads 425.0 mm wide, not rescaled to 415 mm" in text
 
 
