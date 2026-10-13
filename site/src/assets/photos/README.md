@@ -126,7 +126,7 @@ outside's, which takes from `nes.webp`, `nes-rear-right.webp`, `nes-pal-front.we
 |---|---|
 | What | The rear of a BBC Micro on a white background (painted in), nearly square on: the ports along the black rear panel, each with its name, the two ventilation slots and the mains panel |
 | Source | Wikimedia Commons, [`File:BBC_Micro_rear.jpeg`](https://commons.wikimedia.org/wiki/File:BBC_Micro_rear.jpeg) |
-| Author | StuartBrady, as Commons assumes from the copyright claims (Stuart Brady) |
+| Author | Stuart Brady (assumed by Commons): Commons names the uploader, StuartBrady, as the author, assumed from the copyright claims |
 | Licence | Public domain, as the file page states it, the uploader's own work assumed by Commons from its copyright claims. Checked on Commons' API on 13 October 2026 (`LicenseShortName` is `Public domain`, `Artist` "StuartBrady assumed (based on copyright claims)"). No credit is owed; the page gives one anyway |
 | Taken | 26 December 2005 (the file page's date, the day it was uploaded; the file has no Exif) |
 | Fetched | 13 October 2026 (first on 4 October), from `upload.wikimedia.org/wikipedia/commons/2/29/BBC_Micro_rear.jpeg`: 2048 by 994 pixels, 107,231 bytes, SHA-1 `3dad0bd9d8efedc7b9f6f6297ee94c32c6e3d572` (as Commons records it; the file here matches it), SHA-256 `4072a59af7f7fab834ca2b912b0f6e3449aa8bdaa01bb621d9d556579dd5937e` |
@@ -152,7 +152,7 @@ outside's, which takes from `nes.webp`, `nes-rear-right.webp`, `nes-pal-front.we
 |---|---|
 | What | A BBC Micro on a white background (painted in, across some of the case's corners), from the front and above: the case top, the keyboard panel with its slot at the left, the badge strip and the three lights |
 | Source | Wikimedia Commons, [`File:BBC_Micro.jpeg`](https://commons.wikimedia.org/wiki/File:BBC_Micro.jpeg) |
-| Author | StuartBrady, as Commons assumes from the copyright claims (Stuart Brady) |
+| Author | Stuart Brady (assumed by Commons): Commons names the uploader, StuartBrady, as the author, assumed from the copyright claims |
 | Licence | Public domain, as the file page states it, the uploader's own work assumed by Commons from its copyright claims. Checked on Commons' API on 13 October 2026 (`LicenseShortName` is `Public domain`, `Artist` "StuartBrady assumed (based on copyright claims)"). No credit is owed; the page gives one anyway |
 | Taken | 26 December 2005, 16:03:25 (Exif: Olympus C760UZ at 6.3 mm, a crop of its 2048 by 1536 frame) |
 | Fetched | 13 October 2026, from `upload.wikimedia.org/wikipedia/commons/3/37/BBC_Micro.jpeg`: 1929 by 1338 pixels, 210,220 bytes, SHA-1 `6b13abeb0250c0fce17b7e8bf0a0d6f8388dc343` (as Commons records it; the file here matches it), SHA-256 `4129306b45dda6b403e4cbab6fa4e96e305e0f9eaa5eb93c223e3dc74fa968c4` |
@@ -165,7 +165,7 @@ outside's, which takes from `nes.webp`, `nes-rear-right.webp`, `nes-pal-front.we
 |---|---|
 | What | The same BBC Micro on a white background (painted in), from the front left and above, 80 seconds after `bbc-micro-front.webp` by the two files' Exif |
 | Source | Wikimedia Commons, [`File:BBC_Micro_left.jpeg`](https://commons.wikimedia.org/wiki/File:BBC_Micro_left.jpeg), whose page says "Photographed by me. Released for the public domain." |
-| Author | StuartBrady, as Commons assumes from the copyright claims (Stuart Brady) |
+| Author | Stuart Brady (assumed by Commons): Commons names the uploader, StuartBrady, as the author, assumed from the copyright claims |
 | Licence | Public domain, as the file page states it, the uploader's own work assumed by Commons from its copyright claims. Checked on Commons' API on 13 October 2026 (`LicenseShortName` is `Public domain`, `Artist` "StuartBrady assumed (based on copyright claims)"). No credit is owed; the page gives one anyway |
 | Taken | 26 December 2005, 16:04:45 (Exif: Olympus C760UZ at 6.3 mm, a crop of its 2048 by 1536 frame) |
 | Fetched | 13 October 2026, from `upload.wikimedia.org/wikipedia/commons/8/8a/BBC_Micro_left.jpeg`: 1756 by 1239 pixels, 118,678 bytes, SHA-1 `e29fb1ed2a95230eae211c3492407f46e6f20ad7` (as Commons records it; the file here matches it), SHA-256 `7370967288c56ff10355a754f5dca5f73b1caf8285749fd0deb263cde7986e94` |
@@ -348,5 +348,5 @@ The BBC Micro's outside model is measured from these too (task 8 of its models p
 |---|---|---|---|---|---|---|
 | K1 | Dominic Beesley's KiCad keyboard for the BBC Micro, as this project's fork of it holds it at commit `5ec53df566c77424caa6be827d0831da3916ecfa` | <https://github.com/dbhq-uk/bbc-keyboard/blob/5ec53df566c77424caa6be827d0831da3916ecfa/KiCad/bbc-keyboard/bbc-keyboard.kicad_pcb> | Dominic Beesley | MIT (its notice is in `NOTICE.md`) | `35b34ac3ef0a04fb311ee1971eb9fc32cb1c323877377c4d1a74986c709b0929` | Every key's centre and size |
 | O8-I | The underside of an Issue 7 machine, 640 px wide | <http://chrisacorns.computinghistory.org.uk/Pics/BBCB7I.jpg> | Chris Whytehead, Chris's Acorns | CC BY-SA 3.0, as the site's home page states (an older paragraph there asks to be asked first) | `4f1a5dbd9a698aa7445dfbacd96e47aa2260f4ad723fdf55567c9df3a9fae3bd` | The words beside the five connectors under the front, in their order |
-| O8-H | The rear of the same machine, 640 px wide | <http://chrisacorns.computinghistory.org.uk/Pics/BBCB7H.jpg> | Chris Whytehead, Chris's Acorns | As O8-I | `4ba8776121497fe59006e0e252c6789059810f28ea4f6574d81ea0c32dd34e1b` | Looked at; nothing is measured from it |
+| O8-H | The rear of the same machine, 640 px wide | <http://chrisacorns.computinghistory.org.uk/Pics/BBCB7H.jpg> | Chris Whytehead, Chris's Acorns | As O8-I | `4ba8776121497fe59006e0e252c6789059810f28ea4f6574d81ea0c32dd34e1b` | Fetched, not used: looked at, nothing measured or read from it |
 | P-TE_1757819 | TE Connectivity's drawing 1757819 of its Amplimite D-subminiature plugs | <https://www.farnell.com/datasheets/1917994.pdf> | TE Connectivity | None stated | `6c70fc080dafcc4dcfab667cf79beec7ce85c07fea8d78037726a1caa067a8b2` | One dimension: the 15-way D's mounting holes, 33.20 to 33.45 mm apart, the scale on the rear photograph |

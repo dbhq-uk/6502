@@ -226,7 +226,8 @@ def test_the_rigid_motion_takes_two_points_to_two_points_and_reports_the_scale_t
 def test_the_module_exports_every_part_with_a_note():
     case = {'footprint': {'widthMm': 415, 'depthMm': 345}, 'heightMm': 73, 'outline': {'cornerRadiusMm': 3},
             'recess': {'opening': [[0, 0]], 'panelZ': 70, 'from': 'O1'}, 'profile': [{'y': 0, 'z': 5}], 'keyPlaneZ': 79,
-            'profileCheck': {'fallback': False}, 'profileFrom': 'D1', 'keys': [{'name': 'A'}], 'k1ToCase': {'from': 'x'},
+            'profileCheck': {'fallback': False}, 'profileFrom': 'D1', 'keys': [{'name': 'A'}], 'k1ToCase': {'from': 'x', 'impliedScale': 1.03},
+            'caseTop': {'scale': 1.04}, 'widthOnRear': {'mm': 425.0},
             'keyPlaneFrom': 'y', 'leds': [{'name': 'caps lock', 'x': 1, 'y': 2, 'z': 3}], 'ledsFrom': 'z',
             'badge': {'strip': [], 'words': ['W'], 'wordsBox': [0, 0, 1, 1], 'from': 'O1'}, 'grille': {'slots': [], 'from': 'O2'},
             'rear': [{'label': 'RGB', 'ref': 'SK3', 'kind': 'din', 'x': 1, 'z': 2, 'w': 3, 'h': 4}], 'mains': {}, 'rearCheck': {'verdict': 'fail'},
@@ -238,6 +239,11 @@ def test_the_module_exports_every_part_with_a_note():
         line = next(l for l in text.splitlines() if l.startswith(f'export const {name} = '))
         assert '"note":' in line, name
     assert 'the check failed as measured' in text
+    width = "the Service Manual's size; the outside's measures read 1.024 to 1.040 times it, not resolved"
+    for name in ('CASE', 'RECESS', 'REAR'):
+        line = next(l for l in text.splitlines() if l.startswith(f'export const {name} = '))
+        assert width in line, name
+    assert "the rear's x values are on the 15-way D's scale, on which the case reads 425.0 mm wide, not rescaled to 415 mm" in text
 
 
 def test_colour_classes_go_by_the_cap_not_its_legend(monkeypatch):
@@ -256,3 +262,17 @@ def test_colour_classes_go_by_the_cap_not_its_legend(monkeypatch):
     caps = [{'x': c['x'] * PITCH / 40, 'y': c['y'] * PITCH / 40} for c in caps]
     classes, clusters = keys.colour_classes(caps, H)
     assert classes == kinds
+
+
+def test_judge_keys_gives_the_plan_s_three_bands():
+    """The plan's O1 row: median at most 1.0, 90th percentile at most 2.0, largest at most 3.0 and 30 keys to pass;
+    a median over 1.5 or more than five keys over 3.0 is a STOP; anything else is between."""
+    k = lambda median, p90, mx, n=50, over3=0: {'heldOutMm': {'median': median, 'p90': p90, 'max': mx}, 'n': n, 'over3mm': over3}
+    assert keys.judge_keys(k(1.0, 2.0, 3.0)) == 'pass'
+    assert keys.judge_keys(k(1.2, 1.5, 2.0)) == 'between pass and stop'
+    assert keys.judge_keys(k(0.9, 2.1, 2.5)) == 'between pass and stop'
+    assert keys.judge_keys(k(0.9, 1.5, 3.1)) == 'between pass and stop'
+    assert keys.judge_keys(k(0.9, 1.5, 2.0, n=29)) == 'between pass and stop'
+    assert keys.judge_keys(k(1.6, 1.8, 2.0)) == 'STOP'
+    assert keys.judge_keys(k(0.9, 3.5, 9.0, over3=6)) == 'STOP'
+    assert keys.judge_keys(k(1.5, 1.8, 2.0)) == 'between pass and stop'
