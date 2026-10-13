@@ -634,7 +634,7 @@ test('ic-table.json is table 8.1, and gives each IC of the nets check its GND an
 
 test('copper.json was written by the method fixed before its checks ran, with the hashes the journal records', () => {
   const journal = fs.readFileSync(path.join(REPO_ROOT, 'docs', 'journal', '2026-10-04-the-bbc-micro-models.md'), 'utf8');
-  const block = journal.split('### The method fixed, and the checks as fixed')[1] ?? '';
+  const block = journal.split('### The method fixed, and the checks as fixed')[1]?.split(/\n#{2,3} /)[0] ?? '';
   const recorded = Object.fromEntries([...block.matchAll(/^([0-9a-f]{64}) (\S+)$/gm)].map(([, sha, f]) => [f, sha]));
   assert.ok(Object.keys(recorded).length >= 7, 'the journal records the method\'s hashes');
   assert.deepEqual(copper.methodFixed, recorded);
@@ -662,7 +662,7 @@ test('board_trace.py and common.py on disk are the method fixed before task 4\'s
   // to either script (a threshold such as NETS_MIN_SHARE or I5_IOU_MIN, say) means copper.json no longer comes from
   // the code in the repository, and needs a new check, fixed before it runs, and a journal entry.
   const journal = fs.readFileSync(path.join(REPO_ROOT, 'docs', 'journal', '2026-10-04-the-bbc-micro-models.md'), 'utf8');
-  const block = journal.split('### The method fixed, and the checks as fixed')[1] ?? '';
+  const block = journal.split('### The method fixed, and the checks as fixed')[1]?.split(/\n#{2,3} /)[0] ?? '';
   const recorded = Object.fromEntries([...block.matchAll(/^([0-9a-f]{64}) (\S+)$/gm)].map(([, sha, f]) => [f, sha]));
   for (const f of ['tools/bbc-micro-model/board_trace.py', 'tools/bbc-micro-model/common.py']) {
     assert.ok(recorded[f], `the journal records no hash for ${f}`);

@@ -16,7 +16,7 @@ outside the repository, and every script refuses an input whose SHA-256 is not
 the one in [`data/sources.json`](data/sources.json). The scans and the
 photographs with no stated licence are never committed, not even resized.
 
-So far (tasks 0, 2, 3 and 4) it holds:
+So far (tasks 0, 2, 3, 4 and 5) it holds:
 
 | File | What it does |
 |---|---|
@@ -26,9 +26,10 @@ So far (tasks 0, 2, 3 and 4) it holds:
 | `board_frame.py` | Task 2: the board frame on scan I1: x and y scales from rows of pads (held out and judged), the board's turn, its outline and its holes; writes `data/frame.json` and a rectified copy of I1 in `out/` |
 | `board_register.py` | Task 3: the solder side (I2, mirrored) registered to I1 on every hole found, tinned pads and open rings, and judged on holes held out; the fitted map from I2 to the board frame, kept unrounded for task 4; the pads, drills (each with both faces' centres) and footprints (DIPs with pin 1 and their references read by hand, connectors, SIPs); the mounting holes on their top rims; writes `data/registration.json` and overlays in `out/` |
 | `board_trace.py` | Task 4: the copper on both faces of the board and its printed legend, traced from I1 and I2 in the board frame; the plan's checks on them (coverage, drills in copper, the known nets of 51 ICs, and the component side against I5, registered on chip pins); writes `data/copper.json`, the track map `site/src/assets/tracks/bbc-micro-board.webp`, and overlays in `out/`. `--look` traces and draws the overlays and runs no check; `--hashes` prints the SHA-256 of the method's files |
+| `board_parts.py` | Task 5: every part on the board, placed on task 3's footprints (and the two 8-pin DIPs, from pads named by hand) and named from the Service Manual's table 8.1 through `data/ic-table.json`, with the fitted set the page runs; the manual's places checked after a similarity, on the convention `--settle` chose from four parts first; the markings read on I5 checked against the table (I6 read and recorded); connectors and the large parts from boxes read on I5; two-lead parts inferred from the print; writes `data/parts.json` and `site/src/models/bbc-micro-board-parts.mjs`. `--look` places the parts and draws them in `out/` and runs neither held-out check; `--crops` writes the crops the markings are read on; `--hashes` prints the SHA-256 of the method's files |
 | `diagnose_nets.py` | After task 4's run, looking only: rebuilds the nets check's pieces from the masks the run left in `out/` and prints why the check failed (the piece joining GND to +5V, and the pieces under the pins left out of the largest net). Written after the check failed; no part of the method |
-| `run-board.sh` | The inside model's scripts, in order (so far `verify.py I1 I2 I5`, `board_frame.py`, `board_register.py` and `board_trace.py --map-ppm 8`) |
-| `tests/test_common.py`, `tests/test_board_frame.py`, `tests/test_board_register.py`, `tests/test_board_trace.py` | pytest, on made-up inputs |
+| `run-board.sh` | The inside model's scripts, in order (so far `verify.py I1 I2 I5 I6 D1`, `board_frame.py`, `board_register.py`, `board_trace.py --map-ppm 8` and `board_parts.py`) |
+| `tests/test_common.py`, `tests/test_board_frame.py`, `tests/test_board_register.py`, `tests/test_board_trace.py`, `tests/test_board_parts.py` | pytest, on made-up inputs |
 | `data/` | See [`data/README.md`](data/README.md) |
 
 ## Fetching the inputs by hand
@@ -68,7 +69,7 @@ export BBC_MODEL_INPUTS=~/bbc-model-inputs
 /tmp/bbcvenv/bin/python tools/bbc-micro-model/verify.py          # every input; or name some: verify.py I1 I2
 /tmp/bbcvenv/bin/python -m pytest tools/bbc-micro-model/tests -q
 cd tools/bbc-micro-model && /tmp/bbcvenv/bin/python spike.py      # writes data/spike.json, and overlays in out/
-PYTHON=/tmp/bbcvenv/bin/python tools/bbc-micro-model/run-board.sh   # writes data/frame.json, data/registration.json, data/copper.json and the track map, and overlays in out/
+PYTHON=/tmp/bbcvenv/bin/python tools/bbc-micro-model/run-board.sh   # writes data/frame.json, data/registration.json, data/copper.json, the track map, data/parts.json and the parts module, and overlays in out/
 ```
 
 `verify.py` says, for each input, present, missing or hash differs. It exits

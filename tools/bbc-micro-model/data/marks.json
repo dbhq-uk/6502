@@ -5268,5 +5268,415 @@
     }
    }
   ]
+ },
+ "parts": {
+  "what": "Task 5's marks. Unless a mark says otherwise, each was read on the rectified copy of I1 that board_frame.py writes to out/ (16 px/mm in the board frame), or on I5 drawn onto the board frame through task 4's fit (refitted unrounded, as board_parts.py does), each crop given as a box in board millimetres (x0, y0, x1, y1) with a 5 mm grid drawn on it and its zoom.",
+  "eightPin": {
+   "what": "The two 8-pin DIPs, which task 3 did not group (it grouped DIPs of 14 to 40 pins): each pad, in pin order, as its index in registration.json's pads, or null for a pad task 3 did not find. Pin 1 is at the outline's printed chamfer, as on every DIP on the board, and the reference is printed beside the outline.",
+   "marks": [
+    {
+     "ref": "IC16",
+     "pads": [
+      33,
+      54,
+      74,
+      100,
+      99,
+      75,
+      55,
+      34
+     ],
+     "crop": {
+      "boxMm": [
+       0,
+       2,
+       25,
+       25
+      ],
+      "zoom": 3,
+      "on": "I1"
+     },
+     "reason": "IC16 is printed beside the outline, the chamfer at its rear left over pad 33; task 3 grouped the two rows as two 4-pad SIPs"
+    },
+    {
+     "ref": "IC19",
+     "pads": [
+      2256,
+      2289,
+      null,
+      2357,
+      2358,
+      2327,
+      2290,
+      2257
+     ],
+     "crop": {
+      "boxMm": [
+       42,
+       186,
+       66,
+       212
+      ],
+      "zoom": 3,
+      "on": "I1"
+     },
+     "reason": "IC19 is printed beside the outline, the chamfer at its rear left over pad 2256; pin 3's pad shows on the crop at about (50.5, 201.4) but task 3 did not find it, so its place is inferred from the pitch"
+    }
+   ]
+  },
+  "outlines": {
+   "what": "Bodies read by hand on I5 drawn onto the board frame through task 4's fit (board_parts.py's i5 fit), each box [x0, y0, x1, y1] in board millimetres, read on crops at 20 or 30 pixels a millimetre with a 2 mm grid; PL13 and PL14 instead from task 3's footprints (their pads' box, 0.3 mm round). The fit is the board's plane: a body's top, which a view from above shows, leans away from the photograph's middle by its height times its distance from the middle over the camera's distance, by up to a few millimetres for the tall parts at the edges; not corrected. Not drawn: SK2, the composite video BNC, which is on the case and wired to the board (D1 PDF page 91, the parts list: \"B.N.C. CONNECTOR ... PANEL MOUNT SK2\"); SK7, Econet's socket, not fitted (modification E, D1 PDF page 39); PL16 and the links (S1 to S39), not read. A label marked [inferring] takes the socket's number from the B+ section of D1, whose circuit description names the same sockets.",
+   "boxes": [
+    {
+     "ref": "SK1",
+     "group": "connector",
+     "kind": "phono",
+     "edge": "rear",
+     "box": [
+      271.9,
+      -7.5,
+      279.3,
+      -0.3
+     ],
+     "label": "UHF out, the modulator's socket",
+     "labelFrom": "D1 PDF page 94, the parts list: \"SK1 (UHF MODULATOR)\"",
+     "crop": {
+      "boxMm": [
+       260,
+       -12,
+       315,
+       36
+      ],
+      "zoom": 2
+     }
+    },
+    {
+     "ref": "SK3",
+     "group": "connector",
+     "kind": "din",
+     "edge": "rear",
+     "box": [
+      204.0,
+      -1.5,
+      226.3,
+      16.0
+     ],
+     "label": "RGB",
+     "labelFrom": "D1 PDF page 29: \"the RGB connector (SK 3)\"; SK3 printed beside it",
+     "crop": {
+      "boxMm": [
+       148,
+       -6,
+       230,
+       30
+      ],
+      "zoom": 2
+     }
+    },
+    {
+     "ref": "SK4",
+     "group": "connector",
+     "kind": "din",
+     "edge": "rear",
+     "box": [
+      184.0,
+      -1.5,
+      204.0,
+      16.5
+     ],
+     "label": "RS423",
+     "labelFrom": "D1 PDF page 126, the B+ section: \"the cassette (SK5) and RS423 (SK4)\" [inferring]; SK4 printed beside it",
+     "crop": {
+      "boxMm": [
+       148,
+       -6,
+       230,
+       30
+      ],
+      "zoom": 2
+     }
+    },
+    {
+     "ref": "SK5",
+     "group": "connector",
+     "kind": "din",
+     "edge": "rear",
+     "box": [
+      163.9,
+      -1.5,
+      184.0,
+      21.0
+     ],
+     "label": "cassette",
+     "labelFrom": "D1 PDF page 126, the B+ section: \"the cassette (SK5)\" [inferring]; SK5 printed beside it",
+     "crop": {
+      "boxMm": [
+       148,
+       -6,
+       230,
+       30
+      ],
+      "zoom": 2
+     }
+    },
+    {
+     "ref": "SK6",
+     "group": "connector",
+     "kind": "dType",
+     "edge": "rear",
+     "box": [
+      85.4,
+      -6.7,
+      123.7,
+      14.2
+     ],
+     "label": "analogue in",
+     "labelFrom": "D1 PDF page 35, \"15-way D-type socket ... SK6\", and page 127, the B+ section: \"four analogue inputs, from SK6\" [inferring]",
+     "crop": {
+      "boxMm": [
+       20,
+       -10,
+       130,
+       20
+      ],
+      "zoom": 2
+     }
+    },
+    {
+     "ref": "PL8",
+     "group": "connector",
+     "kind": "idc",
+     "edge": "underside",
+     "box": [
+      -1.0,
+      218.5,
+      61.0,
+      232.5
+     ],
+     "label": "disc drive",
+     "labelFrom": "D1 PDF page 41, link 8: \"links disc head load signal to PL8\"",
+     "crop": {
+      "boxMm": [
+       -6,
+       205,
+       100,
+       242
+      ],
+      "zoom": 2
+     }
+    },
+    {
+     "ref": "PL9",
+     "group": "connector",
+     "kind": "idc",
+     "edge": "underside",
+     "box": [
+      61.5,
+      218.5,
+      115.5,
+      232.5
+     ],
+     "label": "printer",
+     "labelFrom": "D1 PDF page 46: \"PL9, the printer port\"",
+     "crop": {
+      "boxMm": [
+       95,
+       205,
+       200,
+       242
+      ],
+      "zoom": 2
+     }
+    },
+    {
+     "ref": "PL10",
+     "group": "connector",
+     "kind": "idc",
+     "edge": "underside",
+     "box": [
+      131.5,
+      218.5,
+      176.0,
+      232.5
+     ],
+     "label": "user port",
+     "labelFrom": "D1 PDF page 125, the B+ section: the user port's lines \"connecting to PL10\" [inferring]",
+     "crop": {
+      "boxMm": [
+       95,
+       205,
+       200,
+       242
+      ],
+      "zoom": 2
+     }
+    },
+    {
+     "ref": "PL11",
+     "group": "connector",
+     "kind": "idc",
+     "edge": "underside",
+     "box": [
+      177.0,
+      218.5,
+      239.5,
+      232.5
+     ],
+     "label": "1 MHz bus",
+     "labelFrom": "D1 PDF page 58: FRED and JIM at PL11 pins 10 and 12",
+     "crop": {
+      "boxMm": [
+       195,
+       205,
+       315,
+       242
+      ],
+      "zoom": 2
+     }
+    },
+    {
+     "ref": "PL12",
+     "group": "connector",
+     "kind": "idc",
+     "edge": "underside",
+     "box": [
+      240.0,
+      218.5,
+      309.7,
+      232.5
+     ],
+     "label": "Tube",
+     "labelFrom": "D1 PDF page 58: the Tube at PL12 pin 8",
+     "crop": {
+      "boxMm": [
+       195,
+       205,
+       315,
+       242
+      ],
+      "zoom": 2
+     }
+    },
+    {
+     "ref": "PL13",
+     "group": "connector",
+     "kind": "header",
+     "edge": "board",
+     "box": [
+      67.2,
+      156.9,
+      110.7,
+      159.6
+     ],
+     "label": "keyboard",
+     "labelFrom": "D1 PDF page 31: \"The keyboard circuit ... connects via PL 13\"",
+     "crop": null
+    },
+    {
+     "ref": "PL14",
+     "group": "connector",
+     "kind": "header",
+     "edge": "board",
+     "box": [
+      10.1,
+      157.0,
+      35.4,
+      159.7
+     ],
+     "label": "serial ROM",
+     "labelFrom": "D1 PDF page 94, the parts list: \"PL14 (SERIAL ROM)\"",
+     "crop": null
+    },
+    {
+     "ref": "PL15",
+     "group": "connector",
+     "kind": "header",
+     "edge": "board",
+     "box": [
+      43.2,
+      211.6,
+      55.8,
+      216.5
+     ],
+     "label": "loudspeaker",
+     "labelFrom": "D1 PDF page 31: \"to drive a speaker from PL15\"",
+     "crop": {
+      "boxMm": [
+       -6,
+       205,
+       100,
+       242
+      ],
+      "zoom": 2
+     }
+    },
+    {
+     "ref": "modulator",
+     "group": "other",
+     "kind": "modulator",
+     "box": [
+      269.5,
+      -0.3,
+      310.0,
+      27.5
+     ],
+     "label": "the UHF modulator (Astec UM1233 E36, as I5 shows it)",
+     "labelFrom": "I5's label; D1 PDF page 29: a UHF signal on channel 36",
+     "crop": {
+      "boxMm": [
+       260,
+       -12,
+       315,
+       36
+      ],
+      "zoom": 2
+     }
+    },
+    {
+     "ref": "X1",
+     "group": "other",
+     "kind": "crystal",
+     "box": [
+      179.0,
+      36.3,
+      182.7,
+      46.2
+     ],
+     "label": "the 16 MHz crystal",
+     "labelFrom": "D1 PDF page 19: \"a 16 MHz crystal oscillator (IC43)\"; X printed beside it",
+     "crop": {
+      "boxMm": [
+       160,
+       20,
+       190,
+       48
+      ],
+      "zoom": 3
+     }
+    },
+    {
+     "ref": "RELAY",
+     "group": "other",
+     "kind": "relay",
+     "box": [
+      164.8,
+      24.7,
+      180.3,
+      35.0
+     ],
+     "label": "the cassette motor's relay",
+     "labelFrom": "D1 PDF page 29: motor control \"by using a small relay\"; RELAY printed on the board",
+     "crop": {
+      "boxMm": [
+       160,
+       20,
+       190,
+       48
+      ],
+      "zoom": 3
+     }
+    }
+   ]
+  }
  }
 }

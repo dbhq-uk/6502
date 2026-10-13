@@ -80,6 +80,118 @@ Taken on 4 October 2026 at the researcher's recommendations, Dan having said to 
 
 **Not usable, and not to be used:** M1 (non-commercial) and M2 (non-commercial, share-alike). K2 only as a cross-check.
 
+## The fitted set
+
+Added by task 5 of the models plan on 13 October 2026. This table is the record of which ICs the inside model shows fitted, which counter of the machine marks each (`sheila`, task 6's `BbcChip` names) and which socket holds which paged ROM. `tools/bbc-micro-model/data/ic-table.json`, `data/parts.json` and `site/src/models/bbc-micro-board-parts.mjs` are generated or edited to agree with it, and `site/tests/bbc-models.test.mjs` fails if any of them differs from it.
+
+The board is the Model B the page runs: a Model B with the 8271 disc interface and the DFS, and without Econet or speech (the choice "Which board the inside shows" above). Each IC is fitted or not by the upgrade in the Service Manual's section 4 that fits it [from D1, PDF pages 35 to 40]: modification B, "Convert Model A to Model B", fits IC61 to IC77; modification D, "Add 5 1/4 inch Disc Interface to Basic Model B", fits IC78 to IC87 and "1 off 2764 EPROM (DFS) IC88"; modification E, "Add Econet Interface", fits IC87, IC89, IC91, IC93 to IC97 and the NFS in IC88; modification C, "Add Speech Option", fits IC98 and IC99. An IC no upgrade adds is on every Model B. Table 8.1 itself says IC90 and IC92 are not fitted. IC100 and IC101 are sideways ROM sockets, left empty because the machine runs BASIC and the DFS only. The board in I5 differs: it has Econet and no disc interface (its 8271 socket and the disc chips' sockets are empty), so it is a check on identities and places, not on which ICs are fitted.
+
+The counters come from the Service Manual's strobe list for SHEILA's select lines [from D1, PDF page 58, "DEFPROC strobe select lines": `&FE00` IC2, `&FE08` IC4, `&FE10` IC7, `&FE20` IC6, `&FE30` IC76, `&FE40` IC3, `&FE60` IC69, `&FE80` IC78, `&FEC0` IC73], and the sound chip, IC18, is written through the system VIA (`via.md`). Which socket holds BASIC is table 8.1's role for IC52; the DFS's socket is modification D's.
+
+| IC | Part (table 8.1) | Fitted | Why | Counter | Paged ROM |
+|---|---|---|---|---|---|
+| IC1 | 6502A | yes | Model B (no upgrade adds it) |  |  |
+| IC2 | 6845 | yes | Model B (no upgrade adds it) | crtc |  |
+| IC3 | 6522 | yes | Model B (no upgrade adds it) | systemVia |  |
+| IC4 | 6850 | yes | Model B (no upgrade adds it) | acia |  |
+| IC5 | SAA5050 | yes | Model B (no upgrade adds it) |  |  |
+| IC6 | 5C094 | yes | Model B (no upgrade adds it) | videoUla |  |
+| IC7 | 2C199 | yes | Model B (no upgrade adds it) | serialUla |  |
+| IC8 | 81LS95 | yes | Model B (no upgrade adds it) |  |  |
+| IC9 | 81LS95 | yes | Model B (no upgrade adds it) |  |  |
+| IC10 | 81LS95 | yes | Model B (no upgrade adds it) |  |  |
+| IC11 | 81LS95 | yes | Model B (no upgrade adds it) |  |  |
+| IC12 | 81LS95 | yes | Model B (no upgrade adds it) |  |  |
+| IC13 | 81LS95 | yes | Model B (no upgrade adds it) |  |  |
+| IC14 | 74LS245 | yes | Model B (no upgrade adds it) |  |  |
+| IC15 | 74LS273 | yes | Model B (no upgrade adds it) |  |  |
+| IC16 | LM555 | yes | Model B (no upgrade adds it) |  |  |
+| IC17 | LM324 | yes | Model B (no upgrade adds it) |  |  |
+| IC18 | 76489 | yes | Model B (no upgrade adds it) | sound |  |
+| IC19 | LM386 | yes | Model B (no upgrade adds it) |  |  |
+| IC20 | 74LS139 | yes | Model B (no upgrade adds it) |  |  |
+| IC21 | 74LS00 | yes | Model B (no upgrade adds it) |  |  |
+| IC22 | 74LS30 | yes | Model B (no upgrade adds it) |  |  |
+| IC23 | 74LS30 | yes | Model B (no upgrade adds it) |  |  |
+| IC24 | 74LS138 | yes | Model B (no upgrade adds it) |  |  |
+| IC25 | 74LS20 | yes | Model B (no upgrade adds it) |  |  |
+| IC26 | 74LS139 | yes | Model B (no upgrade adds it) |  |  |
+| IC27 | 7438 | yes | Model B (no upgrade adds it) |  |  |
+| IC28 | 74LS51 | yes | Model B (no upgrade adds it) |  |  |
+| IC29 | 74LS32 | yes | Model B (no upgrade adds it) |  |  |
+| IC30 | 74LS74 | yes | Model B (no upgrade adds it) |  |  |
+| IC31 | 74LS34 | yes | Model B (no upgrade adds it) |  |  |
+| IC32 | 74LS259 | yes | Model B (no upgrade adds it) |  |  |
+| IC33 | 74LS04 | yes | Model B (no upgrade adds it) |  |  |
+| IC34 | 74LS74 | yes | Model B (no upgrade adds it) |  |  |
+| IC35 | LM324 | yes | Model B (no upgrade adds it) |  |  |
+| IC36 | 74LS10 | yes | Model B (no upgrade adds it) |  |  |
+| IC37 | 74LS04 | yes | Model B (no upgrade adds it) |  |  |
+| IC38 | 74LS86 | yes | Model B (no upgrade adds it) |  |  |
+| IC39 | 74LS283 | yes | Model B (no upgrade adds it) |  |  |
+| IC40 | 74S00 | yes | Model B (no upgrade adds it) |  |  |
+| IC41 | 74LS02 | yes | Model B (no upgrade adds it) |  |  |
+| IC42 | 74LS163 | yes | Model B (no upgrade adds it) |  |  |
+| IC43 | 74S04 | yes | Model B (no upgrade adds it) |  |  |
+| IC44 | 74LS74 | yes | Model B (no upgrade adds it) |  |  |
+| IC45 | 74S139 | yes | Model B (no upgrade adds it) |  |  |
+| IC46 | 74S74 | yes | Model B (no upgrade adds it) |  |  |
+| IC47 | 74LS86 | yes | Model B (no upgrade adds it) |  |  |
+| IC48 | 74LS86 | yes | Model B (no upgrade adds it) |  |  |
+| IC49 | 74LS00 | yes | Model B (no upgrade adds it) |  |  |
+| IC50 | 74LS00 | yes | Model B (no upgrade adds it) |  |  |
+| IC51 | (27128) | yes | Model B (no upgrade adds it) |  |  |
+| IC52 | (27128) | yes | Model B (no upgrade adds it) |  | BASIC |
+| IC53 | 4816 | yes | Model B (no upgrade adds it) |  |  |
+| IC54 | 4816 | yes | Model B (no upgrade adds it) |  |  |
+| IC55 | 4816 | yes | Model B (no upgrade adds it) |  |  |
+| IC56 | 4816 | yes | Model B (no upgrade adds it) |  |  |
+| IC57 | 4816 | yes | Model B (no upgrade adds it) |  |  |
+| IC58 | 4816 | yes | Model B (no upgrade adds it) |  |  |
+| IC59 | 4816 | yes | Model B (no upgrade adds it) |  |  |
+| IC60 | 4816 | yes | Model B (no upgrade adds it) |  |  |
+| IC61 | 4816 | yes | modification B, page 35 |  |  |
+| IC62 | 4816 | yes | modification B, page 35 |  |  |
+| IC63 | 4816 | yes | modification B, page 35 |  |  |
+| IC64 | 4816 | yes | modification B, page 35 |  |  |
+| IC65 | 4816 | yes | modification B, page 35 |  |  |
+| IC66 | 4816 | yes | modification B, page 35 |  |  |
+| IC67 | 4816 | yes | modification B, page 35 |  |  |
+| IC68 | 4816 | yes | modification B, page 35 |  |  |
+| IC69 | 6522 | yes | modification B, page 35 | userVia |  |
+| IC70 | 74LS244 | yes | modification B, page 35 |  |  |
+| IC71 | 74LS244 | yes | modification B, page 35 |  |  |
+| IC72 | 74LS245 | yes | modification B, page 35 |  |  |
+| IC73 | uPD7002 | yes | modification B, page 35 | adc |  |
+| IC74 | 88LS120 | yes | modification B, page 35 |  |  |
+| IC75 | 3691 | yes | modification B, page 35 |  |  |
+| IC76 | 74LS163 | yes | modification B, page 35 | romLatch |  |
+| IC77 | 74S00 | yes | modification B, page 35 |  |  |
+| IC78 | 8271 | yes | modification D, page 38 | fdc8271 |  |
+| IC79 | 7438 | yes | modification D, page 38 |  |  |
+| IC80 | 7438 | yes | modification D, page 38 |  |  |
+| IC81 | 74LS393 | yes | modification D, page 38 |  |  |
+| IC82 | 74LS10 | yes | modification D, page 38 |  |  |
+| IC83 | 4013 | yes | modification D, page 38 |  |  |
+| IC84 | 4013 | yes | modification D, page 38 |  |  |
+| IC85 | 4020 | yes | modification D, page 38 |  |  |
+| IC86 | 74LS393 | yes | modification D, page 38 |  |  |
+| IC87 | 74LS123 | yes | modification D, page 38 |  |  |
+| IC88 | 2764 | yes | modification D (the DFS), page 38 |  | DFS |
+| IC89 | 68B54 | no | Econet, modification E, page 39 |  |  |
+| IC90 | 40178 | no | table 8.1: not fitted |  |  |
+| IC91 | 74LS132 | no | Econet, modification E, page 39 |  |  |
+| IC92 | 74LS74 | no | table 8.1: not fitted |  |  |
+| IC93 | 75159 | no | Econet, modification E, page 39 |  |  |
+| IC94 | LM319 | no | Econet, modification E, page 39 |  |  |
+| IC95 | LM319 | no | Econet, modification E, page 39 |  |  |
+| IC96 | 74LS244 | no | Econet, modification E, page 39 |  |  |
+| IC97 | 74LS74 | no | Econet, modification E, page 39 |  |  |
+| IC98 | TMS6100 | no | speech, modification C, page 37 |  |  |
+| IC99 | TMS5220 | no | speech, modification C, page 37 |  |  |
+| IC100 | (27128) | no | an empty sideways ROM socket |  |  |
+| IC101 | (27128) | no | an empty sideways ROM socket |  |  |
+
 ## Downloaded for the work
 
 SHA-256 of the files the research downloaded (kept at `~/dbhq-previews/bbc-model-research/`, not committed: the scans are 13 to 15 MB with no stated licence):

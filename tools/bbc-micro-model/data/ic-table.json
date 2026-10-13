@@ -1,12 +1,12 @@
 {
- "about": "The Issue 7 board's ICs as Acorn's Service Manual (D1) lists them in table 8.1, \"Integrated circuits\" (PDF pages 66 and 67, printed pages 56 and 57), transcribed by hand on 13 October 2026 from the page images: each IC's reference, its part as the table prints it, its place in mm from the board's SW corner as the table gives it (manualXY, task 5's check), and its role in our words where the table gives one. Task 4 added, before its nets check was run, the GND and +5V pins of the ICs that check uses, each with the data sheet it was read from (pinoutSourceId, an id in sources.json with the sheet's SHA-256); every other IC says why it is left out. The reasons were reworded after review on 13 October 2026, after the run, as documentation only: the set of ICs and every pin are as the run used them. Task 5 completes the file. Facts read from the sources named, not their text.",
+ "about": "The Issue 7 board's ICs as Acorn's Service Manual (D1) lists them in table 8.1, \"Integrated circuits\" (PDF pages 66 and 67, printed pages 56 and 57), transcribed by hand on 13 October 2026 from the page images: each IC's reference, its part as the table prints it, its place in mm from the board's SW corner as the table gives it (manualXY, task 5's check), and its role in our words where the table gives one. Task 4 added, before its nets check was run, the GND and +5V pins of the ICs that check uses, each with the data sheet it was read from (pinoutSourceId, an id in sources.json with the sheet's SHA-256); every other IC says why it is left out. The reasons were reworded after review on 13 October 2026, after the run, as documentation only: the set of ICs and every pin are as the run used them. Task 5 completes the file. Facts read from the sources named, not their text. Task 5 completed it on 13 October 2026: every IC's pins and package (pinsFrom says where from), a role for every IC (roleFrom: table 8.1, D1's circuit description by page, or what the part is by its type), the fitted set (fitted and fittedWhy: the Model B the page runs, with the 8271 disc interface and the DFS and without Econet or speech, each IC by the upgrade in D1 section 4 that fits it) and the paged ROMs (paged). The record of the fitted set is docs/bbc-micro/facts/models.md, \"The fitted set\".",
  "source": "D1",
  "pages": "PDF pages 66 and 67 (printed pages 56 and 57), table 8.1",
  "ics": [
   {
    "ref": "IC1",
    "part": "6502A",
-   "role": null,
+   "role": "the processor",
    "manualXY": [
     160.0,
     85.0
@@ -17,7 +17,11 @@
    "gnd": 1,
    "vcc": 8,
    "pinoutSource": "Rockwell, \"R650X and R651X Microprocessors (CPU)\" data sheet, Document No. 29000D39, Rev. 8, June 1987, the R6502's 40-pin pinout on page 3 (http://archive.6502.org/datasheets/rockwell_r650x_r651x.pdf), read 13 October 2026: pin 1 VSS, pin 8 VCC (pin 21 is VSS too). The board's part is the 6502A",
-   "pinoutSourceId": "P-ROCKWELL_R650X_R651X"
+   "pinoutSourceId": "P-ROCKWELL_R650X_R651X",
+   "pinsFrom": "the data sheet its pinoutSource names",
+   "roleFrom": "what the part is, by its type",
+   "fitted": true,
+   "fittedWhy": "on every Model B: table 8.1 lists it and no upgrade in D1 section 4 (PDF pages 35 to 40) adds it"
   },
   {
    "ref": "IC2",
@@ -28,7 +32,13 @@
     140.0
    ],
    "page": 66,
-   "excludedWhy": "no data sheet for the 6845 was read (not found at the address tried on 13 October 2026), so its pinout has no source"
+   "excludedWhy": "no data sheet for the 6845 was read (not found at the address tried on 13 October 2026), so its pinout has no source",
+   "pins": 40,
+   "package": "DIP-40",
+   "pinsFrom": "the part's usual DIP package, not read from a data sheet; checked against its footprint's pads by board_parts.py",
+   "roleFrom": "table 8.1's comment, in our words",
+   "fitted": true,
+   "fittedWhy": "on every Model B: table 8.1 lists it and no upgrade in D1 section 4 (PDF pages 35 to 40) adds it"
   },
   {
    "ref": "IC3",
@@ -44,7 +54,11 @@
    "gnd": 1,
    "vcc": 20,
    "pinoutSource": "Rockwell, \"R6522 Versatile Interface Adapter (VIA)\" data sheet, Document No. 29000D47, Rev. 9, June 1987, Figure 1 \"R6522 Pin Assignments\" (http://archive.6502.org/datasheets/rockwell_r6522_via.pdf), read 13 October 2026: pin 1 VSS, pin 20 VCC",
-   "pinoutSourceId": "P-ROCKWELL_R6522_VIA"
+   "pinoutSourceId": "P-ROCKWELL_R6522_VIA",
+   "pinsFrom": "the data sheet its pinoutSource names",
+   "roleFrom": "table 8.1's comment, in our words",
+   "fitted": true,
+   "fittedWhy": "on every Model B: table 8.1 lists it and no upgrade in D1 section 4 (PDF pages 35 to 40) adds it"
   },
   {
    "ref": "IC4",
@@ -55,7 +69,13 @@
     141.0
    ],
    "page": 66,
-   "excludedWhy": "no data sheet for the 6850 was read (not found at the address tried on 13 October 2026), so its pinout has no source"
+   "excludedWhy": "no data sheet for the 6850 was read (not found at the address tried on 13 October 2026), so its pinout has no source",
+   "pins": 24,
+   "package": "DIP-24",
+   "pinsFrom": "the part's usual DIP package, not read from a data sheet; checked against its footprint's pads by board_parts.py",
+   "roleFrom": "table 8.1's comment, in our words",
+   "fitted": true,
+   "fittedWhy": "on every Model B: table 8.1 lists it and no upgrade in D1 section 4 (PDF pages 35 to 40) adds it"
   },
   {
    "ref": "IC5",
@@ -66,7 +86,13 @@
     102.0
    ],
    "page": 66,
-   "excludedWhy": "no data sheet for the SAA5050 was read, so its pinout has no source"
+   "excludedWhy": "no data sheet for the SAA5050 was read, so its pinout has no source",
+   "pins": 28,
+   "package": "DIP-28",
+   "pinsFrom": "the part's usual DIP package, not read from a data sheet; checked against its footprint's pads by board_parts.py",
+   "roleFrom": "table 8.1's comment, in our words",
+   "fitted": true,
+   "fittedWhy": "on every Model B: table 8.1 lists it and no upgrade in D1 section 4 (PDF pages 35 to 40) adds it"
   },
   {
    "ref": "IC6",
@@ -77,7 +103,13 @@
     71.0
    ],
    "page": 66,
-   "excludedWhy": "the video ULA, a custom part with no maker's data sheet"
+   "excludedWhy": "the video ULA, a custom part with no maker's data sheet",
+   "pins": 28,
+   "package": "DIP-28",
+   "pinsFrom": "the part's usual DIP package, not read from a data sheet; checked against its footprint's pads by board_parts.py",
+   "roleFrom": "table 8.1's comment, in our words",
+   "fitted": true,
+   "fittedWhy": "on every Model B: table 8.1 lists it and no upgrade in D1 section 4 (PDF pages 35 to 40) adds it"
   },
   {
    "ref": "IC7",
@@ -88,78 +120,120 @@
     182.0
    ],
    "page": 66,
-   "excludedWhy": "the serial ULA, a custom part with no maker's data sheet"
+   "excludedWhy": "the serial ULA, a custom part with no maker's data sheet",
+   "pins": 28,
+   "package": "DIP-28",
+   "pinsFrom": "the part's usual DIP package, not read from a data sheet; checked against its footprint's pads by board_parts.py",
+   "roleFrom": "table 8.1's comment, in our words",
+   "fitted": true,
+   "fittedWhy": "on every Model B: table 8.1 lists it and no upgrade in D1 section 4 (PDF pages 35 to 40) adds it"
   },
   {
    "ref": "IC8",
    "part": "81LS95",
-   "role": null,
+   "role": "an octal buffer",
    "manualXY": [
     241.0,
     62.0
    ],
    "page": 66,
-   "excludedWhy": "no maker's data sheet for the 81LS95 could be fetched on 13 October 2026, so its pinout has no source"
+   "excludedWhy": "no maker's data sheet for the 81LS95 could be fetched on 13 October 2026, so its pinout has no source",
+   "pins": 20,
+   "package": "DIP-20",
+   "pinsFrom": "the part's usual DIP package, not read from a data sheet; checked against its footprint's pads by board_parts.py",
+   "roleFrom": "what the part is, by its type",
+   "fitted": true,
+   "fittedWhy": "on every Model B: table 8.1 lists it and no upgrade in D1 section 4 (PDF pages 35 to 40) adds it"
   },
   {
    "ref": "IC9",
    "part": "81LS95",
-   "role": null,
+   "role": "an octal buffer",
    "manualXY": [
     241.0,
     93.0
    ],
    "page": 66,
-   "excludedWhy": "no maker's data sheet for the 81LS95 could be fetched on 13 October 2026, so its pinout has no source"
+   "excludedWhy": "no maker's data sheet for the 81LS95 could be fetched on 13 October 2026, so its pinout has no source",
+   "pins": 20,
+   "package": "DIP-20",
+   "pinsFrom": "the part's usual DIP package, not read from a data sheet; checked against its footprint's pads by board_parts.py",
+   "roleFrom": "what the part is, by its type",
+   "fitted": true,
+   "fittedWhy": "on every Model B: table 8.1 lists it and no upgrade in D1 section 4 (PDF pages 35 to 40) adds it"
   },
   {
    "ref": "IC10",
    "part": "81LS95",
-   "role": null,
+   "role": "an octal buffer",
    "manualXY": [
     252.0,
     63.0
    ],
    "page": 66,
-   "excludedWhy": "no maker's data sheet for the 81LS95 could be fetched on 13 October 2026, so its pinout has no source"
+   "excludedWhy": "no maker's data sheet for the 81LS95 could be fetched on 13 October 2026, so its pinout has no source",
+   "pins": 20,
+   "package": "DIP-20",
+   "pinsFrom": "the part's usual DIP package, not read from a data sheet; checked against its footprint's pads by board_parts.py",
+   "roleFrom": "what the part is, by its type",
+   "fitted": true,
+   "fittedWhy": "on every Model B: table 8.1 lists it and no upgrade in D1 section 4 (PDF pages 35 to 40) adds it"
   },
   {
    "ref": "IC11",
    "part": "81LS95",
-   "role": null,
+   "role": "an octal buffer",
    "manualXY": [
     252.0,
     93.0
    ],
    "page": 66,
-   "excludedWhy": "no maker's data sheet for the 81LS95 could be fetched on 13 October 2026, so its pinout has no source"
+   "excludedWhy": "no maker's data sheet for the 81LS95 could be fetched on 13 October 2026, so its pinout has no source",
+   "pins": 20,
+   "package": "DIP-20",
+   "pinsFrom": "the part's usual DIP package, not read from a data sheet; checked against its footprint's pads by board_parts.py",
+   "roleFrom": "what the part is, by its type",
+   "fitted": true,
+   "fittedWhy": "on every Model B: table 8.1 lists it and no upgrade in D1 section 4 (PDF pages 35 to 40) adds it"
   },
   {
    "ref": "IC12",
    "part": "81LS95",
-   "role": null,
+   "role": "an octal buffer",
    "manualXY": [
     275.0,
     62.0
    ],
    "page": 66,
-   "excludedWhy": "no maker's data sheet for the 81LS95 could be fetched on 13 October 2026, so its pinout has no source"
+   "excludedWhy": "no maker's data sheet for the 81LS95 could be fetched on 13 October 2026, so its pinout has no source",
+   "pins": 20,
+   "package": "DIP-20",
+   "pinsFrom": "the part's usual DIP package, not read from a data sheet; checked against its footprint's pads by board_parts.py",
+   "roleFrom": "what the part is, by its type",
+   "fitted": true,
+   "fittedWhy": "on every Model B: table 8.1 lists it and no upgrade in D1 section 4 (PDF pages 35 to 40) adds it"
   },
   {
    "ref": "IC13",
    "part": "81LS95",
-   "role": null,
+   "role": "an octal buffer",
    "manualXY": [
     264.0,
     62.0
    ],
    "page": 66,
-   "excludedWhy": "no maker's data sheet for the 81LS95 could be fetched on 13 October 2026, so its pinout has no source"
+   "excludedWhy": "no maker's data sheet for the 81LS95 could be fetched on 13 October 2026, so its pinout has no source",
+   "pins": 20,
+   "package": "DIP-20",
+   "pinsFrom": "the part's usual DIP package, not read from a data sheet; checked against its footprint's pads by board_parts.py",
+   "roleFrom": "what the part is, by its type",
+   "fitted": true,
+   "fittedWhy": "on every Model B: table 8.1 lists it and no upgrade in D1 section 4 (PDF pages 35 to 40) adds it"
   },
   {
    "ref": "IC14",
    "part": "74LS245",
-   "role": null,
+   "role": "an octal bus transceiver",
    "manualXY": [
     184.0,
     71.0
@@ -170,12 +244,16 @@
    "gnd": 10,
    "vcc": 20,
    "pinoutSource": "Texas Instruments, SN74LS245 data sheet, the plastic DIP (N package) pinout, top view (https://www.ti.com/lit/ds/symlink/sn74ls245.pdf), read 13 October 2026: pin 10 GND, pin 20 VCC. The LS, S and plain TTL families share each pinout",
-   "pinoutSourceId": "P-SN74LS245"
+   "pinoutSourceId": "P-SN74LS245",
+   "pinsFrom": "the data sheet its pinoutSource names",
+   "roleFrom": "what the part is, by its type",
+   "fitted": true,
+   "fittedWhy": "on every Model B: table 8.1 lists it and no upgrade in D1 section 4 (PDF pages 35 to 40) adds it"
   },
   {
    "ref": "IC15",
    "part": "74LS273",
-   "role": null,
+   "role": "an octal D flip-flop",
    "manualXY": [
     196.0,
     71.0
@@ -186,29 +264,45 @@
    "gnd": 10,
    "vcc": 20,
    "pinoutSource": "Texas Instruments, SN74LS273 data sheet, the plastic DIP (N package) pinout, top view (https://www.ti.com/lit/ds/symlink/sn74ls273.pdf), read 13 October 2026: pin 10 GND, pin 20 VCC. The LS, S and plain TTL families share each pinout",
-   "pinoutSourceId": "P-SN74LS273"
+   "pinoutSourceId": "P-SN74LS273",
+   "pinsFrom": "the data sheet its pinoutSource names",
+   "roleFrom": "what the part is, by its type",
+   "fitted": true,
+   "fittedWhy": "on every Model B: table 8.1 lists it and no upgrade in D1 section 4 (PDF pages 35 to 40) adds it"
   },
   {
    "ref": "IC16",
    "part": "LM555",
-   "role": null,
+   "role": "a timer",
    "manualXY": [
     7.0,
     210.0
    ],
    "page": 66,
-   "excludedWhy": "not a logic IC (a timer), and not on the footprints task 3 found"
+   "excludedWhy": "not a logic IC (a timer), and not on the footprints task 3 found",
+   "pins": 8,
+   "package": "DIP-8",
+   "pinsFrom": "the part's usual DIP package, not read from a data sheet; checked against its footprint's pads by board_parts.py",
+   "roleFrom": "what the part is, by its type",
+   "fitted": true,
+   "fittedWhy": "on every Model B: table 8.1 lists it and no upgrade in D1 section 4 (PDF pages 35 to 40) adds it"
   },
   {
    "ref": "IC17",
    "part": "LM324",
-   "role": null,
+   "role": "four operational amplifiers",
    "manualXY": [
     6.0,
     28.0
    ],
    "page": 66,
-   "excludedWhy": "not a logic IC (an analogue op amp); its supply pins need not be the logic's +5V and 0V"
+   "excludedWhy": "not a logic IC (an analogue op amp); its supply pins need not be the logic's +5V and 0V",
+   "pins": 14,
+   "package": "DIP-14",
+   "pinsFrom": "the part's usual DIP package, not read from a data sheet; checked against its footprint's pads by board_parts.py",
+   "roleFrom": "what the part is, by its type",
+   "fitted": true,
+   "fittedWhy": "on every Model B: table 8.1 lists it and no upgrade in D1 section 4 (PDF pages 35 to 40) adds it"
   },
   {
    "ref": "IC18",
@@ -219,23 +313,35 @@
     44.0
    ],
    "page": 66,
-   "excludedWhy": "no data sheet for the SN76489 was read (it was not at the address tried on 13 October 2026), so its pinout has no source"
+   "excludedWhy": "no data sheet for the SN76489 was read (it was not at the address tried on 13 October 2026), so its pinout has no source",
+   "pins": 16,
+   "package": "DIP-16",
+   "pinsFrom": "the part's usual DIP package, not read from a data sheet; checked against its footprint's pads by board_parts.py",
+   "roleFrom": "table 8.1's comment, in our words",
+   "fitted": true,
+   "fittedWhy": "on every Model B: table 8.1 lists it and no upgrade in D1 section 4 (PDF pages 35 to 40) adds it"
   },
   {
    "ref": "IC19",
    "part": "LM386",
-   "role": null,
+   "role": "an audio amplifier",
    "manualXY": [
     52.0,
     23.0
    ],
    "page": 66,
-   "excludedWhy": "not a logic IC (an audio amplifier), and not on the footprints task 3 found"
+   "excludedWhy": "not a logic IC (an audio amplifier), and not on the footprints task 3 found",
+   "pins": 8,
+   "package": "DIP-8",
+   "pinsFrom": "the part's usual DIP package, not read from a data sheet; checked against its footprint's pads by board_parts.py",
+   "roleFrom": "what the part is, by its type",
+   "fitted": true,
+   "fittedWhy": "on every Model B: table 8.1 lists it and no upgrade in D1 section 4 (PDF pages 35 to 40) adds it"
   },
   {
    "ref": "IC20",
    "part": "74LS139",
-   "role": null,
+   "role": "two 2 to 4 line decoders",
    "manualXY": [
     120.0,
     23.0
@@ -246,12 +352,16 @@
    "gnd": 8,
    "vcc": 16,
    "pinoutSource": "Texas Instruments, SN74LS139A data sheet, the plastic DIP (N package) pinout, top view (https://www.ti.com/lit/ds/symlink/sn74ls139a.pdf), read 13 October 2026: pin 8 GND, pin 16 VCC. The LS, S and plain TTL families share each pinout",
-   "pinoutSourceId": "P-SN74LS139A"
+   "pinoutSourceId": "P-SN74LS139A",
+   "pinsFrom": "the data sheet its pinoutSource names",
+   "roleFrom": "what the part is, by its type",
+   "fitted": true,
+   "fittedWhy": "on every Model B: table 8.1 lists it and no upgrade in D1 section 4 (PDF pages 35 to 40) adds it"
   },
   {
    "ref": "IC21",
    "part": "74LS00",
-   "role": null,
+   "role": "decodes the ROMs' addresses",
    "manualXY": [
     120.0,
     55.0
@@ -262,12 +372,16 @@
    "gnd": 7,
    "vcc": 14,
    "pinoutSource": "Texas Instruments, SN74LS00 data sheet, the plastic DIP (N package) pinout, top view (https://www.ti.com/lit/ds/symlink/sn74ls00.pdf), read 13 October 2026: pin 7 GND, pin 14 VCC. The LS, S and plain TTL families share each pinout",
-   "pinoutSourceId": "P-SN74LS00"
+   "pinoutSourceId": "P-SN74LS00",
+   "pinsFrom": "the data sheet its pinoutSource names",
+   "roleFrom": "D1 PDF page 20",
+   "fitted": true,
+   "fittedWhy": "on every Model B: table 8.1 lists it and no upgrade in D1 section 4 (PDF pages 35 to 40) adds it"
   },
   {
    "ref": "IC22",
    "part": "74LS30",
-   "role": null,
+   "role": "an 8-input NAND gate",
    "manualXY": [
     137.0,
     55.0
@@ -278,12 +392,16 @@
    "gnd": 7,
    "vcc": 14,
    "pinoutSource": "Texas Instruments, SN74LS30 data sheet, the plastic DIP (N package) pinout, top view (https://www.ti.com/lit/ds/symlink/sn74ls30.pdf), read 13 October 2026: pin 7 GND, pin 14 VCC. The LS, S and plain TTL families share each pinout",
-   "pinoutSourceId": "P-SN74LS30"
+   "pinoutSourceId": "P-SN74LS30",
+   "pinsFrom": "the data sheet its pinoutSource names",
+   "roleFrom": "what the part is, by its type",
+   "fitted": true,
+   "fittedWhy": "on every Model B: table 8.1 lists it and no upgrade in D1 section 4 (PDF pages 35 to 40) adds it"
   },
   {
    "ref": "IC23",
    "part": "74LS30",
-   "role": null,
+   "role": "an 8-input NAND gate",
    "manualXY": [
     120.0,
     80.0
@@ -294,12 +412,16 @@
    "gnd": 7,
    "vcc": 14,
    "pinoutSource": "Texas Instruments, SN74LS30 data sheet, the plastic DIP (N package) pinout, top view (https://www.ti.com/lit/ds/symlink/sn74ls30.pdf), read 13 October 2026: pin 7 GND, pin 14 VCC. The LS, S and plain TTL families share each pinout",
-   "pinoutSourceId": "P-SN74LS30"
+   "pinoutSourceId": "P-SN74LS30",
+   "pinsFrom": "the data sheet its pinoutSource names",
+   "roleFrom": "what the part is, by its type",
+   "fitted": true,
+   "fittedWhy": "on every Model B: table 8.1 lists it and no upgrade in D1 section 4 (PDF pages 35 to 40) adds it"
   },
   {
    "ref": "IC24",
    "part": "74LS138",
-   "role": null,
+   "role": "a 3 to 8 line decoder",
    "manualXY": [
     135.0,
     78.0
@@ -310,12 +432,16 @@
    "gnd": 8,
    "vcc": 16,
    "pinoutSource": "Texas Instruments, SN74LS138 data sheet, the plastic DIP (N package) pinout, top view (https://www.ti.com/lit/ds/symlink/sn74ls138.pdf), read 13 October 2026: pin 8 GND, pin 16 VCC. The LS, S and plain TTL families share each pinout",
-   "pinoutSourceId": "P-SN74LS138"
+   "pinoutSourceId": "P-SN74LS138",
+   "pinsFrom": "the data sheet its pinoutSource names",
+   "roleFrom": "what the part is, by its type",
+   "fitted": true,
+   "fittedWhy": "on every Model B: table 8.1 lists it and no upgrade in D1 section 4 (PDF pages 35 to 40) adds it"
   },
   {
    "ref": "IC25",
    "part": "74LS20",
-   "role": null,
+   "role": "two 4-input NAND gates",
    "manualXY": [
     120.0,
     108.0
@@ -326,12 +452,16 @@
    "gnd": 7,
    "vcc": 14,
    "pinoutSource": "Texas Instruments, SN74LS20 data sheet, the plastic DIP (N package) pinout, top view (https://www.ti.com/lit/ds/symlink/sn74ls20.pdf), read 13 October 2026: pin 7 GND, pin 14 VCC. The LS, S and plain TTL families share each pinout",
-   "pinoutSourceId": "P-SN74LS20"
+   "pinoutSourceId": "P-SN74LS20",
+   "pinsFrom": "the data sheet its pinoutSource names",
+   "roleFrom": "what the part is, by its type",
+   "fitted": true,
+   "fittedWhy": "on every Model B: table 8.1 lists it and no upgrade in D1 section 4 (PDF pages 35 to 40) adds it"
   },
   {
    "ref": "IC26",
    "part": "74LS139",
-   "role": null,
+   "role": "two 2 to 4 line decoders",
    "manualXY": [
     137.0,
     105.0
@@ -342,12 +472,16 @@
    "gnd": 8,
    "vcc": 16,
    "pinoutSource": "Texas Instruments, SN74LS139A data sheet, the plastic DIP (N package) pinout, top view (https://www.ti.com/lit/ds/symlink/sn74ls139a.pdf), read 13 October 2026: pin 8 GND, pin 16 VCC. The LS, S and plain TTL families share each pinout",
-   "pinoutSourceId": "P-SN74LS139A"
+   "pinoutSourceId": "P-SN74LS139A",
+   "pinsFrom": "the data sheet its pinoutSource names",
+   "roleFrom": "what the part is, by its type",
+   "fitted": true,
+   "fittedWhy": "on every Model B: table 8.1 lists it and no upgrade in D1 section 4 (PDF pages 35 to 40) adds it"
   },
   {
    "ref": "IC27",
    "part": "7438",
-   "role": null,
+   "role": "four open-collector NAND buffers",
    "manualXY": [
     3.0,
     124.0
@@ -358,12 +492,16 @@
    "gnd": 7,
    "vcc": 14,
    "pinoutSource": "Texas Instruments, SN7438 (in the SN74LS38 data sheet) data sheet, the plastic DIP (N package) pinout, top view (https://www.ti.com/lit/ds/symlink/sn74ls38.pdf), read 13 October 2026: pin 7 GND, pin 14 VCC. The LS, S and plain TTL families share each pinout",
-   "pinoutSourceId": "P-SN74LS38"
+   "pinoutSourceId": "P-SN74LS38",
+   "pinsFrom": "the data sheet its pinoutSource names",
+   "roleFrom": "what the part is, by its type",
+   "fitted": true,
+   "fittedWhy": "on every Model B: table 8.1 lists it and no upgrade in D1 section 4 (PDF pages 35 to 40) adds it"
   },
   {
    "ref": "IC28",
    "part": "74LS51",
-   "role": null,
+   "role": "AND-OR-invert gates",
    "manualXY": [
     50.0,
     143.0
@@ -374,12 +512,16 @@
    "gnd": 7,
    "vcc": 14,
    "pinoutSource": "Texas Instruments, SN74LS51 data sheet, the plastic DIP (N package) pinout, top view (https://www.ti.com/lit/ds/symlink/sn74ls51.pdf), read 13 October 2026: pin 7 GND, pin 14 VCC. The LS, S and plain TTL families share each pinout",
-   "pinoutSourceId": "P-SN74LS51"
+   "pinoutSourceId": "P-SN74LS51",
+   "pinsFrom": "the data sheet its pinoutSource names",
+   "roleFrom": "what the part is, by its type",
+   "fitted": true,
+   "fittedWhy": "on every Model B: table 8.1 lists it and no upgrade in D1 section 4 (PDF pages 35 to 40) adds it"
   },
   {
    "ref": "IC29",
    "part": "74LS32",
-   "role": null,
+   "role": "four 2-input OR gates",
    "manualXY": [
     65.0,
     143.0
@@ -390,12 +532,16 @@
    "gnd": 7,
    "vcc": 14,
    "pinoutSource": "Texas Instruments, SN74LS32 data sheet, the plastic DIP (N package) pinout, top view (https://www.ti.com/lit/ds/symlink/sn74ls32.pdf), read 13 October 2026: pin 7 GND, pin 14 VCC. The LS, S and plain TTL families share each pinout",
-   "pinoutSourceId": "P-SN74LS32"
+   "pinoutSourceId": "P-SN74LS32",
+   "pinsFrom": "the data sheet its pinoutSource names",
+   "roleFrom": "what the part is, by its type",
+   "fitted": true,
+   "fittedWhy": "on every Model B: table 8.1 lists it and no upgrade in D1 section 4 (PDF pages 35 to 40) adds it"
   },
   {
    "ref": "IC30",
    "part": "74LS74",
-   "role": null,
+   "role": "two D flip-flops",
    "manualXY": [
     78.0,
     143.0
@@ -406,23 +552,33 @@
    "gnd": 7,
    "vcc": 14,
    "pinoutSource": "Texas Instruments, SN74LS74A data sheet, the plastic DIP (N package) pinout, top view (https://www.ti.com/lit/ds/symlink/sn74ls74a.pdf), read 13 October 2026: pin 7 GND, pin 14 VCC. The LS, S and plain TTL families share each pinout",
-   "pinoutSourceId": "P-SN74LS74A"
+   "pinoutSourceId": "P-SN74LS74A",
+   "pinsFrom": "the data sheet its pinoutSource names",
+   "roleFrom": "what the part is, by its type",
+   "fitted": true,
+   "fittedWhy": "on every Model B: table 8.1 lists it and no upgrade in D1 section 4 (PDF pages 35 to 40) adds it"
   },
   {
    "ref": "IC31",
    "part": "74LS34",
-   "role": null,
+   "role": "six buffers",
    "manualXY": [
     90.0,
     143.0
    ],
    "page": 66,
-   "excludedWhy": "no data sheet for a 74LS34 was found in the search made on 13 October 2026 (Texas Instruments' address for one returned no sheet); that is a gap in the search, not evidence about the part"
+   "excludedWhy": "no data sheet for a 74LS34 was found in the search made on 13 October 2026 (Texas Instruments' address for one returned no sheet); that is a gap in the search, not evidence about the part",
+   "pins": 14,
+   "package": "DIP-14",
+   "pinsFrom": "the part's usual DIP package, not read from a data sheet; checked against its footprint's pads by board_parts.py",
+   "roleFrom": "what the part is, by its type",
+   "fitted": true,
+   "fittedWhy": "on every Model B: table 8.1 lists it and no upgrade in D1 section 4 (PDF pages 35 to 40) adds it"
   },
   {
    "ref": "IC32",
    "part": "74LS259",
-   "role": null,
+   "role": "an 8-bit addressable latch",
    "manualXY": [
     105.0,
     143.0
@@ -433,12 +589,16 @@
    "gnd": 8,
    "vcc": 16,
    "pinoutSource": "Texas Instruments, SN74LS259B data sheet, the plastic DIP (N package) pinout, top view (https://www.ti.com/lit/ds/symlink/sn74ls259b.pdf), read 13 October 2026: pin 8 GND, pin 16 VCC. The LS, S and plain TTL families share each pinout",
-   "pinoutSourceId": "P-SN74LS259B"
+   "pinoutSourceId": "P-SN74LS259B",
+   "pinsFrom": "the data sheet its pinoutSource names",
+   "roleFrom": "what the part is, by its type",
+   "fitted": true,
+   "fittedWhy": "on every Model B: table 8.1 lists it and no upgrade in D1 section 4 (PDF pages 35 to 40) adds it"
   },
   {
    "ref": "IC33",
    "part": "74LS04",
-   "role": null,
+   "role": "six inverters",
    "manualXY": [
     58.0,
     164.0
@@ -449,12 +609,16 @@
    "gnd": 7,
    "vcc": 14,
    "pinoutSource": "Texas Instruments, SN74LS04 data sheet, the plastic DIP (N package) pinout, top view (https://www.ti.com/lit/ds/symlink/sn74ls04.pdf), read 13 October 2026: pin 7 GND, pin 14 VCC. The LS, S and plain TTL families share each pinout",
-   "pinoutSourceId": "P-SN74LS04"
+   "pinoutSourceId": "P-SN74LS04",
+   "pinsFrom": "the data sheet its pinoutSource names",
+   "roleFrom": "what the part is, by its type",
+   "fitted": true,
+   "fittedWhy": "on every Model B: table 8.1 lists it and no upgrade in D1 section 4 (PDF pages 35 to 40) adds it"
   },
   {
    "ref": "IC34",
    "part": "74LS74",
-   "role": null,
+   "role": "two D flip-flops",
    "manualXY": [
     71.0,
     164.0
@@ -465,23 +629,33 @@
    "gnd": 7,
    "vcc": 14,
    "pinoutSource": "Texas Instruments, SN74LS74A data sheet, the plastic DIP (N package) pinout, top view (https://www.ti.com/lit/ds/symlink/sn74ls74a.pdf), read 13 October 2026: pin 7 GND, pin 14 VCC. The LS, S and plain TTL families share each pinout",
-   "pinoutSourceId": "P-SN74LS74A"
+   "pinoutSourceId": "P-SN74LS74A",
+   "pinsFrom": "the data sheet its pinoutSource names",
+   "roleFrom": "what the part is, by its type",
+   "fitted": true,
+   "fittedWhy": "on every Model B: table 8.1 lists it and no upgrade in D1 section 4 (PDF pages 35 to 40) adds it"
   },
   {
    "ref": "IC35",
    "part": "LM324",
-   "role": null,
+   "role": "amplifies and shapes the cassette signal",
    "manualXY": [
     151.0,
     205.0
    ],
    "page": 66,
-   "excludedWhy": "not a logic IC (an analogue op amp); its supply pins need not be the logic's +5V and 0V"
+   "excludedWhy": "not a logic IC (an analogue op amp); its supply pins need not be the logic's +5V and 0V",
+   "pins": 14,
+   "package": "DIP-14",
+   "pinsFrom": "the part's usual DIP package, not read from a data sheet; checked against its footprint's pads by board_parts.py",
+   "roleFrom": "D1 PDF page 29",
+   "fitted": true,
+   "fittedWhy": "on every Model B: table 8.1 lists it and no upgrade in D1 section 4 (PDF pages 35 to 40) adds it"
   },
   {
    "ref": "IC36",
    "part": "74LS10",
-   "role": null,
+   "role": "three 3-input NAND gates",
    "manualXY": [
     215.0,
     122.0
@@ -492,12 +666,16 @@
    "gnd": 7,
    "vcc": 14,
    "pinoutSource": "Texas Instruments, SN74LS10 data sheet, the plastic DIP (N package) pinout, top view (https://www.ti.com/lit/ds/symlink/sn74ls10.pdf), read 13 October 2026: pin 7 GND, pin 14 VCC. The LS, S and plain TTL families share each pinout",
-   "pinoutSourceId": "P-SN74LS10"
+   "pinoutSourceId": "P-SN74LS10",
+   "pinsFrom": "the data sheet its pinoutSource names",
+   "roleFrom": "what the part is, by its type",
+   "fitted": true,
+   "fittedWhy": "on every Model B: table 8.1 lists it and no upgrade in D1 section 4 (PDF pages 35 to 40) adds it"
   },
   {
    "ref": "IC37",
    "part": "74LS04",
-   "role": null,
+   "role": "six inverters",
    "manualXY": [
     228.0,
     122.0
@@ -508,12 +686,16 @@
    "gnd": 7,
    "vcc": 14,
    "pinoutSource": "Texas Instruments, SN74LS04 data sheet, the plastic DIP (N package) pinout, top view (https://www.ti.com/lit/ds/symlink/sn74ls04.pdf), read 13 October 2026: pin 7 GND, pin 14 VCC. The LS, S and plain TTL families share each pinout",
-   "pinoutSourceId": "P-SN74LS04"
+   "pinoutSourceId": "P-SN74LS04",
+   "pinsFrom": "the data sheet its pinoutSource names",
+   "roleFrom": "what the part is, by its type",
+   "fitted": true,
+   "fittedWhy": "on every Model B: table 8.1 lists it and no upgrade in D1 section 4 (PDF pages 35 to 40) adds it"
   },
   {
    "ref": "IC38",
    "part": "74LS86",
-   "role": null,
+   "role": "four exclusive-OR gates",
    "manualXY": [
     241.0,
     122.0
@@ -524,12 +706,16 @@
    "gnd": 7,
    "vcc": 14,
    "pinoutSource": "Texas Instruments, SN74LS86A data sheet, the plastic DIP (N package) pinout, top view (https://www.ti.com/lit/ds/symlink/sn74ls86a.pdf), read 13 October 2026: pin 7 GND, pin 14 VCC. The LS, S and plain TTL families share each pinout",
-   "pinoutSourceId": "P-SN74LS86A"
+   "pinoutSourceId": "P-SN74LS86A",
+   "pinsFrom": "the data sheet its pinoutSource names",
+   "roleFrom": "what the part is, by its type",
+   "fitted": true,
+   "fittedWhy": "on every Model B: table 8.1 lists it and no upgrade in D1 section 4 (PDF pages 35 to 40) adds it"
   },
   {
    "ref": "IC39",
    "part": "74LS283",
-   "role": null,
+   "role": "a 4-bit adder",
    "manualXY": [
     197.0,
     145.0
@@ -540,12 +726,16 @@
    "gnd": 8,
    "vcc": 16,
    "pinoutSource": "Texas Instruments, SN74LS283 data sheet, the plastic DIP (N package) pinout, top view (https://www.ti.com/lit/ds/symlink/sn74ls283.pdf), read 13 October 2026: pin 8 GND, pin 16 VCC. The LS, S and plain TTL families share each pinout",
-   "pinoutSourceId": "P-SN74LS283"
+   "pinoutSourceId": "P-SN74LS283",
+   "pinsFrom": "the data sheet its pinoutSource names",
+   "roleFrom": "what the part is, by its type",
+   "fitted": true,
+   "fittedWhy": "on every Model B: table 8.1 lists it and no upgrade in D1 section 4 (PDF pages 35 to 40) adds it"
   },
   {
    "ref": "IC40",
    "part": "74S00",
-   "role": null,
+   "role": "four 2-input NAND gates",
    "manualXY": [
     206.0,
     149.0
@@ -557,12 +747,16 @@
    "gnd": 7,
    "vcc": 14,
    "pinoutSource": "Texas Instruments, SN74S00 (in the SN74LS00 data sheet) data sheet, the plastic DIP (N package) pinout, top view (https://www.ti.com/lit/ds/symlink/sn74ls00.pdf), read 13 October 2026: pin 7 GND, pin 14 VCC. The LS, S and plain TTL families share each pinout",
-   "pinoutSourceId": "P-SN74LS00"
+   "pinoutSourceId": "P-SN74LS00",
+   "pinsFrom": "the data sheet its pinoutSource names",
+   "roleFrom": "what the part is, by its type",
+   "fitted": true,
+   "fittedWhy": "on every Model B: table 8.1 lists it and no upgrade in D1 section 4 (PDF pages 35 to 40) adds it"
   },
   {
    "ref": "IC41",
    "part": "74LS02",
-   "role": null,
+   "role": "four 2-input NOR gates",
    "manualXY": [
     228.0,
     149.0
@@ -573,12 +767,16 @@
    "gnd": 7,
    "vcc": 14,
    "pinoutSource": "Texas Instruments, SN74LS02 data sheet, the plastic DIP (N package) pinout, top view (https://www.ti.com/lit/ds/symlink/sn74ls02.pdf), read 13 October 2026: pin 7 GND, pin 14 VCC. The LS, S and plain TTL families share each pinout",
-   "pinoutSourceId": "P-SN74LS02"
+   "pinoutSourceId": "P-SN74LS02",
+   "pinsFrom": "the data sheet its pinoutSource names",
+   "roleFrom": "what the part is, by its type",
+   "fitted": true,
+   "fittedWhy": "on every Model B: table 8.1 lists it and no upgrade in D1 section 4 (PDF pages 35 to 40) adds it"
   },
   {
    "ref": "IC42",
    "part": "74LS163",
-   "role": null,
+   "role": "divides the 16 MHz clock by 13 for the serial ULA",
    "manualXY": [
     241.0,
     158.0
@@ -589,12 +787,16 @@
    "gnd": 8,
    "vcc": 16,
    "pinoutSource": "Texas Instruments, SN74LS163A data sheet, the plastic DIP (N package) pinout, top view (https://www.ti.com/lit/ds/symlink/sn74ls163a.pdf), read 13 October 2026: pin 8 GND, pin 16 VCC. The LS, S and plain TTL families share each pinout",
-   "pinoutSourceId": "P-SN74LS163A"
+   "pinoutSourceId": "P-SN74LS163A",
+   "pinsFrom": "the data sheet its pinoutSource names",
+   "roleFrom": "D1 PDF page 29",
+   "fitted": true,
+   "fittedWhy": "on every Model B: table 8.1 lists it and no upgrade in D1 section 4 (PDF pages 35 to 40) adds it"
   },
   {
    "ref": "IC43",
    "part": "74S04",
-   "role": null,
+   "role": "with its crystal, the 16 MHz clock oscillator",
    "manualXY": [
     187.0,
     174.0
@@ -605,12 +807,16 @@
    "gnd": 7,
    "vcc": 14,
    "pinoutSource": "Texas Instruments, SN74S04 (in the SN74LS04 data sheet) data sheet, the plastic DIP (N package) pinout, top view (https://www.ti.com/lit/ds/symlink/sn74ls04.pdf), read 13 October 2026: pin 7 GND, pin 14 VCC. The LS, S and plain TTL families share each pinout",
-   "pinoutSourceId": "P-SN74LS04"
+   "pinoutSourceId": "P-SN74LS04",
+   "pinsFrom": "the data sheet its pinoutSource names",
+   "roleFrom": "D1 PDF page 19",
+   "fitted": true,
+   "fittedWhy": "on every Model B: table 8.1 lists it and no upgrade in D1 section 4 (PDF pages 35 to 40) adds it"
   },
   {
    "ref": "IC44",
    "part": "74LS74",
-   "role": null,
+   "role": "two D flip-flops",
    "manualXY": [
     206.0,
     174.0
@@ -621,12 +827,16 @@
    "gnd": 7,
    "vcc": 14,
    "pinoutSource": "Texas Instruments, SN74LS74A data sheet, the plastic DIP (N package) pinout, top view (https://www.ti.com/lit/ds/symlink/sn74ls74a.pdf), read 13 October 2026: pin 7 GND, pin 14 VCC. The LS, S and plain TTL families share each pinout",
-   "pinoutSourceId": "P-SN74LS74A"
+   "pinoutSourceId": "P-SN74LS74A",
+   "pinsFrom": "the data sheet its pinoutSource names",
+   "roleFrom": "what the part is, by its type",
+   "fitted": true,
+   "fittedWhy": "on every Model B: table 8.1 lists it and no upgrade in D1 section 4 (PDF pages 35 to 40) adds it"
   },
   {
    "ref": "IC45",
    "part": "74S139",
-   "role": null,
+   "role": "two 2 to 4 line decoders",
    "manualXY": [
     228.0,
     172.0
@@ -637,12 +847,16 @@
    "gnd": 8,
    "vcc": 16,
    "pinoutSource": "Texas Instruments, SN74S139A (in the SN74LS139A data sheet) data sheet, the plastic DIP (N package) pinout, top view (https://www.ti.com/lit/ds/symlink/sn74ls139a.pdf), read 13 October 2026: pin 8 GND, pin 16 VCC. The LS, S and plain TTL families share each pinout",
-   "pinoutSourceId": "P-SN74LS139A"
+   "pinoutSourceId": "P-SN74LS139A",
+   "pinsFrom": "the data sheet its pinoutSource names",
+   "roleFrom": "what the part is, by its type",
+   "fitted": true,
+   "fittedWhy": "on every Model B: table 8.1 lists it and no upgrade in D1 section 4 (PDF pages 35 to 40) adds it"
   },
   {
    "ref": "IC46",
    "part": "74S74",
-   "role": null,
+   "role": "two D flip-flops",
    "manualXY": [
     252.0,
     183.0
@@ -653,12 +867,16 @@
    "gnd": 7,
    "vcc": 14,
    "pinoutSource": "Texas Instruments, SN74S74 (in the SN74LS74A data sheet) data sheet, the plastic DIP (N package) pinout, top view (https://www.ti.com/lit/ds/symlink/sn74ls74a.pdf), read 13 October 2026: pin 7 GND, pin 14 VCC. The LS, S and plain TTL families share each pinout",
-   "pinoutSourceId": "P-SN74LS74A"
+   "pinoutSourceId": "P-SN74LS74A",
+   "pinsFrom": "the data sheet its pinoutSource names",
+   "roleFrom": "what the part is, by its type",
+   "fitted": true,
+   "fittedWhy": "on every Model B: table 8.1 lists it and no upgrade in D1 section 4 (PDF pages 35 to 40) adds it"
   },
   {
    "ref": "IC47",
    "part": "74LS86",
-   "role": null,
+   "role": "four exclusive-OR gates",
    "manualXY": [
     264.0,
     183.0
@@ -669,12 +887,16 @@
    "gnd": 7,
    "vcc": 14,
    "pinoutSource": "Texas Instruments, SN74LS86A data sheet, the plastic DIP (N package) pinout, top view (https://www.ti.com/lit/ds/symlink/sn74ls86a.pdf), read 13 October 2026: pin 7 GND, pin 14 VCC. The LS, S and plain TTL families share each pinout",
-   "pinoutSourceId": "P-SN74LS86A"
+   "pinoutSourceId": "P-SN74LS86A",
+   "pinsFrom": "the data sheet its pinoutSource names",
+   "roleFrom": "what the part is, by its type",
+   "fitted": true,
+   "fittedWhy": "on every Model B: table 8.1 lists it and no upgrade in D1 section 4 (PDF pages 35 to 40) adds it"
   },
   {
    "ref": "IC48",
    "part": "74LS86",
-   "role": null,
+   "role": "four exclusive-OR gates",
    "manualXY": [
     275.0,
     183.0
@@ -685,12 +907,16 @@
    "gnd": 7,
    "vcc": 14,
    "pinoutSource": "Texas Instruments, SN74LS86A data sheet, the plastic DIP (N package) pinout, top view (https://www.ti.com/lit/ds/symlink/sn74ls86a.pdf), read 13 October 2026: pin 7 GND, pin 14 VCC. The LS, S and plain TTL families share each pinout",
-   "pinoutSourceId": "P-SN74LS86A"
+   "pinoutSourceId": "P-SN74LS86A",
+   "pinsFrom": "the data sheet its pinoutSource names",
+   "roleFrom": "what the part is, by its type",
+   "fitted": true,
+   "fittedWhy": "on every Model B: table 8.1 lists it and no upgrade in D1 section 4 (PDF pages 35 to 40) adds it"
   },
   {
    "ref": "IC49",
    "part": "74LS00",
-   "role": null,
+   "role": "four 2-input NAND gates",
    "manualXY": [
     286.0,
     183.0
@@ -701,12 +927,16 @@
    "gnd": 7,
    "vcc": 14,
    "pinoutSource": "Texas Instruments, SN74LS00 data sheet, the plastic DIP (N package) pinout, top view (https://www.ti.com/lit/ds/symlink/sn74ls00.pdf), read 13 October 2026: pin 7 GND, pin 14 VCC. The LS, S and plain TTL families share each pinout",
-   "pinoutSourceId": "P-SN74LS00"
+   "pinoutSourceId": "P-SN74LS00",
+   "pinsFrom": "the data sheet its pinoutSource names",
+   "roleFrom": "what the part is, by its type",
+   "fitted": true,
+   "fittedWhy": "on every Model B: table 8.1 lists it and no upgrade in D1 section 4 (PDF pages 35 to 40) adds it"
   },
   {
    "ref": "IC50",
    "part": "74LS00",
-   "role": null,
+   "role": "four 2-input NAND gates",
    "manualXY": [
     298.0,
     183.0
@@ -717,7 +947,11 @@
    "gnd": 7,
    "vcc": 14,
    "pinoutSource": "Texas Instruments, SN74LS00 data sheet, the plastic DIP (N package) pinout, top view (https://www.ti.com/lit/ds/symlink/sn74ls00.pdf), read 13 October 2026: pin 7 GND, pin 14 VCC. The LS, S and plain TTL families share each pinout",
-   "pinoutSourceId": "P-SN74LS00"
+   "pinoutSourceId": "P-SN74LS00",
+   "pinsFrom": "the data sheet its pinoutSource names",
+   "roleFrom": "what the part is, by its type",
+   "fitted": true,
+   "fittedWhy": "on every Model B: table 8.1 lists it and no upgrade in D1 section 4 (PDF pages 35 to 40) adds it"
   },
   {
    "ref": "IC51",
@@ -728,7 +962,13 @@
     24.0
    ],
    "page": 67,
-   "excludedWhy": "no ROM data sheet was read; and a BBC Micro ROM socket may be set by links for more than one type of ROM [guessing - verify], so its power pins could depend on its links"
+   "excludedWhy": "no ROM data sheet was read; and a BBC Micro ROM socket may be set by links for more than one type of ROM [guessing - verify], so its power pins could depend on its links",
+   "pins": 28,
+   "package": "DIP-28",
+   "pinsFrom": "the part's usual DIP package, not read from a data sheet; checked against its footprint's pads by board_parts.py",
+   "roleFrom": "table 8.1's comment, in our words",
+   "fitted": true,
+   "fittedWhy": "on every Model B: table 8.1 lists it and no upgrade in D1 section 4 (PDF pages 35 to 40) adds it"
   },
   {
    "ref": "IC52",
@@ -739,183 +979,286 @@
     24.0
    ],
    "page": 67,
-   "excludedWhy": "no ROM data sheet was read; and a BBC Micro ROM socket may be set by links for more than one type of ROM [guessing - verify], so its power pins could depend on its links"
+   "excludedWhy": "no ROM data sheet was read; and a BBC Micro ROM socket may be set by links for more than one type of ROM [guessing - verify], so its power pins could depend on its links",
+   "pins": 28,
+   "package": "DIP-28",
+   "pinsFrom": "the part's usual DIP package, not read from a data sheet; checked against its footprint's pads by board_parts.py",
+   "roleFrom": "table 8.1's comment, in our words",
+   "fitted": true,
+   "fittedWhy": "on every Model B: table 8.1 lists it and no upgrade in D1 section 4 (PDF pages 35 to 40) adds it",
+   "paged": "BASIC"
   },
   {
    "ref": "IC53",
    "part": "4816",
-   "role": null,
+   "role": "a 16K by 1 dynamic RAM",
    "manualXY": [
     287.0,
     69.0
    ],
    "page": 67,
-   "excludedWhy": "no data sheet for the 4816 dynamic RAM was read, so which of its pins are +5V and 0V has no source here"
+   "excludedWhy": "no data sheet for the 4816 dynamic RAM was read, so which of its pins are +5V and 0V has no source here",
+   "pins": 16,
+   "package": "DIP-16",
+   "pinsFrom": "the part's usual DIP package, not read from a data sheet; checked against its footprint's pads by board_parts.py",
+   "roleFrom": "what the part is, by its type",
+   "fitted": true,
+   "fittedWhy": "on every Model B: table 8.1 lists it and no upgrade in D1 section 4 (PDF pages 35 to 40) adds it"
   },
   {
    "ref": "IC54",
    "part": "4816",
-   "role": null,
+   "role": "a 16K by 1 dynamic RAM",
    "manualXY": [
     287.0,
     93.0
    ],
    "page": 67,
-   "excludedWhy": "no data sheet for the 4816 dynamic RAM was read, so which of its pins are +5V and 0V has no source here"
+   "excludedWhy": "no data sheet for the 4816 dynamic RAM was read, so which of its pins are +5V and 0V has no source here",
+   "pins": 16,
+   "package": "DIP-16",
+   "pinsFrom": "the part's usual DIP package, not read from a data sheet; checked against its footprint's pads by board_parts.py",
+   "roleFrom": "what the part is, by its type",
+   "fitted": true,
+   "fittedWhy": "on every Model B: table 8.1 lists it and no upgrade in D1 section 4 (PDF pages 35 to 40) adds it"
   },
   {
    "ref": "IC55",
    "part": "4816",
-   "role": null,
+   "role": "a 16K by 1 dynamic RAM",
    "manualXY": [
     275.0,
     93.0
    ],
    "page": 67,
-   "excludedWhy": "no data sheet for the 4816 dynamic RAM was read, so which of its pins are +5V and 0V has no source here"
+   "excludedWhy": "no data sheet for the 4816 dynamic RAM was read, so which of its pins are +5V and 0V has no source here",
+   "pins": 16,
+   "package": "DIP-16",
+   "pinsFrom": "the part's usual DIP package, not read from a data sheet; checked against its footprint's pads by board_parts.py",
+   "roleFrom": "what the part is, by its type",
+   "fitted": true,
+   "fittedWhy": "on every Model B: table 8.1 lists it and no upgrade in D1 section 4 (PDF pages 35 to 40) adds it"
   },
   {
    "ref": "IC56",
    "part": "4816",
-   "role": null,
+   "role": "a 16K by 1 dynamic RAM",
    "manualXY": [
     298.0,
     146.0
    ],
    "page": 67,
-   "excludedWhy": "no data sheet for the 4816 dynamic RAM was read, so which of its pins are +5V and 0V has no source here"
+   "excludedWhy": "no data sheet for the 4816 dynamic RAM was read, so which of its pins are +5V and 0V has no source here",
+   "pins": 16,
+   "package": "DIP-16",
+   "pinsFrom": "the part's usual DIP package, not read from a data sheet; checked against its footprint's pads by board_parts.py",
+   "roleFrom": "what the part is, by its type",
+   "fitted": true,
+   "fittedWhy": "on every Model B: table 8.1 lists it and no upgrade in D1 section 4 (PDF pages 35 to 40) adds it"
   },
   {
    "ref": "IC57",
    "part": "4816",
-   "role": null,
+   "role": "a 16K by 1 dynamic RAM",
    "manualXY": [
     287.0,
     146.0
    ],
    "page": 67,
-   "excludedWhy": "no data sheet for the 4816 dynamic RAM was read, so which of its pins are +5V and 0V has no source here"
+   "excludedWhy": "no data sheet for the 4816 dynamic RAM was read, so which of its pins are +5V and 0V has no source here",
+   "pins": 16,
+   "package": "DIP-16",
+   "pinsFrom": "the part's usual DIP package, not read from a data sheet; checked against its footprint's pads by board_parts.py",
+   "roleFrom": "what the part is, by its type",
+   "fitted": true,
+   "fittedWhy": "on every Model B: table 8.1 lists it and no upgrade in D1 section 4 (PDF pages 35 to 40) adds it"
   },
   {
    "ref": "IC58",
    "part": "4816",
-   "role": null,
+   "role": "a 16K by 1 dynamic RAM",
    "manualXY": [
     275.0,
     146.0
    ],
    "page": 67,
-   "excludedWhy": "no data sheet for the 4816 dynamic RAM was read, so which of its pins are +5V and 0V has no source here"
+   "excludedWhy": "no data sheet for the 4816 dynamic RAM was read, so which of its pins are +5V and 0V has no source here",
+   "pins": 16,
+   "package": "DIP-16",
+   "pinsFrom": "the part's usual DIP package, not read from a data sheet; checked against its footprint's pads by board_parts.py",
+   "roleFrom": "what the part is, by its type",
+   "fitted": true,
+   "fittedWhy": "on every Model B: table 8.1 lists it and no upgrade in D1 section 4 (PDF pages 35 to 40) adds it"
   },
   {
    "ref": "IC59",
    "part": "4816",
-   "role": null,
+   "role": "a 16K by 1 dynamic RAM",
    "manualXY": [
     264.0,
     146.0
    ],
    "page": 67,
-   "excludedWhy": "no data sheet for the 4816 dynamic RAM was read, so which of its pins are +5V and 0V has no source here"
+   "excludedWhy": "no data sheet for the 4816 dynamic RAM was read, so which of its pins are +5V and 0V has no source here",
+   "pins": 16,
+   "package": "DIP-16",
+   "pinsFrom": "the part's usual DIP package, not read from a data sheet; checked against its footprint's pads by board_parts.py",
+   "roleFrom": "what the part is, by its type",
+   "fitted": true,
+   "fittedWhy": "on every Model B: table 8.1 lists it and no upgrade in D1 section 4 (PDF pages 35 to 40) adds it"
   },
   {
    "ref": "IC60",
    "part": "4816",
-   "role": null,
+   "role": "a 16K by 1 dynamic RAM",
    "manualXY": [
     252.0,
     146.0
    ],
    "page": 67,
-   "excludedWhy": "no data sheet for the 4816 dynamic RAM was read, so which of its pins are +5V and 0V has no source here"
+   "excludedWhy": "no data sheet for the 4816 dynamic RAM was read, so which of its pins are +5V and 0V has no source here",
+   "pins": 16,
+   "package": "DIP-16",
+   "pinsFrom": "the part's usual DIP package, not read from a data sheet; checked against its footprint's pads by board_parts.py",
+   "roleFrom": "what the part is, by its type",
+   "fitted": true,
+   "fittedWhy": "on every Model B: table 8.1 lists it and no upgrade in D1 section 4 (PDF pages 35 to 40) adds it"
   },
   {
    "ref": "IC61",
    "part": "4816",
-   "role": null,
+   "role": "a 16K by 1 dynamic RAM",
    "manualXY": [
     298.0,
     68.0
    ],
    "page": 67,
-   "excludedWhy": "no data sheet for the 4816 dynamic RAM was read, so which of its pins are +5V and 0V has no source here"
+   "excludedWhy": "no data sheet for the 4816 dynamic RAM was read, so which of its pins are +5V and 0V has no source here",
+   "pins": 16,
+   "package": "DIP-16",
+   "pinsFrom": "the part's usual DIP package, not read from a data sheet; checked against its footprint's pads by board_parts.py",
+   "roleFrom": "what the part is, by its type",
+   "fitted": true,
+   "fittedWhy": "on every Model B: modification B, \"Convert Model A to Model B\", fits it (D1 PDF page 35)"
   },
   {
    "ref": "IC62",
    "part": "4816",
-   "role": null,
+   "role": "a 16K by 1 dynamic RAM",
    "manualXY": [
     298.0,
     93.0
    ],
    "page": 67,
-   "excludedWhy": "no data sheet for the 4816 dynamic RAM was read, so which of its pins are +5V and 0V has no source here"
+   "excludedWhy": "no data sheet for the 4816 dynamic RAM was read, so which of its pins are +5V and 0V has no source here",
+   "pins": 16,
+   "package": "DIP-16",
+   "pinsFrom": "the part's usual DIP package, not read from a data sheet; checked against its footprint's pads by board_parts.py",
+   "roleFrom": "what the part is, by its type",
+   "fitted": true,
+   "fittedWhy": "on every Model B: modification B, \"Convert Model A to Model B\", fits it (D1 PDF page 35)"
   },
   {
    "ref": "IC63",
    "part": "4816",
-   "role": null,
+   "role": "a 16K by 1 dynamic RAM",
    "manualXY": [
     264.0,
     93.0
    ],
    "page": 67,
-   "excludedWhy": "no data sheet for the 4816 dynamic RAM was read, so which of its pins are +5V and 0V has no source here"
+   "excludedWhy": "no data sheet for the 4816 dynamic RAM was read, so which of its pins are +5V and 0V has no source here",
+   "pins": 16,
+   "package": "DIP-16",
+   "pinsFrom": "the part's usual DIP package, not read from a data sheet; checked against its footprint's pads by board_parts.py",
+   "roleFrom": "what the part is, by its type",
+   "fitted": true,
+   "fittedWhy": "on every Model B: modification B, \"Convert Model A to Model B\", fits it (D1 PDF page 35)"
   },
   {
    "ref": "IC64",
    "part": "4816",
-   "role": null,
+   "role": "a 16K by 1 dynamic RAM",
    "manualXY": [
     298.0,
     122.0
    ],
    "page": 67,
-   "excludedWhy": "no data sheet for the 4816 dynamic RAM was read, so which of its pins are +5V and 0V has no source here"
+   "excludedWhy": "no data sheet for the 4816 dynamic RAM was read, so which of its pins are +5V and 0V has no source here",
+   "pins": 16,
+   "package": "DIP-16",
+   "pinsFrom": "the part's usual DIP package, not read from a data sheet; checked against its footprint's pads by board_parts.py",
+   "roleFrom": "what the part is, by its type",
+   "fitted": true,
+   "fittedWhy": "on every Model B: modification B, \"Convert Model A to Model B\", fits it (D1 PDF page 35)"
   },
   {
    "ref": "IC65",
    "part": "4816",
-   "role": null,
+   "role": "a 16K by 1 dynamic RAM",
    "manualXY": [
     287.0,
     122.0
    ],
    "page": 67,
-   "excludedWhy": "no data sheet for the 4816 dynamic RAM was read, so which of its pins are +5V and 0V has no source here"
+   "excludedWhy": "no data sheet for the 4816 dynamic RAM was read, so which of its pins are +5V and 0V has no source here",
+   "pins": 16,
+   "package": "DIP-16",
+   "pinsFrom": "the part's usual DIP package, not read from a data sheet; checked against its footprint's pads by board_parts.py",
+   "roleFrom": "what the part is, by its type",
+   "fitted": true,
+   "fittedWhy": "on every Model B: modification B, \"Convert Model A to Model B\", fits it (D1 PDF page 35)"
   },
   {
    "ref": "IC66",
    "part": "4816",
-   "role": null,
+   "role": "a 16K by 1 dynamic RAM",
    "manualXY": [
     275.0,
     122.0
    ],
    "page": 67,
-   "excludedWhy": "no data sheet for the 4816 dynamic RAM was read, so which of its pins are +5V and 0V has no source here"
+   "excludedWhy": "no data sheet for the 4816 dynamic RAM was read, so which of its pins are +5V and 0V has no source here",
+   "pins": 16,
+   "package": "DIP-16",
+   "pinsFrom": "the part's usual DIP package, not read from a data sheet; checked against its footprint's pads by board_parts.py",
+   "roleFrom": "what the part is, by its type",
+   "fitted": true,
+   "fittedWhy": "on every Model B: modification B, \"Convert Model A to Model B\", fits it (D1 PDF page 35)"
   },
   {
    "ref": "IC67",
    "part": "4816",
-   "role": null,
+   "role": "a 16K by 1 dynamic RAM",
    "manualXY": [
     264.0,
     122.0
    ],
    "page": 67,
-   "excludedWhy": "no data sheet for the 4816 dynamic RAM was read, so which of its pins are +5V and 0V has no source here"
+   "excludedWhy": "no data sheet for the 4816 dynamic RAM was read, so which of its pins are +5V and 0V has no source here",
+   "pins": 16,
+   "package": "DIP-16",
+   "pinsFrom": "the part's usual DIP package, not read from a data sheet; checked against its footprint's pads by board_parts.py",
+   "roleFrom": "what the part is, by its type",
+   "fitted": true,
+   "fittedWhy": "on every Model B: modification B, \"Convert Model A to Model B\", fits it (D1 PDF page 35)"
   },
   {
    "ref": "IC68",
    "part": "4816",
-   "role": null,
+   "role": "a 16K by 1 dynamic RAM",
    "manualXY": [
     252.0,
     122.0
    ],
    "page": 67,
-   "excludedWhy": "no data sheet for the 4816 dynamic RAM was read, so which of its pins are +5V and 0V has no source here"
+   "excludedWhy": "no data sheet for the 4816 dynamic RAM was read, so which of its pins are +5V and 0V has no source here",
+   "pins": 16,
+   "package": "DIP-16",
+   "pinsFrom": "the part's usual DIP package, not read from a data sheet; checked against its footprint's pads by board_parts.py",
+   "roleFrom": "what the part is, by its type",
+   "fitted": true,
+   "fittedWhy": "on every Model B: modification B, \"Convert Model A to Model B\", fits it (D1 PDF page 35)"
   },
   {
    "ref": "IC69",
@@ -931,12 +1274,16 @@
    "gnd": 1,
    "vcc": 20,
    "pinoutSource": "Rockwell, \"R6522 Versatile Interface Adapter (VIA)\" data sheet, Document No. 29000D47, Rev. 9, June 1987, Figure 1 \"R6522 Pin Assignments\" (http://archive.6502.org/datasheets/rockwell_r6522_via.pdf), read 13 October 2026: pin 1 VSS, pin 20 VCC",
-   "pinoutSourceId": "P-ROCKWELL_R6522_VIA"
+   "pinoutSourceId": "P-ROCKWELL_R6522_VIA",
+   "pinsFrom": "the data sheet its pinoutSource names",
+   "roleFrom": "table 8.1's comment, in our words",
+   "fitted": true,
+   "fittedWhy": "on every Model B: modification B, \"Convert Model A to Model B\", fits it (D1 PDF page 35)"
   },
   {
    "ref": "IC70",
    "part": "74LS244",
-   "role": null,
+   "role": "buffers the printer port's data lines",
    "manualXY": [
     137.0,
     24.0
@@ -947,12 +1294,16 @@
    "gnd": 10,
    "vcc": 20,
    "pinoutSource": "Texas Instruments, SN74LS244 data sheet, the plastic DIP (N package) pinout, top view (https://www.ti.com/lit/ds/symlink/sn74ls244.pdf), read 13 October 2026: pin 10 GND, pin 20 VCC. The LS, S and plain TTL families share each pinout",
-   "pinoutSourceId": "P-SN74LS244"
+   "pinoutSourceId": "P-SN74LS244",
+   "pinsFrom": "the data sheet its pinoutSource names",
+   "roleFrom": "D1 PDF page 32",
+   "fitted": true,
+   "fittedWhy": "on every Model B: modification B, \"Convert Model A to Model B\", fits it (D1 PDF page 35)"
   },
   {
    "ref": "IC71",
    "part": "74LS244",
-   "role": null,
+   "role": "an octal buffer",
    "manualXY": [
     184.0,
     29.0
@@ -963,12 +1314,16 @@
    "gnd": 10,
    "vcc": 20,
    "pinoutSource": "Texas Instruments, SN74LS244 data sheet, the plastic DIP (N package) pinout, top view (https://www.ti.com/lit/ds/symlink/sn74ls244.pdf), read 13 October 2026: pin 10 GND, pin 20 VCC. The LS, S and plain TTL families share each pinout",
-   "pinoutSourceId": "P-SN74LS244"
+   "pinoutSourceId": "P-SN74LS244",
+   "pinsFrom": "the data sheet its pinoutSource names",
+   "roleFrom": "what the part is, by its type",
+   "fitted": true,
+   "fittedWhy": "on every Model B: modification B, \"Convert Model A to Model B\", fits it (D1 PDF page 35)"
   },
   {
    "ref": "IC72",
    "part": "74LS245",
-   "role": null,
+   "role": "an octal bus transceiver",
    "manualXY": [
     199.0,
     29.0
@@ -979,7 +1334,11 @@
    "gnd": 10,
    "vcc": 20,
    "pinoutSource": "Texas Instruments, SN74LS245 data sheet, the plastic DIP (N package) pinout, top view (https://www.ti.com/lit/ds/symlink/sn74ls245.pdf), read 13 October 2026: pin 10 GND, pin 20 VCC. The LS, S and plain TTL families share each pinout",
-   "pinoutSourceId": "P-SN74LS245"
+   "pinoutSourceId": "P-SN74LS245",
+   "pinsFrom": "the data sheet its pinoutSource names",
+   "roleFrom": "what the part is, by its type",
+   "fitted": true,
+   "fittedWhy": "on every Model B: modification B, \"Convert Model A to Model B\", fits it (D1 PDF page 35)"
   },
   {
    "ref": "IC73",
@@ -990,34 +1349,52 @@
     173.0
    ],
    "page": 67,
-   "excludedWhy": "no data sheet for the uPD7002 was read, so its pinout has no source"
+   "excludedWhy": "no data sheet for the uPD7002 was read, so its pinout has no source",
+   "pins": 28,
+   "package": "DIP-28",
+   "pinsFrom": "the part's usual DIP package, not read from a data sheet; checked against its footprint's pads by board_parts.py",
+   "roleFrom": "table 8.1's comment, in our words",
+   "fitted": true,
+   "fittedWhy": "on every Model B: modification B, \"Convert Model A to Model B\", fits it (D1 PDF page 35)"
   },
   {
    "ref": "IC74",
    "part": "88LS120",
-   "role": null,
+   "role": "RS423 line receivers",
    "manualXY": [
     183.0,
     201.0
    ],
    "page": 67,
-   "excludedWhy": "an RS423 line receiver, whose supply pins need not be the logic's +5V and 0V; no data sheet was read"
+   "excludedWhy": "an RS423 line receiver, whose supply pins need not be the logic's +5V and 0V; no data sheet was read",
+   "pins": 16,
+   "package": "DIP-16",
+   "pinsFrom": "the part's usual DIP package, not read from a data sheet; checked against its footprint's pads by board_parts.py",
+   "roleFrom": "D1 PDF page 29",
+   "fitted": true,
+   "fittedWhy": "on every Model B: modification B, \"Convert Model A to Model B\", fits it (D1 PDF page 35)"
   },
   {
    "ref": "IC75",
    "part": "3691",
-   "role": null,
+   "role": "RS423 line drivers",
    "manualXY": [
     207.0,
     199.0
    ],
    "page": 67,
-   "excludedWhy": "an RS423 line driver, powered from +5V and -5V; no data sheet was read"
+   "excludedWhy": "an RS423 line driver, powered from +5V and -5V; no data sheet was read",
+   "pins": 16,
+   "package": "DIP-16",
+   "pinsFrom": "the part's usual DIP package, not read from a data sheet; checked against its footprint's pads by board_parts.py",
+   "roleFrom": "D1 PDF page 29",
+   "fitted": true,
+   "fittedWhy": "on every Model B: modification B, \"Convert Model A to Model B\", fits it (D1 PDF page 35)"
   },
   {
    "ref": "IC76",
    "part": "74LS163",
-   "role": null,
+   "role": "the paged ROM select latch (ROMSEL, at &FE30)",
    "manualXY": [
     70.0,
     44.0
@@ -1028,12 +1405,16 @@
    "gnd": 8,
    "vcc": 16,
    "pinoutSource": "Texas Instruments, SN74LS163A data sheet, the plastic DIP (N package) pinout, top view (https://www.ti.com/lit/ds/symlink/sn74ls163a.pdf), read 13 October 2026: pin 8 GND, pin 16 VCC. The LS, S and plain TTL families share each pinout",
-   "pinoutSourceId": "P-SN74LS163A"
+   "pinoutSourceId": "P-SN74LS163A",
+   "pinsFrom": "the data sheet its pinoutSource names",
+   "roleFrom": "D1 PDF pages 20 and 58",
+   "fitted": true,
+   "fittedWhy": "on every Model B: modification B, \"Convert Model A to Model B\", fits it (D1 PDF page 35)"
   },
   {
    "ref": "IC77",
    "part": "74S00",
-   "role": null,
+   "role": "four 2-input NAND gates",
    "manualXY": [
     38.0,
     143.0
@@ -1044,7 +1425,11 @@
    "gnd": 7,
    "vcc": 14,
    "pinoutSource": "Texas Instruments, SN74S00 (in the SN74LS00 data sheet) data sheet, the plastic DIP (N package) pinout, top view (https://www.ti.com/lit/ds/symlink/sn74ls00.pdf), read 13 October 2026: pin 7 GND, pin 14 VCC. The LS, S and plain TTL families share each pinout",
-   "pinoutSourceId": "P-SN74LS00"
+   "pinoutSourceId": "P-SN74LS00",
+   "pinsFrom": "the data sheet its pinoutSource names",
+   "roleFrom": "what the part is, by its type",
+   "fitted": true,
+   "fittedWhy": "on every Model B: modification B, \"Convert Model A to Model B\", fits it (D1 PDF page 35)"
   },
   {
    "ref": "IC78",
@@ -1055,12 +1440,18 @@
     75.0
    ],
    "page": 67,
-   "excludedWhy": "no data sheet for the 8271 was read, so its pinout has no source"
+   "excludedWhy": "no data sheet for the 8271 was read, so its pinout has no source",
+   "pins": 40,
+   "package": "DIP-40",
+   "pinsFrom": "the part's usual DIP package, not read from a data sheet; checked against its footprint's pads by board_parts.py",
+   "roleFrom": "table 8.1's comment, in our words",
+   "fitted": true,
+   "fittedWhy": "the disc interface: modification D, \"Add 5 1/4 inch Disc Interface to Basic Model B\", fits it (D1 PDF page 38)"
   },
   {
    "ref": "IC79",
    "part": "7438",
-   "role": null,
+   "role": "drives the disc drive's lines (open collector)",
    "manualXY": [
     42.0,
     46.0
@@ -1071,12 +1462,16 @@
    "gnd": 7,
    "vcc": 14,
    "pinoutSource": "Texas Instruments, SN7438 (in the SN74LS38 data sheet) data sheet, the plastic DIP (N package) pinout, top view (https://www.ti.com/lit/ds/symlink/sn74ls38.pdf), read 13 October 2026: pin 7 GND, pin 14 VCC. The LS, S and plain TTL families share each pinout",
-   "pinoutSourceId": "P-SN74LS38"
+   "pinoutSourceId": "P-SN74LS38",
+   "pinsFrom": "the data sheet its pinoutSource names",
+   "roleFrom": "D1 PDF page 32",
+   "fitted": true,
+   "fittedWhy": "the disc interface: modification D, \"Add 5 1/4 inch Disc Interface to Basic Model B\", fits it (D1 PDF page 38)"
   },
   {
    "ref": "IC80",
    "part": "7438",
-   "role": null,
+   "role": "drives the disc drive's lines (open collector)",
    "manualXY": [
     57.0,
     46.0
@@ -1087,12 +1482,16 @@
    "gnd": 7,
    "vcc": 14,
    "pinoutSource": "Texas Instruments, SN7438 (in the SN74LS38 data sheet) data sheet, the plastic DIP (N package) pinout, top view (https://www.ti.com/lit/ds/symlink/sn74ls38.pdf), read 13 October 2026: pin 7 GND, pin 14 VCC. The LS, S and plain TTL families share each pinout",
-   "pinoutSourceId": "P-SN74LS38"
+   "pinoutSourceId": "P-SN74LS38",
+   "pinsFrom": "the data sheet its pinoutSource names",
+   "roleFrom": "D1 PDF page 32",
+   "fitted": true,
+   "fittedWhy": "the disc interface: modification D, \"Add 5 1/4 inch Disc Interface to Basic Model B\", fits it (D1 PDF page 38)"
   },
   {
    "ref": "IC81",
    "part": "74LS393",
-   "role": null,
+   "role": "separates the disc's data (a digital monostable, with IC82)",
    "manualXY": [
     82.0,
     46.0
@@ -1103,12 +1502,16 @@
    "gnd": 7,
    "vcc": 14,
    "pinoutSource": "Texas Instruments, SN74LS393 data sheet, the plastic DIP (N package) pinout, top view (https://www.ti.com/lit/ds/symlink/sn74ls393.pdf), read 13 October 2026: pin 7 GND, pin 14 VCC. The LS, S and plain TTL families share each pinout",
-   "pinoutSourceId": "P-SN74LS393"
+   "pinoutSourceId": "P-SN74LS393",
+   "pinsFrom": "the data sheet its pinoutSource names",
+   "roleFrom": "D1 PDF page 32",
+   "fitted": true,
+   "fittedWhy": "the disc interface: modification D, \"Add 5 1/4 inch Disc Interface to Basic Model B\", fits it (D1 PDF page 38)"
   },
   {
    "ref": "IC82",
    "part": "74LS10",
-   "role": null,
+   "role": "separates the disc's data (a digital monostable, with IC81)",
    "manualXY": [
     97.0,
     46.0
@@ -1119,12 +1522,16 @@
    "gnd": 7,
    "vcc": 14,
    "pinoutSource": "Texas Instruments, SN74LS10 data sheet, the plastic DIP (N package) pinout, top view (https://www.ti.com/lit/ds/symlink/sn74ls10.pdf), read 13 October 2026: pin 7 GND, pin 14 VCC. The LS, S and plain TTL families share each pinout",
-   "pinoutSourceId": "P-SN74LS10"
+   "pinoutSourceId": "P-SN74LS10",
+   "pinsFrom": "the data sheet its pinoutSource names",
+   "roleFrom": "D1 PDF page 32",
+   "fitted": true,
+   "fittedWhy": "the disc interface: modification D, \"Add 5 1/4 inch Disc Interface to Basic Model B\", fits it (D1 PDF page 38)"
   },
   {
    "ref": "IC83",
    "part": "4013",
-   "role": null,
+   "role": "detects the disc drive's index pulses (with IC84 and IC85)",
    "manualXY": [
     67.0,
     24.0
@@ -1135,12 +1542,16 @@
    "gnd": 7,
    "vcc": 14,
    "pinoutSource": "Texas Instruments, CD4013B data sheet, the plastic DIP (N package) pinout, top view (https://www.ti.com/lit/ds/symlink/cd4013b.pdf), read 13 October 2026: pin 7 VSS, pin 14 VDD. A CMOS part; on this board its VDD is the logic's +5V [inferring: the BBC Micro's logic has one +5V supply]",
-   "pinoutSourceId": "P-CD4013B"
+   "pinoutSourceId": "P-CD4013B",
+   "pinsFrom": "the data sheet its pinoutSource names",
+   "roleFrom": "D1 PDF page 32",
+   "fitted": true,
+   "fittedWhy": "the disc interface: modification D, \"Add 5 1/4 inch Disc Interface to Basic Model B\", fits it (D1 PDF page 38)"
   },
   {
    "ref": "IC84",
    "part": "4013",
-   "role": null,
+   "role": "detects the disc drive's index pulses (with IC83 and IC85)",
    "manualXY": [
     82.0,
     24.0
@@ -1151,12 +1562,16 @@
    "gnd": 7,
    "vcc": 14,
    "pinoutSource": "Texas Instruments, CD4013B data sheet, the plastic DIP (N package) pinout, top view (https://www.ti.com/lit/ds/symlink/cd4013b.pdf), read 13 October 2026: pin 7 VSS, pin 14 VDD. A CMOS part; on this board its VDD is the logic's +5V [inferring: the BBC Micro's logic has one +5V supply]",
-   "pinoutSourceId": "P-CD4013B"
+   "pinoutSourceId": "P-CD4013B",
+   "pinsFrom": "the data sheet its pinoutSource names",
+   "roleFrom": "D1 PDF page 32",
+   "fitted": true,
+   "fittedWhy": "the disc interface: modification D, \"Add 5 1/4 inch Disc Interface to Basic Model B\", fits it (D1 PDF page 38)"
   },
   {
    "ref": "IC85",
    "part": "4020",
-   "role": null,
+   "role": "detects the disc drive's index pulses (with IC83 and IC84)",
    "manualXY": [
     97.0,
     21.0
@@ -1167,12 +1582,16 @@
    "gnd": 8,
    "vcc": 16,
    "pinoutSource": "Texas Instruments, CD4020B data sheet, the plastic DIP (N package) pinout, top view (https://www.ti.com/lit/ds/symlink/cd4020b.pdf), read 13 October 2026: pin 8 VSS, pin 16 VDD. A CMOS part; on this board its VDD is the logic's +5V [inferring: the BBC Micro's logic has one +5V supply]",
-   "pinoutSourceId": "P-CD4020B"
+   "pinoutSourceId": "P-CD4020B",
+   "pinsFrom": "the data sheet its pinoutSource names",
+   "roleFrom": "D1 PDF page 32",
+   "fitted": true,
+   "fittedWhy": "the disc interface: modification D, \"Add 5 1/4 inch Disc Interface to Basic Model B\", fits it (D1 PDF page 38)"
   },
   {
    "ref": "IC86",
    "part": "74LS393",
-   "role": null,
+   "role": "divides the 8 MHz clock to 31.25 kHz for the disc interface",
    "manualXY": [
     108.0,
     23.0
@@ -1183,12 +1602,16 @@
    "gnd": 7,
    "vcc": 14,
    "pinoutSource": "Texas Instruments, SN74LS393 data sheet, the plastic DIP (N package) pinout, top view (https://www.ti.com/lit/ds/symlink/sn74ls393.pdf), read 13 October 2026: pin 7 GND, pin 14 VCC. The LS, S and plain TTL families share each pinout",
-   "pinoutSourceId": "P-SN74LS393"
+   "pinoutSourceId": "P-SN74LS393",
+   "pinsFrom": "the data sheet its pinoutSource names",
+   "roleFrom": "D1 PDF page 32",
+   "fitted": true,
+   "fittedWhy": "the disc interface: modification D, \"Add 5 1/4 inch Disc Interface to Basic Model B\", fits it (D1 PDF page 38)"
   },
   {
    "ref": "IC87",
    "part": "74LS123",
-   "role": null,
+   "role": "shapes the disc drive's read pulses (a monostable)",
    "manualXY": [
     43.0,
     164.0
@@ -1199,18 +1622,29 @@
    "gnd": 8,
    "vcc": 16,
    "pinoutSource": "Texas Instruments, SN74LS123 data sheet, the plastic DIP (N package) pinout, top view (https://www.ti.com/lit/ds/symlink/sn74ls123.pdf), read 13 October 2026: pin 8 GND, pin 16 VCC. The LS, S and plain TTL families share each pinout",
-   "pinoutSourceId": "P-SN74LS123"
+   "pinoutSourceId": "P-SN74LS123",
+   "pinsFrom": "the data sheet its pinoutSource names",
+   "roleFrom": "D1 PDF page 32",
+   "fitted": true,
+   "fittedWhy": "the disc interface: modification D, \"Add 5 1/4 inch Disc Interface to Basic Model B\", fits it (D1 PDF page 38)"
   },
   {
    "ref": "IC88",
    "part": "2764",
-   "role": null,
+   "role": "a sideways ROM socket: the DFS",
    "manualXY": [
     252.0,
     24.0
    ],
    "page": 67,
-   "excludedWhy": "no ROM data sheet was read; and a BBC Micro ROM socket may be set by links for more than one type of ROM [guessing - verify], so its power pins could depend on its links"
+   "excludedWhy": "no ROM data sheet was read; and a BBC Micro ROM socket may be set by links for more than one type of ROM [guessing - verify], so its power pins could depend on its links",
+   "pins": 28,
+   "package": "DIP-28",
+   "pinsFrom": "the part's usual DIP package, not read from a data sheet; checked against its footprint's pads by board_parts.py",
+   "roleFrom": "D1 PDF page 38",
+   "fitted": true,
+   "fittedWhy": "the DFS ROM: modification D fits \"2764 EPROM (DFS) IC88\" (D1 PDF page 38)",
+   "paged": "DFS"
   },
   {
    "ref": "IC89",
@@ -1221,7 +1655,13 @@
     125.0
    ],
    "page": 67,
-   "excludedWhy": "no data sheet for the 68B54 was read, so its pinout has no source"
+   "excludedWhy": "no data sheet for the 68B54 was read, so its pinout has no source",
+   "pins": 28,
+   "package": "DIP-28",
+   "pinsFrom": "the part's usual DIP package, not read from a data sheet; checked against its footprint's pads by board_parts.py",
+   "roleFrom": "table 8.1's comment, in our words",
+   "fitted": false,
+   "fittedWhy": "not fitted: an Econet part, which modification E, \"Add Econet Interface\" (D1 PDF page 39), fits; the machine has no Econet"
   },
   {
    "ref": "IC90",
@@ -1233,12 +1673,17 @@
    ],
    "page": 67,
    "tableSaysNotFitted": true,
-   "excludedWhy": "table 8.1 says not fitted, and task 3 found no footprint for it"
+   "excludedWhy": "table 8.1 says not fitted, and task 3 found no footprint for it",
+   "pins": null,
+   "pinsFrom": "not known: not fitted, task 3 found no footprint, and no data sheet was read",
+   "roleFrom": "none: not fitted",
+   "fitted": false,
+   "fittedWhy": "not fitted: table 8.1 says not fitted"
   },
   {
    "ref": "IC91",
    "part": "74LS132",
-   "role": null,
+   "role": "four Schmitt-trigger NAND gates",
    "manualXY": [
     27.0,
     166.0
@@ -1249,57 +1694,85 @@
    "gnd": 7,
    "vcc": 14,
    "pinoutSource": "Texas Instruments, SN74LS132 data sheet, the plastic DIP (N package) pinout, top view (https://www.ti.com/lit/ds/symlink/sn74ls132.pdf), read 13 October 2026: pin 7 GND, pin 14 VCC. The LS, S and plain TTL families share each pinout",
-   "pinoutSourceId": "P-SN74LS132"
+   "pinoutSourceId": "P-SN74LS132",
+   "pinsFrom": "the data sheet its pinoutSource names",
+   "roleFrom": "what the part is, by its type",
+   "fitted": false,
+   "fittedWhy": "not fitted: an Econet part, which modification E, \"Add Econet Interface\" (D1 PDF page 39), fits; the machine has no Econet"
   },
   {
    "ref": "IC92",
    "part": "74LS74",
-   "role": null,
+   "role": "two D flip-flops",
    "manualXY": [
     16.0,
     188.0
    ],
    "page": 67,
    "tableSaysNotFitted": true,
-   "excludedWhy": "task 3 found no footprint for it (table 8.1: not fitted, and on I1 no DIP was grouped there)"
+   "excludedWhy": "task 3 found no footprint for it (table 8.1: not fitted, and on I1 no DIP was grouped there)",
+   "pins": 14,
+   "package": "DIP-14",
+   "pinsFrom": "the part's usual DIP package, not read from a data sheet; checked against its footprint's pads by board_parts.py",
+   "roleFrom": "what the part is, by its type",
+   "fitted": false,
+   "fittedWhy": "not fitted: table 8.1 says not fitted"
   },
   {
    "ref": "IC93",
    "part": "75159",
-   "role": null,
+   "role": "an Econet line driver",
    "manualXY": [
     13.0,
     166.0
    ],
    "page": 67,
-   "excludedWhy": "a line driver for Econet; no data sheet was read"
+   "excludedWhy": "a line driver for Econet; no data sheet was read",
+   "pins": 14,
+   "package": "DIP-14",
+   "pinsFrom": "the part's usual DIP package, not read from a data sheet; checked against its footprint's pads by board_parts.py",
+   "roleFrom": "what the part is, by its type",
+   "fitted": false,
+   "fittedWhy": "not fitted: an Econet part, which modification E, \"Add Econet Interface\" (D1 PDF page 39), fits; the machine has no Econet"
   },
   {
    "ref": "IC94",
    "part": "LM319",
-   "role": null,
+   "role": "two comparators",
    "manualXY": [
     45.0,
     93.0
    ],
    "page": 67,
-   "excludedWhy": "not a logic IC (an analogue comparator); its supply pins need not be the logic's +5V and 0V"
+   "excludedWhy": "not a logic IC (an analogue comparator); its supply pins need not be the logic's +5V and 0V",
+   "pins": 14,
+   "package": "DIP-14",
+   "pinsFrom": "the part's usual DIP package, not read from a data sheet; checked against its footprint's pads by board_parts.py",
+   "roleFrom": "what the part is, by its type",
+   "fitted": false,
+   "fittedWhy": "not fitted: an Econet part, which modification E, \"Add Econet Interface\" (D1 PDF page 39), fits; the machine has no Econet"
   },
   {
    "ref": "IC95",
    "part": "LM319",
-   "role": null,
+   "role": "two comparators",
    "manualXY": [
     20.0,
     193.0
    ],
    "page": 67,
-   "excludedWhy": "not a logic IC (an analogue comparator); its supply pins need not be the logic's +5V and 0V"
+   "excludedWhy": "not a logic IC (an analogue comparator); its supply pins need not be the logic's +5V and 0V",
+   "pins": 14,
+   "package": "DIP-14",
+   "pinsFrom": "the part's usual DIP package, not read from a data sheet; checked against its footprint's pads by board_parts.py",
+   "roleFrom": "what the part is, by its type",
+   "fitted": false,
+   "fittedWhy": "not fitted: an Econet part, which modification E, \"Add Econet Interface\" (D1 PDF page 39), fits; the machine has no Econet"
   },
   {
    "ref": "IC96",
    "part": "74LS244",
-   "role": null,
+   "role": "an octal buffer",
    "manualXY": [
     82.0,
     185.0
@@ -1310,12 +1783,16 @@
    "gnd": 10,
    "vcc": 20,
    "pinoutSource": "Texas Instruments, SN74LS244 data sheet, the plastic DIP (N package) pinout, top view (https://www.ti.com/lit/ds/symlink/sn74ls244.pdf), read 13 October 2026: pin 10 GND, pin 20 VCC. The LS, S and plain TTL families share each pinout",
-   "pinoutSourceId": "P-SN74LS244"
+   "pinoutSourceId": "P-SN74LS244",
+   "pinsFrom": "the data sheet its pinoutSource names",
+   "roleFrom": "what the part is, by its type",
+   "fitted": false,
+   "fittedWhy": "not fitted: an Econet part, which modification E, \"Add Econet Interface\" (D1 PDF page 39), fits; the machine has no Econet"
   },
   {
    "ref": "IC97",
    "part": "74LS74",
-   "role": null,
+   "role": "two D flip-flops",
    "manualXY": [
     4.0,
     171.0
@@ -1326,7 +1803,11 @@
    "gnd": 7,
    "vcc": 14,
    "pinoutSource": "Texas Instruments, SN74LS74A data sheet, the plastic DIP (N package) pinout, top view (https://www.ti.com/lit/ds/symlink/sn74ls74a.pdf), read 13 October 2026: pin 7 GND, pin 14 VCC. The LS, S and plain TTL families share each pinout",
-   "pinoutSourceId": "P-SN74LS74A"
+   "pinoutSourceId": "P-SN74LS74A",
+   "pinsFrom": "the data sheet its pinoutSource names",
+   "roleFrom": "what the part is, by its type",
+   "fitted": false,
+   "fittedWhy": "not fitted: an Econet part, which modification E, \"Add Econet Interface\" (D1 PDF page 39), fits; the machine has no Econet"
   },
   {
    "ref": "IC98",
@@ -1337,7 +1818,13 @@
     75.0
    ],
    "page": 67,
-   "excludedWhy": "a speech part; no data sheet was read"
+   "excludedWhy": "a speech part; no data sheet was read",
+   "pins": 28,
+   "package": "DIP-28",
+   "pinsFrom": "the part's usual DIP package, not read from a data sheet; checked against its footprint's pads by board_parts.py",
+   "roleFrom": "table 8.1's comment, in our words",
+   "fitted": false,
+   "fittedWhy": "not fitted: a speech part, which modification C, \"Add Speech Option\" (D1 PDF page 37), fits; the machine has no speech"
   },
   {
    "ref": "IC99",
@@ -1348,7 +1835,13 @@
     75.0
    ],
    "page": 67,
-   "excludedWhy": "a speech part; no data sheet was read"
+   "excludedWhy": "a speech part; no data sheet was read",
+   "pins": 28,
+   "package": "DIP-28",
+   "pinsFrom": "the part's usual DIP package, not read from a data sheet; checked against its footprint's pads by board_parts.py",
+   "roleFrom": "table 8.1's comment, in our words",
+   "fitted": false,
+   "fittedWhy": "not fitted: a speech part, which modification C, \"Add Speech Option\" (D1 PDF page 37), fits; the machine has no speech"
   },
   {
    "ref": "IC100",
@@ -1359,7 +1852,13 @@
     24.0
    ],
    "page": 67,
-   "excludedWhy": "no ROM data sheet was read; and a BBC Micro ROM socket may be set by links for more than one type of ROM [guessing - verify], so its power pins could depend on its links"
+   "excludedWhy": "no ROM data sheet was read; and a BBC Micro ROM socket may be set by links for more than one type of ROM [guessing - verify], so its power pins could depend on its links",
+   "pins": 28,
+   "package": "DIP-28",
+   "pinsFrom": "the part's usual DIP package, not read from a data sheet; checked against its footprint's pads by board_parts.py",
+   "roleFrom": "table 8.1's comment, in our words",
+   "fitted": false,
+   "fittedWhy": "not fitted: a sideways ROM socket left empty, as the machine runs BASIC and the DFS only"
   },
   {
    "ref": "IC101",
@@ -1370,7 +1869,13 @@
     24.0
    ],
    "page": 67,
-   "excludedWhy": "no ROM data sheet was read; and a BBC Micro ROM socket may be set by links for more than one type of ROM [guessing - verify], so its power pins could depend on its links"
+   "excludedWhy": "no ROM data sheet was read; and a BBC Micro ROM socket may be set by links for more than one type of ROM [guessing - verify], so its power pins could depend on its links",
+   "pins": 28,
+   "package": "DIP-28",
+   "pinsFrom": "the part's usual DIP package, not read from a data sheet; checked against its footprint's pads by board_parts.py",
+   "roleFrom": "table 8.1's comment, in our words",
+   "fitted": false,
+   "fittedWhy": "not fitted: a sideways ROM socket left empty, as the machine runs BASIC and the DFS only"
   }
  ]
 }
