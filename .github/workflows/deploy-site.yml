@@ -188,6 +188,8 @@ jobs:
           PASS=$(count pass); FAILED=$(count fail)
           echo "pass=${PASS:-unread} fail=${FAILED:-unread}"
           [ "${FAILED:-1}" = "0" ]
+          # 496 as at 13 Oct 2026, with task 5's review (two tests: the method's files and marks.json on
+          # disk as the run read them; every description of the parts says both checks failed);
           # 494 as at 13 Oct 2026, with the BBC Micro models' task 5 (nine tests: the parts' method
           # pinned to its hashes, places on footprints, the fitted set against models.md, the counters,
           # the outline and overlaps, the manual's places and the identities pinned as failed, I5, the module);
@@ -229,7 +231,7 @@ jobs:
           # Adding tests is expected; losing them is the failure this floor catches.
           # Raise the number when the suite grows, here and in the same step of
           # validate.yml, which must hold the same number.
-          [ "${PASS:-0}" -ge 494 ]
+          [ "${PASS:-0}" -ge 496 ]
 
       # The same floor as "Every machine file must be serving" below, checked on
       # the build itself, so a build that is missing a machine fails here and

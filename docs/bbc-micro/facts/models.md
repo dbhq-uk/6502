@@ -86,6 +86,8 @@ Added by task 5 of the models plan on 13 October 2026. This table is the record 
 
 The board is the Model B the page runs: a Model B with the 8271 disc interface and the DFS, and without Econet or speech (the choice "Which board the inside shows" above). Each IC is fitted or not by the upgrade in the Service Manual's section 4 that fits it [from D1, PDF pages 35 to 40]: modification B, "Convert Model A to Model B", fits IC61 to IC77; modification D, "Add 5 1/4 inch Disc Interface to Basic Model B", fits IC78 to IC87 and "1 off 2764 EPROM (DFS) IC88"; modification E, "Add Econet Interface", fits IC87, IC89, IC91, IC93 to IC97 and the NFS in IC88; modification C, "Add Speech Option", fits IC98 and IC99. An IC no upgrade adds is on every Model B. Table 8.1 itself says IC90 and IC92 are not fitted. IC100 and IC101 are sideways ROM sockets, left empty because the machine runs BASIC and the DFS only. The board in I5 differs: it has Econet and no disc interface (its 8271 socket and the disc chips' sockets are empty), so it is a check on identities and places, not on which ICs are fitted.
 
+**The two checks on these parts failed** (task 5, 13 October 2026; the figures are in `tools/bbc-micro-model/data/parts.json` and the journal). After a best-fit similarity, five ICs are more than 10 mm from table 8.1's places (IC94 97.22 mm, where the table's "45,93" is probably a misprint of 193 [inferring]; IC74 and IC75, which lie across the board; IC42 and IC39). Of the 80 markings read on I5, 11 disagree with table 8.1 by the rule fixed before they were read. So the model's places are the scan's footprints, checked against nothing else, and its identities are table 8.1's parts, as this table records them. The fitted set follows the machine the page emulates (the disc interface fitted, no Econet or speech), not the board in I5.
+
 The counters come from the Service Manual's strobe list for SHEILA's select lines [from D1, PDF page 58, "DEFPROC strobe select lines": `&FE00` IC2, `&FE08` IC4, `&FE10` IC7, `&FE20` IC6, `&FE30` IC76, `&FE40` IC3, `&FE60` IC69, `&FE80` IC78, `&FEC0` IC73], and the sound chip, IC18, is written through the system VIA (`via.md`). Which socket holds BASIC is table 8.1's role for IC52; the DFS's socket is modification D's.
 
 | IC | Part (table 8.1) | Fitted | Why | Counter | Paged ROM |
@@ -191,6 +193,8 @@ The counters come from the Service Manual's strobe list for SHEILA's select line
 | IC99 | TMS5220 | no | speech, modification C, page 37 |  |  |
 | IC100 | (27128) | no | an empty sideways ROM socket |  |  |
 | IC101 | (27128) | no | an empty sideways ROM socket |  |  |
+
+**Marked as, on the boards photographed.** Two ICs carry another part than table 8.1 gives, on both I5 and I6, and the model keeps the table's: IC31 is marked 74LS74 (74LS74AN on I5, DM74LS74AN on I6) where the table says 74LS34, and IC31's neighbours IC30 and IC34 are 74LS74s too, so the table's 34 may be a misprint [inferring]; IC77 is marked 74LS00 (74LS00N on both) where the table says 74S00, and the manual's own modification B lists "1 off 74LS00 IC77" [from D1, PDF page 35]. The RAMs IC61 to IC68 on I5 are Mostek MK4516N-11s, a second source for the 4816 the table names; I6's are all HM4816AP-11.
 
 ## Downloaded for the work
 

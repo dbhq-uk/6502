@@ -905,4 +905,45 @@ test('the parts module is generated from parts.json, is not claimed by the page 
   for (const c of mod.CONNECTORS) assert.ok(c.label && ['rear', 'underside', 'board'].includes(c.edge), c.ref);
   // only the page's entries are .js; the scene's data lands as .mjs until task 9b claims the models
   assert.ok(!fs.readdirSync(path.join(REPO_ROOT, 'site', 'src', 'models')).some((f) => /^bbc-micro.*\.js$/.test(f)));
+  // and nothing on the page names it: no MODELS entry, and no machine's models in the registry
+  const { MODELS } = await import('../src/models/models.mjs');
+  const { loadRegistry } = await import('../src/lib/registry.mjs');
+  assert.ok(!Object.keys(MODELS).some((k) => k.startsWith('bbc-micro-board')), 'a MODELS entry names the BBC board');
+  const claimed = loadRegistry().machines.flatMap((m) => (m.models ?? []).map((x) => x.module));
+  assert.ok(!claimed.some((k) => k.startsWith('bbc-micro-board')), 'a machine claims the BBC board');
+});
+
+test('task 5\'s seven method files and marks.json on disk are the ones the run read, by the hashes the journal records', () => {
+  const recorded = task5Hashes();
+  assert.equal(Object.keys(recorded).length, 7);
+  const journal = fs.readFileSync(JOURNAL, 'utf8');
+  // marks.json's hash was recorded after the run, in its own labelled line, outside the method's block
+  const after = [...journal.matchAll(/^added after the run: ([0-9a-f]{64}) (\S+)$/gm)].map(([, sha, f]) => [f, sha]);
+  assert.deepEqual(after.map(([f]) => f), ['tools/bbc-micro-model/data/marks.json']);
+  for (const [f, sha] of [...Object.entries(recorded), ...after]) {
+    const got = crypto.createHash('sha256').update(fs.readFileSync(path.join(REPO_ROOT, f))).digest('hex');
+    assert.equal(got, sha, `${f} is not the file task 5's run read`);
+  }
+});
+
+test('every description of the BBC board\'s parts says both checks failed and what the model keeps', () => {
+  const flat = (t) => t.replace(/\s+/g, ' ');
+  const read = (f) => flat(fs.readFileSync(path.join(REPO_ROOT, f), 'utf8'));
+  const tool = read('tools/bbc-micro-model/README.md').split('| `board_parts.py` |')[1]?.split('\n')[0] ?? '';
+  const data = read('tools/bbc-micro-model/data/README.md').split('| `parts.json` |')[1] ?? '';
+  const md = read('docs/bbc-micro/facts/models.md').split('## The fitted set')[1]?.split(' ## ')[0] ?? '';
+  const module = flat(fs.readFileSync(PARTS_MJS, 'utf8').split('\nexport ')[0]);
+  for (const [where, text] of [['the tool README', tool], ['the data README', data], ['parts.json afterRun', flat(parts.afterRun.text)], ['the module', module], ['models.md', md]]) {
+    assert.match(text, /(both held-out checks failed|the two checks on these parts failed)/i, `${where} does not say both checks failed`);
+    assert.match(text, /table 8\.1's parts/, `${where} does not say the identities are table 8.1's`);
+    assert.match(text, /not the board in I5/, `${where} does not say the fitted set is the emulated machine's`);
+  }
+  assert.match(md, /IC31 is marked 74LS74/);
+  assert.match(md, /IC77 is marked 74LS00/);
+  const notice = flat(fs.readFileSync(path.join(REPO_ROOT, 'NOTICE.md'), 'utf8').split(/^## /m).find((x) => x.includes('bbc-micro-board-parts.mjs')) ?? '');
+  assert.match(notice, /8bs\.com\/see\/BBC_B_iss7\.jpg/);
+  assert.match(notice, /states no licence/);
+  assert.match(notice, /CC BY-SA 3\.0/);
+  assert.match(notice, /Credit: photograph by Chris Whytehead, Chris's Acorns/);
+  assert.match(notice, /No image from either photograph is committed/);
 });
