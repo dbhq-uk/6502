@@ -603,7 +603,7 @@ def _slots(P, chain, u0, axis):
     return out
 
 
-def _facing_runs(P, a, b, axis, covered=None, real=None):
+def _facing_runs(P, a, b, axis, covered=None):
     """Each run of pitch slots along two rows where at least one row has a
     pad in each slot (a slot empty on both rows ends a run), trimmed so that
     both rows have a pad at both ends (a DIP's four corner pads are found):
@@ -624,18 +624,10 @@ def _facing_runs(P, a, b, axis, covered=None, real=None):
             cur = [s] if s is not None else []
     la, lb = _row_line(P, a, axis), _row_line(P, b, axis)
 
-    def corner_ok(i):
-        # a corner is a pad, or a spare blob (real says which) where the
-        # component side shows solder: a blob seen on the solder side alone
-        # never sets where a row ends
-        return real is None or real(i) or (covered is not None and covered(P[i]))
-
     def both(s):
         if s in sa and s in sb:
-            return corner_ok(sa[s]) and corner_ok(sb[s])
+            return True
         if covered is None or (s not in sa and s not in sb):
-            return False
-        if not corner_ok(sa.get(s, sb.get(s))):
             return False
         # one row's pad found; the other row's place covered by solder (a pin
         # under a blob too ragged or too big to be a pad on its own)
@@ -717,29 +709,6 @@ def _clear_spare(P, spare, clear_mm=COMPLETE_MM):
     return kept
 
 
-def _without(c, used, candidate, real):
-    """A candidate with the slots already taken by an accepted DIP dropped:
-    the longest piece left, trimmed until both rows have a pad at each end,
-    rescored; None when nothing fit is left."""
-    taken = [(i in used) or (j in used) for i, j in zip(c['a'], c['b'])]
-    best, cur = None, []
-    for k, t in enumerate(taken + [True]):
-        if not t:
-            cur.append(k)
-            continue
-        if cur:
-            while cur and not (real(c['a'][cur[0]]) and real(c['b'][cur[0]])):
-                cur = cur[1:]
-            while cur and not (real(c['a'][cur[-1]]) and real(c['b'][cur[-1]])):
-                cur = cur[:-1]
-            if cur and (best is None or len(cur) > len(best)):
-                best = cur
-        cur = []
-    if not best:
-        return None
-    return candidate([c['a'][k] for k in best], [c['b'][k] for k in best], c['axis'], c['spacing'])
-
-
 def _trim_to_outline(c, candidate, ok):
     """The stretch of a run whose printed outline scores best (the longest on
     a tie), at least the shortest DIP, with a pad found at all four corners;
@@ -813,7 +782,7 @@ def group_footprints(pads, to_px, rgb, spare=(), faint=()):
                     spacing = min(SPACINGS_MM, key=lambda s: abs(s - across))
                     if abs(spacing - across) > SPACING_TOL_MM:
                         continue
-                    for ra, rb in _facing_runs(Q, a, b, axis, covered, real=real):
+                    for ra, rb in _facing_runs(Q, a, b, axis, covered):
                         c = candidate(ra, rb, axis, spacing)
                         if c is not None:
                             cands.append(c)
@@ -823,12 +792,7 @@ def group_footprints(pads, to_px, rgb, spare=(), faint=()):
             if c['outline'] < OUTLINE_TRIM_BELOW:
                 c = _trim_to_outline(c, candidate, lambda i: i is not None and (real(i) or covered(Q[i])))
             if used & set(found_of(c)):
-                # It runs into a DIP already taken (IC30's rows run on into the
-                # pads of the DIP above it): the slots taken are dropped, and the
-                # longest piece left, trimmed to found corners, is tried again.
-                c = _without(c, used, candidate, lambda i: i is not None and (real(i) or covered(Q[i])))
-                if c is None:
-                    continue
+                continue
             if c['outline'] < OUTLINE_MIN and not (c['outlineStronger'] >= OUTLINE_MIN and marked_faint(c)):
                 continue
             c['faintPrint'] = c['outline'] < OUTLINE_MIN

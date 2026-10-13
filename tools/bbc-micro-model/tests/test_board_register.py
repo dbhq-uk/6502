@@ -544,14 +544,17 @@ def _spare_of(p):
             'area': p['area'], 'hole': False}
 
 
-def _small_dip(pins=14, tail=0, outline_left=True, right='pads', stray=None, seed=7):
+def _small_dip(pins=14, tail=0, right='pads', stray=None, nudge=None, seed=7):
     """One DIP down a small board, its left row discs and its right row 1.7 x
     2.3 mm ellipses (ragged solder, as on I1's RAM block). right='spare':
     the right row is left out of the pads and handed over as spare blobs
     (what the hole finder's gates do to ragged solder); `tail` more pad
-    pairs are drawn past the far end, outside the printed outline; `stray`
-    is the slot of a spare blob 0.5 mm off its place along the row, with its
-    pad left out. Returns (footprints, pads, truth, to_px)."""
+    pairs are drawn past the far end, outside the printed outline; `stray`,
+    (slot, mm), puts a spare blob that far off its place along the right
+    row, with its pad left out; `nudge`, (slot, mm), moves one found pad of
+    the right row that far along the row (as a ragged pad's centroid sits off
+    its hole; drawn there, the 2.3 mm blob would touch its neighbour).
+    Returns (footprints, pads, to_px)."""
     S = 15.75
     to_px = lambda mm: np.asarray(mm, float).reshape(-1, 2) * S + 30  # noqa: E731
     c = Canvas((700, 900), to_px, S)
@@ -562,7 +565,7 @@ def _small_dip(pins=14, tail=0, outline_left=True, right='pads', stray=None, see
         c.disc('pad', (x0, y), 1.7)
         c.poly('pad', [(x0 + spacing + 0.85 * math.cos(t), y + 1.15 * math.sin(t)) for t in np.linspace(0, 2 * math.pi, 48, endpoint=False)])
     top, bottom = y0 - 1.5, y0 + (n - 1) * PITCH + 1.5
-    c.line('print', (x0 + 1.1, top), (x0 + 1.1, bottom), 0.3) if outline_left else None
+    c.line('print', (x0 + 1.1, top), (x0 + 1.1, bottom), 0.3)
     c.line('print', (x0 + spacing - 1.1, top), (x0 + spacing - 1.1, bottom), 0.3)
     c.line('print', (x0 + 1.1, top), (x0 + spacing - 1.1, top), 0.3)
     c.line('print', (x0 + 1.1, bottom), (x0 + spacing - 1.1, bottom), 0.3)
@@ -573,10 +576,15 @@ def _small_dip(pins=14, tail=0, outline_left=True, right='pads', stray=None, see
     if right == 'spare':
         spare = [_spare_of(p) for p in pads if p['x'] > x0 + 3]
         pads = [p for p in pads if p['x'] <= x0 + 3]
+    if nudge is not None:
+        for p in pads:
+            if p['x'] > x0 + 3 and abs(p['y'] - (y0 + nudge[0] * PITCH)) < 0.3:
+                p['y'] += nudge[1]
     if stray is not None:
-        gone = [p for p in pads if p['x'] > x0 + 3 and abs(p['y'] - (y0 + stray * PITCH)) < 0.3]
+        gone = [p for p in pads if p['x'] > x0 + 3 and abs(p['y'] - (y0 + stray[0] * PITCH)) < 0.3]
+        assert len(gone) == 1
         pads = [p for p in pads if p not in gone]
-        spare = [dict(_spare_of(g), y=g['y'] + 0.5) for g in gone]
+        spare = [dict(_spare_of(g), y=g['y'] + stray[1]) for g in gone]
     return board_register.group_footprints(pads, to_px, rgb, spare), pads, to_px
 
 
@@ -589,10 +597,14 @@ def test_a_dip_whose_right_row_is_ragged_solder_with_no_pad_is_found():
 
 
 def test_a_stray_blob_beside_a_row_does_not_break_the_row_the_pads_chain():
-    """IC68's case: a blob of ragged solder 0.5 mm off the place of the pad
-    it stands in for sat nearer than the next pad and broke the row in two,
-    losing the DIP. The pads alone chain first; blobs only join what is left."""
-    fps, pads, _ = _small_dip(stray=3)
+    """IC68's case, as measured on I1 (the review of 5 October 2026): the
+    right row's pin 11 has no pad, and a spare blob of solder sits 0.39 mm
+    short of its place; pin 12's pad sits 0.16 mm short too. Chained with
+    the pads, the blob is pin 12's next link (0.22 mm off the pitch) and has
+    no next of its own (pin 10 is 0.36 mm off, over the 0.35 tolerance), so
+    the row breaks in two and the DIP is lost. The pads alone chain first;
+    blobs only join what is left, and the blob then completes pin 11."""
+    fps, pads, _ = _small_dip(stray=(3, -0.40), nudge=(2, -0.15))
     dips = [f for f in fps if f['kind'] == 'dip']
     assert len(dips) == 1 and dips[0]['pins'] == 14, [(f['kind'], f['pins']) for f in fps]
 
@@ -608,16 +620,14 @@ def test_a_run_of_pads_longer_than_the_printed_outline_is_cut_back_to_it():
 
 
 def test_a_faint_outline_on_one_side_needs_a_mark_and_the_other_side_strong():
-    fps, _, to_px = _small_dip(pins=16, outline_left=False)
+    """IC61's case: the left side of its printed outline is washed out. With
+    no mark the DIP is not accepted; with a mark inside it, the strong side
+    alone passes the outline test, and the footprint says its print is faint."""
+    fps, _ = _small_dip_marked(pins=16, faint=[])
     assert not [f for f in fps if f['kind'] == 'dip']
-    S = 15.75
-    lonely = (23.0, 18.0)
-    rgb = None
-    # the same board again, with the mark: group_footprints is given the point
-    fps2, pads2 = _small_dip_marked(pins=16, faint=[lonely])
-    dips = [f for f in fps2 if f['kind'] == 'dip']
+    fps, _ = _small_dip_marked(pins=16, faint=[(23.0, 18.0)])
+    dips = [f for f in fps if f['kind'] == 'dip']
     assert len(dips) == 1 and dips[0]['pins'] == 16 and dips[0]['faintPrint'] is True
-    assert S and rgb is None and to_px
 
 
 def _small_dip_marked(pins, faint):
@@ -636,7 +646,6 @@ def _small_dip_marked(pins, faint):
     rgb = c.render(['print', 'pad'], 7)
     pads = board_register.pads_of_one_face(rgb, S, S, lambda px: (np.asarray(px, float).reshape(-1, 2) - 30) / S)
     return board_register.group_footprints(pads, to_px, rgb, [], faint), pads
-
 
 
 def _long_dip(n_found):
