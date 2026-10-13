@@ -57,7 +57,7 @@ phase) and its baseline recorded again as
 and on 9 October, with twelve background-only scrolling cartridges added after the
 review of task 3, as `bench/nes-speed/differential/baseline/132fd50.txt`, and with
 twelve sparse-sprite cartridges added for task 4a as
-`bench/nes-speed/differential/baseline/8f7314d.txt`.
+`bench/nes-speed/differential/baseline/fae4b62.txt`.
 
 ## Why
 

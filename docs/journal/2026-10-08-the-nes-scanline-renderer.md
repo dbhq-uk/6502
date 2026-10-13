@@ -1451,8 +1451,7 @@ looked at. `AFastLinesEvaluationSetsTheOverflowFlag` checks the flag by itself.
 The line-edge `$2001` family gained the masks with both layers on. State and
 pixels are compared with the per-dot PPU as in task 3.
 
-**Against the code without the clause, 140 of the new and changed tests failed**,
-each on the count of lines taken. With the clause in, the NES tests are all
+**Against the code without the clause, 224 of the 2,724 NES tests fail**, most on the count of lines taken (13 October 2026, the clause's condition put back to `layers == 0x08` in a scratch copy of the tree, `dotnet test tests/Dbhq.Machines.Nes.Tests -c Release`: Failed 224, Passed 2,500). The first agent counted 140 of the tests it had then. With the clause in, the NES tests are all
 green (2,724 passed, 0 failed, `dotnet test tests/Dbhq.Machines.Nes.Tests -c
 Release`, 13 October 06:05 UTC on aarch64, 5 minutes 25 seconds with the gate
 recording running beside it), and `dotnet build -c Release` gives 0 warnings
@@ -1479,16 +1478,18 @@ The first agent on this task staged `baseline/bc92102.txt` and ran out of usage 
 
 The output is integer hashes, so it should not depend on the CPU. The staged file was recorded on another machine (the agent that recorded it did not log its architecture); this recording, on aarch64, matched it byte for byte.
 
-**The OAMADDR fault was seen by too few runs, and the cartridges were changed.** The fault runs below showed that `fast-sprite-oamaddr-kept` (the replacement for the equivalent fault, see below) changed 11 runs of 380, under the 20 that every fault in this gate must reach. The sparse cartridges never set OAMADDR while a fast line follows. Their mid-frame action (which already read `$2002`) now also writes `$2003` (commit `8f7314d`). Only the 24 sparse lines of the baseline changed, which was checked with `diff`: the other 356 lines are the same. **The baseline was recorded again** from `8f7314d` with `--oracle` (13 October, 10:00 UTC or so, 380 runs), `bc92102.txt` was removed and the file is now `baseline/8f7314d.txt`; the lazy build and `--oracle` were checked against it:
+**The OAMADDR fault was seen by too few runs, and the cartridges were changed twice.** The fault runs showed that `fast-sprite-oamaddr-kept` (the replacement for the equivalent fault, see below) changed 11 runs of 380, under the 20 that every fault in this gate must reach. The sparse cartridges never set OAMADDR in a way a fast line could leave visible. Their mid-frame action (which already read `$2002`) now also wrote `$2003` (commit `8f7314d`); the baseline was recorded again and the fault then changed 17 runs, still under 20. A probe in a scratch copy (a message printed when a fast line with the sprites on found OAMADDR not 0) showed the fault was reached in the MMC1 and AxROM sparse runs too, but the value was lost at the next line the per-dot path ran (the cursor's lines, or the pre-render line) before the next register access saw it. So the action now also reads `$2004` about two lines after the write (`delay` with DelayHi 1), which puts an observation point after a whole fast line and before the next exact one (commit `fae4b62`). Only the 24 sparse lines of the baseline changed each time, which was checked with `diff`: the other 356 lines are the same. **The baseline was recorded again** from `fae4b62` with `--oracle` (13 October, finished 12:02 UTC, 380 runs), `bc92102.txt` (the staged file) was removed and the file is now `baseline/fae4b62.txt`; the lazy build and `--oracle` were checked against it:
 
-- `--check differential/baseline/8f7314d.txt`, the lazy build: **IDENTICAL, all 380 runs**, 10:10 to 10:17 UTC.
-- `--check differential/baseline/8f7314d.txt --oracle`: **IDENTICAL, all 380 runs**, 10:17 to 10:25 UTC.
+- `--check differential/baseline/fae4b62.txt`, the lazy build: **IDENTICAL, all 380 runs**, 12:02 to 12:12 UTC.
+- `--check differential/baseline/fae4b62.txt --oracle`: **IDENTICAL, all 380 runs**, 12:12 to 12:19 UTC.
+
+(Both intermediate baselines were also checked IDENTICAL in both modes, `8f7314d.txt` at 10:10 to 10:25 UTC, before they were removed.)
 
 ### The faults
 
 The eleven faults of task 3 in `PpuScanline.cs` and six for the clause were run
 on a scratch copy of this tree (the repository is never changed), each with the
-differential `--check` against `bc92102.txt` (first run) and `8f7314d.txt` (the six faults of the clause, again) and the 1,203 tests of
+differential `--check` against `bc92102.txt` (first run) and `fae4b62.txt` (the six faults of the clause, again) and the 1,203 tests of
 `PpuScanlineTests`, `PpuDotScene*`, `PpuCatchUpTests`, `StateReport` and
 `PpuMoveTo`:
 
@@ -1496,8 +1497,8 @@ differential `--check` against `bc92102.txt` (first run) and `8f7314d.txt` (the 
 python3 bench/nes-speed/differential/faults.py <copy> <copy>/bench/nes-speed/differential/baseline/bc92102.txt --tests <filter> <fault ...>
 ```
 
-First run 13 October 2026, 07:04 to 10:02 UTC, on aarch64; then the six faults of the clause again, 10:25 to 10:58 UTC or so, after the cartridge change above. The whole output of both is in
-[`task-4a-faults.txt`](../../bench/nes-speed/lazy-chips/task-4a-faults.txt). The run counts are of 380 and the tests of 1,203 (`PpuScanlineTests`, `PpuDotScene*`, `PpuCatchUpTests`, `StateReport`, `PpuMoveTo`). The six faults of the clause are from the second run, the others from the first; the baseline of the second run differs from the first's in the 24 sparse lines only.
+All the runs below were on aarch64, 13 October 2026. The first run was of all 17 faults, 07:04 to 10:02 UTC, against `bc92102.txt`; the six faults of the clause were run again against `8f7314d.txt` (10:25 to 10:58 UTC or so) and a third time against `fae4b62.txt` (12:19 to 13:10 UTC), after the cartridge changes above. The whole output of all three is in
+[`task-4a-faults.txt`](../../bench/nes-speed/lazy-chips/task-4a-faults.txt). The run counts are of 380 and the tests of 1,203 (`PpuScanlineTests`, `PpuDotScene*`, `PpuCatchUpTests`, `StateReport`, `PpuMoveTo`). The table has the first run's rows for the eleven faults of task 3 and the third run's for the six of the clause; the counts of the five clause faults other than the OAMADDR one did not change between the runs (only `fast-sprite-oamaddr-kept` went from 11 to 17 to 23). The baseline of each run differs from the one before in the 24 sparse lines only.
 
 | Fault | Differential runs that differ | Scene and state tests that fail |
 | --- | --- | --- |
@@ -1515,11 +1516,11 @@ First run 13 October 2026, 07:04 to 10:02 UTC, on aarch64; then the six faults o
 | `fast-sprite-clause-with-sprites` | 93 of 380 | 144 of 1203 |
 | `fast-sprite-clause-left-clip` | 36 of 380 | 52 of 1203 |
 | `fast-sprite0-hit-from-nothing` | 79 of 380 | 232 of 1203 |
-| `fast-sprite-oamaddr-kept` | 17 of 380 | 12 of 1203 |
+| `fast-sprite-oamaddr-kept` | 23 of 380 | 12 of 1203 |
 | `fast-sprite-count-not-set` | 88 of 380 | 170 of 1203 |
 | `fast-sprite-overflow-not-set` | 29 of 380 | 14 of 1203 |
 
-**Sixteen of the 17 faults are seen by at least 20 runs and every one of the 17 by scene tests. `fast-sprite-oamaddr-kept` is seen by 17 runs, not 20** (11 before the cartridge change). It is the fault that keeps OAMADDR on a fast line; the value it keeps is lost at the next line that the per-dot path runs, and at the pre-render line, so a run sees it only when the program writes `$2003` in a visible line with no line of the per-dot path after it before the next point where the PPU can be seen. 12 tests fail on it. The 17 runs are NROM sparse cartridges on NTSC, the fuzz and sprite cartridges on a few boards, and the others not at all. The shortfall is recorded here and not hidden: I did not find out why the other boards and PAL do not see it, and the gate was not changed a second time. The smallest of the others is `fast-vblank-line-off-by-one` at 20 runs, as before the sparse cartridges: it only changes the VBlank lines, which a program reaches in few runs. Task 3's faults are seen by more runs than at task 3's review, because the clause makes more of their lines fast (`fast-pixel-one-off` went from 75 runs of 356 to 131 of 380).
+**Every one of the 17 faults is seen by at least 20 runs of the differential (the smallest is `fast-vblank-line-off-by-one` at 20, then `fast-sprite-oamaddr-kept` at 23) and by scene tests (the smallest is `fast-nametable-page` at 8 tests; that is a property of the scene families, each failing row holds many scenes, as at task 3's review).** `fast-vblank-line-off-by-one` is at 20 as before the sparse cartridges: it only changes the VBlank lines, which a program reaches in few runs. Task 3's faults are seen by more runs than at task 3's review, because the clause makes more of their lines fast (`fast-pixel-one-off` went from 75 runs of 356 to 131 of 380).
 
 **One fault was equivalent, and was replaced.** The previous agent's
 `fast-sprite-buffer-not-cleared` (skip the line buffer's emptying on a fast line
