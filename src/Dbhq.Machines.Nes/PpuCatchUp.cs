@@ -112,9 +112,15 @@ public sealed partial class Ppu
     public void CatchUp()
     {
         // The count goes up before the dot runs, so a frame end inside it, which tells the
-        // observer, sees the position and the count agree.
+        // observer, sees the position and the count agree. A line whose every dot is owed may be
+        // run at once (TryRenderLine, PpuScanline.cs), which leaves the state as its dots would.
         while (_caughtUpDots < _logicalDots)
         {
+            if (_dot == 0 && _logicalDots - _caughtUpDots >= Region.DotsPerLine && TryRenderLine())
+            {
+                continue;
+            }
+
             _caughtUpDots++;
             RunDot();
         }
