@@ -2,14 +2,14 @@
 files, so the page never carries a figure typed by hand (AGENTS.md rule 5). The
 board half, for the inside model, writes
 site/src/data/bbc-micro-board-model.json (plan task 7); the case half, for the
-outside model, comes with task 9a.
+outside model, writes site/src/data/bbc-micro-case-model.json (plan task 9a).
 
     ~/venv-models/bin/python tools/bbc-micro-model/results.py
 
 Reads data/frame.json, data/registration.json, data/copper.json,
-data/parts.json and data/sources.json, all written or kept by the other
-scripts here, and writes only the figures the page quotes, each as the data
-file holds it. It reads no input and fetches nothing.
+data/parts.json, data/keys.json, data/case.json and data/sources.json, all
+written or kept by the other scripts here, and writes only the figures the page
+quotes, each as the data file holds it. It reads no input and fetches nothing.
 """
 import json
 
@@ -17,6 +17,7 @@ import common
 
 SITE_DATA = common.REPO / 'site' / 'src' / 'data'
 BOARD_OUT = SITE_DATA / 'bbc-micro-board-model.json'
+CASE_OUT = SITE_DATA / 'bbc-micro-case-model.json'
 
 
 def load(name):
@@ -138,11 +139,59 @@ def board_results(frame, registration, copper, parts, sources):
     }
 
 
-def main():
-    out = board_results(load('frame.json'), load('registration.json'), load('copper.json'), load('parts.json'), load('sources.json')['sources'])
+def case_results(keys, case, sources):
+    """The case model's figures, each read from keys.json or case.json as
+    named beside it. The width's three measures are case_parts.py's
+    width_words(): the keys' scale on O1's case top, the scale the opening's
+    two front corners imply, and the case's width on O2's D shell scale against
+    the Service Manual's; they disagree with the manual, and nothing here
+    resolves that."""
+    width = case['footprint']['widthMm']
+    rear_ratio = round(case['widthOnRear']['mm'] / width, 4)
+    ratios = [case['caseTop']['scale'], case['k1ToCase']['impliedScale'], rear_ratio]
+    o1, o3 = keys['o1'], keys['o3']
+    rear = case['rearCheck']
+    worst = max(rear['errMm'], key=lambda ref: abs(rear['errMm'][ref]))
+    profile = case['profileCheck']
+    # The typical values the model draws. keyAboveTop and panelBelowKeys are
+    # case_parts.py's fallback, drawn only if the side profile's check failed.
+    fallback_only = {'keyAboveTop', 'panelBelowKeys'}
+    typical = sorted(k for k, t in case['typical'].items() if not t['measured'] and (profile['fallback'] or k not in fallback_only))
+    colours = [k['colour'] for k in keys['keys']]
+    front = case['frontEdge']
+    return {
+        'about': 'Made by tools/bbc-micro-model/results.py from tools/bbc-micro-model/data/keys.json and case.json. '
+                 'The BBC Micro page quotes these for the case model; nothing on it is typed by hand.',
+        # case.json: the Service Manual's size, and the three measures that disagree with it
+        'size': {'widthMm': width, 'depthMm': case['footprint']['depthMm'], 'heightMm': case['heightMm'], 'from': case['footprint']['source']},
+        'width': {'caseTopScale': case['caseTop']['scale'], 'cornersScale': case['k1ToCase']['impliedScale'],
+                  'rearMm': case['widthOnRear']['mm'], 'rearRatio': rear_ratio, 'low': min(ratios), 'high': max(ratios), 'resolved': False},
+        # keys.json: the keycaps, their mapping and their colours as read on O1
+        'keys': {'keycaps': keys['mapping']['keys'], 'machineKeys': keys['mapping']['machineKeys'], 'mapping': keys['verdicts']['mapping'],
+                 'red': colours.count('red'), 'light': colours.count('light'), 'dark': colours.count('dark'), 'coloursAgree': keys['colours']['agree']},
+        'o1': {'n': o1['n'], 'medianMm': o1['heldOutMm']['median'], 'p90Mm': o1['heldOutMm']['p90'], 'maxMm': o1['heldOutMm']['max'], 'verdict': keys['verdicts']['o1']},
+        'o3': {'n': len(o3['legends']), 'medianMm': o3['heldOutMm']['median'], 'p90Mm': o3['heldOutMm']['p90'], 'maxMm': o3['heldOutMm']['max'], 'verdict': keys['verdicts']['o3']},
+        # case.json: the front edge's check, not measurable, and d
+        'frontEdge': {'rawMm': front['rawMm'], 'verdict': case['verdicts']['frontEdge'], 'hFound': front['h']['mm'] is not None,
+                      'dMm': front['d']['mm'], 'dSeMm': front['d']['seMm']},
+        'profileCheck': {'errMm': profile['errMm'], 'limitMm': profile['limitMm'], 'verdict': case['verdicts']['profileCheck'], 'fallback': profile['fallback']},
+        'rear': {'n': rear['n'], 'within': rear['within'], 'worstMm': rear['worstMm'], 'worstRef': worst, 'limitMm': rear['limitMm'],
+                 'verdict': case['verdicts']['rear'], 'boardOffsetMm': case['boardInCase']['x']},
+        'typical': typical,
+        'sources': with_addresses(case['sources'], sources),
+    }
+
+
+def write(path, out):
     text = json.dumps(common.plain(out, None), indent=1, sort_keys=True, ensure_ascii=False)
-    BOARD_OUT.write_text(text + '\n', encoding='utf8')
-    print(f'wrote {BOARD_OUT.relative_to(common.REPO)}')
+    path.write_text(text + '\n', encoding='utf8')
+    print(f'wrote {path.relative_to(common.REPO)}')
+
+
+def main():
+    sources = load('sources.json')['sources']
+    write(BOARD_OUT, board_results(load('frame.json'), load('registration.json'), load('copper.json'), load('parts.json'), sources))
+    write(CASE_OUT, case_results(load('keys.json'), load('case.json'), sources))
 
 
 if __name__ == '__main__':

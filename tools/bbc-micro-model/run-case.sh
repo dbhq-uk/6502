@@ -18,3 +18,4 @@ cd "$here"
 "$py" verify.py O1 O2 O3 O4 O5 O8-I K1 P-TE_1757819
 "$py" keys.py          # data/keys.json: every K1 keycap mapped to the machine's keys; O1 and O3 registered to K1
 "$py" case_parts.py    # data/case.json and site/src/models/bbc-micro-case-parts.mjs: the case top, the triangulation and its check, the rear and its check
+"$py" results.py      # site/src/data/bbc-micro-board-model.json and bbc-micro-case-model.json: the figures the page quotes

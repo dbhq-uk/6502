@@ -85,6 +85,22 @@
   --model-nes-button: #a3a39f;
   --model-nes-ink: #c63a2f;
   --model-nes-sticker: #e6e3d6;
+  /* the BBC Micro's case (its outside model): the cream of the case, the
+     charcoal of the panel the keys stand on, the smoked badge strip, and the
+     keycaps. The red is between the centres of the two clusters O1's function
+     keys fell into, and the black the centre of the cluster nearly every other
+     key fell into (tools/bbc-micro-model/data/keys.json, colours); the brown of
+     the cursor keys and COPY, lighter than the black, the cream, the charcoal,
+     the strip and the white of the legends are chosen by eye on O1. Its lights
+     are --model-led, lit, and --model-led-off, dark, as the KIM-1's LEDs. None
+     is a text colour on the page. */
+  --model-bbc-case: #d8d1bb;
+  --model-bbc-panel: #3a3a3c;
+  --model-bbc-badge: #2a2827;
+  --model-bbc-key-red: #b33328;
+  --model-bbc-key-light: #4b3f35;
+  --model-bbc-key-dark: #2d2621;
+  --model-bbc-legend: #ecebe4;
 
   /* type */
   --font-head: "Inter Tight Variable", "Inter Tight", system-ui, sans-serif;

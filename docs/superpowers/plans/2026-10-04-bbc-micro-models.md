@@ -627,6 +627,7 @@ After task 9b the BBC Micro's record has `"models": [{ "view": "inside", "module
   2. The key state machine.
   3. No owl.
   4. No colour literal.
+- **Outcome, 13 October 2026.** Built and unclaimed: `bbc-micro-case-scene.mjs` (all of the drawing, no `mount`), `bbc-micro-case-layout.mjs`, `bbc-micro-case-notes.mjs`, `results.py`'s case half and `site/src/data/bbc-micro-case-model.json` (its sources with their authors), and seven `--model-bbc-*` tokens; the lights are `--model-led` and `--model-led-off`. The legends are `LEGENDS[name]` imported from `bbc-keys.js`, but for the space bar, blank as O1 shows it; SHIFT puts both SHIFT keycaps down; the key state is a function of time, run in the tests on a fake clock. The caps are typical flat-topped blocks, not sculpted, K2 being unobtainable; each is a mesh of its own, not instanced, because each carries its own legend. Every word on the size says it is the Service Manual's and that the photographs' three measures disagree, not resolved; the note gives the three figures, the front edge as not measurable, and the inside's copper as traced to look at. Nothing was measured. The pages are unchanged but for the stylesheet's seven new lines. What 9b's entry wires is listed in the journal's task 9a section.
 
 **Task 9b: both views on the page.**
 

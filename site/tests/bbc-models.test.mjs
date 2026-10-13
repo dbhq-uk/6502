@@ -1488,3 +1488,380 @@ test('the outside\'s photographs are committed, credited and are the resized ori
   assert.equal(bbc.photos[0].file, 'bbc-micro.webp');
   assert.match(fs.readFileSync(path.join(REPO_ROOT, 'NOTICE.md'), 'utf8'), /## The BBC Micro's key centres, from Dominic Beesley's keyboard \(MIT\)[\s\S]*github\.com\/dbhq-uk\/bbc-keyboard[\s\S]*Copyright \(c\) 2023 dominicbeesley/);
 });
+
+// --- Task 9a: the outside's scene, words and data, not on the page ----------------------------
+//
+// As task 7's inside: the scene, its layout, its notes and its results file land as .mjs modules
+// that no MODELS entry lists and no machine claims, tested here in node. Task 9b adds the thin
+// .js entry, the MODELS entries and the claim of both views together.
+
+const caseLayout = await import('../src/models/bbc-micro-case-layout.mjs');
+const caseScene = await import('../src/models/bbc-micro-case-scene.mjs');
+const caseNotes = await import('../src/models/bbc-micro-case-notes.mjs');
+const { LEGENDS } = await import('../public/bbc-keys.js');
+const CASE_DIR = path.join(process.cwd(), 'src', 'models');
+const CASE_SCENE_MJS = path.join(CASE_DIR, 'bbc-micro-case-scene.mjs');
+const CASE_LAYOUT_MJS = path.join(CASE_DIR, 'bbc-micro-case-layout.mjs');
+const CASE_RESULTS = path.join(process.cwd(), 'src', 'data', 'bbc-micro-case-model.json');
+const caseFigures = JSON.parse(fs.readFileSync(CASE_RESULTS, 'utf8'));
+const KEY_TOKENS = { red: 'model-bbc-key-red', light: 'model-bbc-key-light', dark: 'model-bbc-key-dark' };
+const codeOf = (file) => fs.readFileSync(file, 'utf8').replace(/^\s*\/\/.*$/gm, '').replace(/^\s*\*.*$/gm, '');
+
+// The case drawn in a scene of its own, with the atlas's places (its texture is the browser's).
+function caseBuilt({ atlas = true } = {}) {
+  const scene = new THREE.Scene();
+  const { token, asked } = tokenReader();
+  const items = caseScene.atlasItems();
+  const handles = caseScene.buildCase(scene, token, { atlas: atlas ? { texture: null, place: caseScene.layoutAtlas(items).boxes } : null });
+  scene.updateMatrixWorld(true);
+  return { scene, handles, asked, items };
+}
+const sceneX = (x) => (x - caseLayout.CASE.width / 2) / 10;
+const sceneY = (z) => (z - caseLayout.CASE.height / 2) / 10;
+const sceneZ = (y) => (y - caseLayout.CASE.depth / 2) / 10;
+
+test('the outside\'s keys are the machine\'s: every key a BBC_KEYS name, BREAK or the second SHIFT, every BBC_KEYS name a key, each legend LEGENDS[name]', () => {
+  const names = caseLayout.KEYS.keys.map((k) => k.name);
+  assert.equal(new Set(names).size, names.length, 'a key twice');
+  for (const n of names) assert.ok(n in BBC_KEYS || n === 'Break' || n === 'Shift2', `${n} is not a machine key`);
+  for (const n of Object.keys(BBC_KEYS)) assert.ok(names.includes(n), `${n} has no key on the case`);
+  assert.ok(names.includes('Break') && names.includes('Shift2'));
+  for (const n of names) {
+    if (n === 'Space') assert.equal(caseLayout.legendOf(n), '', 'the space bar is blank, as O1 shows it');
+    else if (n === 'Shift2') assert.equal(caseLayout.legendOf(n), LEGENDS.Shift);
+    else if (n === 'Break') assert.equal(caseLayout.legendOf(n), 'BREAK');
+    else assert.equal(caseLayout.legendOf(n), LEGENDS[n], n);
+  }
+  assert.equal(caseLayout.machineKey('Shift2'), 'Shift');
+  assert.deepEqual(caseLayout.capsOf('Shift'), ['Shift', 'Shift2']);
+  assert.deepEqual(caseLayout.capsOf('C'), ['C']);
+  assert.deepEqual(caseLayout.capsOf('NoSuchKey'), []);
+  assert.throws(() => caseLayout.legendOf('NoSuchKey'));
+  // the legends are read from bbc-keys.js, never typed here: the layout imports LEGENDS and spells no key's legend
+  const src = codeOf(CASE_LAYOUT_MJS);
+  assert.match(src, /import \{[^}]*LEGENDS[^}]*\} from '\.\.\/\.\.\/public\/bbc-keys\.js'/);
+  for (const word of ['CAPS LOCK', 'SHIFT LOCK', 'RETURN', 'DELETE', 'ESCAPE', 'COPY', '←']) assert.ok(!src.includes(`'${word}'`), `the layout types the legend ${word}`);
+  // and the scene prints exactly those legends on the caps
+  const { handles } = caseBuilt();
+  for (const n of names) {
+    const printed = handles.caps.get(n).children.filter((c) => c.userData.words !== undefined).map((c) => c.userData.words);
+    assert.deepEqual(printed, n === 'Space' ? [] : [caseLayout.legendOf(n)], n);
+  }
+});
+
+test('the case scene is the Service Manual\'s footprint and height, its opening cut through the top, and every keycap stands in the opening at its place, coloured by its class on O1', () => {
+  const { scene, handles } = caseBuilt();
+  const { CASE, RECESS, PROFILE, KEYS } = caseLayout;
+  const box = new THREE.Box3().setFromObject(handles.shell);
+  const near = (a, b, what) => assert.ok(Math.abs(a - b) < 1e-6, `${what}: ${a} against ${b}`);
+  near(box.min.x, sceneX(0), 'left'); near(box.max.x, sceneX(CASE.width), 'right');
+  near(box.min.z, sceneZ(0), 'rear'); near(box.max.z, sceneZ(CASE.depth), 'front');
+  near(box.max.y, sceneY(CASE.height), 'top'); near(box.min.y, sceneY(caseLayout.FEET.height), 'base on its feet');
+  assert.deepEqual([CASE.width, CASE.depth, CASE.height], [caseJson.footprint.widthMm, caseJson.footprint.depthMm, caseJson.heightMm]);
+  assert.equal(caseJson.footprint.source, 'D1');
+  const feet = new THREE.Box3().setFromObject(handles.feet);
+  near(feet.min.y, sceneY(0), 'the feet stand on the table');
+  // a ray down through the opening, left of the keys, meets the panel at its height; behind the opening, the top at 73 mm
+  const down = (x, y) => new THREE.Raycaster(new THREE.Vector3(sceneX(x), 20, sceneZ(y)), new THREE.Vector3(0, -1, 0)).intersectObject(scene, true)[0];
+  const inOpening = down(40, 280);
+  assert.equal(inOpening.object.material, handles.materials.panel, 'the opening is not cut through the top');
+  near(inOpening.point.y, sceneY(RECESS.panel), 'the panel\'s height');
+  const behind = down(200, 100);
+  assert.equal(behind.object.material, handles.materials.case);
+  near(behind.point.y, sceneY(CASE.height), 'the case top');
+  assert.equal(PROFILE.fallback, false);
+  // every keycap: one cap each, its top at the key plane, its foot on the panel, at its K1 place, inside the opening
+  assert.equal(handles.caps.size, KEYS.keys.length);
+  const op = RECESS.opening;
+  const inside = (x, z) => op.every((p, i) => { const q = op[(i + 1) % op.length]; return (sceneX(q[0]) - sceneX(p[0])) * (z - sceneZ(p[1])) - (sceneZ(q[1]) - sceneZ(p[1])) * (x - sceneX(p[0])) >= 0; });
+  for (const k of KEYS.keys) {
+    const cap = handles.caps.get(k.name);
+    const b = new THREE.Box3().setFromObject(cap);
+    near(b.max.y, sceneY(PROFILE.keyPlane), `${k.name}'s top`);
+    assert.ok(b.min.y >= sceneY(RECESS.panel) - 1e-6, `${k.name} sinks into the panel`);
+    near(cap.position.x, sceneX(k.x), `${k.name} x`); near(cap.position.z, sceneZ(k.y), `${k.name} y`);
+    for (const x of [b.min.x, b.max.x]) for (const z of [b.min.z, b.max.z]) assert.ok(inside(x, z), `${k.name} is outside the opening`);
+    assert.equal(`#${cap.material.color.getHexString()}`, tokenHex(KEY_TOKENS[k.colour]), `${k.name} is not ${k.colour}`);
+    assert.equal(k.colour, keysJson.keys.find((j) => j.name === k.name).colour);
+  }
+});
+
+test('the lights are the cassette motor, CAPS LOCK and SHIFT LOCK, left to right, each lit as panel.bbc.leds() says, in --model-led and --model-led-off', () => {
+  const { handles } = caseBuilt();
+  assert.deepEqual([...handles.leds.keys()], ['cassette motor', 'caps lock', 'shift lock']);
+  const xs = [...handles.leds.values()].map((m) => m.position.x);
+  assert.ok(xs[0] < xs[1] && xs[1] < xs[2]);
+  assert.deepEqual(caseLayout.LED_OF, { motor: 'cassette motor', caps: 'caps lock', shiftLock: 'shift lock' });
+  for (const leds of [{ motor: false, caps: true, shiftLock: false }, { motor: true, caps: false, shiftLock: true }, { motor: false, caps: false, shiftLock: false }]) {
+    const lit = caseLayout.litLeds(leds);
+    assert.deepEqual(lit, Object.entries(caseLayout.LED_OF).filter(([k]) => leds[k]).map(([, v]) => v));
+    handles.setLeds(lit);
+    for (const [name, mesh] of handles.leds) assert.equal(`#${mesh.material.color.getHexString()}`, tokenHex(lit.includes(name) ? 'model-led' : 'model-led-off'), name);
+  }
+  assert.deepEqual(caseLayout.litLeds(null), []);
+  assert.equal(caseLayout.ledWords([]), 'none');
+  assert.equal(caseLayout.ledWords(['caps lock', 'shift lock']), 'caps lock, shift lock');
+});
+
+test('a key goes down on bbc:key: down until up, a tap for 140 ms on a fake clock, latch-on until latch-off, SHIFT both its keycaps, and the scene moves exactly those caps', () => {
+  assert.equal(caseLayout.TAP_MS, 140);
+  const s = caseLayout.createKeyState();
+  assert.deepEqual(s.down(0), []);
+  s.on({ name: 'A', action: 'down' }, 0);
+  assert.deepEqual(s.down(10_000), ['A'], 'down holds until up');
+  s.on({ name: 'A', action: 'up' }, 10_000);
+  assert.deepEqual(s.down(10_000), []);
+  s.on({ name: 'C', action: 'tap' }, 20_000);
+  assert.deepEqual(s.down(20_139), ['C'], 'a tap holds for 140 ms');
+  assert.deepEqual(s.down(20_140), [], 'and not longer');
+  s.on({ name: 'Shift', action: 'latch-on' }, 30_000);
+  assert.deepEqual(s.down(90_000), ['Shift', 'Shift2'], 'a latched SHIFT holds both SHIFT keycaps until latch-off');
+  s.on({ name: 'Shift', action: 'latch-off' }, 90_000);
+  assert.deepEqual(s.down(90_000), []);
+  s.on({ name: 'Ctrl', action: 'latch-on' }, 100_000);
+  s.on({ name: 'D2', action: 'tap' }, 100_050);
+  s.on({ name: 'Ctrl', action: 'latch-off' }, 100_050);
+  assert.deepEqual(s.down(100_100), ['D2'], 'the latch lets go, the tap holds on');
+  s.on({ name: 'Break', action: 'tap' }, 200_000);
+  assert.deepEqual(s.down(200_000), ['Break']);
+  // a tap while down, and a down while latched: a key is down while anything holds it
+  s.on({ name: 'Q', action: 'down' }, 300_000);
+  s.on({ name: 'Q', action: 'tap' }, 300_010);
+  assert.deepEqual(s.down(400_000), ['Q']);
+  s.on({ name: 'Q', action: 'up' }, 400_000);
+  assert.deepEqual(s.down(400_000), []);
+  // presses: each down, tap and latch-on is one; nothing else is, and a name not on the case is ignored
+  assert.equal(s.presses, 8);
+  assert.equal(s.on({ name: 'NoSuchKey', action: 'down' }, 1), false);
+  assert.equal(s.on({ name: 'A', action: 'wiggle' }, 1), false);
+  assert.equal(s.presses, 8);
+  assert.equal(s.last, 'Q');
+  s.on({ name: 'A', action: 'down' }, 500_000);
+  s.reset();
+  assert.deepEqual(s.down(500_000), [], 'a new machine has no key down');
+  // the scene: exactly the caps named go down, by the key's travel, and come back
+  const { handles } = caseBuilt({ atlas: false });
+  const rest = new Map([...handles.caps].map(([n, c]) => [n, c.position.y]));
+  handles.setKeys(['C', 'Shift', 'Shift2']);
+  for (const [n, c] of handles.caps) {
+    const want = ['C', 'Shift', 'Shift2'].includes(n) ? rest.get(n) - caseScene.TRAVEL_MM / 10 : rest.get(n);
+    assert.ok(Math.abs(c.position.y - want) < 1e-9, n);
+  }
+  handles.setKeys([]);
+  for (const [n, c] of handles.caps) assert.equal(c.position.y, rest.get(n), n);
+  assert.ok(caseScene.TRAVEL_MM > 0 && caseScene.TRAVEL_MM < caseLayout.PROFILE.keyPlane - caseLayout.RECESS.panel, 'a key goes through the panel');
+});
+
+test('a click on a key presses it through panel.bbc.tap, the second SHIFT as SHIFT, and before Start presses nothing and says why', () => {
+  const tapped = [];
+  const panel = { bbc: { tap: (n) => tapped.push(n) } };
+  assert.equal(caseLayout.press('C', panel), caseLayout.STATUS.pressed('C'));
+  assert.equal(caseLayout.press('Shift2', panel), caseLayout.STATUS.pressed('Shift2'));
+  assert.equal(caseLayout.press('Break', panel), caseLayout.STATUS.pressed('Break'));
+  assert.deepEqual(tapped, ['C', 'Shift', 'Break']);
+  assert.match(caseLayout.STATUS.pressed('C'), /C/);
+  assert.match(caseLayout.STATUS.pressed('Shift2'), /SHIFT/);
+  for (const notYet of [{}, null, undefined]) assert.equal(caseLayout.press('C', notYet), caseLayout.STATUS.notRunning);
+  assert.equal(tapped.length, 3, 'a key before Start pressed something');
+  assert.match(caseLayout.STATUS.notRunning, /not running/);
+  assert.throws(() => caseLayout.press('NoSuchKey', panel));
+  assert.match(caseLayout.HELP, /CAPS LOCK and SHIFT LOCK/);
+  assert.match(caseLayout.HELP, /cassette motor/);
+});
+
+test('no owl: the case\'s scene and layout name none, load no image, draw their words into one canvas from text, and hold no SVG path', () => {
+  for (const file of [CASE_SCENE_MJS, CASE_LAYOUT_MJS]) {
+    const src = fs.readFileSync(file, 'utf8');
+    assert.doesNotMatch(src, /owl|logo|emblem/i, `${path.basename(file)} names an owl`);
+    assert.doesNotMatch(src, /<path\b|Path2D|SVGLoader|\bd="M|\.svg\b/i, `${path.basename(file)} holds an SVG path`);
+    assert.doesNotMatch(src, /['"`]\s*M\s*-?\d[\d.\s,-]*[LHVCSQTAZ]/i, `${path.basename(file)} holds an SVG path's data`);
+    assert.deepEqual([...src.matchAll(/new Image\(|TextureLoader|ImageLoader|ImageBitmapLoader|fetch\(|import\(/g)].map((m) => m[0]), [], `${path.basename(file)} loads something`);
+  }
+  const src = fs.readFileSync(CASE_SCENE_MJS, 'utf8');
+  assert.equal([...src.matchAll(/document\.createElement\('canvas'\)/g)].length, 1, 'the words are drawn into more than one canvas');
+  assert.match(src, /document\.fonts\?\.load\(/);
+  assert.match(src, /g\.fillText\(/);
+  // the badge strip carries the words O1 shows, as words
+  const { items } = caseBuilt();
+  assert.deepEqual(items.find((i) => i.id === 'badge').lines, caseJson.badge.words);
+  assert.match(caseJson.badge.from, /No owl is drawn or measured/);
+});
+
+test('every rear port and underside connector has its label drawn on the case beside it, and the rear\'s ports, vents and mains panel lie on the rear face', () => {
+  const { scene, handles } = caseBuilt();
+  const { REAR, UNDERSIDE, GRILLE, CASE } = caseLayout;
+  const words = new Map();
+  scene.traverse((o) => { if (o.userData.item) words.set(o.userData.item, o); });
+  const rearZ = sceneZ(0);
+  for (const p of REAR.ports) {
+    assert.ok(p.label, p.ref);
+    const port = handles.ports.get(p.ref);
+    assert.ok(port && port.userData.label === p.label, `${p.ref} is not drawn with its label`);
+    const b = new THREE.Box3().setFromObject(port);
+    assert.ok(b.max.z <= rearZ + 1e-6 && b.max.z > rearZ - 0.3, `${p.ref} is not on the rear face`);
+    assert.ok(b.min.x >= sceneX(0) && b.max.x <= sceneX(CASE.width), `${p.ref} is off the case`);
+    const w = words.get(`rear:${p.ref}`);
+    assert.ok(w, `${p.ref}'s label is not drawn`);
+    assert.equal(w.userData.words, p.label);
+    const wp = new THREE.Vector3(); w.getWorldPosition(wp);
+    assert.ok(wp.z < rearZ && Math.abs(wp.x - sceneX(p.x)) < 1e-6 && wp.y > sceneY(p.z + p.h / 2), `${p.ref}'s label is not above it on the rear`);
+  }
+  assert.deepEqual(REAR.ports.map((p) => p.label), caseJson.rearOrder);
+  for (const u of UNDERSIDE.connectors) {
+    assert.ok(u.label, u.ref);
+    const c = handles.ports.get(u.ref);
+    assert.ok(c && c.userData.label === u.label, `${u.ref} is not drawn with its label`);
+    const b = new THREE.Box3().setFromObject(c);
+    assert.ok(b.max.y <= sceneY(caseLayout.FEET.height) + 1e-6 && b.min.y > sceneY(0), `${u.ref} is not under the case, above the table`);
+    const w = words.get(`under:${u.ref}`);
+    assert.ok(w && w.userData.words === u.label, `${u.ref}'s label is not drawn`);
+    const wp = new THREE.Vector3(); w.getWorldPosition(wp);
+    assert.ok(wp.y < sceneY(caseLayout.FEET.height) && Math.abs(wp.x - sceneX(u.x)) < 1e-6, `${u.ref}'s label is not beside it underneath`);
+  }
+  assert.equal(GRILLE.face, 'rear');
+  assert.equal(handles.vents.length, GRILLE.slots.length);
+  for (const v of handles.vents) { const b = new THREE.Box3().setFromObject(v); assert.ok(b.max.z <= rearZ + 1e-6, 'a vent is not on the rear'); }
+  assert.deepEqual(words.get('mains').userData.words, REAR.mains.words.join('\n'));
+  // pointing at a port or connector names it
+  for (const p of [...REAR.ports, ...UNDERSIDE.connectors]) assert.match(caseLayout.pointWords({ port: p.ref }), new RegExp(`^${p.label.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}`));
+  assert.match(caseLayout.pointWords({ key: 'Shift2' }), /SHIFT/);
+  assert.equal(caseLayout.pointWords({}), null);
+});
+
+test('the words atlas holds every legend, label and word the scene draws, each in a box of its own, within one canvas', () => {
+  const { scene, items } = caseBuilt();
+  const { width, height, boxes } = caseScene.layoutAtlas(items);
+  assert.ok(width <= 4096 && height <= 4096, `the atlas is ${width} by ${height}`);
+  const drawn = [];
+  scene.traverse((o) => { if (o.userData.item) drawn.push(o.userData.item); });
+  assert.deepEqual([...new Set(drawn)].sort(), items.map((i) => i.id).sort(), 'a word drawn that is not in the atlas, or one in it not drawn');
+  const want = [...caseLayout.KEYS.keys.filter((k) => k.name !== 'Space').map((k) => `key:${k.name}`), 'badge', 'mains',
+    ...caseLayout.LEDS.leds.map((l) => `led:${l.name}`), ...caseLayout.REAR.ports.map((p) => `rear:${p.ref}`), ...caseLayout.UNDERSIDE.connectors.map((u) => `under:${u.ref}`)];
+  assert.deepEqual(items.map((i) => i.id).sort(), want.sort());
+  const list = [...boxes.values()];
+  for (const a of list) {
+    assert.ok(a.x >= 0 && a.y >= 0 && a.x + a.w <= width && a.y + a.h <= height, 'a box is off the canvas');
+    assert.ok(a.u0 >= 0 && a.u1 <= 1 && a.v0 >= 0 && a.v1 <= 1 && a.u0 < a.u1 && a.v0 < a.v1);
+    for (const b of list) if (a !== b) assert.ok(a.x + a.w <= b.x || b.x + b.w <= a.x || a.y + a.h <= b.y || b.y + b.h <= a.y, 'two boxes overlap');
+  }
+  for (const i of items) {
+    assert.ok(i.lines.every((l) => typeof l === 'string' && l.length > 0), i.id);
+    assert.ok(i.wMm > 0 && i.hMm > 0, i.id);
+  }
+  assert.deepEqual(items.find((i) => i.id === 'key:CapsLock').lines, LEGENDS.CapsLock.split(' '));
+  assert.deepEqual(items.find((i) => i.id === 'led:cassette motor').lines, ['cassette', 'motor']);
+});
+
+test('the outside\'s colours are tokens of their own, none the lime, and every token its scene reads is defined', () => {
+  const { asked, handles } = caseBuilt();
+  const own = ['model-bbc-case', 'model-bbc-panel', 'model-bbc-badge', 'model-bbc-key-red', 'model-bbc-key-light', 'model-bbc-key-dark', 'model-bbc-legend'];
+  for (const name of [...own.filter((n) => n !== 'model-bbc-legend'), 'model-led', 'model-led-off']) assert.ok(asked.has(name), `the scene does not read --${name}`);
+  // the legends' ink is read when the atlas is drawn, in the browser
+  for (const k of caseScene.atlasItems().filter((i) => i.id.startsWith('key:'))) assert.equal(k.ink, 'model-bbc-legend', k.id);
+  for (const name of asked) assert.ok(tokenHex(name), `--${name}`);
+  for (const name of own) assert.notEqual(tokenHex(name), tokenHex('lime'), name);
+  assert.equal(new Set(own.map(tokenHex)).size, own.length, 'two of the outside\'s tokens are one colour');
+  assert.equal(`#${handles.materials.case.color.getHexString()}`, tokenHex('model-bbc-case'));
+  assert.equal(`#${handles.materials.panel.color.getHexString()}`, tokenHex('model-bbc-panel'));
+  // the words take their ink from tokens too
+  for (const i of caseScene.atlasItems()) assert.ok(tokenHex(i.ink), `${i.id} is printed in --${i.ink}`);
+  assert.doesNotMatch(fs.readFileSync(CASE_SCENE_MJS, 'utf8'), /emissive/);
+});
+
+test('the outside\'s caption starts "Model, not a photograph.", reads its sizes and counts from the layout, and says the size is the manual\'s and the measures disagree', () => {
+  const about = caseLayout.describe();
+  const cm = (mm) => (mm / 10).toLocaleString('en-GB', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+  const { CASE, KEYS, REAR, UNDERSIDE } = caseLayout;
+  assert.match(about, /^Model, not a photograph\. /);
+  assert.ok(about.includes(`${cm(CASE.width)} by ${cm(CASE.depth)} cm and ${cm(CASE.height)} cm high`));
+  assert.match(about, /the Service Manual's size, though three measures on the photographs read the case a few per cent wider, which is not resolved/);
+  assert.ok(about.includes(`its ${KEYS.keys.length} keys`));
+  assert.ok(about.includes(`the rear's ${REAR.ports.length} ports`));
+  for (const u of UNDERSIDE.connectors) assert.ok(about.includes(u.label), u.label);
+  assert.match(about, /goes down on the model/);
+  // nothing typed: no count or size in the layout's code
+  const counts = new Set([KEYS.keys.length, KEYS.keys.length - 2, REAR.ports.length, UNDERSIDE.connectors.length, CASE.width, CASE.depth, CASE.height]);
+  for (const n of counts) assert.ok(!new RegExp(`\\b${n}\\b`).test(codeOf(CASE_LAYOUT_MJS)), `the layout types ${n}`);
+});
+
+test('the case results file is written from keys.json and case.json and agrees with them, with every source\'s author', () => {
+  const f = caseFigures;
+  assert.deepEqual(f.size, { widthMm: caseJson.footprint.widthMm, depthMm: caseJson.footprint.depthMm, heightMm: caseJson.heightMm, from: 'D1' });
+  const rearRatio = Math.round((caseJson.widthOnRear.mm / caseJson.footprint.widthMm) * 1e4) / 1e4;
+  const ratios = [caseJson.caseTop.scale, caseJson.k1ToCase.impliedScale, rearRatio];
+  assert.deepEqual(f.width, { caseTopScale: caseJson.caseTop.scale, cornersScale: caseJson.k1ToCase.impliedScale, rearMm: caseJson.widthOnRear.mm, rearRatio, low: Math.min(...ratios), high: Math.max(...ratios), resolved: false });
+  // the same range the case parts module's notes give
+  assert.ok(caseLayout.CASE.note.includes(`read ${f.width.low.toFixed(3)} to ${f.width.high.toFixed(3)} times it, not resolved`));
+  const count = (c) => keysJson.keys.filter((k) => k.colour === c).length;
+  assert.deepEqual(f.keys, { keycaps: keysJson.mapping.keys, machineKeys: keysJson.mapping.machineKeys, mapping: 'pass', red: count('red'), light: count('light'), dark: count('dark'), coloursAgree: keysJson.colours.agree });
+  assert.deepEqual(f.o1, { n: keysJson.o1.n, medianMm: keysJson.o1.heldOutMm.median, p90Mm: keysJson.o1.heldOutMm.p90, maxMm: keysJson.o1.heldOutMm.max, verdict: keysJson.verdicts.o1 });
+  assert.deepEqual(f.o3, { n: Object.keys(keysJson.o3.legends).length, medianMm: keysJson.o3.heldOutMm.median, p90Mm: keysJson.o3.heldOutMm.p90, maxMm: keysJson.o3.heldOutMm.max, verdict: keysJson.verdicts.o3 });
+  assert.deepEqual(f.frontEdge, { rawMm: caseJson.frontEdge.rawMm, verdict: 'not measurable', hFound: false, dMm: caseJson.frontEdge.d.mm, dSeMm: caseJson.frontEdge.d.seMm });
+  assert.deepEqual(f.profileCheck, { errMm: caseJson.profileCheck.errMm, limitMm: caseJson.profileCheck.limitMm, verdict: 'pass', fallback: false });
+  const rc = caseJson.rearCheck;
+  assert.deepEqual(f.rear, { n: rc.n, within: rc.within, worstMm: rc.worstMm, worstRef: 'SK1', limitMm: rc.limitMm, verdict: 'pass', boardOffsetMm: caseJson.boardInCase.x });
+  assert.deepEqual(f.typical, Object.entries(caseJson.typical).filter(([k, t]) => !t.measured && !['keyAboveTop', 'panelBelowKeys'].includes(k)).map(([k]) => k).sort());
+  assert.deepEqual(f.sources.map((x) => x.id), caseJson.sources);
+  for (const x of f.sources) {
+    const s = sources.find((y) => y.id === x.id);
+    assert.deepEqual(x, { id: s.id, url: s.url, page: s.page, sha256: s.sha256, kind: s.kind, licence: s.licence, author: s.author, fetched: s.fetched });
+    assert.ok(x.author, `${x.id} has no author to credit`);
+  }
+  for (const id of ['O1', 'O2', 'O3', 'O4', 'O5', 'K1', 'D1']) assert.ok(caseJson.sources.includes(id), `${id} is not a source of the case`);
+  assert.match(fs.readFileSync(path.join(TOOL, 'results.py'), 'utf8'), /bbc-micro-case-model\.json/);
+  assert.match(fs.readFileSync(path.join(TOOL, 'run-case.sh'), 'utf8'), /results\.py/);
+});
+
+test('the outside\'s note is made() from its results file, and says the size is the manual\'s, the measures disagree unresolved, the front edge was not measurable and the inside\'s copper is traced to look at', () => {
+  const f = caseFigures;
+  const { paragraphs, limits } = caseNotes.made(f);
+  const text = [...paragraphs, ...limits].join(' ');
+  const mm = (v) => v.toLocaleString('en-GB', { maximumFractionDigits: 2 });
+  const x = (v) => v.toLocaleString('en-GB', { maximumFractionDigits: 3 });
+  for (const v of [f.size.widthMm, f.size.depthMm, f.size.heightMm, f.o1.medianMm, f.o1.maxMm, f.o3.medianMm, f.o3.maxMm, f.frontEdge.rawMm, f.frontEdge.dMm, f.frontEdge.dSeMm, f.profileCheck.errMm, f.profileCheck.limitMm, f.rear.worstMm, f.rear.limitMm, f.rear.boardOffsetMm, f.width.rearMm]) assert.ok(text.includes(`${mm(v)} mm`), `${mm(v)} mm is not in the note`);
+  for (const v of [f.width.caseTopScale, f.width.cornersScale, f.width.rearRatio]) assert.ok(text.includes(x(v)), `${x(v)} is not in the note`);
+  const sentence = caseNotes.sizeSentence(f);
+  assert.ok(text.includes(sentence));
+  assert.match(sentence, /The case's size is the Service Manual's/);
+  assert.match(sentence, /disagree with it/);
+  assert.match(sentence, /not resolved/);
+  assert.match(sentence, /not independent/);
+  assert.match(text, /front edge[^.]*not measurable/);
+  assert.match(text, /traced to look at[^.]*not verified/);
+  assert.ok(text.includes(`${f.rear.within} of the ${f.rear.n}`));
+  assert.ok(text.includes(`${f.keys.keycaps} keycaps`));
+  assert.match(text, /typical, not measured/);
+  assert.match(text, /owl/, 'the note does not say the badge\'s owl is left out');
+  assert.equal(f.width.resolved, false);
+  assert.deepEqual([f.frontEdge.verdict, f.profileCheck.verdict, f.rear.verdict, f.o1.verdict], ['not measurable', 'pass', 'pass', 'pass']);
+  // read, not typed: a changed results file changes the note
+  const changed = structuredClone(f);
+  changed.width.rearMm += 0.1;
+  changed.rear.worstMm += 0.01;
+  changed.frontEdge.dMm += 0.01;
+  assert.notEqual(caseNotes.sizeSentence(changed), sentence);
+  assert.notEqual(caseNotes.made(changed).paragraphs.join(' '), paragraphs.join(' '));
+  // a profile that fell back would be said
+  changed.profileCheck = { ...changed.profileCheck, verdict: 'fail', fallback: true };
+  assert.match(caseNotes.made(changed).paragraphs.join(' '), /typical/);
+  // the words in the notes module are the notes' alone: no figure typed
+  assert.ok(!/\b(415|345|73|74|72|0\.395|425\.1|6\.18|0\.45)\b/.test(codeOf(path.join(CASE_DIR, 'bbc-micro-case-notes.mjs'))), 'the notes type a figure');
+});
+
+test('the outside\'s scene, words and results land unclaimed: .mjs modules with no mount, no MODELS entry, no claim and nothing in the deploy list', async () => {
+  assert.equal(caseScene.mount, undefined);
+  assert.doesNotMatch(fs.readFileSync(CASE_SCENE_MJS, 'utf8'), /export (async )?function mount/);
+  assert.ok(!fs.readdirSync(CASE_DIR).some((f) => /^bbc-micro.*\.js$/.test(f)));
+  const { MODELS } = await import('../src/models/models.mjs');
+  assert.ok(!Object.keys(MODELS).some((k) => k.startsWith('bbc-micro')));
+  const { loadRegistry } = await import('../src/lib/registry.mjs');
+  const bbc = loadRegistry().machines.find((m) => m.id === 'bbc-micro');
+  assert.deepEqual(bbc.models ?? [], []);
+  assert.equal(bbc.case, undefined);
+  assert.doesNotMatch(fs.readFileSync(path.join(REPO_ROOT, '.github', 'workflows', 'deploy-site.yml'), 'utf8'), /bbc-micro-case/);
+  // the scene reads the layout, never the notes (Node only)
+  const src = fs.readFileSync(CASE_SCENE_MJS, 'utf8');
+  assert.match(src, /from '\.\/bbc-micro-case-layout\.mjs'/);
+  assert.doesNotMatch(src, /bbc-micro-case-notes/);
+  assert.doesNotMatch(fs.readFileSync(CASE_LAYOUT_MJS, 'utf8'), /node:/);
+});

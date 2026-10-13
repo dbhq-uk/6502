@@ -80,3 +80,70 @@ def test_the_x_scale_verdict_must_be_found_once():
     frame['verdicts'] = [v for v in frame['verdicts'] if 'as revised' not in v['measure']]
     with pytest.raises(SystemExit, match='as revised'):
         results.board_results(frame, *rest)
+
+
+# The case half (plan task 9a): the outside model's figures, from keys.json and
+# case.json as each holds them, and the sources case.json names.
+
+def case_data():
+    keys = {
+        'mapping': {'keys': 74, 'machineKeys': 72, 'verdict': 'pass'},
+        'o1': {'n': 50, 'heldOutMm': {'median': 0.395, 'p90': 0.632, 'max': 0.989}, 'over3mm': 0, 'verdict': 'pass'},
+        'o3': {'heldOutMm': {'median': 0.205, 'p90': 0.329, 'max': 0.588}, 'legends': {'A': [1, 2], 'F0': [3, 4], 'B': [5, 6]}},
+        'verdicts': {'mapping': 'pass', 'o1': 'pass', 'o3': 'pass'},
+        'colours': {'agree': 63},
+        'keys': [{'name': 'F0', 'colour': 'red'}, {'name': 'Up', 'colour': 'light'}, {'name': 'A', 'colour': 'dark'}, {'name': 'B', 'colour': 'dark'}],
+    }
+    case = {
+        'footprint': {'widthMm': 415.0, 'depthMm': 345.0, 'source': 'D1'},
+        'heightMm': 73.0,
+        'caseTop': {'scale': 1.0387},
+        'k1ToCase': {'impliedScale': 1.0373},
+        'widthOnRear': {'mm': 425.0986},
+        'frontEdge': {'rawMm': 403.4661, 'rawSeMm': 0.8475, 'verdict': 'not measurable', 'correctedMm': None,
+                      'h': {'mm': None, 'seMm': None, 'from': 'none found'}, 'd': {'mm': 6.1848, 'seMm': 2.8027, 'from': 'O4 and O5'}},
+        'profileCheck': {'errMm': 0.4496, 'limitMm': 2.0, 'verdict': 'pass', 'fallback': False},
+        'rearCheck': {'errMm': {'SK1': 0.7773, 'SK3': -0.3165}, 'limitMm': 2.0, 'n': 2, 'within': 2, 'worstMm': 0.7773, 'verdict': 'pass'},
+        'boardInCase': {'x': 104.6405},
+        'verdicts': {'frontEdge': 'not measurable', 'profileCheck': 'pass', 'rear': 'pass'},
+        'typical': {'feet': {'measured': False}, 'wall': {'measured': False}, 'keyAboveTop': {'measured': False, 'what': 'typical, used only if the side profile\'s check fails'}},
+        'sources': ['D1', 'O1'],
+    }
+    sources = [{'id': i, 'url': f'address-of-{i}', 'page': f'page-of-{i}', 'sha256': i * 4,
+                'kind': 'photograph', 'licence': 'Public domain', 'author': f'author-of-{i}', 'fetched': '2026-10-13'}
+               for i in ('D1', 'O1', 'O2')]
+    return keys, case, sources
+
+
+def test_the_case_figures_are_the_data_files_own():
+    out = results.case_results(*case_data())
+    assert out['size'] == {'widthMm': 415.0, 'depthMm': 345.0, 'heightMm': 73.0, 'from': 'D1'}
+    assert out['width'] == {'caseTopScale': 1.0387, 'cornersScale': 1.0373, 'rearMm': 425.0986, 'rearRatio': 1.0243,
+                            'low': 1.0243, 'high': 1.0387, 'resolved': False}
+    assert out['keys'] == {'keycaps': 74, 'machineKeys': 72, 'mapping': 'pass', 'red': 1, 'light': 1, 'dark': 2, 'coloursAgree': 63}
+    assert out['o1'] == {'n': 50, 'medianMm': 0.395, 'p90Mm': 0.632, 'maxMm': 0.989, 'verdict': 'pass'}
+    assert out['o3'] == {'n': 3, 'medianMm': 0.205, 'p90Mm': 0.329, 'maxMm': 0.588, 'verdict': 'pass'}
+    assert out['frontEdge'] == {'rawMm': 403.4661, 'verdict': 'not measurable', 'hFound': False, 'dMm': 6.1848, 'dSeMm': 2.8027}
+    assert out['profileCheck'] == {'errMm': 0.4496, 'limitMm': 2.0, 'verdict': 'pass', 'fallback': False}
+    assert out['rear'] == {'n': 2, 'within': 2, 'worstMm': 0.7773, 'worstRef': 'SK1', 'limitMm': 2.0, 'verdict': 'pass', 'boardOffsetMm': 104.6405}
+    # the typical values the model draws, not the ones kept for a fallback that did not happen
+    assert out['typical'] == ['feet', 'wall']
+
+
+def test_the_case_sources_are_case_json_s_with_their_authors():
+    out = results.case_results(*case_data())
+    assert [s['id'] for s in out['sources']] == ['D1', 'O1']
+    assert out['sources'][1] == {'id': 'O1', 'url': 'address-of-O1', 'page': 'page-of-O1', 'sha256': 'O1O1O1O1',
+                                 'kind': 'photograph', 'licence': 'Public domain', 'author': 'author-of-O1', 'fetched': '2026-10-13'}
+
+
+def test_a_fallback_profile_lists_its_typical_heights_and_a_missing_source_stops_the_run():
+    keys, case, sources = case_data()
+    case['profileCheck'] = {**case['profileCheck'], 'verdict': 'fail', 'fallback': True}
+    out = results.case_results(keys, case, sources)
+    assert out['profileCheck']['fallback'] is True
+    # with the fallback in use, the typical heights it draws are listed too
+    assert out['typical'] == ['feet', 'keyAboveTop', 'wall']
+    case['sources'] = ['D1', 'O9']
+    with pytest.raises(SystemExit, match='O9'):
+        results.case_results(keys, case, sources)
