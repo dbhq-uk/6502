@@ -379,6 +379,8 @@ test('every drill in registration.json records both faces\' centres, sits at the
 });
 
 test('registration.json\'s held-out figures by kind of hole are the matched holes\' own', () => {
+  // This catches figures that disagree with the rows they were computed from. It does not
+  // catch a hole given the wrong `kind`: that classification is the tool's, tested there.
   const s = registration.solder;
   const c = Object.fromEntries(s.matched.columns.map((k, i) => [k, i]));
   for (const [name, kind] of [['solder', 'blob'], ['ring', 'ring']]) {
@@ -389,6 +391,19 @@ test('registration.json\'s held-out figures by kind of hole are the matched hole
     for (const k of ['median', 'p90', 'max']) assert.ok(Math.abs(got[k] - want[k]) < 1e-3, `${name} ${k}: ${got[k]} against ${want[k]}`);
   }
   for (const r of s.matched.rows) assert.ok(['blob', 'ring', 'mixed'].includes(r[c.kind]));
+});
+
+test('registration.json keeps the solder side\'s map: its model, parameters and the flip it was fitted after', () => {
+  const s = registration.solder;
+  assert.ok(['affine', 'cubic'].includes(s.model), `model ${s.model}`);
+  assert.ok(s.params && typeof s.params === 'object' && Object.keys(s.params).length > 0, 'solder.params');
+  if (s.model === 'cubic') assert.ok(Array.isArray(s.params.H) && s.params.H.length === 3 && s.params.H.every((r) => r.length === 3), 'the cubic\'s homography');
+  const t = s.transform;
+  assert.ok(t && t.source === 'I2' && Number.isInteger(t.widthPx) && t.widthPx > 0 && Number.isInteger(t.heightPx) && t.heightPx > 0, 'solder.transform');
+  assert.ok(typeof t.mirror === 'string' && t.mirror.length > 0);
+  // the parameters are unrounded (a map rounded to 4 places puts a drill 0.017 mm off)
+  const flat = JSON.stringify(s.params).match(/-?\d+\.\d+/g);
+  assert.ok(flat.some((n) => n.replace(/^-?\d+\./, '').length > 8), 'params are written unrounded');
 });
 
 test('every DIP footprint in registration.json has an even pin count from 14 to 40, a pad per pin and pin 1 first', () => {

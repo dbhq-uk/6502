@@ -518,6 +518,11 @@ def test_a_tie_between_the_models_goes_to_the_affine():
         return {'affine': {'heldOutMm': {'median': a}}, 'cubic': {'heldOutMm': {'median': c}}}
     assert board_register.choose_model(fits(0.120, 0.116)) == 'affine'      # 0.004 lower: a tie
     assert board_register.choose_model(fits(0.120, 0.1151)) == 'affine'     # 0.0049
+    # exactly TIE_MM lower: the test is a strict `c < a - TIE_MM`, so the boundary is a tie and
+    # the affine wins (in floats, 0.120 - 0.005 is 0.11499999999999999, so 0.115 is not below it)
+    assert board_register.TIE_MM == 0.005
+    assert board_register.choose_model(fits(0.120, 0.115)) == 'affine'
+    assert board_register.choose_model(fits(0.120, 0.1149)) == 'cubic'      # 0.0051
     assert board_register.choose_model(fits(0.120, 0.114)) == 'cubic'       # 0.006
     assert board_register.choose_model(fits(0.110, 0.114)) == 'affine'
 
@@ -531,7 +536,7 @@ def test_the_saved_transform_reproduces_the_drills_solder_side():
     s, t = r['solder'], r['solder']['transform']
     drills = r['drills']
     assert len(drills) > 200
-    for d in drills[::97] + drills[-1:]:
+    for d in drills[::7] + drills[-1:]:
         x, y = d['bottomPx']
         q = common.transform(s['model'], s['params'], [[t['widthPx'] - 1 - x, y]])[0]
         assert math.hypot(q[0] - d['bottom'][0], q[1] - d['bottom'][1]) < 0.001, (d, q)

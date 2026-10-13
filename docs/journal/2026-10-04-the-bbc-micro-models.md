@@ -1012,7 +1012,10 @@ passed (4 October 2026). `run-board.sh` was run end to end from the inputs
 and gave `frame.json` and `registration.json` back byte for byte. Each new
 site test was seen to fail on a copy of `registration.json` broken its way (an
 excluded hole dropped, the verdict changed, IC5's reference removed, a
-drill's pad moved 0.3 mm, a DIP's last pad dropped). `cd site && npm test`:
+drill's pad moved 0.3 mm, a DIP's last pad dropped). The logs of these runs
+were kept outside the repository and are not committed, so the claims in this
+paragraph rest on the record made at the time, not on a file anyone can open.
+`cd site && npm test`:
 286 passed before this task, 292 after, one to-do, none failed; both
 workflows' floors are raised to 292. `site/tests/bbc-models.test.mjs` gains six
 tests: the solder row passes on the figures without exclusion, with the model
@@ -1100,7 +1103,7 @@ pytest`: Python 3.12.3, numpy 2.5.4, opencv-python-headless 5.0.0.93, Pillow
 
 **The run.** `BBC_MODEL_INPUTS=~/bbc-model-inputs
 PYTHON=~/venv-models/bin/python tools/bbc-micro-model/run-board.sh`, on 13
-October 2026, took 1 minute 10 seconds. `frame.json` came back byte for byte.
+October 2026, took 1 minute 10 seconds. `frame.json` came back byte for byte (the run's log is not committed).
 The solder side printed the same figures as on 4 October (cubic, 2367 holes,
 held out median 0.114, 90th percentile 0.258, largest 0.766 mm: pass), and
 every rounded number in `registration.json` outside the pads and footprints
@@ -1132,7 +1135,14 @@ that retried a candidate running into a DIP already taken, with the taken
 slots dropped, and a rule that a blob seen only on the solder side never sets
 where a row ends. No test reached either. Run on the scans with each switched
 off in turn, the DIPs came out the same, so both were removed, and the run
-gave `registration.json` back byte for byte.
+gave `registration.json` back byte for byte. To reproduce it: copy
+`tools/bbc-micro-model/` to a scratch folder, replace its `board_register.py`
+with the one from before the change (`git show
+793731e^:tools/bbc-micro-model/board_register.py`), run that copy's
+`board_register.py` with `BBC_MODEL_INPUTS` set, and `cmp` the copy's
+`data/registration.json` with the one at HEAD. A reviewer did this on 13
+October 2026 and got identical files in 56 seconds; it was run again the same
+day and gave identical files in 1 minute 20 seconds.
 
 **A test that did not test its case.** The test for a stray blob beside a row
 (IC68) still passed with the pads-only first pass removed. On the scans, with
@@ -1148,7 +1158,7 @@ and fails with the first pass removed.
 `~/venv-models/bin/python -m pytest tools/bbc-micro-model/tests -q`: 58
 passed (13 October 2026). Each test added in the fix wave was seen to fail
 with the code broken the way it guards against, one break at a time, with the
-file restored after each: the outlier rule also taking holes with a residual
+file restored after each (the log of that run is not committed): the outlier rule also taking holes with a residual
 over 0.1 mm; no tie margin between the models; the drill report never
 counting a filled, or an open, drill off; no second grouping pass; no
 pads-only first pass; no trim to the outline; the faint mark ignored, and a
@@ -1156,6 +1166,8 @@ faint outline accepted with no mark; a marked run cut from its first slot;
 `unread` not kept. The saved map's test failed with the parameters rounded to
 4 places, as the file was written before: a drill's solder side then lands
 0.017 mm off.
+
+**Review minors, 13 October 2026.** The saved map's test now samples every 7th drill, not every 97th. The tie test gained the boundary, 0.115 against 0.120: the code is `c < a - TIE_MM`, a strict comparison, so exactly `TIE_MM` lower is a tie and the affine wins (in floats 0.120 - 0.005 is 0.11499999999999999, so the case is not below it), and 0.1149 gives the cubic. A site test now requires `solder.model`, `solder.params` (unrounded) and `solder.transform`, the names the plan's interface gives. The held-out-by-kind test says in a comment that it catches figures that disagree with their rows, not a wrong `kind`. Each was seen to fail on a break: drill 7 moved 0.01 mm; `TIE_MM` at 0.0049 and at 0.0051; `params` removed, rounded to 4 places, and `transform` removed.
 
 `site/tests/bbc-models.test.mjs` gains two tests and rewrites one. The drill
 test now checks each drill against its two faces as the plan revised it (a

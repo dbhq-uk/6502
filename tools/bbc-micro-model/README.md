@@ -60,7 +60,7 @@ python3 -m venv /tmp/bbcvenv
 Point `BBC_MODEL_INPUTS` at the folder of inputs, check them, and run:
 
 ```
-export BBC_MODEL_INPUTS=~/dbhq-previews/bbc-model-research
+export BBC_MODEL_INPUTS=~/bbc-model-inputs
 /tmp/bbcvenv/bin/python tools/bbc-micro-model/verify.py          # every input; or name some: verify.py I1 I2
 /tmp/bbcvenv/bin/python -m pytest tools/bbc-micro-model/tests -q
 cd tools/bbc-micro-model && /tmp/bbcvenv/bin/python spike.py      # writes data/spike.json, and overlays in out/
