@@ -25,6 +25,7 @@ if (box && api) {
   const status = box.querySelector("[data-analytics-status]");
   const on = box.querySelector("[data-analytics-on]");
   const off = box.querySelector("[data-analytics-off]");
+  const settings = [...document.querySelectorAll("[data-analytics-settings]")];
   let returnTo = null;
 
   const show = (reopened) => {
@@ -38,10 +39,16 @@ if (box && api) {
   };
   const hide = () => {
     box.hidden = true;
-    if (returnTo) {
-      returnTo.focus();
-      returnTo = null;
-    }
+    // Hiding the notice hides the button that was focused, and the browser
+    // then drops focus to the top of the page. So focus is always put
+    // somewhere: back on Cookie settings if that reopened the notice, and on
+    // the first Cookie settings button after a first-visit answer. That button
+    // is the notice's own way back, so it is the natural next stop.
+    // preventScroll: the button is in the footer, and a click on OK must not
+    // throw the page to the bottom.
+    const target = returnTo ?? settings[0];
+    returnTo = null;
+    if (target) target.focus({ preventScroll: true });
   };
 
   on.addEventListener("click", () => {
@@ -61,7 +68,7 @@ if (box && api) {
   // "Cookie settings" ships with the `hidden` attribute and is revealed here,
   // so a reader without JavaScript - who gets no analytics either - is not
   // shown a button that does nothing.
-  document.querySelectorAll("[data-analytics-settings]").forEach((b) => {
+  settings.forEach((b) => {
     b.hidden = false;
     b.addEventListener("click", () => {
       returnTo = b;
