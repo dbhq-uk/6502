@@ -364,7 +364,7 @@ def fit_held_out(src, dst, model: str, folds) -> dict:
 
 def plain(obj, places=4):
     """obj as plain Python: dicts, lists, str, bool, None, int and floats
-    rounded to `places` places. numpy numbers become Python numbers; NaN and
+    rounded to `places` places (None: not rounded). numpy numbers become Python numbers; NaN and
     infinity are refused (ValueError), and so is anything else (TypeError)."""
     if isinstance(obj, dict):
         return {str(k): plain(v, places) for k, v in obj.items()}
@@ -377,7 +377,7 @@ def plain(obj, places=4):
     if isinstance(obj, (float, np.floating)):
         if not math.isfinite(obj):
             raise ValueError(f'{obj} is not a finite number')
-        r = round(float(obj), places)
+        r = float(obj) if places is None else round(float(obj), places)
         return 0.0 if r == 0 else r
     raise TypeError(f'{type(obj).__name__} is not plain data')
 
