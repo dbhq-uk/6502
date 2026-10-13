@@ -328,26 +328,67 @@ test('the excluded holes are exactly those the roundness rule names, counted, wi
   }
 });
 
-test('every drill in registration.json has a pad on both faces within 0.2 mm', () => {
-  const { drills, pads } = registration;
+// The plan's task 3 step 4, as revised after task 3's review (5 October 2026).
+// Each drill's pad is placed at the drill, so "a pad within 0.2 mm" held by
+// construction; what can fail is where each face put the hole.
+const FACE_MM = 0.2;
+const FILLED_OFF_SHARE_MAX = 0.05;
+
+test('every drill in registration.json records both faces\' centres, sits at their mean, and has its faces within 0.2 mm as revised', () => {
+  const { drills, pads, drillFaces } = registration;
   assert.ok(drills.length >= 200);
   const byDrill = new Map();
   for (const p of pads) if (p.drill !== null) byDrill.set(p.drill, [...(byDrill.get(p.drill) ?? []), p]);
+  // registration.json rounds to 3 places, so a face this near the limit is either side of it
+  const near = (v) => Math.abs(v - FACE_MM) <= 0.002;
+  const off = (d) => Math.max(Math.hypot(d.top[0] - d.x, d.top[1] - d.y), Math.hypot(d.bottom[0] - d.x, d.bottom[1] - d.y));
+  const count = { open: 0, filled: 0, filledOver: 0, filledNear: 0 };
   drills.forEach((d, i) => {
-    const mine = byDrill.get(i) ?? [];
-    const near = (p) => Math.hypot(p.x - d.x, p.y - d.y) <= 0.2;
-    const both = mine.some((p) => p.face === 'both' && near(p));
-    const top = mine.some((p) => p.face === 'top' && near(p));
-    const bottom = mine.some((p) => p.face === 'bottom' && near(p));
-    assert.ok(both || (top && bottom), `drill ${i} at ${d.x}, ${d.y} has no pad on both faces within 0.2 mm`);
-    // the drill is the mean of where each face put the hole; how far apart they were is recorded
-    assert.ok(Number.isFinite(d.spreadMm) && d.spreadMm >= 0 && d.spreadMm <= 1.0, `drill ${i}: faces ${d.spreadMm} mm apart, over the 1.0 mm match gate`);
+    assert.ok(Array.isArray(d.top) && Array.isArray(d.bottom), `drill ${i}: both faces' centres are recorded`);
+    assert.ok(Math.abs((d.top[0] + d.bottom[0]) / 2 - d.x) <= 0.0011 && Math.abs((d.top[1] + d.bottom[1]) / 2 - d.y) <= 0.0011, `drill ${i} is not the mean of its faces`);
+    assert.ok(Math.abs(Math.hypot(d.top[0] - d.bottom[0], d.top[1] - d.bottom[1]) - d.spreadMm) <= 0.003, `drill ${i}: spreadMm is not the faces' distance`);
+    assert.ok(d.spreadMm <= 1.0, `drill ${i}: faces ${d.spreadMm} mm apart, over the 1.0 mm match gate`);
     assert.ok(d.d === null ? d.filled === true : d.d > 0.2 && d.d < 2, `drill ${i}: diameter ${d.d}`);
+    // its pad, at the drill, on both faces (a check of the file's shape: it holds by construction)
+    assert.ok((byDrill.get(i) ?? []).some((p) => p.face === 'both'), `drill ${i} has no pad`);
+    const o = off(d);
+    if (d.filled) {
+      count.filled += 1;
+      if (near(o)) count.filledNear += 1;
+      else if (o > FACE_MM) count.filledOver += 1;
+    } else {
+      count.open += 1;
+      assert.ok(o <= FACE_MM || near(o), `open drill ${i} at ${d.x}, ${d.y}: a face ${o.toFixed(3)} mm off`);
+    }
   });
+  assert.ok(count.open > 0 && count.filled > 0, JSON.stringify(count));
+  // filled with solder, the solder may sit off the hole: the share further off is bounded, even with every near one counted over
+  assert.ok((count.filledOver + count.filledNear) / count.filled <= FILLED_OFF_SHARE_MAX, JSON.stringify(count));
+  // the file's report says the same
+  assert.equal(drillFaces.limitMm, FACE_MM);
+  assert.equal(drillFaces.filledShareMax, FILLED_OFF_SHARE_MAX);
+  assert.equal(drillFaces.open.n, count.open);
+  assert.equal(drillFaces.open.over, 0);
+  assert.equal(drillFaces.filled.n, count.filled);
+  assert.ok(drillFaces.filled.over >= count.filledOver && drillFaces.filled.over <= count.filledOver + count.filledNear, `${drillFaces.filled.over} filled drills over, against ${JSON.stringify(count)}`);
+  assert.ok(Math.abs(drillFaces.filled.share - drillFaces.filled.over / drillFaces.filled.n) < 1e-3);
   for (const p of pads) {
     assert.ok(['round', 'square', 'oval'].includes(p.shape) && ['top', 'bottom', 'both'].includes(p.face));
     assert.ok(p.x > -1 && p.x < frame.board.widthMm + 1 && p.y > -1 && p.y < frame.board.depthMm + 1, JSON.stringify(p));
   }
+});
+
+test('registration.json\'s held-out figures by kind of hole are the matched holes\' own', () => {
+  const s = registration.solder;
+  const c = Object.fromEntries(s.matched.columns.map((k, i) => [k, i]));
+  for (const [name, kind] of [['solder', 'blob'], ['ring', 'ring']]) {
+    const v = s.matched.rows.filter((r) => r[c.kind] === kind).map((r) => r[c.heldOutMm]);
+    const want = s.heldOutByKind[name];
+    assert.equal(want.n, v.length, name);
+    const got = summary(v);
+    for (const k of ['median', 'p90', 'max']) assert.ok(Math.abs(got[k] - want[k]) < 1e-3, `${name} ${k}: ${got[k]} against ${want[k]}`);
+  }
+  for (const r of s.matched.rows) assert.ok(['blob', 'ring', 'mixed'].includes(r[c.kind]));
 });
 
 test('every DIP footprint in registration.json has an even pin count from 14 to 40, a pad per pin and pin 1 first', () => {
@@ -387,6 +428,31 @@ test('IC1 to IC7, IC51, IC52, IC69 and IC78 each have a DIP footprint, its refer
   const refs = registration.footprints.map((f) => f.ref).filter(Boolean);
   assert.equal(new Set(refs).size, refs.length, 'a reference twice');
   for (const r of refs) assert.ok(marks.some((m) => m.ref === r), `${r} has no mark`);
+});
+
+test('every DIP footprint has a reference read from the print, or says it is unread and why', () => {
+  // the plan's task 3 step 4, as revised after task 3's review (5 October 2026)
+  const marks = JSON.parse(fs.readFileSync(path.join(TOOL, 'data', 'marks.json'), 'utf8')).footprints.marks;
+  const dips = registration.footprints.filter((f) => f.kind === 'dip');
+  for (const f of dips) {
+    const where = `the ${f.pins}-pin DIP at ${f.box.map((v) => v.toFixed(1)).join(', ')}`;
+    if (f.ref) {
+      assert.ok(!f.unread, `${f.ref}: read and unread`);
+      const m = marks.find((x) => x.ref === f.ref);
+      assert.ok(m && m.reason.length > 20 && m.crop && m.crop.box.length === 4, `${f.ref}: its mark, crop and reason`);
+    } else {
+      assert.ok(typeof f.unread === 'string' && f.unread.length > 20, `${where} has neither a reference nor an unread reason`);
+    }
+  }
+  const c = registration.footprintCounts;
+  assert.equal(c.dipRefsRead, dips.filter((f) => f.ref).length);
+  assert.equal(c.dipRefsUnread, dips.filter((f) => !f.ref && f.unread).length);
+  assert.equal(c.dipsWithNeither, 0);
+  // no mark went unused, and none disagreed with its footprint
+  for (const m of registration.marks) {
+    assert.equal(m.found, true, `the mark for ${m.ref} found no footprint`);
+    for (const k of ['pins', 'pin1']) assert.ok(typeof m[k] !== 'string', `${m.ref}: ${m[k]}`);
+  }
 });
 
 test('registration.json fits each mounting hole on its top rim and records the move from task 2\'s centre', () => {
