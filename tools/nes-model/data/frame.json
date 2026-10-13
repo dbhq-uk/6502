@@ -1,0 +1,2070 @@
+{
+ "about": "Task 2 of the NES models plan: the board frame on scan I1-front. A board millimetre X (from the board's top left corner as the scan lies, x to the right, y down towards the edge fingers) is at I1-front pixel origin + diag(pxPerMm.x, pxPerMm.y) R(rotationDeg) X. The outline, holes, notches, corners and edges are in board millimetres. Written by board_frame.py; every figure here is a measurement made on the date of the journal entry that quotes it.",
+ "board": {
+  "depthMm": 119.4452,
+  "widthMm": 195.9495
+ },
+ "corners": [
+  [
+   0.0,
+   0.0
+  ],
+  [
+   15.6446,
+   0.0
+  ],
+  [
+   15.6446,
+   2.9732
+  ],
+  [
+   148.1323,
+   2.874
+  ],
+  [
+   148.1323,
+   -0.1119
+  ],
+  [
+   195.803,
+   -0.0721
+  ],
+  [
+   195.6601,
+   74.5531
+  ],
+  [
+   192.7828,
+   74.5531
+  ],
+  [
+   192.6625,
+   119.2811
+  ],
+  [
+   140.0102,
+   119.224
+  ],
+  [
+   139.9961,
+   109.5007
+  ],
+  [
+   128.3323,
+   109.4909
+  ],
+  [
+   128.2845,
+   119.2024
+  ],
+  [
+   35.1531,
+   119.2989
+  ],
+  [
+   35.1872,
+   109.4871
+  ],
+  [
+   24.6216,
+   109.467
+  ],
+  [
+   24.602,
+   119.3332
+  ],
+  [
+   -0.1465,
+   119.2599
+  ]
+ ],
+ "edges": [
+  {
+   "a": 0.0,
+   "axis": "x",
+   "b": 0.0,
+   "index": 0,
+   "lightFound": 138,
+   "notches": [],
+   "points": 7,
+   "rmsMm": null,
+   "shiftMm": 0.9317,
+   "slopeDeg": 0.0,
+   "square": true,
+   "stations": 138,
+   "tabs": true,
+   "u0": -0.1389,
+   "u1": 15.6212,
+   "um": 7.7111,
+   "v": -0.0193
+  },
+  {
+   "a": 15.6446,
+   "axis": "y",
+   "b": 0.0,
+   "index": 1,
+   "lightFound": 11,
+   "notches": [],
+   "points": 11,
+   "rmsMm": 0.0214,
+   "shiftMm": 0.0223,
+   "slopeDeg": 0.0,
+   "square": true,
+   "stations": 11,
+   "tabs": false,
+   "u0": -0.0248,
+   "u1": 2.978,
+   "um": 1.4752,
+   "v": 15.6223
+  },
+  {
+   "a": 2.9236,
+   "axis": "x",
+   "b": -0.0007,
+   "index": 2,
+   "lightFound": 1306,
+   "notches": [],
+   "points": 1306,
+   "rmsMm": 0.0279,
+   "shiftMm": 0.001,
+   "slopeDeg": -0.0429,
+   "square": false,
+   "stations": 1306,
+   "tabs": false,
+   "u0": 15.6233,
+   "u1": 148.1435,
+   "um": 81.8733,
+   "v": 2.932
+  },
+  {
+   "a": 148.1323,
+   "axis": "y",
+   "b": 0.0,
+   "index": 3,
+   "lightFound": 10,
+   "notches": [],
+   "points": 10,
+   "rmsMm": 0.0073,
+   "shiftMm": 0.0102,
+   "slopeDeg": 0.0,
+   "square": true,
+   "stations": 10,
+   "tabs": false,
+   "u0": -0.0745,
+   "u1": 2.8861,
+   "um": 1.3755,
+   "v": 148.1425
+  },
+  {
+   "a": -0.092,
+   "axis": "x",
+   "b": 0.0008,
+   "index": 4,
+   "lightFound": 457,
+   "notches": [],
+   "points": 355,
+   "rmsMm": 0.0317,
+   "shiftMm": 0.0413,
+   "slopeDeg": 0.0479,
+   "square": false,
+   "stations": 457,
+   "tabs": false,
+   "u0": 148.1415,
+   "u1": 195.8031,
+   "um": 171.9415,
+   "v": -0.0699
+  },
+  {
+   "a": 195.7366,
+   "axis": "y",
+   "b": -0.0019,
+   "index": 5,
+   "lightFound": 642,
+   "notches": [
+    "right upper",
+    "right lower"
+   ],
+   "points": 642,
+   "rmsMm": 0.0327,
+   "shiftMm": -0.0214,
+   "slopeDeg": -0.1097,
+   "square": false,
+   "stations": 642,
+   "tabs": false,
+   "u0": -0.0653,
+   "u1": 73.8638,
+   "um": 34.6006,
+   "v": 195.744
+  },
+  {
+   "a": 74.5531,
+   "axis": "x",
+   "b": 0.0,
+   "index": 6,
+   "lightFound": 9,
+   "notches": [],
+   "points": 9,
+   "rmsMm": 0.1103,
+   "shiftMm": 0.6883,
+   "slopeDeg": 0.0,
+   "square": true,
+   "stations": 9,
+   "tabs": false,
+   "u0": 192.804,
+   "u1": 195.6849,
+   "um": 194.204,
+   "v": 73.8648
+  },
+  {
+   "a": 192.7236,
+   "axis": "y",
+   "b": -0.0027,
+   "index": 7,
+   "lightFound": 435,
+   "notches": [],
+   "points": 428,
+   "rmsMm": 0.0508,
+   "shiftMm": -0.0037,
+   "slopeDeg": -0.154,
+   "square": false,
+   "stations": 435,
+   "tabs": false,
+   "u0": 73.8658,
+   "u1": 119.2891,
+   "um": 96.5658,
+   "v": 192.7351
+  },
+  {
+   "a": 119.2525,
+   "axis": "x",
+   "b": 0.0011,
+   "index": 8,
+   "lightFound": 507,
+   "notches": [],
+   "points": 507,
+   "rmsMm": 0.0494,
+   "shiftMm": 0.0112,
+   "slopeDeg": 0.0622,
+   "square": false,
+   "stations": 507,
+   "tabs": false,
+   "u0": 140.0053,
+   "u1": 192.6661,
+   "um": 166.3053,
+   "v": 119.2439
+  },
+  {
+   "a": 140.0031,
+   "axis": "y",
+   "b": 0.0015,
+   "index": 9,
+   "lightFound": 77,
+   "notches": [],
+   "points": 77,
+   "rmsMm": 0.0078,
+   "shiftMm": 0.0003,
+   "slopeDeg": 0.0835,
+   "square": false,
+   "stations": 77,
+   "tabs": false,
+   "u0": 109.5135,
+   "u1": 119.1987,
+   "um": 114.3135,
+   "v": 140.0019
+  },
+  {
+   "a": 109.4958,
+   "axis": "x",
+   "b": 0.0008,
+   "index": 10,
+   "lightFound": 97,
+   "notches": [],
+   "points": 97,
+   "rmsMm": 0.0118,
+   "shiftMm": 0.0032,
+   "slopeDeg": 0.048,
+   "square": false,
+   "stations": 97,
+   "tabs": false,
+   "u0": 128.348,
+   "u1": 139.9986,
+   "um": 134.148,
+   "v": 109.4964
+  },
+  {
+   "a": 128.3085,
+   "axis": "y",
+   "b": -0.0049,
+   "index": 11,
+   "lightFound": 78,
+   "notches": [],
+   "points": 77,
+   "rmsMm": 0.0217,
+   "shiftMm": 0.0069,
+   "slopeDeg": -0.2824,
+   "square": false,
+   "stations": 78,
+   "tabs": false,
+   "u0": 109.4793,
+   "u1": 119.2069,
+   "um": 114.3293,
+   "v": 128.309
+  },
+  {
+   "a": 119.2508,
+   "axis": "x",
+   "b": -0.001,
+   "index": 12,
+   "lightFound": 913,
+   "notches": [],
+   "points": 913,
+   "rmsMm": 0.0439,
+   "shiftMm": -0.0087,
+   "slopeDeg": -0.0593,
+   "square": false,
+   "stations": 913,
+   "tabs": false,
+   "u0": 34.9805,
+   "u1": 128.27,
+   "um": 81.5805,
+   "v": 119.2604
+  },
+  {
+   "a": 35.1704,
+   "axis": "y",
+   "b": -0.0035,
+   "index": 13,
+   "lightFound": 80,
+   "notches": [],
+   "points": 57,
+   "rmsMm": 0.0418,
+   "shiftMm": -0.0633,
+   "slopeDeg": -0.1996,
+   "square": false,
+   "stations": 80,
+   "tabs": false,
+   "u0": 109.3748,
+   "u1": 119.3139,
+   "um": 114.3248,
+   "v": 35.1041
+  },
+  {
+   "a": 109.477,
+   "axis": "x",
+   "b": 0.0019,
+   "index": 14,
+   "lightFound": 86,
+   "notches": [],
+   "points": 64,
+   "rmsMm": 0.0477,
+   "shiftMm": 0.0173,
+   "slopeDeg": 0.109,
+   "square": false,
+   "stations": 86,
+   "tabs": false,
+   "u0": 24.6365,
+   "u1": 35.2278,
+   "um": 29.8865,
+   "v": 109.4842
+  },
+  {
+   "a": 24.6117,
+   "axis": "y",
+   "b": -0.002,
+   "index": 15,
+   "lightFound": 78,
+   "notches": [],
+   "points": 78,
+   "rmsMm": 0.0286,
+   "shiftMm": -0.011,
+   "slopeDeg": -0.1141,
+   "square": false,
+   "stations": 78,
+   "tabs": false,
+   "u0": 109.5936,
+   "u1": 119.3211,
+   "um": 114.4436,
+   "v": 24.6187
+  },
+  {
+   "a": 119.2965,
+   "axis": "x",
+   "b": 0.003,
+   "index": 16,
+   "lightFound": 228,
+   "notches": [],
+   "points": 228,
+   "rmsMm": 0.0444,
+   "shiftMm": 0.0191,
+   "slopeDeg": 0.1697,
+   "square": false,
+   "stations": 228,
+   "tabs": false,
+   "u0": -0.1408,
+   "u1": 24.6009,
+   "um": 12.2092,
+   "v": 119.2874
+  },
+  {
+   "a": -0.0755,
+   "axis": "y",
+   "b": -0.0012,
+   "index": 17,
+   "lightFound": 1119,
+   "notches": [
+    "left"
+   ],
+   "points": 1110,
+   "rmsMm": 0.0592,
+   "shiftMm": -0.045,
+   "slopeDeg": -0.0704,
+   "square": false,
+   "stations": 1119,
+   "tabs": false,
+   "u0": -0.0139,
+   "u1": 119.2537,
+   "um": 61.4947,
+   "v": -0.1398
+  }
+ ],
+ "fingers": {
+  "gapPitchMm": 2.4988,
+  "gaps": 35,
+  "what": "The gaps between P1's 36 fingers, their pitch along x through this frame: recorded, not used (task 0 found 2.50 mm, not 2.54)"
+ },
+ "heldOutX": {
+  "everyRowScaledErrMm": {
+   "max": 0.1525,
+   "median": 0.0385,
+   "n": 22,
+   "p90": 0.1447
+  },
+  "largestRow": "U6 pins 1 to 20",
+  "n": 6,
+  "rows": [
+   {
+    "errMm": 0.0315,
+    "lengthMm": 48.26,
+    "measuredMm": 48.2915,
+    "pitches": 19,
+    "row": "U6 pins 1 to 20",
+    "scaledErrMm": 0.0315,
+    "scored": true
+   },
+   {
+    "errMm": 0.0217,
+    "lengthMm": 48.26,
+    "measuredMm": 48.2817,
+    "pitches": 19,
+    "row": "U6 pins 40 to 21",
+    "scaledErrMm": 0.0217,
+    "scored": true
+   },
+   {
+    "errMm": -0.0062,
+    "lengthMm": 48.26,
+    "measuredMm": 48.2538,
+    "pitches": 19,
+    "row": "U5 pins 1 to 20",
+    "scaledErrMm": -0.0062,
+    "scored": true
+   },
+   {
+    "errMm": 0.0007,
+    "lengthMm": 48.26,
+    "measuredMm": 48.2607,
+    "pitches": 19,
+    "row": "U5 pins 40 to 21",
+    "scaledErrMm": 0.0007,
+    "scored": true
+   },
+   {
+    "errMm": 0.0101,
+    "lengthMm": 27.94,
+    "measuredMm": 27.9501,
+    "pitches": 11,
+    "row": "U1 pins 1 to 12",
+    "scaledErrMm": 0.0175,
+    "scored": false
+   },
+   {
+    "errMm": 0.0029,
+    "lengthMm": 27.94,
+    "measuredMm": 27.9429,
+    "pitches": 11,
+    "row": "U1 pins 24 to 13",
+    "scaledErrMm": 0.005,
+    "scored": false
+   },
+   {
+    "errMm": -0.054,
+    "lengthMm": 27.94,
+    "measuredMm": 27.886,
+    "pitches": 11,
+    "row": "U4 pins 1 to 12",
+    "scaledErrMm": -0.0932,
+    "scored": false
+   },
+   {
+    "errMm": 0.0185,
+    "lengthMm": 27.94,
+    "measuredMm": 27.9585,
+    "pitches": 11,
+    "row": "U4 pins 24 to 13",
+    "scaledErrMm": 0.032,
+    "scored": false
+   },
+   {
+    "errMm": 0.0068,
+    "lengthMm": 22.86,
+    "measuredMm": 22.8668,
+    "pitches": 9,
+    "row": "U2 pins 1 to 10",
+    "scaledErrMm": 0.0143,
+    "scored": false
+   },
+   {
+    "errMm": 0.0374,
+    "lengthMm": 22.86,
+    "measuredMm": 22.8974,
+    "pitches": 9,
+    "row": "U2 pins 20 to 11",
+    "scaledErrMm": 0.0789,
+    "scored": false
+   },
+   {
+    "errMm": -0.0201,
+    "lengthMm": 17.78,
+    "measuredMm": 17.7599,
+    "pitches": 7,
+    "row": "U3 pins 1 to 8",
+    "scaledErrMm": -0.0546,
+    "scored": false
+   },
+   {
+    "errMm": -0.0309,
+    "lengthMm": 17.78,
+    "measuredMm": 17.7491,
+    "pitches": 7,
+    "row": "U3 pins 16 to 9",
+    "scaledErrMm": -0.0838,
+    "scored": false
+   },
+   {
+    "errMm": -0.0416,
+    "lengthMm": 17.78,
+    "measuredMm": 17.7384,
+    "pitches": 7,
+    "row": "U7 pins 1 to 8",
+    "scaledErrMm": -0.113,
+    "scored": false
+   },
+   {
+    "errMm": 0.0562,
+    "lengthMm": 17.78,
+    "measuredMm": 17.8362,
+    "pitches": 7,
+    "row": "U7 pins 16 to 9",
+    "scaledErrMm": 0.1525,
+    "scored": false
+   },
+   {
+    "errMm": -0.0489,
+    "lengthMm": 17.78,
+    "measuredMm": 17.7311,
+    "pitches": 7,
+    "row": "U8 pins 1 to 8",
+    "scaledErrMm": -0.1326,
+    "scored": false
+   },
+   {
+    "errMm": -0.0065,
+    "lengthMm": 17.78,
+    "measuredMm": 17.7735,
+    "pitches": 7,
+    "row": "U8 pins 16 to 9",
+    "scaledErrMm": -0.0177,
+    "scored": false
+   },
+   {
+    "errMm": -0.055,
+    "lengthMm": 17.78,
+    "measuredMm": 17.725,
+    "pitches": 7,
+    "row": "U10 pins 1 to 8",
+    "scaledErrMm": -0.1494,
+    "scored": false
+   },
+   {
+    "errMm": -0.0166,
+    "lengthMm": 17.78,
+    "measuredMm": 17.7634,
+    "pitches": 7,
+    "row": "U10 pins 16 to 9",
+    "scaledErrMm": -0.045,
+    "scored": false
+   },
+   {
+    "errMm": -0.0461,
+    "lengthMm": 15.24,
+    "measuredMm": 15.1939,
+    "pitches": 6,
+    "row": "U9 pins 1 to 7",
+    "scaledErrMm": -0.1461,
+    "scored": false
+   },
+   {
+    "errMm": -0.0182,
+    "lengthMm": 15.24,
+    "measuredMm": 15.2218,
+    "pitches": 6,
+    "row": "U9 pins 14 to 8",
+    "scaledErrMm": -0.0575,
+    "scored": false
+   },
+   {
+    "errMm": 0.0145,
+    "lengthMm": 58.42,
+    "measuredMm": 58.4345,
+    "pitches": 23,
+    "row": "P2 pins 1 to 24",
+    "scaledErrMm": 0.0119,
+    "scored": true
+   },
+   {
+    "errMm": 0.0129,
+    "lengthMm": 58.42,
+    "measuredMm": 58.4329,
+    "pitches": 23,
+    "row": "P2 pins 48 to 25",
+    "scaledErrMm": 0.0107,
+    "scored": true
+   }
+  ],
+  "scaledErrMm": {
+   "max": 0.0315,
+   "median": 0.0113
+  },
+  "what": "Rows of pins on 2.54 mm across the board (the DIPs' and the expansion header's), first drill to last, each held out of the scale fit in turn; scaledErrMm is the error x 48.26 / the row's length; rows of at least 30 mm are scored (the plan). The edge fingers are not among them: they are on 2.50 mm (task 0)"
+ },
+ "heldOutY": {
+  "errPct": {
+   "max": 0.9813,
+   "median": 0.432
+  },
+  "errPct300": {
+   "max": 0.9704,
+   "median": 0.4272,
+   "n": 6,
+   "p90": 0.7821
+  },
+  "errPct600": {
+   "max": 0.9813,
+   "median": 0.4776,
+   "n": 4,
+   "p90": 0.8605
+  },
+  "footprints": [
+   {
+    "errPct": -0.9813,
+    "measuredMm": 15.0904,
+    "pairs": 20,
+    "pins": 40,
+    "ref": "U6",
+    "spacingMm": 15.24
+   },
+   {
+    "errPct": 0.3765,
+    "measuredMm": 15.2974,
+    "pairs": 19,
+    "pins": 40,
+    "ref": "U5",
+    "spacingMm": 15.24
+   },
+   {
+    "errPct": 0.5788,
+    "measuredMm": 15.3282,
+    "pairs": 12,
+    "pins": 24,
+    "ref": "U1",
+    "spacingMm": 15.24
+   },
+   {
+    "errPct": 0.0357,
+    "measuredMm": 15.2454,
+    "pairs": 11,
+    "pins": 24,
+    "ref": "U4",
+    "spacingMm": 15.24
+   },
+   {
+    "errPct": -0.4875,
+    "measuredMm": 7.5829,
+    "pairs": 9,
+    "pins": 20,
+    "ref": "U2",
+    "spacingMm": 7.62
+   },
+   {
+    "errPct": 0.2949,
+    "measuredMm": 7.6425,
+    "pairs": 8,
+    "pins": 16,
+    "ref": "U3",
+    "spacingMm": 7.62
+   },
+   {
+    "errPct": 0.3669,
+    "measuredMm": 7.648,
+    "pairs": 8,
+    "pins": 16,
+    "ref": "U7",
+    "spacingMm": 7.62
+   },
+   {
+    "errPct": -0.9704,
+    "measuredMm": 7.5461,
+    "pairs": 8,
+    "pins": 16,
+    "ref": "U8",
+    "spacingMm": 7.62
+   },
+   {
+    "errPct": 0.5939,
+    "measuredMm": 7.6653,
+    "pairs": 6,
+    "pins": 16,
+    "ref": "U10",
+    "spacingMm": 7.62
+   },
+   {
+    "errPct": 0.1312,
+    "measuredMm": 7.63,
+    "pairs": 7,
+    "pins": 14,
+    "ref": "U9",
+    "spacingMm": 7.62
+   }
+  ],
+  "refusedPairs": {
+   "U10": [
+    1,
+    4
+   ],
+   "U2": [
+    7
+   ],
+   "U4": [
+    1
+   ],
+   "U5": [
+    15
+   ]
+  },
+  "what": "Each DIP's row spacing (15.24 or 7.62 mm) on drill centres, fitted on their top rims: the mean of every pin's pair across the footprint; each footprint held out of the scale fit in turn, its error a per cent of its spacing"
+ },
+ "holeCandidates": [
+  {
+   "aspect": 1.2667,
+   "centroidMm": [
+    11.8199,
+    6.351
+   ],
+   "crescentDeg": 269.9602,
+   "d": 3.712,
+   "dEqMm": 2.8706,
+   "fill": 1.0085,
+   "kept": 65,
+   "ownCrescentDeg": 265.9534,
+   "rays": 75,
+   "refused": null,
+   "rimRmsMm": 0.0287,
+   "x": 11.8716,
+   "y": 5.7986
+  },
+  {
+   "aspect": 1.3333,
+   "centroidMm": [
+    151.9052,
+    6.2844
+   ],
+   "crescentDeg": 269.9602,
+   "d": 3.671,
+   "dEqMm": 2.9552,
+   "fill": 1.0154,
+   "kept": 52,
+   "ownCrescentDeg": 269.9602,
+   "rays": 75,
+   "refused": null,
+   "rimRmsMm": 0.0465,
+   "x": 151.9218,
+   "y": 5.749
+  },
+  {
+   "aspect": 1.3226,
+   "centroidMm": [
+    187.9166,
+    6.2454
+   ],
+   "crescentDeg": 269.9602,
+   "d": 3.574,
+   "dEqMm": 3.0344,
+   "fill": 1.0108,
+   "kept": 75,
+   "ownCrescentDeg": 269.9602,
+   "rays": 75,
+   "refused": null,
+   "rimRmsMm": 0.0281,
+   "x": 187.9319,
+   "y": 5.8558
+  },
+  {
+   "aspect": 1.5625,
+   "centroidMm": [
+    182.7842,
+    6.2452
+   ],
+   "crescentDeg": 269.9602,
+   "d": 2.2956,
+   "dEqMm": 1.6738,
+   "fill": 0.9772,
+   "kept": 58,
+   "ownCrescentDeg": 269.9602,
+   "rays": 75,
+   "refused": null,
+   "rimRmsMm": 0.0419,
+   "x": 182.8085,
+   "y": 5.8242
+  },
+  {
+   "aspect": 1.0,
+   "centroidMm": [
+    121.2949,
+    30.5441
+   ],
+   "dEqMm": 1.7973,
+   "fill": 0.3478,
+   "refused": "does not fill its box (a pad)"
+  },
+  {
+   "aspect": 1.4242,
+   "centroidMm": [
+    48.5669,
+    36.236
+   ],
+   "crescentDeg": 269.9602,
+   "d": 4.0905,
+   "dEqMm": 3.3202,
+   "fill": 0.9917,
+   "kept": 73,
+   "ownCrescentDeg": 271.9637,
+   "rays": 75,
+   "refused": null,
+   "rimRmsMm": 0.024,
+   "x": 48.5625,
+   "y": 35.7404
+  },
+  {
+   "aspect": 1.5455,
+   "centroidMm": [
+    114.9873,
+    36.3102
+   ],
+   "crescentDeg": 269.9602,
+   "d": 3.2226,
+   "dEqMm": 2.2767,
+   "fill": 0.9668,
+   "kept": 75,
+   "ownCrescentDeg": 271.9637,
+   "rays": 75,
+   "refused": null,
+   "rimRmsMm": 0.0077,
+   "x": 115.0065,
+   "y": 35.7122
+  },
+  {
+   "aspect": 1.7333,
+   "centroidMm": [
+    11.8403,
+    36.4329
+   ],
+   "crescentDeg": 269.9602,
+   "d": 2.7702,
+   "dEqMm": 1.6127,
+   "fill": 0.9304,
+   "kept": 75,
+   "ownCrescentDeg": 83.95,
+   "rays": 75,
+   "refused": null,
+   "rimRmsMm": 0.0196,
+   "x": 11.8257,
+   "y": 35.7846
+  },
+  {
+   "aspect": 1.1613,
+   "centroidMm": [
+    186.2847,
+    58.787
+   ],
+   "dEqMm": 1.6601,
+   "fill": 0.3446,
+   "refused": "does not fill its box (a pad)"
+  },
+  {
+   "aspect": 1.4483,
+   "centroidMm": [
+    187.8638,
+    85.2629
+   ],
+   "crescentDeg": 269.9602,
+   "d": 3.7121,
+   "dEqMm": 2.9288,
+   "fill": 0.9826,
+   "kept": 75,
+   "ownCrescentDeg": 271.9637,
+   "rays": 75,
+   "refused": null,
+   "rimRmsMm": 0.0342,
+   "x": 187.859,
+   "y": 84.7439
+  },
+  {
+   "aspect": 1.0213,
+   "centroidMm": [
+    164.8814,
+    95.8596
+   ],
+   "dEqMm": 2.8595,
+   "fill": 0.5057,
+   "refused": "does not fill its box (a pad)"
+  },
+  {
+   "aspect": 1.617,
+   "centroidMm": [
+    169.3035,
+    95.959
+   ],
+   "dEqMm": 4.213,
+   "fill": 0.6933,
+   "refused": "does not fill its box (a pad)"
+  },
+  {
+   "aspect": 1.2368,
+   "centroidMm": [
+    177.22,
+    95.9112
+   ],
+   "dEqMm": 2.2505,
+   "fill": 0.3957,
+   "refused": "does not fill its box (a pad)"
+  },
+  {
+   "aspect": 1.1277,
+   "centroidMm": [
+    181.0579,
+    96.0775
+   ],
+   "dEqMm": 3.3882,
+   "fill": 0.643,
+   "refused": "does not fill its box (a pad)"
+  },
+  {
+   "aspect": 1.2703,
+   "centroidMm": [
+    4.7145,
+    114.158
+   ],
+   "crescentDeg": 269.9602,
+   "d": 4.2431,
+   "dEqMm": 3.5358,
+   "fill": 1.0031,
+   "kept": 71,
+   "ownCrescentDeg": 269.9602,
+   "rays": 75,
+   "refused": null,
+   "rimRmsMm": 0.0321,
+   "x": 4.7037,
+   "y": 113.6249
+  },
+  {
+   "aspect": 1.3429,
+   "centroidMm": [
+    179.7066,
+    114.1046
+   ],
+   "crescentDeg": 269.9602,
+   "d": 4.1142,
+   "dEqMm": 3.4284,
+   "fill": 0.9969,
+   "kept": 59,
+   "ownCrescentDeg": 267.9568,
+   "rays": 75,
+   "refused": null,
+   "rimRmsMm": 0.0355,
+   "x": 179.7236,
+   "y": 113.6395
+  },
+  {
+   "aspect": 1.3667,
+   "centroidMm": [
+    16.7443,
+    114.2077
+   ],
+   "crescentDeg": 269.9602,
+   "d": 3.717,
+   "dEqMm": 3.0404,
+   "fill": 1.0486,
+   "kept": 69,
+   "ownCrescentDeg": 269.9602,
+   "rays": 75,
+   "refused": null,
+   "rimRmsMm": 0.0374,
+   "x": 16.7819,
+   "y": 113.7472
+  },
+  {
+   "aspect": 1.3333,
+   "centroidMm": [
+    146.7942,
+    114.1163
+   ],
+   "crescentDeg": 269.9602,
+   "d": 3.8756,
+   "dEqMm": 2.9675,
+   "fill": 1.0239,
+   "kept": 68,
+   "ownCrescentDeg": 269.9602,
+   "rays": 75,
+   "refused": null,
+   "rimRmsMm": 0.0255,
+   "x": 146.8701,
+   "y": 113.6025
+  }
+ ],
+ "holeCrescentDeg": 269.9602,
+ "holes": [
+  {
+   "crescentDeg": 269.9602,
+   "d": 3.712,
+   "kept": 65,
+   "kicad": {
+    "d": 3.55,
+    "dxMm": 0.3284,
+    "dyMm": 0.5014,
+    "offMm": 0.5993
+   },
+   "rays": 75,
+   "rimRmsMm": 0.0287,
+   "x": 11.8716,
+   "y": 5.7986
+  },
+  {
+   "crescentDeg": 269.9602,
+   "d": 3.671,
+   "kept": 52,
+   "kicad": {
+    "d": 3.55,
+    "dxMm": 0.1522,
+    "dyMm": 0.551,
+    "offMm": 0.5716
+   },
+   "rays": 75,
+   "rimRmsMm": 0.0465,
+   "x": 151.9218,
+   "y": 5.749
+  },
+  {
+   "crescentDeg": 269.9602,
+   "d": 3.574,
+   "kept": 75,
+   "kicad": {
+    "d": 3.55,
+    "dxMm": 0.2931,
+    "dyMm": 0.4442,
+    "offMm": 0.5322
+   },
+   "rays": 75,
+   "rimRmsMm": 0.0281,
+   "x": 187.9319,
+   "y": 5.8558
+  },
+  {
+   "crescentDeg": 269.9602,
+   "d": 2.2956,
+   "kept": 58,
+   "kicad": {
+    "d": 2.12,
+    "dxMm": 0.4665,
+    "dyMm": 0.1508,
+    "offMm": 0.4903
+   },
+   "rays": 75,
+   "rimRmsMm": 0.0419,
+   "x": 182.8085,
+   "y": 5.8242
+  },
+  {
+   "crescentDeg": 269.9602,
+   "d": 4.0905,
+   "kept": 73,
+   "kicad": null,
+   "rays": 75,
+   "rimRmsMm": 0.024,
+   "x": 48.5625,
+   "y": 35.7404
+  },
+  {
+   "crescentDeg": 269.9602,
+   "d": 3.2226,
+   "kept": 75,
+   "kicad": null,
+   "rays": 75,
+   "rimRmsMm": 0.0077,
+   "x": 115.0065,
+   "y": 35.7122
+  },
+  {
+   "crescentDeg": 269.9602,
+   "d": 2.7702,
+   "kept": 75,
+   "kicad": {
+    "d": 2.0,
+    "dxMm": 0.1493,
+    "dyMm": 0.1904,
+    "offMm": 0.242
+   },
+   "rays": 75,
+   "rimRmsMm": 0.0196,
+   "x": 11.8257,
+   "y": 35.7846
+  },
+  {
+   "crescentDeg": 269.9602,
+   "d": 3.7121,
+   "kept": 75,
+   "kicad": {
+    "d": 3.2004,
+    "dxMm": 0.666,
+    "dyMm": 0.2061,
+    "offMm": 0.6971
+   },
+   "rays": 75,
+   "rimRmsMm": 0.0342,
+   "x": 187.859,
+   "y": 84.7439
+  },
+  {
+   "crescentDeg": 269.9602,
+   "d": 4.2431,
+   "kept": 71,
+   "kicad": {
+    "d": 4.12,
+    "dxMm": -0.0307,
+    "dyMm": 0.1991,
+    "offMm": 0.2015
+   },
+   "rays": 75,
+   "rimRmsMm": 0.0321,
+   "x": 4.7037,
+   "y": 113.6249
+  },
+  {
+   "crescentDeg": 269.9602,
+   "d": 4.1142,
+   "kept": 59,
+   "kicad": {
+    "d": 4.12,
+    "dxMm": 0.5544,
+    "dyMm": 0.1845,
+    "offMm": 0.5843
+   },
+   "rays": 75,
+   "rimRmsMm": 0.0355,
+   "x": 179.7236,
+   "y": 113.6395
+  },
+  {
+   "crescentDeg": 269.9602,
+   "d": 3.717,
+   "kept": 69,
+   "kicad": {
+    "d": 3.62,
+    "dxMm": 0.2901,
+    "dyMm": 0.0388,
+    "offMm": 0.2926
+   },
+   "rays": 75,
+   "rimRmsMm": 0.0374,
+   "x": 16.7819,
+   "y": 113.7472
+  },
+  {
+   "crescentDeg": 269.9602,
+   "d": 3.8756,
+   "kept": 68,
+   "kicad": {
+    "d": 3.62,
+    "dxMm": 0.2619,
+    "dyMm": 0.1835,
+    "offMm": 0.3197
+   },
+   "rays": 75,
+   "rimRmsMm": 0.0255,
+   "x": 146.8701,
+   "y": 113.6025
+  }
+ ],
+ "kicad": {
+  "depthMm": 118.7,
+  "what": "The KiCad redrawing's outline box (I2), compared and never drawn",
+  "widthMm": 196.2523
+ },
+ "kicadHoles": {
+  "matched": 10,
+  "medianOffsetMm": [
+   0.2916,
+   0.1948
+  ],
+  "n": 10,
+  "what": "The redrawing's round holes in its outline; each hole above names the nearest one within 3 mm, in the two outlines' own top left frames, and the median offset is the two frames' difference: recorded, not judged"
+ },
+ "notches": [
+  {
+   "edge": 5,
+   "fitRmsMm": 0.0652,
+   "id": "right upper",
+   "kept": 50,
+   "r": 1.1125,
+   "rays": 57,
+   "x": 195.346,
+   "y": 41.0957
+  },
+  {
+   "edge": 5,
+   "fitRmsMm": 0.0146,
+   "id": "right lower",
+   "kept": 52,
+   "r": 0.9594,
+   "rays": 57,
+   "x": 195.1395,
+   "y": 69.7945
+  },
+  {
+   "edge": 17,
+   "fitRmsMm": 0.0227,
+   "id": "left",
+   "kept": 55,
+   "r": 2.2476,
+   "rays": 57,
+   "x": -0.2286,
+   "y": 19.8212
+  }
+ ],
+ "origin": [
+  28.1388,
+  52.665
+ ],
+ "outline": [
+  [
+   0.0,
+   0.0
+  ],
+  [
+   15.6446,
+   0.0
+  ],
+  [
+   15.6446,
+   2.9732
+  ],
+  [
+   148.1323,
+   2.874
+  ],
+  [
+   148.1323,
+   -0.1119
+  ],
+  [
+   195.803,
+   -0.0721
+  ],
+  [
+   195.7262,
+   40.0502
+  ],
+  [
+   195.5391,
+   40.0001
+  ],
+  [
+   195.3461,
+   39.9832
+  ],
+  [
+   195.1532,
+   40.0
+  ],
+  [
+   194.9661,
+   40.0501
+  ],
+  [
+   194.7905,
+   40.1318
+  ],
+  [
+   194.6317,
+   40.2428
+  ],
+  [
+   194.4946,
+   40.3796
+  ],
+  [
+   194.3833,
+   40.5382
+  ],
+  [
+   194.3012,
+   40.7136
+  ],
+  [
+   194.2508,
+   40.9006
+  ],
+  [
+   194.2335,
+   41.0936
+  ],
+  [
+   194.25,
+   41.2865
+  ],
+  [
+   194.2997,
+   41.4737
+  ],
+  [
+   194.3812,
+   41.6495
+  ],
+  [
+   194.4919,
+   41.8085
+  ],
+  [
+   194.6284,
+   41.9458
+  ],
+  [
+   194.7868,
+   42.0574
+  ],
+  [
+   194.9621,
+   42.1398
+  ],
+  [
+   195.149,
+   42.1906
+  ],
+  [
+   195.3419,
+   42.2082
+  ],
+  [
+   195.5349,
+   42.192
+  ],
+  [
+   195.7222,
+   42.1426
+  ],
+  [
+   195.6708,
+   68.9956
+  ],
+  [
+   195.5258,
+   68.9163
+  ],
+  [
+   195.3693,
+   68.863
+  ],
+  [
+   195.2061,
+   68.8374
+  ],
+  [
+   195.0409,
+   68.8402
+  ],
+  [
+   194.8786,
+   68.8713
+  ],
+  [
+   194.724,
+   68.9297
+  ],
+  [
+   194.5818,
+   69.0139
+  ],
+  [
+   194.4561,
+   69.1212
+  ],
+  [
+   194.3507,
+   69.2484
+  ],
+  [
+   194.2687,
+   69.3919
+  ],
+  [
+   194.2125,
+   69.5473
+  ],
+  [
+   194.1838,
+   69.71
+  ],
+  [
+   194.1835,
+   69.8753
+  ],
+  [
+   194.2115,
+   70.0382
+  ],
+  [
+   194.2671,
+   70.1938
+  ],
+  [
+   194.3486,
+   70.3376
+  ],
+  [
+   194.4535,
+   70.4652
+  ],
+  [
+   194.5788,
+   70.573
+  ],
+  [
+   194.7207,
+   70.6577
+  ],
+  [
+   194.875,
+   70.7167
+  ],
+  [
+   195.0372,
+   70.7484
+  ],
+  [
+   195.2024,
+   70.7518
+  ],
+  [
+   195.3658,
+   70.7268
+  ],
+  [
+   195.5224,
+   70.6742
+  ],
+  [
+   195.6677,
+   70.5954
+  ],
+  [
+   195.6601,
+   74.5531
+  ],
+  [
+   192.7828,
+   74.5531
+  ],
+  [
+   192.6625,
+   119.2811
+  ],
+  [
+   140.0102,
+   119.224
+  ],
+  [
+   139.9961,
+   109.5007
+  ],
+  [
+   128.3323,
+   109.4909
+  ],
+  [
+   128.2845,
+   119.2024
+  ],
+  [
+   35.1531,
+   119.2989
+  ],
+  [
+   35.1872,
+   109.4871
+  ],
+  [
+   24.6216,
+   109.467
+  ],
+  [
+   24.602,
+   119.3332
+  ],
+  [
+   -0.1465,
+   119.2599
+  ],
+  [
+   -0.0271,
+   22.0597
+  ],
+  [
+   0.3576,
+   21.991
+  ],
+  [
+   0.7246,
+   21.8566
+  ],
+  [
+   1.0627,
+   21.6607
+  ],
+  [
+   1.3619,
+   21.4093
+  ],
+  [
+   1.6129,
+   21.1098
+  ],
+  [
+   1.8082,
+   20.7713
+  ],
+  [
+   1.942,
+   20.4041
+  ],
+  [
+   2.0102,
+   20.0193
+  ],
+  [
+   2.0107,
+   19.6285
+  ],
+  [
+   1.9435,
+   19.2436
+  ],
+  [
+   1.8106,
+   18.8761
+  ],
+  [
+   1.616,
+   18.5371
+  ],
+  [
+   1.3657,
+   18.237
+  ],
+  [
+   1.0672,
+   17.9848
+  ],
+  [
+   0.7296,
+   17.7881
+  ],
+  [
+   0.3629,
+   17.6528
+  ],
+  [
+   -0.0216,
+   17.5831
+  ],
+  [
+   0.0,
+   0.0
+  ]
+ ],
+ "pxPerMm": {
+  "stated": 11.811,
+  "x": 11.802,
+  "y": 11.8222
+ },
+ "ratio": 0.9983,
+ "ratioPct": 0.1708,
+ "rectified": {
+  "file": "out/rectified-12.jpg",
+  "marginMm": 2.0,
+  "pxPerMm": 12,
+  "what": "I1-front resampled onto the board frame: pixel (u, v)'s centre is board millimetre ((u + 0.5) / 12 - 2, (v + 0.5) / 12 - 2). Made by board_frame.py in out/, which is git-ignored: the scan states no licence, so no copy of it is committed"
+ },
+ "rotationDeg": 0.0398,
+ "rows": [
+  {
+   "drillsKept": 20,
+   "padsFound": 20,
+   "pitches": 19,
+   "refused": [],
+   "row": "U6 pins 1 to 20",
+   "usable": true
+  },
+  {
+   "drillsKept": 20,
+   "padsFound": 20,
+   "pitches": 19,
+   "refused": [],
+   "row": "U6 pins 40 to 21",
+   "usable": true
+  },
+  {
+   "drillsKept": 19,
+   "padsFound": 17,
+   "pitches": 19,
+   "refused": [
+    {
+     "pin": 15,
+     "why": "off its row"
+    }
+   ],
+   "row": "U5 pins 1 to 20",
+   "usable": true
+  },
+  {
+   "drillsKept": 20,
+   "padsFound": 20,
+   "pitches": 19,
+   "refused": [],
+   "row": "U5 pins 40 to 21",
+   "usable": true
+  },
+  {
+   "drillsKept": 12,
+   "padsFound": 12,
+   "pitches": 11,
+   "refused": [],
+   "row": "U1 pins 1 to 12",
+   "usable": true
+  },
+  {
+   "drillsKept": 12,
+   "padsFound": 11,
+   "pitches": 11,
+   "refused": [],
+   "row": "U1 pins 24 to 13",
+   "usable": true
+  },
+  {
+   "drillsKept": 11,
+   "padsFound": 12,
+   "pitches": 11,
+   "refused": [
+    {
+     "pin": 1,
+     "why": "two fits disagree"
+    }
+   ],
+   "row": "U4 pins 1 to 12",
+   "usable": true
+  },
+  {
+   "drillsKept": 12,
+   "padsFound": 11,
+   "pitches": 11,
+   "refused": [],
+   "row": "U4 pins 24 to 13",
+   "usable": true
+  },
+  {
+   "drillsKept": 9,
+   "padsFound": 8,
+   "pitches": 9,
+   "refused": [
+    {
+     "pin": 7,
+     "why": "off its row"
+    }
+   ],
+   "row": "U2 pins 1 to 10",
+   "usable": true
+  },
+  {
+   "drillsKept": 10,
+   "padsFound": 10,
+   "pitches": 9,
+   "refused": [],
+   "row": "U2 pins 20 to 11",
+   "usable": true
+  },
+  {
+   "drillsKept": 8,
+   "padsFound": 8,
+   "pitches": 7,
+   "refused": [],
+   "row": "U3 pins 1 to 8",
+   "usable": true
+  },
+  {
+   "drillsKept": 8,
+   "padsFound": 8,
+   "pitches": 7,
+   "refused": [],
+   "row": "U3 pins 16 to 9",
+   "usable": true
+  },
+  {
+   "drillsKept": 8,
+   "padsFound": 8,
+   "pitches": 7,
+   "refused": [],
+   "row": "U7 pins 1 to 8",
+   "usable": true
+  },
+  {
+   "drillsKept": 8,
+   "padsFound": 8,
+   "pitches": 7,
+   "refused": [],
+   "row": "U7 pins 16 to 9",
+   "usable": true
+  },
+  {
+   "drillsKept": 8,
+   "padsFound": 8,
+   "pitches": 7,
+   "refused": [],
+   "row": "U8 pins 1 to 8",
+   "usable": true
+  },
+  {
+   "drillsKept": 8,
+   "padsFound": 8,
+   "pitches": 7,
+   "refused": [],
+   "row": "U8 pins 16 to 9",
+   "usable": true
+  },
+  {
+   "drillsKept": 6,
+   "padsFound": 7,
+   "pitches": 7,
+   "refused": [
+    {
+     "pin": 1,
+     "why": "no rim"
+    },
+    {
+     "pin": 4,
+     "why": "off its row"
+    }
+   ],
+   "row": "U10 pins 1 to 8",
+   "usable": true
+  },
+  {
+   "drillsKept": 8,
+   "padsFound": 7,
+   "pitches": 7,
+   "refused": [],
+   "row": "U10 pins 16 to 9",
+   "usable": true
+  },
+  {
+   "drillsKept": 7,
+   "padsFound": 6,
+   "pitches": 6,
+   "refused": [],
+   "row": "U9 pins 1 to 7",
+   "usable": true
+  },
+  {
+   "drillsKept": 7,
+   "padsFound": 6,
+   "pitches": 6,
+   "refused": [],
+   "row": "U9 pins 14 to 8",
+   "usable": true
+  },
+  {
+   "drillsKept": 24,
+   "padsFound": 23,
+   "pitches": 23,
+   "refused": [],
+   "row": "P2 pins 1 to 24",
+   "usable": true
+  },
+  {
+   "drillsKept": 24,
+   "padsFound": 14,
+   "pitches": 23,
+   "refused": [],
+   "row": "P2 pins 48 to 25",
+   "usable": true
+  }
+ ],
+ "skew": {
+  "footprints": [
+   {
+    "ref": "U6",
+    "skewDeg": -0.0046
+   },
+   {
+    "ref": "U5",
+    "skewDeg": 0.044
+   },
+   {
+    "ref": "U1",
+    "skewDeg": 0.0377
+   },
+   {
+    "ref": "U4",
+    "skewDeg": 0.0285
+   },
+   {
+    "ref": "U2",
+    "skewDeg": -0.0385
+   },
+   {
+    "ref": "U3",
+    "skewDeg": 0.0878
+   },
+   {
+    "ref": "U7",
+    "skewDeg": -0.0405
+   },
+   {
+    "ref": "U8",
+    "skewDeg": 0.2204
+   },
+   {
+    "ref": "U10",
+    "skewDeg": 0.1123
+   },
+   {
+    "ref": "U9",
+    "skewDeg": -0.0192
+   }
+  ],
+  "medianDeg": 0.0331,
+  "what": "How far each DIP's spacing, on drills, is from square to the rows; recorded"
+ },
+ "statedDpi": 300,
+ "straightness": {
+  "bowMm": {
+   "max": 0.0477,
+   "median": 0.0255,
+   "n": 12,
+   "p90": 0.0375
+  },
+  "limitMm": 0.05,
+  "over": [],
+  "rmsMm": {
+   "max": 0.0315,
+   "median": 0.0209,
+   "n": 12,
+   "p90": 0.0294
+  },
+  "rows": [
+   {
+    "angleDeg": 0.1119,
+    "bowMm": -0.0375,
+    "maxMm": 0.0826,
+    "of": 20,
+    "pads": 20,
+    "rmsMm": 0.024,
+    "row": "U6 pins 1 to 20"
+   },
+   {
+    "angleDeg": 0.0846,
+    "bowMm": -0.0477,
+    "maxMm": 0.0892,
+    "of": 20,
+    "pads": 20,
+    "rmsMm": 0.03,
+    "row": "U6 pins 40 to 21"
+   },
+   {
+    "angleDeg": 0.0187,
+    "bowMm": -0.0295,
+    "maxMm": 0.1057,
+    "of": 20,
+    "pads": 19,
+    "rmsMm": 0.0315,
+    "row": "U5 pins 1 to 20"
+   },
+   {
+    "angleDeg": 0.0486,
+    "bowMm": 0.0123,
+    "maxMm": 0.024,
+    "of": 20,
+    "pads": 20,
+    "rmsMm": 0.0112,
+    "row": "U5 pins 40 to 21"
+   },
+   {
+    "angleDeg": 0.0223,
+    "bowMm": -0.0032,
+    "maxMm": 0.0309,
+    "of": 12,
+    "pads": 12,
+    "rmsMm": 0.014,
+    "row": "U1 pins 1 to 12"
+   },
+   {
+    "angleDeg": -0.0998,
+    "bowMm": 0.0263,
+    "maxMm": 0.0516,
+    "of": 12,
+    "pads": 12,
+    "rmsMm": 0.0214,
+    "row": "U1 pins 24 to 13"
+   },
+   {
+    "angleDeg": -0.067,
+    "bowMm": 0.0125,
+    "maxMm": 0.034,
+    "of": 12,
+    "pads": 11,
+    "rmsMm": 0.015,
+    "row": "U4 pins 1 to 12"
+   },
+   {
+    "angleDeg": -0.0055,
+    "bowMm": -0.0371,
+    "maxMm": 0.0469,
+    "of": 12,
+    "pads": 12,
+    "rmsMm": 0.0204,
+    "row": "U4 pins 24 to 13"
+   },
+   {
+    "angleDeg": -0.0262,
+    "bowMm": 0.0062,
+    "maxMm": 0.0321,
+    "of": 10,
+    "pads": 9,
+    "rmsMm": 0.0182,
+    "row": "U2 pins 1 to 10"
+   },
+   {
+    "angleDeg": -0.0277,
+    "bowMm": 0.0034,
+    "maxMm": 0.0371,
+    "of": 10,
+    "pads": 10,
+    "rmsMm": 0.0168,
+    "row": "U2 pins 20 to 11"
+   },
+   {
+    "angleDeg": 0.0399,
+    "bowMm": -0.0246,
+    "maxMm": 0.0658,
+    "of": 24,
+    "pads": 24,
+    "rmsMm": 0.023,
+    "row": "P2 pins 1 to 24"
+   },
+   {
+    "angleDeg": 0.024,
+    "bowMm": 0.0333,
+    "maxMm": 0.0534,
+    "of": 24,
+    "pads": 24,
+    "rmsMm": 0.0238,
+    "row": "P2 pins 48 to 25"
+   }
+  ],
+  "what": "Each long row's drills (10 or more) against a straight line through them, in millimetres; recorded, not judged: the rows at or over 0.05 mm are named"
+ },
+ "verdicts": [
+  {
+   "check": "scale x",
+   "verdict": "pass"
+  },
+  {
+   "check": "scale y",
+   "verdict": "pass"
+  },
+  {
+   "check": "x against y",
+   "verdict": "pass"
+  }
+ ],
+ "xFromPadCentroids": {
+  "largestRow": "U5 pins 1 to 20",
+  "n": 6,
+  "pxPerMmX": 11.8004,
+  "rows": 20,
+  "scaledErrMm": {
+   "max": 0.1843,
+   "median": 0.0312
+  },
+  "what": "The same rows from the solder's centroids, first pad to last (task 0's way): recorded, not judged"
+ },
+ "yFromPadCentroids": {
+  "errPct": {
+   "max": 1.7871,
+   "median": 0.2927
+  },
+  "errPct300": {
+   "max": 1.7871,
+   "median": 0.2882,
+   "n": 6,
+   "p90": 1.6429
+  },
+  "errPct600": {
+   "max": 0.8116,
+   "median": 0.3658,
+   "n": 4,
+   "p90": 0.7315
+  },
+  "footprints": 10,
+  "pxPerMmY": 11.8234,
+  "what": "The same spacings from the pads' solder centroids, not the drills: recorded, not judged"
+ },
+ "yFromPin1AndPinN": {
+  "errPct": {
+   "max": 1.156,
+   "median": 0.5656
+  },
+  "errPct300": {
+   "max": 1.156,
+   "median": 0.8198,
+   "n": 6,
+   "p90": 1.0958
+  },
+  "errPct600": {
+   "max": 0.654,
+   "median": 0.1761,
+   "n": 4,
+   "p90": 0.5213
+  },
+  "footprints": 10,
+  "pxPerMmY": 11.8407,
+  "what": "Task 0's way: pin 1 and pin N alone, on drill centres: recorded, not judged"
+ }
+}

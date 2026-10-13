@@ -34,10 +34,8 @@ if (!Panel) throw new Error(`machine ${machine.id} is running but has no panel i
 // only when the visitor gets near it.
 const models = modelsOf(machine);
 const hasModels = models.length > 0;
-// One model is one section. A machine with a case offers two as tabs, and those
-// come with the outside model (plan task 9): until then a page with two would
-// show one and drop the other without saying so, so the build stops instead.
-if (models.length > 1) throw new Error(`machine ${machine.id} claims ${models.length} models, and the page offers one until the two views land as tabs`);
+// A machine's models are one section (src/components/MachineModel.astro): its
+// board alone as it always was, or a case's views, outside and inside, as tabs.
 const scripts = [...({ 'kim-1': ['/kim-1.js'], 'bbc-micro': ['/bbc-micro.js'], nes: ['/nes.js'] }[machine.id] ?? []), ...(hasModels ? ['/model-loader.js'] : [])];
 const base = `/machines/${machine.id}/`;
 const clockMhz = Number(/([\d.]+) MHz/.exec(machine.cpu ?? '')?.[1]);
@@ -234,13 +232,13 @@ const notOnAPc = Object.entries(NOT_ON_A_PC).reduce((groups, [key, why]) => grou
         <ul>
           {NES_NOT_MODELLED.map((m) => <li>{m.part[0].toUpperCase() + m.part.slice(1)}: <a href={issueUrl(m.issue)}>issue {m.issue}</a></li>)}
         </ul>
-        <p>Saving is not built, so a page reload loses battery RAM: a game that saves its progress on the cartridge loses it when the page is reloaded or closed. The NES's 3D models, the outside and the board, are a project of their own: <a href={issueUrl(NES_ISSUES.models)}>issue {NES_ISSUES.models}</a>.</p>
+        <p>Saving is not built, so a page reload loses battery RAM: a game that saves its progress on the cartridge loses it when the page is reloaded or closed. The NES's 3D models, the outside and the board, are a project of their own: <a href={issueUrl(NES_ISSUES.models)}>issue {NES_ISSUES.models}</a>. Both are below, as two views of the same console: the outside and the inside.</p>
         </div>
       </div>
     </section>
   )}
 
-  {models.map((m) => <MachineModel module={m.module} photos={machine.photos} drawings={machine.drawings} references={machine.references} />)}
+  {hasModels && <MachineModel models={models} photos={machine.photos} drawings={machine.drawings} references={machine.references} />}
 
   <MachinePhotos machine={machine} model={hasModels} />
 

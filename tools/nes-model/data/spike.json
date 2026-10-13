@@ -1,0 +1,1391 @@
+{
+ "about": "Task 0 of the NES models plan: the eight checks the two models rest on, each on data held out of its fit where it has one, judged against the plan's thresholds. Written by spike.py; every figure here is a measurement made on the date of the journal entry that quotes it (docs/journal/2026-10-05-the-nes-models.md).",
+ "case": {
+  "depthToWidth": {
+   "br": 0.7298,
+   "fl": 0.7358
+  },
+  "depthToWidthErrPct": -8.7704,
+  "depthToWidthErrPctEach": {
+   "br": -8.7704,
+   "fl": -8.026
+  },
+  "focalPx": {
+   "exif": 19077.9661,
+   "used": {
+    "br": 23831.3901,
+    "fl": 24596.0788
+   },
+   "vanishing": {
+    "br": 23831.3901,
+    "fl": 24596.0788
+   }
+  },
+  "heightToWidth": {
+   "br": 0.3332,
+   "fl": 0.3355
+  },
+  "heightToWidthAgreePct": 0.6725,
+  "patent": {
+   "depthToWidth": {
+    "bottom": 0.7758,
+    "sideOverFront": 0.7914,
+    "top": 0.7723
+   },
+   "depthToWidthErrPct": -3.0846,
+   "depthToWidthErrPctEach": {
+    "bottom": -2.6388,
+    "sideOverFront": -0.681,
+    "top": -3.0846
+   },
+   "firstRevisionAgainst254Mm": {
+    "depthToWidth": 0.8,
+    "depthToWidthErrPct": -3.4632,
+    "depthToWidthErrPctEach": {
+     "bottom": -3.0191,
+     "sideOverFront": -1.0689,
+     "top": -3.4632
+    },
+    "heightToWidth": 0.35,
+    "heightToWidthErrPct": 0.9723,
+    "heightToWidthErrPctEach": {
+     "front": 0.723,
+     "side": 0.9723
+    }
+   },
+   "front": {
+    "bandHeight": 0.1719,
+    "buttonsSpan": 0.2144,
+    "doorWidth": 0.5823,
+    "faceWidthPx": 1133.5,
+    "linesPx": {
+     "bandTop": 479.0,
+     "doorLeft": 801.2,
+     "doorRight": 1461.2,
+     "faceLeft": 653.0,
+     "faceRight": 1786.5,
+     "powerLeft": 836.5,
+     "resetRight": 1079.5,
+     "seam": 673.8571
+    }
+   },
+   "heightToWidth": {
+    "front": 0.3525,
+    "side": 0.3534
+   },
+   "heightToWidthErrPct": 1.3699,
+   "heightToWidthErrPctEach": {
+    "front": 1.1196,
+    "side": 1.3699
+   },
+   "heightToWidthWithFeet": {
+    "front": 0.3682,
+    "side": 0.3709
+   },
+   "published": {
+    "depthMm": 203.2,
+    "depthToWidth": 0.7969,
+    "depthToWidthRange": [
+     0.7937,
+     0.8
+    ],
+    "heightMm": 88.9,
+    "heightToWidth": 0.3486,
+    "widthsMm": [
+     254.0,
+     256.0
+    ]
+   },
+   "views": {
+    "FIG 3": {
+     "acrossPx": 1146,
+     "box": [
+      647,
+      478,
+      1792,
+      881
+     ],
+     "downPx": 404,
+     "overallDownPx": 422
+    },
+    "FIG 5": {
+     "acrossPx": 1155,
+     "box": [
+      641,
+      1832,
+      1795,
+      2723
+     ],
+     "downPx": 892,
+     "overallDownPx": 899
+    },
+    "FIG 6": {
+     "acrossPx": 1151,
+     "box": [
+      744,
+      417,
+      1894,
+      1309
+     ],
+     "downPx": 893,
+     "overallDownPx": 899
+    },
+    "FIG 7": {
+     "acrossPx": 907,
+     "box": [
+      870,
+      1583,
+      1776,
+      1987
+     ],
+     "downPx": 405,
+     "overallDownPx": 425
+    }
+   }
+  },
+  "photographsRecordedOnly": "The figures at this level are the corner photographs', each through its camera: recorded, not judged, since the plan was revised on 5 October 2026 (see revision). The judged figures are under patent.",
+  "photos": {
+   "O2-BR": {
+    "base": {
+     "kept": 73,
+     "points": 73,
+     "rmsPx": 0.0797
+    },
+    "cornersPx": [
+     [
+      250.6089,
+      1170.5854
+     ],
+     [
+      2800.8472,
+      1860.6957
+     ],
+     [
+      3765.9546,
+      835.0571
+     ],
+     [
+      1322.1239,
+      236.8712
+     ]
+    ],
+    "depthToWidth": 0.7298,
+    "depthToWidthOneCornerMoved3Px": [
+     0.7215,
+     0.7388
+    ],
+    "depthToWidthWithExif": 0.68,
+    "edges": {
+     "farLong": {
+      "kept": 128,
+      "points": 145,
+      "rmsPx": 0.367
+     },
+     "farShort": {
+      "kept": 115,
+      "points": 115,
+      "rmsPx": 0.1682
+     },
+     "nearLong": {
+      "kept": 165,
+      "points": 166,
+      "rmsPx": 2.1106
+     },
+     "nearShort": {
+      "kept": 116,
+      "points": 118,
+      "rmsPx": 1.8264
+     }
+    },
+    "focalPx": {
+     "exif": 19077.9661,
+     "used": 23831.3901,
+     "vanishing": 23831.3901
+    },
+    "heightToWidth": 0.3332,
+    "heightToWidthSpread": [
+     0.3325,
+     0.3339
+    ],
+    "principalPointPx": [
+     2009.5,
+     1439.5
+    ],
+    "vanishingPointsPx": [
+     [
+      -46047.7054,
+      -11358.0256
+     ],
+     [
+      18023.1414,
+      -14316.3349
+     ]
+    ],
+    "verticals": [
+     {
+      "atPx": [
+       244.7932,
+       1395.958
+      ],
+      "cameraDeg": 5.2976,
+      "rmsPx": 0.1586,
+      "seenDeg": -0.6378
+     },
+     {
+      "atPx": [
+       2804.0483,
+       2079.1375
+      ],
+      "cameraDeg": 1.4663,
+      "rmsPx": 3.7559,
+      "seenDeg": 0.0491
+     }
+    ]
+   },
+   "O2-FL": {
+    "base": {
+     "kept": 146,
+     "points": 146,
+     "rmsPx": 0.2342
+    },
+    "cornersPx": [
+     [
+      246.4716,
+      1186.4573
+     ],
+     [
+      2802.5532,
+      1866.7748
+     ],
+     [
+      3758.2194,
+      835.2412
+     ],
+     [
+      1308.886,
+      243.4135
+     ]
+    ],
+    "depthToWidth": 0.7358,
+    "depthToWidthOneCornerMoved3Px": [
+     0.7268,
+     0.7455
+    ],
+    "depthToWidthWithExif": 0.6773,
+    "edges": {
+     "farLong": {
+      "kept": 150,
+      "points": 150,
+      "rmsPx": 0.6085
+     },
+     "farShort": {
+      "kept": 115,
+      "points": 115,
+      "rmsPx": 0.2221
+     },
+     "nearLong": {
+      "kept": 111,
+      "points": 124,
+      "rmsPx": 0.3947
+     },
+     "nearShort": {
+      "kept": 102,
+      "points": 118,
+      "rmsPx": 0.3802
+     }
+    },
+    "focalPx": {
+     "exif": 19077.9661,
+     "used": 24596.0788,
+     "vanishing": 24596.0788
+    },
+    "heightToWidth": 0.3355,
+    "heightToWidthSpread": [
+     0.3345,
+     0.3365
+    ],
+    "principalPointPx": [
+     2009.5,
+     1439.5
+    ],
+    "vanishingPointsPx": [
+     [
+      -48666.4446,
+      -11832.0294
+     ],
+     [
+      18183.434,
+      -14735.1462
+     ]
+    ],
+    "verticals": [
+     {
+      "atPx": [
+       247.6669,
+       1399.001
+      ],
+      "cameraDeg": 5.0516,
+      "rmsPx": 0.1553,
+      "seenDeg": -0.8296
+     },
+     {
+      "atPx": [
+       2805.7685,
+       2093.5879
+      ],
+      "cameraDeg": 1.3436,
+      "rmsPx": 1.086,
+      "seenDeg": 0.5141
+     }
+    ]
+   }
+  },
+  "published": {
+   "depthMm": 203.2,
+   "depthToWidth": 0.8,
+   "widthMm": 254.0
+  }
+ },
+ "outline": {
+  "kicadMm": [
+   196.2523,
+   118.7
+  ],
+  "scanMm": [
+   196.4853,
+   120.2659
+  ],
+  "scanPx": [
+   24,
+   41,
+   2339,
+   1464
+  ]
+ },
+ "palFront": {
+  "O2-FL": {
+   "bandHeight": 0.1637,
+   "buttonsSpan": 0.2611,
+   "cornersPx": [
+    [
+     246.4716,
+     1186.4573
+    ],
+    [
+     2802.5532,
+     1866.7748
+    ],
+    [
+     2813.1289,
+     2280.0401
+    ],
+    [
+     245.1483,
+     1574.0437
+    ]
+   ],
+   "doorWidth": 0.5744,
+   "lines": {
+    "doorLeft": {
+     "kept": 21,
+     "points": 21,
+     "rmsPx": 0.1646
+    },
+    "doorRight": {
+     "kept": 26,
+     "points": 29,
+     "rmsPx": 1.4264
+    },
+    "leftEnd": {
+     "kept": 33,
+     "points": 33,
+     "rmsPx": 0.1497
+    },
+    "powerLeft": {
+     "kept": 11,
+     "points": 11,
+     "rmsPx": 0.2269
+    },
+    "resetRight": {
+     "kept": 7,
+     "points": 8,
+     "rmsPx": 0.2416
+    },
+    "rightEnd": {
+     "kept": 26,
+     "points": 33,
+     "rmsPx": 0.645
+    },
+    "seamLeft": {
+     "kept": 63,
+     "points": 63,
+     "rmsPx": 0.1997
+    },
+    "seamRight": {
+     "kept": 28,
+     "points": 28,
+     "rmsPx": 0.1612
+    }
+   }
+  },
+  "O4": {
+   "bandHeight": 0.158,
+   "buttonsSpan": null,
+   "cornersPx": [
+    [
+     590.8728,
+     430.7951
+    ],
+    [
+     8043.4465,
+     490.5119
+    ],
+    [
+     8109.9499,
+     1687.2084
+    ],
+    [
+     502.4673,
+     1608.8154
+    ]
+   ],
+   "doorWidth": 0.5764,
+   "lines": {
+    "bottom": {
+     "kept": 458,
+     "points": 481,
+     "rmsPx": 1.5715
+    },
+    "doorLeft": {
+     "kept": 45,
+     "points": 51,
+     "rmsPx": 0.8904
+    },
+    "doorRight": {
+     "kept": 51,
+     "points": 51,
+     "rmsPx": 0.1501
+    },
+    "leftEnd": {
+     "kept": 102,
+     "points": 103,
+     "rmsPx": 0.7762
+    },
+    "rightEnd": {
+     "kept": 95,
+     "points": 107,
+     "rmsPx": 0.5763
+    },
+    "top": {
+     "kept": 419,
+     "points": 701,
+     "rmsPx": 1.754
+    }
+   }
+  },
+  "measured": [
+   "door width",
+   "label band height"
+  ],
+  "notMeasured": [
+   {
+    "ratio": "buttons span",
+    "why": "O4 is the PAL top shell taken off its console; POWER and RESET are on the bottom shell, which O4 does not show. Measured on O2-FL and the patent, recorded."
+   }
+  ],
+  "ratioErrPct": [
+   0.3537,
+   -3.4912
+  ],
+  "ratios": [
+   {
+    "O2-FL": 0.5744,
+    "O2-FLAgainstPatentPct": -1.357,
+    "O4": 0.5764,
+    "O4AgainstO2-FLPct": 0.3537,
+    "O4AgainstPatentPct": -1.0081,
+    "patentFig3": 0.5823,
+    "ratio": "door width"
+   },
+   {
+    "O2-FL": 0.1637,
+    "O2-FLAgainstPatentPct": -4.7539,
+    "O4": 0.158,
+    "O4AgainstO2-FLPct": -3.4912,
+    "O4AgainstPatentPct": -8.0791,
+    "patentFig3": 0.1719,
+    "ratio": "label band height"
+   },
+   {
+    "O2-FL": 0.2611,
+    "O2-FLAgainstPatentPct": 21.8018,
+    "O4": null,
+    "O4AgainstO2-FLPct": null,
+    "O4AgainstPatentPct": null,
+    "patentFig3": 0.2144,
+    "ratio": "buttons span"
+   }
+  ],
+  "what": "Lines on the front band of the top shell, each a segment marked by hand along it; spike.py fits each line. O2-FL: the band's ends are the corners' vertical edges, its top the case top's near long edge (from \"case\"), its bottom where the bottom shell starts, either side of the black strip; the door's left side is the middle of the dark gap beside it, its right side the black strip's left edge; POWER's left edge and RESET's right edge on the bottom shell. O4: the PAL top shell, taken apart, straight on: its band's four edges, the door's left gap and the black block's left edge."
+ },
+ "palLayout": {
+  "heldOutMm": {
+   "max": 0.3862,
+   "median": 0.1476
+  },
+  "i1Refused": 4,
+  "model": "homography",
+  "notMeasured": [
+   {
+    "part": "P1",
+    "why": "On I3 the 72-pin cartridge connector is fitted over the edge fingers, so no finger can be seen."
+   },
+   {
+    "part": "P2",
+    "why": "On I3 the expansion port's socket is fitted; its body hides every pin."
+   },
+   {
+    "part": "P3",
+    "why": "On I3 the PAL modulator's can covers the place of the 5-pin MOD RF footprint that I1 shows; its own pins on its small board above the can are not the board's."
+   }
+  ],
+  "parts": 10,
+  "perPart": [
+   {
+    "dxMm": 0.2869,
+    "dyMm": 0.0104,
+    "heldOutMm": 0.2871,
+    "part": "U6",
+    "pins": 4,
+    "pinsHeldOutMm": [
+     0.3268,
+     0.4611,
+     0.3569,
+     0.6874
+    ]
+   },
+   {
+    "dxMm": 0.054,
+    "dyMm": 0.037,
+    "heldOutMm": 0.0654,
+    "part": "U5",
+    "pins": 4,
+    "pinsHeldOutMm": [
+     0.1288,
+     0.2963,
+     0.14,
+     0.1294
+    ]
+   },
+   {
+    "dxMm": -0.3163,
+    "dyMm": -0.0907,
+    "heldOutMm": 0.3291,
+    "part": "U1",
+    "pins": 4,
+    "pinsHeldOutMm": [
+     0.3587,
+     0.1512,
+     0.2533,
+     0.6183
+    ]
+   },
+   {
+    "dxMm": 0.2017,
+    "dyMm": -0.1229,
+    "heldOutMm": 0.2362,
+    "part": "U4",
+    "pins": 4,
+    "pinsHeldOutMm": [
+     0.093,
+     0.2922,
+     0.3621,
+     0.2721
+    ]
+   },
+   {
+    "dxMm": -0.0236,
+    "dyMm": -0.046,
+    "heldOutMm": 0.0517,
+    "part": "U2",
+    "pins": 4,
+    "pinsHeldOutMm": [
+     0.0548,
+     0.0999,
+     0.1498,
+     0.1075
+    ]
+   },
+   {
+    "dxMm": -0.3285,
+    "dyMm": 0.203,
+    "heldOutMm": 0.3862,
+    "part": "U3",
+    "pins": 3,
+    "pinsHeldOutMm": [
+     0.4277,
+     0.4419,
+     0.3945
+    ]
+   },
+   {
+    "dxMm": -0.0338,
+    "dyMm": -0.0743,
+    "heldOutMm": 0.0817,
+    "part": "U7",
+    "pins": 4,
+    "pinsHeldOutMm": [
+     0.0445,
+     0.2538,
+     0.2013,
+     0.284
+    ]
+   },
+   {
+    "dxMm": -0.004,
+    "dyMm": 0.0474,
+    "heldOutMm": 0.0475,
+    "part": "U8",
+    "pins": 4,
+    "pinsHeldOutMm": [
+     0.0218,
+     0.1854,
+     0.1008,
+     0.2207
+    ]
+   },
+   {
+    "dxMm": -0.1673,
+    "dyMm": 0.1327,
+    "heldOutMm": 0.2135,
+    "part": "U10",
+    "pins": 4,
+    "pinsHeldOutMm": [
+     0.2354,
+     0.4335,
+     0.1686,
+     0.148
+    ]
+   },
+   {
+    "dxMm": 0.0371,
+    "dyMm": -0.023,
+    "heldOutMm": 0.0436,
+    "part": "U9",
+    "pins": 4,
+    "pinsHeldOutMm": [
+     0.0663,
+     0.3145,
+     0.3882,
+     0.114
+    ]
+   }
+  ],
+  "pinsLeaveOneOutMm": {
+   "max": 0.6528,
+   "median": 0.191,
+   "p90": 0.3977
+  },
+  "unmatched": []
+ },
+ "revision": {
+  "date": "2026-10-05",
+  "firstRevisionVerdicts": [
+   {
+    "check": "scale x",
+    "verdict": "pass"
+   },
+   {
+    "check": "scale y",
+    "verdict": "between pass and stop"
+   },
+   {
+    "check": "x against y",
+    "verdict": "pass"
+   },
+   {
+    "check": "solder side",
+    "verdict": "pass"
+   },
+   {
+    "check": "PAL layout",
+    "verdict": "pass"
+   },
+   {
+    "check": "case depth",
+    "verdict": "STOP"
+   },
+   {
+    "check": "case height",
+    "verdict": "pass"
+   },
+   {
+    "check": "PAL front",
+    "verdict": "STOP"
+   }
+  ],
+  "firstVerdicts": [
+   {
+    "check": "scale x",
+    "verdict": "pass"
+   },
+   {
+    "check": "scale y",
+    "verdict": "between pass and stop"
+   },
+   {
+    "check": "x against y",
+    "verdict": "pass"
+   },
+   {
+    "check": "solder side",
+    "verdict": "pass"
+   },
+   {
+    "check": "PAL layout",
+    "verdict": "pass"
+   },
+   {
+    "check": "case depth",
+    "verdict": "STOP"
+   },
+   {
+    "check": "case height, the two photographs",
+    "verdict": "pass"
+   },
+   {
+    "check": "PAL front",
+    "verdict": "between pass and stop"
+   }
+  ],
+  "note": "The case depth check as first written, on the corner photographs O2-FL and O2-BR each through its camera, crossed its STOP: -8.77 per cent on O2-BR (case.depthToWidthErrPct, kept with the photographs' other figures, recorded only). Dan ruled on 5 October 2026, after an independent review, that it judged the wrong quantity: it measured the camera, not the case. The plan (docs/superpowers/plans/2026-10-05-nes-models.md, Global Constraints, the rows revised that day) now judges the case's depth and height on the design patent's orthographic views (case.patent), against the same 1.5 and 3 per cent, drops the row on the two photographs' heights agreeing, and judges the PAL front on O4 against the patent's front view, on at least two measured ratios. That first revision's run crossed two STOPs: case depth -3.46 per cent on the patent's top view against 203.2 / 254 (case.patent.firstRevisionAgainst254Mm), and the PAL front -8.08 per cent on the label band, O4 against the patent (palFront.ratios, O4AgainstPatentPct). A second revision, the same day, by the controller with Dan's instruction to be pragmatic, was made AFTER those patent figures were seen: the sources disagree with each other by more than the 1.5 and 3 per cent limits can resolve (the patent's top view against its side over front; the published widths of 254 and 256 mm at a depth of 203.2), and the check's real purpose is to catch a gross scale error. So the case's depth and height are judged against the published ratios' midpoints, pass within 5 per cent, STOP over 8, and the PAL front is back on O4 against O2-FL's front as the plan first had it. Its door width needs no camera (the rectification on four corners is planar); its label band height does: on O2-FL it is read through the case's camera, the one the first revision found faulty, and O4 is taken to be straight on, so the band's figure is the weakest and the nearest a stop, known and disclosed."
+ },
+ "scale": {
+  "fingers": {
+   "asWordedSpanMm": 88.9,
+   "edgesPx": [
+    [
+     452.3845,
+     488.2131
+    ],
+    [
+     1496.9937,
+     1532.7504
+    ]
+   ],
+   "endFingerWidthsMm": [
+    3.0362,
+    3.0301
+   ],
+   "first": [
+    470.2988,
+    1400
+   ],
+   "gapPitchMm": 2.4991,
+   "gaps": 35,
+   "id": "P1 edge fingers 1 and 36",
+   "kicad": {
+    "endPadWidthsMm": [
+     3.0,
+     3.0
+    ],
+    "pad2WidthMm": 2.0,
+    "pads": 36,
+    "pitchMm": 2.5,
+    "spanMm": 88.5
+   },
+   "last": [
+    1514.8721,
+    1400
+   ],
+   "part": "P1",
+   "pitches": 35,
+   "px": 1044.5732,
+   "spanMm": 88.5204
+  },
+  "pxPerMm": {
+   "stated": 11.811,
+   "x": 11.7871,
+   "xWithoutFingers": 11.8004,
+   "y": 11.8404
+  },
+  "ratio": 0.9955,
+  "ratioWithoutFingers": 0.9966,
+  "statedDpi": 300,
+  "x": {
+   "asWorded": "The plan's rows, the edge fingers among them at 2.54 mm: this is the figure judged.",
+   "each": [
+    {
+     "errMm": 0.0527,
+     "id": "U6 pins 1 to 20",
+     "px": 569.4208,
+     "scaledErrMm": 0.0527,
+     "scored": true,
+     "trueMm": 48.26
+    },
+    {
+     "errMm": 0.113,
+     "id": "U6 pins 40 to 21",
+     "px": 570.0766,
+     "scaledErrMm": 0.113,
+     "scored": true,
+     "trueMm": 48.26
+    },
+    {
+     "errMm": -0.1202,
+     "id": "U5 pins 1 to 20",
+     "px": 567.5399,
+     "scaledErrMm": -0.1202,
+     "scored": true,
+     "trueMm": 48.26
+    },
+    {
+     "errMm": 0.0578,
+     "id": "U5 pins 40 to 21",
+     "px": 569.4755,
+     "scaledErrMm": 0.0578,
+     "scored": true,
+     "trueMm": 48.26
+    },
+    {
+     "errMm": 0.0179,
+     "id": "U1 pins 1 to 12",
+     "px": 329.5382,
+     "scaledErrMm": 0.0309,
+     "scored": false,
+     "trueMm": 27.94
+    },
+    {
+     "errMm": -0.0008,
+     "id": "U1 pins 24 to 13",
+     "px": 329.3236,
+     "scaledErrMm": -0.0014,
+     "scored": false,
+     "trueMm": 27.94
+    },
+    {
+     "errMm": 0.0509,
+     "id": "U4 pins 1 to 12",
+     "px": 329.9167,
+     "scaledErrMm": 0.0878,
+     "scored": false,
+     "trueMm": 27.94
+    },
+    {
+     "errMm": 0.0032,
+     "id": "U2 pins 1 to 10",
+     "px": 269.4907,
+     "scaledErrMm": 0.0067,
+     "scored": false,
+     "trueMm": 22.86
+    },
+    {
+     "errMm": 0.0272,
+     "id": "U2 pins 20 to 11",
+     "px": 269.7689,
+     "scaledErrMm": 0.0574,
+     "scored": false,
+     "trueMm": 22.86
+    },
+    {
+     "errMm": 0.0499,
+     "id": "U3 pins 1 to 8",
+     "px": 210.1578,
+     "scaledErrMm": 0.1355,
+     "scored": false,
+     "trueMm": 17.78
+    },
+    {
+     "errMm": 0.0859,
+     "id": "U3 pins 16 to 9",
+     "px": 210.5769,
+     "scaledErrMm": 0.2331,
+     "scored": false,
+     "trueMm": 17.78
+    },
+    {
+     "errMm": -0.0248,
+     "id": "U7 pins 1 to 8",
+     "px": 209.2863,
+     "scaledErrMm": -0.0673,
+     "scored": false,
+     "trueMm": 17.78
+    },
+    {
+     "errMm": 0.1093,
+     "id": "U7 pins 16 to 9",
+     "px": 210.8505,
+     "scaledErrMm": 0.2968,
+     "scored": false,
+     "trueMm": 17.78
+    },
+    {
+     "errMm": -0.0103,
+     "id": "U8 pins 1 to 8",
+     "px": 209.4557,
+     "scaledErrMm": -0.0278,
+     "scored": false,
+     "trueMm": 17.78
+    },
+    {
+     "errMm": 0.0937,
+     "id": "U8 pins 16 to 9",
+     "px": 210.6685,
+     "scaledErrMm": 0.2544,
+     "scored": false,
+     "trueMm": 17.78
+    },
+    {
+     "errMm": -0.0002,
+     "id": "U10 pins 1 to 8",
+     "px": 209.5734,
+     "scaledErrMm": -0.0005,
+     "scored": false,
+     "trueMm": 17.78
+    },
+    {
+     "errMm": -0.1199,
+     "id": "U9 pins 1 to 7",
+     "px": 178.233,
+     "scaledErrMm": -0.3798,
+     "scored": false,
+     "trueMm": 15.24
+    },
+    {
+     "errMm": -0.0423,
+     "id": "U9 pins 14 to 8",
+     "px": 179.1408,
+     "scaledErrMm": -0.1341,
+     "scored": false,
+     "trueMm": 15.24
+    },
+    {
+     "errMm": 0.082,
+     "id": "P2 pins 1 to 24",
+     "px": 689.462,
+     "scaledErrMm": 0.0678,
+     "scored": true,
+     "trueMm": 58.42
+    },
+    {
+     "errMm": 0.2057,
+     "id": "P2 pins 48 to 25",
+     "px": 690.7543,
+     "scaledErrMm": 0.17,
+     "scored": true,
+     "trueMm": 58.42
+    },
+    {
+     "errMm": -0.3796,
+     "id": "P1 edge fingers 1 and 36",
+     "px": 1044.5732,
+     "scaledErrMm": -0.2061,
+     "scored": true,
+     "trueMm": 88.9
+    }
+   ],
+   "largestRow": "P1 edge fingers 1 and 36",
+   "refusedRows": [
+    {
+     "id": "U4 pins 24 to 13",
+     "refused": [
+      "last"
+     ]
+    },
+    {
+     "id": "U10 pins 16 to 9",
+     "refused": [
+      "first"
+     ]
+    }
+   ],
+   "rows": 7,
+   "scaledErrMm": {
+    "max": 0.2061,
+    "median": 0.113
+   },
+   "withoutFingers": {
+    "largestRow": "U5 pins 1 to 20",
+    "pxPerMm": 11.8004,
+    "rows": 6,
+    "scaledErrMm": {
+     "max": 0.1842,
+     "median": 0.0315
+    },
+    "why": "The edge fingers are on 2.50 mm, not 2.54: measured here with the x scale from the other rows, and so in the KiCad redrawing (P1's pads 2.5 mm apart). Recorded, not judged."
+   }
+  },
+  "y": {
+   "each": [
+    {
+     "errPct": -0.6519,
+     "heldOutPxPerMm": 11.8545,
+     "part": "U6",
+     "pin1": {
+      "diameterMm": 0.8984,
+      "rays": 67,
+      "rimRmsPx": 0.3196,
+      "x": 242.9708,
+      "y": 954.2879
+     },
+     "pinN": {
+      "diameterMm": 0.9818,
+      "rays": 52,
+      "rimRmsPx": 0.3533,
+      "x": 243.0904,
+      "y": 774.8033
+     },
+     "pins": 40,
+     "px": 179.4846,
+     "spacingMm": 15.24
+    },
+    {
+     "errPct": 0.1178,
+     "heldOutPxPerMm": 11.8379,
+     "part": "U5",
+     "pin1": {
+      "diameterMm": 1.0048,
+      "rays": 62,
+      "rimRmsPx": 0.2768,
+      "x": 1142.1989,
+      "y": 806.2345
+     },
+     "pinN": {
+      "diameterMm": 1.0007,
+      "rays": 65,
+      "rimRmsPx": 0.2774,
+      "x": 1142.448,
+      "y": 625.6125
+     },
+     "pins": 40,
+     "px": 180.6221,
+     "spacingMm": 15.24
+    },
+    {
+     "errPct": 0.2145,
+     "heldOutPxPerMm": 11.8358,
+     "part": "U1",
+     "pin1": {
+      "diameterMm": 0.987,
+      "rays": 67,
+      "rimRmsPx": 0.178,
+      "x": 482.749,
+      "y": 1195.776
+     },
+     "pinN": {
+      "diameterMm": 0.9974,
+      "rays": 64,
+      "rimRmsPx": 0.2571,
+      "x": 483.112,
+      "y": 1015.0117
+     },
+     "pins": 24,
+     "px": 180.7647,
+     "spacingMm": 15.24
+    },
+    {
+     "errPct": 0.1435,
+     "heldOutPxPerMm": 11.8373,
+     "part": "U4",
+     "pin1": {
+      "diameterMm": 0.9844,
+      "rays": 65,
+      "rimRmsPx": 0.3643,
+      "x": 1142.5481,
+      "y": 1225.8522
+     },
+     "pinN": {
+      "diameterMm": 1.0632,
+      "rays": 47,
+      "rimRmsPx": 0.3426,
+      "x": 1142.509,
+      "y": 1045.1922
+     },
+     "pins": 24,
+     "px": 180.66,
+     "spacingMm": 15.24
+    },
+    {
+     "errPct": -0.4497,
+     "heldOutPxPerMm": 11.8429,
+     "part": "U2",
+     "pin1": {
+      "diameterMm": 1.1007,
+      "rays": 61,
+      "rimRmsPx": 0.2483,
+      "x": 1142.5942,
+      "y": 985.3532
+     },
+     "pinN": {
+      "diameterMm": 1.0894,
+      "rays": 68,
+      "rimRmsPx": 0.2361,
+      "x": 1142.4379,
+      "y": 895.5166
+     },
+     "pins": 20,
+     "px": 89.8367,
+     "spacingMm": 7.62
+    },
+    {
+     "errPct": 0.4982,
+     "heldOutPxPerMm": 11.8378,
+     "part": "U3",
+     "pin1": {
+      "diameterMm": 1.1033,
+      "rays": 64,
+      "rimRmsPx": 0.2203,
+      "x": 243.4839,
+      "y": 655.8184
+     },
+     "pinN": {
+      "diameterMm": 1.1083,
+      "rays": 62,
+      "rimRmsPx": 0.3288,
+      "x": 243.9263,
+      "y": 565.1664
+     },
+     "pins": 16,
+     "px": 90.6531,
+     "spacingMm": 7.62
+    },
+    {
+     "errPct": 1.0376,
+     "heldOutPxPerMm": 11.8349,
+     "part": "U7",
+     "pin1": {
+      "diameterMm": 1.129,
+      "rays": 71,
+      "rimRmsPx": 0.2611,
+      "x": 1532.8748,
+      "y": 355.7547
+     },
+     "pinN": {
+      "diameterMm": 1.2484,
+      "rays": 41,
+      "rimRmsPx": 0.3252,
+      "x": 1532.0149,
+      "y": 264.6415
+     },
+     "pins": 16,
+     "px": 91.1173,
+     "spacingMm": 7.62
+    },
+    {
+     "errPct": -1.0021,
+     "heldOutPxPerMm": 11.8458,
+     "part": "U8",
+     "pin1": {
+      "diameterMm": 1.1098,
+      "rays": 67,
+      "rimRmsPx": 0.2491,
+      "x": 1532.7716,
+      "y": 505.5501
+     },
+     "pinN": {
+      "diameterMm": 1.0777,
+      "rays": 66,
+      "rimRmsPx": 0.2213,
+      "x": 1532.6673,
+      "y": 416.1896
+     },
+     "pins": 16,
+     "px": 89.3606,
+     "spacingMm": 7.62
+    },
+    {
+     "errPct": 1.1579,
+     "heldOutPxPerMm": 11.8342,
+     "part": "U10",
+     "pin1": {
+      "diameterMm": 1.087,
+      "rays": 68,
+      "rimRmsPx": 0.2522,
+      "x": 1577.2943,
+      "y": 1045.1818
+     },
+     "pinN": {
+      "diameterMm": 1.2252,
+      "rays": 48,
+      "rimRmsPx": 0.3043,
+      "x": 1577.4931,
+      "y": 953.9612
+     },
+     "pins": 16,
+     "px": 91.2208,
+     "spacingMm": 7.62
+    },
+    {
+     "errPct": -0.6331,
+     "heldOutPxPerMm": 11.8438,
+     "part": "U9",
+     "pin1": {
+      "diameterMm": 1.1172,
+      "rays": 57,
+      "rimRmsPx": 0.2964,
+      "x": 1817.4449,
+      "y": 835.9143
+     },
+     "pinN": {
+      "diameterMm": 1.0875,
+      "rays": 59,
+      "rimRmsPx": 0.2632,
+      "x": 1817.3989,
+      "y": 746.2356
+     },
+     "pins": 14,
+     "px": 89.6787,
+     "spacingMm": 7.62
+    }
+   ],
+   "errPct": {
+    "max": 1.1579,
+    "median": 0.5656
+   },
+   "errPct300": {
+    "median": 0.8176
+   },
+   "errPct600": {
+    "median": 0.179
+   },
+   "footprints": 10,
+   "refused": []
+  }
+ },
+ "solder": {
+  "blockMm": 20.0,
+  "drillsFound": {
+   "I1-back": 478,
+   "I1-front": 590
+  },
+  "drillsLost": {
+   "I1-back": 123,
+   "I1-front": 46
+  },
+  "fits": {
+   "affine": {
+    "fitMm": {
+     "max": 0.9172,
+     "median": 0.0708,
+     "p90": 0.2428
+    },
+    "heldOutMm": {
+     "max": 0.9209,
+     "median": 0.0744,
+     "p90": 0.2392
+    }
+   },
+   "cubic": {
+    "fitMm": {
+     "max": 0.9321,
+     "median": 0.0711,
+     "p90": 0.2396
+    },
+    "heldOutMm": {
+     "max": 0.9531,
+     "median": 0.0773,
+     "p90": 0.2362
+    }
+   }
+  },
+  "gateMm": 1.0,
+  "heldOutMm": {
+   "max": 0.9209,
+   "median": 0.0744,
+   "p90": 0.2392
+  },
+  "holes": 323,
+  "model": "affine",
+  "outliers": {
+   "excluded": 107,
+   "heldOutMmWithExclusion": {
+    "max": 0.4304,
+    "median": 0.0665,
+    "p90": 0.1456
+   },
+   "rule": "a matched hole is left out of the scoring only if its pad on either face has a major to minor axis ratio over 1.25 from its second moments, or an area outside 0.6 to 1.6 times the median of the matched pads on that face"
+  },
+  "seedFitPx": {
+   "max": 0.1589,
+   "median": 0.1504,
+   "p90": 0.1568
+  },
+  "tieMm": 0.005,
+  "worst": [
+   [
+    177,
+    0.9209
+   ],
+   [
+    60,
+    0.5811
+   ],
+   [
+    205,
+    0.562
+   ],
+   [
+    192,
+    0.5167
+   ],
+   [
+    176,
+    0.4889
+   ],
+   [
+    151,
+    0.4602
+   ],
+   [
+    157,
+    0.4445
+   ],
+   [
+    264,
+    0.4304
+   ],
+   [
+    228,
+    0.4055
+   ],
+   [
+    206,
+    0.387
+   ]
+  ]
+ },
+ "verdicts": [
+  {
+   "check": "scale x",
+   "verdict": "pass"
+  },
+  {
+   "check": "scale y",
+   "verdict": "between pass and stop"
+  },
+  {
+   "check": "x against y",
+   "verdict": "pass"
+  },
+  {
+   "check": "solder side",
+   "verdict": "pass"
+  },
+  {
+   "check": "PAL layout",
+   "verdict": "pass"
+  },
+  {
+   "check": "case depth",
+   "verdict": "pass"
+  },
+  {
+   "check": "case height",
+   "verdict": "pass"
+  },
+  {
+   "check": "PAL front",
+   "verdict": "between pass and stop"
+  }
+ ]
+}

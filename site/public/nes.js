@@ -65,7 +65,26 @@
 // RAM, a battery-backed save included. Saving is not built, so reloading the
 // page loses it too; the panel says so.
 //
-// FOR THE SITE'S BROWSER CHECK, once running the panel carries `panel.nes`:
+// FOR THE MODELS AND THE SITE'S BROWSER CHECK, the panel carries `panel.nes`
+// from the moment the page is ready, before Start, so a model loaded early can
+// ask it whether the machine runs and which region the page has:
+//   running()      false until Start has the machine running, then true. The
+//                  page never stops it: it has no power-off, and Power and
+//                  Reset restart the game, not the page. A hidden tab pauses
+//                  the run loop, and stepTo holds it, but the machine stays
+//                  switched on, so neither makes running() false.
+//   region()       the region the page has now, "NTSC" or "PAL": the region
+//                  control's before Start, the machine's (NesHost.Region)
+//                  after. Upper case, as the host gives it; a model takes
+//                  region().toLowerCase().
+//   accessCounts() the CPU's accesses to each chip since the machine's power
+//                  on, NesHost.AccessCounts: four wrapping counters as signed
+//                  32-bit ints, in NesChip order Ppu, Apu, Pad1, Pad2, in an
+//                  Int32Array (a copy: JSExport hands an int[] over so). A
+//                  reader takes differences, wrapped: (b - a) | 0. null
+//                  before Start.
+//   reset()        does exactly what the Reset button does. Nothing before Start.
+// and once running:
 //   host           the machine (NesHost).
 //   stepTo(n)      holds the run loop, lets go of every button, switches the
 //                  machine off and on, runs it until exactly n frames have
@@ -74,7 +93,23 @@
 //                  with machines/nes/expected-frames.json at exactly n frames.
 //                  Returns the frames completed. The loop stays held.
 //   play()         lets go of the loop again.
-//   region()       the region running, "NTSC" or "PAL".
+//
+// THE EVENTS, each a CustomEvent on the panel:
+//   nes:ready      once running, as panel.nes gains host, stepTo and play.
+//   nes:start      a machine is running with its counters from zero: after
+//                  Start, after Power and stepTo (both switch it off and on),
+//                  after a new cartridge goes in while it runs, and after a
+//                  change of region (after its nes:region). A model takes a
+//                  fresh baseline for accessCounts() on it, and reads
+//                  region() again: the cartridge Start puts in may name the
+//                  other region from the one the control showed before, and
+//                  no nes:region is sent for that.
+//   nes:reset      after every reset, the Reset button's and reset()'s alike.
+//                  The counters carry on.
+//   nes:region     detail { region: 'ntsc' | 'pal' }, lower case: after a
+//                  change of region has restarted the machine and it runs,
+//                  from the control or a new cartridge whose file names the
+//                  other region. nes:start follows it.
 import { startMachine } from '/machine-host.js';
 import { BUTTONS, KEYS, GAMEPAD_BUTTONS } from '/nes-keys.js';
 
@@ -154,6 +189,13 @@ export async function firstCartridge(bundled, use, openPicker, waitForFile) {
 
 /** The line for a cartridge put in; the line under the region control is the host's sentence. */
 export const cartridgeLine = (name) => `${name} is in.`;
+
+/** Dispatches one of the panel's events, `nes:<name>`, with its detail if it has one. */
+export const announce = (panel, name, detail) =>
+  panel.dispatchEvent(new CustomEvent(`nes:${name}`, detail === undefined ? undefined : { detail }));
+
+/** Announces a region the machine now runs in: the one place the page's "NTSC" or "PAL" is lower-cased. */
+export const announceRegion = (panel, region) => announce(panel, 'region', { region: region.toLowerCase() });
 
 /** The line for a change of region. */
 export const regionChangeLine = (result) => `The region changed, so the machine restarted. ${result.sentence}`;
@@ -277,6 +319,13 @@ function prepare(panel) {
     status.textContent = text;
     panel.dataset.state = state;
   };
+  // What a model may ask before Start; run() gives each its running meaning.
+  panel.nes = {
+    running: () => false,
+    region: () => panel.querySelector('[data-nes-region]:checked').value,
+    accessCounts: () => null,
+    reset: () => {},
+  };
   if (!panel.dataset.download) {
     say('This copy of the site was built without the NES\'s files, so it cannot run here.', 'missing');
     return;
@@ -366,6 +415,7 @@ async function run(panel, say) {
       cartLine.textContent = badFileLine(name, result, running || rom !== null);
       return false;
     }
+    const before = region;
     rom = data;
     loaded(result);
     cartLine.textContent = cartridgeLine(name);
@@ -373,6 +423,11 @@ async function run(panel, say) {
     panel.dataset.cartridge = name;
     cartridgeArrived?.();
     cartridgeArrived = null;
+    // A new machine while one runs: its counters start from zero, and its region may be the other.
+    if (running) {
+      if (region !== before) announceRegion(panel, region);
+      announce(panel, 'start');
+    }
     return true;
   };
   const put = async (file) => {
@@ -433,24 +488,30 @@ async function run(panel, say) {
       }
       loaded(result);
       regionLine.textContent = regionChangeLine(result);
+      // A new machine: the region first, so a model redraws, then its counters from zero.
+      announceRegion(panel, region);
+      announce(panel, 'start');
     });
   }
   const line = panel.querySelector('[data-nes-power-line]');
   const reset = panel.querySelector('[data-nes-reset]');
   const power = panel.querySelector('[data-nes-power]');
   reset.disabled = power.disabled = false;
-  reset.addEventListener('click', () => {
+  const resetMachine = () => {
     host.Reset();
     line.textContent = 'Reset: the game started again, and the cartridge\'s RAM was kept.';
-  });
+    announce(panel, 'reset');
+  };
+  reset.addEventListener('click', resetMachine);
   power.addEventListener('click', () => {
     host.PowerCycle();
     shown = -1;
     line.textContent = 'Switched off and on: the game started again, and the cartridge\'s RAM, a saved game included, was cleared.';
+    announce(panel, 'start');
   });
   sound.wire();
 
-  panel.nes = {
+  Object.assign(panel.nes, {
     host,
     stepTo(frames) {
       started.hold(true);
@@ -458,12 +519,17 @@ async function run(panel, say) {
       host.PowerCycle();
       host.RunFrames(frames);
       paint();
+      announce(panel, 'start');
       return host.Frames();
     },
     play: () => started.hold(false),
     region: () => region,
-  };
-  panel.dispatchEvent(new CustomEvent('nes:ready'));
+    running: () => running,
+    accessCounts: () => host.AccessCounts(),
+    reset: resetMachine,
+  });
+  announce(panel, 'ready');
+  announce(panel, 'start');
   say('Running. The screen has the keyboard: play with the keys below, or press Tab to move on.', 'running');
   // Start was the visitor asking to play, so the keyboard goes to the machine.
   screen.focus({ preventScroll: true });

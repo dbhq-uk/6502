@@ -1,84 +1,65 @@
 ---
-// One of a machine's 3D models: a module the machine claims in the registry,
-// whose entry is in src/models/models.mjs. The section is hidden in the
-// markup: public/model-loader.js shows it, and loads
-// the model's bundle only when the section nears the screen or the visitor
-// presses the button. Without JavaScript it never shows, and the photograph
-// and the machine's own panel are the page.
+// A machine's 3D models: the modules it claims in the registry, whose entries
+// are in src/models/models.mjs. The section is hidden in the markup:
+// public/model-loader.js shows it, and loads a model's bundle only when the
+// model nears the screen or the visitor presses its Load button. Without
+// JavaScript it never shows, and the photograph and the machine's own panel are
+// the page.
 //
-// A model with a track map (a `texture` in its entry) gets two toggle buttons,
-// Show tracks (on to start with) and Show tracks only.
+// A machine with no case has one model, its board, and its section is as it
+// always was: one model, its id the section's own (data-model on the section).
 //
-// Under it, how the model was made: what it was measured from, with the
-// figures that say how well (from src/data/<id>-model.json, which the
-// measuring scripts write, so nothing here is typed by hand), what it still
-// does not show, and a credit for every photograph, drawing and reference it
-// was traced or measured from, saying what it took from each. The credit is
-// built from the machine's registry entry, the same `photos`, `drawings` and
-// `references` the photographs section and the registry check read, so they
-// cannot disagree. A reference is a source that is not committed (a flatbed
-// scan, a photograph whose source states no licence); it is credited as a
-// drawing is, after the drawings.
-import { MODELS, CONTROLS, CONTROLS_DESCRIPTION, TRACK_BUTTONS, modelSrc } from '../models/models.mjs';
+// A machine with a case offers its models as views of the same machine (the
+// BBC Micro's models design, "How the page offers the two views", built here for
+// the NES on 6 October 2026, for the BBC Micro to take up): one section, headed
+// "Models of the machine", with a WAI-ARIA tab list named "Views of the model",
+// a tab for each view in the registry's order (Outside, then Inside), and a tab
+// panel for each, which is that model's root (data-model on the panel) and holds
+// everything a single model's section holds, ModelPanel.astro, with its ids
+// suffixed by the view. The first tab is selected and the other panels are
+// hidden; the loader switches them. A hidden panel never nears the screen, so a
+// view's bundle is fetched only once its tab is chosen. The controls are the
+// same for every view, so they are said once, after the panels.
+import ModelPanel from './ModelPanel.astro';
+import { CONTROLS, MODELS, modelSrc } from '../models/models.mjs';
 
 interface Source { author: string; sourceUrl: string; licence: string | null; licenceUrl?: string; used: string; caption?: string; title?: string; sha256?: string }
 interface Props {
-  /** The model's module, as the machine claims it in the registry. */
-  module: string;
+  /** The models the machine claims in the registry, { view, module }, in its order. */
+  models: { view: string; module: string }[];
   /** The machine's photographs, drawings and references, from the registry. */
   photos: Source[];
   drawings?: Source[];
   references?: Source[];
 }
-const { module: id, photos, drawings = [], references = [] } = Astro.props;
-const model = MODELS[id];
-if (!model) throw new Error(`model ${id} has no entry in src/models/models.mjs`);
-const tracks = Boolean(model.texture);
-const help = [CONTROLS.pointer, CONTROLS.touch, CONTROLS.keys, ...(tracks ? [CONTROLS.tracks] : [])].join(' ');
-const measured = import.meta.glob<{ default: object }>('../data/*-model.json', { eager: true });
-const figures = measured[`../data/${id}-model.json`]?.default;
-if (model.made && !figures) throw new Error(`model ${id} describes how it was made, but src/data/${id}-model.json is missing`);
-const made = model.made ? model.made(figures) : null;
-const sources = [
-  ...photos.map((p) => ({ ...p, what: `the photograph of ${p.caption ?? 'the original'}` })),
-  ...drawings.map((d) => ({ ...d, what: d.title })),
-  ...references.map((r) => ({ ...r, what: r.title })),
-];
+const { models, photos, drawings = [], references = [] } = Astro.props;
+for (const m of models) if (!MODELS[m.module]) throw new Error(`model ${m.module} has no entry in src/models/models.mjs`);
+/** A view's tab label: the view's own name, capitalised. A label: no full stop. */
+const tabLabel = (view: string) => view.charAt(0).toUpperCase() + view.slice(1);
+const one = models.length === 1 && models[0].view === 'board' ? models[0] : null;
+const credits = { photos, drawings, references };
 ---
 
-<section class="model" aria-labelledby="model" data-model={id} data-model-src={modelSrc(id)} data-model-texture={model.texture} data-state="idle" hidden>
+{one ? (
+<section class="model" aria-labelledby="model" data-model={one.module} data-model-src={modelSrc(one.module)} data-model-texture={MODELS[one.module].texture} data-state="idle" hidden>
   <div class="wrap narrow">
     <h2 id="model">A model of the board</h2>
-    <section class="model-stage" data-model-stage tabindex="0" aria-label={model.label} aria-description={CONTROLS_DESCRIPTION} aria-describedby="model-about">
-      <span class="model-tag" aria-hidden="true">Model, not a photograph</span>
-      <span class="model-hint" aria-hidden="true"><span class="hint-pointer">{CONTROLS.hint}</span><span class="hint-touch">{CONTROLS.hintTouch}</span></span>
-      <button type="button" class="btn small model-load" data-model-load>Load the 3D model</button>
-    </section>
-    <div class="model-controls">
-      <button type="button" class="btn small" data-model-reset>Reset the view</button>
-      {tracks && (
-        <div class="model-toggles" role="group" aria-label="Tracks">
-          <button type="button" class="btn small model-toggle" data-toggle-tracks aria-pressed="true">{TRACK_BUTTONS.tracks}</button>
-          <button type="button" class="btn small model-toggle" data-toggle-tracks-only aria-pressed="false">{TRACK_BUTTONS.only}</button>
-        </div>
-      )}
-      <p class="model-status" role="status" data-model-status>The 3D model loads when you scroll to it.</p>
-    </div>
-    <p class="model-help" id="model-help">{help}</p>
-    <p class="figure-caption model-about" id="model-about">{model.about}</p>
-    {made && (
-      <div class="model-made prose" data-model-made>
-        <h3 id="model-made">How the model was made</h3>
-        {made.paragraphs.map((p) => <p>{p}</p>)}
-        <p>What it was traced and measured from:</p>
-        <ul class="model-credit" data-model-credit>
-          {sources.map((s) => <li data-model-source>{s.used.charAt(0).toUpperCase() + s.used.slice(1)}: from <a href={s.sourceUrl}>{s.what}</a>, by {s.author}, {s.licence === null ? 'no licence stated' : s.licenceUrl ? <a href={s.licenceUrl}>{s.licence}</a> : s.licence}.</li>)}
-        </ul>
-        <p>What it does not show, or shows less well:</p>
-        <ul class="model-limits" data-model-limits>
-          {made.limits.map((l) => <li>{l}</li>)}
-        </ul>
-      </div>
-    )}
+    <ModelPanel module={one.module} suffix="" {...credits} />
   </div>
 </section>
+) : (
+<section class="model" aria-labelledby="model" data-model-section hidden>
+  <div class="wrap narrow">
+    <h2 id="model">Models of the machine</h2>
+    <div class="model-tabs" role="tablist" aria-label="Views of the model" data-model-tabs>
+      {models.map((m, i) => <button type="button" class="model-tab" role="tab" id={`model-tab-${m.view}`} aria-selected={String(i === 0)} aria-controls={`model-panel-${m.view}`} tabindex={i === 0 ? '0' : '-1'}>{tabLabel(m.view)}</button>)}
+    </div>
+    {models.map((m, i) => (
+      <div class="model-panel" role="tabpanel" id={`model-panel-${m.view}`} aria-labelledby={`model-tab-${m.view}`} data-model={m.module} data-model-src={modelSrc(m.module)} data-model-texture={MODELS[m.module].texture} data-state="idle" hidden={i > 0}>
+        <ModelPanel module={m.module} suffix={`-${m.view}`} {...credits} />
+      </div>
+    ))}
+    <p class="model-help" id="model-help">{[CONTROLS.pointer, CONTROLS.touch, CONTROLS.keys].join(' ')}</p>
+  </div>
+</section>
+)}
