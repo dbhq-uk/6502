@@ -12,10 +12,11 @@
 // Under them, the teletype: the TTY/KB switch, the terminal's speed, the paper
 // (a log, one line to a row), a field that types at the teletype while it has
 // focus, and RUB OUT and LF, which a PC keyboard has no key for. Without
-// JavaScript all of it is disabled too. The switch and the speed say
-// autocomplete="off": Firefox restores form state on a reload, and the machine
-// starts at KB and 110 baud, so a restored switch would disagree with it
-// (kim-1.js also pushes what the page shows into the machine at start).
+// JavaScript all of it is disabled too. Firefox restores form state on a
+// reload, and the machine starts at KB and 110 baud, so a restored switch or
+// speed would disagree with it. The speed says autocomplete="off"; HTML does
+// not allow that on a checkbox, so for the switch, as well as the speed,
+// kim-1.js pushes what the page shows into the machine at start.
 import { KEY_ROWS as rows } from '../models/kim-1-layout.mjs';
 
 interface Props {
@@ -66,7 +67,7 @@ const segments = [across(top), down(right, top, mid), down(right, mid, bottom), 
   <div class="kim1-tty" role="group" aria-labelledby="kim1-tty-name" data-kim1-tty>
     <p class="kim1-tty-name" id="kim1-tty-name">Teletype</p>
     <div class="kim1-tty-controls">
-      <label class="kim1-tty-switch"><input type="checkbox" role="switch" data-kim1-mode aria-describedby="kim1-tty-about" autocomplete="off" disabled /> TTY switch</label>
+      <label class="kim1-tty-switch"><input type="checkbox" role="switch" data-kim1-mode aria-describedby="kim1-tty-about" disabled /> TTY switch</label>
       <label class="kim1-tty-speed">Speed
         <select data-kim1-baud autocomplete="off" disabled>
           <option value="110" selected>110 baud, a Teletype Model 33</option>

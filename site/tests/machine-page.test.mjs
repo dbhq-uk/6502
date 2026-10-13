@@ -148,7 +148,7 @@ test('the teletype is on the panel: a labelled group with the TTY switch, the sp
   assert.ok(ttyPanel, 'the panel has no teletype');
   assert.match(ttyPanel, /role="group" aria-labelledby="kim1-tty-name"/);
   assert.match(ttyPanel, /id="kim1-tty-name">Teletype</);
-  assert.match(ttyPanel, /<label class="kim1-tty-switch"><input type="checkbox" role="switch" data-kim1-mode aria-describedby="kim1-tty-about" autocomplete="off" disabled\/?> TTY switch<\/label>/);
+  assert.match(ttyPanel, /<label class="kim1-tty-switch"><input type="checkbox" role="switch" data-kim1-mode aria-describedby="kim1-tty-about" disabled\/?> TTY switch<\/label>/);
   assert.match(ttyPanel, /<div class="kim1-paper" role="log" aria-label="The teletype's paper" tabindex="0" data-kim1-paper><\/div>/);
   assert.match(ttyPanel, /<label class="kim1-tty-input">Type to the KIM-1 <input type="text" data-kim1-type[^>]*disabled/);
   assert.match(ttyPanel, /<select data-kim1-baud autocomplete="off" disabled>/, 'the speed can be restored by the browser on a reload, and then disagrees with the machine');
@@ -248,7 +248,7 @@ test('a screen reader is given a line of the paper once it is complete, never th
   assert.match(ttyPanel, /<p class="sr-only" aria-live="polite" data-kim1-line><\/p>/);
 });
 
-test('the page pushes the switch and the speed it shows into the machine at start, and asks the browser not to restore them', () => {
+test('the page pushes the switch and the speed it shows into the machine at start, whatever the browser restored', () => {
   const page = fs.readFileSync(path.join(process.cwd(), 'public', 'kim-1.js'), 'utf8');
   assert.match(page, /kim\.SetTeletypeBaud\(Number\(baud\.value\)\);\n\s*kim\.SetTeletypeMode\(mode\.checked\);/);
 });
