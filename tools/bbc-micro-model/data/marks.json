@@ -2463,7 +2463,7 @@
   "what": "Four pads marked on I1 and on I2 mirrored (I2 flipped left to right, x' = 5013 - x, so that it lies as the component side does), to seed the solder side's first affine fit. They are corners of four footprints far apart."
  },
  "footprints": {
-  "what": "Footprints' references, read from I1's print by hand because nothing in board_register.py reads text: each mark is a point in I1 pixels inside the footprint it names, with the crop (I1 pixels, enlarged by zoom, a grid every 100 pixels) the label was read on. A mark with pin1 also names pin 1, for a footprint whose print chamfer the code could not find. The references are the footprints the plan requires (task 3: IC1 to IC7, IC51, IC52, IC69, IC78) and IC21; task 5 names the rest. A mark with kind says the grouping took something for a DIP that is not one, and why; a mark with ref null names no reference.",
+  "what": "Footprints' references, read from I1's print by hand because nothing in board_register.py reads text: each mark is a point in I1 pixels inside the footprint it names, with the crop (I1 pixels, enlarged by zoom; a label on the side of a footprint is turned upright) the label was read on, and the reason. A mark with pin1 also names pin 1, for a footprint whose print chamfer the code could not find. A mark with pins says how many pins a DIP has where the grouping's run is longer than its printed outline, and keeps that many slots round the point. A mark with outlineFaint says the outline's print is too faint on one side for the grouping's outline test, which the stronger side then passes alone. A mark with kind says the grouping took something for a DIP that is not one. A mark with ref null and unread true says the reference is on the board and cannot be read; none is needed in this run, every DIP's was read. Every DIP footprint has a mark; the connectors PL8 to PL14 and SK6 and the resistor packs RP1 and RP2 are marked too, where the print is legible; no other connector or single row is.",
   "source": "I1",
   "marks": [
    {
@@ -2679,43 +2679,1633 @@
     "reason": "The label IC21 is printed left of the left row; pin 1 is the top left pad, at the print's chamfer, which is larger than the box the code looks in"
    },
    {
-    "ref": null,
+    "ref": "IC8",
     "at": [
-     412,
-     1435
+     3912.3,
+     2484.8
     ],
+    "crop": {
+     "box": [
+      3768,
+      2272,
+      3849,
+      2697
+     ],
+     "zoom": 2.4
+    },
+    "reason": "The label IC8 is printed left of the footprint's left row (read on the crop, enlarged and, for a label on a side, turned upright); the mark is the middle of the footprint's pads"
+   },
+   {
+    "ref": "IC9",
+    "at": [
+     3914.6,
+     2025.5
+    ],
+    "crop": {
+     "box": [
+      3770,
+      1813,
+      3852,
+      2236
+     ],
+     "zoom": 2.4
+    },
+    "reason": "The label IC9 is printed left of the footprint's left row (read on the crop, enlarged and, for a label on a side, turned upright); the mark is the middle of the footprint's pads"
+   },
+   {
+    "ref": "IC10",
+    "at": [
+     4093.9,
+     2485.2
+    ],
+    "crop": {
+     "box": [
+      3951,
+      2273,
+      4032,
+      2697
+     ],
+     "zoom": 2.4
+    },
+    "reason": "The label IC10 is printed left of the footprint's left row; as every label in this row does, it stands left of its own chip, between it and the chip before (read on the crop, enlarged and, for a label on a side, turned upright); the mark is the middle of the footprint's pads"
+   },
+   {
+    "ref": "IC11",
+    "at": [
+     4095.8,
+     2025.7
+    ],
+    "crop": {
+     "box": [
+      3951,
+      1813,
+      4032,
+      2238
+     ],
+     "zoom": 2.4
+    },
+    "reason": "The label IC11 is printed left of the footprint's left row (read on the crop, enlarged and, for a label on a side, turned upright); the mark is the middle of the footprint's pads"
+   },
+   {
+    "ref": "IC12",
+    "at": [
+     4453.6,
+     2485.8
+    ],
+    "crop": {
+     "box": [
+      4309,
+      2273,
+      4390,
+      2698
+     ],
+     "zoom": 2.4
+    },
+    "reason": "The label IC12 is printed left of the footprint's left row; as every label in this row does, it stands left of its own chip, between it and the chip before (read on the crop, enlarged and, for a label on a side, turned upright); the mark is the middle of the footprint's pads"
+   },
+   {
+    "ref": "IC13",
+    "at": [
+     4273.4,
+     2485.1
+    ],
+    "crop": {
+     "box": [
+      4131,
+      2273,
+      4212,
+      2698
+     ],
+     "zoom": 2.4
+    },
+    "reason": "The label IC13 is printed left of the footprint's left row; as every label in this row does, it stands left of its own chip, between it and the chip before (read on the crop, enlarged and, for a label on a side, turned upright); the mark is the middle of the footprint's pads"
+   },
+   {
+    "ref": "IC14",
+    "at": [
+     3011.0,
+     2363.2
+    ],
+    "crop": {
+     "box": [
+      2868,
+      2150,
+      2949,
+      2575
+     ],
+     "zoom": 2.4
+    },
+    "reason": "The label IC14 is printed left of the footprint's left row (read on the crop, enlarged and, for a label on a side, turned upright); the mark is the middle of the footprint's pads"
+   },
+   {
+    "ref": "IC15",
+    "at": [
+     3211.5,
+     2363.7
+    ],
+    "crop": {
+     "box": [
+      3069,
+      2151,
+      3150,
+      2575
+     ],
+     "zoom": 2.4
+    },
+    "reason": "The label IC15 is printed left of the footprint's left row; as every label in this row does, it stands left of its own chip, between it and the chip before (read on the crop, enlarged and, for a label on a side, turned upright); the mark is the middle of the footprint's pads"
+   },
+   {
+    "ref": "IC17",
+    "at": [
+     205.5,
+     3093.3
+    ],
+    "crop": {
+     "box": [
+      112,
+      3220,
+      361,
+      3309
+     ],
+     "zoom": 2.4
+    },
+    "reason": "The label IC17 is printed below the footprint (read on the crop, enlarged and, for a label on a side, turned upright); the mark is the middle of the footprint's pads"
+   },
+   {
+    "ref": "IC18",
+    "at": [
+     465.6,
+     2814.5
+    ],
+    "crop": {
+     "box": [
+      322,
+      2642,
+      403,
+      2985
+     ],
+     "zoom": 2.4
+    },
+    "reason": "The label IC18 is printed left of the footprint's left row (read on the crop, enlarged and, for a label on a side, turned upright); the mark is the middle of the footprint's pads"
+   },
+   {
+    "ref": "IC20",
+    "at": [
+     2007.6,
+     3138.0
+    ],
+    "crop": {
+     "box": [
+      1864,
+      2966,
+      1946,
+      3309
+     ],
+     "zoom": 2.4
+    },
+    "reason": "The label IC20 is printed left of the footprint's left row; as every label in this row does, it stands left of its own chip, between it and the chip before (read on the crop, enlarged and, for a label on a side, turned upright); the mark is the middle of the footprint's pads"
+   },
+   {
+    "ref": "IC22",
+    "at": [
+     2289.8,
+     2660.1
+    ],
+    "crop": {
+     "box": [
+      2351,
+      2508,
+      2433,
+      2812
+     ],
+     "zoom": 2.4
+    },
+    "reason": "The label IC22 is printed just right of the footprint's right row, 1 mm from it; the nearest other footprint is 20 mm away (read on the crop, enlarged and, for a label on a side, turned upright); the mark is the middle of the footprint's pads"
+   },
+   {
+    "ref": "IC23",
+    "at": [
+     2011.5,
+     2260.3
+    ],
+    "crop": {
+     "box": [
+      2074,
+      2109,
+      2156,
+      2413
+     ],
+     "zoom": 2.4
+    },
+    "reason": "The label IC23 is printed just right of the footprint's right row, 1 mm from it; the next footprint to the right, IC24's, has its own label on its left (read on the crop, enlarged and, for a label on a side, turned upright); the mark is the middle of the footprint's pads"
+   },
+   {
+    "ref": "IC24",
+    "at": [
+     2291.5,
+     2281.1
+    ],
+    "crop": {
+     "box": [
+      2147,
+      2108,
+      2228,
+      2452
+     ],
+     "zoom": 2.4
+    },
+    "reason": "The label IC24 is printed left of the footprint's left row (read on the crop, enlarged and, for a label on a side, turned upright); the mark is the middle of the footprint's pads"
+   },
+   {
+    "ref": "IC25",
+    "at": [
+     2013.9,
+     1821.1
+    ],
+    "crop": {
+     "box": [
+      1871,
+      1667,
+      1952,
+      1973
+     ],
+     "zoom": 2.4
+    },
+    "reason": "The label IC25 is printed left of the footprint's left row (read on the crop, enlarged and, for a label on a side, turned upright); the mark is the middle of the footprint's pads"
+   },
+   {
+    "ref": "IC26",
+    "at": [
+     2293.8,
+     1841.8
+    ],
+    "crop": {
+     "box": [
+      2150,
+      1669,
+      2232,
+      2015
+     ],
+     "zoom": 2.4
+    },
+    "reason": "The label IC26 is printed left of the footprint's left row (read on the crop, enlarged and, for a label on a side, turned upright); the mark is the middle of the footprint's pads"
+   },
+   {
+    "ref": "IC27",
+    "at": [
+     171.4,
+     1574.9
+    ],
+    "crop": {
+     "box": [
+      79,
+      1312,
+      174,
+      1447
+     ],
+     "zoom": 2.4
+    },
+    "reason": "The label IC27 is printed above the footprint, turned on its side, reading up (read on the crop, enlarged and, for a label on a side, turned upright); the mark is the middle of the footprint's pads"
+   },
+   {
+    "ref": "IC28",
+    "at": [
+     913.8,
+     1277.9
+    ],
+    "crop": {
+     "box": [
+      770,
+      1125,
+      852,
+      1430
+     ],
+     "zoom": 2.4
+    },
+    "reason": "The label IC28 is printed left of the footprint's left row; as every label in this row does, it stands left of its own chip, between it and the chip before (read on the crop, enlarged and, for a label on a side, turned upright); the mark is the middle of the footprint's pads"
+   },
+   {
+    "ref": "IC29",
+    "at": [
+     1153.7,
+     1278.6
+    ],
+    "crop": {
+     "box": [
+      1010,
+      1126,
+      1091,
+      1431
+     ],
+     "zoom": 2.4
+    },
+    "reason": "The label IC29 is printed left of the footprint's left row (read on the crop, enlarged and, for a label on a side, turned upright); the mark is the middle of the footprint's pads"
+   },
+   {
+    "ref": "IC30",
+    "at": [
+     1354.1,
+     1279.5
+    ],
+    "crop": {
+     "box": [
+      1210,
+      1125,
+      1292,
+      1433
+     ],
+     "zoom": 2.4
+    },
+    "reason": "The label IC30 is printed left of the footprint's left row; as every label in this row does, it stands left of its own chip, between it and the chip before (read on the crop, enlarged and, for a label on a side, turned upright); the mark is the middle of the footprint's pads"
+   },
+   {
+    "ref": "IC31",
+    "at": [
+     1535.1,
+     1280.2
+    ],
+    "crop": {
+     "box": [
+      1391,
+      1127,
+      1473,
+      1433
+     ],
+     "zoom": 2.4
+    },
+    "reason": "The label IC31 is printed left of the footprint's left row; as every label in this row does, it stands left of its own chip, between it and the chip before (read on the crop, enlarged and, for a label on a side, turned upright); the mark is the middle of the footprint's pads"
+   },
+   {
+    "ref": "IC32",
+    "at": [
+     1775.4,
+     1261.4
+    ],
+    "crop": {
+     "box": [
+      1632,
+      1089,
+      1713,
+      1433
+     ],
+     "zoom": 2.4
+    },
+    "reason": "The label IC32 is printed left of the footprint's left row (read on the crop, enlarged and, for a label on a side, turned upright); the mark is the middle of the footprint's pads"
+   },
+   {
+    "ref": "IC33",
+    "at": [
+     1035.8,
+     958.2
+    ],
+    "crop": {
+     "box": [
+      944,
+      743,
+      1195,
+      831
+     ],
+     "zoom": 2.4
+    },
+    "reason": "The label IC33 is printed above the footprint (read on the crop, enlarged and, for a label on a side, turned upright); the mark is the middle of the footprint's pads"
+   },
+   {
+    "ref": "IC34",
+    "at": [
+     1235.4,
+     959.3
+    ],
+    "crop": {
+     "box": [
+      1143,
+      744,
+      1393,
+      832
+     ],
+     "zoom": 2.4
+    },
+    "reason": "The label IC34 is printed above the footprint (read on the crop, enlarged and, for a label on a side, turned upright); the mark is the middle of the footprint's pads"
+   },
+   {
+    "ref": "IC35",
+    "at": [
+     2503.5,
+     322.3
+    ],
+    "crop": {
+     "box": [
+      2351,
+      134,
+      2432,
+      519
+     ],
+     "zoom": 2.4
+    },
+    "reason": "The label IC35 is printed left of the footprint's left row, beside two A marks (read on the crop, enlarged and, for a label on a side, turned upright); the mark is the middle of the footprint's pads; the grouping's run has two more pads than the 14-pin outline (R79, R82, R161 and their neighbours' pads at the ends), so the mark says 14 pins and the body's middle, and pin 1 is the top left pad, at the print's chamfer",
+    "pin1": [
+     2441.6,
+     205.6
+    ],
+    "pins": 14
+   },
+   {
+    "ref": "IC36",
+    "at": [
+     3495.4,
+     1625.2
+    ],
+    "crop": {
+     "box": [
+      3351,
+      1471,
+      3433,
+      1777
+     ],
+     "zoom": 2.4
+    },
+    "reason": "The label IC36 is printed left of the footprint's left row (read on the crop, enlarged and, for a label on a side, turned upright); the mark is the middle of the footprint's pads"
+   },
+   {
+    "ref": "IC37",
+    "at": [
+     3716.3,
+     1625.7
+    ],
+    "crop": {
+     "box": [
+      3573,
+      1471,
+      3655,
+      1778
+     ],
+     "zoom": 2.4
+    },
+    "reason": "The label IC37 is printed left of the footprint's left row; as every label in this row does, it stands left of its own chip, between it and the chip before (read on the crop, enlarged and, for a label on a side, turned upright); the mark is the middle of the footprint's pads"
+   },
+   {
+    "ref": "IC38",
+    "at": [
+     3916.7,
+     1626.0
+    ],
+    "crop": {
+     "box": [
+      3769,
+      1410,
+      3904,
+      1506
+     ],
+     "zoom": 2.4
+    },
+    "reason": "The label IC38 is printed at the top left corner of the footprint, left of its first row (the print is partly under a pad) (read on the crop, enlarged and, for a label on a side, turned upright); the mark is the middle of the footprint's pads"
+   },
+   {
+    "ref": "IC39",
+    "at": [
+     3076.6,
+     1225.7
+    ],
+    "crop": {
+     "box": [
+      2932,
+      1053,
+      3014,
+      1397
+     ],
+     "zoom": 2.4
+    },
+    "reason": "The label IC39 is printed left of the footprint's left row; its digit is 3, compared at 6x with IC89's 8 (read on the crop, enlarged and, for a label on a side, turned upright); the mark is the middle of the footprint's pads"
+   },
+   {
+    "ref": "IC40",
+    "at": [
+     3377.6,
+     1206.2
+    ],
+    "crop": {
+     "box": [
+      3234,
+      1054,
+      3316,
+      1357
+     ],
+     "zoom": 2.4
+    },
+    "reason": "The label IC40 is printed left of the footprint's left row (read on the crop, enlarged and, for a label on a side, turned upright); the mark is the middle of the footprint's pads"
+   },
+   {
+    "ref": "IC41",
+    "at": [
+     3718.2,
+     1206.5
+    ],
+    "crop": {
+     "box": [
+      3625,
+      1334,
+      3876,
+      1422
+     ],
+     "zoom": 2.4
+    },
+    "reason": "The label IC41 is printed below the footprint (read on the crop, enlarged and, for a label on a side, turned upright); the mark is the middle of the footprint's pads"
+   },
+   {
+    "ref": "IC42",
+    "at": [
+     3918.3,
+     1226.9
+    ],
+    "crop": {
+     "box": [
+      3776,
+      1054,
+      3857,
+      1399
+     ],
+     "zoom": 2.4
+    },
+    "reason": "The label IC42 is printed left of the footprint's left row; as every label in this row does, it stands left of its own chip, between it and the chip before (read on the crop, enlarged and, for a label on a side, turned upright); the mark is the middle of the footprint's pads"
+   },
+   {
+    "ref": "IC43",
+    "at": [
+     3078.9,
+     806.5
+    ],
+    "crop": {
+     "box": [
+      2983,
+      933,
+      3237,
+      1021
+     ],
+     "zoom": 2.4
+    },
+    "reason": "The label IC43 is printed below the footprint, 3 mm from it; IC39 is printed on the left of the footprint below, so this label is this footprint's by elimination, which is the nearer of the two as well [inferring] (read on the crop, enlarged and, for a label on a side, turned upright); the mark is the middle of the footprint's pads"
+   },
+   {
+    "ref": "IC44",
+    "at": [
+     3379.3,
+     806.9
+    ],
+    "crop": {
+     "box": [
+      3236,
+      654,
+      3317,
+      959
+     ],
+     "zoom": 2.4
+    },
+    "reason": "The label IC44 is printed left of the footprint's left row (read on the crop, enlarged and, for a label on a side, turned upright); the mark is the middle of the footprint's pads"
+   },
+   {
+    "ref": "IC45",
+    "at": [
+     3720.0,
+     827.7
+    ],
+    "crop": {
+     "box": [
+      3782,
+      655,
+      3863,
+      1000
+     ],
+     "zoom": 2.4
+    },
+    "reason": "The label IC45 is printed just right of the footprint's right row, 1 mm from it; the next footprint to the right, IC46's, has its own label on its left (read on the crop, enlarged and, for a label on a side, turned upright); the mark is the middle of the footprint's pads"
+   },
+   {
+    "ref": "IC46",
+    "at": [
+     4101.9,
+     668.9
+    ],
+    "crop": {
+     "box": [
+      3958,
+      516,
+      4040,
+      821
+     ],
+     "zoom": 2.4
+    },
+    "reason": "The label IC46 is printed left of the footprint's left row (read on the crop, enlarged and, for a label on a side, turned upright); the mark is the middle of the footprint's pads"
+   },
+   {
+    "ref": "IC47",
+    "at": [
+     4281.5,
+     668.1
+    ],
+    "crop": {
+     "box": [
+      4137,
+      514,
+      4219,
+      820
+     ],
+     "zoom": 2.4
+    },
+    "reason": "The label IC47 is printed left of the footprint's left row; as every label in this row does, it stands left of its own chip, between it and the chip before (read on the crop, enlarged and, for a label on a side, turned upright); the mark is the middle of the footprint's pads"
+   },
+   {
+    "ref": "IC48",
+    "at": [
+     4461.4,
+     668.2
+    ],
+    "crop": {
+     "box": [
+      4318,
+      514,
+      4399,
+      1022
+     ],
+     "zoom": 2.4
+    },
+    "reason": "The label IC48 is printed left of the footprint's left row; as every label in this row does, it stands left of its own chip, between it and the chip before (read on the crop, enlarged and, for a label on a side, turned upright); the mark is the middle of the footprint's pads"
+   },
+   {
+    "ref": "IC49",
+    "at": [
+     4641.7,
+     668.6
+    ],
+    "crop": {
+     "box": [
+      4498,
+      515,
+      4579,
+      820
+     ],
+     "zoom": 2.4
+    },
+    "reason": "The label IC49 is printed left of the footprint's left row; as every label in this row does, it stands left of its own chip, between it and the chip before (read on the crop, enlarged and, for a label on a side, turned upright); the mark is the middle of the footprint's pads"
+   },
+   {
+    "ref": "IC50",
+    "at": [
+     4823.1,
+     669.5
+    ],
+    "crop": {
+     "box": [
+      4680,
+      517,
+      4762,
+      821
+     ],
+     "zoom": 2.4
+    },
+    "reason": "The label IC50 is printed left of the footprint's left row; as every label in this row does, it stands left of its own chip, between it and the chip before (read on the crop, enlarged and, for a label on a side, turned upright); the mark is the middle of the footprint's pads"
+   },
+   {
+    "ref": "IC53",
+    "at": [
+     4633.8,
+     2445.2
+    ],
+    "crop": {
+     "box": [
+      4488,
+      2269,
+      4569,
+      2619
+     ],
+     "zoom": 2.4
+    },
+    "reason": "The label IC53 is printed left of the footprint's left row; the print here is faint and tan, and legible (read on the crop, enlarged and, for a label on a side, turned upright); the mark is the middle of the footprint's pads"
+   },
+   {
+    "ref": "IC54",
+    "at": [
+     4635.5,
+     2065.6
+    ],
+    "crop": {
+     "box": [
+      4491,
+      1888,
+      4573,
+      2238
+     ],
+     "zoom": 2.4
+    },
+    "reason": "The label IC54 is printed left of the footprint's left row; as every label in this row does, it stands left of its own chip, between it and the chip before (read on the crop, enlarged and, for a label on a side, turned upright); the mark is the middle of the footprint's pads"
+   },
+   {
+    "ref": "IC55",
+    "at": [
+     4454.9,
+     2065.5
+    ],
+    "crop": {
+     "box": [
+      4312,
+      1888,
+      4394,
+      2238
+     ],
+     "zoom": 2.4
+    },
+    "reason": "The label IC55 is printed left of the footprint's left row; as every label in this row does, it stands left of its own chip, between it and the chip before (read on the crop, enlarged and, for a label on a side, turned upright); the mark is the middle of the footprint's pads"
+   },
+   {
+    "ref": "IC56",
+    "at": [
+     4819.4,
+     1227.9
+    ],
+    "crop": {
+     "box": [
+      4676,
+      1055,
+      4757,
+      1400
+     ],
+     "zoom": 2.4
+    },
+    "reason": "The label IC56 is printed left of the footprint's left row; as every label in this row does, it stands left of its own chip, between it and the chip before (read on the crop, enlarged and, for a label on a side, turned upright); the mark is the middle of the footprint's pads"
+   },
+   {
+    "ref": "IC57",
+    "at": [
+     4638.6,
+     1227.1
+    ],
+    "crop": {
+     "box": [
+      4494,
+      1052,
+      4576,
+      1400
+     ],
+     "zoom": 2.4
+    },
+    "reason": "The label IC57 is printed left of the footprint's left row; as every label in this row does, it stands left of its own chip, between it and the chip before (read on the crop, enlarged and, for a label on a side, turned upright); the mark is the middle of the footprint's pads"
+   },
+   {
+    "ref": "IC58",
+    "at": [
+     4458.5,
+     1226.7
+    ],
+    "crop": {
+     "box": [
+      4316,
+      1050,
+      4397,
+      1401
+     ],
+     "zoom": 2.4
+    },
+    "reason": "The label IC58 is printed left of the footprint's left row; as every label in this row does, it stands left of its own chip, between it and the chip before (read on the crop, enlarged and, for a label on a side, turned upright); the mark is the middle of the footprint's pads"
+   },
+   {
+    "ref": "IC59",
+    "at": [
+     4278.0,
+     1226.6
+    ],
+    "crop": {
+     "box": [
+      4135,
+      1052,
+      4217,
+      1400
+     ],
+     "zoom": 2.4
+    },
+    "reason": "The label IC59 is printed left of the footprint's left row; as every label in this row does, it stands left of its own chip, between it and the chip before (read on the crop, enlarged and, for a label on a side, turned upright); the mark is the middle of the footprint's pads"
+   },
+   {
+    "ref": "IC60",
+    "at": [
+     4098.7,
+     1226.9
+    ],
+    "crop": {
+     "box": [
+      3956,
+      1052,
+      4038,
+      1399
+     ],
+     "zoom": 2.4
+    },
+    "reason": "The label IC60 is printed left of the footprint's left row; as every label in this row does, it stands left of its own chip, between it and the chip before (read on the crop, enlarged and, for a label on a side, turned upright); the mark is the middle of the footprint's pads"
+   },
+   {
+    "ref": "IC61",
+    "at": [
+     4812.9,
+     2446.3
+    ],
+    "crop": {
+     "box": [
+      4670,
+      2274,
+      4751,
+      2619
+     ],
+     "zoom": 2.4
+    },
+    "reason": "The label IC61 is printed left of the footprint's left row; the print here is faint and tan, and legible (read on the crop, enlarged and, for a label on a side, turned upright); the mark is the middle of the footprint's pads; the outline's print is too faint on its left side for the grouping's test (its yellow is washed out: OKLab b 0.03 to 0.05 against the 0.08 the print is found at) and the mark says so; pin 1 is the top left pad, at the chamfer",
+    "outlineFaint": true,
+    "pin1": [
+     4752.7,
+     2306.3
+    ]
+   },
+   {
+    "ref": "IC62",
+    "at": [
+     4815.2,
+     2066.4
+    ],
+    "crop": {
+     "box": [
+      4671,
+      1892,
+      4753,
+      2239
+     ],
+     "zoom": 2.4
+    },
+    "reason": "The label IC62 is printed left of the footprint's left row; as every label in this row does, it stands left of its own chip, between it and the chip before (read on the crop, enlarged and, for a label on a side, turned upright); the mark is the middle of the footprint's pads"
+   },
+   {
+    "ref": "IC63",
+    "at": [
+     4275.0,
+     2065.4
+    ],
+    "crop": {
+     "box": [
+      4131,
+      1891,
+      4213,
+      2237
+     ],
+     "zoom": 2.4
+    },
+    "reason": "The label IC63 is printed left of the footprint's left row; as every label in this row does, it stands left of its own chip, between it and the chip before (read on the crop, enlarged and, for a label on a side, turned upright); the mark is the middle of the footprint's pads"
+   },
+   {
+    "ref": "IC64",
+    "at": [
+     4817.1,
+     1606.9
+    ],
+    "crop": {
+     "box": [
+      4673,
+      1434,
+      4755,
+      1779
+     ],
+     "zoom": 2.4
+    },
+    "reason": "The label IC64 is printed left of the footprint's left row; as every label in this row does, it stands left of its own chip, between it and the chip before (read on the crop, enlarged and, for a label on a side, turned upright); the mark is the middle of the footprint's pads"
+   },
+   {
+    "ref": "IC65",
+    "at": [
+     4637.4,
+     1606.3
+    ],
+    "crop": {
+     "box": [
+      4494,
+      1432,
+      4576,
+      1779
+     ],
+     "zoom": 2.4
+    },
+    "reason": "The label IC65 is printed left of the footprint's left row; as every label in this row does, it stands left of its own chip, between it and the chip before (read on the crop, enlarged and, for a label on a side, turned upright); the mark is the middle of the footprint's pads"
+   },
+   {
+    "ref": "IC66",
+    "at": [
+     4457.0,
+     1605.8
+    ],
+    "crop": {
+     "box": [
+      4313,
+      1431,
+      4395,
+      1779
+     ],
+     "zoom": 2.4
+    },
+    "reason": "The label IC66 is printed left of the footprint's left row; as every label in this row does, it stands left of its own chip, between it and the chip before (read on the crop, enlarged and, for a label on a side, turned upright); the mark is the middle of the footprint's pads"
+   },
+   {
+    "ref": "IC67",
+    "at": [
+     4277.6,
+     1605.8
+    ],
+    "crop": {
+     "box": [
+      4133,
+      1434,
+      4215,
+      1778
+     ],
+     "zoom": 2.4
+    },
+    "reason": "The label IC67 is printed left of the footprint's left row; as every label in this row does, it stands left of its own chip, between it and the chip before (read on the crop, enlarged and, for a label on a side, turned upright); the mark is the middle of the footprint's pads"
+   },
+   {
+    "ref": "IC68",
+    "at": [
+     4095.8,
+     1605.5
+    ],
+    "crop": {
+     "box": [
+      3952,
+      1431,
+      4034,
+      1778
+     ],
+     "zoom": 2.4
+    },
+    "reason": "The label IC68 is printed left of the footprint's left row; as every label in this row does, it stands left of its own chip, between it and the chip before (read on the crop, enlarged and, for a label on a side, turned upright); the mark is the middle of the footprint's pads"
+   },
+   {
+    "ref": "IC70",
+    "at": [
+     2288.7,
+     3098.6
+    ],
+    "crop": {
+     "box": [
+      2146,
+      2885,
+      2228,
+      3310
+     ],
+     "zoom": 2.4
+    },
+    "reason": "The label IC70 is printed left of the footprint's left row (read on the crop, enlarged and, for a label on a side, turned upright); the mark is the middle of the footprint's pads"
+   },
+   {
+    "ref": "IC71",
+    "at": [
+     3008.7,
+     3021.6
+    ],
+    "crop": {
+     "box": [
+      2865,
+      2809,
+      2946,
+      3233
+     ],
+     "zoom": 2.4
+    },
+    "reason": "The label IC71 is printed left of the footprint's left row (read on the crop, enlarged and, for a label on a side, turned upright); the mark is the middle of the footprint's pads"
+   },
+   {
+    "ref": "IC72",
+    "at": [
+     3249.6,
+     3022.3
+    ],
+    "crop": {
+     "box": [
+      3107,
+      2807,
+      3188,
+      3234
+     ],
+     "zoom": 2.4
+    },
+    "reason": "The label IC72 is printed left of the footprint's left row (read on the crop, enlarged and, for a label on a side, turned upright); the mark is the middle of the footprint's pads"
+   },
+   {
+    "ref": "IC73",
+    "at": [
+     1758.5,
+     682.3
+    ],
+    "crop": {
+     "box": [
+      1603,
+      949,
+      1974,
+      1038
+     ],
+     "zoom": 2.4
+    },
+    "reason": "The label IC73 is printed below the footprint (read on the crop, enlarged and, for a label on a side, turned upright); the mark is the middle of the footprint's pads"
+   },
+   {
+    "ref": "IC74",
+    "at": [
+     3119.9,
+     487.6
+    ],
+    "crop": {
+     "box": [
+      2946,
+      556,
+      3356,
+      645
+     ],
+     "zoom": 2.4
+    },
+    "reason": "The label IC74 is printed below the footprint (read on the crop, enlarged and, for a label on a side, turned upright); the mark is the middle of the footprint's pads"
+   },
+   {
+    "ref": "IC75",
+    "at": [
+     3500.6,
+     488.0
+    ],
+    "crop": {
+     "box": [
+      3328,
+      331,
+      3736,
+      421
+     ],
+     "zoom": 2.4
+    },
+    "reason": "The label IC75 is printed above the footprint (read on the crop, enlarged and, for a label on a side, turned upright); the mark is the middle of the footprint's pads"
+   },
+   {
+    "ref": "IC76",
+    "at": [
+     1226.5,
+     2816.8
+    ],
+    "crop": {
+     "box": [
+      1084,
+      2643,
+      1166,
+      2988
+     ],
+     "zoom": 2.4
+    },
+    "reason": "The label IC76 is printed left of the footprint's left row; as every label in this row does, it stands left of its own chip, between it and the chip before (read on the crop, enlarged and, for a label on a side, turned upright); the mark is the middle of the footprint's pads"
+   },
+   {
+    "ref": "IC77",
+    "at": [
+     713.4,
+     1276.4
+    ],
+    "crop": {
+     "box": [
+      569,
+      1124,
+      651,
+      1428
+     ],
+     "zoom": 2.4
+    },
+    "reason": "The label IC77 is printed left of the footprint's left row (read on the crop, enlarged and, for a label on a side, turned upright); the mark is the middle of the footprint's pads"
+   },
+   {
+    "ref": "IC79",
+    "at": [
+     785.8,
+     2795.1
+    ],
+    "crop": {
+     "box": [
+      643,
+      2641,
+      725,
+      2947
+     ],
+     "zoom": 2.4
+    },
+    "reason": "The label IC79 is printed left of the footprint's left row (read on the crop, enlarged and, for a label on a side, turned upright); the mark is the middle of the footprint's pads"
+   },
+   {
+    "ref": "IC80",
+    "at": [
+     1026.5,
+     2795.9
+    ],
+    "crop": {
+     "box": [
+      883,
+      2642,
+      965,
+      2948
+     ],
+     "zoom": 2.4
+    },
+    "reason": "The label IC80 is printed left of the footprint's left row (read on the crop, enlarged and, for a label on a side, turned upright); the mark is the middle of the footprint's pads"
+   },
+   {
+    "ref": "IC81",
+    "at": [
+     1407.3,
+     2797.0
+    ],
+    "crop": {
+     "box": [
+      1265,
+      2645,
+      1346,
+      2948
+     ],
+     "zoom": 2.4
+    },
+    "reason": "The label IC81 is printed left of the footprint's left row; as every label in this row does, it stands left of its own chip, between it and the chip before (read on the crop, enlarged and, for a label on a side, turned upright); the mark is the middle of the footprint's pads"
+   },
+   {
+    "ref": "IC82",
+    "at": [
+     1648.1,
+     2797.8
+    ],
+    "crop": {
+     "box": [
+      1506,
+      2645,
+      1588,
+      2951
+     ],
+     "zoom": 2.4
+    },
+    "reason": "The label IC82 is printed left of the footprint's left row (read on the crop, enlarged and, for a label on a side, turned upright); the mark is the middle of the footprint's pads"
+   },
+   {
+    "ref": "IC83",
+    "at": [
+     1166.3,
+     3155.5
+    ],
+    "crop": {
+     "box": [
+      1023,
+      3002,
+      1105,
+      3308
+     ],
+     "zoom": 2.4
+    },
+    "reason": "The label IC83 is printed left of the footprint's left row (read on the crop, enlarged and, for a label on a side, turned upright); the mark is the middle of the footprint's pads"
+   },
+   {
+    "ref": "IC84",
+    "at": [
+     1406.2,
+     3155.7
+    ],
+    "crop": {
+     "box": [
+      1312,
+      2939,
+      1564,
+      3028
+     ],
+     "zoom": 2.4
+    },
+    "reason": "The label IC84 is printed above the footprint (read on the crop, enlarged and, for a label on a side, turned upright); the mark is the middle of the footprint's pads"
+   },
+   {
+    "ref": "IC85",
+    "at": [
+     1647.6,
+     3176.5
+    ],
+    "crop": {
+     "box": [
+      1505,
+      3003,
+      1587,
+      3348
+     ],
+     "zoom": 2.4
+    },
+    "reason": "The label IC85 is printed left of the footprint's left row (read on the crop, enlarged and, for a label on a side, turned upright); the mark is the middle of the footprint's pads"
+   },
+   {
+    "ref": "IC86",
+    "at": [
+     1827.5,
+     3157.2
+    ],
+    "crop": {
+     "box": [
+      1685,
+      3005,
+      1766,
+      3309
+     ],
+     "zoom": 2.4
+    },
+    "reason": "The label IC86 is printed left of the footprint's left row; as every label in this row does, it stands left of its own chip, between it and the chip before (read on the crop, enlarged and, for a label on a side, turned upright); the mark is the middle of the footprint's pads"
+   },
+   {
+    "ref": "IC87",
+    "at": [
+     795.4,
+     937.1
+    ],
+    "crop": {
+     "box": [
+      703,
+      702,
+      953,
+      790
+     ],
+     "zoom": 2.4
+    },
+    "reason": "The label IC87 is printed above the footprint (read on the crop, enlarged and, for a label on a side, turned upright); the mark is the middle of the footprint's pads"
+   },
+   {
+    "ref": "IC88",
+    "at": [
+     4152.1,
+     3024.9
+    ],
+    "crop": {
+     "box": [
+      3949,
+      2731,
+      4030,
+      3317
+     ],
+     "zoom": 2.4
+    },
+    "reason": "The label IC88 is printed left of the footprint's left row; as every label in this row does, it stands left of its own chip, between it and the chip before (read on the crop, enlarged and, for a label on a side, turned upright); the mark is the middle of the footprint's pads"
+   },
+   {
+    "ref": "IC89",
+    "at": [
+     411.7,
+     1435.3
+    ],
+    "crop": {
+     "box": [
+      208,
+      1142,
+      289,
+      1727
+     ],
+     "zoom": 2.4
+    },
+    "reason": "The label IC89 is printed left of the 28-pin footprint at the board's left edge; the digit is 8, not 3 (compared at 6x with IC39's 3 on another crop), and the earlier mark here that left the label unread is replaced (read on the crop, enlarged and, for a label on a side, turned upright); the mark is the middle of the footprint's pads; pin 1 is the top left pad, at the print's chamfer, which is larger than the box the code looks in (the bottom end, crop 250, 1660, 580, 1750, has a plain corner)",
     "pin1": [
      291,
      1171
-    ],
-    "crop": {
-     "box": [
-      250,
-      1120,
-      580,
-      1210
-     ],
-     "zoom": 3
-    },
-    "reason": "The 28-pin footprint at the left edge (task 0's L28, its label not read with confidence): pin 1 is the top left pad, at the print's chamfer; the bottom end (crop 250, 1660, 580, 1750) has a plain corner"
+    ]
    },
    {
-    "ref": null,
+    "ref": "IC91",
     "at": [
-     2497,
-     327
+     554.3,
+     915.5
     ],
-    "kind": "other",
     "crop": {
      "box": [
-      2480,
-      120,
-      2700,
-      540
+      462,
+      700,
+      711,
+      788
      ],
-     "zoom": 2
+     "zoom": 2.4
     },
-    "reason": "two columns of resistor and capacitor pads (R85 to R87, C32, C33 printed between them), not a DIP: the print beside the rows is their labels, not an outline"
+    "reason": "The label IC91 is printed above the footprint (read on the crop, enlarged and, for a label on a side, turned upright); the mark is the middle of the footprint's pads"
+   },
+   {
+    "ref": "IC93",
+    "at": [
+     333.9,
+     914.4
+    ],
+    "crop": {
+     "box": [
+      242,
+      697,
+      491,
+      786
+     ],
+     "zoom": 2.4
+    },
+    "reason": "The label IC93 is printed above the footprint (read on the crop, enlarged and, for a label on a side, turned upright); the mark is the middle of the footprint's pads"
+   },
+   {
+    "ref": "IC94",
+    "at": [
+     837.9,
+     497.2
+    ],
+    "crop": {
+     "box": [
+      746,
+      281,
+      996,
+      369
+     ],
+     "zoom": 2.4
+    },
+    "reason": "The label IC94 is printed above the footprint; the 4 is partly under a blob of solder and is read from the shape that shows (read on the crop, enlarged and, for a label on a side, turned upright); the mark is the middle of the footprint's pads"
+   },
+   {
+    "ref": "IC95",
+    "at": [
+     436.3,
+     494.9
+    ],
+    "crop": {
+     "box": [
+      344,
+      279,
+      593,
+      368
+     ],
+     "zoom": 2.4
+    },
+    "reason": "The label IC95 is printed above the footprint (read on the crop, enlarged and, for a label on a side, turned upright); the mark is the middle of the footprint's pads"
+   },
+   {
+    "ref": "IC96",
+    "at": [
+     1438.3,
+     561.0
+    ],
+    "crop": {
+     "box": [
+      1346,
+      287,
+      1596,
+      375
+     ],
+     "zoom": 2.4
+    },
+    "reason": "The label IC96 is printed above the footprint (read on the crop, enlarged and, for a label on a side, turned upright); the mark is the middle of the footprint's pads"
+   },
+   {
+    "ref": "IC97",
+    "at": [
+     173.9,
+     834.1
+    ],
+    "crop": {
+     "box": [
+      80,
+      618,
+      331,
+      707
+     ],
+     "zoom": 2.4
+    },
+    "reason": "The label IC97 is printed above the footprint (read on the crop, enlarged and, for a label on a side, turned upright); the mark is the middle of the footprint's pads"
+   },
+   {
+    "ref": "IC98",
+    "at": [
+     408.5,
+     2195.1
+    ],
+    "crop": {
+     "box": [
+      206,
+      1901,
+      287,
+      2486
+     ],
+     "zoom": 2.4
+    },
+    "reason": "The label IC98 is printed left of the footprint's left row (read on the crop, enlarged and, for a label on a side, turned upright); the mark is the middle of the footprint's pads"
+   },
+   {
+    "ref": "IC99",
+    "at": [
+     728.4,
+     2196.2
+    ],
+    "crop": {
+     "box": [
+      576,
+      1841,
+      946,
+      1930
+     ],
+     "zoom": 2.4
+    },
+    "reason": "The label IC99 is printed above the footprint (read on the crop, enlarged and, for a label on a side, turned upright); the mark is the middle of the footprint's pads"
+   },
+   {
+    "ref": "IC100",
+    "at": [
+     4452.1,
+     3025.6
+    ],
+    "crop": {
+     "box": [
+      4248,
+      2732,
+      4329,
+      3317
+     ],
+     "zoom": 2.4
+    },
+    "reason": "The label IC100 is printed left of the footprint's left row; as every label in this row does, it stands left of its own chip, between it and the chip before (read on the crop, enlarged and, for a label on a side, turned upright); the mark is the middle of the footprint's pads"
+   },
+   {
+    "ref": "IC101",
+    "at": [
+     4752.3,
+     3026.6
+    ],
+    "crop": {
+     "box": [
+      4549,
+      2733,
+      4630,
+      3319
+     ],
+     "zoom": 2.4
+    },
+    "reason": "The label IC101 is printed left of the footprint's left row; as every label in this row does, it stands left of its own chip, between it and the chip before (read on the crop, enlarged and, for a label on a side, turned upright); the mark is the middle of the footprint's pads"
+   },
+   {
+    "ref": "PL8",
+    "at": [
+     544.8,
+     3572.1
+    ],
+    "crop": {
+     "box": [
+      175,
+      3460,
+      916,
+      3681
+     ],
+     "zoom": 2.0
+    },
+    "reason": "The label PL8 is printed above the row of pads (read on the crop, enlarged); the mark is the middle of the footprint's pads"
+   },
+   {
+    "ref": "PL9",
+    "at": [
+     1465.9,
+     3574.8
+    ],
+    "crop": {
+     "box": [
+      1177,
+      3466,
+      1755,
+      3685
+     ],
+     "zoom": 2.0
+    },
+    "reason": "The label PL9 is printed above the row of pads (read on the crop, enlarged); the mark is the middle of the footprint's pads"
+   },
+   {
+    "ref": "PL10",
+    "at": [
+     2488.2,
+     3558.0
+    ],
+    "crop": {
+     "box": [
+      2261,
+      3469,
+      2714,
+      3646
+     ],
+     "zoom": 2.0
+    },
+    "reason": "The label PL10 is printed above the row of pads (read on the crop, enlarged); the mark is the middle of the footprint's pads"
+   },
+   {
+    "ref": "PL11",
+    "at": [
+     3348.6,
+     3561.2
+    ],
+    "crop": {
+     "box": [
+      2980,
+      3471,
+      3718,
+      3650
+     ],
+     "zoom": 2.0
+    },
+    "reason": "The label PL11 is printed above, left of the D14 pad the row of pads (read on the crop, enlarged); the last 1 is partly under a pad of D14 and is read from the shape that shows, and from PL8 to PL12 being in order; the mark is the middle of the footprint's pads"
+   },
+   {
+    "ref": "PL12",
+    "at": [
+     4412.3,
+     3564.7
+    ],
+    "crop": {
+     "box": [
+      3986,
+      3475,
+      4840,
+      3655
+     ],
+     "zoom": 2.0
+    },
+    "reason": "The label PL12 is printed above the row of pads (read on the crop, enlarged); the mark is the middle of the footprint's pads"
+   },
+   {
+    "ref": "PL13",
+    "at": [
+     1469.2,
+     2557.5
+    ],
+    "crop": {
+     "box": [
+      1102,
+      2468,
+      1840,
+      2647
+     ],
+     "zoom": 2.0
+    },
+    "reason": "The label PL13 is printed below the row of pads (read on the crop, enlarged); the mark is the middle of the footprint's pads"
+   },
+   {
+    "ref": "PL14",
+    "at": [
+     427.7,
+     2554.3
+    ],
+    "crop": {
+     "box": [
+      201,
+      2465,
+      654,
+      2644
+     ],
+     "zoom": 2.0
+    },
+    "reason": "The label PL14 is printed below the row of pads (read on the crop, enlarged); the mark is the middle of the footprint's pads"
+   },
+   {
+    "ref": "SK6",
+    "at": [
+     1740.4,
+     262.4
+    ],
+    "crop": {
+     "box": [
+      1542,
+      173,
+      1939,
+      354
+     ],
+     "zoom": 2.0
+    },
+    "reason": "The label SK6 is printed below the row of pads (read on the crop, enlarged); SK6 is the 15-way socket's two staggered rows, 8 pads here and 7 in the next footprint along, which carries no reference of its own so that none is given twice; the mark is the middle of the footprint's pads"
+   },
+   {
+    "ref": "RP1",
+    "at": [
+     888.7,
+     2196.9
+    ],
+    "crop": {
+     "box": [
+      809,
+      2009,
+      968,
+      2384
+     ],
+     "zoom": 2.0
+    },
+    "reason": "The label RP1 is printed beside the single row of pads, turned on its side (read on the crop, enlarged); the mark is the middle of the footprint's pads"
+   },
+   {
+    "ref": "RP2",
+    "at": [
+     1237.6,
+     460.3
+    ],
+    "crop": {
+     "box": [
+      1158,
+      254,
+      1317,
+      668
+     ],
+     "zoom": 2.0
+    },
+    "reason": "The label RP2 is printed beside the single row of pads, turned on its side (read on the crop, enlarged); the mark is the middle of the footprint's pads"
    }
   ]
  }

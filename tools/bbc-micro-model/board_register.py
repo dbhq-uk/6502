@@ -143,6 +143,12 @@ COMPLETE_MM = 0.6             # a spare blob this near where a missing pin goes 
 # (a row and the next DIP's row, 7.62 or 15.24 mm apart) 0.1 to 0.2, read on
 # the first run before this floor was set; it sits between them.
 OUTLINE_MIN = 0.5
+# A run whose outline scores under this is tried trimmed: the printed outline
+# stops where the DIP does, and a run of pads that goes on past it (IC48's
+# fourteen pins and the five pads of the parts below it, which score 0.59) is
+# cut back to the stretch the outline covers. Every other DIP on I1 scores
+# 0.78 or more; this was set on 5 October 2026 after IC48 was seen.
+OUTLINE_TRIM_BELOW = 0.7
 CONNECTOR_MIN_PADS = 8
 SIP_MIN_PADS = 3
 # The print: yellow. Read off I1's outlines (OKLab b 0.10 to 0.16, L over
@@ -459,7 +465,7 @@ def pads_and_drills(faces, gate_mm=MATCH_GATE_MM):
         x, y = (t['x'] + u['x']) / 2, (t['y'] + u['y']) / 2
         ds = [p['d'] for p in (t, u) if p['kind'] == 'ring']
         drills.append({'x': x, 'y': y, 'd': float(np.mean(ds)) if ds else None, 'filled': not ds,
-                       'top': [t['x'], t['y']], 'bottom': [u['x'], u['y']],
+                       'top': [t['x'], t['y']], 'bottom': [u['x'], u['y']], 'bottomPxMirrored': list(u['px']),
                        'spreadMm': float(math.hypot(t['x'] - u['x'], t['y'] - u['y'])), 'kinds': [t['kind'], u['kind']]})
         pads.append(_pad(t, x, y, 'both', len(drills) - 1, 'drill'))
     single = {'top': 0, 'bottom': 0}
@@ -477,6 +483,29 @@ def pads_and_drills(faces, gate_mm=MATCH_GATE_MM):
     spare = [dict(p, face=face) for face, plist, used in (('top', top, used_t), ('bottom', bot, used_b))
              for i, p in enumerate(plist) if i not in used and not (p['kind'] == 'solder' and p['hole'])]
     return drills, pads, {'pairs': len(pairs), 'notHoles': dropped, 'singleFace': single}, spare
+
+
+FACE_MM = 0.2                 # each face's centre within this of its drill (the plan's Task 3 step 4)
+FILLED_OFF_MAX = 0.05         # at most this share of solder-filled drills may have a face further off
+
+
+def drill_faces(drills):
+    """How far each face's centre is from its drill: for an open drill each
+    face's dark middle is the hole, so both must be within FACE_MM; for a
+    drill filled with solder the blob's centroid is where the solder went,
+    which may sit off the hole, so only the share further off is bounded
+    (the rule fixed in the review of 4 October 2026, when it was 93 of 2522)."""
+    def off(d):
+        return max(math.hypot(d['top'][0] - d['x'], d['top'][1] - d['y']), math.hypot(d['bottom'][0] - d['x'], d['bottom'][1] - d['y']))
+    opened = [off(d) for d in drills if not d['filled']]
+    filled = [off(d) for d in drills if d['filled']]
+    over = sum(v > FACE_MM for v in filled)
+    return {
+        'what': 'Each face\'s centre against its drill (the larger of the two faces), in millimetres. Open: both faces must be within limitMm. Filled with solder: the share with a face further off must be at most filledShareMax',
+        'limitMm': FACE_MM, 'filledShareMax': FILLED_OFF_MAX,
+        'open': dict(common.stats(opened), n=len(opened), over=sum(v > FACE_MM for v in opened)) if opened else {'n': 0},
+        'filled': dict(common.stats(filled), n=len(filled), over=over, share=over / len(filled)) if filled else {'n': 0},
+    }
 
 
 def _pad(p, x, y, face, drill, source):
@@ -535,7 +564,7 @@ def print_mask(rgb):
 def _sample(mask, pts_px):
     from scipy.ndimage import map_coordinates
     pts_px = np.asarray(pts_px, float).reshape(-1, 2)
-    return map_coordinates(mask.astype(np.float32), [pts_px[:, 1], pts_px[:, 0]], order=1, mode='constant')
+    return map_coordinates(np.asarray(mask, dtype=np.float32), [pts_px[:, 1], pts_px[:, 0]], order=1, mode='constant')
 
 
 def outline_score(pm, to_px, row, other, axis):
@@ -574,7 +603,7 @@ def _slots(P, chain, u0, axis):
     return out
 
 
-def _facing_runs(P, a, b, axis, covered=None):
+def _facing_runs(P, a, b, axis, covered=None, real=None):
     """Each run of pitch slots along two rows where at least one row has a
     pad in each slot (a slot empty on both rows ends a run), trimmed so that
     both rows have a pad at both ends (a DIP's four corner pads are found):
@@ -595,10 +624,18 @@ def _facing_runs(P, a, b, axis, covered=None):
             cur = [s] if s is not None else []
     la, lb = _row_line(P, a, axis), _row_line(P, b, axis)
 
+    def corner_ok(i):
+        # a corner is a pad, or a spare blob (real says which) where the
+        # component side shows solder: a blob seen on the solder side alone
+        # never sets where a row ends
+        return real is None or real(i) or (covered is not None and covered(P[i]))
+
     def both(s):
         if s in sa and s in sb:
-            return True
+            return corner_ok(sa[s]) and corner_ok(sb[s])
         if covered is None or (s not in sa and s not in sb):
+            return False
+        if not corner_ok(sa.get(s, sb.get(s))):
             return False
         # one row's pad found; the other row's place covered by solder (a pin
         # under a blob too ragged or too big to be a pad on its own)
@@ -663,54 +700,181 @@ def _complete(c, P, pads, spare, axis):
     return rows
 
 
-def group_footprints(pads, to_px, rgb, spare=()):
+def _clear_spare(P, spare, clear_mm=COMPLETE_MM):
+    """Indexes of the spare blobs clear of every pad and of each other (the
+    first kept), to chain with the pads into a DIP's rows."""
+    from scipy.spatial import cKDTree
+    tree = cKDTree(P) if len(P) else None
+    kept, pts = [], []
+    for k, s in enumerate(spare):
+        q = (s['x'], s['y'])
+        if tree is not None and tree.query(q)[0] < clear_mm:
+            continue
+        if any(math.hypot(q[0] - a, q[1] - b) < clear_mm for a, b in pts):
+            continue
+        kept.append(k)
+        pts.append(q)
+    return kept
+
+
+def _without(c, used, candidate, real):
+    """A candidate with the slots already taken by an accepted DIP dropped:
+    the longest piece left, trimmed until both rows have a pad at each end,
+    rescored; None when nothing fit is left."""
+    taken = [(i in used) or (j in used) for i, j in zip(c['a'], c['b'])]
+    best, cur = None, []
+    for k, t in enumerate(taken + [True]):
+        if not t:
+            cur.append(k)
+            continue
+        if cur:
+            while cur and not (real(c['a'][cur[0]]) and real(c['b'][cur[0]])):
+                cur = cur[1:]
+            while cur and not (real(c['a'][cur[-1]]) and real(c['b'][cur[-1]])):
+                cur = cur[:-1]
+            if cur and (best is None or len(cur) > len(best)):
+                best = cur
+        cur = []
+    if not best:
+        return None
+    return candidate([c['a'][k] for k in best], [c['b'][k] for k in best], c['axis'], c['spacing'])
+
+
+def _trim_to_outline(c, candidate, ok):
+    """The stretch of a run whose printed outline scores best (the longest on
+    a tie), at least the shortest DIP, with a pad found at all four corners;
+    the run itself if no stretch scores better."""
+    n = len(c['a'])
+    best = c
+    for i in range(n):
+        for j in range(i + DIP_ROW_PADS[0], n + 1):
+            if (i, j) == (0, n) or not all(ok(r[k]) for r in (c['a'], c['b']) for k in (i, j - 1)):
+                continue
+            t = candidate(c['a'][i:j], c['b'][i:j], c['axis'], c['spacing'])
+            if t is not None and (round(t['outline'], 2), len(t['a'])) > (round(best['outline'], 2), len(best['a'])):
+                best = t
+    return best
+
+
+def group_footprints(pads, to_px, rgb, spare=(), faint=()):
     """DIPs, connectors and SIPs from pads in board millimetres. to_px maps
     board millimetres to the component side's pixels (rgb), where the print
     is read, and where solder covering a pin's place is looked for. spare:
     blobs on either face that are not pads (each with x, y
     and face), to complete a DIP's rows; pins still missing are inferred.
+    faint: board millimetre points, marked by hand, inside a DIP whose
+    printed outline is too faint on one side for the outline test (the
+    test is then passed by the stronger side alone: the other evidence, a pad
+    or covered solder at every slot of both rows, is still required).
     Pads are appended to `pads` for both."""
     spare = [dict(s) for s in spare]
     P = np.array([[p['x'], p['y']] for p in pads], float)
-    pm = print_mask(rgb)
+    pm = print_mask(rgb).astype(np.float32)      # once: _sample reads it thousands of times
     solder = common.pad_mask(rgb)
 
     def covered(q):
         x, y = to_px([q])[0]
         return bool(solder[int(round(min(max(y, 0), solder.shape[0] - 1))), int(round(min(max(x, 0), solder.shape[1] - 1)))])
-    cands = []
+
+    def found_of(c):
+        return [i for i in c['a'] + c['b'] if i is not None]
+
     chains = {0: _chains(P, 0), 1: _chains(P, 1)}
-    for axis in (0, 1):
-        cs = [c for c in _chains(P, axis, max_step=ROW_MAX_STEP) if len(c) >= DIP_ROW_PADS[0] - 2]
-        for ia in range(len(cs)):
-            for ib in range(ia + 1, len(cs)):
-                a, b = cs[ia], cs[ib]
-                across = abs(np.median(P[b][:, 1 - axis]) - np.median(P[a][:, 1 - axis]))
-                spacing = min(SPACINGS_MM, key=lambda s: abs(s - across))
-                if abs(spacing - across) > SPACING_TOL_MM:
-                    continue
-                for ra, rb in _facing_runs(P, a, b, axis, covered):
-                    if not DIP_ROW_PADS[0] <= len(ra) <= DIP_ROW_PADS[1]:
+    fps = []
+
+    def dips_in(Q, ids):
+        """DIPs among the points Q. ids[i] says what Q[i] is: ('pad', index
+        into pads) or ('spare', index into spare). The rows are chained from
+        the pads and, in the second pass, from spare blobs too."""
+        def real(i):
+            return ids[i][0] == 'pad'
+
+        def marked_faint(c):
+            q = Q[found_of(c)]
+            lo, hi = q.min(axis=0) - 1.0, q.max(axis=0) + 1.0
+            return any((lo <= np.asarray(f)).all() and (np.asarray(f) <= hi).all() for f in faint)
+
+        def candidate(ra, rb, axis, spacing):
+            if not DIP_ROW_PADS[0] <= len(ra) <= DIP_ROW_PADS[1]:
+                return None
+            fa, fb = [i for i in ra if i is not None], [i for i in rb if i is not None]
+            if min(len(fa), len(fb)) < len(ra) / 2:
+                return None                       # most of both rows' pads are found, or it is not a DIP
+            sa_, sb_ = outline_score(pm, to_px, Q[fa], Q[fb], axis), outline_score(pm, to_px, Q[fb], Q[fa], axis)
+            return {'axis': axis, 'a': ra, 'b': rb, 'spacing': spacing, 'outline': min(sa_, sb_), 'outlineStronger': max(sa_, sb_)}
+
+        cands = []
+        for axis in (0, 1):
+            cs = [c for c in _chains(Q, axis, max_step=ROW_MAX_STEP) if len(c) >= DIP_ROW_PADS[0] - 2]
+            for ia in range(len(cs)):
+                for ib in range(ia + 1, len(cs)):
+                    a, b = cs[ia], cs[ib]
+                    across = abs(np.median(Q[b][:, 1 - axis]) - np.median(Q[a][:, 1 - axis]))
+                    spacing = min(SPACINGS_MM, key=lambda s: abs(s - across))
+                    if abs(spacing - across) > SPACING_TOL_MM:
                         continue
-                    fa, fb = [i for i in ra if i is not None], [i for i in rb if i is not None]
-                    if min(len(fa), len(fb)) < len(ra) / 2:
-                        continue                # most of both rows' pads are found, or it is not a DIP
-                    score = min(outline_score(pm, to_px, P[fa], P[fb], axis), outline_score(pm, to_px, P[fb], P[fa], axis))
-                    cands.append({'axis': axis, 'a': ra, 'b': rb, 'spacing': spacing, 'outline': score})
-    cands.sort(key=lambda c: (-round(c['outline'], 2), -len(c['a']), c['spacing']))
-    used, fps = set(), []
-    for c in cands:
-        found = {i for i in c['a'] + c['b'] if i is not None}
-        if used & found or c['outline'] < OUTLINE_MIN:
-            continue
-        used |= found
-        missing = sum(i is None for i in c['a'] + c['b'])
-        c['a'], c['b'] = _complete(c, P, pads, spare, c['axis'])
-        P = np.array([[p['x'], p['y']] for p in pads], float)
-        fp = _dip(c, P, pads, pm, to_px)
-        fp['padsNotFound'] = missing
-        fp['padsInferred'] = sum(pads[i].get('source') == 'inferred' for i in fp['pads'])
-        fps.append(fp)
+                    for ra, rb in _facing_runs(Q, a, b, axis, covered, real=real):
+                        c = candidate(ra, rb, axis, spacing)
+                        if c is not None:
+                            cands.append(c)
+        cands.sort(key=lambda c: (-round(c['outline'], 2), -len(c['a']), c['spacing']))
+        used, out = set(), []
+        for c in cands:
+            if c['outline'] < OUTLINE_TRIM_BELOW:
+                c = _trim_to_outline(c, candidate, lambda i: i is not None and (real(i) or covered(Q[i])))
+            if used & set(found_of(c)):
+                # It runs into a DIP already taken (IC30's rows run on into the
+                # pads of the DIP above it): the slots taken are dropped, and the
+                # longest piece left, trimmed to found corners, is tried again.
+                c = _without(c, used, candidate, lambda i: i is not None and (real(i) or covered(Q[i])))
+                if c is None:
+                    continue
+            if c['outline'] < OUTLINE_MIN and not (c['outlineStronger'] >= OUTLINE_MIN and marked_faint(c)):
+                continue
+            c['faintPrint'] = c['outline'] < OUTLINE_MIN
+            used |= set(found_of(c))
+            c['missing'] = sum(i is None for i in c['a'] + c['b'])
+            for row in ('a', 'b'):
+                rowout = []
+                for i in c[row]:
+                    if i is not None:
+                        kind, k = ids[i]
+                        if kind == 'spare':          # a spare blob a DIP uses becomes its pad
+                            s_ = spare[k]
+                            s_['taken'] = True
+                            pads.append(_pad(s_, s_['x'], s_['y'], s_['face'], None, 'completion'))
+                            i = len(pads) - 1
+                        else:
+                            i = k
+                    rowout.append(i)
+                c[row] = rowout
+            out.append(c)
+        return out
+
+    def finish(cs):
+        for c in cs:
+            Pn = np.array([[p['x'], p['y']] for p in pads], float)
+            c['a'], c['b'] = _complete(c, Pn, pads, spare, c['axis'])
+            Pn = np.array([[p['x'], p['y']] for p in pads], float)
+            fp = _dip(c, Pn, pads, pm, to_px)
+            fp['padsNotFound'] = c['missing']
+            fp['faintPrint'] = c['faintPrint']
+            fp['padsInferred'] = sum(pads[i].get('source') == 'inferred' for i in fp['pads'])
+            fps.append(fp)
+
+    # Pass 1: the pads alone. Pass 2: the pads still free, with the spare
+    # blobs clear of every pad, so that a row of ragged solder with no pad of
+    # its own is found (IC30, and three DIPs right of the RAM block); it runs
+    # second so that a stray blob cannot break a row pass 1 chains from pads.
+    finish(dips_in(P, [('pad', i) for i in range(len(P))]))
+    taken = {i for f in fps for i in f['pads']}
+    free = [i for i in range(len(P)) if i not in taken]
+    extra = _clear_spare(P, spare)
+    ids = [('pad', i) for i in free] + [('spare', k) for k in extra]
+    Q = np.array([[pads[i]['x'], pads[i]['y']] for i in free] + [[spare[k]['x'], spare[k]['y']] for k in extra], float).reshape(-1, 2)
+    finish(dips_in(Q, ids))
+    used = {i for f in fps for i in f['pads'] if i < len(P)}
+    P = np.array([[p['x'], p['y']] for p in pads], float)
     # rows left over: connectors (a double row 2.54 mm apart, or eight pads
     # or more) and SIPs
     rest = []
@@ -780,6 +944,28 @@ def _pin_order(a, b, pin1):
     return first + second
 
 
+def _trim_marked(f, P, pins, at):
+    """A DIP the grouping made longer than it is (IC35's run has an end pad of
+    the parts above and below it): the print says how many pins it has, and
+    `at`, a point in its body, says where. Keeps the `pins` / 2 slots of both
+    rows centred on `at`; pin 1 is whatever a 'pin1' in the mark says, else
+    the first corner."""
+    n = f['pins'] // 2
+    a, b = f['pads'][:n], f['pads'][n:][::-1]
+    axis = 0 if f['axis'] == 'x' else 1
+    pitch = (P[a[-1]][axis] - P[a[0]][axis]) / (n - 1)
+    centre = (at[axis] - P[a[0]][axis]) / pitch
+    k = pins // 2
+    s = int(min(max(round(centre - (k - 1) / 2), 0), n - k))
+    a, b = a[s:s + k], b[s:s + k]
+    f['pads'] = _pin_order(a, b, ('a', 0))
+    f['pins'] = pins
+    f['pin1'] = P[f['pads'][0]].tolist()
+    f['pin1From'] = None
+    f['box'] = _box(P[f['pads']])
+    f['trimmedByHand'] = 2 * n
+
+
 def apply_marks(fps, pads, marks, to_board):
     """The references, and any pin 1, read from the print by hand: each mark
     is a point in I1's pixels inside its footprint."""
@@ -795,9 +981,16 @@ def apply_marks(fps, pads, marks, to_board):
         f = hits[0]
         if m.get('ref') is not None:
             f['ref'] = m['ref']
+        if m.get('unread'):              # the reference is printed and cannot be read: said, with why, never guessed
+            f['unread'] = m['reason']
         if 'kind' in m:                  # grouping got it wrong: the print says what it is
             f['kind'], f['pin1From'] = m['kind'], 'not marked: ' + m['reason']
             out.append({'ref': m.get('ref'), 'found': True, 'kind': f['kind'], 'pins': f['pins']})
+            continue
+        if 'pins' in m and f['kind'] == 'dip' and m['pins'] < f['pins']:
+            _trim_marked(f, P, m['pins'], q)
+        elif 'pins' in m and m['pins'] != f['pins']:
+            out.append({'ref': m.get('ref'), 'found': True, 'pins': 'the footprint has %d, the mark says %d and cannot add pads' % (f['pins'], m['pins'])})
             continue
         if 'pin1' in m:
             p1 = to_board([m['pin1']])[0]
@@ -965,10 +1158,13 @@ def main():
     i1 = common.read_rgb('I1')
     i2m = common.read_rgb('I2', mirror=True)
     reg = register_scans(i1, i2m, m['solderSeeds']['holes'], frame)
+    i2_height, i2_width = i2m.shape[:2]
     verdict = judge(reg['heldOutMm'], reg['holes'])
     drills, pads, pad_counts, spare = pads_and_drills(reg['faces'])
-    fps = group_footprints(pads, frame.to_px, i1, spare)
-    marked = apply_marks(fps, pads, m.get('footprints', {}).get('marks', []), frame.to_board)
+    footprint_marks = m.get('footprints', {}).get('marks', [])
+    faint = [tuple(frame.to_board([k['at']])[0]) for k in footprint_marks if k.get('outlineFaint')]
+    fps = group_footprints(pads, frame.to_px, i1, spare, faint)
+    marked = apply_marks(fps, pads, footprint_marks, frame.to_board)
     holes = mounting_holes(i1, frame, fj['holes'])
     shifts = [h['shiftLenMm'] for h in holes if 'shiftLenMm' in h]
     excluded = [{'hole': e['index'], 'at': reg['pairs'][e['index']]['top'], 'why': e['why']} for e in reg['excluded']]
@@ -979,6 +1175,14 @@ def main():
                   'y towards the front). Written by board_register.py; every figure here is a measurement made on the date of the journal entry that quotes it.'),
         'solder': {
             'model': reg['model'],
+            'params': reg['params'],
+            'transform': {
+                'what': ('The fitted map from I2 to the board frame, for any later task that draws the solder side registered: an I2 pixel '
+                         '(x, y), as scanned, is first flipped left to right, x_m = widthPx - 1 - x (common.read_rgb mirror=True), then '
+                         'common.transform(model, params, [[x_m, y]]) gives board millimetres. params are written unrounded. The cubic is '
+                         'a homography H, then a cubic in ((p - centre) / half) of the homography\'s output added in x and y (common._cubic_terms).'),
+                'source': 'I2', 'widthPx': i2_width, 'heightPx': i2_height, 'mirror': 'x_m = widthPx - 1 - x; y unchanged',
+            },
             'holes': reg['holes'],
             'heldOutMm': reg['heldOutMm'],
             'verdict': verdict,
@@ -999,26 +1203,36 @@ def main():
             },
             'matched': {
                 'what': 'Every matched hole, in the order the excluded list counts them: its blob on each face (axis ratio from second moments, area in I1 or I2 pixels) and its held-out error under the chosen model',
-                'columns': ['topAxis', 'topArea', 'bottomAxis', 'bottomArea', 'heldOutMm'],
-                'rows': [[p['blobs'][0]['axis'], p['blobs'][0]['area'], p['blobs'][1]['axis'], p['blobs'][1]['area'], p['heldOutMm']]
+                'columns': ['topAxis', 'topArea', 'bottomAxis', 'bottomArea', 'heldOutMm', 'kind', 'x', 'y'],
+                'kinds': 'blob: a solder blob on both faces; ring: an open ring on both; mixed: one of each. x and y: the hole on the component side, board millimetres (the chequerboard\'s folds are int(x // 20 + y // 20) % 2)',
+                'rows': [[p['blobs'][0]['axis'], p['blobs'][0]['area'], p['blobs'][1]['axis'], p['blobs'][1]['area'], p['heldOutMm'],
+                          {('solder', 'solder'): 'blob', ('ring', 'ring'): 'ring'}.get(tuple(p['kinds']), 'mixed'), p['top'][0], p['top'][1]]
                          for p in reg['pairs']],
             },
         },
-        'drills': [{k: d[k] for k in ('x', 'y', 'd', 'filled', 'spreadMm')} for d in drills],
+        'drills': [dict({k: d[k] for k in ('x', 'y', 'd', 'filled', 'top', 'bottom', 'spreadMm')},
+                        bottomPx=[i2_width - 1 - d['bottomPxMirrored'][0], d['bottomPxMirrored'][1]]) for d in drills],
+        'drillFaces': drill_faces(drills),
         'drillSpreadMm': common.stats([d['spreadMm'] for d in drills]),
         'pads': [{k: p[k] for k in ('x', 'y', 'w', 'h', 'shape', 'face', 'drill', 'source')} for p in pads],
         'padCounts': dict(pad_counts, total=len(pads), both=sum(p['face'] == 'both' for p in pads),
                           bySource={s: sum(p['source'] == s for p in pads) for s in ('drill', 'pair, not hole-shaped', 'one face', 'completion', 'inferred')},
                           inFootprints=len({i for f in fps for i in f['pads']})),
         'footprints': [{k: f.get(k) for k in ('ref', 'kind', 'pins', 'pin1', 'pin1From', 'pads', 'box', 'axis', 'rowSpacingMm', 'outline',
-                                              'padsNotFound', 'padsInferred')} for f in fps],
+                                              'padsNotFound', 'padsInferred', 'faintPrint', 'trimmedByHand', 'unread')} for f in fps],
         'footprintCounts': {'dip': len(dips), 'connector': sum(f['kind'] == 'connector' for f in fps), 'sip': sum(f['kind'] == 'sip' for f in fps),
                             'dipPin1': {str(k): sum(f['pin1From'] == k for f in dips) for k in ('print', 'square pad', 'marked by hand', None)},
-                            'withRef': sum(f['ref'] is not None for f in fps)},
+                            'withRef': sum(f['ref'] is not None for f in fps),
+                            'dipRefsRead': sum(f['ref'] is not None for f in dips), 'dipRefsUnread': sum(bool(f.get('unread')) for f in dips),
+                            'dipsWithNeither': sum(f['ref'] is None and not f.get('unread') for f in dips),
+                            'otherRefsRead': sum(f['ref'] is not None for f in fps if f['kind'] != 'dip')},
         'marks': marked,
         'holes': holes,
         'holeShiftMm': {'mean': float(np.mean(shifts)), 'max': float(np.max(shifts)), 'n': len(shifts),
                         'what': 'Each mounting hole fitted on its top rim (the outer edge of the grey crescent), against task 2\'s circle, which stopped at the lid seen through the hole'},
+        # Typed in by hand from the first run's printout on 4 October 2026: a
+        # dated historical record of a run whose code no longer exists, kept as
+        # measured (the journal quotes the same figures with the command).
         'firstRun': {
             'what': ('The first run on 4 October 2026, kept as measured. Its ring finder also took dark specks inside tinned pads, and letters of the print, '
                      'for open holes: 1167 rings on I1 and 945 on I2, where the run below finds 399 and 703. A speck beside its own pad made one hole two, '
@@ -1038,7 +1252,12 @@ def main():
     print("  fits: " + '; '.join(f"{k} {v['heldOutMm']['median']:.3f}/{v['heldOutMm']['p90']:.3f}/{v['heldOutMm']['max']:.3f}" for k, v in reg['fits'].items()))
     print(f"drills {len(drills)}, pads {len(pads)}, footprints {len(fps)} ({len(dips)} DIPs); holes shifted mean {np.mean(shifts):.3f}, max {np.max(shifts):.3f} mm")
     # Three places is a micron, far under anything judged; one record a line.
-    common.write_data('registration.json', result, places=3, rows_per_line=True)
+    # The fitted map's parameters are not rounded: a homography's terms are
+    # small numbers, and task 4 maps I2's copper through them.
+    params = result['solder'].pop('params')
+    out = common.plain(result, 3)
+    out['solder']['params'] = common.plain(params, None)
+    common.write_data('registration.json', out, places=None, rows_per_line=True)
     overlays(i1, reg, drills, pads, fps, holes, frame)
     return 3 if verdict == 'STOP' else 0
 

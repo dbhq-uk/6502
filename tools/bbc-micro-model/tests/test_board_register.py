@@ -215,8 +215,6 @@ def test_the_roundness_rule_never_looks_at_a_residual():
     assert out[1]['why'][0].startswith('top: area 0.50')
     assert out[3]['why'] == ['bottom: axis ratio 1.26 over 1.25']
     assert out[4]['why'][0].startswith('bottom: area 0.25')
-    # it takes no residuals: the same blobs give the same list whatever the fit did
-    assert 'residual' not in board_register.roundness_exclusions.__code__.co_varnames
 
 
 def test_second_moments_axis_ratio():
@@ -474,3 +472,205 @@ def test_a_dip_whose_end_pin_is_under_bridged_solder_keeps_its_pin_count(grouped
     pins, pin1 = truth['H']
     f = min((f for f in fps if f['kind'] == 'dip'), key=lambda f: math.hypot(f['pin1'][0] - pin1[0], f['pin1'][1] - pin1[1]))
     assert f['pins'] == pins, f
+
+
+def _pair_with_ragged_pads(jitter_mm, seed):
+    """The registration's made-up pair, with every 15th pad drawn as an
+    ellipse 1.35 times as long as wide (on the component side), and the
+    solder side's holes each moved by up to jitter_mm: the residuals change,
+    the blobs' shapes do not."""
+    pads, vias = hole_set()
+    n = len(pads) + len(vias)
+    rng = np.random.default_rng(seed)
+    moved = pads + rng.uniform(-jitter_mm, jitter_mm, pads.shape)
+    c1 = Canvas(SIZE, frame1().to_px, (SX + SY) / 2)
+    for k, p in enumerate(pads):
+        if k % 15 == 0:
+            c1.poly('pad', [(p[0] + 0.85 * math.cos(t), p[1] + 1.15 * math.sin(t)) for t in np.linspace(0, 2 * math.pi, 48, endpoint=False)])
+        else:
+            c1.disc('pad', p, 1.7)
+    for p in vias:
+        c1.disc('ring', p, 1.05)
+        c1.disc('hole', p, 0.5)
+    i1 = c1.render(['ring', 'hole', 'pad'], 11)
+    raw = draw_face(to_i2_raw, moved, vias, np.ones(n, bool), 13)
+    i2m = np.ascontiguousarray(raw[:, ::-1])
+    corners = [int(np.argmin(pads[:, 0] + pads[:, 1])), int(np.argmax(pads[:, 0] - pads[:, 1])),
+               int(np.argmin(pads[:, 0] - pads[:, 1])), int(np.argmax(pads[:, 0] + pads[:, 1]))]
+    seeds = [{'I1': frame1().to_px([pads[i]])[0].tolist(), 'I2mirrored': to_i2_mirrored([moved[i]])[0].tolist()} for i in corners]
+    r = board_register.register_scans(i1, i2m, seeds, frame1())
+    return r, {tuple(np.round(r['pairs'][e['index']]['top'], 2)) for e in r['excluded']}
+
+
+def test_the_outlier_rule_does_not_move_when_the_residuals_do():
+    """Moving the solder side's holes changes every residual and none of the
+    blobs: the holes the roundness rule leaves out must be the same ones."""
+    still, out_still = _pair_with_ragged_pads(0.0, 1)
+    moved, out_moved = _pair_with_ragged_pads(0.15, 2)
+    held = lambda r: np.array([p['heldOutMm'] for p in r['pairs']])  # noqa: E731
+    assert np.median(held(moved)) > 2 * np.median(held(still)), 'the residuals did change'
+    assert len(out_still) >= 10, 'the ragged pads are left out'
+    assert out_still == out_moved
+
+
+def test_a_tie_between_the_models_goes_to_the_affine():
+    def fits(a, c):
+        return {'affine': {'heldOutMm': {'median': a}}, 'cubic': {'heldOutMm': {'median': c}}}
+    assert board_register.choose_model(fits(0.120, 0.116)) == 'affine'      # 0.004 lower: a tie
+    assert board_register.choose_model(fits(0.120, 0.1151)) == 'affine'     # 0.0049
+    assert board_register.choose_model(fits(0.120, 0.114)) == 'cubic'       # 0.006
+    assert board_register.choose_model(fits(0.110, 0.114)) == 'affine'
+
+
+def test_the_saved_transform_reproduces_the_drills_solder_side():
+    """registration.json keeps the fitted map from I2 to the board frame:
+    a drill's I2 pixel, flipped as the record says and put through the
+    saved parameters, lands on that drill's bottom face to 0.001 mm."""
+    import json
+    r = json.loads((common.DATA / 'registration.json').read_text())
+    s, t = r['solder'], r['solder']['transform']
+    drills = r['drills']
+    assert len(drills) > 200
+    for d in drills[::97] + drills[-1:]:
+        x, y = d['bottomPx']
+        q = common.transform(s['model'], s['params'], [[t['widthPx'] - 1 - x, y]])[0]
+        assert math.hypot(q[0] - d['bottom'][0], q[1] - d['bottom'][1]) < 0.001, (d, q)
+
+
+# --- footprints the first grouping missed, from the review of 5 October 2026 ---------------
+
+def _spare_of(p):
+    return {'x': p['x'], 'y': p['y'], 'face': 'top', 'axis': p['axis'], 'square': p['square'], 'w': p['w'], 'h': p['h'], 'kind': 'solder',
+            'area': p['area'], 'hole': False}
+
+
+def _small_dip(pins=14, tail=0, outline_left=True, right='pads', stray=None, seed=7):
+    """One DIP down a small board, its left row discs and its right row 1.7 x
+    2.3 mm ellipses (ragged solder, as on I1's RAM block). right='spare':
+    the right row is left out of the pads and handed over as spare blobs
+    (what the hole finder's gates do to ragged solder); `tail` more pad
+    pairs are drawn past the far end, outside the printed outline; `stray`
+    is the slot of a spare blob 0.5 mm off its place along the row, with its
+    pad left out. Returns (footprints, pads, truth, to_px)."""
+    S = 15.75
+    to_px = lambda mm: np.asarray(mm, float).reshape(-1, 2) * S + 30  # noqa: E731
+    c = Canvas((700, 900), to_px, S)
+    n = pins // 2
+    x0, y0, spacing = 20.0, 10.0, 7.62
+    for k in range(n + tail):
+        y = y0 + k * PITCH
+        c.disc('pad', (x0, y), 1.7)
+        c.poly('pad', [(x0 + spacing + 0.85 * math.cos(t), y + 1.15 * math.sin(t)) for t in np.linspace(0, 2 * math.pi, 48, endpoint=False)])
+    top, bottom = y0 - 1.5, y0 + (n - 1) * PITCH + 1.5
+    c.line('print', (x0 + 1.1, top), (x0 + 1.1, bottom), 0.3) if outline_left else None
+    c.line('print', (x0 + spacing - 1.1, top), (x0 + spacing - 1.1, bottom), 0.3)
+    c.line('print', (x0 + 1.1, top), (x0 + spacing - 1.1, top), 0.3)
+    c.line('print', (x0 + 1.1, bottom), (x0 + spacing - 1.1, bottom), 0.3)
+    c.line('print', (x0 + 1.1, top + 0.0), (x0 + 3.0, top - 1.5 + 3.0), 0.3)    # pin 1's chamfer
+    rgb = c.render(['print', 'pad'], seed)
+    pads = board_register.pads_of_one_face(rgb, S, S, lambda px: (np.asarray(px, float).reshape(-1, 2) - 30) / S)
+    spare = []
+    if right == 'spare':
+        spare = [_spare_of(p) for p in pads if p['x'] > x0 + 3]
+        pads = [p for p in pads if p['x'] <= x0 + 3]
+    if stray is not None:
+        gone = [p for p in pads if p['x'] > x0 + 3 and abs(p['y'] - (y0 + stray * PITCH)) < 0.3]
+        pads = [p for p in pads if p not in gone]
+        spare = [dict(_spare_of(g), y=g['y'] + 0.5) for g in gone]
+    return board_register.group_footprints(pads, to_px, rgb, spare), pads, to_px
+
+
+def test_a_dip_whose_right_row_is_ragged_solder_with_no_pad_is_found():
+    fps, pads, _ = _small_dip(right='spare')
+    dips = [f for f in fps if f['kind'] == 'dip']
+    assert len(dips) == 1 and dips[0]['pins'] == 14, [(f['kind'], f['pins']) for f in fps]
+    assert sum(pads[i].get('source') == 'completion' for i in dips[0]['pads']) == 7
+    assert dips[0]['pin1From'] == 'print'
+
+
+def test_a_stray_blob_beside_a_row_does_not_break_the_row_the_pads_chain():
+    """IC68's case: a blob of ragged solder 0.5 mm off the place of the pad
+    it stands in for sat nearer than the next pad and broke the row in two,
+    losing the DIP. The pads alone chain first; blobs only join what is left."""
+    fps, pads, _ = _small_dip(stray=3)
+    dips = [f for f in fps if f['kind'] == 'dip']
+    assert len(dips) == 1 and dips[0]['pins'] == 14, [(f['kind'], f['pins']) for f in fps]
+
+
+def test_a_run_of_pads_longer_than_the_printed_outline_is_cut_back_to_it():
+    """IC48's case: fourteen pins, and the pads of the parts below it on the
+    same 2.54 mm grid made one 24-pin run whose outline scored 0.59."""
+    fps, pads, _ = _small_dip(pins=14, tail=5)
+    dips = [f for f in fps if f['kind'] == 'dip']
+    assert len(dips) == 1 and dips[0]['pins'] == 14, [(f['kind'], f['pins']) for f in fps]
+    ys = sorted(pads[i]['y'] for i in dips[0]['pads'])
+    assert ys[-1] < 10.0 + 7 * PITCH, 'the tail is not in it'
+
+
+def test_a_faint_outline_on_one_side_needs_a_mark_and_the_other_side_strong():
+    fps, _, to_px = _small_dip(pins=16, outline_left=False)
+    assert not [f for f in fps if f['kind'] == 'dip']
+    S = 15.75
+    lonely = (23.0, 18.0)
+    rgb = None
+    # the same board again, with the mark: group_footprints is given the point
+    fps2, pads2 = _small_dip_marked(pins=16, faint=[lonely])
+    dips = [f for f in fps2 if f['kind'] == 'dip']
+    assert len(dips) == 1 and dips[0]['pins'] == 16 and dips[0]['faintPrint'] is True
+    assert S and rgb is None and to_px
+
+
+def _small_dip_marked(pins, faint):
+    S = 15.75
+    to_px = lambda mm: np.asarray(mm, float).reshape(-1, 2) * S + 30  # noqa: E731
+    c = Canvas((700, 900), to_px, S)
+    n = pins // 2
+    x0, y0, spacing = 20.0, 10.0, 7.62
+    for k in range(n):
+        for x in (x0, x0 + spacing):
+            c.disc('pad', (x, y0 + k * PITCH), 1.7)
+    top, bottom = y0 - 1.5, y0 + (n - 1) * PITCH + 1.5
+    c.line('print', (x0 + spacing - 1.1, top), (x0 + spacing - 1.1, bottom), 0.3)
+    c.line('print', (x0 + 1.1, top), (x0 + spacing - 1.1, top), 0.3)
+    c.line('print', (x0 + 1.1, bottom), (x0 + spacing - 1.1, bottom), 0.3)
+    rgb = c.render(['print', 'pad'], 7)
+    pads = board_register.pads_of_one_face(rgb, S, S, lambda px: (np.asarray(px, float).reshape(-1, 2) - 30) / S)
+    return board_register.group_footprints(pads, to_px, rgb, [], faint), pads
+
+
+
+def _long_dip(n_found):
+    """18 pads in two rows of nine, rows 7.62 mm apart, as IC35's run."""
+    P = np.array([[20.0 + dx, 10.0 + k * PITCH] for k in range(9) for dx in (0.0, 7.62)])
+    f = {'kind': 'dip', 'pins': 18, 'axis': 'y', 'pads': list(range(0, 18, 2)) + list(range(17, 0, -2)), 'pin1': P[0].tolist(),
+         'pin1From': 'print', 'box': [0, 0, 1, 1], 'ref': None}
+    return f, P
+
+
+def test_a_marked_dip_is_cut_to_its_pins_round_the_marked_point():
+    f, P = _long_dip(18)
+    centre_y = 10.0 + 4 * PITCH           # the body's middle
+    board_register._trim_marked(f, P, 14, (23.8, centre_y))
+    assert f['pins'] == 14 and len(f['pads']) == 14 and f['trimmedByHand'] == 18
+    ys = sorted({round(float(P[i][1]), 2) for i in f['pads']})
+    assert ys[0] == round(10.0 + PITCH, 2) and ys[-1] == round(10.0 + 7 * PITCH, 2), 'one slot off each end'
+    assert f['pin1From'] is None, 'pin 1 is for the mark to say'
+
+
+def test_a_mark_that_says_unread_keeps_the_reason_and_gives_no_reference():
+    f, P = _long_dip(18)
+    f['box'] = [18.0, 8.0, 30.0, 34.0]
+    pads = [{'x': float(x), 'y': float(y)} for x, y in P]
+    out = board_register.apply_marks([f], pads, [{'ref': None, 'unread': True, 'at': [1, 1], 'reason': 'the label is under a blob of solder'}], lambda px: [(25.0, 20.0)])
+    assert f['ref'] is None and f['unread'] == 'the label is under a blob of solder'
+    assert out[0]['found'] is True
+
+
+def test_the_drill_faces_report_counts_open_and_filled_apart():
+    def d(x, y, filled, tx, ty, bx, by):
+        return {'x': x, 'y': y, 'filled': filled, 'top': [tx, ty], 'bottom': [bx, by]}
+    drills = [d(0, 0, False, 0.05, 0, -0.05, 0), d(1, 0, False, 1.25, 0, 0.75, 0),
+              d(2, 0, True, 2.0, 0.3, 2.0, -0.3), d(3, 0, True, 3.1, 0, 2.9, 0)]
+    r = board_register.drill_faces(drills)
+    assert r['open'] == {**r['open'], 'n': 2, 'over': 1}
+    assert r['filled']['n'] == 2 and r['filled']['over'] == 1 and r['filled']['share'] == 0.5
