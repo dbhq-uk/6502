@@ -1,7 +1,7 @@
 ---
 title: "The BBC Micro's small robustness items, from the reviews"
 date: 2026-10-13
-summary: "Issue #44 collected the small items the BBC Micro's reviews left. Four are done, each with a test that fails without the change: the VIA's catch-up guard is let go in a finally, SystemVia.VsyncInput and BbcBus.Irq are internal, and the CRTC gets tests for the cycle each event carries and for a handler that writes to the chip. Two were found already done on main, and one list could not be recovered. No cycle behaviour changed."
+summary: "One issue collected the small items the BBC Micro's reviews left. Four are done, each with a test that fails without the change: the VIA's catch-up guard is let go in a finally, SystemVia.VsyncInput and BbcBus.Irq are internal, and the CRTC gets tests for the cycle each event carries and for a handler that writes to the chip. Two were found already done on main, and one list could not be recovered. No cycle behaviour changed."
 order: 43
 ---
 
