@@ -1,7 +1,7 @@
 ---
 title: "The small notes from the NES models' reviews, worked through"
 date: 2026-10-13
-summary: "One issue collected six small notes left from the reviews of the NES models. Each was checked against current main first. The frame's corners are now checked against the marks they were fitted from. The journal wording was corrected in four places, and one of the four notes could not be reproduced. A model's status line no longer keeps its sentence about a missing console. U9's jobs are read from the redrawing's nets by a script and a test. Three claims on the page that no test touched now have one. One bound in a test turned out to do nothing and is now said to. Nothing on the page changed."
+summary: "One issue collected six small notes left from the reviews of the NES models. Each was checked against current main first. The frame's corners are now checked against the marks they were fitted from. The journal wording was corrected in four places, and one of the four notes could not be reproduced. A model's status line no longer keeps its sentence about a missing console. The sound chip's jobs on one board are read from the redrawing's nets by a script and a test. Three claims on the page that no test touched now have one. One bound in a test turned out to do nothing and is now said to. Nothing on the page changed."
 order: 39
 ---
 
