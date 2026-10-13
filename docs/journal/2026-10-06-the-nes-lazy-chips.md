@@ -21,6 +21,12 @@ This entry is kept as the work goes, one section a task. Task 1 builds the test
 before anything changes: the differential in `bench/nes-speed/differential`,
 extended, and its output from the code as it stood recorded as the baseline.
 
+**Note, 8 October 2026.** The baseline file this entry names, `4e9b92b.txt`, was
+replaced by `38c5544.txt` after the reset fix (#71) changed one field in the PPU's
+state report; the section "The baseline after the reset fix", at the end, says how
+and why. The commands in the sections written on 6 and 7 October keep the name of
+the file as it was on the day they were run; to run one now, use the new name.
+
 ## Task 1: the gate
 
 ### What was there
@@ -208,8 +214,10 @@ prints the first run that differs and which of its hashes, and exits 1, so each
 later task's gate is one command:
 
 ```
-dotnet run -c Release --project bench/nes-speed/differential -- --check bench/nes-speed/differential/baseline/4e9b92b.txt
+dotnet run -c Release --project bench/nes-speed/differential -- --check bench/nes-speed/differential/baseline/38c5544.txt
 ```
+
+(On 6 October the file was `4e9b92b.txt`; see the note at the top.)
 
 ### The baseline
 
@@ -234,7 +242,8 @@ seconds, at loads of 17.2 to 1.9), and `--check` with `--oracle` from 18:53 to
 `bench/nes-speed/differential/baseline/4e9b92b.txt`, named for the commit it was
 recorded at. That commit's `src/` still differs from `5e48505` only in the
 observer, the option, the state reports and the reports' skip reasons (`git diff
-5e48505 4e9b92b -- src`); the harness changed, not the machine.
+5e48505 4e9b92b -- src`); the harness changed, not the machine. (It was itself
+replaced on 8 October by `38c5544.txt`: see "The baseline after the reset fix".)
 
 ```
 dotnet run -c Release --project bench/nes-speed/differential -- bench/nes-speed/differential/baseline/4e9b92b.txt
@@ -1209,9 +1218,9 @@ work.
 
 **Built.** Task 1, the gate: the differential extended to hash every chip's
 whole state at every point where it can be seen, its synthetic cartridges, the
-baseline `bench/nes-speed/differential/baseline/4e9b92b.txt`, and the faults
-that show it can fail. Task 2, the PPU caught up on demand, with the same per-dot
-code, at the points in the table under "Where the bus catches it up". The gate
+baseline (`bench/nes-speed/differential/baseline/4e9b92b.txt` when it was
+written; `38c5544.txt` since 8 October), and the faults that show it can fail.
+Task 2, the PPU caught up on demand, with the same per-dot code, at the points in the table under "Where the bus catches it up". The gate
 gave output identical to the baseline, lazy and with the per-dot reference ("The
 gate", under task 2).
 
@@ -1252,21 +1261,23 @@ has a section on it, "The NES: the PPU caught up lazily".
 button in the middle of sprite evaluation can leave the PPU writing past
 secondary OAM. It is on `main` and was there before this work. It is fixed in its
 own pull request against `main`, #71 (branch `fix/nes-reset-evaluation`), which
-is not merged. **This branch does not contain the fix**: the differential still
-reports the one fault run that throws, as in "The faults pass again".
+was not merged when this section was written. **This branch did not contain the
+fix**: the differential still reported the one fault run that throws, as in "The
+faults pass again". #70 and #71 were both merged on 8 October (see the last
+section).
 
-**The baseline must be re-recorded after #71.** The fix makes the PPU's place in
-secondary OAM, `_secondaryIndex`, wrap at 32, and that field is in the PPU's
-state report, which the differential hashes at every PPU point. So once #71 is in
-the same tree as this branch's differential, `--check
-bench/nes-speed/differential/baseline/4e9b92b.txt` fails on the PPU's hash with
+**The baseline had to be re-recorded after #71, and was.** The fix makes the PPU's
+place in secondary OAM, `_secondaryIndex`, wrap at 32, and that field is in the PPU's
+state report, which the differential hashes at every PPU point. So with #71 in the
+same tree as this branch's differential, `--check
+bench/nes-speed/differential/baseline/4e9b92b.txt` would fail on the PPU's hash with
 no difference in behaviour behind it: when secondary OAM is full the index reads
 0 where it read 32. The final review found this; neither this entry nor #71's
-had seen it. After #71 lands, re-record the baseline from the merged tree with
-`--oracle` (the per-dot reference, Ruling S's mechanism), name the file for that
-commit, `--check` the lazy build against it, and say in the journal why the file
-changed. The recommended merge order is this pull request (#70) first, then #71,
-then one small follow-up on `main` that re-records the baseline.
+had seen it. #70 and #71 were merged, in that order, and then the baseline was
+re-recorded from the merged tree with `--oracle` (the per-dot reference, Ruling S's
+mechanism), the file named for that commit, the lazy build checked against it, and
+the old file removed. The last section, "The baseline after the reset fix", has the
+commands, the date and the counts.
 
 **The issues.** Tasks 3 and 4 are
 [#72, a fast scanline renderer for the lazy PPU](https://github.com/dbhq-uk/6502/issues/72),
@@ -1286,3 +1297,82 @@ state at each catch-up is exactly what advancing it every call would give, which
 a differential test over real programs proves. `docs/superpowers/specs/2026-10-05-nes-design.md`
 says, under its decisions, that "tick inside every bus call" no longer holds for
 the PPU.
+
+## The baseline after the reset fix
+
+8 October 2026. Issue [#74](https://github.com/dbhq-uk/6502/issues/74).
+
+**Why the file changed.** Pull request #71 (merged 8 October, 14:05 UTC) made the
+PPU's place in secondary OAM, `_secondaryIndex`, wrap at 32, as the chip's 5-bit
+counter does. That field is in the PPU's state report, so it is in the `ppu`
+hash the differential takes at every PPU point. When secondary OAM is full, the
+report held 32 before the fix and holds 0 after it. The PPU does the same thing
+either way; only the number it reports differs. So with #70 (the lazy PPU and the
+differential, merged 8 October, 13:43 UTC) and #71 in one tree, `--check` against
+`4e9b92b.txt` would fail on the `ppu` hash, and the failure would say nothing
+about the lazy PPU. The old file could not be the baseline any more.
+
+**Recorded** from `main` at `38c5544` (the merge of #71), with the per-dot
+reference, as the issue asked:
+
+```
+dotnet run -c Release --project bench/nes-speed/differential -- bench/nes-speed/differential/baseline/38c5544.txt --oracle
+```
+
+14:07:51 to 14:29:50 UTC, 21 minutes 58 seconds of wall clock and 13 minutes 38
+seconds of CPU, with the one-minute load average at 37.5 at the start and 135.5 at
+the end (a busy shared machine; the run of 6 October took 4 minutes 18 seconds at
+loads of 1.4 to 4.7). It wrote 332 runs, 90,387 bytes, the same size as the old
+file, with the same first line (`# nes-differential format 2 frames=150`), the
+same runs in the same order, and the same twelve fields in each line.
+
+**The lazy build against the new file**, run on the same tree (`--out` keeps the
+lazy build's own output):
+
+```
+dotnet run -c Release --project bench/nes-speed/differential -- --check bench/nes-speed/differential/baseline/38c5544.txt --out /tmp/rebase/lazy-new.txt
+```
+
+14:34:13 to 15:08:05 UTC, load 12.9 at the start and 39.6 at the end:
+`IDENTICAL: all 332 runs match`. The output was also byte for byte the file, by
+`cmp`.
+
+**The lazy build against the old file**, started at the same time as the check
+above, finished 15:07:06 UTC, load 26.6 at the end:
+
+```
+dotnet run -c Release --project bench/nes-speed/differential -- --check bench/nes-speed/differential/baseline/4e9b92b.txt --out /tmp/rebase/lazy-old.txt
+```
+
+`DIFFERENT: 116 of 332 runs differ`, the first being
+`blargg_apu_2005.07.30/01.len_ctr.nes NTSC`, on the `ppu` hash.
+
+**What differs, field by field.** A small script read the old file and the new
+one, split each line into its twelve fields (`steps`, `cycles`, `trace`, `sound`,
+`dropped`, `memory`, `cpu`, `points`, `ppu`, `apu`, `board`, `lines`) and compared
+them for each of the 332 run names (both files hold the same names). Of 332
+runs, 116 differ (57 NTSC and 59 PAL; 28 of them synthetic cartridges), and in
+every one of the 116 the only field that differs is `ppu`. In the other 216 runs
+every field is the same, `ppu` included. In all 332 runs `steps`, `cycles`,
+`trace`, `sound`, `dropped`, `memory`, `cpu`, `points`, `apu`, `board` and `lines`
+are the same. There is no frame-end or combined hash in the format that is
+derived from `ppu`, so nothing else moves with it. The same script on the lazy
+build's output against the old file gave the same counts, and against the new
+file it found no difference.
+
+**What this shows.** The pixels, the registers, the memory, the CPU's trace, the
+interrupt lines, the sound and the board are the same in every run as before the
+fix, and the PPU's own hash is the same in every run that does not reach the
+secondary OAM index's value of 32. The behaviour is unchanged for every run
+that does not fill secondary OAM; for those that do, the one difference is the
+number the state report shows for the index (0 where it showed 32). Which of
+the 116 runs fill secondary OAM was not instrumented; what the comparison gives
+is that they are the runs whose `ppu` hash moves, and that no other hash does.
+
+**What changed in the repository.** `baseline/38c5544.txt` was added and
+`baseline/4e9b92b.txt` removed. The paths were updated in
+`bench/nes-speed/README.md`, `docs/known-differences.md`, the spec and the plan.
+The earlier sections of this entry, which record what was run on 6 and 7 October,
+keep the name of the file as it was then, and the note at the top of the entry
+says it was replaced. `faults.py` and the tests name no baseline file; they take
+its path.
