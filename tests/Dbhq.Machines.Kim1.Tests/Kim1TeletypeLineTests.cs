@@ -243,4 +243,78 @@ public sealed class Kim1TeletypeLineTests
         tty.Drive(end, pb0: true, pb5: true);
         Tick(tty, end, end + (long)(2 * bit));
     }
+
+    /// <summary>
+    /// Reading what the printer has decoded between cycles brings it up to
+    /// the cycle the machine has run, and no further: a key queued since then
+    /// has not had a cycle to start on, so it does not start on or before
+    /// that cycle.
+    /// </summary>
+    [Fact]
+    public void CatchingUpDoesNotStartAKeyQueuedSinceTheLastCycle()
+    {
+        var tty = new Kim1Teletype();
+        tty.Drive(1, pb0: true, pb5: false);
+        tty.Advance(100);
+
+        tty.Send('A');
+        tty.CatchUp(100);
+        Assert.True(tty.KeyboardMark, "the key started on a cycle that has already run");
+        Assert.False(tty.Sending);
+        Assert.Equal(1, tty.Queued);
+        Assert.True(tty.Due <= 101, "the terminal would not be called on the next cycle");
+
+        tty.Advance(101);
+        Assert.False(tty.KeyboardMark);
+        Assert.True(tty.Sending);
+    }
+
+    /// <summary>
+    /// The quiet time runs from the end of what the printer last heard: for a
+    /// good character, the middle of its stop bit, where the receiver reads it.
+    /// </summary>
+    [Fact]
+    public void TheKeyboardWaitsFourBitsFromTheMiddleOfTheMonitorsLastStopBit()
+    {
+        var tty = new Kim1Teletype();
+        DriveCharacter(tty, 1_000, '\0', Bit110, stopMark: true);
+        Assert.Equal("\0", tty.Drain());
+
+        tty.Send('A');
+        long started = FirstCycleSending(tty, 119_182, 300_000);
+        long expected = 1_000 + (long)(9.5 * Bit110) + (long)(4 * Bit110);
+        Assert.InRange(started, expected - 1, expected + 1);
+    }
+
+    /// <summary>
+    /// After a framing error the printer gives up at the middle of the bad
+    /// stop bit, but the line is not quiet until it has gone back to a mark.
+    /// </summary>
+    [Fact]
+    public void TheKeyboardWaitsFourBitsFromTheLineReturningToAMarkAfterAFramingError()
+    {
+        var tty = new Kim1Teletype();
+        DriveCharacter(tty, 1_000, 'X', Bit110, stopMark: false);
+        Assert.Equal(1, tty.FramingErrors);
+
+        tty.Send('A');
+        long started = FirstCycleSending(tty, 119_182, 300_000);
+        long expected = 1_000 + (long)Math.Round(11 * Bit110) + (long)(4 * Bit110);
+        Assert.InRange(started, expected - 1, expected + 1);
+    }
+
+    /// <summary>Runs the teletype a cycle at a time and returns the first cycle on which its keyboard has a character on the line.</summary>
+    private static long FirstCycleSending(Kim1Teletype tty, long from, long to)
+    {
+        for (long c = from; c <= to; c++)
+        {
+            tty.Advance(c);
+            if (tty.Sending)
+            {
+                return c;
+            }
+        }
+
+        return -1;
+    }
 }

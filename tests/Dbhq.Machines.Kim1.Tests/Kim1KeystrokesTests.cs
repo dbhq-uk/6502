@@ -78,4 +78,90 @@ public sealed class Kim1KeystrokesTests
         keys.RunUntilIdle();
         Assert.Equal("000000", machine.ReadDisplay());
     }
+
+    /// <summary>
+    /// The page can press a key on the keypad and type at the teletype in one
+    /// go. The keypad goes first, and the teletype's key is held until the last
+    /// tap has been up for its rest.
+    /// </summary>
+    [Fact]
+    public void TeletypeKeysWaitForTheKeypadTapsQueuedBeforeThem()
+    {
+        var machine = new Kim1Session().Machine;
+        machine.Mode = Kim1Mode.Teletype;
+        var keys = new Kim1Keystrokes(machine);
+
+        keys.Tap("RS");
+        keys.TypeAtTeletype("\u007f");
+        Assert.Equal(1, keys.HeldForTeletype);
+        Assert.False(keys.Idle, "idle with a key still held for the teletype");
+
+        keys.Run(2 * Hold - 100);
+        Assert.Equal(1, keys.HeldForTeletype);
+        Assert.Equal(0, machine.Teletype.Queued);
+        Assert.False(machine.Teletype.Sending);
+
+        keys.Run(200);
+        Assert.Equal(0, keys.HeldForTeletype);
+        Assert.True(machine.Teletype.Queued == 1 || machine.Teletype.Sending, "the key was not handed to the teletype");
+
+        // And the monitor, which was reset by RS and had time to start, answers it.
+        keys.RunUntilIdle();
+        do
+        {
+            machine.Run(10_000);
+        }
+        while (!machine.Teletype.Idle(machine.Cycles));
+        Assert.Contains("KIM", machine.ReadTeletype());
+    }
+
+    [Fact]
+    public void TeletypeKeysWithNoTapsBeforeThemGoOnTheNextRun()
+    {
+        var machine = new Kim1Session().Machine;
+        var keys = new Kim1Keystrokes(machine);
+
+        keys.TypeAtTeletype("A");
+        keys.Run(1);
+        Assert.Equal(0, keys.HeldForTeletype);
+        Assert.True(machine.Teletype.Queued == 1 || machine.Teletype.Sending);
+
+        // A held key can be dropped, as a terminal swapped for another drops its own.
+        keys.Tap("RS");
+        keys.TypeAtTeletype("B");
+        keys.DropHeldForTeletype();
+        Assert.Equal(0, keys.HeldForTeletype);
+    }
+
+    /// <summary>
+    /// Stopping a running program with ST and typing at the teletype in one go:
+    /// the monitor takes a moment to start printing KIM, and a character sent
+    /// into that moment is garbled, which the teletype's quiet-line rule cannot
+    /// prevent because the answer has not begun. Held until ST is done, the
+    /// characters arrive after the answer.
+    /// </summary>
+    [Fact]
+    public void AStopKeyAndTypingQueuedTogetherAreNotGarbled()
+    {
+        var kim = new Kim1Session();
+        kim.Machine.Mode = Kim1Mode.Teletype;
+        kim.Keys("[RS]");
+        kim.Type("[RUBOUT]");
+        kim.Type("17FA[SPACE]00.1C.");
+        kim.Type("0200[SPACE]AD.10.02.18.6D.11.02.8D.12.02.4C.0A.02.");
+        kim.Type("0210[SPACE]27.15.");
+        kim.Type("0200[SPACE]G");
+
+        kim.Keystrokes.Tap("ST");
+        kim.Keystrokes.TypeAtTeletype(Kim1Teletype.Parse("0212[SPACE]"));
+        do
+        {
+            kim.Keystrokes.Run(10_000);
+        }
+        while (!kim.Keystrokes.Idle || !kim.Machine.Teletype.Idle(kim.Machine.Cycles));
+        kim.Print();
+
+        Assert.Equal(["KIM", "020A 4C 0212", "0212 3C"], kim.Paper.Last(3));
+        Assert.Equal(0, kim.Machine.Teletype.FramingErrors);
+    }
 }

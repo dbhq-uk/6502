@@ -229,7 +229,7 @@ public sealed class Kim1Teletype
     public void ClearQueue()
     {
         _queue.Clear();
-        _due = ComputeDue();
+        _due = Refresh();
     }
 
     /// <summary>Everything the printer has decoded since the last call, as it came: NULs, CR and LF included.</summary>
@@ -264,9 +264,22 @@ public sealed class Kim1Teletype
             _due = ComputeDue();
         }
 
-        while (_due <= cycle)
+        CatchUp(cycle);
+    }
+
+    /// <summary>
+    /// Takes every edge and sample that has fallen due by
+    /// <paramref name="cycle"/>, which the machine has already run, as
+    /// <see cref="Advance"/> does, except that a key queued since the last
+    /// cycle stays unstarted: it was queued after <paramref name="cycle"/>, so
+    /// it may not go on or before it. For reading what the printer has decoded
+    /// between cycles.
+    /// </summary>
+    public void CatchUp(long cycle)
+    {
+        while (ComputeDue() <= cycle)
         {
-            long due = _due;
+            long due = ComputeDue();
             if (due == _nextSendEdge)
             {
                 SendEdge(due);
@@ -279,9 +292,9 @@ public sealed class Kim1Teletype
             {
                 StartSending(due);
             }
-
-            _due = ComputeDue();
         }
+
+        _due = Refresh();
     }
 
     /// <summary>
@@ -291,11 +304,11 @@ public sealed class Kim1Teletype
     /// </summary>
     public void Drive(long cycle, bool pb0, bool pb5)
     {
-        Advance(cycle);
+        CatchUp(cycle);
         _pb0 = pb0;
         _pb5 = pb5;
         UpdateOutput(cycle);
-        _due = ComputeDue();
+        _due = Refresh();
     }
 
     private long BitStart(long start, int bit) => start + (long)bit * 1_000_000 / Baud;
@@ -306,11 +319,15 @@ public sealed class Kim1Teletype
 
     private long QuietUntil() => LastActivity() + QuietBitsCycles;
 
+    // What Due says: a key queued since the last cycle is due on the next one,
+    // whatever it is that comes first after that.
+    private long Refresh() => _queuedAt == NextCycle && _queue.Count > 0 ? NextCycle : ComputeDue();
+
     private long ComputeDue() => Math.Min(Math.Min(_nextSendEdge, _nextSample), NextStart());
 
     private long NextStart()
     {
-        if (_queue.Count == 0 || _sending >= 0 || _receiving)
+        if (_queue.Count == 0 || _sending >= 0 || _receiving || _queuedAt == NextCycle)
         {
             return Never;
         }

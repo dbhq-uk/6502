@@ -88,11 +88,13 @@ public sealed class Kim1Machine
     /// <summary>
     /// Everything the teletype has printed since the last call, as it came
     /// off the line. The printer is brought up to the cycle the machine is on
-    /// first, so a character whose stop bit has been read is in it.
+    /// first, so a character whose stop bit has been read is in it. A key
+    /// queued since that cycle is not started by this: it goes on the next
+    /// cycle the machine runs.
     /// </summary>
     public string ReadTeletype()
     {
-        Bus.Teletype.Advance(Bus.Cycles);
+        Bus.Teletype.CatchUp(Bus.Cycles);
         return Bus.Teletype.Drain();
     }
 

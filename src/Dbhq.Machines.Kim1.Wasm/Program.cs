@@ -66,23 +66,38 @@ public static partial class Kim1Host
     [JSExport]
     public static void SetTeletypeMode(bool on) => Machine.Mode = on ? Kim1Mode.Teletype : Kim1Mode.Keypad;
 
-    /// <summary>Puts a terminal of <paramref name="baud"/> bits a second on the loops in place of the one there. Keys still queued are dropped.</summary>
+    /// <summary>
+    /// Puts a terminal of <paramref name="baud"/> bits a second on the loops in place of the one there. Keys still queued are dropped.
+    /// A speed outside the 50 to 9600 a teletype runs at is refused, so the machine is left as it was.
+    /// </summary>
     [JSExport]
-    public static void SetTeletypeBaud(int baud) => Machine.Teletype = new Kim1Teletype(baud);
+    public static void SetTeletypeBaud(int baud)
+    {
+        if (baud is < 50 or > 9600)
+        {
+            throw new ArgumentOutOfRangeException(nameof(baud), baud, "a teletype runs between 50 and 9600 baud");
+        }
+
+        Keys.DropHeldForTeletype();
+        Machine.Teletype = new Kim1Teletype(baud);
+    }
 
     /// <summary>The terminal's speed, in bits a second.</summary>
     [JSExport]
     public static int TeletypeBaud() => Machine.Teletype.Baud;
 
-    /// <summary>Queues characters at the teletype's keyboard, sent as bits at its speed when the line is quiet (Kim1Teletype).</summary>
+    /// <summary>
+    /// Queues characters at the teletype's keyboard, sent as bits at its speed when the line is quiet (Kim1Teletype),
+    /// and not before the keypad taps already queued have been played (Kim1Keystrokes.TypeAtTeletype).
+    /// </summary>
     [JSExport]
-    public static void TeletypeSend(string text) => Machine.Teletype.Send(text);
+    public static void TeletypeSend(string text) => Keys.TypeAtTeletype(text);
 
     /// <summary>Everything the teletype has printed since the last call, as it came off the line: CR, LF and NULs included.</summary>
     [JSExport]
     public static string TeletypePrinted() => Machine.ReadTeletype();
 
-    /// <summary>True when no key is queued or on the line and the monitor has stopped printing.</summary>
+    /// <summary>True when no key is held, queued or on the line and the monitor has stopped printing.</summary>
     [JSExport]
-    public static bool TeletypeIdle() => Machine.Teletype.Idle(Machine.Cycles);
+    public static bool TeletypeIdle() => Keys.HeldForTeletype == 0 && Machine.Teletype.Idle(Machine.Cycles);
 }

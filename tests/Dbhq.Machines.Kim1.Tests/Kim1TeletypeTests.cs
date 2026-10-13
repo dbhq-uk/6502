@@ -108,6 +108,7 @@ public sealed class Kim1TeletypeTests(ITestOutputHelper output)
 
         var kim = new Kim1Session();
         kim.Machine.Mode = Kim1Mode.Teletype;
+        string lastLine = "";
         foreach (JsonElement step in steps)
         {
             long before = kim.Machine.Cycles;
@@ -125,6 +126,7 @@ public sealed class Kim1TeletypeTests(ITestOutputHelper output)
             }
 
             IReadOnlyList<string> shown = kim.Paper.Last(prints.Length);
+            lastLine = prints[^1];
             output.WriteLine($"{keypad} {type}: {kim.Machine.Cycles - before:N0} cycles");
             Assert.True(Kim1Session.Matches(prints, shown), $"after {keypad} {type}: the page promises \"{string.Join(" / ", prints)}\", the paper shows \"{string.Join(" / ", shown)}\"");
         }
@@ -134,6 +136,13 @@ public sealed class Kim1TeletypeTests(ITestOutputHelper output)
 
         // The program really ran: the sum is in RAM where it stored it.
         Assert.Equal(0x3C, kim.Machine.Bus.Peek(0x0212));
+
+        // Open the switch and the monitor hands back to the keypad, whose digits
+        // show the cell the teletype last opened: the last line the page promises.
+        // The site's browser check expects the same digits, worked out from the same file.
+        kim.Machine.Mode = Kim1Mode.Keypad;
+        kim.Machine.Run(100_000);
+        Assert.True(Kim1Session.Matches(lastLine, kim.Display), $"with the switch open the digits show \"{kim.Display}\", not \"{lastLine}\"");
     }
 
     /// <summary>
@@ -321,5 +330,25 @@ public sealed class Kim1TeletypeTests(ITestOutputHelper output)
         kim.Machine.Mode = Kim1Mode.Keypad;
         kim.Machine.Run(100_000);
         Assert.Equal("0200 00", kim.Display);
+    }
+
+    /// <summary>
+    /// The page reads the paper every frame, between cycles. Doing so must not
+    /// start a key typed since the last cycle on that cycle, which has run.
+    /// </summary>
+    [Fact]
+    public void ReadingThePaperDoesNotStartAKeyOnACycleThatHasAlreadyRun()
+    {
+        var kim = new Kim1Session().LogOn();
+        kim.Machine.Run(1_000_000);
+
+        kim.Machine.Teletype.Send('A');
+        kim.Machine.ReadTeletype();
+        Assert.False(kim.Machine.Teletype.Sending, "reading the paper started the key");
+        Assert.True(kim.Machine.Teletype.KeyboardMark);
+
+        kim.Machine.Run(1);
+        Assert.True(kim.Machine.Teletype.Sending);
+        Assert.False(kim.Machine.Teletype.KeyboardMark, "the key did not start on the cycle after it was typed");
     }
 }
