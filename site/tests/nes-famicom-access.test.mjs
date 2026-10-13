@@ -89,10 +89,9 @@ test('a count that goes down is a new machine: no rate, and the new counts are t
   assert.deepEqual(s.sample(), { ppu: { moved: true, perSecond: 400 }, apu: { moved: false, perSecond: 0 }, pad1: { moved: true, perSecond: 8 }, pad2: { moved: false, perSecond: 0 } });
 });
 
-test('the difference is taken as a signed 32-bit number, (b - a) | 0, as the page\'s script says a reader takes it', async () => {
+test('the page\'s script says a reader takes the difference as a signed 32-bit number, (b - a) | 0', async () => {
+  // The expression the sampler uses, (after[i] - before[i]) | 0, lives in ../src/models/access.mjs and access.test.mjs holds it there;
+  // this test holds only the NES page's script, which says how a reader takes it.
   const fs = await import('node:fs');
-  const src = fs.readFileSync(new URL('../src/models/nes-famicom-access.mjs', import.meta.url), 'utf8');
-  assert.match(src, /\(after\[i\] - before\[i\]\) \| 0/);
-  assert.doesNotMatch(src, />>> 0/);
   assert.match(fs.readFileSync(new URL('../public/nes.js', import.meta.url), 'utf8'), /\(b - a\) \| 0/);
 });

@@ -10,7 +10,7 @@ import { REPO_ROOT } from '../src/lib/registry.mjs';
 // the NES's, lifted out of nes-famicom-access.mjs by task 7 of the BBC Micro
 // models plan (re-plan of 13 October 2026), taking the list of counted chips.
 // The NES binds its own list and keeps its exports, and its tests
-// (nes-famicom-access.test.mjs) run unedited; these hold the shared code and
+// (nes-famicom-access.test.mjs) still pass, one of them edited after review; these hold the shared code and
 // the BBC Micro's use of it.
 
 // BbcChip's members, in its order, read from the C#: the host hands the counts in this order.
