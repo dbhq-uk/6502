@@ -2,7 +2,7 @@
 title: "The NES panel tests waited for a count of turns, not for the page"
 date: 2026-10-13
 summary: "Two NES panel tests failed once each in CI with the panel still loading. The helper that waits for Start spun a fixed number of event-loop turns, which is not a wait when the page's start-up does real work. It now waits for the state, with a time limit, and a slowed fetch shows the old loop fails and the new wait does not."
-order: 43
+order: 44
 ---
 
 # 13 October 2026: the NES panel tests waited for a count of turns, not for the page
