@@ -851,9 +851,15 @@ cost. This is reasoned, not measured: the browser bench runs one game only.
 (`bench/nes-speed/differential`, its README) compares the lazy build with the
 build before the work at every point where a chip can be seen, over the pinned
 test ROMs and its own synthetic cartridges in both regions, against
-`baseline/4e9b92b.txt`. `NesOptions.PerDotReference` catches the PPU up every
-cycle; `PpuCatchUpTests`, `CatchUpScenes` and `NesBusTests` use it as the
-oracle for the lazy build.
+`baseline/fae4b62.txt` (format 4: it also hashes the picture as far as it is
+drawn at every point where the PPU can be seen, and its homebrew and synthetic
+runs press reset a second time on a chosen PAL dot phase; twelve of its synthetic
+cartridges scroll the background alone and twelve keep a few sprites on, for the
+fast scanline renderer). `NesOptions.PerDotReference`
+catches the PPU up every cycle; `PpuCatchUpTests`, `CatchUpScenes` and
+`NesBusTests` use it as the oracle for the lazy build, and `PpuDotSceneTests`
+holds the lazy PPU to the per-dot one with a register access on every dot of a
+line.
 
 ## The NES: the PPU's picture, where the model stops
 
@@ -909,6 +915,23 @@ which is close to what the sheet says but not checked against a ROM:
 
 **OAM does not decay**, and the 2C02G's OAM corruption on some OAMADDR writes
 is not modelled (`ppu.md` section 4).
+
+**The reset button in the middle of sprite evaluation.** The sheet says what a
+reset does to the registers (`ppu.md` section 12) and says nothing of sprite
+evaluation. The model's `Ppu.Reset` clears the count of sprites found and the
+sprites on the line, and keeps the rest of evaluation as it was: the sprite and
+byte being read, the place in secondary OAM, whether eight are found and whether
+the search is over. Evaluation starts afresh at dot 1 of each visible line, so
+the kept state only matters if rendering is switched on after dot 1, and then it
+carries on from where the reset left it, for the rest of that line. What the real
+chip does there is not known. The place in secondary OAM is a counter of 5 bits
+that wraps at 32, as the chip's does, so the writes can never go outside the 32
+bytes. Until 6 October 2026 it did not wrap, and this case threw
+`IndexOutOfRangeException` and stopped the machine
+(`TheResetButtonInTheMiddleOfEvaluationLeavesItSafeAndTheNextLineClean`). It was
+chosen over clearing all of evaluation in `Ppu.Reset`, which would have hidden
+this one path and left the next one: the wrap makes the write safe whatever
+state the counter is in, and changes nothing on any run that does not reach it.
 
 ## The NES: the sound unit, where the model stops
 
