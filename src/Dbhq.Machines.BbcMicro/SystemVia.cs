@@ -96,9 +96,10 @@ public sealed class SystemVia : Via6522
     /// <summary>
     /// The 6845's VSYNC output, which drives CA1: for a system VIA on its own. In a machine the
     /// CRTC drives CA1 (<see cref="BbcBus.Crtc"/>), and a level set here is overwritten at its
-    /// next edge.
+    /// next edge, so it is internal: the tests drive it, and nothing outside the assembly can
+    /// put CA1 out of step with the CRTC.
     /// </summary>
-    public bool VsyncInput
+    internal bool VsyncInput
     {
         set => SetCa1(value);
     }
