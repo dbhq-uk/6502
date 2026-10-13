@@ -1584,3 +1584,60 @@ The entry, `site/src/models/bbc-micro-board.js`: `createStage(root, stageOptions
 - The first draft of the note said the I5 comparison "failed too" in a sentence about the copper that did not say it was traced to look at, and the print's limit did the same; the copper sentences test found both.
 - The first draft of the legend's words for the serial ULA and the video ULA said the processor "writes to" them; the counters count a read of a write-only chip too (`bus.md` s1f), so every counted chip's words now say "reads or writes".
 - The first pytest data held URLs, which `mirrors.test.mjs` would have failed in a `.py` under `tools/`; they were made plain strings before the site's tests were run.
+
+## Task 8: the outside measured: keys, case, profile and ports (13 October 2026)
+
+Task 8 measures the outside model: which K1 keycap is which key, where the keys, the lights, the opening and the badge strip sit in the case, how high the key tops stand, and where the rear ports and the underside connectors are. Four scripts do it (`keys.py`, `case_register.py`, `case_profile.py`, `case_parts.py`, run in that order by `run-case.sh`), and they write `data/keys.json`, `data/case.json` and `site/src/models/bbc-micro-case-parts.mjs`, which no machine claims (that is task 9b). The NES's task 8 is the precedent.
+
+### The inputs
+
+Fetched by hand on 13 October 2026 into `~/bbc-model-inputs`, outside the repository, each into its own empty folder first:
+
+| Input | From | Check |
+|---|---|---|
+| O1, O2, O3 | Commons, again | Commons' API (`prop=imageinfo`, `iiprop=url\|size\|sha1\|extmetadata`): each file's SHA-1 is Commons', and its SHA-256 is the one recorded on 4 October |
+| O4, O5 | Commons: `File:BBC_Micro.jpeg`, `File:BBC_Micro_left.jpeg` | The same API: `LicenseShortName` "Public domain" for both, the author "StuartBrady assumed (based on copyright claims)", each SHA-1 Commons'; SHA-256 new, in `sources.json` and `models.md` |
+| O8-I, O8-H | Chris's Acorns, `Pics/BBCB7I.jpg` (underside) and `Pics/BBCB7H.jpg` (rear), 640 px wide | CC BY-SA 3.0 as the site states, as for I6. Not committed; credited. The site is now an archived copy hosted by The Centre for Computing History |
+| K1 | The fork, `dbhq-uk/bbc-keyboard`, at `5ec53df5`: `gh api -H "Accept: application/vnd.github.raw" "repos/dbhq-uk/bbc-keyboard/contents/KiCad/bbc-keyboard/bbc-keyboard.kicad_pcb?ref=5ec53df566c77424caa6be827d0831da3916ecfa"` and the LICENSE the same way | The fork's API says it is a fork of `dominicbeesley/bbc-keyboard`, MIT; the file's git blob SHA-1 is the one the API lists, its SHA-256 the one task 0 recorded from the original. Nothing was fetched from the original repository. `sources.json` now names the fork |
+| P-TE_1757819 | TE Connectivity's drawing 1757819 (Amplimite plugs, size 1 to 5), the source German Wikipedia's D-Sub article cites for its sizes | Read for one fact: shell size 2, 15 positions, dimension C (the mounting holes' spacing) 1.307 to 1.317 inch, 33.20 to 33.45 mm |
+
+**K2 is dropped.** `https://www.thingiverse.com/thing:4867915` and its `/zip` answered with HTTP 403 and a "Just a moment..." challenge page, and Thingiverse's API answered 403 too; its API needs a token tied to an account. The plan says to drop the cross-check if the download needs a login, and not to work round it, so K2 is not used and nothing waits on it.
+
+### Decisions, and what they were chosen over
+
+- **Task 8's marks are in a file of their own,** `data/case-marks.json`, because `marks.json` is pinned by hash to task 5's run and a site test holds it there. Chosen over changing that pin.
+- **Keys by reference, checked by value.** Each K1 footprint is mapped to the machine's key by its reference (`K1_KEYS`), and the value K1 prints on it must be the one the table expects, so a mistyped row fails. K1 has 74 keycaps: the 72 machine keys, BREAK, and a second SHIFT; O1 shows a SHIFT at each end of the bottom letter row, so the plan's `Shift2` exists.
+- **No legend in `keys.json`.** The model draws `LEGENDS[name]` from `bbc-keys.js`, so the legends cannot drift from the on-screen keys; a copy here could.
+- **O3's points are its legends, found in code,** not marks by hand: the middle of the bounding box of each legend's light pixels, for the 26 letters and the ten function keys. A legend is printed in the middle of its keycap's top. The bounding box, not the centroid: a centroid sits where the ink is, which for L, J or F is off the middle.
+- **The keys are placed by triangulation, not by O1's top.** O1's registration on the case top's four corners is exact for the top's plane only; the key tops are not in it. So the keys, the lights and the key tops' height come from one camera fitted to O4 and O5, and K1's frame is put in the case by the turn and shift that take the opening's two front corners, triangulated, onto the same corners read on O1's top. Chosen over reading the keys on O1's top, which the plan's recorded row shows is a few per cent off scale.
+- **O4 and O5 have painted backgrounds.** Their backgrounds are painted white, and the paint cuts across the case's front corners at an angle. So no point on the case's outline is used from them: only the legends, the opening's front corners and the lights.
+- **One focal length, a principal point each.** Both photographs are crops of the camera's 2048 by 1536 frame (their Exif's size) by amounts no record gives, so each principal point is free. A soft L1 loss of scale 2 px keeps a legend found wrongly from pulling the fit. A radial distortion term was tried in a look run and moved nothing that mattered (the opening's corners by under a millimetre), so it is not in the method.
+- **The rear's scale is the 15-way D's posts,** as the plan says: 33.325 mm, the middle of TE's 33.20 to 33.45 mm. The posts stand in the D's mounting holes, which a plug and its socket share. The D's outer width was not used: TE's figure is the plug's, and the socket's D is larger. Heights are read on the rear face's own height (its top at 73 mm, its bottom at the feet's typical 5 mm), because O2 looks down on the rear and a scale taken across would read heights short.
+
+### Task 8's method fixed, and its checks
+
+The plan's task 8 note gained a dated block, "Fixed on 13 October 2026, by task 8's build", with each check: the keys' mapping (a key K1 lacks is a STOP); O1 to K1 on the plan's row (task 0's marks again, not a new check); O3 to K1 on the same row, recorded; the front edge's parallax check **not measurable**, decided from h alone before any corrected width, because no h independent of the 415 mm exists here (K2 unobtainable, O1 without Exif and looking almost straight down with its case's base unseen, O4's and O5's camera another camera, the key fit's own camera ruled out by the plan); the side profile's check point, the key A, left out of the camera fit and triangulated, within 2.0 mm of K1's place on the key plane, else the typical profile; d recorded with its standard error; the case top's plan size recorded; and the rear ports, each scored port within 2.0 mm of its socket's x plus the board's offset, on the D's scale.
+
+Three things were seen before the method was fixed, and are said here:
+
+- **O3 to K1's figure.** While the legend finder was being written, one development run printed O3's held-out figure. That row is recorded, not a stop, and its numbers were the plan's since 4 October; but the method that gives it was chosen after the figure was seen.
+- **The opening's two front corners disagree in height by about 5 mm** once the cameras are fitted (look runs), though the case top is level. Each corner moves about 0.2 to 0.5 mm in height for a pixel of its mark, so 5 mm is more than marking noise. Why was not found. It goes into d's standard error, and it means a pass of the check point says the cameras agree where the legends are, not at the case's edges.
+- **The case's width on the D's scale.** Reading the marks, the case's ends were about 1786 px apart and the posts about 140 px, so the case reads about 425 mm on that scale against the manual's 415. The scale had been chosen first and was not changed.
+
+The pytest file (`tests/test_case.py`, 13 tests) was written after a first draft of the scripts, not before, which the plan's step asks for; each test was then seen to fail with the scripts broken one way at a time in a scratch copy outside the repository (15 breaks, all caught; the log is not committed): the mapping ignoring BREAK and the second SHIFT; the second SHIFT mapped as SHIFT; a legend by its centroid; glare kept in a legend; the keys registered by an affine; the focal length not fitted; triangulation from its linear start only; triangulation from one view; the D's posts taken as its flange; the rear check always passing; heights on the photograph's scale; the machine's ends swapped; a rim's circle by the mean of its points; the rigid motion with no turn; a module export without its note. Four breaks first survived (glare kept, the linear start, the D's scale, and heights on the photograph's scale), and the tests were strengthened until each failed. A dry run of the whole method, printing nothing, ran end to end before the method was fixed. `~/venv-models/bin/python -m pytest tools/bbc-micro-model/tests -q`: 139 passed (13 October 2026), 126 before.
+
+`case_parts.py --hashes` printed, at 2026-10-13T22:05:05Z, before the check point or the rear check had ever been run:
+
+```
+a8f53d5828cfa89b60aadc5bf3cc62870de54ed5e8c3dd947a8e8d69ff7e2033 tools/bbc-micro-model/keys.py
+b30245d1a30c380cd41853390dec5fbbdca2ee59f21627c4b6cf996cbcb8fdb8 tools/bbc-micro-model/case_register.py
+96557265aeb0ecc03ae549f8ece2992c26da05125aeb6ec15fca65e836ff13a6 tools/bbc-micro-model/case_profile.py
+84456ccfcf968c0886b6715a038cdbbe5c36562d20d7d199c739894f0c71f06f tools/bbc-micro-model/case_parts.py
+d9d9e1bcea7e643c8a9c7b11a3035b8bd8f551ebd687eb930eef19b3f1e90dc9 tools/bbc-micro-model/common.py
+204afb5b91fbfec4b8fe9a95840a159245f5942ad0aed272419593e17d989ced tools/bbc-micro-model/spike.py
+f12fe6159a9872a81cca73b0b4796db9acf515c0d19bf22c093dc32f999e4318 tools/bbc-micro-model/data/case-marks.json
+0cf894ecccf8b24327a37a13bb82419ed3f910340a53cb7972131015a1754904 tools/bbc-micro-model/data/marks.json
+4012160780e9a94477b184eb10194c150606780055e526575053d2d4543748eb tools/bbc-micro-model/data/parts.json
+```
+
+`case.json` and `keys.json` carry the same hashes (`methodFixed`). These files are committed as they are before the run.

@@ -455,6 +455,61 @@
           "alt": "An original Acorn BBC Micro Model B seen from the front left and slightly above on a blue cloth: a beige case with a black keyboard panel, a row of ten red function keys along the top, the \"British Broadcasting Corporation Microcomputer System\" badge above them, and three indicator lights for cassette motor, caps lock and shift lock below the bottom left of the keyboard, to the left of the space bar.",
           "fetched": "2026-10-04",
           "used": "the photograph of the machine at the head of its page; nothing is traced or measured from it, because the BBC Micro has no 3D model"
+        },
+        {
+          "file": "bbc-micro-top.webp",
+          "author": "Daniel Beardsmore",
+          "sourceUrl": "https://commons.wikimedia.org/wiki/File:Acorn_BBC_Microcomputer.jpg",
+          "licence": "Public domain",
+          "date": "2016-02-04",
+          "caption": "a BBC Micro, Issue 7, from straight above",
+          "alt": "A BBC Micro seen from almost straight above on a dark red carpet: the beige case top, plain at the back, and at the front a dark grey panel with the keyboard: ten red function keys and a black BREAK key in the top row, black keys below with white legends, light brown cursor keys and COPY at the right, and a long space bar. Across the back of the panel runs a clear strip with a ribbed design at the left and, at the right, the words British Broadcasting Corporation Microcomputer System beside an owl. Three small red lights under the words cassette motor, caps lock and shift lock sit at the panel's front left.",
+          "fetched": "2026-10-13",
+          "used": "measured on its full-size original for the outside model: the case top registered on its four corners to the Service Manual's 415 by 345 mm, the keyboard's opening, the badge strip and its words, the order of the three lights, the keys registered to the MIT keyboard drawing and their colours"
+        },
+        {
+          "file": "bbc-micro-rear.webp",
+          "author": "StuartBrady",
+          "sourceUrl": "https://commons.wikimedia.org/wiki/File:BBC_Micro_rear.jpeg",
+          "licence": "Public domain",
+          "date": "2005-12-26",
+          "caption": "the rear of a BBC Micro, with its ports",
+          "alt": "The rear of a BBC Micro on a white background, seen nearly square on and a little from above, the keyboard showing upside down beyond the case top. Along the black rear panel, left to right, are a small round UHF out socket, a metal video out socket, three round DIN sockets for RGB, RS423 and cassette, a 15-pin D socket for analogue in and a round Econet socket, each with its name printed above it, and two long ventilation slots run across the top of the panel. At the right is the mains panel with its On and Off switch and the mains lead.",
+          "fetched": "2026-10-13",
+          "used": "measured on its full-size original for the outside model: each rear port's place and height on the scale of the 15-way D socket, checked against its socket on the board, and the ventilation slots and the mains panel"
+        },
+        {
+          "file": "bbc-micro-keyboard.webp",
+          "author": "Daniel Beardsmore",
+          "sourceUrl": "https://commons.wikimedia.org/wiki/File:BBC_Micro_Type_1.jpg",
+          "licence": "Public domain",
+          "date": "2013-06-24",
+          "caption": "a BBC Micro keyboard out of its case",
+          "alt": "A BBC Micro keyboard out of its case, on a wooden table: its cream circuit board with the speaker in a black housing at the top left, a grey ribbon cable at the top, a few chips along the top edge, and the keys: ten red function keys and BREAK, black keys with white legends, brown cursor keys and COPY, and a long black space bar. Three red lights stand on a black plate at the front left.",
+          "fetched": "2026-10-13",
+          "used": "measured on its full-size original for the outside model: its keys' legends registered to the MIT keyboard drawing, as a check that is recorded"
+        },
+        {
+          "file": "bbc-micro-front.webp",
+          "author": "StuartBrady",
+          "sourceUrl": "https://commons.wikimedia.org/wiki/File:BBC_Micro.jpeg",
+          "licence": "Public domain",
+          "date": "2005-12-26",
+          "caption": "a BBC Micro from the front and above",
+          "alt": "A BBC Micro on a white background, seen from the front and above: the beige case, its plain top at the back, and the dark keyboard panel at the front with ten red function keys, black keys with light legends, a slot at the left of the keys, and three lights at the front left under the words cassette motor, caps lock and shift lock. The badge strip across the back of the panel reads British Broadcasting Corporation Microcomputer System.",
+          "fetched": "2026-10-13",
+          "used": "measured on its full-size original for the outside model: with the next photograph, one camera fitted to both, which places the keys, the opening and the three lights in height"
+        },
+        {
+          "file": "bbc-micro-left.webp",
+          "author": "StuartBrady",
+          "sourceUrl": "https://commons.wikimedia.org/wiki/File:BBC_Micro_left.jpeg",
+          "licence": "Public domain",
+          "date": "2005-12-26",
+          "caption": "the same BBC Micro from the front left",
+          "alt": "The same BBC Micro on a white background, seen from the front left and above, so that its plain left side and its front edge show as well as the top: the dark keyboard panel with its red function keys runs away to the right, with the slot at the left of the keys and the three lights at the panel's front left.",
+          "fetched": "2026-10-13",
+          "used": "measured on its full-size original for the outside model: the second view for the camera fitted with the one before it"
         }
       ]
     },

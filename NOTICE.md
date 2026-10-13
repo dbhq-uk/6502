@@ -1,11 +1,11 @@
 # Notices
 
-This repository is MIT (see `LICENSE`). Four things in it were taken from
+This repository is MIT (see `LICENSE`). Five things in it were taken from
 outside under different terms, or rest on work that states none, and are
 recorded here: the teletext glyph table, the BBC Micro's preset discs, the NES
 board's track map, traced from OpenTendo's scans of a bare board under the TAPR
-Open Hardware License, and the BBC Micro board's track map, traced from amb5l's
-scans of a bare board, which state no licence. The
+Open Hardware License, the BBC Micro board's track map, traced from amb5l's
+scans of a bare board, which state no licence, and the BBC Micro's key centres, read from Dominic Beesley's keyboard under the MIT licence, whose notice is kept below. The
 system ROMs, and the NES's bundled homebrew, Lan Master, which its author
 released into the public domain, are recorded separately, in
 [`roms/README.md`](roms/README.md).
@@ -168,3 +168,33 @@ from.
 ## The BBC Micro board's parts, and the two photographs of populated boards read for them
 
 `tools/bbc-micro-model/data/parts.json`, `marks.json`'s `parts` section and `site/src/models/bbc-micro-board-parts.mjs` record what was read by eye on two photographs of populated Issue 7 boards: each chip's marking, and boxes round the connectors and the large parts. No image from either photograph is committed, not even a crop; only the readings and the boxes, in our words and numbers. I5 is 8BS's photograph, https://8bs.com/see/BBC_B_iss7.jpg , which states no licence; its markings and the parts' boxes were read from it. I6 is Chris Whytehead's photograph from Chris's Acorns, http://chrisacorns.computinghistory.org.uk/Pics/BBCB7LL.jpg , which that site says may be reused under CC BY-SA 3.0 with a byline (an older paragraph on the same site asks to be asked first); only its markings were read. Credit: photograph by Chris Whytehead, Chris's Acorns. Both are listed with their SHA-256 in `tools/bbc-micro-model/data/sources.json`.
+
+## The BBC Micro's key centres, from Dominic Beesley's keyboard (MIT)
+
+`tools/bbc-micro-model/data/keys.json`, `data/case.json` and `site/src/models/bbc-micro-case-parts.mjs` hold every key's centre and footprint size read from Dominic Beesley's KiCad keyboard, github.com/dominicbeesley/bbc-keyboard, as its fork github.com/dbhq-uk/bbc-keyboard holds it at commit `5ec53df566c77424caa6be827d0831da3916ecfa` (K1 in `tools/bbc-micro-model/data/sources.json`). The KiCad file itself is not committed. Its licence is MIT, and its notice is kept here:
+
+```
+MIT License
+
+Copyright (c) 2023 dominicbeesley
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+```
+
+The outside model's other readings are ours: the words and places read on Chris Whytehead's underside photograph from Chris's Acorns (O8-I, CC BY-SA 3.0 as that site states, credited, not committed), and one dimension of a D-subminiature shell read from TE Connectivity's drawing 1757819 (a fact; nothing of the drawing is copied).

@@ -14,8 +14,8 @@
    "width": 2490,
    "height": 1868,
    "sha256": "a616c736c51c4bf0f796be21ba426d435acdbf2d6b692cbf0cc3256f5782949a",
-   "committed": null,
-   "use": "The top of the case from above: the keys registered to K1 by a homography on the key plane, the case's front edge, and later the recess, LEDs, badge strip and grille"
+   "committed": "bbc-micro-top.webp",
+   "use": "The top of the case from above: the keys registered to K1 by a homography on the key plane, the case's front edge, and later the recess, LEDs, badge strip and grille; task 8: the case top registered on its four corners to the Service Manual's 415 by 345 mm, the keyboard's opening, the badge strip and the three lights, and the keys' colours. Fetched again on 13 October 2026 from Commons; its SHA-1 was Commons' (f8ee3ba32bb3ea9c107a34e64282caca21c533e8) and its SHA-256 the one above"
   },
   {
    "id": "O2",
@@ -30,8 +30,8 @@
    "width": 2048,
    "height": 994,
    "sha256": "4072a59af7f7fab834ca2b912b0f6e3449aa8bdaa01bb621d9d556579dd5937e",
-   "committed": null,
-   "use": "The rear: the ports' heights and labels"
+   "committed": "bbc-micro-rear.webp",
+   "use": "The rear: the ports' heights and labels; task 8: the rear ports' places and heights, the vents and the mains panel, on the scale of the 15-way D shell. Fetched again on 13 October 2026 from Commons; its SHA-1 was Commons' (3dad0bd9d8efedc7b9f6f6297ee94c32c6e3d572) and its SHA-256 the one above"
   },
   {
    "id": "O3",
@@ -46,8 +46,8 @@
    "width": 1996,
    "height": 1512,
    "sha256": "745b34357b2befd5d1bcc501bb48ad9c3e345e2b876d59b3f812cec48d2e2403",
-   "committed": null,
-   "use": "The keyboard out of its case: keycap shapes, the LEDs; registered to K1 as a check"
+   "committed": "bbc-micro-keyboard.webp",
+   "use": "The keyboard out of its case: keycap shapes, the LEDs; registered to K1 as a check; task 8: registered to K1 on its keys' legends, recorded. Fetched again on 13 October 2026 from Commons; its SHA-1 was Commons' (5bd4df29308488c8e34f24483f46bf96c71c746b) and its SHA-256 the one above"
   },
   {
    "id": "I1",
@@ -101,17 +101,17 @@
    "id": "K1",
    "kind": "drawing",
    "file": "bbc-keyboard/KiCad/bbc-keyboard/bbc-keyboard.kicad_pcb",
-   "url": "https://github.com/dominicbeesley/bbc-keyboard/blob/5ec53df566c77424caa6be827d0831da3916ecfa/KiCad/bbc-keyboard/bbc-keyboard.kicad_pcb",
-   "page": "https://github.com/dominicbeesley/bbc-keyboard/blob/5ec53df566c77424caa6be827d0831da3916ecfa/LICENSE",
+   "url": "https://github.com/dbhq-uk/bbc-keyboard/blob/5ec53df566c77424caa6be827d0831da3916ecfa/KiCad/bbc-keyboard/bbc-keyboard.kicad_pcb",
+   "page": "https://github.com/dbhq-uk/bbc-keyboard/blob/5ec53df566c77424caa6be827d0831da3916ecfa/LICENSE",
    "author": "Dominic Beesley",
    "licence": "MIT License / Copyright (c) 2023 dominicbeesley",
-   "fetched": "2026-10-04",
+   "fetched": "2026-10-13",
    "bytes": 4569870,
    "width": null,
    "height": null,
    "sha256": "35b34ac3ef0a04fb311ee1971eb9fc32cb1c323877377c4d1a74986c709b0929",
    "committed": null,
-   "use": "Every key centre on the BBC layout, read from each switch footprint's 4 mm centre hole: the frame the photographs of the keyboard are registered to. Cloned at commit 5ec53df566c77424caa6be827d0831da3916ecfa"
+   "use": "Every key centre on the BBC layout, read from each switch footprint's 4 mm centre hole: the frame the photographs of the keyboard are registered to, and the keys' places and sizes in the outside model (task 8). Dominic Beesley's repository github.com/dominicbeesley/bbc-keyboard, read from its fork in the dbhq-uk organisation (AGENTS.md rule 3) at commit 5ec53df566c77424caa6be827d0831da3916ecfa: fetched on 13 October 2026 with `gh api -H \"Accept: application/vnd.github.raw\" repos/dbhq-uk/bbc-keyboard/contents/KiCad/bbc-keyboard/bbc-keyboard.kicad_pcb?ref=5ec53df566c77424caa6be827d0831da3916ecfa`, whose git blob SHA-1 (c1bfd4788faa4a5930b21c519c6748f2c61c4bad) is the one the fork's API gives, and whose SHA-256 is the one task 0 recorded on 4 October 2026 from a clone of the original. The LICENSE at that commit in the fork is the MIT notice kept in data/README.md"
   },
   {
    "id": "I6",
@@ -560,6 +560,86 @@
    "sha256": "160ba6a9e8ea8c643e67fd3a411365418ce75a13e882b3a985f6d30825beaed3",
    "committed": null,
    "use": "A data sheet, read for one fact only, as task 4's nets check uses it: the GND and +5V pin numbers of IC38, IC47, IC48 (data/ic-table.json). The maker's copyright; no licence to reuse is stated, and nothing of it is copied or committed"
+  },
+  {
+   "id": "O4",
+   "kind": "photograph",
+   "file": "outside-4-front-BBC_Micro.jpeg",
+   "url": "https://upload.wikimedia.org/wikipedia/commons/3/37/BBC_Micro.jpeg",
+   "page": "https://commons.wikimedia.org/wiki/File:BBC_Micro.jpeg",
+   "author": "Stuart Brady (assumed by Commons)",
+   "licence": "Public domain",
+   "fetched": "2026-10-13",
+   "bytes": 210220,
+   "width": 1929,
+   "height": 1338,
+   "sha256": "4129306b45dda6b403e4cbab6fa4e96e305e0f9eaa5eb93c223e3dc74fa968c4",
+   "committed": "bbc-micro-front.webp",
+   "use": "The machine from the front and above, its background painted white: with O5, one camera fitted to both, the key plane, the top at the front of the keyboard's opening and the three lights triangulated (task 8). Exif: Olympus C760UZ, 6.3 mm, 2005-12-26 16:03:25, a 2048 by 1536 frame cropped. Commons' API (13 October 2026): LicenseShortName 'Public domain', Artist 'StuartBrady assumed (based on copyright claims)', SHA-1 6b13abeb0250c0fce17b7e8bf0a0d6f8388dc343, which the file matches"
+  },
+  {
+   "id": "O5",
+   "kind": "photograph",
+   "file": "outside-5-left-BBC_Micro_left.jpeg",
+   "url": "https://upload.wikimedia.org/wikipedia/commons/8/8a/BBC_Micro_left.jpeg",
+   "page": "https://commons.wikimedia.org/wiki/File:BBC_Micro_left.jpeg",
+   "author": "Stuart Brady (assumed by Commons)",
+   "licence": "Public domain",
+   "fetched": "2026-10-13",
+   "bytes": 118678,
+   "width": 1756,
+   "height": 1239,
+   "sha256": "7370967288c56ff10355a754f5dca5f73b1caf8285749fd0deb263cde7986e94",
+   "committed": "bbc-micro-left.webp",
+   "use": "The machine from the front left and above, its background painted white: the second view for the camera fitted with O4 (task 8). Exif: Olympus C760UZ, 6.3 mm, 2005-12-26 16:04:45, a 2048 by 1536 frame cropped. The file page says 'Photographed by me. Released for the public domain.' Commons' API (13 October 2026): LicenseShortName 'Public domain', SHA-1 e29fb1ed2a95230eae211c3492407f46e6f20ad7, which the file matches"
+  },
+  {
+   "id": "O8-I",
+   "kind": "photograph",
+   "file": "outside-8-underside-chrisacorns-BBCB7I.jpg",
+   "url": "http://chrisacorns.computinghistory.org.uk/Pics/BBCB7I.jpg",
+   "page": "http://chrisacorns.computinghistory.org.uk/",
+   "author": "Chris Whytehead (Chris's Acorns)",
+   "licence": "CC BY-SA 3.0, as the site's home page states under 'License to reuse': 'Information (including text and photos) presented on Chris's Acorns may be reused under the CC-BY-SA 3.0 license unless otherwise specified'. An older paragraph on the same page says the photographs 'remain my copyright. If you want to use them please ask me first'",
+   "fetched": "2026-10-13",
+   "bytes": 20647,
+   "width": 640,
+   "height": 311,
+   "sha256": "4f1a5dbd9a698aa7445dfbacd96e47aa2260f4ad723fdf55567c9df3a9fae3bd",
+   "committed": null,
+   "use": "The underside of an Issue 7 machine, from http://chrisacorns.computinghistory.org.uk/Computers/BBCBI7.html ('BBC Model B Issue 7 (bottom)'): the words beside the five connectors under the front, read in order, and that they sit in one panel (task 8). Not committed; credited"
+  },
+  {
+   "id": "O8-H",
+   "kind": "photograph",
+   "file": "outside-8-rear-chrisacorns-BBCB7H.jpg",
+   "url": "http://chrisacorns.computinghistory.org.uk/Pics/BBCB7H.jpg",
+   "page": "http://chrisacorns.computinghistory.org.uk/",
+   "author": "Chris Whytehead (Chris's Acorns)",
+   "licence": "CC BY-SA 3.0, as the site's home page states under 'License to reuse': 'Information (including text and photos) presented on Chris's Acorns may be reused under the CC-BY-SA 3.0 license unless otherwise specified'. An older paragraph on the same page says the photographs 'remain my copyright. If you want to use them please ask me first'",
+   "fetched": "2026-10-13",
+   "bytes": 15890,
+   "width": 640,
+   "height": 197,
+   "sha256": "4ba8776121497fe59006e0e252c6789059810f28ea4f6574d81ea0c32dd34e1b",
+   "committed": null,
+   "use": "The rear of the same machine, from the same page ('BBC Model B Issue 7 (rear)'), fetched beside O8-I as the plan names both; looked at, nothing measured from it: O2 is larger and square on. Not committed"
+  },
+  {
+   "id": "P-TE_1757819",
+   "kind": "document",
+   "file": "datasheets/te-1757819-amplimite-plug.pdf",
+   "url": "https://www.farnell.com/datasheets/1917994.pdf",
+   "page": "https://www.farnell.com/datasheets/1917994.pdf",
+   "author": "TE Connectivity (drawing 1757819, rev. F, 2013)",
+   "licence": null,
+   "fetched": "2026-10-13",
+   "bytes": 167509,
+   "width": null,
+   "height": null,
+   "sha256": "6c70fc080dafcc4dcfab667cf79beec7ce85c07fea8d78037726a1caa067a8b2",
+   "committed": null,
+   "use": "A drawing of the Amplimite D-subminiature plugs, read for one fact only, as task 8's scale on O2 uses it: for shell size 2, 15 positions (MS18274-1), dimension C, the spacing of the two mounting holes, is 1.307 to 1.317 inch, [33.20] to [33.45] mm. The receptacle a plug mates with has the same spacing. Found as the source German Wikipedia's article D-Sub cites for its table of sizes (revision 268237955)"
   }
  ]
 }

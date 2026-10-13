@@ -16,7 +16,7 @@ outside the repository, and every script refuses an input whose SHA-256 is not
 the one in [`data/sources.json`](data/sources.json). The scans and the
 photographs with no stated licence are never committed, not even resized.
 
-So far (tasks 0, 2, 3, 4 and 5) it holds:
+So far (tasks 0, 2, 3, 4, 5, 7 and 8) it holds:
 
 | File | What it does |
 |---|---|
@@ -29,8 +29,13 @@ So far (tasks 0, 2, 3, 4 and 5) it holds:
 | `board_parts.py` | Task 5: every part on the board, placed on task 3's footprints (and the two 8-pin DIPs, from pads named by hand) and named from the Service Manual's table 8.1 through `data/ic-table.json`, with the fitted set the page runs; the manual's places checked after a similarity, on the convention `--settle` chose from four parts first; the markings read on I5 checked against the table (I6 read and recorded); connectors and the large parts from boxes read on I5; two-lead parts inferred from the print; writes `data/parts.json` and `site/src/models/bbc-micro-board-parts.mjs`. Both held-out checks failed on the one run (13 October 2026): the manual's places (IC94 97.22 mm off, four more over 10 mm) and the markings read on I5 (11 of 80 disagree). The model keeps the scan's footprints as places and table 8.1's parts as identities, and its fitted set follows the machine the page emulates (the disc interface fitted, no Econet or speech), not the board in I5. `--look` places the parts and draws them in `out/` and runs neither held-out check; `--crops` writes the crops the markings are read on; `--hashes` prints the SHA-256 of the method's files |
 | `diagnose_nets.py` | After task 4's run, looking only: rebuilds the nets check's pieces from the masks the run left in `out/` and prints why the check failed (the piece joining GND to +5V, and the pieces under the pins left out of the largest net). Written after the check failed; no part of the method |
 | `results.py` | Task 7: gathers the figures the inside model's note quotes, each as `frame.json`, `registration.json`, `copper.json` and `parts.json` hold it, and the sources the board used, by address, into `site/src/data/bbc-micro-board-model.json`, so the page types no figure. It reads no input. The nets check and the comparison with I5 failed, and so did both checks on the parts; the file keeps those verdicts, and the note says so |
+| `keys.py` | Task 8: every keycap of K1 (the MIT KiCad keyboard, read from the `dbhq-uk` fork) mapped to the machine's keys, BREAK and a second SHIFT, with its size and row; O1 registered to K1 on task 0's marks, and O3 on its keys' legends, found in code, each key held out; each key's colour class on O1; writes `data/keys.json`. `--look` draws O3's legends in `out/` |
+| `case_register.py` | Task 8: O1 registered on the case top's four corners to the Service Manual's 415 by 345 mm; the keyboard's opening, the badge strip and its words read on that plane; the keys' scale on that plane, recorded |
+| `case_profile.py` | Task 8: one camera fitted to O4 and O5 on the keys' legends, the opening's front corners and the three lights triangulated, and the side profile's check point (the key A, left out, against K1); d, the front edge's depth below the key plane. `--look` fits the cameras and draws them in `out/` without the check |
+| `case_parts.py` | Task 8: the outside put together: the keys and lights placed in the case, the front edge's parallax check (not measurable: no independent camera height), the rear ports from O2 on the 15-way D shell's scale and their check against the board's sockets, the vents, the mains panel, the underside connectors and the board's place in the case; writes `data/case.json` and `site/src/models/bbc-micro-case-parts.mjs`. `--hashes` prints the SHA-256 of task 8's method's files |
 | `run-board.sh` | The inside model's scripts, in order (so far `verify.py I1 I2 I5 I6 D1`, `board_frame.py`, `board_register.py`, `board_trace.py --map-ppm 8`, `board_parts.py` and `results.py`) |
-| `tests/test_common.py`, `tests/test_board_frame.py`, `tests/test_board_register.py`, `tests/test_board_trace.py`, `tests/test_board_parts.py`, `tests/test_results.py` | pytest, on made-up inputs |
+| `run-case.sh` | The outside model's scripts, in order: `verify.py` on its inputs, `keys.py`, `case_parts.py` |
+| `tests/test_common.py`, `tests/test_board_frame.py`, `tests/test_board_register.py`, `tests/test_board_trace.py`, `tests/test_board_parts.py`, `tests/test_results.py`, `tests/test_case.py` | pytest, on made-up inputs |
 | `data/` | See [`data/README.md`](data/README.md) |
 
 ## Fetching the inputs by hand
@@ -48,7 +53,12 @@ the name `data/sources.json` gives as its `file`:
 | I5 | `inside-2-populated-iss7-8bs.jpg` | [8BS](https://8bs.com/see/BBC_B_iss7.jpg) |
 | I6 | `inside-6-cased-iss7-chrisacorns-BBCB7LL.jpg` | [Chris's Acorns](http://chrisacorns.computinghistory.org.uk/Pics/BBCB7LL.jpg), linked as the hi-res motherboard picture from [the Issue 7 page](http://chrisacorns.computinghistory.org.uk/Computers/BBCBI7.html). CC BY-SA 3.0 as [the site's home page](http://chrisacorns.computinghistory.org.uk/) states under "License to reuse"; an older paragraph there asks to be asked first. Not committed |
 | D1 | `document-1-bbc-micro-service-manual-acorn-1985.pdf` | [archive.org](https://archive.org/download/bbc-micro-service-manual/BBC-Micro-Service-Manual%20Sections-1-2-3.pdf), from [its item page](https://archive.org/details/bbc-micro-service-manual); archive.org's MD5 for it is `d64017d9f5d956500965648b354af6ee`. Acorn's copyright notice: read for facts only, not committed |
-| K1 | `bbc-keyboard/` | `git clone https://github.com/dominicbeesley/bbc-keyboard` into the folder, then `git checkout 5ec53df566c77424caa6be827d0831da3916ecfa` inside it; the file read is `bbc-keyboard/KiCad/bbc-keyboard/bbc-keyboard.kicad_pcb` |
+| O4 | `outside-4-front-BBC_Micro.jpeg` | [Commons: BBC Micro.jpeg](https://commons.wikimedia.org/wiki/File:BBC_Micro.jpeg) (the original file) |
+| O5 | `outside-5-left-BBC_Micro_left.jpeg` | [Commons: BBC Micro left.jpeg](https://commons.wikimedia.org/wiki/File:BBC_Micro_left.jpeg) (the original file) |
+| O8-I | `outside-8-underside-chrisacorns-BBCB7I.jpg` | [Chris's Acorns](http://chrisacorns.computinghistory.org.uk/Pics/BBCB7I.jpg), the underside picture on [the Issue 7 page](http://chrisacorns.computinghistory.org.uk/Computers/BBCBI7.html). CC BY-SA 3.0 as the site's home page states; not committed |
+| O8-H | `outside-8-rear-chrisacorns-BBCB7H.jpg` | [Chris's Acorns](http://chrisacorns.computinghistory.org.uk/Pics/BBCB7H.jpg), the rear picture on the same page; not committed |
+| K1 | `bbc-keyboard/KiCad/bbc-keyboard/bbc-keyboard.kicad_pcb` | The `dbhq-uk` fork of Dominic Beesley's repository (AGENTS.md rule 3), at commit `5ec53df566c77424caa6be827d0831da3916ecfa`: `gh api -H "Accept: application/vnd.github.raw" "repos/dbhq-uk/bbc-keyboard/contents/KiCad/bbc-keyboard/bbc-keyboard.kicad_pcb?ref=5ec53df566c77424caa6be827d0831da3916ecfa"` into that path in the folder. Never from the original repository |
+| P-TE_1757819 | `datasheets/te-1757819-amplimite-plug.pdf` | [TE Connectivity's drawing 1757819](https://www.farnell.com/datasheets/1917994.pdf), read for one dimension (the 15-way D's mounting holes) |
 
 Later tasks add inputs (more photographs, the Service Manual) to
 `data/sources.json` as they first need them, with the same fields.
@@ -71,6 +81,7 @@ export BBC_MODEL_INPUTS=~/bbc-model-inputs
 /tmp/bbcvenv/bin/python -m pytest tools/bbc-micro-model/tests -q
 cd tools/bbc-micro-model && /tmp/bbcvenv/bin/python spike.py      # writes data/spike.json, and overlays in out/
 PYTHON=/tmp/bbcvenv/bin/python tools/bbc-micro-model/run-board.sh   # writes data/frame.json, data/registration.json, data/copper.json, the track map, data/parts.json and the parts module, and overlays in out/
+PYTHON=~/venv-models/bin/python tools/bbc-micro-model/run-case.sh  # writes data/keys.json, data/case.json and the case's parts module
 ```
 
 `verify.py` says, for each input, present, missing or hash differs. It exits
