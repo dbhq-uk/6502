@@ -160,3 +160,7 @@ from.
 
 **Rights.** The scans state no licence, and none was found in the post or the thread. Nothing of them is committed: not the scans, not a resized copy, not a crop. What is derived from them is the map's pixels: which parts of each face are copper and which are print. The map is published with amb5l credited as the source of the scans, and if amb5l asks for it to be removed, it will be. Everything else in the BBC Micro models (the code, the measurements in `tools/bbc-micro-model/data/`) is ours and MIT. The board's design, and the legend the map shows as it is printed (Acorn's name and copyright line included), are Acorn's.
 
+
+## The BBC Micro board's IC table, facts from Acorn's Service Manual
+
+`tools/bbc-micro-model/data/ic-table.json` holds facts read from table 8.1, "Integrated circuits", of Acorn's BBC Microcomputer Service Manual (1985; D1 in `tools/bbc-micro-model/data/sources.json`): each IC's reference, its part number and its place on the board as the table gives them. The roles are in our words. The manual carries Acorn's copyright notice; none of its text, tables as laid out, or drawings is copied, and the manual is not committed. The GND and +5V pin numbers in the same file are facts read from the makers' data sheets each entry names, with their SHA-256 in `sources.json`; nothing of those sheets is copied or committed either.
