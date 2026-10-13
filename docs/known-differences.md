@@ -161,6 +161,40 @@ the User Manual says it does. The open-bus value and power-on RAM are pinned
 by tests of the memory map and the boot state, so a change to either is
 seen.
 
+## The KIM-1: the teletype, where the model stops
+
+**What.** The teletype (`Kim1Teletype`) is modelled from the User Manual, the
+board's schematic and a disassembly of the monitor. It is not measured against
+a real board and a real Teletype Model 33. Four things are simpler than the
+hardware:
+
+- **Levels, not currents.** The two 20 mA loops are logic levels. There is no
+  loop resistance, no slow edge and no external supply, so a 60 mA loop, a
+  reversed connection or a terminal that cannot do full duplex cannot be
+  shown. The speed at which the monitor stops being able to measure RUB OUT
+  depends on the real loop circuit, which is not modelled.
+- **A polite keyboard.** A queued key goes only when both loops have been
+  quiet for four bit times. A person at a real Teletype does not wait, and a
+  key typed while the monitor prints is lost, and garbles the line. Here it
+  waits its turn, so a whole command can be queued at once.
+- **Overprint by replacement.** The paper (`TeletypePaper` in the tests,
+  `teletype-paper.js` on the page) puts a character where the head is and
+  drops what was there. A real printer strikes over it. The paper also keeps
+  only the last thousand lines.
+- **PA7 as an output.** A program that makes PA7 an output would fight the
+  7400 gate that drives it on the board. Here the pin shows the 6530's output
+  and the echo uses the gate's level.
+
+Paper tape is text through the keyboard and printer. There is no reader or
+punch.
+
+**How the tests treat it.** `Kim1TeletypeTests` runs the original monitor
+through the teletype, and `Kim1TeletypeLineTests` runs the terminal alone with
+the line driven by hand. `QueuedKeysWaitForBothLinesToBeQuiet` and
+`KeysQueuedWhileTheMonitorIsPrintingAreNotLost` pin the polite keyboard, and
+a send with no wait (`quietBits: 0`) shows the loss it prevents. Nothing tests
+the electrics or the overprint, because nothing models them.
+
 ## The BBC Micro: the bus and the memory map, where the sources stop
 
 **What.** `BbcBus` is the memory map and the 1 MHz stretch of `bus.md`. Where

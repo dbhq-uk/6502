@@ -35,8 +35,9 @@ the original ROM, and on the page.
   modelled; the cassette and the expansion bus still are not.
 - **`tools/probes/kim1_serial_routines.py`**, which disassembles the
   monitor's teletype routines from the hash-checked ROM.
-- **`site/scripts/browser-check-kim1-tty.mjs`**, the same session in a real
-  browser.
+- **`site/scripts/browser-check-kim1-tty.mjs`**, the same session written to
+  run in a real browser, by CI. It has not been run on the machine this was
+  written on, which has no Chrome.
 
 ## What was read
 
@@ -184,18 +185,21 @@ it shows:
   printed at the head (over what was there), and NUL, RUB OUT and XOFF printing
   nothing. The two are separate code, one C# and one JavaScript; they are held
   together by the session, which the test checks on one and the browser check
-  on the other.
-- **The page's paper is a `role="log"` of one row per line**, so a screen
-  reader hears a new line rather than the whole paper again. The field types
+  (run by CI) on the other.
+- **The page's paper is a `role="log"` of one row per line, set not to be
+  live, with a polite region beside it that is given each line once it is
+  complete** (see the review fixes below for why). The field types
   only while it has focus, in capitals; Enter is CR and Backspace or Delete is
   RUB OUT; LF has a button, and so does RUB OUT for a touch screen. Tab is never
   taken. The keypad's own keyboard handler now ignores keys typed anywhere in
   the teletype, so a hex digit typed at the terminal is not also a keypad press.
-- **The browser check runs the session at 1200 baud,** after logging on and
-  opening an address at 110. At 110 baud the session is the best part of a
-  minute of the machine's time (below), and the page runs the machine in real
-  time, so the check would add that to every CI run; at 1200 it takes seconds,
-  and 110 is still exercised in the browser.
+- **The browser check is written to run the session at 1200 baud,** after
+  logging on and opening an address at 110. At 110 baud the session is 51
+  seconds of the machine's time (below), and the page runs the machine in real
+  time, so the check would add that to every CI run; at 1200 baud the same
+  bits take an eleventh of the time, and 110 is still exercised in the browser.
+  The check has not been run: this box has no Chrome, so CI is where it runs,
+  and nothing here says how long it takes there.
 - **The CSP did not change.** The page loads one more same-origin module,
   `teletype-paper.js`, and `script-src` already allows the site's own scripts.
 
@@ -234,27 +238,68 @@ it shows:
   keyboard off PA7 and the printer; PB0 low holding the printer at a space;
   queued keys spaced by the quiet time; and the key notation.
 
-Measured on 8 October with `dotnet test tests/Dbhq.Machines.Kim1.Tests -c
-Release --filter Kim1TeletypeTests --logger "console;verbosity=detailed"`,
-which prints what three of the tests measure:
+Measured on 13 October 2026, on the ARM box (the figures are machine
+cycles, so the box does not change them), with `dotnet test
+tests/Dbhq.Machines.Kim1.Tests -c Release --filter Kim1TeletypeTests --logger
+"console;verbosity=detailed"`, which prints what three of the tests measure.
+The first draft of this entry quoted figures that were not tied to a command; these replace
+them, and they came out the same:
 
 - **The monitor's bit at 110 baud is 9,088.8 cycles**, against 9,090.9 for
-  110 baud exactly, 0.02 per cent short. All 27 characters it prints after
-  logging on measured the same, start edge to stop edge 81,799 cycles (nine
-  bits). The shortfall is the 14-cycle step of its counting loop.
+  110 baud exactly, 0.02 per cent short. The test printed one value for all 27
+  characters it measured after logging on ("9088.8 to 9088.8"), and a start
+  edge to a stop edge of nine bits is 9 x 9,088.8, about 81,799 cycles. The
+  shortfall is the 14-cycle step of the monitor's counting loop.
 - **Logging on**, from power on to the line going quiet after the prompt (the
   RS key's 80 ms hold and rest included, and the test's run in 10,000-cycle
   steps): 2,920,123 cycles at 110 baud, 1,130,165 at 300, 350,030 at 1200 and
   220,014 at 2400.
 - **The page's session at 110 baud takes 51,083,187 cycles**, 51 seconds of
-  the KIM-1's time, of which the program's fourteen bytes are 28,211,802: each
-  byte is three keys and an answer of sixteen characters (CR, LF, six NULs and
-  `020x xx `), at ten characters a second. This is why the browser check runs
-  the session at 1200 baud.
+  the KIM-1's time; the test prints each step's cycles and the total. The
+  step that enters the program, `0200` SPACE and the program's fourteen bytes,
+  is 28,211,802 of them, about two seconds a byte: each byte is three keys
+  and an answer of sixteen characters (CR, LF, six NULs and `020x xx `), at
+  ten characters a second. The first draft gave that figure for the fourteen
+  bytes alone; the test counts the whole step. This is why the browser check
+  runs the session at 1200 baud.
 
-## Every new assertion was shown to fail
+## The new tests were shown to fail
 
-MUTATIONS
+The first draft of this entry had this heading over a placeholder. The mutations were run on 13 October 2026.
+
+**How.** One fault at a time, applied in the working copy by a small script (kept outside the repository, in the controller's notes). Each fault was one exact replacement, checked to match once. The script then ran `dotnet test tests/Dbhq.Machines.Kim1.Tests -c Release`, recorded which tests failed, and put the file back. The whole project was run each time, 77 tests in the final tree, and it passed with no fault planted. The faults were chosen from what the model gets right on purpose: the bit timing, the framing, the wiring and the queue's rules. They were run in three batches as tests were added in answer to what survived, and the table gives each fault's last result.
+
+| # | Fault planted | File | Tests that failed | Caught by |
+| --- | --- | --- | --- | --- |
+| 1 | The printer samples at the start of each bit, not the middle | `Kim1Teletype.cs` | 9 | `ThePrinterSamplesAtTheMiddleOfEachBitAndDecodesTheCharacter`, `ACharacterSentAFewPerCentSlowStillDecodes`, `ASpaceShorterThanHalfABitIsNotAStartBit`, and six more, among them the monitor's log-on |
+| 2 | The keyboard's eighth bit is a space, not a mark | `Kim1Teletype.cs` | 1 | `AKeySendsAStartBitSevenBitsOfAsciiAMarkAndTwoStopBitsAt110Baud` |
+| 3 | The keyboard sends one stop bit, not two | `Kim1Teletype.cs` | 1 | `QueuedKeysWaitForBothLinesToBeQuiet` |
+| 4 | The printer keeps a character whose stop bit is a space | `Kim1Teletype.cs` | 2 | `ACharacterWhoseStopBitIsASpaceIsThrownAwayAndTheNextStillDecodes`, `TheKeyboardWaitsFourBitsFromTheLineReturningToAMarkAfterAFramingError` |
+| 5 | The keyboard does not wait for a quiet line | `Kim1Teletype.cs` | 12 | `QueuedKeysWaitForBothLinesToBeQuiet`, `KeysQueuedWhileTheMonitorIsPrintingAreNotLost`, and ten more |
+| 6 | PB5 high no longer holds PA7 at a mark | `Kim1Teletype.cs` | 1 | `PB5HighHoldsPA7AtAMarkAndKeepsTheKeyboardOffThePrinter` |
+| 7 | PB0 low no longer holds the printer at a space | `Kim1Teletype.cs` | 14 | `PB0LowHoldsThePrinterAtASpaceWhateverTheKeyboardDoes`, the monitor's log-on, the session, and eleven more |
+| 8 | A short space is taken as a start bit | `Kim1Teletype.cs` | 5 | `ASpaceShorterThanHalfABitIsNotAStartBit`, `AfterRsThePullUpOnPB0HoldsThePrinterLoopAtAMark`, and three more |
+| 9 | A key queued between cycles can start in the past (the guard in `NextStart` removed) | `Kim1Teletype.cs` | 2 | `CatchingUpDoesNotStartAKeyQueuedSinceTheLastCycle`, `ReadingThePaperDoesNotStartAKeyOnACycleThatHasAlreadyRun` |
+| 10 | Reading the paper stamps a queued key with the last cycle run (`CatchUp` back to `Advance`) | `Kim1Machine.cs` | 1 | `ReadingThePaperDoesNotStartAKeyOnACycleThatHasAlreadyRun` |
+| 11 | Teletype keys are not held back for the keypad taps before them | `Kim1Keystrokes.cs` | 2 | `AStopKeyAndTypingQueuedTogetherAreNotGarbled`, `TeletypeKeysWaitForTheKeypadTapsQueuedBeforeThem` |
+| 12 | The TTY switch is read on the wrong decoder output | `Kim1Bus.cs` | 10 | the monitor's log-on, the manual's example, the session and seven more |
+| 13 | The quiet timer ignores edges on the printer loop | `Kim1Teletype.cs` | 1 | `TheKeyboardWaitsFourBitsFromTheLineReturningToAMarkAfterAFramingError` |
+| 14 | The quiet timer ignores where the printer's receiver finished | `Kim1Teletype.cs` | 1 | `TheKeyboardWaitsFourBitsFromTheMiddleOfTheMonitorsLastStopBit` |
+
+**The site's side.** The same way, six faults in the page's files, each run against `tests/machine-page.test.mjs` and `tests/html.test.mjs` after the site was rebuilt where the fault was in the panel. The browser check was not mutated, because it cannot run here.
+
+| # | Fault planted | File | Tests that failed |
+| --- | --- | --- | --- |
+| S1 | `parseTeletype` checks the key table with `in`, not `Object.hasOwn` | `site/src/lib/machines.mjs` | teletype keys are read as `Kim1Teletype.Parse` reads them |
+| S2 | The paper gives out its open line as if it were complete | `site/public/teletype-paper.js` | a screen reader is given a line once it is complete |
+| S3 | The paper is left live (`aria-live="off"` removed) | `site/public/kim-1.js` | the same test |
+| S4 | The page does not push the switch and speed into the machine at start | `site/public/kim-1.js` | the page pushes the switch and the speed it shows into the machine at start |
+| S5 | The speed lets the browser restore it (`autocomplete` removed) | `site/src/components/Kim1Panel.astro` | the teletype is on the panel |
+| S6 | The polite region for completed lines is missing | `site/src/components/Kim1Panel.astro` | the same screen reader test |
+
+One test failed for each, and no other did.
+
+**What it found.** Two faults survived the first batch. Faults 13 and 14 were not caught because nothing tested when the quiet time starts, only that a second key waits, so the quiet timer could have run half a bit or more early. Each now has a test that works the start cycle out from the bit time (the last two in the table). Fault 11 was caught only by a test that checks the hold directly, and not by a test that shows what the hold is for, so `AStopKeyAndTypingQueuedTogetherAreNotGarbled` was added: it runs the page's session to the point where ST stops the program, queues ST and the next characters together, and checks the paper is clean. Two faults, 4 and 8, did not build the first time (the compiler refused unreachable code, with warnings as errors) and were planted again as conditions that are always true or false but not constant.
 
 ## Surprises and mistakes
 
@@ -292,9 +337,31 @@ MUTATIONS
   register, which turns PB0 into an output at 0, before it writes $07 to the
   port. The printer sees a falling edge, checks the start bit half a bit later,
   finds a mark and ignores it, as a real receiver would.
-- **A mutation run was lost to `pkill -f`**, which matched the shell running
-  it and killed the run part way through a mutation, leaving it applied in the
-  scratch copy. The scratch copy was rebuilt and the whole run done again.
+- **The first draft of this entry claimed a mutation run it could not
+  show.** An earlier run was lost when a `pkill -f` killed the shell running it
+  part way through a mutation, and the entry went on to say every assertion had
+  been shown to fail. A reviewer found the section was a placeholder. The claim
+  came out and the mutations were run again on 13 October (above).
+
+## The review of the page, and what was done about it
+
+The page, the panel, the paper, the browser check and this entry were first committed as an unfinished work in progress. A reviewer read them without building and raised fourteen items. Each was checked against the code before anything was changed. All fourteen were real, and all were fixed, except for one part of two of them that could not be applied (a reference to `@125`, and a change to `validate.yml`; both are said below).
+
+- **Mutations and figures (items 1, 2 and 14).** The mutation section was a placeholder and the figures had no command behind them. Both are redone above: the mutations were run, and the figures were measured again with the command the entry names. The 28,211,802 figure is printed by the session test as the cost of one step; the draft had given it for the program's bytes alone.
+- **A race between the keypad and the teletype (item 3).** The reviewer's case was RS then RUB OUT queued together by the page. That one did not fail: in a scratch test on 13 October, RS tapped and RUB OUT sent 0, 1,000 and 20,000 cycles later all logged on and printed KIM. That is consistent with the monitor timing the part of the start bit it sees, which is nearly all of 9,000 cycles, but it was not worked out further. The race is real for another pair, ST followed at once by typing. ST starts the monitor's answer a few milliseconds later, the teletype's rule (send on a quiet line) cannot see an answer that has not begun, and the first character of the next command arrived as the monitor started to print. The scratch run queued ST and `0212` SPACE together, once straight into the teletype and once held until ST was done. Straight in, the paper showed `020A 4C 212` and one framing error, the leading 0 lost. Held, it showed `020A 4C 0212` and `0212 3C`, and no error. The tests had not met it, because `Kim1Session.Keys` runs the keypad to idle before anything is typed, and the browser check waits for each step to settle. The fix is in the machine, not the script: `Kim1Keystrokes.TypeAtTeletype` holds teletype keys back until the keypad taps queued before them have been played and rested, and `Kim1Host.TeletypeSend` uses it, so a page cannot get the order wrong. `TeletypeIdle` is false while keys are held. Two tests cover it: one checks the hold, with RS and then RUB OUT, and one runs the ST case above and checks the paper.
+- **The digits `02123C` written into the browser check (item 4).** Real as a risk: it was typed by hand. The check now takes the last line of the last step in `teletype.json`, takes the spaces out, and waits for those digits. The session test in C# now also opens the switch at the end and checks the digits show that same line, so the browser check's expectation rests on a test that runs here. The reviewer also asked for `@125` to be checked against `OpeningTheSwitchHandsTheMonitorBackToTheKeypad`; there is no `@125` in the script or the tests, so that part could not be done. That test shows `0200 00` after the switch opens, which agrees with the rule used.
+- **The switch and the speed after a reload (item 5).** Real. The machine starts at KB and 110 baud, and Firefox restores form state on a reload, so the page could show a switch that was on and a machine with it off. The speed says `autocomplete="off"`. The switch cannot: the site's HTML check refused it (`autocomplete` is not allowed on a checkbox), which the first build of the fix showed. So for both, the page pushes what it shows into the machine when it starts, and the two agree whatever the browser restored.
+- **A screen reader and the open line (item 6).** Real. The paper rewrote the open line a character at a time, and a `role="log"` is live, so a reader would announce partial lines. The paper is now `aria-live="off"`, and a separate polite region is given each line once a line feed has completed it (`Paper.takeCompleted`: blank lines left out, each line once, lines torn off the top not repeated). The paper is still a log with one row to a line, and still readable by browsing.
+- **`docs/known-differences.md` and `AGENTS.md` (items 7 and 8).** Real. The known differences now have a section for the teletype, with the four simplifications from the limitations below. The layout line for `machines/` mentions `machines/kim-1/teletype.json`.
+- **`in` on the key table (item 9).** Real. `"toString" in TELETYPE_KEYS` is true, so `[toString]` was accepted as a key and would have sent a function's source. It is `Object.hasOwn` now, and the test of bad notation includes `[toString]` and `[__proto__]`.
+- **Comments in the deploy workflow (item 10).** Real in `deploy-site.yml`, where a new sentence was spliced into the middle of another; it is its own comment now. `validate.yml` was read for the same fault and needs no change: this branch does not touch it.
+- **The check that the keypad was not pressed (item 11).** Real. It waited 400 ms and then read the digits, which races the wait. It now checks that nothing is pending and that no `kim1:key` event was announced, which is what pressing the keypad does, as well as the digits not changing.
+- **A baud outside 50 to 9600 (item 12).** Real, though the page offers only valid speeds. `Kim1Host.SetTeletypeBaud` refuses a bad one before it changes anything, and says so.
+- **`ReadTeletype` and a key queued between cycles (item 13).** Real, and it contradicted the entry's own account above. `ReadTeletype` called `Advance` with the last cycle run, and that stamped a key queued since then with that cycle, so the key's start bit began on a cycle that had already run. A new `Kim1Teletype.CatchUp` takes the due edges and samples without stamping a queued key, `ReadTeletype` and `Drive` use it, and `Advance` (the bus's call, at the start of a cycle) still stamps. Two tests cover it, one on the terminal alone and one through the machine. The effect was one cycle at most, but the entry said otherwise.
+
+**Counts after the fixes**, 13 October 2026, on the ARM box. `dotnet build -c Release` gave 0 warnings and 0 errors. `dotnet test --configuration Release --logger trx --results-directory TestResults` passed 2,724 in `Dbhq.Machines.Nes.Tests`, 980 in `Dbhq.Machines.BbcMicro.Tests` and 77 in `Dbhq.Machines.Kim1.Tests` (70 before the review). `Dbhq.Cpu6502.Tests` passed 1,596 of 1,608: the 12 that failed are Dormann's tests, because as65 is a 32-bit x86 program and this box could not run it. With the assembler run under qemu, as the branch for that fix does (`tests/Dbhq.Cpu6502.TestSupport/Dormann.cs`, copied in for the run and then put back), all 1,608 passed. Then `npm test` in `site` (after `npm ci`, the KIM-1's WebAssembly built here, and the BBC Micro's and the NES's copied from an older build on the same box) ran 378 tests and passed 377, with one marked todo; the site job's floor was 369 and is now 377, in `validate.yml` and `deploy-site.yml` alike.
+
+What was not done: the browser check was not run. This box has no Chrome, so the check, the page's real timing and the screen reader behaviour are unverified here; CI runs the check.
 
 ## Limitations
 
