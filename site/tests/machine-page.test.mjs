@@ -7,7 +7,7 @@ import { page, visibleText, DIST } from './helpers.mjs';
 import { loadRegistry } from '../src/lib/registry.mjs';
 import { KIM1_KEYS, TELETYPE_KEYS, loadTeletype, loadTryIt, parseKeys, parseTeletype, teletypeChars } from '../src/lib/machines.mjs';
 import { loadResults } from '../src/lib/results.mjs';
-import { Paper } from '../public/teletype-paper.js';
+import { Announcer, Paper } from '../public/teletype-paper.js';
 import { kim1Roms } from '../src/lib/pins.mjs';
 
 // The KIM-1's own page, built against the real registry: the first page of a
@@ -246,6 +246,33 @@ test('a screen reader is given a line of the paper once it is complete, never th
   const page = fs.readFileSync(path.join(process.cwd(), 'public', 'kim-1.js'), 'utf8');
   assert.match(page, /paperEl\.setAttribute\('aria-live', 'off'\)/, 'the paper is still live, and a screen reader would read its open line in pieces');
   assert.match(ttyPanel, /<p class="sr-only" aria-live="polite" data-kim1-line><\/p>/);
+});
+
+test('an announcer writes each batch of lines once, and clears between, so a repeated line is still announced', () => {
+  const writes = [];
+  const announcer = new Announcer((text) => writes.push(text));
+  announcer.frame();
+  assert.deepEqual(writes, [], 'wrote with nothing to say');
+  announcer.say(['KIM']);
+  announcer.frame();
+  // The same line again, the very next frame: the region is cleared first, so the text changes.
+  announcer.say(['KIM']);
+  announcer.frame();
+  announcer.frame();
+  announcer.frame();
+  announcer.say(['0000 00', '0001 00']);
+  announcer.frame();
+  assert.deepEqual(writes, ['KIM', '', 'KIM', '', '0000 00\n0001 00']);
+  announcer.clear();
+  assert.equal(writes.at(-1), '');
+  announcer.frame();
+  assert.equal(writes.length, 6, 'wrote after being cleared with nothing waiting');
+});
+
+test('a switch or speed the browser restored is said at start: the monitor needs RS', () => {
+  const page = fs.readFileSync(path.join(process.cwd(), 'public', 'kim-1.js'), 'utf8');
+  assert.match(page, /if \(mode\.checked\) say\('TTY switch on, kept by the browser from before\. Press RS/);
+  assert.match(page, /else if \(baud\.value !== '110'\) say\(/);
 });
 
 test('the page pushes the switch and the speed it shows into the machine at start, whatever the browser restored', () => {

@@ -64,3 +64,42 @@ export class Paper {
     return this.lines.map((l) => l.trimEnd()).join('\n');
   }
 }
+
+/**
+ * Gives lines to a screen reader's live region so that each is announced. A
+ * live region announces a change, and setting it to the text it already has is
+ * no change, so a line that repeats the one before would be missed. The region
+ * is therefore cleared on the frame after it is written, and lines wait for the
+ * next frame it is clear. `write` sets the region's text.
+ */
+export class Announcer {
+  constructor(write) {
+    this.write = write;
+    this.shown = false;
+    this.waiting = [];
+  }
+
+  /** Lines to announce, in order. */
+  say(lines) {
+    this.waiting.push(...lines);
+  }
+
+  /** Call once a frame: clears the region if it has text, else writes what is waiting. */
+  frame() {
+    if (this.shown) {
+      this.write('');
+      this.shown = false;
+    } else if (this.waiting.length > 0) {
+      this.write(this.waiting.join('\n'));
+      this.waiting = [];
+      this.shown = true;
+    }
+  }
+
+  /** Drops what is waiting and empties the region. */
+  clear() {
+    this.waiting = [];
+    this.shown = false;
+    this.write('');
+  }
+}

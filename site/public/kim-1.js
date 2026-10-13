@@ -45,7 +45,7 @@
 // At start the switch and the speed on the page are pushed into the machine,
 // so a browser that restored them on a reload cannot disagree with it.
 import { startMachine } from '/machine-host.js';
-import { Paper } from '/teletype-paper.js';
+import { Announcer, Paper } from '/teletype-paper.js';
 
 const SETTLE_MS = 400;
 
@@ -69,6 +69,9 @@ async function start(panel) {
   const tty = panel.querySelector('[data-kim1-tty]');
   const paper = new Paper();
   const lineEl = panel.querySelector('[data-kim1-line]');
+  const announcer = new Announcer((text) => {
+    lineEl.textContent = text;
+  });
 
   const say = (text, state) => {
     status.textContent = text;
@@ -111,6 +114,7 @@ async function start(panel) {
     panel.dataset.pending = String(kim.Pending());
     const printed = kim.TeletypePrinted();
     if (printed) draw(paper.print(printed));
+    announcer.frame();
     panel.dataset.ttyIdle = kim.TeletypeIdle() ? '1' : '0';
   };
 
@@ -127,13 +131,8 @@ async function start(panel) {
     }
     panel.dataset.paper = paper.text();
     if (atFoot) paperEl.scrollTop = paperEl.scrollHeight;
-    announce();
-  };
-
-  // Every line but the last is complete: the paper has moved on from it.
-  const announce = () => {
-    const fresh = paper.takeCompleted();
-    if (fresh.length > 0) lineEl.textContent = fresh.join('\n');
+    // Every line but the last is complete: the paper has moved on from it.
+    announcer.say(paper.takeCompleted());
   };
 
   const started = await startMachine({
@@ -194,7 +193,7 @@ async function start(panel) {
     paper.clear();
     paperEl.replaceChildren();
     panel.dataset.paper = '';
-    lineEl.textContent = '';
+    announcer.clear();
   });
   for (const b of sends) b.addEventListener('click', () => send({ RUBOUT: '\u007f', LF: '\n' }[b.dataset.kim1Send]));
   // What is typed in the field goes to the teletype, in capitals, and leaves
@@ -217,6 +216,10 @@ async function start(panel) {
   panel.kim1 = { tap, segments: (digit) => shown[digit] };
   panel.dispatchEvent(new CustomEvent('kim1:ready'));
   say('Running. Press RS to start the monitor.', 'running');
+  // A browser may have kept the switch or the speed from before a reload. They
+  // are in the machine now, but the monitor reads them at RS.
+  if (mode.checked) say('TTY switch on, kept by the browser from before. Press RS, then RUB OUT, and the monitor prints KIM on the teletype.', 'teletype');
+  else if (baud.value !== '110') say(`The teletype runs at ${baud.value} baud, kept by the browser from before. Press RS, then RUB OUT, so the monitor measures it.`, 'teletype');
 }
 
 async function bytes(url) {
