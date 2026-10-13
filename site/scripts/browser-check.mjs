@@ -36,7 +36,8 @@
 // from this site.
 //
 // Then the BBC Micro, in the same browser, on the same server and watched the
-// same way: scripts/browser-check-bbc.mjs says what it checks. Then the NES,
+// same way: scripts/browser-check-bbc.mjs says what it checks, its machine and
+// then its two 3D models, the outside and the inside. Then the NES,
 // the same way again: scripts/browser-check-nes.mjs.
 //
 //   node scripts/browser-check.mjs [--throttle N] [--measure seconds]
@@ -51,7 +52,7 @@ import { fileURLToPath } from 'node:url';
 import { chromium } from 'playwright-core';
 import sharp from 'sharp';
 import { loadTryIt, parseKeys } from '../src/lib/machines.mjs';
-import { checkBbcMicro } from './browser-check-bbc.mjs';
+import { checkBbcMicro, checkBbcModels } from './browser-check-bbc.mjs';
 import { checkNes } from './browser-check-nes.mjs';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
@@ -799,6 +800,7 @@ try {
 
   // ---- The BBC Micro ----
   await checkBbcMicro({ browser, watch, problems, origin });
+  await checkBbcModels({ browser, watch, problems, origin });
 
   // ---- The NES ----
   await checkNes({ browser, watch, problems, origin });

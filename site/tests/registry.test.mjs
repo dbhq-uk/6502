@@ -156,7 +156,7 @@ const claims = (models, over = {}) => registry(machine({ case: false, models, ..
 const check = (reg, files = built()) => validateRegistry(reg, null, files).join('\n');
 
 test('a machine with no models and no case is valid, running or not: models never hold up a machine counting', () => {
-  // The BBC Micro today: running, cased, and claiming no model.
+  // The BBC Micro as it was before task 9b of its models plan: running, cased, and claiming no model.
   const bbc = machine({ id: 'bbc-micro', category: 'computer', status: 'running', acceptance: 'BbcAcceptanceTests', photos: [photo()] });
   assert.deepEqual(validateRegistry(registry(bbc), results({ BbcAcceptanceTests: { passed: 1, failed: 0, skipped: 0 } }), built()), []);
   assert.equal(check(registry(machine())), '');
@@ -165,16 +165,20 @@ test('a machine with no models and no case is valid, running or not: models neve
   assert.equal(check(registry(machine({ case: false }))), '');
 });
 
-test('the real registry: the KIM-1 has no case and one model, its board, and the BBC Micro claims none yet', () => {
+test('the real registry: the KIM-1 has no case and one model, its board, and the BBC Micro states its case and claims both views at once, outside then inside', () => {
   const reg = loadRegistry();
   const kim = reg.machines.find((m) => m.id === 'kim-1');
   const bbc = reg.machines.find((m) => m.id === 'bbc-micro');
   assert.equal(kim.case, false);
   assert.deepEqual(kim.models, [{ view: 'board', module: 'kim-1' }]);
-  assert.equal(bbc.models, undefined);
-  assert.equal(bbc.case, undefined);
-  // Read from the disk, as the build reads it: the KIM-1's module and results file are there.
+  // Task 9b of the BBC Micro models plan (13 October 2026): main's rules leave it no other way to claim a model.
+  assert.equal(bbc.case, true);
+  assert.deepEqual(bbc.models, [{ view: 'outside', module: 'bbc-micro-case' }, { view: 'inside', module: 'bbc-micro-board' }]);
+  // Read from the disk, as the build reads it: each machine's modules and results files are there.
   assert.deepEqual(modelProblems(kim, 'machine kim-1'), []);
+  assert.deepEqual(modelProblems(bbc, 'machine bbc-micro'), []);
+  // Either view alone, with its case stated, is refused: the claim is both or none.
+  for (const one of bbc.models) assert.match(modelProblems({ ...bbc, models: [one] }, 'machine bbc-micro').join('\n'), /must claim both outside and inside/);
   assert.deepEqual(VIEWS, ['board', 'outside', 'inside']);
   assert.equal(MODELS_DIR, path.join(process.cwd(), 'src', 'models'));
   assert.equal(DATA_DIR, path.join(process.cwd(), 'src', 'data'));
@@ -253,9 +257,9 @@ test('a machine that claims a model states case: a claim with no case fails, and
   assert.match(check(claims([both[1]], { case: true })), /must claim both outside and inside/);
   // A machine that claims no model need not state its case.
   assert.equal(check(registry(machine())), '');
-  // The real registry: the KIM-1 states no case and claims its board; the NES states its case and claims both views.
+  // The real registry: the KIM-1 states no case and claims its board; the NES and the BBC Micro state their case and claim both views.
   const reg = loadRegistry();
-  for (const id of ['kim-1', 'nes']) assert.deepEqual(modelProblems(reg.machines.find((m) => m.id === id), `machine ${id}`), [], id);
+  for (const id of ['kim-1', 'nes', 'bbc-micro']) assert.deepEqual(modelProblems(reg.machines.find((m) => m.id === id), `machine ${id}`), [], id);
   for (const m of reg.machines) if (m.models) assert.equal(typeof m.case, 'boolean', `${m.id} claims a model and does not state case`);
 });
 

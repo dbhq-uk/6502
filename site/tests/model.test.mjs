@@ -356,8 +356,9 @@ test('the track map is loaded with the model, never with the page, and the deplo
 });
 
 test('every model with a track map has it committed, inside the budget its plan set, and built beside its bundle byte for byte, where its entry says', () => {
-  // The KIM-1's map's budget is the test above's; the NES board's, set before it was traced, is 600,000 bytes (its plan's budgets).
-  const BUDGETS = { 'kim-1': TRACK_BUDGET, 'nes-famicom-board': 600_000 };
+  // The KIM-1's map's budget is the test above's; the NES board's and the BBC Micro board's, each set before it was
+  // traced, are 600,000 bytes (their plans' budgets).
+  const BUDGETS = { 'kim-1': TRACK_BUDGET, 'nes-famicom-board': 600_000, 'bbc-micro-board': 600_000 };
   const textured = Object.entries(MODELS).filter(([, m]) => m.texture);
   assert.ok(textured.length >= 2, 'fewer than two models have a track map');
   for (const [id, m] of textured) {
@@ -493,7 +494,16 @@ test('every model a machine claims is in the map, with that machine and that vie
 
 test('a machine\'s page shows the model section exactly when the machine claims a model, with that model\'s module', () => {
   const running = registry.machines.filter((m) => m.status === 'running');
-  assert.ok(running.some((m) => modelsOf(m).length > 0) && running.some((m) => modelsOf(m).length === 0), 'the real registry no longer has a running machine with a model and one without');
+  // Since the BBC Micro claimed its models (task 9b of its plan, 13 October 2026), every running machine has one, so
+  // the page without a model is held on a made-up machine that claims none: it has no models, and the page renders
+  // the model section, the loader and the photographs' "used for the model" only for a machine that has them.
+  const none = { id: 'made-up', status: 'running', photos: [] };
+  assert.deepEqual(modelsOf(none), []);
+  const machinePage = fs.readFileSync(path.join(process.cwd(), 'src', 'pages', 'machines', '[id].astro'), 'utf8');
+  assert.match(machinePage, /const models = modelsOf\(machine\);\s*const hasModels = models\.length > 0;/);
+  assert.match(machinePage, /\.\.\.\(hasModels \? \['\/model-loader\.js'\] : \[\]\)/);
+  assert.match(machinePage, /\{hasModels && <MachineModel models=\{models\}/);
+  assert.match(machinePage, /<MachinePhotos machine=\{machine\} model=\{hasModels\} \/>/);
   for (const m of running) {
     const built = page(`/machines/${m.id}/`)?.html ?? '';
     assert.ok(built, `/machines/${m.id}/ was not built`);
