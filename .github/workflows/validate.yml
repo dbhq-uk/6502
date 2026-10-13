@@ -58,6 +58,44 @@ jobs:
           path: site/src/data/results.json
           if-no-files-found: error
 
+  # The NES's gate on amd64: the differential (bench/nes-speed/differential) run
+  # against its committed baseline, which was recorded with the per-dot reference.
+  # The lazy build and the reference must both give it byte for byte, so a change
+  # for speed (the lazy chips, the fast scanline renderer) cannot change what the
+  # machine does, on this architecture as on the one the baseline was made on. The
+  # output is integer hashes, so a difference between architectures would be a
+  # finding. The pinned test ROMs are downloaded, hash-checked and cached as for
+  # the tests; the cache is its own, so it does not hold Harte's data.
+  nes-gate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6
+        with:
+          dotnet-version: '10.0.x'
+      - name: Cache the NES test ROMs
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
+        with:
+          path: .testdata
+          key: nes-testdata-${{ hashFiles('tests/Dbhq.Cpu6502.TestSupport/Pins.cs') }}
+      - name: Build the differential
+        run: dotnet build bench/nes-speed/differential --configuration Release
+      - name: One baseline, and the lazy build matches it
+        run: |
+          set -eu
+          files=(bench/nes-speed/differential/baseline/*.txt)
+          test "${#files[@]}" -eq 1
+          uname -m
+          dotnet run --no-build --configuration Release --project bench/nes-speed/differential -- --check "${files[0]}"
+      - name: The per-dot reference matches it
+        run: |
+          set -eu
+          files=(bench/nes-speed/differential/baseline/*.txt)
+          dotnet run --no-build --configuration Release --project bench/nes-speed/differential -- --check "${files[0]}" --oracle
+
   # The machines' browser builds, alongside the tests: the KIM-1, the BBC
   # Micro and the NES as .NET WebAssembly, compiled ahead of time, and their
   # ROMs (for the NES, its bundled game), read from roms/ and checked against
