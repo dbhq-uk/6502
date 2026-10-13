@@ -1,0 +1,775 @@
+=== launch smoke folder=/home/runner/work/_temp/publish-after screen=boot start=2026-10-13T21:46:15Z loadavg=0.94 0.66 0.28 1/260 9535
+--- top before: 0.0 systemd;0.0 kthreadd;0.0 pool_workqueue_release;0.0 kworker/R-rcu_gp;
+os: roms/bbc-micro/os.rom, 16384 bytes, sha256 2d9fea69017864f6962704481829f95fee08446c8c3a13826d5d4e44000ac9de, hash checked
+basic: roms/bbc-micro/BASIC.ROM, 16384 bytes, sha256 45bd55dc0f6f0f8f1fe9e2481de7def206565eec8f600ba3068b849ca4132079, hash checked
+dfs: roms/bbc-micro/DFS-1.2.rom, 16384 bytes, sha256 e745e34895225a6650b712c1dd0656cb0b0b15f072a8ae6d9ea8d1ac257eb3d6, hash checked
+browser 154.0.8037.97
+launch 1 boot cycles=6000003 ms=152.500 cycles_per_second=39344282 mhz=39.344
+launch 1 screen ["","BBC Computer 32K","","Acorn DFS","","BASIC","",">"]
+launch 1 prompt yes
+launch 1 timed 1 cycles=2000000 ms=25.200 cycles_per_second=79365079 mhz=79.365
+launch 1 timed 2 cycles=2000003 ms=24.800 cycles_per_second=80645282 mhz=80.645
+launch 1 timed 3 cycles=2000000 ms=24.800 cycles_per_second=80645161 mhz=80.645
+launch 1 timed 4 cycles=2000000 ms=25.100 cycles_per_second=79681275 mhz=79.681
+launch 1 timed 5 cycles=2000005 ms=25.000 cycles_per_second=80000200 mhz=80.000
+launch 1 thread 1 cycles=2000001 thread_ms=26.464 mhz=75.574
+launch 1 thread 2 cycles=2000002 thread_ms=26.164 mhz=76.441
+launch 1 thread 3 cycles=2000002 thread_ms=26.353 mhz=75.893
+launch 1 thread 4 cycles=2000000 thread_ms=26.292 mhz=76.069
+launch 1 thread 5 cycles=2000000 thread_ms=26.011 mhz=76.891
+launch 1 thread 6 cycles=2000001 thread_ms=26.066 mhz=76.728
+launch 1 thread 7 cycles=2000001 thread_ms=25.959 mhz=77.045
+launch 1 thread 8 cycles=2000000 thread_ms=26.027 mhz=76.843
+--- exit=0 end=2026-10-13T21:46:21Z loadavg=1.11 0.70 0.29 1/243 9672
+=== launch mode7-p1-base folder=/home/runner/work/_temp/publish-base screen=boot start=2026-10-13T21:46:36Z loadavg=0.86 0.67 0.29 1/244 9697
+--- top before: 0.0 systemd;0.0 kthreadd;0.0 pool_workqueue_release;0.0 kworker/R-rcu_gp;
+os: roms/bbc-micro/os.rom, 16384 bytes, sha256 2d9fea69017864f6962704481829f95fee08446c8c3a13826d5d4e44000ac9de, hash checked
+basic: roms/bbc-micro/BASIC.ROM, 16384 bytes, sha256 45bd55dc0f6f0f8f1fe9e2481de7def206565eec8f600ba3068b849ca4132079, hash checked
+dfs: roms/bbc-micro/DFS-1.2.rom, 16384 bytes, sha256 e745e34895225a6650b712c1dd0656cb0b0b15f072a8ae6d9ea8d1ac257eb3d6, hash checked
+browser 154.0.8037.97
+launch 1 boot cycles=6000003 ms=166.400 cycles_per_second=36057710 mhz=36.058
+launch 1 screen ["","BBC Computer 32K","","Acorn DFS","","BASIC","",">"]
+launch 1 prompt yes
+launch 1 timed 1 cycles=2000000 ms=24.200 cycles_per_second=82644628 mhz=82.645
+launch 1 timed 2 cycles=2000003 ms=24.100 cycles_per_second=82987676 mhz=82.988
+launch 1 timed 3 cycles=2000000 ms=24.800 cycles_per_second=80645161 mhz=80.645
+launch 1 timed 4 cycles=2000000 ms=24.200 cycles_per_second=82644628 mhz=82.645
+launch 1 timed 5 cycles=2000005 ms=23.900 cycles_per_second=83682218 mhz=83.682
+launch 1 thread 1 cycles=2000001 thread_ms=24.062 mhz=83.119
+launch 1 thread 2 cycles=2000002 thread_ms=24.468 mhz=81.739
+launch 1 thread 3 cycles=2000002 thread_ms=23.792 mhz=84.062
+launch 1 thread 4 cycles=2000000 thread_ms=25.084 mhz=79.732
+launch 1 thread 5 cycles=2000000 thread_ms=24.925 mhz=80.241
+launch 1 thread 6 cycles=2000001 thread_ms=24.866 mhz=80.431
+launch 1 thread 7 cycles=2000001 thread_ms=24.751 mhz=80.805
+launch 1 thread 8 cycles=2000000 thread_ms=24.689 mhz=81.008
+--- exit=0 end=2026-10-13T21:46:38Z loadavg=0.86 0.67 0.29 1/245 9831
+=== launch mode7-p1-after folder=/home/runner/work/_temp/publish-after screen=boot start=2026-10-13T21:46:38Z loadavg=0.86 0.67 0.29 1/245 9840
+--- top before: 0.0 systemd;0.0 kthreadd;0.0 pool_workqueue_release;0.0 kworker/R-rcu_gp;
+os: roms/bbc-micro/os.rom, 16384 bytes, sha256 2d9fea69017864f6962704481829f95fee08446c8c3a13826d5d4e44000ac9de, hash checked
+basic: roms/bbc-micro/BASIC.ROM, 16384 bytes, sha256 45bd55dc0f6f0f8f1fe9e2481de7def206565eec8f600ba3068b849ca4132079, hash checked
+dfs: roms/bbc-micro/DFS-1.2.rom, 16384 bytes, sha256 e745e34895225a6650b712c1dd0656cb0b0b15f072a8ae6d9ea8d1ac257eb3d6, hash checked
+browser 154.0.8037.97
+launch 1 boot cycles=6000003 ms=147.400 cycles_per_second=40705583 mhz=40.706
+launch 1 screen ["","BBC Computer 32K","","Acorn DFS","","BASIC","",">"]
+launch 1 prompt yes
+launch 1 timed 1 cycles=2000000 ms=25.300 cycles_per_second=79051383 mhz=79.051
+launch 1 timed 2 cycles=2000003 ms=24.800 cycles_per_second=80645282 mhz=80.645
+launch 1 timed 3 cycles=2000000 ms=24.900 cycles_per_second=80321285 mhz=80.321
+launch 1 timed 4 cycles=2000000 ms=24.000 cycles_per_second=83333333 mhz=83.333
+launch 1 timed 5 cycles=2000005 ms=23.700 cycles_per_second=84388397 mhz=84.388
+launch 1 thread 1 cycles=2000001 thread_ms=24.136 mhz=82.864
+launch 1 thread 2 cycles=2000002 thread_ms=24.073 mhz=83.081
+launch 1 thread 3 cycles=2000002 thread_ms=24.145 mhz=82.833
+launch 1 thread 4 cycles=2000000 thread_ms=24.016 mhz=83.278
+launch 1 thread 5 cycles=2000000 thread_ms=24.038 mhz=83.202
+launch 1 thread 6 cycles=2000001 thread_ms=24.205 mhz=82.628
+launch 1 thread 7 cycles=2000001 thread_ms=24.046 mhz=83.174
+launch 1 thread 8 cycles=2000000 thread_ms=24.099 mhz=82.991
+--- exit=0 end=2026-10-13T21:46:39Z loadavg=0.87 0.67 0.29 1/245 9971
+=== launch mode7-p2-after folder=/home/runner/work/_temp/publish-after screen=boot start=2026-10-13T21:46:39Z loadavg=0.87 0.67 0.29 1/245 9980
+--- top before: 0.0 systemd;0.0 kthreadd;0.0 pool_workqueue_release;0.0 kworker/R-rcu_gp;
+os: roms/bbc-micro/os.rom, 16384 bytes, sha256 2d9fea69017864f6962704481829f95fee08446c8c3a13826d5d4e44000ac9de, hash checked
+basic: roms/bbc-micro/BASIC.ROM, 16384 bytes, sha256 45bd55dc0f6f0f8f1fe9e2481de7def206565eec8f600ba3068b849ca4132079, hash checked
+dfs: roms/bbc-micro/DFS-1.2.rom, 16384 bytes, sha256 e745e34895225a6650b712c1dd0656cb0b0b15f072a8ae6d9ea8d1ac257eb3d6, hash checked
+browser 154.0.8037.97
+launch 1 boot cycles=6000003 ms=155.600 cycles_per_second=38560431 mhz=38.560
+launch 1 screen ["","BBC Computer 32K","","Acorn DFS","","BASIC","",">"]
+launch 1 prompt yes
+launch 1 timed 1 cycles=2000000 ms=24.700 cycles_per_second=80971660 mhz=80.972
+launch 1 timed 2 cycles=2000003 ms=24.800 cycles_per_second=80645282 mhz=80.645
+launch 1 timed 3 cycles=2000000 ms=25.600 cycles_per_second=78125000 mhz=78.125
+launch 1 timed 4 cycles=2000000 ms=26.200 cycles_per_second=76335878 mhz=76.336
+launch 1 timed 5 cycles=2000005 ms=25.700 cycles_per_second=77821206 mhz=77.821
+launch 1 thread 1 cycles=2000001 thread_ms=24.457 mhz=81.776
+launch 1 thread 2 cycles=2000002 thread_ms=23.986 mhz=83.382
+launch 1 thread 3 cycles=2000002 thread_ms=23.924 mhz=83.598
+launch 1 thread 4 cycles=2000000 thread_ms=23.699 mhz=84.392
+launch 1 thread 5 cycles=2000000 thread_ms=23.697 mhz=84.399
+launch 1 thread 6 cycles=2000001 thread_ms=23.481 mhz=85.175
+launch 1 thread 7 cycles=2000001 thread_ms=23.588 mhz=84.789
+launch 1 thread 8 cycles=2000000 thread_ms=23.473 mhz=85.204
+--- exit=0 end=2026-10-13T21:46:41Z loadavg=0.87 0.67 0.29 1/243 10109
+=== launch mode7-p2-base folder=/home/runner/work/_temp/publish-base screen=boot start=2026-10-13T21:46:41Z loadavg=0.87 0.67 0.29 1/243 10118
+--- top before: 0.0 systemd;0.0 kthreadd;0.0 pool_workqueue_release;0.0 kworker/R-rcu_gp;
+os: roms/bbc-micro/os.rom, 16384 bytes, sha256 2d9fea69017864f6962704481829f95fee08446c8c3a13826d5d4e44000ac9de, hash checked
+basic: roms/bbc-micro/BASIC.ROM, 16384 bytes, sha256 45bd55dc0f6f0f8f1fe9e2481de7def206565eec8f600ba3068b849ca4132079, hash checked
+dfs: roms/bbc-micro/DFS-1.2.rom, 16384 bytes, sha256 e745e34895225a6650b712c1dd0656cb0b0b15f072a8ae6d9ea8d1ac257eb3d6, hash checked
+browser 154.0.8037.97
+launch 1 boot cycles=6000003 ms=147.800 cycles_per_second=40595419 mhz=40.595
+launch 1 screen ["","BBC Computer 32K","","Acorn DFS","","BASIC","",">"]
+launch 1 prompt yes
+launch 1 timed 1 cycles=2000000 ms=24.300 cycles_per_second=82304527 mhz=82.305
+launch 1 timed 2 cycles=2000003 ms=23.600 cycles_per_second=84745890 mhz=84.746
+launch 1 timed 3 cycles=2000000 ms=23.900 cycles_per_second=83682008 mhz=83.682
+launch 1 timed 4 cycles=2000000 ms=24.000 cycles_per_second=83333333 mhz=83.333
+launch 1 timed 5 cycles=2000005 ms=23.700 cycles_per_second=84388397 mhz=84.388
+launch 1 thread 1 cycles=2000001 thread_ms=24.096 mhz=83.001
+launch 1 thread 2 cycles=2000002 thread_ms=23.752 mhz=84.204
+launch 1 thread 3 cycles=2000002 thread_ms=23.735 mhz=84.264
+launch 1 thread 4 cycles=2000000 thread_ms=23.832 mhz=83.921
+launch 1 thread 5 cycles=2000000 thread_ms=24.913 mhz=80.279
+launch 1 thread 6 cycles=2000001 thread_ms=23.726 mhz=84.296
+launch 1 thread 7 cycles=2000001 thread_ms=23.592 mhz=84.775
+launch 1 thread 8 cycles=2000000 thread_ms=23.658 mhz=84.538
+--- exit=0 end=2026-10-13T21:46:42Z loadavg=0.87 0.67 0.29 1/243 10247
+=== launch mode7-p3-base folder=/home/runner/work/_temp/publish-base screen=boot start=2026-10-13T21:46:42Z loadavg=0.87 0.67 0.29 1/243 10256
+--- top before: 9.1 Runner.Worker;0.0 systemd;0.0 kthreadd;0.0 pool_workqueue_release;
+os: roms/bbc-micro/os.rom, 16384 bytes, sha256 2d9fea69017864f6962704481829f95fee08446c8c3a13826d5d4e44000ac9de, hash checked
+basic: roms/bbc-micro/BASIC.ROM, 16384 bytes, sha256 45bd55dc0f6f0f8f1fe9e2481de7def206565eec8f600ba3068b849ca4132079, hash checked
+dfs: roms/bbc-micro/DFS-1.2.rom, 16384 bytes, sha256 e745e34895225a6650b712c1dd0656cb0b0b15f072a8ae6d9ea8d1ac257eb3d6, hash checked
+browser 154.0.8037.97
+launch 1 boot cycles=6000003 ms=134.100 cycles_per_second=44742752 mhz=44.743
+launch 1 screen ["","BBC Computer 32K","","Acorn DFS","","BASIC","",">"]
+launch 1 prompt yes
+launch 1 timed 1 cycles=2000000 ms=24.400 cycles_per_second=81967213 mhz=81.967
+launch 1 timed 2 cycles=2000003 ms=23.700 cycles_per_second=84388312 mhz=84.388
+launch 1 timed 3 cycles=2000000 ms=23.500 cycles_per_second=85106383 mhz=85.106
+launch 1 timed 4 cycles=2000000 ms=23.400 cycles_per_second=85470085 mhz=85.470
+launch 1 timed 5 cycles=2000005 ms=23.700 cycles_per_second=84388397 mhz=84.388
+launch 1 thread 1 cycles=2000001 thread_ms=23.818 mhz=83.970
+launch 1 thread 2 cycles=2000002 thread_ms=23.609 mhz=84.714
+launch 1 thread 3 cycles=2000002 thread_ms=23.677 mhz=84.470
+launch 1 thread 4 cycles=2000000 thread_ms=23.737 mhz=84.257
+launch 1 thread 5 cycles=2000000 thread_ms=23.721 mhz=84.313
+launch 1 thread 6 cycles=2000001 thread_ms=23.602 mhz=84.739
+launch 1 thread 7 cycles=2000001 thread_ms=23.585 mhz=84.800
+launch 1 thread 8 cycles=2000000 thread_ms=23.614 mhz=84.696
+--- exit=0 end=2026-10-13T21:46:44Z loadavg=0.87 0.67 0.29 1/242 10385
+=== launch mode7-p3-after folder=/home/runner/work/_temp/publish-after screen=boot start=2026-10-13T21:46:44Z loadavg=0.87 0.67 0.29 1/242 10394
+--- top before: 0.0 systemd;0.0 kthreadd;0.0 pool_workqueue_release;0.0 kworker/R-rcu_gp;
+os: roms/bbc-micro/os.rom, 16384 bytes, sha256 2d9fea69017864f6962704481829f95fee08446c8c3a13826d5d4e44000ac9de, hash checked
+basic: roms/bbc-micro/BASIC.ROM, 16384 bytes, sha256 45bd55dc0f6f0f8f1fe9e2481de7def206565eec8f600ba3068b849ca4132079, hash checked
+dfs: roms/bbc-micro/DFS-1.2.rom, 16384 bytes, sha256 e745e34895225a6650b712c1dd0656cb0b0b15f072a8ae6d9ea8d1ac257eb3d6, hash checked
+browser 154.0.8037.97
+launch 1 boot cycles=6000003 ms=138.200 cycles_per_second=43415362 mhz=43.415
+launch 1 screen ["","BBC Computer 32K","","Acorn DFS","","BASIC","",">"]
+launch 1 prompt yes
+launch 1 timed 1 cycles=2000000 ms=24.800 cycles_per_second=80645161 mhz=80.645
+launch 1 timed 2 cycles=2000003 ms=24.000 cycles_per_second=83333458 mhz=83.333
+launch 1 timed 3 cycles=2000000 ms=23.900 cycles_per_second=83682008 mhz=83.682
+launch 1 timed 4 cycles=2000000 ms=24.500 cycles_per_second=81632653 mhz=81.633
+launch 1 timed 5 cycles=2000005 ms=23.900 cycles_per_second=83682218 mhz=83.682
+launch 1 thread 1 cycles=2000001 thread_ms=26.305 mhz=76.031
+launch 1 thread 2 cycles=2000002 thread_ms=24.622 mhz=81.228
+launch 1 thread 3 cycles=2000002 thread_ms=24.535 mhz=81.516
+launch 1 thread 4 cycles=2000000 thread_ms=24.444 mhz=81.820
+launch 1 thread 5 cycles=2000000 thread_ms=24.772 mhz=80.736
+launch 1 thread 6 cycles=2000001 thread_ms=24.645 mhz=81.152
+launch 1 thread 7 cycles=2000001 thread_ms=24.575 mhz=81.384
+launch 1 thread 8 cycles=2000000 thread_ms=24.630 mhz=81.202
+--- exit=0 end=2026-10-13T21:46:45Z loadavg=0.80 0.66 0.29 1/243 10525
+=== launch mode7-p4-after folder=/home/runner/work/_temp/publish-after screen=boot start=2026-10-13T21:46:45Z loadavg=0.80 0.66 0.29 1/243 10534
+--- top before: 0.0 systemd;0.0 kthreadd;0.0 pool_workqueue_release;0.0 kworker/R-rcu_gp;
+os: roms/bbc-micro/os.rom, 16384 bytes, sha256 2d9fea69017864f6962704481829f95fee08446c8c3a13826d5d4e44000ac9de, hash checked
+basic: roms/bbc-micro/BASIC.ROM, 16384 bytes, sha256 45bd55dc0f6f0f8f1fe9e2481de7def206565eec8f600ba3068b849ca4132079, hash checked
+dfs: roms/bbc-micro/DFS-1.2.rom, 16384 bytes, sha256 e745e34895225a6650b712c1dd0656cb0b0b15f072a8ae6d9ea8d1ac257eb3d6, hash checked
+browser 154.0.8037.97
+launch 1 boot cycles=6000003 ms=162.900 cycles_per_second=36832431 mhz=36.832
+launch 1 screen ["","BBC Computer 32K","","Acorn DFS","","BASIC","",">"]
+launch 1 prompt yes
+launch 1 timed 1 cycles=2000000 ms=25.100 cycles_per_second=79681275 mhz=79.681
+launch 1 timed 2 cycles=2000003 ms=24.500 cycles_per_second=81632776 mhz=81.633
+launch 1 timed 3 cycles=2000000 ms=24.600 cycles_per_second=81300813 mhz=81.301
+launch 1 timed 4 cycles=2000000 ms=24.400 cycles_per_second=81967213 mhz=81.967
+launch 1 timed 5 cycles=2000005 ms=24.600 cycles_per_second=81301016 mhz=81.301
+launch 1 thread 1 cycles=2000001 thread_ms=24.932 mhz=80.218
+launch 1 thread 2 cycles=2000002 thread_ms=24.655 mhz=81.120
+launch 1 thread 3 cycles=2000002 thread_ms=24.451 mhz=81.796
+launch 1 thread 4 cycles=2000000 thread_ms=24.448 mhz=81.806
+launch 1 thread 5 cycles=2000000 thread_ms=25.292 mhz=79.076
+launch 1 thread 6 cycles=2000001 thread_ms=24.332 mhz=82.196
+launch 1 thread 7 cycles=2000001 thread_ms=24.374 mhz=82.055
+launch 1 thread 8 cycles=2000000 thread_ms=24.285 mhz=82.355
+--- exit=0 end=2026-10-13T21:46:47Z loadavg=0.80 0.66 0.29 1/243 10665
+=== launch mode7-p4-base folder=/home/runner/work/_temp/publish-base screen=boot start=2026-10-13T21:46:47Z loadavg=0.80 0.66 0.29 1/243 10674
+--- top before: 0.0 systemd;0.0 kthreadd;0.0 pool_workqueue_release;0.0 kworker/R-rcu_gp;
+os: roms/bbc-micro/os.rom, 16384 bytes, sha256 2d9fea69017864f6962704481829f95fee08446c8c3a13826d5d4e44000ac9de, hash checked
+basic: roms/bbc-micro/BASIC.ROM, 16384 bytes, sha256 45bd55dc0f6f0f8f1fe9e2481de7def206565eec8f600ba3068b849ca4132079, hash checked
+dfs: roms/bbc-micro/DFS-1.2.rom, 16384 bytes, sha256 e745e34895225a6650b712c1dd0656cb0b0b15f072a8ae6d9ea8d1ac257eb3d6, hash checked
+browser 154.0.8037.97
+launch 1 boot cycles=6000003 ms=159.400 cycles_per_second=37641173 mhz=37.641
+launch 1 screen ["","BBC Computer 32K","","Acorn DFS","","BASIC","",">"]
+launch 1 prompt yes
+launch 1 timed 1 cycles=2000000 ms=23.500 cycles_per_second=85106383 mhz=85.106
+launch 1 timed 2 cycles=2000003 ms=23.500 cycles_per_second=85106511 mhz=85.107
+launch 1 timed 3 cycles=2000000 ms=24.200 cycles_per_second=82644628 mhz=82.645
+launch 1 timed 4 cycles=2000000 ms=24.600 cycles_per_second=81300813 mhz=81.301
+launch 1 timed 5 cycles=2000005 ms=24.200 cycles_per_second=82644835 mhz=82.645
+launch 1 thread 1 cycles=2000001 thread_ms=23.799 mhz=84.037
+launch 1 thread 2 cycles=2000002 thread_ms=23.875 mhz=83.770
+launch 1 thread 3 cycles=2000002 thread_ms=23.679 mhz=84.463
+launch 1 thread 4 cycles=2000000 thread_ms=23.659 mhz=84.534
+launch 1 thread 5 cycles=2000000 thread_ms=23.679 mhz=84.463
+launch 1 thread 6 cycles=2000001 thread_ms=23.657 mhz=84.542
+launch 1 thread 7 cycles=2000001 thread_ms=23.541 mhz=84.958
+launch 1 thread 8 cycles=2000000 thread_ms=23.577 mhz=84.828
+--- exit=0 end=2026-10-13T21:46:48Z loadavg=0.80 0.66 0.29 1/243 10805
+=== launch mode7-p5-base folder=/home/runner/work/_temp/publish-base screen=boot start=2026-10-13T21:46:48Z loadavg=0.80 0.66 0.29 1/243 10814
+--- top before: 0.0 systemd;0.0 kthreadd;0.0 pool_workqueue_release;0.0 kworker/R-rcu_gp;
+os: roms/bbc-micro/os.rom, 16384 bytes, sha256 2d9fea69017864f6962704481829f95fee08446c8c3a13826d5d4e44000ac9de, hash checked
+basic: roms/bbc-micro/BASIC.ROM, 16384 bytes, sha256 45bd55dc0f6f0f8f1fe9e2481de7def206565eec8f600ba3068b849ca4132079, hash checked
+dfs: roms/bbc-micro/DFS-1.2.rom, 16384 bytes, sha256 e745e34895225a6650b712c1dd0656cb0b0b15f072a8ae6d9ea8d1ac257eb3d6, hash checked
+browser 154.0.8037.97
+launch 1 boot cycles=6000003 ms=145.300 cycles_per_second=41293895 mhz=41.294
+launch 1 screen ["","BBC Computer 32K","","Acorn DFS","","BASIC","",">"]
+launch 1 prompt yes
+launch 1 timed 1 cycles=2000000 ms=25.400 cycles_per_second=78740157 mhz=78.740
+launch 1 timed 2 cycles=2000003 ms=25.400 cycles_per_second=78740276 mhz=78.740
+launch 1 timed 3 cycles=2000000 ms=25.100 cycles_per_second=79681275 mhz=79.681
+launch 1 timed 4 cycles=2000000 ms=26.300 cycles_per_second=76045627 mhz=76.046
+launch 1 timed 5 cycles=2000005 ms=24.900 cycles_per_second=80321486 mhz=80.321
+launch 1 thread 1 cycles=2000001 thread_ms=25.392 mhz=78.765
+launch 1 thread 2 cycles=2000002 thread_ms=24.996 mhz=80.013
+launch 1 thread 3 cycles=2000002 thread_ms=24.976 mhz=80.077
+launch 1 thread 4 cycles=2000000 thread_ms=25.005 mhz=79.984
+launch 1 thread 5 cycles=2000000 thread_ms=25.016 mhz=79.949
+launch 1 thread 6 cycles=2000001 thread_ms=25.052 mhz=79.834
+launch 1 thread 7 cycles=2000001 thread_ms=25.021 mhz=79.933
+launch 1 thread 8 cycles=2000000 thread_ms=25.462 mhz=78.548
+--- exit=0 end=2026-10-13T21:46:50Z loadavg=1.86 0.88 0.36 1/243 10943
+=== launch mode7-p5-after folder=/home/runner/work/_temp/publish-after screen=boot start=2026-10-13T21:47:35Z loadavg=0.88 0.76 0.34 1/245 10988
+--- top before: 0.0 systemd;0.0 kthreadd;0.0 pool_workqueue_release;0.0 kworker/R-rcu_gp;
+os: roms/bbc-micro/os.rom, 16384 bytes, sha256 2d9fea69017864f6962704481829f95fee08446c8c3a13826d5d4e44000ac9de, hash checked
+basic: roms/bbc-micro/BASIC.ROM, 16384 bytes, sha256 45bd55dc0f6f0f8f1fe9e2481de7def206565eec8f600ba3068b849ca4132079, hash checked
+dfs: roms/bbc-micro/DFS-1.2.rom, 16384 bytes, sha256 e745e34895225a6650b712c1dd0656cb0b0b15f072a8ae6d9ea8d1ac257eb3d6, hash checked
+browser 154.0.8037.97
+launch 1 boot cycles=6000003 ms=136.200 cycles_per_second=44052885 mhz=44.053
+launch 1 screen ["","BBC Computer 32K","","Acorn DFS","","BASIC","",">"]
+launch 1 prompt yes
+launch 1 timed 1 cycles=2000000 ms=24.400 cycles_per_second=81967213 mhz=81.967
+launch 1 timed 2 cycles=2000003 ms=23.800 cycles_per_second=84033739 mhz=84.034
+launch 1 timed 3 cycles=2000000 ms=23.700 cycles_per_second=84388186 mhz=84.388
+launch 1 timed 4 cycles=2000000 ms=23.800 cycles_per_second=84033613 mhz=84.034
+launch 1 timed 5 cycles=2000005 ms=24.100 cycles_per_second=82987759 mhz=82.988
+launch 1 thread 1 cycles=2000001 thread_ms=23.833 mhz=83.917
+launch 1 thread 2 cycles=2000002 thread_ms=24.096 mhz=83.001
+launch 1 thread 3 cycles=2000002 thread_ms=23.674 mhz=84.481
+launch 1 thread 4 cycles=2000000 thread_ms=23.857 mhz=83.833
+launch 1 thread 5 cycles=2000000 thread_ms=24.050 mhz=83.160
+launch 1 thread 6 cycles=2000001 thread_ms=23.694 mhz=84.410
+launch 1 thread 7 cycles=2000001 thread_ms=23.647 mhz=84.577
+launch 1 thread 8 cycles=2000000 thread_ms=23.555 mhz=84.908
+--- exit=0 end=2026-10-13T21:47:36Z loadavg=0.88 0.76 0.34 1/245 11116
+=== launch mode7-p6-after folder=/home/runner/work/_temp/publish-after screen=boot start=2026-10-13T21:47:36Z loadavg=0.88 0.76 0.34 1/245 11125
+--- top before: 20.0 Runner.Listener;0.0 systemd;0.0 kthreadd;0.0 pool_workqueue_release;
+os: roms/bbc-micro/os.rom, 16384 bytes, sha256 2d9fea69017864f6962704481829f95fee08446c8c3a13826d5d4e44000ac9de, hash checked
+basic: roms/bbc-micro/BASIC.ROM, 16384 bytes, sha256 45bd55dc0f6f0f8f1fe9e2481de7def206565eec8f600ba3068b849ca4132079, hash checked
+dfs: roms/bbc-micro/DFS-1.2.rom, 16384 bytes, sha256 e745e34895225a6650b712c1dd0656cb0b0b15f072a8ae6d9ea8d1ac257eb3d6, hash checked
+browser 154.0.8037.97
+launch 1 boot cycles=6000003 ms=148.100 cycles_per_second=40513187 mhz=40.513
+launch 1 screen ["","BBC Computer 32K","","Acorn DFS","","BASIC","",">"]
+launch 1 prompt yes
+launch 1 timed 1 cycles=2000000 ms=23.900 cycles_per_second=83682008 mhz=83.682
+launch 1 timed 2 cycles=2000003 ms=23.800 cycles_per_second=84033739 mhz=84.034
+launch 1 timed 3 cycles=2000000 ms=23.900 cycles_per_second=83682008 mhz=83.682
+launch 1 timed 4 cycles=2000000 ms=23.900 cycles_per_second=83682008 mhz=83.682
+launch 1 timed 5 cycles=2000005 ms=23.800 cycles_per_second=84033824 mhz=84.034
+launch 1 thread 1 cycles=2000001 thread_ms=24.412 mhz=81.927
+launch 1 thread 2 cycles=2000002 thread_ms=24.208 mhz=82.617
+launch 1 thread 3 cycles=2000002 thread_ms=24.092 mhz=83.015
+launch 1 thread 4 cycles=2000000 thread_ms=24.158 mhz=82.788
+launch 1 thread 5 cycles=2000000 thread_ms=24.905 mhz=80.305
+launch 1 thread 6 cycles=2000001 thread_ms=24.062 mhz=83.119
+launch 1 thread 7 cycles=2000001 thread_ms=23.921 mhz=83.609
+launch 1 thread 8 cycles=2000000 thread_ms=24.001 mhz=83.330
+--- exit=0 end=2026-10-13T21:47:38Z loadavg=0.88 0.76 0.34 1/247 11262
+=== launch mode7-p6-base folder=/home/runner/work/_temp/publish-base screen=boot start=2026-10-13T21:47:38Z loadavg=0.88 0.76 0.34 1/247 11271
+--- top before: 0.0 systemd;0.0 kthreadd;0.0 pool_workqueue_release;0.0 kworker/R-rcu_gp;
+os: roms/bbc-micro/os.rom, 16384 bytes, sha256 2d9fea69017864f6962704481829f95fee08446c8c3a13826d5d4e44000ac9de, hash checked
+basic: roms/bbc-micro/BASIC.ROM, 16384 bytes, sha256 45bd55dc0f6f0f8f1fe9e2481de7def206565eec8f600ba3068b849ca4132079, hash checked
+dfs: roms/bbc-micro/DFS-1.2.rom, 16384 bytes, sha256 e745e34895225a6650b712c1dd0656cb0b0b15f072a8ae6d9ea8d1ac257eb3d6, hash checked
+browser 154.0.8037.97
+launch 1 boot cycles=6000003 ms=133.700 cycles_per_second=44876612 mhz=44.877
+launch 1 screen ["","BBC Computer 32K","","Acorn DFS","","BASIC","",">"]
+launch 1 prompt yes
+launch 1 timed 1 cycles=2000000 ms=24.500 cycles_per_second=81632653 mhz=81.633
+launch 1 timed 2 cycles=2000003 ms=23.500 cycles_per_second=85106511 mhz=85.107
+launch 1 timed 3 cycles=2000000 ms=23.500 cycles_per_second=85106383 mhz=85.106
+launch 1 timed 4 cycles=2000000 ms=24.300 cycles_per_second=82304527 mhz=82.305
+launch 1 timed 5 cycles=2000005 ms=24.400 cycles_per_second=81967418 mhz=81.967
+launch 1 thread 1 cycles=2000001 thread_ms=23.922 mhz=83.605
+launch 1 thread 2 cycles=2000002 thread_ms=24.246 mhz=82.488
+launch 1 thread 3 cycles=2000002 thread_ms=23.964 mhz=83.459
+launch 1 thread 4 cycles=2000000 thread_ms=24.256 mhz=82.454
+launch 1 thread 5 cycles=2000000 thread_ms=24.619 mhz=81.238
+launch 1 thread 6 cycles=2000001 thread_ms=23.691 mhz=84.420
+launch 1 thread 7 cycles=2000001 thread_ms=23.860 mhz=83.822
+launch 1 thread 8 cycles=2000000 thread_ms=23.975 mhz=83.420
+--- exit=0 end=2026-10-13T21:47:39Z loadavg=0.97 0.78 0.35 1/247 11400
+=== launch mode7-p7-base folder=/home/runner/work/_temp/publish-base screen=boot start=2026-10-13T21:47:39Z loadavg=0.97 0.78 0.35 2/247 11409
+--- top before: 0.0 systemd;0.0 kthreadd;0.0 pool_workqueue_release;0.0 kworker/R-rcu_gp;
+os: roms/bbc-micro/os.rom, 16384 bytes, sha256 2d9fea69017864f6962704481829f95fee08446c8c3a13826d5d4e44000ac9de, hash checked
+basic: roms/bbc-micro/BASIC.ROM, 16384 bytes, sha256 45bd55dc0f6f0f8f1fe9e2481de7def206565eec8f600ba3068b849ca4132079, hash checked
+dfs: roms/bbc-micro/DFS-1.2.rom, 16384 bytes, sha256 e745e34895225a6650b712c1dd0656cb0b0b15f072a8ae6d9ea8d1ac257eb3d6, hash checked
+browser 154.0.8037.97
+launch 1 boot cycles=6000003 ms=138.600 cycles_per_second=43290065 mhz=43.290
+launch 1 screen ["","BBC Computer 32K","","Acorn DFS","","BASIC","",">"]
+launch 1 prompt yes
+launch 1 timed 1 cycles=2000000 ms=24.500 cycles_per_second=81632653 mhz=81.633
+launch 1 timed 2 cycles=2000003 ms=24.300 cycles_per_second=82304650 mhz=82.305
+launch 1 timed 3 cycles=2000000 ms=24.300 cycles_per_second=82304527 mhz=82.305
+launch 1 timed 4 cycles=2000000 ms=24.400 cycles_per_second=81967213 mhz=81.967
+launch 1 timed 5 cycles=2000005 ms=24.300 cycles_per_second=82304733 mhz=82.305
+launch 1 thread 1 cycles=2000001 thread_ms=24.410 mhz=81.934
+launch 1 thread 2 cycles=2000002 thread_ms=24.367 mhz=82.078
+launch 1 thread 3 cycles=2000002 thread_ms=24.424 mhz=81.887
+launch 1 thread 4 cycles=2000000 thread_ms=24.402 mhz=81.960
+launch 1 thread 5 cycles=2000000 thread_ms=24.464 mhz=81.753
+launch 1 thread 6 cycles=2000001 thread_ms=24.379 mhz=82.038
+launch 1 thread 7 cycles=2000001 thread_ms=24.352 mhz=82.129
+launch 1 thread 8 cycles=2000000 thread_ms=24.459 mhz=81.769
+--- exit=0 end=2026-10-13T21:47:41Z loadavg=0.97 0.78 0.35 1/246 11536
+=== launch mode7-p7-after folder=/home/runner/work/_temp/publish-after screen=boot start=2026-10-13T21:47:41Z loadavg=0.97 0.78 0.35 1/246 11545
+--- top before: 0.0 systemd;0.0 kthreadd;0.0 pool_workqueue_release;0.0 kworker/R-rcu_gp;
+os: roms/bbc-micro/os.rom, 16384 bytes, sha256 2d9fea69017864f6962704481829f95fee08446c8c3a13826d5d4e44000ac9de, hash checked
+basic: roms/bbc-micro/BASIC.ROM, 16384 bytes, sha256 45bd55dc0f6f0f8f1fe9e2481de7def206565eec8f600ba3068b849ca4132079, hash checked
+dfs: roms/bbc-micro/DFS-1.2.rom, 16384 bytes, sha256 e745e34895225a6650b712c1dd0656cb0b0b15f072a8ae6d9ea8d1ac257eb3d6, hash checked
+browser 154.0.8037.97
+launch 1 boot cycles=6000003 ms=136.100 cycles_per_second=44085253 mhz=44.085
+launch 1 screen ["","BBC Computer 32K","","Acorn DFS","","BASIC","",">"]
+launch 1 prompt yes
+launch 1 timed 1 cycles=2000000 ms=23.700 cycles_per_second=84388186 mhz=84.388
+launch 1 timed 2 cycles=2000003 ms=23.700 cycles_per_second=84388312 mhz=84.388
+launch 1 timed 3 cycles=2000000 ms=23.700 cycles_per_second=84388186 mhz=84.388
+launch 1 timed 4 cycles=2000000 ms=23.800 cycles_per_second=84033613 mhz=84.034
+launch 1 timed 5 cycles=2000005 ms=23.700 cycles_per_second=84388397 mhz=84.388
+launch 1 thread 1 cycles=2000001 thread_ms=24.966 mhz=80.109
+launch 1 thread 2 cycles=2000002 thread_ms=25.011 mhz=79.965
+launch 1 thread 3 cycles=2000002 thread_ms=24.737 mhz=80.851
+launch 1 thread 4 cycles=2000000 thread_ms=24.973 mhz=80.086
+launch 1 thread 5 cycles=2000000 thread_ms=24.732 mhz=80.867
+launch 1 thread 6 cycles=2000001 thread_ms=24.569 mhz=81.403
+launch 1 thread 7 cycles=2000001 thread_ms=24.690 mhz=81.004
+launch 1 thread 8 cycles=2000000 thread_ms=24.735 mhz=80.857
+--- exit=0 end=2026-10-13T21:47:42Z loadavg=0.97 0.78 0.35 1/246 11676
+=== launch mode7-p8-after folder=/home/runner/work/_temp/publish-after screen=boot start=2026-10-13T21:47:42Z loadavg=0.97 0.78 0.35 1/246 11685
+--- top before: 0.0 systemd;0.0 kthreadd;0.0 pool_workqueue_release;0.0 kworker/R-rcu_gp;
+os: roms/bbc-micro/os.rom, 16384 bytes, sha256 2d9fea69017864f6962704481829f95fee08446c8c3a13826d5d4e44000ac9de, hash checked
+basic: roms/bbc-micro/BASIC.ROM, 16384 bytes, sha256 45bd55dc0f6f0f8f1fe9e2481de7def206565eec8f600ba3068b849ca4132079, hash checked
+dfs: roms/bbc-micro/DFS-1.2.rom, 16384 bytes, sha256 e745e34895225a6650b712c1dd0656cb0b0b15f072a8ae6d9ea8d1ac257eb3d6, hash checked
+browser 154.0.8037.97
+launch 1 boot cycles=6000003 ms=149.300 cycles_per_second=40187562 mhz=40.188
+launch 1 screen ["","BBC Computer 32K","","Acorn DFS","","BASIC","",">"]
+launch 1 prompt yes
+launch 1 timed 1 cycles=2000000 ms=24.400 cycles_per_second=81967213 mhz=81.967
+launch 1 timed 2 cycles=2000003 ms=23.500 cycles_per_second=85106511 mhz=85.107
+launch 1 timed 3 cycles=2000000 ms=23.600 cycles_per_second=84745763 mhz=84.746
+launch 1 timed 4 cycles=2000000 ms=23.500 cycles_per_second=85106383 mhz=85.106
+launch 1 timed 5 cycles=2000005 ms=23.400 cycles_per_second=85470299 mhz=85.470
+launch 1 thread 1 cycles=2000001 thread_ms=23.866 mhz=83.801
+launch 1 thread 2 cycles=2000002 thread_ms=23.648 mhz=84.574
+launch 1 thread 3 cycles=2000002 thread_ms=23.625 mhz=84.656
+launch 1 thread 4 cycles=2000000 thread_ms=24.368 mhz=82.075
+launch 1 thread 5 cycles=2000000 thread_ms=24.577 mhz=81.377
+launch 1 thread 6 cycles=2000001 thread_ms=23.906 mhz=83.661
+launch 1 thread 7 cycles=2000001 thread_ms=23.556 mhz=84.904
+launch 1 thread 8 cycles=2000000 thread_ms=23.690 mhz=84.424
+--- exit=0 end=2026-10-13T21:47:44Z loadavg=0.97 0.78 0.35 1/246 11816
+=== launch mode7-p8-base folder=/home/runner/work/_temp/publish-base screen=boot start=2026-10-13T21:47:44Z loadavg=0.97 0.78 0.35 1/246 11825
+--- top before: 0.0 systemd;0.0 kthreadd;0.0 pool_workqueue_release;0.0 kworker/R-rcu_gp;
+os: roms/bbc-micro/os.rom, 16384 bytes, sha256 2d9fea69017864f6962704481829f95fee08446c8c3a13826d5d4e44000ac9de, hash checked
+basic: roms/bbc-micro/BASIC.ROM, 16384 bytes, sha256 45bd55dc0f6f0f8f1fe9e2481de7def206565eec8f600ba3068b849ca4132079, hash checked
+dfs: roms/bbc-micro/DFS-1.2.rom, 16384 bytes, sha256 e745e34895225a6650b712c1dd0656cb0b0b15f072a8ae6d9ea8d1ac257eb3d6, hash checked
+browser 154.0.8037.97
+launch 1 boot cycles=6000003 ms=134.900 cycles_per_second=44477413 mhz=44.477
+launch 1 screen ["","BBC Computer 32K","","Acorn DFS","","BASIC","",">"]
+launch 1 prompt yes
+launch 1 timed 1 cycles=2000000 ms=25.200 cycles_per_second=79365079 mhz=79.365
+launch 1 timed 2 cycles=2000003 ms=25.300 cycles_per_second=79051502 mhz=79.052
+launch 1 timed 3 cycles=2000000 ms=24.600 cycles_per_second=81300813 mhz=81.301
+launch 1 timed 4 cycles=2000000 ms=24.200 cycles_per_second=82644628 mhz=82.645
+launch 1 timed 5 cycles=2000005 ms=23.700 cycles_per_second=84388397 mhz=84.388
+launch 1 thread 1 cycles=2000001 thread_ms=24.028 mhz=83.236
+launch 1 thread 2 cycles=2000002 thread_ms=23.836 mhz=83.907
+launch 1 thread 3 cycles=2000002 thread_ms=23.878 mhz=83.759
+launch 1 thread 4 cycles=2000000 thread_ms=24.001 mhz=83.330
+launch 1 thread 5 cycles=2000000 thread_ms=24.785 mhz=80.694
+launch 1 thread 6 cycles=2000001 thread_ms=23.889 mhz=83.721
+launch 1 thread 7 cycles=2000001 thread_ms=23.984 mhz=83.389
+launch 1 thread 8 cycles=2000000 thread_ms=24.088 mhz=83.029
+--- exit=0 end=2026-10-13T21:47:45Z loadavg=1.05 0.80 0.36 1/246 11955
+=== launch dense-p1-base folder=/home/runner/work/_temp/publish-base screen=dense start=2026-10-13T21:48:00Z loadavg=0.82 0.76 0.36 1/246 11975
+--- top before: 0.0 systemd;0.0 kthreadd;0.0 pool_workqueue_release;0.0 kworker/R-rcu_gp;
+os: roms/bbc-micro/os.rom, 16384 bytes, sha256 2d9fea69017864f6962704481829f95fee08446c8c3a13826d5d4e44000ac9de, hash checked
+basic: roms/bbc-micro/BASIC.ROM, 16384 bytes, sha256 45bd55dc0f6f0f8f1fe9e2481de7def206565eec8f600ba3068b849ca4132079, hash checked
+dfs: roms/bbc-micro/DFS-1.2.rom, 16384 bytes, sha256 e745e34895225a6650b712c1dd0656cb0b0b15f072a8ae6d9ea8d1ac257eb3d6, hash checked
+browser 154.0.8037.97
+launch 1 boot cycles=6000003 ms=133.400 cycles_per_second=44977534 mhz=44.978
+launch 1 screen ["","BBC Computer 32K","","Acorn DFS","","BASIC","",">"]
+launch 1 prompt yes
+launch 1 screen dense
+launch 1 timed 1 cycles=2000000 ms=28.700 cycles_per_second=69686411 mhz=69.686
+launch 1 timed 2 cycles=2000003 ms=28.900 cycles_per_second=69204256 mhz=69.204
+launch 1 timed 3 cycles=2000000 ms=28.200 cycles_per_second=70921986 mhz=70.922
+launch 1 timed 4 cycles=2000000 ms=28.200 cycles_per_second=70921986 mhz=70.922
+launch 1 timed 5 cycles=2000005 ms=28.100 cycles_per_second=71174555 mhz=71.175
+launch 1 thread 1 cycles=2000001 thread_ms=28.345 mhz=70.559
+launch 1 thread 2 cycles=2000002 thread_ms=28.045 mhz=71.314
+launch 1 thread 3 cycles=2000002 thread_ms=28.161 mhz=71.020
+launch 1 thread 4 cycles=2000000 thread_ms=28.063 mhz=71.268
+launch 1 thread 5 cycles=2000000 thread_ms=28.350 mhz=70.547
+launch 1 thread 6 cycles=2000001 thread_ms=27.937 mhz=71.590
+launch 1 thread 7 cycles=2000001 thread_ms=28.252 mhz=70.791
+launch 1 thread 8 cycles=2000000 thread_ms=28.221 mhz=70.869
+--- exit=0 end=2026-10-13T21:48:02Z loadavg=0.82 0.76 0.36 1/245 12106
+=== launch dense-p1-after folder=/home/runner/work/_temp/publish-after screen=dense start=2026-10-13T21:48:02Z loadavg=0.82 0.76 0.36 1/245 12116
+--- top before: 0.0 systemd;0.0 kthreadd;0.0 pool_workqueue_release;0.0 kworker/R-rcu_gp;
+os: roms/bbc-micro/os.rom, 16384 bytes, sha256 2d9fea69017864f6962704481829f95fee08446c8c3a13826d5d4e44000ac9de, hash checked
+basic: roms/bbc-micro/BASIC.ROM, 16384 bytes, sha256 45bd55dc0f6f0f8f1fe9e2481de7def206565eec8f600ba3068b849ca4132079, hash checked
+dfs: roms/bbc-micro/DFS-1.2.rom, 16384 bytes, sha256 e745e34895225a6650b712c1dd0656cb0b0b15f072a8ae6d9ea8d1ac257eb3d6, hash checked
+browser 154.0.8037.97
+launch 1 boot cycles=6000003 ms=140.900 cycles_per_second=42583414 mhz=42.583
+launch 1 screen ["","BBC Computer 32K","","Acorn DFS","","BASIC","",">"]
+launch 1 prompt yes
+launch 1 screen dense
+launch 1 timed 1 cycles=2000000 ms=29.300 cycles_per_second=68259386 mhz=68.259
+launch 1 timed 2 cycles=2000003 ms=28.900 cycles_per_second=69204256 mhz=69.204
+launch 1 timed 3 cycles=2000000 ms=28.700 cycles_per_second=69686411 mhz=69.686
+launch 1 timed 4 cycles=2000000 ms=28.900 cycles_per_second=69204152 mhz=69.204
+launch 1 timed 5 cycles=2000005 ms=28.800 cycles_per_second=69444618 mhz=69.445
+launch 1 thread 1 cycles=2000001 thread_ms=28.561 mhz=70.026
+launch 1 thread 2 cycles=2000002 thread_ms=28.908 mhz=69.185
+launch 1 thread 3 cycles=2000002 thread_ms=28.483 mhz=70.217
+launch 1 thread 4 cycles=2000000 thread_ms=28.416 mhz=70.383
+launch 1 thread 5 cycles=2000000 thread_ms=29.300 mhz=68.259
+launch 1 thread 6 cycles=2000001 thread_ms=28.250 mhz=70.796
+launch 1 thread 7 cycles=2000001 thread_ms=28.375 mhz=70.485
+launch 1 thread 8 cycles=2000000 thread_ms=28.337 mhz=70.579
+--- exit=0 end=2026-10-13T21:48:03Z loadavg=0.82 0.76 0.36 1/245 12245
+=== launch dense-p2-after folder=/home/runner/work/_temp/publish-after screen=dense start=2026-10-13T21:48:03Z loadavg=0.82 0.76 0.36 1/245 12255
+--- top before: 0.0 systemd;0.0 kthreadd;0.0 pool_workqueue_release;0.0 kworker/R-rcu_gp;
+os: roms/bbc-micro/os.rom, 16384 bytes, sha256 2d9fea69017864f6962704481829f95fee08446c8c3a13826d5d4e44000ac9de, hash checked
+basic: roms/bbc-micro/BASIC.ROM, 16384 bytes, sha256 45bd55dc0f6f0f8f1fe9e2481de7def206565eec8f600ba3068b849ca4132079, hash checked
+dfs: roms/bbc-micro/DFS-1.2.rom, 16384 bytes, sha256 e745e34895225a6650b712c1dd0656cb0b0b15f072a8ae6d9ea8d1ac257eb3d6, hash checked
+browser 154.0.8037.97
+launch 1 boot cycles=6000003 ms=137.300 cycles_per_second=43699949 mhz=43.700
+launch 1 screen ["","BBC Computer 32K","","Acorn DFS","","BASIC","",">"]
+launch 1 prompt yes
+launch 1 screen dense
+launch 1 timed 1 cycles=2000000 ms=28.500 cycles_per_second=70175439 mhz=70.175
+launch 1 timed 2 cycles=2000003 ms=28.100 cycles_per_second=71174484 mhz=71.174
+launch 1 timed 3 cycles=2000000 ms=28.200 cycles_per_second=70921986 mhz=70.922
+launch 1 timed 4 cycles=2000000 ms=28.100 cycles_per_second=71174377 mhz=71.174
+launch 1 timed 5 cycles=2000005 ms=28.200 cycles_per_second=70922163 mhz=70.922
+launch 1 thread 1 cycles=2000001 thread_ms=28.427 mhz=70.356
+launch 1 thread 2 cycles=2000002 thread_ms=28.939 mhz=69.111
+launch 1 thread 3 cycles=2000002 thread_ms=28.546 mhz=70.062
+launch 1 thread 4 cycles=2000000 thread_ms=28.363 mhz=70.514
+launch 1 thread 5 cycles=2000000 thread_ms=28.325 mhz=70.609
+launch 1 thread 6 cycles=2000001 thread_ms=28.434 mhz=70.338
+launch 1 thread 7 cycles=2000001 thread_ms=28.268 mhz=70.751
+launch 1 thread 8 cycles=2000000 thread_ms=28.255 mhz=70.784
+--- exit=0 end=2026-10-13T21:48:05Z loadavg=2.19 1.04 0.45 1/247 12386
+=== launch dense-p2-base folder=/home/runner/work/_temp/publish-base screen=dense start=2026-10-13T21:49:05Z loadavg=0.80 0.85 0.42 1/246 12441
+--- top before: 0.0 systemd;0.0 kthreadd;0.0 pool_workqueue_release;0.0 kworker/R-rcu_gp;
+os: roms/bbc-micro/os.rom, 16384 bytes, sha256 2d9fea69017864f6962704481829f95fee08446c8c3a13826d5d4e44000ac9de, hash checked
+basic: roms/bbc-micro/BASIC.ROM, 16384 bytes, sha256 45bd55dc0f6f0f8f1fe9e2481de7def206565eec8f600ba3068b849ca4132079, hash checked
+dfs: roms/bbc-micro/DFS-1.2.rom, 16384 bytes, sha256 e745e34895225a6650b712c1dd0656cb0b0b15f072a8ae6d9ea8d1ac257eb3d6, hash checked
+browser 154.0.8037.97
+launch 1 boot cycles=6000003 ms=131.500 cycles_per_second=45627399 mhz=45.627
+launch 1 screen ["","BBC Computer 32K","","Acorn DFS","","BASIC","",">"]
+launch 1 prompt yes
+launch 1 screen dense
+launch 1 timed 1 cycles=2000000 ms=28.600 cycles_per_second=69930070 mhz=69.930
+launch 1 timed 2 cycles=2000003 ms=28.000 cycles_per_second=71428679 mhz=71.429
+launch 1 timed 3 cycles=2000000 ms=28.300 cycles_per_second=70671378 mhz=70.671
+launch 1 timed 4 cycles=2000000 ms=29.700 cycles_per_second=67340067 mhz=67.340
+launch 1 timed 5 cycles=2000005 ms=30.100 cycles_per_second=66445349 mhz=66.445
+launch 1 thread 1 cycles=2000001 thread_ms=29.668 mhz=67.413
+launch 1 thread 2 cycles=2000002 thread_ms=30.132 mhz=66.375
+launch 1 thread 3 cycles=2000002 thread_ms=29.329 mhz=68.192
+launch 1 thread 4 cycles=2000000 thread_ms=29.345 mhz=68.155
+launch 1 thread 5 cycles=2000000 thread_ms=30.127 mhz=66.386
+launch 1 thread 6 cycles=2000001 thread_ms=28.471 mhz=70.247
+launch 1 thread 7 cycles=2000001 thread_ms=27.971 mhz=71.503
+launch 1 thread 8 cycles=2000000 thread_ms=28.767 mhz=69.524
+--- exit=0 end=2026-10-13T21:49:06Z loadavg=0.80 0.85 0.42 1/246 12571
+=== launch dense-p3-base folder=/home/runner/work/_temp/publish-base screen=dense start=2026-10-13T21:49:06Z loadavg=0.80 0.85 0.42 1/246 12581
+--- top before: 0.0 systemd;0.0 kthreadd;0.0 pool_workqueue_release;0.0 kworker/R-rcu_gp;
+os: roms/bbc-micro/os.rom, 16384 bytes, sha256 2d9fea69017864f6962704481829f95fee08446c8c3a13826d5d4e44000ac9de, hash checked
+basic: roms/bbc-micro/BASIC.ROM, 16384 bytes, sha256 45bd55dc0f6f0f8f1fe9e2481de7def206565eec8f600ba3068b849ca4132079, hash checked
+dfs: roms/bbc-micro/DFS-1.2.rom, 16384 bytes, sha256 e745e34895225a6650b712c1dd0656cb0b0b15f072a8ae6d9ea8d1ac257eb3d6, hash checked
+browser 154.0.8037.97
+launch 1 boot cycles=6000003 ms=144.400 cycles_per_second=41551267 mhz=41.551
+launch 1 screen ["","BBC Computer 32K","","Acorn DFS","","BASIC","",">"]
+launch 1 prompt yes
+launch 1 screen dense
+launch 1 timed 1 cycles=2000000 ms=29.000 cycles_per_second=68965517 mhz=68.966
+launch 1 timed 2 cycles=2000003 ms=32.000 cycles_per_second=62500094 mhz=62.500
+launch 1 timed 3 cycles=2000000 ms=28.900 cycles_per_second=69204152 mhz=69.204
+launch 1 timed 4 cycles=2000000 ms=28.600 cycles_per_second=69930070 mhz=69.930
+launch 1 timed 5 cycles=2000005 ms=28.900 cycles_per_second=69204325 mhz=69.204
+launch 1 thread 1 cycles=2000001 thread_ms=29.556 mhz=67.668
+launch 1 thread 2 cycles=2000002 thread_ms=29.276 mhz=68.315
+launch 1 thread 3 cycles=2000002 thread_ms=29.375 mhz=68.085
+launch 1 thread 4 cycles=2000000 thread_ms=29.280 mhz=68.306
+launch 1 thread 5 cycles=2000000 thread_ms=29.327 mhz=68.197
+launch 1 thread 6 cycles=2000001 thread_ms=29.331 mhz=68.187
+launch 1 thread 7 cycles=2000001 thread_ms=29.140 mhz=68.634
+launch 1 thread 8 cycles=2000000 thread_ms=29.092 mhz=68.747
+--- exit=0 end=2026-10-13T21:49:08Z loadavg=0.80 0.85 0.42 1/247 12709
+=== launch dense-p3-after folder=/home/runner/work/_temp/publish-after screen=dense start=2026-10-13T21:49:08Z loadavg=0.80 0.85 0.42 1/247 12719
+--- top before: 0.0 systemd;0.0 kthreadd;0.0 pool_workqueue_release;0.0 kworker/R-rcu_gp;
+os: roms/bbc-micro/os.rom, 16384 bytes, sha256 2d9fea69017864f6962704481829f95fee08446c8c3a13826d5d4e44000ac9de, hash checked
+basic: roms/bbc-micro/BASIC.ROM, 16384 bytes, sha256 45bd55dc0f6f0f8f1fe9e2481de7def206565eec8f600ba3068b849ca4132079, hash checked
+dfs: roms/bbc-micro/DFS-1.2.rom, 16384 bytes, sha256 e745e34895225a6650b712c1dd0656cb0b0b15f072a8ae6d9ea8d1ac257eb3d6, hash checked
+browser 154.0.8037.97
+launch 1 boot cycles=6000003 ms=143.900 cycles_per_second=41695643 mhz=41.696
+launch 1 screen ["","BBC Computer 32K","","Acorn DFS","","BASIC","",">"]
+launch 1 prompt yes
+launch 1 screen dense
+launch 1 timed 1 cycles=2000000 ms=28.500 cycles_per_second=70175439 mhz=70.175
+launch 1 timed 2 cycles=2000003 ms=27.900 cycles_per_second=71684695 mhz=71.685
+launch 1 timed 3 cycles=2000000 ms=27.800 cycles_per_second=71942446 mhz=71.942
+launch 1 timed 4 cycles=2000000 ms=28.000 cycles_per_second=71428571 mhz=71.429
+launch 1 timed 5 cycles=2000005 ms=27.800 cycles_per_second=71942626 mhz=71.943
+launch 1 thread 1 cycles=2000001 thread_ms=28.479 mhz=70.227
+launch 1 thread 2 cycles=2000002 thread_ms=28.233 mhz=70.839
+launch 1 thread 3 cycles=2000002 thread_ms=28.272 mhz=70.741
+launch 1 thread 4 cycles=2000000 thread_ms=28.194 mhz=70.937
+launch 1 thread 5 cycles=2000000 thread_ms=29.112 mhz=68.700
+launch 1 thread 6 cycles=2000001 thread_ms=28.375 mhz=70.485
+launch 1 thread 7 cycles=2000001 thread_ms=28.142 mhz=71.068
+launch 1 thread 8 cycles=2000000 thread_ms=28.170 mhz=70.998
+--- exit=0 end=2026-10-13T21:49:09Z loadavg=0.82 0.85 0.43 2/247 12854
+=== launch dense-p4-after folder=/home/runner/work/_temp/publish-after screen=dense start=2026-10-13T21:49:09Z loadavg=0.82 0.85 0.43 1/247 12864
+--- top before: 0.0 systemd;0.0 kthreadd;0.0 pool_workqueue_release;0.0 kworker/R-rcu_gp;
+os: roms/bbc-micro/os.rom, 16384 bytes, sha256 2d9fea69017864f6962704481829f95fee08446c8c3a13826d5d4e44000ac9de, hash checked
+basic: roms/bbc-micro/BASIC.ROM, 16384 bytes, sha256 45bd55dc0f6f0f8f1fe9e2481de7def206565eec8f600ba3068b849ca4132079, hash checked
+dfs: roms/bbc-micro/DFS-1.2.rom, 16384 bytes, sha256 e745e34895225a6650b712c1dd0656cb0b0b15f072a8ae6d9ea8d1ac257eb3d6, hash checked
+browser 154.0.8037.97
+launch 1 boot cycles=6000003 ms=151.500 cycles_per_second=39603980 mhz=39.604
+launch 1 screen ["","BBC Computer 32K","","Acorn DFS","","BASIC","",">"]
+launch 1 prompt yes
+launch 1 screen dense
+launch 1 timed 1 cycles=2000000 ms=29.000 cycles_per_second=68965517 mhz=68.966
+launch 1 timed 2 cycles=2000003 ms=28.800 cycles_per_second=69444549 mhz=69.445
+launch 1 timed 3 cycles=2000000 ms=28.100 cycles_per_second=71174377 mhz=71.174
+launch 1 timed 4 cycles=2000000 ms=27.900 cycles_per_second=71684588 mhz=71.685
+launch 1 timed 5 cycles=2000005 ms=28.000 cycles_per_second=71428750 mhz=71.429
+launch 1 thread 1 cycles=2000001 thread_ms=28.745 mhz=69.577
+launch 1 thread 2 cycles=2000002 thread_ms=28.895 mhz=69.216
+launch 1 thread 3 cycles=2000002 thread_ms=28.478 mhz=70.230
+launch 1 thread 4 cycles=2000000 thread_ms=28.479 mhz=70.227
+launch 1 thread 5 cycles=2000000 thread_ms=28.688 mhz=69.716
+launch 1 thread 6 cycles=2000001 thread_ms=28.439 mhz=70.326
+launch 1 thread 7 cycles=2000001 thread_ms=28.387 mhz=70.455
+launch 1 thread 8 cycles=2000000 thread_ms=28.393 mhz=70.440
+--- exit=0 end=2026-10-13T21:49:11Z loadavg=0.82 0.85 0.43 1/247 12993
+=== launch dense-p4-base folder=/home/runner/work/_temp/publish-base screen=dense start=2026-10-13T21:49:11Z loadavg=0.82 0.85 0.43 1/247 13003
+--- top before: 0.0 systemd;0.0 kthreadd;0.0 pool_workqueue_release;0.0 kworker/R-rcu_gp;
+os: roms/bbc-micro/os.rom, 16384 bytes, sha256 2d9fea69017864f6962704481829f95fee08446c8c3a13826d5d4e44000ac9de, hash checked
+basic: roms/bbc-micro/BASIC.ROM, 16384 bytes, sha256 45bd55dc0f6f0f8f1fe9e2481de7def206565eec8f600ba3068b849ca4132079, hash checked
+dfs: roms/bbc-micro/DFS-1.2.rom, 16384 bytes, sha256 e745e34895225a6650b712c1dd0656cb0b0b15f072a8ae6d9ea8d1ac257eb3d6, hash checked
+browser 154.0.8037.97
+launch 1 boot cycles=6000003 ms=142.600 cycles_per_second=42075757 mhz=42.076
+launch 1 screen ["","BBC Computer 32K","","Acorn DFS","","BASIC","",">"]
+launch 1 prompt yes
+launch 1 screen dense
+launch 1 timed 1 cycles=2000000 ms=27.900 cycles_per_second=71684588 mhz=71.685
+launch 1 timed 2 cycles=2000003 ms=27.600 cycles_per_second=72463877 mhz=72.464
+launch 1 timed 3 cycles=2000000 ms=27.500 cycles_per_second=72727273 mhz=72.727
+launch 1 timed 4 cycles=2000000 ms=27.800 cycles_per_second=71942446 mhz=71.942
+launch 1 timed 5 cycles=2000005 ms=27.600 cycles_per_second=72463949 mhz=72.464
+launch 1 thread 1 cycles=2000001 thread_ms=28.237 mhz=70.829
+launch 1 thread 2 cycles=2000002 thread_ms=27.914 mhz=71.649
+launch 1 thread 3 cycles=2000002 thread_ms=27.975 mhz=71.492
+launch 1 thread 4 cycles=2000000 thread_ms=27.927 mhz=71.615
+launch 1 thread 5 cycles=2000000 thread_ms=28.488 mhz=70.205
+launch 1 thread 6 cycles=2000001 thread_ms=28.048 mhz=71.306
+launch 1 thread 7 cycles=2000001 thread_ms=27.842 mhz=71.834
+launch 1 thread 8 cycles=2000000 thread_ms=27.842 mhz=71.834
+--- exit=0 end=2026-10-13T21:49:13Z loadavg=0.82 0.85 0.43 1/246 13133
+=== launch dense-p5-base folder=/home/runner/work/_temp/publish-base screen=dense start=2026-10-13T21:49:13Z loadavg=0.82 0.85 0.43 1/246 13143
+--- top before: 0.0 systemd;0.0 kthreadd;0.0 pool_workqueue_release;0.0 kworker/R-rcu_gp;
+os: roms/bbc-micro/os.rom, 16384 bytes, sha256 2d9fea69017864f6962704481829f95fee08446c8c3a13826d5d4e44000ac9de, hash checked
+basic: roms/bbc-micro/BASIC.ROM, 16384 bytes, sha256 45bd55dc0f6f0f8f1fe9e2481de7def206565eec8f600ba3068b849ca4132079, hash checked
+dfs: roms/bbc-micro/DFS-1.2.rom, 16384 bytes, sha256 e745e34895225a6650b712c1dd0656cb0b0b15f072a8ae6d9ea8d1ac257eb3d6, hash checked
+browser 154.0.8037.97
+launch 1 boot cycles=6000003 ms=149.700 cycles_per_second=40080180 mhz=40.080
+launch 1 screen ["","BBC Computer 32K","","Acorn DFS","","BASIC","",">"]
+launch 1 prompt yes
+launch 1 screen dense
+launch 1 timed 1 cycles=2000000 ms=29.500 cycles_per_second=67796610 mhz=67.797
+launch 1 timed 2 cycles=2000003 ms=29.100 cycles_per_second=68728625 mhz=68.729
+launch 1 timed 3 cycles=2000000 ms=29.200 cycles_per_second=68493151 mhz=68.493
+launch 1 timed 4 cycles=2000000 ms=30.600 cycles_per_second=65359477 mhz=65.359
+launch 1 timed 5 cycles=2000005 ms=29.600 cycles_per_second=67567736 mhz=67.568
+launch 1 thread 1 cycles=2000001 thread_ms=29.341 mhz=68.164
+launch 1 thread 2 cycles=2000002 thread_ms=29.972 mhz=66.729
+launch 1 thread 3 cycles=2000002 thread_ms=30.638 mhz=65.278
+launch 1 thread 4 cycles=2000000 thread_ms=30.748 mhz=65.045
+launch 1 thread 5 cycles=2000000 thread_ms=31.512 mhz=63.468
+launch 1 thread 6 cycles=2000001 thread_ms=30.740 mhz=65.062
+launch 1 thread 7 cycles=2000001 thread_ms=30.413 mhz=65.761
+launch 1 thread 8 cycles=2000000 thread_ms=30.001 mhz=66.664
+--- exit=0 end=2026-10-13T21:49:14Z loadavg=0.83 0.86 0.43 1/246 13273
+=== launch dense-p5-after folder=/home/runner/work/_temp/publish-after screen=dense start=2026-10-13T21:49:14Z loadavg=0.83 0.86 0.43 1/246 13283
+--- top before: 0.0 systemd;0.0 kthreadd;0.0 pool_workqueue_release;0.0 kworker/R-rcu_gp;
+os: roms/bbc-micro/os.rom, 16384 bytes, sha256 2d9fea69017864f6962704481829f95fee08446c8c3a13826d5d4e44000ac9de, hash checked
+basic: roms/bbc-micro/BASIC.ROM, 16384 bytes, sha256 45bd55dc0f6f0f8f1fe9e2481de7def206565eec8f600ba3068b849ca4132079, hash checked
+dfs: roms/bbc-micro/DFS-1.2.rom, 16384 bytes, sha256 e745e34895225a6650b712c1dd0656cb0b0b15f072a8ae6d9ea8d1ac257eb3d6, hash checked
+browser 154.0.8037.97
+launch 1 boot cycles=6000003 ms=145.200 cycles_per_second=41322335 mhz=41.322
+launch 1 screen ["","BBC Computer 32K","","Acorn DFS","","BASIC","",">"]
+launch 1 prompt yes
+launch 1 screen dense
+launch 1 timed 1 cycles=2000000 ms=29.700 cycles_per_second=67340067 mhz=67.340
+launch 1 timed 2 cycles=2000003 ms=29.200 cycles_per_second=68493253 mhz=68.493
+launch 1 timed 3 cycles=2000000 ms=29.400 cycles_per_second=68027211 mhz=68.027
+launch 1 timed 4 cycles=2000000 ms=29.500 cycles_per_second=67796610 mhz=67.797
+launch 1 timed 5 cycles=2000005 ms=29.400 cycles_per_second=68027381 mhz=68.027
+launch 1 thread 1 cycles=2000001 thread_ms=29.864 mhz=66.970
+launch 1 thread 2 cycles=2000002 thread_ms=29.847 mhz=67.008
+launch 1 thread 3 cycles=2000002 thread_ms=30.018 mhz=66.627
+launch 1 thread 4 cycles=2000000 thread_ms=29.709 mhz=67.320
+launch 1 thread 5 cycles=2000000 thread_ms=29.617 mhz=67.529
+launch 1 thread 6 cycles=2000001 thread_ms=29.460 mhz=67.889
+launch 1 thread 7 cycles=2000001 thread_ms=29.487 mhz=67.827
+launch 1 thread 8 cycles=2000000 thread_ms=30.186 mhz=66.256
+--- exit=0 end=2026-10-13T21:49:16Z loadavg=0.83 0.86 0.43 1/246 13413
+=== launch dense-p6-after folder=/home/runner/work/_temp/publish-after screen=dense start=2026-10-13T21:49:16Z loadavg=0.83 0.86 0.43 1/246 13423
+--- top before: 0.0 systemd;0.0 kthreadd;0.0 pool_workqueue_release;0.0 kworker/R-rcu_gp;
+os: roms/bbc-micro/os.rom, 16384 bytes, sha256 2d9fea69017864f6962704481829f95fee08446c8c3a13826d5d4e44000ac9de, hash checked
+basic: roms/bbc-micro/BASIC.ROM, 16384 bytes, sha256 45bd55dc0f6f0f8f1fe9e2481de7def206565eec8f600ba3068b849ca4132079, hash checked
+dfs: roms/bbc-micro/DFS-1.2.rom, 16384 bytes, sha256 e745e34895225a6650b712c1dd0656cb0b0b15f072a8ae6d9ea8d1ac257eb3d6, hash checked
+browser 154.0.8037.97
+launch 1 boot cycles=6000003 ms=154.000 cycles_per_second=38961058 mhz=38.961
+launch 1 screen ["","BBC Computer 32K","","Acorn DFS","","BASIC","",">"]
+launch 1 prompt yes
+launch 1 screen dense
+launch 1 timed 1 cycles=2000000 ms=29.800 cycles_per_second=67114094 mhz=67.114
+launch 1 timed 2 cycles=2000003 ms=29.800 cycles_per_second=67114195 mhz=67.114
+launch 1 timed 3 cycles=2000000 ms=29.500 cycles_per_second=67796610 mhz=67.797
+launch 1 timed 4 cycles=2000000 ms=29.500 cycles_per_second=67796610 mhz=67.797
+launch 1 timed 5 cycles=2000005 ms=29.500 cycles_per_second=67796780 mhz=67.797
+launch 1 thread 1 cycles=2000001 thread_ms=30.574 mhz=65.415
+launch 1 thread 2 cycles=2000002 thread_ms=30.652 mhz=65.249
+launch 1 thread 3 cycles=2000002 thread_ms=30.834 mhz=64.864
+launch 1 thread 4 cycles=2000000 thread_ms=30.532 mhz=65.505
+launch 1 thread 5 cycles=2000000 thread_ms=30.931 mhz=64.660
+launch 1 thread 6 cycles=2000001 thread_ms=29.810 mhz=67.092
+launch 1 thread 7 cycles=2000001 thread_ms=29.691 mhz=67.361
+launch 1 thread 8 cycles=2000000 thread_ms=29.713 mhz=67.311
+--- exit=0 end=2026-10-13T21:49:17Z loadavg=0.83 0.86 0.43 1/246 13553
+=== launch dense-p6-base folder=/home/runner/work/_temp/publish-base screen=dense start=2026-10-13T21:49:17Z loadavg=0.83 0.86 0.43 1/246 13563
+--- top before: 0.0 systemd;0.0 kthreadd;0.0 pool_workqueue_release;0.0 kworker/R-rcu_gp;
+os: roms/bbc-micro/os.rom, 16384 bytes, sha256 2d9fea69017864f6962704481829f95fee08446c8c3a13826d5d4e44000ac9de, hash checked
+basic: roms/bbc-micro/BASIC.ROM, 16384 bytes, sha256 45bd55dc0f6f0f8f1fe9e2481de7def206565eec8f600ba3068b849ca4132079, hash checked
+dfs: roms/bbc-micro/DFS-1.2.rom, 16384 bytes, sha256 e745e34895225a6650b712c1dd0656cb0b0b15f072a8ae6d9ea8d1ac257eb3d6, hash checked
+browser 154.0.8037.97
+launch 1 boot cycles=6000003 ms=147.700 cycles_per_second=40622905 mhz=40.623
+launch 1 screen ["","BBC Computer 32K","","Acorn DFS","","BASIC","",">"]
+launch 1 prompt yes
+launch 1 screen dense
+launch 1 timed 1 cycles=2000000 ms=28.000 cycles_per_second=71428571 mhz=71.429
+launch 1 timed 2 cycles=2000003 ms=27.800 cycles_per_second=71942554 mhz=71.943
+launch 1 timed 3 cycles=2000000 ms=27.800 cycles_per_second=71942446 mhz=71.942
+launch 1 timed 4 cycles=2000000 ms=28.200 cycles_per_second=70921986 mhz=70.922
+launch 1 timed 5 cycles=2000005 ms=27.800 cycles_per_second=71942626 mhz=71.943
+launch 1 thread 1 cycles=2000001 thread_ms=28.238 mhz=70.827
+launch 1 thread 2 cycles=2000002 thread_ms=27.841 mhz=71.837
+launch 1 thread 3 cycles=2000002 thread_ms=28.186 mhz=70.957
+launch 1 thread 4 cycles=2000000 thread_ms=27.911 mhz=71.656
+launch 1 thread 5 cycles=2000000 thread_ms=27.922 mhz=71.628
+launch 1 thread 6 cycles=2000001 thread_ms=27.912 mhz=71.654
+launch 1 thread 7 cycles=2000001 thread_ms=27.737 mhz=72.106
+launch 1 thread 8 cycles=2000000 thread_ms=27.771 mhz=72.018
+--- exit=0 end=2026-10-13T21:49:19Z loadavg=0.83 0.86 0.43 1/247 13695
+=== launch dense-p7-base folder=/home/runner/work/_temp/publish-base screen=dense start=2026-10-13T21:49:19Z loadavg=0.83 0.86 0.43 1/247 13705
+--- top before: 0.0 systemd;0.0 kthreadd;0.0 pool_workqueue_release;0.0 kworker/R-rcu_gp;
+os: roms/bbc-micro/os.rom, 16384 bytes, sha256 2d9fea69017864f6962704481829f95fee08446c8c3a13826d5d4e44000ac9de, hash checked
+basic: roms/bbc-micro/BASIC.ROM, 16384 bytes, sha256 45bd55dc0f6f0f8f1fe9e2481de7def206565eec8f600ba3068b849ca4132079, hash checked
+dfs: roms/bbc-micro/DFS-1.2.rom, 16384 bytes, sha256 e745e34895225a6650b712c1dd0656cb0b0b15f072a8ae6d9ea8d1ac257eb3d6, hash checked
+browser 154.0.8037.97
+launch 1 boot cycles=6000003 ms=139.000 cycles_per_second=43165489 mhz=43.165
+launch 1 screen ["","BBC Computer 32K","","Acorn DFS","","BASIC","",">"]
+launch 1 prompt yes
+launch 1 screen dense
+launch 1 timed 1 cycles=2000000 ms=28.200 cycles_per_second=70921986 mhz=70.922
+launch 1 timed 2 cycles=2000003 ms=27.800 cycles_per_second=71942554 mhz=71.943
+launch 1 timed 3 cycles=2000000 ms=27.700 cycles_per_second=72202166 mhz=72.202
+launch 1 timed 4 cycles=2000000 ms=28.200 cycles_per_second=70921986 mhz=70.922
+launch 1 timed 5 cycles=2000005 ms=28.500 cycles_per_second=70175614 mhz=70.176
+launch 1 thread 1 cycles=2000001 thread_ms=29.205 mhz=68.481
+launch 1 thread 2 cycles=2000002 thread_ms=29.144 mhz=68.625
+launch 1 thread 3 cycles=2000002 thread_ms=28.640 mhz=69.832
+launch 1 thread 4 cycles=2000000 thread_ms=28.155 mhz=71.035
+launch 1 thread 5 cycles=2000000 thread_ms=28.334 mhz=70.587
+launch 1 thread 6 cycles=2000001 thread_ms=28.171 mhz=70.995
+launch 1 thread 7 cycles=2000001 thread_ms=28.162 mhz=71.018
+launch 1 thread 8 cycles=2000000 thread_ms=28.575 mhz=69.991
+--- exit=0 end=2026-10-13T21:49:20Z loadavg=0.77 0.84 0.43 2/247 13836
+=== launch dense-p7-after folder=/home/runner/work/_temp/publish-after screen=dense start=2026-10-13T21:49:20Z loadavg=0.77 0.84 0.43 1/247 13846
+--- top before: 0.0 systemd;0.0 kthreadd;0.0 pool_workqueue_release;0.0 kworker/R-rcu_gp;
+os: roms/bbc-micro/os.rom, 16384 bytes, sha256 2d9fea69017864f6962704481829f95fee08446c8c3a13826d5d4e44000ac9de, hash checked
+basic: roms/bbc-micro/BASIC.ROM, 16384 bytes, sha256 45bd55dc0f6f0f8f1fe9e2481de7def206565eec8f600ba3068b849ca4132079, hash checked
+dfs: roms/bbc-micro/DFS-1.2.rom, 16384 bytes, sha256 e745e34895225a6650b712c1dd0656cb0b0b15f072a8ae6d9ea8d1ac257eb3d6, hash checked
+browser 154.0.8037.97
+launch 1 boot cycles=6000003 ms=142.900 cycles_per_second=41987425 mhz=41.987
+launch 1 screen ["","BBC Computer 32K","","Acorn DFS","","BASIC","",">"]
+launch 1 prompt yes
+launch 1 screen dense
+launch 1 timed 1 cycles=2000000 ms=28.800 cycles_per_second=69444444 mhz=69.444
+launch 1 timed 2 cycles=2000003 ms=28.300 cycles_per_second=70671484 mhz=70.671
+launch 1 timed 3 cycles=2000000 ms=28.200 cycles_per_second=70921986 mhz=70.922
+launch 1 timed 4 cycles=2000000 ms=28.300 cycles_per_second=70671378 mhz=70.671
+launch 1 timed 5 cycles=2000005 ms=28.200 cycles_per_second=70922163 mhz=70.922
+launch 1 thread 1 cycles=2000001 thread_ms=30.176 mhz=66.278
+launch 1 thread 2 cycles=2000002 thread_ms=28.399 mhz=70.425
+launch 1 thread 3 cycles=2000002 thread_ms=28.225 mhz=70.859
+launch 1 thread 4 cycles=2000000 thread_ms=28.310 mhz=70.646
+launch 1 thread 5 cycles=2000000 thread_ms=28.420 mhz=70.373
+launch 1 thread 6 cycles=2000001 thread_ms=28.299 mhz=70.674
+launch 1 thread 7 cycles=2000001 thread_ms=28.272 mhz=70.741
+launch 1 thread 8 cycles=2000000 thread_ms=28.264 mhz=70.761
+--- exit=0 end=2026-10-13T21:49:22Z loadavg=0.77 0.84 0.43 1/247 13976
+=== launch dense-p8-after folder=/home/runner/work/_temp/publish-after screen=dense start=2026-10-13T21:49:22Z loadavg=0.77 0.84 0.43 1/247 13986
+--- top before: 0.0 systemd;0.0 kthreadd;0.0 pool_workqueue_release;0.0 kworker/R-rcu_gp;
+os: roms/bbc-micro/os.rom, 16384 bytes, sha256 2d9fea69017864f6962704481829f95fee08446c8c3a13826d5d4e44000ac9de, hash checked
+basic: roms/bbc-micro/BASIC.ROM, 16384 bytes, sha256 45bd55dc0f6f0f8f1fe9e2481de7def206565eec8f600ba3068b849ca4132079, hash checked
+dfs: roms/bbc-micro/DFS-1.2.rom, 16384 bytes, sha256 e745e34895225a6650b712c1dd0656cb0b0b15f072a8ae6d9ea8d1ac257eb3d6, hash checked
+browser 154.0.8037.97
+launch 1 boot cycles=6000003 ms=140.300 cycles_per_second=42765524 mhz=42.766
+launch 1 screen ["","BBC Computer 32K","","Acorn DFS","","BASIC","",">"]
+launch 1 prompt yes
+launch 1 screen dense
+launch 1 timed 1 cycles=2000000 ms=28.500 cycles_per_second=70175439 mhz=70.175
+launch 1 timed 2 cycles=2000003 ms=28.100 cycles_per_second=71174484 mhz=71.174
+launch 1 timed 3 cycles=2000000 ms=28.000 cycles_per_second=71428571 mhz=71.429
+launch 1 timed 4 cycles=2000000 ms=28.100 cycles_per_second=71174377 mhz=71.174
+launch 1 timed 5 cycles=2000005 ms=28.100 cycles_per_second=71174555 mhz=71.175
+launch 1 thread 1 cycles=2000001 thread_ms=29.242 mhz=68.395
+launch 1 thread 2 cycles=2000002 thread_ms=28.940 mhz=69.109
+launch 1 thread 3 cycles=2000002 thread_ms=29.084 mhz=68.766
+launch 1 thread 4 cycles=2000000 thread_ms=29.047 mhz=68.854
+launch 1 thread 5 cycles=2000000 thread_ms=29.070 mhz=68.799
+launch 1 thread 6 cycles=2000001 thread_ms=28.881 mhz=69.250
+launch 1 thread 7 cycles=2000001 thread_ms=28.904 mhz=69.195
+launch 1 thread 8 cycles=2000000 thread_ms=28.880 mhz=69.252
+--- exit=0 end=2026-10-13T21:49:23Z loadavg=0.77 0.84 0.43 1/247 14114
+=== launch dense-p8-base folder=/home/runner/work/_temp/publish-base screen=dense start=2026-10-13T21:49:23Z loadavg=0.77 0.84 0.43 1/247 14124
+--- top before: 9.1 containerd;0.0 systemd;0.0 kthreadd;0.0 pool_workqueue_release;
+os: roms/bbc-micro/os.rom, 16384 bytes, sha256 2d9fea69017864f6962704481829f95fee08446c8c3a13826d5d4e44000ac9de, hash checked
+basic: roms/bbc-micro/BASIC.ROM, 16384 bytes, sha256 45bd55dc0f6f0f8f1fe9e2481de7def206565eec8f600ba3068b849ca4132079, hash checked
+dfs: roms/bbc-micro/DFS-1.2.rom, 16384 bytes, sha256 e745e34895225a6650b712c1dd0656cb0b0b15f072a8ae6d9ea8d1ac257eb3d6, hash checked
+browser 154.0.8037.97
+launch 1 boot cycles=6000003 ms=137.100 cycles_per_second=43763698 mhz=43.764
+launch 1 screen ["","BBC Computer 32K","","Acorn DFS","","BASIC","",">"]
+launch 1 prompt yes
+launch 1 screen dense
+launch 1 timed 1 cycles=2000000 ms=28.700 cycles_per_second=69686411 mhz=69.686
+launch 1 timed 2 cycles=2000003 ms=28.400 cycles_per_second=70422641 mhz=70.423
+launch 1 timed 3 cycles=2000000 ms=28.000 cycles_per_second=71428571 mhz=71.429
+launch 1 timed 4 cycles=2000000 ms=28.100 cycles_per_second=71174377 mhz=71.174
+launch 1 timed 5 cycles=2000005 ms=28.000 cycles_per_second=71428750 mhz=71.429
+launch 1 thread 1 cycles=2000001 thread_ms=29.083 mhz=68.769
+launch 1 thread 2 cycles=2000002 thread_ms=28.615 mhz=69.893
+launch 1 thread 3 cycles=2000002 thread_ms=28.495 mhz=70.188
+launch 1 thread 4 cycles=2000000 thread_ms=28.758 mhz=69.546
+launch 1 thread 5 cycles=2000000 thread_ms=28.584 mhz=69.969
+launch 1 thread 6 cycles=2000001 thread_ms=28.378 mhz=70.477
+launch 1 thread 7 cycles=2000001 thread_ms=28.547 mhz=70.060
+launch 1 thread 8 cycles=2000000 thread_ms=28.501 mhz=70.173
+--- exit=0 end=2026-10-13T21:49:25Z loadavg=0.95 0.88 0.44 1/246 14261

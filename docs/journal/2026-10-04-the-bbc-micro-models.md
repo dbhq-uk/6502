@@ -1526,6 +1526,27 @@ In the site's tests, `bbc-micro.test.mjs` gains ten: the PC keyboard's down and 
 
 The browser speed rule was written before any launch, at 20:43 UTC, and committed in `0554ff6`: [`bench/bbc-micro-speed/chip-counters/rule.md`](../../bench/bbc-micro-speed/chip-counters/rule.md), the NES's two per cent rule with mode 7 and the dense page as its two cases, and `analyse.py`, which applies it (checked only on made-up launch files: equal builds pass, a five per cent and a two and a half per cent slowdown fail). **No launch has run.** This box is aarch64 and shared, with no Chrome, and the re-plan rules it out; where the run happens is Dan's to say. Until then the run is owed, and the pull request does not merge without it. No speed figure was taken here, and none is claimed.
 
+Superseded the same day: the run was made in CI and passed, as the next section records.
+
+### The browser speed run, in CI
+
+Added 13 October 2026, after the section above, which is the record of the time before the run and is left as written. Dan chose a GitHub runner as the host on 13 October 2026. AGENTS.md keeps `bench/` out of CI, so he approved one exception: the run is a workflow started by hand (`workflow_dispatch`), not part of any pull request's checks. The branch `ci/bbc-speed-run` carried it, and it is merged here. Its final form has only the `workflow_dispatch` trigger (checked: no `pull_request`, `push` or `schedule` in `.github/workflows/bbc-speed-run.yml`); the `pull_request` trigger that one commit added to start the run was taken out again by the next.
+
+GitHub offers a `workflow_dispatch` workflow only when its file is on the default branch, and it was not on `main`. So the run went through a throwaway pull request, number 96, whose trigger started it, and which was closed unmerged. The run is CI run 38472729370, on 13 October 2026. The baseline was `8a30791`, `git merge-base origin/main` of the branch, and the after build was `0d9e1ab`, the head of the branch then. The harness was the after tree's `bench/bbc-micro-speed`, for both builds.
+
+The host, from the run's `host.txt`: the ubuntu runner image 20261004.327.1, x86_64, an AMD EPYC 9V45 virtual machine with 4 CPUs, Chrome 154.0.8037.97 and .NET 10.0.401 with `wasm-tools`. The one-minute load average before each launch was between 0.77 and 0.97, under the rule's gate of 1.00. All 33 launches (32 for the series and the one smoke launch the rule keeps and does not count) exited 0, and every one of the 32 counted.
+
+The verdict, from `analyse.py` on the run's `launches.txt` (`python3 bench/bbc-micro-speed/chip-counters/analyse.py bench/bbc-micro-speed/chip-counters/runs/2026-10-13-ci-38472729370/launches.txt`, which prints what the workflow printed):
+
+| Case | Pairs | Median ratio, after over baseline | 90 per cent interval | Case verdict |
+| --- | --- | --- | --- | --- |
+| mode 7 | 8 | 0.9977 | 0.9774 to 1.0177 | pass |
+| dense | 8 | 0.9981 | 0.9834 to 1.0291 | pass |
+
+**VERDICT PASS.** The rule was applied as it was fixed: no threshold moved and no launch was dropped. The native fingerprints of the two trees are the same. The pairs in one case range widely (mode 7 from 0.9602 to 1.0528, dense from 0.9135 to 1.0372), which is why the rule uses the median of eight and an interval, and why a single pair says nothing.
+
+Two limits. The load average cannot see other tenants on the same physical hardware, so a quiet figure here does not prove a quiet host. And the run covers the machine as of `0d9e1ab`: a later change to the machine, in the bus or in anything the CPU calls, would need the run repeated. The run's files are kept in [`bench/bbc-micro-speed/chip-counters/runs/2026-10-13-ci-38472729370/`](../../bench/bbc-micro-speed/chip-counters/runs/2026-10-13-ci-38472729370/) (the artifact `bbc-speed-run`, 92 KB, downloaded with `gh run download 38472729370 --repo dbhq-uk/6502 -n bbc-speed-run`): the launches, the analysis, the host, the fingerprints and the watch log.
+
 ### The checks before this was pushed
 
 On 13 October 2026, on this box: `dotnet build -c Release`, 0 warnings and 0 errors; `dotnet test -c Release tests/Dbhq.Machines.BbcMicro.Tests`, 997 passed and 0 failed; in `site/`, `node scripts/build-machines.mjs bbc-micro`, then `npm test` (with the results artefact already in `src/data/`), 509 tests: 508 passed, 0 failed, 1 to-do. Both workflows' floors rise by the eleven new site tests, from 496 to 507; the suite passed 508 here, one more than the old floor plus the new tests, which this task did not add. The core (`src/Dbhq.Cpu6502`) is not touched. The browser check was not run here (it needs Chrome); Validate in CI is its record.
@@ -1740,3 +1761,16 @@ Both workflows' floors rise by the ten new site tests, from 523 to 533.
 ### Left for task 9a
 
 The scene draws the case from `CASE`, `RECESS` and `PROFILE`, the keys from `KEYS` with `LEGENDS[name]`, the lights from `LEDS`, the badge strip's words from `BADGE` and no owl, the rear vents from `GRILLE`, the ports and mains panel from `REAR`, the underside from `UNDERSIDE`, and the feet from `FEET`, each note into its words. The case's size is the manual's; the page says that the outside's measures disagree with it by a few per cent (above), and that the front edge's check was not measurable. K2 is not credited, being unused.
+
+## The fix batch after the reviews of tasks 6 and 7 (13 October 2026)
+
+The reviews of tasks 6 and 7 left a short list. Each item, and how it was checked:
+
+- **The legend's serial ULA.** The legend said the serial ULA is not emulated. It is emulated in part: the machine keeps its control byte, and bit 7 of it drives the cassette relay (`bus.md`, 1e). The sentence now says "emulates only in part" and names the control byte and the relay, and keeps the 6850 and the uPD7002 as not emulated. The test that pinned the old words now pins the new and refuses the old; it failed against the old sentence (60 of 62 tests in that file passed with the new test and the old words, one failed) and passes with the new one.
+- **The results file's sources lacked `author`.** `results.py` copied six keys of each source and not its author, so task 9b could not credit the board's inputs from the file. The key is added, the Python test and the site test both require it (each failed first), and `site/src/data/bbc-micro-board-model.json` is regenerated: five sources gain an `author`, and nothing else in the file changes.
+- **The plan said the record has `models` "after this task".** It does not until task 9b claims; the plan now says after task 9b.
+- **`rule.md` and the NES's rule.** `rule.md` now lists what it changes from the NES's rule (the field `mhz`, the alternating launch order, the two cases, exit 0 required, seed 88). No threshold changed.
+- **`analyse.py` and a repeated label.** A label that heads two launches was silently taken as the later one. It now prints a note naming it. There is no test harness for the `bench` scripts, so this was checked by a small self-check on made-up launch files: with no repeat, the new script's output and the old script's are identical; with a repeated `mode7-p2-after`, the new script prints the note and the rest of its output is identical to the old script's. The maths is unchanged.
+- **`bus.md` 1e.** The step "so a light is lit by a low latch bit" is an inference from the power-on state and the OS routine, not something a source states. It is tagged `[inferring]`.
+- **`lights()`.** `site/public/bbc-micro.js` now says in a comment that both lock lights read lit before boot, because `SystemVia.Latch` starts at 0.
+- **The floors' comments.** The notes in `validate.yml` and `deploy-site.yml` gave "524 passed here" and "508 passed here" for two tasks. Those are numbers of one day's run on one tree, not floors, and they drift; they are removed, and the dated floor convention is kept. No floor moves in this batch, as it adds no site test.
