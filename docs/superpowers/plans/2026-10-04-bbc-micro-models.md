@@ -665,6 +665,8 @@ After task 9b the BBC Micro's record has `"models": [{ "view": "inside", "module
   3. The KIM-1's and the NES's pages are unchanged in markup.
   4. The browser check's lines are read from CI's log, not assumed.
 
+- **Outcome, 13 October 2026.** Built, in `0d5d7a6`, with one fix after CI in `6b8339e`: the two thin entries, both `MODELS` entries (the board's legend rows given `chip` from `sheila` in the entry, the shared table unchanged), the claim of both views with `"case": true`, eight `references` each with its SHA-256, each view crediting exactly the sources its results file lists, the deploy list, the map's budget, `checkBbcModels` with the NES's `settled()` imported, `DESIGN.md`'s section, and the page's words on the copper, the case's size and the front edge read from the modules. The shared section, tabs, loader and styles are unchanged, and the KIM-1's and the NES's pages are the same in markup. Validate's first run failed on one browser step, a click before Start whose line the hover replaced, a bug in the entry, fixed with a test; its second run was green. The figures, the page weight and both runs' lines are in the journal's task 9b section.
+
 The largest task. If its first review sends it back more than twice, split it at step 4: the case model first (steps 1 to 3, with the page's single view temporarily the outside), the views second.
 
 **Files:**
