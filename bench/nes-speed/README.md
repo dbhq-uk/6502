@@ -21,7 +21,7 @@ below says which code it measured.
 | `lan-master-play.json`, `play/` | A scripted play session of the bundled homebrew, Lan Master (`play/make-script.py` writes the JSON): the title, its menu, then the first level, played to 55 seconds of its clock, as the pad's buttons for each PPU frame, with a last frame of play for each region. `play/PlayScript.cs` reads it for `bench/thread-time` (`play-ntsc`, `play-pal`); `main.js` reads the same JSON for the page (`PLAY=1`, below). Task 3b of the scanline renderer work. |
 | `native/` | The same workload as a console program, in the solution so CI builds it. |
 | `differential/` | The check that a change for speed changed nothing else: it runs every pinned NES test ROM, the bundled homebrew with a fixed round of button presses, and synthetic cartridges it assembles itself, which keep rendering on and touch the chips at moving dots, in both regions and writes one line of hashes for each (every instruction's registers, cycle and PPU position, every cycle's interrupt lines, every frame's pixels, the sound, the end state, each chip's whole state at every point where it can be seen, and, since format 3, the picture as far as it is drawn at each of those points). In the solution too. |
-| `differential/baseline/` | The differential's output with the per-dot reference (`--oracle`), which the lazy build is checked against; the file is named for the commit it was recorded at (`bc92102.txt`, format 4, from 9 October 2026, with the twelve background and twelve sparse cartridges). It replaced `132fd50.txt` (format 4, without the sparse ones), `034b43f.txt` (format 4, without either), `acf9748.txt` (format 3) and `38c5544.txt` (format 2, after the reset fix), which had replaced `4e9b92b.txt`, recorded from the code before the lazy chips, behaving as `5e48505` (below). |
+| `differential/baseline/` | The differential's output with the per-dot reference (`--oracle`), which the lazy build is checked against; the file is named for the commit it was recorded at (`8f7314d.txt`, format 4, from 13 October 2026, with the twelve background and twelve sparse cartridges). It replaced `bc92102.txt` (the same, before the sparse cartridges set OAMADDR), `132fd50.txt` (format 4, without the sparse ones), `034b43f.txt` (format 4, without either), `acf9748.txt` (format 3) and `38c5544.txt` (format 2, after the reset fix), which had replaced `4e9b92b.txt`, recorded from the code before the lazy chips, behaving as `5e48505` (below). |
 | `differential/faults.py` | Shows the differential can fail: in a scratch copy of the repository, whose path it takes, it plants one fault at a time, runs `--check` against a baseline, and counts the runs each changes; with `--tests <filter>` it also runs the NES tests that match with each fault in, and with `--no-differential` only those. |
 
 ## The workload
@@ -76,8 +76,8 @@ Or check against the committed baseline in one command. It prints the first run 
 which of its hashes do, and exits 1 on any difference:
 
 ```sh
-dotnet run -c Release --project differential -- --check differential/baseline/bc92102.txt
-dotnet run -c Release --project differential -- --check differential/baseline/bc92102.txt --oracle
+dotnet run -c Release --project differential -- --check differential/baseline/8f7314d.txt
+dotnet run -c Release --project differential -- --check differential/baseline/8f7314d.txt --oracle
 ```
 
 `--oracle` builds the machine with `NesOptions.PerDotReference`, the per-dot reference that a
@@ -147,7 +147,10 @@ AxROM, keep both layers on with few sprites, a cursor of four with sprite 0 and 
 239 in half the frames), 8 by 16 every other 8 frames, and PPUMASK cycling the two left clips,
 greyscale and emphasis. Last in the list again; the baseline was recorded again from `bc92102` with
 `--oracle` (380 runs), its 356 earlier lines identical to `132fd50.txt`'s, which was removed, and the
-lazy build checked against it (the journal entry, "Task 4a").
+lazy build checked against it (the journal entry, "Task 4a"). On 13 October 2026 the sparse cartridges' mid-frame action
+gained a write of `$2003` (the fault that leaves OAMADDR unheld on a fast line was seen by only 11 runs), which changes
+the 24 sparse lines and no others: the baseline was recorded again from `8f7314d` with `--oracle`, `bc92102.txt` was
+removed, and the lazy build was checked against it.
 
 To run it on a baseline that is older than the tool, export that commit with `git archive`
 into a folder of its own, copy `bench/nes-speed/differential/` into the same place in the

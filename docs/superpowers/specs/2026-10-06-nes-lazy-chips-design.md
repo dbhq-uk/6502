@@ -34,6 +34,8 @@ tables are in the journal,
 [`../../journal/2026-10-06-the-nes-lazy-chips.md`](../../journal/2026-10-06-the-nes-lazy-chips.md),
 sections "Task 2b" and "Task 2c", and the plan's "What was built" says the same.
 
+**Update, 8 to 13 October 2026.** The fast path was then built, in part, as issue #72 asked (tasks 3 and 4a of the plan; `src/Dbhq.Machines.Nes/PpuScanline.cs`): whole lines after the picture, in VBlank and with rendering off, and visible lines with the background on and either no sprite layer or no sprite fetched for the line. Sprite drawing and the sprite 0 hit path are not built. The APU's batch (#73) is still unbuilt. The plan's "What was built" and the journal entry [`../../journal/2026-10-08-the-nes-scanline-renderer.md`](../../journal/2026-10-08-the-nes-scanline-renderer.md) have the detail and the figures.
+
 The speed target below, 1.5 times, was met natively on the benchmark ROM and
 about met on the homebrew (the journal's task 2, "Speed"), and not met in the
 browser (task 2b).
@@ -55,7 +57,7 @@ phase) and its baseline recorded again as
 and on 9 October, with twelve background-only scrolling cartridges added after the
 review of task 3, as `bench/nes-speed/differential/baseline/132fd50.txt`, and with
 twelve sparse-sprite cartridges added for task 4a as
-`bench/nes-speed/differential/baseline/bc92102.txt`.
+`bench/nes-speed/differential/baseline/8f7314d.txt`.
 
 ## Why
 

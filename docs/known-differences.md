@@ -851,7 +851,7 @@ cost. This is reasoned, not measured: the browser bench runs one game only.
 (`bench/nes-speed/differential`, its README) compares the lazy build with the
 build before the work at every point where a chip can be seen, over the pinned
 test ROMs and its own synthetic cartridges in both regions, against
-`baseline/bc92102.txt` (format 4: it also hashes the picture as far as it is
+`baseline/8f7314d.txt` (format 4: it also hashes the picture as far as it is
 drawn at every point where the PPU can be seen, and its homebrew and synthetic
 runs press reset a second time on a chosen PAL dot phase; twelve of its synthetic
 cartridges scroll the background alone and twelve keep a few sprites on, for the

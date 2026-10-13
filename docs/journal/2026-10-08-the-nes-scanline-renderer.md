@@ -1,7 +1,7 @@
 ---
 title: "The NES's fast scanline renderer: the gate first, then the lines without sprites"
 date: 2026-10-08
-summary: "Dan said to merge the lazy PPU and continue, which was read as building the fast scanline renderer the lazy chips plan specified and left unbuilt: a second way to run a line of the PPU, used when nothing can see the line. Before any of it is written, the gate that must hold it equal to the first was made able to see it fail, closing the three gaps the last review named. The differential now hashes the picture as far as it is drawn at every point where the PPU can be seen, not only at the end of a frame. Its sprite 0 cartridges sweep sprite 0 down the whole picture, at every named x, with the left clips on and off, where before they covered the top half. A new layer of scene tests puts the PPU at any dot directly and makes register accesses on every dot of visible lines, the VBlank lines and the pre-render line, in both regions. Four faults of the kind a fast renderer could make were planted one at a time. The old differential saw each of them, two in only a handful of runs, and the old unit tests saw none. The new differential sees the pixel fault in many times as many runs and the sprite 0 fault in twice as many, and the scene tests catch all four. The review of this work found holes in the scene layer: sprite 0 hit its line a line early because the scenes kept the last scene's sprites, and the scenes left the right pixels behind. Both were fixed, the scenes were widened, and the differential now presses reset a second time on a dot phase chosen for each run, so every dot of PAL's pre-render line is reached by programs as well as by the scenes. The differential's output changed format twice, so its baseline was recorded again from the per-dot reference each time, and the lazy build matches it on every run. Then the renderer itself was built for the lines that draw no sprite: the lines after the picture and in VBlank, the visible lines with rendering off, and those with the background alone, on which sprite evaluation still runs and is run with the per-dot code. The gate stayed identical to its baseline, and every fault planted in the new code was caught both by the differential and by new scene tests that also say how many lines the fast path must take. Against main, in the browser, the homebrew's title screen runs about a third faster and SNOW, whose every visible line has sprites, no faster at all, so the stopping rule set before the work was reached. After its review the new tests ran under every nametable layout, and the differential gained cartridges that scroll the background alone, which the renderer's faults now show in many more runs. Last, the bundled game was played by a script and measured in play, not only at its title: there the sprite layer is on for every visible line, so the renderer takes almost none of them and the browser gain is small. A scratch change that also takes the lines with no sprite on them, which is nearly every line in play, was measured as the cheapest part of a sprite path, and it passes the existing gate."
+summary: "Dan said to merge the lazy PPU and continue, which was read as building the fast scanline renderer the lazy chips plan specified and left unbuilt: a second way to run a line of the PPU, used when nothing can see the line. Before any of it is written, the gate that must hold it equal to the first was made able to see it fail, closing the three gaps the last review named. The differential now hashes the picture as far as it is drawn at every point where the PPU can be seen, not only at the end of a frame. Its sprite 0 cartridges sweep sprite 0 down the whole picture, at every named x, with the left clips on and off, where before they covered the top half. A new layer of scene tests puts the PPU at any dot directly and makes register accesses on every dot of visible lines, the VBlank lines and the pre-render line, in both regions. Four faults of the kind a fast renderer could make were planted one at a time. The old differential saw each of them, two in only a handful of runs, and the old unit tests saw none. The new differential sees the pixel fault in many times as many runs and the sprite 0 fault in twice as many, and the scene tests catch all four. The review of this work found holes in the scene layer: sprite 0 hit its line a line early because the scenes kept the last scene's sprites, and the scenes left the right pixels behind. Both were fixed, the scenes were widened, and the differential now presses reset a second time on a dot phase chosen for each run, so every dot of PAL's pre-render line is reached by programs as well as by the scenes. The differential's output changed format twice, so its baseline was recorded again from the per-dot reference each time, and the lazy build matches it on every run. Then the renderer itself was built for the lines that draw no sprite: the lines after the picture and in VBlank, the visible lines with rendering off, and those with the background alone, on which sprite evaluation still runs and is run with the per-dot code. The gate stayed identical to its baseline, and every fault planted in the new code was caught both by the differential and by new scene tests that also say how many lines the fast path must take. Against main, in the browser, the homebrew's title screen runs about a third faster and SNOW, whose every visible line has sprites, no faster at all, so the stopping rule set before the work was reached. After its review the new tests ran under every nametable layout, and the differential gained cartridges that scroll the background alone, which the renderer's faults now show in many more runs. Last, the bundled game was played by a script and measured in play, not only at its title: there the sprite layer is on for every visible line, so the renderer takes almost none of them and the browser gain is small. A scratch change that also takes the lines with no sprite on them, which is nearly every line in play, was measured as the cheapest part of a sprite path, and it passes the existing gate. That one clause was then built: a line with both layers on and no sprite fetched for it is rendered whole, with sprite drawing and the sprite hit still left to the exact path. Twelve new cartridges that keep a few sprites on were added to the differential so that the clause is seen by many runs, the baseline was recorded again, every planted fault in the clause was caught by the differential and the scene tests, and in play the browser gain over main went from small to about a third."
 order: 38
 ---
 
@@ -1453,9 +1453,10 @@ pixels are compared with the per-dot PPU as in task 3.
 
 **Against the code without the clause, 140 of the new and changed tests failed**,
 each on the count of lines taken. With the clause in, the NES tests are all
-green (2,640 passed, 0 failed, `dotnet test tests/Dbhq.Machines.Nes.Tests -c
-Release`, 9 October 07:54 UTC, 3 minutes 46 seconds), and `dotnet build -c
-Release` gives 0 warnings and 0 errors.
+green (2,724 passed, 0 failed, `dotnet test tests/Dbhq.Machines.Nes.Tests -c
+Release`, 13 October 06:05 UTC on aarch64, 5 minutes 25 seconds with the gate
+recording running beside it), and `dotnet build -c Release` gives 0 warnings
+and 0 errors.
 
 ### The gate
 
@@ -1470,25 +1471,24 @@ line 239 evaluates it), 8 by 16 every other 8 frames, PPUMASK cycling the two
 left clips with greyscale and emphasis, and a `$2002` read in the frame kept in
 RAM. They sort among the others by name; the format did not change.
 
-On this tree (`bc92102`, from `bench/nes-speed/differential`), 9 October 2026:
+The first agent on this task staged `baseline/bc92102.txt` and ran out of usage before it was checked. It was checked again from nothing on 13 October 2026, on an aarch64 machine (4 cores), with the tree at `b510205` (whose `src/` is `cdd7980`'s), from `bench/nes-speed/differential`:
 
-- `dotnet run -c Release -- <file> --oracle` wrote 380 runs, 07:54:12 to
-  08:02:38 UTC. **It is byte for byte the baseline the previous agent staged**
-  (`cmp` printed nothing), which is `baseline/bc92102.txt`. Checked here and not
-  trusted: the file's first line is the format 4, 150 frames line as before; every
-  one of `132fd50.txt`'s 357 lines, in order, is in it (the 254 pinned-ROM
-  lines among them, unchanged); the other 24 lines are the twelve sparse
-  cartridges in both regions. `132fd50.txt` was removed.
-- `--check baseline/bc92102.txt`, the lazy build: **IDENTICAL, all 380 runs**,
-  08:05:12 to 08:12:22 UTC.
-- `--check baseline/bc92102.txt --oracle`: **IDENTICAL, all 380 runs**, 08:12:22
-  to 08:18:33 UTC.
+- `dotnet run -c Release --no-build -- /tmp/fresh.txt --oracle` wrote 380 runs (06:04 to 06:14 UTC). **It was byte for byte the staged baseline** (`cmp` printed nothing). Without the 24 `synthetic/sparse-*` lines (the twelve cartridges in both regions, interleaved among the others by name), the file equals `132fd50.txt` as it was at `a1b3118` (`git show a1b3118:bench/nes-speed/differential/baseline/132fd50.txt`), line for line: the 254 pinned-ROM lines and the 102 other synthetic lines are unchanged.
+- `--check differential/baseline/bc92102.txt`, the lazy build: IDENTICAL, all 380 runs, 06:35 to 06:47 UTC.
+- `--check differential/baseline/bc92102.txt --oracle`: IDENTICAL, all 380 runs, 06:47 to 06:55 UTC.
+
+The output is integer hashes, so it should not depend on the CPU. The staged file was recorded on another machine (the agent that recorded it did not log its architecture); this recording, on aarch64, matched it byte for byte.
+
+**The OAMADDR fault was seen by too few runs, and the cartridges were changed.** The fault runs below showed that `fast-sprite-oamaddr-kept` (the replacement for the equivalent fault, see below) changed 11 runs of 380, under the 20 that every fault in this gate must reach. The sparse cartridges never set OAMADDR while a fast line follows. Their mid-frame action (which already read `$2002`) now also writes `$2003` (commit `8f7314d`). Only the 24 sparse lines of the baseline changed, which was checked with `diff`: the other 356 lines are the same. **The baseline was recorded again** from `8f7314d` with `--oracle` (13 October, 10:00 UTC or so, 380 runs), `bc92102.txt` was removed and the file is now `baseline/8f7314d.txt`; the lazy build and `--oracle` were checked against it:
+
+- `--check differential/baseline/8f7314d.txt`, the lazy build: **IDENTICAL, all 380 runs**, 10:10 to 10:17 UTC.
+- `--check differential/baseline/8f7314d.txt --oracle`: **IDENTICAL, all 380 runs**, 10:17 to 10:25 UTC.
 
 ### The faults
 
 The eleven faults of task 3 in `PpuScanline.cs` and six for the clause were run
 on a scratch copy of this tree (the repository is never changed), each with the
-differential `--check` against `bc92102.txt` and the 1,119 tests of
+differential `--check` against `bc92102.txt` (first run) and `8f7314d.txt` (the six faults of the clause, again) and the 1,203 tests of
 `PpuScanlineTests`, `PpuDotScene*`, `PpuCatchUpTests`, `StateReport` and
 `PpuMoveTo`:
 
@@ -1496,18 +1496,30 @@ differential `--check` against `bc92102.txt` and the 1,119 tests of
 python3 bench/nes-speed/differential/faults.py <copy> <copy>/bench/nes-speed/differential/baseline/bc92102.txt --tests <filter> <fault ...>
 ```
 
-08:19 to 10:42 UTC. The machine was shared with other jobs (load 2 to 16), which
-does not change a count. The whole output is in
-[`task-4a-faults.txt`](../../bench/nes-speed/lazy-chips/task-4a-faults.txt).
+First run 13 October 2026, 07:04 to 10:02 UTC, on aarch64; then the six faults of the clause again, 10:25 to 10:58 UTC or so, after the cartridge change above. The whole output of both is in
+[`task-4a-faults.txt`](../../bench/nes-speed/lazy-chips/task-4a-faults.txt). The run counts are of 380 and the tests of 1,203 (`PpuScanlineTests`, `PpuDotScene*`, `PpuCatchUpTests`, `StateReport`, `PpuMoveTo`). The six faults of the clause are from the second run, the others from the first; the baseline of the second run differs from the first's in the 24 sparse lines only.
 
-FAULT_TABLE
+| Fault | Differential runs that differ | Scene and state tests that fail |
+| --- | --- | --- |
+| `fast-pixel-one-off` | 131 of 380 | 516 of 1203 |
+| `fast-attribute-quadrant` | 96 of 380 | 462 of 1203 |
+| `fast-fine-x` | 60 of 380 | 514 of 1203 |
+| `fast-coarse-y-wrap` | 219 of 380 | 130 of 1203 |
+| `fast-vertical-copy` | 276 of 380 | 514 of 1203 |
+| `fast-left-clip-off-by-one` | 94 of 380 | 462 of 1203 |
+| `fast-off-palette-v-ignored` | 37 of 380 | 56 of 1203 |
+| `fast-off-emphasis-ignored` | 64 of 380 | 60 of 1203 |
+| `fast-vblank-line-off-by-one` | 20 of 380 | 212 of 1203 |
+| `fast-nametable-page` | 58 of 380 | 8 of 1203 |
+| `fast-sprites-not-evaluated` | 195 of 380 | 503 of 1203 |
+| `fast-sprite-clause-with-sprites` | 93 of 380 | 144 of 1203 |
+| `fast-sprite-clause-left-clip` | 36 of 380 | 52 of 1203 |
+| `fast-sprite0-hit-from-nothing` | 79 of 380 | 232 of 1203 |
+| `fast-sprite-oamaddr-kept` | 17 of 380 | 12 of 1203 |
+| `fast-sprite-count-not-set` | 88 of 380 | 170 of 1203 |
+| `fast-sprite-overflow-not-set` | 29 of 380 | 14 of 1203 |
 
-Every fault is seen by at least 20 runs of the differential and by scene tests.
-The smallest count is `fast-vblank-line-off-by-one` at 20 runs, the same as
-before the sparse cartridges: it only changes the VBlank lines, which a program
-reaches in few runs. Task 3's faults are seen by more runs than at task 3's
-review, because the clause makes more of their lines fast (`fast-pixel-one-off`
-went from 75 runs of 356 to 131 of 380).
+**Sixteen of the 17 faults are seen by at least 20 runs and every one of the 17 by scene tests. `fast-sprite-oamaddr-kept` is seen by 17 runs, not 20** (11 before the cartridge change). It is the fault that keeps OAMADDR on a fast line; the value it keeps is lost at the next line that the per-dot path runs, and at the pre-render line, so a run sees it only when the program writes `$2003` in a visible line with no line of the per-dot path after it before the next point where the PPU can be seen. 12 tests fail on it. The 17 runs are NROM sparse cartridges on NTSC, the fuzz and sprite cartridges on a few boards, and the others not at all. The shortfall is recorded here and not hidden: I did not find out why the other boards and PAL do not see it, and the gate was not changed a second time. The smallest of the others is `fast-vblank-line-off-by-one` at 20 runs, as before the sparse cartridges: it only changes the VBlank lines, which a program reaches in few runs. Task 3's faults are seen by more runs than at task 3's review, because the clause makes more of their lines fast (`fast-pixel-one-off` went from 75 runs of 356 to 131 of 380).
 
 **One fault was equivalent, and was replaced.** The previous agent's
 `fast-sprite-buffer-not-cleared` (skip the line buffer's emptying on a fast line
