@@ -11,6 +11,17 @@
 // at /rom. It is never copied into the published app and never committed. A ROM that does not
 // match its pin stops the run.
 //
+// With ROM=homebrew in the environment, the ROM is the bundled homebrew, Lan Master, read from
+// roms/nes/ (Pins.NesHomebrewPath) and checked against its SHA-256 pin (Pins.NesHomebrewSha256), in
+// place of SNOW: the program the thread-time bench's lan-ntsc and lan-pal workloads run, here
+// at its title after the boot cycles (added in task 3 of the scanline renderer work).
+//
+// With PLAY=1 as well (it needs ROM=homebrew), the game is played by the script lan-master-play.json beside
+// this file, served at /script: the page runs whole frames and sets controller 1 before each (main.js's
+// ?play=1), the boot cycles get it into the first level, and the THREAD_TIME runs play on from there. It
+// prints the frame it ended on beside the script's last frame of play for the region, which it must not
+// pass (task 3b of the scanline renderer work).
+//
 // With PROFILE=<n> in the environment, each launch is also recorded with the DevTools protocol's
 // sampling profiler (200 microsecond interval), and the n functions with the most self time are
 // printed with their share of all the samples: of the whole page, boot included, or with
@@ -54,7 +65,17 @@ if (!commit || !want) throw new Error(`Pins.cs has no commit or no hash for ${ro
 const sha256 = (bytes) => crypto.createHash('sha256').update(bytes).digest('hex');
 const local = path.join(repo, '.testdata', 'nes-test-roms', commit, ...romName.split('/'));
 let rom = fs.existsSync(local) ? fs.readFileSync(local) : null;
-if (!rom || sha256(rom) !== want) {
+const homebrew = process.env.ROM === 'homebrew';
+const play = process.env.PLAY === '1';
+if (play && !homebrew) throw new Error('PLAY=1 plays the homebrew: give ROM=homebrew too');
+if (homebrew) {
+  const relative = /public const string NesHomebrewPath = "([^"]+)";/.exec(pins)?.[1];
+  const pinned = /public const string NesHomebrewSha256 = "([0-9a-f]{64})";/.exec(pins)?.[1];
+  if (!relative || !pinned) throw new Error('Pins.cs has no path or no hash for the homebrew');
+  rom = fs.readFileSync(path.join(repo, ...relative.split('/')));
+  if (sha256(rom) !== pinned) throw new Error(`${relative} does not match its pinned hash ${pinned}`);
+  console.log(`rom: ${relative}, ${rom.length} bytes, sha256 ${sha256(rom)}, hash checked`);
+} else if (!rom || sha256(rom) !== want) {
   const url = `https://raw.githubusercontent.com/dbhq-uk/nes-test-roms/${commit}/${romName}`;
   const response = await fetch(url);
   if (!response.ok) throw new Error(`HTTP ${response.status}: ${url}`);
@@ -63,7 +84,7 @@ if (!rom || sha256(rom) !== want) {
   fs.mkdirSync(path.dirname(local), { recursive: true });
   fs.writeFileSync(local, rom);
 }
-console.log(`rom: ${romName} at ${commit.slice(0, 12)}, ${rom.length} bytes, sha256 ${sha256(rom)}, hash checked`);
+if (!homebrew) console.log(`rom: ${romName} at ${commit.slice(0, 12)}, ${rom.length} bytes, sha256 ${sha256(rom)}, hash checked`);
 
 const types = {
   '.html': 'text/html', '.js': 'text/javascript', '.mjs': 'text/javascript',
@@ -82,6 +103,8 @@ const server = http.createServer((req, res) => {
     return send(res, 'application/octet-stream', rom);
   } else if (name === '/' || name === '/index.html') {
     return send(res, 'text/html', fs.readFileSync(path.join(here, 'index.html')));
+  } else if (name === '/script' && play) {
+    return send(res, 'application/json', fs.readFileSync(path.join(here, 'lan-master-play.json')));
   } else if (name === '/main.js') {
     return send(res, 'text/javascript', fs.readFileSync(path.join(here, 'main.js')));
   } else {
@@ -120,7 +143,7 @@ try {
     };
     if (cdp && threadRuns === 0) await startProfile();
     try {
-      await page.goto(`${base}?cycles=${cyclesArg}&boot=${bootArg}&runs=${runsArg}&region=${regionArg}`);
+      await page.goto(`${base}?cycles=${cyclesArg}&boot=${bootArg}&runs=${runsArg}&region=${regionArg}${play ? '&play=1' : ''}`);
       await Promise.race([
         page.waitForFunction(() => document.body.dataset.done === 'true', null, { timeout: 30 * 60 * 1000 }),
         failed,
@@ -171,9 +194,14 @@ async function threadTimes(page, launch, runs, cycles) {
   const threadMs = async () => (await session.send('Performance.getMetrics')).metrics.find(m => m.name === 'ThreadTime').value * 1000;
   for (let i = 1; i <= runs; i++) {
     const before = await threadMs();
-    const ran = await page.evaluate(n => { const c = globalThis.benchNes.Cycles(); globalThis.benchNes.Run(n); return globalThis.benchNes.Cycles() - c; }, cycles);
+    const ran = await page.evaluate(n => { const c = globalThis.benchNes.Cycles(); if (globalThis.benchPlayLimit === null) globalThis.benchNes.Run(n); else globalThis.benchRun(n); return globalThis.benchNes.Cycles() - c; }, cycles);
     const ms = await threadMs() - before;
     const perSecond = ran / (ms / 1000);
     console.log(`launch ${launch} thread ${i} cycles=${ran} thread_ms=${ms.toFixed(3)} mhz=${(perSecond / 1e6).toFixed(3)} times_real=${(perSecond / cpuHz).toFixed(2)}`);
+  }
+  const limit = await page.evaluate(() => globalThis.benchPlayLimit);
+  if (limit !== null) {
+    const frame = await page.evaluate(() => globalThis.benchNes.Frames());
+    console.log(`launch ${launch} play frame=${frame} limit=${limit}${frame > limit ? ' PAST THE SCRIPT' : ''}`);
   }
 }

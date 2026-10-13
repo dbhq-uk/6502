@@ -1,0 +1,1671 @@
+# Task 4a of the scanline renderer work: the browser AOT figure in play, three sets of
+# task-4a-browser.sh <main 5640a57> <before 7b963e6> <after cdd7980>, 9 October 2026. Chrome 153.0.8010.47.
+#   python3 bench/nes-speed/lazy-chips/task-4a-medians.py browser bench/nes-speed/lazy-chips/task-4a-browser.txt
+
+## Set 1
+set play region 0
+ 06:01:48 up 12 days, 15:30,  1 user,  load average: 2.30, 2.42, 3.21
+Fri Oct  9 06:01:48 UTC 2026
+round 1 build main
+rom: roms/nes/Lan_Master.nes, 40976 bytes, sha256 becfeafb80479c330333c9e9385417f68f3c88e85443dfb37b05ae9283f3ea45, hash checked
+browser 153.0.8010.47
+launch 1 region 0 NTSC
+launch 1 Running as NTSC, as chosen here: the file does not say which.
+launch 1 boot cycles=6015656 frames=202 ms=1104.700 cycles_per_second=5445511 mhz=5.446 times_real=3.04
+launch 1 timed 1 cycles=5390272 frames=181 ms=892.800 cycles_per_second=6037491 mhz=6.037 times_real=3.37
+launch 1 timed 2 cycles=5390269 frames=181 ms=894.300 cycles_per_second=6027361 mhz=6.027 times_real=3.37
+launch 1 timed 3 cycles=5390272 frames=181 ms=901.700 cycles_per_second=5977900 mhz=5.978 times_real=3.34
+launch 1 timed 4 cycles=5390272 frames=181 ms=1018.100 cycles_per_second=5294443 mhz=5.294 times_real=2.96
+launch 1 timed 5 cycles=5390268 frames=181 ms=799.500 cycles_per_second=6742049 mhz=6.742 times_real=3.77
+launch 1 play frame=1107 limit=3450
+launch 1 thread 1 cycles=5390270 thread_ms=885.556 mhz=6.087 times_real=3.40
+launch 1 thread 2 cycles=5390270 thread_ms=820.433 mhz=6.570 times_real=3.67
+launch 1 thread 3 cycles=5390274 thread_ms=864.425 mhz=6.236 times_real=3.48
+launch 1 thread 4 cycles=5390267 thread_ms=846.534 mhz=6.367 times_real=3.56
+launch 1 thread 5 cycles=5390275 thread_ms=918.896 mhz=5.866 times_real=3.28
+launch 1 thread 6 cycles=5390267 thread_ms=998.869 mhz=5.396 times_real=3.02
+launch 1 thread 7 cycles=5390270 thread_ms=1037.840 mhz=5.194 times_real=2.90
+launch 1 thread 8 cycles=5390272 thread_ms=1086.012 mhz=4.963 times_real=2.77
+launch 1 play frame=2555 limit=3450
+round 1 build before
+rom: roms/nes/Lan_Master.nes, 40976 bytes, sha256 becfeafb80479c330333c9e9385417f68f3c88e85443dfb37b05ae9283f3ea45, hash checked
+browser 153.0.8010.47
+launch 1 region 0 NTSC
+launch 1 Running as NTSC, as chosen here: the file does not say which.
+launch 1 boot cycles=6015656 frames=202 ms=970.900 cycles_per_second=6195958 mhz=6.196 times_real=3.46
+launch 1 timed 1 cycles=5390272 frames=181 ms=851.100 cycles_per_second=6333300 mhz=6.333 times_real=3.54
+launch 1 timed 2 cycles=5390269 frames=181 ms=894.500 cycles_per_second=6026013 mhz=6.026 times_real=3.37
+launch 1 timed 3 cycles=5390272 frames=181 ms=874.600 cycles_per_second=6163128 mhz=6.163 times_real=3.44
+launch 1 timed 4 cycles=5390272 frames=181 ms=816.500 cycles_per_second=6601680 mhz=6.602 times_real=3.69
+launch 1 timed 5 cycles=5390268 frames=181 ms=1047.900 cycles_per_second=5143876 mhz=5.144 times_real=2.87
+launch 1 play frame=1107 limit=3450
+launch 1 thread 1 cycles=5390270 thread_ms=967.016 mhz=5.574 times_real=3.11
+launch 1 thread 2 cycles=5390270 thread_ms=868.401 mhz=6.207 times_real=3.47
+launch 1 thread 3 cycles=5390274 thread_ms=839.875 mhz=6.418 times_real=3.59
+launch 1 thread 4 cycles=5390267 thread_ms=904.968 mhz=5.956 times_real=3.33
+launch 1 thread 5 cycles=5390275 thread_ms=923.609 mhz=5.836 times_real=3.26
+launch 1 thread 6 cycles=5390267 thread_ms=952.618 mhz=5.658 times_real=3.16
+launch 1 thread 7 cycles=5390270 thread_ms=959.142 mhz=5.620 times_real=3.14
+launch 1 thread 8 cycles=5390272 thread_ms=894.043 mhz=6.029 times_real=3.37
+launch 1 play frame=2555 limit=3450
+round 1 build after
+rom: roms/nes/Lan_Master.nes, 40976 bytes, sha256 becfeafb80479c330333c9e9385417f68f3c88e85443dfb37b05ae9283f3ea45, hash checked
+browser 153.0.8010.47
+launch 1 region 0 NTSC
+launch 1 Running as NTSC, as chosen here: the file does not say which.
+launch 1 boot cycles=6015656 frames=202 ms=832.700 cycles_per_second=7224278 mhz=7.224 times_real=4.04
+launch 1 timed 1 cycles=5390272 frames=181 ms=656.300 cycles_per_second=8213122 mhz=8.213 times_real=4.59
+launch 1 timed 2 cycles=5390269 frames=181 ms=745.200 cycles_per_second=7233319 mhz=7.233 times_real=4.04
+launch 1 timed 3 cycles=5390272 frames=181 ms=699.100 cycles_per_second=7710302 mhz=7.710 times_real=4.31
+launch 1 timed 4 cycles=5390272 frames=181 ms=652.100 cycles_per_second=8266021 mhz=8.266 times_real=4.62
+launch 1 timed 5 cycles=5390268 frames=181 ms=716.800 cycles_per_second=7519905 mhz=7.520 times_real=4.20
+launch 1 play frame=1107 limit=3450
+launch 1 thread 1 cycles=5390270 thread_ms=648.067 mhz=8.317 times_real=4.65
+launch 1 thread 2 cycles=5390270 thread_ms=649.627 mhz=8.297 times_real=4.64
+launch 1 thread 3 cycles=5390274 thread_ms=655.633 mhz=8.221 times_real=4.59
+launch 1 thread 4 cycles=5390267 thread_ms=669.790 mhz=8.048 times_real=4.50
+launch 1 thread 5 cycles=5390275 thread_ms=674.058 mhz=7.997 times_real=4.47
+launch 1 thread 6 cycles=5390267 thread_ms=689.784 mhz=7.814 times_real=4.37
+launch 1 thread 7 cycles=5390270 thread_ms=742.098 mhz=7.264 times_real=4.06
+launch 1 thread 8 cycles=5390272 thread_ms=745.448 mhz=7.231 times_real=4.04
+launch 1 play frame=2555 limit=3450
+round 2 build main
+rom: roms/nes/Lan_Master.nes, 40976 bytes, sha256 becfeafb80479c330333c9e9385417f68f3c88e85443dfb37b05ae9283f3ea45, hash checked
+browser 153.0.8010.47
+launch 1 region 0 NTSC
+launch 1 Running as NTSC, as chosen here: the file does not say which.
+launch 1 boot cycles=6015656 frames=202 ms=1245.600 cycles_per_second=4829525 mhz=4.830 times_real=2.70
+launch 1 timed 1 cycles=5390272 frames=181 ms=936.200 cycles_per_second=5757607 mhz=5.758 times_real=3.22
+launch 1 timed 2 cycles=5390269 frames=181 ms=945.900 cycles_per_second=5698561 mhz=5.699 times_real=3.18
+launch 1 timed 3 cycles=5390272 frames=181 ms=922.000 cycles_per_second=5846282 mhz=5.846 times_real=3.27
+launch 1 timed 4 cycles=5390272 frames=181 ms=1258.800 cycles_per_second=4282072 mhz=4.282 times_real=2.39
+launch 1 timed 5 cycles=5390268 frames=181 ms=904.700 cycles_per_second=5958072 mhz=5.958 times_real=3.33
+launch 1 play frame=1107 limit=3450
+launch 1 thread 1 cycles=5390270 thread_ms=890.334 mhz=6.054 times_real=3.38
+launch 1 thread 2 cycles=5390270 thread_ms=882.175 mhz=6.110 times_real=3.41
+launch 1 thread 3 cycles=5390274 thread_ms=863.455 mhz=6.243 times_real=3.49
+launch 1 thread 4 cycles=5390267 thread_ms=1071.875 mhz=5.029 times_real=2.81
+launch 1 thread 5 cycles=5390275 thread_ms=967.472 mhz=5.572 times_real=3.11
+launch 1 thread 6 cycles=5390267 thread_ms=1018.837 mhz=5.291 times_real=2.96
+launch 1 thread 7 cycles=5390270 thread_ms=975.206 mhz=5.527 times_real=3.09
+launch 1 thread 8 cycles=5390272 thread_ms=906.495 mhz=5.946 times_real=3.32
+launch 1 play frame=2555 limit=3450
+round 2 build before
+rom: roms/nes/Lan_Master.nes, 40976 bytes, sha256 becfeafb80479c330333c9e9385417f68f3c88e85443dfb37b05ae9283f3ea45, hash checked
+browser 153.0.8010.47
+launch 1 region 0 NTSC
+launch 1 Running as NTSC, as chosen here: the file does not say which.
+launch 1 boot cycles=6015656 frames=202 ms=771.800 cycles_per_second=7794320 mhz=7.794 times_real=4.35
+launch 1 timed 1 cycles=5390272 frames=181 ms=908.200 cycles_per_second=5935116 mhz=5.935 times_real=3.32
+launch 1 timed 2 cycles=5390269 frames=181 ms=1004.400 cycles_per_second=5366656 mhz=5.367 times_real=3.00
+launch 1 timed 3 cycles=5390272 frames=181 ms=867.000 cycles_per_second=6217153 mhz=6.217 times_real=3.47
+launch 1 timed 4 cycles=5390272 frames=181 ms=841.500 cycles_per_second=6405552 mhz=6.406 times_real=3.58
+launch 1 timed 5 cycles=5390268 frames=181 ms=954.800 cycles_per_second=5645442 mhz=5.645 times_real=3.15
+launch 1 play frame=1107 limit=3450
+launch 1 thread 1 cycles=5390270 thread_ms=835.110 mhz=6.455 times_real=3.61
+launch 1 thread 2 cycles=5390270 thread_ms=892.255 mhz=6.041 times_real=3.38
+launch 1 thread 3 cycles=5390274 thread_ms=924.048 mhz=5.833 times_real=3.26
+launch 1 thread 4 cycles=5390267 thread_ms=1007.623 mhz=5.349 times_real=2.99
+launch 1 thread 5 cycles=5390275 thread_ms=1157.152 mhz=4.658 times_real=2.60
+launch 1 thread 6 cycles=5390267 thread_ms=1042.203 mhz=5.172 times_real=2.89
+launch 1 thread 7 cycles=5390270 thread_ms=1062.748 mhz=5.072 times_real=2.83
+launch 1 thread 8 cycles=5390272 thread_ms=1063.605 mhz=5.068 times_real=2.83
+launch 1 play frame=2555 limit=3450
+round 2 build after
+rom: roms/nes/Lan_Master.nes, 40976 bytes, sha256 becfeafb80479c330333c9e9385417f68f3c88e85443dfb37b05ae9283f3ea45, hash checked
+browser 153.0.8010.47
+launch 1 region 0 NTSC
+launch 1 Running as NTSC, as chosen here: the file does not say which.
+launch 1 boot cycles=6015656 frames=202 ms=792.200 cycles_per_second=7593608 mhz=7.594 times_real=4.24
+launch 1 timed 1 cycles=5390272 frames=181 ms=674.700 cycles_per_second=7989139 mhz=7.989 times_real=4.46
+launch 1 timed 2 cycles=5390269 frames=181 ms=639.000 cycles_per_second=8435476 mhz=8.435 times_real=4.71
+launch 1 timed 3 cycles=5390272 frames=181 ms=637.700 cycles_per_second=8452677 mhz=8.453 times_real=4.72
+launch 1 timed 4 cycles=5390272 frames=181 ms=628.300 cycles_per_second=8579137 mhz=8.579 times_real=4.79
+launch 1 timed 5 cycles=5390268 frames=181 ms=631.200 cycles_per_second=8539715 mhz=8.540 times_real=4.77
+launch 1 play frame=1107 limit=3450
+launch 1 thread 1 cycles=5390270 thread_ms=580.979 mhz=9.278 times_real=5.18
+launch 1 thread 2 cycles=5390270 thread_ms=718.795 mhz=7.499 times_real=4.19
+launch 1 thread 3 cycles=5390274 thread_ms=599.219 mhz=8.995 times_real=5.03
+launch 1 thread 4 cycles=5390267 thread_ms=664.005 mhz=8.118 times_real=4.54
+launch 1 thread 5 cycles=5390275 thread_ms=809.882 mhz=6.656 times_real=3.72
+launch 1 thread 6 cycles=5390267 thread_ms=753.120 mhz=7.157 times_real=4.00
+launch 1 thread 7 cycles=5390270 thread_ms=744.755 mhz=7.238 times_real=4.04
+launch 1 thread 8 cycles=5390272 thread_ms=741.640 mhz=7.268 times_real=4.06
+launch 1 play frame=2555 limit=3450
+round 3 build main
+rom: roms/nes/Lan_Master.nes, 40976 bytes, sha256 becfeafb80479c330333c9e9385417f68f3c88e85443dfb37b05ae9283f3ea45, hash checked
+browser 153.0.8010.47
+launch 1 region 0 NTSC
+launch 1 Running as NTSC, as chosen here: the file does not say which.
+launch 1 boot cycles=6015656 frames=202 ms=1128.100 cycles_per_second=5332556 mhz=5.333 times_real=2.98
+launch 1 timed 1 cycles=5390272 frames=181 ms=880.900 cycles_per_second=6119051 mhz=6.119 times_real=3.42
+launch 1 timed 2 cycles=5390269 frames=181 ms=870.900 cycles_per_second=6189309 mhz=6.189 times_real=3.46
+launch 1 timed 3 cycles=5390272 frames=181 ms=894.700 cycles_per_second=6024670 mhz=6.025 times_real=3.37
+launch 1 timed 4 cycles=5390272 frames=181 ms=888.500 cycles_per_second=6066710 mhz=6.067 times_real=3.39
+launch 1 timed 5 cycles=5390268 frames=181 ms=903.600 cycles_per_second=5965325 mhz=5.965 times_real=3.33
+launch 1 play frame=1107 limit=3450
+launch 1 thread 1 cycles=5390270 thread_ms=909.573 mhz=5.926 times_real=3.31
+launch 1 thread 2 cycles=5390270 thread_ms=818.530 mhz=6.585 times_real=3.68
+launch 1 thread 3 cycles=5390274 thread_ms=837.834 mhz=6.434 times_real=3.59
+launch 1 thread 4 cycles=5390267 thread_ms=873.106 mhz=6.174 times_real=3.45
+launch 1 thread 5 cycles=5390275 thread_ms=937.107 mhz=5.752 times_real=3.21
+launch 1 thread 6 cycles=5390267 thread_ms=868.240 mhz=6.208 times_real=3.47
+launch 1 thread 7 cycles=5390270 thread_ms=973.251 mhz=5.538 times_real=3.09
+launch 1 thread 8 cycles=5390272 thread_ms=881.387 mhz=6.116 times_real=3.42
+launch 1 play frame=2555 limit=3450
+round 3 build before
+rom: roms/nes/Lan_Master.nes, 40976 bytes, sha256 becfeafb80479c330333c9e9385417f68f3c88e85443dfb37b05ae9283f3ea45, hash checked
+browser 153.0.8010.47
+launch 1 region 0 NTSC
+launch 1 Running as NTSC, as chosen here: the file does not say which.
+launch 1 boot cycles=6015656 frames=202 ms=1206.300 cycles_per_second=4986866 mhz=4.987 times_real=2.79
+launch 1 timed 1 cycles=5390272 frames=181 ms=825.100 cycles_per_second=6532871 mhz=6.533 times_real=3.65
+launch 1 timed 2 cycles=5390269 frames=181 ms=851.300 cycles_per_second=6331809 mhz=6.332 times_real=3.54
+launch 1 timed 3 cycles=5390272 frames=181 ms=816.500 cycles_per_second=6601680 mhz=6.602 times_real=3.69
+launch 1 timed 4 cycles=5390272 frames=181 ms=787.600 cycles_per_second=6843921 mhz=6.844 times_real=3.82
+launch 1 timed 5 cycles=5390268 frames=181 ms=793.500 cycles_per_second=6793028 mhz=6.793 times_real=3.80
+launch 1 play frame=1107 limit=3450
+launch 1 thread 1 cycles=5390270 thread_ms=871.114 mhz=6.188 times_real=3.46
+launch 1 thread 2 cycles=5390270 thread_ms=809.755 mhz=6.657 times_real=3.72
+launch 1 thread 3 cycles=5390274 thread_ms=819.576 mhz=6.577 times_real=3.67
+launch 1 thread 4 cycles=5390267 thread_ms=921.394 mhz=5.850 times_real=3.27
+launch 1 thread 5 cycles=5390275 thread_ms=944.745 mhz=5.706 times_real=3.19
+launch 1 thread 6 cycles=5390267 thread_ms=977.540 mhz=5.514 times_real=3.08
+launch 1 thread 7 cycles=5390270 thread_ms=895.490 mhz=6.019 times_real=3.36
+launch 1 thread 8 cycles=5390272 thread_ms=949.248 mhz=5.678 times_real=3.17
+launch 1 play frame=2555 limit=3450
+round 3 build after
+rom: roms/nes/Lan_Master.nes, 40976 bytes, sha256 becfeafb80479c330333c9e9385417f68f3c88e85443dfb37b05ae9283f3ea45, hash checked
+browser 153.0.8010.47
+launch 1 region 0 NTSC
+launch 1 Running as NTSC, as chosen here: the file does not say which.
+launch 1 boot cycles=6015656 frames=202 ms=800.400 cycles_per_second=7515812 mhz=7.516 times_real=4.20
+launch 1 timed 1 cycles=5390272 frames=181 ms=673.800 cycles_per_second=7999810 mhz=8.000 times_real=4.47
+launch 1 timed 2 cycles=5390269 frames=181 ms=749.800 cycles_per_second=7188942 mhz=7.189 times_real=4.02
+launch 1 timed 3 cycles=5390272 frames=181 ms=861.300 cycles_per_second=6258298 mhz=6.258 times_real=3.50
+launch 1 timed 4 cycles=5390272 frames=181 ms=827.100 cycles_per_second=6517074 mhz=6.517 times_real=3.64
+launch 1 timed 5 cycles=5390268 frames=181 ms=816.200 cycles_per_second=6604102 mhz=6.604 times_real=3.69
+launch 1 play frame=1107 limit=3450
+launch 1 thread 1 cycles=5390270 thread_ms=670.444 mhz=8.040 times_real=4.49
+launch 1 thread 2 cycles=5390270 thread_ms=719.899 mhz=7.488 times_real=4.18
+launch 1 thread 3 cycles=5390274 thread_ms=682.358 mhz=7.899 times_real=4.41
+launch 1 thread 4 cycles=5390267 thread_ms=760.034 mhz=7.092 times_real=3.96
+launch 1 thread 5 cycles=5390275 thread_ms=719.441 mhz=7.492 times_real=4.19
+launch 1 thread 6 cycles=5390267 thread_ms=700.516 mhz=7.695 times_real=4.30
+launch 1 thread 7 cycles=5390270 thread_ms=704.306 mhz=7.653 times_real=4.28
+launch 1 thread 8 cycles=5390272 thread_ms=733.141 mhz=7.352 times_real=4.11
+launch 1 play frame=2555 limit=3450
+round 4 build main
+rom: roms/nes/Lan_Master.nes, 40976 bytes, sha256 becfeafb80479c330333c9e9385417f68f3c88e85443dfb37b05ae9283f3ea45, hash checked
+browser 153.0.8010.47
+launch 1 region 0 NTSC
+launch 1 Running as NTSC, as chosen here: the file does not say which.
+launch 1 boot cycles=6015656 frames=202 ms=1100.100 cycles_per_second=5468281 mhz=5.468 times_real=3.06
+launch 1 timed 1 cycles=5390272 frames=181 ms=1098.600 cycles_per_second=4906492 mhz=4.906 times_real=2.74
+launch 1 timed 2 cycles=5390269 frames=181 ms=890.600 cycles_per_second=6052402 mhz=6.052 times_real=3.38
+launch 1 timed 3 cycles=5390272 frames=181 ms=1017.600 cycles_per_second=5297044 mhz=5.297 times_real=2.96
+launch 1 timed 4 cycles=5390272 frames=181 ms=1049.300 cycles_per_second=5137017 mhz=5.137 times_real=2.87
+launch 1 timed 5 cycles=5390268 frames=181 ms=996.200 cycles_per_second=5410829 mhz=5.411 times_real=3.02
+launch 1 play frame=1107 limit=3450
+launch 1 thread 1 cycles=5390270 thread_ms=911.491 mhz=5.914 times_real=3.30
+launch 1 thread 2 cycles=5390270 thread_ms=906.862 mhz=5.944 times_real=3.32
+launch 1 thread 3 cycles=5390274 thread_ms=890.095 mhz=6.056 times_real=3.38
+launch 1 thread 4 cycles=5390267 thread_ms=967.541 mhz=5.571 times_real=3.11
+launch 1 thread 5 cycles=5390275 thread_ms=1198.667 mhz=4.497 times_real=2.51
+launch 1 thread 6 cycles=5390267 thread_ms=957.929 mhz=5.627 times_real=3.14
+launch 1 thread 7 cycles=5390270 thread_ms=963.243 mhz=5.596 times_real=3.13
+launch 1 thread 8 cycles=5390272 thread_ms=1026.018 mhz=5.254 times_real=2.94
+launch 1 play frame=2555 limit=3450
+round 4 build before
+rom: roms/nes/Lan_Master.nes, 40976 bytes, sha256 becfeafb80479c330333c9e9385417f68f3c88e85443dfb37b05ae9283f3ea45, hash checked
+browser 153.0.8010.47
+launch 1 region 0 NTSC
+launch 1 Running as NTSC, as chosen here: the file does not say which.
+launch 1 boot cycles=6015656 frames=202 ms=762.000 cycles_per_second=7894562 mhz=7.895 times_real=4.41
+launch 1 timed 1 cycles=5390272 frames=181 ms=784.200 cycles_per_second=6873593 mhz=6.874 times_real=3.84
+launch 1 timed 2 cycles=5390269 frames=181 ms=912.600 cycles_per_second=5906497 mhz=5.906 times_real=3.30
+launch 1 timed 3 cycles=5390272 frames=181 ms=782.800 cycles_per_second=6885887 mhz=6.886 times_real=3.85
+launch 1 timed 4 cycles=5390272 frames=181 ms=795.100 cycles_per_second=6779364 mhz=6.779 times_real=3.79
+launch 1 timed 5 cycles=5390268 frames=181 ms=776.900 cycles_per_second=6938175 mhz=6.938 times_real=3.88
+launch 1 play frame=1107 limit=3450
+launch 1 thread 1 cycles=5390270 thread_ms=851.966 mhz=6.327 times_real=3.54
+launch 1 thread 2 cycles=5390270 thread_ms=943.760 mhz=5.711 times_real=3.19
+launch 1 thread 3 cycles=5390274 thread_ms=874.161 mhz=6.166 times_real=3.45
+launch 1 thread 4 cycles=5390267 thread_ms=884.063 mhz=6.097 times_real=3.41
+launch 1 thread 5 cycles=5390275 thread_ms=887.001 mhz=6.077 times_real=3.40
+launch 1 thread 6 cycles=5390267 thread_ms=1026.467 mhz=5.251 times_real=2.93
+launch 1 thread 7 cycles=5390270 thread_ms=854.147 mhz=6.311 times_real=3.53
+launch 1 thread 8 cycles=5390272 thread_ms=853.486 mhz=6.316 times_real=3.53
+launch 1 play frame=2555 limit=3450
+round 4 build after
+rom: roms/nes/Lan_Master.nes, 40976 bytes, sha256 becfeafb80479c330333c9e9385417f68f3c88e85443dfb37b05ae9283f3ea45, hash checked
+browser 153.0.8010.47
+launch 1 region 0 NTSC
+launch 1 Running as NTSC, as chosen here: the file does not say which.
+launch 1 boot cycles=6015656 frames=202 ms=907.700 cycles_per_second=6627361 mhz=6.627 times_real=3.70
+launch 1 timed 1 cycles=5390272 frames=181 ms=679.700 cycles_per_second=7930369 mhz=7.930 times_real=4.43
+launch 1 timed 2 cycles=5390269 frames=181 ms=650.000 cycles_per_second=8292722 mhz=8.293 times_real=4.63
+launch 1 timed 3 cycles=5390272 frames=181 ms=585.200 cycles_per_second=9210991 mhz=9.211 times_real=5.15
+launch 1 timed 4 cycles=5390272 frames=181 ms=646.100 cycles_per_second=8342783 mhz=8.343 times_real=4.66
+launch 1 timed 5 cycles=5390268 frames=181 ms=623.900 cycles_per_second=8639635 mhz=8.640 times_real=4.83
+launch 1 play frame=1107 limit=3450
+launch 1 thread 1 cycles=5390270 thread_ms=630.261 mhz=8.552 times_real=4.78
+launch 1 thread 2 cycles=5390270 thread_ms=655.773 mhz=8.220 times_real=4.59
+launch 1 thread 3 cycles=5390274 thread_ms=617.048 mhz=8.736 times_real=4.88
+launch 1 thread 4 cycles=5390267 thread_ms=648.022 mhz=8.318 times_real=4.65
+launch 1 thread 5 cycles=5390275 thread_ms=707.285 mhz=7.621 times_real=4.26
+launch 1 thread 6 cycles=5390267 thread_ms=688.252 mhz=7.832 times_real=4.38
+launch 1 thread 7 cycles=5390270 thread_ms=786.755 mhz=6.851 times_real=3.83
+launch 1 thread 8 cycles=5390272 thread_ms=701.586 mhz=7.683 times_real=4.29
+launch 1 play frame=2555 limit=3450
+gauge
+ 06:04:38 up 12 days, 15:33,  1 user,  load average: 2.39, 2.49, 3.10
+Fri Oct  9 06:04:38 UTC 2026
+os: roms/bbc-micro/os.rom, 16384 bytes, sha256 2d9fea69017864f6962704481829f95fee08446c8c3a13826d5d4e44000ac9de, hash checked
+basic: roms/bbc-micro/BASIC.ROM, 16384 bytes, sha256 45bd55dc0f6f0f8f1fe9e2481de7def206565eec8f600ba3068b849ca4132079, hash checked
+dfs: roms/bbc-micro/DFS-1.2.rom, 16384 bytes, sha256 e745e34895225a6650b712c1dd0656cb0b0b15f072a8ae6d9ea8d1ac257eb3d6, hash checked
+browser 153.0.8010.47
+launch 1 boot cycles=6000003 ms=463.400 cycles_per_second=12947784 mhz=12.948
+launch 1 screen ["","BBC Computer 32K","","Acorn DFS","","BASIC","",">"]
+launch 1 prompt yes
+launch 1 timed 1 cycles=2000000 ms=79.500 cycles_per_second=25157233 mhz=25.157
+launch 1 thread 1 cycles=2000003 thread_ms=100.579 mhz=19.885
+launch 1 thread 2 cycles=2000000 thread_ms=104.724 mhz=19.098
+launch 1 thread 3 cycles=2000000 thread_ms=89.181 mhz=22.426
+launch 1 thread 4 cycles=2000005 thread_ms=97.746 mhz=20.461
+launch 1 thread 5 cycles=2000001 thread_ms=97.197 mhz=20.577
+launch 1 thread 6 cycles=2000002 thread_ms=99.837 mhz=20.033
+launch 1 thread 7 cycles=2000002 thread_ms=91.476 mhz=21.864
+launch 1 thread 8 cycles=2000000 thread_ms=85.372 mhz=23.427
+launch 1 thread 9 cycles=2000000 thread_ms=89.033 mhz=22.464
+launch 1 thread 10 cycles=2000001 thread_ms=79.947 mhz=25.017
+set play region 1
+ 06:04:41 up 12 days, 15:33,  1 user,  load average: 2.39, 2.49, 3.10
+Fri Oct  9 06:04:41 UTC 2026
+round 1 build main
+rom: roms/nes/Lan_Master.nes, 40976 bytes, sha256 becfeafb80479c330333c9e9385417f68f3c88e85443dfb37b05ae9283f3ea45, hash checked
+browser 153.0.8010.47
+launch 1 region 1 PAL
+launch 1 Running as PAL, as chosen here: the file does not say which.
+launch 1 boot cycles=6017791 frames=181 ms=1003.700 cycles_per_second=5995607 mhz=5.996 times_real=3.61
+launch 1 timed 1 cycles=5386096 frames=162 ms=803.900 cycles_per_second=6699958 mhz=6.700 times_real=4.03
+launch 1 timed 2 cycles=5386095 frames=162 ms=814.300 cycles_per_second=6614387 mhz=6.614 times_real=3.98
+launch 1 timed 3 cycles=5386096 frames=162 ms=808.200 cycles_per_second=6664311 mhz=6.664 times_real=4.01
+launch 1 timed 4 cycles=5386093 frames=162 ms=847.800 cycles_per_second=6353023 mhz=6.353 times_real=3.82
+launch 1 timed 5 cycles=5386096 frames=162 ms=954.600 cycles_per_second=5642254 mhz=5.642 times_real=3.39
+launch 1 play frame=991 limit=2850
+launch 1 thread 1 cycles=5386095 thread_ms=859.007 mhz=6.270 times_real=3.77
+launch 1 thread 2 cycles=5386096 thread_ms=877.298 mhz=6.139 times_real=3.69
+launch 1 thread 3 cycles=5386093 thread_ms=1064.954 mhz=5.058 times_real=3.04
+launch 1 thread 4 cycles=5386095 thread_ms=1108.945 mhz=4.857 times_real=2.92
+launch 1 thread 5 cycles=5386097 thread_ms=1098.818 mhz=4.902 times_real=2.95
+launch 1 thread 6 cycles=5386095 thread_ms=940.739 mhz=5.725 times_real=3.44
+launch 1 thread 7 cycles=5386093 thread_ms=949.416 mhz=5.673 times_real=3.41
+launch 1 thread 8 cycles=5386096 thread_ms=863.304 mhz=6.239 times_real=3.75
+launch 1 play frame=2287 limit=2850
+round 1 build before
+rom: roms/nes/Lan_Master.nes, 40976 bytes, sha256 becfeafb80479c330333c9e9385417f68f3c88e85443dfb37b05ae9283f3ea45, hash checked
+browser 153.0.8010.47
+launch 1 region 1 PAL
+launch 1 Running as PAL, as chosen here: the file does not say which.
+launch 1 boot cycles=6017791 frames=181 ms=902.100 cycles_per_second=6670869 mhz=6.671 times_real=4.01
+launch 1 timed 1 cycles=5386096 frames=162 ms=1109.500 cycles_per_second=4854525 mhz=4.855 times_real=2.92
+launch 1 timed 2 cycles=5386095 frames=162 ms=1164.600 cycles_per_second=4624845 mhz=4.625 times_real=2.78
+launch 1 timed 3 cycles=5386096 frames=162 ms=1191.100 cycles_per_second=4521951 mhz=4.522 times_real=2.72
+launch 1 timed 4 cycles=5386093 frames=162 ms=1073.900 cycles_per_second=5015451 mhz=5.015 times_real=3.02
+launch 1 timed 5 cycles=5386096 frames=162 ms=990.600 cycles_per_second=5437206 mhz=5.437 times_real=3.27
+launch 1 play frame=991 limit=2850
+launch 1 thread 1 cycles=5386095 thread_ms=939.892 mhz=5.731 times_real=3.45
+launch 1 thread 2 cycles=5386096 thread_ms=907.541 mhz=5.935 times_real=3.57
+launch 1 thread 3 cycles=5386093 thread_ms=994.872 mhz=5.414 times_real=3.26
+launch 1 thread 4 cycles=5386095 thread_ms=992.146 mhz=5.429 times_real=3.27
+launch 1 thread 5 cycles=5386097 thread_ms=966.903 mhz=5.570 times_real=3.35
+launch 1 thread 6 cycles=5386095 thread_ms=1062.080 mhz=5.071 times_real=3.05
+launch 1 thread 7 cycles=5386093 thread_ms=1067.933 mhz=5.043 times_real=3.03
+launch 1 thread 8 cycles=5386096 thread_ms=1167.970 mhz=4.612 times_real=2.77
+launch 1 play frame=2287 limit=2850
+round 1 build after
+rom: roms/nes/Lan_Master.nes, 40976 bytes, sha256 becfeafb80479c330333c9e9385417f68f3c88e85443dfb37b05ae9283f3ea45, hash checked
+browser 153.0.8010.47
+launch 1 region 1 PAL
+launch 1 Running as PAL, as chosen here: the file does not say which.
+launch 1 boot cycles=6017791 frames=181 ms=843.500 cycles_per_second=7134311 mhz=7.134 times_real=4.29
+launch 1 timed 1 cycles=5386096 frames=162 ms=634.000 cycles_per_second=8495420 mhz=8.495 times_real=5.11
+launch 1 timed 2 cycles=5386095 frames=162 ms=612.700 cycles_per_second=8790754 mhz=8.791 times_real=5.29
+launch 1 timed 3 cycles=5386096 frames=162 ms=800.700 cycles_per_second=6726734 mhz=6.727 times_real=4.05
+launch 1 timed 4 cycles=5386093 frames=162 ms=897.200 cycles_per_second=6003224 mhz=6.003 times_real=3.61
+launch 1 timed 5 cycles=5386096 frames=162 ms=692.300 cycles_per_second=7780003 mhz=7.780 times_real=4.68
+launch 1 play frame=991 limit=2850
+launch 1 thread 1 cycles=5386095 thread_ms=850.273 mhz=6.335 times_real=3.81
+launch 1 thread 2 cycles=5386096 thread_ms=801.386 mhz=6.721 times_real=4.04
+launch 1 thread 3 cycles=5386093 thread_ms=710.400 mhz=7.582 times_real=4.56
+launch 1 thread 4 cycles=5386095 thread_ms=850.077 mhz=6.336 times_real=3.81
+launch 1 thread 5 cycles=5386097 thread_ms=893.318 mhz=6.029 times_real=3.63
+launch 1 thread 6 cycles=5386095 thread_ms=980.351 mhz=5.494 times_real=3.30
+launch 1 thread 7 cycles=5386093 thread_ms=770.163 mhz=6.993 times_real=4.21
+launch 1 thread 8 cycles=5386096 thread_ms=771.122 mhz=6.985 times_real=4.20
+launch 1 play frame=2287 limit=2850
+round 2 build main
+rom: roms/nes/Lan_Master.nes, 40976 bytes, sha256 becfeafb80479c330333c9e9385417f68f3c88e85443dfb37b05ae9283f3ea45, hash checked
+browser 153.0.8010.47
+launch 1 region 1 PAL
+launch 1 Running as PAL, as chosen here: the file does not say which.
+launch 1 boot cycles=6017791 frames=181 ms=1149.400 cycles_per_second=5235593 mhz=5.236 times_real=3.15
+launch 1 timed 1 cycles=5386096 frames=162 ms=856.200 cycles_per_second=6290698 mhz=6.291 times_real=3.78
+launch 1 timed 2 cycles=5386095 frames=162 ms=780.800 cycles_per_second=6898175 mhz=6.898 times_real=4.15
+launch 1 timed 3 cycles=5386096 frames=162 ms=837.600 cycles_per_second=6430392 mhz=6.430 times_real=3.87
+launch 1 timed 4 cycles=5386093 frames=162 ms=944.700 cycles_per_second=5701379 mhz=5.701 times_real=3.43
+launch 1 timed 5 cycles=5386096 frames=162 ms=966.400 cycles_per_second=5573361 mhz=5.573 times_real=3.35
+launch 1 play frame=991 limit=2850
+launch 1 thread 1 cycles=5386095 thread_ms=885.205 mhz=6.085 times_real=3.66
+launch 1 thread 2 cycles=5386096 thread_ms=803.995 mhz=6.699 times_real=4.03
+launch 1 thread 3 cycles=5386093 thread_ms=836.331 mhz=6.440 times_real=3.87
+launch 1 thread 4 cycles=5386095 thread_ms=1004.197 mhz=5.364 times_real=3.23
+launch 1 thread 5 cycles=5386097 thread_ms=938.278 mhz=5.740 times_real=3.45
+launch 1 thread 6 cycles=5386095 thread_ms=976.642 mhz=5.515 times_real=3.32
+launch 1 thread 7 cycles=5386093 thread_ms=958.935 mhz=5.617 times_real=3.38
+launch 1 thread 8 cycles=5386096 thread_ms=970.625 mhz=5.549 times_real=3.34
+launch 1 play frame=2287 limit=2850
+round 2 build before
+rom: roms/nes/Lan_Master.nes, 40976 bytes, sha256 becfeafb80479c330333c9e9385417f68f3c88e85443dfb37b05ae9283f3ea45, hash checked
+browser 153.0.8010.47
+launch 1 region 1 PAL
+launch 1 Running as PAL, as chosen here: the file does not say which.
+launch 1 boot cycles=6017791 frames=181 ms=1138.200 cycles_per_second=5287112 mhz=5.287 times_real=3.18
+launch 1 timed 1 cycles=5386096 frames=162 ms=866.800 cycles_per_second=6213770 mhz=6.214 times_real=3.74
+launch 1 timed 2 cycles=5386095 frames=162 ms=986.300 cycles_per_second=5460909 mhz=5.461 times_real=3.28
+launch 1 timed 3 cycles=5386096 frames=162 ms=842.600 cycles_per_second=6392234 mhz=6.392 times_real=3.84
+launch 1 timed 4 cycles=5386093 frames=162 ms=1014.300 cycles_per_second=5310158 mhz=5.310 times_real=3.19
+launch 1 timed 5 cycles=5386096 frames=162 ms=799.100 cycles_per_second=6740203 mhz=6.740 times_real=4.05
+launch 1 play frame=991 limit=2850
+launch 1 thread 1 cycles=5386095 thread_ms=1067.921 mhz=5.044 times_real=3.03
+launch 1 thread 2 cycles=5386096 thread_ms=882.116 mhz=6.106 times_real=3.67
+launch 1 thread 3 cycles=5386093 thread_ms=919.386 mhz=5.858 times_real=3.52
+launch 1 thread 4 cycles=5386095 thread_ms=930.626 mhz=5.788 times_real=3.48
+launch 1 thread 5 cycles=5386097 thread_ms=1177.260 mhz=4.575 times_real=2.75
+launch 1 thread 6 cycles=5386095 thread_ms=1096.072 mhz=4.914 times_real=2.96
+launch 1 thread 7 cycles=5386093 thread_ms=983.248 mhz=5.478 times_real=3.29
+launch 1 thread 8 cycles=5386096 thread_ms=993.939 mhz=5.419 times_real=3.26
+launch 1 play frame=2287 limit=2850
+round 2 build after
+rom: roms/nes/Lan_Master.nes, 40976 bytes, sha256 becfeafb80479c330333c9e9385417f68f3c88e85443dfb37b05ae9283f3ea45, hash checked
+browser 153.0.8010.47
+launch 1 region 1 PAL
+launch 1 Running as PAL, as chosen here: the file does not say which.
+launch 1 boot cycles=6017791 frames=181 ms=979.000 cycles_per_second=6146875 mhz=6.147 times_real=3.70
+launch 1 timed 1 cycles=5386096 frames=162 ms=702.500 cycles_per_second=7667041 mhz=7.667 times_real=4.61
+launch 1 timed 2 cycles=5386095 frames=162 ms=788.500 cycles_per_second=6830812 mhz=6.831 times_real=4.11
+launch 1 timed 3 cycles=5386096 frames=162 ms=793.300 cycles_per_second=6789482 mhz=6.789 times_real=4.08
+launch 1 timed 4 cycles=5386093 frames=162 ms=804.800 cycles_per_second=6692461 mhz=6.692 times_real=4.03
+launch 1 timed 5 cycles=5386096 frames=162 ms=783.100 cycles_per_second=6877916 mhz=6.878 times_real=4.14
+launch 1 play frame=991 limit=2850
+launch 1 thread 1 cycles=5386095 thread_ms=704.764 mhz=7.642 times_real=4.60
+launch 1 thread 2 cycles=5386096 thread_ms=699.148 mhz=7.704 times_real=4.63
+launch 1 thread 3 cycles=5386093 thread_ms=760.944 mhz=7.078 times_real=4.26
+launch 1 thread 4 cycles=5386095 thread_ms=735.356 mhz=7.324 times_real=4.41
+launch 1 thread 5 cycles=5386097 thread_ms=793.609 mhz=6.787 times_real=4.08
+launch 1 thread 6 cycles=5386095 thread_ms=700.793 mhz=7.686 times_real=4.62
+launch 1 thread 7 cycles=5386093 thread_ms=855.528 mhz=6.296 times_real=3.79
+launch 1 thread 8 cycles=5386096 thread_ms=790.374 mhz=6.815 times_real=4.10
+launch 1 play frame=2287 limit=2850
+round 3 build main
+rom: roms/nes/Lan_Master.nes, 40976 bytes, sha256 becfeafb80479c330333c9e9385417f68f3c88e85443dfb37b05ae9283f3ea45, hash checked
+browser 153.0.8010.47
+launch 1 region 1 PAL
+launch 1 Running as PAL, as chosen here: the file does not say which.
+launch 1 boot cycles=6017791 frames=181 ms=1016.900 cycles_per_second=5917781 mhz=5.918 times_real=3.56
+launch 1 timed 1 cycles=5386096 frames=162 ms=855.700 cycles_per_second=6294374 mhz=6.294 times_real=3.79
+launch 1 timed 2 cycles=5386095 frames=162 ms=822.100 cycles_per_second=6551630 mhz=6.552 times_real=3.94
+launch 1 timed 3 cycles=5386096 frames=162 ms=715.700 cycles_per_second=7525634 mhz=7.526 times_real=4.53
+launch 1 timed 4 cycles=5386093 frames=162 ms=744.800 cycles_per_second=7231596 mhz=7.232 times_real=4.35
+launch 1 timed 5 cycles=5386096 frames=162 ms=821.300 cycles_per_second=6558013 mhz=6.558 times_real=3.94
+launch 1 play frame=991 limit=2850
+launch 1 thread 1 cycles=5386095 thread_ms=821.441 mhz=6.557 times_real=3.94
+launch 1 thread 2 cycles=5386096 thread_ms=818.687 mhz=6.579 times_real=3.96
+launch 1 thread 3 cycles=5386093 thread_ms=838.454 mhz=6.424 times_real=3.86
+launch 1 thread 4 cycles=5386095 thread_ms=911.803 mhz=5.907 times_real=3.55
+launch 1 thread 5 cycles=5386097 thread_ms=1038.556 mhz=5.186 times_real=3.12
+launch 1 thread 6 cycles=5386095 thread_ms=1017.175 mhz=5.295 times_real=3.18
+launch 1 thread 7 cycles=5386093 thread_ms=998.849 mhz=5.392 times_real=3.24
+launch 1 thread 8 cycles=5386096 thread_ms=1183.403 mhz=4.551 times_real=2.74
+launch 1 play frame=2287 limit=2850
+round 3 build before
+rom: roms/nes/Lan_Master.nes, 40976 bytes, sha256 becfeafb80479c330333c9e9385417f68f3c88e85443dfb37b05ae9283f3ea45, hash checked
+browser 153.0.8010.47
+launch 1 region 1 PAL
+launch 1 Running as PAL, as chosen here: the file does not say which.
+launch 1 boot cycles=6017791 frames=181 ms=943.700 cycles_per_second=6376805 mhz=6.377 times_real=3.84
+launch 1 timed 1 cycles=5386096 frames=162 ms=989.800 cycles_per_second=5441600 mhz=5.442 times_real=3.27
+launch 1 timed 2 cycles=5386095 frames=162 ms=942.600 cycles_per_second=5714083 mhz=5.714 times_real=3.44
+launch 1 timed 3 cycles=5386096 frames=162 ms=939.500 cycles_per_second=5732939 mhz=5.733 times_real=3.45
+launch 1 timed 4 cycles=5386093 frames=162 ms=918.200 cycles_per_second=5865926 mhz=5.866 times_real=3.53
+launch 1 timed 5 cycles=5386096 frames=162 ms=926.400 cycles_per_second=5814007 mhz=5.814 times_real=3.50
+launch 1 play frame=991 limit=2850
+launch 1 thread 1 cycles=5386095 thread_ms=1044.062 mhz=5.159 times_real=3.10
+launch 1 thread 2 cycles=5386096 thread_ms=835.400 mhz=6.447 times_real=3.88
+launch 1 thread 3 cycles=5386093 thread_ms=902.365 mhz=5.969 times_real=3.59
+launch 1 thread 4 cycles=5386095 thread_ms=875.081 mhz=6.155 times_real=3.70
+launch 1 thread 5 cycles=5386097 thread_ms=865.281 mhz=6.225 times_real=3.74
+launch 1 thread 6 cycles=5386095 thread_ms=1112.505 mhz=4.841 times_real=2.91
+launch 1 thread 7 cycles=5386093 thread_ms=914.654 mhz=5.889 times_real=3.54
+launch 1 thread 8 cycles=5386096 thread_ms=907.104 mhz=5.938 times_real=3.57
+launch 1 play frame=2287 limit=2850
+round 3 build after
+rom: roms/nes/Lan_Master.nes, 40976 bytes, sha256 becfeafb80479c330333c9e9385417f68f3c88e85443dfb37b05ae9283f3ea45, hash checked
+browser 153.0.8010.47
+launch 1 region 1 PAL
+launch 1 Running as PAL, as chosen here: the file does not say which.
+launch 1 boot cycles=6017791 frames=181 ms=791.400 cycles_per_second=7603982 mhz=7.604 times_real=4.57
+launch 1 timed 1 cycles=5386096 frames=162 ms=622.100 cycles_per_second=8657926 mhz=8.658 times_real=5.21
+launch 1 timed 2 cycles=5386095 frames=162 ms=621.000 cycles_per_second=8673261 mhz=8.673 times_real=5.22
+launch 1 timed 3 cycles=5386096 frames=162 ms=690.400 cycles_per_second=7801414 mhz=7.801 times_real=4.69
+launch 1 timed 4 cycles=5386093 frames=162 ms=651.200 cycles_per_second=8271027 mhz=8.271 times_real=4.97
+launch 1 timed 5 cycles=5386096 frames=162 ms=596.500 cycles_per_second=9029499 mhz=9.029 times_real=5.43
+launch 1 play frame=991 limit=2850
+launch 1 thread 1 cycles=5386095 thread_ms=603.214 mhz=8.929 times_real=5.37
+launch 1 thread 2 cycles=5386096 thread_ms=629.807 mhz=8.552 times_real=5.14
+launch 1 thread 3 cycles=5386093 thread_ms=661.921 mhz=8.137 times_real=4.89
+launch 1 thread 4 cycles=5386095 thread_ms=858.558 mhz=6.273 times_real=3.77
+launch 1 thread 5 cycles=5386097 thread_ms=693.411 mhz=7.768 times_real=4.67
+launch 1 thread 6 cycles=5386095 thread_ms=711.109 mhz=7.574 times_real=4.56
+launch 1 thread 7 cycles=5386093 thread_ms=728.034 mhz=7.398 times_real=4.45
+launch 1 thread 8 cycles=5386096 thread_ms=725.963 mhz=7.419 times_real=4.46
+launch 1 play frame=2287 limit=2850
+round 4 build main
+rom: roms/nes/Lan_Master.nes, 40976 bytes, sha256 becfeafb80479c330333c9e9385417f68f3c88e85443dfb37b05ae9283f3ea45, hash checked
+browser 153.0.8010.47
+launch 1 region 1 PAL
+launch 1 Running as PAL, as chosen here: the file does not say which.
+launch 1 boot cycles=6017791 frames=181 ms=1303.800 cycles_per_second=4615578 mhz=4.616 times_real=2.78
+launch 1 timed 1 cycles=5386096 frames=162 ms=1095.000 cycles_per_second=4918809 mhz=4.919 times_real=2.96
+launch 1 timed 2 cycles=5386095 frames=162 ms=1082.000 cycles_per_second=4977907 mhz=4.978 times_real=2.99
+launch 1 timed 3 cycles=5386096 frames=162 ms=1256.900 cycles_per_second=4285222 mhz=4.285 times_real=2.58
+launch 1 timed 4 cycles=5386093 frames=162 ms=1069.000 cycles_per_second=5038441 mhz=5.038 times_real=3.03
+launch 1 timed 5 cycles=5386096 frames=162 ms=1040.100 cycles_per_second=5178441 mhz=5.178 times_real=3.11
+launch 1 play frame=991 limit=2850
+launch 1 thread 1 cycles=5386095 thread_ms=986.211 mhz=5.461 times_real=3.28
+launch 1 thread 2 cycles=5386096 thread_ms=951.541 mhz=5.660 times_real=3.40
+launch 1 thread 3 cycles=5386093 thread_ms=968.331 mhz=5.562 times_real=3.35
+launch 1 thread 4 cycles=5386095 thread_ms=1075.672 mhz=5.007 times_real=3.01
+launch 1 thread 5 cycles=5386097 thread_ms=989.147 mhz=5.445 times_real=3.28
+launch 1 thread 6 cycles=5386095 thread_ms=1036.085 mhz=5.199 times_real=3.13
+launch 1 thread 7 cycles=5386093 thread_ms=1084.898 mhz=4.965 times_real=2.99
+launch 1 thread 8 cycles=5386096 thread_ms=1005.952 mhz=5.354 times_real=3.22
+launch 1 play frame=2287 limit=2850
+round 4 build before
+rom: roms/nes/Lan_Master.nes, 40976 bytes, sha256 becfeafb80479c330333c9e9385417f68f3c88e85443dfb37b05ae9283f3ea45, hash checked
+browser 153.0.8010.47
+launch 1 region 1 PAL
+launch 1 Running as PAL, as chosen here: the file does not say which.
+launch 1 boot cycles=6017791 frames=181 ms=978.200 cycles_per_second=6151902 mhz=6.152 times_real=3.70
+launch 1 timed 1 cycles=5386096 frames=162 ms=967.100 cycles_per_second=5569327 mhz=5.569 times_real=3.35
+launch 1 timed 2 cycles=5386095 frames=162 ms=924.700 cycles_per_second=5824694 mhz=5.825 times_real=3.50
+launch 1 timed 3 cycles=5386096 frames=162 ms=948.000 cycles_per_second=5681536 mhz=5.682 times_real=3.42
+launch 1 timed 4 cycles=5386093 frames=162 ms=899.700 cycles_per_second=5986543 mhz=5.987 times_real=3.60
+launch 1 timed 5 cycles=5386096 frames=162 ms=1019.400 cycles_per_second=5283594 mhz=5.284 times_real=3.18
+launch 1 play frame=991 limit=2850
+launch 1 thread 1 cycles=5386095 thread_ms=916.526 mhz=5.877 times_real=3.53
+launch 1 thread 2 cycles=5386096 thread_ms=990.662 mhz=5.437 times_real=3.27
+launch 1 thread 3 cycles=5386093 thread_ms=1105.100 mhz=4.874 times_real=2.93
+launch 1 thread 4 cycles=5386095 thread_ms=998.291 mhz=5.395 times_real=3.25
+launch 1 thread 5 cycles=5386097 thread_ms=894.536 mhz=6.021 times_real=3.62
+launch 1 thread 6 cycles=5386095 thread_ms=1192.189 mhz=4.518 times_real=2.72
+launch 1 thread 7 cycles=5386093 thread_ms=984.143 mhz=5.473 times_real=3.29
+launch 1 thread 8 cycles=5386096 thread_ms=978.554 mhz=5.504 times_real=3.31
+launch 1 play frame=2287 limit=2850
+round 4 build after
+rom: roms/nes/Lan_Master.nes, 40976 bytes, sha256 becfeafb80479c330333c9e9385417f68f3c88e85443dfb37b05ae9283f3ea45, hash checked
+browser 153.0.8010.47
+launch 1 region 1 PAL
+launch 1 Running as PAL, as chosen here: the file does not say which.
+launch 1 boot cycles=6017791 frames=181 ms=885.800 cycles_per_second=6793623 mhz=6.794 times_real=4.09
+launch 1 timed 1 cycles=5386096 frames=162 ms=876.700 cycles_per_second=6143602 mhz=6.144 times_real=3.70
+launch 1 timed 2 cycles=5386095 frames=162 ms=890.000 cycles_per_second=6051792 mhz=6.052 times_real=3.64
+launch 1 timed 3 cycles=5386096 frames=162 ms=836.200 cycles_per_second=6441158 mhz=6.441 times_real=3.87
+launch 1 timed 4 cycles=5386093 frames=162 ms=730.900 cycles_per_second=7369124 mhz=7.369 times_real=4.43
+launch 1 timed 5 cycles=5386096 frames=162 ms=793.800 cycles_per_second=6785205 mhz=6.785 times_real=4.08
+launch 1 play frame=991 limit=2850
+launch 1 thread 1 cycles=5386095 thread_ms=749.505 mhz=7.186 times_real=4.32
+launch 1 thread 2 cycles=5386096 thread_ms=728.375 mhz=7.395 times_real=4.45
+launch 1 thread 3 cycles=5386093 thread_ms=821.464 mhz=6.557 times_real=3.94
+launch 1 thread 4 cycles=5386095 thread_ms=828.937 mhz=6.498 times_real=3.91
+launch 1 thread 5 cycles=5386097 thread_ms=708.475 mhz=7.602 times_real=4.57
+launch 1 thread 6 cycles=5386095 thread_ms=725.181 mhz=7.427 times_real=4.47
+launch 1 thread 7 cycles=5386093 thread_ms=748.043 mhz=7.200 times_real=4.33
+launch 1 thread 8 cycles=5386096 thread_ms=783.294 mhz=6.876 times_real=4.14
+launch 1 play frame=2287 limit=2850
+gauge
+ 06:07:42 up 12 days, 15:36,  1 user,  load average: 2.88, 2.57, 3.01
+Fri Oct  9 06:07:42 UTC 2026
+os: roms/bbc-micro/os.rom, 16384 bytes, sha256 2d9fea69017864f6962704481829f95fee08446c8c3a13826d5d4e44000ac9de, hash checked
+basic: roms/bbc-micro/BASIC.ROM, 16384 bytes, sha256 45bd55dc0f6f0f8f1fe9e2481de7def206565eec8f600ba3068b849ca4132079, hash checked
+dfs: roms/bbc-micro/DFS-1.2.rom, 16384 bytes, sha256 e745e34895225a6650b712c1dd0656cb0b0b15f072a8ae6d9ea8d1ac257eb3d6, hash checked
+browser 153.0.8010.47
+launch 1 boot cycles=6000003 ms=503.100 cycles_per_second=11926064 mhz=11.926
+launch 1 screen ["","BBC Computer 32K","","Acorn DFS","","BASIC","",">"]
+launch 1 prompt yes
+launch 1 timed 1 cycles=2000000 ms=105.100 cycles_per_second=19029496 mhz=19.029
+launch 1 thread 1 cycles=2000003 thread_ms=98.784 mhz=20.246
+launch 1 thread 2 cycles=2000000 thread_ms=74.629 mhz=26.799
+launch 1 thread 3 cycles=2000000 thread_ms=81.521 mhz=24.534
+launch 1 thread 4 cycles=2000005 thread_ms=87.156 mhz=22.947
+launch 1 thread 5 cycles=2000001 thread_ms=108.280 mhz=18.471
+launch 1 thread 6 cycles=2000002 thread_ms=103.532 mhz=19.318
+launch 1 thread 7 cycles=2000002 thread_ms=80.238 mhz=24.926
+launch 1 thread 8 cycles=2000000 thread_ms=79.484 mhz=25.162
+launch 1 thread 9 cycles=2000000 thread_ms=86.806 mhz=23.040
+launch 1 thread 10 cycles=2000001 thread_ms=82.198 mhz=24.332
+ 06:07:46 up 12 days, 15:36,  1 user,  load average: 2.88, 2.57, 3.01
+Fri Oct  9 06:07:46 UTC 2026
+
+## Set 2
+set play region 0
+ 06:07:46 up 12 days, 15:36,  1 user,  load average: 2.88, 2.57, 3.01
+Fri Oct  9 06:07:46 UTC 2026
+round 1 build main
+rom: roms/nes/Lan_Master.nes, 40976 bytes, sha256 becfeafb80479c330333c9e9385417f68f3c88e85443dfb37b05ae9283f3ea45, hash checked
+browser 153.0.8010.47
+launch 1 region 0 NTSC
+launch 1 Running as NTSC, as chosen here: the file does not say which.
+launch 1 boot cycles=6015656 frames=202 ms=1058.000 cycles_per_second=5685875 mhz=5.686 times_real=3.18
+launch 1 timed 1 cycles=5390272 frames=181 ms=851.000 cycles_per_second=6334045 mhz=6.334 times_real=3.54
+launch 1 timed 2 cycles=5390269 frames=181 ms=913.800 cycles_per_second=5898740 mhz=5.899 times_real=3.30
+launch 1 timed 3 cycles=5390272 frames=181 ms=1118.900 cycles_per_second=4817474 mhz=4.817 times_real=2.69
+launch 1 timed 4 cycles=5390272 frames=181 ms=1113.300 cycles_per_second=4841707 mhz=4.842 times_real=2.71
+launch 1 timed 5 cycles=5390268 frames=181 ms=1034.900 cycles_per_second=5208492 mhz=5.208 times_real=2.91
+launch 1 play frame=1107 limit=3450
+launch 1 thread 1 cycles=5390270 thread_ms=1061.389 mhz=5.079 times_real=2.84
+launch 1 thread 2 cycles=5390270 thread_ms=998.289 mhz=5.400 times_real=3.02
+launch 1 thread 3 cycles=5390274 thread_ms=1024.876 mhz=5.259 times_real=2.94
+launch 1 thread 4 cycles=5390267 thread_ms=1013.279 mhz=5.320 times_real=2.97
+launch 1 thread 5 cycles=5390275 thread_ms=1104.407 mhz=4.881 times_real=2.73
+launch 1 thread 6 cycles=5390267 thread_ms=1129.989 mhz=4.770 times_real=2.67
+launch 1 thread 7 cycles=5390270 thread_ms=1089.722 mhz=4.946 times_real=2.76
+launch 1 thread 8 cycles=5390272 thread_ms=1078.178 mhz=4.999 times_real=2.79
+launch 1 play frame=2555 limit=3450
+round 1 build before
+rom: roms/nes/Lan_Master.nes, 40976 bytes, sha256 becfeafb80479c330333c9e9385417f68f3c88e85443dfb37b05ae9283f3ea45, hash checked
+browser 153.0.8010.47
+launch 1 region 0 NTSC
+launch 1 Running as NTSC, as chosen here: the file does not say which.
+launch 1 boot cycles=6015656 frames=202 ms=978.100 cycles_per_second=6150349 mhz=6.150 times_real=3.44
+launch 1 timed 1 cycles=5390272 frames=181 ms=1010.600 cycles_per_second=5333734 mhz=5.334 times_real=2.98
+launch 1 timed 2 cycles=5390269 frames=181 ms=962.400 cycles_per_second=5600861 mhz=5.601 times_real=3.13
+launch 1 timed 3 cycles=5390272 frames=181 ms=1019.300 cycles_per_second=5288210 mhz=5.288 times_real=2.95
+launch 1 timed 4 cycles=5390272 frames=181 ms=879.600 cycles_per_second=6128095 mhz=6.128 times_real=3.42
+launch 1 timed 5 cycles=5390268 frames=181 ms=919.200 cycles_per_second=5864086 mhz=5.864 times_real=3.28
+launch 1 play frame=1107 limit=3450
+launch 1 thread 1 cycles=5390270 thread_ms=977.342 mhz=5.515 times_real=3.08
+launch 1 thread 2 cycles=5390270 thread_ms=982.112 mhz=5.488 times_real=3.07
+launch 1 thread 3 cycles=5390274 thread_ms=989.169 mhz=5.449 times_real=3.04
+launch 1 thread 4 cycles=5390267 thread_ms=989.528 mhz=5.447 times_real=3.04
+launch 1 thread 5 cycles=5390275 thread_ms=981.113 mhz=5.494 times_real=3.07
+launch 1 thread 6 cycles=5390267 thread_ms=857.695 mhz=6.285 times_real=3.51
+launch 1 thread 7 cycles=5390270 thread_ms=896.440 mhz=6.013 times_real=3.36
+launch 1 thread 8 cycles=5390272 thread_ms=834.569 mhz=6.459 times_real=3.61
+launch 1 play frame=2555 limit=3450
+round 1 build after
+rom: roms/nes/Lan_Master.nes, 40976 bytes, sha256 becfeafb80479c330333c9e9385417f68f3c88e85443dfb37b05ae9283f3ea45, hash checked
+browser 153.0.8010.47
+launch 1 region 0 NTSC
+launch 1 Running as NTSC, as chosen here: the file does not say which.
+launch 1 boot cycles=6015656 frames=202 ms=701.300 cycles_per_second=8577864 mhz=8.578 times_real=4.79
+launch 1 timed 1 cycles=5390272 frames=181 ms=648.100 cycles_per_second=8317037 mhz=8.317 times_real=4.65
+launch 1 timed 2 cycles=5390269 frames=181 ms=558.900 cycles_per_second=9644425 mhz=9.644 times_real=5.39
+launch 1 timed 3 cycles=5390272 frames=181 ms=527.200 cycles_per_second=10224340 mhz=10.224 times_real=5.71
+launch 1 timed 4 cycles=5390272 frames=181 ms=593.500 cycles_per_second=9082177 mhz=9.082 times_real=5.07
+launch 1 timed 5 cycles=5390268 frames=181 ms=622.300 cycles_per_second=8661848 mhz=8.662 times_real=4.84
+launch 1 play frame=1107 limit=3450
+launch 1 thread 1 cycles=5390270 thread_ms=629.341 mhz=8.565 times_real=4.79
+launch 1 thread 2 cycles=5390270 thread_ms=601.164 mhz=8.966 times_real=5.01
+launch 1 thread 3 cycles=5390274 thread_ms=594.771 mhz=9.063 times_real=5.06
+launch 1 thread 4 cycles=5390267 thread_ms=614.662 mhz=8.769 times_real=4.90
+launch 1 thread 5 cycles=5390275 thread_ms=634.437 mhz=8.496 times_real=4.75
+launch 1 thread 6 cycles=5390267 thread_ms=692.850 mhz=7.780 times_real=4.35
+launch 1 thread 7 cycles=5390270 thread_ms=689.606 mhz=7.816 times_real=4.37
+launch 1 thread 8 cycles=5390272 thread_ms=832.217 mhz=6.477 times_real=3.62
+launch 1 play frame=2555 limit=3450
+round 2 build main
+rom: roms/nes/Lan_Master.nes, 40976 bytes, sha256 becfeafb80479c330333c9e9385417f68f3c88e85443dfb37b05ae9283f3ea45, hash checked
+browser 153.0.8010.47
+launch 1 region 0 NTSC
+launch 1 Running as NTSC, as chosen here: the file does not say which.
+launch 1 boot cycles=6015656 frames=202 ms=1142.700 cycles_per_second=5264423 mhz=5.264 times_real=2.94
+launch 1 timed 1 cycles=5390272 frames=181 ms=924.400 cycles_per_second=5831103 mhz=5.831 times_real=3.26
+launch 1 timed 2 cycles=5390269 frames=181 ms=940.600 cycles_per_second=5730671 mhz=5.731 times_real=3.20
+launch 1 timed 3 cycles=5390272 frames=181 ms=911.900 cycles_per_second=5911034 mhz=5.911 times_real=3.30
+launch 1 timed 4 cycles=5390272 frames=181 ms=946.700 cycles_per_second=5693749 mhz=5.694 times_real=3.18
+launch 1 timed 5 cycles=5390268 frames=181 ms=956.100 cycles_per_second=5637766 mhz=5.638 times_real=3.15
+launch 1 play frame=1107 limit=3450
+launch 1 thread 1 cycles=5390270 thread_ms=920.619 mhz=5.855 times_real=3.27
+launch 1 thread 2 cycles=5390270 thread_ms=996.842 mhz=5.407 times_real=3.02
+launch 1 thread 3 cycles=5390274 thread_ms=871.769 mhz=6.183 times_real=3.45
+launch 1 thread 4 cycles=5390267 thread_ms=963.888 mhz=5.592 times_real=3.12
+launch 1 thread 5 cycles=5390275 thread_ms=1097.279 mhz=4.912 times_real=2.74
+launch 1 thread 6 cycles=5390267 thread_ms=882.409 mhz=6.109 times_real=3.41
+launch 1 thread 7 cycles=5390270 thread_ms=850.027 mhz=6.341 times_real=3.54
+launch 1 thread 8 cycles=5390272 thread_ms=858.555 mhz=6.278 times_real=3.51
+launch 1 play frame=2555 limit=3450
+round 2 build before
+rom: roms/nes/Lan_Master.nes, 40976 bytes, sha256 becfeafb80479c330333c9e9385417f68f3c88e85443dfb37b05ae9283f3ea45, hash checked
+browser 153.0.8010.47
+launch 1 region 0 NTSC
+launch 1 Running as NTSC, as chosen here: the file does not say which.
+launch 1 boot cycles=6015656 frames=202 ms=885.600 cycles_per_second=6792746 mhz=6.793 times_real=3.80
+launch 1 timed 1 cycles=5390272 frames=181 ms=947.300 cycles_per_second=5690143 mhz=5.690 times_real=3.18
+launch 1 timed 2 cycles=5390269 frames=181 ms=933.600 cycles_per_second=5773639 mhz=5.774 times_real=3.23
+launch 1 timed 3 cycles=5390272 frames=181 ms=848.300 cycles_per_second=6354205 mhz=6.354 times_real=3.55
+launch 1 timed 4 cycles=5390272 frames=181 ms=782.700 cycles_per_second=6886766 mhz=6.887 times_real=3.85
+launch 1 timed 5 cycles=5390268 frames=181 ms=750.900 cycles_per_second=7178410 mhz=7.178 times_real=4.01
+launch 1 play frame=1107 limit=3450
+launch 1 thread 1 cycles=5390270 thread_ms=797.953 mhz=6.755 times_real=3.77
+launch 1 thread 2 cycles=5390270 thread_ms=769.187 mhz=7.008 times_real=3.92
+launch 1 thread 3 cycles=5390274 thread_ms=851.576 mhz=6.330 times_real=3.54
+launch 1 thread 4 cycles=5390267 thread_ms=1001.150 mhz=5.384 times_real=3.01
+launch 1 thread 5 cycles=5390275 thread_ms=998.162 mhz=5.400 times_real=3.02
+launch 1 thread 6 cycles=5390267 thread_ms=968.882 mhz=5.563 times_real=3.11
+launch 1 thread 7 cycles=5390270 thread_ms=986.052 mhz=5.467 times_real=3.05
+launch 1 thread 8 cycles=5390272 thread_ms=997.525 mhz=5.404 times_real=3.02
+launch 1 play frame=2555 limit=3450
+round 2 build after
+rom: roms/nes/Lan_Master.nes, 40976 bytes, sha256 becfeafb80479c330333c9e9385417f68f3c88e85443dfb37b05ae9283f3ea45, hash checked
+browser 153.0.8010.47
+launch 1 region 0 NTSC
+launch 1 Running as NTSC, as chosen here: the file does not say which.
+launch 1 boot cycles=6015656 frames=202 ms=1016.500 cycles_per_second=5918009 mhz=5.918 times_real=3.31
+launch 1 timed 1 cycles=5390272 frames=181 ms=724.800 cycles_per_second=7436909 mhz=7.437 times_real=4.16
+launch 1 timed 2 cycles=5390269 frames=181 ms=771.500 cycles_per_second=6986739 mhz=6.987 times_real=3.90
+launch 1 timed 3 cycles=5390272 frames=181 ms=865.800 cycles_per_second=6225770 mhz=6.226 times_real=3.48
+launch 1 timed 4 cycles=5390272 frames=181 ms=714.600 cycles_per_second=7543062 mhz=7.543 times_real=4.21
+launch 1 timed 5 cycles=5390268 frames=181 ms=695.800 cycles_per_second=7746864 mhz=7.747 times_real=4.33
+launch 1 play frame=1107 limit=3450
+launch 1 thread 1 cycles=5390270 thread_ms=759.723 mhz=7.095 times_real=3.96
+launch 1 thread 2 cycles=5390270 thread_ms=623.193 mhz=8.649 times_real=4.83
+launch 1 thread 3 cycles=5390274 thread_ms=692.839 mhz=7.780 times_real=4.35
+launch 1 thread 4 cycles=5390267 thread_ms=716.412 mhz=7.524 times_real=4.20
+launch 1 thread 5 cycles=5390275 thread_ms=843.758 mhz=6.388 times_real=3.57
+launch 1 thread 6 cycles=5390267 thread_ms=743.521 mhz=7.250 times_real=4.05
+launch 1 thread 7 cycles=5390270 thread_ms=685.277 mhz=7.866 times_real=4.39
+launch 1 thread 8 cycles=5390272 thread_ms=683.736 mhz=7.884 times_real=4.40
+launch 1 play frame=2555 limit=3450
+round 3 build main
+rom: roms/nes/Lan_Master.nes, 40976 bytes, sha256 becfeafb80479c330333c9e9385417f68f3c88e85443dfb37b05ae9283f3ea45, hash checked
+browser 153.0.8010.47
+launch 1 region 0 NTSC
+launch 1 Running as NTSC, as chosen here: the file does not say which.
+launch 1 boot cycles=6015656 frames=202 ms=964.800 cycles_per_second=6235133 mhz=6.235 times_real=3.48
+launch 1 timed 1 cycles=5390272 frames=181 ms=799.700 cycles_per_second=6740368 mhz=6.740 times_real=3.77
+launch 1 timed 2 cycles=5390269 frames=181 ms=876.600 cycles_per_second=6149063 mhz=6.149 times_real=3.44
+launch 1 timed 3 cycles=5390272 frames=181 ms=787.200 cycles_per_second=6847398 mhz=6.847 times_real=3.83
+launch 1 timed 4 cycles=5390272 frames=181 ms=718.900 cycles_per_second=7497944 mhz=7.498 times_real=4.19
+launch 1 timed 5 cycles=5390268 frames=181 ms=749.900 cycles_per_second=7187982 mhz=7.188 times_real=4.02
+launch 1 play frame=1107 limit=3450
+launch 1 thread 1 cycles=5390270 thread_ms=817.855 mhz=6.591 times_real=3.68
+launch 1 thread 2 cycles=5390270 thread_ms=790.709 mhz=6.817 times_real=3.81
+launch 1 thread 3 cycles=5390274 thread_ms=844.751 mhz=6.381 times_real=3.57
+launch 1 thread 4 cycles=5390267 thread_ms=832.926 mhz=6.471 times_real=3.62
+launch 1 thread 5 cycles=5390275 thread_ms=1143.807 mhz=4.713 times_real=2.63
+launch 1 thread 6 cycles=5390267 thread_ms=814.884 mhz=6.615 times_real=3.70
+launch 1 thread 7 cycles=5390270 thread_ms=905.650 mhz=5.952 times_real=3.33
+launch 1 thread 8 cycles=5390272 thread_ms=916.225 mhz=5.883 times_real=3.29
+launch 1 play frame=2555 limit=3450
+round 3 build before
+rom: roms/nes/Lan_Master.nes, 40976 bytes, sha256 becfeafb80479c330333c9e9385417f68f3c88e85443dfb37b05ae9283f3ea45, hash checked
+browser 153.0.8010.47
+launch 1 region 0 NTSC
+launch 1 Running as NTSC, as chosen here: the file does not say which.
+launch 1 boot cycles=6015656 frames=202 ms=857.500 cycles_per_second=7015342 mhz=7.015 times_real=3.92
+launch 1 timed 1 cycles=5390272 frames=181 ms=845.400 cycles_per_second=6376002 mhz=6.376 times_real=3.56
+launch 1 timed 2 cycles=5390269 frames=181 ms=817.400 cycles_per_second=6594408 mhz=6.594 times_real=3.68
+launch 1 timed 3 cycles=5390272 frames=181 ms=909.600 cycles_per_second=5925981 mhz=5.926 times_real=3.31
+launch 1 timed 4 cycles=5390272 frames=181 ms=901.400 cycles_per_second=5979889 mhz=5.980 times_real=3.34
+launch 1 timed 5 cycles=5390268 frames=181 ms=834.800 cycles_per_second=6456957 mhz=6.457 times_real=3.61
+launch 1 play frame=1107 limit=3450
+launch 1 thread 1 cycles=5390270 thread_ms=1112.189 mhz=4.847 times_real=2.71
+launch 1 thread 2 cycles=5390270 thread_ms=1065.610 mhz=5.058 times_real=2.83
+launch 1 thread 3 cycles=5390274 thread_ms=904.022 mhz=5.963 times_real=3.33
+launch 1 thread 4 cycles=5390267 thread_ms=1039.747 mhz=5.184 times_real=2.90
+launch 1 thread 5 cycles=5390275 thread_ms=956.311 mhz=5.637 times_real=3.15
+launch 1 thread 6 cycles=5390267 thread_ms=1086.283 mhz=4.962 times_real=2.77
+launch 1 thread 7 cycles=5390270 thread_ms=952.845 mhz=5.657 times_real=3.16
+launch 1 thread 8 cycles=5390272 thread_ms=876.373 mhz=6.151 times_real=3.44
+launch 1 play frame=2555 limit=3450
+round 3 build after
+rom: roms/nes/Lan_Master.nes, 40976 bytes, sha256 becfeafb80479c330333c9e9385417f68f3c88e85443dfb37b05ae9283f3ea45, hash checked
+browser 153.0.8010.47
+launch 1 region 0 NTSC
+launch 1 Running as NTSC, as chosen here: the file does not say which.
+launch 1 boot cycles=6015656 frames=202 ms=869.400 cycles_per_second=6919319 mhz=6.919 times_real=3.87
+launch 1 timed 1 cycles=5390272 frames=181 ms=652.200 cycles_per_second=8264753 mhz=8.265 times_real=4.62
+launch 1 timed 2 cycles=5390269 frames=181 ms=764.800 cycles_per_second=7047946 mhz=7.048 times_real=3.94
+launch 1 timed 3 cycles=5390272 frames=181 ms=739.300 cycles_per_second=7291048 mhz=7.291 times_real=4.07
+launch 1 timed 4 cycles=5390272 frames=181 ms=619.700 cycles_per_second=8698196 mhz=8.698 times_real=4.86
+launch 1 timed 5 cycles=5390268 frames=181 ms=653.800 cycles_per_second=8244521 mhz=8.245 times_real=4.61
+launch 1 play frame=1107 limit=3450
+launch 1 thread 1 cycles=5390270 thread_ms=640.417 mhz=8.417 times_real=4.70
+launch 1 thread 2 cycles=5390270 thread_ms=734.281 mhz=7.341 times_real=4.10
+launch 1 thread 3 cycles=5390274 thread_ms=623.679 mhz=8.643 times_real=4.83
+launch 1 thread 4 cycles=5390267 thread_ms=693.669 mhz=7.771 times_real=4.34
+launch 1 thread 5 cycles=5390275 thread_ms=733.179 mhz=7.352 times_real=4.11
+launch 1 thread 6 cycles=5390267 thread_ms=803.232 mhz=6.711 times_real=3.75
+launch 1 thread 7 cycles=5390270 thread_ms=729.656 mhz=7.387 times_real=4.13
+launch 1 thread 8 cycles=5390272 thread_ms=845.497 mhz=6.375 times_real=3.56
+launch 1 play frame=2555 limit=3450
+round 4 build main
+rom: roms/nes/Lan_Master.nes, 40976 bytes, sha256 becfeafb80479c330333c9e9385417f68f3c88e85443dfb37b05ae9283f3ea45, hash checked
+browser 153.0.8010.47
+launch 1 region 0 NTSC
+launch 1 Running as NTSC, as chosen here: the file does not say which.
+launch 1 boot cycles=6015656 frames=202 ms=1012.200 cycles_per_second=5943150 mhz=5.943 times_real=3.32
+launch 1 timed 1 cycles=5390272 frames=181 ms=1022.100 cycles_per_second=5273723 mhz=5.274 times_real=2.95
+launch 1 timed 2 cycles=5390269 frames=181 ms=1167.000 cycles_per_second=4618911 mhz=4.619 times_real=2.58
+launch 1 timed 3 cycles=5390272 frames=181 ms=1188.300 cycles_per_second=4536121 mhz=4.536 times_real=2.53
+launch 1 timed 4 cycles=5390272 frames=181 ms=1108.000 cycles_per_second=4864866 mhz=4.865 times_real=2.72
+launch 1 timed 5 cycles=5390268 frames=181 ms=1145.300 cycles_per_second=4706425 mhz=4.706 times_real=2.63
+launch 1 play frame=1107 limit=3450
+launch 1 thread 1 cycles=5390270 thread_ms=1051.882 mhz=5.124 times_real=2.86
+launch 1 thread 2 cycles=5390270 thread_ms=965.868 mhz=5.581 times_real=3.12
+launch 1 thread 3 cycles=5390274 thread_ms=1014.204 mhz=5.315 times_real=2.97
+launch 1 thread 4 cycles=5390267 thread_ms=1031.518 mhz=5.226 times_real=2.92
+launch 1 thread 5 cycles=5390275 thread_ms=1039.136 mhz=5.187 times_real=2.90
+launch 1 thread 6 cycles=5390267 thread_ms=942.015 mhz=5.722 times_real=3.20
+launch 1 thread 7 cycles=5390270 thread_ms=953.454 mhz=5.653 times_real=3.16
+launch 1 thread 8 cycles=5390272 thread_ms=978.842 mhz=5.507 times_real=3.08
+launch 1 play frame=2555 limit=3450
+round 4 build before
+rom: roms/nes/Lan_Master.nes, 40976 bytes, sha256 becfeafb80479c330333c9e9385417f68f3c88e85443dfb37b05ae9283f3ea45, hash checked
+browser 153.0.8010.47
+launch 1 region 0 NTSC
+launch 1 Running as NTSC, as chosen here: the file does not say which.
+launch 1 boot cycles=6015656 frames=202 ms=892.100 cycles_per_second=6743253 mhz=6.743 times_real=3.77
+launch 1 timed 1 cycles=5390272 frames=181 ms=987.700 cycles_per_second=5457398 mhz=5.457 times_real=3.05
+launch 1 timed 2 cycles=5390269 frames=181 ms=872.200 cycles_per_second=6180084 mhz=6.180 times_real=3.45
+launch 1 timed 3 cycles=5390272 frames=181 ms=897.300 cycles_per_second=6007213 mhz=6.007 times_real=3.36
+launch 1 timed 4 cycles=5390272 frames=181 ms=908.800 cycles_per_second=5931197 mhz=5.931 times_real=3.31
+launch 1 timed 5 cycles=5390268 frames=181 ms=1024.000 cycles_per_second=5263934 mhz=5.264 times_real=2.94
+launch 1 play frame=1107 limit=3450
+launch 1 thread 1 cycles=5390270 thread_ms=1112.147 mhz=4.847 times_real=2.71
+launch 1 thread 2 cycles=5390270 thread_ms=867.125 mhz=6.216 times_real=3.47
+launch 1 thread 3 cycles=5390274 thread_ms=934.401 mhz=5.769 times_real=3.22
+launch 1 thread 4 cycles=5390267 thread_ms=1094.111 mhz=4.927 times_real=2.75
+launch 1 thread 5 cycles=5390275 thread_ms=940.127 mhz=5.734 times_real=3.20
+launch 1 thread 6 cycles=5390267 thread_ms=904.598 mhz=5.959 times_real=3.33
+launch 1 thread 7 cycles=5390270 thread_ms=914.687 mhz=5.893 times_real=3.29
+launch 1 thread 8 cycles=5390272 thread_ms=854.714 mhz=6.307 times_real=3.52
+launch 1 play frame=2555 limit=3450
+round 4 build after
+rom: roms/nes/Lan_Master.nes, 40976 bytes, sha256 becfeafb80479c330333c9e9385417f68f3c88e85443dfb37b05ae9283f3ea45, hash checked
+browser 153.0.8010.47
+launch 1 region 0 NTSC
+launch 1 Running as NTSC, as chosen here: the file does not say which.
+launch 1 boot cycles=6015656 frames=202 ms=793.100 cycles_per_second=7584991 mhz=7.585 times_real=4.24
+launch 1 timed 1 cycles=5390272 frames=181 ms=754.800 cycles_per_second=7141325 mhz=7.141 times_real=3.99
+launch 1 timed 2 cycles=5390269 frames=181 ms=598.300 cycles_per_second=9009308 mhz=9.009 times_real=5.03
+launch 1 timed 3 cycles=5390272 frames=181 ms=585.500 cycles_per_second=9206272 mhz=9.206 times_real=5.14
+launch 1 timed 4 cycles=5390272 frames=181 ms=608.000 cycles_per_second=8865579 mhz=8.866 times_real=4.95
+launch 1 timed 5 cycles=5390268 frames=181 ms=622.400 cycles_per_second=8660456 mhz=8.660 times_real=4.84
+launch 1 play frame=1107 limit=3450
+launch 1 thread 1 cycles=5390270 thread_ms=672.315 mhz=8.017 times_real=4.48
+launch 1 thread 2 cycles=5390270 thread_ms=662.200 mhz=8.140 times_real=4.55
+launch 1 thread 3 cycles=5390274 thread_ms=616.843 mhz=8.738 times_real=4.88
+launch 1 thread 4 cycles=5390267 thread_ms=701.068 mhz=7.689 times_real=4.30
+launch 1 thread 5 cycles=5390275 thread_ms=680.900 mhz=7.916 times_real=4.42
+launch 1 thread 6 cycles=5390267 thread_ms=724.780 mhz=7.437 times_real=4.16
+launch 1 thread 7 cycles=5390270 thread_ms=638.272 mhz=8.445 times_real=4.72
+launch 1 thread 8 cycles=5390272 thread_ms=609.958 mhz=8.837 times_real=4.94
+launch 1 play frame=2555 limit=3450
+gauge
+ 06:10:40 up 12 days, 15:39,  2 users,  load average: 2.25, 2.33, 2.83
+Fri Oct  9 06:10:40 UTC 2026
+os: roms/bbc-micro/os.rom, 16384 bytes, sha256 2d9fea69017864f6962704481829f95fee08446c8c3a13826d5d4e44000ac9de, hash checked
+basic: roms/bbc-micro/BASIC.ROM, 16384 bytes, sha256 45bd55dc0f6f0f8f1fe9e2481de7def206565eec8f600ba3068b849ca4132079, hash checked
+dfs: roms/bbc-micro/DFS-1.2.rom, 16384 bytes, sha256 e745e34895225a6650b712c1dd0656cb0b0b15f072a8ae6d9ea8d1ac257eb3d6, hash checked
+browser 153.0.8010.47
+launch 1 boot cycles=6000003 ms=550.900 cycles_per_second=10891274 mhz=10.891
+launch 1 screen ["","BBC Computer 32K","","Acorn DFS","","BASIC","",">"]
+launch 1 prompt yes
+launch 1 timed 1 cycles=2000000 ms=69.700 cycles_per_second=28694405 mhz=28.694
+launch 1 thread 1 cycles=2000003 thread_ms=76.417 mhz=26.172
+launch 1 thread 2 cycles=2000000 thread_ms=77.623 mhz=25.766
+launch 1 thread 3 cycles=2000000 thread_ms=75.603 mhz=26.454
+launch 1 thread 4 cycles=2000005 thread_ms=77.318 mhz=25.867
+launch 1 thread 5 cycles=2000001 thread_ms=90.358 mhz=22.134
+launch 1 thread 6 cycles=2000002 thread_ms=79.101 mhz=25.284
+launch 1 thread 7 cycles=2000002 thread_ms=83.417 mhz=23.976
+launch 1 thread 8 cycles=2000000 thread_ms=75.479 mhz=26.497
+launch 1 thread 9 cycles=2000000 thread_ms=88.581 mhz=22.578
+launch 1 thread 10 cycles=2000001 thread_ms=92.853 mhz=21.539
+set play region 1
+ 06:10:44 up 12 days, 15:39,  2 users,  load average: 2.47, 2.38, 2.84
+Fri Oct  9 06:10:44 UTC 2026
+round 1 build main
+rom: roms/nes/Lan_Master.nes, 40976 bytes, sha256 becfeafb80479c330333c9e9385417f68f3c88e85443dfb37b05ae9283f3ea45, hash checked
+browser 153.0.8010.47
+launch 1 region 1 PAL
+launch 1 Running as PAL, as chosen here: the file does not say which.
+launch 1 boot cycles=6017791 frames=181 ms=892.900 cycles_per_second=6739602 mhz=6.740 times_real=4.05
+launch 1 timed 1 cycles=5386096 frames=162 ms=762.200 cycles_per_second=7066513 mhz=7.067 times_real=4.25
+launch 1 timed 2 cycles=5386095 frames=162 ms=747.300 cycles_per_second=7207407 mhz=7.207 times_real=4.34
+launch 1 timed 3 cycles=5386096 frames=162 ms=784.800 cycles_per_second=6863017 mhz=6.863 times_real=4.13
+launch 1 timed 4 cycles=5386093 frames=162 ms=774.500 cycles_per_second=6954284 mhz=6.954 times_real=4.18
+launch 1 timed 5 cycles=5386096 frames=162 ms=860.000 cycles_per_second=6262902 mhz=6.263 times_real=3.77
+launch 1 play frame=991 limit=2850
+launch 1 thread 1 cycles=5386095 thread_ms=822.853 mhz=6.546 times_real=3.94
+launch 1 thread 2 cycles=5386096 thread_ms=886.394 mhz=6.076 times_real=3.65
+launch 1 thread 3 cycles=5386093 thread_ms=1009.084 mhz=5.338 times_real=3.21
+launch 1 thread 4 cycles=5386095 thread_ms=961.055 mhz=5.604 times_real=3.37
+launch 1 thread 5 cycles=5386097 thread_ms=951.518 mhz=5.661 times_real=3.40
+launch 1 thread 6 cycles=5386095 thread_ms=946.024 mhz=5.693 times_real=3.42
+launch 1 thread 7 cycles=5386093 thread_ms=973.193 mhz=5.534 times_real=3.33
+launch 1 thread 8 cycles=5386096 thread_ms=1013.801 mhz=5.313 times_real=3.20
+launch 1 play frame=2287 limit=2850
+round 1 build before
+rom: roms/nes/Lan_Master.nes, 40976 bytes, sha256 becfeafb80479c330333c9e9385417f68f3c88e85443dfb37b05ae9283f3ea45, hash checked
+browser 153.0.8010.47
+launch 1 region 1 PAL
+launch 1 Running as PAL, as chosen here: the file does not say which.
+launch 1 boot cycles=6017791 frames=181 ms=1234.900 cycles_per_second=4873100 mhz=4.873 times_real=2.93
+launch 1 timed 1 cycles=5386096 frames=162 ms=1059.800 cycles_per_second=5082182 mhz=5.082 times_real=3.06
+launch 1 timed 2 cycles=5386095 frames=162 ms=1630.000 cycles_per_second=3304353 mhz=3.304 times_real=1.99
+launch 1 timed 3 cycles=5386096 frames=162 ms=1991.300 cycles_per_second=2704814 mhz=2.705 times_real=1.63
+launch 1 timed 4 cycles=5386093 frames=162 ms=2267.000 cycles_per_second=2375868 mhz=2.376 times_real=1.43
+launch 1 timed 5 cycles=5386096 frames=162 ms=2048.600 cycles_per_second=2629159 mhz=2.629 times_real=1.58
+launch 1 play frame=991 limit=2850
+launch 1 thread 1 cycles=5386095 thread_ms=1034.377 mhz=5.207 times_real=3.13
+launch 1 thread 2 cycles=5386096 thread_ms=940.131 mhz=5.729 times_real=3.45
+launch 1 thread 3 cycles=5386093 thread_ms=1200.683 mhz=4.486 times_real=2.70
+launch 1 thread 4 cycles=5386095 thread_ms=1227.848 mhz=4.387 times_real=2.64
+launch 1 thread 5 cycles=5386097 thread_ms=877.823 mhz=6.136 times_real=3.69
+launch 1 thread 6 cycles=5386095 thread_ms=1090.375 mhz=4.940 times_real=2.97
+launch 1 thread 7 cycles=5386093 thread_ms=1154.346 mhz=4.666 times_real=2.81
+launch 1 thread 8 cycles=5386096 thread_ms=938.323 mhz=5.740 times_real=3.45
+launch 1 play frame=2287 limit=2850
+round 1 build after
+rom: roms/nes/Lan_Master.nes, 40976 bytes, sha256 becfeafb80479c330333c9e9385417f68f3c88e85443dfb37b05ae9283f3ea45, hash checked
+browser 153.0.8010.47
+launch 1 region 1 PAL
+launch 1 Running as PAL, as chosen here: the file does not say which.
+launch 1 boot cycles=6017791 frames=181 ms=810.400 cycles_per_second=7425705 mhz=7.426 times_real=4.47
+launch 1 timed 1 cycles=5386096 frames=162 ms=680.200 cycles_per_second=7918400 mhz=7.918 times_real=4.76
+launch 1 timed 2 cycles=5386095 frames=162 ms=724.200 cycles_per_second=7437303 mhz=7.437 times_real=4.47
+launch 1 timed 3 cycles=5386096 frames=162 ms=772.400 cycles_per_second=6973195 mhz=6.973 times_real=4.19
+launch 1 timed 4 cycles=5386093 frames=162 ms=641.700 cycles_per_second=8393475 mhz=8.393 times_real=5.05
+launch 1 timed 5 cycles=5386096 frames=162 ms=606.300 cycles_per_second=8883549 mhz=8.884 times_real=5.34
+launch 1 play frame=991 limit=2850
+launch 1 thread 1 cycles=5386095 thread_ms=590.868 mhz=9.116 times_real=5.48
+launch 1 thread 2 cycles=5386096 thread_ms=612.218 mhz=8.798 times_real=5.29
+launch 1 thread 3 cycles=5386093 thread_ms=614.586 mhz=8.764 times_real=5.27
+launch 1 thread 4 cycles=5386095 thread_ms=685.904 mhz=7.853 times_real=4.72
+launch 1 thread 5 cycles=5386097 thread_ms=667.718 mhz=8.066 times_real=4.85
+launch 1 thread 6 cycles=5386095 thread_ms=629.584 mhz=8.555 times_real=5.15
+launch 1 thread 7 cycles=5386093 thread_ms=671.009 mhz=8.027 times_real=4.83
+launch 1 thread 8 cycles=5386096 thread_ms=612.661 mhz=8.791 times_real=5.29
+launch 1 play frame=2287 limit=2850
+round 2 build main
+rom: roms/nes/Lan_Master.nes, 40976 bytes, sha256 becfeafb80479c330333c9e9385417f68f3c88e85443dfb37b05ae9283f3ea45, hash checked
+browser 153.0.8010.47
+launch 1 region 1 PAL
+launch 1 Running as PAL, as chosen here: the file does not say which.
+launch 1 boot cycles=6017791 frames=181 ms=1144.100 cycles_per_second=5259847 mhz=5.260 times_real=3.16
+launch 1 timed 1 cycles=5386096 frames=162 ms=747.100 cycles_per_second=7209337 mhz=7.209 times_real=4.34
+launch 1 timed 2 cycles=5386095 frames=162 ms=744.000 cycles_per_second=7239375 mhz=7.239 times_real=4.35
+launch 1 timed 3 cycles=5386096 frames=162 ms=805.000 cycles_per_second=6690802 mhz=6.691 times_real=4.02
+launch 1 timed 4 cycles=5386093 frames=162 ms=930.400 cycles_per_second=5789008 mhz=5.789 times_real=3.48
+launch 1 timed 5 cycles=5386096 frames=162 ms=805.400 cycles_per_second=6687480 mhz=6.687 times_real=4.02
+launch 1 play frame=991 limit=2850
+launch 1 thread 1 cycles=5386095 thread_ms=913.570 mhz=5.896 times_real=3.55
+launch 1 thread 2 cycles=5386096 thread_ms=816.679 mhz=6.595 times_real=3.97
+launch 1 thread 3 cycles=5386093 thread_ms=887.149 mhz=6.071 times_real=3.65
+launch 1 thread 4 cycles=5386095 thread_ms=969.623 mhz=5.555 times_real=3.34
+launch 1 thread 5 cycles=5386097 thread_ms=860.281 mhz=6.261 times_real=3.77
+launch 1 thread 6 cycles=5386095 thread_ms=1039.273 mhz=5.183 times_real=3.12
+launch 1 thread 7 cycles=5386093 thread_ms=931.648 mhz=5.781 times_real=3.48
+launch 1 thread 8 cycles=5386096 thread_ms=853.732 mhz=6.309 times_real=3.79
+launch 1 play frame=2287 limit=2850
+round 2 build before
+rom: roms/nes/Lan_Master.nes, 40976 bytes, sha256 becfeafb80479c330333c9e9385417f68f3c88e85443dfb37b05ae9283f3ea45, hash checked
+browser 153.0.8010.47
+launch 1 region 1 PAL
+launch 1 Running as PAL, as chosen here: the file does not say which.
+launch 1 boot cycles=6017791 frames=181 ms=820.800 cycles_per_second=7331617 mhz=7.332 times_real=4.41
+launch 1 timed 1 cycles=5386096 frames=162 ms=874.300 cycles_per_second=6160467 mhz=6.160 times_real=3.71
+launch 1 timed 2 cycles=5386095 frames=162 ms=802.700 cycles_per_second=6709973 mhz=6.710 times_real=4.04
+launch 1 timed 3 cycles=5386096 frames=162 ms=877.300 cycles_per_second=6139400 mhz=6.139 times_real=3.69
+launch 1 timed 4 cycles=5386093 frames=162 ms=787.900 cycles_per_second=6836011 mhz=6.836 times_real=4.11
+launch 1 timed 5 cycles=5386096 frames=162 ms=781.800 cycles_per_second=6889353 mhz=6.889 times_real=4.14
+launch 1 play frame=991 limit=2850
+launch 1 thread 1 cycles=5386095 thread_ms=770.981 mhz=6.986 times_real=4.20
+launch 1 thread 2 cycles=5386096 thread_ms=722.144 mhz=7.458 times_real=4.49
+launch 1 thread 3 cycles=5386093 thread_ms=756.868 mhz=7.116 times_real=4.28
+launch 1 thread 4 cycles=5386095 thread_ms=800.049 mhz=6.732 times_real=4.05
+launch 1 thread 5 cycles=5386097 thread_ms=855.435 mhz=6.296 times_real=3.79
+launch 1 thread 6 cycles=5386095 thread_ms=816.322 mhz=6.598 times_real=3.97
+launch 1 thread 7 cycles=5386093 thread_ms=892.063 mhz=6.038 times_real=3.63
+launch 1 thread 8 cycles=5386096 thread_ms=977.973 mhz=5.507 times_real=3.31
+launch 1 play frame=2287 limit=2850
+round 2 build after
+rom: roms/nes/Lan_Master.nes, 40976 bytes, sha256 becfeafb80479c330333c9e9385417f68f3c88e85443dfb37b05ae9283f3ea45, hash checked
+browser 153.0.8010.47
+launch 1 region 1 PAL
+launch 1 Running as PAL, as chosen here: the file does not say which.
+launch 1 boot cycles=6017791 frames=181 ms=802.600 cycles_per_second=7497871 mhz=7.498 times_real=4.51
+launch 1 timed 1 cycles=5386096 frames=162 ms=776.000 cycles_per_second=6940845 mhz=6.941 times_real=4.17
+launch 1 timed 2 cycles=5386095 frames=162 ms=778.900 cycles_per_second=6915002 mhz=6.915 times_real=4.16
+launch 1 timed 3 cycles=5386096 frames=162 ms=768.600 cycles_per_second=7007671 mhz=7.008 times_real=4.21
+launch 1 timed 4 cycles=5386093 frames=162 ms=668.100 cycles_per_second=8061807 mhz=8.062 times_real=4.85
+launch 1 timed 5 cycles=5386096 frames=162 ms=685.500 cycles_per_second=7857179 mhz=7.857 times_real=4.73
+launch 1 play frame=991 limit=2850
+launch 1 thread 1 cycles=5386095 thread_ms=648.468 mhz=8.306 times_real=5.00
+launch 1 thread 2 cycles=5386096 thread_ms=656.184 mhz=8.208 times_real=4.94
+launch 1 thread 3 cycles=5386093 thread_ms=706.458 mhz=7.624 times_real=4.59
+launch 1 thread 4 cycles=5386095 thread_ms=984.283 mhz=5.472 times_real=3.29
+launch 1 thread 5 cycles=5386097 thread_ms=759.265 mhz=7.094 times_real=4.27
+launch 1 thread 6 cycles=5386095 thread_ms=711.122 mhz=7.574 times_real=4.56
+launch 1 thread 7 cycles=5386093 thread_ms=725.824 mhz=7.421 times_real=4.46
+launch 1 thread 8 cycles=5386096 thread_ms=838.781 mhz=6.421 times_real=3.86
+launch 1 play frame=2287 limit=2850
+round 3 build main
+rom: roms/nes/Lan_Master.nes, 40976 bytes, sha256 becfeafb80479c330333c9e9385417f68f3c88e85443dfb37b05ae9283f3ea45, hash checked
+browser 153.0.8010.47
+launch 1 region 1 PAL
+launch 1 Running as PAL, as chosen here: the file does not say which.
+launch 1 boot cycles=6017791 frames=181 ms=971.700 cycles_per_second=6193054 mhz=6.193 times_real=3.72
+launch 1 timed 1 cycles=5386096 frames=162 ms=719.500 cycles_per_second=7485887 mhz=7.486 times_real=4.50
+launch 1 timed 2 cycles=5386095 frames=162 ms=749.400 cycles_per_second=7187210 mhz=7.187 times_real=4.32
+launch 1 timed 3 cycles=5386096 frames=162 ms=759.700 cycles_per_second=7089767 mhz=7.090 times_real=4.26
+launch 1 timed 4 cycles=5386093 frames=162 ms=751.600 cycles_per_second=7166170 mhz=7.166 times_real=4.31
+launch 1 timed 5 cycles=5386096 frames=162 ms=844.600 cycles_per_second=6377097 mhz=6.377 times_real=3.84
+launch 1 play frame=991 limit=2850
+launch 1 thread 1 cycles=5386095 thread_ms=832.851 mhz=6.467 times_real=3.89
+launch 1 thread 2 cycles=5386096 thread_ms=798.936 mhz=6.742 times_real=4.05
+launch 1 thread 3 cycles=5386093 thread_ms=803.131 mhz=6.706 times_real=4.03
+launch 1 thread 4 cycles=5386095 thread_ms=883.200 mhz=6.098 times_real=3.67
+launch 1 thread 5 cycles=5386097 thread_ms=810.023 mhz=6.649 times_real=4.00
+launch 1 thread 6 cycles=5386095 thread_ms=913.468 mhz=5.896 times_real=3.55
+launch 1 thread 7 cycles=5386093 thread_ms=820.603 mhz=6.564 times_real=3.95
+launch 1 thread 8 cycles=5386096 thread_ms=892.655 mhz=6.034 times_real=3.63
+launch 1 play frame=2287 limit=2850
+round 3 build before
+rom: roms/nes/Lan_Master.nes, 40976 bytes, sha256 becfeafb80479c330333c9e9385417f68f3c88e85443dfb37b05ae9283f3ea45, hash checked
+browser 153.0.8010.47
+launch 1 region 1 PAL
+launch 1 Running as PAL, as chosen here: the file does not say which.
+launch 1 boot cycles=6017791 frames=181 ms=835.200 cycles_per_second=7205210 mhz=7.205 times_real=4.33
+launch 1 timed 1 cycles=5386096 frames=162 ms=802.500 cycles_per_second=6711646 mhz=6.712 times_real=4.04
+launch 1 timed 2 cycles=5386095 frames=162 ms=821.500 cycles_per_second=6556415 mhz=6.556 times_real=3.94
+launch 1 timed 3 cycles=5386096 frames=162 ms=770.000 cycles_per_second=6994930 mhz=6.995 times_real=4.21
+launch 1 timed 4 cycles=5386093 frames=162 ms=886.300 cycles_per_second=6077054 mhz=6.077 times_real=3.66
+launch 1 timed 5 cycles=5386096 frames=162 ms=782.600 cycles_per_second=6882310 mhz=6.882 times_real=4.14
+launch 1 play frame=991 limit=2850
+launch 1 thread 1 cycles=5386095 thread_ms=805.426 mhz=6.687 times_real=4.02
+launch 1 thread 2 cycles=5386096 thread_ms=773.001 mhz=6.968 times_real=4.19
+launch 1 thread 3 cycles=5386093 thread_ms=795.341 mhz=6.772 times_real=4.07
+launch 1 thread 4 cycles=5386095 thread_ms=839.247 mhz=6.418 times_real=3.86
+launch 1 thread 5 cycles=5386097 thread_ms=804.921 mhz=6.691 times_real=4.02
+launch 1 thread 6 cycles=5386095 thread_ms=826.652 mhz=6.516 times_real=3.92
+launch 1 thread 7 cycles=5386093 thread_ms=887.656 mhz=6.068 times_real=3.65
+launch 1 thread 8 cycles=5386096 thread_ms=919.998 mhz=5.854 times_real=3.52
+launch 1 play frame=2287 limit=2850
+round 3 build after
+rom: roms/nes/Lan_Master.nes, 40976 bytes, sha256 becfeafb80479c330333c9e9385417f68f3c88e85443dfb37b05ae9283f3ea45, hash checked
+browser 153.0.8010.47
+launch 1 region 1 PAL
+launch 1 Running as PAL, as chosen here: the file does not say which.
+launch 1 boot cycles=6017791 frames=181 ms=763.000 cycles_per_second=7887013 mhz=7.887 times_real=4.74
+launch 1 timed 1 cycles=5386096 frames=162 ms=616.300 cycles_per_second=8739406 mhz=8.739 times_real=5.26
+launch 1 timed 2 cycles=5386095 frames=162 ms=592.300 cycles_per_second=9093525 mhz=9.094 times_real=5.47
+launch 1 timed 3 cycles=5386096 frames=162 ms=555.800 cycles_per_second=9690709 mhz=9.691 times_real=5.83
+launch 1 timed 4 cycles=5386093 frames=162 ms=592.100 cycles_per_second=9096593 mhz=9.097 times_real=5.47
+launch 1 timed 5 cycles=5386096 frames=162 ms=584.000 cycles_per_second=9222767 mhz=9.223 times_real=5.55
+launch 1 play frame=991 limit=2850
+launch 1 thread 1 cycles=5386095 thread_ms=588.524 mhz=9.152 times_real=5.50
+launch 1 thread 2 cycles=5386096 thread_ms=576.960 mhz=9.335 times_real=5.61
+launch 1 thread 3 cycles=5386093 thread_ms=580.754 mhz=9.274 times_real=5.58
+launch 1 thread 4 cycles=5386095 thread_ms=667.972 mhz=8.063 times_real=4.85
+launch 1 thread 5 cycles=5386097 thread_ms=623.840 mhz=8.634 times_real=5.19
+launch 1 thread 6 cycles=5386095 thread_ms=625.963 mhz=8.604 times_real=5.18
+launch 1 thread 7 cycles=5386093 thread_ms=621.511 mhz=8.666 times_real=5.21
+launch 1 thread 8 cycles=5386096 thread_ms=651.984 mhz=8.261 times_real=4.97
+launch 1 play frame=2287 limit=2850
+round 4 build main
+rom: roms/nes/Lan_Master.nes, 40976 bytes, sha256 becfeafb80479c330333c9e9385417f68f3c88e85443dfb37b05ae9283f3ea45, hash checked
+browser 153.0.8010.47
+launch 1 region 1 PAL
+launch 1 Running as PAL, as chosen here: the file does not say which.
+launch 1 boot cycles=6017791 frames=181 ms=921.500 cycles_per_second=6530430 mhz=6.530 times_real=3.93
+launch 1 timed 1 cycles=5386096 frames=162 ms=787.800 cycles_per_second=6836882 mhz=6.837 times_real=4.11
+launch 1 timed 2 cycles=5386095 frames=162 ms=778.600 cycles_per_second=6917666 mhz=6.918 times_real=4.16
+launch 1 timed 3 cycles=5386096 frames=162 ms=807.000 cycles_per_second=6674221 mhz=6.674 times_real=4.01
+launch 1 timed 4 cycles=5386093 frames=162 ms=724.400 cycles_per_second=7435247 mhz=7.435 times_real=4.47
+launch 1 timed 5 cycles=5386096 frames=162 ms=729.400 cycles_per_second=7384283 mhz=7.384 times_real=4.44
+launch 1 play frame=991 limit=2850
+launch 1 thread 1 cycles=5386095 thread_ms=962.248 mhz=5.597 times_real=3.37
+launch 1 thread 2 cycles=5386096 thread_ms=848.603 mhz=6.347 times_real=3.82
+launch 1 thread 3 cycles=5386093 thread_ms=1058.557 mhz=5.088 times_real=3.06
+launch 1 thread 4 cycles=5386095 thread_ms=1059.871 mhz=5.082 times_real=3.06
+launch 1 thread 5 cycles=5386097 thread_ms=1007.207 mhz=5.348 times_real=3.22
+launch 1 thread 6 cycles=5386095 thread_ms=992.493 mhz=5.427 times_real=3.26
+launch 1 thread 7 cycles=5386093 thread_ms=902.579 mhz=5.967 times_real=3.59
+launch 1 thread 8 cycles=5386096 thread_ms=941.034 mhz=5.724 times_real=3.44
+launch 1 play frame=2287 limit=2850
+round 4 build before
+rom: roms/nes/Lan_Master.nes, 40976 bytes, sha256 becfeafb80479c330333c9e9385417f68f3c88e85443dfb37b05ae9283f3ea45, hash checked
+browser 153.0.8010.47
+launch 1 region 1 PAL
+launch 1 Running as PAL, as chosen here: the file does not say which.
+launch 1 boot cycles=6017791 frames=181 ms=782.300 cycles_per_second=7692434 mhz=7.692 times_real=4.63
+launch 1 timed 1 cycles=5386096 frames=162 ms=722.600 cycles_per_second=7453772 mhz=7.454 times_real=4.48
+launch 1 timed 2 cycles=5386095 frames=162 ms=780.700 cycles_per_second=6899059 mhz=6.899 times_real=4.15
+launch 1 timed 3 cycles=5386096 frames=162 ms=819.300 cycles_per_second=6574022 mhz=6.574 times_real=3.95
+launch 1 timed 4 cycles=5386093 frames=162 ms=708.100 cycles_per_second=7606402 mhz=7.606 times_real=4.57
+launch 1 timed 5 cycles=5386096 frames=162 ms=823.900 cycles_per_second=6537318 mhz=6.537 times_real=3.93
+launch 1 play frame=991 limit=2850
+launch 1 thread 1 cycles=5386095 thread_ms=851.553 mhz=6.325 times_real=3.80
+launch 1 thread 2 cycles=5386096 thread_ms=854.106 mhz=6.306 times_real=3.79
+launch 1 thread 3 cycles=5386093 thread_ms=808.155 mhz=6.665 times_real=4.01
+launch 1 thread 4 cycles=5386095 thread_ms=909.282 mhz=5.923 times_real=3.56
+launch 1 thread 5 cycles=5386097 thread_ms=818.010 mhz=6.584 times_real=3.96
+launch 1 thread 6 cycles=5386095 thread_ms=858.479 mhz=6.274 times_real=3.77
+launch 1 thread 7 cycles=5386093 thread_ms=865.808 mhz=6.221 times_real=3.74
+launch 1 thread 8 cycles=5386096 thread_ms=918.841 mhz=5.862 times_real=3.53
+launch 1 play frame=2287 limit=2850
+round 4 build after
+rom: roms/nes/Lan_Master.nes, 40976 bytes, sha256 becfeafb80479c330333c9e9385417f68f3c88e85443dfb37b05ae9283f3ea45, hash checked
+browser 153.0.8010.47
+launch 1 region 1 PAL
+launch 1 Running as PAL, as chosen here: the file does not say which.
+launch 1 boot cycles=6017791 frames=181 ms=843.200 cycles_per_second=7136849 mhz=7.137 times_real=4.29
+launch 1 timed 1 cycles=5386096 frames=162 ms=701.300 cycles_per_second=7680160 mhz=7.680 times_real=4.62
+launch 1 timed 2 cycles=5386095 frames=162 ms=628.100 cycles_per_second=8575219 mhz=8.575 times_real=5.16
+launch 1 timed 3 cycles=5386096 frames=162 ms=691.300 cycles_per_second=7791257 mhz=7.791 times_real=4.69
+launch 1 timed 4 cycles=5386093 frames=162 ms=633.000 cycles_per_second=8508836 mhz=8.509 times_real=5.12
+launch 1 timed 5 cycles=5386096 frames=162 ms=635.900 cycles_per_second=8470036 mhz=8.470 times_real=5.09
+launch 1 play frame=991 limit=2850
+launch 1 thread 1 cycles=5386095 thread_ms=639.853 mhz=8.418 times_real=5.06
+launch 1 thread 2 cycles=5386096 thread_ms=709.106 mhz=7.596 times_real=4.57
+launch 1 thread 3 cycles=5386093 thread_ms=713.279 mhz=7.551 times_real=4.54
+launch 1 thread 4 cycles=5386095 thread_ms=721.944 mhz=7.461 times_real=4.49
+launch 1 thread 5 cycles=5386097 thread_ms=715.005 mhz=7.533 times_real=4.53
+launch 1 thread 6 cycles=5386095 thread_ms=766.382 mhz=7.028 times_real=4.23
+launch 1 thread 7 cycles=5386093 thread_ms=785.684 mhz=6.855 times_real=4.12
+launch 1 thread 8 cycles=5386096 thread_ms=748.289 mhz=7.198 times_real=4.33
+launch 1 play frame=2287 limit=2850
+gauge
+ 06:13:33 up 12 days, 15:42,  1 user,  load average: 2.01, 2.38, 2.78
+Fri Oct  9 06:13:33 UTC 2026
+os: roms/bbc-micro/os.rom, 16384 bytes, sha256 2d9fea69017864f6962704481829f95fee08446c8c3a13826d5d4e44000ac9de, hash checked
+basic: roms/bbc-micro/BASIC.ROM, 16384 bytes, sha256 45bd55dc0f6f0f8f1fe9e2481de7def206565eec8f600ba3068b849ca4132079, hash checked
+dfs: roms/bbc-micro/DFS-1.2.rom, 16384 bytes, sha256 e745e34895225a6650b712c1dd0656cb0b0b15f072a8ae6d9ea8d1ac257eb3d6, hash checked
+browser 153.0.8010.47
+launch 1 boot cycles=6000003 ms=379.500 cycles_per_second=15810285 mhz=15.810
+launch 1 screen ["","BBC Computer 32K","","Acorn DFS","","BASIC","",">"]
+launch 1 prompt yes
+launch 1 timed 1 cycles=2000000 ms=69.700 cycles_per_second=28694405 mhz=28.694
+launch 1 thread 1 cycles=2000003 thread_ms=69.403 mhz=28.817
+launch 1 thread 2 cycles=2000000 thread_ms=76.530 mhz=26.134
+launch 1 thread 3 cycles=2000000 thread_ms=73.939 mhz=27.049
+launch 1 thread 4 cycles=2000005 thread_ms=78.661 mhz=25.426
+launch 1 thread 5 cycles=2000001 thread_ms=81.290 mhz=24.603
+launch 1 thread 6 cycles=2000002 thread_ms=67.350 mhz=29.696
+launch 1 thread 7 cycles=2000002 thread_ms=75.742 mhz=26.405
+launch 1 thread 8 cycles=2000000 thread_ms=66.884 mhz=29.903
+launch 1 thread 9 cycles=2000000 thread_ms=78.244 mhz=25.561
+launch 1 thread 10 cycles=2000001 thread_ms=70.093 mhz=28.534
+ 06:13:36 up 12 days, 15:42,  1 user,  load average: 2.01, 2.38, 2.78
+Fri Oct  9 06:13:36 UTC 2026
+
+## Set 3
+set play region 0
+ 06:13:36 up 12 days, 15:42,  1 user,  load average: 2.01, 2.38, 2.78
+Fri Oct  9 06:13:36 UTC 2026
+round 1 build main
+rom: roms/nes/Lan_Master.nes, 40976 bytes, sha256 becfeafb80479c330333c9e9385417f68f3c88e85443dfb37b05ae9283f3ea45, hash checked
+browser 153.0.8010.47
+launch 1 region 0 NTSC
+launch 1 Running as NTSC, as chosen here: the file does not say which.
+launch 1 boot cycles=6015656 frames=202 ms=934.700 cycles_per_second=6435922 mhz=6.436 times_real=3.60
+launch 1 timed 1 cycles=5390272 frames=181 ms=820.300 cycles_per_second=6571098 mhz=6.571 times_real=3.67
+launch 1 timed 2 cycles=5390269 frames=181 ms=849.700 cycles_per_second=6343732 mhz=6.344 times_real=3.54
+launch 1 timed 3 cycles=5390272 frames=181 ms=966.300 cycles_per_second=5578259 mhz=5.578 times_real=3.12
+launch 1 timed 4 cycles=5390272 frames=181 ms=1149.200 cycles_per_second=4690456 mhz=4.690 times_real=2.62
+launch 1 timed 5 cycles=5390268 frames=181 ms=843.900 cycles_per_second=6387330 mhz=6.387 times_real=3.57
+launch 1 play frame=1107 limit=3450
+launch 1 thread 1 cycles=5390270 thread_ms=791.233 mhz=6.812 times_real=3.81
+launch 1 thread 2 cycles=5390270 thread_ms=788.876 mhz=6.833 times_real=3.82
+launch 1 thread 3 cycles=5390274 thread_ms=791.309 mhz=6.812 times_real=3.81
+launch 1 thread 4 cycles=5390267 thread_ms=839.647 mhz=6.420 times_real=3.59
+launch 1 thread 5 cycles=5390275 thread_ms=845.165 mhz=6.378 times_real=3.56
+launch 1 thread 6 cycles=5390267 thread_ms=936.721 mhz=5.754 times_real=3.22
+launch 1 thread 7 cycles=5390270 thread_ms=906.893 mhz=5.944 times_real=3.32
+launch 1 thread 8 cycles=5390272 thread_ms=796.209 mhz=6.770 times_real=3.78
+launch 1 play frame=2555 limit=3450
+round 1 build before
+rom: roms/nes/Lan_Master.nes, 40976 bytes, sha256 becfeafb80479c330333c9e9385417f68f3c88e85443dfb37b05ae9283f3ea45, hash checked
+browser 153.0.8010.47
+launch 1 region 0 NTSC
+launch 1 Running as NTSC, as chosen here: the file does not say which.
+launch 1 boot cycles=6015656 frames=202 ms=739.100 cycles_per_second=8139164 mhz=8.139 times_real=4.55
+launch 1 timed 1 cycles=5390272 frames=181 ms=743.800 cycles_per_second=7246937 mhz=7.247 times_real=4.05
+launch 1 timed 2 cycles=5390269 frames=181 ms=706.300 cycles_per_second=7631699 mhz=7.632 times_real=4.26
+launch 1 timed 3 cycles=5390272 frames=181 ms=764.600 cycles_per_second=7049793 mhz=7.050 times_real=3.94
+launch 1 timed 4 cycles=5390272 frames=181 ms=763.000 cycles_per_second=7064577 mhz=7.065 times_real=3.95
+launch 1 timed 5 cycles=5390268 frames=181 ms=741.400 cycles_per_second=7270391 mhz=7.270 times_real=4.06
+launch 1 play frame=1107 limit=3450
+launch 1 thread 1 cycles=5390270 thread_ms=720.594 mhz=7.480 times_real=4.18
+launch 1 thread 2 cycles=5390270 thread_ms=727.034 mhz=7.414 times_real=4.14
+launch 1 thread 3 cycles=5390274 thread_ms=713.928 mhz=7.550 times_real=4.22
+launch 1 thread 4 cycles=5390267 thread_ms=778.578 mhz=6.923 times_real=3.87
+launch 1 thread 5 cycles=5390275 thread_ms=826.682 mhz=6.520 times_real=3.64
+launch 1 thread 6 cycles=5390267 thread_ms=934.022 mhz=5.771 times_real=3.22
+launch 1 thread 7 cycles=5390270 thread_ms=929.016 mhz=5.802 times_real=3.24
+launch 1 thread 8 cycles=5390272 thread_ms=1100.495 mhz=4.898 times_real=2.74
+launch 1 play frame=2555 limit=3450
+round 1 build after
+rom: roms/nes/Lan_Master.nes, 40976 bytes, sha256 becfeafb80479c330333c9e9385417f68f3c88e85443dfb37b05ae9283f3ea45, hash checked
+browser 153.0.8010.47
+launch 1 region 0 NTSC
+launch 1 Running as NTSC, as chosen here: the file does not say which.
+launch 1 boot cycles=6015656 frames=202 ms=775.700 cycles_per_second=7755132 mhz=7.755 times_real=4.33
+launch 1 timed 1 cycles=5390272 frames=181 ms=643.000 cycles_per_second=8383005 mhz=8.383 times_real=4.68
+launch 1 timed 2 cycles=5390269 frames=181 ms=585.100 cycles_per_second=9212560 mhz=9.213 times_real=5.15
+launch 1 timed 3 cycles=5390272 frames=181 ms=587.700 cycles_per_second=9171809 mhz=9.172 times_real=5.12
+launch 1 timed 4 cycles=5390272 frames=181 ms=688.700 cycles_per_second=7826734 mhz=7.827 times_real=4.37
+launch 1 timed 5 cycles=5390268 frames=181 ms=647.900 cycles_per_second=8319599 mhz=8.320 times_real=4.65
+launch 1 play frame=1107 limit=3450
+launch 1 thread 1 cycles=5390270 thread_ms=603.895 mhz=8.926 times_real=4.99
+launch 1 thread 2 cycles=5390270 thread_ms=576.352 mhz=9.352 times_real=5.23
+launch 1 thread 3 cycles=5390274 thread_ms=629.590 mhz=8.562 times_real=4.78
+launch 1 thread 4 cycles=5390267 thread_ms=721.131 mhz=7.475 times_real=4.18
+launch 1 thread 5 cycles=5390275 thread_ms=667.574 mhz=8.074 times_real=4.51
+launch 1 thread 6 cycles=5390267 thread_ms=716.850 mhz=7.519 times_real=4.20
+launch 1 thread 7 cycles=5390270 thread_ms=670.938 mhz=8.034 times_real=4.49
+launch 1 thread 8 cycles=5390272 thread_ms=642.534 mhz=8.389 times_real=4.69
+launch 1 play frame=2555 limit=3450
+round 2 build main
+rom: roms/nes/Lan_Master.nes, 40976 bytes, sha256 becfeafb80479c330333c9e9385417f68f3c88e85443dfb37b05ae9283f3ea45, hash checked
+browser 153.0.8010.47
+launch 1 region 0 NTSC
+launch 1 Running as NTSC, as chosen here: the file does not say which.
+launch 1 boot cycles=6015656 frames=202 ms=1009.100 cycles_per_second=5961407 mhz=5.961 times_real=3.33
+launch 1 timed 1 cycles=5390272 frames=181 ms=790.400 cycles_per_second=6819676 mhz=6.820 times_real=3.81
+launch 1 timed 2 cycles=5390269 frames=181 ms=852.600 cycles_per_second=6322155 mhz=6.322 times_real=3.53
+launch 1 timed 3 cycles=5390272 frames=181 ms=810.500 cycles_per_second=6650552 mhz=6.651 times_real=3.72
+launch 1 timed 4 cycles=5390272 frames=181 ms=741.100 cycles_per_second=7273340 mhz=7.273 times_real=4.06
+launch 1 timed 5 cycles=5390268 frames=181 ms=853.100 cycles_per_second=6318448 mhz=6.318 times_real=3.53
+launch 1 play frame=1107 limit=3450
+launch 1 thread 1 cycles=5390270 thread_ms=778.094 mhz=6.928 times_real=3.87
+launch 1 thread 2 cycles=5390270 thread_ms=831.932 mhz=6.479 times_real=3.62
+launch 1 thread 3 cycles=5390274 thread_ms=830.386 mhz=6.491 times_real=3.63
+launch 1 thread 4 cycles=5390267 thread_ms=802.820 mhz=6.714 times_real=3.75
+launch 1 thread 5 cycles=5390275 thread_ms=911.984 mhz=5.910 times_real=3.30
+launch 1 thread 6 cycles=5390267 thread_ms=834.921 mhz=6.456 times_real=3.61
+launch 1 thread 7 cycles=5390270 thread_ms=817.950 mhz=6.590 times_real=3.68
+launch 1 thread 8 cycles=5390272 thread_ms=899.001 mhz=5.996 times_real=3.35
+launch 1 play frame=2555 limit=3450
+round 2 build before
+rom: roms/nes/Lan_Master.nes, 40976 bytes, sha256 becfeafb80479c330333c9e9385417f68f3c88e85443dfb37b05ae9283f3ea45, hash checked
+browser 153.0.8010.47
+launch 1 region 0 NTSC
+launch 1 Running as NTSC, as chosen here: the file does not say which.
+launch 1 boot cycles=6015656 frames=202 ms=793.500 cycles_per_second=7581167 mhz=7.581 times_real=4.24
+launch 1 timed 1 cycles=5390272 frames=181 ms=762.900 cycles_per_second=7065503 mhz=7.066 times_real=3.95
+launch 1 timed 2 cycles=5390269 frames=181 ms=760.100 cycles_per_second=7091526 mhz=7.092 times_real=3.96
+launch 1 timed 3 cycles=5390272 frames=181 ms=907.000 cycles_per_second=5942968 mhz=5.943 times_real=3.32
+launch 1 timed 4 cycles=5390272 frames=181 ms=796.200 cycles_per_second=6769997 mhz=6.770 times_real=3.78
+launch 1 timed 5 cycles=5390268 frames=181 ms=780.200 cycles_per_second=6908829 mhz=6.909 times_real=3.86
+launch 1 play frame=1107 limit=3450
+launch 1 thread 1 cycles=5390270 thread_ms=804.955 mhz=6.696 times_real=3.74
+launch 1 thread 2 cycles=5390270 thread_ms=787.134 mhz=6.848 times_real=3.83
+launch 1 thread 3 cycles=5390274 thread_ms=825.137 mhz=6.533 times_real=3.65
+launch 1 thread 4 cycles=5390267 thread_ms=775.652 mhz=6.949 times_real=3.88
+launch 1 thread 5 cycles=5390275 thread_ms=870.135 mhz=6.195 times_real=3.46
+launch 1 thread 6 cycles=5390267 thread_ms=918.304 mhz=5.870 times_real=3.28
+launch 1 thread 7 cycles=5390270 thread_ms=773.647 mhz=6.967 times_real=3.89
+launch 1 thread 8 cycles=5390272 thread_ms=962.749 mhz=5.599 times_real=3.13
+launch 1 play frame=2555 limit=3450
+round 2 build after
+rom: roms/nes/Lan_Master.nes, 40976 bytes, sha256 becfeafb80479c330333c9e9385417f68f3c88e85443dfb37b05ae9283f3ea45, hash checked
+browser 153.0.8010.47
+launch 1 region 0 NTSC
+launch 1 Running as NTSC, as chosen here: the file does not say which.
+launch 1 boot cycles=6015656 frames=202 ms=676.200 cycles_per_second=8896267 mhz=8.896 times_real=4.97
+launch 1 timed 1 cycles=5390272 frames=181 ms=554.900 cycles_per_second=9713952 mhz=9.714 times_real=5.43
+launch 1 timed 2 cycles=5390269 frames=181 ms=570.400 cycles_per_second=9449981 mhz=9.450 times_real=5.28
+launch 1 timed 3 cycles=5390272 frames=181 ms=546.000 cycles_per_second=9872293 mhz=9.872 times_real=5.52
+launch 1 timed 4 cycles=5390272 frames=181 ms=547.400 cycles_per_second=9847044 mhz=9.847 times_real=5.50
+launch 1 timed 5 cycles=5390268 frames=181 ms=563.100 cycles_per_second=9572488 mhz=9.572 times_real=5.35
+launch 1 play frame=1107 limit=3450
+launch 1 thread 1 cycles=5390270 thread_ms=576.260 mhz=9.354 times_real=5.23
+launch 1 thread 2 cycles=5390270 thread_ms=592.717 mhz=9.094 times_real=5.08
+launch 1 thread 3 cycles=5390274 thread_ms=585.956 mhz=9.199 times_real=5.14
+launch 1 thread 4 cycles=5390267 thread_ms=604.706 mhz=8.914 times_real=4.98
+launch 1 thread 5 cycles=5390275 thread_ms=654.794 mhz=8.232 times_real=4.60
+launch 1 thread 6 cycles=5390267 thread_ms=646.093 mhz=8.343 times_real=4.66
+launch 1 thread 7 cycles=5390270 thread_ms=655.242 mhz=8.226 times_real=4.60
+launch 1 thread 8 cycles=5390272 thread_ms=639.074 mhz=8.435 times_real=4.71
+launch 1 play frame=2555 limit=3450
+round 3 build main
+rom: roms/nes/Lan_Master.nes, 40976 bytes, sha256 becfeafb80479c330333c9e9385417f68f3c88e85443dfb37b05ae9283f3ea45, hash checked
+browser 153.0.8010.47
+launch 1 region 0 NTSC
+launch 1 Running as NTSC, as chosen here: the file does not say which.
+launch 1 boot cycles=6015656 frames=202 ms=897.900 cycles_per_second=6699695 mhz=6.700 times_real=3.74
+launch 1 timed 1 cycles=5390272 frames=181 ms=765.300 cycles_per_second=7043345 mhz=7.043 times_real=3.94
+launch 1 timed 2 cycles=5390269 frames=181 ms=852.600 cycles_per_second=6322155 mhz=6.322 times_real=3.53
+launch 1 timed 3 cycles=5390272 frames=181 ms=830.600 cycles_per_second=6489612 mhz=6.490 times_real=3.63
+launch 1 timed 4 cycles=5390272 frames=181 ms=777.700 cycles_per_second=6931043 mhz=6.931 times_real=3.87
+launch 1 timed 5 cycles=5390268 frames=181 ms=764.500 cycles_per_second=7050710 mhz=7.051 times_real=3.94
+launch 1 play frame=1107 limit=3450
+launch 1 thread 1 cycles=5390270 thread_ms=853.417 mhz=6.316 times_real=3.53
+launch 1 thread 2 cycles=5390270 thread_ms=971.780 mhz=5.547 times_real=3.10
+launch 1 thread 3 cycles=5390274 thread_ms=1128.457 mhz=4.777 times_real=2.67
+launch 1 thread 4 cycles=5390267 thread_ms=1218.948 mhz=4.422 times_real=2.47
+launch 1 thread 5 cycles=5390275 thread_ms=1279.618 mhz=4.212 times_real=2.35
+launch 1 thread 6 cycles=5390267 thread_ms=1128.579 mhz=4.776 times_real=2.67
+launch 1 thread 7 cycles=5390270 thread_ms=1101.423 mhz=4.894 times_real=2.73
+launch 1 thread 8 cycles=5390272 thread_ms=993.942 mhz=5.423 times_real=3.03
+launch 1 play frame=2555 limit=3450
+round 3 build before
+rom: roms/nes/Lan_Master.nes, 40976 bytes, sha256 becfeafb80479c330333c9e9385417f68f3c88e85443dfb37b05ae9283f3ea45, hash checked
+browser 153.0.8010.47
+launch 1 region 0 NTSC
+launch 1 Running as NTSC, as chosen here: the file does not say which.
+launch 1 boot cycles=6015656 frames=202 ms=962.400 cycles_per_second=6250682 mhz=6.251 times_real=3.49
+launch 1 timed 1 cycles=5390272 frames=181 ms=983.700 cycles_per_second=5479589 mhz=5.480 times_real=3.06
+launch 1 timed 2 cycles=5390269 frames=181 ms=936.000 cycles_per_second=5758834 mhz=5.759 times_real=3.22
+launch 1 timed 3 cycles=5390272 frames=181 ms=827.300 cycles_per_second=6515499 mhz=6.515 times_real=3.64
+launch 1 timed 4 cycles=5390272 frames=181 ms=865.800 cycles_per_second=6225770 mhz=6.226 times_real=3.48
+launch 1 timed 5 cycles=5390268 frames=181 ms=992.800 cycles_per_second=5429359 mhz=5.429 times_real=3.03
+launch 1 play frame=1107 limit=3450
+launch 1 thread 1 cycles=5390270 thread_ms=993.363 mhz=5.426 times_real=3.03
+launch 1 thread 2 cycles=5390270 thread_ms=895.942 mhz=6.016 times_real=3.36
+launch 1 thread 3 cycles=5390274 thread_ms=988.472 mhz=5.453 times_real=3.05
+launch 1 thread 4 cycles=5390267 thread_ms=942.931 mhz=5.717 times_real=3.19
+launch 1 thread 5 cycles=5390275 thread_ms=997.920 mhz=5.402 times_real=3.02
+launch 1 thread 6 cycles=5390267 thread_ms=976.597 mhz=5.519 times_real=3.08
+launch 1 thread 7 cycles=5390270 thread_ms=970.428 mhz=5.555 times_real=3.10
+launch 1 thread 8 cycles=5390272 thread_ms=889.263 mhz=6.062 times_real=3.39
+launch 1 play frame=2555 limit=3450
+round 3 build after
+rom: roms/nes/Lan_Master.nes, 40976 bytes, sha256 becfeafb80479c330333c9e9385417f68f3c88e85443dfb37b05ae9283f3ea45, hash checked
+browser 153.0.8010.47
+launch 1 region 0 NTSC
+launch 1 Running as NTSC, as chosen here: the file does not say which.
+launch 1 boot cycles=6015656 frames=202 ms=745.700 cycles_per_second=8067126 mhz=8.067 times_real=4.51
+launch 1 timed 1 cycles=5390272 frames=181 ms=646.000 cycles_per_second=8344074 mhz=8.344 times_real=4.66
+launch 1 timed 2 cycles=5390269 frames=181 ms=638.300 cycles_per_second=8444727 mhz=8.445 times_real=4.72
+launch 1 timed 3 cycles=5390272 frames=181 ms=647.800 cycles_per_second=8320889 mhz=8.321 times_real=4.65
+launch 1 timed 4 cycles=5390272 frames=181 ms=620.500 cycles_per_second=8686981 mhz=8.687 times_real=4.85
+launch 1 timed 5 cycles=5390268 frames=181 ms=648.000 cycles_per_second=8318315 mhz=8.318 times_real=4.65
+launch 1 play frame=1107 limit=3450
+launch 1 thread 1 cycles=5390270 thread_ms=647.926 mhz=8.319 times_real=4.65
+launch 1 thread 2 cycles=5390270 thread_ms=783.970 mhz=6.876 times_real=3.84
+launch 1 thread 3 cycles=5390274 thread_ms=778.981 mhz=6.920 times_real=3.87
+launch 1 thread 4 cycles=5390267 thread_ms=809.645 mhz=6.658 times_real=3.72
+launch 1 thread 5 cycles=5390275 thread_ms=727.372 mhz=7.411 times_real=4.14
+launch 1 thread 6 cycles=5390267 thread_ms=799.487 mhz=6.742 times_real=3.77
+launch 1 thread 7 cycles=5390270 thread_ms=810.896 mhz=6.647 times_real=3.71
+launch 1 thread 8 cycles=5390272 thread_ms=780.304 mhz=6.908 times_real=3.86
+launch 1 play frame=2555 limit=3450
+round 4 build main
+rom: roms/nes/Lan_Master.nes, 40976 bytes, sha256 becfeafb80479c330333c9e9385417f68f3c88e85443dfb37b05ae9283f3ea45, hash checked
+browser 153.0.8010.47
+launch 1 region 0 NTSC
+launch 1 Running as NTSC, as chosen here: the file does not say which.
+launch 1 boot cycles=6015656 frames=202 ms=1220.200 cycles_per_second=4930057 mhz=4.930 times_real=2.75
+launch 1 timed 1 cycles=5390272 frames=181 ms=900.200 cycles_per_second=5987860 mhz=5.988 times_real=3.35
+launch 1 timed 2 cycles=5390269 frames=181 ms=887.000 cycles_per_second=6076966 mhz=6.077 times_real=3.40
+launch 1 timed 3 cycles=5390272 frames=181 ms=998.700 cycles_per_second=5397288 mhz=5.397 times_real=3.02
+launch 1 timed 4 cycles=5390272 frames=181 ms=901.500 cycles_per_second=5979226 mhz=5.979 times_real=3.34
+launch 1 timed 5 cycles=5390268 frames=181 ms=932.100 cycles_per_second=5782929 mhz=5.783 times_real=3.23
+launch 1 play frame=1107 limit=3450
+launch 1 thread 1 cycles=5390270 thread_ms=882.129 mhz=6.111 times_real=3.41
+launch 1 thread 2 cycles=5390270 thread_ms=804.445 mhz=6.701 times_real=3.74
+launch 1 thread 3 cycles=5390274 thread_ms=864.345 mhz=6.236 times_real=3.48
+launch 1 thread 4 cycles=5390267 thread_ms=918.690 mhz=5.867 times_real=3.28
+launch 1 thread 5 cycles=5390275 thread_ms=953.964 mhz=5.650 times_real=3.16
+launch 1 thread 6 cycles=5390267 thread_ms=980.142 mhz=5.499 times_real=3.07
+launch 1 thread 7 cycles=5390270 thread_ms=921.778 mhz=5.848 times_real=3.27
+launch 1 thread 8 cycles=5390272 thread_ms=896.813 mhz=6.010 times_real=3.36
+launch 1 play frame=2555 limit=3450
+round 4 build before
+rom: roms/nes/Lan_Master.nes, 40976 bytes, sha256 becfeafb80479c330333c9e9385417f68f3c88e85443dfb37b05ae9283f3ea45, hash checked
+browser 153.0.8010.47
+launch 1 region 0 NTSC
+launch 1 Running as NTSC, as chosen here: the file does not say which.
+launch 1 boot cycles=6015656 frames=202 ms=834.100 cycles_per_second=7212152 mhz=7.212 times_real=4.03
+launch 1 timed 1 cycles=5390272 frames=181 ms=801.400 cycles_per_second=6726069 mhz=6.726 times_real=3.76
+launch 1 timed 2 cycles=5390269 frames=181 ms=986.200 cycles_per_second=5465696 mhz=5.466 times_real=3.05
+launch 1 timed 3 cycles=5390272 frames=181 ms=819.900 cycles_per_second=6574304 mhz=6.574 times_real=3.67
+launch 1 timed 4 cycles=5390272 frames=181 ms=848.100 cycles_per_second=6355703 mhz=6.356 times_real=3.55
+launch 1 timed 5 cycles=5390268 frames=181 ms=815.000 cycles_per_second=6613826 mhz=6.614 times_real=3.70
+launch 1 play frame=1107 limit=3450
+launch 1 thread 1 cycles=5390270 thread_ms=820.051 mhz=6.573 times_real=3.67
+launch 1 thread 2 cycles=5390270 thread_ms=912.044 mhz=5.910 times_real=3.30
+launch 1 thread 3 cycles=5390274 thread_ms=903.838 mhz=5.964 times_real=3.33
+launch 1 thread 4 cycles=5390267 thread_ms=997.510 mhz=5.404 times_real=3.02
+launch 1 thread 5 cycles=5390275 thread_ms=1138.961 mhz=4.733 times_real=2.64
+launch 1 thread 6 cycles=5390267 thread_ms=1026.224 mhz=5.253 times_real=2.93
+launch 1 thread 7 cycles=5390270 thread_ms=970.407 mhz=5.555 times_real=3.10
+launch 1 thread 8 cycles=5390272 thread_ms=860.140 mhz=6.267 times_real=3.50
+launch 1 play frame=2555 limit=3450
+round 4 build after
+rom: roms/nes/Lan_Master.nes, 40976 bytes, sha256 becfeafb80479c330333c9e9385417f68f3c88e85443dfb37b05ae9283f3ea45, hash checked
+browser 153.0.8010.47
+launch 1 region 0 NTSC
+launch 1 Running as NTSC, as chosen here: the file does not say which.
+launch 1 boot cycles=6015656 frames=202 ms=793.200 cycles_per_second=7584034 mhz=7.584 times_real=4.24
+launch 1 timed 1 cycles=5390272 frames=181 ms=624.600 cycles_per_second=8629958 mhz=8.630 times_real=4.82
+launch 1 timed 2 cycles=5390269 frames=181 ms=612.300 cycles_per_second=8803314 mhz=8.803 times_real=4.92
+launch 1 timed 3 cycles=5390272 frames=181 ms=645.700 cycles_per_second=8347951 mhz=8.348 times_real=4.66
+launch 1 timed 4 cycles=5390272 frames=181 ms=597.700 cycles_per_second=9018357 mhz=9.018 times_real=5.04
+launch 1 timed 5 cycles=5390268 frames=181 ms=671.600 cycles_per_second=8026010 mhz=8.026 times_real=4.48
+launch 1 play frame=1107 limit=3450
+launch 1 thread 1 cycles=5390270 thread_ms=758.271 mhz=7.109 times_real=3.97
+launch 1 thread 2 cycles=5390270 thread_ms=757.164 mhz=7.119 times_real=3.98
+launch 1 thread 3 cycles=5390274 thread_ms=862.981 mhz=6.246 times_real=3.49
+launch 1 thread 4 cycles=5390267 thread_ms=688.381 mhz=7.830 times_real=4.38
+launch 1 thread 5 cycles=5390275 thread_ms=757.336 mhz=7.117 times_real=3.98
+launch 1 thread 6 cycles=5390267 thread_ms=664.403 mhz=8.113 times_real=4.53
+launch 1 thread 7 cycles=5390270 thread_ms=682.684 mhz=7.896 times_real=4.41
+launch 1 thread 8 cycles=5390272 thread_ms=646.924 mhz=8.332 times_real=4.66
+launch 1 play frame=2555 limit=3450
+gauge
+ 06:16:17 up 12 days, 15:45,  2 users,  load average: 2.15, 2.22, 2.65
+Fri Oct  9 06:16:17 UTC 2026
+os: roms/bbc-micro/os.rom, 16384 bytes, sha256 2d9fea69017864f6962704481829f95fee08446c8c3a13826d5d4e44000ac9de, hash checked
+basic: roms/bbc-micro/BASIC.ROM, 16384 bytes, sha256 45bd55dc0f6f0f8f1fe9e2481de7def206565eec8f600ba3068b849ca4132079, hash checked
+dfs: roms/bbc-micro/DFS-1.2.rom, 16384 bytes, sha256 e745e34895225a6650b712c1dd0656cb0b0b15f072a8ae6d9ea8d1ac257eb3d6, hash checked
+browser 153.0.8010.47
+launch 1 boot cycles=6000003 ms=466.000 cycles_per_second=12875543 mhz=12.876
+launch 1 screen ["","BBC Computer 32K","","Acorn DFS","","BASIC","",">"]
+launch 1 prompt yes
+launch 1 timed 1 cycles=2000000 ms=72.900 cycles_per_second=27434842 mhz=27.435
+launch 1 thread 1 cycles=2000003 thread_ms=72.653 mhz=27.528
+launch 1 thread 2 cycles=2000000 thread_ms=73.020 mhz=27.390
+launch 1 thread 3 cycles=2000000 thread_ms=78.395 mhz=25.512
+launch 1 thread 4 cycles=2000005 thread_ms=85.349 mhz=23.433
+launch 1 thread 5 cycles=2000001 thread_ms=86.360 mhz=23.159
+launch 1 thread 6 cycles=2000002 thread_ms=73.689 mhz=27.141
+launch 1 thread 7 cycles=2000002 thread_ms=73.985 mhz=27.033
+launch 1 thread 8 cycles=2000000 thread_ms=80.250 mhz=24.922
+launch 1 thread 9 cycles=2000000 thread_ms=93.218 mhz=21.455
+launch 1 thread 10 cycles=2000001 thread_ms=90.451 mhz=22.111
+set play region 1
+ 06:16:21 up 12 days, 15:45,  2 users,  load average: 2.15, 2.22, 2.65
+Fri Oct  9 06:16:21 UTC 2026
+round 1 build main
+rom: roms/nes/Lan_Master.nes, 40976 bytes, sha256 becfeafb80479c330333c9e9385417f68f3c88e85443dfb37b05ae9283f3ea45, hash checked
+browser 153.0.8010.47
+launch 1 region 1 PAL
+launch 1 Running as PAL, as chosen here: the file does not say which.
+launch 1 boot cycles=6017791 frames=181 ms=1224.400 cycles_per_second=4914890 mhz=4.915 times_real=2.96
+launch 1 timed 1 cycles=5386096 frames=162 ms=802.800 cycles_per_second=6709138 mhz=6.709 times_real=4.04
+launch 1 timed 2 cycles=5386095 frames=162 ms=797.400 cycles_per_second=6754571 mhz=6.755 times_real=4.06
+launch 1 timed 3 cycles=5386096 frames=162 ms=1053.900 cycles_per_second=5110633 mhz=5.111 times_real=3.07
+launch 1 timed 4 cycles=5386093 frames=162 ms=862.300 cycles_per_second=6246194 mhz=6.246 times_real=3.76
+launch 1 timed 5 cycles=5386096 frames=162 ms=873.400 cycles_per_second=6166815 mhz=6.167 times_real=3.71
+launch 1 play frame=991 limit=2850
+launch 1 thread 1 cycles=5386095 thread_ms=1101.870 mhz=4.888 times_real=2.94
+launch 1 thread 2 cycles=5386096 thread_ms=1095.421 mhz=4.917 times_real=2.96
+launch 1 thread 3 cycles=5386093 thread_ms=1042.286 mhz=5.168 times_real=3.11
+launch 1 thread 4 cycles=5386095 thread_ms=1072.355 mhz=5.023 times_real=3.02
+launch 1 thread 5 cycles=5386097 thread_ms=1009.685 mhz=5.334 times_real=3.21
+launch 1 thread 6 cycles=5386095 thread_ms=962.847 mhz=5.594 times_real=3.36
+launch 1 thread 7 cycles=5386093 thread_ms=974.294 mhz=5.528 times_real=3.33
+launch 1 thread 8 cycles=5386096 thread_ms=1113.470 mhz=4.837 times_real=2.91
+launch 1 play frame=2287 limit=2850
+round 1 build before
+rom: roms/nes/Lan_Master.nes, 40976 bytes, sha256 becfeafb80479c330333c9e9385417f68f3c88e85443dfb37b05ae9283f3ea45, hash checked
+browser 153.0.8010.47
+launch 1 region 1 PAL
+launch 1 Running as PAL, as chosen here: the file does not say which.
+launch 1 boot cycles=6017791 frames=181 ms=891.400 cycles_per_second=6750943 mhz=6.751 times_real=4.06
+launch 1 timed 1 cycles=5386096 frames=162 ms=889.500 cycles_per_second=6055195 mhz=6.055 times_real=3.64
+launch 1 timed 2 cycles=5386095 frames=162 ms=960.300 cycles_per_second=5608763 mhz=5.609 times_real=3.37
+launch 1 timed 3 cycles=5386096 frames=162 ms=896.800 cycles_per_second=6005905 mhz=6.006 times_real=3.61
+launch 1 timed 4 cycles=5386093 frames=162 ms=876.100 cycles_per_second=6147806 mhz=6.148 times_real=3.70
+launch 1 timed 5 cycles=5386096 frames=162 ms=945.700 cycles_per_second=5695354 mhz=5.695 times_real=3.43
+launch 1 play frame=991 limit=2850
+launch 1 thread 1 cycles=5386095 thread_ms=872.420 mhz=6.174 times_real=3.71
+launch 1 thread 2 cycles=5386096 thread_ms=901.974 mhz=5.971 times_real=3.59
+launch 1 thread 3 cycles=5386093 thread_ms=970.943 mhz=5.547 times_real=3.34
+launch 1 thread 4 cycles=5386095 thread_ms=921.245 mhz=5.847 times_real=3.52
+launch 1 thread 5 cycles=5386097 thread_ms=986.290 mhz=5.461 times_real=3.28
+launch 1 thread 6 cycles=5386095 thread_ms=1221.523 mhz=4.409 times_real=2.65
+launch 1 thread 7 cycles=5386093 thread_ms=984.965 mhz=5.468 times_real=3.29
+launch 1 thread 8 cycles=5386096 thread_ms=1064.433 mhz=5.060 times_real=3.04
+launch 1 play frame=2287 limit=2850
+round 1 build after
+rom: roms/nes/Lan_Master.nes, 40976 bytes, sha256 becfeafb80479c330333c9e9385417f68f3c88e85443dfb37b05ae9283f3ea45, hash checked
+browser 153.0.8010.47
+launch 1 region 1 PAL
+launch 1 Running as PAL, as chosen here: the file does not say which.
+launch 1 boot cycles=6017791 frames=181 ms=841.100 cycles_per_second=7154668 mhz=7.155 times_real=4.30
+launch 1 timed 1 cycles=5386096 frames=162 ms=734.200 cycles_per_second=7336007 mhz=7.336 times_real=4.41
+launch 1 timed 2 cycles=5386095 frames=162 ms=647.700 cycles_per_second=8315725 mhz=8.316 times_real=5.00
+launch 1 timed 3 cycles=5386096 frames=162 ms=644.400 cycles_per_second=8358312 mhz=8.358 times_real=5.03
+launch 1 timed 4 cycles=5386093 frames=162 ms=770.400 cycles_per_second=6991294 mhz=6.991 times_real=4.21
+launch 1 timed 5 cycles=5386096 frames=162 ms=648.400 cycles_per_second=8306749 mhz=8.307 times_real=5.00
+launch 1 play frame=991 limit=2850
+launch 1 thread 1 cycles=5386095 thread_ms=647.202 mhz=8.322 times_real=5.01
+launch 1 thread 2 cycles=5386096 thread_ms=808.008 mhz=6.666 times_real=4.01
+launch 1 thread 3 cycles=5386093 thread_ms=807.293 mhz=6.672 times_real=4.01
+launch 1 thread 4 cycles=5386095 thread_ms=869.786 mhz=6.192 times_real=3.72
+launch 1 thread 5 cycles=5386097 thread_ms=829.989 mhz=6.489 times_real=3.90
+launch 1 thread 6 cycles=5386095 thread_ms=823.252 mhz=6.542 times_real=3.94
+launch 1 thread 7 cycles=5386093 thread_ms=811.913 mhz=6.634 times_real=3.99
+launch 1 thread 8 cycles=5386096 thread_ms=793.859 mhz=6.785 times_real=4.08
+launch 1 play frame=2287 limit=2850
+round 2 build main
+rom: roms/nes/Lan_Master.nes, 40976 bytes, sha256 becfeafb80479c330333c9e9385417f68f3c88e85443dfb37b05ae9283f3ea45, hash checked
+browser 153.0.8010.47
+launch 1 region 1 PAL
+launch 1 Running as PAL, as chosen here: the file does not say which.
+launch 1 boot cycles=6017791 frames=181 ms=1102.900 cycles_per_second=5456334 mhz=5.456 times_real=3.28
+launch 1 timed 1 cycles=5386096 frames=162 ms=875.700 cycles_per_second=6150618 mhz=6.151 times_real=3.70
+launch 1 timed 2 cycles=5386095 frames=162 ms=995.600 cycles_per_second=5409899 mhz=5.410 times_real=3.25
+launch 1 timed 3 cycles=5386096 frames=162 ms=844.400 cycles_per_second=6378607 mhz=6.379 times_real=3.84
+launch 1 timed 4 cycles=5386093 frames=162 ms=984.000 cycles_per_second=5473672 mhz=5.474 times_real=3.29
+launch 1 timed 5 cycles=5386096 frames=162 ms=840.700 cycles_per_second=6406680 mhz=6.407 times_real=3.85
+launch 1 play frame=991 limit=2850
+launch 1 thread 1 cycles=5386095 thread_ms=765.130 mhz=7.039 times_real=4.23
+launch 1 thread 2 cycles=5386096 thread_ms=825.644 mhz=6.524 times_real=3.92
+launch 1 thread 3 cycles=5386093 thread_ms=1093.886 mhz=4.924 times_real=2.96
+launch 1 thread 4 cycles=5386095 thread_ms=1128.429 mhz=4.773 times_real=2.87
+launch 1 thread 5 cycles=5386097 thread_ms=1129.468 mhz=4.769 times_real=2.87
+launch 1 thread 6 cycles=5386095 thread_ms=1122.060 mhz=4.800 times_real=2.89
+launch 1 thread 7 cycles=5386093 thread_ms=1112.867 mhz=4.840 times_real=2.91
+launch 1 thread 8 cycles=5386096 thread_ms=954.884 mhz=5.641 times_real=3.39
+launch 1 play frame=2287 limit=2850
+round 2 build before
+rom: roms/nes/Lan_Master.nes, 40976 bytes, sha256 becfeafb80479c330333c9e9385417f68f3c88e85443dfb37b05ae9283f3ea45, hash checked
+browser 153.0.8010.47
+launch 1 region 1 PAL
+launch 1 Running as PAL, as chosen here: the file does not say which.
+launch 1 boot cycles=6017791 frames=181 ms=854.200 cycles_per_second=7044944 mhz=7.045 times_real=4.24
+launch 1 timed 1 cycles=5386096 frames=162 ms=1080.600 cycles_per_second=4984357 mhz=4.984 times_real=3.00
+launch 1 timed 2 cycles=5386095 frames=162 ms=922.600 cycles_per_second=5837953 mhz=5.838 times_real=3.51
+launch 1 timed 3 cycles=5386096 frames=162 ms=829.000 cycles_per_second=6497100 mhz=6.497 times_real=3.91
+launch 1 timed 4 cycles=5386093 frames=162 ms=805.700 cycles_per_second=6684986 mhz=6.685 times_real=4.02
+launch 1 timed 5 cycles=5386096 frames=162 ms=819.900 cycles_per_second=6569211 mhz=6.569 times_real=3.95
+launch 1 play frame=991 limit=2850
+launch 1 thread 1 cycles=5386095 thread_ms=976.840 mhz=5.514 times_real=3.32
+launch 1 thread 2 cycles=5386096 thread_ms=951.072 mhz=5.663 times_real=3.41
+launch 1 thread 3 cycles=5386093 thread_ms=954.614 mhz=5.642 times_real=3.39
+launch 1 thread 4 cycles=5386095 thread_ms=1063.648 mhz=5.064 times_real=3.05
+launch 1 thread 5 cycles=5386097 thread_ms=855.392 mhz=6.297 times_real=3.79
+launch 1 thread 6 cycles=5386095 thread_ms=927.999 mhz=5.804 times_real=3.49
+launch 1 thread 7 cycles=5386093 thread_ms=854.573 mhz=6.303 times_real=3.79
+launch 1 thread 8 cycles=5386096 thread_ms=858.926 mhz=6.271 times_real=3.77
+launch 1 play frame=2287 limit=2850
+round 2 build after
+rom: roms/nes/Lan_Master.nes, 40976 bytes, sha256 becfeafb80479c330333c9e9385417f68f3c88e85443dfb37b05ae9283f3ea45, hash checked
+browser 153.0.8010.47
+launch 1 region 1 PAL
+launch 1 Running as PAL, as chosen here: the file does not say which.
+launch 1 boot cycles=6017791 frames=181 ms=734.300 cycles_per_second=8195276 mhz=8.195 times_real=4.93
+launch 1 timed 1 cycles=5386096 frames=162 ms=624.600 cycles_per_second=8623272 mhz=8.623 times_real=5.19
+launch 1 timed 2 cycles=5386095 frames=162 ms=647.600 cycles_per_second=8317009 mhz=8.317 times_real=5.00
+launch 1 timed 3 cycles=5386096 frames=162 ms=644.900 cycles_per_second=8351831 mhz=8.352 times_real=5.02
+launch 1 timed 4 cycles=5386093 frames=162 ms=627.900 cycles_per_second=8577947 mhz=8.578 times_real=5.16
+launch 1 timed 5 cycles=5386096 frames=162 ms=655.300 cycles_per_second=8219283 mhz=8.219 times_real=4.94
+launch 1 play frame=991 limit=2850
+launch 1 thread 1 cycles=5386095 thread_ms=686.443 mhz=7.846 times_real=4.72
+launch 1 thread 2 cycles=5386096 thread_ms=669.902 mhz=8.040 times_real=4.84
+launch 1 thread 3 cycles=5386093 thread_ms=658.582 mhz=8.178 times_real=4.92
+launch 1 thread 4 cycles=5386095 thread_ms=693.677 mhz=7.765 times_real=4.67
+launch 1 thread 5 cycles=5386097 thread_ms=788.996 mhz=6.827 times_real=4.11
+launch 1 thread 6 cycles=5386095 thread_ms=829.205 mhz=6.495 times_real=3.91
+launch 1 thread 7 cycles=5386093 thread_ms=826.281 mhz=6.518 times_real=3.92
+launch 1 thread 8 cycles=5386096 thread_ms=773.385 mhz=6.964 times_real=4.19
+launch 1 play frame=2287 limit=2850
+round 3 build main
+rom: roms/nes/Lan_Master.nes, 40976 bytes, sha256 becfeafb80479c330333c9e9385417f68f3c88e85443dfb37b05ae9283f3ea45, hash checked
+browser 153.0.8010.47
+launch 1 region 1 PAL
+launch 1 Running as PAL, as chosen here: the file does not say which.
+launch 1 boot cycles=6017791 frames=181 ms=983.600 cycles_per_second=6118128 mhz=6.118 times_real=3.68
+launch 1 timed 1 cycles=5386096 frames=162 ms=907.000 cycles_per_second=5938364 mhz=5.938 times_real=3.57
+launch 1 timed 2 cycles=5386095 frames=162 ms=792.500 cycles_per_second=6796334 mhz=6.796 times_real=4.09
+launch 1 timed 3 cycles=5386096 frames=162 ms=757.600 cycles_per_second=7109419 mhz=7.109 times_real=4.28
+launch 1 timed 4 cycles=5386093 frames=162 ms=776.200 cycles_per_second=6939053 mhz=6.939 times_real=4.17
+launch 1 timed 5 cycles=5386096 frames=162 ms=735.900 cycles_per_second=7319060 mhz=7.319 times_real=4.40
+launch 1 play frame=991 limit=2850
+launch 1 thread 1 cycles=5386095 thread_ms=810.752 mhz=6.643 times_real=4.00
+launch 1 thread 2 cycles=5386096 thread_ms=880.469 mhz=6.117 times_real=3.68
+launch 1 thread 3 cycles=5386093 thread_ms=853.982 mhz=6.307 times_real=3.79
+launch 1 thread 4 cycles=5386095 thread_ms=881.091 mhz=6.113 times_real=3.68
+launch 1 thread 5 cycles=5386097 thread_ms=938.859 mhz=5.737 times_real=3.45
+launch 1 thread 6 cycles=5386095 thread_ms=973.298 mhz=5.534 times_real=3.33
+launch 1 thread 7 cycles=5386093 thread_ms=1108.760 mhz=4.858 times_real=2.92
+launch 1 thread 8 cycles=5386096 thread_ms=1210.515 mhz=4.449 times_real=2.68
+launch 1 play frame=2287 limit=2850
+round 3 build before
+rom: roms/nes/Lan_Master.nes, 40976 bytes, sha256 becfeafb80479c330333c9e9385417f68f3c88e85443dfb37b05ae9283f3ea45, hash checked
+browser 153.0.8010.47
+launch 1 region 1 PAL
+launch 1 Running as PAL, as chosen here: the file does not say which.
+launch 1 boot cycles=6017791 frames=181 ms=1132.500 cycles_per_second=5313723 mhz=5.314 times_real=3.20
+launch 1 timed 1 cycles=5386096 frames=162 ms=819.000 cycles_per_second=6576430 mhz=6.576 times_real=3.96
+launch 1 timed 2 cycles=5386095 frames=162 ms=785.400 cycles_per_second=6857773 mhz=6.858 times_real=4.12
+launch 1 timed 3 cycles=5386096 frames=162 ms=847.200 cycles_per_second=6357526 mhz=6.358 times_real=3.82
+launch 1 timed 4 cycles=5386093 frames=162 ms=760.000 cycles_per_second=7086964 mhz=7.087 times_real=4.26
+launch 1 timed 5 cycles=5386096 frames=162 ms=868.100 cycles_per_second=6204465 mhz=6.204 times_real=3.73
+launch 1 play frame=991 limit=2850
+launch 1 thread 1 cycles=5386095 thread_ms=927.325 mhz=5.808 times_real=3.49
+launch 1 thread 2 cycles=5386096 thread_ms=915.220 mhz=5.885 times_real=3.54
+launch 1 thread 3 cycles=5386093 thread_ms=857.659 mhz=6.280 times_real=3.78
+launch 1 thread 4 cycles=5386095 thread_ms=870.224 mhz=6.189 times_real=3.72
+launch 1 thread 5 cycles=5386097 thread_ms=864.102 mhz=6.233 times_real=3.75
+launch 1 thread 6 cycles=5386095 thread_ms=891.249 mhz=6.043 times_real=3.63
+launch 1 thread 7 cycles=5386093 thread_ms=851.471 mhz=6.326 times_real=3.80
+launch 1 thread 8 cycles=5386096 thread_ms=811.271 mhz=6.639 times_real=3.99
+launch 1 play frame=2287 limit=2850
+round 3 build after
+rom: roms/nes/Lan_Master.nes, 40976 bytes, sha256 becfeafb80479c330333c9e9385417f68f3c88e85443dfb37b05ae9283f3ea45, hash checked
+browser 153.0.8010.47
+launch 1 region 1 PAL
+launch 1 Running as PAL, as chosen here: the file does not say which.
+launch 1 boot cycles=6017791 frames=181 ms=773.900 cycles_per_second=7775928 mhz=7.776 times_real=4.68
+launch 1 timed 1 cycles=5386096 frames=162 ms=581.600 cycles_per_second=9260825 mhz=9.261 times_real=5.57
+launch 1 timed 2 cycles=5386095 frames=162 ms=615.400 cycles_per_second=8752186 mhz=8.752 times_real=5.26
+launch 1 timed 3 cycles=5386096 frames=162 ms=608.100 cycles_per_second=8857254 mhz=8.857 times_real=5.33
+launch 1 timed 4 cycles=5386093 frames=162 ms=579.100 cycles_per_second=9300800 mhz=9.301 times_real=5.59
+launch 1 timed 5 cycles=5386096 frames=162 ms=685.200 cycles_per_second=7860619 mhz=7.861 times_real=4.73
+launch 1 play frame=991 limit=2850
+launch 1 thread 1 cycles=5386095 thread_ms=630.974 mhz=8.536 times_real=5.13
+launch 1 thread 2 cycles=5386096 thread_ms=558.366 mhz=9.646 times_real=5.80
+launch 1 thread 3 cycles=5386093 thread_ms=631.499 mhz=8.529 times_real=5.13
+launch 1 thread 4 cycles=5386095 thread_ms=703.125 mhz=7.660 times_real=4.61
+launch 1 thread 5 cycles=5386097 thread_ms=667.697 mhz=8.067 times_real=4.85
+launch 1 thread 6 cycles=5386095 thread_ms=702.064 mhz=7.672 times_real=4.61
+launch 1 thread 7 cycles=5386093 thread_ms=657.858 mhz=8.187 times_real=4.92
+launch 1 thread 8 cycles=5386096 thread_ms=663.914 mhz=8.113 times_real=4.88
+launch 1 play frame=2287 limit=2850
+round 4 build main
+rom: roms/nes/Lan_Master.nes, 40976 bytes, sha256 becfeafb80479c330333c9e9385417f68f3c88e85443dfb37b05ae9283f3ea45, hash checked
+browser 153.0.8010.47
+launch 1 region 1 PAL
+launch 1 Running as PAL, as chosen here: the file does not say which.
+launch 1 boot cycles=6017791 frames=181 ms=979.700 cycles_per_second=6142483 mhz=6.142 times_real=3.69
+launch 1 timed 1 cycles=5386096 frames=162 ms=786.800 cycles_per_second=6845572 mhz=6.846 times_real=4.12
+launch 1 timed 2 cycles=5386095 frames=162 ms=741.200 cycles_per_second=7266723 mhz=7.267 times_real=4.37
+launch 1 timed 3 cycles=5386096 frames=162 ms=739.900 cycles_per_second=7279492 mhz=7.279 times_real=4.38
+launch 1 timed 4 cycles=5386093 frames=162 ms=745.500 cycles_per_second=7224806 mhz=7.225 times_real=4.35
+launch 1 timed 5 cycles=5386096 frames=162 ms=757.300 cycles_per_second=7112236 mhz=7.112 times_real=4.28
+launch 1 play frame=991 limit=2850
+launch 1 thread 1 cycles=5386095 thread_ms=965.164 mhz=5.580 times_real=3.36
+launch 1 thread 2 cycles=5386096 thread_ms=821.535 mhz=6.556 times_real=3.94
+launch 1 thread 3 cycles=5386093 thread_ms=817.236 mhz=6.591 times_real=3.96
+launch 1 thread 4 cycles=5386095 thread_ms=892.852 mhz=6.032 times_real=3.63
+launch 1 thread 5 cycles=5386097 thread_ms=976.832 mhz=5.514 times_real=3.32
+launch 1 thread 6 cycles=5386095 thread_ms=903.623 mhz=5.961 times_real=3.59
+launch 1 thread 7 cycles=5386093 thread_ms=1020.653 mhz=5.277 times_real=3.17
+launch 1 thread 8 cycles=5386096 thread_ms=965.602 mhz=5.578 times_real=3.35
+launch 1 play frame=2287 limit=2850
+round 4 build before
+rom: roms/nes/Lan_Master.nes, 40976 bytes, sha256 becfeafb80479c330333c9e9385417f68f3c88e85443dfb37b05ae9283f3ea45, hash checked
+browser 153.0.8010.47
+launch 1 region 1 PAL
+launch 1 Running as PAL, as chosen here: the file does not say which.
+launch 1 boot cycles=6017791 frames=181 ms=738.300 cycles_per_second=8150875 mhz=8.151 times_real=4.90
+launch 1 timed 1 cycles=5386096 frames=162 ms=723.700 cycles_per_second=7442443 mhz=7.442 times_real=4.48
+launch 1 timed 2 cycles=5386095 frames=162 ms=748.100 cycles_per_second=7199699 mhz=7.200 times_real=4.33
+launch 1 timed 3 cycles=5386096 frames=162 ms=756.500 cycles_per_second=7119757 mhz=7.120 times_real=4.28
+launch 1 timed 4 cycles=5386093 frames=162 ms=767.700 cycles_per_second=7015883 mhz=7.016 times_real=4.22
+launch 1 timed 5 cycles=5386096 frames=162 ms=769.200 cycles_per_second=7002205 mhz=7.002 times_real=4.21
+launch 1 play frame=991 limit=2850
+launch 1 thread 1 cycles=5386095 thread_ms=730.326 mhz=7.375 times_real=4.44
+launch 1 thread 2 cycles=5386096 thread_ms=709.286 mhz=7.594 times_real=4.57
+launch 1 thread 3 cycles=5386093 thread_ms=782.368 mhz=6.884 times_real=4.14
+launch 1 thread 4 cycles=5386095 thread_ms=827.865 mhz=6.506 times_real=3.91
+launch 1 thread 5 cycles=5386097 thread_ms=780.634 mhz=6.900 times_real=4.15
+launch 1 thread 6 cycles=5386095 thread_ms=827.932 mhz=6.505 times_real=3.91
+launch 1 thread 7 cycles=5386093 thread_ms=843.480 mhz=6.386 times_real=3.84
+launch 1 thread 8 cycles=5386096 thread_ms=862.785 mhz=6.243 times_real=3.75
+launch 1 play frame=2287 limit=2850
+round 4 build after
+rom: roms/nes/Lan_Master.nes, 40976 bytes, sha256 becfeafb80479c330333c9e9385417f68f3c88e85443dfb37b05ae9283f3ea45, hash checked
+browser 153.0.8010.47
+launch 1 region 1 PAL
+launch 1 Running as PAL, as chosen here: the file does not say which.
+launch 1 boot cycles=6017791 frames=181 ms=700.200 cycles_per_second=8594389 mhz=8.594 times_real=5.17
+launch 1 timed 1 cycles=5386096 frames=162 ms=605.700 cycles_per_second=8892349 mhz=8.892 times_real=5.35
+launch 1 timed 2 cycles=5386095 frames=162 ms=568.400 cycles_per_second=9475888 mhz=9.476 times_real=5.70
+launch 1 timed 3 cycles=5386096 frames=162 ms=615.400 cycles_per_second=8752187 mhz=8.752 times_real=5.26
+launch 1 timed 4 cycles=5386093 frames=162 ms=680.300 cycles_per_second=7917232 mhz=7.917 times_real=4.76
+launch 1 timed 5 cycles=5386096 frames=162 ms=626.900 cycles_per_second=8591635 mhz=8.592 times_real=5.17
+launch 1 play frame=991 limit=2850
+launch 1 thread 1 cycles=5386095 thread_ms=683.370 mhz=7.882 times_real=4.74
+launch 1 thread 2 cycles=5386096 thread_ms=622.547 mhz=8.652 times_real=5.20
+launch 1 thread 3 cycles=5386093 thread_ms=714.920 mhz=7.534 times_real=4.53
+launch 1 thread 4 cycles=5386095 thread_ms=776.977 mhz=6.932 times_real=4.17
+launch 1 thread 5 cycles=5386097 thread_ms=746.805 mhz=7.212 times_real=4.34
+launch 1 thread 6 cycles=5386095 thread_ms=995.768 mhz=5.409 times_real=3.25
+launch 1 thread 7 cycles=5386093 thread_ms=998.040 mhz=5.397 times_real=3.25
+launch 1 thread 8 cycles=5386096 thread_ms=969.952 mhz=5.553 times_real=3.34
+launch 1 play frame=2287 limit=2850
+gauge
+ 06:19:08 up 12 days, 15:48,  1 user,  load average: 1.37, 1.90, 2.45
+Fri Oct  9 06:19:08 UTC 2026
+os: roms/bbc-micro/os.rom, 16384 bytes, sha256 2d9fea69017864f6962704481829f95fee08446c8c3a13826d5d4e44000ac9de, hash checked
+basic: roms/bbc-micro/BASIC.ROM, 16384 bytes, sha256 45bd55dc0f6f0f8f1fe9e2481de7def206565eec8f600ba3068b849ca4132079, hash checked
+dfs: roms/bbc-micro/DFS-1.2.rom, 16384 bytes, sha256 e745e34895225a6650b712c1dd0656cb0b0b15f072a8ae6d9ea8d1ac257eb3d6, hash checked
+browser 153.0.8010.47
+launch 1 boot cycles=6000003 ms=410.000 cycles_per_second=14634154 mhz=14.634
+launch 1 screen ["","BBC Computer 32K","","Acorn DFS","","BASIC","",">"]
+launch 1 prompt yes
+launch 1 timed 1 cycles=2000000 ms=76.200 cycles_per_second=26246719 mhz=26.247
+launch 1 thread 1 cycles=2000003 thread_ms=85.664 mhz=23.347
+launch 1 thread 2 cycles=2000000 thread_ms=85.833 mhz=23.301
+launch 1 thread 3 cycles=2000000 thread_ms=86.062 mhz=23.239
+launch 1 thread 4 cycles=2000005 thread_ms=93.068 mhz=21.490
+launch 1 thread 5 cycles=2000001 thread_ms=96.754 mhz=20.671
+launch 1 thread 6 cycles=2000002 thread_ms=96.401 mhz=20.747
+launch 1 thread 7 cycles=2000002 thread_ms=97.832 mhz=20.443
+launch 1 thread 8 cycles=2000000 thread_ms=93.885 mhz=21.303
+launch 1 thread 9 cycles=2000000 thread_ms=91.711 mhz=21.808
+launch 1 thread 10 cycles=2000001 thread_ms=82.430 mhz=24.263
+ 06:19:11 up 12 days, 15:48,  1 user,  load average: 1.37, 1.90, 2.45
+Fri Oct  9 06:19:11 UTC 2026

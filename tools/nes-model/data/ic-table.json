@@ -1,0 +1,224 @@
+{
+ "about": "Each IC on the NES-CPU-10 board: its reference (as the print reads it, task 3), role, pin count, package, and its GND and +5V (VCC) pins with the source each pinout was read from. Task 4 wrote what its nets check needs; task 5 adds each console's part. Facts read from the sources named, not their text.",
+ "ics": [
+  {
+   "ref": "U6",
+   "role": "the processor and sound unit (RP2A03)",
+   "pins": 40,
+   "package": "DIP-40 600 mil",
+   "gnd": 20,
+   "vcc": 40,
+   "pinoutSource": "nesdev wiki, \"CPU pinout\" (https://www.nesdev.org/wiki/CPU_pinout), read 5 October 2026: pin 20 GND, pin 40 +5V",
+   "parts": {
+    "ntsc": {
+     "part": "RP2A03G",
+     "seen": "I4"
+    },
+    "pal": {
+     "part": "RP2A07A",
+     "seen": "I3"
+    }
+   }
+  },
+  {
+   "ref": "U5",
+   "role": "the picture processing unit (RP2C02)",
+   "pins": 40,
+   "package": "DIP-40 600 mil",
+   "gnd": 20,
+   "vcc": 40,
+   "pinoutSource": "nesdev wiki, \"PPU pinout\" (https://www.nesdev.org/wiki/PPU_pinout), read 5 October 2026: pin 20 GND, pin 40 +5V",
+   "parts": {
+    "ntsc": {
+     "part": "RP2C02G-0",
+     "seen": "I4"
+    },
+    "pal": {
+     "part": "RP2C07-0",
+     "seen": "I3"
+    }
+   }
+  },
+  {
+   "ref": "U1",
+   "role": "the work RAM, 2 KB (6116)",
+   "pins": 24,
+   "package": "DIP-24 600 mil",
+   "gnd": 12,
+   "vcc": 24,
+   "pinoutSource": "Hitachi, \"HM6116 Series, 2048-word x 8-bit High Speed CMOS Static RAM\" data sheet, \"Pin Arrangement\", the 24-pin DIP (https://w140.com/tekwiki/images/b/bb/HM6116LP-4_CMOS_SRAM.PDF), read 5 October 2026: pin 12 Vss, pin 24 Vcc. The 6116 pinout is the same whoever made the part",
+   "parts": {
+    "ntsc": {
+     "part": "MB8416A-15-SK",
+     "seen": "I4"
+    },
+    "pal": {
+     "part": "XRM6216-10",
+     "seen": "I3"
+    }
+   }
+  },
+  {
+   "ref": "U4",
+   "role": "the video RAM, 2 KB (6116)",
+   "pins": 24,
+   "package": "DIP-24 600 mil",
+   "gnd": 12,
+   "vcc": 24,
+   "pinoutSource": "Hitachi, \"HM6116 Series, 2048-word x 8-bit High Speed CMOS Static RAM\" data sheet, \"Pin Arrangement\", the 24-pin DIP (https://w140.com/tekwiki/images/b/bb/HM6116LP-4_CMOS_SRAM.PDF), read 5 October 2026: pin 12 Vss, pin 24 Vcc. The 6116 pinout is the same whoever made the part",
+   "parts": {
+    "ntsc": {
+     "part": "MB8416A-15-SK",
+     "seen": "I4"
+    },
+    "pal": {
+     "part": "XRM6216-10",
+     "seen": "I3"
+    }
+   }
+  },
+  {
+   "ref": "U2",
+   "role": "the address latch (74LS373)",
+   "pins": 20,
+   "package": "DIP-20 300 mil",
+   "gnd": 10,
+   "vcc": 20,
+   "pinoutSource": "Texas Instruments, \"SN54HC373, SN74HC373 Octal D-Type Transparent Latches\" data sheet (SCLS140G, revised February 2025), the pin functions table for the 20-pin PDIP (https://www.ti.com/lit/ds/symlink/sn74hc373.pdf), read 5 October 2026: pin 10 GND, pin 20 VCC. The board's print reads 74LS373 and the KiCad redrawing 74HC373; the '373 has one pinout in both families",
+   "parts": {
+    "ntsc": {
+     "part": "SN74LS373N",
+     "seen": "I4"
+    },
+    "pal": {
+     "part": "MB74LS373",
+     "seen": "I3"
+    }
+   }
+  },
+  {
+   "ref": "U3",
+   "role": "the address decoder (74LS139)",
+   "pins": 16,
+   "package": "DIP-16 300 mil",
+   "gnd": 8,
+   "vcc": 16,
+   "pinoutSource": "Texas Instruments, \"SNx4HC139 Dual 2-Line To 4-Line Decoders/Demultiplexers\" data sheet (SCLS108E, revised February 2022), section 4 \"Pin Configuration and Functions\", the 16-pin PDIP (https://www.ti.com/lit/ds/symlink/sn74hc139.pdf), read 5 October 2026: pin 8 GND, pin 16 VCC. The board's print reads 74LS139; the '139 has one pinout in both families",
+   "parts": {
+    "ntsc": {
+     "part": "SN74LS139N",
+     "seen": "I4"
+    },
+    "pal": {
+     "part": "SN74LS139N",
+     "seen": "I3"
+    }
+   }
+  },
+  {
+   "ref": "U7",
+   "role": "the controller ports' buffer CI (40H368)",
+   "pins": 16,
+   "package": "DIP-16 300 mil",
+   "gnd": 8,
+   "vcc": 16,
+   "pinoutSource": "Texas Instruments, \"SN54HC368, SN74HC368\" data sheet (SCLS310F, revised June 2022), section 4 \"Pin Configuration and Functions\", the 16-pin PDIP (https://www.ti.com/lit/ds/symlink/sn74hc368.pdf), read 5 October 2026: pin 8 GND, pin 16 VCC. The board's part is Toshiba's TC40H368, whose own data sheet was not found as text; logicroom.jp's \"TC40H368\" page (https://logicroom.jp/page/MOS/TC40H368.html), read the same day, says its pin assignment and function are the 74LS368's",
+   "parts": {
+    "ntsc": {
+     "part": "MN74HC368",
+     "seen": "I4"
+    },
+    "pal": {
+     "part": "MC74HC368N",
+     "seen": "I3"
+    }
+   },
+   "port": {
+    "value": 1,
+    "inferred": true,
+    "why": "U7 is pad1 and U8 pad2 by the board's print, \"40H368(CI)\" and \"40H368(CII)\"; checked on 6 October 2026: the nesdev wiki gives the read of $4016 /OE1 and of $4017 /OE2 (Input devices, CPU pinout), and the KiCad redrawing (I2) puts U7's enables on /OE1 and U8's on /OE2; still inferred, as it is not traced on the scan"
+   }
+  },
+  {
+   "ref": "U8",
+   "role": "the controller ports' buffer CII (40H368)",
+   "pins": 16,
+   "package": "DIP-16 300 mil",
+   "gnd": 8,
+   "vcc": 16,
+   "pinoutSource": "Texas Instruments, \"SN54HC368, SN74HC368\" data sheet (SCLS310F, revised June 2022), section 4 \"Pin Configuration and Functions\", the 16-pin PDIP (https://www.ti.com/lit/ds/symlink/sn74hc368.pdf), read 5 October 2026: pin 8 GND, pin 16 VCC. The board's part is Toshiba's TC40H368, whose own data sheet was not found as text; logicroom.jp's \"TC40H368\" page (https://logicroom.jp/page/MOS/TC40H368.html), read the same day, says its pin assignment and function are the 74LS368's",
+   "parts": {
+    "ntsc": {
+     "part": "MN74HC368",
+     "seen": "I4"
+    },
+    "pal": {
+     "part": "MC74HC368N",
+     "seen": "I3"
+    }
+   },
+   "port": {
+    "value": 2,
+    "inferred": true,
+    "why": "U7 is pad1 and U8 pad2 by the board's print, \"40H368(CI)\" and \"40H368(CII)\"; checked on 6 October 2026: the nesdev wiki gives the read of $4016 /OE1 and of $4017 /OE2 (Input devices, CPU pinout), and the KiCad redrawing (I2) puts U7's enables on /OE1 and U8's on /OE2; still inferred, as it is not traced on the scan"
+   }
+  },
+  {
+   "ref": "U9",
+   "role": "the hex inverter (74HCU04)",
+   "pins": 14,
+   "package": "DIP-14 300 mil",
+   "gnd": 7,
+   "vcc": 14,
+   "pinoutSource": "Texas Instruments, \"SN54HCU04, SN74HCU04 Hex Inverters\" data sheet (SCLS079E, revised March 2004), the 14-pin DIP (https://www.ti.com/lit/ds/symlink/sn74hcu04.pdf), read 5 October 2026: pin 7 GND, pin 14 VCC. The board's print reads 74HCU04P",
+   "parts": {
+    "ntsc": {
+     "part": "74HCU04AP",
+     "seen": "I4"
+    },
+    "pal": {
+     "part": "SN74HCU04N",
+     "seen": "I3"
+    }
+   }
+  },
+  {
+   "ref": "U10",
+   "role": "the lockout chip (CIC)",
+   "pins": 16,
+   "package": "DIP-16 300 mil",
+   "gnd": 8,
+   "vcc": 16,
+   "pinoutSource": "nesdev wiki, \"CIC lockout chip pinout\" (https://www.nesdev.org/wiki/CIC_lockout_chip_pinout), read 5 October 2026: pin 8 Gnd, pin 16 +5V (Vcc). The page also shows pins 11 to 15 grounded in an NES; only pin 8, the chip's own ground, is used here",
+   "parts": {
+    "ntsc": {
+     "part": "3193A",
+     "seen": "I4"
+    },
+    "pal": {
+     "part": "3195A",
+     "seen": "I3"
+    }
+   }
+  }
+ ],
+ "crystals": [
+  {
+   "ref": "X1",
+   "role": "the master clock's crystal",
+   "kicadValue": "21.477272 MHz",
+   "parts": {
+    "ntsc": {
+     "part": "21.47727 MHz",
+     "seen": "I4",
+     "marking": "21.47727 KDS 8A"
+    },
+    "pal": {
+     "part": "26.601712 MHz",
+     "seen": "I3",
+     "marking": "26.601712 KDS 1G"
+    }
+   }
+  }
+ ]
+}

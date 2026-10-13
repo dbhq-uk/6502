@@ -106,5 +106,12 @@ public sealed partial class Ppu
         sink.Skip(nameof(_nextEventDot), "worked out from the state (ScheduleEvents)");
         sink.Skip(nameof(_frameEndDot), "worked out from the state (ScheduleEvents)");
         sink.Skip(nameof(_catchUpAt), "worked out from the state (ScheduleEvents)");
+
+        // The fast scanline renderer's switch and counts, for the tests and the differential's
+        // coverage: which path ran a line is not the chip's state, and the two leave the same.
+        const string Lines = "the fast scanline renderer's switch and counts, not the chip's state: both paths leave the same state";
+        sink.Skip(nameof(_wholeLines), Lines);
+        sink.Skip(nameof(_fastLines), Lines);
+        sink.Skip(nameof(_exactLines), Lines);
     }
 }

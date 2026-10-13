@@ -107,8 +107,10 @@ export function referenceProblems(reference, where) {
  * What is wrong with a machine's `case` and `models`, as sentences (design,
  * "The registry's models field"). Both are optional: a running machine is never
  * required to claim a model (Dan, 2 October 2026), but a model it claims must
- * be built, and a machine with a case that claims a model claims both the
- * outside and the inside. `modelFiles(module)` says what is on disk for a
+ * be built, a machine that claims a model states whether it has a case (the
+ * page offers a board alone or a case's two views by it; added with the NES's
+ * outside model, 6 October 2026), and a machine with a case that claims a model
+ * claims both the outside and the inside. `modelFiles(module)` says what is on disk for a
  * module; the tests replace it to try made-up registries. That a module is
  * claimed once in the whole registry is checked by validateRegistry, which sees
  * every machine.
@@ -119,6 +121,7 @@ export function modelProblems(machine, where, { modelFiles = modelOnDisk } = {})
   if (hasCase !== undefined && typeof hasCase !== 'boolean') errors.push(`${where}: case, when given, must be true or false`);
   if (machine.models === undefined) return errors;
   if (!Array.isArray(machine.models) || machine.models.length === 0) return [...errors, `${where}: models, when given, must be a non-empty list of { view, module }`];
+  if (hasCase === undefined) errors.push(`${where}: a machine that claims a model must state case, true or false: whether its models are a board or a case's outside and inside`);
   const views = [];
   machine.models.forEach((model, i) => {
     const at = `${where}: models[${i}]`;
