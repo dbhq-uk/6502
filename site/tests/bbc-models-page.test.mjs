@@ -182,6 +182,9 @@ test('the outside\'s entry is thin and follows the machine: its keys from bbc:ke
   assert.match(src, /const lit = litLeds\(bbc\(\)\?\.leds\?\.\(\) \?\? null\);/);
   assert.match(src, /model\.setLeds\(lit\)/);
   assert.match(src, /status\.textContent = press\(o\.userData\.key, panel\)/);
+  // A click's line stands: the pointing that the same mouse movement queued is dropped, and the part clicked counts
+  // as pointed, so the hover's name for it does not replace what the click said (CI round 1, 13 October 2026).
+  assert.match(src, /s\.onClick\(\(\) => model\.pickable, \(hit\) => \{\s*if \(pending\) \{ cancelAnimationFrame\(pending\); pending = null; \}\s*pointed = pointWords\(partOf\(hit\) \?\? \{\}\);/);
   for (const hook of ['root.dataset.modelPressed', 'root.dataset.modelPresses', 'root.dataset.modelDown', 'root.dataset.modelLeds', 'root.modelKeyPoint = ']) assert.ok(src.includes(hook), hook);
   assert.doesNotMatch(src, /new (BoxGeometry|PlaneGeometry|CylinderGeometry|BufferGeometry|MeshStandardMaterial)\(/);
   assert.doesNotMatch(src.replace(/^\s*\/\/.*$/gm, ''), /textContent = '/);

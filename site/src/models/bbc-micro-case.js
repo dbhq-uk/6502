@@ -84,20 +84,25 @@ export async function mount(root) {
     }
   });
 
-  // A click on a keycap presses it on the machine (press, in the layout); on a port, names it.
+  // Pointing names a keycap, a port or a connector on the status line, a frame after the pointer moves.
+  const ray = new Raycaster();
+  const ndc = new Vector2();
+  const canvas = s.renderer.domElement;
+  let pending = null;
+  let pointed = null;
+
+  // A click on a keycap presses it on the machine (press, in the layout); on a port, names it. Its line stands: the
+  // pointing the same mouse movement queued is dropped, and the part clicked counts as pointed, so the hover does not
+  // say its name over what the click said.
   s.onClick(() => model.pickable, (hit) => {
+    if (pending) { cancelAnimationFrame(pending); pending = null; }
+    pointed = pointWords(partOf(hit) ?? {});
     for (let o = hit; o; o = o.parent) {
       if (o.userData?.key) { status.textContent = press(o.userData.key, panel); return; }
       if (o.userData?.port) { status.textContent = pointWords({ port: o.userData.port }); return; }
     }
   });
 
-  // Pointing names a keycap, a port or a connector on the status line.
-  const ray = new Raycaster();
-  const ndc = new Vector2();
-  const canvas = s.renderer.domElement;
-  let pending = null;
-  let pointed = null;
   canvas.addEventListener('pointermove', (e) => {
     if (e.buttons || e.pointerType !== 'mouse' || pending) return;
     pending = requestAnimationFrame(() => {
