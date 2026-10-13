@@ -2,8 +2,8 @@
 
 A cycle-accurate 6502 core in C#, covering the original NMOS 6502 and the CMOS
 65C02, and the aim of implementing as many 6502-family machines as possible on
-it, each one proven: the KIM-1 first, then the BBC Micro, then the Acorn
-Electron, the Atari 2600, the NES and the Commodore 64, and more.
+it, each one proven: the KIM-1 first, then the BBC Micro, then the NES,
+then the Acorn Electron, the Atari 2600 and the Commodore 64, and more.
 
 This is built in public. The design, the plan and every step of the work are
 in this repository, and the journey is written up at
@@ -13,7 +13,7 @@ in this repository, and the journey is written up at
 
 As many 6502-family machines as possible, each one running in the browser and
 proven by an automated test. The core comes first, then the KIM-1, the BBC Micro,
-the Acorn Electron, the Atari 2600, the NES and the Commodore 64. The design is in
+the NES, the Acorn Electron, the Atari 2600 and the Commodore 64. The design is in
 [`docs/superpowers/specs/2026-09-29-6502-design.md`](docs/superpowers/specs/2026-09-29-6502-design.md).
 
 ## Where it stands
@@ -41,14 +41,7 @@ console, the outside (the case) and the inside (the main board, showing which
 chips the processor is talking to), each drawn for the NTSC and the PAL
 console. They are measured from photographs, a design patent and scans of a bare
 board, and the note under each says how well each part is known. The Acorn
-Electron, the fourth, runs Acorn's OS 1.00 and BBC BASIC, passes its acceptance
-test, and runs in the browser at
-[6502.dbhq.uk/machines/electron/](https://6502.dbhq.uk/machines/electron/), with
-its keyboard, picture, one-bit sound and a cassette recorder that loads and saves
-tapes as UEF files in the browser, so it counts too. Its ROMs and the record of
-their rights are in [`roms/`](roms/README.md).
-The Atari 2600 and the Commodore 64 follow, one at a
-time and smallest first. The programme's design is in
+Electron, the fourth, runs Acorn's OS 1.00 and BBC BASIC, passes its acceptance test, and runs in the browser at [6502.dbhq.uk/machines/electron/](https://6502.dbhq.uk/machines/electron/), with its keyboard, picture, one-bit sound and a cassette recorder that loads and saves tapes as UEF files in the browser, so it counts too. Its ROMs and the record of their rights are in [`roms/`](roms/README.md). The Atari 2600 and the Commodore 64 follow, one at a time and smallest first. The programme's design is in
 [`docs/superpowers/specs/2026-09-30-machines-and-site-design.md`](docs/superpowers/specs/2026-09-30-machines-and-site-design.md).
 
 ## What "cycle-accurate" means here

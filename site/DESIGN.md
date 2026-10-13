@@ -166,7 +166,7 @@ Micro has its disc drive. Chosen over sharing the BBC Micro's classes because
 the two pages then change apart: a fix to one panel cannot move the other.
 
 - **The screen is a canvas, and it is the machine's own picture,** 640 by 256
-  pixels as the ULA draws it, one row a scan line, shown four wide by three high
+  pixels as the model of the ULA draws it, one row a scan line, shown four wide by three high
   as the television showed it, so a row is drawn about twice as tall as a pixel
   is wide. Nothing is added, and the line under it says so. Not recoloured: the
   Electron's colours are the page's subject, as the BBC Micro's are.

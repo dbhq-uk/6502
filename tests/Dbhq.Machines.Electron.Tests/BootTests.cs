@@ -158,6 +158,27 @@ public class BootTests
     }
 
     [Fact]
+    public void FuncAndKTypeTheKeywordChainThroughTheOs()
+    {
+        // The page says FUNC and K types CHAIN (S8, "FUNC plus K (CHAIN)", ula.md s7b). Caps Lock
+        // and Func are one position. It is pressed first and K after it, as a person does: the
+        // two pressed in the same instant do not give CHAIN (the first run of this test showed
+        // that), so the OS reads FUNC before the key. The OS puts the keyword in the keyboard
+        // buffer and BASIC echoes it. Moving K to another matrix position gives another word.
+        var s = new ElectronSession().Boot().RunUntilPrompt();
+        ElectronKeyboard keyboard = s.Machine.Keyboard;
+        keyboard.Down(ElectronKey.CapsLock);
+        s.RunFor(ElectronSession.HoldCycles);
+        keyboard.Down(ElectronKey.K);
+        s.RunFor(ElectronSession.HoldCycles);
+        keyboard.Up(ElectronKey.K);
+        keyboard.Up(ElectronKey.CapsLock);
+        s.RunFor(ElectronSession.RestCycles);
+
+        Assert.Equal(">CHAIN", s.ScreenText()[5].TrimEnd().TrimEnd('_'));
+    }
+
+    [Fact]
     public void TheOsReadsThePowerOnFlagOnceAndNotAfterABreak()
     {
         // s6a, s10a: the OS reads $FE00 at $D8E8 (LDA $FE00) and tests bit 1. At power on the bit

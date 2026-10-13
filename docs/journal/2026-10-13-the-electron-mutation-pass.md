@@ -2,7 +2,7 @@
 title: "The Electron's mutation pass"
 date: 2026-10-13
 summary: "Task 15 of the Electron plan, its first two steps. Twenty-three faults were planted one at a time in a scratch copy, the plan's seventeen and six close variants, and the Electron's tests were run against each. Every one was caught; the thinnest catches are a ROM select fault that one test sees and the RTS dummy read that two see. The known differences were checked against the plan's list of twelve, and three things the model does without saying so were added: what absent devices read, the ROM latch at power on, and that BREAK resets only the 6502."
-order: 40
+order: 42
 ---
 
 # 13 October 2026: the Electron's mutation pass

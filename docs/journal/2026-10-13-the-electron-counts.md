@@ -69,3 +69,20 @@ All on 13 October 2026, on this aarch64 machine, with other work on it.
 ## Mistakes
 
 - The first query to the Commons API carried a User-Agent with a contact address in it. The others, and the download of the photograph, named the site only, as the BBC Micro's fetch did.
+
+## Final review fix wave
+
+A final review of the branch made eleven findings. Each was checked before it was acted on. None was rejected; two were met in a different way from the one suggested, and both are said below.
+
+- **Contention "exactly" (design entry).** The summary and the paragraph claimed more than the check of plus or minus 0.05 s shows. Both now say "access by access", which is what the model does.
+- **"Pixel for pixel, as its ULA draws it".** On the Electron's panel and in `site/DESIGN.md` it now says "as the model of its ULA draws it". The BBC Micro's and the NES's panels were left alone. No page test pins either string.
+- **"FUNC and K types CHAIN" had no test through the OS.** Added `BootTests.FuncAndKTypeTheKeywordChainThroughTheOs`: it presses FUNC (the Caps Lock position), then K, and reads `>CHAIN` off the picture. Finding: the two pressed in the same instant did not give CHAIN, so the test presses FUNC first, as a person does. It can fail: with K moved to another matrix position the screen reads `>LIST` (run once, then reverted). `dotnet test -c Release tests/Dbhq.Machines.Electron.Tests`: 512 passed. No site test was added, so both workflow floors stay as they were.
+- **"Under a hundredth of a second" in `known-differences.md`.** The fact sheet gives the figure with a pointer to an `io1` case in its section 4g, and that case is not in the sheet or in any test here. The figure is dropped from `known-differences.md` and the entry says no run measures it. `ula.md` still carries the sheet's own estimate (section 3 and section 12 item 2), marked there as a guess; it was not touched.
+- **Journal order.** `the-electron-mutation-pass.md` was order 40, as was PR 90's entry, with PR 92's at 41. It is now 42. No other entry on this branch or on PR 90 uses 42.
+- **"Four came in" in both workflows.** It is five (529 - 8 + 5 = 526). The comment was corrected and the floor was not touched.
+- **Plan jargon in `known-differences.md`.** "The brief fixed a constant level" now points at `ula.md`'s description of S of 0 and 1. "The task 10 probe" now names `TapeProbe` and `TapeProbeTests`.
+- **The `LOAD` figure in `tape.md`.** The sheet's 11,116,283 cycles is the probe's run. A clause now says so and gives the production cassette's 11,116,233, as the page and the journal do.
+- **Hard-wrapped prose.** The new sections of `known-differences.md` and the Electron paragraph added to `README.md` are one line a paragraph or list item. Only lines this branch added were changed.
+- **Build order in `AGENTS.md`.** It said KIM-1, BBC Micro, Electron, Atari, NES, Commodore 64, which is the plan's order. The history is KIM-1, BBC Micro, NES, Electron (the README says the NES is the third and the Electron the fourth). `AGENTS.md` now says that, with the Atari 2600 and the Commodore 64 to come. The same wrong order was in two sentences of `README.md` and was fixed there too.
+
+`npm test` in `site/` after the fixes: 526 tests, 525 pass, 0 fail, 1 to-do, the same as before.
