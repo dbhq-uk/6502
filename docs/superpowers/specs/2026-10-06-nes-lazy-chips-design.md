@@ -38,14 +38,14 @@ The speed target below, 1.5 times, was met natively on the benchmark ROM and
 about met on the homebrew (the journal's task 2, "Speed"), and not met in the
 browser (task 2b).
 
-The baseline changes when the reset fix lands. Pull request #71 makes the PPU's
+The baseline changed when the reset fix landed. Pull request #71 made the PPU's
 place in secondary OAM wrap at 32, and that place is in the PPU's state report,
-so once #71 is in the tree the check against
-`bench/nes-speed/differential/baseline/4e9b92b.txt` fails on the PPU's hash with
-no difference in behaviour behind it. Then the baseline is re-recorded from the
-merged tree with the per-dot reference (`--oracle`), named for that commit, the
-lazy build is checked against it, and the journal says why the file changed
-([#74](https://github.com/dbhq-uk/6502/issues/74)).
+so with #71 in the tree the check against `baseline/4e9b92b.txt` failed on the
+PPU's hash with no difference in behaviour behind it. On 8 October 2026 the
+baseline was re-recorded from the merged tree with the per-dot reference
+(`--oracle`) as `bench/nes-speed/differential/baseline/38c5544.txt`, the lazy
+build was checked against it, and the old file was removed. The journal says why
+the file changed ([#74](https://github.com/dbhq-uk/6502/issues/74)).
 
 ## Why
 
