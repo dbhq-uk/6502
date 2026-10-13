@@ -188,6 +188,9 @@ jobs:
           PASS=$(count pass); FAILED=$(count fail)
           echo "pass=${PASS:-unread} fail=${FAILED:-unread}"
           [ "${FAILED:-1}" = "0" ]
+          # 484 as at 13 Oct 2026, with the BBC Micro models' task 4 (six tests: the board's track map,
+          # copper.json's verdicts and figures, its nets and I5 FAILs pinned, ic-table.json, the method's
+          # hashes, and NOTICE.md's section on the map);
           # 478 as at 13 Oct 2026, with the BBC Micro models' task 3 review minors (a test that
           # registration.json keeps the solder side's model, unrounded parameters and transform);
           # 477 as at 13 Oct 2026, with the BBC Micro models' task 3 fix wave (the drills'
@@ -221,7 +224,7 @@ jobs:
           # Adding tests is expected; losing them is the failure this floor catches.
           # Raise the number when the suite grows, here and in the same step of
           # validate.yml, which must hold the same number.
-          [ "${PASS:-0}" -ge 478 ]
+          [ "${PASS:-0}" -ge 484 ]
 
       # The same floor as "Every machine file must be serving" below, checked on
       # the build itself, so a build that is missing a machine fails here and

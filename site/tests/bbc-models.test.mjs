@@ -481,3 +481,172 @@ test('registration.json fits each mounting hole on its top rim and records the m
   const shifts = holes.map((h) => h.shiftLenMm);
   assert.ok(Math.abs(registration.holeShiftMm.max - Math.max(...shifts)) < 1e-3);
 });
+
+// Task 4: the copper on both faces and the print, traced from the bare scans
+// (tools/bbc-micro-model/board_trace.py), the plan's checks on them, and the track map.
+const copper = JSON.parse(fs.readFileSync(path.join(TOOL, 'data', 'copper.json'), 'utf8'));
+const icTable = JSON.parse(fs.readFileSync(path.join(TOOL, 'data', 'ic-table.json'), 'utf8'));
+const BBC_MAP = path.join(process.cwd(), 'src', 'assets', 'tracks', 'bbc-micro-board.webp');
+const BBC_MAP_BUDGET = 600_000;
+const PLAN = fs.readFileSync(path.join(REPO_ROOT, 'docs', 'superpowers', 'plans', '2026-10-04-bbc-micro-models.md'), 'utf8');
+// The plan's table and task 4's note "Fixed on 13 October 2026", set before the checks were run
+const COPPER_ROWS = { coverage: [0.10, 0.50], drills: 0.95, chips: 20, share: 0.90, i5Pass: 1.0, i5Stop: 2.0, iou: 0.50 };
+
+function copperVerdicts(c) {
+  const ok = (b) => (b ? 'pass' : 'fail');
+  const n = c.nets;
+  const med = c.againstI5.registration.heldOutMm.median;
+  return {
+    coverage: ok(['top', 'bottom'].every((f) => c.coverage[f] >= COPPER_ROWS.coverage[0] && c.coverage[f] <= COPPER_ROWS.coverage[1])),
+    drillsInCopper: ok(['top', 'bottom'].every((f) => c.drillsInCopper[f] >= COPPER_ROWS.drills)),
+    nets: ok(n.chips >= COPPER_ROWS.chips && !n.touching
+      && ['gnd', 'vcc'].every((k) => n[k].pins > 0 && n[k].inLargest >= COPPER_ROWS.share * n[k].pins - 1e-9)),
+    i5Registration: med <= COPPER_ROWS.i5Pass ? 'pass' : (med > COPPER_ROWS.i5Stop ? 'STOP' : 'between pass and stop'),
+    againstI5: ok(c.againstI5.iou >= COPPER_ROWS.iou),
+  };
+}
+
+test('the BBC Micro board\'s track map is committed, WebP, the size copper.json gives, inside its budget, its three channels apart', async () => {
+  const sharp = (await import('sharp')).default;
+  assert.ok(fs.existsSync(BBC_MAP), 'src/assets/tracks/bbc-micro-board.webp is missing');
+  const bytes = fs.readFileSync(BBC_MAP);
+  assert.ok(bytes.length <= BBC_MAP_BUDGET, `the track map is ${bytes.length} bytes, over its ${BBC_MAP_BUDGET} budget`);
+  assert.equal(bytes.length, copper.map.bytes);
+  assert.equal(crypto.createHash('sha256').update(bytes).digest('hex'), copper.map.sha256, 'copper.json\'s map.sha256 is not the committed map\'s');
+  assert.equal((await sharp(bytes).metadata()).format, 'webp');
+  // the highest of 8, 7 or 6 px/mm inside the budget, 8 as the plan's task 4 note records it was chosen before the run
+  assert.equal(copper.mapPxPerMm, 8);
+  const { data, info } = await sharp(bytes).removeAlpha().raw().toBuffer({ resolveWithObject: true });
+  assert.deepEqual([info.width, info.height], [copper.map.width, copper.map.height]);
+  assert.equal(info.width, Math.round((copper.grid.width / copper.grid.pxPerMm) * copper.mapPxPerMm));
+  assert.equal(info.height, Math.round((copper.grid.height / copper.grid.pxPerMm) * copper.mapPxPerMm));
+  // edge to edge: the grid covers the outline's box, to within one of its pixels
+  const xs = frame.outline.map((p) => p[0]);
+  const ys = frame.outline.map((p) => p[1]);
+  const px = 1 / copper.grid.pxPerMm;
+  assert.ok(Math.abs(copper.grid.originMm[0] - Math.min(...xs)) < 1e-3 && Math.abs(copper.grid.originMm[1] - Math.min(...ys)) < 1e-3);
+  assert.ok(Math.abs(copper.grid.width * px - (Math.max(...xs) - Math.min(...xs))) <= px, 'the grid is the outline\'s width');
+  assert.ok(Math.abs(copper.grid.height * px - (Math.max(...ys) - Math.min(...ys))) <= px, 'the grid is the outline\'s depth');
+  assert.deepEqual(copper.map.originMm, copper.grid.originMm);
+  const on = [0, 0, 0];
+  let between = 0;
+  for (let i = 0; i < data.length; i += info.channels) {
+    for (let k = 0; k < 3; k += 1) {
+      if (data[i + k] > 127) on[k] += 1;
+      if (data[i + k] > 8 && data[i + k] < 247) between += 1;
+    }
+  }
+  const n = info.width * info.height;
+  const [red, green, blue] = on.map((v) => v / n);
+  assert.ok(red >= 0.10 && red <= 0.50, `red (the component side) covers ${(red * 100).toFixed(1)}%`);
+  assert.ok(green >= 0.10 && green <= 0.50, `green (the solder side) covers ${(green * 100).toFixed(1)}%`);
+  assert.ok(blue < 0.15, `blue (the print) covers ${(blue * 100).toFixed(1)}%`);
+  assert.ok(between / (3 * n) < 0.001, 'the channels are not 255 or 0');
+});
+
+test('copper.json records the verdicts its figures give against the plan\'s rows, and its figures are its own', () => {
+  assert.deepEqual(copper.verdicts, copperVerdicts(copper));
+  for (const f of ['top', 'bottom', 'print']) assert.ok(copper.coverage[f] > 0 && copper.coverage[f] < 1, f);
+  assert.equal(copper.drills.n, registration.drills.length, 'every drill task 3 made is checked');
+  for (const f of ['top', 'bottom']) {
+    const share = 1 - copper.drills.notInCopper[f].length / copper.drills.n;
+    assert.ok(Math.abs(share - copper.drillsInCopper[f]) < 1e-3, `${f}: the share is the drills' own`);
+  }
+  // every IC of table 8.1 is either in the nets check or left out with a reason
+  const refs = icTable.ics.map((i) => i.ref);
+  assert.deepEqual([...copper.netsChips, ...copper.nets.excluded.map(([r]) => r)].sort(), [...refs].sort());
+  for (const [ref, why] of copper.nets.excluded) assert.ok(typeof why === 'string' && why.length > 10, `${ref}: why it is left out`);
+  assert.equal(copper.nets.chips, copper.netsChips.length);
+  for (const k of ['gnd', 'vcc']) {
+    assert.equal(copper.nets[k].pins, copper.netsChips.length, `${k}: one pin a chip`);
+    assert.equal(copper.pinNets[k].length, copper.nets[k].pins);
+    const ids = copper.pinNets[k].map(([, net]) => net).filter((x) => x !== null);
+    const most = Math.max(0, ...ids.map((x) => ids.filter((y) => y === x).length));
+    assert.equal(copper.nets[k].inLargest, most, `${k}: the largest net is the pins' own`);
+  }
+  const gnd = new Set(copper.pinNets.gnd.map(([, x]) => x).filter((x) => x !== null));
+  assert.equal(copper.nets.touching, copper.pinNets.vcc.some(([, x]) => x !== null && gnd.has(x)), 'touching is the pins\' own');
+  // I5's registration is on the pins marked by hand, every chip held out in turn
+  const marks = JSON.parse(fs.readFileSync(path.join(TOOL, 'data', 'marks.json'), 'utf8')).i5Pins.marks;
+  const reg = copper.againstI5.registration;
+  assert.equal(reg.points, marks.length);
+  assert.equal(reg.chips, new Set(marks.map((m) => m.ref)).size);
+  assert.equal(reg.folds, 'each chip held out in turn');
+  const fps = new Map(registration.footprints.filter((f) => f.ref).map((f) => [f.ref, f]));
+  for (const m of marks) {
+    const f = fps.get(m.ref);
+    assert.ok(f && f.kind === 'dip', `${m.ref}: an I5 mark on a chip task 3 found`);
+    assert.ok(Number.isInteger(m.pin) && m.pin >= 1 && m.pin <= f.pins, `${m.ref} pin ${m.pin}`);
+    assert.ok(m.crop && m.crop.box.length === 4, `${m.ref} pin ${m.pin}: its crop`);
+  }
+  assert.match(copper.thresholds.nets, /at least 20 ICs/);
+});
+
+test('copper.json passes the coverage, drills and I5 registration rows, and its nets and I5 rows stay the FAILs the plan records', () => {
+  assert.equal(copper.verdicts.coverage, 'pass');
+  assert.equal(copper.verdicts.drillsInCopper, 'pass');
+  assert.equal(copper.verdicts.i5Registration, 'pass');
+  // The plan's task 4 note, "Outcome, 13 October 2026": the nets check and the comparison with I5 failed on the one
+  // run of the fixed method, and the map ships traced to look at. A run that changes either verdict must change that
+  // note, the journal and every sentence that describes the copper, so both are pinned here with their figures.
+  assert.equal(copper.verdicts.nets, 'fail');
+  assert.deepEqual([copper.nets.chips, copper.nets.gnd, copper.nets.vcc, copper.nets.touching],
+    [51, { pins: 51, inLargest: 39 }, { pins: 51, inLargest: 30 }, true]);
+  assert.equal(copper.verdicts.againstI5, 'fail');
+  assert.equal(copper.againstI5.iou.toFixed(3), '0.411');
+  const outcome = PLAN.split('\n').find((l) => l.startsWith('- **Outcome, 13 October 2026 (the one run')) ?? '';
+  assert.match(outcome, /\*\*The known nets FAILED\*\* \(51 ICs: GND 39 of 51 pins in the largest net, \+5V 30 of 51, and a GND pin and a \+5V pin in one net\)/);
+  assert.match(outcome, /\*\*The component side against I5 FAILED\*\* \(intersection over union 0\.411 /);
+  assert.match(outcome, /ships traced to look at, its connections not verified/);
+});
+
+test('ic-table.json is table 8.1, and gives each IC of the nets check its GND and +5V pins from a data sheet', () => {
+  assert.equal(icTable.source, 'D1');
+  assert.deepEqual(icTable.ics.map((i) => i.ref), Array.from({ length: 101 }, (_, k) => `IC${k + 1}`));
+  // a few of table 8.1's rows, read again from the page images (PDF pages 66 and 67)
+  const part = Object.fromEntries(icTable.ics.map((i) => [i.ref, i.part]));
+  assert.deepEqual(['IC1', 'IC2', 'IC3', 'IC6', 'IC7', 'IC31', 'IC40', 'IC45', 'IC51', 'IC69', 'IC78', 'IC89'].map((r) => part[r]),
+    ['6502A', '6845', '6522', '5C094', '2C199', '74LS34', '74S00', '74S139', '(27128)', '6522', '8271', '68B54']);
+  for (const ic of icTable.ics) {
+    assert.ok([66, 67].includes(ic.page) && ic.manualXY.length === 2, ic.ref);
+    if ('excludedWhy' in ic) {
+      assert.ok(!('gnd' in ic) && ic.excludedWhy.length > 10, `${ic.ref}: left out, with why`);
+      continue;
+    }
+    for (const k of ['pins', 'package', 'gnd', 'vcc', 'pinoutSource']) assert.ok(k in ic, `${ic.ref}: ${k}`);
+    assert.ok(Number.isInteger(ic.gnd) && Number.isInteger(ic.vcc) && ic.gnd !== ic.vcc, ic.ref);
+    assert.ok(ic.gnd >= 1 && ic.gnd <= ic.pins && ic.vcc >= 1 && ic.vcc <= ic.pins, ic.ref);
+    assert.equal(ic.package, `DIP-${ic.pins}`, ic.ref);
+    assert.match(ic.pinoutSource, /https?:\/\/\S+\.pdf/, `${ic.ref}: its data sheet is named with its address`);
+    assert.match(ic.pinoutSource, new RegExp(`pin ${ic.gnd} (GND|VSS)`), `${ic.ref}: the data sheet's GND pin`);
+    assert.match(ic.pinoutSource, new RegExp(`pin ${ic.vcc} (VCC|VDD)`), `${ic.ref}: the data sheet's +5V pin`);
+    // a 74-series or 4000-series part on a corner pinout; the 6502 and the 6522s from Rockwell's sheets
+    if (/^74|^7438$|^40\d\d$/.test(ic.part)) assert.deepEqual([ic.gnd, ic.vcc], [ic.pins / 2, ic.pins], ic.ref);
+  }
+  assert.equal(icTable.ics.filter((i) => 'gnd' in i).length, copper.netsChips.length);
+  assert.deepEqual(['IC1', 'IC3', 'IC69'].map((r) => { const i = icTable.ics.find((x) => x.ref === r); return [i.gnd, i.vcc]; }), [[1, 8], [1, 20], [1, 20]]);
+});
+
+test('copper.json was written by the method fixed before its checks ran, with the hashes the journal records', () => {
+  const journal = fs.readFileSync(path.join(REPO_ROOT, 'docs', 'journal', '2026-10-04-the-bbc-micro-models.md'), 'utf8');
+  const block = journal.split('### The method fixed, and the checks as fixed')[1] ?? '';
+  const recorded = Object.fromEntries([...block.matchAll(/^([0-9a-f]{64}) (\S+)$/gm)].map(([, sha, f]) => [f, sha]));
+  assert.ok(Object.keys(recorded).length >= 7, 'the journal records the method\'s hashes');
+  assert.deepEqual(copper.methodFixed, recorded);
+  assert.ok('tools/bbc-micro-model/board_trace.py' in recorded);
+});
+
+test('NOTICE.md and the photographs\' README name the BBC Micro board\'s track map, amb5l\'s scans, and that it is traced to look at', () => {
+  const flat = (t) => t.replace(/\s+/g, ' ');
+  const notice = fs.readFileSync(path.join(REPO_ROOT, 'NOTICE.md'), 'utf8');
+  const section = flat(notice.split(/^## /m).find((s) => s.includes('bbc-micro-board.webp')) ?? '');
+  assert.ok(section, 'NOTICE.md does not name site/src/assets/tracks/bbc-micro-board.webp');
+  assert.match(section, /traced from amb5l's scans/);
+  assert.match(section, /state no licence/);
+  assert.match(section, /traced to look at: its connections are not verified/);
+  assert.match(section, /stardot\.org\.uk\/forums\/viewtopic\.php\?t=23329/);
+  const photos = fs.readFileSync(path.join(process.cwd(), 'src', 'assets', 'photos', 'README.md'), 'utf8');
+  const ours = flat(photos.split(/^## /m).find((s) => s.includes('bbc-micro-board.webp')) ?? '');
+  assert.match(ours, /traced from amb5l's scans/);
+  assert.match(ours, /traced to look at: its connections are not verified/);
+});
