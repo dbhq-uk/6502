@@ -614,6 +614,8 @@ export async function checkBbcModels({ browser, watch, problems, origin }) {
   say(`*CAT: chips marked ${cat.accessed.join(' ') || 'none'}; rows marked ${cat.rows.join(' ') || 'none'}; ROMs framed ${cat.paged.join(' ') || 'none'}; the 8271's rate then "${rate}"`);
   if (!cat.accessed.includes('IC78') || !cat.rows.includes('IC78')) problem(`*CAT never marked IC78, the 8271, or its row in ${LOOK_MS / 1000} s`);
   await until(async () => (await lastRow()) === '>');
+  // The frames seen so far are forgotten, so that what is judged is what *DUMP shows.
+  await page.evaluate(() => window.bbcInside.paged.clear());
   await type(['Shift+Quote', 'KeyD', 'KeyU', 'KeyM', 'KeyP', 'Space', 'KeyH', 'KeyE', 'KeyL', 'KeyL', 'KeyO', 'Enter']);
   const dump = await lookFor((x) => x.paged.includes(dfs));
   say(`*DUMP HELLO: ROMs framed ${dump.paged.join(' ') || 'none'} (the DFS is ${dfs}); the screen's last line "${await lastRow()}"`);
