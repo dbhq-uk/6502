@@ -1,0 +1,32 @@
+{
+  "about": "What a visitor does with the NES on its page at 6502.dbhq.uk: nothing to load, press Start, and play the bundled homebrew, Lan Master, by Shiru, which he released into the public domain (roms/README.md). The page renders these steps and the controls. Buttons are the NES pad's; the keys and the gamepad buttons that press them are the page's own map, shown beside it. NesAcceptanceTests boots the same file and checks its first picture against machines/nes/expected-frames.json, which the browser check also reads.",
+  "rom": "roms/nes/Lan_Master.nes",
+  "title": "Lan Master",
+  "author": "Shiru",
+  "licence": "public domain",
+  "steps": [
+    {
+      "do": "Press Start on the page.",
+      "says": "The machine switches on with Lan Master in it. The title fades in within a second and its music plays: the name in a blue band, PD2011 Shiru under it, and a menu of START, CODE, SFX and BGM with a blinking square by START."
+    },
+    {
+      "do": "Press Start or A on the pad.",
+      "says": "START is chosen and the first level begins: a board of wire pieces and computers, with the level, how much is connected and the time along the top."
+    },
+    {
+      "do": "Move the square with the D-pad and turn the pieces.",
+      "says": "A and B turn the piece under the square a quarter turn, one each way, and Select turns it half way round. Connect every computer before the time runs out."
+    },
+    {
+      "do": "Press Start during a level.",
+      "says": "The game pauses, with RESUME, RESTART and MAIN MENU, and the pass code of the level reached. CODE on the title screen takes a pass code, to carry on from that level later."
+    }
+  ],
+  "controls": [
+    { "button": "D-pad", "does": "moves the square on the board, and up and down in the menu" },
+    { "button": "A", "does": "turns the piece a quarter turn; in the menu, chooses" },
+    { "button": "B", "does": "turns the piece a quarter turn the other way; in the menu, chooses" },
+    { "button": "Select", "does": "turns the piece half way round; in the menu, moves down" },
+    { "button": "Start", "does": "pauses, with the pass code; in a menu, chooses" }
+  ]
+}

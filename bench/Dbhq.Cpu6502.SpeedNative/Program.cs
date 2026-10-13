@@ -64,9 +64,9 @@ static void Listing()
     }
 }
 
-file sealed class ArrayBus(byte[] memory) : IBus
+file sealed class ArrayBus(byte[] memory) : Bus
 {
-    public byte Read(ushort address) => memory[address];
+    public override byte Read(ushort address) => memory[address];
 
-    public void Write(ushort address, byte value) => memory[address] = value;
+    public override void Write(ushort address, byte value) => memory[address] = value;
 }

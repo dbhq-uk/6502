@@ -4,13 +4,14 @@
 //
 //   node scripts/build-machines.mjs <id>... [--interpreter]
 //
-// One machine or several, by registry id: kim-1, bbc-micro, electron. The
+// One machine or several, by registry id: kim-1, bbc-micro, nes, electron. The
 // machines it knows, their projects and their ROMs are MACHINE_BUILDS in
 // src/lib/machines.mjs. For each one named that is two things:
 //
 //   1. The machine as .NET WebAssembly (src/Dbhq.Machines.Kim1.Wasm for the
 //      KIM-1, src/Dbhq.Machines.BbcMicro.Wasm for the BBC Micro,
-//      src/Dbhq.Machines.Electron.Wasm for the Electron), published
+//      src/Dbhq.Machines.Nes.Wasm for the NES, src/Dbhq.Machines.Electron.Wasm
+//      for the Electron), published
 //      and its _framework folder copied across. It is compiled ahead of time
 //      (AOT), which needs the wasm-tools workload; --interpreter publishes it
 //      without AOT instead, for comparison. The journal entry "The KIM-1 in the
@@ -18,8 +19,10 @@
 //   2. Its ROMs, read from roms/ in this repository and checked against the
 //      SHA-256 pinned in tests/Dbhq.Cpu6502.TestSupport/Pins.cs (AGENTS.md
 //      rules 3 and 4): the KIM-1's monitor ROM, the two 1 KB halves; the BBC
-//      Micro's operating system, BASIC and DFS, 16 KB each; the Electron's
-//      operating system from roms/electron/ and BASIC, the BBC Micro's file.
+//      Micro's operating system, BASIC and DFS, 16 KB each; for the NES,
+//      which has no system ROM, the game its page puts in, Lan Master; the
+//      Electron's operating system from roms/electron/ and BASIC, the BBC
+//      Micro's file.
 //   3. For the BBC Micro, its preset discs: each image listed in
 //      machines/bbc-micro/discs/manifest.json, read from its folder, checked
 //      against the manifest's size and SHA-256, and written to discs/<slug>.ssd.

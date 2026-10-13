@@ -7,6 +7,7 @@ import { page, visibleText, DIST } from './helpers.mjs';
 import { KIM1_KEYS } from '../src/lib/machines.mjs';
 import { REPO_ROOT } from '../src/lib/registry.mjs';
 import { MODELS, CONTROLS, CONTROLS_DESCRIPTION, TRACK_BUTTONS, modelSrc } from '../src/models/models.mjs';
+import { modelsOf } from '../src/models/models.mjs';
 import { BOARD, TABS, CONTACTS_PER_TAB, PITCH, CHIPS, AXIAL, TRANSISTORS, TRIMMER, CRYSTAL, NAME, HOLES, KEYPAD_HOLES, WIRE, DISPLAY, KEYPAD, KEY_ROWS, KEYS, SST, HEIGHTS, TRACKS, decode, describe } from '../src/models/kim-1-layout.mjs';
 import { made } from '../src/models/kim-1-notes.mjs';
 import { registry } from '../src/lib/data.mjs';
@@ -445,4 +446,37 @@ test('the analysis behind the model is committed: its sources agree with the reg
   // The analysis runs offline, from the full-size originals; nothing in the build or the tests runs it.
   assert.ok(fs.existsSync(path.join(tools, 'README.md')));
   assert.doesNotMatch(fs.readFileSync(path.join(process.cwd(), 'package.json'), 'utf8'), /kim1-model/);
+});
+
+// The registry says which models a machine has, and MODELS holds what each one
+// is (design, "A model is built", rule 2): the two agree both ways.
+test('every model in the map is claimed by exactly one machine, with the same view', () => {
+  for (const [module, entry] of Object.entries(MODELS)) {
+    const by = registry.machines.flatMap((m) => modelsOf(m).filter((c) => c.module === module).map((c) => ({ machine: m.id, view: c.view })));
+    assert.equal(by.length, 1, `${module} is claimed by ${by.length} machines in the registry`);
+    assert.deepEqual(by[0], { machine: entry.machine, view: entry.view }, `${module}'s entry in src/models/models.mjs is not the registry's claim`);
+  }
+});
+
+test('every model a machine claims is in the map, with that machine and that view', () => {
+  for (const m of registry.machines) {
+    for (const c of modelsOf(m)) {
+      assert.ok(c.module in MODELS, `${m.id} claims ${c.module}, which src/models/models.mjs does not list`);
+      assert.equal(MODELS[c.module].machine, m.id, `${c.module} is listed for ${MODELS[c.module].machine}, not ${m.id}`);
+      assert.equal(MODELS[c.module].view, c.view, `${c.module} is listed as the ${MODELS[c.module].view} view, not ${c.view}`);
+    }
+  }
+  assert.deepEqual(modelsOf({ id: 'x' }), []);
+});
+
+test('a machine\'s page shows the model section exactly when the machine claims a model, with that model\'s module', () => {
+  const running = registry.machines.filter((m) => m.status === 'running');
+  assert.ok(running.some((m) => modelsOf(m).length > 0) && running.some((m) => modelsOf(m).length === 0), 'the real registry no longer has a running machine with a model and one without');
+  for (const m of running) {
+    const built = page(`/machines/${m.id}/`)?.html ?? '';
+    assert.ok(built, `/machines/${m.id}/ was not built`);
+    const sections = [...built.matchAll(/<section class="model"[^>]*\bdata-model="([^"]+)"/g)].map((x) => x[1]);
+    assert.deepEqual(sections, modelsOf(m).map((c) => c.module), `${m.id}'s page shows models ${sections.join(', ') || 'none'}`);
+    assert.equal(/src="\/model-loader\.js"/.test(built), modelsOf(m).length > 0, `${m.id}'s page loads the model loader exactly when it has a model`);
+  }
 });

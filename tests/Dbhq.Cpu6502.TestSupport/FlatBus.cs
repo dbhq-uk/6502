@@ -9,7 +9,7 @@ public readonly record struct BusAccess(ushort Address, byte Value, bool IsWrite
 }
 
 /// <summary>A plain 64 KB of RAM that can record every access.</summary>
-public sealed class FlatBus : IBus
+public sealed class FlatBus : Bus
 {
     public byte[] Memory { get; } = new byte[0x10000];
 
@@ -18,7 +18,7 @@ public sealed class FlatBus : IBus
     /// <summary>Off for long runs, where the log would only cost time and memory.</summary>
     public bool Recording { get; set; } = true;
 
-    public byte Read(ushort address)
+    public override byte Read(ushort address)
     {
         byte value = Memory[address];
         if (Recording)
@@ -29,7 +29,7 @@ public sealed class FlatBus : IBus
         return value;
     }
 
-    public void Write(ushort address, byte value)
+    public override void Write(ushort address, byte value)
     {
         Memory[address] = value;
         if (Recording)

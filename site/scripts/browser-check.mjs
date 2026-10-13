@@ -36,7 +36,8 @@
 // from this site.
 //
 // Then the BBC Micro, in the same browser, on the same server and watched the
-// same way: scripts/browser-check-bbc.mjs says what it checks.
+// same way: scripts/browser-check-bbc.mjs says what it checks. Then the NES,
+// the same way again: scripts/browser-check-nes.mjs.
 //
 // Then the Electron, in the same browser and watched the same way:
 // scripts/browser-check-electron.mjs says what it checks, on a build of the site
@@ -56,6 +57,7 @@ import { chromium } from 'playwright-core';
 import sharp from 'sharp';
 import { loadTryIt, parseKeys } from '../src/lib/machines.mjs';
 import { checkBbcMicro } from './browser-check-bbc.mjs';
+import { checkNes } from './browser-check-nes.mjs';
 import { checkElectron } from './browser-check-electron.mjs';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
@@ -806,6 +808,9 @@ try {
 
   // ---- The BBC Micro ----
   await checkBbcMicro({ browser, watch, problems, origin });
+
+  // ---- The NES ----
+  await checkNes({ browser, watch, problems, origin });
 
   // ---- The Electron ----
   await checkElectron({ browser, watch, problems, serve });

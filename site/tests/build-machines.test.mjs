@@ -6,7 +6,7 @@ import path from 'node:path';
 import crypto from 'node:crypto';
 import { spawnSync } from 'node:child_process';
 import { MACHINE_BUILDS, machineBuilds, readRom } from '../src/lib/machines.mjs';
-import { bbcRoms, electronRoms, kim1Roms, pin } from '../src/lib/pins.mjs';
+import { bbcRoms, electronRoms, kim1Roms, nesRoms, pin } from '../src/lib/pins.mjs';
 import { REPO_ROOT } from '../src/lib/registry.mjs';
 
 // scripts/build-machines.mjs publishes a machine by its registry id, with the
@@ -16,15 +16,31 @@ import { REPO_ROOT } from '../src/lib/registry.mjs';
 
 const sha256 = (bytes) => crypto.createHash('sha256').update(bytes).digest('hex');
 
-test('the builds are the KIM-1, the BBC Micro and the Electron, each from its own WebAssembly project, by its registry id', () => {
-  assert.deepEqual(Object.keys(MACHINE_BUILDS), ['kim-1', 'bbc-micro', 'electron']);
+test('the builds are the KIM-1, the BBC Micro, the NES and the Electron, each from its own WebAssembly project, by its registry id', () => {
+  assert.deepEqual(Object.keys(MACHINE_BUILDS), ['kim-1', 'bbc-micro', 'nes', 'electron']);
   for (const { project } of Object.values(MACHINE_BUILDS)) assert.ok(fs.existsSync(path.join(REPO_ROOT, 'src', project, `${project}.csproj`)), `no project ${project}`);
   const ids = JSON.parse(fs.readFileSync(path.join(REPO_ROOT, 'machines', 'registry.json'), 'utf8')).machines.map((m) => m.id);
   for (const id of Object.keys(MACHINE_BUILDS)) assert.ok(ids.includes(id), `${id} is not a registry id`);
   assert.equal(MACHINE_BUILDS['kim-1'].roms, kim1Roms);
   assert.equal(MACHINE_BUILDS['bbc-micro'].roms, bbcRoms);
+  assert.equal(MACHINE_BUILDS.nes.roms, nesRoms);
   assert.equal(MACHINE_BUILDS.electron.roms, electronRoms);
   assert.equal(MACHINE_BUILDS.electron.discs, false);
+});
+
+test('the NES\'s one file is its bundled game, the pin in Pins.cs, which NesHost.Load takes, and the file in roms/ matches its pin', () => {
+  const roms = nesRoms();
+  assert.equal(roms.length, 1, 'the NES has no system ROM: its one file is the game Start puts in');
+  const [game] = roms;
+  assert.equal(game.path, pin('NesHomebrewPath'));
+  assert.equal(game.sha256, pin('NesHomebrewSha256'));
+  assert.equal(game.file, path.basename(game.path));
+  assert.equal(game.url, `https://github.com/dbhq-uk/6502/blob/main/${game.path}`);
+  const host = fs.readFileSync(path.join(REPO_ROOT, 'src', 'Dbhq.Machines.Nes.Wasm', 'Program.cs'), 'utf8');
+  assert.match(host, /public static string Load\(byte\[\] rom, string region, int sampleRate\)/);
+  const bytes = readRom(game);
+  assert.deepEqual([...bytes.subarray(0, 4)], [0x4e, 0x45, 0x53, 0x1a], 'the game is not an iNES file');
+  assert.equal(sha256(bytes), game.sha256);
 });
 
 test('the Electron\'s ROMs are its OS pin and the BBC Micro\'s BASIC pin, in the order ElectronHost.Load takes them, and each file in roms/ matches its pin', () => {
@@ -78,8 +94,9 @@ test('the machines to build are named, each once, and a name with no build is re
   assert.deepEqual(machineBuilds(['kim-1']).map((b) => b.id), ['kim-1']);
   assert.deepEqual(machineBuilds(['bbc-micro', 'kim-1', 'bbc-micro']).map((b) => b.id), ['bbc-micro', 'kim-1']);
   assert.deepEqual(machineBuilds(['electron']).map((b) => b.id), ['electron']);
-  assert.throws(() => machineBuilds([]), /name the machines to build: kim-1, bbc-micro or electron, or several/);
-  assert.throws(() => machineBuilds(['nes']), /no build for "nes": the machines are kim-1, bbc-micro and electron/);
+  assert.deepEqual(machineBuilds(['nes']).map((b) => b.id), ['nes']);
+  assert.throws(() => machineBuilds([]), /name the machines to build: kim-1, bbc-micro, nes or electron, or several/);
+  assert.throws(() => machineBuilds(['apple-ii']), /no build for "apple-ii": the machines are kim-1, bbc-micro, nes and electron/);
 });
 
 /**
@@ -108,7 +125,7 @@ function scratchRepo(spoil = () => {}) {
 test('the script stops before publishing anything when the machine, or an option, is not one it knows', () => {
   const { root, run, dotnetRan } = scratchRepo();
   try {
-    for (const args of [[], ['nes'], ['kim-1', '--aot']]) {
+    for (const args of [[], ['apple-ii'], ['kim-1', '--aot']]) {
       const result = run(args);
       assert.notEqual(result.status, 0, `build-machines.mjs ${args.join(' ')} succeeded`);
       assert.doesNotMatch(result.stdout, /dotnet publish/);

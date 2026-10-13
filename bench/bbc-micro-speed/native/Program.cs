@@ -378,11 +378,11 @@ internal static class Profile
     }
 
     /// <summary>64 KB and nothing else: every access is one array read or write.</summary>
-    private sealed class FlatBus(byte[] memory) : Dbhq.Cpu6502.IBus
+    private sealed class FlatBus(byte[] memory) : Dbhq.Cpu6502.Bus
     {
-        public byte Read(ushort address) => memory[address];
+        public override byte Read(ushort address) => memory[address];
 
-        public void Write(ushort address, byte value) => memory[address] = value;
+        public override void Write(ushort address, byte value) => memory[address] = value;
     }
 }
 

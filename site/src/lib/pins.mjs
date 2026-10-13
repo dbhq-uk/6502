@@ -27,6 +27,24 @@ export function kim1Roms(source = fs.readFileSync(PINS_FILE, 'utf8')) {
 }
 
 /**
+ * The NES's one file: no system ROM, but the game its page puts in when Start
+ * is pressed, Lan Master (roms/README.md says whose it is and where it came
+ * from). As a list, in the shape of the other machines' ROMs: its name in the
+ * Pins.cs constants (`rom`), the file name the page loads it by, its repository
+ * path, GitHub link and SHA-256.
+ */
+export function nesRoms(source = fs.readFileSync(PINS_FILE, 'utf8')) {
+  const relative = pin('NesHomebrewPath', source);
+  return [{
+    rom: 'homebrew',
+    file: path.posix.basename(relative),
+    path: relative,
+    url: `https://github.com/dbhq-uk/6502/blob/main/${relative}`,
+    sha256: pin('NesHomebrewSha256', source),
+  }];
+}
+
+/**
  * The BBC Micro's three 16 KB ROMs, in the order BbcHost.Load takes them: the
  * operating system, BASIC and the Disc Filing System. Each with its name in the
  * Pins.cs constants (`rom`), what it is (`name`, as roms/README.md says), the

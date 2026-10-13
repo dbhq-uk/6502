@@ -13,6 +13,13 @@
       "acceptance": "Kim1AcceptanceTests",
       "rights": "The monitor ROM is MOS Technology's, copyright 1975, and MOS was bought by Commodore in 1976; who holds it now was not established, and no licence or permission from any holder was found. Our copy is Hans Otten's dump of real 6530-002 and 6530-003 chips, kept in this repository under roms/, with where it came from, and checked by SHA-256 each time it is read.",
       "notes": "The keypad, the six LED digits, the RS and ST keys, the SST switch and both 6530s, with the original monitor ROM. Not modelled: the teletype interface, the cassette interface and the expansion bus.",
+      "case": false,
+      "models": [
+        {
+          "view": "board",
+          "module": "kim-1"
+        }
+      ],
       "photos": [
         {
           "file": "kim-1.webp",
@@ -582,18 +589,32 @@
       "notes": null
     },
     {
-      "id": "nes-famicom",
-      "name": "NES, Famicom",
+      "id": "nes",
+      "name": "NES",
       "year": 1983,
-      "maker": null,
+      "maker": "Nintendo",
       "category": "console",
-      "cpu": "Ricoh 2A03 (NTSC), 2A07 (PAL)",
+      "cpu": "Ricoh 2A03 at 1.79 MHz (NTSC), 2A07 at 1.66 MHz (PAL)",
       "core": "2a03",
-      "status": "planned",
+      "status": "running",
       "priority": 3,
-      "acceptance": null,
-      "rights": null,
-      "notes": null
+      "acceptance": "NesAcceptanceTests",
+      "rights": "The NES has no system ROM: the console runs whatever cartridge is in it. Commercial games are not bundled and never will be: load your own, which is read in this tab and not uploaded. The cartridge Start puts in is Lan Master, a puzzle game by Shiru from 2011, which he released into the public domain in his own words, in its manual: \"It is free of charge, released into Public Domain, and provided \"as is\", without warranty or responsibility of any kind.\" Its title screen says PD2011 Shiru. Our copy is the 2015 build, with rainwarrior's fix, from Shiru's own archive, lan_master.zip, as the Internet Archive kept it: https://web.archive.org/web/20160327132502id_/http://shiru.untergrund.net/files/nes/lan_master.zip, SHA-256 79410cc133f1100d2fe5409fd49297a62afc748aeeb5faccb8fe69c68c16e6aa, because his own site's files could not be fetched on 6 October 2026. It is kept in this repository under roms/, with where it came from, and checked by SHA-256 each time it is read.",
+      "notes": "The picture drawn a dot at a time as the PPU draws it, the sound unit's five channels, two controllers, NTSC and PAL, and six cartridge boards: NROM, MMC1, UxROM, CNROM, AxROM and MMC3. Not modelled: the Dendy, the Famicom Disk System, expansion audio, the Zapper and other peripherals, the unlicensed mappers, the analogue quirks of the picture, and saving battery-backed RAM.",
+      "case": true,
+      "photos": [
+        {
+          "file": "nes.webp",
+          "author": "Evan-Amos",
+          "sourceUrl": "https://commons.wikimedia.org/wiki/File:Nintendo-Entertainment-System-NES-Console-FL.jpg",
+          "licence": "Public domain",
+          "date": "2016-07-27",
+          "caption": "an original Nintendo Entertainment System, the North American console",
+          "alt": "An original Nintendo Entertainment System seen from the front left and a little above on a white background: a light grey box with a darker grey lower half, the lid of the cartridge slot on top with the red Nintendo Entertainment System name on its front, the power light and the POWER and RESET buttons at the front left, and the two controller ports, numbered 1 and 2, at the foot of the black band on the right.",
+          "fetched": "2026-10-06",
+          "used": "the photograph of the machine at the head of its page; nothing is traced or measured from it, because the NES has no 3D model yet"
+        }
+      ]
     },
     {
       "id": "atari-7800",

@@ -31,7 +31,7 @@ namespace Dbhq.Machines.Kim1;
 /// and A7 low, and A6 tells the two chips apart.
 /// </para>
 /// </remarks>
-public sealed class Kim1Bus : IBus
+public sealed class Kim1Bus : Bus
 {
     private readonly byte[] _ram = new byte[0x400];
     private byte _dataBus;
@@ -78,7 +78,7 @@ public sealed class Kim1Bus : IBus
     /// </summary>
     public void BeginInstruction() => _syncNext = true;
 
-    public byte Read(ushort address)
+    public override byte Read(ushort address)
     {
         BeginCycle(address);
         int a = address & 0x1FFF;
@@ -94,7 +94,7 @@ public sealed class Kim1Bus : IBus
         return value;
     }
 
-    public void Write(ushort address, byte value)
+    public override void Write(ushort address, byte value)
     {
         BeginCycle(address);
         _dataBus = value;

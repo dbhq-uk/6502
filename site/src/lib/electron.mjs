@@ -1,12 +1,14 @@
 import { SITE_ROOT } from './registry.mjs';
 import { electronRoms } from './pins.mjs';
-import { readRom } from './machines.mjs';
-import { downloadBytes as machineDownloadBytes, issueUrl, megabytes } from './machine-page.mjs';
+import { machineDownloadBytes, readRom } from './machines.mjs';
+import { issueUrl, megabytes } from './bbc-micro.mjs';
 import { PC_LABELS, electronCharacters, legend, pcKeysFor } from '../../public/electron-keys.js';
 
 // What the Electron's page says that is the Electron's own, kept out of the
 // template so the tests can read the same values. The BBC Micro's page keeps
-// its own in bbc-micro.mjs; what both say the same way is in machine-page.mjs.
+// its own in bbc-micro.mjs. What every machine page says the same way is shared
+// as the NES's page shares it: the download size is machineDownloadBytes in
+// machines.mjs, and the issue link and the megabytes are bbc-micro.mjs's.
 
 export { issueUrl, megabytes };
 
@@ -26,7 +28,7 @@ export const NOT_MODELLED = [
  * How many bytes the Start button downloads: every file the build put in
  * public/machines/electron/, the WebAssembly and the two ROMs, as built. Null
  * when the machine was not built into this copy of the site, which the page
- * says.
+ * says. The rule is every machine's, machineDownloadBytes in src/lib/machines.mjs.
  */
 export const downloadBytes = (root = SITE_ROOT) => machineDownloadBytes('electron', root);
 

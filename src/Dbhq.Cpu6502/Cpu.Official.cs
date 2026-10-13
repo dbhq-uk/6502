@@ -58,8 +58,9 @@ public sealed partial class Cpu
             // Flags
             case 0x18: Read(PC); SetFlag(C, false); break;
             case 0x38: Read(PC); SetFlag(C, true); break;
-            case 0x58: Read(PC); SetFlag(I, false); break;
-            case 0x78: Read(PC); SetFlag(I, true); break;
+            // CLI, SEI and PLP change I after their last cycle, which the poll must not see.
+            case 0x58: Read(PC); FreezePoll(); SetFlag(I, false); break;
+            case 0x78: Read(PC); FreezePoll(); SetFlag(I, true); break;
             case 0xB8: Read(PC); SetFlag(V, false); break;
             case 0xD8: Read(PC); SetFlag(D, false); break;
             case 0xF8: Read(PC); SetFlag(D, true); break;
@@ -184,11 +185,17 @@ public sealed partial class Cpu
             case 0x48: Read(PC); Push(A); break;
             case 0x08: Read(PC); Push((byte)(P | B | U)); break;
             case 0x68: Read(PC); Read(StackAddress); A = NZ(Pull()); break;
-            case 0x28: Read(PC); Read(StackAddress); P = (byte)((Pull() & ~B) | U); break;
+            case 0x28: Read(PC); Read(StackAddress); Plp(Pull()); break;
 
             default: return false;
         }
 
         return true;
+    }
+
+    private void Plp(byte pulled)
+    {
+        FreezePoll();
+        P = (byte)((pulled & ~B) | U);
     }
 }
