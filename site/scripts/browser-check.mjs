@@ -39,10 +39,7 @@
 // same way: scripts/browser-check-bbc.mjs says what it checks. Then the NES,
 // the same way again: scripts/browser-check-nes.mjs.
 //
-// Then the Electron, in the same browser and watched the same way:
-// scripts/browser-check-electron.mjs says what it checks, on a build of the site
-// with the Electron switched on in a preview of the registry, since the registry
-// itself still says planned.
+// Then the Electron, the same way again: scripts/browser-check-electron.mjs.
 //
 //   node scripts/browser-check.mjs [--throttle N] [--measure seconds]
 //
@@ -96,20 +93,17 @@ const types = {
 };
 
 const headers = edgeHeaders();
-// A built site served with the edge's headers: dist/ for the KIM-1 and the BBC
-// Micro, and the Electron's preview build for its section.
-const serve = (root) => http.createServer((req, res) => {
+const server = http.createServer((req, res) => {
   const url = new URL(req.url, 'http://127.0.0.1');
-  let file = path.join(root, path.normalize(decodeURIComponent(url.pathname)));
+  let file = path.join(dist, path.normalize(decodeURIComponent(url.pathname)));
   if (fs.existsSync(file) && fs.statSync(file).isDirectory()) file = path.join(file, 'index.html');
-  if (!file.startsWith(root) || !fs.existsSync(file)) {
+  if (!file.startsWith(dist) || !fs.existsSync(file)) {
     res.writeHead(404).end();
     return;
   }
   res.writeHead(200, { ...headers, 'Content-Type': types[path.extname(file)] ?? 'application/octet-stream', 'Cache-Control': 'no-store' });
   fs.createReadStream(file).pipe(res);
 });
-const server = serve(dist);
 await new Promise((resolve) => server.listen(0, '127.0.0.1', resolve));
 const origin = `http://127.0.0.1:${server.address().port}`;
 
@@ -813,7 +807,7 @@ try {
   await checkNes({ browser, watch, problems, origin });
 
   // ---- The Electron ----
-  await checkElectron({ browser, watch, problems, serve });
+  await checkElectron({ browser, watch, problems, origin });
 } catch (error) {
   problems.push(error.message);
 } finally {

@@ -5,7 +5,7 @@ import path from 'node:path';
 import vm from 'node:vm';
 import { register } from 'node:module';
 import { pathToFileURL } from 'node:url';
-import { REPO_ROOT, applyPreview, loadRegistry } from '../src/lib/registry.mjs';
+import { REPO_ROOT, loadRegistry } from '../src/lib/registry.mjs';
 import { loadTryIt, readRom } from '../src/lib/machines.mjs';
 import { electronRoms } from '../src/lib/pins.mjs';
 import { NOT_MODELLED, TAPE_TIMES, machineSeconds, symbolTable } from '../src/lib/electron.mjs';
@@ -537,29 +537,13 @@ test('how long a tape takes is the journal\'s dated measurement, its cycles over
   assert.equal(machineSeconds(21_513_995), '10.76');
 });
 
-// ---- The registry, planned, and its preview ----
+// ---- The registry ----
 
-test('a preview lays its fields over the registry\'s for the machines it names, and cannot add one', () => {
-  const registry = { machines: [{ id: 'a', status: 'planned', name: 'A' }, { id: 'b', status: 'planned' }], chips: [] };
-  const seen = applyPreview(registry, { machines: { a: { status: 'running', notes: 'n' } } });
-  assert.deepEqual(seen.machines[0], { id: 'a', status: 'running', name: 'A', notes: 'n' });
-  assert.equal(seen.machines[1], registry.machines[1]);
-  assert.equal(registry.machines[0].status, 'planned', 'the registry itself was changed');
-  assert.throws(() => applyPreview(registry, { machines: { c: {} } }), /not in the registry/);
-});
-
-test('the real registry says the Electron is planned, with its acceptance test, rights and notes already; the preview switches it on and gives its clock', () => {
-  const plain = loadRegistry(undefined, '');
-  const record = plain.machines.find((m) => m.id === 'electron');
-  assert.equal(record.status, 'planned');
+test('the registry\'s Electron record names its acceptance test, which exists, its rights as documented and not cleared, and what it models', () => {
+  const record = loadRegistry().machines.find((m) => m.id === 'electron');
+  assert.equal(record.status, 'running');
   assert.equal(record.acceptance, 'ElectronAcceptanceTests');
   assert.ok(fs.existsSync(path.join(REPO_ROOT, 'tests', 'Dbhq.Machines.Electron.Tests', 'ElectronAcceptanceTests.cs')));
   assert.match(record.rights, /documented, not cleared/);
   assert.match(record.notes, /^The keyboard/);
-  const previewed = loadRegistry(undefined, 'tests/fixtures/electron-running.json');
-  const electron = previewed.machines.find((m) => m.id === 'electron');
-  assert.equal(electron.status, 'running');
-  assert.equal(electron.cpu, '6502, 2 MHz');
-  assert.equal(electron.rights, record.rights, 'the preview changes the rights: they are the registry\'s');
-  assert.deepEqual(previewed.machines.filter((m) => m.id !== 'electron'), plain.machines.filter((m) => m.id !== 'electron'));
 });
