@@ -95,7 +95,7 @@
    "height": 1536,
    "sha256": "7ae4b57399e9576d46bcfe0d4e2b39ddb362d7bb33782c002a39adffab208263",
    "committed": null,
-   "use": "A populated Issue 7 board: the chips' markings, registered to I1 by homography. Stored 2048 by 1536 with EXIF orientation 8, so shown upright as 1536 by 2048"
+   "use": "A populated Issue 7 board: the chips' markings, registered to I1 by homography. Stored 2048 by 1536 with EXIF orientation 8, so shown upright as 1536 by 2048. Task 4 registers it, in its pixels as stored (which lie as I1 does, rear connectors at the top), to the board frame on chip pins marked by hand, and compares the component side's copper with it"
   },
   {
    "id": "K1",
@@ -143,7 +143,7 @@
    "height": null,
    "sha256": "974550803fbce738b143ea0f1fdb6aa129a5c0a69c9e0072634d16f127a7fb99",
    "committed": null,
-   "use": "Facts only, credited; no page or drawing is copied. Table 8.1 (PDF p.66 to 67): every IC's part and its approximate position from the board's SW corner; section 3.11 (PDF p.109): the case's height, width and depth. 222 pages, scanned with a text layer; archive.org's MD5 for the file, d64017d9f5d956500965648b354af6ee, matched the download"
+   "use": "Facts only, credited; no page or drawing is copied. Table 8.1 (PDF p.66 to 67): every IC's part and its approximate position from the board's SW corner; section 3.11 (PDF p.109): the case's height, width and depth. 222 pages, scanned with a text layer; archive.org's MD5 for the file, d64017d9f5d956500965648b354af6ee, matched the download. Task 4 transcribed table 8.1 into data/ic-table.json from the page images"
   }
  ]
 }

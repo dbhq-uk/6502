@@ -1,7 +1,7 @@
 ---
 title: "The BBC Micro's models: the inputs, and what they rest on"
 date: 2026-10-04
-summary: "Before the BBC Micro's two models are built, the work measures what both rest on: the scale of a flatbed scan of the bare board, how well the solder side lies on the component side, and how well a photograph of the keyboard fits an open keyboard layout. The keys, the scan's scale down the board, and the board's size and outline hold, and the solder side holds except for a few holes. Two checks failed and were revised the same day, each kept on record as it failed: the case's front edge, measured on the plane of the keys, which it does not lie in; and a row by row check of the board's width scale, which magnified the noise of short rows and met one long row off the pitch, and as revised lands between pass and stop. The solder side then lies on the component side within the plan's limits over every hole found, and the board's chips come out as footprints, pin one read from the print."
+summary: "Before the BBC Micro's two models are built, the work measures what both rest on: the scale of a flatbed scan of the bare board, how well the solder side lies on the component side, and how well a photograph of the keyboard fits an open keyboard layout. The keys, the scan's scale down the board, and the board's size and outline hold, and the solder side holds except for a few holes. Two checks failed and were revised the same day, each kept on record as it failed: the case's front edge, measured on the plane of the keys, which it does not lie in; and a row by row check of the board's width scale, which magnified the noise of short rows and met one long row off the pitch, and as revised lands between pass and stop. The solder side then lies on the component side within the plan's limits over every hole found, and the board's chips come out as footprints, pin one read from the print. Both faces' copper is then traced from the scans with its method fixed first, but its check on the board's power nets fails, and so does its comparison with a photograph of a populated board, so the track map is offered to look at, not as a netlist."
 order: 28
 ---
 
@@ -1277,3 +1277,61 @@ e8683a74d1bb4d82fb0251b02aac0a517b6df70799159ab698051be5ce2e9fe4 tools/bbc-micro
 ```
 
 The same hashes are written into `copper.json` (`methodFixed`) by the run, so a reader can see that the run used the fixed method. These files were committed as they are before the run.
+
+### The run, once
+
+Run once, at 2026-10-13T19:17:50Z, on the committed and pushed method (`b0b4644`), from the inputs in `~/bbc-model-inputs`:
+
+```
+cd tools/bbc-micro-model && BBC_MODEL_INPUTS=~/bbc-model-inputs nice -n 10 ~/venv-models/bin/python board_trace.py --map-ppm 8
+top: Otsu d(-a) 0.0271; level from 2600 of 2736 blocks, robust sd 0.0052; copper 32.2% of the board (green 17.9%, tin 6.6%, pads 12.1%)
+bottom: Otsu d(-a) 0.0262; level from 2607 of 2741 blocks, robust sd 0.0052; copper 35.1% of the board (green 21.0%, tin 8.1%, pads 12.3%)
+coverage: top 32.2%, bottom 35.1%, print 12.2%: pass
+drills in copper: top 100.0%, bottom 100.0% of 2797: pass
+nets: 51 ICs; excluded 50; GND 39 of 51 in one net, +5V 30 of 51; touching True: fail
+I5 to the board frame: 56 pins on 14 chips, each chip held out: median 0.363, p90 0.842, max 1.036 mm: pass
+top against I5: intersection over union 0.411 over 17127 mm2: fail
+print 8624 mm2, copper recovered under it 700 mm2; map 8 px/mm, 2480 x 1837, 376968 bytes
+```
+
+| Check | Figure | Pass | Verdict |
+|---|---|---|---|
+| Copper coverage, each face | component side 32.2 per cent, solder side 35.1 | 10 to 50 per cent | pass |
+| Drills in copper | 100.0 per cent of 2797 on each face | at least 95 per cent each | pass (weak by construction) |
+| Known nets | 51 ICs; GND 39 of 51 pins in the largest net, +5V 30 of 51; a GND pin and a +5V pin in one net | at least 20 ICs; 90 per cent each; never connected | **fail** |
+| I5 to I1, each chip held out | 56 pins on 14 chips: median 0.363 mm, 90th percentile 0.842, largest 1.036 | median at most 1.0 mm; STOP over 2.0 | pass |
+| The component side against I5 | intersection over union 0.411, over 17,127 square mm where I5 shows the board | at least 0.50 | **fail** |
+
+Both failures stand as measured. Nothing in the method has been changed since. As the plan's note says, the map ships traced to look at, its connections not verified: `NOTICE.md` and the photographs' README say so, and the plan's task 4 note records the outcome, which a site test pins with its figures. The page's sentences about the copper are tasks 7 and 9b's to write, and the plan now tells them to say it, I5's failure with the nets'. A re-trace needs a new check, fixed before it runs, as the NES's #78. The run's log was kept outside the repository and is not committed; the lines above are copied from it.
+
+### Why the nets fail
+
+Looked at after the run, without changing anything, with a scratch script outside the repository that rebuilds the nets check's pieces from the masks the run wrote to `out/`. Two faults, either enough to fail the check.
+
+- **A merge.** One piece of the component side's copper, 264 square mm, holds the GND pins of IC21, IC81 and IC82 and the +5V pins of IC82, IC84 and IC85. It runs along the row of chips from IC76 to IC82 and through the selection links S14, S17 and S18. That is how the largest net comes to hold 39 GND pins and 30 +5V pins at once. Where in the piece the two nets meet was not found: it may be a real merge in the trace, or a link the board makes with copper that the trace cannot tell from a track. Not looked into further, because that would be tuning after the check.
+- **Breaks.** Even without the merge the largest GND net would hold 39 of 51 pins, 76 per cent, under the 90. Some power pins sit on their pad alone (under 6 square mm on both faces: IC1's +5V, IC86's +5V, IC70's GND, IC97's GND, and others). The five chips IC46 to IC50 have their GND pins on one piece of 99.6 square mm and four of their +5V pins on one of 162.8, each joined to the rest of the board nowhere: a break in each rail where the row joins the rest.
+
+This trace is much nearer a netlist than the NES's was (its largest nets held 1 and 2 of 10 pins), but it is not one, and the check says so.
+
+### Why I5 does not agree
+
+Looked at after the run on its overlay (`out/trace-against-i5.png`: red the component side alone, blue I5 alone, white both). Thin tracks agree in place, but nearly every one has a blue edge on the same side: an offset of about a pixel of I5's (0.2 mm), under the registration's 0.36 mm median, and I5's tracks read about a pixel wider than I1's from the photograph's blur. At about 5.4 pixels to the millimetre a 0.3 mm track is under two pixels wide, so a pixel's offset or spread halves its overlap. I5 alone covers 95,940 of its pixels, I1 alone 61,617 and both 110,023. A band of tracks just above IC1 is copper on I1 and is not found on I5; why was not looked into. The comparison was fixed at I5's resolution before the run, and it fails there; it is not run again at another.
+
+### What the print hid
+
+The print covers 8,624 square mm of the component side, 12.2 per cent of the board (under the 15 per cent the map's blue may take). Copper was recovered under 700 square mm of it, 8.1 per cent: where tracks cross an IC's outline or a thin stroke of a label. The wide blocks (the outlines' corners and chamfers where strokes meet, the large lettering of "ACORN COMPUTERS Ltd" and "203,000 Issue 7", the logo) hide what is under them, and the map shows them blue only.
+
+### Mistakes
+
+- The first implementation joined solder to green copper nowhere, because the pixel where they meet is neither. The made-up board's solder over a track found it.
+- Recovery under the print first ran after the specks rule, which had already dropped a track cut into short pieces by print. Seen on an overlay.
+- The I5 registration's test first passed whether each chip or each pin was held out. The break found it.
+- A test of mine on the made-up I5 checked that the gaps between a chip's legs were not board, when they are. The test was wrong, not the code.
+- I wrote "about 6.6 px/mm" for I5 in a first draft of a comment before measuring; it is about 5.4. Corrected before the method was fixed.
+- I saw each face's copper share on every `--look` run, so coverage was seen before the method was fixed (above). Nothing was changed to move it.
+
+### Tests
+
+`~/venv-models/bin/python -m pytest tools/bbc-micro-model/tests -q`: 77 passed (13 October 2026), 58 before this task.
+
+`site/tests/bbc-models.test.mjs` gains six tests: the map is committed, WebP, its size and SHA-256 those `copper.json` gives, inside 600,000 bytes, at 8 px/mm, covering the outline's box, red and green each 10 to 50 per cent and blue under 15, each channel 255 or 0; the verdicts `copper.json` records are the ones its figures give against the fixed rows, and the shares, nets, pins and I5 marks are its own; coverage, drills and the I5 registration pass, and the nets and the I5 comparison are pinned to their FAILs, with their figures and the plan's outcome words; `ic-table.json` is table 8.1's 101 rows, a dozen parts read again from the page images, each IC of the nets check with its data sheet's address and pins; `copper.json`'s `methodFixed` equals the hashes recorded above; and `NOTICE.md` and the photographs' README name the map, amb5l's scans and that it is traced to look at. Each was seen to fail on a copy broken its way, restored after each: the map's SHA-256 changed, and its resolution said 7; one more GND pin in the largest net, and an I5 mark on a chip with no footprint; the nets verdict set to pass, and the plan's outcome words taken out; IC3's GND pin set to 2, and IC40 read as 74LS00; one hash changed in the journal; "traced to look at" taken out of `NOTICE.md`.

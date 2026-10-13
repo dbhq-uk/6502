@@ -3,9 +3,11 @@
 | File | What | Terms |
 |---|---|---|
 | `sources.json` | Every input: where it came from, its author and licence as stated, when it was fetched, its size and SHA-256, and what it is used for | MIT (ours): facts about the inputs, not copies of them |
-| `marks.json` | Points marked by hand on I1, I2 and O1, each with the crop it was read from (task 2 added the connector rows across I1; task 3 the footprints' references and pin 1 where the print's chamfer was not found) | MIT (ours) |
+| `marks.json` | Points marked by hand on I1, I2, I5 and O1, each with the crop it was read from (task 2 added the connector rows across I1; task 3 the footprints' references and pin 1 where the print's chamfer was not found; task 4 the chip pins on I5) | MIT (ours) |
 | `frame.json` | Task 2's board frame on I1: the x and y scales with their held-out checks, the turn, each long row's straightness, the outline, the holes, and the verdict against each of the plan's scale thresholds | MIT (ours): numbers about the input, not a copy of it |
 | `registration.json` | Task 3's solder side registered to the component side on every hole found, with the held-out figures with and without the outlier rule and the verdict, and the fitted map from I2 to the board frame; the drills with both faces' centres, the pads on each face and the footprints with their references, in the board frame; the mounting holes fitted on their top rims | MIT (ours): numbers about the inputs, not copies of them |
+| `ic-table.json` | Acorn's table 8.1 of the Issue 7 board's ICs (D1, PDF pages 66 and 67), transcribed by hand: each IC's part, its place as the manual gives it and the table's comment; for the 51 ICs task 4's nets check uses, the GND and +5V pins with the maker's data sheet each was read from, and for the others why they are left out | MIT (ours): facts read from the manual and the data sheets, not their text |
+| `copper.json` | Task 4's trace of both copper faces and the print: the coverage, the drills in copper, the known nets, I5's registration and the component side against I5, each with its verdict against the plan; the track map's size and SHA-256; the SHA-256 of the method's files | MIT (ours): numbers about the inputs, not copies of them |
 | `spike.json` | Task 0's measurements: the scan's scale, the solder side's registration and the keys' registration, with the verdict against each of the plan's thresholds | MIT (ours): numbers about the inputs, not copies of them |
 
 No input is committed. The scans I1 and I2 (amb5l, posted to stardot) and the

@@ -1,0 +1,880 @@
+{
+ "about": "Task 4 of the BBC Micro models plan: the copper on both faces of the Issue 7 board and its printed legend, traced from the bare scans I1 and I2 (amb5l) in the board frame of frame.json; the plan's checks on them, the component side also against I5 (8BS); and the track map. Written by board_trace.py; every figure here is a measurement made on the date of the journal entry that quotes it.",
+ "againstI5": {
+  "comparedMm2": 17127.3887,
+  "comparedPx": 524229,
+  "i5Trace": {
+   "level": {
+    "blocks": 1645,
+    "firstSplit": 0.0312,
+    "kept": 1546,
+    "robustSd": 0.0053
+   },
+   "showsShare": 0.1707,
+   "threshold": 0.0228
+  },
+  "iou": 0.4112,
+  "registration": {
+   "chips": 14,
+   "fitMm": {
+    "max": 0.8543,
+    "median": 0.3497,
+    "p90": 0.6936
+   },
+   "folds": "each chip held out in turn",
+   "heldOutMm": {
+    "max": 1.0355,
+    "median": 0.363,
+    "p90": 0.8419
+   },
+   "model": "homography",
+   "params": {
+    "H": [
+     [
+      0.1818,
+      -0.0005,
+      -31.0512
+     ],
+     [
+      0.0009,
+      0.1804,
+      -26.7923
+     ],
+     [
+      0.0,
+      0.0,
+      1.0
+     ]
+    ]
+   },
+   "points": 56,
+   "worst": [
+    [
+     55,
+     1.0355
+    ],
+    [
+     33,
+     1.0104
+    ],
+    [
+     35,
+     0.9912
+    ],
+    [
+     53,
+     0.9222
+    ],
+    [
+     49,
+     0.9116
+    ],
+    [
+     36,
+     0.8489
+    ],
+    [
+     51,
+     0.8349
+    ],
+    [
+     38,
+     0.823
+    ],
+    [
+     2,
+     0.7719
+    ],
+    [
+     50,
+     0.7602
+    ]
+   ]
+  },
+  "what": "I5 registered to the board frame by a homography on chip pins marked by hand (marks.json i5Pins), each chip held out of the fit in turn; then the component side's copper drawn into I5's pixels through the fit to every pin, against the copper seen on I5, over the pixels where I5 shows the board (its lacquer's teal, less 0.5 mm round every edge) and I1 shows no print; intersection over union"
+ },
+ "coverage": {
+  "bottom": 0.3507,
+  "print": 0.1218,
+  "top": 0.3222
+ },
+ "drills": {
+  "n": 2797,
+  "notInCopper": {
+   "bottom": [],
+   "top": []
+  }
+ },
+ "drillsInCopper": {
+  "bottom": 1.0,
+  "top": 1.0
+ },
+ "grid": {
+  "height": 3674,
+  "originMm": [
+   0.0,
+   -0.0492
+  ],
+  "pxPerMm": 16,
+  "what": "The traced grid: pixel (u, v)'s centre is board millimetre (originMm + ((u + 0.5) / pxPerMm, (v + 0.5) / pxPerMm))",
+  "width": 4960
+ },
+ "map": {
+  "budget": 600000,
+  "bytes": 376968,
+  "choice": "the highest of 8, 7 or 6 px/mm inside the budget, chosen from --look before this run",
+  "file": "site/src/assets/tracks/bbc-micro-board.webp",
+  "height": 1837,
+  "originMm": [
+   0.0,
+   -0.0492
+  ],
+  "sha256": "15c2ae2d3254acfe9077527d8109b4ad9d16cb8e2c4f406bb31b10b6d0feeb0b",
+  "what": "Red the component side's copper, green the solder side's, blue the print, each 255 or 0; pixel (u, v)'s centre is board millimetre (originMm + ((u + 0.5) / mapPxPerMm, (v + 0.5) / mapPxPerMm)); lossless WebP",
+  "width": 2480
+ },
+ "mapPxPerMm": 8,
+ "methodFixed": {
+  "tools/bbc-micro-model/board_frame.py": "e2754725ff1b859da595ad43ef33ac3983e956bc07ade8b19e9634089177407f",
+  "tools/bbc-micro-model/board_trace.py": "f7ff0fbdee5143e29f4dba34ef8d41125869181cf6af3c040dc0534922701e85",
+  "tools/bbc-micro-model/common.py": "d9d9e1bcea7e643c8a9c7b11a3035b8bd8f551ebd687eb930eef19b3f1e90dc9",
+  "tools/bbc-micro-model/data/frame.json": "1c8b2fff24351fd3b521f0f283eeefa29fd86edcfe82930d1350d2a20bf01872",
+  "tools/bbc-micro-model/data/ic-table.json": "6d991b2c828d4dad5b369f3d0941ca305b362c8d63f671376868b452cf2d0361",
+  "tools/bbc-micro-model/data/marks.json": "e8683a74d1bb4d82fb0251b02aac0a517b6df70799159ab698051be5ce2e9fe4",
+  "tools/bbc-micro-model/data/registration.json": "4327f2c19b0d21e49ccac75989172e2618a3a58b54a3c942626ef1f76ca2d5fb"
+ },
+ "nets": {
+  "chips": 51,
+  "excluded": [
+   [
+    "IC2",
+    "no data sheet for the 6845 was read (not found at the address tried on 13 October 2026), so its pinout has no source"
+   ],
+   [
+    "IC4",
+    "no data sheet for the 6850 was read (not found at the address tried on 13 October 2026), so its pinout has no source"
+   ],
+   [
+    "IC5",
+    "no data sheet for the SAA5050 was read, so its pinout has no source"
+   ],
+   [
+    "IC6",
+    "the video ULA, a custom part with no maker's data sheet"
+   ],
+   [
+    "IC7",
+    "the serial ULA, a custom part with no maker's data sheet"
+   ],
+   [
+    "IC8",
+    "no maker's data sheet for the 81LS95 could be fetched on 13 October 2026, so its pinout has no source"
+   ],
+   [
+    "IC9",
+    "no maker's data sheet for the 81LS95 could be fetched on 13 October 2026, so its pinout has no source"
+   ],
+   [
+    "IC10",
+    "no maker's data sheet for the 81LS95 could be fetched on 13 October 2026, so its pinout has no source"
+   ],
+   [
+    "IC11",
+    "no maker's data sheet for the 81LS95 could be fetched on 13 October 2026, so its pinout has no source"
+   ],
+   [
+    "IC12",
+    "no maker's data sheet for the 81LS95 could be fetched on 13 October 2026, so its pinout has no source"
+   ],
+   [
+    "IC13",
+    "no maker's data sheet for the 81LS95 could be fetched on 13 October 2026, so its pinout has no source"
+   ],
+   [
+    "IC16",
+    "not a logic IC (a timer), and not on the footprints task 3 found"
+   ],
+   [
+    "IC17",
+    "not a logic IC (an analogue op amp); its supply pins need not be the logic's +5V and 0V"
+   ],
+   [
+    "IC18",
+    "no data sheet for the SN76489 was read (it was not at the address tried on 13 October 2026), so its pinout has no source"
+   ],
+   [
+    "IC19",
+    "not a logic IC (an audio amplifier), and not on the footprints task 3 found"
+   ],
+   [
+    "IC31",
+    "table 8.1 prints 74LS34, a part for which no maker's data sheet was found (Texas Instruments has none at its usual address), so its pinout has no source; the print may mean another part"
+   ],
+   [
+    "IC35",
+    "not a logic IC (an analogue op amp); its supply pins need not be the logic's +5V and 0V"
+   ],
+   [
+    "IC51",
+    "no ROM data sheet was read, and the sockets are wired by links for more than one ROM type"
+   ],
+   [
+    "IC52",
+    "no ROM data sheet was read, and the sockets are wired by links for more than one ROM type"
+   ],
+   [
+    "IC53",
+    "no data sheet for the 4816 dynamic RAM was read, so its pinout has no source"
+   ],
+   [
+    "IC54",
+    "no data sheet for the 4816 dynamic RAM was read, so its pinout has no source"
+   ],
+   [
+    "IC55",
+    "no data sheet for the 4816 dynamic RAM was read, so its pinout has no source"
+   ],
+   [
+    "IC56",
+    "no data sheet for the 4816 dynamic RAM was read, so its pinout has no source"
+   ],
+   [
+    "IC57",
+    "no data sheet for the 4816 dynamic RAM was read, so its pinout has no source"
+   ],
+   [
+    "IC58",
+    "no data sheet for the 4816 dynamic RAM was read, so its pinout has no source"
+   ],
+   [
+    "IC59",
+    "no data sheet for the 4816 dynamic RAM was read, so its pinout has no source"
+   ],
+   [
+    "IC60",
+    "no data sheet for the 4816 dynamic RAM was read, so its pinout has no source"
+   ],
+   [
+    "IC61",
+    "no data sheet for the 4816 dynamic RAM was read, so its pinout has no source"
+   ],
+   [
+    "IC62",
+    "no data sheet for the 4816 dynamic RAM was read, so its pinout has no source"
+   ],
+   [
+    "IC63",
+    "no data sheet for the 4816 dynamic RAM was read, so its pinout has no source"
+   ],
+   [
+    "IC64",
+    "no data sheet for the 4816 dynamic RAM was read, so its pinout has no source"
+   ],
+   [
+    "IC65",
+    "no data sheet for the 4816 dynamic RAM was read, so its pinout has no source"
+   ],
+   [
+    "IC66",
+    "no data sheet for the 4816 dynamic RAM was read, so its pinout has no source"
+   ],
+   [
+    "IC67",
+    "no data sheet for the 4816 dynamic RAM was read, so its pinout has no source"
+   ],
+   [
+    "IC68",
+    "no data sheet for the 4816 dynamic RAM was read, so its pinout has no source"
+   ],
+   [
+    "IC73",
+    "no data sheet for the uPD7002 was read, so its pinout has no source"
+   ],
+   [
+    "IC74",
+    "an RS423 line receiver, whose supply pins need not be the logic's +5V and 0V; no data sheet was read"
+   ],
+   [
+    "IC75",
+    "an RS423 line driver, powered from +5V and -5V; no data sheet was read"
+   ],
+   [
+    "IC78",
+    "no data sheet for the 8271 was read, so its pinout has no source"
+   ],
+   [
+    "IC88",
+    "no ROM data sheet was read, and the socket is wired by links for more than one ROM type"
+   ],
+   [
+    "IC89",
+    "no data sheet for the 68B54 was read, so its pinout has no source"
+   ],
+   [
+    "IC90",
+    "table 8.1 says not fitted, and task 3 found no footprint for it"
+   ],
+   [
+    "IC92",
+    "task 3 found no footprint for it (table 8.1: not fitted, and on I1 no DIP was grouped there)"
+   ],
+   [
+    "IC93",
+    "a line driver for Econet; no data sheet was read"
+   ],
+   [
+    "IC94",
+    "not a logic IC (an analogue comparator); its supply pins need not be the logic's +5V and 0V"
+   ],
+   [
+    "IC95",
+    "not a logic IC (an analogue comparator); its supply pins need not be the logic's +5V and 0V"
+   ],
+   [
+    "IC98",
+    "a speech part; no data sheet was read"
+   ],
+   [
+    "IC99",
+    "a speech part; no data sheet was read"
+   ],
+   [
+    "IC100",
+    "no ROM data sheet was read, and the sockets are wired by links for more than one ROM type"
+   ],
+   [
+    "IC101",
+    "no ROM data sheet was read, and the sockets are wired by links for more than one ROM type"
+   ]
+  ],
+  "gnd": {
+   "inLargest": 39,
+   "pins": 51
+  },
+  "touching": true,
+  "vcc": {
+   "inLargest": 30,
+   "pins": 51
+  }
+ },
+ "netsChips": [
+  "IC1",
+  "IC3",
+  "IC14",
+  "IC15",
+  "IC20",
+  "IC21",
+  "IC22",
+  "IC23",
+  "IC24",
+  "IC25",
+  "IC26",
+  "IC27",
+  "IC28",
+  "IC29",
+  "IC30",
+  "IC32",
+  "IC33",
+  "IC34",
+  "IC36",
+  "IC37",
+  "IC38",
+  "IC39",
+  "IC40",
+  "IC41",
+  "IC42",
+  "IC43",
+  "IC44",
+  "IC45",
+  "IC46",
+  "IC47",
+  "IC48",
+  "IC49",
+  "IC50",
+  "IC69",
+  "IC70",
+  "IC71",
+  "IC72",
+  "IC76",
+  "IC77",
+  "IC79",
+  "IC80",
+  "IC81",
+  "IC82",
+  "IC83",
+  "IC84",
+  "IC85",
+  "IC86",
+  "IC87",
+  "IC91",
+  "IC96",
+  "IC97"
+ ],
+ "pinNets": {
+  "gnd": [
+   [
+    "IC1",
+    "bottom:1781"
+   ],
+   [
+    "IC3",
+    "bottom:1781"
+   ],
+   [
+    "IC14",
+    "bottom:1594"
+   ],
+   [
+    "IC15",
+    "bottom:1781"
+   ],
+   [
+    "IC20",
+    "bottom:2299"
+   ],
+   [
+    "IC21",
+    "bottom:1781"
+   ],
+   [
+    "IC22",
+    "bottom:1781"
+   ],
+   [
+    "IC23",
+    "bottom:1605"
+   ],
+   [
+    "IC24",
+    "bottom:1781"
+   ],
+   [
+    "IC25",
+    "bottom:1781"
+   ],
+   [
+    "IC26",
+    "bottom:1781"
+   ],
+   [
+    "IC27",
+    "bottom:1781"
+   ],
+   [
+    "IC28",
+    "bottom:1781"
+   ],
+   [
+    "IC29",
+    "bottom:1781"
+   ],
+   [
+    "IC30",
+    "bottom:1781"
+   ],
+   [
+    "IC32",
+    "bottom:1781"
+   ],
+   [
+    "IC33",
+    "bottom:1781"
+   ],
+   [
+    "IC34",
+    "bottom:1781"
+   ],
+   [
+    "IC36",
+    "bottom:1781"
+   ],
+   [
+    "IC37",
+    "bottom:1781"
+   ],
+   [
+    "IC38",
+    "bottom:1781"
+   ],
+   [
+    "IC39",
+    "bottom:1781"
+   ],
+   [
+    "IC40",
+    "bottom:1781"
+   ],
+   [
+    "IC41",
+    "bottom:1781"
+   ],
+   [
+    "IC42",
+    "bottom:1781"
+   ],
+   [
+    "IC43",
+    "bottom:1781"
+   ],
+   [
+    "IC44",
+    "bottom:695"
+   ],
+   [
+    "IC45",
+    "bottom:1781"
+   ],
+   [
+    "IC46",
+    "bottom:635"
+   ],
+   [
+    "IC47",
+    "bottom:635"
+   ],
+   [
+    "IC48",
+    "bottom:635"
+   ],
+   [
+    "IC49",
+    "bottom:635"
+   ],
+   [
+    "IC50",
+    "bottom:635"
+   ],
+   [
+    "IC69",
+    "bottom:1781"
+   ],
+   [
+    "IC70",
+    "bottom:2306"
+   ],
+   [
+    "IC71",
+    "bottom:2230"
+   ],
+   [
+    "IC72",
+    "bottom:1781"
+   ],
+   [
+    "IC76",
+    "bottom:1781"
+   ],
+   [
+    "IC77",
+    "bottom:1781"
+   ],
+   [
+    "IC79",
+    "bottom:1781"
+   ],
+   [
+    "IC80",
+    "bottom:1781"
+   ],
+   [
+    "IC81",
+    "bottom:1781"
+   ],
+   [
+    "IC82",
+    "bottom:1781"
+   ],
+   [
+    "IC83",
+    "bottom:1781"
+   ],
+   [
+    "IC84",
+    "bottom:1781"
+   ],
+   [
+    "IC85",
+    "bottom:1781"
+   ],
+   [
+    "IC86",
+    "bottom:1781"
+   ],
+   [
+    "IC87",
+    "bottom:1781"
+   ],
+   [
+    "IC91",
+    "bottom:1781"
+   ],
+   [
+    "IC96",
+    "bottom:1781"
+   ],
+   [
+    "IC97",
+    "bottom:717"
+   ]
+  ],
+  "vcc": [
+   [
+    "IC1",
+    "bottom:1255"
+   ],
+   [
+    "IC3",
+    "bottom:1781"
+   ],
+   [
+    "IC14",
+    "bottom:1583"
+   ],
+   [
+    "IC15",
+    "bottom:1781"
+   ],
+   [
+    "IC20",
+    "bottom:1706"
+   ],
+   [
+    "IC21",
+    "bottom:1706"
+   ],
+   [
+    "IC22",
+    "bottom:1616"
+   ],
+   [
+    "IC23",
+    "bottom:1781"
+   ],
+   [
+    "IC24",
+    "bottom:1781"
+   ],
+   [
+    "IC25",
+    "bottom:1781"
+   ],
+   [
+    "IC26",
+    "bottom:1166"
+   ],
+   [
+    "IC27",
+    "bottom:1781"
+   ],
+   [
+    "IC28",
+    "bottom:1781"
+   ],
+   [
+    "IC29",
+    "bottom:1781"
+   ],
+   [
+    "IC30",
+    "bottom:1781"
+   ],
+   [
+    "IC32",
+    "bottom:1781"
+   ],
+   [
+    "IC33",
+    "bottom:1781"
+   ],
+   [
+    "IC34",
+    "bottom:1781"
+   ],
+   [
+    "IC36",
+    "bottom:1072"
+   ],
+   [
+    "IC37",
+    "bottom:1781"
+   ],
+   [
+    "IC38",
+    "bottom:1781"
+   ],
+   [
+    "IC39",
+    "bottom:1781"
+   ],
+   [
+    "IC40",
+    "bottom:665"
+   ],
+   [
+    "IC41",
+    "bottom:1781"
+   ],
+   [
+    "IC42",
+    "bottom:805"
+   ],
+   [
+    "IC43",
+    "bottom:447"
+   ],
+   [
+    "IC44",
+    "bottom:471"
+   ],
+   [
+    "IC45",
+    "bottom:491"
+   ],
+   [
+    "IC46",
+    "bottom:460"
+   ],
+   [
+    "IC47",
+    "bottom:342"
+   ],
+   [
+    "IC48",
+    "bottom:342"
+   ],
+   [
+    "IC49",
+    "bottom:342"
+   ],
+   [
+    "IC50",
+    "bottom:342"
+   ],
+   [
+    "IC69",
+    "bottom:1911"
+   ],
+   [
+    "IC70",
+    "bottom:1911"
+   ],
+   [
+    "IC71",
+    "bottom:1781"
+   ],
+   [
+    "IC72",
+    "bottom:1781"
+   ],
+   [
+    "IC76",
+    "bottom:1781"
+   ],
+   [
+    "IC77",
+    "bottom:1781"
+   ],
+   [
+    "IC79",
+    "bottom:1781"
+   ],
+   [
+    "IC80",
+    "bottom:1781"
+   ],
+   [
+    "IC81",
+    "bottom:1832"
+   ],
+   [
+    "IC82",
+    "bottom:1781"
+   ],
+   [
+    "IC83",
+    "bottom:1781"
+   ],
+   [
+    "IC84",
+    "bottom:1781"
+   ],
+   [
+    "IC85",
+    "bottom:1781"
+   ],
+   [
+    "IC86",
+    "bottom:2080"
+   ],
+   [
+    "IC87",
+    "bottom:1781"
+   ],
+   [
+    "IC91",
+    "bottom:1781"
+   ],
+   [
+    "IC96",
+    "bottom:1781"
+   ],
+   [
+    "IC97",
+    "bottom:1781"
+   ]
+  ]
+ },
+ "print": {
+  "areaMm2": 8624.2227,
+  "recoveredMm2": 700.2188,
+  "recoveredShare": 0.0812
+ },
+ "thresholds": {
+  "againstI5": "the component side against I5 where I5 shows the board: intersection over union at least 0.50",
+  "coverage": "each face's copper 10 to 50 per cent of the board",
+  "drillsInCopper": "at least 95 per cent on each face",
+  "i5Registration": "I5 to the board frame on chip pins, each chip held out: median at most 1.0 mm passes, over 2.0 mm stops",
+  "nets": "at least 20 ICs; at least 90 per cent of their GND pins in one net and of their +5V pins in another; the two never connected"
+ },
+ "trace": {
+  "bottom": {
+   "hysteresisHigh": 0.0519,
+   "laminateMedianDA": 0.0005,
+   "level": {
+    "blocks": 2741,
+    "firstSplit": 0.0402,
+    "kept": 2607,
+    "robustSd": 0.0052
+   },
+   "otsuDA": 0.0262,
+   "shares": {
+    "green": 0.21,
+    "pads": 0.123,
+    "tin": 0.0808
+   }
+  },
+  "top": {
+   "hysteresisHigh": 0.0533,
+   "laminateMedianDA": 0.0008,
+   "level": {
+    "blocks": 2736,
+    "firstSplit": 0.0381,
+    "kept": 2600,
+    "robustSd": 0.0052
+   },
+   "otsuDA": 0.0271,
+   "shares": {
+    "green": 0.1787,
+    "pads": 0.1212,
+    "tin": 0.0664
+   }
+  }
+ },
+ "verdicts": {
+  "againstI5": "fail",
+  "coverage": "pass",
+  "drillsInCopper": "pass",
+  "i5Registration": "pass",
+  "nets": "fail"
+ }
+}

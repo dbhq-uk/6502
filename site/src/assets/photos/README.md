@@ -237,6 +237,25 @@ fetches a scan. The NES board's model draws the map, served as
 `/models/nes-famicom-board-tracks.webp` beside its bundle by
 `scripts/build-models.mjs` and fetched with the model, never with the page.
 
+## The BBC Micro board's track map, src/assets/tracks/bbc-micro-board.webp
+
+The copper on both faces of the BBC Micro Model B's main board, Issue 7, for the BBC Micro's inside 3D model, and its printed legend. **The map is traced from amb5l's scans**, the bare board scanned on both faces at 400 dpi and posted to the stardot forum ([thread 23329](https://stardot.org.uk/forums/viewtopic.php?t=23329)). The scans state no licence and are not committed, not even resized.
+
+| Channel | What | From | Terms |
+|---|---|---|---|
+| Red | The component side's copper | I1, amb5l's scan of the component side, traced | No licence stated for the scan; `NOTICE.md` says what is derived from it |
+| Green | The solder side's copper | I2, amb5l's scan of the solder side, registered to I1 and traced | The same |
+| Blue | The printed legend, as it is printed, Acorn's name included | I1, traced | The same |
+
+| | |
+|---|---|
+| Made by | `tools/bbc-micro-model/board_trace.py` on 13 October 2026, from the full-size scans, in the board frame of `tools/bbc-micro-model/data/frame.json`. Its `README.md` says how to run it; `tools/bbc-micro-model/data/copper.json` holds the map's size, bytes and SHA-256 and the checks on it; the journal for 4 October 2026 has the figures, under task 4 |
+| This copy | 8 pixels to the millimetre, lossless, covering the board edge to edge; each channel 255 or 0 |
+| Connections | The copper is traced to look at: its connections are not verified (the check on its known nets failed, and so did the check of the component side against I5, 8BS's photograph of a populated board, 13 October 2026) |
+| Terms | amb5l credited as the source of the scans, which state no licence; `NOTICE.md` says what is derived from them |
+
+The build does not run the analysis, and nothing in the tests or the build fetches a scan.
+
 ## The NES board's sources, which are not committed
 
 The NES board's model is measured from these, and none of them is in the

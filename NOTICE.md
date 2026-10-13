@@ -1,9 +1,11 @@
 # Notices
 
-This repository is MIT (see `LICENSE`). Three things in it were taken from
-outside under different terms, and are recorded here: the teletext glyph table,
-the BBC Micro's preset discs, and the NES board's track map, traced from
-OpenTendo's scans of a bare board under the TAPR Open Hardware License. The
+This repository is MIT (see `LICENSE`). Four things in it were taken from
+outside under different terms, or rest on work that states none, and are
+recorded here: the teletext glyph table, the BBC Micro's preset discs, the NES
+board's track map, traced from OpenTendo's scans of a bare board under the TAPR
+Open Hardware License, and the BBC Micro board's track map, traced from amb5l's
+scans of a bare board, which state no licence. The
 system ROMs, and the NES's bundled homebrew, Lan Master, which its author
 released into the public domain, are recorded separately, in
 [`roms/README.md`](roms/README.md).
@@ -149,3 +151,12 @@ are copper and which are print. Everything else in the NES models (the code,
 the measurements in `tools/nes-model/data/`, the generated parts) is ours and
 MIT, and the KiCad redrawing in OpenTendo is only compared with, never drawn
 from.
+
+## The BBC Micro board's track map, traced from amb5l's scans
+
+**What.** `site/src/assets/tracks/bbc-micro-board.webp`: the copper on both faces of the BBC Micro Model B's main board, Issue 7, and its printed legend, as one lossless WebP, 8 pixels to the millimetre, edge to edge in the board frame. Red is the component side's copper, green the solder side's, blue the print. **The copper is traced to look at: its connections are not verified.** The check on its known nets failed, and so did the check of the component side against a photograph of a populated board (13 October 2026; the figures are in `tools/bbc-micro-model/data/copper.json` and the journal). It is ours in the sense that our code traced it (`tools/bbc-micro-model/board_trace.py`, 13 October 2026), but **the map is traced from amb5l's scans**, so it is derived from them.
+
+**Where it came from.** Two flat scans at 400 dpi of a bare Issue 7 board, one of each face, posted by amb5l to the stardot forum on 18 September 2021 (<https://stardot.org.uk/forums/viewtopic.php?t=23329>, the files on Google Drive). The scans are not committed here; their URLs, sizes and SHA-256 are in `tools/bbc-micro-model/data/sources.json` (I1 and I2).
+
+**Rights.** The scans state no licence, and none was found in the post or the thread. Nothing of them is committed: not the scans, not a resized copy, not a crop. What is derived from them is the map's pixels: which parts of each face are copper and which are print. The map is published with amb5l credited as the source of the scans, and if amb5l asks for it to be removed, it will be. Everything else in the BBC Micro models (the code, the measurements in `tools/bbc-micro-model/data/`) is ours and MIT. The board's design, and the legend the map shows as it is printed (Acorn's name and copyright line included), are Acorn's.
+
