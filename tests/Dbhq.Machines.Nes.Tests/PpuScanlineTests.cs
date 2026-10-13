@@ -111,11 +111,6 @@ public class PpuScanlineTests
     }
 
     /// <summary>
-    /// Runs <paramref name="scene"/> on <paramref name="pair"/> and checks that the fast path took
-    /// <paramref name="fast"/> lines of it on the lazy PPU, and none ever on the reference, whose
-    /// catch-ups are one dot.
-    /// </summary>
-    /// <summary>
     /// Runs <paramref name="scene"/> on <paramref name="pair"/>, where <paramref name="wholeLines"/>
     /// are the lines (by their place in the scene, 0 its first) that a catch-up owes whole, and
     /// checks that the fast path took exactly those of them that <see cref="Qualifies"/> on the
@@ -164,6 +159,11 @@ public class PpuScanlineTests
     /// <summary>The first <paramref name="count"/> lines of a scene, by their place in it.</summary>
     internal static int[] First(int count) => [.. Enumerable.Range(0, count)];
 
+    /// <summary>
+    /// Runs <paramref name="scene"/> on <paramref name="pair"/> and checks that the fast path took
+    /// <paramref name="fast"/> lines of it on the lazy PPU, and none ever on the reference, whose
+    /// catch-ups are one dot.
+    /// </summary>
     internal static void Run(DotScenePair pair, DotScene scene, int fast)
     {
         long before = pair.Lazy.FastLines;
@@ -535,13 +535,37 @@ public class PpuScanlineTests
     // parts.
     [Theory]
     [MemberData(nameof(AccessRows))]
-    public void AnAccessOnAnyDotOfTheLine(string kind, string region, int line)
+    public void AnAccessOnAnyDotOfTheLine(string kind, string region, int line) =>
+        AccessOnEveryDot(kind, region, line, 0x0A, noSprites: false);
+
+    // Task 4a: the same with both layers on and OAM holding no sprite on any line, so the lines
+    // the clause takes are the lines the background alone takes. An access on every dot (OAMADDR
+    // written, OAM read and written, PPUMASK, the scroll) must leave what the per-dot path
+    // leaves, OAMADDR held at 0 over dots 257 to 320 among it.
+    [Theory]
+    [MemberData(nameof(AccessRows))]
+    public void AnAccessOnAnyDotOfALineWithTheSpritesOnAndNoneOnIt(string kind, string region, int line) =>
+        AccessOnEveryDot(kind, region, line, 0x1E, noSprites: true);
+
+    private static void AccessOnEveryDot(string kind, string region, int line, byte mask, bool noSprites)
     {
         Region r = PpuScene.RegionNamed(region);
-        const byte Mask = 0x0A;
-        var pair = new DotScenePair(() => PpuDotSceneTests.Busy(r, Ctrl, Mask, line, quiet: true));
+        var pair = new DotScenePair(() =>
+        {
+            Ppu ppu = PpuDotSceneTests.Busy(r, Ctrl, mask, line, quiet: true);
+            if (noSprites)
+            {
+                byte[] oam = ppu.Oam;
+                for (int i = 0; i < 64; i++)
+                {
+                    oam[i * 4] = 0xFF;
+                }
+            }
+
+            return ppu;
+        });
         int dot = 0;
-        foreach (DotScene scene in PpuDotSceneTests.AtEveryDot(kind, r, line, false, 0x00, Ctrl, Mask))
+        foreach (DotScene scene in PpuDotSceneTests.AtEveryDot(kind, r, line, false, 0x00, Ctrl, mask))
         {
             Run(pair, scene, dot == 0 ? First(3) : [0, 2]);
             dot++;

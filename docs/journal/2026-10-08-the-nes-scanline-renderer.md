@@ -1369,3 +1369,272 @@ cursor is all of, are worth another second implementation. They are worth about
 - The native bench is noisy (the NTSC ratio went from 1.05 to 0.87 between sets
   of the same two builds). The browser figures were taken in the CPU time of the
   page's main thread, which is quieter.
+
+## Task 4a: the sprite layer on, no sprite on the line
+
+Task 3b found that in play the sprite layer is on for every visible line of Lan
+Master, so the fast path took none of them, and that 93 percent of those lines
+have no sprite on them. Task 4a is the one clause that reaches them, decided by
+the controller on that evidence (ruling AB): a visible line with both layers on
+is rendered whole when no sprite was fetched for it. It draws no sprite and
+sets no sprite 0 hit. A line with any sprite on it stays on the per-dot path,
+and so does task 4 proper, which is not built.
+
+The code is commit `cdd7980` (`PpuScanline.cs`, with a comment in `Ppu.cs` at
+`DrawPixel` and one in `PpuSprites.cs` at `LaySprite`, so the next change to
+either sees what the clause rests on, and two test hooks in `PpuTestHooks.cs`).
+The condition in `TryRenderLine` went from `layers == 0x08` to
+`layers == 0x08 || (layers == 0x18 && _spriteCount == 0)`, and everything else
+is the background line that task 3 built. The twelve sparse cartridges are
+`bc92102`. Figures are of 9 October 2026, the speed against main at `5640a57`
+and the build before this task at `7b963e6`.
+
+### Why it is safe, and when it is refused
+
+`_spriteCount` is the number of sprites fetched for the line the PPU is on. It
+is set at dot 257 of the line before, in the same step that empties the line
+buffer, and every write of it to 0 (a reset, a rendering-off line, the
+pre-render line, `MoveTo`) empties the buffer with it. The fetches on dots 257 to
+320 lay a sprite only for a slot below `_spriteCount`. So with `_spriteCount`
+at 0 the buffer is empty, and `DrawPixel` reads no sprite pixel on the line.
+Then the sprite multiplexer has nothing to choose, the sprite's left clip
+(`_spritesFrom`) clips nothing, and sprite 0 hit, which needs a pixel of sprite
+0 in the buffer, cannot be set. The pixel is the background's alone, as on a
+line with the sprites off. The rest of what a line with both layers on does does
+not depend on the sprite layer, and the background line already runs it with
+the per-dot code: evaluation and its overflow bug, the 8 by 16 bit, OAMADDR held
+at 0 on dots 257 to 320, and the fetches for the next line. So a line whose
+evaluation finds ten sprites for the next line sets the overflow flag, and the
+next line's sprites are fetched, exactly as before.
+
+The line is refused, and the per-dot path runs it, when:
+
+- a sprite was fetched for it (`_spriteCount` is not 0), so the sprites are
+  drawn by the per-dot code, including sprite 0 and the left clip;
+- the sprite layer is on and the background off. With no sprite fetched this is
+  a line of backdrop, not the rendering-off line's fill (which can be a palette
+  entry `v` points at), and the clause does not take it. Lan Master never
+  runs with the background off and the sprites on, so nothing measured needs it,
+  and refusing costs only speed;
+- the board watches the PPU's address bus, has no pattern windows or has no
+  nametable page table, and any line the catch-up does not owe whole, as for
+  every background line;
+- it is the pre-render line, or `WholeLines` is off.
+
+**Chosen over.** The condition could have looked at the line buffer
+(`_spriteWidth`) or at OAM's Y bytes. The count was chosen because it is the
+state the per-dot path itself sets, at the dot that empties the buffer, so the
+claim "no sprite fetched, so the buffer is empty" is one line of reasoning and a
+check in the tests (below), and not a second derivation of which sprites are in
+range. The background-off case was left out, not proved: there the reference's
+pixel is the backdrop colour from a background that is masked, and the clause
+would need a second proof for no measured gain.
+
+### The tests
+
+The scene tests used to compute from the mask alone how many lines the fast
+path must take. That cannot be right now, because whether a line qualifies
+depends on what the line before fetched. `PpuScanlineTests.Run` now takes the
+lines a catch-up owes whole and reads, from the reference's own state at the
+start of each (the PPUMASK it has by then and the sprites fetched for the line),
+whether `Qualifies` says the fast path may take it, and checks the lazy PPU took
+exactly those. At each line's start it also checks the claim the clause rests on:
+no sprite fetched means a line buffer of width 0.
+
+A new family, `SpriteLayerOnLines`, puts the sprite layer on under every
+combination of the two layers and the two left clips (and greyscale and emphasis
+masks), with OAM holding sprites that are on no line, on line 240 only, on the
+next line only, on this line only, on both, ten on the next line (so the line's
+own evaluation sets the overflow flag), and sprite 0 alone on the next line or
+on this one, 8 by 8 and 8 by 16, in both regions, from two lines before the line
+looked at. `AFastLinesEvaluationSetsTheOverflowFlag` checks the flag by itself.
+The line-edge `$2001` family gained the masks with both layers on. State and
+pixels are compared with the per-dot PPU as in task 3.
+
+**Against the code without the clause, 140 of the new and changed tests failed**,
+each on the count of lines taken. With the clause in, the NES tests are all
+green (2,640 passed, 0 failed, `dotnet test tests/Dbhq.Machines.Nes.Tests -c
+Release`, 9 October 07:54 UTC, 3 minutes 46 seconds), and `dotnet build -c
+Release` gives 0 warnings and 0 errors.
+
+### The gate
+
+Sparse cartridges first. After the clause was written, two of its planted faults
+were seen by very few runs: the left clip by 12 (fuzz cartridges alone) and the
+overflow flag by 5. The reason is that the fuzz cartridges keep sprites on every
+line, and the clause only acts when a line has none. Twelve synthetic "sparse"
+cartridges were added to the differential (NROM, CNROM, MMC1, UxROM, AxROM): both
+layers on with few sprites, as a game's play has them, a cursor of four sprites
+with sprite 0, a cluster of ten on one line (at Y 239 in half the frames, so only
+line 239 evaluates it), 8 by 16 every other 8 frames, PPUMASK cycling the two
+left clips with greyscale and emphasis, and a `$2002` read in the frame kept in
+RAM. They sort among the others by name; the format did not change.
+
+On this tree (`bc92102`, from `bench/nes-speed/differential`), 9 October 2026:
+
+- `dotnet run -c Release -- <file> --oracle` wrote 380 runs, 07:54:12 to
+  08:02:38 UTC. **It is byte for byte the baseline the previous agent staged**
+  (`cmp` printed nothing), which is `baseline/bc92102.txt`. Checked here and not
+  trusted: the file's first line is the format 4, 150 frames line as before; every
+  one of `132fd50.txt`'s 357 lines, in order, is in it (the 254 pinned-ROM
+  lines among them, unchanged); the other 24 lines are the twelve sparse
+  cartridges in both regions. `132fd50.txt` was removed.
+- `--check baseline/bc92102.txt`, the lazy build: **IDENTICAL, all 380 runs**,
+  08:05:12 to 08:12:22 UTC.
+- `--check baseline/bc92102.txt --oracle`: **IDENTICAL, all 380 runs**, 08:12:22
+  to 08:18:33 UTC.
+
+### The faults
+
+The eleven faults of task 3 in `PpuScanline.cs` and six for the clause were run
+on a scratch copy of this tree (the repository is never changed), each with the
+differential `--check` against `bc92102.txt` and the 1,119 tests of
+`PpuScanlineTests`, `PpuDotScene*`, `PpuCatchUpTests`, `StateReport` and
+`PpuMoveTo`:
+
+```
+python3 bench/nes-speed/differential/faults.py <copy> <copy>/bench/nes-speed/differential/baseline/bc92102.txt --tests <filter> <fault ...>
+```
+
+08:19 to 10:42 UTC. The machine was shared with other jobs (load 2 to 16), which
+does not change a count. The whole output is in
+[`task-4a-faults.txt`](../../bench/nes-speed/lazy-chips/task-4a-faults.txt).
+
+FAULT_TABLE
+
+Every fault is seen by at least 20 runs of the differential and by scene tests.
+The smallest count is `fast-vblank-line-off-by-one` at 20 runs, the same as
+before the sparse cartridges: it only changes the VBlank lines, which a program
+reaches in few runs. Task 3's faults are seen by more runs than at task 3's
+review, because the clause makes more of their lines fast (`fast-pixel-one-off`
+went from 75 runs of 356 to 131 of 380).
+
+**One fault was equivalent, and was replaced.** The previous agent's
+`fast-sprite-buffer-not-cleared` (skip the line buffer's emptying on a fast line
+with the sprites on) changed 0 runs and failed 0 tests. It is not a hole in the
+gate. On a line the clause takes the buffer is already empty, so emptying it
+again does nothing: it is the invariant itself seen from the other side. It was
+replaced by `fast-sprite-oamaddr-kept` (OAMADDR not held at 0 on a fast line with
+the sprites on), which can be seen.
+
+The 14 older faults (the lazy catch-up, not the fast path) were not run again:
+nothing in `PpuCatchUp.cs` or the board code changed in this task.
+
+### The share of play
+
+The line probe of task 3b run on this tree (`cdd7980`, the clause in; a scratch
+copy with the counting, never committed; the output in
+[`task-4a-line-probe.txt`](../../bench/nes-speed/lazy-chips/task-4a-line-probe.txt)),
+9 October 05:06:29 to 05:06:58 UTC, from power on to the script's last frame of
+play in each region. It counts lines and times nothing, so the load (12 to 14,
+other jobs) does not matter. Its totals equal `Ppu.FastLines` and
+`Ppu.ExactLines`, read by reflection, in both regions.
+
+The share of the visible lines (lines 0 to 239) the fast path took, and of all
+lines, NTSC then PAL, with task 3b's figure for the level beside it:
+
+| Phase | Frames | Visible lines fast | All lines fast |
+| --- | --- | --- | --- |
+| title | 36 | 91.9 / 89.7 | 90.8 / 88.8 |
+| menu | 60 | 99.6 / 99.8 | 97.7 / 98.0 |
+| transition | 54 | 96.7 / 95.8 | 95.5 / 95.3 |
+| level | 3,300 / 2,700 | 93.1 / 93.1 | 90.2 / 91.0 |
+
+Task 3b's level row was 0.0 and 0.1 percent of the visible lines. Over the whole
+run, 817,218 NTSC lines fast and 86,682 exact (90.4 percent fast), and 810,704
+PAL lines fast and 78,496 exact (91.2 percent). In the level, 93.3 percent of
+the visible lines have no sprite on them (task 3b), and the path takes 93.1. The
+last 0.2 points are not broken down here; a line a catch-up does not owe whole,
+such as line 0 split by the frame end's catch-up as in task 3, is the likely
+cause. The 6.7 percent it leaves are the cursor's lines. In the level the sprite
+layer and the background are on for 100.0 percent of the visible lines on NTSC
+and 99.9 on PAL.
+
+### Speed in play
+
+Three builds, alternated: main at `5640a57`, the build before this task
+(`7b963e6`), and this one (`cdd7980`, whose `src/` is the head's, as `bc92102`
+changes `bench/` only). Times real is the machine's speed against the region's
+own clock, so higher is faster. The medians are by
+[`task-4a-medians.py`](../../bench/nes-speed/lazy-chips/task-4a-medians.py) on
+the logs.
+
+**Natively**, thread CPU time a cycle, `bench/thread-time` on `play-ntsc` and
+`play-pal` (the method of task 3b), by
+[`task-4a-thread-time.sh`](../../bench/nes-speed/lazy-chips/task-4a-thread-time.sh):
+four rounds a set, three sets, 05:52:06 to 06:01:38 UTC, one-minute loads 1.4 to
+3.2. Each build's figure is the median of its 12 rounds' medians
+([`task-4a-thread-time.txt`](../../bench/nes-speed/lazy-chips/task-4a-thread-time.txt)):
+
+```
+python3 bench/nes-speed/lazy-chips/task-4a-medians.py native bench/nes-speed/lazy-chips/task-4a-thread-time.txt
+```
+
+| Play | Main `5640a57` | Before `7b963e6` | This build `cdd7980` | This over main | This over before (the three sets) |
+| --- | --- | --- | --- | --- | --- |
+| NTSC | 83.1 ns a cycle, 6.72 times real | 84.4, 6.62 | 66.9, 8.35 | 1.24 | 1.26 (1.24, 1.18, 1.35) |
+| PAL | 87.1, 6.91 | 83.1, 7.24 | 69.8, 8.61 | 1.25 | 1.19 (1.31, 1.23, 1.16) |
+
+The bench's noise is 10 to 20 percent from launch to launch (task 17), and the
+three sets disagree by more than that between themselves, so a reading to one
+decimal place is the most these deserve.
+
+**In the browser** (AOT), the method of task 3b: `dotnet publish
+src/Dbhq.Machines.Nes.Wasm -c Release -p:RunAOTCompilation=true -o <folder>` for
+each build, and
+[`task-4a-browser.sh`](../../bench/nes-speed/lazy-chips/task-4a-browser.sh), per
+region four rounds of one fresh launch of each build in turn: `ROM=homebrew
+PLAY=1 THREAD_TIME=8 node run-in-browser.mjs <folder> 1 5370000 6000000 5
+<region>`, 6 million cycles of boot and then the page's five timed runs and eight
+more in the main thread's CPU time, each of 5.37 million cycles. Three sets,
+06:01:48 to 06:19:11 UTC, one-minute loads 1.4 to 2.9, nothing else of this task
+running. Chrome 153.0.8010.47, headless. Every launch printed its end frame
+beside the limit and none passed it (the runs end at frame 2,555 on NTSC and
+2,287 on PAL, in the level, as in task 3b). That is 96 runs a build and region:
+
+```
+python3 bench/nes-speed/lazy-chips/task-4a-medians.py browser bench/nes-speed/lazy-chips/task-4a-browser.txt
+python3 bench/nes-speed/lazy-chips/task-4a-medians.py wall bench/nes-speed/lazy-chips/task-4a-browser.txt
+```
+
+| Play, main thread CPU time | Main `5640a57` | Before `7b963e6` | This build `cdd7980` | This over main (sets) | This over before (sets) |
+| --- | --- | --- | --- | --- | --- |
+| NTSC | 170.1 ns a cycle, 3.29 times real | 171.4, 3.26 | 127.4, 4.38 | 1.33 (1.31, 1.41, 1.33) | 1.35 (1.31, 1.40, 1.36) |
+| PAL | 178.2, 3.38 | 168.7, 3.56 | 132.6, 4.54 | 1.34 (1.29, 1.37, 1.33) | 1.27 (1.31, 1.28, 1.19) |
+
+The page's own wall-clock figure (the five timed runs a launch, 60 a build) is
+noisier and says the same: NTSC 3.34, 3.54 and 4.66 times real (this over main
+1.40), PAL 4.02, 3.70 and 4.98 (1.24).
+
+The BBC Micro gauge, the median of ten after each region of each set: 21.2 to
+26.7 MHz, against 23.3 to 29.3 in task 3b. The machine was a little slower than
+on that day, so the figures above are lower than a quiet machine's, all three
+builds alike.
+
+**What the figures say.** In play, over main, the browser gain is about 1.3
+times on both regions, from about 1.05 in task 3b. The build before this task is
+the same as main, as it should be: it ran the same lines. The arithmetic of task
+3b predicted 1.30 and 1.26 over that build, the scratch measurement 1.23 and
+1.22, and this build measures 1.35 and 1.27 in the browser, 1.26 and 1.19
+natively. The sets range from 1.16 to 1.40, so the estimate, the scratch
+measurement and this are one answer. For a device twice as slow the CPU-time
+figures halve, to 2.19 on NTSC and 2.27 on PAL: the device that falls to real
+time is about 4.4 times slower than this machine.
+
+### What is left
+
+The fast path now takes 93.1 percent of the visible lines in play, and the
+remaining 6.7 percent are the cursor. Task 4 proper (drawing sprites on the fast
+path, with sprite 0 hit) could add the arithmetic of task 3b's 0.03, for the
+riskiest part of the renderer, and is not built. It is Dan's call whether to
+build it; the recommendation of task 3b stands, which is not to.
+
+### What limits these figures
+
+- Only Lan Master is bundled and measured, played by a script that is not a
+  person (task 3b). A game that keeps many sprites on its lines gets less.
+- The gain depends on one invariant, that a count of 0 means an empty buffer.
+  A later change to where `_spriteCount` or the buffer is written must keep it;
+  the tests check it at the start of every whole line and the comments at
+  `DrawPixel`, `LaySprite` and `TryRenderLine` say so.
+- The older faults were not re-run (above).

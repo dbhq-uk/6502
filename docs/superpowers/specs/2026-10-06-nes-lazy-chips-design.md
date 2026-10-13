@@ -53,7 +53,9 @@ phase) and its baseline recorded again as
 `bench/nes-speed/differential/baseline/034b43f.txt`
 ([the scanline renderer entry](../../journal/2026-10-08-the-nes-scanline-renderer.md), task 3a),
 and on 9 October, with twelve background-only scrolling cartridges added after the
-review of task 3, as `bench/nes-speed/differential/baseline/132fd50.txt`.
+review of task 3, as `bench/nes-speed/differential/baseline/132fd50.txt`, and with
+twelve sparse-sprite cartridges added for task 4a as
+`bench/nes-speed/differential/baseline/bc92102.txt`.
 
 ## Why
 

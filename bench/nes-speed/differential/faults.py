@@ -287,14 +287,14 @@ FAULTS += [
         EvaluateLine();
         FetchSpritesForNextLine();""",
      "on a fast line with the sprites on, sprite 0 hit set with no sprite on the line, from the background alone"),
-    ('fast-sprite-buffer-not-cleared', 'PpuScanline.cs', """        ClearSpriteLine();
-        _oamAddress = 0;""", """        if ((_mask & 0x10) == 0)
+    ('fast-sprite-oamaddr-kept', 'PpuScanline.cs', """        ClearSpriteLine();
+        _oamAddress = 0;""", """        ClearSpriteLine();
+        if ((_mask & 0x10) == 0)
         {
-            ClearSpriteLine();
+            _oamAddress = 0;
         }
-
-        _oamAddress = 0;""",
-     "on a fast line with the sprites on, the line buffer not emptied at dot 257 before the next line's sprites are laid in it"),
+""",
+     "on a fast line with the sprites on, OAMADDR not held at 0 over dots 257 to 320, so it keeps the value a program set"),
     ('fast-sprite-count-not-set', 'PpuScanline.cs', """        _spriteCount = _found;""", """        _spriteCount = (_mask & 0x10) != 0 ? 0 : _found;""",
      "on a fast line with the sprites on, the next line's sprite count left at 0, so the sprites found for it are not fetched or drawn"),
     ('fast-sprite-overflow-not-set', 'PpuScanline.cs', """        EvaluateLine();
