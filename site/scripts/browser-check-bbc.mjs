@@ -357,10 +357,10 @@ export async function checkBbcMicro({ browser, watch, problems, origin }) {
 // screen and adds one press; from below (polar pi) the case is drawn.
 // Then the tabs: Right on the Outside tab selects Inside, which only then
 // fetches its bundle and its track map, runs and draws; pointing at IC78 names
-// it and marks its row; with the check's test disc in the drive, *CAT marks
-// IC78 and its legend row, looked at every 50 ms, and frames the DFS as the
-// paged ROM at least once (at most three *CATs, each looked at for up to ten
-// seconds: a timeout for the disc to be read, not a judged figure); Show tracks
+// it and marks its row; with a disc of its own in the drive, *CAT marks IC78
+// and its legend row, and *DUMP of a 2 KB file frames the DFS as the paged ROM,
+// each looked at every 50 ms for up to ten seconds (a timeout for the disc to
+// be read, not a judged figure); Show tracks
 // and Show tracks only work; and from below, the board shows its solder side's
 // copper where the map has it. Left returns to Outside with its camera where it
 // was, Right to Inside with its own, and Tab goes from the selected tab into
@@ -372,6 +372,19 @@ export async function checkBbcMicro({ browser, watch, problems, origin }) {
 const OUTSIDE = '#model-panel-outside';
 const INSIDE = '#model-panel-inside';
 
+/**
+ * The test disc with its one file, $.HELLO, made 2 KB long (eight sectors from sector 2), so that *DUMP HELLO prints
+ * for seconds with the DFS paged in.
+ */
+export function dumpDisc() {
+  const disc = testDisc();
+  disc[256 + 8 + 4] = 0x00; // length 2048: low byte
+  disc[256 + 8 + 5] = 0x08; //              middle byte
+  const text = 'HELLO FROM THE BROWSER CHECK. ';
+  for (let i = 0; i < 2048; i++) disc[512 + i] = text.charCodeAt(i % text.length);
+  return disc;
+}
+
 export async function checkBbcModels({ browser, watch, problems, origin }) {
   const say = (s) => console.log(`bbc models: ${s}`);
   const problem = (s) => problems.push(`bbc models: ${s}`);
@@ -380,6 +393,8 @@ export async function checkBbcModels({ browser, watch, problems, origin }) {
     const own = [];
     const view = await settled(p, root, own);
     for (const x of own) problem(x.replace(/^nes: /, ''));
+    // What the camera was doing when it did not rest, for the next reading of the log (CI round 3, 13 October 2026).
+    if (!view) say(`${root} did not rest: ${JSON.stringify(await p.locator(root).evaluate((m) => ({ view: m.modelView(), shown: (() => { const r = m.querySelector('[data-model-stage]').getBoundingClientRect(); return { top: Math.round(r.top), bottom: Math.round(r.bottom), height: innerHeight }; })() })))}`);
     return view;
   };
   const page = await browser.newPage();
@@ -518,7 +533,9 @@ export async function checkBbcModels({ browser, watch, problems, origin }) {
   await page.locator('[data-bbc-screen]').focus();
   await page.keyboard.press('Enter');
   await until(async () => (await lastRow()) === '>');
-  // From below: the camera goes under the case, and the underside is drawn.
+  // From below: the camera goes under the case, and the underside is drawn. The stage is brought on screen first:
+  // it moves its camera only while it is on screen.
+  await page.locator(`${OUTSIDE} [data-model-stage]`).scrollIntoViewIfNeeded();
   await page.locator(`${OUTSIDE} [data-model-stage]`).focus();
   await page.keyboard.press('Home');
   await rest(page, OUTSIDE);
@@ -563,10 +580,13 @@ export async function checkBbcModels({ browser, watch, problems, origin }) {
   if (!named.startsWith('IC78, the disc controller') || pointedRows.join() !== 'IC78') problem(`pointing at IC78 did not name it and mark its row alone ("${named}", rows ${pointedRows.join(', ')})`);
   await page.mouse.move(5, 5);
 
-  // *CAT with the check's test disc: IC78 and its row marked, and the DFS framed as the paged ROM, at least once.
+  // With a disc of its own in the drive: *CAT marks IC78 and its row, and *DUMP frames the DFS as the paged ROM, each
+  // at least once. The DFS is the paged ROM only while it works, and the model reads the ROM latch every quarter
+  // second: a *CAT is over in a fraction of a second, so the frame is looked for while *DUMP prints a file of 2 KB,
+  // which keeps the DFS paged for seconds (CI round 3, 13 October 2026: three *CATs never showed it framed).
   const dfs = pagedRef(14);
-  await page.locator('[data-bbc-file]').setInputFiles({ name: 'test.ssd', mimeType: 'application/octet-stream', buffer: Buffer.from(testDisc()) });
-  await page.waitForFunction(() => document.querySelector('[data-bbc]').dataset.disc === 'test.ssd', null, { timeout: 10_000 }).catch(() => {});
+  await page.locator('[data-bbc-file]').setInputFiles({ name: 'dump.ssd', mimeType: 'application/octet-stream', buffer: Buffer.from(dumpDisc()) });
+  await page.waitForFunction(() => document.querySelector('[data-bbc]').dataset.disc === 'dump.ssd', null, { timeout: 10_000 }).catch(() => {});
   await inside.evaluate((m) => {
     window.bbcInside = { accessed: new Set(), paged: new Set(), rows: new Set() };
     const look = () => {
@@ -577,25 +597,30 @@ export async function checkBbcModels({ browser, watch, problems, origin }) {
     new MutationObserver(look).observe(m, { attributes: true, subtree: true, attributeFilter: ['data-model-accessed', 'data-model-paged', 'data-accessed'] });
   });
   const seen = () => page.evaluate(() => ({ accessed: [...window.bbcInside.accessed].sort(), paged: [...window.bbcInside.paged].sort(), rows: [...window.bbcInside.rows].sort() }));
-  const done = (s) => s.accessed.includes('IC78') && s.rows.includes('IC78') && s.paged.includes(dfs);
-  let tries = 0;
-  let marks = await seen();
   const LOOK_MS = 10_000;
-  while (tries < 3 && !done(marks)) {
-    tries++;
-    await page.locator('[data-bbc-screen]').focus();
-    await type(['Shift+Quote', 'KeyC', 'KeyA', 'KeyT', 'Enter']);
+  const lookFor = async (test) => {
     const t = Date.now();
-    while (Date.now() - t < LOOK_MS && !done(marks)) {
+    let marks = await seen();
+    while (Date.now() - t < LOOK_MS && !test(marks)) {
       await page.waitForTimeout(50);
       marks = await seen();
     }
-  }
+    return marks;
+  };
+  await page.locator('[data-bbc-screen]').focus();
+  await type(['Shift+Quote', 'KeyC', 'KeyA', 'KeyT', 'Enter']);
+  const cat = await lookFor((x) => x.accessed.includes('IC78') && x.rows.includes('IC78'));
   const rate = await page.locator('[data-legend-rate="fdc8271"]').innerText();
-  say(`*CAT ${tries} time(s): chips marked ${marks.accessed.join(' ') || 'none'}; rows marked ${marks.rows.join(' ') || 'none'}; ROMs framed ${marks.paged.join(' ') || 'none'} (the DFS is ${dfs}); the 8271's rate now "${rate}"`);
-  if (!marks.accessed.includes('IC78') || !marks.rows.includes('IC78')) problem(`*CAT never marked IC78, the 8271, or its row (in ${tries} *CATs, each looked at for up to ${LOOK_MS / 1000} s)`);
-  if (!marks.paged.includes(dfs)) problem(`*CAT never framed ${dfs}, the DFS, as the paged ROM (in ${tries} *CATs)`);
-  if (!marks.paged.includes(pagedRef(15))) problem(`the paged ROM was never ${pagedRef(15)}, BASIC, while the machine ran`);
+  say(`*CAT: chips marked ${cat.accessed.join(' ') || 'none'}; rows marked ${cat.rows.join(' ') || 'none'}; ROMs framed ${cat.paged.join(' ') || 'none'}; the 8271's rate then "${rate}"`);
+  if (!cat.accessed.includes('IC78') || !cat.rows.includes('IC78')) problem(`*CAT never marked IC78, the 8271, or its row in ${LOOK_MS / 1000} s`);
+  await until(async () => (await lastRow()) === '>');
+  await type(['Shift+Quote', 'KeyD', 'KeyU', 'KeyM', 'KeyP', 'Space', 'KeyH', 'KeyE', 'KeyL', 'KeyL', 'KeyO', 'Enter']);
+  const dump = await lookFor((x) => x.paged.includes(dfs));
+  say(`*DUMP HELLO: ROMs framed ${dump.paged.join(' ') || 'none'} (the DFS is ${dfs}); the screen's last line "${await lastRow()}"`);
+  if (!dump.paged.includes(dfs)) problem(`*DUMP never framed ${dfs}, the DFS, as the paged ROM in ${LOOK_MS / 1000} s`);
+  if (!dump.paged.includes(pagedRef(15))) problem(`the paged ROM was never ${pagedRef(15)}, BASIC, while the machine ran`);
+  await page.keyboard.press('Escape');
+  await until(async () => (await lastRow()) === '>', 30_000);
 
   // Show tracks and Show tracks only.
   await inside.locator('[data-model-stage]').scrollIntoViewIfNeeded();
