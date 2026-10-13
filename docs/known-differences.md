@@ -1412,6 +1412,9 @@ that times the clock and display-end interrupts (`ula.md` sections 1c, 5d and
   address.** The sheet is split on this (section 1b, section 12 item 3): one
   source says the ROM byte under it, another that the bus floats. The OS reads
   only `$FE00` and `$FE04`.
+- **Every absent device reads as the high byte of its address, and a write to one goes nowhere.** FRED, `$FC00` to `$FCFF`, reads `$FC`; JIM, `$FD00` to `$FDFF`, reads `$FD`; a write-only ULA register reads `$FE`; and `$8000` to `$BFFF` with an empty slot paged in reads `$80` to `$BF`. The OS ROM's own bytes under `$FC00` to `$FEFF` are never seen. The sheet's sources disagree (section 12 item 3: S3 says the ROM byte, S10 turns the ROM off there), and the model takes the BBC Micro sheet's measured rule for absent devices; the boot does not depend on it. `ElectronBusTests` holds each of these reads.
+- **At power on the ROM latch selects slot 0, which is empty**, as source S10 resets it (section 12 item 4); the OS writes `$F8` first, which selects the keyboard from any slot. The other registers start as the bullets above and the display, sound and cassette sections below say.
+- **BREAK resets the 6502 and nothing else.** RAM, the ROM latch, the interrupt enable and status, the mode, the start address, the palette, the sound's counter and level, and the cassette's motor, position and registers all stay as they were (section 12 item 5). What the real ULA clears on BREAK is not in the sources; the OS rewrites what it needs, and `BootTests` shows BREAK keeps RAM and gives the banner without the bell.
 
 ## The Acorn Electron: the contention, where the sources stop
 
