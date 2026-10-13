@@ -10,6 +10,10 @@
 // photographs section (MachinePhotos.astro) shows every one, lazily, each with
 // what the 3D model took from it. Both ask for the same widths, so the main
 // photograph is fetched once.
+//
+// Every photograph here is a resized copy of the original, so every credit says
+// so ("Changes: ..."). CC BY and CC BY-SA ask that a change is indicated, and
+// saying it for a public-domain photograph too costs nothing and keeps the rule one.
 import { Picture } from 'astro:assets';
 
 export interface Photo { file: string; author: string; sourceUrl: string; licence: string | null; licenceUrl?: string; date: string; alt: string; caption?: string; used?: string }
@@ -41,7 +45,7 @@ const caption = photo.caption ?? `an original ${machine.name}`;
   <Picture src={src} formats={['avif']} fallbackFormat="webp" width={720} widths={[360, 720, 1080]} sizes="(max-width: 760px) min(88vw, 360px), 300px" alt={photo.alt} loading={main ? 'eager' : 'lazy'} data-photo-img={main ? '' : undefined} data-photo-item-img={main ? undefined : ''} />
   <figcaption class="figure-caption">
     <span class="photo-what">Photograph: {caption}, taken {taken}.</span>
-    <span class="photo-credit" data-photo-credit>By {photo.author}. Source: <a href={photo.sourceUrl}>{host}</a>. Licence: {photo.licence === null ? 'no licence stated' : photo.licenceUrl ? <a href={photo.licenceUrl}>{photo.licence}</a> : photo.licence}.</span>
+    <span class="photo-credit" data-photo-credit>By {photo.author}. Source: <a href={photo.sourceUrl}>{host}</a>. Licence: {photo.licence === null ? 'no licence stated' : photo.licenceUrl ? <a href={photo.licenceUrl}>{photo.licence}</a> : photo.licence}. Changes: resized and converted to WebP for this page.</span>
     {used && photo.used && <span class="photo-used" data-photo-used>Used for the model: {photo.used}.</span>}
   </figcaption>
 </figure>
