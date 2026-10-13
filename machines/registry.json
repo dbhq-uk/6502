@@ -602,6 +602,16 @@
       "rights": "The NES has no system ROM: the console runs whatever cartridge is in it. Commercial games are not bundled and never will be: load your own, which is read in this tab and not uploaded. The cartridge Start puts in is Lan Master, a puzzle game by Shiru from 2011, which he released into the public domain in his own words, in its manual: \"It is free of charge, released into Public Domain, and provided \"as is\", without warranty or responsibility of any kind.\" Its title screen says PD2011 Shiru. Our copy is the 2015 build, with rainwarrior's fix, from Shiru's own archive, lan_master.zip, as the Internet Archive kept it: https://web.archive.org/web/20160327132502id_/http://shiru.untergrund.net/files/nes/lan_master.zip, SHA-256 79410cc133f1100d2fe5409fd49297a62afc748aeeb5faccb8fe69c68c16e6aa, because his own site's files could not be fetched on 6 October 2026. It is kept in this repository under roms/, with where it came from, and checked by SHA-256 each time it is read.",
       "notes": "The picture drawn a dot at a time as the PPU draws it, the sound unit's five channels, two controllers, NTSC and PAL, and six cartridge boards: NROM, MMC1, UxROM, CNROM, AxROM and MMC3. Not modelled: the Dendy, the Famicom Disk System, expansion audio, the Zapper and other peripherals, the unlicensed mappers, the analogue quirks of the picture, and saving battery-backed RAM.",
       "case": true,
+      "models": [
+        {
+          "view": "outside",
+          "module": "nes-famicom-case"
+        },
+        {
+          "view": "inside",
+          "module": "nes-famicom-board"
+        }
+      ],
       "photos": [
         {
           "file": "nes.webp",
@@ -612,7 +622,146 @@
           "caption": "an original Nintendo Entertainment System, the North American console",
           "alt": "An original Nintendo Entertainment System seen from the front left and a little above on a white background: a light grey box with a darker grey lower half, the lid of the cartridge slot on top with the red Nintendo Entertainment System name on its front, the power light and the POWER and RESET buttons at the front left, and the two controller ports, numbered 1 and 2, at the foot of the black band on the right.",
           "fetched": "2026-10-06",
-          "used": "the photograph of the machine at the head of its page; nothing is traced or measured from it, because the NES has no 3D model yet"
+          "used": "the outside model's front, top and left end, measured on the full-size original: the cartridge door, the vents, the buttons, the power light, the controller ports and the lean of the lower shell; the board model takes nothing from it"
+        },
+        {
+          "file": "nes-rear-right.webp",
+          "author": "Evan-Amos",
+          "sourceUrl": "https://commons.wikimedia.org/wiki/File:Nintendo-Entertainment-System-NES-Console-BR.jpg",
+          "licence": "Public domain",
+          "date": "2016-07-27",
+          "caption": "the same North American console from above and behind, at its rear connectors",
+          "alt": "An original Nintendo Entertainment System seen from above and behind on a white background: a light grey top shell with a block of grey slotted vents between two black end blocks across its left part and the flat lid of the cartridge slot to the right of it, over a darker grey lower shell. In a recess at the lower left of the rear are three connectors with short red words beneath them: a round power socket, a small slide switch and a round socket with a white ring.",
+          "fetched": "2026-10-05",
+          "used": "the outside model's rear, measured on the full-size original: its window, the places of the three connectors and their words, and the notch; and the lean of the lower shell, held out as a check"
+        },
+        {
+          "file": "nes-pal-front.webp",
+          "author": "PantheraLeo1359531",
+          "sourceUrl": "https://commons.wikimedia.org/wiki/File:Ge%C3%B6ffnetes_deutsches_NES_20221102_HOF06342_RAW-Export.png",
+          "licence": "CC BY 4.0",
+          "licenceUrl": "https://creativecommons.org/licenses/by/4.0/",
+          "date": "2022-11-02",
+          "caption": "the top shell of a German (PAL) console, straight on from the front: its case has yellowed",
+          "alt": "The front of the top shell of a PAL Nintendo Entertainment System, a yellowed beige, seen straight on against a pale background: a long cartridge slot lid at the left with the red words Nintendo and ENTERTAINMENT SYSTEM and, below them in italics, EUROPEAN VERSION, and at the right a black band. The picture is a wide, shallow strip.",
+          "fetched": "2026-10-05",
+          "used": "the outside model's PAL console: its front words, including the line EUROPEAN VERSION, and a check of its front against the NTSC console's, measured on the full-size original"
+        },
+        {
+          "file": "nes-pal-underside.webp",
+          "author": "PantheraLeo1359531",
+          "sourceUrl": "https://commons.wikimedia.org/wiki/File:Unterseite_NES_NESE-001_20221102_132229.jpg",
+          "licence": "CC BY 4.0",
+          "licenceUrl": "https://creativecommons.org/licenses/by/4.0/",
+          "date": "2022-11-02",
+          "caption": "the underside of a German (PAL) console, the NESE-001, with its two labels",
+          "alt": "The underside of a grey PAL Nintendo Entertainment System, model NESE-001, lying on an orange speckled carpet: a larger white label at the upper left with the Nintendo Entertainment System name, German rating text and three marks (a house, TÜV GS and TÜV), with a small number sticker below it, and a smaller white label at the right with the model and brand, a serial number heading with no number after it and a post office mark. There are four round dark feet near the corners, two slotted vent grilles, a rectangular cover for the expansion port in the middle and a black plate held by two screws at the bottom left.",
+          "fetched": "2026-10-05",
+          "used": "the outside model's PAL underside, measured on the full-size original rectified on its screw holes: its two labels and their words, the feet and the expansion port's cover"
+        }
+      ],
+      "references": [
+        {
+          "title": "a flatbed scan of a bare NES-CPU-10, its component side, at 300 dots an inch, in OpenTendo, as this project's fork of it holds it",
+          "author": "the OpenTendo project, by Redherring32 and its contributors (the scans added by Kamoteshake; the scanner is not named)",
+          "sourceUrl": "https://github.com/dbhq-uk/OpenTendo/raw/3bd0b0be5c9ed6fc6a36d9e458bc58d9976b2009/Scans/NES-CPU-10_front_300dpi.png",
+          "licence": null,
+          "fetched": "2026-10-05",
+          "sha256": "fd41c714258a4d379d034eaf39cdcfcc7aab5273f4dafb74ff8517b55c88ab3a",
+          "used": "the board's outline, holes, pads and scale, the component side's copper and the printed legend, traced to look at, and the place of every part"
+        },
+        {
+          "title": "the same board's solder side, scanned the same way, in OpenTendo, as this project's fork of it holds it",
+          "author": "the OpenTendo project, by Redherring32 and its contributors (the scans added by Kamoteshake; the scanner is not named)",
+          "sourceUrl": "https://github.com/dbhq-uk/OpenTendo/raw/3bd0b0be5c9ed6fc6a36d9e458bc58d9976b2009/Scans/NES-CPU-10_back_300dpi.png",
+          "licence": null,
+          "fetched": "2026-10-05",
+          "sha256": "fa15ea9e5a57c8621932fa4cbd8b8121feba82a746cc996627f95b6d12b8a0a5",
+          "used": "the solder side's copper, traced to look at after the scan was turned over and fitted to the component side by its drilled holes"
+        },
+        {
+          "title": "OpenTendo's redrawing of the front-loader's main board in KiCad, as this project's fork of it holds it",
+          "author": "Redherring32 and the OpenTendo contributors",
+          "sourceUrl": "https://github.com/dbhq-uk/OpenTendo/raw/3bd0b0be5c9ed6fc6a36d9e458bc58d9976b2009/Board%20Files/Motherboard.kicad_pcb",
+          "licence": "TAPR Open Hardware License (the repository's README)",
+          "fetched": "2026-10-05",
+          "sha256": "9cce8323c9c18f0c583f99d1e07d7650f85858ca2599cbf52b2c75f384e8224a",
+          "used": "a cross-check only, from which nothing is drawn: the board's outline and the chips' places compared with the scan's, U9's jobs read from its nets, and which buffer serves which controller port checked against them"
+        },
+        {
+          "title": "a photograph of a populated PAL board, an NES-CPU-11, from above",
+          "author": "PantheraLeo1359531",
+          "sourceUrl": "https://commons.wikimedia.org/wiki/File:Frontalansicht_Mainboard_NES_NESE-001_HOF06378.png",
+          "licence": "CC BY 4.0",
+          "licenceUrl": "https://creativecommons.org/licenses/by/4.0/",
+          "fetched": "2026-10-05",
+          "sha256": "e9f606535f4b01507a62f185ce38aa3403862bb82f434cc51f148a90088ea8cd",
+          "used": "the PAL console's parts and their markings, and a check that each sits on the scanned board's footprint of the same name"
+        },
+        {
+          "title": "a photograph of a populated NES-CPU-07, from above",
+          "author": "Evan-Amos",
+          "sourceUrl": "https://commons.wikimedia.org/wiki/File:Nintendo-NES-Mk1-Motherboard-Top.jpg",
+          "licence": "Public domain",
+          "fetched": "2026-10-05",
+          "sha256": "2158318ca6e7c913fce4220e8763dc8df4b37e70fea50cf29a1c975556a5b46c",
+          "used": "the NTSC console's parts and their markings, the chips' bodies, and a check that each sits on the scanned board's footprint of the same name"
+        },
+        {
+          "title": "a photograph of the same NES-CPU-07's solder side",
+          "author": "Evan-Amos",
+          "sourceUrl": "https://commons.wikimedia.org/wiki/File:Nintendo-NES-Mk1-Motherboard-Bottom.jpg",
+          "licence": "Public domain",
+          "fetched": "2026-10-05",
+          "sha256": "64d52d1dbedfd123a56780def11821ef4157694e4d88d701924d567e2cb1ae10",
+          "used": "a check, from below, that the NTSC console's parts sit on the scanned board's footprints"
+        },
+        {
+          "title": "the design patent for the NES-001's case, US D299,726: its front, rear, top, bottom and side views",
+          "author": "Masayuki Yukawa, for Nintendo Co., Ltd.",
+          "sourceUrl": "https://patentimages.storage.googleapis.com/pdfs/USD299726.pdf",
+          "licence": "Public domain (a United States design patent; Commons tags its copy of sheet 1 PD-US-Patent)",
+          "fetched": "2026-10-05",
+          "sha256": "4c699b1b31a40ddf4a80f9827b7c927058dd54979acdd1988aa94c3060775f3d",
+          "used": "the underside, its expansion cover, its vents and its feet, the feet's height, the AV jacks' places on the side, and checks on the case's proportions and on the rear connectors' places"
+        },
+        {
+          "title": "a photograph of an NES-001's lower shell, empty, from the rear right",
+          "author": "Evan-Amos",
+          "sourceUrl": "https://commons.wikimedia.org/wiki/File:Nintendo-Entertainment-System-NES-Deconstruction-01.jpg",
+          "licence": "Public domain",
+          "fetched": "2026-10-05",
+          "sha256": "48b896dac434f458094aadbc62cc6145b9ce091850c0cc8ec3123f505f8c270e",
+          "used": "looked at for whether POWER latches in when pressed, which it does not show"
+        },
+        {
+          "title": "a photograph of a PAL NESE-001's lower shell from above, with its board in it",
+          "author": "PantheraLeo1359531",
+          "sourceUrl": "https://commons.wikimedia.org/wiki/File:Ge%C3%B6ffnetes_deutsches_NES_20221102_HOF06601_RAW-Export.png",
+          "licence": "CC BY 4.0",
+          "licenceUrl": "https://creativecommons.org/licenses/by/4.0/",
+          "fetched": "2026-10-05",
+          "sha256": "b3add1f8480e6afb1a89a11e1aa447f1a195c1e5752bb7dbce08cc2a269d03df",
+          "used": "where the board lies in the case, for the check of the rear connectors' places against the board"
+        },
+        {
+          "title": "a photograph of a PAL NESE-001's lower shell from the rear",
+          "author": "PantheraLeo1359531",
+          "sourceUrl": "https://commons.wikimedia.org/wiki/File:Ge%C3%B6ffnetes_deutsches_NES_20221102_HOF06440_RAW-Export.png",
+          "licence": "CC BY 4.0",
+          "licenceUrl": "https://creativecommons.org/licenses/by/4.0/",
+          "fetched": "2026-10-05",
+          "sha256": "15a62769d03497da6f09a0ab6351c8d00167acb63d4af4a1ba18048df1e7be10",
+          "used": "the words on the PAL console's rear"
+        },
+        {
+          "title": "a photograph of an NTSC board with its RF modulator, from beyond the edge fingers",
+          "author": "Evan-Amos",
+          "sourceUrl": "https://commons.wikimedia.org/wiki/File:Nintendo-Entertainment-System-NES-Motherboard-FL.jpg",
+          "licence": "Public domain",
+          "fetched": "2026-10-05",
+          "sha256": "8b6bc5f4e49dada4f550436e4fbdadf778f5f04540dd708fa43ac6e80b180ed7",
+          "used": "the modulator's rear face, for the check of the rear connectors' places against the board, which failed as measured"
         }
       ]
     },

@@ -1,0 +1,20 @@
+# Task 4a of the scanline renderer work: task 3b's line probe on cdd7980's tree (the clause in), which plays Lan Master by
+# bench/nes-speed/lan-master-play.json from power on to the script's last frame of play in each region, 9 October 2026,
+# 05:06:29 to 05:06:58 UTC, load 12.3 to 13.8 (other work on the machine; the probe counts lines, it times nothing). A scratch
+# copy of the tree with task 3b's counting added (PpuProbe.cs and one call where each path finishes a line, as in
+# task-3b-line-probe.txt, without its --tier-a switch, which is now the code) and task 3b's program, never committed:
+#   dotnet build bench/probe4a -c Release -o <folder in the copy>; dotnet <folder>/Dbhq.Machines.Nes.Probe4a.dll
+# Checked: the probe's totals equal Ppu.FastLines and Ppu.ExactLines (read by reflection).
+
+## NTSC: from power on to frame 3450 (limit 3450); Ppu.FastLines 817218 ExactLines 86682; probe fast 817218 exact 86682 agree
+phase | frames | visible lines | fast % of visible | idle lines (VBlank, post-render) fast % | all lines fast % | mean sprites on a visible line (OAM) | visible lines with a sprite % | with 0/1/2/3-8/9+ sprites % | PPUMASK of visible lines: off / bg / sprites / both %
+title | 36 | 8640 | 91.9 | 756 82.0 | 90.8 | 0.30 | 3.3 | 96.7/0.0/0.0/0.0/3.3 | 15.4 / 84.6 / 0.0 / 0.0
+menu | 60 | 14400 | 99.6 | 1260 81.2 | 97.7 | 0.30 | 3.3 | 96.7/0.0/0.0/0.0/3.3 | 0.0 / 100.0 / 0.0 / 0.0
+transition | 54 | 12960 | 96.7 | 1134 87.1 | 95.5 | 0.28 | 3.8 | 96.2/0.0/1.0/0.0/2.8 | 3.7 / 81.5 / 0.0 / 14.8
+level | 3300 | 792000 | 93.1 | 69300 60.9 | 90.2 | 0.13 | 6.7 | 93.3/0.0/6.7/0.0/0.0 | 0.0 / 0.0 / 0.0 / 100.0
+## PAL: from power on to frame 2850 (limit 2850); Ppu.FastLines 810704 ExactLines 78496; probe fast 810704 exact 78496 agree
+phase | frames | visible lines | fast % of visible | idle lines (VBlank, post-render) fast % | all lines fast % | mean sprites on a visible line (OAM) | visible lines with a sprite % | with 0/1/2/3-8/9+ sprites % | PPUMASK of visible lines: off / bg / sprites / both %
+title | 36 | 8640 | 89.7 | 2556 87.1 | 88.8 | 0.30 | 3.3 | 96.7/0.0/0.0/0.0/3.3 | 14.9 / 85.1 / 0.0 / 0.0
+menu | 60 | 14400 | 99.8 | 4260 93.3 | 98.0 | 0.30 | 3.3 | 96.7/0.0/0.0/0.0/3.3 | 0.0 / 100.0 / 0.0 / 0.0
+transition | 54 | 12960 | 95.8 | 3834 95.0 | 95.3 | 0.25 | 4.4 | 95.6/0.0/2.1/0.0/2.3 | 3.7 / 64.8 / 0.0 / 31.5
+level | 2700 | 648000 | 93.1 | 191700 84.9 | 91.0 | 0.13 | 6.7 | 93.3/0.0/6.7/0.0/0.0 | 0.0 / 0.1 / 0.0 / 99.9

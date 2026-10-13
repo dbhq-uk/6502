@@ -34,18 +34,30 @@ tables are in the journal,
 [`../../journal/2026-10-06-the-nes-lazy-chips.md`](../../journal/2026-10-06-the-nes-lazy-chips.md),
 sections "Task 2b" and "Task 2c", and the plan's "What was built" says the same.
 
+**Update, 8 to 13 October 2026.** The fast path was then built, in part, as issue #72 asked (tasks 3 and 4a of the plan; `src/Dbhq.Machines.Nes/PpuScanline.cs`): whole lines after the picture, in VBlank and with rendering off, and visible lines with the background on and either no sprite layer or no sprite fetched for the line. Sprite drawing and the sprite 0 hit path are not built. The APU's batch (#73) is still unbuilt. The plan's "What was built" and the journal entry [`../../journal/2026-10-08-the-nes-scanline-renderer.md`](../../journal/2026-10-08-the-nes-scanline-renderer.md) have the detail and the figures.
+
 The speed target below, 1.5 times, was met natively on the benchmark ROM and
 about met on the homebrew (the journal's task 2, "Speed"), and not met in the
 browser (task 2b).
 
-The baseline changes when the reset fix lands. Pull request #71 makes the PPU's
+The baseline changed when the reset fix landed. Pull request #71 made the PPU's
 place in secondary OAM wrap at 32, and that place is in the PPU's state report,
-so once #71 is in the tree the check against
-`bench/nes-speed/differential/baseline/4e9b92b.txt` fails on the PPU's hash with
-no difference in behaviour behind it. Then the baseline is re-recorded from the
-merged tree with the per-dot reference (`--oracle`), named for that commit, the
-lazy build is checked against it, and the journal says why the file changed
-([#74](https://github.com/dbhq-uk/6502/issues/74)).
+so with #71 in the tree the check against `baseline/4e9b92b.txt` failed on the
+PPU's hash with no difference in behaviour behind it. On 8 October 2026 the
+baseline was re-recorded from the merged tree with the per-dot reference
+(`--oracle`) as `bench/nes-speed/differential/baseline/38c5544.txt`, the lazy
+build was checked against it, and the old file was removed. The journal says why
+the file changed ([#74](https://github.com/dbhq-uk/6502/issues/74)). On the same
+day the gate was extended for the fast scanline renderer (format 3: the picture as
+far as it is drawn at every point, the sprite 0 sweep over the whole picture, and
+scene tests on every dot of a line, then a second reset on a chosen PAL dot
+phase) and its baseline recorded again as
+`bench/nes-speed/differential/baseline/034b43f.txt`
+([the scanline renderer entry](../../journal/2026-10-08-the-nes-scanline-renderer.md), task 3a),
+and on 9 October, with twelve background-only scrolling cartridges added after the
+review of task 3, as `bench/nes-speed/differential/baseline/132fd50.txt`, and with
+twelve sparse-sprite cartridges added for task 4a as
+`bench/nes-speed/differential/baseline/fae4b62.txt`.
 
 ## Why
 

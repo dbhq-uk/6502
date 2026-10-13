@@ -1,0 +1,105 @@
+# Task 4a of the scanline renderer work: the thread-time bench in play (play-ntsc, play-pal), three sets of
+# task-4a-thread-time.sh <main 5640a57> <before 7b963e6> <after cdd7980>, 9 October 2026.
+#   python3 bench/nes-speed/lazy-chips/task-4a-medians.py native bench/nes-speed/lazy-chips/task-4a-thread-time.txt
+
+## Set 1
+ 05:52:06 up 12 days, 15:20,  1 user,  load average: 1.35, 2.92, 3.93
+Fri Oct  9 05:52:06 UTC 2026
+round 1 main play-ntsc ns/cycle best=78.00 median=81.34 all=78.00,78.58,81.34,82.67,89.38 frame=3028 limit=3450
+round 1 before play-ntsc ns/cycle best=76.83 median=82.13 all=76.83,76.93,82.13,85.68,93.10 frame=3028 limit=3450
+round 1 after play-ntsc ns/cycle best=58.40 median=60.17 all=58.40,59.54,60.17,60.56,61.29 frame=3028 limit=3450
+round 1 main play-pal ns/cycle best=70.62 median=75.22 all=70.62,74.29,75.22,78.59,80.64 frame=2713 limit=2850
+round 1 before play-pal ns/cycle best=69.55 median=79.32 all=69.55,78.79,79.32,84.30,90.75 frame=2713 limit=2850
+round 1 after play-pal ns/cycle best=54.39 median=55.57 all=54.39,55.46,55.57,58.38,64.08 frame=2713 limit=2850
+ 05:52:48 up 12 days, 15:21,  1 user,  load average: 1.78, 2.81, 3.84
+round 2 main play-ntsc ns/cycle best=64.64 median=68.28 all=64.64,67.71,68.28,71.76,77.22 frame=3028 limit=3450
+round 2 before play-ntsc ns/cycle best=63.64 median=71.06 all=63.64,69.51,71.06,77.92,84.72 frame=3028 limit=3450
+round 2 after play-ntsc ns/cycle best=53.73 median=60.91 all=53.73,55.57,60.91,63.72,72.87 frame=3028 limit=3450
+round 2 main play-pal ns/cycle best=74.38 median=86.96 all=74.38,75.58,86.96,90.07,91.07 frame=2713 limit=2850
+round 2 before play-pal ns/cycle best=62.19 median=71.57 all=62.19,65.31,71.57,74.18,75.95 frame=2713 limit=2850
+round 2 after play-pal ns/cycle best=53.54 median=59.24 all=53.54,56.76,59.24,64.70,65.61 frame=2713 limit=2850
+ 05:53:28 up 12 days, 15:22,  1 user,  load average: 1.64, 2.64, 3.74
+round 3 main play-ntsc ns/cycle best=73.33 median=82.57 all=73.33,80.45,82.57,85.24,88.14 frame=3028 limit=3450
+round 3 before play-ntsc ns/cycle best=80.76 median=86.79 all=80.76,83.06,86.79,88.16,88.55 frame=3028 limit=3450
+round 3 after play-ntsc ns/cycle best=63.30 median=66.57 all=63.30,63.72,66.57,67.77,70.04 frame=3028 limit=3450
+round 3 main play-pal ns/cycle best=77.44 median=84.31 all=77.44,79.29,84.31,85.92,90.02 frame=2713 limit=2850
+round 3 before play-pal ns/cycle best=79.58 median=85.83 all=79.58,81.50,85.83,87.68,88.65 frame=2713 limit=2850
+round 3 after play-pal ns/cycle best=64.81 median=72.22 all=64.81,66.25,72.22,73.90,75.58 frame=2713 limit=2850
+ 05:54:14 up 12 days, 15:23,  1 user,  load average: 1.86, 2.55, 3.66
+round 4 main play-ntsc ns/cycle best=72.99 median=77.37 all=72.99,75.47,77.37,79.38,93.13 frame=3028 limit=3450
+round 4 before play-ntsc ns/cycle best=66.16 median=72.56 all=66.16,67.52,72.56,85.23,94.24 frame=3028 limit=3450
+round 4 after play-ntsc ns/cycle best=57.40 median=63.29 all=57.40,62.98,63.29,69.53,71.04 frame=3028 limit=3450
+round 4 main play-pal ns/cycle best=71.72 median=77.86 all=71.72,73.02,77.86,79.71,81.28 frame=2713 limit=2850
+round 4 before play-pal ns/cycle best=67.42 median=70.85 all=67.42,70.30,70.85,74.06,76.87 frame=2713 limit=2850
+round 4 after play-pal ns/cycle best=45.70 median=51.43 all=45.70,46.98,51.43,53.21,54.77 frame=2713 limit=2850
+ 05:55:00 up 12 days, 15:23,  1 user,  load average: 3.20, 2.79, 3.68
+Fri Oct  9 05:55:00 UTC 2026
+ 05:55:00 up 12 days, 15:23,  1 user,  load average: 3.20, 2.79, 3.68
+
+## Set 2
+ 05:55:00 up 12 days, 15:23,  1 user,  load average: 3.20, 2.79, 3.68
+Fri Oct  9 05:55:00 UTC 2026
+round 1 main play-ntsc ns/cycle best=91.69 median=94.17 all=91.69,94.09,94.17,96.52,106.82 frame=3028 limit=3450
+round 1 before play-ntsc ns/cycle best=77.92 median=87.13 all=77.92,83.06,87.13,87.13,98.81 frame=3028 limit=3450
+round 1 after play-ntsc ns/cycle best=61.09 median=67.26 all=61.09,62.88,67.26,72.80,77.64 frame=3028 limit=3450
+round 1 main play-pal ns/cycle best=82.04 median=93.05 all=82.04,86.80,93.05,95.95,101.39 frame=2713 limit=2850
+round 1 before play-pal ns/cycle best=79.18 median=83.35 all=79.18,79.79,83.35,84.64,89.28 frame=2713 limit=2850
+round 1 after play-pal ns/cycle best=61.05 median=66.42 all=61.05,63.68,66.42,69.13,70.73 frame=2713 limit=2850
+ 05:55:47 up 12 days, 15:24,  2 users,  load average: 3.07, 2.81, 3.64
+round 2 main play-ntsc ns/cycle best=74.03 median=83.73 all=74.03,76.51,83.73,86.50,87.83 frame=3028 limit=3450
+round 2 before play-ntsc ns/cycle best=77.82 median=92.08 all=77.82,78.46,92.08,107.92,108.00 frame=3028 limit=3450
+round 2 after play-ntsc ns/cycle best=64.94 median=73.58 all=64.94,66.68,73.58,77.58,78.04 frame=3028 limit=3450
+round 2 main play-pal ns/cycle best=85.11 median=91.84 all=85.11,85.43,91.84,92.14,93.95 frame=2713 limit=2850
+round 2 before play-pal ns/cycle best=82.80 median=88.75 all=82.80,84.92,88.75,99.39,105.06 frame=2713 limit=2850
+round 2 after play-pal ns/cycle best=71.03 median=76.71 all=71.03,73.60,76.71,78.76,82.84 frame=2713 limit=2850
+ 05:56:35 up 12 days, 15:25,  1 user,  load average: 3.08, 2.83, 3.60
+round 3 main play-ntsc ns/cycle best=95.10 median=97.24 all=95.10,95.48,97.24,97.70,110.09 frame=3028 limit=3450
+round 3 before play-ntsc ns/cycle best=77.27 median=85.81 all=77.27,81.96,85.81,85.91,88.17 frame=3028 limit=3450
+round 3 after play-ntsc ns/cycle best=58.51 median=73.25 all=58.51,64.12,73.25,75.64,80.36 frame=3028 limit=3450
+round 3 main play-pal ns/cycle best=77.49 median=90.81 all=77.49,87.74,90.81,96.13,98.02 frame=2713 limit=2850
+round 3 before play-pal ns/cycle best=70.31 median=78.43 all=70.31,70.96,78.43,94.07,95.07 frame=2713 limit=2850
+round 3 after play-pal ns/cycle best=64.51 median=69.21 all=64.51,66.35,69.21,70.86,73.65 frame=2713 limit=2850
+ 05:57:35 up 12 days, 15:26,  1 user,  load average: 2.83, 2.87, 3.57
+round 4 main play-ntsc ns/cycle best=81.10 median=91.74 all=81.10,86.70,91.74,92.64,104.30 frame=3028 limit=3450
+round 4 before play-ntsc ns/cycle best=71.32 median=75.33 all=71.32,73.85,75.33,77.91,82.97 frame=3028 limit=3450
+round 4 after play-ntsc ns/cycle best=57.67 median=76.84 all=57.67,61.52,76.84,77.16,83.17 frame=3028 limit=3450
+round 4 main play-pal ns/cycle best=80.31 median=86.02 all=80.31,81.45,86.02,86.74,87.07 frame=2713 limit=2850
+round 4 before play-pal ns/cycle best=77.84 median=96.49 all=77.84,88.61,96.49,101.29,107.09 frame=2713 limit=2850
+round 4 after play-pal ns/cycle best=63.93 median=70.49 all=63.93,64.35,70.49,86.11,86.18 frame=2713 limit=2850
+ 05:58:27 up 12 days, 15:27,  1 user,  load average: 2.37, 2.76, 3.50
+Fri Oct  9 05:58:27 UTC 2026
+ 05:58:27 up 12 days, 15:27,  1 user,  load average: 2.37, 2.76, 3.50
+
+## Set 3
+ 05:58:27 up 12 days, 15:27,  1 user,  load average: 2.37, 2.76, 3.50
+Fri Oct  9 05:58:27 UTC 2026
+round 1 main play-ntsc ns/cycle best=79.29 median=84.90 all=79.29,80.37,84.90,88.03,92.31 frame=3028 limit=3450
+round 1 before play-ntsc ns/cycle best=81.28 median=83.00 all=81.28,82.64,83.00,85.03,86.67 frame=3028 limit=3450
+round 1 after play-ntsc ns/cycle best=55.55 median=57.04 all=55.55,56.92,57.04,57.84,59.31 frame=3028 limit=3450
+round 1 main play-pal ns/cycle best=76.10 median=79.93 all=76.10,76.93,79.93,85.89,86.53 frame=2713 limit=2850
+round 1 before play-pal ns/cycle best=77.32 median=87.98 all=77.32,82.76,87.98,98.61,99.56 frame=2713 limit=2850
+round 1 after play-pal ns/cycle best=61.21 median=64.67 all=61.21,62.55,64.67,69.83,74.38 frame=2713 limit=2850
+ 05:59:11 up 12 days, 15:28,  1 user,  load average: 2.07, 2.63, 3.42
+round 2 main play-ntsc ns/cycle best=77.21 median=80.96 all=77.21,77.23,80.96,84.60,87.52 frame=3028 limit=3450
+round 2 before play-ntsc ns/cycle best=74.76 median=78.43 all=74.76,75.89,78.43,79.34,81.55 frame=3028 limit=3450
+round 2 after play-ntsc ns/cycle best=58.84 median=62.95 all=58.84,60.74,62.95,63.65,66.24 frame=3028 limit=3450
+round 2 main play-pal ns/cycle best=71.06 median=87.15 all=71.06,75.31,87.15,87.89,87.95 frame=2713 limit=2850
+round 2 before play-pal ns/cycle best=74.97 median=82.84 all=74.97,75.11,82.84,85.86,86.16 frame=2713 limit=2850
+round 2 after play-pal ns/cycle best=64.78 median=73.36 all=64.78,70.86,73.36,77.78,77.83 frame=2713 limit=2850
+ 05:59:56 up 12 days, 15:28,  1 user,  load average: 1.85, 2.50, 3.34
+round 3 main play-ntsc ns/cycle best=82.55 median=116.82 all=82.55,97.03,116.82,118.43,139.97 frame=3028 limit=3450
+round 3 before play-ntsc ns/cycle best=92.77 median=101.07 all=92.77,98.34,101.07,104.39,105.21 frame=3028 limit=3450
+round 3 after play-ntsc ns/cycle best=70.46 median=75.35 all=70.46,75.18,75.35,76.83,79.42 frame=3028 limit=3450
+round 3 main play-pal ns/cycle best=79.41 median=94.93 all=79.41,94.32,94.93,95.44,99.41 frame=2713 limit=2850
+round 3 before play-pal ns/cycle best=88.09 median=94.71 all=88.09,93.82,94.71,105.22,106.28 frame=2713 limit=2850
+round 3 after play-pal ns/cycle best=66.33 median=79.00 all=66.33,75.19,79.00,87.61,94.61 frame=2713 limit=2850
+ 06:00:49 up 12 days, 15:29,  2 users,  load average: 1.81, 2.42, 3.26
+round 4 main play-ntsc ns/cycle best=73.83 median=82.50 all=73.83,76.54,82.50,84.66,93.84 frame=3028 limit=3450
+round 4 before play-ntsc ns/cycle best=93.96 median=95.81 all=93.96,95.76,95.81,101.01,106.21 frame=3028 limit=3450
+round 4 after play-ntsc ns/cycle best=62.58 median=68.77 all=62.58,64.94,68.77,69.97,76.51 frame=3028 limit=3450
+round 4 main play-pal ns/cycle best=79.58 median=97.29 all=79.58,91.08,97.29,98.38,100.32 frame=2713 limit=2850
+round 4 before play-pal ns/cycle best=77.06 median=81.97 all=77.06,78.06,81.97,91.11,91.52 frame=2713 limit=2850
+round 4 after play-pal ns/cycle best=70.09 median=74.34 all=70.09,74.33,74.34,79.00,79.70 frame=2713 limit=2850
+ 06:01:38 up 12 days, 15:30,  1 user,  load average: 2.25, 2.42, 3.22
+Fri Oct  9 06:01:38 UTC 2026
+ 06:01:38 up 12 days, 15:30,  1 user,  load average: 2.25, 2.42, 3.22
