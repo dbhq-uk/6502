@@ -153,6 +153,8 @@ read puts an observation point after a fast line before the next exact line sets
 sparse lines and no others. The baseline was recorded again from `fae4b62` with `--oracle`, `bc92102.txt` was
 removed, and the lazy build was checked against it.
 
+**In CI.** The `nes-gate` job of `.github/workflows/validate.yml` runs both `--check` commands above on every pull request, on `ubuntu-latest` (amd64), against the one file in `differential/baseline/`. The baseline was recorded and first checked on aarch64 (13 October 2026), so a pass there is the cross-architecture result, and a failure would be a finding. A change of baseline needs no change to the workflow, which takes whichever single file is there.
+
 To run it on a baseline that is older than the tool, export that commit with `git archive`
 into a folder of its own, copy `bench/nes-speed/differential/` into the same place in the
 export, link or copy `.testdata/` there so the ROMs are not fetched again, and run it from the

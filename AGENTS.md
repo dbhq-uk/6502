@@ -23,7 +23,7 @@ machines/                   # registry.json, and per machine its "try it" progra
   bbc-micro/discs/          # the BBC Micro page's preset discs: one folder each with its image, licence, README and (if copyleft) source; manifest.json lists them
 site/                       # 6502.dbhq.uk: the Astro site, its tests, and the scripts that build the machines into it
 tests/                      # the tests and the library they share, one project per machine
-bench/                      # the speed benchmarks (native, and the browser speed checks), run locally and never in CI; the .NET ones are in the solution, so CI builds them (bench/nes-speed/ from the NES's task 6; in it, differential/ is the gate for the NES's lazy chips, and lazy-chips/ their measurements)
+bench/                      # the speed benchmarks (native, and the browser speed checks), run locally and never in CI; the .NET ones are in the solution, so CI builds them (bench/nes-speed/ from the NES's task 6; in it, differential/ is the gate for the NES's lazy chips and CI's nes-gate job runs it against its baseline on amd64, and lazy-chips/ their measurements)
 tools/                      # scripts that make test data and check assumptions
   Dbhq.Cpu6502.ChipTrace/   # records the core's bus cycles for the site's chip page
   probes/                   # scripts that check assumptions against test data

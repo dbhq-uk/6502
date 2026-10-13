@@ -1485,6 +1485,8 @@ The output is integer hashes, so it should not depend on the CPU. The staged fil
 
 (Both intermediate baselines were also checked IDENTICAL in both modes, `8f7314d.txt` at 10:10 to 10:25 UTC, before they were removed.)
 
+**On amd64, in CI.** The gate had only ever been run by hand, and the baseline of 13 October 2026 was made and checked on aarch64, so nothing in CI showed the same hashes on amd64. A job `nes-gate` was added to `.github/workflows/validate.yml`: it builds the differential and runs `--check` on the baseline in the lazy mode and with `--oracle` on `ubuntu-latest`, which is amd64 (it prints `uname -m`). The pinned ROMs come from the same fork and hash check as the tests, in a cache of their own. RESULT_NES_GATE
+
 ### The faults
 
 The eleven faults of task 3 in `PpuScanline.cs` and six for the clause were run
