@@ -618,6 +618,11 @@ test('ic-table.json is table 8.1, and gives each IC of the nets check its GND an
     assert.ok(ic.gnd >= 1 && ic.gnd <= ic.pins && ic.vcc >= 1 && ic.vcc <= ic.pins, ic.ref);
     assert.equal(ic.package, `DIP-${ic.pins}`, ic.ref);
     assert.match(ic.pinoutSource, /https?:\/\/\S+\.pdf/, `${ic.ref}: its data sheet is named with its address`);
+    // the data sheet is an input in sources.json with its SHA-256, at the address the pinout names
+    const sheet = sources.find((x) => x.id === ic.pinoutSourceId);
+    assert.ok(sheet && sheet.kind === 'document' && sheet.committed === null, `${ic.ref}: ${ic.pinoutSourceId} is not a data sheet in sources.json`);
+    assert.ok(ic.pinoutSource.includes(`(${sheet.url})`), `${ic.ref}: the pinout's address is not ${sheet.id}'s`);
+    assert.ok(sheet.use.includes(ic.ref), `${sheet.id}'s use does not name ${ic.ref}`);
     assert.match(ic.pinoutSource, new RegExp(`pin ${ic.gnd} (GND|VSS)`), `${ic.ref}: the data sheet's GND pin`);
     assert.match(ic.pinoutSource, new RegExp(`pin ${ic.vcc} (VCC|VDD)`), `${ic.ref}: the data sheet's +5V pin`);
     // a 74-series or 4000-series part on a corner pinout; the 6502 and the 6522s from Rockwell's sheets
@@ -649,4 +654,19 @@ test('NOTICE.md and the photographs\' README name the BBC Micro board\'s track m
   const ours = flat(photos.split(/^## /m).find((s) => s.includes('bbc-micro-board.webp')) ?? '');
   assert.match(ours, /traced from amb5l's scans/);
   assert.match(ours, /traced to look at: its connections are not verified/);
+});
+
+test('board_trace.py and common.py on disk are the method fixed before task 4\'s checks ran', () => {
+  // The journal records the SHA-256 of the method's files, taken before the nets and I5 checks were first run.
+  // Only the two scripts are pinned here: task 5 changes ic-table.json and registration.json on purpose. A change
+  // to either script (a threshold such as NETS_MIN_SHARE or I5_IOU_MIN, say) means copper.json no longer comes from
+  // the code in the repository, and needs a new check, fixed before it runs, and a journal entry.
+  const journal = fs.readFileSync(path.join(REPO_ROOT, 'docs', 'journal', '2026-10-04-the-bbc-micro-models.md'), 'utf8');
+  const block = journal.split('### The method fixed, and the checks as fixed')[1] ?? '';
+  const recorded = Object.fromEntries([...block.matchAll(/^([0-9a-f]{64}) (\S+)$/gm)].map(([, sha, f]) => [f, sha]));
+  for (const f of ['tools/bbc-micro-model/board_trace.py', 'tools/bbc-micro-model/common.py']) {
+    assert.ok(recorded[f], `the journal records no hash for ${f}`);
+    const sha = crypto.createHash('sha256').update(fs.readFileSync(path.join(REPO_ROOT, f))).digest('hex');
+    assert.equal(sha, recorded[f], `${f} is not the file the method was fixed with`);
+  }
 });
