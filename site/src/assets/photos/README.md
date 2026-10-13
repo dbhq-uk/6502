@@ -21,8 +21,12 @@ resized copy of the source, which is a derivative under that licence.
 **What the 3D model takes from each**, for a machine that has one (the KIM-1),
 is in its section below and on the page. The analysis that does it is in
 `tools/kim1-model/` (its `README.md` says how to run it), and the journal for 2
-October 2026 has every figure. The BBC Micro and the NES have no model, so their
-photographs are shown and nothing is taken from them.
+October 2026 has every figure. The BBC Micro has no model, so its photograph is
+shown and nothing is taken from it. The NES has two: its board's model,
+which takes nothing from the photographs here, being measured from scans and
+photographs that are not committed, listed in their own section below; and its
+outside's, which takes from `nes.webp`, `nes-rear-right.webp`, `nes-pal-front.webp` and
+`nes-pal-underside.webp`, each measured on its full-size original.
 
 ## kim-1.webp
 
@@ -115,7 +119,49 @@ photographs are shown and nothing is taken from them.
 | Taken | 27 July 2016, 21:32 (`DateTimeOriginal`: Nikon D7000). Uploaded to Commons on 29 July 2016, by the photographer, over two earlier photographs of 2011 under the same name; the file used is the current one, whose SHA-1 is below |
 | Fetched | 6 October 2026, from `upload.wikimedia.org/wikipedia/commons/8/82/Nintendo-Entertainment-System-NES-Console-FL.jpg`: 4020 by 2880 pixels, 2,193,817 bytes, SHA-1 `339e959bbdb741c24a7f00e4256152b00e5c802c` (the SHA-1 Commons records for the file), SHA-256 `53c4ff11da6ba56bc2d9d8138dd585d126e08fe22350e8e0363003f9ddb8ab3c` |
 | This copy | Not cropped: the console already sits in an even margin of about 240 pixels of white on every side (ImageMagick's trim box at 2 % fuzz is 3520 by 2395 at 243, 249). Resized only: `cwebp -q 82 -resize 1600 0 -metadata none`: 1600 by 1147 pixels, 32,014 bytes, SHA-256 `4325012461f3919fc899d0a9adca509d5f5f09d14833905c076c0cc1e6335f55`. Colours are the source's. The original is not committed, being over 1.5 MB; the line above is enough to fetch it again and check it |
-| Used for | The photograph of the machine at the head of its page. Nothing is traced or measured from it: the NES's 3D models are their own project (issue 68) |
+| Used for | The photograph of the machine at the head of its page, and, measured on its full-size original, the outside model's front, top and left end: the cartridge door, the vents, the buttons, the power light, the controller ports and the lean of the lower shell (task 9 of the NES models plan, 6 October 2026; the measuring is task 8's). The board's model takes nothing from it |
+
+## nes-rear-right.webp
+
+| | |
+|---|---|
+| What | An original Nintendo Entertainment System, the North American console, seen from above and behind and a little from the right on white: the rear with its three connectors in a recess at the lower left, the top shell's block of vents between two black end blocks and the cartridge slot's lid |
+| Source | Wikimedia Commons, [`File:Nintendo-Entertainment-System-NES-Console-BR.jpg`](https://commons.wikimedia.org/wiki/File:Nintendo-Entertainment-System-NES-Console-BR.jpg), the photographer's own work |
+| Author | Evan-Amos, as the file page names him |
+| Licence | Public domain, as the file page states it: the photographer's `{{PD-self}}` release ("I, the copyright holder of this work, release this work into the public domain. This applies worldwide."). Checked on Commons' API on 6 October 2026 (`LicenseShortName` is `Public domain`). No credit is owed; the page gives one anyway |
+| Which console | The file page describes it as showing "a DC in, channel 3/4 selector and RF A/V out", so the North American NES, the NTSC console. The same console as `nes.webp`, from the other side |
+| Taken | 27 July 2016 (`DateTimeOriginal`: Nikon D7000). The file page's own date, 29 July 2016, is when it was uploaded |
+| Fetched | 5 October 2026, from `upload.wikimedia.org/wikipedia/commons/c/cf/Nintendo-Entertainment-System-NES-Console-BR.jpg`: 4020 by 2880 pixels, 2,230,258 bytes, SHA-1 `ec812d15b0117d144825bf214b0eedab1f34aa90` (the SHA-1 Commons records for the file; the file here matches it), SHA-256 `0681170937ae3af9db3fc8898e155792e295dacb5cb73942f8d2371c8733907f` |
+| This copy | Not cropped. Resized only: `cwebp -q 82 -resize 1600 0 -metadata none`: 1600 by 1147 pixels, 26,862 bytes, SHA-256 `2db816d995fdcba4b6d4492a4a92a74dfb7e0d9b1de723c513f5c6130bf41b19`. Colours are the source's. The original is not committed, being over 1.5 MB; the line above is enough to fetch it again and check it |
+| Used for | The outside model's rear, measured on the full-size original with the rear face rectified: its window, the places of the three connectors and their words, and the notch; and the lean of the lower shell, held out as a check (task 8 of the NES models plan; the credit is moved here from the registry's references, where it stood until 6 October 2026) |
+
+## nes-pal-front.webp
+
+| | |
+|---|---|
+| What | The front of the top shell of a PAL Nintendo Entertainment System, a European console whose plastic has yellowed, seen straight on from the front against a pale ground: the cartridge slot's lid with its red words, including EUROPEAN VERSION, and the black band at the right. A wide, shallow strip |
+| Source | Wikimedia Commons, [`File:Geöffnetes_deutsches_NES_20221102_HOF06342_RAW-Export.png`](https://commons.wikimedia.org/wiki/File:Ge%C3%B6ffnetes_deutsches_NES_20221102_HOF06342_RAW-Export.png), the photographer's own work |
+| Author | PantheraLeo1359531, as the file page names the user |
+| Licence | CC BY 4.0, as the file page states it ([deed](https://creativecommons.org/licenses/by/4.0/)), checked on Commons' API on 6 October 2026 (`LicenseShortName` is `CC BY 4.0`, `AttributionRequired` is true). The credit above, with the licence's name and link, is the attribution; the copy here is resized, which is a change, and this file says so (the page's credit line does not yet say it: see the journal's task 8 follow-up) |
+| Which console | The file page is titled "Geöffnetes deutsches NES" and describes a German Nintendo Entertainment System, so the PAL console; its label underneath, in `nes-pal-underside.webp`, is NESE-001 |
+| Taken | 2 November 2022 (the file page's `DateTimeOriginal`; the page's `DateTime`, 5 April 2023, is when the file was exported). The camera is a Sony ILCE-7RM4 at 20 mm, as `tools/nes-model/data/sources.json` records |
+| Fetched | 5 October 2026, from `upload.wikimedia.org/wikipedia/commons/d/d0/Ge%C3%B6ffnetes_deutsches_NES_20221102_HOF06342_RAW-Export.png`: 8606 by 2253 pixels, 92,882,699 bytes, SHA-1 `be7b9617e71ce915a27b0b1950f53150bba1a1e5` (the SHA-1 Commons records for the file; the file here matches it), SHA-256 `3cf7eca8f43bafd3a8f341127d6c6f728acd2da3d2deb2464d93b66681b913d6` |
+| This copy | Not cropped. Resized only: `cwebp -q 82 -resize 1600 0 -metadata none`, which reads the PNG as it is: 1600 by 419 pixels, 18,370 bytes, SHA-256 `0853dfe7e4545574ca4fe83b2c3283a6debc2ce5ae9606e12ee769aff57e3f08`. The original is not committed, being 93 MB; the line above is enough to fetch it again and check it |
+| Used for | The outside model's PAL console: its front words, including the line EUROPEAN VERSION, and a check of its front against the NTSC console's, measured on the full-size original (task 8 of the NES models plan; the credit is moved here from the registry's references, where it stood until 6 October 2026) |
+
+## nes-pal-underside.webp
+
+| | |
+|---|---|
+| What | The underside of a PAL Nintendo Entertainment System, a NESE-001, photographed from above on a patterned carpet: its two labels, four feet, two vent grilles, the cover of the expansion port and a black plate with two screws |
+| Source | Wikimedia Commons, [`File:Unterseite_NES_NESE-001_20221102_132229.jpg`](https://commons.wikimedia.org/wiki/File:Unterseite_NES_NESE-001_20221102_132229.jpg), the photographer's own work |
+| Author | PantheraLeo1359531, as the file page names the user |
+| Licence | CC BY 4.0, as the file page states it ([deed](https://creativecommons.org/licenses/by/4.0/)), checked on Commons' API on 6 October 2026 (`LicenseShortName` is `CC BY 4.0`, `AttributionRequired` is true). The credit above, with the licence's name and link, is the attribution; the copy here is resized, which is a change, and this file says so (the page's credit line does not yet say it: see the journal's task 8 follow-up) |
+| Which console | The file page says "Bottom of the model NESE-001 of the Nintendo Entertainment System", and the labels in it are German, so the PAL console |
+| Taken | 2 November 2022, 13:22 (`DateTimeOriginal`: a Samsung SM-G988B, a phone, so not the camera of `nes-pal-front.webp`) |
+| Fetched | 5 October 2026, from `upload.wikimedia.org/wikipedia/commons/2/23/Unterseite_NES_NESE-001_20221102_132229.jpg`: 4000 by 3000 pixels, 3,025,854 bytes, SHA-1 `15faa3996e91bd7f0c9433c7baf3e64ae51c655f` (the SHA-1 Commons records for the file; the file here matches it), SHA-256 `a8e10ed2cf0148beccab8f7979f0a92497b01846df684e6c5260c56d4c9a4c27` |
+| This copy | Not cropped. Resized only: `cwebp -q 82 -resize 1600 0 -metadata none`: 1600 by 1200 pixels, 244,400 bytes, SHA-256 `466c1ae3cb419ee6dfa5422f3546cebe5d731acf3aa3437f91ec12ba6a4b0c8b`. The original is not committed, being over 1.5 MB; the line above is enough to fetch it again and check it |
+| Used for | The outside model's PAL underside, measured on the full-size original rectified on its six screw holes: the two labels and their words, the feet and the expansion port's cover (task 8 of the NES models plan; the credit is moved here from the registry's references, where it stood until 6 October 2026) |
 
 The site builds AVIF and WebP copies of each file here at build time
 (`astro:assets`), so a page never loads a 1600 pixel master.
@@ -160,3 +206,52 @@ model and here, with each channel's source named; none of it is MIT.
 
 The build does not run the analysis, and nothing in the tests or the build
 fetches a photograph or the replica.
+
+## The NES board's track map, src/assets/tracks/nes-famicom-board.webp
+
+The copper on both faces of the NES main board, NES-CPU-10, for the NES's
+inside 3D model, and its printed legend. **The map is traced from OpenTendo's
+scans**, the bare board scanned on both faces at 300 dpi, read from the
+`dbhq-uk` fork at commit `3bd0b0be5c9ed6fc6a36d9e458bc58d9976b2009`
+([dbhq-uk/OpenTendo](https://github.com/dbhq-uk/OpenTendo), a fork of
+[Redherring32/OpenTendo](https://github.com/Redherring32/OpenTendo)). The scans
+are not photographs of ours and are not committed: they state no licence of
+their own, and OpenTendo's README puts the repository under the TAPR Open
+Hardware License (www.tapr.org/OHL).
+
+| Channel | What | From | Terms |
+|---|---|---|---|
+| Red | The component side's copper | `NES-CPU-10_front_300dpi.png`, traced | TAPR Open Hardware License, as OpenTendo's README states it |
+| Green | The solder side's copper | `NES-CPU-10_back_300dpi.png`, registered to the front and traced | The same |
+| Blue | The printed legend, as it is printed, Nintendo's name included | `NES-CPU-10_front_300dpi.png`, traced | The same |
+
+| | |
+|---|---|
+| Made by | `tools/nes-model/board_trace.py` on 5 October 2026, from the full-size scans, in the board frame of `tools/nes-model/data/frame.json`. Its `README.md` says how to run it; `tools/nes-model/data/copper.json` holds the map's size, bytes and SHA-256 and the checks on it; the journal for 5 October 2026 has the figures |
+| This copy | 1959 by 1194 pixels, 10 pixels to the millimetre, lossless, covering the board edge to edge; each channel 255 or 0 |
+| Connections | The copper is traced to look at: its connectivity is not verified (the check on its known nets failed, 5 October 2026) |
+| Terms | The TAPR Open Hardware License's, credited to OpenTendo and its authors; `NOTICE.md` says what is derived from the scans |
+
+The build does not run the analysis, and nothing in the tests or the build
+fetches a scan. The NES board's model draws the map, served as
+`/models/nes-famicom-board-tracks.webp` beside its bundle by
+`scripts/build-models.mjs` and fetched with the model, never with the page.
+
+## The NES board's sources, which are not committed
+
+The NES board's model is measured from these, and none of them is in the
+repository: the scans state no licence of their own, and the photographs are
+large originals that are not shown on the page. Each is credited under the
+model, from the NES's `references` in `machines/registry.json`, which give the
+same address and SHA-256; `tools/nes-model/data/sources.json` has every input,
+and the tools check each against its SHA-256 before reading it. Fetched on 5
+October 2026.
+
+| Id | What | Address | Author | Licence, as stated | SHA-256 of the original | Used for |
+|---|---|---|---|---|---|---|
+| I1-front | A flatbed scan of a bare NES-CPU-10, its component side, at 300 dots an inch, in OpenTendo, as this project's fork of it holds it | <https://github.com/dbhq-uk/OpenTendo/raw/3bd0b0be5c9ed6fc6a36d9e458bc58d9976b2009/Scans/NES-CPU-10_front_300dpi.png> | The OpenTendo project, by Redherring32 and its contributors (the scans added by Kamoteshake; the scanner is not named) | None stated | `fd41c714258a4d379d034eaf39cdcfcc7aab5273f4dafb74ff8517b55c88ab3a` | The board's outline, holes, pads and scale, the component side's copper and the printed legend, traced to look at, and the place of every part |
+| I1-back | The same board's solder side, scanned the same way, in OpenTendo, as this project's fork of it holds it | <https://github.com/dbhq-uk/OpenTendo/raw/3bd0b0be5c9ed6fc6a36d9e458bc58d9976b2009/Scans/NES-CPU-10_back_300dpi.png> | The OpenTendo project, by Redherring32 and its contributors (the scans added by Kamoteshake; the scanner is not named) | None stated | `fa15ea9e5a57c8621932fa4cbd8b8121feba82a746cc996627f95b6d12b8a0a5` | The solder side's copper, traced to look at after the scan was turned over and fitted to the component side by its drilled holes |
+| I3 | A photograph of a populated PAL board, an NES-CPU-11, from above | <https://commons.wikimedia.org/wiki/File:Frontalansicht_Mainboard_NES_NESE-001_HOF06378.png> | PantheraLeo1359531 | CC BY 4.0 | `e9f606535f4b01507a62f185ce38aa3403862bb82f434cc51f148a90088ea8cd` | The PAL console's parts and their markings, and a check that each sits on the scanned board's footprint of the same name |
+| I4 | A photograph of a populated NES-CPU-07, from above | <https://commons.wikimedia.org/wiki/File:Nintendo-NES-Mk1-Motherboard-Top.jpg> | Evan-Amos | Public domain | `2158318ca6e7c913fce4220e8763dc8df4b37e70fea50cf29a1c975556a5b46c` | The NTSC console's parts and their markings, the chips' bodies, and a check that each sits on the scanned board's footprint of the same name |
+| I5 | A photograph of the same NES-CPU-07's solder side | <https://commons.wikimedia.org/wiki/File:Nintendo-NES-Mk1-Motherboard-Bottom.jpg> | Evan-Amos | Public domain | `64d52d1dbedfd123a56780def11821ef4157694e4d88d701924d567e2cb1ae10` | A check, from below, that the NTSC console's parts sit on the scanned board's footprints |
+| I2 | OpenTendo's redrawing of the front-loader's main board in KiCad, as this project's fork of it holds it | <https://github.com/dbhq-uk/OpenTendo/raw/3bd0b0be5c9ed6fc6a36d9e458bc58d9976b2009/Board%20Files/Motherboard.kicad_pcb> | Redherring32 and the OpenTendo contributors | TAPR Open Hardware License (the repository's README) | `9cce8323c9c18f0c583f99d1e07d7650f85858ca2599cbf52b2c75f384e8224a` | A cross-check only, from which nothing is drawn: the board's outline and the chips' places compared with the scan's, U9's jobs read from its nets, and which buffer serves which controller port checked against them |

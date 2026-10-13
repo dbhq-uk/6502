@@ -1,0 +1,98 @@
+{
+ "about": "Made by tools/nes-model/results.py from the measurements in tools/nes-model/data/. The NES page quotes these for the board model; nothing on it is typed by hand.",
+ "board": {
+  "depthMm": 119.4452,
+  "dpi": 300,
+  "widthMm": 195.9495
+ },
+ "copper": {
+  "bottom": 0.3122,
+  "drills": 480,
+  "drillsBottom": 0.9896,
+  "drillsTop": 0.9958,
+  "mapPxPerMm": 10,
+  "nets": {
+   "chips": 10,
+   "gndInLargest": 1,
+   "gndPins": 10,
+   "touching": true,
+   "vccInLargest": 2,
+   "vccPins": 10,
+   "verdict": "fail"
+  },
+  "top": 0.4581
+ },
+ "parts": {
+  "heightsMeasured": 0,
+  "heightsTypical": 12,
+  "ics": 10,
+  "kicadMaxMm": 0.438,
+  "kicadMedianMm": 0.292,
+  "ntscWorstMm": 0.432,
+  "palWorstMm": 0.348,
+  "passives": 71,
+  "sitsOnLimitMm": 2.0
+ },
+ "scale": {
+  "verdicts": [
+   "pass",
+   "pass",
+   "pass"
+  ],
+  "xMedianMm": 0.0113,
+  "xRows": 6,
+  "xyPct": 0.1708,
+  "yFootprints": 10,
+  "yMedianPct": 0.432
+ },
+ "solder": {
+  "heldOutMedianMm": 0.089,
+  "heldOutP90Mm": 0.319,
+  "holes": 511,
+  "verdict": "pass"
+ },
+ "sources": [
+  {
+   "id": "I1-front",
+   "kind": "scan",
+   "page": "https://github.com/Redherring32/OpenTendo/blob/3bd0b0be5c9ed6fc6a36d9e458bc58d9976b2009/README.md",
+   "sha256": "fd41c714258a4d379d034eaf39cdcfcc7aab5273f4dafb74ff8517b55c88ab3a",
+   "url": "https://github.com/dbhq-uk/OpenTendo/raw/3bd0b0be5c9ed6fc6a36d9e458bc58d9976b2009/Scans/NES-CPU-10_front_300dpi.png"
+  },
+  {
+   "id": "I1-back",
+   "kind": "scan",
+   "page": "https://github.com/Redherring32/OpenTendo/blob/3bd0b0be5c9ed6fc6a36d9e458bc58d9976b2009/README.md",
+   "sha256": "fa15ea9e5a57c8621932fa4cbd8b8121feba82a746cc996627f95b6d12b8a0a5",
+   "url": "https://github.com/dbhq-uk/OpenTendo/raw/3bd0b0be5c9ed6fc6a36d9e458bc58d9976b2009/Scans/NES-CPU-10_back_300dpi.png"
+  },
+  {
+   "id": "I3",
+   "kind": "photograph",
+   "page": "https://commons.wikimedia.org/wiki/File:Frontalansicht_Mainboard_NES_NESE-001_HOF06378.png",
+   "sha256": "e9f606535f4b01507a62f185ce38aa3403862bb82f434cc51f148a90088ea8cd",
+   "url": "https://upload.wikimedia.org/wikipedia/commons/6/65/Frontalansicht_Mainboard_NES_NESE-001_HOF06378.png"
+  },
+  {
+   "id": "I4",
+   "kind": "photograph",
+   "page": "https://commons.wikimedia.org/wiki/File:Nintendo-NES-Mk1-Motherboard-Top.jpg",
+   "sha256": "2158318ca6e7c913fce4220e8763dc8df4b37e70fea50cf29a1c975556a5b46c",
+   "url": "https://upload.wikimedia.org/wikipedia/commons/5/5a/Nintendo-NES-Mk1-Motherboard-Top.jpg"
+  },
+  {
+   "id": "I5",
+   "kind": "photograph",
+   "page": "https://commons.wikimedia.org/wiki/File:Nintendo-NES-Mk1-Motherboard-Bottom.jpg",
+   "sha256": "64d52d1dbedfd123a56780def11821ef4157694e4d88d701924d567e2cb1ae10",
+   "url": "https://upload.wikimedia.org/wikipedia/commons/4/43/Nintendo-NES-Mk1-Motherboard-Bottom.jpg"
+  },
+  {
+   "id": "I2",
+   "kind": "drawing",
+   "page": "https://github.com/Redherring32/OpenTendo/blob/3bd0b0be5c9ed6fc6a36d9e458bc58d9976b2009/README.md",
+   "sha256": "9cce8323c9c18f0c583f99d1e07d7650f85858ca2599cbf52b2c75f384e8224a",
+   "url": "https://github.com/dbhq-uk/OpenTendo/raw/3bd0b0be5c9ed6fc6a36d9e458bc58d9976b2009/Board%20Files/Motherboard.kicad_pcb"
+  }
+ ]
+}

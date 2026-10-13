@@ -1,0 +1,65 @@
+=== launch r0-p1-cur folder=/tmp/nes77/pub-after region=0 start=2026-10-13T09:25:37Z loadavg=0.91 2.41 3.26 7/443 162686
+--- top before: 193.1 dotnet;6.9 claude;2.0 Paseo;1.0 tailsca+;
+rom: other/snow.nes at 95d8f621ae55, 40976 bytes, sha256 7db551e868b2c0182941bd68adc447c2f0668098a4425e8e170b20e4327b7210, hash checked
+browser 153.0.8010.12
+launch 1 region 0 NTSC
+launch 1 Running as NTSC, as chosen here: the file does not say which.
+launch 1 boot cycles=5000000 frames=167 ms=1711.500 cycles_per_second=2921414 mhz=2.921 times_real=1.63
+launch 1 timed 1 cycles=1790000 frames=61 ms=573.000 cycles_per_second=3123909 mhz=3.124 times_real=1.75
+launch 1 timed 2 cycles=1790003 frames=60 ms=515.700 cycles_per_second=3471016 mhz=3.471 times_real=1.94
+launch 1 timed 3 cycles=1790001 frames=60 ms=513.600 cycles_per_second=3485204 mhz=3.485 times_real=1.95
+launch 1 timed 4 cycles=1790000 frames=60 ms=566.000 cycles_per_second=3162544 mhz=3.163 times_real=1.77
+launch 1 timed 5 cycles=1790002 frames=60 ms=633.300 cycles_per_second=2826468 mhz=2.826 times_real=1.58
+launch 1 thread 1 cycles=1790001 thread_ms=256.126 mhz=6.989 times_real=3.90
+launch 1 thread 2 cycles=1790000 thread_ms=249.087 mhz=7.186 times_real=4.02
+launch 1 thread 3 cycles=1790002 thread_ms=248.401 mhz=7.206 times_real=4.03
+launch 1 thread 4 cycles=1790002 thread_ms=247.943 mhz=7.219 times_real=4.03
+launch 1 thread 5 cycles=1790002 thread_ms=250.117 mhz=7.157 times_real=4.00
+launch 1 thread 6 cycles=1790002 thread_ms=248.585 mhz=7.201 times_real=4.02
+launch 1 thread 7 cycles=1790001 thread_ms=248.752 mhz=7.196 times_real=4.02
+launch 1 thread 8 cycles=1790003 thread_ms=248.751 mhz=7.196 times_real=4.02
+--- exit=0 end=2026-10-13T09:25:50Z loadavg=0.71 2.30 3.21 6/439 162877
+=== launch r0-p1-A folder=/tmp/nes77/pub-A region=0 start=2026-10-13T09:25:50Z loadavg=0.71 2.30 3.21 5/439 162882
+--- top before: 182.2 dotnet;16.8 claude;1.0 Paseo;1.0 esbuild;
+rom: other/snow.nes at 95d8f621ae55, 40976 bytes, sha256 7db551e868b2c0182941bd68adc447c2f0668098a4425e8e170b20e4327b7210, hash checked
+browser 153.0.8010.12
+launch 1 region 0 NTSC
+launch 1 Running as NTSC, as chosen here: the file does not say which.
+launch 1 boot cycles=5000000 frames=167 ms=1806.600 cycles_per_second=2767630 mhz=2.768 times_real=1.55
+launch 1 timed 1 cycles=1790000 frames=61 ms=586.100 cycles_per_second=3054086 mhz=3.054 times_real=1.71
+launch 1 timed 2 cycles=1790003 frames=60 ms=504.000 cycles_per_second=3551593 mhz=3.552 times_real=1.98
+launch 1 timed 3 cycles=1790001 frames=60 ms=501.000 cycles_per_second=3572856 mhz=3.573 times_real=2.00
+launch 1 timed 4 cycles=1790000 frames=60 ms=528.400 cycles_per_second=3387585 mhz=3.388 times_real=1.89
+launch 1 timed 5 cycles=1790002 frames=60 ms=484.200 cycles_per_second=3696824 mhz=3.697 times_real=2.07
+launch 1 thread 1 cycles=1790001 thread_ms=253.048 mhz=7.074 times_real=3.95
+launch 1 thread 2 cycles=1790000 thread_ms=244.688 mhz=7.315 times_real=4.09
+launch 1 thread 3 cycles=1790002 thread_ms=244.481 mhz=7.322 times_real=4.09
+launch 1 thread 4 cycles=1790002 thread_ms=245.358 mhz=7.295 times_real=4.08
+launch 1 thread 5 cycles=1790002 thread_ms=247.102 mhz=7.244 times_real=4.05
+launch 1 thread 6 cycles=1790002 thread_ms=245.008 mhz=7.306 times_real=4.08
+launch 1 thread 7 cycles=1790001 thread_ms=250.563 mhz=7.144 times_real=3.99
+launch 1 thread 8 cycles=1790003 thread_ms=245.648 mhz=7.287 times_real=4.07
+--- exit=0 end=2026-10-13T09:26:05Z loadavg=0.55 2.18 3.16 6/440 163114
+=== launch r0-p1-B folder=/tmp/nes77/pub-B region=0 start=2026-10-13T09:26:05Z loadavg=0.55 2.18 3.16 7/440 163119
+VARIANTS-DONE 09:26:06Z
+--- top before: 113.9 dotnet;53.5 claude;28.7 claude;5.0 Paseo;
+rom: other/snow.nes at 95d8f621ae55, 40976 bytes, sha256 7db551e868b2c0182941bd68adc447c2f0668098a4425e8e170b20e4327b7210, hash checked
+browser 153.0.8010.12
+launch 1 region 0 NTSC
+launch 1 Running as NTSC, as chosen here: the file does not say which.
+launch 1 boot cycles=5000000 frames=167 ms=1525.500 cycles_per_second=3277614 mhz=3.278 times_real=1.83
+launch 1 timed 1 cycles=1790000 frames=61 ms=556.700 cycles_per_second=3215376 mhz=3.215 times_real=1.80
+launch 1 timed 2 cycles=1790003 frames=60 ms=503.700 cycles_per_second=3553709 mhz=3.554 times_real=1.99
+launch 1 timed 3 cycles=1790001 frames=60 ms=518.200 cycles_per_second=3454267 mhz=3.454 times_real=1.93
+launch 1 timed 4 cycles=1790000 frames=60 ms=518.700 cycles_per_second=3450935 mhz=3.451 times_real=1.93
+launch 1 timed 5 cycles=1790002 frames=60 ms=569.200 cycles_per_second=3144768 mhz=3.145 times_real=1.76
+launch 1 thread 1 cycles=1790001 thread_ms=253.800 mhz=7.053 times_real=3.94
+launch 1 thread 2 cycles=1790000 thread_ms=245.812 mhz=7.282 times_real=4.07
+launch 1 thread 3 cycles=1790002 thread_ms=246.711 mhz=7.255 times_real=4.05
+launch 1 thread 4 cycles=1790002 thread_ms=248.251 mhz=7.210 times_real=4.03
+launch 1 thread 5 cycles=1790002 thread_ms=248.694 mhz=7.198 times_real=4.02
+launch 1 thread 6 cycles=1790002 thread_ms=245.847 mhz=7.281 times_real=4.07
+launch 1 thread 7 cycles=1790001 thread_ms=250.741 mhz=7.139 times_real=3.99
+launch 1 thread 8 cycles=1790003 thread_ms=246.618 mhz=7.258 times_real=4.06
+--- exit=0 end=2026-10-13T09:26:19Z loadavg=0.43 2.07 3.11 6/438 163360
+ABORTED 09:26:24Z: not mine, faults.py (pid 136474) was running a differential on ~2 cores during these launches; launches here are not valid
