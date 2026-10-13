@@ -4308,5 +4308,965 @@
     "reason": "The label RP2 is printed beside the single row of pads, turned on its side (read on the crop, enlarged); the mark is the middle of the footprint's pads"
    }
   ]
+ },
+ "i5Pins": {
+  "what": "Chip pins on I5 (8BS's photograph of a populated Issue 7 board, in its pixels as stored, 2048 by 1536, not turned by its EXIF orientation: stored that way it lies as I1 does, rear connectors at the top), for registering I5 to the board frame (task 4's \"I5 to I1\" check). Each is the centroid of a pin's leg where it shows as a bright blob (OKLab L over 0.75, chroma under 0.05, 8 to 150 pixels), the blob picked by eye on the crop as the leg of the named pin: the corner pins of 14 chips spread over the board, or the pin next to a corner whose leg is hidden. The candidates were proposed by a rough fit (an affine from eight chips' centres read by eye on a reduced copy, then a homography refitted on the candidates within 3 pixels) and each was checked on its crop; the chips whose legs were ambiguous on their crops (the packed RAM, IC20, IC53, IC56, IC68), in sockets (IC6) or empty (IC78) were left out. Marked on 13 October 2026, before the check was run. The leg is seen from above, so its centroid can sit up to about half a millimetre outside the pad's centre, away from the chip's body.",
+  "source": "I5",
+  "marks": [
+   {
+    "ref": "IC1",
+    "pin": 1,
+    "i5Px": [
+     1058.0,
+     676.31
+    ],
+    "crop": {
+     "box": [
+      1038,
+      654,
+      1158,
+      698
+     ],
+     "zoom": 4
+    }
+   },
+   {
+    "ref": "IC1",
+    "pin": 40,
+    "i5Px": [
+     1138.57,
+     677.0
+    ],
+    "crop": {
+     "box": [
+      1038,
+      654,
+      1158,
+      698
+     ],
+     "zoom": 4
+    }
+   },
+   {
+    "ref": "IC1",
+    "pin": 20,
+    "i5Px": [
+     1058.4,
+     943.42
+    ],
+    "crop": {
+     "box": [
+      1038,
+      921,
+      1158,
+      965
+     ],
+     "zoom": 4
+    }
+   },
+   {
+    "ref": "IC1",
+    "pin": 21,
+    "i5Px": [
+     1138.45,
+     943.39
+    ],
+    "crop": {
+     "box": [
+      1038,
+      921,
+      1158,
+      965
+     ],
+     "zoom": 4
+    }
+   },
+   {
+    "ref": "IC2",
+    "pin": 1,
+    "i5Px": [
+     1055.95,
+     359.15
+    ],
+    "crop": {
+     "box": [
+      1036,
+      343,
+      1156,
+      387
+     ],
+     "zoom": 4
+    }
+   },
+   {
+    "ref": "IC2",
+    "pin": 39,
+    "i5Px": [
+     1137.44,
+     372.56
+    ],
+    "crop": {
+     "box": [
+      1036,
+      343,
+      1156,
+      387
+     ],
+     "zoom": 4
+    },
+    "why": "pin 40, the corner, is half hidden and its leg was not found as a bright blob; pin 39, next to it, is plain"
+   },
+   {
+    "ref": "IC2",
+    "pin": 20,
+    "i5Px": [
+     1058.07,
+     626.33
+    ],
+    "crop": {
+     "box": [
+      1037,
+      604,
+      1157,
+      648
+     ],
+     "zoom": 4
+    }
+   },
+   {
+    "ref": "IC2",
+    "pin": 21,
+    "i5Px": [
+     1137.57,
+     626.04
+    ],
+    "crop": {
+     "box": [
+      1037,
+      604,
+      1157,
+      648
+     ],
+     "zoom": 4
+    }
+   },
+   {
+    "ref": "IC3",
+    "pin": 1,
+    "i5Px": [
+     662.94,
+     721.2
+    ],
+    "crop": {
+     "box": [
+      643,
+      699,
+      763,
+      743
+     ],
+     "zoom": 4
+    }
+   },
+   {
+    "ref": "IC3",
+    "pin": 40,
+    "i5Px": [
+     743.5,
+     721.27
+    ],
+    "crop": {
+     "box": [
+      643,
+      699,
+      763,
+      743
+     ],
+     "zoom": 4
+    }
+   },
+   {
+    "ref": "IC3",
+    "pin": 20,
+    "i5Px": [
+     662.05,
+     988.15
+    ],
+    "crop": {
+     "box": [
+      642,
+      966,
+      762,
+      1010
+     ],
+     "zoom": 4
+    }
+   },
+   {
+    "ref": "IC3",
+    "pin": 21,
+    "i5Px": [
+     743.94,
+     987.91
+    ],
+    "crop": {
+     "box": [
+      642,
+      966,
+      762,
+      1010
+     ],
+     "zoom": 4
+    }
+   },
+   {
+    "ref": "IC69",
+    "pin": 1,
+    "i5Px": [
+     1057.56,
+     979.58
+    ],
+    "crop": {
+     "box": [
+      1037,
+      957,
+      1157,
+      1001
+     ],
+     "zoom": 4
+    }
+   },
+   {
+    "ref": "IC69",
+    "pin": 40,
+    "i5Px": [
+     1137.0,
+     979.5
+    ],
+    "crop": {
+     "box": [
+      1037,
+      957,
+      1157,
+      1001
+     ],
+     "zoom": 4
+    }
+   },
+   {
+    "ref": "IC69",
+    "pin": 20,
+    "i5Px": [
+     1057.11,
+     1246.26
+    ],
+    "crop": {
+     "box": [
+      1037,
+      1224,
+      1157,
+      1268
+     ],
+     "zoom": 4
+    }
+   },
+   {
+    "ref": "IC69",
+    "pin": 21,
+    "i5Px": [
+     1138.36,
+     1245.96
+    ],
+    "crop": {
+     "box": [
+      1037,
+      1224,
+      1157,
+      1268
+     ],
+     "zoom": 4
+    }
+   },
+   {
+    "ref": "IC5",
+    "pin": 1,
+    "i5Px": [
+     1199.09,
+     663.36
+    ],
+    "crop": {
+     "box": [
+      1182,
+      640,
+      1302,
+      684
+     ],
+     "zoom": 4
+    }
+   },
+   {
+    "ref": "IC5",
+    "pin": 28,
+    "i5Px": [
+     1285.02,
+     662.23
+    ],
+    "crop": {
+     "box": [
+      1182,
+      640,
+      1302,
+      684
+     ],
+     "zoom": 4
+    }
+   },
+   {
+    "ref": "IC5",
+    "pin": 14,
+    "i5Px": [
+     1203.29,
+     844.71
+    ],
+    "crop": {
+     "box": [
+      1184,
+      815,
+      1304,
+      859
+     ],
+     "zoom": 4
+    }
+   },
+   {
+    "ref": "IC5",
+    "pin": 16,
+    "i5Px": [
+     1285.0,
+     830.5
+    ],
+    "crop": {
+     "box": [
+      1184,
+      815,
+      1304,
+      859
+     ],
+     "zoom": 4
+    },
+    "why": "pin 15, the corner, is in shadow and its leg was not found as a bright blob; pin 16, next to it, is plain"
+   },
+   {
+    "ref": "IC51",
+    "pin": 1,
+    "i5Px": [
+     1352.95,
+     1092.15
+    ],
+    "crop": {
+     "box": [
+      1333,
+      1070,
+      1453,
+      1114
+     ],
+     "zoom": 4
+    }
+   },
+   {
+    "ref": "IC51",
+    "pin": 28,
+    "i5Px": [
+     1434.23,
+     1092.97
+    ],
+    "crop": {
+     "box": [
+      1333,
+      1070,
+      1453,
+      1114
+     ],
+     "zoom": 4
+    }
+   },
+   {
+    "ref": "IC51",
+    "pin": 14,
+    "i5Px": [
+     1352.84,
+     1274.53
+    ],
+    "crop": {
+     "box": [
+      1332,
+      1252,
+      1452,
+      1296
+     ],
+     "zoom": 4
+    }
+   },
+   {
+    "ref": "IC51",
+    "pin": 15,
+    "i5Px": [
+     1433.03,
+     1274.81
+    ],
+    "crop": {
+     "box": [
+      1332,
+      1252,
+      1452,
+      1296
+     ],
+     "zoom": 4
+    }
+   },
+   {
+    "ref": "IC52",
+    "pin": 1,
+    "i5Px": [
+     1458.25,
+     1091.0
+    ],
+    "crop": {
+     "box": [
+      1438,
+      1069,
+      1558,
+      1113
+     ],
+     "zoom": 4
+    }
+   },
+   {
+    "ref": "IC52",
+    "pin": 28,
+    "i5Px": [
+     1538.81,
+     1091.14
+    ],
+    "crop": {
+     "box": [
+      1438,
+      1069,
+      1558,
+      1113
+     ],
+     "zoom": 4
+    }
+   },
+   {
+    "ref": "IC52",
+    "pin": 14,
+    "i5Px": [
+     1459.07,
+     1273.6
+    ],
+    "crop": {
+     "box": [
+      1439,
+      1251,
+      1559,
+      1295
+     ],
+     "zoom": 4
+    }
+   },
+   {
+    "ref": "IC52",
+    "pin": 15,
+    "i5Px": [
+     1539.05,
+     1273.15
+    ],
+    "crop": {
+     "box": [
+      1439,
+      1251,
+      1559,
+      1295
+     ],
+     "zoom": 4
+    }
+   },
+   {
+    "ref": "IC4",
+    "pin": 1,
+    "i5Px": [
+     871.73,
+     474.49
+    ],
+    "crop": {
+     "box": [
+      853,
+      451,
+      973,
+      495
+     ],
+     "zoom": 4
+    }
+   },
+   {
+    "ref": "IC4",
+    "pin": 24,
+    "i5Px": [
+     955.12,
+     473.38
+    ],
+    "crop": {
+     "box": [
+      853,
+      451,
+      973,
+      495
+     ],
+     "zoom": 4
+    }
+   },
+   {
+    "ref": "IC4",
+    "pin": 12,
+    "i5Px": [
+     872.09,
+     628.56
+    ],
+    "crop": {
+     "box": [
+      854,
+      606,
+      974,
+      650
+     ],
+     "zoom": 4
+    }
+   },
+   {
+    "ref": "IC4",
+    "pin": 13,
+    "i5Px": [
+     956.49,
+     628.08
+    ],
+    "crop": {
+     "box": [
+      854,
+      606,
+      974,
+      650
+     ],
+     "zoom": 4
+    }
+   },
+   {
+    "ref": "IC89",
+    "pin": 1,
+    "i5Px": [
+     249.38,
+     538.65
+    ],
+    "crop": {
+     "box": [
+      228,
+      516,
+      348,
+      560
+     ],
+     "zoom": 4
+    }
+   },
+   {
+    "ref": "IC89",
+    "pin": 28,
+    "i5Px": [
+     327.83,
+     537.54
+    ],
+    "crop": {
+     "box": [
+      228,
+      516,
+      348,
+      560
+     ],
+     "zoom": 4
+    }
+   },
+   {
+    "ref": "IC89",
+    "pin": 14,
+    "i5Px": [
+     248.87,
+     720.07
+    ],
+    "crop": {
+     "box": [
+      229,
+      697,
+      349,
+      741
+     ],
+     "zoom": 4
+    }
+   },
+   {
+    "ref": "IC89",
+    "pin": 15,
+    "i5Px": [
+     329.71,
+     719.5
+    ],
+    "crop": {
+     "box": [
+      229,
+      697,
+      349,
+      741
+     ],
+     "zoom": 4
+    }
+   },
+   {
+    "ref": "IC97",
+    "pin": 1,
+    "i5Px": [
+     184.92,
+     380.42
+    ],
+    "crop": {
+     "box": [
+      146,
+      357,
+      266,
+      401
+     ],
+     "zoom": 4
+    }
+   },
+   {
+    "ref": "IC97",
+    "pin": 14,
+    "i5Px": [
+     227.9,
+     378.2
+    ],
+    "crop": {
+     "box": [
+      146,
+      357,
+      266,
+      401
+     ],
+     "zoom": 4
+    }
+   },
+   {
+    "ref": "IC97",
+    "pin": 7,
+    "i5Px": [
+     187.48,
+     463.64
+    ],
+    "crop": {
+     "box": [
+      147,
+      440,
+      267,
+      484
+     ],
+     "zoom": 4
+    }
+   },
+   {
+    "ref": "IC97",
+    "pin": 8,
+    "i5Px": [
+     227.05,
+     461.85
+    ],
+    "crop": {
+     "box": [
+      147,
+      440,
+      267,
+      484
+     ],
+     "zoom": 4
+    }
+   },
+   {
+    "ref": "IC33",
+    "pin": 1,
+    "i5Px": [
+     488.4,
+     419.13
+    ],
+    "crop": {
+     "box": [
+      449,
+      397,
+      569,
+      441
+     ],
+     "zoom": 4
+    }
+   },
+   {
+    "ref": "IC33",
+    "pin": 14,
+    "i5Px": [
+     530.49,
+     419.04
+    ],
+    "crop": {
+     "box": [
+      449,
+      397,
+      569,
+      441
+     ],
+     "zoom": 4
+    }
+   },
+   {
+    "ref": "IC33",
+    "pin": 7,
+    "i5Px": [
+     486.75,
+     503.5
+    ],
+    "crop": {
+     "box": [
+      446,
+      481,
+      566,
+      525
+     ],
+     "zoom": 4
+    }
+   },
+   {
+    "ref": "IC33",
+    "pin": 8,
+    "i5Px": [
+     526.96,
+     502.65
+    ],
+    "crop": {
+     "box": [
+      446,
+      481,
+      566,
+      525
+     ],
+     "zoom": 4
+    }
+   },
+   {
+    "ref": "IC87",
+    "pin": 1,
+    "i5Px": [
+     400.54,
+     406.46
+    ],
+    "crop": {
+     "box": [
+      362,
+      383,
+      482,
+      427
+     ],
+     "zoom": 4
+    }
+   },
+   {
+    "ref": "IC87",
+    "pin": 16,
+    "i5Px": [
+     443.62,
+     404.77
+    ],
+    "crop": {
+     "box": [
+      362,
+      383,
+      482,
+      427
+     ],
+     "zoom": 4
+    }
+   },
+   {
+    "ref": "IC87",
+    "pin": 8,
+    "i5Px": [
+     403.23,
+     503.25
+    ],
+    "crop": {
+     "box": [
+      363,
+      481,
+      483,
+      525
+     ],
+     "zoom": 4
+    }
+   },
+   {
+    "ref": "IC87",
+    "pin": 9,
+    "i5Px": [
+     444.65,
+     503.61
+    ],
+    "crop": {
+     "box": [
+      363,
+      481,
+      483,
+      525
+     ],
+     "zoom": 4
+    }
+   },
+   {
+    "ref": "IC73",
+    "pin": 1,
+    "i5Px": [
+     719.56,
+     267.02
+    ],
+    "crop": {
+     "box": [
+      699,
+      245,
+      819,
+      289
+     ],
+     "zoom": 4
+    }
+   },
+   {
+    "ref": "IC73",
+    "pin": 28,
+    "i5Px": [
+     798.58,
+     267.08
+    ],
+    "crop": {
+     "box": [
+      699,
+      245,
+      819,
+      289
+     ],
+     "zoom": 4
+    }
+   },
+   {
+    "ref": "IC73",
+    "pin": 14,
+    "i5Px": [
+     719.44,
+     450.09
+    ],
+    "crop": {
+     "box": [
+      698,
+      428,
+      818,
+      472
+     ],
+     "zoom": 4
+    }
+   },
+   {
+    "ref": "IC73",
+    "pin": 15,
+    "i5Px": [
+     798.46,
+     450.68
+    ],
+    "crop": {
+     "box": [
+      698,
+      428,
+      818,
+      472
+     ],
+     "zoom": 4
+    }
+   },
+   {
+    "ref": "IC61",
+    "pin": 1,
+    "i5Px": [
+     1815.35,
+     928.7
+    ],
+    "crop": {
+     "box": [
+      1774,
+      906,
+      1894,
+      950
+     ],
+     "zoom": 4
+    }
+   },
+   {
+    "ref": "IC61",
+    "pin": 16,
+    "i5Px": [
+     1853.0,
+     928.5
+    ],
+    "crop": {
+     "box": [
+      1774,
+      906,
+      1894,
+      950
+     ],
+     "zoom": 4
+    }
+   },
+   {
+    "ref": "IC61",
+    "pin": 8,
+    "i5Px": [
+     1815.0,
+     1023.69
+    ],
+    "crop": {
+     "box": [
+      1773,
+      1001,
+      1893,
+      1045
+     ],
+     "zoom": 4
+    }
+   },
+   {
+    "ref": "IC61",
+    "pin": 9,
+    "i5Px": [
+     1852.93,
+     1023.0
+    ],
+    "crop": {
+     "box": [
+      1773,
+      1001,
+      1893,
+      1045
+     ],
+     "zoom": 4
+    }
+   }
+  ]
  }
 }

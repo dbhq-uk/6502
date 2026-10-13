@@ -1,0 +1,1322 @@
+{
+ "about": "The Issue 7 board's ICs as Acorn's Service Manual (D1) lists them in table 8.1, \"Integrated circuits\" (PDF pages 66 and 67, printed pages 56 and 57), transcribed by hand on 13 October 2026 from the page images: each IC's reference, its part as the table prints it, the table's comment, and its PCB position in mm from the SW corner (manualXY, task 5's check). Task 4 added, before its nets check was run, the GND and +5V pins of the ICs that check uses, each with the data sheet it was read from; every other IC says why it is left out. Task 5 completes the file. Facts read from the sources named, not their text.",
+ "source": "D1",
+ "pages": "PDF pages 66 and 67 (printed pages 56 and 57), table 8.1",
+ "ics": [
+  {
+   "ref": "IC1",
+   "part": "6502A",
+   "manualXY": [
+    160.0,
+    85.0
+   ],
+   "comment": null,
+   "page": 66,
+   "pins": 40,
+   "package": "DIP-40",
+   "gnd": 1,
+   "vcc": 8,
+   "pinoutSource": "Rockwell, \"R650X and R651X Microprocessors (CPU)\" data sheet, Document No. 29000D39, Rev. 8, June 1987, the R6502's 40-pin pinout on page 3 (http://archive.6502.org/datasheets/rockwell_r650x_r651x.pdf), read 13 October 2026: pin 1 VSS, pin 8 VCC (pin 21 is VSS too). The board's part is the 6502A"
+  },
+  {
+   "ref": "IC2",
+   "part": "6845",
+   "manualXY": [
+    160.0,
+    140.0
+   ],
+   "comment": "CRT controller",
+   "page": 66,
+   "excludedWhy": "no data sheet for the 6845 was read (not found at the address tried on 13 October 2026), so its pinout has no source"
+  },
+  {
+   "ref": "IC3",
+   "part": "6522",
+   "manualXY": [
+    90.0,
+    75.0
+   ],
+   "comment": "Internal VIA",
+   "page": 66,
+   "pins": 40,
+   "package": "DIP-40",
+   "gnd": 1,
+   "vcc": 20,
+   "pinoutSource": "Rockwell, \"R6522 Versatile Interface Adapter (VIA)\" data sheet, Document No. 29000D47, Rev. 9, June 1987, Figure 1 \"R6522 Pin Assignments\" (http://archive.6502.org/datasheets/rockwell_r6522_via.pdf), read 13 October 2026: pin 1 VSS, pin 20 VCC"
+  },
+  {
+   "ref": "IC4",
+   "part": "6850",
+   "manualXY": [
+    128.0,
+    141.0
+   ],
+   "comment": "ACIA",
+   "page": 66,
+   "excludedWhy": "no data sheet for the 6850 was read (not found at the address tried on 13 October 2026), so its pinout has no source"
+  },
+  {
+   "ref": "IC5",
+   "part": "SAA5050",
+   "manualXY": [
+    187.0,
+    102.0
+   ],
+   "comment": "Teletext ROM",
+   "page": 66,
+   "excludedWhy": "no data sheet for the SAA5050 was read, so its pinout has no source"
+  },
+  {
+   "ref": "IC6",
+   "part": "5C094",
+   "manualXY": [
+    214.0,
+    71.0
+   ],
+   "comment": "Video ULA",
+   "page": 66,
+   "excludedWhy": "the video ULA, a custom part with no maker's data sheet"
+  },
+  {
+   "ref": "IC7",
+   "part": "2C199",
+   "manualXY": [
+    128.0,
+    182.0
+   ],
+   "comment": "Serial ULA",
+   "page": 66,
+   "excludedWhy": "the serial ULA, a custom part with no maker's data sheet"
+  },
+  {
+   "ref": "IC8",
+   "part": "81LS95",
+   "manualXY": [
+    241.0,
+    62.0
+   ],
+   "comment": null,
+   "page": 66,
+   "excludedWhy": "no maker's data sheet for the 81LS95 could be fetched on 13 October 2026, so its pinout has no source"
+  },
+  {
+   "ref": "IC9",
+   "part": "81LS95",
+   "manualXY": [
+    241.0,
+    93.0
+   ],
+   "comment": null,
+   "page": 66,
+   "excludedWhy": "no maker's data sheet for the 81LS95 could be fetched on 13 October 2026, so its pinout has no source"
+  },
+  {
+   "ref": "IC10",
+   "part": "81LS95",
+   "manualXY": [
+    252.0,
+    63.0
+   ],
+   "comment": null,
+   "page": 66,
+   "excludedWhy": "no maker's data sheet for the 81LS95 could be fetched on 13 October 2026, so its pinout has no source"
+  },
+  {
+   "ref": "IC11",
+   "part": "81LS95",
+   "manualXY": [
+    252.0,
+    93.0
+   ],
+   "comment": null,
+   "page": 66,
+   "excludedWhy": "no maker's data sheet for the 81LS95 could be fetched on 13 October 2026, so its pinout has no source"
+  },
+  {
+   "ref": "IC12",
+   "part": "81LS95",
+   "manualXY": [
+    275.0,
+    62.0
+   ],
+   "comment": null,
+   "page": 66,
+   "excludedWhy": "no maker's data sheet for the 81LS95 could be fetched on 13 October 2026, so its pinout has no source"
+  },
+  {
+   "ref": "IC13",
+   "part": "81LS95",
+   "manualXY": [
+    264.0,
+    62.0
+   ],
+   "comment": null,
+   "page": 66,
+   "excludedWhy": "no maker's data sheet for the 81LS95 could be fetched on 13 October 2026, so its pinout has no source"
+  },
+  {
+   "ref": "IC14",
+   "part": "74LS245",
+   "manualXY": [
+    184.0,
+    71.0
+   ],
+   "comment": null,
+   "page": 66,
+   "pins": 20,
+   "package": "DIP-20",
+   "gnd": 10,
+   "vcc": 20,
+   "pinoutSource": "Texas Instruments, SN74LS245 data sheet, the plastic DIP (N package) pinout, top view (https://www.ti.com/lit/ds/symlink/sn74ls245.pdf), read 13 October 2026: pin 10 GND, pin 20 VCC. The LS, S and plain TTL families share each pinout"
+  },
+  {
+   "ref": "IC15",
+   "part": "74LS273",
+   "manualXY": [
+    196.0,
+    71.0
+   ],
+   "comment": null,
+   "page": 66,
+   "pins": 20,
+   "package": "DIP-20",
+   "gnd": 10,
+   "vcc": 20,
+   "pinoutSource": "Texas Instruments, SN74LS273 data sheet, the plastic DIP (N package) pinout, top view (https://www.ti.com/lit/ds/symlink/sn74ls273.pdf), read 13 October 2026: pin 10 GND, pin 20 VCC. The LS, S and plain TTL families share each pinout"
+  },
+  {
+   "ref": "IC16",
+   "part": "LM555",
+   "manualXY": [
+    7.0,
+    210.0
+   ],
+   "comment": null,
+   "page": 66,
+   "excludedWhy": "not a logic IC (a timer), and not on the footprints task 3 found"
+  },
+  {
+   "ref": "IC17",
+   "part": "LM324",
+   "manualXY": [
+    6.0,
+    28.0
+   ],
+   "comment": null,
+   "page": 66,
+   "excludedWhy": "not a logic IC (an analogue op amp); its supply pins need not be the logic's +5V and 0V"
+  },
+  {
+   "ref": "IC18",
+   "part": "76489",
+   "manualXY": [
+    22.0,
+    44.0
+   ],
+   "comment": "Sound generator",
+   "page": 66,
+   "excludedWhy": "no data sheet for the SN76489 was read (it was not at the address tried on 13 October 2026), so its pinout has no source"
+  },
+  {
+   "ref": "IC19",
+   "part": "LM386",
+   "manualXY": [
+    52.0,
+    23.0
+   ],
+   "comment": null,
+   "page": 66,
+   "excludedWhy": "not a logic IC (an audio amplifier), and not on the footprints task 3 found"
+  },
+  {
+   "ref": "IC20",
+   "part": "74LS139",
+   "manualXY": [
+    120.0,
+    23.0
+   ],
+   "comment": null,
+   "page": 66,
+   "pins": 16,
+   "package": "DIP-16",
+   "gnd": 8,
+   "vcc": 16,
+   "pinoutSource": "Texas Instruments, SN74LS139A data sheet, the plastic DIP (N package) pinout, top view (https://www.ti.com/lit/ds/symlink/sn74ls139a.pdf), read 13 October 2026: pin 8 GND, pin 16 VCC. The LS, S and plain TTL families share each pinout"
+  },
+  {
+   "ref": "IC21",
+   "part": "74LS00",
+   "manualXY": [
+    120.0,
+    55.0
+   ],
+   "comment": null,
+   "page": 66,
+   "pins": 14,
+   "package": "DIP-14",
+   "gnd": 7,
+   "vcc": 14,
+   "pinoutSource": "Texas Instruments, SN74LS00 data sheet, the plastic DIP (N package) pinout, top view (https://www.ti.com/lit/ds/symlink/sn74ls00.pdf), read 13 October 2026: pin 7 GND, pin 14 VCC. The LS, S and plain TTL families share each pinout"
+  },
+  {
+   "ref": "IC22",
+   "part": "74LS30",
+   "manualXY": [
+    137.0,
+    55.0
+   ],
+   "comment": null,
+   "page": 66,
+   "pins": 14,
+   "package": "DIP-14",
+   "gnd": 7,
+   "vcc": 14,
+   "pinoutSource": "Texas Instruments, SN74LS30 data sheet, the plastic DIP (N package) pinout, top view (https://www.ti.com/lit/ds/symlink/sn74ls30.pdf), read 13 October 2026: pin 7 GND, pin 14 VCC. The LS, S and plain TTL families share each pinout"
+  },
+  {
+   "ref": "IC23",
+   "part": "74LS30",
+   "manualXY": [
+    120.0,
+    80.0
+   ],
+   "comment": null,
+   "page": 66,
+   "pins": 14,
+   "package": "DIP-14",
+   "gnd": 7,
+   "vcc": 14,
+   "pinoutSource": "Texas Instruments, SN74LS30 data sheet, the plastic DIP (N package) pinout, top view (https://www.ti.com/lit/ds/symlink/sn74ls30.pdf), read 13 October 2026: pin 7 GND, pin 14 VCC. The LS, S and plain TTL families share each pinout"
+  },
+  {
+   "ref": "IC24",
+   "part": "74LS138",
+   "manualXY": [
+    135.0,
+    78.0
+   ],
+   "comment": null,
+   "page": 66,
+   "pins": 16,
+   "package": "DIP-16",
+   "gnd": 8,
+   "vcc": 16,
+   "pinoutSource": "Texas Instruments, SN74LS138 data sheet, the plastic DIP (N package) pinout, top view (https://www.ti.com/lit/ds/symlink/sn74ls138.pdf), read 13 October 2026: pin 8 GND, pin 16 VCC. The LS, S and plain TTL families share each pinout"
+  },
+  {
+   "ref": "IC25",
+   "part": "74LS20",
+   "manualXY": [
+    120.0,
+    108.0
+   ],
+   "comment": null,
+   "page": 66,
+   "pins": 14,
+   "package": "DIP-14",
+   "gnd": 7,
+   "vcc": 14,
+   "pinoutSource": "Texas Instruments, SN74LS20 data sheet, the plastic DIP (N package) pinout, top view (https://www.ti.com/lit/ds/symlink/sn74ls20.pdf), read 13 October 2026: pin 7 GND, pin 14 VCC. The LS, S and plain TTL families share each pinout"
+  },
+  {
+   "ref": "IC26",
+   "part": "74LS139",
+   "manualXY": [
+    137.0,
+    105.0
+   ],
+   "comment": null,
+   "page": 66,
+   "pins": 16,
+   "package": "DIP-16",
+   "gnd": 8,
+   "vcc": 16,
+   "pinoutSource": "Texas Instruments, SN74LS139A data sheet, the plastic DIP (N package) pinout, top view (https://www.ti.com/lit/ds/symlink/sn74ls139a.pdf), read 13 October 2026: pin 8 GND, pin 16 VCC. The LS, S and plain TTL families share each pinout"
+  },
+  {
+   "ref": "IC27",
+   "part": "7438",
+   "manualXY": [
+    3.0,
+    124.0
+   ],
+   "comment": null,
+   "page": 66,
+   "pins": 14,
+   "package": "DIP-14",
+   "gnd": 7,
+   "vcc": 14,
+   "pinoutSource": "Texas Instruments, SN7438 (in the SN74LS38 data sheet) data sheet, the plastic DIP (N package) pinout, top view (https://www.ti.com/lit/ds/symlink/sn74ls38.pdf), read 13 October 2026: pin 7 GND, pin 14 VCC. The LS, S and plain TTL families share each pinout"
+  },
+  {
+   "ref": "IC28",
+   "part": "74LS51",
+   "manualXY": [
+    50.0,
+    143.0
+   ],
+   "comment": null,
+   "page": 66,
+   "pins": 14,
+   "package": "DIP-14",
+   "gnd": 7,
+   "vcc": 14,
+   "pinoutSource": "Texas Instruments, SN74LS51 data sheet, the plastic DIP (N package) pinout, top view (https://www.ti.com/lit/ds/symlink/sn74ls51.pdf), read 13 October 2026: pin 7 GND, pin 14 VCC. The LS, S and plain TTL families share each pinout"
+  },
+  {
+   "ref": "IC29",
+   "part": "74LS32",
+   "manualXY": [
+    65.0,
+    143.0
+   ],
+   "comment": null,
+   "page": 66,
+   "pins": 14,
+   "package": "DIP-14",
+   "gnd": 7,
+   "vcc": 14,
+   "pinoutSource": "Texas Instruments, SN74LS32 data sheet, the plastic DIP (N package) pinout, top view (https://www.ti.com/lit/ds/symlink/sn74ls32.pdf), read 13 October 2026: pin 7 GND, pin 14 VCC. The LS, S and plain TTL families share each pinout"
+  },
+  {
+   "ref": "IC30",
+   "part": "74LS74",
+   "manualXY": [
+    78.0,
+    143.0
+   ],
+   "comment": null,
+   "page": 66,
+   "pins": 14,
+   "package": "DIP-14",
+   "gnd": 7,
+   "vcc": 14,
+   "pinoutSource": "Texas Instruments, SN74LS74A data sheet, the plastic DIP (N package) pinout, top view (https://www.ti.com/lit/ds/symlink/sn74ls74a.pdf), read 13 October 2026: pin 7 GND, pin 14 VCC. The LS, S and plain TTL families share each pinout"
+  },
+  {
+   "ref": "IC31",
+   "part": "74LS34",
+   "manualXY": [
+    90.0,
+    143.0
+   ],
+   "comment": null,
+   "page": 66,
+   "excludedWhy": "table 8.1 prints 74LS34, a part for which no maker's data sheet was found (Texas Instruments has none at its usual address), so its pinout has no source; the print may mean another part"
+  },
+  {
+   "ref": "IC32",
+   "part": "74LS259",
+   "manualXY": [
+    105.0,
+    143.0
+   ],
+   "comment": null,
+   "page": 66,
+   "pins": 16,
+   "package": "DIP-16",
+   "gnd": 8,
+   "vcc": 16,
+   "pinoutSource": "Texas Instruments, SN74LS259B data sheet, the plastic DIP (N package) pinout, top view (https://www.ti.com/lit/ds/symlink/sn74ls259b.pdf), read 13 October 2026: pin 8 GND, pin 16 VCC. The LS, S and plain TTL families share each pinout"
+  },
+  {
+   "ref": "IC33",
+   "part": "74LS04",
+   "manualXY": [
+    58.0,
+    164.0
+   ],
+   "comment": null,
+   "page": 66,
+   "pins": 14,
+   "package": "DIP-14",
+   "gnd": 7,
+   "vcc": 14,
+   "pinoutSource": "Texas Instruments, SN74LS04 data sheet, the plastic DIP (N package) pinout, top view (https://www.ti.com/lit/ds/symlink/sn74ls04.pdf), read 13 October 2026: pin 7 GND, pin 14 VCC. The LS, S and plain TTL families share each pinout"
+  },
+  {
+   "ref": "IC34",
+   "part": "74LS74",
+   "manualXY": [
+    71.0,
+    164.0
+   ],
+   "comment": null,
+   "page": 66,
+   "pins": 14,
+   "package": "DIP-14",
+   "gnd": 7,
+   "vcc": 14,
+   "pinoutSource": "Texas Instruments, SN74LS74A data sheet, the plastic DIP (N package) pinout, top view (https://www.ti.com/lit/ds/symlink/sn74ls74a.pdf), read 13 October 2026: pin 7 GND, pin 14 VCC. The LS, S and plain TTL families share each pinout"
+  },
+  {
+   "ref": "IC35",
+   "part": "LM324",
+   "manualXY": [
+    151.0,
+    205.0
+   ],
+   "comment": null,
+   "page": 66,
+   "excludedWhy": "not a logic IC (an analogue op amp); its supply pins need not be the logic's +5V and 0V"
+  },
+  {
+   "ref": "IC36",
+   "part": "74LS10",
+   "manualXY": [
+    215.0,
+    122.0
+   ],
+   "comment": null,
+   "page": 66,
+   "pins": 14,
+   "package": "DIP-14",
+   "gnd": 7,
+   "vcc": 14,
+   "pinoutSource": "Texas Instruments, SN74LS10 data sheet, the plastic DIP (N package) pinout, top view (https://www.ti.com/lit/ds/symlink/sn74ls10.pdf), read 13 October 2026: pin 7 GND, pin 14 VCC. The LS, S and plain TTL families share each pinout"
+  },
+  {
+   "ref": "IC37",
+   "part": "74LS04",
+   "manualXY": [
+    228.0,
+    122.0
+   ],
+   "comment": null,
+   "page": 66,
+   "pins": 14,
+   "package": "DIP-14",
+   "gnd": 7,
+   "vcc": 14,
+   "pinoutSource": "Texas Instruments, SN74LS04 data sheet, the plastic DIP (N package) pinout, top view (https://www.ti.com/lit/ds/symlink/sn74ls04.pdf), read 13 October 2026: pin 7 GND, pin 14 VCC. The LS, S and plain TTL families share each pinout"
+  },
+  {
+   "ref": "IC38",
+   "part": "74LS86",
+   "manualXY": [
+    241.0,
+    122.0
+   ],
+   "comment": null,
+   "page": 66,
+   "pins": 14,
+   "package": "DIP-14",
+   "gnd": 7,
+   "vcc": 14,
+   "pinoutSource": "Texas Instruments, SN74LS86A data sheet, the plastic DIP (N package) pinout, top view (https://www.ti.com/lit/ds/symlink/sn74ls86a.pdf), read 13 October 2026: pin 7 GND, pin 14 VCC. The LS, S and plain TTL families share each pinout"
+  },
+  {
+   "ref": "IC39",
+   "part": "74LS283",
+   "manualXY": [
+    197.0,
+    145.0
+   ],
+   "comment": null,
+   "page": 66,
+   "pins": 16,
+   "package": "DIP-16",
+   "gnd": 8,
+   "vcc": 16,
+   "pinoutSource": "Texas Instruments, SN74LS283 data sheet, the plastic DIP (N package) pinout, top view (https://www.ti.com/lit/ds/symlink/sn74ls283.pdf), read 13 October 2026: pin 8 GND, pin 16 VCC. The LS, S and plain TTL families share each pinout"
+  },
+  {
+   "ref": "IC40",
+   "part": "74S00",
+   "manualXY": [
+    206.0,
+    149.0
+   ],
+   "comment": "(Previously 74LS00)",
+   "page": 66,
+   "pins": 14,
+   "package": "DIP-14",
+   "gnd": 7,
+   "vcc": 14,
+   "pinoutSource": "Texas Instruments, SN74S00 (in the SN74LS00 data sheet) data sheet, the plastic DIP (N package) pinout, top view (https://www.ti.com/lit/ds/symlink/sn74ls00.pdf), read 13 October 2026: pin 7 GND, pin 14 VCC. The LS, S and plain TTL families share each pinout"
+  },
+  {
+   "ref": "IC41",
+   "part": "74LS02",
+   "manualXY": [
+    228.0,
+    149.0
+   ],
+   "comment": null,
+   "page": 66,
+   "pins": 14,
+   "package": "DIP-14",
+   "gnd": 7,
+   "vcc": 14,
+   "pinoutSource": "Texas Instruments, SN74LS02 data sheet, the plastic DIP (N package) pinout, top view (https://www.ti.com/lit/ds/symlink/sn74ls02.pdf), read 13 October 2026: pin 7 GND, pin 14 VCC. The LS, S and plain TTL families share each pinout"
+  },
+  {
+   "ref": "IC42",
+   "part": "74LS163",
+   "manualXY": [
+    241.0,
+    158.0
+   ],
+   "comment": null,
+   "page": 66,
+   "pins": 16,
+   "package": "DIP-16",
+   "gnd": 8,
+   "vcc": 16,
+   "pinoutSource": "Texas Instruments, SN74LS163A data sheet, the plastic DIP (N package) pinout, top view (https://www.ti.com/lit/ds/symlink/sn74ls163a.pdf), read 13 October 2026: pin 8 GND, pin 16 VCC. The LS, S and plain TTL families share each pinout"
+  },
+  {
+   "ref": "IC43",
+   "part": "74S04",
+   "manualXY": [
+    187.0,
+    174.0
+   ],
+   "comment": null,
+   "page": 66,
+   "pins": 14,
+   "package": "DIP-14",
+   "gnd": 7,
+   "vcc": 14,
+   "pinoutSource": "Texas Instruments, SN74S04 (in the SN74LS04 data sheet) data sheet, the plastic DIP (N package) pinout, top view (https://www.ti.com/lit/ds/symlink/sn74ls04.pdf), read 13 October 2026: pin 7 GND, pin 14 VCC. The LS, S and plain TTL families share each pinout"
+  },
+  {
+   "ref": "IC44",
+   "part": "74LS74",
+   "manualXY": [
+    206.0,
+    174.0
+   ],
+   "comment": null,
+   "page": 67,
+   "pins": 14,
+   "package": "DIP-14",
+   "gnd": 7,
+   "vcc": 14,
+   "pinoutSource": "Texas Instruments, SN74LS74A data sheet, the plastic DIP (N package) pinout, top view (https://www.ti.com/lit/ds/symlink/sn74ls74a.pdf), read 13 October 2026: pin 7 GND, pin 14 VCC. The LS, S and plain TTL families share each pinout"
+  },
+  {
+   "ref": "IC45",
+   "part": "74S139",
+   "manualXY": [
+    228.0,
+    172.0
+   ],
+   "comment": null,
+   "page": 67,
+   "pins": 16,
+   "package": "DIP-16",
+   "gnd": 8,
+   "vcc": 16,
+   "pinoutSource": "Texas Instruments, SN74S139A (in the SN74LS139A data sheet) data sheet, the plastic DIP (N package) pinout, top view (https://www.ti.com/lit/ds/symlink/sn74ls139a.pdf), read 13 October 2026: pin 8 GND, pin 16 VCC. The LS, S and plain TTL families share each pinout"
+  },
+  {
+   "ref": "IC46",
+   "part": "74S74",
+   "manualXY": [
+    252.0,
+    183.0
+   ],
+   "comment": null,
+   "page": 67,
+   "pins": 14,
+   "package": "DIP-14",
+   "gnd": 7,
+   "vcc": 14,
+   "pinoutSource": "Texas Instruments, SN74S74 (in the SN74LS74A data sheet) data sheet, the plastic DIP (N package) pinout, top view (https://www.ti.com/lit/ds/symlink/sn74ls74a.pdf), read 13 October 2026: pin 7 GND, pin 14 VCC. The LS, S and plain TTL families share each pinout"
+  },
+  {
+   "ref": "IC47",
+   "part": "74LS86",
+   "manualXY": [
+    264.0,
+    183.0
+   ],
+   "comment": null,
+   "page": 67,
+   "pins": 14,
+   "package": "DIP-14",
+   "gnd": 7,
+   "vcc": 14,
+   "pinoutSource": "Texas Instruments, SN74LS86A data sheet, the plastic DIP (N package) pinout, top view (https://www.ti.com/lit/ds/symlink/sn74ls86a.pdf), read 13 October 2026: pin 7 GND, pin 14 VCC. The LS, S and plain TTL families share each pinout"
+  },
+  {
+   "ref": "IC48",
+   "part": "74LS86",
+   "manualXY": [
+    275.0,
+    183.0
+   ],
+   "comment": null,
+   "page": 67,
+   "pins": 14,
+   "package": "DIP-14",
+   "gnd": 7,
+   "vcc": 14,
+   "pinoutSource": "Texas Instruments, SN74LS86A data sheet, the plastic DIP (N package) pinout, top view (https://www.ti.com/lit/ds/symlink/sn74ls86a.pdf), read 13 October 2026: pin 7 GND, pin 14 VCC. The LS, S and plain TTL families share each pinout"
+  },
+  {
+   "ref": "IC49",
+   "part": "74LS00",
+   "manualXY": [
+    286.0,
+    183.0
+   ],
+   "comment": null,
+   "page": 67,
+   "pins": 14,
+   "package": "DIP-14",
+   "gnd": 7,
+   "vcc": 14,
+   "pinoutSource": "Texas Instruments, SN74LS00 data sheet, the plastic DIP (N package) pinout, top view (https://www.ti.com/lit/ds/symlink/sn74ls00.pdf), read 13 October 2026: pin 7 GND, pin 14 VCC. The LS, S and plain TTL families share each pinout"
+  },
+  {
+   "ref": "IC50",
+   "part": "74LS00",
+   "manualXY": [
+    298.0,
+    183.0
+   ],
+   "comment": null,
+   "page": 67,
+   "pins": 14,
+   "package": "DIP-14",
+   "gnd": 7,
+   "vcc": 14,
+   "pinoutSource": "Texas Instruments, SN74LS00 data sheet, the plastic DIP (N package) pinout, top view (https://www.ti.com/lit/ds/symlink/sn74ls00.pdf), read 13 October 2026: pin 7 GND, pin 14 VCC. The LS, S and plain TTL families share each pinout"
+  },
+  {
+   "ref": "IC51",
+   "part": "(27128)",
+   "manualXY": [
+    214.0,
+    24.0
+   ],
+   "comment": "Operating system ROM",
+   "page": 67,
+   "excludedWhy": "no ROM data sheet was read, and the sockets are wired by links for more than one ROM type"
+  },
+  {
+   "ref": "IC52",
+   "part": "(27128)",
+   "manualXY": [
+    233.0,
+    24.0
+   ],
+   "comment": "BASIC ROM",
+   "page": 67,
+   "excludedWhy": "no ROM data sheet was read, and the sockets are wired by links for more than one ROM type"
+  },
+  {
+   "ref": "IC53",
+   "part": "4816",
+   "manualXY": [
+    287.0,
+    69.0
+   ],
+   "comment": null,
+   "page": 67,
+   "excludedWhy": "no data sheet for the 4816 dynamic RAM was read, so its pinout has no source"
+  },
+  {
+   "ref": "IC54",
+   "part": "4816",
+   "manualXY": [
+    287.0,
+    93.0
+   ],
+   "comment": null,
+   "page": 67,
+   "excludedWhy": "no data sheet for the 4816 dynamic RAM was read, so its pinout has no source"
+  },
+  {
+   "ref": "IC55",
+   "part": "4816",
+   "manualXY": [
+    275.0,
+    93.0
+   ],
+   "comment": null,
+   "page": 67,
+   "excludedWhy": "no data sheet for the 4816 dynamic RAM was read, so its pinout has no source"
+  },
+  {
+   "ref": "IC56",
+   "part": "4816",
+   "manualXY": [
+    298.0,
+    146.0
+   ],
+   "comment": null,
+   "page": 67,
+   "excludedWhy": "no data sheet for the 4816 dynamic RAM was read, so its pinout has no source"
+  },
+  {
+   "ref": "IC57",
+   "part": "4816",
+   "manualXY": [
+    287.0,
+    146.0
+   ],
+   "comment": null,
+   "page": 67,
+   "excludedWhy": "no data sheet for the 4816 dynamic RAM was read, so its pinout has no source"
+  },
+  {
+   "ref": "IC58",
+   "part": "4816",
+   "manualXY": [
+    275.0,
+    146.0
+   ],
+   "comment": null,
+   "page": 67,
+   "excludedWhy": "no data sheet for the 4816 dynamic RAM was read, so its pinout has no source"
+  },
+  {
+   "ref": "IC59",
+   "part": "4816",
+   "manualXY": [
+    264.0,
+    146.0
+   ],
+   "comment": null,
+   "page": 67,
+   "excludedWhy": "no data sheet for the 4816 dynamic RAM was read, so its pinout has no source"
+  },
+  {
+   "ref": "IC60",
+   "part": "4816",
+   "manualXY": [
+    252.0,
+    146.0
+   ],
+   "comment": null,
+   "page": 67,
+   "excludedWhy": "no data sheet for the 4816 dynamic RAM was read, so its pinout has no source"
+  },
+  {
+   "ref": "IC61",
+   "part": "4816",
+   "manualXY": [
+    298.0,
+    68.0
+   ],
+   "comment": null,
+   "page": 67,
+   "excludedWhy": "no data sheet for the 4816 dynamic RAM was read, so its pinout has no source"
+  },
+  {
+   "ref": "IC62",
+   "part": "4816",
+   "manualXY": [
+    298.0,
+    93.0
+   ],
+   "comment": null,
+   "page": 67,
+   "excludedWhy": "no data sheet for the 4816 dynamic RAM was read, so its pinout has no source"
+  },
+  {
+   "ref": "IC63",
+   "part": "4816",
+   "manualXY": [
+    264.0,
+    93.0
+   ],
+   "comment": null,
+   "page": 67,
+   "excludedWhy": "no data sheet for the 4816 dynamic RAM was read, so its pinout has no source"
+  },
+  {
+   "ref": "IC64",
+   "part": "4816",
+   "manualXY": [
+    298.0,
+    122.0
+   ],
+   "comment": null,
+   "page": 67,
+   "excludedWhy": "no data sheet for the 4816 dynamic RAM was read, so its pinout has no source"
+  },
+  {
+   "ref": "IC65",
+   "part": "4816",
+   "manualXY": [
+    287.0,
+    122.0
+   ],
+   "comment": null,
+   "page": 67,
+   "excludedWhy": "no data sheet for the 4816 dynamic RAM was read, so its pinout has no source"
+  },
+  {
+   "ref": "IC66",
+   "part": "4816",
+   "manualXY": [
+    275.0,
+    122.0
+   ],
+   "comment": null,
+   "page": 67,
+   "excludedWhy": "no data sheet for the 4816 dynamic RAM was read, so its pinout has no source"
+  },
+  {
+   "ref": "IC67",
+   "part": "4816",
+   "manualXY": [
+    264.0,
+    122.0
+   ],
+   "comment": null,
+   "page": 67,
+   "excludedWhy": "no data sheet for the 4816 dynamic RAM was read, so its pinout has no source"
+  },
+  {
+   "ref": "IC68",
+   "part": "4816",
+   "manualXY": [
+    252.0,
+    122.0
+   ],
+   "comment": null,
+   "page": 67,
+   "excludedWhy": "no data sheet for the 4816 dynamic RAM was read, so its pinout has no source"
+  },
+  {
+   "ref": "IC69",
+   "part": "6522",
+   "manualXY": [
+    160.0,
+    29.0
+   ],
+   "comment": "External VIA",
+   "page": 67,
+   "pins": 40,
+   "package": "DIP-40",
+   "gnd": 1,
+   "vcc": 20,
+   "pinoutSource": "Rockwell, \"R6522 Versatile Interface Adapter (VIA)\" data sheet, Document No. 29000D47, Rev. 9, June 1987, Figure 1 \"R6522 Pin Assignments\" (http://archive.6502.org/datasheets/rockwell_r6522_via.pdf), read 13 October 2026: pin 1 VSS, pin 20 VCC"
+  },
+  {
+   "ref": "IC70",
+   "part": "74LS244",
+   "manualXY": [
+    137.0,
+    24.0
+   ],
+   "comment": null,
+   "page": 67,
+   "pins": 20,
+   "package": "DIP-20",
+   "gnd": 10,
+   "vcc": 20,
+   "pinoutSource": "Texas Instruments, SN74LS244 data sheet, the plastic DIP (N package) pinout, top view (https://www.ti.com/lit/ds/symlink/sn74ls244.pdf), read 13 October 2026: pin 10 GND, pin 20 VCC. The LS, S and plain TTL families share each pinout"
+  },
+  {
+   "ref": "IC71",
+   "part": "74LS244",
+   "manualXY": [
+    184.0,
+    29.0
+   ],
+   "comment": null,
+   "page": 67,
+   "pins": 20,
+   "package": "DIP-20",
+   "gnd": 10,
+   "vcc": 20,
+   "pinoutSource": "Texas Instruments, SN74LS244 data sheet, the plastic DIP (N package) pinout, top view (https://www.ti.com/lit/ds/symlink/sn74ls244.pdf), read 13 October 2026: pin 10 GND, pin 20 VCC. The LS, S and plain TTL families share each pinout"
+  },
+  {
+   "ref": "IC72",
+   "part": "74LS245",
+   "manualXY": [
+    199.0,
+    29.0
+   ],
+   "comment": null,
+   "page": 67,
+   "pins": 20,
+   "package": "DIP-20",
+   "gnd": 10,
+   "vcc": 20,
+   "pinoutSource": "Texas Instruments, SN74LS245 data sheet, the plastic DIP (N package) pinout, top view (https://www.ti.com/lit/ds/symlink/sn74ls245.pdf), read 13 October 2026: pin 10 GND, pin 20 VCC. The LS, S and plain TTL families share each pinout"
+  },
+  {
+   "ref": "IC73",
+   "part": "uPD7002",
+   "manualXY": [
+    100.0,
+    173.0
+   ],
+   "comment": "ADC convertor",
+   "page": 67,
+   "excludedWhy": "no data sheet for the uPD7002 was read, so its pinout has no source"
+  },
+  {
+   "ref": "IC74",
+   "part": "88LS120",
+   "manualXY": [
+    183.0,
+    201.0
+   ],
+   "comment": null,
+   "page": 67,
+   "excludedWhy": "an RS423 line receiver, whose supply pins need not be the logic's +5V and 0V; no data sheet was read"
+  },
+  {
+   "ref": "IC75",
+   "part": "3691",
+   "manualXY": [
+    207.0,
+    199.0
+   ],
+   "comment": null,
+   "page": 67,
+   "excludedWhy": "an RS423 line driver, powered from +5V and -5V; no data sheet was read"
+  },
+  {
+   "ref": "IC76",
+   "part": "74LS163",
+   "manualXY": [
+    70.0,
+    44.0
+   ],
+   "comment": null,
+   "page": 67,
+   "pins": 16,
+   "package": "DIP-16",
+   "gnd": 8,
+   "vcc": 16,
+   "pinoutSource": "Texas Instruments, SN74LS163A data sheet, the plastic DIP (N package) pinout, top view (https://www.ti.com/lit/ds/symlink/sn74ls163a.pdf), read 13 October 2026: pin 8 GND, pin 16 VCC. The LS, S and plain TTL families share each pinout"
+  },
+  {
+   "ref": "IC77",
+   "part": "74S00",
+   "manualXY": [
+    38.0,
+    143.0
+   ],
+   "comment": null,
+   "page": 67,
+   "pins": 14,
+   "package": "DIP-14",
+   "gnd": 7,
+   "vcc": 14,
+   "pinoutSource": "Texas Instruments, SN74S00 (in the SN74LS00 data sheet) data sheet, the plastic DIP (N package) pinout, top view (https://www.ti.com/lit/ds/symlink/sn74ls00.pdf), read 13 October 2026: pin 7 GND, pin 14 VCC. The LS, S and plain TTL families share each pinout"
+  },
+  {
+   "ref": "IC78",
+   "part": "8271",
+   "manualXY": [
+    60.0,
+    75.0
+   ],
+   "comment": "Disc controller",
+   "page": 67,
+   "excludedWhy": "no data sheet for the 8271 was read, so its pinout has no source"
+  },
+  {
+   "ref": "IC79",
+   "part": "7438",
+   "manualXY": [
+    42.0,
+    46.0
+   ],
+   "comment": null,
+   "page": 67,
+   "pins": 14,
+   "package": "DIP-14",
+   "gnd": 7,
+   "vcc": 14,
+   "pinoutSource": "Texas Instruments, SN7438 (in the SN74LS38 data sheet) data sheet, the plastic DIP (N package) pinout, top view (https://www.ti.com/lit/ds/symlink/sn74ls38.pdf), read 13 October 2026: pin 7 GND, pin 14 VCC. The LS, S and plain TTL families share each pinout"
+  },
+  {
+   "ref": "IC80",
+   "part": "7438",
+   "manualXY": [
+    57.0,
+    46.0
+   ],
+   "comment": null,
+   "page": 67,
+   "pins": 14,
+   "package": "DIP-14",
+   "gnd": 7,
+   "vcc": 14,
+   "pinoutSource": "Texas Instruments, SN7438 (in the SN74LS38 data sheet) data sheet, the plastic DIP (N package) pinout, top view (https://www.ti.com/lit/ds/symlink/sn74ls38.pdf), read 13 October 2026: pin 7 GND, pin 14 VCC. The LS, S and plain TTL families share each pinout"
+  },
+  {
+   "ref": "IC81",
+   "part": "74LS393",
+   "manualXY": [
+    82.0,
+    46.0
+   ],
+   "comment": null,
+   "page": 67,
+   "pins": 14,
+   "package": "DIP-14",
+   "gnd": 7,
+   "vcc": 14,
+   "pinoutSource": "Texas Instruments, SN74LS393 data sheet, the plastic DIP (N package) pinout, top view (https://www.ti.com/lit/ds/symlink/sn74ls393.pdf), read 13 October 2026: pin 7 GND, pin 14 VCC. The LS, S and plain TTL families share each pinout"
+  },
+  {
+   "ref": "IC82",
+   "part": "74LS10",
+   "manualXY": [
+    97.0,
+    46.0
+   ],
+   "comment": null,
+   "page": 67,
+   "pins": 14,
+   "package": "DIP-14",
+   "gnd": 7,
+   "vcc": 14,
+   "pinoutSource": "Texas Instruments, SN74LS10 data sheet, the plastic DIP (N package) pinout, top view (https://www.ti.com/lit/ds/symlink/sn74ls10.pdf), read 13 October 2026: pin 7 GND, pin 14 VCC. The LS, S and plain TTL families share each pinout"
+  },
+  {
+   "ref": "IC83",
+   "part": "4013",
+   "manualXY": [
+    67.0,
+    24.0
+   ],
+   "comment": null,
+   "page": 67,
+   "pins": 14,
+   "package": "DIP-14",
+   "gnd": 7,
+   "vcc": 14,
+   "pinoutSource": "Texas Instruments, CD4013B data sheet, the plastic DIP (N package) pinout, top view (https://www.ti.com/lit/ds/symlink/cd4013b.pdf), read 13 October 2026: pin 7 VSS, pin 14 VDD. A CMOS part; on this board its VDD is the logic's +5V [inferring: the BBC Micro's logic has one +5V supply]"
+  },
+  {
+   "ref": "IC84",
+   "part": "4013",
+   "manualXY": [
+    82.0,
+    24.0
+   ],
+   "comment": null,
+   "page": 67,
+   "pins": 14,
+   "package": "DIP-14",
+   "gnd": 7,
+   "vcc": 14,
+   "pinoutSource": "Texas Instruments, CD4013B data sheet, the plastic DIP (N package) pinout, top view (https://www.ti.com/lit/ds/symlink/cd4013b.pdf), read 13 October 2026: pin 7 VSS, pin 14 VDD. A CMOS part; on this board its VDD is the logic's +5V [inferring: the BBC Micro's logic has one +5V supply]"
+  },
+  {
+   "ref": "IC85",
+   "part": "4020",
+   "manualXY": [
+    97.0,
+    21.0
+   ],
+   "comment": null,
+   "page": 67,
+   "pins": 16,
+   "package": "DIP-16",
+   "gnd": 8,
+   "vcc": 16,
+   "pinoutSource": "Texas Instruments, CD4020B data sheet, the plastic DIP (N package) pinout, top view (https://www.ti.com/lit/ds/symlink/cd4020b.pdf), read 13 October 2026: pin 8 VSS, pin 16 VDD. A CMOS part; on this board its VDD is the logic's +5V [inferring: the BBC Micro's logic has one +5V supply]"
+  },
+  {
+   "ref": "IC86",
+   "part": "74LS393",
+   "manualXY": [
+    108.0,
+    23.0
+   ],
+   "comment": null,
+   "page": 67,
+   "pins": 14,
+   "package": "DIP-14",
+   "gnd": 7,
+   "vcc": 14,
+   "pinoutSource": "Texas Instruments, SN74LS393 data sheet, the plastic DIP (N package) pinout, top view (https://www.ti.com/lit/ds/symlink/sn74ls393.pdf), read 13 October 2026: pin 7 GND, pin 14 VCC. The LS, S and plain TTL families share each pinout"
+  },
+  {
+   "ref": "IC87",
+   "part": "74LS123",
+   "manualXY": [
+    43.0,
+    164.0
+   ],
+   "comment": null,
+   "page": 67,
+   "pins": 16,
+   "package": "DIP-16",
+   "gnd": 8,
+   "vcc": 16,
+   "pinoutSource": "Texas Instruments, SN74LS123 data sheet, the plastic DIP (N package) pinout, top view (https://www.ti.com/lit/ds/symlink/sn74ls123.pdf), read 13 October 2026: pin 8 GND, pin 16 VCC. The LS, S and plain TTL families share each pinout"
+  },
+  {
+   "ref": "IC88",
+   "part": "2764",
+   "manualXY": [
+    252.0,
+    24.0
+   ],
+   "comment": null,
+   "page": 67,
+   "excludedWhy": "no ROM data sheet was read, and the socket is wired by links for more than one ROM type"
+  },
+  {
+   "ref": "IC89",
+   "part": "68B54",
+   "manualXY": [
+    15.0,
+    125.0
+   ],
+   "comment": "ADLC - Econet",
+   "page": 67,
+   "excludedWhy": "no data sheet for the 68B54 was read, so its pinout has no source"
+  },
+  {
+   "ref": "IC90",
+   "part": "40178",
+   "manualXY": [
+    16.0,
+    162.0
+   ],
+   "comment": "(Not fitted)",
+   "page": 67,
+   "excludedWhy": "table 8.1 says not fitted, and task 3 found no footprint for it"
+  },
+  {
+   "ref": "IC91",
+   "part": "74LS132",
+   "manualXY": [
+    27.0,
+    166.0
+   ],
+   "comment": null,
+   "page": 67,
+   "pins": 14,
+   "package": "DIP-14",
+   "gnd": 7,
+   "vcc": 14,
+   "pinoutSource": "Texas Instruments, SN74LS132 data sheet, the plastic DIP (N package) pinout, top view (https://www.ti.com/lit/ds/symlink/sn74ls132.pdf), read 13 October 2026: pin 7 GND, pin 14 VCC. The LS, S and plain TTL families share each pinout"
+  },
+  {
+   "ref": "IC92",
+   "part": "74LS74",
+   "manualXY": [
+    16.0,
+    188.0
+   ],
+   "comment": "(Not fitted)",
+   "page": 67,
+   "excludedWhy": "task 3 found no footprint for it (table 8.1: not fitted, and on I1 no DIP was grouped there)"
+  },
+  {
+   "ref": "IC93",
+   "part": "75159",
+   "manualXY": [
+    13.0,
+    166.0
+   ],
+   "comment": null,
+   "page": 67,
+   "excludedWhy": "a line driver for Econet; no data sheet was read"
+  },
+  {
+   "ref": "IC94",
+   "part": "LM319",
+   "manualXY": [
+    45.0,
+    93.0
+   ],
+   "comment": null,
+   "page": 67,
+   "excludedWhy": "not a logic IC (an analogue comparator); its supply pins need not be the logic's +5V and 0V"
+  },
+  {
+   "ref": "IC95",
+   "part": "LM319",
+   "manualXY": [
+    20.0,
+    193.0
+   ],
+   "comment": null,
+   "page": 67,
+   "excludedWhy": "not a logic IC (an analogue comparator); its supply pins need not be the logic's +5V and 0V"
+  },
+  {
+   "ref": "IC96",
+   "part": "74LS244",
+   "manualXY": [
+    82.0,
+    185.0
+   ],
+   "comment": null,
+   "page": 67,
+   "pins": 20,
+   "package": "DIP-20",
+   "gnd": 10,
+   "vcc": 20,
+   "pinoutSource": "Texas Instruments, SN74LS244 data sheet, the plastic DIP (N package) pinout, top view (https://www.ti.com/lit/ds/symlink/sn74ls244.pdf), read 13 October 2026: pin 10 GND, pin 20 VCC. The LS, S and plain TTL families share each pinout"
+  },
+  {
+   "ref": "IC97",
+   "part": "74LS74",
+   "manualXY": [
+    4.0,
+    171.0
+   ],
+   "comment": null,
+   "page": 67,
+   "pins": 14,
+   "package": "DIP-14",
+   "gnd": 7,
+   "vcc": 14,
+   "pinoutSource": "Texas Instruments, SN74LS74A data sheet, the plastic DIP (N package) pinout, top view (https://www.ti.com/lit/ds/symlink/sn74ls74a.pdf), read 13 October 2026: pin 7 GND, pin 14 VCC. The LS, S and plain TTL families share each pinout"
+  },
+  {
+   "ref": "IC98",
+   "part": "TMS6100",
+   "manualXY": [
+    15.0,
+    75.0
+   ],
+   "comment": "Speech ROM",
+   "page": 67,
+   "excludedWhy": "a speech part; no data sheet was read"
+  },
+  {
+   "ref": "IC99",
+   "part": "TMS5220",
+   "manualXY": [
+    35.0,
+    75.0
+   ],
+   "comment": "Speech generator",
+   "page": 67,
+   "excludedWhy": "a speech part; no data sheet was read"
+  },
+  {
+   "ref": "IC100",
+   "part": "(27128)",
+   "manualXY": [
+    272.0,
+    24.0
+   ],
+   "comment": "Sideways ROM",
+   "page": 67,
+   "excludedWhy": "no ROM data sheet was read, and the sockets are wired by links for more than one ROM type"
+  },
+  {
+   "ref": "IC101",
+   "part": "(27128)",
+   "manualXY": [
+    290.0,
+    24.0
+   ],
+   "comment": "Sideways ROM",
+   "page": 67,
+   "excludedWhy": "no ROM data sheet was read, and the sockets are wired by links for more than one ROM type"
+  }
+ ]
+}
