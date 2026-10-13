@@ -9,6 +9,9 @@ name: BBC Micro speed run
 # bench/bbc-micro-speed/chip-counters/README.md says how to start it and what
 # it writes.
 on:
+  # TEMPORARY, to prove the workflow on a real runner once. Reverted before merge.
+  pull_request:
+    paths: ['.github/workflows/bbc-speed-run.yml']
   workflow_dispatch:
     inputs:
       base:
