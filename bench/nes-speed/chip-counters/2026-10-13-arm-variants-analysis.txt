@@ -1,0 +1,27 @@
+NTSC: round, base, cur, A, B (times real time)
+  1: 4.110 3.930 4.100 4.090
+  2: 4.110 4.100 4.120 4.095
+  3: 4.105 3.990 4.085 4.050
+  4: 4.110 4.020 4.030 4.100
+  5: 4.100 4.100 4.085 4.105
+  6: 4.120 3.980 4.115 4.095
+  7: 4.120 3.980 4.110 4.090
+  8: 4.110 4.050 4.110 4.090
+  cur: n=8 median ratio 0.9750, 90% interval 0.9660 to 0.9915, range 0.9562 to 1.0000: inconclusive
+  A: n=8 median ratio 0.9976, 90% interval 0.9957 to 0.9994, range 0.9805 to 1.0024: pass
+  B: n=8 median ratio 0.9951, 90% interval 0.9933 to 0.9970, range 0.9866 to 1.0012: pass
+PAL: round, base, cur, A, B (times real time)
+  1: 4.500 4.360 4.490 4.435
+  2: 4.520 4.360 4.455 4.490
+  3: 4.510 4.480 4.490 4.500
+  4: 4.510 4.345 4.505 4.465
+  5: 4.515 4.365 4.510 4.490
+  6: 4.490 4.500 4.510 4.480
+  7: 4.510 4.495 4.505 4.490
+  8: 4.510 4.475 4.510 4.415
+  cur: n=8 median ratio 0.9806, 90% interval 0.9657 to 0.9950, range 0.9634 to 1.0022: pass
+  A: n=8 median ratio 0.9989, 90% interval 0.9967 to 0.9994, range 0.9856 to 1.0045: pass
+  B: n=8 median ratio 0.9939, 90% interval 0.9878 to 0.9967, range 0.9789 to 0.9978: pass
+VERDICT cur: INCONCLUSIVE
+VERDICT A: PASS
+VERDICT B: PASS

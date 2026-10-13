@@ -21,9 +21,11 @@ public enum NesChip
 
 /// <summary>
 /// Counts the CPU's reads and writes of each <see cref="NesChip"/>, so the page can show which
-/// chips the processor talks to. The bus calls <see cref="Note"/> on every access it decodes to
-/// <c>$2000-$401F</c> and on no other, and never for a peek. Nothing here changes what any chip
-/// does or adds a cycle: it only counts.
+/// chips the processor talks to. The bus adds to the four counters in its own decode of
+/// <c>$2000-$401F</c>, with no call, because a call per access cost the browser build about
+/// three per cent on NTSC (<c>docs/journal/2026-10-13-the-nes-counters-on-arm.md</c>), and it
+/// counts nothing else and never a peek. <see cref="Note"/> is the same count by address, for
+/// tests. Nothing here changes what any chip does or adds a cycle: it only counts.
 /// </summary>
 /// <remarks>
 /// The counters wrap, so a reader takes the difference between two snapshots, which stays right
@@ -31,7 +33,11 @@ public enum NesChip
 /// </remarks>
 public sealed class ChipAccesses
 {
-    private readonly uint[] _counts = new uint[Enum.GetValues<NesChip>().Length];
+    // One field per chip, in NesChip order, so the bus can count with a single add and no call.
+    internal uint Ppu;
+    internal uint Apu;
+    internal uint Pad1;
+    internal uint Pad2;
 
     /// <summary>The chip an access to <paramref name="address"/> reaches, or null for none of them.</summary>
     public static NesChip? ChipAt(ushort address, bool write) => address switch
@@ -46,15 +52,25 @@ public sealed class ChipAccesses
     /// <summary>Counts one access by the CPU, if it reaches a counted chip.</summary>
     public void Note(ushort address, bool write)
     {
-        if (ChipAt(address, write) is { } chip)
+        switch (ChipAt(address, write))
         {
-            unchecked { _counts[(int)chip]++; }
+            case NesChip.Ppu: unchecked { Ppu++; } break;
+            case NesChip.Apu: unchecked { Apu++; } break;
+            case NesChip.Pad1: unchecked { Pad1++; } break;
+            case NesChip.Pad2: unchecked { Pad2++; } break;
         }
     }
 
     /// <summary>The accesses to <paramref name="chip"/> since power on, wrapping.</summary>
-    public uint this[NesChip chip] => _counts[(int)chip];
+    public uint this[NesChip chip] => chip switch
+    {
+        NesChip.Ppu => Ppu,
+        NesChip.Apu => Apu,
+        NesChip.Pad1 => Pad1,
+        NesChip.Pad2 => Pad2,
+        _ => throw new ArgumentOutOfRangeException(nameof(chip)),
+    };
 
     /// <summary>Every counter, in <see cref="NesChip"/> order, as the host hands them to the page.</summary>
-    public int[] Snapshot() => Array.ConvertAll(_counts, c => unchecked((int)c));
+    public int[] Snapshot() => [unchecked((int)Ppu), unchecked((int)Apu), unchecked((int)Pad1), unchecked((int)Pad2)];
 }

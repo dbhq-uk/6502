@@ -572,26 +572,33 @@ public sealed class NesBus : Bus, IReportsState
         }
         else if (address < 0x4000)
         {
-            _accesses.Note(address, false);
+            unchecked { _accesses.Ppu++; }
             value = _ppu.ReadRegister(address & 7);
         }
         else if (address < 0x4020)
         {
-            _accesses.Note(address, false);
             switch (address)
             {
                 case 0x4015:
                     // The status read is internal to the CPU: it drives nothing outside, so the
                     // bus latch is not changed, and only bit 5 shows it.
+                    unchecked { _accesses.Apu++; }
                     return (byte)(_apu.ReadStatus() | (_openBus & 0x20));
                 case 0x4016:
                     // Bit 0 is the pad and bits 4 to 1 read 0, which nothing drives; 7 to 5 are open bus.
+                    unchecked { _accesses.Pad1++; }
                     value = (byte)((_openBus & 0xE0) | ReadPad(0, address));
                     break;
                 case 0x4017:
+                    unchecked { _accesses.Pad2++; }
                     value = (byte)((_openBus & 0xE0) | ReadPad(1, address));
                     break;
                 default:
+                    if (address < 0x4015)
+                    {
+                        unchecked { _accesses.Apu++; }
+                    }
+
                     value = _openBus;
                     break;
             }
@@ -629,12 +636,16 @@ public sealed class NesBus : Bus, IReportsState
         else if (address < 0x4000)
         {
             // OAM DMA's writes to $2004 come through here too, as Cycle's writes.
-            _accesses.Note(address, true);
+            unchecked { _accesses.Ppu++; }
             _ppu.WriteRegister(address & 7, value);
         }
         else if (address < 0x4020)
         {
-            _accesses.Note(address, true);
+            if (address <= 0x4017)
+            {
+                unchecked { _accesses.Apu++; }
+            }
+
             if (address == 0x4016)
             {
                 // Both pads see bit 0 (bus.md section 7).

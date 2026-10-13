@@ -1,7 +1,7 @@
 ---
 title: "The NES chip counters' speed, measured again on a quiet ARM machine"
 date: 2026-10-13
-summary: "The chip counters the NES models added to the bus were measured again, on the machine as it now is, after the lazy PPU made it faster. This time the host was an idle ARM machine and the launches agreed closely. By the rule fixed beforehand the result is a fail: in NTSC the build with the counters was a little under three per cent slower, and the whole interval lies below the limit. PAL passed. A profile shows the counter's own code takes almost none of the time; the slow launches are slower everywhere at once, as if the browser compiled the same program differently. Nothing in the machine was changed. The differential check shows the counters change no behaviour."
+summary: "The chip counters the NES models added to the bus were measured again on an idle ARM machine, after the lazy PPU made the machine faster. By the rule fixed beforehand the first result is a fail: in NTSC the build with the counters was a little under three per cent slower. A profile showed the counter's own code takes almost none of the time, so two variants were tried that change only how the bus counts. Both passed in both regions, in a run with the original as a control that showed the slowdown again. The smaller variant, plain field increments in the bus with no call, is now in the branch. The differential check shows the counters, in every version, change no behaviour."
 order: 38
 ---
 
@@ -82,7 +82,7 @@ Each wrote 332 runs and 90,387 bytes; `cmp` printed nothing. The files are ident
 
 ## What was decided, and what it was chosen over
 
-- **The machine's code was not changed.** The brief said: on a slowdown over 2 per cent, profile and tell Dan before changing anything. Two changes could remove the slowdown: count only while a model is mounted, or count in the lazy catch-up instead of in `ReadAccess` and `WriteAccess`. Since the counting itself is nearly free, either would work only by changing the code V8 compiles, and that has to be measured, not assumed.
+- **The machine's code was not changed until Dan chose.** The brief said: on a slowdown over 2 per cent, profile and tell Dan before changing anything. He chose to try a variant, and A is the result (below). The two variants tried are not the two this entry first named (count only while a model is mounted, or count in the lazy catch-up); they change the same thing, the code V8 compiles for the access, with a smaller change to the machine. Since the counting itself is nearly free, any such change works only by changing that code, and has to be measured, not assumed.
 - **The rule was kept as written.** NTSC failed by its upper end, 0.9786 against 0.98. It was not loosened after the result was seen, and no launch was dropped.
 - **The supporting files are committed** in `bench/nes-speed/chip-counters/`, unlike 7 October's report, which was kept outside the repository.
 
@@ -92,6 +92,40 @@ Each wrote 332 runs and 90,387 bytes; `cmp` printed nothing. The files are ident
 - Why one launch settles into the slow code and another does not was not traced.
 - The order inside each pair was always baseline then after. With launches this steady, drift would show as a trend across pairs, and none shows, but an alternated order would rule it out.
 
+## The variants, and the second run
+
+Dan chose, on 13 October 2026, to try a variant of the counter and measure it the same way. Two were made, in scratch worktrees (their diffs are [`2026-10-13-variant-A.diff`](../../bench/nes-speed/chip-counters/2026-10-13-variant-A.diff) and [`2026-10-13-variant-B.diff`](../../bench/nes-speed/chip-counters/2026-10-13-variant-B.diff)):
+
+- **A**: four plain `uint` fields on `ChipAccesses`, and the bus adds to them in its own decode (`_accesses.Ppu++` and so on). No call, no array, no address decode. `Note` stays, for the tests, and gives the same count by address.
+- **B**: the PPU counts the CPU's reads and writes of its registers in `ReadRegister` and `WriteRegister`, so the bus's PPU branches are as on `main`; the sound and pad counts stay in the bus.
+
+The design and the rule were written before either was built, in [`2026-10-13-arm-variants-rule.md`](../../bench/nes-speed/chip-counters/2026-10-13-arm-variants-rule.md): four builds (`main`, the branch as it was, A, B), rounds of four launches in a rotating order, each build over the same round's `main` launch, the same pass rule applied to each of the three on its own, and the choice fixed too (a variant goes in only if it passes; if both pass, the higher NTSC median, and within 0.005 of each other, A as the smaller change). Before any launch, each variant passed all 1661 NES tests and wrote a differential file byte-identical to `main`'s (SHA-256 `5c68068807f2895393fb9ac795edadd1c4f4c6bcaad582d23e2e253f8ebd3722`).
+
+**The first try was invalid and is kept.** Three launches ran from 09:25:37 to 09:26:05 UTC while another job's differential check (`faults.py`, not mine) was using about two cores. The one-minute load average had not caught up, so my gate let them start. I stopped them, kept them in [`2026-10-13-arm-variants-aborted.txt`](../../bench/nes-speed/chip-counters/2026-10-13-arm-variants-aborted.txt) marked invalid, and added a second condition to the gate before any valid launch: wait while any `Dbhq.Machines.Nes.Differential` process runs. My own `pkill -f` matched my shell twice while I stopped them, which left the first restart half-started; no launch from that counts. A wait for the other job ran out its two-hour limit without a launch.
+
+**The valid run** ran from 11:31:19 to 11:40:16 UTC, with 64 launches (eight rounds of four, both regions), all exit 0, the load average before each launch 0.00 to 0.97, and nothing but the bench's own Chrome (and one sample each of a Ruby and a Claude process) above 10 per cent of a core in the 37 watch samples ([`2026-10-13-arm-variants-analysis.txt`](../../bench/nes-speed/chip-counters/2026-10-13-arm-variants-analysis.txt) has every round):
+
+| Build | Region | Median ratio over `main` (eight rounds) | 90 per cent interval | Verdict |
+| --- | --- | --- | --- | --- |
+| the branch as it was (control) | NTSC | 0.9750 | 0.9660 to 0.9915 | inconclusive |
+| the branch as it was (control) | PAL | 0.9806 | 0.9657 to 0.9950 | pass |
+| A | NTSC | 0.9976 | 0.9957 to 0.9994 | pass |
+| A | PAL | 0.9989 | 0.9967 to 0.9994 | pass |
+| B | NTSC | 0.9951 | 0.9933 to 0.9970 | pass |
+| B | PAL | 0.9939 | 0.9878 to 0.9967 | pass |
+
+**A passes, and so does B.** The control matters: the branch as it was ran about 2 to 4 per cent slower than `main` in six of eight NTSC rounds and in five of eight PAL rounds, so the slowdown of the first run came back in the same session, and A and B did not show it. By the choice fixed beforehand, A goes in: its NTSC median is higher than B's, and the two are within 0.005.
+
+**What this does and does not show.** A passes the rule on this host, in Chromium on ARM. It does not show why the call cost three per cent when the profile put it under 0.1 per cent of the samples. The likeliest cause, still a fit and not a proof, is that the extra call in `ReadAccess` and `WriteAccess` changes what V8 compiles for the whole loop, and plain increments leave that code as it was. Any change moves the program's layout, so a pass says this build is not slower here, not that the layout cannot matter on x64. The x64 run is still open. The native instruction count was not repeated for A; the differential file of A is the same as `main`'s.
+
+A is in the branch as `ChipAccesses.cs` and `NesBus.cs`, with the class's comments corrected to say the bus counts directly. The code is the measured code; only the doc comments differ from the measured build.
+
 ## The checks before this was pushed
 
 On 13 October 2026, on `dbhq-arm`, one at a time, on this change (documents and bench files only; no code changed): `dotnet build -c Release 6502.slnx`, 0 warnings and 0 errors; `dotnet test tests/Dbhq.Machines.Nes.Tests -c Release --no-build`, 1661 passed and 0 failed; in `site/`, `node scripts/build-machines.mjs nes bbc-micro kim-1` and `npm test`, 476 tests, 475 passed, 0 failed and 1 to-do (the BBC Micro's, already there); `node scripts/browser-check.mjs` with `CHROME_PATH` set, exit 0, no console errors, no failed requests and no CSP violations, from 07:36 to 07:43 UTC at a load average of 3.13 at its start.
+
+## The checks after variant A went in
+
+On 13 October 2026, on `dbhq-arm`, one at a time, with A in the tree: `dotnet build -c Release 6502.slnx`, 0 warnings and 0 errors; `dotnet test tests/Dbhq.Machines.Nes.Tests -c Release --no-build`, 1661 passed and 0 failed; in `site/`, `node scripts/build-machines.mjs nes bbc-micro kim-1` and `npm test`, 476 tests, 475 passed, 0 failed and 1 to-do (the BBC Micro's, already there). The differential file of A (332 runs) is byte-identical to `main`'s, from before the comments were corrected; the code is the same apart from doc comments (checked with `diff` after removing the comment lines).
+
+**The whole browser check failed once, then passed.** The first run, from 11:42 UTC, exit 1: "phone: a finger on the focused model scrolled the page", in the KIM-1's part, the step issue #80 is about, in code this change does not touch (the output is kept outside the repository). The load average at its start was about 0.8 and its 5-minute average 3.3, from my own build and test just before. The second run, from 11:57 UTC at a load average of 0.77, exit 0: no console errors, no failed requests, no CSP violations. So #80's step has now also failed once on a host that was not busy; that is noted on the issue. It is not a result of this change, but two runs do not prove that, and it is said so.

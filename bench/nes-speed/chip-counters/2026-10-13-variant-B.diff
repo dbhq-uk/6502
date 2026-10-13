@@ -1,0 +1,136 @@
+diff --git a/src/Dbhq.Machines.Nes/ChipAccesses.cs b/src/Dbhq.Machines.Nes/ChipAccesses.cs
+index e6e29e6..f71a9ed 100644
+--- a/src/Dbhq.Machines.Nes/ChipAccesses.cs
++++ b/src/Dbhq.Machines.Nes/ChipAccesses.cs
+@@ -33,6 +33,21 @@ public sealed class ChipAccesses
+ {
+     private readonly uint[] _counts = new uint[Enum.GetValues<NesChip>().Length];
+ 
++    // The PPU counts the CPU's accesses to its registers itself, in its register handlers, so the
++    // bus's PPU decode is not changed; null when this counts on its own, as in the tests.
++    private readonly Ppu? _ppu;
++
++    /// <summary>A counter that counts every chip itself, from <see cref="Note"/>.</summary>
++    public ChipAccesses()
++    {
++    }
++
++    // The bus's counter: the PPU's count is read from the PPU, the others are noted here.
++    internal ChipAccesses(Ppu ppu)
++    {
++        _ppu = ppu;
++    }
++
+     /// <summary>The chip an access to <paramref name="address"/> reaches, or null for none of them.</summary>
+     public static NesChip? ChipAt(ushort address, bool write) => address switch
+     {
+@@ -53,8 +68,8 @@ public sealed class ChipAccesses
+     }
+ 
+     /// <summary>The accesses to <paramref name="chip"/> since power on, wrapping.</summary>
+-    public uint this[NesChip chip] => _counts[(int)chip];
++    public uint this[NesChip chip] => chip == NesChip.Ppu && _ppu is not null ? _ppu.CpuAccesses : _counts[(int)chip];
+ 
+     /// <summary>Every counter, in <see cref="NesChip"/> order, as the host hands them to the page.</summary>
+-    public int[] Snapshot() => Array.ConvertAll(_counts, c => unchecked((int)c));
++    public int[] Snapshot() => Array.ConvertAll(Enum.GetValues<NesChip>(), chip => unchecked((int)this[chip]));
+ }
+diff --git a/src/Dbhq.Machines.Nes/NesBus.cs b/src/Dbhq.Machines.Nes/NesBus.cs
+index a8308a9..b2e62d1 100644
+--- a/src/Dbhq.Machines.Nes/NesBus.cs
++++ b/src/Dbhq.Machines.Nes/NesBus.cs
+@@ -122,7 +122,7 @@ public sealed class NesBus : Bus, IReportsState
+     private int _dmaPage = -1;
+ 
+     // The CPU's accesses to each chip, for the board model; a new one at each power on.
+-    private ChipAccesses _accesses = new();
++    private ChipAccesses _accesses;
+ 
+     // NesOptions.PerDotReference: the PPU is caught up inside every cycle, as the per-dot build ran it.
+     private readonly bool _perDotReference;
+@@ -153,6 +153,7 @@ public sealed class NesBus : Bus, IReportsState
+         Region = region;
+         _mapper = mapper;
+         _ppu = new Ppu(region, _mapper);
++        _accesses = new ChipAccesses(_ppu);
+         _apu = new Apu(region);
+         options ??= new NesOptions();
+         _perDotReference = options.PerDotReference;
+@@ -326,7 +327,7 @@ public sealed class NesBus : Bus, IReportsState
+         // The PPU runs the dots it is owed with the board as it was, before either is reset.
+         _ppu.CatchUp();
+         Array.Clear(_ram);
+-        _accesses = new ChipAccesses();
++        _accesses = new ChipAccesses(_ppu);
+         _mapper.Reset(true);
+         _mapper.ClearPrgRam();
+         _openBus = 0;
+@@ -572,7 +573,6 @@ public sealed class NesBus : Bus, IReportsState
+         }
+         else if (address < 0x4000)
+         {
+-            _accesses.Note(address, false);
+             value = _ppu.ReadRegister(address & 7);
+         }
+         else if (address < 0x4020)
+@@ -629,7 +629,6 @@ public sealed class NesBus : Bus, IReportsState
+         else if (address < 0x4000)
+         {
+             // OAM DMA's writes to $2004 come through here too, as Cycle's writes.
+-            _accesses.Note(address, true);
+             _ppu.WriteRegister(address & 7, value);
+         }
+         else if (address < 0x4020)
+diff --git a/src/Dbhq.Machines.Nes/Ppu.cs b/src/Dbhq.Machines.Nes/Ppu.cs
+index d7a7ad3..2dd3118 100644
+--- a/src/Dbhq.Machines.Nes/Ppu.cs
++++ b/src/Dbhq.Machines.Nes/Ppu.cs
+@@ -232,6 +232,12 @@ public sealed partial class Ppu : IReportsState
+     private byte _fetchLow;
+     private ushort _spriteAddress;
+ 
++    // The CPU's reads and writes of the registers since power on, for the board model (ChipAccesses).
++    private uint _cpuAccesses;
++
++    /// <summary>The CPU's reads and writes of the registers since power on, wrapping; the bus's <see cref="ChipAccesses"/> reads it.</summary>
++    internal uint CpuAccesses => _cpuAccesses;
++
+     /// <summary>A PPU for <paramref name="region"/>, whose pattern tables and nametable wiring are <paramref name="mapper"/>'s.</summary>
+     public Ppu(Region region, IMapper mapper)
+     {
+@@ -438,6 +444,7 @@ public sealed partial class Ppu : IReportsState
+     public void PowerOn()
+     {
+         CatchUp();
++        _cpuAccesses = 0;
+         _status = 0;
+         _oamAddress = 0;
+         _latch = 0;
+@@ -581,6 +588,7 @@ public sealed partial class Ppu : IReportsState
+     /// </summary>
+     public byte ReadRegister(int register)
+     {
++        unchecked { _cpuAccesses++; }
+         CatchUp();
+         switch (register & 7)
+         {
+@@ -643,6 +651,7 @@ public sealed partial class Ppu : IReportsState
+     /// </summary>
+     public void WriteRegister(int register, byte value)
+     {
++        unchecked { _cpuAccesses++; }
+         CatchUp();
+         Drive(value, 0xFF);
+         switch (register & 7)
+diff --git a/src/Dbhq.Machines.Nes/PpuState.cs b/src/Dbhq.Machines.Nes/PpuState.cs
+index 9ac5ad5..cf657f6 100644
+--- a/src/Dbhq.Machines.Nes/PpuState.cs
++++ b/src/Dbhq.Machines.Nes/PpuState.cs
+@@ -13,6 +13,7 @@ public sealed partial class Ppu
+     void IReportsState.ReportState(IStateSink sink)
+     {
+         sink.Skip(nameof(_region), StateReport.Fixed);
++        sink.Skip(nameof(_cpuAccesses), "counts the CPU's accesses for the board model: it changes no value, no latch and no cycle, and nothing in the machine reads it");
+         sink.Skip(nameof(_mapper), "the board, which the bus reports");
+         sink.Skip(nameof(_watchesAddresses), StateReport.Fixed);
+         sink.Skip(nameof(_chr), "the board's pattern memory, which it reports where it is RAM; ROM never changes");

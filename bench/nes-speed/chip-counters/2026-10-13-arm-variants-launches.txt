@@ -1,0 +1,1345 @@
+=== launch r0-p1-cur folder=/tmp/nes77/pub-after region=0 start=2026-10-13T11:31:19Z loadavg=0.00 0.08 0.79 4/402 180022
+--- top before: 1.0 Paseo;1.0 claude;1.0 kworker+;0.0 systemd;
+rom: other/snow.nes at 95d8f621ae55, 40976 bytes, sha256 7db551e868b2c0182941bd68adc447c2f0668098a4425e8e170b20e4327b7210, hash checked
+browser 153.0.8010.12
+launch 1 region 0 NTSC
+launch 1 Running as NTSC, as chosen here: the file does not say which.
+launch 1 boot cycles=5000000 frames=167 ms=768.900 cycles_per_second=6502796 mhz=6.503 times_real=3.63
+launch 1 timed 1 cycles=1790000 frames=61 ms=265.800 cycles_per_second=6734387 mhz=6.734 times_real=3.76
+launch 1 timed 2 cycles=1790003 frames=60 ms=264.200 cycles_per_second=6775182 mhz=6.775 times_real=3.79
+launch 1 timed 3 cycles=1790001 frames=60 ms=264.500 cycles_per_second=6767490 mhz=6.767 times_real=3.78
+launch 1 timed 4 cycles=1790000 frames=60 ms=263.600 cycles_per_second=6790592 mhz=6.791 times_real=3.79
+launch 1 timed 5 cycles=1790002 frames=60 ms=263.400 cycles_per_second=6795756 mhz=6.796 times_real=3.80
+launch 1 thread 1 cycles=1790001 thread_ms=262.233 mhz=6.826 times_real=3.81
+launch 1 thread 2 cycles=1790000 thread_ms=254.790 mhz=7.025 times_real=3.93
+launch 1 thread 3 cycles=1790002 thread_ms=254.022 mhz=7.047 times_real=3.94
+launch 1 thread 4 cycles=1790002 thread_ms=254.127 mhz=7.044 times_real=3.94
+launch 1 thread 5 cycles=1790002 thread_ms=256.804 mhz=6.970 times_real=3.89
+launch 1 thread 6 cycles=1790002 thread_ms=255.132 mhz=7.016 times_real=3.92
+launch 1 thread 7 cycles=1790001 thread_ms=254.531 mhz=7.033 times_real=3.93
+launch 1 thread 8 cycles=1790003 thread_ms=254.790 mhz=7.025 times_real=3.93
+--- exit=0 end=2026-10-13T11:31:26Z loadavg=0.08 0.09 0.79 1/405 180160
+=== launch r0-p1-A folder=/tmp/nes77/pub-A region=0 start=2026-10-13T11:31:26Z loadavg=0.08 0.09 0.79 1/405 180166
+--- top before: 1.0 claude;1.0 kworker+;0.0 systemd;0.0 kthreadd;
+rom: other/snow.nes at 95d8f621ae55, 40976 bytes, sha256 7db551e868b2c0182941bd68adc447c2f0668098a4425e8e170b20e4327b7210, hash checked
+browser 153.0.8010.12
+launch 1 region 0 NTSC
+launch 1 Running as NTSC, as chosen here: the file does not say which.
+launch 1 boot cycles=5000000 frames=167 ms=729.100 cycles_per_second=6857770 mhz=6.858 times_real=3.83
+launch 1 timed 1 cycles=1790000 frames=61 ms=255.300 cycles_per_second=7011359 mhz=7.011 times_real=3.92
+launch 1 timed 2 cycles=1790003 frames=60 ms=253.600 cycles_per_second=7058371 mhz=7.058 times_real=3.94
+launch 1 timed 3 cycles=1790001 frames=60 ms=253.800 cycles_per_second=7052801 mhz=7.053 times_real=3.94
+launch 1 timed 4 cycles=1790000 frames=60 ms=253.400 cycles_per_second=7063931 mhz=7.064 times_real=3.95
+launch 1 timed 5 cycles=1790002 frames=60 ms=253.100 cycles_per_second=7072311 mhz=7.072 times_real=3.95
+launch 1 thread 1 cycles=1790001 thread_ms=251.014 mhz=7.131 times_real=3.98
+launch 1 thread 2 cycles=1790000 thread_ms=243.537 mhz=7.350 times_real=4.11
+launch 1 thread 3 cycles=1790002 thread_ms=244.070 mhz=7.334 times_real=4.10
+launch 1 thread 4 cycles=1790002 thread_ms=242.596 mhz=7.379 times_real=4.12
+launch 1 thread 5 cycles=1790002 thread_ms=244.993 mhz=7.306 times_real=4.08
+launch 1 thread 6 cycles=1790002 thread_ms=244.298 mhz=7.327 times_real=4.09
+launch 1 thread 7 cycles=1790001 thread_ms=243.442 mhz=7.353 times_real=4.11
+launch 1 thread 8 cycles=1790003 thread_ms=243.811 mhz=7.342 times_real=4.10
+--- exit=0 end=2026-10-13T11:31:33Z loadavg=0.31 0.14 0.80 3/407 180302
+=== launch r0-p1-B folder=/tmp/nes77/pub-B region=0 start=2026-10-13T11:31:33Z loadavg=0.31 0.14 0.80 2/407 180308
+--- top before: 40.6 ruby;3.0 Paseo;1.0 claude;1.0 top;
+rom: other/snow.nes at 95d8f621ae55, 40976 bytes, sha256 7db551e868b2c0182941bd68adc447c2f0668098a4425e8e170b20e4327b7210, hash checked
+browser 153.0.8010.12
+launch 1 region 0 NTSC
+launch 1 Running as NTSC, as chosen here: the file does not say which.
+launch 1 boot cycles=5000000 frames=167 ms=732.400 cycles_per_second=6826871 mhz=6.827 times_real=3.81
+launch 1 timed 1 cycles=1790000 frames=61 ms=255.900 cycles_per_second=6994920 mhz=6.995 times_real=3.91
+launch 1 timed 2 cycles=1790003 frames=60 ms=254.700 cycles_per_second=7027888 mhz=7.028 times_real=3.93
+launch 1 timed 3 cycles=1790001 frames=60 ms=254.300 cycles_per_second=7038934 mhz=7.039 times_real=3.93
+launch 1 timed 4 cycles=1790000 frames=60 ms=254.000 cycles_per_second=7047244 mhz=7.047 times_real=3.94
+launch 1 timed 5 cycles=1790002 frames=60 ms=253.900 cycles_per_second=7050028 mhz=7.050 times_real=3.94
+launch 1 thread 1 cycles=1790001 thread_ms=251.700 mhz=7.112 times_real=3.97
+launch 1 thread 2 cycles=1790000 thread_ms=243.976 mhz=7.337 times_real=4.10
+launch 1 thread 3 cycles=1790002 thread_ms=243.709 mhz=7.345 times_real=4.10
+launch 1 thread 4 cycles=1790002 thread_ms=243.138 mhz=7.362 times_real=4.11
+launch 1 thread 5 cycles=1790002 thread_ms=252.546 mhz=7.088 times_real=3.96
+launch 1 thread 6 cycles=1790002 thread_ms=244.881 mhz=7.310 times_real=4.08
+launch 1 thread 7 cycles=1790001 thread_ms=244.677 mhz=7.316 times_real=4.09
+launch 1 thread 8 cycles=1790003 thread_ms=244.533 mhz=7.320 times_real=4.09
+--- exit=0 end=2026-10-13T11:31:40Z loadavg=0.49 0.19 0.81 1/406 180446
+=== launch r0-p1-base folder=/tmp/nes77/pub-base region=0 start=2026-10-13T11:31:40Z loadavg=0.49 0.19 0.81 1/406 180452
+--- top before: 8.9 claude;1.0 tailsca+;1.0 Paseo;0.0 systemd;
+rom: other/snow.nes at 95d8f621ae55, 40976 bytes, sha256 7db551e868b2c0182941bd68adc447c2f0668098a4425e8e170b20e4327b7210, hash checked
+browser 153.0.8010.12
+launch 1 region 0 NTSC
+launch 1 Running as NTSC, as chosen here: the file does not say which.
+launch 1 boot cycles=5000000 frames=167 ms=727.300 cycles_per_second=6874742 mhz=6.875 times_real=3.84
+launch 1 timed 1 cycles=1790000 frames=61 ms=254.200 cycles_per_second=7041699 mhz=7.042 times_real=3.93
+launch 1 timed 2 cycles=1790003 frames=60 ms=252.800 cycles_per_second=7080708 mhz=7.081 times_real=3.96
+launch 1 timed 3 cycles=1790001 frames=60 ms=252.700 cycles_per_second=7083502 mhz=7.084 times_real=3.96
+launch 1 timed 4 cycles=1790000 frames=60 ms=252.600 cycles_per_second=7086302 mhz=7.086 times_real=3.96
+launch 1 timed 5 cycles=1790002 frames=60 ms=252.200 cycles_per_second=7097550 mhz=7.098 times_real=3.97
+launch 1 thread 1 cycles=1790001 thread_ms=250.856 mhz=7.136 times_real=3.99
+launch 1 thread 2 cycles=1790000 thread_ms=243.591 mhz=7.348 times_real=4.11
+launch 1 thread 3 cycles=1790002 thread_ms=243.055 mhz=7.365 times_real=4.11
+launch 1 thread 4 cycles=1790002 thread_ms=242.841 mhz=7.371 times_real=4.12
+launch 1 thread 5 cycles=1790002 thread_ms=245.604 mhz=7.288 times_real=4.07
+launch 1 thread 6 cycles=1790002 thread_ms=243.126 mhz=7.362 times_real=4.11
+launch 1 thread 7 cycles=1790001 thread_ms=242.997 mhz=7.366 times_real=4.12
+launch 1 thread 8 cycles=1790003 thread_ms=243.107 mhz=7.363 times_real=4.11
+--- exit=0 end=2026-10-13T11:31:46Z loadavg=0.53 0.20 0.81 1/407 180615
+=== launch r0-p2-A folder=/tmp/nes77/pub-A region=0 start=2026-10-13T11:31:46Z loadavg=0.53 0.20 0.81 1/407 180621
+--- top before: 1.0 claude;1.0 top;0.0 systemd;0.0 kthreadd;
+rom: other/snow.nes at 95d8f621ae55, 40976 bytes, sha256 7db551e868b2c0182941bd68adc447c2f0668098a4425e8e170b20e4327b7210, hash checked
+browser 153.0.8010.12
+launch 1 region 0 NTSC
+launch 1 Running as NTSC, as chosen here: the file does not say which.
+launch 1 boot cycles=5000000 frames=167 ms=726.700 cycles_per_second=6880418 mhz=6.880 times_real=3.84
+launch 1 timed 1 cycles=1790000 frames=61 ms=253.800 cycles_per_second=7052797 mhz=7.053 times_real=3.94
+launch 1 timed 2 cycles=1790003 frames=60 ms=252.400 cycles_per_second=7091929 mhz=7.092 times_real=3.96
+launch 1 timed 3 cycles=1790001 frames=60 ms=252.000 cycles_per_second=7103179 mhz=7.103 times_real=3.97
+launch 1 timed 4 cycles=1790000 frames=60 ms=252.100 cycles_per_second=7100357 mhz=7.100 times_real=3.97
+launch 1 timed 5 cycles=1790002 frames=60 ms=251.600 cycles_per_second=7114475 mhz=7.114 times_real=3.98
+launch 1 thread 1 cycles=1790001 thread_ms=251.192 mhz=7.126 times_real=3.98
+launch 1 thread 2 cycles=1790000 thread_ms=243.029 mhz=7.365 times_real=4.12
+launch 1 thread 3 cycles=1790002 thread_ms=243.177 mhz=7.361 times_real=4.11
+launch 1 thread 4 cycles=1790002 thread_ms=241.971 mhz=7.398 times_real=4.13
+launch 1 thread 5 cycles=1790002 thread_ms=244.407 mhz=7.324 times_real=4.09
+launch 1 thread 6 cycles=1790002 thread_ms=242.801 mhz=7.372 times_real=4.12
+launch 1 thread 7 cycles=1790001 thread_ms=242.852 mhz=7.371 times_real=4.12
+launch 1 thread 8 cycles=1790003 thread_ms=242.420 mhz=7.384 times_real=4.13
+--- exit=0 end=2026-10-13T11:31:53Z loadavg=0.57 0.21 0.81 1/405 180749
+=== launch r0-p2-B folder=/tmp/nes77/pub-B region=0 start=2026-10-13T11:31:53Z loadavg=0.57 0.21 0.81 1/405 180755
+--- top before: 1.0 claude;1.0 kworker+;0.0 systemd;0.0 kthreadd;
+rom: other/snow.nes at 95d8f621ae55, 40976 bytes, sha256 7db551e868b2c0182941bd68adc447c2f0668098a4425e8e170b20e4327b7210, hash checked
+browser 153.0.8010.12
+launch 1 region 0 NTSC
+launch 1 Running as NTSC, as chosen here: the file does not say which.
+launch 1 boot cycles=5000000 frames=167 ms=726.500 cycles_per_second=6882312 mhz=6.882 times_real=3.85
+launch 1 timed 1 cycles=1790000 frames=61 ms=254.400 cycles_per_second=7036164 mhz=7.036 times_real=3.93
+launch 1 timed 2 cycles=1790003 frames=60 ms=252.800 cycles_per_second=7080708 mhz=7.081 times_real=3.96
+launch 1 timed 3 cycles=1790001 frames=60 ms=252.600 cycles_per_second=7086306 mhz=7.086 times_real=3.96
+launch 1 timed 4 cycles=1790000 frames=60 ms=252.900 cycles_per_second=7077896 mhz=7.078 times_real=3.95
+launch 1 timed 5 cycles=1790002 frames=60 ms=252.700 cycles_per_second=7083506 mhz=7.084 times_real=3.96
+launch 1 thread 1 cycles=1790001 thread_ms=251.477 mhz=7.118 times_real=3.98
+launch 1 thread 2 cycles=1790000 thread_ms=244.283 mhz=7.328 times_real=4.09
+launch 1 thread 3 cycles=1790002 thread_ms=243.522 mhz=7.350 times_real=4.11
+launch 1 thread 4 cycles=1790002 thread_ms=244.278 mhz=7.328 times_real=4.09
+launch 1 thread 5 cycles=1790002 thread_ms=246.862 mhz=7.251 times_real=4.05
+launch 1 thread 6 cycles=1790002 thread_ms=243.848 mhz=7.341 times_real=4.10
+launch 1 thread 7 cycles=1790001 thread_ms=243.815 mhz=7.342 times_real=4.10
+launch 1 thread 8 cycles=1790003 thread_ms=244.033 mhz=7.335 times_real=4.10
+--- exit=0 end=2026-10-13T11:32:00Z loadavg=0.56 0.22 0.81 1/409 180886
+=== launch r0-p2-base folder=/tmp/nes77/pub-base region=0 start=2026-10-13T11:32:00Z loadavg=0.56 0.22 0.81 1/409 180892
+--- top before: 1.0 Paseo;1.0 top;0.0 systemd;0.0 kthreadd;
+rom: other/snow.nes at 95d8f621ae55, 40976 bytes, sha256 7db551e868b2c0182941bd68adc447c2f0668098a4425e8e170b20e4327b7210, hash checked
+browser 153.0.8010.12
+launch 1 region 0 NTSC
+launch 1 Running as NTSC, as chosen here: the file does not say which.
+launch 1 boot cycles=5000000 frames=167 ms=726.600 cycles_per_second=6881365 mhz=6.881 times_real=3.84
+launch 1 timed 1 cycles=1790000 frames=61 ms=254.500 cycles_per_second=7033399 mhz=7.033 times_real=3.93
+launch 1 timed 2 cycles=1790003 frames=60 ms=253.200 cycles_per_second=7069522 mhz=7.070 times_real=3.95
+launch 1 timed 3 cycles=1790001 frames=60 ms=252.700 cycles_per_second=7083502 mhz=7.084 times_real=3.96
+launch 1 timed 4 cycles=1790000 frames=60 ms=252.800 cycles_per_second=7080696 mhz=7.081 times_real=3.96
+launch 1 timed 5 cycles=1790002 frames=60 ms=252.500 cycles_per_second=7089117 mhz=7.089 times_real=3.96
+launch 1 thread 1 cycles=1790001 thread_ms=251.778 mhz=7.109 times_real=3.97
+launch 1 thread 2 cycles=1790000 thread_ms=243.477 mhz=7.352 times_real=4.11
+launch 1 thread 3 cycles=1790002 thread_ms=243.125 mhz=7.362 times_real=4.11
+launch 1 thread 4 cycles=1790002 thread_ms=242.615 mhz=7.378 times_real=4.12
+launch 1 thread 5 cycles=1790002 thread_ms=244.571 mhz=7.319 times_real=4.09
+launch 1 thread 6 cycles=1790002 thread_ms=243.110 mhz=7.363 times_real=4.11
+launch 1 thread 7 cycles=1790001 thread_ms=243.166 mhz=7.361 times_real=4.11
+launch 1 thread 8 cycles=1790003 thread_ms=242.983 mhz=7.367 times_real=4.12
+--- exit=0 end=2026-10-13T11:32:07Z loadavg=0.60 0.24 0.81 1/406 181024
+=== launch r0-p2-cur folder=/tmp/nes77/pub-after region=0 start=2026-10-13T11:32:07Z loadavg=0.60 0.24 0.81 1/406 181030
+--- top before: 1.0 claude;1.0 claude;0.0 systemd;0.0 kthreadd;
+rom: other/snow.nes at 95d8f621ae55, 40976 bytes, sha256 7db551e868b2c0182941bd68adc447c2f0668098a4425e8e170b20e4327b7210, hash checked
+browser 153.0.8010.12
+launch 1 region 0 NTSC
+launch 1 Running as NTSC, as chosen here: the file does not say which.
+launch 1 boot cycles=5000000 frames=167 ms=729.900 cycles_per_second=6850253 mhz=6.850 times_real=3.83
+launch 1 timed 1 cycles=1790000 frames=61 ms=255.100 cycles_per_second=7016856 mhz=7.017 times_real=3.92
+launch 1 timed 2 cycles=1790003 frames=60 ms=254.300 cycles_per_second=7038942 mhz=7.039 times_real=3.93
+launch 1 timed 3 cycles=1790001 frames=60 ms=253.600 cycles_per_second=7058364 mhz=7.058 times_real=3.94
+launch 1 timed 4 cycles=1790000 frames=60 ms=253.300 cycles_per_second=7066719 mhz=7.067 times_real=3.95
+launch 1 timed 5 cycles=1790002 frames=60 ms=253.000 cycles_per_second=7075107 mhz=7.075 times_real=3.95
+launch 1 thread 1 cycles=1790001 thread_ms=251.840 mhz=7.108 times_real=3.97
+launch 1 thread 2 cycles=1790000 thread_ms=243.683 mhz=7.346 times_real=4.10
+launch 1 thread 3 cycles=1790002 thread_ms=243.466 mhz=7.352 times_real=4.11
+launch 1 thread 4 cycles=1790002 thread_ms=243.685 mhz=7.346 times_real=4.10
+launch 1 thread 5 cycles=1790002 thread_ms=245.094 mhz=7.303 times_real=4.08
+launch 1 thread 6 cycles=1790002 thread_ms=244.251 mhz=7.329 times_real=4.09
+launch 1 thread 7 cycles=1790001 thread_ms=243.452 mhz=7.353 times_real=4.11
+launch 1 thread 8 cycles=1790003 thread_ms=243.584 mhz=7.349 times_real=4.11
+--- exit=0 end=2026-10-13T11:32:13Z loadavg=0.79 0.28 0.82 1/405 181155
+=== launch r0-p3-B folder=/tmp/nes77/pub-B region=0 start=2026-10-13T11:32:13Z loadavg=0.79 0.28 0.82 1/405 181161
+--- top before: 1.0 kworker+;0.0 systemd;0.0 kthreadd;0.0 pool_wo+;
+rom: other/snow.nes at 95d8f621ae55, 40976 bytes, sha256 7db551e868b2c0182941bd68adc447c2f0668098a4425e8e170b20e4327b7210, hash checked
+browser 153.0.8010.12
+launch 1 region 0 NTSC
+launch 1 Running as NTSC, as chosen here: the file does not say which.
+launch 1 boot cycles=5000000 frames=167 ms=741.900 cycles_per_second=6739453 mhz=6.739 times_real=3.77
+launch 1 timed 1 cycles=1790000 frames=61 ms=258.000 cycles_per_second=6937984 mhz=6.938 times_real=3.88
+launch 1 timed 2 cycles=1790003 frames=60 ms=256.400 cycles_per_second=6981291 mhz=6.981 times_real=3.90
+launch 1 timed 3 cycles=1790001 frames=60 ms=256.100 cycles_per_second=6989461 mhz=6.989 times_real=3.91
+launch 1 timed 4 cycles=1790000 frames=60 ms=256.200 cycles_per_second=6986729 mhz=6.987 times_real=3.90
+launch 1 timed 5 cycles=1790002 frames=60 ms=256.000 cycles_per_second=6992195 mhz=6.992 times_real=3.91
+launch 1 thread 1 cycles=1790001 thread_ms=255.101 mhz=7.017 times_real=3.92
+launch 1 thread 2 cycles=1790000 thread_ms=247.211 mhz=7.241 times_real=4.05
+launch 1 thread 3 cycles=1790002 thread_ms=246.730 mhz=7.255 times_real=4.05
+launch 1 thread 4 cycles=1790002 thread_ms=245.865 mhz=7.280 times_real=4.07
+launch 1 thread 5 cycles=1790002 thread_ms=248.384 mhz=7.207 times_real=4.03
+launch 1 thread 6 cycles=1790002 thread_ms=246.725 mhz=7.255 times_real=4.05
+launch 1 thread 7 cycles=1790001 thread_ms=246.761 mhz=7.254 times_real=4.05
+launch 1 thread 8 cycles=1790003 thread_ms=246.799 mhz=7.253 times_real=4.05
+--- exit=0 end=2026-10-13T11:32:20Z loadavg=0.75 0.29 0.82 1/404 181294
+=== launch r0-p3-base folder=/tmp/nes77/pub-base region=0 start=2026-10-13T11:32:20Z loadavg=0.75 0.29 0.82 1/404 181300
+--- top before: 1.0 contain+;1.0 claude;1.0 top;0.0 systemd;
+rom: other/snow.nes at 95d8f621ae55, 40976 bytes, sha256 7db551e868b2c0182941bd68adc447c2f0668098a4425e8e170b20e4327b7210, hash checked
+browser 153.0.8010.12
+launch 1 region 0 NTSC
+launch 1 Running as NTSC, as chosen here: the file does not say which.
+launch 1 boot cycles=5000000 frames=167 ms=728.600 cycles_per_second=6862476 mhz=6.862 times_real=3.83
+launch 1 timed 1 cycles=1790000 frames=61 ms=255.000 cycles_per_second=7019608 mhz=7.020 times_real=3.92
+launch 1 timed 2 cycles=1790003 frames=60 ms=253.600 cycles_per_second=7058371 mhz=7.058 times_real=3.94
+launch 1 timed 3 cycles=1790001 frames=60 ms=253.100 cycles_per_second=7072307 mhz=7.072 times_real=3.95
+launch 1 timed 4 cycles=1790000 frames=60 ms=253.400 cycles_per_second=7063931 mhz=7.064 times_real=3.95
+launch 1 timed 5 cycles=1790002 frames=60 ms=252.800 cycles_per_second=7080704 mhz=7.081 times_real=3.96
+launch 1 thread 1 cycles=1790001 thread_ms=251.869 mhz=7.107 times_real=3.97
+launch 1 thread 2 cycles=1790000 thread_ms=243.814 mhz=7.342 times_real=4.10
+launch 1 thread 3 cycles=1790002 thread_ms=243.103 mhz=7.363 times_real=4.11
+launch 1 thread 4 cycles=1790002 thread_ms=242.199 mhz=7.391 times_real=4.13
+launch 1 thread 5 cycles=1790002 thread_ms=244.818 mhz=7.312 times_real=4.09
+launch 1 thread 6 cycles=1790002 thread_ms=242.833 mhz=7.371 times_real=4.12
+launch 1 thread 7 cycles=1790001 thread_ms=244.183 mhz=7.331 times_real=4.10
+launch 1 thread 8 cycles=1790003 thread_ms=242.916 mhz=7.369 times_real=4.12
+--- exit=0 end=2026-10-13T11:32:27Z loadavg=0.77 0.30 0.82 1/405 181429
+=== launch r0-p3-cur folder=/tmp/nes77/pub-after region=0 start=2026-10-13T11:32:27Z loadavg=0.77 0.30 0.82 1/405 181435
+--- top before: 1.0 fluentd;1.0 claude;1.0 kworker+;1.0 top;
+rom: other/snow.nes at 95d8f621ae55, 40976 bytes, sha256 7db551e868b2c0182941bd68adc447c2f0668098a4425e8e170b20e4327b7210, hash checked
+browser 153.0.8010.12
+launch 1 region 0 NTSC
+launch 1 Running as NTSC, as chosen here: the file does not say which.
+launch 1 boot cycles=5000000 frames=167 ms=755.300 cycles_per_second=6619886 mhz=6.620 times_real=3.70
+launch 1 timed 1 cycles=1790000 frames=61 ms=262.900 cycles_per_second=6808672 mhz=6.809 times_real=3.80
+launch 1 timed 2 cycles=1790003 frames=60 ms=259.900 cycles_per_second=6887276 mhz=6.887 times_real=3.85
+launch 1 timed 3 cycles=1790001 frames=60 ms=260.200 cycles_per_second=6879327 mhz=6.879 times_real=3.84
+launch 1 timed 4 cycles=1790000 frames=60 ms=259.700 cycles_per_second=6892568 mhz=6.893 times_real=3.85
+launch 1 timed 5 cycles=1790002 frames=60 ms=259.400 cycles_per_second=6900547 mhz=6.901 times_real=3.86
+launch 1 thread 1 cycles=1790001 thread_ms=257.927 mhz=6.940 times_real=3.88
+launch 1 thread 2 cycles=1790000 thread_ms=250.449 mhz=7.147 times_real=3.99
+launch 1 thread 3 cycles=1790002 thread_ms=250.210 mhz=7.154 times_real=4.00
+launch 1 thread 4 cycles=1790002 thread_ms=249.888 mhz=7.163 times_real=4.00
+launch 1 thread 5 cycles=1790002 thread_ms=251.915 mhz=7.106 times_real=3.97
+launch 1 thread 6 cycles=1790002 thread_ms=250.880 mhz=7.135 times_real=3.99
+launch 1 thread 7 cycles=1790001 thread_ms=250.377 mhz=7.149 times_real=3.99
+launch 1 thread 8 cycles=1790003 thread_ms=250.784 mhz=7.138 times_real=3.99
+--- exit=0 end=2026-10-13T11:32:34Z loadavg=0.71 0.30 0.82 1/406 181600
+=== launch r0-p3-A folder=/tmp/nes77/pub-A region=0 start=2026-10-13T11:32:34Z loadavg=0.71 0.30 0.82 1/406 181606
+--- top before: 2.0 claude;1.0 tailsca+;0.0 systemd;0.0 kthreadd;
+rom: other/snow.nes at 95d8f621ae55, 40976 bytes, sha256 7db551e868b2c0182941bd68adc447c2f0668098a4425e8e170b20e4327b7210, hash checked
+browser 153.0.8010.12
+launch 1 region 0 NTSC
+launch 1 Running as NTSC, as chosen here: the file does not say which.
+launch 1 boot cycles=5000000 frames=167 ms=728.600 cycles_per_second=6862476 mhz=6.862 times_real=3.83
+launch 1 timed 1 cycles=1790000 frames=61 ms=255.000 cycles_per_second=7019608 mhz=7.020 times_real=3.92
+launch 1 timed 2 cycles=1790003 frames=60 ms=253.000 cycles_per_second=7075111 mhz=7.075 times_real=3.95
+launch 1 timed 3 cycles=1790001 frames=60 ms=253.000 cycles_per_second=7075103 mhz=7.075 times_real=3.95
+launch 1 timed 4 cycles=1790000 frames=60 ms=252.700 cycles_per_second=7083498 mhz=7.083 times_real=3.96
+launch 1 timed 5 cycles=1790002 frames=60 ms=252.500 cycles_per_second=7089117 mhz=7.089 times_real=3.96
+launch 1 thread 1 cycles=1790001 thread_ms=252.184 mhz=7.098 times_real=3.97
+launch 1 thread 2 cycles=1790000 thread_ms=245.728 mhz=7.284 times_real=4.07
+launch 1 thread 3 cycles=1790002 thread_ms=243.760 mhz=7.343 times_real=4.10
+launch 1 thread 4 cycles=1790002 thread_ms=243.562 mhz=7.349 times_real=4.11
+launch 1 thread 5 cycles=1790002 thread_ms=245.591 mhz=7.289 times_real=4.07
+launch 1 thread 6 cycles=1790002 thread_ms=244.540 mhz=7.320 times_real=4.09
+launch 1 thread 7 cycles=1790001 thread_ms=244.238 mhz=7.329 times_real=4.09
+launch 1 thread 8 cycles=1790003 thread_ms=244.961 mhz=7.307 times_real=4.08
+--- exit=0 end=2026-10-13T11:32:41Z loadavg=0.68 0.30 0.81 1/405 181732
+=== launch r0-p4-base folder=/tmp/nes77/pub-base region=0 start=2026-10-13T11:32:41Z loadavg=0.68 0.30 0.81 1/405 181738
+--- top before: 2.0 gomon;1.0 Paseo;1.0 top;0.0 systemd;
+rom: other/snow.nes at 95d8f621ae55, 40976 bytes, sha256 7db551e868b2c0182941bd68adc447c2f0668098a4425e8e170b20e4327b7210, hash checked
+browser 153.0.8010.12
+launch 1 region 0 NTSC
+launch 1 Running as NTSC, as chosen here: the file does not say which.
+launch 1 boot cycles=5000000 frames=167 ms=725.500 cycles_per_second=6891799 mhz=6.892 times_real=3.85
+launch 1 timed 1 cycles=1790000 frames=61 ms=253.400 cycles_per_second=7063931 mhz=7.064 times_real=3.95
+launch 1 timed 2 cycles=1790003 frames=60 ms=252.400 cycles_per_second=7091929 mhz=7.092 times_real=3.96
+launch 1 timed 3 cycles=1790001 frames=60 ms=252.200 cycles_per_second=7097546 mhz=7.098 times_real=3.97
+launch 1 timed 4 cycles=1790000 frames=60 ms=252.000 cycles_per_second=7103175 mhz=7.103 times_real=3.97
+launch 1 timed 5 cycles=1790002 frames=60 ms=252.100 cycles_per_second=7100365 mhz=7.100 times_real=3.97
+launch 1 thread 1 cycles=1790001 thread_ms=252.074 mhz=7.101 times_real=3.97
+launch 1 thread 2 cycles=1790000 thread_ms=243.547 mhz=7.350 times_real=4.11
+launch 1 thread 3 cycles=1790002 thread_ms=243.041 mhz=7.365 times_real=4.12
+launch 1 thread 4 cycles=1790002 thread_ms=242.736 mhz=7.374 times_real=4.12
+launch 1 thread 5 cycles=1790002 thread_ms=245.033 mhz=7.305 times_real=4.08
+launch 1 thread 6 cycles=1790002 thread_ms=244.633 mhz=7.317 times_real=4.09
+launch 1 thread 7 cycles=1790001 thread_ms=243.605 mhz=7.348 times_real=4.11
+launch 1 thread 8 cycles=1790003 thread_ms=243.378 mhz=7.355 times_real=4.11
+--- exit=0 end=2026-10-13T11:32:47Z loadavg=0.71 0.31 0.81 1/404 181878
+=== launch r0-p4-cur folder=/tmp/nes77/pub-after region=0 start=2026-10-13T11:32:47Z loadavg=0.71 0.31 0.81 1/404 181884
+--- top before: 1.0 contain+;1.0 Paseo;1.0 claude;1.0 top;
+rom: other/snow.nes at 95d8f621ae55, 40976 bytes, sha256 7db551e868b2c0182941bd68adc447c2f0668098a4425e8e170b20e4327b7210, hash checked
+browser 153.0.8010.12
+launch 1 region 0 NTSC
+launch 1 Running as NTSC, as chosen here: the file does not say which.
+launch 1 boot cycles=5000000 frames=167 ms=750.700 cycles_per_second=6660450 mhz=6.660 times_real=3.72
+launch 1 timed 1 cycles=1790000 frames=61 ms=260.900 cycles_per_second=6860866 mhz=6.861 times_real=3.83
+launch 1 timed 2 cycles=1790003 frames=60 ms=258.800 cycles_per_second=6916549 mhz=6.917 times_real=3.86
+launch 1 timed 3 cycles=1790001 frames=60 ms=257.700 cycles_per_second=6946065 mhz=6.946 times_real=3.88
+launch 1 timed 4 cycles=1790000 frames=60 ms=259.200 cycles_per_second=6905864 mhz=6.906 times_real=3.86
+launch 1 timed 5 cycles=1790002 frames=60 ms=257.600 cycles_per_second=6948766 mhz=6.949 times_real=3.88
+launch 1 thread 1 cycles=1790001 thread_ms=256.725 mhz=6.972 times_real=3.90
+launch 1 thread 2 cycles=1790000 thread_ms=249.145 mhz=7.185 times_real=4.01
+launch 1 thread 3 cycles=1790002 thread_ms=248.408 mhz=7.206 times_real=4.03
+launch 1 thread 4 cycles=1790002 thread_ms=247.703 mhz=7.226 times_real=4.04
+launch 1 thread 5 cycles=1790002 thread_ms=250.368 mhz=7.149 times_real=3.99
+launch 1 thread 6 cycles=1790002 thread_ms=249.141 mhz=7.185 times_real=4.01
+launch 1 thread 7 cycles=1790001 thread_ms=248.435 mhz=7.205 times_real=4.03
+launch 1 thread 8 cycles=1790003 thread_ms=248.415 mhz=7.206 times_real=4.03
+--- exit=0 end=2026-10-13T11:32:54Z loadavg=0.65 0.31 0.81 2/405 182011
+=== launch r0-p4-A folder=/tmp/nes77/pub-A region=0 start=2026-10-13T11:32:54Z loadavg=0.65 0.31 0.81 1/405 182017
+--- top before: 1.0 kworker+;0.0 systemd;0.0 kthreadd;0.0 pool_wo+;
+rom: other/snow.nes at 95d8f621ae55, 40976 bytes, sha256 7db551e868b2c0182941bd68adc447c2f0668098a4425e8e170b20e4327b7210, hash checked
+browser 153.0.8010.12
+launch 1 region 0 NTSC
+launch 1 Running as NTSC, as chosen here: the file does not say which.
+launch 1 boot cycles=5000000 frames=167 ms=747.700 cycles_per_second=6687174 mhz=6.687 times_real=3.74
+launch 1 timed 1 cycles=1790000 frames=61 ms=259.400 cycles_per_second=6900540 mhz=6.901 times_real=3.86
+launch 1 timed 2 cycles=1790003 frames=60 ms=258.000 cycles_per_second=6937996 mhz=6.938 times_real=3.88
+launch 1 timed 3 cycles=1790001 frames=60 ms=257.300 cycles_per_second=6956864 mhz=6.957 times_real=3.89
+launch 1 timed 4 cycles=1790000 frames=60 ms=257.300 cycles_per_second=6956860 mhz=6.957 times_real=3.89
+launch 1 timed 5 cycles=1790002 frames=60 ms=257.300 cycles_per_second=6956867 mhz=6.957 times_real=3.89
+launch 1 thread 1 cycles=1790001 thread_ms=255.457 mhz=7.007 times_real=3.92
+launch 1 thread 2 cycles=1790000 thread_ms=248.100 mhz=7.215 times_real=4.03
+launch 1 thread 3 cycles=1790002 thread_ms=247.683 mhz=7.227 times_real=4.04
+launch 1 thread 4 cycles=1790002 thread_ms=247.551 mhz=7.231 times_real=4.04
+launch 1 thread 5 cycles=1790002 thread_ms=249.790 mhz=7.166 times_real=4.00
+launch 1 thread 6 cycles=1790002 thread_ms=248.505 mhz=7.203 times_real=4.02
+launch 1 thread 7 cycles=1790001 thread_ms=248.006 mhz=7.218 times_real=4.03
+launch 1 thread 8 cycles=1790003 thread_ms=248.271 mhz=7.210 times_real=4.03
+--- exit=0 end=2026-10-13T11:33:01Z loadavg=0.63 0.31 0.81 1/409 182148
+=== launch r0-p4-B folder=/tmp/nes77/pub-B region=0 start=2026-10-13T11:33:01Z loadavg=0.63 0.31 0.81 1/409 182154
+--- top before: 1.0 Paseo;1.0 top;0.0 systemd;0.0 kthreadd;
+rom: other/snow.nes at 95d8f621ae55, 40976 bytes, sha256 7db551e868b2c0182941bd68adc447c2f0668098a4425e8e170b20e4327b7210, hash checked
+browser 153.0.8010.12
+launch 1 region 0 NTSC
+launch 1 Running as NTSC, as chosen here: the file does not say which.
+launch 1 boot cycles=5000000 frames=167 ms=729.400 cycles_per_second=6854949 mhz=6.855 times_real=3.83
+launch 1 timed 1 cycles=1790000 frames=61 ms=255.100 cycles_per_second=7016856 mhz=7.017 times_real=3.92
+launch 1 timed 2 cycles=1790003 frames=60 ms=253.600 cycles_per_second=7058371 mhz=7.058 times_real=3.94
+launch 1 timed 3 cycles=1790001 frames=60 ms=253.500 cycles_per_second=7061148 mhz=7.061 times_real=3.95
+launch 1 timed 4 cycles=1790000 frames=60 ms=253.300 cycles_per_second=7066719 mhz=7.067 times_real=3.95
+launch 1 timed 5 cycles=1790002 frames=60 ms=253.000 cycles_per_second=7075107 mhz=7.075 times_real=3.95
+launch 1 thread 1 cycles=1790001 thread_ms=251.338 mhz=7.122 times_real=3.98
+launch 1 thread 2 cycles=1790000 thread_ms=243.874 mhz=7.340 times_real=4.10
+launch 1 thread 3 cycles=1790002 thread_ms=243.467 mhz=7.352 times_real=4.11
+launch 1 thread 4 cycles=1790002 thread_ms=243.376 mhz=7.355 times_real=4.11
+launch 1 thread 5 cycles=1790002 thread_ms=245.892 mhz=7.280 times_real=4.07
+launch 1 thread 6 cycles=1790002 thread_ms=244.326 mhz=7.326 times_real=4.09
+launch 1 thread 7 cycles=1790001 thread_ms=244.106 mhz=7.333 times_real=4.10
+launch 1 thread 8 cycles=1790003 thread_ms=243.910 mhz=7.339 times_real=4.10
+--- exit=0 end=2026-10-13T11:33:08Z loadavg=0.66 0.33 0.81 1/406 182286
+=== launch r0-p5-cur folder=/tmp/nes77/pub-after region=0 start=2026-10-13T11:33:08Z loadavg=0.66 0.33 0.81 1/406 182292
+--- top before: 0.0 systemd;0.0 kthreadd;0.0 pool_wo+;0.0 kworker+;
+rom: other/snow.nes at 95d8f621ae55, 40976 bytes, sha256 7db551e868b2c0182941bd68adc447c2f0668098a4425e8e170b20e4327b7210, hash checked
+browser 153.0.8010.12
+launch 1 region 0 NTSC
+launch 1 Running as NTSC, as chosen here: the file does not say which.
+launch 1 boot cycles=5000000 frames=167 ms=727.300 cycles_per_second=6874742 mhz=6.875 times_real=3.84
+launch 1 timed 1 cycles=1790000 frames=61 ms=254.500 cycles_per_second=7033399 mhz=7.033 times_real=3.93
+launch 1 timed 2 cycles=1790003 frames=60 ms=253.000 cycles_per_second=7075111 mhz=7.075 times_real=3.95
+launch 1 timed 3 cycles=1790001 frames=60 ms=252.800 cycles_per_second=7080700 mhz=7.081 times_real=3.96
+launch 1 timed 4 cycles=1790000 frames=60 ms=253.000 cycles_per_second=7075099 mhz=7.075 times_real=3.95
+launch 1 timed 5 cycles=1790002 frames=60 ms=252.500 cycles_per_second=7089117 mhz=7.089 times_real=3.96
+launch 1 thread 1 cycles=1790001 thread_ms=250.974 mhz=7.132 times_real=3.98
+launch 1 thread 2 cycles=1790000 thread_ms=243.305 mhz=7.357 times_real=4.11
+launch 1 thread 3 cycles=1790002 thread_ms=243.298 mhz=7.357 times_real=4.11
+launch 1 thread 4 cycles=1790002 thread_ms=243.042 mhz=7.365 times_real=4.12
+launch 1 thread 5 cycles=1790002 thread_ms=245.073 mhz=7.304 times_real=4.08
+launch 1 thread 6 cycles=1790002 thread_ms=243.656 mhz=7.346 times_real=4.10
+launch 1 thread 7 cycles=1790001 thread_ms=243.853 mhz=7.340 times_real=4.10
+launch 1 thread 8 cycles=1790003 thread_ms=243.922 mhz=7.338 times_real=4.10
+--- exit=0 end=2026-10-13T11:33:14Z loadavg=0.71 0.35 0.81 1/405 182416
+=== launch r0-p5-A folder=/tmp/nes77/pub-A region=0 start=2026-10-13T11:33:15Z loadavg=0.71 0.35 0.81 1/405 182422
+--- top before: 2.0 claude;2.0 claude;1.0 tailsca+;1.0 Paseo;
+rom: other/snow.nes at 95d8f621ae55, 40976 bytes, sha256 7db551e868b2c0182941bd68adc447c2f0668098a4425e8e170b20e4327b7210, hash checked
+browser 153.0.8010.12
+launch 1 region 0 NTSC
+launch 1 Running as NTSC, as chosen here: the file does not say which.
+launch 1 boot cycles=5000000 frames=167 ms=734.100 cycles_per_second=6811061 mhz=6.811 times_real=3.81
+launch 1 timed 1 cycles=1790000 frames=61 ms=256.000 cycles_per_second=6992188 mhz=6.992 times_real=3.91
+launch 1 timed 2 cycles=1790003 frames=60 ms=254.600 cycles_per_second=7030648 mhz=7.031 times_real=3.93
+launch 1 timed 3 cycles=1790001 frames=60 ms=254.300 cycles_per_second=7038934 mhz=7.039 times_real=3.93
+launch 1 timed 4 cycles=1790000 frames=60 ms=254.200 cycles_per_second=7041699 mhz=7.042 times_real=3.93
+launch 1 timed 5 cycles=1790002 frames=60 ms=254.200 cycles_per_second=7041707 mhz=7.042 times_real=3.93
+launch 1 thread 1 cycles=1790001 thread_ms=252.578 mhz=7.087 times_real=3.96
+launch 1 thread 2 cycles=1790000 thread_ms=244.855 mhz=7.310 times_real=4.08
+launch 1 thread 3 cycles=1790002 thread_ms=244.664 mhz=7.316 times_real=4.09
+launch 1 thread 4 cycles=1790002 thread_ms=243.991 mhz=7.336 times_real=4.10
+launch 1 thread 5 cycles=1790002 thread_ms=246.839 mhz=7.252 times_real=4.05
+launch 1 thread 6 cycles=1790002 thread_ms=245.425 mhz=7.293 times_real=4.08
+launch 1 thread 7 cycles=1790001 thread_ms=244.818 mhz=7.312 times_real=4.09
+launch 1 thread 8 cycles=1790003 thread_ms=244.729 mhz=7.314 times_real=4.09
+--- exit=0 end=2026-10-13T11:33:21Z loadavg=0.74 0.36 0.81 1/404 182555
+=== launch r0-p5-B folder=/tmp/nes77/pub-B region=0 start=2026-10-13T11:33:21Z loadavg=0.74 0.36 0.81 1/404 182561
+--- top before: 1.0 iscsid;1.0 claude;0.0 systemd;0.0 kthreadd;
+rom: other/snow.nes at 95d8f621ae55, 40976 bytes, sha256 7db551e868b2c0182941bd68adc447c2f0668098a4425e8e170b20e4327b7210, hash checked
+browser 153.0.8010.12
+launch 1 region 0 NTSC
+launch 1 Running as NTSC, as chosen here: the file does not say which.
+launch 1 boot cycles=5000000 frames=167 ms=731.100 cycles_per_second=6839010 mhz=6.839 times_real=3.82
+launch 1 timed 1 cycles=1790000 frames=61 ms=255.500 cycles_per_second=7005871 mhz=7.006 times_real=3.91
+launch 1 timed 2 cycles=1790003 frames=60 ms=253.900 cycles_per_second=7050032 mhz=7.050 times_real=3.94
+launch 1 timed 3 cycles=1790001 frames=60 ms=253.600 cycles_per_second=7058364 mhz=7.058 times_real=3.94
+launch 1 timed 4 cycles=1790000 frames=60 ms=254.600 cycles_per_second=7030636 mhz=7.031 times_real=3.93
+launch 1 timed 5 cycles=1790002 frames=60 ms=253.600 cycles_per_second=7058368 mhz=7.058 times_real=3.94
+launch 1 thread 1 cycles=1790001 thread_ms=251.403 mhz=7.120 times_real=3.98
+launch 1 thread 2 cycles=1790000 thread_ms=243.408 mhz=7.354 times_real=4.11
+launch 1 thread 3 cycles=1790002 thread_ms=244.730 mhz=7.314 times_real=4.09
+launch 1 thread 4 cycles=1790002 thread_ms=243.399 mhz=7.354 times_real=4.11
+launch 1 thread 5 cycles=1790002 thread_ms=245.724 mhz=7.285 times_real=4.07
+launch 1 thread 6 cycles=1790002 thread_ms=243.650 mhz=7.347 times_real=4.10
+launch 1 thread 7 cycles=1790001 thread_ms=243.540 mhz=7.350 times_real=4.11
+launch 1 thread 8 cycles=1790003 thread_ms=243.180 mhz=7.361 times_real=4.11
+--- exit=0 end=2026-10-13T11:33:28Z loadavg=0.76 0.37 0.81 1/404 182689
+=== launch r0-p5-base folder=/tmp/nes77/pub-base region=0 start=2026-10-13T11:33:28Z loadavg=0.76 0.37 0.81 1/404 182695
+--- top before: 2.0 claude;1.0 ruby;0.0 systemd;0.0 kthreadd;
+rom: other/snow.nes at 95d8f621ae55, 40976 bytes, sha256 7db551e868b2c0182941bd68adc447c2f0668098a4425e8e170b20e4327b7210, hash checked
+browser 153.0.8010.12
+launch 1 region 0 NTSC
+launch 1 Running as NTSC, as chosen here: the file does not say which.
+launch 1 boot cycles=5000000 frames=167 ms=724.900 cycles_per_second=6897503 mhz=6.898 times_real=3.85
+launch 1 timed 1 cycles=1790000 frames=61 ms=253.400 cycles_per_second=7063931 mhz=7.064 times_real=3.95
+launch 1 timed 2 cycles=1790003 frames=60 ms=251.800 cycles_per_second=7108828 mhz=7.109 times_real=3.97
+launch 1 timed 3 cycles=1790001 frames=60 ms=251.700 cycles_per_second=7111645 mhz=7.112 times_real=3.97
+launch 1 timed 4 cycles=1790000 frames=60 ms=251.700 cycles_per_second=7111641 mhz=7.112 times_real=3.97
+launch 1 timed 5 cycles=1790002 frames=60 ms=251.400 cycles_per_second=7120135 mhz=7.120 times_real=3.98
+launch 1 thread 1 cycles=1790001 thread_ms=251.424 mhz=7.119 times_real=3.98
+launch 1 thread 2 cycles=1790000 thread_ms=244.193 mhz=7.330 times_real=4.10
+launch 1 thread 3 cycles=1790002 thread_ms=243.227 mhz=7.359 times_real=4.11
+launch 1 thread 4 cycles=1790002 thread_ms=242.966 mhz=7.367 times_real=4.12
+launch 1 thread 5 cycles=1790002 thread_ms=244.996 mhz=7.306 times_real=4.08
+launch 1 thread 6 cycles=1790002 thread_ms=243.965 mhz=7.337 times_real=4.10
+launch 1 thread 7 cycles=1790001 thread_ms=244.593 mhz=7.318 times_real=4.09
+launch 1 thread 8 cycles=1790003 thread_ms=243.632 mhz=7.347 times_real=4.11
+--- exit=0 end=2026-10-13T11:33:35Z loadavg=0.79 0.39 0.82 1/406 182832
+=== launch r0-p6-A folder=/tmp/nes77/pub-A region=0 start=2026-10-13T11:33:35Z loadavg=0.79 0.39 0.82 1/406 182838
+--- top before: 2.0 claude;1.0 tailsca+;1.0 kworker+;1.0 top;
+rom: other/snow.nes at 95d8f621ae55, 40976 bytes, sha256 7db551e868b2c0182941bd68adc447c2f0668098a4425e8e170b20e4327b7210, hash checked
+browser 153.0.8010.12
+launch 1 region 0 NTSC
+launch 1 Running as NTSC, as chosen here: the file does not say which.
+launch 1 boot cycles=5000000 frames=167 ms=725.600 cycles_per_second=6890849 mhz=6.891 times_real=3.85
+launch 1 timed 1 cycles=1790000 frames=61 ms=254.000 cycles_per_second=7047244 mhz=7.047 times_real=3.94
+launch 1 timed 2 cycles=1790003 frames=60 ms=252.200 cycles_per_second=7097554 mhz=7.098 times_real=3.97
+launch 1 timed 3 cycles=1790001 frames=60 ms=252.400 cycles_per_second=7091922 mhz=7.092 times_real=3.96
+launch 1 timed 4 cycles=1790000 frames=60 ms=252.200 cycles_per_second=7097542 mhz=7.098 times_real=3.97
+launch 1 timed 5 cycles=1790002 frames=60 ms=251.900 cycles_per_second=7106002 mhz=7.106 times_real=3.97
+launch 1 thread 1 cycles=1790001 thread_ms=250.761 mhz=7.138 times_real=3.99
+launch 1 thread 2 cycles=1790000 thread_ms=242.881 mhz=7.370 times_real=4.12
+launch 1 thread 3 cycles=1790002 thread_ms=242.747 mhz=7.374 times_real=4.12
+launch 1 thread 4 cycles=1790002 thread_ms=242.245 mhz=7.389 times_real=4.13
+launch 1 thread 5 cycles=1790002 thread_ms=244.794 mhz=7.312 times_real=4.09
+launch 1 thread 6 cycles=1790002 thread_ms=243.350 mhz=7.356 times_real=4.11
+launch 1 thread 7 cycles=1790001 thread_ms=243.346 mhz=7.356 times_real=4.11
+launch 1 thread 8 cycles=1790003 thread_ms=243.044 mhz=7.365 times_real=4.12
+--- exit=0 end=2026-10-13T11:33:41Z loadavg=0.89 0.42 0.82 1/405 182966
+=== launch r0-p6-B folder=/tmp/nes77/pub-B region=0 start=2026-10-13T11:33:41Z loadavg=0.89 0.42 0.82 1/405 182972
+--- top before: 1.0 Paseo;1.0 claude;1.0 top;0.0 systemd;
+rom: other/snow.nes at 95d8f621ae55, 40976 bytes, sha256 7db551e868b2c0182941bd68adc447c2f0668098a4425e8e170b20e4327b7210, hash checked
+browser 153.0.8010.12
+launch 1 region 0 NTSC
+launch 1 Running as NTSC, as chosen here: the file does not say which.
+launch 1 boot cycles=5000000 frames=167 ms=729.000 cycles_per_second=6858711 mhz=6.859 times_real=3.83
+launch 1 timed 1 cycles=1790000 frames=61 ms=255.300 cycles_per_second=7011359 mhz=7.011 times_real=3.92
+launch 1 timed 2 cycles=1790003 frames=60 ms=253.500 cycles_per_second=7061156 mhz=7.061 times_real=3.95
+launch 1 timed 3 cycles=1790001 frames=60 ms=254.800 cycles_per_second=7025122 mhz=7.025 times_real=3.93
+launch 1 timed 4 cycles=1790000 frames=60 ms=254.200 cycles_per_second=7041699 mhz=7.042 times_real=3.93
+launch 1 timed 5 cycles=1790002 frames=60 ms=254.000 cycles_per_second=7047252 mhz=7.047 times_real=3.94
+launch 1 thread 1 cycles=1790001 thread_ms=251.917 mhz=7.106 times_real=3.97
+launch 1 thread 2 cycles=1790000 thread_ms=244.369 mhz=7.325 times_real=4.09
+launch 1 thread 3 cycles=1790002 thread_ms=243.375 mhz=7.355 times_real=4.11
+launch 1 thread 4 cycles=1790002 thread_ms=244.786 mhz=7.313 times_real=4.09
+launch 1 thread 5 cycles=1790002 thread_ms=245.464 mhz=7.292 times_real=4.07
+launch 1 thread 6 cycles=1790002 thread_ms=243.940 mhz=7.338 times_real=4.10
+launch 1 thread 7 cycles=1790001 thread_ms=243.980 mhz=7.337 times_real=4.10
+launch 1 thread 8 cycles=1790003 thread_ms=244.177 mhz=7.331 times_real=4.10
+--- exit=0 end=2026-10-13T11:33:48Z loadavg=0.90 0.43 0.83 1/405 183133
+=== launch r0-p6-base folder=/tmp/nes77/pub-base region=0 start=2026-10-13T11:33:48Z loadavg=0.90 0.43 0.83 1/405 183139
+--- top before: 1.0 Paseo;1.0 claude;1.0 top;0.0 systemd;
+rom: other/snow.nes at 95d8f621ae55, 40976 bytes, sha256 7db551e868b2c0182941bd68adc447c2f0668098a4425e8e170b20e4327b7210, hash checked
+browser 153.0.8010.12
+launch 1 region 0 NTSC
+launch 1 Running as NTSC, as chosen here: the file does not say which.
+launch 1 boot cycles=5000000 frames=167 ms=727.500 cycles_per_second=6872852 mhz=6.873 times_real=3.84
+launch 1 timed 1 cycles=1790000 frames=61 ms=254.100 cycles_per_second=7044471 mhz=7.044 times_real=3.94
+launch 1 timed 2 cycles=1790003 frames=60 ms=252.600 cycles_per_second=7086314 mhz=7.086 times_real=3.96
+launch 1 timed 3 cycles=1790001 frames=60 ms=252.300 cycles_per_second=7094732 mhz=7.095 times_real=3.96
+launch 1 timed 4 cycles=1790000 frames=60 ms=252.200 cycles_per_second=7097542 mhz=7.098 times_real=3.97
+launch 1 timed 5 cycles=1790002 frames=60 ms=252.200 cycles_per_second=7097550 mhz=7.098 times_real=3.97
+launch 1 thread 1 cycles=1790001 thread_ms=250.544 mhz=7.144 times_real=3.99
+launch 1 thread 2 cycles=1790000 thread_ms=242.495 mhz=7.382 times_real=4.12
+launch 1 thread 3 cycles=1790002 thread_ms=242.220 mhz=7.390 times_real=4.13
+launch 1 thread 4 cycles=1790002 thread_ms=241.983 mhz=7.397 times_real=4.13
+launch 1 thread 5 cycles=1790002 thread_ms=244.405 mhz=7.324 times_real=4.09
+launch 1 thread 6 cycles=1790002 thread_ms=243.233 mhz=7.359 times_real=4.11
+launch 1 thread 7 cycles=1790001 thread_ms=242.944 mhz=7.368 times_real=4.12
+launch 1 thread 8 cycles=1790003 thread_ms=242.528 mhz=7.381 times_real=4.12
+--- exit=0 end=2026-10-13T11:33:55Z loadavg=0.84 0.43 0.82 1/408 183268
+=== launch r0-p6-cur folder=/tmp/nes77/pub-after region=0 start=2026-10-13T11:33:55Z loadavg=0.84 0.43 0.82 1/408 183274
+--- top before: 2.0 claude;1.0 top;0.0 systemd;0.0 kthreadd;
+rom: other/snow.nes at 95d8f621ae55, 40976 bytes, sha256 7db551e868b2c0182941bd68adc447c2f0668098a4425e8e170b20e4327b7210, hash checked
+browser 153.0.8010.12
+launch 1 region 0 NTSC
+launch 1 Running as NTSC, as chosen here: the file does not say which.
+launch 1 boot cycles=5000000 frames=167 ms=753.300 cycles_per_second=6637462 mhz=6.637 times_real=3.71
+launch 1 timed 1 cycles=1790000 frames=61 ms=264.100 cycles_per_second=6777736 mhz=6.778 times_real=3.79
+launch 1 timed 2 cycles=1790003 frames=60 ms=261.500 cycles_per_second=6845136 mhz=6.845 times_real=3.82
+launch 1 timed 3 cycles=1790001 frames=60 ms=261.100 cycles_per_second=6855615 mhz=6.856 times_real=3.83
+launch 1 timed 4 cycles=1790000 frames=60 ms=261.500 cycles_per_second=6845124 mhz=6.845 times_real=3.82
+launch 1 timed 5 cycles=1790002 frames=60 ms=260.400 cycles_per_second=6874048 mhz=6.874 times_real=3.84
+launch 1 thread 1 cycles=1790001 thread_ms=258.901 mhz=6.914 times_real=3.86
+launch 1 thread 2 cycles=1790000 thread_ms=250.917 mhz=7.134 times_real=3.99
+launch 1 thread 3 cycles=1790002 thread_ms=251.826 mhz=7.108 times_real=3.97
+launch 1 thread 4 cycles=1790002 thread_ms=251.314 mhz=7.123 times_real=3.98
+launch 1 thread 5 cycles=1790002 thread_ms=253.381 mhz=7.064 times_real=3.95
+launch 1 thread 6 cycles=1790002 thread_ms=250.891 mhz=7.135 times_real=3.99
+launch 1 thread 7 cycles=1790001 thread_ms=251.021 mhz=7.131 times_real=3.98
+launch 1 thread 8 cycles=1790003 thread_ms=251.018 mhz=7.131 times_real=3.98
+--- exit=0 end=2026-10-13T11:34:02Z loadavg=0.85 0.44 0.82 1/411 183405
+=== launch r0-p7-B folder=/tmp/nes77/pub-B region=0 start=2026-10-13T11:34:02Z loadavg=0.85 0.44 0.82 1/411 183411
+--- top before: 2.0 claude;1.0 claude;0.0 systemd;0.0 kthreadd;
+rom: other/snow.nes at 95d8f621ae55, 40976 bytes, sha256 7db551e868b2c0182941bd68adc447c2f0668098a4425e8e170b20e4327b7210, hash checked
+browser 153.0.8010.12
+launch 1 region 0 NTSC
+launch 1 Running as NTSC, as chosen here: the file does not say which.
+launch 1 boot cycles=5000000 frames=167 ms=728.900 cycles_per_second=6859652 mhz=6.860 times_real=3.83
+launch 1 timed 1 cycles=1790000 frames=61 ms=255.000 cycles_per_second=7019608 mhz=7.020 times_real=3.92
+launch 1 timed 2 cycles=1790003 frames=60 ms=253.600 cycles_per_second=7058371 mhz=7.058 times_real=3.94
+launch 1 timed 3 cycles=1790001 frames=60 ms=253.500 cycles_per_second=7061148 mhz=7.061 times_real=3.95
+launch 1 timed 4 cycles=1790000 frames=60 ms=253.400 cycles_per_second=7063931 mhz=7.064 times_real=3.95
+launch 1 timed 5 cycles=1790002 frames=60 ms=253.200 cycles_per_second=7069518 mhz=7.070 times_real=3.95
+launch 1 thread 1 cycles=1790001 thread_ms=251.887 mhz=7.106 times_real=3.97
+launch 1 thread 2 cycles=1790000 thread_ms=243.976 mhz=7.337 times_real=4.10
+launch 1 thread 3 cycles=1790002 thread_ms=244.364 mhz=7.325 times_real=4.09
+launch 1 thread 4 cycles=1790002 thread_ms=245.167 mhz=7.301 times_real=4.08
+launch 1 thread 5 cycles=1790002 thread_ms=246.501 mhz=7.262 times_real=4.06
+launch 1 thread 6 cycles=1790002 thread_ms=244.453 mhz=7.322 times_real=4.09
+launch 1 thread 7 cycles=1790001 thread_ms=244.456 mhz=7.322 times_real=4.09
+launch 1 thread 8 cycles=1790003 thread_ms=244.535 mhz=7.320 times_real=4.09
+--- exit=0 end=2026-10-13T11:34:09Z loadavg=0.79 0.43 0.82 1/406 183541
+=== launch r0-p7-base folder=/tmp/nes77/pub-base region=0 start=2026-10-13T11:34:09Z loadavg=0.79 0.43 0.82 1/406 183547
+--- top before: 3.0 claude;1.0 claude;0.0 systemd;0.0 kthreadd;
+rom: other/snow.nes at 95d8f621ae55, 40976 bytes, sha256 7db551e868b2c0182941bd68adc447c2f0668098a4425e8e170b20e4327b7210, hash checked
+browser 153.0.8010.12
+launch 1 region 0 NTSC
+launch 1 Running as NTSC, as chosen here: the file does not say which.
+launch 1 boot cycles=5000000 frames=167 ms=727.500 cycles_per_second=6872852 mhz=6.873 times_real=3.84
+launch 1 timed 1 cycles=1790000 frames=61 ms=254.400 cycles_per_second=7036164 mhz=7.036 times_real=3.93
+launch 1 timed 2 cycles=1790003 frames=60 ms=253.800 cycles_per_second=7052809 mhz=7.053 times_real=3.94
+launch 1 timed 3 cycles=1790001 frames=60 ms=253.100 cycles_per_second=7072307 mhz=7.072 times_real=3.95
+launch 1 timed 4 cycles=1790000 frames=60 ms=252.700 cycles_per_second=7083498 mhz=7.083 times_real=3.96
+launch 1 timed 5 cycles=1790002 frames=60 ms=252.200 cycles_per_second=7097550 mhz=7.098 times_real=3.97
+launch 1 thread 1 cycles=1790001 thread_ms=250.637 mhz=7.142 times_real=3.99
+launch 1 thread 2 cycles=1790000 thread_ms=242.952 mhz=7.368 times_real=4.12
+launch 1 thread 3 cycles=1790002 thread_ms=242.782 mhz=7.373 times_real=4.12
+launch 1 thread 4 cycles=1790002 thread_ms=242.064 mhz=7.395 times_real=4.13
+launch 1 thread 5 cycles=1790002 thread_ms=244.242 mhz=7.329 times_real=4.09
+launch 1 thread 6 cycles=1790002 thread_ms=242.873 mhz=7.370 times_real=4.12
+launch 1 thread 7 cycles=1790001 thread_ms=242.979 mhz=7.367 times_real=4.12
+launch 1 thread 8 cycles=1790003 thread_ms=242.873 mhz=7.370 times_real=4.12
+--- exit=0 end=2026-10-13T11:34:15Z loadavg=0.75 0.44 0.81 2/405 183671
+=== launch r0-p7-cur folder=/tmp/nes77/pub-after region=0 start=2026-10-13T11:34:15Z loadavg=0.75 0.44 0.81 1/405 183677
+--- top before: 2.0 Paseo;1.0 contain+;1.0 watch.sh;1.0 kworker+;
+rom: other/snow.nes at 95d8f621ae55, 40976 bytes, sha256 7db551e868b2c0182941bd68adc447c2f0668098a4425e8e170b20e4327b7210, hash checked
+browser 153.0.8010.12
+launch 1 region 0 NTSC
+launch 1 Running as NTSC, as chosen here: the file does not say which.
+launch 1 boot cycles=5000000 frames=167 ms=749.500 cycles_per_second=6671114 mhz=6.671 times_real=3.73
+launch 1 timed 1 cycles=1790000 frames=61 ms=262.400 cycles_per_second=6821646 mhz=6.822 times_real=3.81
+launch 1 timed 2 cycles=1790003 frames=60 ms=260.700 cycles_per_second=6866141 mhz=6.866 times_real=3.84
+launch 1 timed 3 cycles=1790001 frames=60 ms=260.400 cycles_per_second=6874044 mhz=6.874 times_real=3.84
+launch 1 timed 4 cycles=1790000 frames=60 ms=260.200 cycles_per_second=6879324 mhz=6.879 times_real=3.84
+launch 1 timed 5 cycles=1790002 frames=60 ms=260.200 cycles_per_second=6879331 mhz=6.879 times_real=3.84
+launch 1 thread 1 cycles=1790001 thread_ms=258.660 mhz=6.920 times_real=3.87
+launch 1 thread 2 cycles=1790000 thread_ms=251.171 mhz=7.127 times_real=3.98
+launch 1 thread 3 cycles=1790002 thread_ms=251.241 mhz=7.125 times_real=3.98
+launch 1 thread 4 cycles=1790002 thread_ms=250.734 mhz=7.139 times_real=3.99
+launch 1 thread 5 cycles=1790002 thread_ms=253.167 mhz=7.070 times_real=3.95
+launch 1 thread 6 cycles=1790002 thread_ms=251.406 mhz=7.120 times_real=3.98
+launch 1 thread 7 cycles=1790001 thread_ms=251.775 mhz=7.110 times_real=3.97
+launch 1 thread 8 cycles=1790003 thread_ms=251.232 mhz=7.125 times_real=3.98
+--- exit=0 end=2026-10-13T11:34:22Z loadavg=0.77 0.45 0.82 2/408 183815
+=== launch r0-p7-A folder=/tmp/nes77/pub-A region=0 start=2026-10-13T11:34:22Z loadavg=0.77 0.45 0.82 1/408 183821
+--- top before: 1.0 Paseo;1.0 claude;1.0 claude;0.0 systemd;
+rom: other/snow.nes at 95d8f621ae55, 40976 bytes, sha256 7db551e868b2c0182941bd68adc447c2f0668098a4425e8e170b20e4327b7210, hash checked
+browser 153.0.8010.12
+launch 1 region 0 NTSC
+launch 1 Running as NTSC, as chosen here: the file does not say which.
+launch 1 boot cycles=5000000 frames=167 ms=726.300 cycles_per_second=6884208 mhz=6.884 times_real=3.85
+launch 1 timed 1 cycles=1790000 frames=61 ms=253.800 cycles_per_second=7052797 mhz=7.053 times_real=3.94
+launch 1 timed 2 cycles=1790003 frames=60 ms=252.600 cycles_per_second=7086314 mhz=7.086 times_real=3.96
+launch 1 timed 3 cycles=1790001 frames=60 ms=252.100 cycles_per_second=7100361 mhz=7.100 times_real=3.97
+launch 1 timed 4 cycles=1790000 frames=60 ms=252.200 cycles_per_second=7097542 mhz=7.098 times_real=3.97
+launch 1 timed 5 cycles=1790002 frames=60 ms=251.600 cycles_per_second=7114475 mhz=7.114 times_real=3.98
+launch 1 thread 1 cycles=1790001 thread_ms=250.207 mhz=7.154 times_real=4.00
+launch 1 thread 2 cycles=1790000 thread_ms=242.641 mhz=7.377 times_real=4.12
+launch 1 thread 3 cycles=1790002 thread_ms=243.983 mhz=7.337 times_real=4.10
+launch 1 thread 4 cycles=1790002 thread_ms=242.830 mhz=7.371 times_real=4.12
+launch 1 thread 5 cycles=1790002 thread_ms=245.137 mhz=7.302 times_real=4.08
+launch 1 thread 6 cycles=1790002 thread_ms=243.482 mhz=7.352 times_real=4.11
+launch 1 thread 7 cycles=1790001 thread_ms=243.149 mhz=7.362 times_real=4.11
+launch 1 thread 8 cycles=1790003 thread_ms=242.736 mhz=7.374 times_real=4.12
+--- exit=0 end=2026-10-13T11:34:29Z loadavg=1.43 0.59 0.86 1/408 183945
+=== launch r0-p8-base folder=/tmp/nes77/pub-base region=0 start=2026-10-13T11:34:59Z loadavg=0.86 0.53 0.83 1/406 184019
+--- top before: 1.0 tailsca+;1.0 contain+;1.0 esbuild;1.0 claude;
+rom: other/snow.nes at 95d8f621ae55, 40976 bytes, sha256 7db551e868b2c0182941bd68adc447c2f0668098a4425e8e170b20e4327b7210, hash checked
+browser 153.0.8010.12
+launch 1 region 0 NTSC
+launch 1 Running as NTSC, as chosen here: the file does not say which.
+launch 1 boot cycles=5000000 frames=167 ms=727.400 cycles_per_second=6873797 mhz=6.874 times_real=3.84
+launch 1 timed 1 cycles=1790000 frames=61 ms=254.200 cycles_per_second=7041699 mhz=7.042 times_real=3.93
+launch 1 timed 2 cycles=1790003 frames=60 ms=253.100 cycles_per_second=7072315 mhz=7.072 times_real=3.95
+launch 1 timed 3 cycles=1790001 frames=60 ms=252.600 cycles_per_second=7086306 mhz=7.086 times_real=3.96
+launch 1 timed 4 cycles=1790000 frames=60 ms=252.400 cycles_per_second=7091918 mhz=7.092 times_real=3.96
+launch 1 timed 5 cycles=1790002 frames=60 ms=252.400 cycles_per_second=7091926 mhz=7.092 times_real=3.96
+launch 1 thread 1 cycles=1790001 thread_ms=250.972 mhz=7.132 times_real=3.99
+launch 1 thread 2 cycles=1790000 thread_ms=243.031 mhz=7.365 times_real=4.12
+launch 1 thread 3 cycles=1790002 thread_ms=242.990 mhz=7.367 times_real=4.12
+launch 1 thread 4 cycles=1790002 thread_ms=242.544 mhz=7.380 times_real=4.12
+launch 1 thread 5 cycles=1790002 thread_ms=245.042 mhz=7.305 times_real=4.08
+launch 1 thread 6 cycles=1790002 thread_ms=243.204 mhz=7.360 times_real=4.11
+launch 1 thread 7 cycles=1790001 thread_ms=243.470 mhz=7.352 times_real=4.11
+launch 1 thread 8 cycles=1790003 thread_ms=243.181 mhz=7.361 times_real=4.11
+--- exit=0 end=2026-10-13T11:35:06Z loadavg=0.81 0.53 0.83 2/405 184155
+=== launch r0-p8-cur folder=/tmp/nes77/pub-after region=0 start=2026-10-13T11:35:06Z loadavg=0.81 0.53 0.83 1/405 184161
+--- top before: 1.0 unified+;1.0 claude;0.0 systemd;0.0 kthreadd;
+rom: other/snow.nes at 95d8f621ae55, 40976 bytes, sha256 7db551e868b2c0182941bd68adc447c2f0668098a4425e8e170b20e4327b7210, hash checked
+browser 153.0.8010.12
+launch 1 region 0 NTSC
+launch 1 Running as NTSC, as chosen here: the file does not say which.
+launch 1 boot cycles=5000000 frames=167 ms=738.400 cycles_per_second=6771398 mhz=6.771 times_real=3.78
+launch 1 timed 1 cycles=1790000 frames=61 ms=257.000 cycles_per_second=6964981 mhz=6.965 times_real=3.89
+launch 1 timed 2 cycles=1790003 frames=60 ms=255.700 cycles_per_second=7000403 mhz=7.000 times_real=3.91
+launch 1 timed 3 cycles=1790001 frames=60 ms=256.300 cycles_per_second=6984007 mhz=6.984 times_real=3.90
+launch 1 timed 4 cycles=1790000 frames=60 ms=255.800 cycles_per_second=6997654 mhz=6.998 times_real=3.91
+launch 1 timed 5 cycles=1790002 frames=60 ms=255.200 cycles_per_second=7014114 mhz=7.014 times_real=3.92
+launch 1 thread 1 cycles=1790001 thread_ms=254.256 mhz=7.040 times_real=3.93
+launch 1 thread 2 cycles=1790000 thread_ms=246.701 mhz=7.256 times_real=4.05
+launch 1 thread 3 cycles=1790002 thread_ms=246.477 mhz=7.262 times_real=4.06
+launch 1 thread 4 cycles=1790002 thread_ms=246.201 mhz=7.270 times_real=4.06
+launch 1 thread 5 cycles=1790002 thread_ms=248.902 mhz=7.192 times_real=4.02
+launch 1 thread 6 cycles=1790002 thread_ms=247.280 mhz=7.239 times_real=4.04
+launch 1 thread 7 cycles=1790001 thread_ms=246.936 mhz=7.249 times_real=4.05
+launch 1 thread 8 cycles=1790003 thread_ms=246.806 mhz=7.253 times_real=4.05
+--- exit=0 end=2026-10-13T11:35:13Z loadavg=0.83 0.54 0.83 1/405 184289
+=== launch r0-p8-A folder=/tmp/nes77/pub-A region=0 start=2026-10-13T11:35:13Z loadavg=0.83 0.54 0.83 1/405 184295
+--- top before: 1.0 multipa+;0.0 systemd;0.0 kthreadd;0.0 pool_wo+;
+rom: other/snow.nes at 95d8f621ae55, 40976 bytes, sha256 7db551e868b2c0182941bd68adc447c2f0668098a4425e8e170b20e4327b7210, hash checked
+browser 153.0.8010.12
+launch 1 region 0 NTSC
+launch 1 Running as NTSC, as chosen here: the file does not say which.
+launch 1 boot cycles=5000000 frames=167 ms=726.900 cycles_per_second=6878525 mhz=6.879 times_real=3.84
+launch 1 timed 1 cycles=1790000 frames=61 ms=254.100 cycles_per_second=7044471 mhz=7.044 times_real=3.94
+launch 1 timed 2 cycles=1790003 frames=60 ms=252.900 cycles_per_second=7077908 mhz=7.078 times_real=3.95
+launch 1 timed 3 cycles=1790001 frames=60 ms=252.500 cycles_per_second=7089113 mhz=7.089 times_real=3.96
+launch 1 timed 4 cycles=1790000 frames=60 ms=252.400 cycles_per_second=7091918 mhz=7.092 times_real=3.96
+launch 1 timed 5 cycles=1790002 frames=60 ms=252.200 cycles_per_second=7097550 mhz=7.098 times_real=3.97
+launch 1 thread 1 cycles=1790001 thread_ms=250.573 mhz=7.144 times_real=3.99
+launch 1 thread 2 cycles=1790000 thread_ms=243.196 mhz=7.360 times_real=4.11
+launch 1 thread 3 cycles=1790002 thread_ms=242.980 mhz=7.367 times_real=4.12
+launch 1 thread 4 cycles=1790002 thread_ms=242.403 mhz=7.384 times_real=4.13
+launch 1 thread 5 cycles=1790002 thread_ms=244.731 mhz=7.314 times_real=4.09
+launch 1 thread 6 cycles=1790002 thread_ms=243.030 mhz=7.365 times_real=4.12
+launch 1 thread 7 cycles=1790001 thread_ms=243.144 mhz=7.362 times_real=4.11
+launch 1 thread 8 cycles=1790003 thread_ms=243.075 mhz=7.364 times_real=4.11
+--- exit=0 end=2026-10-13T11:35:19Z loadavg=1.72 0.73 0.89 2/405 184425
+=== launch r0-p8-B folder=/tmp/nes77/pub-B region=0 start=2026-10-13T11:36:04Z loadavg=0.81 0.62 0.84 1/409 184557
+--- top before: 18.8 unified+;1.0 systemd;1.0 systemd+;1.0 claude;
+rom: other/snow.nes at 95d8f621ae55, 40976 bytes, sha256 7db551e868b2c0182941bd68adc447c2f0668098a4425e8e170b20e4327b7210, hash checked
+browser 153.0.8010.12
+launch 1 region 0 NTSC
+launch 1 Running as NTSC, as chosen here: the file does not say which.
+launch 1 boot cycles=5000000 frames=167 ms=730.800 cycles_per_second=6841817 mhz=6.842 times_real=3.82
+launch 1 timed 1 cycles=1790000 frames=61 ms=255.600 cycles_per_second=7003130 mhz=7.003 times_real=3.91
+launch 1 timed 2 cycles=1790003 frames=60 ms=254.600 cycles_per_second=7030648 mhz=7.031 times_real=3.93
+launch 1 timed 3 cycles=1790001 frames=60 ms=253.800 cycles_per_second=7052801 mhz=7.053 times_real=3.94
+launch 1 timed 4 cycles=1790000 frames=60 ms=253.900 cycles_per_second=7050020 mhz=7.050 times_real=3.94
+launch 1 timed 5 cycles=1790002 frames=60 ms=253.700 cycles_per_second=7055585 mhz=7.056 times_real=3.94
+launch 1 thread 1 cycles=1790001 thread_ms=251.937 mhz=7.105 times_real=3.97
+launch 1 thread 2 cycles=1790000 thread_ms=244.425 mhz=7.323 times_real=4.09
+launch 1 thread 3 cycles=1790002 thread_ms=244.186 mhz=7.330 times_real=4.10
+launch 1 thread 4 cycles=1790002 thread_ms=243.632 mhz=7.347 times_real=4.11
+launch 1 thread 5 cycles=1790002 thread_ms=246.040 mhz=7.275 times_real=4.06
+launch 1 thread 6 cycles=1790002 thread_ms=244.564 mhz=7.319 times_real=4.09
+launch 1 thread 7 cycles=1790001 thread_ms=244.514 mhz=7.321 times_real=4.09
+launch 1 thread 8 cycles=1790003 thread_ms=244.319 mhz=7.326 times_real=4.09
+--- exit=0 end=2026-10-13T11:36:11Z loadavg=0.77 0.62 0.84 1/404 184697
+=== launch r1-p1-cur folder=/tmp/nes77/pub-after region=1 start=2026-10-13T11:36:11Z loadavg=0.77 0.62 0.84 1/404 184705
+--- top before: 1.0 claude;0.0 systemd;0.0 kthreadd;0.0 pool_wo+;
+rom: other/snow.nes at 95d8f621ae55, 40976 bytes, sha256 7db551e868b2c0182941bd68adc447c2f0668098a4425e8e170b20e4327b7210, hash checked
+browser 153.0.8010.12
+launch 1 region 1 PAL
+launch 1 Running as PAL, as chosen here: the file does not say which.
+launch 1 boot cycles=5000001 frames=150 ms=737.700 cycles_per_second=6777824 mhz=6.778 times_real=4.08
+launch 1 timed 1 cycles=1790002 frames=54 ms=255.700 cycles_per_second=7000399 mhz=7.000 times_real=4.21
+launch 1 timed 2 cycles=1790000 frames=54 ms=255.900 cycles_per_second=6994920 mhz=6.995 times_real=4.21
+launch 1 timed 3 cycles=1790000 frames=53 ms=256.100 cycles_per_second=6989457 mhz=6.989 times_real=4.20
+launch 1 timed 4 cycles=1790001 frames=54 ms=254.100 cycles_per_second=7044475 mhz=7.044 times_real=4.24
+launch 1 timed 5 cycles=1790001 frames=54 ms=255.700 cycles_per_second=7000395 mhz=7.000 times_real=4.21
+launch 1 thread 1 cycles=1790004 thread_ms=259.057 mhz=6.910 times_real=4.16
+launch 1 thread 2 cycles=1790003 thread_ms=256.923 mhz=6.967 times_real=4.19
+launch 1 thread 3 cycles=1790000 thread_ms=246.853 mhz=7.251 times_real=4.36
+launch 1 thread 4 cycles=1790001 thread_ms=247.190 mhz=7.241 times_real=4.36
+launch 1 thread 5 cycles=1790004 thread_ms=246.278 mhz=7.268 times_real=4.37
+launch 1 thread 6 cycles=1790003 thread_ms=248.136 mhz=7.214 times_real=4.34
+launch 1 thread 7 cycles=1790003 thread_ms=246.512 mhz=7.261 times_real=4.37
+launch 1 thread 8 cycles=1790003 thread_ms=246.480 mhz=7.262 times_real=4.37
+--- exit=0 end=2026-10-13T11:36:18Z loadavg=0.79 0.63 0.84 1/408 184833
+=== launch r1-p1-A folder=/tmp/nes77/pub-A region=1 start=2026-10-13T11:36:18Z loadavg=0.79 0.63 0.84 1/408 184839
+--- top before: 1.0 kworker+;1.0 top;0.0 systemd;0.0 kthreadd;
+rom: other/snow.nes at 95d8f621ae55, 40976 bytes, sha256 7db551e868b2c0182941bd68adc447c2f0668098a4425e8e170b20e4327b7210, hash checked
+browser 153.0.8010.12
+launch 1 region 1 PAL
+launch 1 Running as PAL, as chosen here: the file does not say which.
+launch 1 boot cycles=5000001 frames=150 ms=714.600 cycles_per_second=6996923 mhz=6.997 times_real=4.21
+launch 1 timed 1 cycles=1790002 frames=54 ms=248.200 cycles_per_second=7211934 mhz=7.212 times_real=4.34
+launch 1 timed 2 cycles=1790000 frames=54 ms=248.300 cycles_per_second=7209021 mhz=7.209 times_real=4.34
+launch 1 timed 3 cycles=1790000 frames=53 ms=248.200 cycles_per_second=7211926 mhz=7.212 times_real=4.34
+launch 1 timed 4 cycles=1790001 frames=54 ms=246.600 cycles_per_second=7258723 mhz=7.259 times_real=4.37
+launch 1 timed 5 cycles=1790001 frames=54 ms=248.300 cycles_per_second=7209025 mhz=7.209 times_real=4.34
+launch 1 thread 1 cycles=1790004 thread_ms=249.492 mhz=7.175 times_real=4.32
+launch 1 thread 2 cycles=1790003 thread_ms=247.203 mhz=7.241 times_real=4.36
+launch 1 thread 3 cycles=1790000 thread_ms=239.689 mhz=7.468 times_real=4.49
+launch 1 thread 4 cycles=1790001 thread_ms=239.047 mhz=7.488 times_real=4.50
+launch 1 thread 5 cycles=1790004 thread_ms=239.224 mhz=7.483 times_real=4.50
+launch 1 thread 6 cycles=1790003 thread_ms=237.788 mhz=7.528 times_real=4.53
+launch 1 thread 7 cycles=1790003 thread_ms=239.746 mhz=7.466 times_real=4.49
+launch 1 thread 8 cycles=1790003 thread_ms=240.995 mhz=7.428 times_real=4.47
+--- exit=0 end=2026-10-13T11:36:25Z loadavg=0.82 0.64 0.84 1/403 184970
+=== launch r1-p1-B folder=/tmp/nes77/pub-B region=1 start=2026-10-13T11:36:25Z loadavg=0.82 0.64 0.84 1/403 184976
+--- top before: 2.0 Paseo;1.0 top;0.0 systemd;0.0 kthreadd;
+rom: other/snow.nes at 95d8f621ae55, 40976 bytes, sha256 7db551e868b2c0182941bd68adc447c2f0668098a4425e8e170b20e4327b7210, hash checked
+browser 153.0.8010.12
+launch 1 region 1 PAL
+launch 1 Running as PAL, as chosen here: the file does not say which.
+launch 1 boot cycles=5000001 frames=150 ms=730.900 cycles_per_second=6840882 mhz=6.841 times_real=4.11
+launch 1 timed 1 cycles=1790002 frames=54 ms=252.100 cycles_per_second=7100365 mhz=7.100 times_real=4.27
+launch 1 timed 2 cycles=1790000 frames=54 ms=252.200 cycles_per_second=7097542 mhz=7.098 times_real=4.27
+launch 1 timed 3 cycles=1790000 frames=53 ms=251.900 cycles_per_second=7105994 mhz=7.106 times_real=4.27
+launch 1 timed 4 cycles=1790001 frames=54 ms=250.700 cycles_per_second=7140012 mhz=7.140 times_real=4.29
+launch 1 timed 5 cycles=1790001 frames=54 ms=252.000 cycles_per_second=7103179 mhz=7.103 times_real=4.27
+launch 1 thread 1 cycles=1790004 thread_ms=252.683 mhz=7.084 times_real=4.26
+launch 1 thread 2 cycles=1790003 thread_ms=251.023 mhz=7.131 times_real=4.29
+launch 1 thread 3 cycles=1790000 thread_ms=243.171 mhz=7.361 times_real=4.43
+launch 1 thread 4 cycles=1790001 thread_ms=242.292 mhz=7.388 times_real=4.44
+launch 1 thread 5 cycles=1790004 thread_ms=242.187 mhz=7.391 times_real=4.45
+launch 1 thread 6 cycles=1790003 thread_ms=241.391 mhz=7.415 times_real=4.46
+launch 1 thread 7 cycles=1790003 thread_ms=243.194 mhz=7.360 times_real=4.43
+launch 1 thread 8 cycles=1790003 thread_ms=242.724 mhz=7.375 times_real=4.44
+--- exit=0 end=2026-10-13T11:36:31Z loadavg=0.83 0.65 0.84 1/405 185132
+=== launch r1-p1-base folder=/tmp/nes77/pub-base region=1 start=2026-10-13T11:36:31Z loadavg=0.83 0.65 0.84 1/405 185138
+--- top before: 0.0 systemd;0.0 kthreadd;0.0 pool_wo+;0.0 kworker+;
+rom: other/snow.nes at 95d8f621ae55, 40976 bytes, sha256 7db551e868b2c0182941bd68adc447c2f0668098a4425e8e170b20e4327b7210, hash checked
+browser 153.0.8010.12
+launch 1 region 1 PAL
+launch 1 Running as PAL, as chosen here: the file does not say which.
+launch 1 boot cycles=5000001 frames=150 ms=713.200 cycles_per_second=7010658 mhz=7.011 times_real=4.22
+launch 1 timed 1 cycles=1790002 frames=54 ms=247.900 cycles_per_second=7220662 mhz=7.221 times_real=4.34
+launch 1 timed 2 cycles=1790000 frames=54 ms=248.200 cycles_per_second=7211926 mhz=7.212 times_real=4.34
+launch 1 timed 3 cycles=1790000 frames=53 ms=247.700 cycles_per_second=7226484 mhz=7.226 times_real=4.35
+launch 1 timed 4 cycles=1790001 frames=54 ms=246.500 cycles_per_second=7261667 mhz=7.262 times_real=4.37
+launch 1 timed 5 cycles=1790001 frames=54 ms=247.700 cycles_per_second=7226488 mhz=7.226 times_real=4.35
+launch 1 thread 1 cycles=1790004 thread_ms=248.188 mhz=7.212 times_real=4.34
+launch 1 thread 2 cycles=1790003 thread_ms=246.295 mhz=7.268 times_real=4.37
+launch 1 thread 3 cycles=1790000 thread_ms=239.347 mhz=7.479 times_real=4.50
+launch 1 thread 4 cycles=1790001 thread_ms=238.522 mhz=7.505 times_real=4.51
+launch 1 thread 5 cycles=1790004 thread_ms=238.847 mhz=7.494 times_real=4.51
+launch 1 thread 6 cycles=1790003 thread_ms=237.129 mhz=7.549 times_real=4.54
+launch 1 thread 7 cycles=1790003 thread_ms=239.075 mhz=7.487 times_real=4.50
+launch 1 thread 8 cycles=1790003 thread_ms=239.108 mhz=7.486 times_real=4.50
+--- exit=0 end=2026-10-13T11:36:38Z loadavg=0.93 0.67 0.85 1/405 185273
+=== launch r1-p2-A folder=/tmp/nes77/pub-A region=1 start=2026-10-13T11:36:38Z loadavg=0.93 0.67 0.85 1/405 185279
+--- top before: 1.0 kworker+;1.0 top;0.0 systemd;0.0 kthreadd;
+rom: other/snow.nes at 95d8f621ae55, 40976 bytes, sha256 7db551e868b2c0182941bd68adc447c2f0668098a4425e8e170b20e4327b7210, hash checked
+browser 153.0.8010.12
+launch 1 region 1 PAL
+launch 1 Running as PAL, as chosen here: the file does not say which.
+launch 1 boot cycles=5000001 frames=150 ms=726.400 cycles_per_second=6883261 mhz=6.883 times_real=4.14
+launch 1 timed 1 cycles=1790002 frames=54 ms=249.900 cycles_per_second=7162873 mhz=7.163 times_real=4.31
+launch 1 timed 2 cycles=1790000 frames=54 ms=251.400 cycles_per_second=7120127 mhz=7.120 times_real=4.28
+launch 1 timed 3 cycles=1790000 frames=53 ms=250.100 cycles_per_second=7157137 mhz=7.157 times_real=4.30
+launch 1 timed 4 cycles=1790001 frames=54 ms=248.900 cycles_per_second=7191647 mhz=7.192 times_real=4.33
+launch 1 timed 5 cycles=1790001 frames=54 ms=250.100 cycles_per_second=7157141 mhz=7.157 times_real=4.30
+launch 1 thread 1 cycles=1790004 thread_ms=251.695 mhz=7.112 times_real=4.28
+launch 1 thread 2 cycles=1790003 thread_ms=248.955 mhz=7.190 times_real=4.32
+launch 1 thread 3 cycles=1790000 thread_ms=241.670 mhz=7.407 times_real=4.45
+launch 1 thread 4 cycles=1790001 thread_ms=241.428 mhz=7.414 times_real=4.46
+launch 1 thread 5 cycles=1790004 thread_ms=241.386 mhz=7.416 times_real=4.46
+launch 1 thread 6 cycles=1790003 thread_ms=239.353 mhz=7.479 times_real=4.50
+launch 1 thread 7 cycles=1790003 thread_ms=242.276 mhz=7.388 times_real=4.44
+launch 1 thread 8 cycles=1790003 thread_ms=241.035 mhz=7.426 times_real=4.47
+--- exit=0 end=2026-10-13T11:36:45Z loadavg=0.94 0.68 0.85 1/403 185404
+=== launch r1-p2-B folder=/tmp/nes77/pub-B region=1 start=2026-10-13T11:36:45Z loadavg=0.94 0.68 0.85 1/403 185410
+--- top before: 1.0 claude;1.0 top;0.0 systemd;0.0 kthreadd;
+rom: other/snow.nes at 95d8f621ae55, 40976 bytes, sha256 7db551e868b2c0182941bd68adc447c2f0668098a4425e8e170b20e4327b7210, hash checked
+browser 153.0.8010.12
+launch 1 region 1 PAL
+launch 1 Running as PAL, as chosen here: the file does not say which.
+launch 1 boot cycles=5000001 frames=150 ms=723.200 cycles_per_second=6913718 mhz=6.914 times_real=4.16
+launch 1 timed 1 cycles=1790002 frames=54 ms=250.900 cycles_per_second=7134324 mhz=7.134 times_real=4.29
+launch 1 timed 2 cycles=1790000 frames=54 ms=250.800 cycles_per_second=7137161 mhz=7.137 times_real=4.29
+launch 1 timed 3 cycles=1790000 frames=53 ms=250.900 cycles_per_second=7134316 mhz=7.134 times_real=4.29
+launch 1 timed 4 cycles=1790001 frames=54 ms=249.200 cycles_per_second=7182990 mhz=7.183 times_real=4.32
+launch 1 timed 5 cycles=1790001 frames=54 ms=250.400 cycles_per_second=7148566 mhz=7.149 times_real=4.30
+launch 1 thread 1 cycles=1790004 thread_ms=249.372 mhz=7.178 times_real=4.32
+launch 1 thread 2 cycles=1790003 thread_ms=247.237 mhz=7.240 times_real=4.35
+launch 1 thread 3 cycles=1790000 thread_ms=239.858 mhz=7.463 times_real=4.49
+launch 1 thread 4 cycles=1790001 thread_ms=239.272 mhz=7.481 times_real=4.50
+launch 1 thread 5 cycles=1790004 thread_ms=239.044 mhz=7.488 times_real=4.50
+launch 1 thread 6 cycles=1790003 thread_ms=237.566 mhz=7.535 times_real=4.53
+launch 1 thread 7 cycles=1790003 thread_ms=239.814 mhz=7.464 times_real=4.49
+launch 1 thread 8 cycles=1790003 thread_ms=239.595 mhz=7.471 times_real=4.49
+--- exit=0 end=2026-10-13T11:36:51Z loadavg=0.94 0.69 0.85 1/403 185543
+=== launch r1-p2-base folder=/tmp/nes77/pub-base region=1 start=2026-10-13T11:36:51Z loadavg=0.94 0.69 0.85 1/403 185549
+--- top before: 1.0 contain+;1.0 claude;0.0 systemd;0.0 kthreadd;
+rom: other/snow.nes at 95d8f621ae55, 40976 bytes, sha256 7db551e868b2c0182941bd68adc447c2f0668098a4425e8e170b20e4327b7210, hash checked
+browser 153.0.8010.12
+launch 1 region 1 PAL
+launch 1 Running as PAL, as chosen here: the file does not say which.
+launch 1 boot cycles=5000001 frames=150 ms=713.600 cycles_per_second=7006728 mhz=7.007 times_real=4.21
+launch 1 timed 1 cycles=1790002 frames=54 ms=247.700 cycles_per_second=7226492 mhz=7.226 times_real=4.35
+launch 1 timed 2 cycles=1790000 frames=54 ms=248.100 cycles_per_second=7214833 mhz=7.215 times_real=4.34
+launch 1 timed 3 cycles=1790000 frames=53 ms=247.700 cycles_per_second=7226484 mhz=7.226 times_real=4.35
+launch 1 timed 4 cycles=1790001 frames=54 ms=245.900 cycles_per_second=7279386 mhz=7.279 times_real=4.38
+launch 1 timed 5 cycles=1790001 frames=54 ms=247.400 cycles_per_second=7235251 mhz=7.235 times_real=4.35
+launch 1 thread 1 cycles=1790004 thread_ms=247.949 mhz=7.219 times_real=4.34
+launch 1 thread 2 cycles=1790003 thread_ms=246.060 mhz=7.275 times_real=4.38
+launch 1 thread 3 cycles=1790000 thread_ms=238.249 mhz=7.513 times_real=4.52
+launch 1 thread 4 cycles=1790001 thread_ms=238.270 mhz=7.512 times_real=4.52
+launch 1 thread 5 cycles=1790004 thread_ms=238.440 mhz=7.507 times_real=4.52
+launch 1 thread 6 cycles=1790003 thread_ms=236.729 mhz=7.561 times_real=4.55
+launch 1 thread 7 cycles=1790003 thread_ms=238.744 mhz=7.498 times_real=4.51
+launch 1 thread 8 cycles=1790003 thread_ms=238.366 mhz=7.509 times_real=4.52
+--- exit=0 end=2026-10-13T11:36:58Z loadavg=0.95 0.69 0.85 2/404 185679
+=== launch r1-p2-cur folder=/tmp/nes77/pub-after region=1 start=2026-10-13T11:36:58Z loadavg=0.95 0.69 0.85 1/404 185685
+--- top before: 1.0 claude;0.0 systemd;0.0 kthreadd;0.0 pool_wo+;
+rom: other/snow.nes at 95d8f621ae55, 40976 bytes, sha256 7db551e868b2c0182941bd68adc447c2f0668098a4425e8e170b20e4327b7210, hash checked
+browser 153.0.8010.12
+launch 1 region 1 PAL
+launch 1 Running as PAL, as chosen here: the file does not say which.
+launch 1 boot cycles=5000001 frames=150 ms=735.800 cycles_per_second=6795326 mhz=6.795 times_real=4.09
+launch 1 timed 1 cycles=1790002 frames=54 ms=255.900 cycles_per_second=6994928 mhz=6.995 times_real=4.21
+launch 1 timed 2 cycles=1790000 frames=54 ms=256.100 cycles_per_second=6989457 mhz=6.989 times_real=4.20
+launch 1 timed 3 cycles=1790000 frames=53 ms=255.800 cycles_per_second=6997654 mhz=6.998 times_real=4.21
+launch 1 timed 4 cycles=1790001 frames=54 ms=254.400 cycles_per_second=7036167 mhz=7.036 times_real=4.23
+launch 1 timed 5 cycles=1790001 frames=54 ms=255.700 cycles_per_second=7000395 mhz=7.000 times_real=4.21
+launch 1 thread 1 cycles=1790004 thread_ms=256.678 mhz=6.974 times_real=4.19
+launch 1 thread 2 cycles=1790003 thread_ms=253.779 mhz=7.053 times_real=4.24
+launch 1 thread 3 cycles=1790000 thread_ms=247.168 mhz=7.242 times_real=4.36
+launch 1 thread 4 cycles=1790001 thread_ms=246.444 mhz=7.263 times_real=4.37
+launch 1 thread 5 cycles=1790004 thread_ms=246.059 mhz=7.275 times_real=4.38
+launch 1 thread 6 cycles=1790003 thread_ms=244.877 mhz=7.310 times_real=4.40
+launch 1 thread 7 cycles=1790003 thread_ms=246.853 mhz=7.251 times_real=4.36
+launch 1 thread 8 cycles=1790003 thread_ms=246.760 mhz=7.254 times_real=4.36
+--- exit=0 end=2026-10-13T11:37:05Z loadavg=0.96 0.70 0.86 1/408 185816
+=== launch r1-p3-B folder=/tmp/nes77/pub-B region=1 start=2026-10-13T11:37:05Z loadavg=0.96 0.70 0.86 1/408 185822
+--- top before: 0.0 systemd;0.0 kthreadd;0.0 pool_wo+;0.0 kworker+;
+rom: other/snow.nes at 95d8f621ae55, 40976 bytes, sha256 7db551e868b2c0182941bd68adc447c2f0668098a4425e8e170b20e4327b7210, hash checked
+browser 153.0.8010.12
+launch 1 region 1 PAL
+launch 1 Running as PAL, as chosen here: the file does not say which.
+launch 1 boot cycles=5000001 frames=150 ms=716.900 cycles_per_second=6974475 mhz=6.974 times_real=4.19
+launch 1 timed 1 cycles=1790002 frames=54 ms=249.200 cycles_per_second=7182994 mhz=7.183 times_real=4.32
+launch 1 timed 2 cycles=1790000 frames=54 ms=249.200 cycles_per_second=7182986 mhz=7.183 times_real=4.32
+launch 1 timed 3 cycles=1790000 frames=53 ms=249.500 cycles_per_second=7174349 mhz=7.174 times_real=4.32
+launch 1 timed 4 cycles=1790001 frames=54 ms=247.900 cycles_per_second=7220658 mhz=7.221 times_real=4.34
+launch 1 timed 5 cycles=1790001 frames=54 ms=249.800 cycles_per_second=7165737 mhz=7.166 times_real=4.31
+launch 1 thread 1 cycles=1790004 thread_ms=249.113 mhz=7.186 times_real=4.32
+launch 1 thread 2 cycles=1790003 thread_ms=247.520 mhz=7.232 times_real=4.35
+launch 1 thread 3 cycles=1790000 thread_ms=239.168 mhz=7.484 times_real=4.50
+launch 1 thread 4 cycles=1790001 thread_ms=239.213 mhz=7.483 times_real=4.50
+launch 1 thread 5 cycles=1790004 thread_ms=238.419 mhz=7.508 times_real=4.52
+launch 1 thread 6 cycles=1790003 thread_ms=237.823 mhz=7.527 times_real=4.53
+launch 1 thread 7 cycles=1790003 thread_ms=239.289 mhz=7.481 times_real=4.50
+launch 1 thread 8 cycles=1790003 thread_ms=239.336 mhz=7.479 times_real=4.50
+--- exit=0 end=2026-10-13T11:37:12Z loadavg=1.04 0.72 0.86 1/402 185952
+=== launch r1-p3-base folder=/tmp/nes77/pub-base region=1 start=2026-10-13T11:37:27Z loadavg=0.81 0.69 0.85 1/403 185975
+--- top before: 1.0 Paseo;1.0 claude;0.0 systemd;0.0 kthreadd;
+rom: other/snow.nes at 95d8f621ae55, 40976 bytes, sha256 7db551e868b2c0182941bd68adc447c2f0668098a4425e8e170b20e4327b7210, hash checked
+browser 153.0.8010.12
+launch 1 region 1 PAL
+launch 1 Running as PAL, as chosen here: the file does not say which.
+launch 1 boot cycles=5000001 frames=150 ms=716.800 cycles_per_second=6975448 mhz=6.975 times_real=4.20
+launch 1 timed 1 cycles=1790002 frames=54 ms=248.800 cycles_per_second=7194542 mhz=7.195 times_real=4.33
+launch 1 timed 2 cycles=1790000 frames=54 ms=248.800 cycles_per_second=7194534 mhz=7.195 times_real=4.33
+launch 1 timed 3 cycles=1790000 frames=53 ms=248.900 cycles_per_second=7191643 mhz=7.192 times_real=4.33
+launch 1 timed 4 cycles=1790001 frames=54 ms=247.200 cycles_per_second=7241104 mhz=7.241 times_real=4.36
+launch 1 timed 5 cycles=1790001 frames=54 ms=249.500 cycles_per_second=7174353 mhz=7.174 times_real=4.32
+launch 1 thread 1 cycles=1790004 thread_ms=247.810 mhz=7.223 times_real=4.34
+launch 1 thread 2 cycles=1790003 thread_ms=246.316 mhz=7.267 times_real=4.37
+launch 1 thread 3 cycles=1790000 thread_ms=238.503 mhz=7.505 times_real=4.51
+launch 1 thread 4 cycles=1790001 thread_ms=238.378 mhz=7.509 times_real=4.52
+launch 1 thread 5 cycles=1790004 thread_ms=238.157 mhz=7.516 times_real=4.52
+launch 1 thread 6 cycles=1790003 thread_ms=236.890 mhz=7.556 times_real=4.54
+launch 1 thread 7 cycles=1790003 thread_ms=238.528 mhz=7.504 times_real=4.51
+launch 1 thread 8 cycles=1790003 thread_ms=238.763 mhz=7.497 times_real=4.51
+--- exit=0 end=2026-10-13T11:37:33Z loadavg=0.83 0.69 0.85 1/402 186100
+=== launch r1-p3-cur folder=/tmp/nes77/pub-after region=1 start=2026-10-13T11:37:33Z loadavg=0.83 0.69 0.85 2/402 186106
+--- top before: 2.0 Paseo;1.0 claude;1.0 top;0.0 systemd;
+rom: other/snow.nes at 95d8f621ae55, 40976 bytes, sha256 7db551e868b2c0182941bd68adc447c2f0668098a4425e8e170b20e4327b7210, hash checked
+browser 153.0.8010.12
+launch 1 region 1 PAL
+launch 1 Running as PAL, as chosen here: the file does not say which.
+launch 1 boot cycles=5000001 frames=150 ms=716.700 cycles_per_second=6976421 mhz=6.976 times_real=4.20
+launch 1 timed 1 cycles=1790002 frames=54 ms=249.000 cycles_per_second=7188763 mhz=7.189 times_real=4.32
+launch 1 timed 2 cycles=1790000 frames=54 ms=249.000 cycles_per_second=7188755 mhz=7.189 times_real=4.32
+launch 1 timed 3 cycles=1790000 frames=53 ms=248.700 cycles_per_second=7197427 mhz=7.197 times_real=4.33
+launch 1 timed 4 cycles=1790001 frames=54 ms=247.400 cycles_per_second=7235251 mhz=7.235 times_real=4.35
+launch 1 timed 5 cycles=1790001 frames=54 ms=248.800 cycles_per_second=7194538 mhz=7.195 times_real=4.33
+launch 1 thread 1 cycles=1790004 thread_ms=249.788 mhz=7.166 times_real=4.31
+launch 1 thread 2 cycles=1790003 thread_ms=247.487 mhz=7.233 times_real=4.35
+launch 1 thread 3 cycles=1790000 thread_ms=240.765 mhz=7.435 times_real=4.47
+launch 1 thread 4 cycles=1790001 thread_ms=239.962 mhz=7.460 times_real=4.49
+launch 1 thread 5 cycles=1790004 thread_ms=239.567 mhz=7.472 times_real=4.49
+launch 1 thread 6 cycles=1790003 thread_ms=237.514 mhz=7.536 times_real=4.53
+launch 1 thread 7 cycles=1790003 thread_ms=240.223 mhz=7.451 times_real=4.48
+launch 1 thread 8 cycles=1790003 thread_ms=240.272 mhz=7.450 times_real=4.48
+--- exit=0 end=2026-10-13T11:37:40Z loadavg=0.78 0.69 0.85 1/402 186248
+=== launch r1-p3-A folder=/tmp/nes77/pub-A region=1 start=2026-10-13T11:37:40Z loadavg=0.78 0.69 0.85 1/402 186254
+--- top before: 1.0 claude;1.0 top;0.0 systemd;0.0 kthreadd;
+rom: other/snow.nes at 95d8f621ae55, 40976 bytes, sha256 7db551e868b2c0182941bd68adc447c2f0668098a4425e8e170b20e4327b7210, hash checked
+browser 153.0.8010.12
+launch 1 region 1 PAL
+launch 1 Running as PAL, as chosen here: the file does not say which.
+launch 1 boot cycles=5000001 frames=150 ms=720.800 cycles_per_second=6936738 mhz=6.937 times_real=4.17
+launch 1 timed 1 cycles=1790002 frames=54 ms=249.400 cycles_per_second=7177233 mhz=7.177 times_real=4.32
+launch 1 timed 2 cycles=1790000 frames=54 ms=249.800 cycles_per_second=7165733 mhz=7.166 times_real=4.31
+launch 1 timed 3 cycles=1790000 frames=53 ms=249.900 cycles_per_second=7162865 mhz=7.163 times_real=4.31
+launch 1 timed 4 cycles=1790001 frames=54 ms=247.700 cycles_per_second=7226488 mhz=7.226 times_real=4.35
+launch 1 timed 5 cycles=1790001 frames=54 ms=248.700 cycles_per_second=7197431 mhz=7.197 times_real=4.33
+launch 1 thread 1 cycles=1790004 thread_ms=248.662 mhz=7.199 times_real=4.33
+launch 1 thread 2 cycles=1790003 thread_ms=246.541 mhz=7.260 times_real=4.37
+launch 1 thread 3 cycles=1790000 thread_ms=240.021 mhz=7.458 times_real=4.49
+launch 1 thread 4 cycles=1790001 thread_ms=239.315 mhz=7.480 times_real=4.50
+launch 1 thread 5 cycles=1790004 thread_ms=239.150 mhz=7.485 times_real=4.50
+launch 1 thread 6 cycles=1790003 thread_ms=237.782 mhz=7.528 times_real=4.53
+launch 1 thread 7 cycles=1790003 thread_ms=239.837 mhz=7.463 times_real=4.49
+launch 1 thread 8 cycles=1790003 thread_ms=240.191 mhz=7.452 times_real=4.48
+--- exit=0 end=2026-10-13T11:37:47Z loadavg=0.80 0.69 0.85 1/402 186379
+=== launch r1-p4-base folder=/tmp/nes77/pub-base region=1 start=2026-10-13T11:37:47Z loadavg=0.80 0.69 0.85 1/402 186385
+--- top before: 0.0 systemd;0.0 kthreadd;0.0 pool_wo+;0.0 kworker+;
+rom: other/snow.nes at 95d8f621ae55, 40976 bytes, sha256 7db551e868b2c0182941bd68adc447c2f0668098a4425e8e170b20e4327b7210, hash checked
+browser 153.0.8010.12
+launch 1 region 1 PAL
+launch 1 Running as PAL, as chosen here: the file does not say which.
+launch 1 boot cycles=5000001 frames=150 ms=715.000 cycles_per_second=6993008 mhz=6.993 times_real=4.21
+launch 1 timed 1 cycles=1790002 frames=54 ms=247.500 cycles_per_second=7232331 mhz=7.232 times_real=4.35
+launch 1 timed 2 cycles=1790000 frames=54 ms=248.200 cycles_per_second=7211926 mhz=7.212 times_real=4.34
+launch 1 timed 3 cycles=1790000 frames=53 ms=247.700 cycles_per_second=7226484 mhz=7.226 times_real=4.35
+launch 1 timed 4 cycles=1790001 frames=54 ms=246.800 cycles_per_second=7252840 mhz=7.253 times_real=4.36
+launch 1 timed 5 cycles=1790001 frames=54 ms=247.600 cycles_per_second=7229406 mhz=7.229 times_real=4.35
+launch 1 thread 1 cycles=1790004 thread_ms=248.207 mhz=7.212 times_real=4.34
+launch 1 thread 2 cycles=1790003 thread_ms=246.470 mhz=7.263 times_real=4.37
+launch 1 thread 3 cycles=1790000 thread_ms=238.857 mhz=7.494 times_real=4.51
+launch 1 thread 4 cycles=1790001 thread_ms=238.183 mhz=7.515 times_real=4.52
+launch 1 thread 5 cycles=1790004 thread_ms=237.947 mhz=7.523 times_real=4.52
+launch 1 thread 6 cycles=1790003 thread_ms=236.980 mhz=7.553 times_real=4.54
+launch 1 thread 7 cycles=1790003 thread_ms=238.953 mhz=7.491 times_real=4.51
+launch 1 thread 8 cycles=1790003 thread_ms=238.777 mhz=7.497 times_real=4.51
+--- exit=0 end=2026-10-13T11:37:53Z loadavg=0.81 0.70 0.85 1/403 186550
+=== launch r1-p4-cur folder=/tmp/nes77/pub-after region=1 start=2026-10-13T11:37:53Z loadavg=0.81 0.70 0.85 1/403 186556
+--- top before: 2.0 claude;1.0 dockerd;1.0 kworker+;1.0 kworker+;
+rom: other/snow.nes at 95d8f621ae55, 40976 bytes, sha256 7db551e868b2c0182941bd68adc447c2f0668098a4425e8e170b20e4327b7210, hash checked
+browser 153.0.8010.12
+launch 1 region 1 PAL
+launch 1 Running as PAL, as chosen here: the file does not say which.
+launch 1 boot cycles=5000001 frames=150 ms=740.000 cycles_per_second=6756758 mhz=6.757 times_real=4.06
+launch 1 timed 1 cycles=1790002 frames=54 ms=257.000 cycles_per_second=6964988 mhz=6.965 times_real=4.19
+launch 1 timed 2 cycles=1790000 frames=54 ms=257.100 cycles_per_second=6962271 mhz=6.962 times_real=4.19
+launch 1 timed 3 cycles=1790000 frames=53 ms=257.300 cycles_per_second=6956860 mhz=6.957 times_real=4.18
+launch 1 timed 4 cycles=1790001 frames=54 ms=255.500 cycles_per_second=7005875 mhz=7.006 times_real=4.21
+launch 1 timed 5 cycles=1790001 frames=54 ms=257.200 cycles_per_second=6959568 mhz=6.960 times_real=4.19
+launch 1 thread 1 cycles=1790004 thread_ms=256.903 mhz=6.968 times_real=4.19
+launch 1 thread 2 cycles=1790003 thread_ms=254.758 mhz=7.026 times_real=4.23
+launch 1 thread 3 cycles=1790000 thread_ms=247.991 mhz=7.218 times_real=4.34
+launch 1 thread 4 cycles=1790001 thread_ms=246.738 mhz=7.255 times_real=4.36
+launch 1 thread 5 cycles=1790004 thread_ms=246.339 mhz=7.266 times_real=4.37
+launch 1 thread 6 cycles=1790003 thread_ms=247.459 mhz=7.234 times_real=4.35
+launch 1 thread 7 cycles=1790003 thread_ms=247.355 mhz=7.237 times_real=4.35
+launch 1 thread 8 cycles=1790003 thread_ms=248.015 mhz=7.217 times_real=4.34
+--- exit=0 end=2026-10-13T11:38:00Z loadavg=0.77 0.69 0.84 2/403 186680
+=== launch r1-p4-A folder=/tmp/nes77/pub-A region=1 start=2026-10-13T11:38:00Z loadavg=0.77 0.69 0.84 1/403 186686
+--- top before: 1.0 contain+;0.0 systemd;0.0 kthreadd;0.0 pool_wo+;
+rom: other/snow.nes at 95d8f621ae55, 40976 bytes, sha256 7db551e868b2c0182941bd68adc447c2f0668098a4425e8e170b20e4327b7210, hash checked
+browser 153.0.8010.12
+launch 1 region 1 PAL
+launch 1 Running as PAL, as chosen here: the file does not say which.
+launch 1 boot cycles=5000001 frames=150 ms=713.800 cycles_per_second=7004765 mhz=7.005 times_real=4.21
+launch 1 timed 1 cycles=1790002 frames=54 ms=248.500 cycles_per_second=7203227 mhz=7.203 times_real=4.33
+launch 1 timed 2 cycles=1790000 frames=54 ms=248.700 cycles_per_second=7197427 mhz=7.197 times_real=4.33
+launch 1 timed 3 cycles=1790000 frames=53 ms=249.600 cycles_per_second=7171474 mhz=7.171 times_real=4.31
+launch 1 timed 4 cycles=1790001 frames=54 ms=246.800 cycles_per_second=7252840 mhz=7.253 times_real=4.36
+launch 1 timed 5 cycles=1790001 frames=54 ms=248.400 cycles_per_second=7206123 mhz=7.206 times_real=4.33
+launch 1 thread 1 cycles=1790004 thread_ms=250.792 mhz=7.137 times_real=4.29
+launch 1 thread 2 cycles=1790003 thread_ms=247.403 mhz=7.235 times_real=4.35
+launch 1 thread 3 cycles=1790000 thread_ms=238.866 mhz=7.494 times_real=4.51
+launch 1 thread 4 cycles=1790001 thread_ms=238.610 mhz=7.502 times_real=4.51
+launch 1 thread 5 cycles=1790004 thread_ms=238.018 mhz=7.520 times_real=4.52
+launch 1 thread 6 cycles=1790003 thread_ms=237.659 mhz=7.532 times_real=4.53
+launch 1 thread 7 cycles=1790003 thread_ms=239.402 mhz=7.477 times_real=4.50
+launch 1 thread 8 cycles=1790003 thread_ms=239.712 mhz=7.467 times_real=4.49
+--- exit=0 end=2026-10-13T11:38:07Z loadavg=0.87 0.71 0.85 1/402 186821
+=== launch r1-p4-B folder=/tmp/nes77/pub-B region=1 start=2026-10-13T11:38:07Z loadavg=0.87 0.71 0.85 1/402 186827
+--- top before: 1.0 Paseo;1.0 claude;0.0 systemd;0.0 kthreadd;
+rom: other/snow.nes at 95d8f621ae55, 40976 bytes, sha256 7db551e868b2c0182941bd68adc447c2f0668098a4425e8e170b20e4327b7210, hash checked
+browser 153.0.8010.12
+launch 1 region 1 PAL
+launch 1 Running as PAL, as chosen here: the file does not say which.
+launch 1 boot cycles=5000001 frames=150 ms=719.900 cycles_per_second=6945410 mhz=6.945 times_real=4.18
+launch 1 timed 1 cycles=1790002 frames=54 ms=250.800 cycles_per_second=7137169 mhz=7.137 times_real=4.29
+launch 1 timed 2 cycles=1790000 frames=54 ms=250.000 cycles_per_second=7160000 mhz=7.160 times_real=4.31
+launch 1 timed 3 cycles=1790000 frames=53 ms=250.200 cycles_per_second=7154277 mhz=7.154 times_real=4.30
+launch 1 timed 4 cycles=1790001 frames=54 ms=248.100 cycles_per_second=7214837 mhz=7.215 times_real=4.34
+launch 1 timed 5 cycles=1790001 frames=54 ms=249.800 cycles_per_second=7165737 mhz=7.166 times_real=4.31
+launch 1 thread 1 cycles=1790004 thread_ms=249.720 mhz=7.168 times_real=4.31
+launch 1 thread 2 cycles=1790003 thread_ms=247.972 mhz=7.219 times_real=4.34
+launch 1 thread 3 cycles=1790000 thread_ms=240.203 mhz=7.452 times_real=4.48
+launch 1 thread 4 cycles=1790001 thread_ms=241.275 mhz=7.419 times_real=4.46
+launch 1 thread 5 cycles=1790004 thread_ms=239.741 mhz=7.466 times_real=4.49
+launch 1 thread 6 cycles=1790003 thread_ms=239.313 mhz=7.480 times_real=4.50
+launch 1 thread 7 cycles=1790003 thread_ms=240.734 mhz=7.436 times_real=4.47
+launch 1 thread 8 cycles=1790003 thread_ms=241.135 mhz=7.423 times_real=4.46
+--- exit=0 end=2026-10-13T11:38:13Z loadavg=0.96 0.73 0.86 1/402 186952
+=== launch r1-p5-cur folder=/tmp/nes77/pub-after region=1 start=2026-10-13T11:38:13Z loadavg=0.96 0.73 0.86 1/402 186958
+--- top before: 1.0 runcomm+;1.0 tailsca+;1.0 Paseo;1.0 claude;
+rom: other/snow.nes at 95d8f621ae55, 40976 bytes, sha256 7db551e868b2c0182941bd68adc447c2f0668098a4425e8e170b20e4327b7210, hash checked
+browser 153.0.8010.12
+launch 1 region 1 PAL
+launch 1 Running as PAL, as chosen here: the file does not say which.
+launch 1 boot cycles=5000001 frames=150 ms=735.700 cycles_per_second=6796250 mhz=6.796 times_real=4.09
+launch 1 timed 1 cycles=1790002 frames=54 ms=256.000 cycles_per_second=6992195 mhz=6.992 times_real=4.21
+launch 1 timed 2 cycles=1790000 frames=54 ms=256.000 cycles_per_second=6992188 mhz=6.992 times_real=4.21
+launch 1 timed 3 cycles=1790000 frames=53 ms=256.200 cycles_per_second=6986729 mhz=6.987 times_real=4.20
+launch 1 timed 4 cycles=1790001 frames=54 ms=254.300 cycles_per_second=7038934 mhz=7.039 times_real=4.23
+launch 1 timed 5 cycles=1790001 frames=54 ms=255.600 cycles_per_second=7003134 mhz=7.003 times_real=4.21
+launch 1 thread 1 cycles=1790004 thread_ms=255.824 mhz=6.997 times_real=4.21
+launch 1 thread 2 cycles=1790003 thread_ms=254.001 mhz=7.047 times_real=4.24
+launch 1 thread 3 cycles=1790000 thread_ms=248.190 mhz=7.212 times_real=4.34
+launch 1 thread 4 cycles=1790001 thread_ms=246.383 mhz=7.265 times_real=4.37
+launch 1 thread 5 cycles=1790004 thread_ms=245.848 mhz=7.281 times_real=4.38
+launch 1 thread 6 cycles=1790003 thread_ms=244.809 mhz=7.312 times_real=4.40
+launch 1 thread 7 cycles=1790003 thread_ms=246.895 mhz=7.250 times_real=4.36
+launch 1 thread 8 cycles=1790003 thread_ms=246.615 mhz=7.258 times_real=4.37
+--- exit=0 end=2026-10-13T11:38:20Z loadavg=0.89 0.73 0.85 1/406 187087
+=== launch r1-p5-A folder=/tmp/nes77/pub-A region=1 start=2026-10-13T11:38:20Z loadavg=0.89 0.73 0.85 1/406 187093
+--- top before: 1.0 Paseo;1.0 top;0.0 systemd;0.0 kthreadd;
+rom: other/snow.nes at 95d8f621ae55, 40976 bytes, sha256 7db551e868b2c0182941bd68adc447c2f0668098a4425e8e170b20e4327b7210, hash checked
+browser 153.0.8010.12
+launch 1 region 1 PAL
+launch 1 Running as PAL, as chosen here: the file does not say which.
+launch 1 boot cycles=5000001 frames=150 ms=715.800 cycles_per_second=6985193 mhz=6.985 times_real=4.20
+launch 1 timed 1 cycles=1790002 frames=54 ms=250.500 cycles_per_second=7145717 mhz=7.146 times_real=4.30
+launch 1 timed 2 cycles=1790000 frames=54 ms=249.400 cycles_per_second=7177225 mhz=7.177 times_real=4.32
+launch 1 timed 3 cycles=1790000 frames=53 ms=250.200 cycles_per_second=7154277 mhz=7.154 times_real=4.30
+launch 1 timed 4 cycles=1790001 frames=54 ms=247.200 cycles_per_second=7241104 mhz=7.241 times_real=4.36
+launch 1 timed 5 cycles=1790001 frames=54 ms=249.000 cycles_per_second=7188759 mhz=7.189 times_real=4.32
+launch 1 thread 1 cycles=1790004 thread_ms=248.192 mhz=7.212 times_real=4.34
+launch 1 thread 2 cycles=1790003 thread_ms=247.043 mhz=7.246 times_real=4.36
+launch 1 thread 3 cycles=1790000 thread_ms=238.727 mhz=7.498 times_real=4.51
+launch 1 thread 4 cycles=1790001 thread_ms=238.150 mhz=7.516 times_real=4.52
+launch 1 thread 5 cycles=1790004 thread_ms=237.614 mhz=7.533 times_real=4.53
+launch 1 thread 6 cycles=1790003 thread_ms=236.933 mhz=7.555 times_real=4.54
+launch 1 thread 7 cycles=1790003 thread_ms=238.783 mhz=7.496 times_real=4.51
+launch 1 thread 8 cycles=1790003 thread_ms=238.724 mhz=7.498 times_real=4.51
+--- exit=0 end=2026-10-13T11:38:27Z loadavg=0.90 0.73 0.85 1/404 187225
+=== launch r1-p5-B folder=/tmp/nes77/pub-B region=1 start=2026-10-13T11:38:27Z loadavg=0.90 0.73 0.85 1/404 187231
+--- top before: 1.0 tailsca+;1.0 contain+;1.0 kworker+;0.0 systemd;
+rom: other/snow.nes at 95d8f621ae55, 40976 bytes, sha256 7db551e868b2c0182941bd68adc447c2f0668098a4425e8e170b20e4327b7210, hash checked
+browser 153.0.8010.12
+launch 1 region 1 PAL
+launch 1 Running as PAL, as chosen here: the file does not say which.
+launch 1 boot cycles=5000001 frames=150 ms=721.500 cycles_per_second=6930008 mhz=6.930 times_real=4.17
+launch 1 timed 1 cycles=1790002 frames=54 ms=250.000 cycles_per_second=7160008 mhz=7.160 times_real=4.31
+launch 1 timed 2 cycles=1790000 frames=54 ms=249.900 cycles_per_second=7162865 mhz=7.163 times_real=4.31
+launch 1 timed 3 cycles=1790000 frames=53 ms=249.400 cycles_per_second=7177225 mhz=7.177 times_real=4.32
+launch 1 timed 4 cycles=1790001 frames=54 ms=247.700 cycles_per_second=7226488 mhz=7.226 times_real=4.35
+launch 1 timed 5 cycles=1790001 frames=54 ms=248.900 cycles_per_second=7191647 mhz=7.192 times_real=4.33
+launch 1 thread 1 cycles=1790004 thread_ms=249.238 mhz=7.182 times_real=4.32
+launch 1 thread 2 cycles=1790003 thread_ms=247.136 mhz=7.243 times_real=4.36
+launch 1 thread 3 cycles=1790000 thread_ms=239.678 mhz=7.468 times_real=4.49
+launch 1 thread 4 cycles=1790001 thread_ms=239.445 mhz=7.476 times_real=4.50
+launch 1 thread 5 cycles=1790004 thread_ms=238.951 mhz=7.491 times_real=4.51
+launch 1 thread 6 cycles=1790003 thread_ms=237.645 mhz=7.532 times_real=4.53
+launch 1 thread 7 cycles=1790003 thread_ms=239.570 mhz=7.472 times_real=4.49
+launch 1 thread 8 cycles=1790003 thread_ms=239.549 mhz=7.472 times_real=4.49
+--- exit=0 end=2026-10-13T11:38:34Z loadavg=1.07 0.77 0.86 1/403 187389
+=== launch r1-p5-base folder=/tmp/nes77/pub-base region=1 start=2026-10-13T11:38:49Z loadavg=0.83 0.73 0.85 1/403 187418
+--- top before: 1.0 Paseo;0.0 systemd;0.0 kthreadd;0.0 pool_wo+;
+rom: other/snow.nes at 95d8f621ae55, 40976 bytes, sha256 7db551e868b2c0182941bd68adc447c2f0668098a4425e8e170b20e4327b7210, hash checked
+browser 153.0.8010.12
+launch 1 region 1 PAL
+launch 1 Running as PAL, as chosen here: the file does not say which.
+launch 1 boot cycles=5000001 frames=150 ms=713.700 cycles_per_second=7005746 mhz=7.006 times_real=4.21
+launch 1 timed 1 cycles=1790002 frames=54 ms=247.900 cycles_per_second=7220662 mhz=7.221 times_real=4.34
+launch 1 timed 2 cycles=1790000 frames=54 ms=247.900 cycles_per_second=7220653 mhz=7.221 times_real=4.34
+launch 1 timed 3 cycles=1790000 frames=53 ms=247.600 cycles_per_second=7229402 mhz=7.229 times_real=4.35
+launch 1 timed 4 cycles=1790001 frames=54 ms=246.300 cycles_per_second=7267564 mhz=7.268 times_real=4.37
+launch 1 timed 5 cycles=1790001 frames=54 ms=247.600 cycles_per_second=7229406 mhz=7.229 times_real=4.35
+launch 1 thread 1 cycles=1790004 thread_ms=247.840 mhz=7.222 times_real=4.34
+launch 1 thread 2 cycles=1790003 thread_ms=245.959 mhz=7.278 times_real=4.38
+launch 1 thread 3 cycles=1790000 thread_ms=238.665 mhz=7.500 times_real=4.51
+launch 1 thread 4 cycles=1790001 thread_ms=238.218 mhz=7.514 times_real=4.52
+launch 1 thread 5 cycles=1790004 thread_ms=237.668 mhz=7.532 times_real=4.53
+launch 1 thread 6 cycles=1790003 thread_ms=236.445 mhz=7.570 times_real=4.55
+launch 1 thread 7 cycles=1790003 thread_ms=238.684 mhz=7.499 times_real=4.51
+launch 1 thread 8 cycles=1790003 thread_ms=238.406 mhz=7.508 times_real=4.52
+--- exit=0 end=2026-10-13T11:38:55Z loadavg=0.78 0.72 0.85 1/402 187552
+=== launch r1-p6-A folder=/tmp/nes77/pub-A region=1 start=2026-10-13T11:38:55Z loadavg=0.78 0.72 0.85 2/402 187558
+--- top before: 1.0 claude;1.0 kworker+;1.0 top;0.0 systemd;
+rom: other/snow.nes at 95d8f621ae55, 40976 bytes, sha256 7db551e868b2c0182941bd68adc447c2f0668098a4425e8e170b20e4327b7210, hash checked
+browser 153.0.8010.12
+launch 1 region 1 PAL
+launch 1 Running as PAL, as chosen here: the file does not say which.
+launch 1 boot cycles=5000001 frames=150 ms=714.100 cycles_per_second=7001822 mhz=7.002 times_real=4.21
+launch 1 timed 1 cycles=1790002 frames=54 ms=248.100 cycles_per_second=7214841 mhz=7.215 times_real=4.34
+launch 1 timed 2 cycles=1790000 frames=54 ms=248.200 cycles_per_second=7211926 mhz=7.212 times_real=4.34
+launch 1 timed 3 cycles=1790000 frames=53 ms=247.900 cycles_per_second=7220653 mhz=7.221 times_real=4.34
+launch 1 timed 4 cycles=1790001 frames=54 ms=246.400 cycles_per_second=7264614 mhz=7.265 times_real=4.37
+launch 1 timed 5 cycles=1790001 frames=54 ms=248.100 cycles_per_second=7214837 mhz=7.215 times_real=4.34
+launch 1 thread 1 cycles=1790004 thread_ms=248.100 mhz=7.215 times_real=4.34
+launch 1 thread 2 cycles=1790003 thread_ms=246.042 mhz=7.275 times_real=4.38
+launch 1 thread 3 cycles=1790000 thread_ms=238.618 mhz=7.502 times_real=4.51
+launch 1 thread 4 cycles=1790001 thread_ms=238.148 mhz=7.516 times_real=4.52
+launch 1 thread 5 cycles=1790004 thread_ms=237.988 mhz=7.521 times_real=4.52
+launch 1 thread 6 cycles=1790003 thread_ms=236.639 mhz=7.564 times_real=4.55
+launch 1 thread 7 cycles=1790003 thread_ms=238.818 mhz=7.495 times_real=4.51
+launch 1 thread 8 cycles=1790003 thread_ms=239.610 mhz=7.470 times_real=4.49
+--- exit=0 end=2026-10-13T11:39:02Z loadavg=0.80 0.73 0.85 1/404 187684
+=== launch r1-p6-B folder=/tmp/nes77/pub-B region=1 start=2026-10-13T11:39:02Z loadavg=0.80 0.73 0.85 1/404 187690
+--- top before: 1.0 claude;1.0 top;0.0 systemd;0.0 kthreadd;
+rom: other/snow.nes at 95d8f621ae55, 40976 bytes, sha256 7db551e868b2c0182941bd68adc447c2f0668098a4425e8e170b20e4327b7210, hash checked
+browser 153.0.8010.12
+launch 1 region 1 PAL
+launch 1 Running as PAL, as chosen here: the file does not say which.
+launch 1 boot cycles=5000001 frames=150 ms=719.000 cycles_per_second=6954104 mhz=6.954 times_real=4.18
+launch 1 timed 1 cycles=1790002 frames=54 ms=249.100 cycles_per_second=7185877 mhz=7.186 times_real=4.32
+launch 1 timed 2 cycles=1790000 frames=54 ms=248.900 cycles_per_second=7191643 mhz=7.192 times_real=4.33
+launch 1 timed 3 cycles=1790000 frames=53 ms=249.200 cycles_per_second=7182986 mhz=7.183 times_real=4.32
+launch 1 timed 4 cycles=1790001 frames=54 ms=247.500 cycles_per_second=7232327 mhz=7.232 times_real=4.35
+launch 1 timed 5 cycles=1790001 frames=54 ms=249.300 cycles_per_second=7180108 mhz=7.180 times_real=4.32
+launch 1 thread 1 cycles=1790004 thread_ms=249.091 mhz=7.186 times_real=4.32
+launch 1 thread 2 cycles=1790003 thread_ms=247.566 mhz=7.230 times_real=4.35
+launch 1 thread 3 cycles=1790000 thread_ms=240.051 mhz=7.457 times_real=4.48
+launch 1 thread 4 cycles=1790001 thread_ms=239.919 mhz=7.461 times_real=4.49
+launch 1 thread 5 cycles=1790004 thread_ms=239.394 mhz=7.477 times_real=4.50
+launch 1 thread 6 cycles=1790003 thread_ms=238.216 mhz=7.514 times_real=4.52
+launch 1 thread 7 cycles=1790003 thread_ms=240.950 mhz=7.429 times_real=4.47
+launch 1 thread 8 cycles=1790003 thread_ms=240.130 mhz=7.454 times_real=4.48
+--- exit=0 end=2026-10-13T11:39:09Z loadavg=0.74 0.72 0.84 1/404 187824
+=== launch r1-p6-base folder=/tmp/nes77/pub-base region=1 start=2026-10-13T11:39:09Z loadavg=0.74 0.72 0.84 1/404 187830
+--- top before: 1.0 esbuild;1.0 claude;0.0 systemd;0.0 kthreadd;
+rom: other/snow.nes at 95d8f621ae55, 40976 bytes, sha256 7db551e868b2c0182941bd68adc447c2f0668098a4425e8e170b20e4327b7210, hash checked
+browser 153.0.8010.12
+launch 1 region 1 PAL
+launch 1 Running as PAL, as chosen here: the file does not say which.
+launch 1 boot cycles=5000001 frames=150 ms=714.400 cycles_per_second=6998882 mhz=6.999 times_real=4.21
+launch 1 timed 1 cycles=1790002 frames=54 ms=248.200 cycles_per_second=7211934 mhz=7.212 times_real=4.34
+launch 1 timed 2 cycles=1790000 frames=54 ms=248.000 cycles_per_second=7217742 mhz=7.218 times_real=4.34
+launch 1 timed 3 cycles=1790000 frames=53 ms=247.700 cycles_per_second=7226484 mhz=7.226 times_real=4.35
+launch 1 timed 4 cycles=1790001 frames=54 ms=246.100 cycles_per_second=7273470 mhz=7.273 times_real=4.37
+launch 1 timed 5 cycles=1790001 frames=54 ms=247.600 cycles_per_second=7229406 mhz=7.229 times_real=4.35
+launch 1 thread 1 cycles=1790004 thread_ms=248.421 mhz=7.206 times_real=4.33
+launch 1 thread 2 cycles=1790003 thread_ms=248.068 mhz=7.216 times_real=4.34
+launch 1 thread 3 cycles=1790000 thread_ms=239.945 mhz=7.460 times_real=4.49
+launch 1 thread 4 cycles=1790001 thread_ms=239.441 mhz=7.476 times_real=4.50
+launch 1 thread 5 cycles=1790004 thread_ms=238.661 mhz=7.500 times_real=4.51
+launch 1 thread 6 cycles=1790003 thread_ms=237.956 mhz=7.522 times_real=4.52
+launch 1 thread 7 cycles=1790003 thread_ms=239.539 mhz=7.473 times_real=4.49
+launch 1 thread 8 cycles=1790003 thread_ms=239.698 mhz=7.468 times_real=4.49
+--- exit=0 end=2026-10-13T11:39:15Z loadavg=0.70 0.71 0.84 1/403 187955
+=== launch r1-p6-cur folder=/tmp/nes77/pub-after region=1 start=2026-10-13T11:39:15Z loadavg=0.70 0.71 0.84 1/403 187961
+--- top before: 1.0 Paseo;1.0 claude;0.0 systemd;0.0 kthreadd;
+rom: other/snow.nes at 95d8f621ae55, 40976 bytes, sha256 7db551e868b2c0182941bd68adc447c2f0668098a4425e8e170b20e4327b7210, hash checked
+browser 153.0.8010.12
+launch 1 region 1 PAL
+launch 1 Running as PAL, as chosen here: the file does not say which.
+launch 1 boot cycles=5000001 frames=150 ms=716.200 cycles_per_second=6981292 mhz=6.981 times_real=4.20
+launch 1 timed 1 cycles=1790002 frames=54 ms=249.000 cycles_per_second=7188763 mhz=7.189 times_real=4.32
+launch 1 timed 2 cycles=1790000 frames=54 ms=248.800 cycles_per_second=7194534 mhz=7.195 times_real=4.33
+launch 1 timed 3 cycles=1790000 frames=53 ms=248.900 cycles_per_second=7191643 mhz=7.192 times_real=4.33
+launch 1 timed 4 cycles=1790001 frames=54 ms=246.900 cycles_per_second=7249903 mhz=7.250 times_real=4.36
+launch 1 timed 5 cycles=1790001 frames=54 ms=248.800 cycles_per_second=7194538 mhz=7.195 times_real=4.33
+launch 1 thread 1 cycles=1790004 thread_ms=248.830 mhz=7.194 times_real=4.33
+launch 1 thread 2 cycles=1790003 thread_ms=246.661 mhz=7.257 times_real=4.36
+launch 1 thread 3 cycles=1790000 thread_ms=239.000 mhz=7.490 times_real=4.50
+launch 1 thread 4 cycles=1790001 thread_ms=238.964 mhz=7.491 times_real=4.51
+launch 1 thread 5 cycles=1790004 thread_ms=238.277 mhz=7.512 times_real=4.52
+launch 1 thread 6 cycles=1790003 thread_ms=237.295 mhz=7.543 times_real=4.54
+launch 1 thread 7 cycles=1790003 thread_ms=239.148 mhz=7.485 times_real=4.50
+launch 1 thread 8 cycles=1790003 thread_ms=239.255 mhz=7.482 times_real=4.50
+--- exit=0 end=2026-10-13T11:39:22Z loadavg=0.73 0.72 0.84 1/407 188092
+=== launch r1-p7-B folder=/tmp/nes77/pub-B region=1 start=2026-10-13T11:39:22Z loadavg=0.73 0.72 0.84 1/407 188098
+--- top before: 2.0 claude;1.0 Paseo;1.0 esbuild;1.0 claude;
+rom: other/snow.nes at 95d8f621ae55, 40976 bytes, sha256 7db551e868b2c0182941bd68adc447c2f0668098a4425e8e170b20e4327b7210, hash checked
+browser 153.0.8010.12
+launch 1 region 1 PAL
+launch 1 Running as PAL, as chosen here: the file does not say which.
+launch 1 boot cycles=5000001 frames=150 ms=716.000 cycles_per_second=6983242 mhz=6.983 times_real=4.20
+launch 1 timed 1 cycles=1790002 frames=54 ms=249.200 cycles_per_second=7182994 mhz=7.183 times_real=4.32
+launch 1 timed 2 cycles=1790000 frames=54 ms=250.400 cycles_per_second=7148562 mhz=7.149 times_real=4.30
+launch 1 timed 3 cycles=1790000 frames=53 ms=249.000 cycles_per_second=7188755 mhz=7.189 times_real=4.32
+launch 1 timed 4 cycles=1790001 frames=54 ms=247.400 cycles_per_second=7235251 mhz=7.235 times_real=4.35
+launch 1 timed 5 cycles=1790001 frames=54 ms=248.800 cycles_per_second=7194538 mhz=7.195 times_real=4.33
+launch 1 thread 1 cycles=1790004 thread_ms=248.915 mhz=7.191 times_real=4.33
+launch 1 thread 2 cycles=1790003 thread_ms=247.171 mhz=7.242 times_real=4.36
+launch 1 thread 3 cycles=1790000 thread_ms=239.585 mhz=7.471 times_real=4.49
+launch 1 thread 4 cycles=1790001 thread_ms=239.317 mhz=7.480 times_real=4.50
+launch 1 thread 5 cycles=1790004 thread_ms=238.703 mhz=7.499 times_real=4.51
+launch 1 thread 6 cycles=1790003 thread_ms=237.925 mhz=7.523 times_real=4.53
+launch 1 thread 7 cycles=1790003 thread_ms=239.689 mhz=7.468 times_real=4.49
+launch 1 thread 8 cycles=1790003 thread_ms=239.789 mhz=7.465 times_real=4.49
+--- exit=0 end=2026-10-13T11:39:29Z loadavg=0.75 0.72 0.84 1/403 188227
+=== launch r1-p7-base folder=/tmp/nes77/pub-base region=1 start=2026-10-13T11:39:29Z loadavg=0.75 0.72 0.84 1/403 188233
+--- top before: 2.0 claude;0.0 systemd;0.0 kthreadd;0.0 pool_wo+;
+rom: other/snow.nes at 95d8f621ae55, 40976 bytes, sha256 7db551e868b2c0182941bd68adc447c2f0668098a4425e8e170b20e4327b7210, hash checked
+browser 153.0.8010.12
+launch 1 region 1 PAL
+launch 1 Running as PAL, as chosen here: the file does not say which.
+launch 1 boot cycles=5000001 frames=150 ms=714.700 cycles_per_second=6995944 mhz=6.996 times_real=4.21
+launch 1 timed 1 cycles=1790002 frames=54 ms=248.600 cycles_per_second=7200330 mhz=7.200 times_real=4.33
+launch 1 timed 2 cycles=1790000 frames=54 ms=248.500 cycles_per_second=7203219 mhz=7.203 times_real=4.33
+launch 1 timed 3 cycles=1790000 frames=53 ms=248.700 cycles_per_second=7197427 mhz=7.197 times_real=4.33
+launch 1 timed 4 cycles=1790001 frames=54 ms=246.900 cycles_per_second=7249903 mhz=7.250 times_real=4.36
+launch 1 timed 5 cycles=1790001 frames=54 ms=248.500 cycles_per_second=7203223 mhz=7.203 times_real=4.33
+launch 1 thread 1 cycles=1790004 thread_ms=248.807 mhz=7.194 times_real=4.33
+launch 1 thread 2 cycles=1790003 thread_ms=247.040 mhz=7.246 times_real=4.36
+launch 1 thread 3 cycles=1790000 thread_ms=238.751 mhz=7.497 times_real=4.51
+launch 1 thread 4 cycles=1790001 thread_ms=238.655 mhz=7.500 times_real=4.51
+launch 1 thread 5 cycles=1790004 thread_ms=237.914 mhz=7.524 times_real=4.53
+launch 1 thread 6 cycles=1790003 thread_ms=237.067 mhz=7.551 times_real=4.54
+launch 1 thread 7 cycles=1790003 thread_ms=238.960 mhz=7.491 times_real=4.51
+launch 1 thread 8 cycles=1790003 thread_ms=238.968 mhz=7.491 times_real=4.51
+--- exit=0 end=2026-10-13T11:39:35Z loadavg=0.87 0.75 0.85 1/403 188358
+=== launch r1-p7-cur folder=/tmp/nes77/pub-after region=1 start=2026-10-13T11:39:35Z loadavg=0.87 0.75 0.85 1/403 188364
+--- top before: 1.0 claude;1.0 top;0.0 systemd;0.0 kthreadd;
+rom: other/snow.nes at 95d8f621ae55, 40976 bytes, sha256 7db551e868b2c0182941bd68adc447c2f0668098a4425e8e170b20e4327b7210, hash checked
+browser 153.0.8010.12
+launch 1 region 1 PAL
+launch 1 Running as PAL, as chosen here: the file does not say which.
+launch 1 boot cycles=5000001 frames=150 ms=716.600 cycles_per_second=6977395 mhz=6.977 times_real=4.20
+launch 1 timed 1 cycles=1790002 frames=54 ms=249.400 cycles_per_second=7177233 mhz=7.177 times_real=4.32
+launch 1 timed 2 cycles=1790000 frames=54 ms=248.900 cycles_per_second=7191643 mhz=7.192 times_real=4.33
+launch 1 timed 3 cycles=1790000 frames=53 ms=248.700 cycles_per_second=7197427 mhz=7.197 times_real=4.33
+launch 1 timed 4 cycles=1790001 frames=54 ms=247.100 cycles_per_second=7244035 mhz=7.244 times_real=4.36
+launch 1 timed 5 cycles=1790001 frames=54 ms=248.600 cycles_per_second=7200326 mhz=7.200 times_real=4.33
+launch 1 thread 1 cycles=1790004 thread_ms=248.685 mhz=7.198 times_real=4.33
+launch 1 thread 2 cycles=1790003 thread_ms=246.828 mhz=7.252 times_real=4.36
+launch 1 thread 3 cycles=1790000 thread_ms=239.349 mhz=7.479 times_real=4.50
+launch 1 thread 4 cycles=1790001 thread_ms=239.252 mhz=7.482 times_real=4.50
+launch 1 thread 5 cycles=1790004 thread_ms=238.568 mhz=7.503 times_real=4.51
+launch 1 thread 6 cycles=1790003 thread_ms=237.568 mhz=7.535 times_real=4.53
+launch 1 thread 7 cycles=1790003 thread_ms=239.804 mhz=7.464 times_real=4.49
+launch 1 thread 8 cycles=1790003 thread_ms=239.632 mhz=7.470 times_real=4.49
+--- exit=0 end=2026-10-13T11:39:42Z loadavg=0.88 0.75 0.85 1/403 188500
+=== launch r1-p7-A folder=/tmp/nes77/pub-A region=1 start=2026-10-13T11:39:42Z loadavg=0.88 0.75 0.85 1/403 188506
+--- top before: 1.0 claude;1.0 top;0.0 systemd;0.0 kthreadd;
+rom: other/snow.nes at 95d8f621ae55, 40976 bytes, sha256 7db551e868b2c0182941bd68adc447c2f0668098a4425e8e170b20e4327b7210, hash checked
+browser 153.0.8010.12
+launch 1 region 1 PAL
+launch 1 Running as PAL, as chosen here: the file does not say which.
+launch 1 boot cycles=5000001 frames=150 ms=716.300 cycles_per_second=6980317 mhz=6.980 times_real=4.20
+launch 1 timed 1 cycles=1790002 frames=54 ms=248.700 cycles_per_second=7197435 mhz=7.197 times_real=4.33
+launch 1 timed 2 cycles=1790000 frames=54 ms=248.700 cycles_per_second=7197427 mhz=7.197 times_real=4.33
+launch 1 timed 3 cycles=1790000 frames=53 ms=248.400 cycles_per_second=7206119 mhz=7.206 times_real=4.33
+launch 1 timed 4 cycles=1790001 frames=54 ms=246.800 cycles_per_second=7252840 mhz=7.253 times_real=4.36
+launch 1 timed 5 cycles=1790001 frames=54 ms=248.500 cycles_per_second=7203223 mhz=7.203 times_real=4.33
+launch 1 thread 1 cycles=1790004 thread_ms=248.349 mhz=7.208 times_real=4.34
+launch 1 thread 2 cycles=1790003 thread_ms=246.997 mhz=7.247 times_real=4.36
+launch 1 thread 3 cycles=1790000 thread_ms=239.192 mhz=7.484 times_real=4.50
+launch 1 thread 4 cycles=1790001 thread_ms=238.839 mhz=7.495 times_real=4.51
+launch 1 thread 5 cycles=1790004 thread_ms=238.123 mhz=7.517 times_real=4.52
+launch 1 thread 6 cycles=1790003 thread_ms=237.121 mhz=7.549 times_real=4.54
+launch 1 thread 7 cycles=1790003 thread_ms=239.278 mhz=7.481 times_real=4.50
+launch 1 thread 8 cycles=1790003 thread_ms=238.977 mhz=7.490 times_real=4.51
+--- exit=0 end=2026-10-13T11:39:49Z loadavg=0.97 0.77 0.85 1/402 188631
+=== launch r1-p8-base folder=/tmp/nes77/pub-base region=1 start=2026-10-13T11:39:49Z loadavg=0.97 0.77 0.85 1/402 188637
+--- top before: 10.9 gh;2.0 Paseo;1.0 contain+;1.0 top;
+rom: other/snow.nes at 95d8f621ae55, 40976 bytes, sha256 7db551e868b2c0182941bd68adc447c2f0668098a4425e8e170b20e4327b7210, hash checked
+browser 153.0.8010.12
+launch 1 region 1 PAL
+launch 1 Running as PAL, as chosen here: the file does not say which.
+launch 1 boot cycles=5000001 frames=150 ms=713.000 cycles_per_second=7012624 mhz=7.013 times_real=4.22
+launch 1 timed 1 cycles=1790002 frames=54 ms=248.200 cycles_per_second=7211934 mhz=7.212 times_real=4.34
+launch 1 timed 2 cycles=1790000 frames=54 ms=248.200 cycles_per_second=7211926 mhz=7.212 times_real=4.34
+launch 1 timed 3 cycles=1790000 frames=53 ms=248.100 cycles_per_second=7214833 mhz=7.215 times_real=4.34
+launch 1 timed 4 cycles=1790001 frames=54 ms=246.900 cycles_per_second=7249903 mhz=7.250 times_real=4.36
+launch 1 timed 5 cycles=1790001 frames=54 ms=248.100 cycles_per_second=7214837 mhz=7.215 times_real=4.34
+launch 1 thread 1 cycles=1790004 thread_ms=248.249 mhz=7.211 times_real=4.34
+launch 1 thread 2 cycles=1790003 thread_ms=246.258 mhz=7.269 times_real=4.37
+launch 1 thread 3 cycles=1790000 thread_ms=238.464 mhz=7.506 times_real=4.51
+launch 1 thread 4 cycles=1790001 thread_ms=237.981 mhz=7.522 times_real=4.52
+launch 1 thread 5 cycles=1790004 thread_ms=237.630 mhz=7.533 times_real=4.53
+launch 1 thread 6 cycles=1790003 thread_ms=236.770 mhz=7.560 times_real=4.55
+launch 1 thread 7 cycles=1790003 thread_ms=238.525 mhz=7.504 times_real=4.51
+launch 1 thread 8 cycles=1790003 thread_ms=238.534 mhz=7.504 times_real=4.51
+--- exit=0 end=2026-10-13T11:39:56Z loadavg=0.90 0.76 0.85 1/404 188803
+=== launch r1-p8-cur folder=/tmp/nes77/pub-after region=1 start=2026-10-13T11:39:56Z loadavg=0.90 0.76 0.85 1/404 188809
+--- top before: 1.0 claude;0.0 systemd;0.0 kthreadd;0.0 pool_wo+;
+rom: other/snow.nes at 95d8f621ae55, 40976 bytes, sha256 7db551e868b2c0182941bd68adc447c2f0668098a4425e8e170b20e4327b7210, hash checked
+browser 153.0.8010.12
+launch 1 region 1 PAL
+launch 1 Running as PAL, as chosen here: the file does not say which.
+launch 1 boot cycles=5000001 frames=150 ms=719.100 cycles_per_second=6953137 mhz=6.953 times_real=4.18
+launch 1 timed 1 cycles=1790002 frames=54 ms=249.600 cycles_per_second=7171482 mhz=7.171 times_real=4.31
+launch 1 timed 2 cycles=1790000 frames=54 ms=250.700 cycles_per_second=7140008 mhz=7.140 times_real=4.29
+launch 1 timed 3 cycles=1790000 frames=53 ms=249.700 cycles_per_second=7168602 mhz=7.169 times_real=4.31
+launch 1 timed 4 cycles=1790001 frames=54 ms=248.500 cycles_per_second=7203223 mhz=7.203 times_real=4.33
+launch 1 timed 5 cycles=1790001 frames=54 ms=249.400 cycles_per_second=7177229 mhz=7.177 times_real=4.32
+launch 1 thread 1 cycles=1790004 thread_ms=250.349 mhz=7.150 times_real=4.30
+launch 1 thread 2 cycles=1790003 thread_ms=247.657 mhz=7.228 times_real=4.35
+launch 1 thread 3 cycles=1790000 thread_ms=240.408 mhz=7.446 times_real=4.48
+launch 1 thread 4 cycles=1790001 thread_ms=240.191 mhz=7.452 times_real=4.48
+launch 1 thread 5 cycles=1790004 thread_ms=239.660 mhz=7.469 times_real=4.49
+launch 1 thread 6 cycles=1790003 thread_ms=237.904 mhz=7.524 times_real=4.53
+launch 1 thread 7 cycles=1790003 thread_ms=241.117 mhz=7.424 times_real=4.47
+launch 1 thread 8 cycles=1790003 thread_ms=242.374 mhz=7.385 times_real=4.44
+--- exit=0 end=2026-10-13T11:40:02Z loadavg=0.91 0.77 0.85 2/405 188938
+=== launch r1-p8-A folder=/tmp/nes77/pub-A region=1 start=2026-10-13T11:40:02Z loadavg=0.91 0.77 0.85 1/405 188944
+--- top before: 1.0 top;0.0 systemd;0.0 kthreadd;0.0 pool_wo+;
+rom: other/snow.nes at 95d8f621ae55, 40976 bytes, sha256 7db551e868b2c0182941bd68adc447c2f0668098a4425e8e170b20e4327b7210, hash checked
+browser 153.0.8010.12
+launch 1 region 1 PAL
+launch 1 Running as PAL, as chosen here: the file does not say which.
+launch 1 boot cycles=5000001 frames=150 ms=715.200 cycles_per_second=6991053 mhz=6.991 times_real=4.20
+launch 1 timed 1 cycles=1790002 frames=54 ms=248.300 cycles_per_second=7209029 mhz=7.209 times_real=4.34
+launch 1 timed 2 cycles=1790000 frames=54 ms=248.600 cycles_per_second=7200322 mhz=7.200 times_real=4.33
+launch 1 timed 3 cycles=1790000 frames=53 ms=248.600 cycles_per_second=7200322 mhz=7.200 times_real=4.33
+launch 1 timed 4 cycles=1790001 frames=54 ms=247.000 cycles_per_second=7246968 mhz=7.247 times_real=4.36
+launch 1 timed 5 cycles=1790001 frames=54 ms=248.400 cycles_per_second=7206123 mhz=7.206 times_real=4.33
+launch 1 thread 1 cycles=1790004 thread_ms=248.329 mhz=7.208 times_real=4.34
+launch 1 thread 2 cycles=1790003 thread_ms=246.408 mhz=7.264 times_real=4.37
+launch 1 thread 3 cycles=1790000 thread_ms=238.703 mhz=7.499 times_real=4.51
+launch 1 thread 4 cycles=1790001 thread_ms=238.476 mhz=7.506 times_real=4.51
+launch 1 thread 5 cycles=1790004 thread_ms=238.334 mhz=7.510 times_real=4.52
+launch 1 thread 6 cycles=1790003 thread_ms=237.269 mhz=7.544 times_real=4.54
+launch 1 thread 7 cycles=1790003 thread_ms=239.066 mhz=7.487 times_real=4.50
+launch 1 thread 8 cycles=1790003 thread_ms=238.793 mhz=7.496 times_real=4.51
+--- exit=0 end=2026-10-13T11:40:09Z loadavg=0.83 0.75 0.85 1/405 189079
+=== launch r1-p8-B folder=/tmp/nes77/pub-B region=1 start=2026-10-13T11:40:09Z loadavg=0.83 0.75 0.85 1/405 189085
+--- top before: 1.0 claude;1.0 kworker+;1.0 kworker+;0.0 systemd;
+rom: other/snow.nes at 95d8f621ae55, 40976 bytes, sha256 7db551e868b2c0182941bd68adc447c2f0668098a4425e8e170b20e4327b7210, hash checked
+browser 153.0.8010.12
+launch 1 region 1 PAL
+launch 1 Running as PAL, as chosen here: the file does not say which.
+launch 1 boot cycles=5000001 frames=150 ms=731.300 cycles_per_second=6837141 mhz=6.837 times_real=4.11
+launch 1 timed 1 cycles=1790002 frames=54 ms=252.100 cycles_per_second=7100365 mhz=7.100 times_real=4.27
+launch 1 timed 2 cycles=1790000 frames=54 ms=252.000 cycles_per_second=7103175 mhz=7.103 times_real=4.27
+launch 1 timed 3 cycles=1790000 frames=53 ms=251.600 cycles_per_second=7114467 mhz=7.114 times_real=4.28
+launch 1 timed 4 cycles=1790001 frames=54 ms=251.200 cycles_per_second=7125800 mhz=7.126 times_real=4.29
+launch 1 timed 5 cycles=1790001 frames=54 ms=252.200 cycles_per_second=7097546 mhz=7.098 times_real=4.27
+launch 1 thread 1 cycles=1790004 thread_ms=252.472 mhz=7.090 times_real=4.26
+launch 1 thread 2 cycles=1790003 thread_ms=250.215 mhz=7.154 times_real=4.30
+launch 1 thread 3 cycles=1790000 thread_ms=243.049 mhz=7.365 times_real=4.43
+launch 1 thread 4 cycles=1790001 thread_ms=242.634 mhz=7.377 times_real=4.44
+launch 1 thread 5 cycles=1790004 thread_ms=243.394 mhz=7.354 times_real=4.42
+launch 1 thread 6 cycles=1790003 thread_ms=241.790 mhz=7.403 times_real=4.45
+launch 1 thread 7 cycles=1790003 thread_ms=243.989 mhz=7.336 times_real=4.41
+launch 1 thread 8 cycles=1790003 thread_ms=244.116 mhz=7.333 times_real=4.41
+--- exit=0 end=2026-10-13T11:40:16Z loadavg=0.79 0.75 0.84 1/403 189211
+VARIANTS-DONE 11:40:16Z
