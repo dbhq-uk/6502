@@ -781,6 +781,13 @@ test('the fitted set is the plan\'s: the 8271 and the DFS fitted, Econet and spe
   for (let n = 78; n <= 87; n++) assert.equal(ic[`IC${n}`].fitted, true, `IC${n}`);
 });
 
+test('the counters\' names are BbcChip\'s members, in its order, as the page reads the host\'s counts', () => {
+  const source = fs.readFileSync(path.join(REPO_ROOT, 'src', 'Dbhq.Machines.BbcMicro', 'BbcChip.cs'), 'utf8');
+  const body = source.slice(source.indexOf('public enum BbcChip'), source.indexOf('}', source.indexOf('public enum BbcChip')));
+  const members = [...body.matchAll(/^\s+(\w+),$/gm)].map((m) => m[1][0].toLowerCase() + m[1].slice(1));
+  assert.deepEqual(members, BBC_CHIPS);
+});
+
 test('every counter is one of BbcChip\'s names and marks one IC', () => {
   const used = parts.model.ics.filter((i) => i.sheila !== null).map((i) => i.sheila);
   assert.deepEqual([...used].sort(), [...BBC_CHIPS].sort());

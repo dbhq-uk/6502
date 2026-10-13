@@ -186,6 +186,8 @@ the sources stop, it chooses:
   zeros. Neither was measured (section 6, item 4): the OS writes the latch before
   it reads `$8000`, and a real machine's RAM holds whatever its chips power up
   with.
+- **The serial ULA is one byte** (added 13 October 2026, models plan task 6): the last value written to `$FE10-$FE17`, kept for its bit 7, the cassette motor's light. It reads 0 before the first write and no reset changes it, neither of which was found in a source (section 1e). Reads of it are the absent slow device's `$00`, as before, and nothing else of the chip is there.
+- **The chip counters count by address block** (section 1f): a read of a write-only chip counts as an access to it, though no source says whether its select is gated by R/W. They change nothing the machine does; the trace test (`BusTraceTests`) holds every access, value and cycle of a session to the one `main` gave before they were added.
 
 **How the tests treat it.** `BbcBusTests` pins the stretch from both phases,
 every slow and fast range, the empty slot's value and the absent devices'

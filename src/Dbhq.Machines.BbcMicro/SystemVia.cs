@@ -88,6 +88,14 @@ public sealed class SystemVia : Via6522
     public event Action<byte>? SoundWrite;
 
     /// <summary>
+    /// The bytes strobed into the sound chip, wrapping: the bus's count for <see cref="BbcChip.Sound"/>.
+    /// A plain field the strobe adds to with no call, as the bus counts its SHEILA accesses
+    /// (<see cref="BbcBus.Accesses"/>); the bus sets it to zero at power on. Nothing reads it but
+    /// the counters.
+    /// </summary>
+    internal uint SoundStrobes;
+
+    /// <summary>
     /// Latch bit 4 or 5, the screen start adder, is about to change: the video ULA draws up to now
     /// with the old bits first. Raised from inside a write to the chip, before the latch changes.
     /// </summary>
@@ -234,6 +242,7 @@ public sealed class SystemVia : Via6522
 
         if (bit == 0 && soundWasHigh && !high)
         {
+            unchecked { SoundStrobes++; }
             SoundWrite?.Invoke(PinsA);
         }
     }

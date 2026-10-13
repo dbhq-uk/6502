@@ -451,6 +451,7 @@ A day's spike, before any pipeline is built. If any STOP threshold is crossed, t
   3. The counting is inline.
   4. The motor bit is sourced, or the LED is left dark with the reason.
   5. The `bbc:key` actions match the on-screen keys, latches included.
+- **Outcome, 13 October 2026.** Built, except the speed run, which is **owed**. The bus counts as the NES's variant A: nine plain fields added to in the SHEILA decode, and the sound chip's in the system VIA where it strobes a byte, with no call. The motor bit is sourced (Advanced User Guide s.20.9.4, not s.17 as this plan said; the Service Manual s.3.5), so the motor's light is lit by serial ULA control bit 7; the lock lights are lit by a low latch bit, from the OS's own routine. Nothing else changed: the native fingerprint's output is byte-identical to `main`'s, and a new trace test (`BusTraceTests`) holds every access, value, cycle and interrupt line of a session to the hash `main` gave before the counters. **The speed rule** was written and committed (`bench/bbc-micro-speed/chip-counters/rule.md`, in `0554ff6`) before any launch, and no launch has run: the host is Dan's to name, and the pull request does not merge without the run. No speed figure was taken on this box. The figures and the commands are in the journal's task 6 section.
 
 **Files:**
 - Create: `src/Dbhq.Machines.BbcMicro/BbcChip.cs`, `tests/Dbhq.Machines.BbcMicro.Tests/MachineStateTests.cs`
@@ -723,7 +724,7 @@ Nothing here needs a decision from him now; the choices are taken (`models.md`, 
 
 Recorded here, not built:
 
-- **Added 13 October 2026 (the re-plan):** task 6's browser speed run, owed until Dan names its host; the pull request does not merge without it. A copper re-trace under a new check fixed before it runs, if task 4's nets check fails (as the NES's #78).
+- **Added 13 October 2026 (the re-plan):** task 6's browser speed run, owed until Dan names its host; the pull request does not merge without it. Its rule and the script that applies it were committed before any launch (`bench/bbc-micro-speed/chip-counters/`, task 6's outcome). A copper re-trace under a new check fixed before it runs, if task 4's nets check fails (as the NES's #78).
 
 - A shared three.js chunk for the two bundles (needs a deploy list that tolerates hashed names).
 - Measured heights for the inside, from a pair of photographs of a populated Issue 7 board, if one is found.

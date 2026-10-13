@@ -69,7 +69,7 @@ The first four columns are [from S1 s.17 table p.358]. Read/write behaviour and 
 |---|---|---|---|---|
 | `$FE00-$FE07` | 6845 CRTC | `$FE00` address register, `$FE01` data. A0 = RS. `$FE02-$FE07` mirror the pair | R0-R13 write only. R14-R17 read | [from S1 s.18.2; S2 IC39 note (B+ section, same decode): uses A3, A4 only] [inferring the pair mirror] |
 | `$FE08-$FE0F` | 6850 ACIA | `$FE08` control (W) / status (R), `$FE09` TDR (W) / RDR (R). A0 = RS. Pairs mirror to `$FE0F` | | [from S1 s.20.4-20.7] [inferring mirror] |
-| `$FE10-$FE17` | Serial ULA | `$FE10` control, write only. Mirrors to `$FE17` | | [from S1 s.17; S2 IC39 note (B+ section) "SERPROC (`$FE10`)"] |
+| `$FE10-$FE17` | Serial ULA | `$FE10` control, write only. Mirrors to `$FE17` | Bit 7 is the cassette motor relay and its light, 1 = on (section 1e) | [from S1 s.17; S2 IC39 note (B+ section) "SERPROC (`$FE10`)"; bit 7 from S1 s.20.9.4 and S2 3.5] |
 | `$FE18-$FE1F` | Station ID (read) / INTOFF | Read `$FE18` = Econet station ID and disables Econet NMI | Not the ADC (that is the Master) | [from S2 3.9 (Model B section)] |
 | `$FE20-$FE2F` | Video ULA | `$FE20` control register (W), `$FE21` palette (W). A0 selects. Pairs presumably mirror to `$FE2F` | Write only. A **read** of `$FE20` is INTON (Econet NMI enable) | [from S1 s.19; S2 3.9] [inferring mirror] |
 | `$FE30-$FE3F` | ROM select latch | see 1b | Write only | [from S1 s.21] |
@@ -108,6 +108,32 @@ Every address maps to something, so "unmapped" means: absent hardware, an empty 
 | Start-up checks the user VIA is real: write `$0E` to `$FE6C`, read back, compare | User VIA PCR must read back what was written | [from ROM `$DA8F-$DA9F`] |
 
 So `$FE` for absent fast SHEILA devices satisfies both probes. jsbeeb, cross-check only, returns `$FF` for FRED/JIM and the address high byte for other absent devices [S10 6502.js `readDevice`], which agrees.
+
+### 1e. The keyboard's lights
+
+Added on 13 October 2026 by task 6 of the models plan, for the outside model's three lights. S1 here is the archive.org item's OCR text, `BBC-Micro Advanced-User-Guide_djvu.txt`, 544,083 bytes, SHA-256 `d801fb6e98ce3793615ddab28b4ce278e174a2fde463df95cb26cc7d41bd8ae4`, fetched that day. S2 is the Service Manual the models plan calls D1, read through its text layer. The plan pointed at S1 s.17 for the motor bit; s.17 is the SHEILA table, and the bit is in s.20.9.4.
+
+| Light | Driven by | Lit when | Source |
+|---|---|---|---|
+| Cassette motor | Serial ULA control register (`$FE10`) bit 7, which also drives the relay through Q3 | The bit is 1. "The cassette motor relay and LED can be turned on by setting this bit to 1, or off by setting it to 0" | [from S1 s.20.9.4; S1 OSBYTE &89: "The cassette motor LED will reflect the relay state"; S2 3.5, PDF pages 29 to 30: "the motor control (bit7)"; S2 PDF page 164: keyboard connector PL13 pin 13 "cassette LED"] |
+| CAPS LOCK | Latch IC32 bit 6 | The bit is 0 | [from S2 3.6: "Pins 6 and 7 of the addressable latch drive the capitals lock and shift lock LEDs"; S1 s.23.2: "B6 - Operates the CAPS lock LED"; polarity from ROM, below] |
+| SHIFT LOCK | Latch IC32 bit 7 | The bit is 0 | [from S1 s.23.2: "B7 - Operates the SHIFT lock LED"; polarity from ROM, below] |
+
+**The lock lights' polarity, from the ROM.** The OS's routine at `$EEEB` loads the keyboard status byte (`$025A`), shifts it right once, keeps bits 3 and 4, ORs in 6 and writes it to the system VIA's port B, then shifts once more, ORs in 7 and writes again. So latch bit 6 takes status bit 4 and latch bit 7 takes status bit 5 [from ROM `$EEEB-$EF01`; S4 ".keyboardIndicators"]. Status bit 4 is 0 while CAPS LOCK is engaged and bit 5 is 0 while SHIFT LOCK is engaged [from S1 OSBYTE &CA]. CAPS LOCK is engaged from power on, and its light is on then [from S2 PDF page 140: "the caps lock LED comes on"], so a light is lit by a low latch bit. S4's table of latch writes says the same: value 6 "Turn on CAPS LOCK LED", 14 "Turn off" [from S4, the notes on "System VIA, Register B ($FE40)"].
+
+**The two lock keys, from the ROM.** Pressing SHIFT LOCK sets "SHIFT enabled", disengages CAPS LOCK and flips SHIFT LOCK; while SHIFT LOCK is engaged every key's code goes through the SHIFT transformation, so `1` types `!` [from S4 KEYV, "deal with SHIFT LOCK key pressed" and "deal with SHIFT LOCK key engaged"].
+
+**What the serial ULA holds at power on, and whether a reset changes it,** were not found. The machine takes 0 and keeps the last byte written; the OS writes the register in its reset code (section 5's order) [guessing].
+
+### 1f. What the chip counters count
+
+Added on 13 October 2026 by task 6 of the models plan. The inside model marks the chips the processor talks to, from counts the bus keeps (`BbcBus.Accesses`, one for each `BbcChip`).
+
+- Each CPU bus access in a counted chip's block of SHEILA adds one to that chip's count, read or write, whichever register it names, and whether the chip is modelled or not (the ACIA, the serial ULA and the ADC are not). The blocks are the Service Manual's strobe list [from S2 PDF page 58, "DEFPROC strobe select lines": `&FE00` IC2, `&FE08` IC4, `&FE10` IC7, `&FE20` IC6, `&FE30` IC76, `&FE40` IC3, `&FE60` IC69, `&FE80` IC78, `&FEC0` IC73] with each block's size from section 1c. Whether a write-only chip's select is gated by R/W, so that a read of it reaches nothing, was not read in any source; a read counts all the same [guessing].
+- A stretched access is one access and counts once; a read-modify-write is three accesses and counts three times; a peek is not an access and counts nothing.
+- The station ID (`$FE18-$FE1F`), the ADLC and the Tube are not counted: they are not fitted on the board the models show (`models.md`, "The fitted set"). Nothing outside SHEILA is counted.
+- The sound chip, IC18, is not on the CPU's bus. Its count is the bytes the system VIA strobes into it, one each time latch bit 0 falls (`via.md` s4.1).
+- The counts start at zero at power on and wrap at 2^32. BREAK keeps them.
 
 ---
 

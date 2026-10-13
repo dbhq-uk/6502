@@ -183,6 +183,26 @@ public static partial class BbcHost
     [JSExport]
     public static void KeyUp(int key) => Keys.Up((BbcKey)key);
 
+    /// <summary>
+    /// The keyboard's three lights, for the outside model: bit 0 the cassette motor, bit 1 CAPS
+    /// LOCK, bit 2 SHIFT LOCK, set when lit (<see cref="BbcBus.Leds"/>).
+    /// </summary>
+    [JSExport]
+    public static int Leds() => (int)Machine.Bus.Leds;
+
+    /// <summary>
+    /// The CPU's accesses to each chip since power on, for the inside model: one wrapping count for
+    /// each <see cref="BbcChip"/>, in its order, as signed 32-bit ints, so a reader takes the
+    /// difference of two readings wrapped to 32 bits (<see cref="BbcBus.Accesses"/>). They start
+    /// from zero with each new machine (<see cref="Load"/>); BREAK keeps them.
+    /// </summary>
+    [JSExport]
+    public static int[] AccessCounts() => Machine.Bus.AccessCounts();
+
+    /// <summary>The paged ROM latch, 0 to 15: 15 is BASIC and 14 the DFS (<see cref="BbcBus.RomSlot"/>).</summary>
+    [JSExport]
+    public static int RomSlot() => Machine.Bus.RomSlot;
+
     /// <summary>The BREAK key: resets everything but the system VIA, as the machine's own does.</summary>
     [JSExport]
     public static void Break() => Machine.PressBreak();
