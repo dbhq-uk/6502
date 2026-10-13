@@ -1,0 +1,1167 @@
+{
+ "about": "Task 5 of the NES models plan: every part on the board, placed on the bare NES-CPU-10 scan's footprints (registration.json) in its board frame (frame.json), and each console's parts read off photographs of populated boards: NTSC on I4 and I5, Evan-Amos's NES-CPU-07, PAL on I3, an NES-CPU-11. Written by board_parts.py; every figure here is a measurement made on the date of the journal entry that quotes it. `model` is what site/src/models/nes-famicom-board-parts.mjs exports.",
+ "bodies": {
+  "byPackage": {
+   "DIP-14 300 mil": {
+    "l": 19.6,
+    "parts": 1,
+    "w": 7.05
+   },
+   "DIP-16 300 mil": {
+    "l": 20.675,
+    "parts": 4,
+    "w": 6.575
+   },
+   "DIP-20 300 mil": {
+    "l": 26.3,
+    "parts": 1,
+    "w": 7.25
+   },
+   "DIP-24 300 mil": {
+    "l": 31.75,
+    "parts": 2,
+    "w": 7.05
+   },
+   "DIP-40 600 mil": {
+    "l": 53.5,
+    "parts": 2,
+    "w": 14.275
+   }
+  },
+  "onI4": {
+   "U1": {
+    "l": 31.9,
+    "lines": [3, 3],
+    "offsetMm": [0.985, 0.04],
+    "w": 7.1
+   },
+   "U10": {
+    "l": 22.95,
+    "lines": [3, 3],
+    "offsetMm": [0.115, 0.115],
+    "w": 6.65
+   },
+   "U2": {
+    "l": 26.3,
+    "lines": [3, 3],
+    "offsetMm": [0.075, 0.04],
+    "w": 7.25
+   },
+   "U3": {
+    "l": 20.15,
+    "lines": [3, 3],
+    "offsetMm": [0.34, -0.235],
+    "w": 6.95
+   },
+   "U4": {
+    "l": 31.6,
+    "lines": [3, 3],
+    "offsetMm": [1.11, -0.135],
+    "w": 7.0
+   },
+   "U5": {
+    "l": 54.4,
+    "lines": [3, 3],
+    "offsetMm": [1.05, 0.08],
+    "w": 13.9
+   },
+   "U6": {
+    "l": 52.6,
+    "lines": [3, 3],
+    "offsetMm": [0.0, 0.055],
+    "w": 14.65
+   },
+   "U7": {
+    "l": 19.75,
+    "lines": [3, 3],
+    "offsetMm": [-0.06, -0.235],
+    "w": 6.5
+   },
+   "U8": {
+    "l": 21.2,
+    "lines": [3, 3],
+    "offsetMm": [-1.06, -0.01],
+    "w": 6.3
+   },
+   "U9": {
+    "l": 19.6,
+    "lines": [3, 3],
+    "offsetMm": [0.46, -0.085],
+    "w": 7.05
+   }
+  },
+  "what": "Each IC's body measured on I4 (lines through it, through the fit: their median), and the size the model draws: each package's median over its parts. Recorded beside: a body's centre against its pads' (offsetMm, along and across)"
+ },
+ "chipInferred": "U7 is pad1 and U8 pad2 by the board's print, \"40H368(CI)\" and \"40H368(CII)\"; checked on 6 October 2026: the nesdev wiki gives the read of $4016 /OE1 and of $4017 /OE2 (Input devices, CPU pinout), and the KiCad redrawing (I2) puts U7's enables on /OE1 and U8's on /OE2; still inferred, as it is not traced on the scan",
+ "kicad": {
+  "beside": {
+   "P1": {
+    "offMm": 0.731,
+    "pads": [72, 72]
+   },
+   "P2": {
+    "offMm": 0.346,
+    "pads": [48, 48]
+   },
+   "P3": {
+    "offMm": 0.896,
+    "pads": [5, 5]
+   },
+   "P4": {
+    "offMm": 0.753,
+    "pads": [7, 7]
+   },
+   "P5": {
+    "offMm": 0.57,
+    "pads": [7, 7]
+   },
+   "P6": {
+    "offMm": 0.379,
+    "pads": [5, 5]
+   },
+   "X1": {
+    "offMm": 0.429,
+    "pads": [3, 4]
+   },
+   "X2": {
+    "offMm": 0.224,
+    "pads": [3, 3]
+   }
+  },
+  "limitMm": 3.0,
+  "maxMm": 0.438,
+  "medianMm": 0.292,
+  "perPart": {
+   "U1": {
+    "dxMm": 0.156,
+    "dyMm": -0.019,
+    "offMm": 0.157
+   },
+   "U10": {
+    "dxMm": 0.293,
+    "dyMm": -0.017,
+    "offMm": 0.293
+   },
+   "U2": {
+    "dxMm": -0.254,
+    "dyMm": 0.184,
+    "offMm": 0.313
+   },
+   "U3": {
+    "dxMm": -0.044,
+    "dyMm": -0.265,
+    "offMm": 0.268
+   },
+   "U4": {
+    "dxMm": -0.147,
+    "dyMm": -0.316,
+    "offMm": 0.348
+   },
+   "U5": {
+    "dxMm": -0.418,
+    "dyMm": -0.131,
+    "offMm": 0.438
+   },
+   "U6": {
+    "dxMm": 0.1,
+    "dyMm": 0.273,
+    "offMm": 0.291
+   },
+   "U7": {
+    "dxMm": -0.073,
+    "dyMm": 0.09,
+    "offMm": 0.116
+   },
+   "U8": {
+    "dxMm": -0.019,
+    "dyMm": 0.243,
+    "offMm": 0.243
+   },
+   "U9": {
+    "dxMm": 0.404,
+    "dyMm": -0.043,
+    "offMm": 0.406
+   }
+  },
+  "places": {
+   "U1": [92.296, 117.265],
+   "U10": [180.59, 104.765],
+   "U2": [145.606, 99.768],
+   "U3": [66.79, 70.965],
+   "U4": [148.146, 119.765],
+   "U5": [158.306, 80.455],
+   "U6": [82.136, 93.27],
+   "U7": [176.69, 46.265],
+   "U8": [176.69, 59.165],
+   "U9": [199.945, 87.04]
+  },
+  "rotationDeg": -0.262,
+  "scale": 0.995,
+  "verdict": "pass",
+  "what": "Each IC's place (its pads' centre) against the centre of the same pads in the KiCad redrawing (I2), for U1 and U4 the 300 mil copies, after the similarity that fits them best; none may be more than 3 mm off (the plan). The connectors and crystals through the same similarity, recorded, not judged. Numbers compared; nothing drawn from I2"
+ },
+ "model": {
+  "board": {
+   "depth": 119.445,
+   "holes": [
+    {"d":3.712,"x":11.872,"y":5.799},
+    {"d":3.671,"x":151.922,"y":5.749},
+    {"d":3.574,"x":187.932,"y":5.856},
+    {"d":2.296,"x":182.809,"y":5.824},
+    {"d":4.09,"x":48.562,"y":35.74},
+    {"d":3.223,"x":115.007,"y":35.712},
+    {"d":2.77,"x":11.826,"y":35.785},
+    {"d":3.712,"x":187.859,"y":84.744},
+    {"d":4.243,"x":4.704,"y":113.625},
+    {"d":4.114,"x":179.724,"y":113.639},
+    {"d":3.717,"x":16.782,"y":113.747},
+    {"d":3.876,"x":146.87,"y":113.603}
+   ],
+   "outline": [
+    [0.0,0.0],
+    [15.645,0.0],
+    [15.645,2.973],
+    [148.132,2.874],
+    [148.132,-0.112],
+    [195.803,-0.072],
+    [195.726,40.05],
+    [195.539,40.0],
+    [195.346,39.983],
+    [195.153,40.0],
+    [194.966,40.05],
+    [194.791,40.132],
+    [194.632,40.243],
+    [194.495,40.38],
+    [194.383,40.538],
+    [194.301,40.714],
+    [194.251,40.901],
+    [194.233,41.094],
+    [194.25,41.286],
+    [194.3,41.474],
+    [194.381,41.65],
+    [194.492,41.809],
+    [194.628,41.946],
+    [194.787,42.057],
+    [194.962,42.14],
+    [195.149,42.191],
+    [195.342,42.208],
+    [195.535,42.192],
+    [195.722,42.143],
+    [195.671,68.996],
+    [195.526,68.916],
+    [195.369,68.863],
+    [195.206,68.837],
+    [195.041,68.84],
+    [194.879,68.871],
+    [194.724,68.93],
+    [194.582,69.014],
+    [194.456,69.121],
+    [194.351,69.248],
+    [194.269,69.392],
+    [194.213,69.547],
+    [194.184,69.71],
+    [194.184,69.875],
+    [194.212,70.038],
+    [194.267,70.194],
+    [194.349,70.338],
+    [194.453,70.465],
+    [194.579,70.573],
+    [194.721,70.658],
+    [194.875,70.717],
+    [195.037,70.748],
+    [195.202,70.752],
+    [195.366,70.727],
+    [195.522,70.674],
+    [195.668,70.595],
+    [195.66,74.553],
+    [192.783,74.553],
+    [192.662,119.281],
+    [140.01,119.224],
+    [139.996,109.501],
+    [128.332,109.491],
+    [128.285,119.202],
+    [35.153,119.299],
+    [35.187,109.487],
+    [24.622,109.467],
+    [24.602,119.333],
+    [-0.146,119.26],
+    [-0.027,22.06],
+    [0.358,21.991],
+    [0.725,21.857],
+    [1.063,21.661],
+    [1.362,21.409],
+    [1.613,21.11],
+    [1.808,20.771],
+    [1.942,20.404],
+    [2.01,20.019],
+    [2.011,19.628],
+    [1.944,19.244],
+    [1.811,18.876],
+    [1.616,18.537],
+    [1.366,18.237],
+    [1.067,17.985],
+    [0.73,17.788],
+    [0.363,17.653],
+    [-0.022,17.583],
+    [0.0,0.0]
+   ],
+   "thickness": 1.6,
+   "width": 195.95
+  },
+  "connectors": [
+   {"h":14.0,"kind":"cartridge","l":113.842,"label":"the 72-pin cartridge connector","ref":"P1","rotation":0.0,"w":23.066,"x":82.731,"y":119.825},
+   {"h":8.0,"kind":"expansion","l":72.871,"label":"the expansion port's socket","ref":"P2","rotation":0.0,"w":13.907,"x":81.086,"y":34.838},
+   {"h":6.0,"kind":"controller","l":16.358,"label":"controller port 1's header (printed P4 I)","ref":"P4","rotation":0.0,"w":7.966,"x":168.302,"y":2.532},
+   {"h":6.0,"kind":"controller","l":7.742,"label":"controller port 2's header (printed P5 II)","ref":"P5","rotation":0.0,"w":15.936,"x":192.033,"y":27.647},
+   {"h":12.0,"kind":"power","l":14.495,"label":"the POWER and RESET switches' header","ref":"P6","rotation":0.0,"w":29.735,"x":189.69,"y":55.548}
+  ],
+  "heights": {
+   "P1": {
+    "measured": false,
+    "value": 14.0,
+    "what": "typical, not measured: the 72-pin cartridge connector"
+   },
+   "P2": {
+    "measured": false,
+    "value": 8.0,
+    "what": "typical, not measured: the expansion port's socket"
+   },
+   "P4": {
+    "measured": false,
+    "value": 6.0,
+    "what": "typical, not measured: a controller header"
+   },
+   "P5": {
+    "measured": false,
+    "value": 6.0,
+    "what": "typical, not measured: a controller header"
+   },
+   "P6": {
+    "measured": false,
+    "value": 12.0,
+    "what": "typical, not measured: the POWER and RESET switch block"
+   },
+   "axial": {
+    "measured": false,
+    "value": 2.5,
+    "what": "typical, not measured: an axial part lying on the board: its body's diameter"
+   },
+   "board": 1.6,
+   "crystal": {
+    "measured": false,
+    "value": 4.5,
+    "what": "typical, not measured: a crystal can lying flat"
+   },
+   "dip": {
+    "measured": false,
+    "value": 4.0,
+    "what": "typical, not measured: a 300 mil plastic DIP seated on its standoffs, to the top of its body"
+   },
+   "dip600": {
+    "measured": false,
+    "value": 4.6,
+    "what": "typical, not measured: a 600 mil plastic DIP seated on its standoffs, to the top of its body"
+   },
+   "modulator": {
+    "measured": false,
+    "value": 22.0,
+    "what": "typical, not measured: the RF modulator's box"
+   },
+   "other": {
+    "measured": false,
+    "value": 5.0,
+    "what": "typical, not measured: a single-in-line array, a transistor or a trimmer"
+   },
+   "radial": {
+    "measured": false,
+    "value": 7.0,
+    "what": "typical, not measured: a disc or electrolytic capacitor standing on its leads"
+   }
+  },
+  "ics": [
+   {"always":null,"chip":"apu","height":4.6,"l":53.5,"parts":{"ntsc":"RP2A03G","pal":"RP2A07A"},"pins":40,"ref":"U6","role":"the processor and sound unit (RP2A03)","rotation":0.077,"w":14.275,"x":42.392,"y":68.737},
+   {"always":null,"chip":"ppu","height":4.6,"l":53.5,"parts":{"ntsc":"RP2C02G-0","pal":"RP2C07-0"},"pins":40,"ref":"U5","role":"the picture processing unit (RP2C02)","rotation":-0.044,"w":14.275,"x":118.611,"y":56.049},
+   {"always":"ram","chip":null,"height":4.0,"l":31.75,"parts":{"ntsc":"MB8416A-15-SK","pal":"XRM6216-10"},"pins":24,"ref":"U1","role":"the work RAM, 2 KB (6116)","rotation":0.004,"w":7.05,"x":52.55,"y":92.849},
+   {"always":"ram","chip":null,"height":4.0,"l":31.75,"parts":{"ntsc":"MB8416A-15-SK","pal":"XRM6216-10"},"pins":24,"ref":"U4","role":"the video RAM, 2 KB (6116)","rotation":-0.099,"w":7.05,"x":108.414,"y":95.378},
+   {"always":"latch","chip":null,"height":4.0,"l":26.3,"parts":{"ntsc":"SN74LS373N","pal":"MB74LS373"},"pins":20,"ref":"U2","role":"the address latch (74LS373)","rotation":-0.065,"w":7.25,"x":105.903,"y":75.001},
+   {"always":"decoder","chip":null,"height":4.0,"l":20.675,"parts":{"ntsc":"SN74LS139N","pal":"SN74LS139N"},"pins":16,"ref":"U3","role":"the address decoder (74LS139)","rotation":-0.123,"w":6.575,"x":27.171,"y":47.16},
+   {"always":null,"chip":"pad1","height":4.0,"l":20.675,"parts":{"ntsc":"MN74HC368","pal":"MC74HC368N"},"pins":16,"ref":"U7","role":"the controller ports' buffer CI (40H368)","rotation":0.094,"w":6.575,"x":136.396,"y":21.74},
+   {"always":null,"chip":"pad2","height":4.0,"l":20.675,"parts":{"ntsc":"MN74HC368","pal":"MC74HC368N"},"pins":16,"ref":"U8","role":"the controller ports' buffer CII (40H368)","rotation":-0.171,"w":6.575,"x":136.4,"y":34.417},
+   {"always":"inverter","chip":null,"height":4.0,"l":19.6,"parts":{"ntsc":"74HCU04AP","pal":"SN74HCU04N"},"pins":14,"ref":"U9","role":"the hex inverter (74HCU04)","rotation":0.011,"w":7.05,"x":159.234,"y":62.322},
+   {"always":"lockout","chip":null,"height":4.0,"l":20.675,"parts":{"ntsc":"3193A","pal":"3195A"},"pins":16,"ref":"U10","role":"the lockout chip (CIC)","rotation":0.074,"w":6.575,"x":140.175,"y":80.013}
+  ],
+  "others": {
+   "ntsc": [
+    {"h":22.0,"kind":"modulator","l":62.796,"label":"RF modulator (its lid off in the photograph; no marking seen)","part":null,"ref":"P3","rotation":0.0,"w":60.044,"x":189.656,"y":125.347},
+    {"h":4.5,"kind":"crystal","l":13.891,"label":"crystal, 21.47727 MHz","part":"21.47727 MHz","ref":"X1","rotation":0.0,"w":11.512,"x":67.637,"y":21.648}
+   ],
+   "pal": [
+    {"h":22.0,"kind":"modulator","l":62.896,"label":"RF modulator (ALPS, its can closed)","part":"ALPS","ref":"P3","rotation":0.0,"w":62.552,"x":193.674,"y":127.152},
+    {"h":4.5,"kind":"crystal","l":13.449,"label":"crystal, 26.601712 MHz","part":"26.601712 MHz","ref":"X1","rotation":0.0,"w":8.899,"x":66.768,"y":20.709}
+   ]
+  },
+  "passives": [
+   {"diameter":2.4,"kind":"axial","length":6.3,"rotation":87.569,"x":17.831,"y":25.566},
+   {"diameter":2.4,"kind":"axial","length":6.3,"rotation":89.937,"x":20.819,"y":25.782},
+   {"diameter":5.0,"kind":"radial","length":5.0,"rotation":-4.835,"x":19.271,"y":33.781},
+   {"diameter":5.0,"kind":"radial","length":5.0,"rotation":0.08,"x":22.031,"y":38.323},
+   {"diameter":3.0,"kind":"other","length":7.0,"rotation":0.274,"x":26.564,"y":21.148},
+   {"diameter":5.0,"kind":"radial","length":5.0,"rotation":-0.054,"x":34.434,"y":21.192},
+   {"diameter":5.0,"kind":"radial","length":5.0,"rotation":0.197,"x":25.623,"y":25.63},
+   {"diameter":2.4,"kind":"axial","length":6.3,"rotation":89.977,"x":34.14,"y":30.767},
+   {"diameter":2.4,"kind":"axial","length":6.3,"rotation":90.46,"x":37.289,"y":30.645},
+   {"diameter":3.0,"kind":"other","length":7.0,"rotation":0.0,"x":26.533,"y":30.8},
+   {"diameter":5.0,"kind":"radial","length":5.0,"rotation":0.324,"x":35.071,"y":39.581},
+   {"diameter":6.5,"kind":"other","length":6.5,"rotation":90.0,"x":42.4,"y":23.08},
+   {"diameter":5.0,"kind":"radial","length":5.0,"rotation":89.827,"x":47.594,"y":21.678},
+   {"diameter":5.0,"kind":"radial","length":5.0,"rotation":-3.293,"x":17.794,"y":54.268},
+   {"diameter":5.0,"kind":"radial","length":5.0,"rotation":3.783,"x":17.671,"y":57.873},
+   {"diameter":2.4,"kind":"axial","length":6.3,"rotation":90.051,"x":16.982,"y":87.865},
+   {"diameter":2.4,"kind":"axial","length":6.3,"rotation":89.92,"x":20.8,"y":87.861},
+   {"diameter":5.0,"kind":"radial","length":5.0,"rotation":89.864,"x":29.678,"y":89.754},
+   {"diameter":2.4,"kind":"axial","length":6.3,"rotation":0.172,"x":62.639,"y":46.762},
+   {"diameter":2.4,"kind":"axial","length":6.3,"rotation":-2.211,"x":62.672,"y":49.808},
+   {"diameter":2.4,"kind":"axial","length":6.3,"rotation":4.988,"x":62.736,"y":52.658},
+   {"diameter":2.5,"kind":"other","length":12.693,"rotation":2.388,"x":61.43,"y":57.534},
+   {"diameter":5.0,"kind":"radial","length":5.0,"rotation":89.942,"x":84.927,"y":75.097},
+   {"diameter":5.0,"kind":"radial","length":5.0,"rotation":90.508,"x":72.877,"y":62.393},
+   {"diameter":2.5,"kind":"other","length":33.127,"rotation":-0.127,"x":102.094,"y":23.066},
+   {"diameter":5.0,"kind":"radial","length":5.0,"rotation":90.034,"x":123.667,"y":78.814},
+   {"diameter":5.0,"kind":"radial","length":5.0,"rotation":-0.61,"x":133.528,"y":87.68},
+   {"diameter":5.0,"kind":"radial","length":5.0,"rotation":95.161,"x":137.547,"y":94.378},
+   {"diameter":5.0,"kind":"radial","length":5.0,"rotation":-2.273,"x":165.821,"y":90.959},
+   {"diameter":5.0,"kind":"radial","length":5.0,"rotation":89.592,"x":171.319,"y":89.099},
+   {"diameter":2.4,"kind":"axial","length":6.3,"rotation":1.107,"x":167.029,"y":69.704},
+   {"diameter":3.0,"kind":"axial","length":6.0,"rotation":90.252,"x":167.502,"y":78.245},
+   {"diameter":2.6,"kind":"axial","length":6.3,"rotation":90.144,"x":171.325,"y":78.251},
+   {"diameter":2.4,"kind":"axial","length":6.3,"rotation":90.166,"x":152.893,"y":80.794},
+   {"diameter":3.0,"kind":"other","length":7.0,"rotation":-1.48,"x":157.96,"y":46.494},
+   {"diameter":2.4,"kind":"axial","length":6.3,"rotation":-0.011,"x":160.419,"y":51.599},
+   {"diameter":2.4,"kind":"axial","length":6.3,"rotation":90.114,"x":169.427,"y":50.373},
+   {"diameter":5.0,"kind":"radial","length":5.0,"rotation":2.015,"x":156.37,"y":55.3},
+   {"diameter":5.0,"kind":"radial","length":5.0,"rotation":2.727,"x":163.916,"y":55.377},
+   {"diameter":5.0,"kind":"radial","length":5.0,"rotation":6.184,"x":149.474,"y":53.921},
+   {"diameter":5.0,"kind":"radial","length":5.0,"rotation":90.125,"x":146.505,"y":61.184},
+   {"diameter":5.0,"kind":"radial","length":5.0,"rotation":3.172,"x":179.48,"y":66.936},
+   {"diameter":5.0,"kind":"radial","length":5.0,"rotation":0.299,"x":181.393,"y":73.09},
+   {"diameter":5.0,"kind":"radial","length":5.0,"rotation":3.664,"x":181.437,"y":76.066},
+   {"diameter":5.0,"kind":"radial","length":5.0,"rotation":-3.039,"x":179.443,"y":46.465},
+   {"diameter":5.0,"kind":"radial","length":5.0,"rotation":-0.115,"x":179.538,"y":51.549},
+   {"diameter":5.0,"kind":"radial","length":5.0,"rotation":-0.379,"x":179.531,"y":56.666},
+   {"diameter":5.0,"kind":"radial","length":5.0,"rotation":-0.561,"x":179.508,"y":61.743},
+   {"diameter":5.0,"kind":"radial","length":5.0,"rotation":-0.125,"x":185.684,"y":23.011},
+   {"diameter":5.0,"kind":"radial","length":5.0,"rotation":-0.72,"x":185.668,"y":25.62},
+   {"diameter":5.0,"kind":"radial","length":5.0,"rotation":-0.391,"x":185.639,"y":28.146},
+   {"diameter":5.0,"kind":"radial","length":5.0,"rotation":1.083,"x":185.608,"y":30.675},
+   {"diameter":5.0,"kind":"radial","length":5.0,"rotation":3.055,"x":185.556,"y":33.177},
+   {"diameter":5.0,"kind":"radial","length":5.0,"rotation":3.105,"x":188.28,"y":38.14},
+   {"diameter":5.0,"kind":"radial","length":5.0,"rotation":89.896,"x":181.305,"y":35.709},
+   {"diameter":5.0,"kind":"radial","length":5.0,"rotation":90.358,"x":162.328,"y":10.63},
+   {"diameter":5.0,"kind":"radial","length":5.0,"rotation":91.321,"x":164.775,"y":10.645},
+   {"diameter":5.0,"kind":"radial","length":5.0,"rotation":91.472,"x":167.258,"y":10.717},
+   {"diameter":5.0,"kind":"radial","length":5.0,"rotation":88.308,"x":169.759,"y":10.665},
+   {"diameter":5.0,"kind":"radial","length":5.0,"rotation":91.776,"x":172.297,"y":10.655},
+   {"diameter":5.0,"kind":"radial","length":5.0,"rotation":89.362,"x":159.873,"y":16.632},
+   {"diameter":5.0,"kind":"radial","length":5.0,"rotation":89.185,"x":154.171,"y":19.254},
+   {"diameter":2.5,"kind":"other","length":17.753,"rotation":0.52,"x":163.046,"y":25.606},
+   {"diameter":2.5,"kind":"other","length":18.367,"rotation":-0.681,"x":162.732,"y":29.494},
+   {"diameter":2.5,"kind":"other","length":17.743,"rotation":0.158,"x":162.933,"y":38.257},
+   {"diameter":2.5,"kind":"other","length":17.593,"rotation":0.936,"x":162.975,"y":42.077},
+   {"diameter":5.0,"kind":"radial","length":5.0,"rotation":0.81,"x":142.697,"y":28.074},
+   {"diameter":5.0,"kind":"radial","length":5.0,"rotation":89.774,"x":74.774,"y":94.156},
+   {"diameter":5.0,"kind":"radial","length":5.0,"rotation":89.977,"x":171.965,"y":61.142},
+   {"diameter":5.0,"kind":"radial","length":5.0,"rotation":-0.093,"x":143.925,"y":87.704},
+   {"diameter":3.5,"kind":"other","length":8.0,"rotation":-84.327,"x":160.249,"y":80.845}
+  ],
+  "sources": ["I1-front", "I1-back", "I3", "I4", "I5"]
+ },
+ "overhang": {
+  "refs": ["P1", "P4", "P5", "P6", "P3 (ntsc)", "P3 (pal)"],
+  "what": "Bodies that run past the board's outline, as the photographs show them (the connectors at the edges and the modulators)"
+ },
+ "passives": {
+  "parts": [
+   {"diameter":2.4,"kind":"axial","leadMovedMm":[0.004,0.003],"leads":[[17.624,20.701],[18.037,30.431]],"length":6.3,"part":"resistor","ref":"R13","rotation":87.569,"x":17.831,"y":25.566},
+   {"diameter":2.4,"kind":"axial","leadMovedMm":[0.004,0.006],"leads":[[20.814,20.789],[20.825,30.774]],"length":6.3,"part":"resistor","ref":"R12","rotation":89.937,"x":20.819,"y":25.782},
+   {"diameter":5.0,"kind":"radial","leadMovedMm":[0.004,0.006],"leads":[[17.669,33.916],[20.873,33.645]],"length":5.0,"part":"disc","ref":"C44","rotation":-4.835,"x":19.271,"y":33.781},
+   {"diameter":5.0,"kind":"radial","leadMovedMm":[0.003,0.004],"leads":[[19.533,38.319],[24.529,38.326]],"length":5.0,"part":"disc","ref":"C46","rotation":0.08,"x":22.031,"y":38.323},
+   {"diameter":3.0,"kind":"other","leadMovedMm":[0.005,0.004,0.006],"leads":[[24.075,21.142],[26.522,21.136],[29.096,21.166]],"length":7.0,"part":"transistor","ref":"Q2","rotation":0.274,"x":26.564,"y":21.148},
+   {"diameter":5.0,"kind":"radial","leadMovedMm":[0.005,0.005],"leads":[[32.843,21.194],[36.025,21.191]],"length":5.0,"part":"disc","ref":"C43","rotation":-0.054,"x":34.434,"y":21.192},
+   {"diameter":5.0,"kind":"radial","leadMovedMm":[0.004,0.006],"leads":[[24.02,25.624],[27.227,25.635]],"length":5.0,"part":"disc","ref":"C42","rotation":0.197,"x":25.623,"y":25.63},
+   {"diameter":2.4,"kind":"axial","leadMovedMm":[0.005,0.003],"leads":[[34.138,25.795],[34.142,35.738]],"length":6.3,"part":"resistor","ref":"R11","rotation":89.977,"x":34.14,"y":30.767},
+   {"diameter":2.4,"kind":"axial","leadMovedMm":[0.002,null],"leads":[[37.328,25.789],[37.25,35.5]],"length":6.3,"part":"resistor","ref":"R10","rotation":90.46,"x":37.289,"y":30.645},
+   {"diameter":3.0,"kind":"other","leadMovedMm":[null,null,null],"leads":[[24.05,30.8],[26.5,30.8],[29.05,30.8]],"length":7.0,"part":"transistor","ref":"Q3","rotation":0.0,"x":26.533,"y":30.8},
+   {"diameter":5.0,"kind":"radial","leadMovedMm":[0.002,0.002],"leads":[[33.48,39.572],[36.662,39.59]],"length":5.0,"part":"disc","ref":"C45","rotation":0.324,"x":35.071,"y":39.581},
+   {"diameter":6.5,"kind":"other","leadMovedMm":[null,null],"leads":[[42.4,20.5],[42.4,25.66]],"length":6.5,"part":"trimmer","ref":"TC1","rotation":90.0,"x":42.4,"y":23.08},
+   {"diameter":5.0,"kind":"radial","leadMovedMm":[0.003,null],"leads":[[47.589,19.857],[47.6,23.5]],"length":5.0,"part":"disc","ref":"C41","rotation":89.827,"x":47.594,"y":21.678},
+   {"diameter":5.0,"kind":"radial","leadMovedMm":[null,0.004],"leads":[[15.5,54.4],[20.089,54.136]],"length":5.0,"part":"disc","ref":"C25","rotation":-3.293,"x":17.794,"y":54.268},
+   {"diameter":5.0,"kind":"radial","leadMovedMm":[0.003,0.003],"leads":[[15.251,57.713],[20.09,58.033]],"length":5.0,"part":"disc","ref":"C13","rotation":3.783,"x":17.671,"y":57.873},
+   {"diameter":2.4,"kind":"axial","leadMovedMm":[0.005,0.005],"leads":[[16.986,82.837],[16.977,92.894]],"length":6.3,"part":"resistor","ref":"R4","rotation":90.051,"x":16.982,"y":87.865},
+   {"diameter":2.4,"kind":"axial","leadMovedMm":[0.004,0.003],"leads":[[20.793,82.823],[20.807,92.899]],"length":6.3,"part":"resistor","ref":"R3","rotation":89.92,"x":20.8,"y":87.861},
+   {"diameter":5.0,"kind":"radial","leadMovedMm":[0.002,0.005],"leads":[[29.672,87.231],[29.684,92.277]],"length":5.0,"part":"disc","ref":"C3","rotation":89.864,"x":29.678,"y":89.754},
+   {"diameter":2.4,"kind":"axial","leadMovedMm":[0.005,0.005],"leads":[[57.644,46.747],[67.634,46.777]],"length":6.3,"part":"resistor","ref":"R9","rotation":0.172,"x":62.639,"y":46.762},
+   {"diameter":2.4,"kind":"axial","leadMovedMm":[null,0.006],"leads":[[57.7,50.0],[67.644,49.616]],"length":6.3,"part":"resistor","ref":"R7","rotation":-2.211,"x":62.672,"y":49.808},
+   {"diameter":2.4,"kind":"axial","leadMovedMm":[0.004,null],"leads":[[57.672,52.216],[67.8,53.1]],"length":6.3,"part":"resistor","ref":"R8","rotation":4.988,"x":62.736,"y":52.658},
+   {"diameter":2.5,"kind":"other","leadMovedMm":[0.005,0.003,0.003,null,null],"leads":[[56.356,57.377],[58.94,57.363],[61.453,57.329],[63.9,57.8],[66.5,57.8]],"length":12.693,"part":"sip","ref":"RA2","rotation":2.388,"x":61.43,"y":57.534},
+   {"diameter":5.0,"kind":"radial","leadMovedMm":[0.005,0.002],"leads":[[84.924,72.623],[84.929,77.572]],"length":5.0,"part":"disc","ref":"C39","rotation":89.942,"x":84.927,"y":75.097},
+   {"diameter":5.0,"kind":"radial","leadMovedMm":[null,0.005],"leads":[[72.9,59.8],[72.854,64.987]],"length":5.0,"part":"disc","ref":"C32","rotation":90.508,"x":72.877,"y":62.393},
+   {"diameter":2.5,"kind":"other","leadMovedMm":[null,0.004],"leads":[[86.8,23.1],[117.387,23.032]],"length":33.127,"part":"sip","ref":"RA1","rotation":-0.127,"x":102.094,"y":23.066},
+   {"diameter":5.0,"kind":"radial","leadMovedMm":[0.004,0.005],"leads":[[123.668,76.287],[123.665,81.341]],"length":5.0,"part":"disc","ref":"C10","rotation":90.034,"x":123.667,"y":78.814},
+   {"diameter":5.0,"kind":"radial","leadMovedMm":[0.003,0.005],"leads":[[131.931,87.697],[135.124,87.663]],"length":5.0,"part":"electrolytic","ref":"C9","rotation":-0.61,"x":133.528,"y":87.68},
+   {"diameter":5.0,"kind":"radial","leadMovedMm":[0.005,null],"leads":[[137.693,92.756],[137.4,96.0]],"length":5.0,"part":"electrolytic","ref":"C1","rotation":95.161,"x":137.547,"y":94.378},
+   {"diameter":5.0,"kind":"radial","leadMovedMm":[null,0.001],"leads":[[164.8,91.0],[166.841,90.919]],"length":5.0,"part":"disc","ref":"C5","rotation":-2.273,"x":165.821,"y":90.959},
+   {"diameter":5.0,"kind":"radial","leadMovedMm":[0.001,0.004],"leads":[[171.301,86.639],[171.336,91.558]],"length":5.0,"part":"disc","ref":"C4","rotation":89.592,"x":171.319,"y":89.099},
+   {"diameter":2.4,"kind":"axial","leadMovedMm":[0.004,0.005],"leads":[[161.931,69.606],[172.126,69.803]],"length":6.3,"part":"resistor","ref":"R2","rotation":1.107,"x":167.029,"y":69.704},
+   {"diameter":3.0,"kind":"axial","leadMovedMm":[0.004,0.002],"leads":[[167.524,73.249],[167.48,83.242]],"length":6.0,"part":"ferrite","ref":"FC2","rotation":90.252,"x":167.502,"y":78.245},
+   {"diameter":2.6,"kind":"axial","leadMovedMm":[0.004,0.002],"leads":[[171.337,73.262],[171.312,83.241]],"length":6.3,"part":"inductor","ref":"FC1","rotation":90.144,"x":171.325,"y":78.251},
+   {"diameter":2.4,"kind":"axial","leadMovedMm":[0.002,0.001],"leads":[[152.908,75.789],[152.879,85.8]],"length":6.3,"part":"resistor","ref":"R1","rotation":90.166,"x":152.893,"y":80.794},
+   {"diameter":3.0,"kind":"other","leadMovedMm":[null,0.005,0.004],"leads":[[155.6,46.6],[157.883,46.406],[160.398,46.476]],"length":7.0,"part":"transistor","ref":"Q1","rotation":-1.48,"x":157.96,"y":46.494},
+   {"diameter":2.4,"kind":"axial","leadMovedMm":[0.004,0.003],"leads":[[155.366,51.6],[165.472,51.598]],"length":6.3,"part":"resistor","ref":"R6","rotation":-0.011,"x":160.419,"y":51.599},
+   {"diameter":2.4,"kind":"axial","leadMovedMm":[0.003,0.004],"leads":[[169.437,45.369],[169.417,55.378]],"length":6.3,"part":"resistor","ref":"R5","rotation":90.114,"x":169.427,"y":50.373},
+   {"diameter":5.0,"kind":"radial","leadMovedMm":[0.005,0.004],"leads":[[154.864,55.247],[157.877,55.353]],"length":5.0,"part":"disc","ref":"C21","rotation":2.015,"x":156.37,"y":55.3},
+   {"diameter":5.0,"kind":"radial","leadMovedMm":[null,0.005],"leads":[[162.3,55.3],[165.533,55.454]],"length":5.0,"part":"disc","ref":"C20","rotation":2.727,"x":163.916,"y":55.377},
+   {"diameter":5.0,"kind":"radial","leadMovedMm":[null,0.003],"leads":[[147.9,53.75],[151.047,54.091]],"length":5.0,"part":"electrolytic","ref":"C23","rotation":6.184,"x":149.474,"y":53.921},
+   {"diameter":5.0,"kind":"radial","leadMovedMm":[0.002,null],"leads":[[146.511,58.668],[146.5,63.7]],"length":5.0,"part":"disc","ref":"C24","rotation":90.125,"x":146.505,"y":61.184},
+   {"diameter":5.0,"kind":"radial","leadMovedMm":[0.002,0.005],"leads":[[176.981,66.798],[181.979,67.075]],"length":5.0,"part":"disc","ref":"C14","rotation":3.172,"x":179.48,"y":66.936},
+   {"diameter":5.0,"kind":"radial","leadMovedMm":[0.003,0.005],"leads":[[178.9,73.077],[183.886,73.103]],"length":5.0,"part":"disc","ref":"C12","rotation":0.299,"x":181.393,"y":73.09},
+   {"diameter":5.0,"kind":"radial","leadMovedMm":[0.004,0.0],"leads":[[179.024,75.911],[183.85,76.22]],"length":5.0,"part":"disc","ref":"C11","rotation":3.664,"x":181.437,"y":76.066},
+   {"diameter":5.0,"kind":"radial","leadMovedMm":[null,0.004],"leads":[[176.9,46.6],[181.986,46.33]],"length":5.0,"part":"disc","ref":"C18","rotation":-3.039,"x":179.443,"y":46.465},
+   {"diameter":5.0,"kind":"radial","leadMovedMm":[0.004,0.005],"leads":[[177.038,51.554],[182.037,51.544]],"length":5.0,"part":"disc","ref":"C17","rotation":-0.115,"x":179.538,"y":51.549},
+   {"diameter":5.0,"kind":"radial","leadMovedMm":[0.004,0.002],"leads":[[177.034,56.682],[182.028,56.649]],"length":5.0,"part":"disc","ref":"C16","rotation":-0.379,"x":179.531,"y":56.666},
+   {"diameter":5.0,"kind":"radial","leadMovedMm":[0.005,0.001],"leads":[[177.005,61.768],[182.011,61.719]],"length":5.0,"part":"disc","ref":"C15","rotation":-0.561,"x":179.508,"y":61.743},
+   {"diameter":5.0,"kind":"radial","leadMovedMm":[0.006,0.003],"leads":[[184.086,23.015],[187.282,23.008]],"length":5.0,"part":"disc","ref":"C31","rotation":-0.125,"x":185.684,"y":23.011},
+   {"diameter":5.0,"kind":"radial","leadMovedMm":[0.003,null],"leads":[[184.037,25.641],[187.3,25.6]],"length":5.0,"part":"disc","ref":"C30","rotation":-0.72,"x":185.668,"y":25.62},
+   {"diameter":5.0,"kind":"radial","leadMovedMm":[0.003,0.005],"leads":[[184.029,28.157],[187.25,28.135]],"length":5.0,"part":"disc","ref":"C29","rotation":-0.391,"x":185.639,"y":28.146},
+   {"diameter":5.0,"kind":"radial","leadMovedMm":[0.005,0.005],"leads":[[184.047,30.646],[187.168,30.705]],"length":5.0,"part":"disc","ref":"C28","rotation":1.083,"x":185.608,"y":30.675},
+   {"diameter":5.0,"kind":"radial","leadMovedMm":[0.004,0.003],"leads":[[183.954,33.091],[187.158,33.262]],"length":5.0,"part":"disc","ref":"C27","rotation":3.055,"x":185.556,"y":33.177},
+   {"diameter":5.0,"kind":"radial","leadMovedMm":[null,0.001],"leads":[[185.7,38.0],[190.861,38.28]],"length":5.0,"part":"disc","ref":"C26","rotation":3.105,"x":188.28,"y":38.14},
+   {"diameter":5.0,"kind":"radial","leadMovedMm":[0.001,0.002],"leads":[[181.301,33.219],[181.31,38.198]],"length":5.0,"part":"disc","ref":"BC1","rotation":89.896,"x":181.305,"y":35.709},
+   {"diameter":5.0,"kind":"radial","leadMovedMm":[0.003,0.003],"leads":[[162.338,9.028],[162.318,12.232]],"length":5.0,"part":"disc","ref":"C37","rotation":90.358,"x":162.328,"y":10.63},
+   {"diameter":5.0,"kind":"radial","leadMovedMm":[0.004,0.004],"leads":[[164.813,8.998],[164.737,12.293]],"length":5.0,"part":"disc","ref":"C36","rotation":91.321,"x":164.775,"y":10.645},
+   {"diameter":5.0,"kind":"radial","leadMovedMm":[0.002,0.004],"leads":[[167.299,9.122],[167.217,12.312]],"length":5.0,"part":"disc","ref":"C35","rotation":91.472,"x":167.258,"y":10.717},
+   {"diameter":5.0,"kind":"radial","leadMovedMm":[0.004,0.005],"leads":[[169.713,9.108],[169.805,12.222]],"length":5.0,"part":"disc","ref":"C34","rotation":88.308,"x":169.759,"y":10.665},
+   {"diameter":5.0,"kind":"radial","leadMovedMm":[0.004,0.004],"leads":[[172.347,9.043],[172.247,12.268]],"length":5.0,"part":"disc","ref":"C33","rotation":91.776,"x":172.297,"y":10.655},
+   {"diameter":5.0,"kind":"radial","leadMovedMm":[0.006,null],"leads":[[159.845,14.164],[159.9,19.1]],"length":5.0,"part":"disc","ref":"C38","rotation":89.362,"x":159.873,"y":16.632},
+   {"diameter":5.0,"kind":"radial","leadMovedMm":[0.005,0.003],"leads":[[154.136,16.757],[154.207,21.75]],"length":5.0,"part":"disc","ref":"BC2","rotation":89.185,"x":154.171,"y":19.254},
+   {"diameter":2.5,"kind":"other","leadMovedMm":[0.003,0.005],"leads":[[155.44,25.537],[170.652,25.675]],"length":17.753,"part":"sip","ref":"DA1","rotation":0.52,"x":163.046,"y":25.606},
+   {"diameter":2.5,"kind":"other","leadMovedMm":[0.002,0.005],"leads":[[154.819,29.588],[170.645,29.4]],"length":18.367,"part":"sip","ref":"DA2","rotation":-0.681,"x":162.732,"y":29.494},
+   {"diameter":2.5,"kind":"other","leadMovedMm":[0.004,0.005],"leads":[[155.332,38.236],[170.535,38.278]],"length":17.743,"part":"sip","ref":"DA3","rotation":0.158,"x":162.933,"y":38.257},
+   {"diameter":2.5,"kind":"other","leadMovedMm":[0.004,null],"leads":[[155.449,41.954],[170.5,42.2]],"length":17.593,"part":"sip","ref":"DA4","rotation":0.936,"x":162.975,"y":42.077},
+   {"diameter":5.0,"kind":"radial","leadMovedMm":[0.004,0.003],"leads":[[140.186,28.038],[145.207,28.109]],"length":5.0,"part":"disc","ref":"C40","rotation":0.81,"x":142.697,"y":28.074},
+   {"diameter":5.0,"kind":"radial","leadMovedMm":[0.006,0.006],"leads":[[74.764,91.616],[74.784,96.696]],"length":5.0,"part":"disc","ref":"C22","rotation":89.774,"x":74.774,"y":94.156},
+   {"diameter":5.0,"kind":"radial","leadMovedMm":[0.006,0.004],"leads":[[171.964,58.634],[171.966,63.651]],"length":5.0,"part":"disc","ref":"C19","rotation":89.977,"x":171.965,"y":61.142},
+   {"diameter":5.0,"kind":"radial","leadMovedMm":[0.002,null],"leads":[[141.45,87.708],[146.4,87.7]],"length":5.0,"part":"disc","ref":"C8","rotation":-0.093,"x":143.925,"y":87.704},
+   {"diameter":3.5,"kind":"other","leadMovedMm":[0.0,0.0,0.0],"leads":[[159.999,83.362],[160.5,80.794],[160.499,78.329]],"length":8.0,"part":"resonator","ref":"X2","rotation":-84.327,"x":160.249,"y":80.845}
+  ],
+  "what": "Each passive: its ref, the part as seen on I4, its leads on the scan's pads (leadMovedMm: how far each lead read by eye moved to its pad; null: no pad within 0.6 mm, the lead read by eye kept)"
+ },
+ "photographs": {
+  "I3": {
+   "fit": {
+    "fitMm": {
+     "max": 0.503,
+     "median": 0.17,
+     "p90": 0.366
+    },
+    "points": 39
+   },
+   "heldOut": {
+    "U1": {
+     "dxMm": -0.341,
+     "dyMm": 0.07,
+     "heldOutMm": 0.348,
+     "points": 4,
+     "pointsMm": {
+      "max": 0.66,
+      "median": 0.317
+     }
+    },
+    "U10": {
+     "dxMm": -0.163,
+     "dyMm": 0.144,
+     "heldOutMm": 0.217,
+     "points": 4,
+     "pointsMm": {
+      "max": 0.387,
+      "median": 0.228
+     }
+    },
+    "U2": {
+     "dxMm": -0.019,
+     "dyMm": -0.069,
+     "heldOutMm": 0.071,
+     "points": 4,
+     "pointsMm": {
+      "max": 0.166,
+      "median": 0.126
+     }
+    },
+    "U3": {
+     "dxMm": -0.289,
+     "dyMm": 0.189,
+     "heldOutMm": 0.346,
+     "points": 3,
+     "pointsMm": {
+      "max": 0.408,
+      "median": 0.393
+     }
+    },
+    "U4": {
+     "dxMm": 0.17,
+     "dyMm": -0.222,
+     "heldOutMm": 0.28,
+     "points": 4,
+     "pointsMm": {
+      "max": 0.469,
+      "median": 0.313
+     }
+    },
+    "U5": {
+     "dxMm": 0.066,
+     "dyMm": 0.002,
+     "heldOutMm": 0.066,
+     "points": 4,
+     "pointsMm": {
+      "max": 0.228,
+      "median": 0.147
+     }
+    },
+    "U6": {
+     "dxMm": 0.295,
+     "dyMm": -0.038,
+     "heldOutMm": 0.297,
+     "points": 4,
+     "pointsMm": {
+      "max": 0.666,
+      "median": 0.398
+     }
+    },
+    "U7": {
+     "dxMm": -0.021,
+     "dyMm": -0.079,
+     "heldOutMm": 0.082,
+     "points": 4,
+     "pointsMm": {
+      "max": 0.263,
+      "median": 0.161
+     }
+    },
+    "U8": {
+     "dxMm": -0.029,
+     "dyMm": 0.025,
+     "heldOutMm": 0.038,
+     "points": 4,
+     "pointsMm": {
+      "max": 0.124,
+      "median": 0.107
+     }
+    },
+    "U9": {
+     "dxMm": 0.037,
+     "dyMm": 0.096,
+     "heldOutMm": 0.102,
+     "points": 4,
+     "pointsMm": {
+      "max": 0.264,
+      "median": 0.094
+     }
+    }
+   },
+   "how": {
+    "U1": "task 0's marks, 4 pins, on U1, U1 (300 mil)",
+    "U10": "task 0's marks, 4 pins, on U10",
+    "U2": "task 0's marks, 4 pins, on U2",
+    "U3": "task 0's marks, 3 pins, on U3",
+    "U4": "task 0's marks, 4 pins, on U4, U4 (300 mil)",
+    "U5": "task 0's marks, 4 pins, on U5",
+    "U6": "task 0's marks, 4 pins, on U6",
+    "U7": "task 0's marks, 4 pins, on U7",
+    "U8": "task 0's marks, 4 pins, on U8",
+    "U9": "task 0's marks, 4 pins, on U9"
+   }
+  },
+  "I4": {
+   "fit": {
+    "fitMm": {
+     "max": 0.565,
+     "median": 0.127,
+     "p90": 0.295
+    },
+    "points": 98
+   },
+   "heldOut": {
+    "U1": {
+     "dxMm": -0.108,
+     "dyMm": 0.029,
+     "heldOutMm": 0.112,
+     "points": 12,
+     "pointsMm": {
+      "max": 0.397,
+      "median": 0.11
+     }
+    },
+    "U10": {
+     "dxMm": 0.203,
+     "dyMm": 0.224,
+     "heldOutMm": 0.302,
+     "points": 8,
+     "pointsMm": {
+      "max": 0.474,
+      "median": 0.294
+     }
+    },
+    "U2": {
+     "dxMm": 0.065,
+     "dyMm": -0.054,
+     "heldOutMm": 0.084,
+     "points": 10,
+     "pointsMm": {
+      "max": 0.329,
+      "median": 0.127
+     }
+    },
+    "U3": {
+     "dxMm": 0.215,
+     "dyMm": 0.081,
+     "heldOutMm": 0.23,
+     "points": 5,
+     "pointsMm": {
+      "max": 0.654,
+      "median": 0.209
+     }
+    },
+    "U4": {
+     "dxMm": -0.063,
+     "dyMm": -0.186,
+     "heldOutMm": 0.197,
+     "points": 12,
+     "pointsMm": {
+      "max": 0.414,
+      "median": 0.217
+     }
+    },
+    "U5": {
+     "dxMm": -0.057,
+     "dyMm": 0.141,
+     "heldOutMm": 0.153,
+     "points": 20,
+     "pointsMm": {
+      "max": 0.306,
+      "median": 0.202
+     }
+    },
+    "U6": {
+     "dxMm": -0.032,
+     "dyMm": -0.046,
+     "heldOutMm": 0.056,
+     "points": 20,
+     "pointsMm": {
+      "max": 0.207,
+      "median": 0.093
+     }
+    },
+    "U7": {
+     "dxMm": 0.041,
+     "dyMm": -0.43,
+     "heldOutMm": 0.432,
+     "points": 2,
+     "pointsMm": {
+      "max": 0.479,
+      "median": 0.472
+     }
+    },
+    "U8": {
+     "dxMm": -0.047,
+     "dyMm": -0.241,
+     "heldOutMm": 0.246,
+     "points": 2,
+     "pointsMm": {
+      "max": 0.318,
+      "median": 0.306
+     }
+    },
+    "U9": {
+     "dxMm": -0.135,
+     "dyMm": -0.027,
+     "heldOutMm": 0.138,
+     "points": 7,
+     "pointsMm": {
+      "max": 0.339,
+      "median": 0.157
+     }
+    }
+   },
+   "how": {
+    "U1": "midline at 12 of 12 lead columns, found",
+    "U10": "midline at 8 of 8 lead columns, found",
+    "U2": "midline at 10 of 10 lead columns, found",
+    "U3": "midline at 5 of 8 lead columns, found",
+    "U4": "midline at 12 of 12 lead columns, found",
+    "U5": "midline at 20 of 20 lead columns, found",
+    "U6": "midline at 20 of 20 lead columns, found",
+    "U7": "midline ends marked by hand",
+    "U8": "midline ends marked by hand",
+    "U9": "midline at 7 of 7 lead columns, found"
+   },
+   "otherWidthMm": {
+    "U1": 3.865,
+    "U4": 3.664,
+    "what": "U1 and U4 held out against the 600 mil footprint's midline instead: where the RAMs would be on it"
+   }
+  },
+  "I5": {
+   "fit": {
+    "fitMm": {
+     "max": 0.263,
+     "median": 0.054,
+     "p90": 0.109
+    },
+    "points": 199
+   },
+   "heldOut": {
+    "U1": {
+     "dxMm": 0.025,
+     "dyMm": -0.021,
+     "heldOutMm": 0.033,
+     "points": 23,
+     "pointsMm": {
+      "max": 0.228,
+      "median": 0.054
+     }
+    },
+    "U10": {
+     "dxMm": -0.006,
+     "dyMm": 0.099,
+     "heldOutMm": 0.099,
+     "points": 12,
+     "pointsMm": {
+      "max": 0.234,
+      "median": 0.1
+     }
+    },
+    "U2": {
+     "dxMm": -0.01,
+     "dyMm": 0.067,
+     "heldOutMm": 0.068,
+     "points": 20,
+     "pointsMm": {
+      "max": 0.116,
+      "median": 0.075
+     }
+    },
+    "U3": {
+     "dxMm": 0.003,
+     "dyMm": 0.008,
+     "heldOutMm": 0.008,
+     "points": 15,
+     "pointsMm": {
+      "max": 0.267,
+      "median": 0.053
+     }
+    },
+    "U4": {
+     "dxMm": 0.029,
+     "dyMm": -0.053,
+     "heldOutMm": 0.06,
+     "points": 8,
+     "pointsMm": {
+      "max": 0.225,
+      "median": 0.107
+     }
+    },
+    "U5": {
+     "dxMm": -0.011,
+     "dyMm": -0.036,
+     "heldOutMm": 0.038,
+     "points": 39,
+     "pointsMm": {
+      "max": 0.224,
+      "median": 0.071
+     }
+    },
+    "U6": {
+     "dxMm": -0.003,
+     "dyMm": -0.013,
+     "heldOutMm": 0.013,
+     "points": 40,
+     "pointsMm": {
+      "max": 0.19,
+      "median": 0.055
+     }
+    },
+    "U7": {
+     "dxMm": 0.024,
+     "dyMm": 0.02,
+     "heldOutMm": 0.031,
+     "points": 14,
+     "pointsMm": {
+      "max": 0.097,
+      "median": 0.027
+     }
+    },
+    "U8": {
+     "dxMm": 0.0,
+     "dyMm": -0.007,
+     "heldOutMm": 0.007,
+     "points": 16,
+     "pointsMm": {
+      "max": 0.083,
+      "median": 0.031
+     }
+    },
+    "U9": {
+     "dxMm": -0.002,
+     "dyMm": -0.037,
+     "heldOutMm": 0.037,
+     "points": 12,
+     "pointsMm": {
+      "max": 0.148,
+      "median": 0.068
+     }
+    }
+   },
+   "how": {
+    "U1": "23 of 24 joints found",
+    "U10": "12 of 16 joints found",
+    "U2": "20 of 20 joints found",
+    "U3": "15 of 16 joints found",
+    "U4": "8 of 24 joints found",
+    "U5": "39 of 40 joints found",
+    "U6": "40 of 40 joints found",
+    "U7": "14 of 16 joints found",
+    "U8": "16 of 16 joints found",
+    "U9": "12 of 14 joints found"
+   }
+  },
+  "what": "Each photograph fitted to the board frame by a homography on the ICs' points (I4: the midline at each lead column, top of the bodies; I5: every pin's solder joint; I3: task 0's marks, the pins' feet), each IC held out in turn: its points through the fit on the others, the mean against the mean of their places on the scan"
+ },
+ "places": {
+  "U1": {
+   "footprint": "U1 (300 mil)",
+   "padCount": 24,
+   "pins": 24,
+   "rotation": 0.004,
+   "x": 52.55,
+   "y": 92.849
+  },
+  "U10": {
+   "footprint": "U10",
+   "padCount": 16,
+   "pins": 16,
+   "rotation": 0.074,
+   "x": 140.175,
+   "y": 80.013
+  },
+  "U2": {
+   "footprint": "U2",
+   "padCount": 20,
+   "pins": 20,
+   "rotation": -0.065,
+   "x": 105.903,
+   "y": 75.001
+  },
+  "U3": {
+   "footprint": "U3",
+   "padCount": 16,
+   "pins": 16,
+   "rotation": -0.123,
+   "x": 27.171,
+   "y": 47.16
+  },
+  "U4": {
+   "footprint": "U4 (300 mil)",
+   "padCount": 24,
+   "pins": 24,
+   "rotation": -0.099,
+   "x": 108.414,
+   "y": 95.378
+  },
+  "U5": {
+   "footprint": "U5",
+   "padCount": 40,
+   "pins": 40,
+   "rotation": -0.044,
+   "x": 118.611,
+   "y": 56.049
+  },
+  "U6": {
+   "footprint": "U6",
+   "padCount": 40,
+   "pins": 40,
+   "rotation": 0.077,
+   "x": 42.392,
+   "y": 68.737
+  },
+  "U7": {
+   "footprint": "U7",
+   "padCount": 16,
+   "pins": 16,
+   "rotation": 0.094,
+   "x": 136.396,
+   "y": 21.74
+  },
+  "U8": {
+   "footprint": "U8",
+   "padCount": 16,
+   "pins": 16,
+   "rotation": -0.171,
+   "x": 136.4,
+   "y": 34.417
+  },
+  "U9": {
+   "footprint": "U9",
+   "padCount": 14,
+   "pins": 14,
+   "rotation": 0.011,
+   "x": 159.234,
+   "y": 62.322
+  }
+ },
+ "problems": [],
+ "sitsOn": {
+  "ics": {
+   "U1": {
+    "I3": 0.348,
+    "I4": 0.112,
+    "I5": 0.033,
+    "verdict": "sits on it"
+   },
+   "U10": {
+    "I3": 0.217,
+    "I4": 0.302,
+    "I5": 0.099,
+    "verdict": "sits on it"
+   },
+   "U2": {
+    "I3": 0.071,
+    "I4": 0.084,
+    "I5": 0.068,
+    "verdict": "sits on it"
+   },
+   "U3": {
+    "I3": 0.346,
+    "I4": 0.23,
+    "I5": 0.008,
+    "verdict": "sits on it"
+   },
+   "U4": {
+    "I3": 0.28,
+    "I4": 0.197,
+    "I5": 0.06,
+    "verdict": "sits on it"
+   },
+   "U5": {
+    "I3": 0.066,
+    "I4": 0.153,
+    "I5": 0.038,
+    "verdict": "sits on it"
+   },
+   "U6": {
+    "I3": 0.297,
+    "I4": 0.056,
+    "I5": 0.013,
+    "verdict": "sits on it"
+   },
+   "U7": {
+    "I3": 0.082,
+    "I4": 0.432,
+    "I5": 0.031,
+    "verdict": "sits on it"
+   },
+   "U8": {
+    "I3": 0.038,
+    "I4": 0.246,
+    "I5": 0.007,
+    "verdict": "sits on it"
+   },
+   "U9": {
+    "I3": 0.102,
+    "I4": 0.138,
+    "I5": 0.037,
+    "verdict": "sits on it"
+   }
+  },
+  "limitMm": 2.0,
+  "others": {
+   "P1": {
+    "holes": 72,
+    "joints": 0,
+    "looked": "no holes: the edge fingers, which the connector clamps; on I4 its body lies across them, its outline's middle 0.9 mm right of the fingers' middle and its ends past both end fingers (parts.json \"beside\")",
+    "offMm": null,
+    "verdict": "sits on it"
+   },
+   "P2": {
+    "holes": 48,
+    "joints": 47,
+    "looked": "every hole has its joint under the cross; the finder missed pin 3's, whose highlight runs off its disc",
+    "offMm": {
+     "max": 0.167,
+     "median": 0.075
+    },
+    "verdict": "sits on it"
+   },
+   "P3": {
+    "holes": 5,
+    "joints": 0,
+    "looked": "every hole has its joint under the cross (pins 1 to 5)",
+    "offMm": null,
+    "verdict": "sits on it"
+   },
+   "P4": {
+    "holes": 7,
+    "joints": 3,
+    "looked": "every hole has its joint under the cross (7)",
+    "offMm": {
+     "max": 0.065,
+     "median": 0.04
+    },
+    "verdict": "sits on it"
+   },
+   "P5": {
+    "holes": 7,
+    "joints": 1,
+    "looked": "every hole has its joint under the cross (7)",
+    "offMm": {
+     "max": 0.079,
+     "median": 0.079
+    },
+    "verdict": "sits on it"
+   },
+   "P6": {
+    "holes": 5,
+    "joints": 0,
+    "looked": "every hole has its joint under the cross (5 large joints)",
+    "offMm": null,
+    "verdict": "sits on it"
+   },
+   "X1": {
+    "holes": 4,
+    "joints": 1,
+    "looked": "every hole has its joint under the cross (the two leads and the two strap holes)",
+    "offMm": {
+     "max": 0.197,
+     "median": 0.197
+    },
+    "verdict": "sits on it"
+   },
+   "X2": {
+    "holes": 3,
+    "joints": 1,
+    "looked": "every hole has its joint, pin 1 about 0.5 mm from the cross",
+    "offMm": {
+     "max": 0.133,
+     "median": 0.133
+    },
+    "verdict": "sits on it"
+   }
+  },
+  "what": "Each part of the CPU-07 (I4, I5) on the CPU-10 footprint of the same reference: an IC sits on it if its held-out error on I4 and on I5 is at most 2.0 mm (the plan's PAL layout row's \"none over 2.0\", set before any figure was seen); a connector or crystal if its holes have their joints on I5 (the finder's count, and where it found fewer, what the crop showed). I3's held-out errors, the PAL board's, are judged on the same limit (since task 5's review)"
+ },
+ "verdicts": [
+  {"check":"pad counts","verdict":"pass"},
+  {"check":"KiCad places","verdict":"pass"},
+  {"check":"CPU-07 parts on the CPU-10 footprints","verdict":"pass"},
+  {"check":"IC bodies inside the outline","verdict":"pass"},
+  {"check":"IC bodies apart","verdict":"pass"}
+ ]
+}

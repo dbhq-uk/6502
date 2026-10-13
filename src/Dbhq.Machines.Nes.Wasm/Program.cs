@@ -140,6 +140,17 @@ public static partial class NesHost
         Machine.SetButtons(pad, (byte)mask);
     }
 
+    /// <summary>
+    /// The CPU's reads and writes of each chip since this machine's power on, in
+    /// <see cref="NesChip"/> order (Ppu, Apu, Pad1, Pad2), for the board model
+    /// (<see cref="ChipAccesses"/>). The counters wrap and are handed over as signed 32-bit ints,
+    /// so a reader takes the difference of two readings, wrapped to 32 bits. They start again from
+    /// zero when a new machine is built (<see cref="Load"/>, a new cartridge or a region change)
+    /// and at <see cref="PowerCycle"/>; <see cref="Reset"/> keeps them.
+    /// </summary>
+    [JSExport]
+    public static int[] AccessCounts() => Machine.Bus.Accesses.Snapshot();
+
     /// <summary>The console's reset button: RAM and the cartridge's PRG RAM are kept.</summary>
     [JSExport]
     public static void Reset() => Machine.Reset();

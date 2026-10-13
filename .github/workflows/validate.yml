@@ -58,6 +58,44 @@ jobs:
           path: site/src/data/results.json
           if-no-files-found: error
 
+  # The NES's gate on amd64: the differential (bench/nes-speed/differential) run
+  # against its committed baseline, which was recorded with the per-dot reference.
+  # The lazy build and the reference must both give it byte for byte, so a change
+  # for speed (the lazy chips, the fast scanline renderer) cannot change what the
+  # machine does, on this architecture as on the one the baseline was made on. The
+  # output is integer hashes, so a difference between architectures would be a
+  # finding. The pinned test ROMs are downloaded, hash-checked and cached as for
+  # the tests; the cache is its own, so it does not hold Harte's data.
+  nes-gate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6
+        with:
+          dotnet-version: '10.0.x'
+      - name: Cache the NES test ROMs
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
+        with:
+          path: .testdata
+          key: nes-testdata-${{ hashFiles('tests/Dbhq.Cpu6502.TestSupport/Pins.cs') }}
+      - name: Build the differential
+        run: dotnet build bench/nes-speed/differential --configuration Release
+      - name: One baseline, and the lazy build matches it
+        run: |
+          set -eu
+          files=(bench/nes-speed/differential/baseline/*.txt)
+          test "${#files[@]}" -eq 1
+          uname -m
+          dotnet run --no-build --configuration Release --project bench/nes-speed/differential -- --check "${files[0]}"
+      - name: The per-dot reference matches it
+        run: |
+          set -eu
+          files=(bench/nes-speed/differential/baseline/*.txt)
+          dotnet run --no-build --configuration Release --project bench/nes-speed/differential -- --check "${files[0]}" --oracle
+
   # The machines' browser builds, alongside the tests: the KIM-1, the BBC
   # Micro, the NES and the Electron as .NET WebAssembly, compiled ahead of
   # time, and their ROMs (for the NES, its bundled game), read from roms/ and
@@ -184,17 +222,38 @@ jobs:
           PASS=$(count pass); FAILED=$(count fail)
           echo "pass=${PASS:-unread} fail=${FAILED:-unread}"
           [ "${FAILED:-1}" = "0" ]
-          # 369 tests as at 6 Oct 2026, after the review of the NES's page (368
-          # with the page and the NES counting, 351 with its registry record, try-it file and build, 342 before
-          # them that day with main's preset discs merged into the NES's branch;
+          # 528 as at 13 Oct 2026, measured on the Electron's branch with main merged
+          # in (`npm test` in site/: 529 tests, 528 pass, 1 todo): main's 475 and the
+          # Electron page's tests, its preview build's whole suite among them;
+          # 475 as at 6 Oct 2026, after the NES models' final fix wave (two tests of the
+          # NES browser check's wait for a camera to come to rest);
+          # 473 as at 6 Oct 2026, with task 10 of the NES models (five tests for
+          # mutations that had survived: the parts against the fact sheet, a change of
+          # console in the scene, the board's mount, the case's sizes in its code and caption);
+          # 468 tests as at 6 Oct 2026, with task 8's follow-up (the photographs
+          # committed for the NES's outside model: credited, listed and hashed);
+          # 467 as at 6 Oct 2026, after task 9's fix round (a model's region path on
+          # a console it does not draw; tab keys with Alt, Ctrl or Meta left to the browser);
+          # 465 with task 9 of the NES models done (the rule that
+          # a machine claiming a model states case, the case's credits, a console the model
+          # does not draw); 462 with task 9's second stage of the NES models (the
+          # outside model: its entry, sizes, features, words, buttons and notes); 453 with
+          # task 9's first stage (the
+          # views of a cased machine as tabs: their markup, styles and loader); 447 after
+          # task 7's fix round of the NES models (two
+          # access tests: a count that falls is a new machine; 445 with task 7, the
+          # board's inside model on the page, its legend, rates, results file and
+          # credits; 423 with
+          # task 6, the page's panel.nes
+          # and its events; 416 with tasks 0 to 5 and 8 merged onto the NES's branch,
+          # 369 before them, after the review of the NES's page; 368 with the page and
+          # the NES counting, 351 with its registry record, try-it file and build, 342
+          # before them that day with main's preset discs merged into the NES's branch;
           # 282 on main after the discs' second review, 292 on the branch).
           # Adding tests is expected; losing them is the failure this floor catches.
           # Raise the number when the suite grows, here and in the same step of
-          # deploy-site.yml, which must hold the same number. On the Electron's
-          # branch, main merged in on 8 Oct 2026: this is the higher of the two
-          # sides' floors (main's; the branch's was still 282) until the
-          # Electron's task 14b raises it from the measured total.
-          [ "${PASS:-0}" -ge 369 ]
+          # deploy-site.yml, which must hold the same number.
+          [ "${PASS:-0}" -ge 528 ]
       # The KIM-1 page in a real browser: the built site served on 127.0.0.1
       # with its own CSP, the try-it program clicked in through the page's own
       # keypad, and the digits read back. Then the page's photograph loads, and
