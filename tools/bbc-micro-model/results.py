@@ -26,13 +26,13 @@ def load(name):
 
 def with_addresses(ids, sources):
     """Each source by id, with its address, its page, the SHA-256 of the
-    original, its licence as stated and the day it was fetched, from
+    original, its licence as stated, its author and the day it was fetched, from
     sources.json, so the page can credit each by its address."""
     by_id = {s['id']: s for s in sources}
     missing = [i for i in ids if i not in by_id]
     if missing:
         raise SystemExit(f'not in data/sources.json: {", ".join(missing)}')
-    keys = ('id', 'url', 'page', 'sha256', 'kind', 'licence', 'fetched')
+    keys = ('id', 'url', 'page', 'sha256', 'kind', 'licence', 'author', 'fetched')
     return [{k: by_id[i][k] for k in keys} for i in ids]
 
 

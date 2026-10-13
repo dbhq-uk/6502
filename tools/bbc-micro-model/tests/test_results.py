@@ -41,7 +41,8 @@ def data():
         'verdicts': {'manual': 'fail', 'identities': 'fail'},
     }
     sources = [{'id': i, 'url': f'address-of-{i}', 'page': f'page-of-{i}', 'sha256': i * 4,
-                'kind': 'scan', 'licence': None, 'fetched': '2026-10-13'} for i in ('I1', 'D1', 'I6', 'O1')]
+                'kind': 'scan', 'licence': None, 'author': f'author-of-{i}', 'fetched': '2026-10-13'}
+               for i in ('I1', 'D1', 'I6', 'O1')]
     return frame, registration, copper, parts, sources
 
 
@@ -65,7 +66,7 @@ def test_the_sources_are_the_parts_modules_then_i6_with_their_addresses():
     out = results.board_results(*data())
     assert [s['id'] for s in out['sources']] == ['I1', 'D1', 'I6']
     assert out['sources'][0] == {'id': 'I1', 'url': 'address-of-I1', 'page': 'page-of-I1', 'sha256': 'I1I1I1I1',
-                                 'kind': 'scan', 'licence': None, 'fetched': '2026-10-13'}
+                                 'kind': 'scan', 'licence': None, 'author': 'author-of-I1', 'fetched': '2026-10-13'}
 
 
 def test_a_source_missing_from_sources_json_stops_the_run():

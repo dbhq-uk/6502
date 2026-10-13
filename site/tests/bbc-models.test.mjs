@@ -1221,7 +1221,8 @@ test('the results file is written from frame.json, registration.json, copper.jso
   assert.deepEqual(f.sources.map((x) => x.id), [...parts.model.sources, 'I6']);
   for (const x of f.sources) {
     const s = sources.find((y) => y.id === x.id);
-    assert.deepEqual(x, { id: s.id, url: s.url, page: s.page, sha256: s.sha256, kind: s.kind, licence: s.licence, fetched: s.fetched });
+    assert.deepEqual(x, { id: s.id, url: s.url, page: s.page, sha256: s.sha256, kind: s.kind, licence: s.licence, author: s.author, fetched: s.fetched });
+    assert.ok(x.author, `${x.id} has no author to credit`);
   }
   assert.match(fs.readFileSync(path.join(TOOL, 'results.py'), 'utf8'), /bbc-micro-board-model\.json/);
 });

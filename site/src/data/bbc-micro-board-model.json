@@ -83,6 +83,7 @@
  },
  "sources": [
   {
+   "author": "amb5l",
    "fetched": "2026-10-04",
    "id": "I1",
    "kind": "scan",
@@ -92,6 +93,7 @@
    "url": "https://drive.google.com/file/d/1llcLHl_ax6rtZRWxdoSyA5jNjFOo_-3N/view"
   },
   {
+   "author": "amb5l",
    "fetched": "2026-10-04",
    "id": "I2",
    "kind": "scan",
@@ -101,6 +103,7 @@
    "url": "https://drive.google.com/file/d/1EIRg4Ump3T5ixNCJtVkrz7DwODJ__YFn/view"
   },
   {
+   "author": "8BS",
    "fetched": "2026-10-04",
    "id": "I5",
    "kind": "photograph",
@@ -110,6 +113,7 @@
    "url": "https://8bs.com/see/BBC_B_iss7.jpg"
   },
   {
+   "author": "Acorn Computers Limited, 1985",
    "fetched": "2026-10-13",
    "id": "D1",
    "kind": "document",
@@ -119,6 +123,7 @@
    "url": "https://archive.org/download/bbc-micro-service-manual/BBC-Micro-Service-Manual%20Sections-1-2-3.pdf"
   },
   {
+   "author": "Chris Whytehead (Chris's Acorns)",
    "fetched": "2026-10-13",
    "id": "I6",
    "kind": "photograph",
