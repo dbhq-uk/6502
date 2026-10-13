@@ -148,9 +148,10 @@ test('the teletype is on the panel: a labelled group with the TTY switch, the sp
   assert.ok(ttyPanel, 'the panel has no teletype');
   assert.match(ttyPanel, /role="group" aria-labelledby="kim1-tty-name"/);
   assert.match(ttyPanel, /id="kim1-tty-name">Teletype</);
-  assert.match(ttyPanel, /<label class="kim1-tty-switch"><input type="checkbox" role="switch" data-kim1-mode aria-describedby="kim1-tty-about" disabled\/?> TTY switch<\/label>/);
+  assert.match(ttyPanel, /<label class="kim1-tty-switch"><input type="checkbox" role="switch" data-kim1-mode aria-describedby="kim1-tty-about" autocomplete="off" disabled\/?> TTY switch<\/label>/);
   assert.match(ttyPanel, /<div class="kim1-paper" role="log" aria-label="The teletype's paper" tabindex="0" data-kim1-paper><\/div>/);
   assert.match(ttyPanel, /<label class="kim1-tty-input">Type to the KIM-1 <input type="text" data-kim1-type[^>]*disabled/);
+  assert.match(ttyPanel, /<select data-kim1-baud autocomplete="off" disabled>/, 'the speed can be restored by the browser on a reload, and then disagrees with the machine');
   const options = [...ttyPanel.matchAll(/<option value="(\d+)"( selected)?>/g)];
   assert.deepEqual(options.map((o) => Number(o[1])), [110, 300, 1200]);
   assert.equal(options.find((o) => o[2])?.[1], '110', 'the terminal does not start at 110 baud, the Teletype Model 33\'s speed');
@@ -197,7 +198,7 @@ test('teletype keys are read as Kim1Teletype.Parse reads them, with the same nam
   assert.deepEqual(named, TELETYPE_KEYS);
   assert.deepEqual(parseTeletype('0200[SPACE]AD.'), [{ text: '0200' }, { key: 'SPACE' }, { text: 'AD.' }]);
   assert.equal(teletypeChars('[RUBOUT]0200[SPACE]G[CR][LF]'), '\u007f0200 G\r\n');
-  for (const bad of ['0200 G', '[RUB OUT]', '[TAB]', '[SPACE', 'café']) assert.throws(() => parseTeletype(bad), bad);
+  for (const bad of ['0200 G', '[RUB OUT]', '[TAB]', '[SPACE', 'café', '[toString]', '[__proto__]']) assert.throws(() => parseTeletype(bad), bad);
 });
 
 test('the paper prints as a teletype does: CR to the start of the line, LF to a new one, nothing for NUL, RUB OUT or XOFF', () => {
@@ -218,6 +219,38 @@ test('the paper prints as a teletype does: CR to the start of the line, LF to a 
   const short = new Paper(3);
   assert.deepEqual(short.print('A\r\nB\r\nC\r\nD\r\nE'), { from: 0, torn: 2 });
   assert.deepEqual(short.lines, ['C', 'D', 'E']);
+});
+
+test('a screen reader is given a line of the paper once it is complete, never the open line a character at a time', () => {
+  const paper = new Paper();
+  // Characters of an open line are not given out, however many frames they arrive in.
+  paper.print('KI');
+  assert.deepEqual(paper.takeCompleted(), []);
+  paper.print('M');
+  assert.deepEqual(paper.takeCompleted(), []);
+  // The line feed completes it; NUL-only and blank lines are left out; each line comes once.
+  paper.print('\r\n\u0000\u0000\r\n0000 00 0002 \r\n0002');
+  assert.deepEqual(paper.takeCompleted(), ['KIM', '0000 00 0002']);
+  assert.deepEqual(paper.takeCompleted(), []);
+  paper.print(' 00\r\n');
+  assert.deepEqual(paper.takeCompleted(), ['0002 00']);
+  // Lines torn off the top are not given out again, and clearing the paper starts the count again.
+  const short = new Paper(3);
+  short.print('A\r\nB\r\nC\r\nD\r\nE');
+  assert.deepEqual(short.takeCompleted(), ['C', 'D']);
+  short.print('\r\nF\r\n');
+  assert.deepEqual(short.takeCompleted(), ['E', 'F']);
+  short.clear();
+  short.print('G\r\n');
+  assert.deepEqual(short.takeCompleted(), ['G']);
+  const page = fs.readFileSync(path.join(process.cwd(), 'public', 'kim-1.js'), 'utf8');
+  assert.match(page, /paperEl\.setAttribute\('aria-live', 'off'\)/, 'the paper is still live, and a screen reader would read its open line in pieces');
+  assert.match(ttyPanel, /<p class="sr-only" aria-live="polite" data-kim1-line><\/p>/);
+});
+
+test('the page pushes the switch and the speed it shows into the machine at start, and asks the browser not to restore them', () => {
+  const page = fs.readFileSync(path.join(process.cwd(), 'public', 'kim-1.js'), 'utf8');
+  assert.match(page, /kim\.SetTeletypeBaud\(Number\(baud\.value\)\);\n\s*kim\.SetTeletypeMode\(mode\.checked\);/);
 });
 
 test('typing at the teletype is never also a press of the keypad, and the field leaves Tab alone', () => {

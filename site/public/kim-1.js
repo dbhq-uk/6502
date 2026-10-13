@@ -38,7 +38,12 @@
 // at the teletype only while it has focus, in capitals, as a Teletype Model 33
 // does; Enter is CR and Backspace or Delete is RUB OUT. Tab is never taken.
 // panel.dataset.ttyIdle is "1" once nothing is waiting to be sent and the
-// monitor has stopped printing.
+// monitor has stopped printing. The log is not live: its open line is
+// rewritten a character at a time, which a screen reader would read out as
+// fragments. A separate polite region is given each line once it is complete
+// (once a line feed has moved the paper on), so a line is heard whole, once.
+// At start the switch and the speed on the page are pushed into the machine,
+// so a browser that restored them on a reload cannot disagree with it.
 import { startMachine } from '/machine-host.js';
 import { Paper } from '/teletype-paper.js';
 
@@ -63,6 +68,7 @@ async function start(panel) {
   const sends = [...panel.querySelectorAll('[data-kim1-send]')];
   const tty = panel.querySelector('[data-kim1-tty]');
   const paper = new Paper();
+  const lineEl = panel.querySelector('[data-kim1-line]');
 
   const say = (text, state) => {
     status.textContent = text;
@@ -121,6 +127,13 @@ async function start(panel) {
     }
     panel.dataset.paper = paper.text();
     if (atFoot) paperEl.scrollTop = paperEl.scrollHeight;
+    announce();
+  };
+
+  // Every line but the last is complete: the paper has moved on from it.
+  const announce = () => {
+    const fresh = paper.takeCompleted();
+    if (fresh.length > 0) lineEl.textContent = fresh.join('\n');
   };
 
   const started = await startMachine({
@@ -166,6 +179,9 @@ async function start(panel) {
   // time when the line is quiet, so typing ahead of the monitor loses nothing.
   const send = (text) => kim.TeletypeSend(text);
   for (const el of [mode, baud, clear, typing, ...sends]) el.disabled = false;
+  paperEl.setAttribute('aria-live', 'off');
+  kim.SetTeletypeBaud(Number(baud.value));
+  kim.SetTeletypeMode(mode.checked);
   mode.addEventListener('change', () => {
     kim.SetTeletypeMode(mode.checked);
     say(mode.checked ? 'TTY switch on. Press RS, then RUB OUT, and the monitor prints KIM on the teletype.' : 'TTY switch off. The monitor goes back to the keypad and the digits.', 'teletype');
@@ -178,6 +194,7 @@ async function start(panel) {
     paper.clear();
     paperEl.replaceChildren();
     panel.dataset.paper = '';
+    lineEl.textContent = '';
   });
   for (const b of sends) b.addEventListener('click', () => send({ RUBOUT: '\u007f', LF: '\n' }[b.dataset.kim1Send]));
   // What is typed in the field goes to the teletype, in capitals, and leaves

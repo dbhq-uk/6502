@@ -283,12 +283,13 @@ jobs:
       # table-sort.js is here because machines-table.js imports it: a 404 on it
       # breaks that whole module, and the filters and sorting quietly vanish.
       # machine-host.js is here because kim-1.js imports it, for the same reason:
-      # a 404 on it and the machine never starts. teletype-paper.js is too: kim-1.js
-      # imports it for the teletype's paper, and a 404 on it stops the whole page script. bbc-micro.js, bbc-keys.js and
-      # bbc-audio.js are the BBC Micro's page: its driver, the key table the
-      # driver imports, and the sound worklet it loads with addModule, which no
-      # import names. nes.js, nes-keys.js and nes-audio.js are the NES's page,
-      # the same three for the same reasons.
+      # a 404 on it and the machine never starts.
+      # teletype-paper.js is here because kim-1.js imports it for the teletype's
+      # paper: a 404 on it stops the whole page script.
+      # bbc-micro.js, bbc-keys.js and bbc-audio.js are the BBC Micro's page: its
+      # driver, the key table the driver imports, and the sound worklet it loads
+      # with addModule, which no import names. nes.js, nes-keys.js and
+      # nes-audio.js are the NES's page, the same three for the same reasons.
       # site/tests/build.test.mjs derives the required list from the built pages.
       # analytics.js and consent.js are in this list for a sharp reason. A 404 on
       # analytics.js means no analytics and nothing to opt out of. A 404 on

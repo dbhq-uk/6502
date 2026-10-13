@@ -62,7 +62,7 @@ export function parseTeletype(keys) {
   for (const m of keys.matchAll(/\[([^\]]*)\]?|[^[]+/g)) {
     const word = m[0];
     if (word.startsWith('[')) {
-      if (!word.endsWith(']') || !(m[1] in TELETYPE_KEYS)) throw new Error(`"${word}" is not a bracketed teletype key`);
+      if (!word.endsWith(']') || !Object.hasOwn(TELETYPE_KEYS, m[1])) throw new Error(`"${word}" is not a bracketed teletype key`);
       parts.push({ key: m[1] });
     } else {
       if (!/^[!-~]+$/.test(word)) throw new Error(`"${word}" has a character that must be written as a bracketed key`);

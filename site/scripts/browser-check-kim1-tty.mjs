@@ -14,7 +14,13 @@
 // same file Kim1TeletypeTests runs. 1200 baud keeps the session to seconds;
 // at 110 it takes the best part of a minute of the machine's time. Tab must
 // leave the field, and the switch going off must hand the monitor back to the
-// digits.
+// digits, which show the cell the session last opened (the last line the file
+// promises; Kim1TeletypeTests checks the same on the machine).
+//
+// Keypad keys and teletype keys are queued separately, but the page's machine
+// holds teletype keys back until the keypad taps before them are done
+// (Kim1Keystrokes.TypeAtTeletype), as a person presses RS and then RUB OUT, so
+// this script need not wait between them.
 import { loadTeletype, parseKeys, parseTeletype } from '../src/lib/machines.mjs';
 
 const lineMatches = (expected, shown) => expected.length === shown.length && [...expected].every((c, i) => (c === 'x' ? /[0-9A-F]/.test(shown[i]) : c === shown[i]));
@@ -65,18 +71,25 @@ export async function checkKim1Teletype({ page, problems, timeout }) {
     }
   };
 
-  // With the switch off, the field types at the teletype and not at the keypad.
+  // With the switch off, the field types at the teletype and not at the keypad:
+  // the key reaches the paper, no keypad tap is queued, and none is announced.
   const shownBefore = await panel.getAttribute('data-display');
+  await page.evaluate(() => {
+    window.kim1KeyEvents = 0;
+    document.querySelector('[data-kim1]').addEventListener('kim1:key', () => window.kim1KeyEvents++);
+  });
   await page.locator('[data-kim1-clear]').click();
   await field.focus();
   await page.keyboard.type('1');
   await page.waitForFunction(() => document.querySelector('[data-kim1]').dataset.paper === '1', null, { timeout: 10_000, polling: 100 }).catch(() => {});
-  await page.waitForTimeout(400);
   const echoed = await paperText();
   const shownAfter = await panel.getAttribute('data-display');
-  console.log(`teletype, switch off: typed 1 in the field; the paper shows "${echoed}", the digits "${shownBefore}" then "${shownAfter}", keys pending ${await panel.getAttribute('data-pending')}`);
+  const pending = await panel.getAttribute('data-pending');
+  const tapped = await page.evaluate(() => window.kim1KeyEvents);
+  console.log(`teletype, switch off: typed 1 in the field; the paper shows "${echoed}", the digits "${shownBefore}" then "${shownAfter}", keys pending ${pending}, keypad taps announced ${tapped}`);
   if (echoed !== '1') problems.push(`teletype: with the switch off, a key typed was not echoed to the paper ("${echoed}")`);
-  if (shownAfter !== shownBefore) problems.push(`teletype: a key typed at the teletype pressed the keypad (the digits went from "${shownBefore}" to "${shownAfter}")`);
+  if (pending !== '0' || tapped !== 0) problems.push(`teletype: a key typed at the teletype pressed the keypad (${pending} keys pending, ${tapped} taps announced)`);
+  if (shownAfter !== shownBefore) problems.push(`teletype: a key typed at the teletype changed the digits from "${shownBefore}" to "${shownAfter}"`);
 
   // Tab leaves the field: the page never keeps the keyboard.
   await field.focus();
@@ -118,10 +131,14 @@ export async function checkKim1Teletype({ page, problems, timeout }) {
   const lines = (await paperText()).split('\n').length;
   if (rows !== lines) problems.push(`teletype: the paper has ${rows} rows for ${lines} lines`);
 
-  // The switch off: the monitor leaves the teletype for the keypad and the digits.
+  // The switch off: the monitor leaves the teletype for the keypad and the
+  // digits, which show the cell the session last opened, from the file's last
+  // line ("0212 3C" is the digits 02123C).
+  const lastLine = steps.at(-1).prints.at(-1);
+  const wantDigits = lastLine.replaceAll(' ', '');
   await page.locator('[data-kim1-mode]').uncheck();
-  await page.waitForFunction(() => (document.querySelector('[data-kim1]').dataset.display ?? '').trim() !== '', null, { timeout: 10_000, polling: 100 }).catch(() => {});
+  await page.waitForFunction((want) => document.querySelector('[data-kim1]').dataset.display === want, wantDigits, { timeout: 10_000, polling: 100 }).catch(() => {});
   const back = await panel.getAttribute('data-display');
   console.log(`teletype: the switch off, the digits show "${back}"`);
-  if (back !== '02123C') problems.push(`teletype: with the switch off the digits show "${back}", not the cell the teletype last opened`);
+  if (back !== wantDigits) problems.push(`teletype: with the switch off the digits show "${back}", not "${wantDigits}", the cell the teletype last opened`);
 }

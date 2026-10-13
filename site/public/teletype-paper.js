@@ -17,6 +17,9 @@ export class Paper {
   clear() {
     this.lines = [''];
     this.column = 0;
+    // Lines counted from the first printed since the paper was cleared, torn-off ones included.
+    this.torn = 0;
+    this.taken = 0;
   }
 
   /**
@@ -39,7 +42,21 @@ export class Paper {
     }
     const torn = Math.max(0, this.lines.length - this.max);
     if (torn > 0) this.lines.splice(0, torn);
+    this.torn += torn;
     return { from: Math.max(0, from - torn), torn };
+  }
+
+  /**
+   * The lines completed since the last call, trimmed, blank ones left out: a
+   * line is complete once a line feed has moved the paper on from it, and the
+   * open line is not given out until then. For a screen reader, which should
+   * hear a line whole and once, not a character at a time.
+   */
+  takeCompleted() {
+    const done = this.torn + this.lines.length - 1;
+    const fresh = this.lines.slice(Math.max(0, this.taken - this.torn), this.lines.length - 1).map((l) => l.trimEnd()).filter(Boolean);
+    this.taken = done;
+    return fresh;
   }
 
   /** The paper as text, a line to a line, with the spaces at their ends taken off. */
