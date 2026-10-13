@@ -1,0 +1,720 @@
+=== launch r0-p1-base folder=/tmp/nes77/prof-base region=0 start=2026-10-13T06:48:17Z loadavg=0.99 3.43 2.93 6/444 131882
+rom: other/snow.nes at 95d8f621ae55, 40976 bytes, sha256 7db551e868b2c0182941bd68adc447c2f0668098a4425e8e170b20e4327b7210, hash checked
+browser 153.0.8010.12
+launch 1 region 0 NTSC
+launch 1 Running as NTSC, as chosen here: the file does not say which.
+launch 1 boot cycles=5000000 frames=167 ms=1497.300 cycles_per_second=3339344 mhz=3.339 times_real=1.87
+launch 1 timed 1 cycles=1790000 frames=61 ms=511.300 cycles_per_second=3500880 mhz=3.501 times_real=1.96
+launch 1 timed 2 cycles=1790003 frames=60 ms=506.800 cycles_per_second=3531971 mhz=3.532 times_real=1.97
+launch 1 timed 3 cycles=1790001 frames=60 ms=499.200 cycles_per_second=3585739 mhz=3.586 times_real=2.00
+launch 1 timed 4 cycles=1790000 frames=60 ms=513.600 cycles_per_second=3485202 mhz=3.485 times_real=1.95
+launch 1 timed 5 cycles=1790002 frames=60 ms=505.100 cycles_per_second=3543857 mhz=3.544 times_real=1.98
+launch 1 thread 1 cycles=1790001 thread_ms=259.732 mhz=6.892 times_real=3.85
+launch 1 thread 2 cycles=1790000 thread_ms=252.209 mhz=7.097 times_real=3.97
+launch 1 thread 3 cycles=1790002 thread_ms=252.931 mhz=7.077 times_real=3.95
+launch 1 thread 4 cycles=1790002 thread_ms=253.270 mhz=7.068 times_real=3.95
+launch 1 thread 5 cycles=1790002 thread_ms=254.523 mhz=7.033 times_real=3.93
+launch 1 thread 6 cycles=1790002 thread_ms=253.102 mhz=7.072 times_real=3.95
+launch 1 thread 7 cycles=1790001 thread_ms=257.003 mhz=6.965 times_real=3.89
+launch 1 thread 8 cycles=1790003 thread_ms=256.939 mhz=6.967 times_real=3.89
+launch 1 profile 22.9% wasm-function[385]
+launch 1 profile 18.4% wasm-function[355]
+launch 1 profile 13.2% wasm-function[204]
+launch 1 profile 8.4% wasm-function[65]
+launch 1 profile 5.7% wasm-function[361]
+launch 1 profile 4.4% (program)
+launch 1 profile 4.4% wasm-function[411]
+launch 1 profile 3.7% wasm-function[386]
+launch 1 profile 3.6% wasm-function[342]
+launch 1 profile 2.7% wasm-function[388]
+launch 1 profile 2.4% wasm-function[357]
+launch 1 profile 2.0% wasm-function[135]
+launch 1 profile 1.4% wasm-function[362]
+launch 1 profile 1.3% wasm-function[461]
+launch 1 profile 1.2% wasm-function[354]
+launch 1 profile 0.7% wasm-function[139]
+launch 1 profile 0.7% (idle)
+launch 1 profile 0.5% wasm-function[198]
+launch 1 profile 0.5% wasm-function[79]
+launch 1 profile 0.4% wasm-function[409]
+launch 1 profile 0.3% wasm-function[460]
+launch 1 profile 0.2% wasm-function[108]
+launch 1 profile 0.2% wasm-function[428]
+launch 1 profile 0.1% (anonymous)
+launch 1 profile 0.1% wasm-function[353]
+launch 1 profile 0.1% wasm-function[410]
+launch 1 profile 0.1% wasm-function[211]
+launch 1 profile 0.1% wasm-function[87]
+launch 1 profile 0.1% wasm-function[400]
+launch 1 profile 0.1% wasm-function[73]
+launch 1 profile 0.1% wasm-function[137]
+launch 1 profile 0.0% wasm-function[102]
+launch 1 profile 0.0% wasm-function[1229]
+launch 1 profile 0.0% wasm-function[366]
+launch 1 profile 0.0% wasm-function[106]
+launch 1 profile 0.0% wasm-function[68]
+launch 1 profile 0.0% wasm-function[96]
+launch 1 profile 0.0% wasm-function[64]
+launch 1 profile 0.0% wasm-function[72]
+launch 1 profile 0.0% wasm-function[389]
+--- exit=0 end=2026-10-13T06:48:29Z loadavg=0.83 3.32 2.90 7/438 132015
+=== launch r0-p1-after folder=/tmp/nes77/prof-after region=0 start=2026-10-13T06:48:29Z loadavg=0.83 3.32 2.90 6/438 132021
+rom: other/snow.nes at 95d8f621ae55, 40976 bytes, sha256 7db551e868b2c0182941bd68adc447c2f0668098a4425e8e170b20e4327b7210, hash checked
+browser 153.0.8010.12
+launch 1 region 0 NTSC
+launch 1 Running as NTSC, as chosen here: the file does not say which.
+launch 1 boot cycles=5000000 frames=167 ms=1691.400 cycles_per_second=2956131 mhz=2.956 times_real=1.65
+launch 1 timed 1 cycles=1790000 frames=61 ms=517.000 cycles_per_second=3462282 mhz=3.462 times_real=1.93
+launch 1 timed 2 cycles=1790003 frames=60 ms=515.300 cycles_per_second=3473710 mhz=3.474 times_real=1.94
+launch 1 timed 3 cycles=1790001 frames=60 ms=510.700 cycles_per_second=3504995 mhz=3.505 times_real=1.96
+launch 1 timed 4 cycles=1790000 frames=60 ms=563.100 cycles_per_second=3178831 mhz=3.179 times_real=1.78
+launch 1 timed 5 cycles=1790002 frames=60 ms=516.100 cycles_per_second=3468324 mhz=3.468 times_real=1.94
+launch 1 thread 1 cycles=1790001 thread_ms=271.614 mhz=6.590 times_real=3.68
+launch 1 thread 2 cycles=1790000 thread_ms=262.999 mhz=6.806 times_real=3.80
+launch 1 thread 3 cycles=1790002 thread_ms=273.388 mhz=6.547 times_real=3.66
+launch 1 thread 4 cycles=1790002 thread_ms=262.373 mhz=6.822 times_real=3.81
+launch 1 thread 5 cycles=1790002 thread_ms=263.848 mhz=6.784 times_real=3.79
+launch 1 thread 6 cycles=1790002 thread_ms=262.905 mhz=6.809 times_real=3.80
+launch 1 thread 7 cycles=1790001 thread_ms=265.405 mhz=6.744 times_real=3.77
+launch 1 thread 8 cycles=1790003 thread_ms=262.705 mhz=6.814 times_real=3.81
+launch 1 profile 29.2% wasm-function[393]
+launch 1 profile 13.9% wasm-function[204]
+launch 1 profile 13.0% wasm-function[363]
+launch 1 profile 5.3% wasm-function[65]
+launch 1 profile 5.3% wasm-function[365]
+launch 1 profile 4.5% wasm-function[369]
+launch 1 profile 4.4% wasm-function[135]
+launch 1 profile 3.1% (program)
+launch 1 profile 3.1% (idle)
+launch 1 profile 2.7% wasm-function[370]
+launch 1 profile 2.7% wasm-function[139]
+launch 1 profile 2.7% wasm-function[396]
+launch 1 profile 1.6% wasm-function[349]
+launch 1 profile 1.3% wasm-function[394]
+launch 1 profile 1.2% wasm-function[408]
+launch 1 profile 1.1% wasm-function[468]
+launch 1 profile 0.9% wasm-function[419]
+launch 1 profile 0.8% wasm-function[418]
+launch 1 profile 0.6% wasm-function[198]
+launch 1 profile 0.4% wasm-function[79]
+launch 1 profile 0.4% wasm-function[417]
+launch 1 profile 0.2% wasm-function[87]
+launch 1 profile 0.2% wasm-function[108]
+launch 1 profile 0.2% wasm-function[68]
+launch 1 profile 0.1% wasm-function[436]
+launch 1 profile 0.1% wasm-function[374]
+launch 1 profile 0.1% wasm-function[211]
+launch 1 profile 0.1% wasm-function[469]
+launch 1 profile 0.1% (anonymous)
+launch 1 profile 0.1% wasm-function[102]
+launch 1 profile 0.1% wasm-function[1242]
+launch 1 profile 0.1% wasm-function[106]
+launch 1 profile 0.1% wasm-function[73]
+launch 1 profile 0.1% wasm-function[361]
+launch 1 profile 0.0% wasm-function[137]
+launch 1 profile 0.0% wasm-function[362]
+launch 1 profile 0.0% wasm-function[96]
+launch 1 profile 0.0% wasm-function[81]
+launch 1 profile 0.0% wasm-function[64]
+launch 1 profile 0.0% wasm-function[72]
+--- exit=0 end=2026-10-13T06:48:42Z loadavg=0.65 3.15 2.85 5/438 132277
+=== launch r0-p2-base folder=/tmp/nes77/prof-base region=0 start=2026-10-13T06:48:42Z loadavg=0.65 3.15 2.85 5/438 132282
+rom: other/snow.nes at 95d8f621ae55, 40976 bytes, sha256 7db551e868b2c0182941bd68adc447c2f0668098a4425e8e170b20e4327b7210, hash checked
+browser 153.0.8010.12
+launch 1 region 0 NTSC
+launch 1 Running as NTSC, as chosen here: the file does not say which.
+launch 1 boot cycles=5000000 frames=167 ms=1601.500 cycles_per_second=3122073 mhz=3.122 times_real=1.74
+launch 1 timed 1 cycles=1790000 frames=61 ms=503.500 cycles_per_second=3555114 mhz=3.555 times_real=1.99
+launch 1 timed 2 cycles=1790003 frames=60 ms=502.100 cycles_per_second=3565033 mhz=3.565 times_real=1.99
+launch 1 timed 3 cycles=1790001 frames=60 ms=511.400 cycles_per_second=3500197 mhz=3.500 times_real=1.96
+launch 1 timed 4 cycles=1790000 frames=60 ms=506.400 cycles_per_second=3534755 mhz=3.535 times_real=1.97
+launch 1 timed 5 cycles=1790002 frames=60 ms=564.600 cycles_per_second=3170390 mhz=3.170 times_real=1.77
+launch 1 thread 1 cycles=1790001 thread_ms=270.929 mhz=6.607 times_real=3.69
+launch 1 thread 2 cycles=1790000 thread_ms=267.338 mhz=6.696 times_real=3.74
+launch 1 thread 3 cycles=1790002 thread_ms=266.532 mhz=6.716 times_real=3.75
+launch 1 thread 4 cycles=1790002 thread_ms=263.350 mhz=6.797 times_real=3.80
+launch 1 thread 5 cycles=1790002 thread_ms=264.778 mhz=6.760 times_real=3.78
+launch 1 thread 6 cycles=1790002 thread_ms=263.438 mhz=6.795 times_real=3.80
+launch 1 thread 7 cycles=1790001 thread_ms=266.807 mhz=6.709 times_real=3.75
+launch 1 thread 8 cycles=1790003 thread_ms=264.117 mhz=6.777 times_real=3.79
+launch 1 profile 21.4% wasm-function[385]
+launch 1 profile 16.2% wasm-function[355]
+launch 1 profile 13.7% wasm-function[204]
+launch 1 profile 7.7% wasm-function[357]
+launch 1 profile 6.9% wasm-function[361]
+launch 1 profile 5.3% wasm-function[135]
+launch 1 profile 5.2% wasm-function[65]
+launch 1 profile 3.9% (program)
+launch 1 profile 3.5% wasm-function[342]
+launch 1 profile 2.3% wasm-function[386]
+launch 1 profile 1.9% wasm-function[139]
+launch 1 profile 1.6% (idle)
+launch 1 profile 1.5% wasm-function[198]
+launch 1 profile 1.4% wasm-function[388]
+launch 1 profile 1.1% wasm-function[64]
+launch 1 profile 1.1% wasm-function[102]
+launch 1 profile 1.1% wasm-function[1229]
+launch 1 profile 1.0% wasm-function[411]
+launch 1 profile 0.4% wasm-function[460]
+launch 1 profile 0.4% wasm-function[409]
+launch 1 profile 0.4% wasm-function[79]
+launch 1 profile 0.3% wasm-function[362]
+launch 1 profile 0.2% wasm-function[428]
+launch 1 profile 0.2% (anonymous)
+launch 1 profile 0.2% wasm-function[461]
+launch 1 profile 0.1% wasm-function[108]
+launch 1 profile 0.1% wasm-function[211]
+launch 1 profile 0.1% wasm-function[87]
+launch 1 profile 0.1% wasm-function[68]
+launch 1 profile 0.1% wasm-function[366]
+launch 1 profile 0.1% wasm-function[410]
+launch 1 profile 0.1% wasm-function[353]
+launch 1 profile 0.0% wasm-function[354]
+launch 1 profile 0.0% wasm-function[137]
+launch 1 profile 0.0% wasm-function[106]
+launch 1 profile 0.0% wasm-function[400]
+launch 1 profile 0.0% wasm-function[73]
+launch 1 profile 0.0% wasm-function[91]
+launch 1 profile 0.0% wasm-function[67]
+launch 1 profile 0.0% wasm-function[389]
+--- exit=0 end=2026-10-13T06:48:54Z loadavg=0.55 3.05 2.82 5/437 132424
+=== launch r0-p2-after folder=/tmp/nes77/prof-after region=0 start=2026-10-13T06:48:55Z loadavg=0.55 3.05 2.82 6/437 132429
+rom: other/snow.nes at 95d8f621ae55, 40976 bytes, sha256 7db551e868b2c0182941bd68adc447c2f0668098a4425e8e170b20e4327b7210, hash checked
+browser 153.0.8010.12
+launch 1 region 0 NTSC
+launch 1 Running as NTSC, as chosen here: the file does not say which.
+launch 1 boot cycles=5000000 frames=167 ms=1671.200 cycles_per_second=2991862 mhz=2.992 times_real=1.67
+launch 1 timed 1 cycles=1790000 frames=61 ms=531.000 cycles_per_second=3370998 mhz=3.371 times_real=1.88
+launch 1 timed 2 cycles=1790003 frames=60 ms=577.800 cycles_per_second=3097963 mhz=3.098 times_real=1.73
+launch 1 timed 3 cycles=1790001 frames=60 ms=592.000 cycles_per_second=3023650 mhz=3.024 times_real=1.69
+launch 1 timed 4 cycles=1790000 frames=60 ms=517.400 cycles_per_second=3459606 mhz=3.460 times_real=1.93
+launch 1 timed 5 cycles=1790002 frames=60 ms=520.600 cycles_per_second=3438344 mhz=3.438 times_real=1.92
+launch 1 thread 1 cycles=1790001 thread_ms=268.999 mhz=6.654 times_real=3.72
+launch 1 thread 2 cycles=1790000 thread_ms=260.890 mhz=6.861 times_real=3.83
+launch 1 thread 3 cycles=1790002 thread_ms=260.557 mhz=6.870 times_real=3.84
+launch 1 thread 4 cycles=1790002 thread_ms=259.944 mhz=6.886 times_real=3.85
+launch 1 thread 5 cycles=1790002 thread_ms=262.283 mhz=6.825 times_real=3.81
+launch 1 thread 6 cycles=1790002 thread_ms=264.783 mhz=6.760 times_real=3.78
+launch 1 thread 7 cycles=1790001 thread_ms=262.303 mhz=6.824 times_real=3.81
+launch 1 thread 8 cycles=1790003 thread_ms=261.429 mhz=6.847 times_real=3.83
+launch 1 profile 32.5% wasm-function[393]
+launch 1 profile 14.3% wasm-function[363]
+launch 1 profile 9.8% wasm-function[204]
+launch 1 profile 7.7% wasm-function[65]
+launch 1 profile 5.8% wasm-function[349]
+launch 1 profile 5.7% wasm-function[365]
+launch 1 profile 4.6% wasm-function[369]
+launch 1 profile 4.2% (program)
+launch 1 profile 3.3% wasm-function[135]
+launch 1 profile 2.1% wasm-function[419]
+launch 1 profile 1.7% (idle)
+launch 1 profile 1.4% wasm-function[396]
+launch 1 profile 1.3% wasm-function[436]
+launch 1 profile 1.1% wasm-function[394]
+launch 1 profile 0.6% wasm-function[139]
+launch 1 profile 0.5% wasm-function[370]
+launch 1 profile 0.4% wasm-function[198]
+launch 1 profile 0.4% wasm-function[79]
+launch 1 profile 0.3% wasm-function[417]
+launch 1 profile 0.3% wasm-function[468]
+launch 1 profile 0.2% (anonymous)
+launch 1 profile 0.2% wasm-function[108]
+launch 1 profile 0.1% wasm-function[87]
+launch 1 profile 0.1% wasm-function[68]
+launch 1 profile 0.1% wasm-function[469]
+launch 1 profile 0.1% wasm-function[211]
+launch 1 profile 0.1% wasm-function[106]
+launch 1 profile 0.1% wasm-function[362]
+launch 1 profile 0.1% wasm-function[361]
+launch 1 profile 0.1% wasm-function[102]
+launch 1 profile 0.1% wasm-function[418]
+launch 1 profile 0.1% wasm-function[408]
+launch 1 profile 0.0% wasm-function[374]
+launch 1 profile 0.0% wasm-function[96]
+launch 1 profile 0.0% wasm-function[137]
+launch 1 profile 0.0% wasm-function[81]
+launch 1 profile 0.0% wasm-function[73]
+launch 1 profile 0.0% wasm-function[64]
+launch 1 profile 0.0% wasm-function[91]
+launch 1 profile 0.0% wasm-function[72]
+--- exit=0 end=2026-10-13T06:49:07Z loadavg=0.43 2.90 2.78 5/437 132574
+=== launch r0-p3-base folder=/tmp/nes77/prof-base region=0 start=2026-10-13T06:49:07Z loadavg=0.43 2.90 2.78 5/437 132579
+rom: other/snow.nes at 95d8f621ae55, 40976 bytes, sha256 7db551e868b2c0182941bd68adc447c2f0668098a4425e8e170b20e4327b7210, hash checked
+browser 153.0.8010.12
+launch 1 region 0 NTSC
+launch 1 Running as NTSC, as chosen here: the file does not say which.
+launch 1 boot cycles=5000000 frames=167 ms=1501.200 cycles_per_second=3330669 mhz=3.331 times_real=1.86
+launch 1 timed 1 cycles=1790000 frames=61 ms=556.500 cycles_per_second=3216532 mhz=3.217 times_real=1.80
+launch 1 timed 2 cycles=1790003 frames=60 ms=503.500 cycles_per_second=3555120 mhz=3.555 times_real=1.99
+launch 1 timed 3 cycles=1790001 frames=60 ms=498.500 cycles_per_second=3590774 mhz=3.591 times_real=2.01
+launch 1 timed 4 cycles=1790000 frames=60 ms=500.500 cycles_per_second=3576424 mhz=3.576 times_real=2.00
+launch 1 timed 5 cycles=1790002 frames=60 ms=496.400 cycles_per_second=3605967 mhz=3.606 times_real=2.01
+launch 1 thread 1 cycles=1790001 thread_ms=263.217 mhz=6.800 times_real=3.80
+launch 1 thread 2 cycles=1790000 thread_ms=254.021 mhz=7.047 times_real=3.94
+launch 1 thread 3 cycles=1790002 thread_ms=256.433 mhz=6.980 times_real=3.90
+launch 1 thread 4 cycles=1790002 thread_ms=252.091 mhz=7.101 times_real=3.97
+launch 1 thread 5 cycles=1790002 thread_ms=255.705 mhz=7.000 times_real=3.91
+launch 1 thread 6 cycles=1790002 thread_ms=254.424 mhz=7.036 times_real=3.93
+launch 1 thread 7 cycles=1790001 thread_ms=260.540 mhz=6.870 times_real=3.84
+launch 1 thread 8 cycles=1790003 thread_ms=257.734 mhz=6.945 times_real=3.88
+launch 1 profile 20.9% wasm-function[385]
+launch 1 profile 17.4% wasm-function[355]
+launch 1 profile 12.6% wasm-function[204]
+launch 1 profile 9.5% wasm-function[65]
+launch 1 profile 5.0% wasm-function[135]
+launch 1 profile 4.4% wasm-function[386]
+launch 1 profile 4.1% wasm-function[361]
+launch 1 profile 3.7% (program)
+launch 1 profile 3.5% wasm-function[388]
+launch 1 profile 3.4% wasm-function[342]
+launch 1 profile 3.3% wasm-function[357]
+launch 1 profile 1.8% wasm-function[139]
+launch 1 profile 1.6% wasm-function[198]
+launch 1 profile 1.4% wasm-function[460]
+launch 1 profile 1.1% wasm-function[410]
+launch 1 profile 1.1% wasm-function[218]
+launch 1 profile 1.1% wasm-function[1229]
+launch 1 profile 1.0% wasm-function[411]
+launch 1 profile 0.8% (idle)
+launch 1 profile 0.3% wasm-function[79]
+launch 1 profile 0.3% wasm-function[409]
+launch 1 profile 0.2% wasm-function[362]
+launch 1 profile 0.2% wasm-function[108]
+launch 1 profile 0.2% wasm-function[87]
+launch 1 profile 0.2% wasm-function[211]
+launch 1 profile 0.1% wasm-function[428]
+launch 1 profile 0.1% (anonymous)
+launch 1 profile 0.1% wasm-function[461]
+launch 1 profile 0.1% wasm-function[137]
+launch 1 profile 0.1% wasm-function[102]
+launch 1 profile 0.1% wasm-function[354]
+launch 1 profile 0.1% wasm-function[366]
+launch 1 profile 0.1% wasm-function[91]
+launch 1 profile 0.0% wasm-function[353]
+launch 1 profile 0.0% wasm-function[400]
+launch 1 profile 0.0% wasm-function[68]
+launch 1 profile 0.0% wasm-function[73]
+launch 1 profile 0.0% wasm-function[64]
+launch 1 profile 0.0% wasm-function[96]
+launch 1 profile 0.0% wasm-function[106]
+--- exit=0 end=2026-10-13T06:49:20Z loadavg=0.36 2.80 2.75 5/442 132719
+=== launch r0-p3-after folder=/tmp/nes77/prof-after region=0 start=2026-10-13T06:49:20Z loadavg=0.36 2.80 2.75 5/442 132724
+rom: other/snow.nes at 95d8f621ae55, 40976 bytes, sha256 7db551e868b2c0182941bd68adc447c2f0668098a4425e8e170b20e4327b7210, hash checked
+browser 153.0.8010.12
+launch 1 region 0 NTSC
+launch 1 Running as NTSC, as chosen here: the file does not say which.
+launch 1 boot cycles=5000000 frames=167 ms=1578.000 cycles_per_second=3168568 mhz=3.169 times_real=1.77
+launch 1 timed 1 cycles=1790000 frames=61 ms=510.300 cycles_per_second=3507741 mhz=3.508 times_real=1.96
+launch 1 timed 2 cycles=1790003 frames=60 ms=499.400 cycles_per_second=3584307 mhz=3.584 times_real=2.00
+launch 1 timed 3 cycles=1790001 frames=60 ms=498.000 cycles_per_second=3594380 mhz=3.594 times_real=2.01
+launch 1 timed 4 cycles=1790000 frames=60 ms=513.800 cycles_per_second=3483846 mhz=3.484 times_real=1.95
+launch 1 timed 5 cycles=1790002 frames=60 ms=505.500 cycles_per_second=3541052 mhz=3.541 times_real=1.98
+launch 1 thread 1 cycles=1790001 thread_ms=260.543 mhz=6.870 times_real=3.84
+launch 1 thread 2 cycles=1790000 thread_ms=253.098 mhz=7.072 times_real=3.95
+launch 1 thread 3 cycles=1790002 thread_ms=252.582 mhz=7.087 times_real=3.96
+launch 1 thread 4 cycles=1790002 thread_ms=251.944 mhz=7.105 times_real=3.97
+launch 1 thread 5 cycles=1790002 thread_ms=254.395 mhz=7.036 times_real=3.93
+launch 1 thread 6 cycles=1790002 thread_ms=252.451 mhz=7.090 times_real=3.96
+launch 1 thread 7 cycles=1790001 thread_ms=254.233 mhz=7.041 times_real=3.93
+launch 1 thread 8 cycles=1790003 thread_ms=253.335 mhz=7.066 times_real=3.95
+launch 1 profile 22.6% wasm-function[393]
+launch 1 profile 17.8% wasm-function[363]
+launch 1 profile 15.5% wasm-function[204]
+launch 1 profile 4.4% wasm-function[65]
+launch 1 profile 4.3% wasm-function[139]
+launch 1 profile 3.8% wasm-function[394]
+launch 1 profile 3.3% wasm-function[419]
+launch 1 profile 3.3% wasm-function[369]
+launch 1 profile 3.1% (program)
+launch 1 profile 2.8% wasm-function[198]
+launch 1 profile 2.5% wasm-function[349]
+launch 1 profile 2.4% wasm-function[418]
+launch 1 profile 2.4% wasm-function[365]
+launch 1 profile 2.1% wasm-function[135]
+launch 1 profile 1.6% wasm-function[370]
+launch 1 profile 1.5% (idle)
+launch 1 profile 1.5% wasm-function[417]
+launch 1 profile 1.3% wasm-function[396]
+launch 1 profile 1.2% wasm-function[91]
+launch 1 profile 0.4% wasm-function[79]
+launch 1 profile 0.3% (anonymous)
+launch 1 profile 0.3% wasm-function[468]
+launch 1 profile 0.2% wasm-function[436]
+launch 1 profile 0.2% wasm-function[108]
+launch 1 profile 0.2% wasm-function[469]
+launch 1 profile 0.1% wasm-function[211]
+launch 1 profile 0.1% wasm-function[87]
+launch 1 profile 0.1% wasm-function[106]
+launch 1 profile 0.0% wasm-function[73]
+launch 1 profile 0.0% wasm-function[408]
+launch 1 profile 0.0% wasm-function[361]
+launch 1 profile 0.0% wasm-function[102]
+launch 1 profile 0.0% wasm-function[397]
+launch 1 profile 0.0% wasm-function[137]
+launch 1 profile 0.0% wasm-function[68]
+launch 1 profile 0.0% wasm-function[1242]
+launch 1 profile 0.0% wasm-function[374]
+launch 1 profile 0.0% wasm-function[362]
+launch 1 profile 0.0% wasm-function[96]
+launch 1 profile 0.0% wasm-function[81]
+--- exit=0 end=2026-10-13T06:49:32Z loadavg=0.28 2.66 2.70 5/442 132860
+=== launch r0-p4-base folder=/tmp/nes77/prof-base region=0 start=2026-10-13T06:49:32Z loadavg=0.28 2.66 2.70 5/442 132865
+rom: other/snow.nes at 95d8f621ae55, 40976 bytes, sha256 7db551e868b2c0182941bd68adc447c2f0668098a4425e8e170b20e4327b7210, hash checked
+browser 153.0.8010.12
+launch 1 region 0 NTSC
+launch 1 Running as NTSC, as chosen here: the file does not say which.
+launch 1 boot cycles=5000000 frames=167 ms=1534.800 cycles_per_second=3257753 mhz=3.258 times_real=1.82
+launch 1 timed 1 cycles=1790000 frames=61 ms=564.100 cycles_per_second=3173196 mhz=3.173 times_real=1.77
+launch 1 timed 2 cycles=1790003 frames=60 ms=506.700 cycles_per_second=3532668 mhz=3.533 times_real=1.97
+launch 1 timed 3 cycles=1790001 frames=60 ms=509.500 cycles_per_second=3513250 mhz=3.513 times_real=1.96
+launch 1 timed 4 cycles=1790000 frames=60 ms=507.200 cycles_per_second=3529180 mhz=3.529 times_real=1.97
+launch 1 timed 5 cycles=1790002 frames=60 ms=506.900 cycles_per_second=3531272 mhz=3.531 times_real=1.97
+launch 1 thread 1 cycles=1790001 thread_ms=259.279 mhz=6.904 times_real=3.86
+launch 1 thread 2 cycles=1790000 thread_ms=251.826 mhz=7.108 times_real=3.97
+launch 1 thread 3 cycles=1790002 thread_ms=251.509 mhz=7.117 times_real=3.98
+launch 1 thread 4 cycles=1790002 thread_ms=251.125 mhz=7.128 times_real=3.98
+launch 1 thread 5 cycles=1790002 thread_ms=254.547 mhz=7.032 times_real=3.93
+launch 1 thread 6 cycles=1790002 thread_ms=252.671 mhz=7.084 times_real=3.96
+launch 1 thread 7 cycles=1790001 thread_ms=251.890 mhz=7.106 times_real=3.97
+launch 1 thread 8 cycles=1790003 thread_ms=251.901 mhz=7.106 times_real=3.97
+launch 1 profile 23.4% wasm-function[385]
+launch 1 profile 17.0% wasm-function[355]
+launch 1 profile 16.3% wasm-function[204]
+launch 1 profile 6.8% wasm-function[357]
+launch 1 profile 6.4% wasm-function[135]
+launch 1 profile 6.1% wasm-function[65]
+launch 1 profile 4.3% (idle)
+launch 1 profile 3.3% wasm-function[361]
+launch 1 profile 3.3% wasm-function[411]
+launch 1 profile 2.7% (program)
+launch 1 profile 2.4% wasm-function[342]
+launch 1 profile 1.6% wasm-function[388]
+launch 1 profile 1.5% wasm-function[409]
+launch 1 profile 1.1% wasm-function[386]
+launch 1 profile 0.7% wasm-function[139]
+launch 1 profile 0.6% wasm-function[198]
+launch 1 profile 0.4% wasm-function[79]
+launch 1 profile 0.3% wasm-function[362]
+launch 1 profile 0.3% wasm-function[460]
+launch 1 profile 0.2% wasm-function[108]
+launch 1 profile 0.2% wasm-function[211]
+launch 1 profile 0.1% wasm-function[87]
+launch 1 profile 0.1% wasm-function[428]
+launch 1 profile 0.1% wasm-function[461]
+launch 1 profile 0.1% wasm-function[353]
+launch 1 profile 0.1% wasm-function[102]
+launch 1 profile 0.1% wasm-function[400]
+launch 1 profile 0.1% wasm-function[366]
+launch 1 profile 0.1% wasm-function[1229]
+launch 1 profile 0.1% wasm-function[73]
+launch 1 profile 0.1% wasm-function[68]
+launch 1 profile 0.0% wasm-function[106]
+launch 1 profile 0.0% wasm-function[137]
+launch 1 profile 0.0% wasm-function[72]
+launch 1 profile 0.0% (anonymous)
+launch 1 profile 0.0% wasm-function[410]
+launch 1 profile 0.0% wasm-function[69]
+launch 1 profile 0.0% wasm-function[80]
+launch 1 profile 0.0% wasm-function[354]
+launch 1 profile 0.0% wasm-function[96]
+--- exit=0 end=2026-10-13T06:49:45Z loadavg=0.24 2.58 2.67 6/441 133011
+=== launch r0-p4-after folder=/tmp/nes77/prof-after region=0 start=2026-10-13T06:49:45Z loadavg=0.24 2.58 2.67 5/441 133016
+rom: other/snow.nes at 95d8f621ae55, 40976 bytes, sha256 7db551e868b2c0182941bd68adc447c2f0668098a4425e8e170b20e4327b7210, hash checked
+browser 153.0.8010.12
+launch 1 region 0 NTSC
+launch 1 Running as NTSC, as chosen here: the file does not say which.
+launch 1 boot cycles=5000000 frames=167 ms=1523.700 cycles_per_second=3281486 mhz=3.281 times_real=1.83
+launch 1 timed 1 cycles=1790000 frames=61 ms=564.400 cycles_per_second=3171510 mhz=3.172 times_real=1.77
+launch 1 timed 2 cycles=1790003 frames=60 ms=499.400 cycles_per_second=3584307 mhz=3.584 times_real=2.00
+launch 1 timed 3 cycles=1790001 frames=60 ms=512.000 cycles_per_second=3496096 mhz=3.496 times_real=1.95
+launch 1 timed 4 cycles=1790000 frames=60 ms=612.100 cycles_per_second=2924359 mhz=2.924 times_real=1.63
+launch 1 timed 5 cycles=1790002 frames=60 ms=517.100 cycles_per_second=3461617 mhz=3.462 times_real=1.93
+launch 1 thread 1 cycles=1790001 thread_ms=265.729 mhz=6.736 times_real=3.76
+launch 1 thread 2 cycles=1790000 thread_ms=255.250 mhz=7.013 times_real=3.92
+launch 1 thread 3 cycles=1790002 thread_ms=253.896 mhz=7.050 times_real=3.94
+launch 1 thread 4 cycles=1790002 thread_ms=253.160 mhz=7.071 times_real=3.95
+launch 1 thread 5 cycles=1790002 thread_ms=255.218 mhz=7.014 times_real=3.92
+launch 1 thread 6 cycles=1790002 thread_ms=253.624 mhz=7.058 times_real=3.94
+launch 1 thread 7 cycles=1790001 thread_ms=255.348 mhz=7.010 times_real=3.92
+launch 1 thread 8 cycles=1790003 thread_ms=253.574 mhz=7.059 times_real=3.94
+launch 1 profile 22.5% wasm-function[393]
+launch 1 profile 14.6% wasm-function[204]
+launch 1 profile 12.7% wasm-function[363]
+launch 1 profile 8.0% wasm-function[365]
+launch 1 profile 7.4% wasm-function[65]
+launch 1 profile 4.8% wasm-function[349]
+launch 1 profile 4.7% wasm-function[369]
+launch 1 profile 4.3% wasm-function[135]
+launch 1 profile 4.2% wasm-function[139]
+launch 1 profile 3.6% wasm-function[394]
+launch 1 profile 2.9% (program)
+launch 1 profile 2.8% (idle)
+launch 1 profile 1.5% wasm-function[396]
+launch 1 profile 1.2% wasm-function[68]
+launch 1 profile 1.0% wasm-function[419]
+launch 1 profile 0.6% wasm-function[198]
+launch 1 profile 0.5% wasm-function[370]
+launch 1 profile 0.4% wasm-function[417]
+launch 1 profile 0.4% wasm-function[468]
+launch 1 profile 0.3% wasm-function[79]
+launch 1 profile 0.2% wasm-function[108]
+launch 1 profile 0.2% wasm-function[436]
+launch 1 profile 0.1% wasm-function[211]
+launch 1 profile 0.1% (anonymous)
+launch 1 profile 0.1% wasm-function[362]
+launch 1 profile 0.1% wasm-function[87]
+launch 1 profile 0.1% wasm-function[361]
+launch 1 profile 0.1% wasm-function[408]
+launch 1 profile 0.1% wasm-function[469]
+launch 1 profile 0.1% wasm-function[418]
+launch 1 profile 0.0% wasm-function[102]
+launch 1 profile 0.0% wasm-function[374]
+launch 1 profile 0.0% wasm-function[137]
+launch 1 profile 0.0% wasm-function[1242]
+launch 1 profile 0.0% wasm-function[76]
+launch 1 profile 0.0% wasm-function[106]
+launch 1 profile 0.0% wasm-function[81]
+launch 1 profile 0.0% wasm-function[84]
+launch 1 profile 0.0% wasm-function[96]
+launch 1 profile 0.0% wasm-function[207]
+--- exit=0 end=2026-10-13T06:49:57Z loadavg=1.40 2.71 2.72 5/438 133153
+=== launch r0-p5-base folder=/tmp/nes77/prof-base region=0 start=2026-10-13T06:56:12Z loadavg=0.99 2.54 2.75 8/538 134194
+rom: other/snow.nes at 95d8f621ae55, 40976 bytes, sha256 7db551e868b2c0182941bd68adc447c2f0668098a4425e8e170b20e4327b7210, hash checked
+browser 153.0.8010.12
+launch 1 region 0 NTSC
+launch 1 Running as NTSC, as chosen here: the file does not say which.
+launch 1 boot cycles=5000000 frames=167 ms=1501.400 cycles_per_second=3330225 mhz=3.330 times_real=1.86
+launch 1 timed 1 cycles=1790000 frames=61 ms=554.400 cycles_per_second=3228716 mhz=3.229 times_real=1.80
+launch 1 timed 2 cycles=1790003 frames=60 ms=445.400 cycles_per_second=4018866 mhz=4.019 times_real=2.25
+launch 1 timed 3 cycles=1790001 frames=60 ms=497.300 cycles_per_second=3599439 mhz=3.599 times_real=2.01
+launch 1 timed 4 cycles=1790000 frames=60 ms=502.200 cycles_per_second=3564317 mhz=3.564 times_real=1.99
+launch 1 timed 5 cycles=1790002 frames=60 ms=491.100 cycles_per_second=3644883 mhz=3.645 times_real=2.04
+launch 1 thread 1 cycles=1790001 thread_ms=261.105 mhz=6.855 times_real=3.83
+launch 1 thread 2 cycles=1790000 thread_ms=257.382 mhz=6.955 times_real=3.89
+launch 1 thread 3 cycles=1790002 thread_ms=252.114 mhz=7.100 times_real=3.97
+launch 1 thread 4 cycles=1790002 thread_ms=251.986 mhz=7.104 times_real=3.97
+launch 1 thread 5 cycles=1790002 thread_ms=254.787 mhz=7.025 times_real=3.93
+launch 1 thread 6 cycles=1790002 thread_ms=257.098 mhz=6.962 times_real=3.89
+launch 1 thread 7 cycles=1790001 thread_ms=252.355 mhz=7.093 times_real=3.96
+launch 1 thread 8 cycles=1790003 thread_ms=254.107 mhz=7.044 times_real=3.94
+launch 1 profile 29.3% wasm-function[385]
+launch 1 profile 20.8% wasm-function[355]
+launch 1 profile 10.9% wasm-function[204]
+launch 1 profile 7.0% wasm-function[357]
+launch 1 profile 4.2% wasm-function[65]
+launch 1 profile 3.6% wasm-function[388]
+launch 1 profile 3.3% wasm-function[361]
+launch 1 profile 3.2% wasm-function[135]
+launch 1 profile 2.8% (program)
+launch 1 profile 2.6% wasm-function[342]
+launch 1 profile 1.5% wasm-function[409]
+launch 1 profile 1.5% wasm-function[79]
+launch 1 profile 1.3% wasm-function[386]
+launch 1 profile 1.2% wasm-function[410]
+launch 1 profile 1.1% wasm-function[106]
+launch 1 profile 1.0% wasm-function[411]
+launch 1 profile 0.9% wasm-function[139]
+launch 1 profile 0.9% (idle)
+launch 1 profile 0.4% wasm-function[198]
+launch 1 profile 0.4% wasm-function[460]
+launch 1 profile 0.3% wasm-function[362]
+launch 1 profile 0.2% wasm-function[108]
+launch 1 profile 0.2% wasm-function[428]
+launch 1 profile 0.1% wasm-function[211]
+launch 1 profile 0.1% wasm-function[87]
+launch 1 profile 0.1% wasm-function[461]
+launch 1 profile 0.1% (anonymous)
+launch 1 profile 0.1% wasm-function[1229]
+launch 1 profile 0.1% wasm-function[353]
+launch 1 profile 0.1% wasm-function[68]
+launch 1 profile 0.1% wasm-function[102]
+launch 1 profile 0.1% wasm-function[400]
+launch 1 profile 0.0% wasm-function[137]
+launch 1 profile 0.0% wasm-function[366]
+launch 1 profile 0.0% wasm-function[96]
+launch 1 profile 0.0% wasm-function[64]
+launch 1 profile 0.0% wasm-function[354]
+launch 1 profile 0.0% wasm-function[73]
+launch 1 profile 0.0% wasm-function[72]
+launch 1 profile 0.0% wasm-function[82]
+--- exit=0 end=2026-10-13T06:56:25Z loadavg=0.84 2.46 2.72 7/531 134334
+=== launch r0-p5-after folder=/tmp/nes77/prof-after region=0 start=2026-10-13T06:56:25Z loadavg=0.84 2.46 2.72 7/531 134339
+rom: other/snow.nes at 95d8f621ae55, 40976 bytes, sha256 7db551e868b2c0182941bd68adc447c2f0668098a4425e8e170b20e4327b7210, hash checked
+browser 153.0.8010.12
+launch 1 region 0 NTSC
+launch 1 Running as NTSC, as chosen here: the file does not say which.
+launch 1 boot cycles=5000000 frames=167 ms=1592.000 cycles_per_second=3140704 mhz=3.141 times_real=1.75
+launch 1 timed 1 cycles=1790000 frames=61 ms=508.800 cycles_per_second=3518082 mhz=3.518 times_real=1.97
+launch 1 timed 2 cycles=1790003 frames=60 ms=507.700 cycles_per_second=3525710 mhz=3.526 times_real=1.97
+launch 1 timed 3 cycles=1790001 frames=60 ms=508.900 cycles_per_second=3517392 mhz=3.517 times_real=1.97
+launch 1 timed 4 cycles=1790000 frames=60 ms=559.500 cycles_per_second=3199285 mhz=3.199 times_real=1.79
+launch 1 timed 5 cycles=1790002 frames=60 ms=515.500 cycles_per_second=3472361 mhz=3.472 times_real=1.94
+launch 1 thread 1 cycles=1790001 thread_ms=270.540 mhz=6.616 times_real=3.70
+launch 1 thread 2 cycles=1790000 thread_ms=262.837 mhz=6.810 times_real=3.81
+launch 1 thread 3 cycles=1790002 thread_ms=265.030 mhz=6.754 times_real=3.77
+launch 1 thread 4 cycles=1790002 thread_ms=260.039 mhz=6.884 times_real=3.85
+launch 1 thread 5 cycles=1790002 thread_ms=262.330 mhz=6.823 times_real=3.81
+launch 1 thread 6 cycles=1790002 thread_ms=262.823 mhz=6.811 times_real=3.81
+launch 1 thread 7 cycles=1790001 thread_ms=266.677 mhz=6.712 times_real=3.75
+launch 1 thread 8 cycles=1790003 thread_ms=265.054 mhz=6.753 times_real=3.77
+launch 1 profile 26.0% wasm-function[393]
+launch 1 profile 14.5% wasm-function[204]
+launch 1 profile 12.4% wasm-function[363]
+launch 1 profile 7.7% wasm-function[65]
+launch 1 profile 6.8% wasm-function[394]
+launch 1 profile 4.7% wasm-function[365]
+launch 1 profile 3.5% wasm-function[369]
+launch 1 profile 3.0% (program)
+launch 1 profile 2.7% wasm-function[396]
+launch 1 profile 2.5% wasm-function[349]
+launch 1 profile 2.0% wasm-function[135]
+launch 1 profile 1.6% wasm-function[370]
+launch 1 profile 1.5% wasm-function[79]
+launch 1 profile 1.4% wasm-function[417]
+launch 1 profile 1.4% (anonymous)
+launch 1 profile 1.4% wasm-function[436]
+launch 1 profile 1.2% wasm-function[1242]
+launch 1 profile 1.2% wasm-function[418]
+launch 1 profile 0.9% wasm-function[419]
+launch 1 profile 0.8% wasm-function[139]
+launch 1 profile 0.6% (idle)
+launch 1 profile 0.4% wasm-function[198]
+launch 1 profile 0.4% wasm-function[468]
+launch 1 profile 0.2% wasm-function[108]
+launch 1 profile 0.2% wasm-function[469]
+launch 1 profile 0.1% wasm-function[211]
+launch 1 profile 0.1% wasm-function[87]
+launch 1 profile 0.1% wasm-function[408]
+launch 1 profile 0.1% wasm-function[68]
+launch 1 profile 0.1% wasm-function[362]
+launch 1 profile 0.1% wasm-function[102]
+launch 1 profile 0.1% wasm-function[106]
+launch 1 profile 0.1% wasm-function[361]
+launch 1 profile 0.1% wasm-function[374]
+launch 1 profile 0.0% wasm-function[397]
+launch 1 profile 0.0% wasm-function[81]
+launch 1 profile 0.0% wasm-function[137]
+launch 1 profile 0.0% wasm-function[80]
+launch 1 profile 0.0% wasm-function[96]
+launch 1 profile 0.0% wasm-function[64]
+--- exit=0 end=2026-10-13T06:56:37Z loadavg=1.19 2.46 2.72 8/528 134472
+=== launch r0-p6-base folder=/tmp/nes77/prof-base region=0 start=2026-10-13T06:56:52Z loadavg=0.93 2.34 2.68 7/526 134537
+rom: other/snow.nes at 95d8f621ae55, 40976 bytes, sha256 7db551e868b2c0182941bd68adc447c2f0668098a4425e8e170b20e4327b7210, hash checked
+browser 153.0.8010.12
+launch 1 region 0 NTSC
+launch 1 Running as NTSC, as chosen here: the file does not say which.
+launch 1 boot cycles=5000000 frames=167 ms=1588.300 cycles_per_second=3148020 mhz=3.148 times_real=1.76
+launch 1 timed 1 cycles=1790000 frames=61 ms=508.900 cycles_per_second=3517390 mhz=3.517 times_real=1.97
+launch 1 timed 2 cycles=1790003 frames=60 ms=505.800 cycles_per_second=3538954 mhz=3.539 times_real=1.98
+launch 1 timed 3 cycles=1790001 frames=60 ms=505.000 cycles_per_second=3544556 mhz=3.545 times_real=1.98
+launch 1 timed 4 cycles=1790000 frames=60 ms=505.500 cycles_per_second=3541048 mhz=3.541 times_real=1.98
+launch 1 timed 5 cycles=1790002 frames=60 ms=499.100 cycles_per_second=3586460 mhz=3.586 times_real=2.00
+launch 1 thread 1 cycles=1790001 thread_ms=260.825 mhz=6.863 times_real=3.83
+launch 1 thread 2 cycles=1790000 thread_ms=252.774 mhz=7.081 times_real=3.96
+launch 1 thread 3 cycles=1790002 thread_ms=257.185 mhz=6.960 times_real=3.89
+launch 1 thread 4 cycles=1790002 thread_ms=251.557 mhz=7.116 times_real=3.98
+launch 1 thread 5 cycles=1790002 thread_ms=257.125 mhz=6.962 times_real=3.89
+launch 1 thread 6 cycles=1790002 thread_ms=252.197 mhz=7.098 times_real=3.97
+launch 1 thread 7 cycles=1790001 thread_ms=260.059 mhz=6.883 times_real=3.85
+launch 1 thread 8 cycles=1790003 thread_ms=252.874 mhz=7.079 times_real=3.96
+launch 1 profile 28.7% wasm-function[385]
+launch 1 profile 13.0% wasm-function[355]
+launch 1 profile 10.3% wasm-function[204]
+launch 1 profile 8.6% wasm-function[65]
+launch 1 profile 7.3% wasm-function[388]
+launch 1 profile 4.2% (program)
+launch 1 profile 3.7% wasm-function[357]
+launch 1 profile 3.1% wasm-function[135]
+launch 1 profile 3.1% wasm-function[139]
+launch 1 profile 2.5% wasm-function[386]
+launch 1 profile 2.4% wasm-function[361]
+launch 1 profile 1.8% wasm-function[198]
+launch 1 profile 1.5% wasm-function[342]
+launch 1 profile 1.5% wasm-function[460]
+launch 1 profile 1.4% wasm-function[428]
+launch 1 profile 1.3% wasm-function[87]
+launch 1 profile 1.3% wasm-function[366]
+launch 1 profile 1.2% wasm-function[411]
+launch 1 profile 0.7% (idle)
+launch 1 profile 0.4% wasm-function[79]
+launch 1 profile 0.4% wasm-function[409]
+launch 1 profile 0.3% wasm-function[362]
+launch 1 profile 0.2% wasm-function[108]
+launch 1 profile 0.2% wasm-function[211]
+launch 1 profile 0.1% (anonymous)
+launch 1 profile 0.1% wasm-function[102]
+launch 1 profile 0.1% wasm-function[461]
+launch 1 profile 0.1% wasm-function[354]
+launch 1 profile 0.1% wasm-function[410]
+launch 1 profile 0.1% wasm-function[73]
+launch 1 profile 0.1% wasm-function[1229]
+launch 1 profile 0.1% wasm-function[68]
+launch 1 profile 0.0% wasm-function[106]
+launch 1 profile 0.0% wasm-function[353]
+launch 1 profile 0.0% wasm-function[137]
+launch 1 profile 0.0% wasm-function[64]
+launch 1 profile 0.0% wasm-function[400]
+launch 1 profile 0.0% wasm-function[96]
+launch 1 profile 0.0% wasm-function[389]
+launch 1 profile 0.0% wasm-function[206]
+--- exit=0 end=2026-10-13T06:57:04Z loadavg=0.78 2.27 2.65 6/525 134676
+=== launch r0-p6-after folder=/tmp/nes77/prof-after region=0 start=2026-10-13T06:57:04Z loadavg=0.78 2.27 2.65 6/525 134681
+rom: other/snow.nes at 95d8f621ae55, 40976 bytes, sha256 7db551e868b2c0182941bd68adc447c2f0668098a4425e8e170b20e4327b7210, hash checked
+browser 153.0.8010.12
+launch 1 region 0 NTSC
+launch 1 Running as NTSC, as chosen here: the file does not say which.
+launch 1 boot cycles=5000000 frames=167 ms=1617.000 cycles_per_second=3092146 mhz=3.092 times_real=1.73
+launch 1 timed 1 cycles=1790000 frames=61 ms=496.200 cycles_per_second=3607416 mhz=3.607 times_real=2.02
+launch 1 timed 2 cycles=1790003 frames=60 ms=570.800 cycles_per_second=3135955 mhz=3.136 times_real=1.75
+launch 1 timed 3 cycles=1790001 frames=60 ms=520.000 cycles_per_second=3442310 mhz=3.442 times_real=1.92
+launch 1 timed 4 cycles=1790000 frames=60 ms=505.300 cycles_per_second=3542450 mhz=3.542 times_real=1.98
+launch 1 timed 5 cycles=1790002 frames=60 ms=514.700 cycles_per_second=3477758 mhz=3.478 times_real=1.94
+launch 1 thread 1 cycles=1790001 thread_ms=270.938 mhz=6.607 times_real=3.69
+launch 1 thread 2 cycles=1790000 thread_ms=262.320 mhz=6.824 times_real=3.81
+launch 1 thread 3 cycles=1790002 thread_ms=260.900 mhz=6.861 times_real=3.83
+launch 1 thread 4 cycles=1790002 thread_ms=260.683 mhz=6.867 times_real=3.84
+launch 1 thread 5 cycles=1790002 thread_ms=267.315 mhz=6.696 times_real=3.74
+launch 1 thread 6 cycles=1790002 thread_ms=264.241 mhz=6.774 times_real=3.78
+launch 1 thread 7 cycles=1790001 thread_ms=266.164 mhz=6.725 times_real=3.76
+launch 1 thread 8 cycles=1790003 thread_ms=262.932 mhz=6.808 times_real=3.80
+launch 1 profile 24.7% wasm-function[393]
+launch 1 profile 18.8% wasm-function[363]
+launch 1 profile 15.0% wasm-function[204]
+launch 1 profile 5.9% wasm-function[369]
+launch 1 profile 5.6% wasm-function[365]
+launch 1 profile 5.3% wasm-function[65]
+launch 1 profile 3.9% (program)
+launch 1 profile 3.2% (idle)
+launch 1 profile 2.4% wasm-function[349]
+launch 1 profile 2.2% wasm-function[419]
+launch 1 profile 1.9% wasm-function[135]
+launch 1 profile 1.6% wasm-function[468]
+launch 1 profile 1.6% wasm-function[396]
+launch 1 profile 1.3% wasm-function[108]
+launch 1 profile 1.2% wasm-function[394]
+launch 1 profile 1.1% wasm-function[74]
+launch 1 profile 0.9% wasm-function[139]
+launch 1 profile 0.6% wasm-function[370]
+launch 1 profile 0.5% wasm-function[79]
+launch 1 profile 0.5% wasm-function[198]
+launch 1 profile 0.3% wasm-function[417]
+launch 1 profile 0.2% wasm-function[211]
+launch 1 profile 0.1% wasm-function[436]
+launch 1 profile 0.1% (anonymous)
+launch 1 profile 0.1% wasm-function[469]
+launch 1 profile 0.1% wasm-function[87]
+launch 1 profile 0.1% wasm-function[68]
+launch 1 profile 0.1% wasm-function[408]
+launch 1 profile 0.0% wasm-function[362]
+launch 1 profile 0.0% wasm-function[73]
+launch 1 profile 0.0% wasm-function[1242]
+launch 1 profile 0.0% wasm-function[418]
+launch 1 profile 0.0% wasm-function[64]
+launch 1 profile 0.0% wasm-function[106]
+launch 1 profile 0.0% wasm-function[137]
+launch 1 profile 0.0% wasm-function[361]
+launch 1 profile 0.0% wasm-function[374]
+launch 1 profile 0.0% wasm-function[96]
+launch 1 profile 0.0% wasm-function[102]
+launch 1 profile 0.0% wasm-function[91]
+--- exit=0 end=2026-10-13T06:57:16Z loadavg=0.61 2.15 2.60 9/521 134817

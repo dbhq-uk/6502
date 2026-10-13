@@ -64,6 +64,7 @@ the rules that were settled along the way.
      journal file (`order` one above the highest in `docs/journal/`, no digits in
      the title or summary), a dated row in the bench README's table, a dated
      'Done' line in the plan's Deferred list, and a comment on #77.
+   - **Done 13 Oct 2026 (issue #77, the speed run again, on `dbhq-arm`, an idle 4-core ARM host, load average 0.80 to 0.99 before each launch; its figures are not comparable with the x64 runs, only the ratio is judged):** both builds compiled ahead of time, `origin/main` (`5640a57`) against `c0fdd2d`, `THREAD_TIME=8`, alternated, the rule of 7 October fixed again before the first launch; the first eight pairs per region were inconclusive on NTSC, so the one extra batch was run: over sixteen pairs, NTSC median 0.9720, 90 per cent interval 0.9666 to 0.9786; PAL median 0.9956, 0.9873 to 0.9961. **FAIL by the rule fixed beforehand** (NTSC's upper end is below 0.98): about 2.8 per cent slower on NTSC in Chromium on ARM. A profile puts `ChipAccesses.Note` at 0.00 to 0.03 per cent of the samples, and the slow launches are slower in many functions at once, so the cause looks like how V8 compiles the changed bus, not the counting. Natively the counters add a median 0.6 per cent (NTSC) and 0.7 per cent (PAL) instructions per cycle. The differential check's two files are identical. The machine was not changed: whether to try a change or to measure on x64 first is Dan's call. See `docs/journal/2026-10-13-the-nes-counters-on-arm.md` and `bench/nes-speed/chip-counters/`.
 2. **Keep #75 and #76 current.** Merge `main` into each branch as it moves
    (`git fetch`, `git merge origin/main`), resolve conflicts, run the checks
    below, push. Reply to review comments. Do not rebase a pushed branch.
@@ -168,7 +169,7 @@ when tests are added.
 
 ## What was not measured, said plainly
 
-The speed of the chip counters on the machine as it now is (#77). The look of the
+The speed of the chip counters on x64 with the machine as it now is (#77 measured it on ARM on 13 October 2026, above, and it failed on NTSC there). The look of the
 models on screen: the shared stage light tints the greys a little green, the case
 geometry is simplified (square corners, a flat rear window set in by about 4.4 mm
 on the console, ribs as lines), and the PAL rear words are squeezed onto one line;

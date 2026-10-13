@@ -1,0 +1,45 @@
+# reg pair build timed_runs instructions:u ok(picture changes yes); rows below the counts are kernel.perf_event_paranoid before and after each session
+ntsc 1 base 0 4592083428 ok=1
+ntsc 1 base 20 24879071546 ok=1
+ntsc 1 after 0 4600112658 ok=1
+ntsc 1 after 20 24942577639 ok=1
+ntsc 2 base 0 4603041961 ok=1
+ntsc 2 base 20 24827099274 ok=1
+ntsc 2 after 0 4579045111 ok=1
+ntsc 2 after 20 24980118598 ok=1
+ntsc 3 base 0 4364797564 ok=1
+ntsc 3 base 20 24625424767 ok=1
+ntsc 3 after 0 4340360382 ok=1
+ntsc 3 after 20 24725461905 ok=1
+ntsc 4 base 0 4244936619 ok=1
+ntsc 4 base 20 24610031374 ok=1
+ntsc 4 after 0 4367984868 ok=1
+ntsc 4 after 20 24848513840 ok=1
+ntsc 5 base 0 4265559232 ok=1
+ntsc 5 base 20 24666645777 ok=1
+ntsc 5 after 0 4270761839 ok=1
+ntsc 5 after 20 24776680200 ok=1
+pal 1 base 0 4320235043 ok=1
+pal 1 base 20 23976085717 ok=1
+pal 1 after 0 4257227901 ok=1
+pal 1 after 20 25326589177 ok=1
+pal 2 base 0 4327308201 ok=1
+pal 2 base 20 24002618783 ok=1
+pal 2 after 0 4212563174 ok=1
+pal 2 after 20 24057994493 ok=1
+pal 3 base 0 4200060470 ok=1
+pal 3 base 20 23889984244 ok=1
+pal 3 after 0 4251824843 ok=1
+pal 3 after 20 24086110207 ok=1
+pal 4 base 0 4209400776 ok=1
+pal 4 base 20 23774913992 ok=1
+pal 4 after 0 4402649463 ok=1
+pal 4 after 20 24069771568 ok=1
+pal 5 base 0 4163882795 ok=1
+pal 5 base 20 23911543351 ok=1
+pal 5 after 0 4314613268 ok=1
+pal 5 after 20 24068390859 ok=1
+before: 4 at 07:15:33Z
+after: 4 at 07:15:34Z
+before: 4 at 07:15:44Z
+after: 4 at 07:17:45Z

@@ -24,7 +24,7 @@ machines/                   # registry.json, and per machine its "try it" progra
 site/                       # 6502.dbhq.uk: the Astro site, its tests, and the scripts that build the machines into it
   src/models/               # the 3D models, one browser module each with its layout, generated parts and notes: kim-1, and the NES's nes-famicom-case (outside) and nes-famicom-board (inside)
 tests/                      # the tests and the library they share, one project per machine
-bench/                      # the speed benchmarks (native, and the browser speed checks), run locally and never in CI; the .NET ones are in the solution, so CI builds them (bench/nes-speed/ from the NES's task 6; in it, differential/ is the gate for the NES's lazy chips, and lazy-chips/ their measurements)
+bench/                      # the speed benchmarks (native, and the browser speed checks), run locally and never in CI; the .NET ones are in the solution, so CI builds them (bench/nes-speed/ from the NES's task 6; in it, differential/ is the gate for the NES's lazy chips, lazy-chips/ their measurements, and chip-counters/ the NES models' counters' speed run on ARM)
 tools/                      # scripts that make test data and check assumptions
   Dbhq.Cpu6502.ChipTrace/   # records the core's bus cycles for the site's chip page
   probes/                   # scripts that check assumptions against test data

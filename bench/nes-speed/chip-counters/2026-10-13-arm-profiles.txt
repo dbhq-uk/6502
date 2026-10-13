@@ -1,0 +1,720 @@
+=== launch r0-p1-base folder=/tmp/nes77/prof-base region=0 start=2026-10-13T07:06:20Z loadavg=0.13 2.07 2.69 11/537 136945
+rom: other/snow.nes at 95d8f621ae55, 40976 bytes, sha256 7db551e868b2c0182941bd68adc447c2f0668098a4425e8e170b20e4327b7210, hash checked
+browser 153.0.8010.12
+launch 1 region 0 NTSC
+launch 1 Running as NTSC, as chosen here: the file does not say which.
+launch 1 boot cycles=5000000 frames=167 ms=1620.600 cycles_per_second=3085277 mhz=3.085 times_real=1.72
+launch 1 timed 1 cycles=1790000 frames=61 ms=572.500 cycles_per_second=3126638 mhz=3.127 times_real=1.75
+launch 1 timed 2 cycles=1790003 frames=60 ms=514.600 cycles_per_second=3478436 mhz=3.478 times_real=1.94
+launch 1 timed 3 cycles=1790001 frames=60 ms=576.500 cycles_per_second=3104945 mhz=3.105 times_real=1.73
+launch 1 timed 4 cycles=1790000 frames=60 ms=518.700 cycles_per_second=3450935 mhz=3.451 times_real=1.93
+launch 1 timed 5 cycles=1790002 frames=60 ms=513.200 cycles_per_second=3487923 mhz=3.488 times_real=1.95
+launch 1 thread 1 cycles=1790001 thread_ms=264.383 mhz=6.770 times_real=3.78
+launch 1 thread 2 cycles=1790000 thread_ms=256.238 mhz=6.986 times_real=3.90
+launch 1 thread 3 cycles=1790002 thread_ms=259.525 mhz=6.897 times_real=3.85
+launch 1 thread 4 cycles=1790002 thread_ms=255.802 mhz=6.998 times_real=3.91
+launch 1 thread 5 cycles=1790002 thread_ms=258.759 mhz=6.918 times_real=3.87
+launch 1 thread 6 cycles=1790002 thread_ms=265.041 mhz=6.754 times_real=3.77
+launch 1 thread 7 cycles=1790001 thread_ms=255.074 mhz=7.018 times_real=3.92
+launch 1 thread 8 cycles=1790003 thread_ms=256.103 mhz=6.989 times_real=3.91
+launch 1 profile 24.3% Dbhq_Machines_Nes_Dbhq_Machines_Nes_Ppu_RunDot
+launch 1 profile 17.3% Dbhq_Machines_Nes_Dbhq_Machines_Nes_NesBus_Cycle_bool_uint16_byte
+launch 1 profile 11.7% Dbhq_Machines_Nes_Dbhq_Machines_Nes_Apu_Tick
+launch 1 profile 7.6% Dbhq_Cpu6502_Dbhq_Cpu6502_Cpu_Read_uint16
+launch 1 profile 5.9% Dbhq_Machines_Nes_Dbhq_Machines_Nes_Ppu_CatchUp
+launch 1 profile 4.4% Dbhq_Machines_Nes_Dbhq_Machines_Nes_NesBus_ReadAccess_uint16
+launch 1 profile 4.1% (program)
+launch 1 profile 3.7% Dbhq_Machines_Nes_Dbhq_Machines_Nes_Ppu_EvaluationStep
+launch 1 profile 3.6% Dbhq_Machines_Nes_Dbhq_Machines_Nes_Nes_Run_long
+launch 1 profile 3.2% Dbhq_Machines_Nes_Dbhq_Machines_Nes_Ppu_FetchSprite_int
+launch 1 profile 2.3% Dbhq_Machines_Nes_Dbhq_Machines_Nes_Ppu_RenderDot_bool
+launch 1 profile 1.9% Dbhq_Cpu6502_Dbhq_Cpu6502_Cpu_Step
+launch 1 profile 1.7% Dbhq_Machines_Nes_Dbhq_Machines_Nes_Apu_Remix
+launch 1 profile 1.3% Dbhq_Cpu6502_Dbhq_Cpu6502_Cpu_EnterHandler
+launch 1 profile 1.3% Dbhq_Machines_Nes_Dbhq_Machines_Nes_Ppu_LaySprite_int_int_int
+launch 1 profile 1.2% Dbhq_Cpu6502_Dbhq_Cpu6502_Cpu_Zp
+launch 1 profile 0.9% Dbhq_Cpu6502_Dbhq_Cpu6502_Cpu_ExecuteOfficial_byte
+launch 1 profile 0.7% (idle)
+launch 1 profile 0.3% Dbhq_Machines_Nes_Dbhq_Machines_Nes_NesBus_WriteAccess_uint16_byte
+launch 1 profile 0.3% Dbhq_Machines_Nes_Dbhq_Machines_Nes_Ppu_FetchBackground_int
+launch 1 profile 0.3% Dbhq_Machines_Nes_Dbhq_Machines_Nes_SampleBuffer_Step_double
+launch 1 profile 0.3% Dbhq_Cpu6502_Dbhq_Cpu6502_Cpu_Write_uint16_byte
+launch 1 profile 0.3% (anonymous)
+launch 1 profile 0.2% Dbhq_Machines_Nes_Dbhq_Machines_Nes_Apu_Write_int_byte
+launch 1 profile 0.2% Dbhq_Machines_Nes_Dbhq_Machines_Nes_SampleBuffer_Emit
+launch 1 profile 0.1% Dbhq_Cpu6502_Dbhq_Cpu6502_Cpu_NZ_byte
+launch 1 profile 0.1% Dbhq_Machines_Nes_Dbhq_Machines_Nes_Ppu_DecayedLatch
+launch 1 profile 0.1% Dbhq_Machines_Nes_Dbhq_Machines_Nes_Ppu_Evaluate_int
+launch 1 profile 0.1% Dbhq_Cpu6502_Dbhq_Cpu6502_Cpu_Rti
+launch 1 profile 0.1% Dbhq_Cpu6502_Dbhq_Cpu6502_Cpu_Branch_bool
+launch 1 profile 0.0% Dbhq_Machines_Nes_Dbhq_Machines_Nes_Ppu_WriteRegister_int_byte
+launch 1 profile 0.0% Dbhq_Machines_Nes_Dbhq_Machines_Nes_NesBus_RunDma_uint16
+launch 1 profile 0.0% Dbhq_Machines_Nes_Dbhq_Machines_Nes_NesBus_Read_uint16
+launch 1 profile 0.0% corlib_System_Array_Clear_System_Array
+launch 1 profile 0.0% Dbhq_Cpu6502_Dbhq_Cpu6502_Cpu_Indexed_uint16_byte_Dbhq_Cpu6502_Cpu_Access
+launch 1 profile 0.0% Dbhq_Machines_Nes_Dbhq_Machines_Nes_Ppu_IncrementY_uint16
+launch 1 profile 0.0% Dbhq_Cpu6502_Dbhq_Cpu6502_Cpu_InterruptSequence
+launch 1 profile 0.0% Dbhq_Cpu6502_Dbhq_Cpu6502_Cpu_IzY_Dbhq_Cpu6502_Cpu_Access
+launch 1 profile 0.0% Dbhq_Cpu6502_Dbhq_Cpu6502_Cpu_FetchWord
+launch 1 profile 0.0% Dbhq_Cpu6502_Dbhq_Cpu6502_Cpu_ZpX
+--- exit=0 end=2026-10-13T07:06:33Z loadavg=1.30 2.22 2.73 13/537 137080
+=== launch r0-p1-after folder=/tmp/nes77/prof-after region=0 start=2026-10-13T07:12:19Z loadavg=0.94 2.96 3.10 5/433 137816
+rom: other/snow.nes at 95d8f621ae55, 40976 bytes, sha256 7db551e868b2c0182941bd68adc447c2f0668098a4425e8e170b20e4327b7210, hash checked
+browser 153.0.8010.12
+launch 1 region 0 NTSC
+launch 1 Running as NTSC, as chosen here: the file does not say which.
+launch 1 boot cycles=5000000 frames=167 ms=1604.800 cycles_per_second=3115653 mhz=3.116 times_real=1.74
+launch 1 timed 1 cycles=1790000 frames=61 ms=510.400 cycles_per_second=3507053 mhz=3.507 times_real=1.96
+launch 1 timed 2 cycles=1790003 frames=60 ms=503.700 cycles_per_second=3553709 mhz=3.554 times_real=1.99
+launch 1 timed 3 cycles=1790001 frames=60 ms=561.400 cycles_per_second=3188459 mhz=3.188 times_real=1.78
+launch 1 timed 4 cycles=1790000 frames=60 ms=509.000 cycles_per_second=3516699 mhz=3.517 times_real=1.96
+launch 1 timed 5 cycles=1790002 frames=60 ms=514.600 cycles_per_second=3478434 mhz=3.478 times_real=1.94
+launch 1 thread 1 cycles=1790001 thread_ms=265.320 mhz=6.747 times_real=3.77
+launch 1 thread 2 cycles=1790000 thread_ms=256.609 mhz=6.976 times_real=3.90
+launch 1 thread 3 cycles=1790002 thread_ms=256.758 mhz=6.972 times_real=3.90
+launch 1 thread 4 cycles=1790002 thread_ms=255.852 mhz=6.996 times_real=3.91
+launch 1 thread 5 cycles=1790002 thread_ms=259.114 mhz=6.908 times_real=3.86
+launch 1 thread 6 cycles=1790002 thread_ms=258.855 mhz=6.915 times_real=3.86
+launch 1 thread 7 cycles=1790001 thread_ms=261.472 mhz=6.846 times_real=3.82
+launch 1 thread 8 cycles=1790003 thread_ms=257.341 mhz=6.956 times_real=3.89
+launch 1 profile 26.3% Dbhq_Machines_Nes_Dbhq_Machines_Nes_Ppu_RunDot
+launch 1 profile 14.0% Dbhq_Machines_Nes_Dbhq_Machines_Nes_NesBus_Cycle_bool_uint16_byte
+launch 1 profile 9.7% Dbhq_Machines_Nes_Dbhq_Machines_Nes_Apu_Tick
+launch 1 profile 9.6% Dbhq_Cpu6502_Dbhq_Cpu6502_Cpu_Read_uint16
+launch 1 profile 5.4% Dbhq_Cpu6502_Dbhq_Cpu6502_Cpu_Step
+launch 1 profile 4.8% Dbhq_Machines_Nes_Dbhq_Machines_Nes_Ppu_CatchUp
+launch 1 profile 4.7% Dbhq_Machines_Nes_Dbhq_Machines_Nes_Ppu_RenderDot_bool
+launch 1 profile 4.1% (program)
+launch 1 profile 3.6% Dbhq_Machines_Nes_Dbhq_Machines_Nes_Ppu_EvaluationStep
+launch 1 profile 3.4% Dbhq_Machines_Nes_Dbhq_Machines_Nes_NesBus_ReadAccess_uint16
+launch 1 profile 3.0% (idle)
+launch 1 profile 2.0% Dbhq_Machines_Nes_Dbhq_Machines_Nes_Ppu_FetchSprite_int
+launch 1 profile 1.8% Dbhq_Cpu6502_Dbhq_Cpu6502_Cpu_ExecuteOfficial_byte
+launch 1 profile 1.6% Dbhq_Machines_Nes_Dbhq_Machines_Nes_NesBus_WriteAccess_uint16_byte
+launch 1 profile 1.5% Dbhq_Machines_Nes_Dbhq_Machines_Nes_Nes_Run_long
+launch 1 profile 1.3% Dbhq_Machines_Nes_Dbhq_Machines_Nes_Apu_Write_int_byte
+launch 1 profile 0.5% Dbhq_Machines_Nes_Dbhq_Machines_Nes_Apu_Remix
+launch 1 profile 0.4% Dbhq_Cpu6502_Dbhq_Cpu6502_Cpu_Write_uint16_byte
+launch 1 profile 0.3% Dbhq_Machines_Nes_Dbhq_Machines_Nes_SampleBuffer_Step_double
+launch 1 profile 0.3% Dbhq_Machines_Nes_Dbhq_Machines_Nes_Ppu_FetchBackground_int
+launch 1 profile 0.2% Dbhq_Cpu6502_Dbhq_Cpu6502_Cpu_EnterHandler
+launch 1 profile 0.2% (anonymous)
+launch 1 profile 0.2% Dbhq_Machines_Nes_Dbhq_Machines_Nes_SampleBuffer_Emit
+launch 1 profile 0.2% Dbhq_Machines_Nes_Dbhq_Machines_Nes_Ppu_LaySprite_int_int_int
+launch 1 profile 0.1% Dbhq_Cpu6502_Dbhq_Cpu6502_Cpu_NZ_byte
+launch 1 profile 0.1% Dbhq_Machines_Nes_Dbhq_Machines_Nes_Ppu_WriteRegister_int_byte
+launch 1 profile 0.1% Dbhq_Machines_Nes_Dbhq_Machines_Nes_Ppu_DecayedLatch
+launch 1 profile 0.1% Dbhq_Cpu6502_Dbhq_Cpu6502_Cpu_Branch_bool
+launch 1 profile 0.0% Dbhq_Machines_Nes_Dbhq_Machines_Nes_Ppu_Evaluate_int
+launch 1 profile 0.0% Dbhq_Cpu6502_Dbhq_Cpu6502_Cpu_Pull
+launch 1 profile 0.0% corlib_System_Array_Clear_System_Array
+launch 1 profile 0.0% Dbhq_Cpu6502_Dbhq_Cpu6502_Cpu_Rti
+launch 1 profile 0.0% Dbhq_Cpu6502_Dbhq_Cpu6502_Cpu_Indexed_uint16_byte_Dbhq_Cpu6502_Cpu_Access
+launch 1 profile 0.0% Dbhq_Machines_Nes_Dbhq_Machines_Nes_NesBus_Read_uint16
+launch 1 profile 0.0% Dbhq_Cpu6502_Dbhq_Cpu6502_Cpu_Zp
+launch 1 profile 0.0% Dbhq_Machines_Nes_Dbhq_Machines_Nes_NesBus_RunDma_uint16
+launch 1 profile 0.0% Dbhq_Cpu6502_Dbhq_Cpu6502_Cpu_Push_byte
+launch 1 profile 0.0% Dbhq_Cpu6502_Dbhq_Cpu6502_Cpu_FetchWord
+launch 1 profile 0.0% Dbhq_Machines_Nes_Dbhq_Machines_Nes_DmcChannel_ClockOutput_long
+launch 1 profile 0.0% Dbhq_Machines_Nes_Dbhq_Machines_Nes_Ppu_IncrementY_uint16
+--- exit=0 end=2026-10-13T07:12:31Z loadavg=0.79 2.86 3.07 5/431 137948
+=== launch r0-p2-base folder=/tmp/nes77/prof-base region=0 start=2026-10-13T07:12:31Z loadavg=0.79 2.86 3.07 6/431 137953
+rom: other/snow.nes at 95d8f621ae55, 40976 bytes, sha256 7db551e868b2c0182941bd68adc447c2f0668098a4425e8e170b20e4327b7210, hash checked
+browser 153.0.8010.12
+launch 1 region 0 NTSC
+launch 1 Running as NTSC, as chosen here: the file does not say which.
+launch 1 boot cycles=5000000 frames=167 ms=1627.100 cycles_per_second=3072952 mhz=3.073 times_real=1.72
+launch 1 timed 1 cycles=1790000 frames=61 ms=573.200 cycles_per_second=3122819 mhz=3.123 times_real=1.74
+launch 1 timed 2 cycles=1790003 frames=60 ms=518.400 cycles_per_second=3452938 mhz=3.453 times_real=1.93
+launch 1 timed 3 cycles=1790001 frames=60 ms=573.100 cycles_per_second=3123366 mhz=3.123 times_real=1.75
+launch 1 timed 4 cycles=1790000 frames=60 ms=520.100 cycles_per_second=3441646 mhz=3.442 times_real=1.92
+launch 1 timed 5 cycles=1790002 frames=60 ms=517.800 cycles_per_second=3456937 mhz=3.457 times_real=1.93
+launch 1 thread 1 cycles=1790001 thread_ms=265.663 mhz=6.738 times_real=3.76
+launch 1 thread 2 cycles=1790000 thread_ms=259.595 mhz=6.895 times_real=3.85
+launch 1 thread 3 cycles=1790002 thread_ms=257.275 mhz=6.958 times_real=3.89
+launch 1 thread 4 cycles=1790002 thread_ms=260.628 mhz=6.868 times_real=3.84
+launch 1 thread 5 cycles=1790002 thread_ms=260.243 mhz=6.878 times_real=3.84
+launch 1 thread 6 cycles=1790002 thread_ms=257.845 mhz=6.942 times_real=3.88
+launch 1 thread 7 cycles=1790001 thread_ms=262.976 mhz=6.807 times_real=3.80
+launch 1 thread 8 cycles=1790003 thread_ms=259.475 mhz=6.899 times_real=3.85
+launch 1 profile 23.0% Dbhq_Machines_Nes_Dbhq_Machines_Nes_Ppu_RunDot
+launch 1 profile 15.2% Dbhq_Machines_Nes_Dbhq_Machines_Nes_NesBus_Cycle_bool_uint16_byte
+launch 1 profile 8.8% Dbhq_Cpu6502_Dbhq_Cpu6502_Cpu_Read_uint16
+launch 1 profile 7.2% Dbhq_Machines_Nes_Dbhq_Machines_Nes_Apu_Tick
+launch 1 profile 7.0% Dbhq_Machines_Nes_Dbhq_Machines_Nes_Ppu_CatchUp
+launch 1 profile 5.7% Dbhq_Machines_Nes_Dbhq_Machines_Nes_NesBus_ReadAccess_uint16
+launch 1 profile 4.0% (program)
+launch 1 profile 3.8% Dbhq_Cpu6502_Dbhq_Cpu6502_Cpu_Write_uint16_byte
+launch 1 profile 3.6% Dbhq_Machines_Nes_Dbhq_Machines_Nes_Ppu_RenderDot_bool
+launch 1 profile 3.5% Dbhq_Machines_Nes_Dbhq_Machines_Nes_Nes_Run_long
+launch 1 profile 3.4% Dbhq_Machines_Nes_Dbhq_Machines_Nes_Ppu_FetchSprite_int
+launch 1 profile 2.9% Dbhq_Cpu6502_Dbhq_Cpu6502_Cpu_Step
+launch 1 profile 2.5% Dbhq_Machines_Nes_Dbhq_Machines_Nes_Ppu_EvaluationStep
+launch 1 profile 1.7% Dbhq_Machines_Nes_Dbhq_Machines_Nes_Apu_Remix
+launch 1 profile 1.4% Dbhq_Machines_Nes_Dbhq_Machines_Nes_SampleBuffer_Step_double
+launch 1 profile 1.2% Dbhq_Cpu6502_Dbhq_Cpu6502_Cpu_EnterHandler
+launch 1 profile 1.2% Dbhq_Cpu6502_Dbhq_Cpu6502_Cpu_InterruptSequence
+launch 1 profile 0.9% Dbhq_Cpu6502_Dbhq_Cpu6502_Cpu_ExecuteOfficial_byte
+launch 1 profile 0.9% (idle)
+launch 1 profile 0.4% Dbhq_Machines_Nes_Dbhq_Machines_Nes_NesBus_WriteAccess_uint16_byte
+launch 1 profile 0.4% Dbhq_Machines_Nes_Dbhq_Machines_Nes_Ppu_FetchBackground_int
+launch 1 profile 0.2% Dbhq_Machines_Nes_Dbhq_Machines_Nes_Apu_Write_int_byte
+launch 1 profile 0.1% Dbhq_Machines_Nes_Dbhq_Machines_Nes_Ppu_LaySprite_int_int_int
+launch 1 profile 0.1% Dbhq_Machines_Nes_Dbhq_Machines_Nes_SampleBuffer_Emit
+launch 1 profile 0.1% Dbhq_Cpu6502_Dbhq_Cpu6502_Cpu_Zp
+launch 1 profile 0.1% Dbhq_Cpu6502_Dbhq_Cpu6502_Cpu_NZ_byte
+launch 1 profile 0.1% Dbhq_Machines_Nes_Dbhq_Machines_Nes_Ppu_Evaluate_int
+launch 1 profile 0.1% Dbhq_Cpu6502_Dbhq_Cpu6502_Cpu_Rti
+launch 1 profile 0.1% Dbhq_Machines_Nes_Dbhq_Machines_Nes_Ppu_DecayedLatch
+launch 1 profile 0.1% Dbhq_Machines_Nes_Dbhq_Machines_Nes_NesBus_RunDma_uint16
+launch 1 profile 0.1% Dbhq_Cpu6502_Dbhq_Cpu6502_Cpu_Branch_bool
+launch 1 profile 0.1% Dbhq_Machines_Nes_Dbhq_Machines_Nes_NesBus_Read_uint16
+launch 1 profile 0.1% corlib_System_Array_Clear_System_Array
+launch 1 profile 0.0% Dbhq_Machines_Nes_Dbhq_Machines_Nes_Ppu_WriteRegister_int_byte
+launch 1 profile 0.0% (anonymous)
+launch 1 profile 0.0% Dbhq_Cpu6502_Dbhq_Cpu6502_Cpu_Indexed_uint16_byte_Dbhq_Cpu6502_Cpu_Access
+launch 1 profile 0.0% Dbhq_Machines_Nes_Dbhq_Machines_Nes_Ppu_IncrementY_uint16
+launch 1 profile 0.0% Dbhq_Machines_Nes_Dbhq_Machines_Nes_DmcChannel_ClockOutput_long
+launch 1 profile 0.0% Dbhq_Cpu6502_Dbhq_Cpu6502_Cpu_ZpX
+launch 1 profile 0.0% Dbhq_Cpu6502_Dbhq_Cpu6502_Cpu_PointerAt_byte
+--- exit=0 end=2026-10-13T07:12:44Z loadavg=0.62 2.72 3.02 5/438 138084
+=== launch r0-p2-after folder=/tmp/nes77/prof-after region=0 start=2026-10-13T07:12:44Z loadavg=0.62 2.72 3.02 5/438 138089
+rom: other/snow.nes at 95d8f621ae55, 40976 bytes, sha256 7db551e868b2c0182941bd68adc447c2f0668098a4425e8e170b20e4327b7210, hash checked
+browser 153.0.8010.12
+launch 1 region 0 NTSC
+launch 1 Running as NTSC, as chosen here: the file does not say which.
+launch 1 boot cycles=5000000 frames=167 ms=1639.700 cycles_per_second=3049338 mhz=3.049 times_real=1.70
+launch 1 timed 1 cycles=1790000 frames=61 ms=563.500 cycles_per_second=3176575 mhz=3.177 times_real=1.77
+launch 1 timed 2 cycles=1790003 frames=60 ms=489.000 cycles_per_second=3660538 mhz=3.661 times_real=2.05
+launch 1 timed 3 cycles=1790001 frames=60 ms=520.500 cycles_per_second=3439003 mhz=3.439 times_real=1.92
+launch 1 timed 4 cycles=1790000 frames=60 ms=513.600 cycles_per_second=3485202 mhz=3.485 times_real=1.95
+launch 1 timed 5 cycles=1790002 frames=60 ms=571.400 cycles_per_second=3132660 mhz=3.133 times_real=1.75
+launch 1 thread 1 cycles=1790001 thread_ms=264.350 mhz=6.771 times_real=3.78
+launch 1 thread 2 cycles=1790000 thread_ms=256.507 mhz=6.978 times_real=3.90
+launch 1 thread 3 cycles=1790002 thread_ms=254.322 mhz=7.038 times_real=3.93
+launch 1 thread 4 cycles=1790002 thread_ms=253.816 mhz=7.052 times_real=3.94
+launch 1 thread 5 cycles=1790002 thread_ms=257.004 mhz=6.965 times_real=3.89
+launch 1 thread 6 cycles=1790002 thread_ms=262.132 mhz=6.829 times_real=3.82
+launch 1 thread 7 cycles=1790001 thread_ms=258.019 mhz=6.937 times_real=3.88
+launch 1 thread 8 cycles=1790003 thread_ms=256.338 mhz=6.983 times_real=3.90
+launch 1 profile 28.0% Dbhq_Machines_Nes_Dbhq_Machines_Nes_Ppu_RunDot
+launch 1 profile 16.3% Dbhq_Machines_Nes_Dbhq_Machines_Nes_NesBus_Cycle_bool_uint16_byte
+launch 1 profile 8.5% Dbhq_Machines_Nes_Dbhq_Machines_Nes_Apu_Tick
+launch 1 profile 8.4% Dbhq_Machines_Nes_Dbhq_Machines_Nes_Ppu_CatchUp
+launch 1 profile 4.8% Dbhq_Machines_Nes_Dbhq_Machines_Nes_Nes_Run_long
+launch 1 profile 4.2% Dbhq_Cpu6502_Dbhq_Cpu6502_Cpu_Read_uint16
+launch 1 profile 4.2% Dbhq_Cpu6502_Dbhq_Cpu6502_Cpu_Step
+launch 1 profile 3.7% Dbhq_Machines_Nes_Dbhq_Machines_Nes_Ppu_RenderDot_bool
+launch 1 profile 3.3% (program)
+launch 1 profile 3.2% Dbhq_Machines_Nes_Dbhq_Machines_Nes_Ppu_FetchSprite_int
+launch 1 profile 2.5% Dbhq_Machines_Nes_Dbhq_Machines_Nes_Ppu_EvaluationStep
+launch 1 profile 2.3% Dbhq_Machines_Nes_Dbhq_Machines_Nes_NesBus_ReadAccess_uint16
+launch 1 profile 1.9% Dbhq_Cpu6502_Dbhq_Cpu6502_Cpu_ExecuteOfficial_byte
+launch 1 profile 1.6% Dbhq_Machines_Nes_Dbhq_Machines_Nes_NesBus_WriteAccess_uint16_byte
+launch 1 profile 1.5% Dbhq_Machines_Nes_Dbhq_Machines_Nes_Ppu_FetchBackground_int
+launch 1 profile 1.3% Dbhq_Machines_Nes_Dbhq_Machines_Nes_Apu_Write_int_byte
+launch 1 profile 1.2% Dbhq_Machines_Nes_Dbhq_Machines_Nes_Ppu_Evaluate_int
+launch 1 profile 0.5% Dbhq_Cpu6502_Dbhq_Cpu6502_Cpu_Write_uint16_byte
+launch 1 profile 0.4% Dbhq_Machines_Nes_Dbhq_Machines_Nes_Apu_Remix
+launch 1 profile 0.3% (idle)
+launch 1 profile 0.3% (anonymous)
+launch 1 profile 0.3% Dbhq_Machines_Nes_Dbhq_Machines_Nes_SampleBuffer_Step_double
+launch 1 profile 0.2% Dbhq_Cpu6502_Dbhq_Cpu6502_Cpu_EnterHandler
+launch 1 profile 0.2% Dbhq_Machines_Nes_Dbhq_Machines_Nes_Ppu_LaySprite_int_int_int
+launch 1 profile 0.1% Dbhq_Machines_Nes_Dbhq_Machines_Nes_SampleBuffer_Emit
+launch 1 profile 0.1% Dbhq_Cpu6502_Dbhq_Cpu6502_Cpu_Zp
+launch 1 profile 0.1% Dbhq_Cpu6502_Dbhq_Cpu6502_Cpu_NZ_byte
+launch 1 profile 0.1% Dbhq_Machines_Nes_Dbhq_Machines_Nes_Ppu_DecayedLatch
+launch 1 profile 0.1% Dbhq_Cpu6502_Dbhq_Cpu6502_Cpu_Rti
+launch 1 profile 0.1% Dbhq_Cpu6502_Dbhq_Cpu6502_Cpu_Indexed_uint16_byte_Dbhq_Cpu6502_Cpu_Access
+launch 1 profile 0.1% Dbhq_Cpu6502_Dbhq_Cpu6502_Cpu_Branch_bool
+launch 1 profile 0.1% Dbhq_Machines_Nes_Dbhq_Machines_Nes_NesBus_RunDma_uint16
+launch 1 profile 0.0% Dbhq_Cpu6502_Dbhq_Cpu6502_Cpu_InterruptSequence
+launch 1 profile 0.0% Dbhq_Machines_Nes_Dbhq_Machines_Nes_Ppu_WriteRegister_int_byte
+launch 1 profile 0.0% Dbhq_Machines_Nes_Dbhq_Machines_Nes_NesBus_Read_uint16
+launch 1 profile 0.0% Dbhq_Cpu6502_Dbhq_Cpu6502_Cpu_AbsX_Dbhq_Cpu6502_Cpu_Access
+launch 1 profile 0.0% Dbhq_Cpu6502_Dbhq_Cpu6502_Cpu_IzY_Dbhq_Cpu6502_Cpu_Access
+launch 1 profile 0.0% Dbhq_Cpu6502_Dbhq_Cpu6502_Cpu_ZpX
+launch 1 profile 0.0% Dbhq_Cpu6502_Dbhq_Cpu6502_Cpu_Push_byte
+launch 1 profile 0.0% Dbhq_Machines_Nes_Dbhq_Machines_Nes_Ppu_IncrementY_uint16
+--- exit=0 end=2026-10-13T07:12:57Z loadavg=0.48 2.59 2.97 5/431 138247
+=== launch r0-p3-base folder=/tmp/nes77/prof-base region=0 start=2026-10-13T07:12:57Z loadavg=0.48 2.59 2.97 5/435 138257
+rom: other/snow.nes at 95d8f621ae55, 40976 bytes, sha256 7db551e868b2c0182941bd68adc447c2f0668098a4425e8e170b20e4327b7210, hash checked
+browser 153.0.8010.12
+launch 1 region 0 NTSC
+launch 1 Running as NTSC, as chosen here: the file does not say which.
+launch 1 boot cycles=5000000 frames=167 ms=1808.900 cycles_per_second=2764111 mhz=2.764 times_real=1.54
+launch 1 timed 1 cycles=1790000 frames=61 ms=675.300 cycles_per_second=2650674 mhz=2.651 times_real=1.48
+launch 1 timed 2 cycles=1790003 frames=60 ms=603.300 cycles_per_second=2967020 mhz=2.967 times_real=1.66
+launch 1 timed 3 cycles=1790001 frames=60 ms=513.900 cycles_per_second=3483170 mhz=3.483 times_real=1.95
+launch 1 timed 4 cycles=1790000 frames=60 ms=599.500 cycles_per_second=2985822 mhz=2.986 times_real=1.67
+launch 1 timed 5 cycles=1790002 frames=60 ms=532.700 cycles_per_second=3360244 mhz=3.360 times_real=1.88
+launch 1 thread 1 cycles=1790001 thread_ms=261.120 mhz=6.855 times_real=3.83
+launch 1 thread 2 cycles=1790000 thread_ms=252.618 mhz=7.086 times_real=3.96
+launch 1 thread 3 cycles=1790002 thread_ms=252.069 mhz=7.101 times_real=3.97
+launch 1 thread 4 cycles=1790002 thread_ms=252.820 mhz=7.080 times_real=3.96
+launch 1 thread 5 cycles=1790002 thread_ms=255.063 mhz=7.018 times_real=3.92
+launch 1 thread 6 cycles=1790002 thread_ms=252.334 mhz=7.094 times_real=3.96
+launch 1 thread 7 cycles=1790001 thread_ms=252.846 mhz=7.079 times_real=3.96
+launch 1 thread 8 cycles=1790003 thread_ms=252.780 mhz=7.081 times_real=3.96
+launch 1 profile 29.8% Dbhq_Machines_Nes_Dbhq_Machines_Nes_Ppu_RunDot
+launch 1 profile 20.4% Dbhq_Machines_Nes_Dbhq_Machines_Nes_NesBus_Cycle_bool_uint16_byte
+launch 1 profile 16.6% Dbhq_Machines_Nes_Dbhq_Machines_Nes_Apu_Tick
+launch 1 profile 4.6% Dbhq_Machines_Nes_Dbhq_Machines_Nes_Ppu_EvaluationStep
+launch 1 profile 4.3% Dbhq_Machines_Nes_Dbhq_Machines_Nes_NesBus_ReadAccess_uint16
+launch 1 profile 3.8% Dbhq_Cpu6502_Dbhq_Cpu6502_Cpu_Read_uint16
+launch 1 profile 3.8% Dbhq_Cpu6502_Dbhq_Cpu6502_Cpu_Step
+launch 1 profile 3.7% (program)
+launch 1 profile 3.5% Dbhq_Machines_Nes_Dbhq_Machines_Nes_Nes_Run_long
+launch 1 profile 2.5% Dbhq_Machines_Nes_Dbhq_Machines_Nes_Ppu_CatchUp
+launch 1 profile 1.3% Dbhq_Machines_Nes_Dbhq_Machines_Nes_Ppu_RenderDot_bool
+launch 1 profile 1.0% Dbhq_Machines_Nes_Dbhq_Machines_Nes_Ppu_FetchSprite_int
+launch 1 profile 0.7% (idle)
+launch 1 profile 0.6% Dbhq_Cpu6502_Dbhq_Cpu6502_Cpu_ExecuteOfficial_byte
+launch 1 profile 0.5% Dbhq_Machines_Nes_Dbhq_Machines_Nes_Apu_Remix
+launch 1 profile 0.4% Dbhq_Cpu6502_Dbhq_Cpu6502_Cpu_Write_uint16_byte
+launch 1 profile 0.4% Dbhq_Machines_Nes_Dbhq_Machines_Nes_Ppu_FetchBackground_int
+launch 1 profile 0.3% Dbhq_Machines_Nes_Dbhq_Machines_Nes_NesBus_WriteAccess_uint16_byte
+launch 1 profile 0.3% Dbhq_Machines_Nes_Dbhq_Machines_Nes_Ppu_LaySprite_int_int_int
+launch 1 profile 0.2% Dbhq_Machines_Nes_Dbhq_Machines_Nes_SampleBuffer_Step_double
+launch 1 profile 0.2% Dbhq_Cpu6502_Dbhq_Cpu6502_Cpu_EnterHandler
+launch 1 profile 0.2% Dbhq_Machines_Nes_Dbhq_Machines_Nes_Apu_Write_int_byte
+launch 1 profile 0.1% Dbhq_Machines_Nes_Dbhq_Machines_Nes_SampleBuffer_Emit
+launch 1 profile 0.1% Dbhq_Cpu6502_Dbhq_Cpu6502_Cpu_Branch_bool
+launch 1 profile 0.1% Dbhq_Machines_Nes_Dbhq_Machines_Nes_Ppu_WriteRegister_int_byte
+launch 1 profile 0.1% Dbhq_Cpu6502_Dbhq_Cpu6502_Cpu_Rts
+launch 1 profile 0.1% Dbhq_Cpu6502_Dbhq_Cpu6502_Cpu_NZ_byte
+launch 1 profile 0.1% Dbhq_Machines_Nes_Dbhq_Machines_Nes_Ppu_Evaluate_int
+launch 1 profile 0.1% Dbhq_Machines_Nes_Dbhq_Machines_Nes_NesBus_RunDma_uint16
+launch 1 profile 0.1% Dbhq_Machines_Nes_Dbhq_Machines_Nes_Ppu_DecayedLatch
+launch 1 profile 0.1% Dbhq_Cpu6502_Dbhq_Cpu6502_Cpu_InterruptSequence
+launch 1 profile 0.1% Dbhq_Cpu6502_Dbhq_Cpu6502_Cpu_Rti
+launch 1 profile 0.0% Dbhq_Cpu6502_Dbhq_Cpu6502_Cpu_Zp
+launch 1 profile 0.0% Dbhq_Machines_Nes_Dbhq_Machines_Nes_NesBus_Read_uint16
+launch 1 profile 0.0% (anonymous)
+launch 1 profile 0.0% Dbhq_Cpu6502_Dbhq_Cpu6502_Cpu_Indexed_uint16_byte_Dbhq_Cpu6502_Cpu_Access
+launch 1 profile 0.0% corlib_System_Array_Clear_System_Array
+launch 1 profile 0.0% Dbhq_Cpu6502_Dbhq_Cpu6502_Cpu_FetchWord
+launch 1 profile 0.0% Dbhq_Cpu6502_Dbhq_Cpu6502_Cpu_AbsX_Dbhq_Cpu6502_Cpu_Access
+launch 1 profile 0.0% evaluate
+--- exit=0 end=2026-10-13T07:13:11Z loadavg=0.40 2.50 2.94 5/434 138386
+=== launch r0-p3-after folder=/tmp/nes77/prof-after region=0 start=2026-10-13T07:13:11Z loadavg=0.40 2.50 2.94 6/434 138391
+rom: other/snow.nes at 95d8f621ae55, 40976 bytes, sha256 7db551e868b2c0182941bd68adc447c2f0668098a4425e8e170b20e4327b7210, hash checked
+browser 153.0.8010.12
+launch 1 region 0 NTSC
+launch 1 Running as NTSC, as chosen here: the file does not say which.
+launch 1 boot cycles=5000000 frames=167 ms=1670.500 cycles_per_second=2993116 mhz=2.993 times_real=1.67
+launch 1 timed 1 cycles=1790000 frames=61 ms=514.400 cycles_per_second=3479782 mhz=3.480 times_real=1.94
+launch 1 timed 2 cycles=1790003 frames=60 ms=513.900 cycles_per_second=3483174 mhz=3.483 times_real=1.95
+launch 1 timed 3 cycles=1790001 frames=60 ms=571.000 cycles_per_second=3134853 mhz=3.135 times_real=1.75
+launch 1 timed 4 cycles=1790000 frames=60 ms=519.500 cycles_per_second=3445621 mhz=3.446 times_real=1.93
+launch 1 timed 5 cycles=1790002 frames=60 ms=511.600 cycles_per_second=3498831 mhz=3.499 times_real=1.95
+launch 1 thread 1 cycles=1790001 thread_ms=262.811 mhz=6.811 times_real=3.81
+launch 1 thread 2 cycles=1790000 thread_ms=256.166 mhz=6.988 times_real=3.90
+launch 1 thread 3 cycles=1790002 thread_ms=258.555 mhz=6.923 times_real=3.87
+launch 1 thread 4 cycles=1790002 thread_ms=255.348 mhz=7.010 times_real=3.92
+launch 1 thread 5 cycles=1790002 thread_ms=257.730 mhz=6.945 times_real=3.88
+launch 1 thread 6 cycles=1790002 thread_ms=255.880 mhz=6.995 times_real=3.91
+launch 1 thread 7 cycles=1790001 thread_ms=256.065 mhz=6.990 times_real=3.91
+launch 1 thread 8 cycles=1790003 thread_ms=256.162 mhz=6.988 times_real=3.90
+launch 1 profile 19.3% Dbhq_Machines_Nes_Dbhq_Machines_Nes_Ppu_RunDot
+launch 1 profile 15.1% Dbhq_Machines_Nes_Dbhq_Machines_Nes_NesBus_Cycle_bool_uint16_byte
+launch 1 profile 13.1% Dbhq_Machines_Nes_Dbhq_Machines_Nes_Apu_Tick
+launch 1 profile 11.3% Dbhq_Cpu6502_Dbhq_Cpu6502_Cpu_Step
+launch 1 profile 5.5% Dbhq_Cpu6502_Dbhq_Cpu6502_Cpu_Read_uint16
+launch 1 profile 5.0% Dbhq_Machines_Nes_Dbhq_Machines_Nes_Ppu_CatchUp
+launch 1 profile 4.4% (program)
+launch 1 profile 3.3% Dbhq_Machines_Nes_Dbhq_Machines_Nes_NesBus_ReadAccess_uint16
+launch 1 profile 2.7% Dbhq_Machines_Nes_Dbhq_Machines_Nes_Ppu_FetchBackground_int
+launch 1 profile 2.6% Dbhq_Machines_Nes_Dbhq_Machines_Nes_Ppu_EvaluationStep
+launch 1 profile 2.6% Dbhq_Machines_Nes_Dbhq_Machines_Nes_Nes_Run_long
+launch 1 profile 2.5% Dbhq_Machines_Nes_Dbhq_Machines_Nes_Ppu_RenderDot_bool
+launch 1 profile 2.3% corlib_System_Array_Clear_System_Array
+launch 1 profile 2.2% Dbhq_Machines_Nes_Dbhq_Machines_Nes_Ppu_FetchSprite_int
+launch 1 profile 1.6% Dbhq_Machines_Nes_Dbhq_Machines_Nes_NesBus_WriteAccess_uint16_byte
+launch 1 profile 1.4% Dbhq_Machines_Nes_Dbhq_Machines_Nes_SampleBuffer_Step_double
+launch 1 profile 1.4% (anonymous)
+launch 1 profile 0.7% Dbhq_Cpu6502_Dbhq_Cpu6502_Cpu_ExecuteOfficial_byte
+launch 1 profile 0.5% Dbhq_Machines_Nes_Dbhq_Machines_Nes_Apu_Remix
+launch 1 profile 0.4% Dbhq_Cpu6502_Dbhq_Cpu6502_Cpu_Write_uint16_byte
+launch 1 profile 0.4% (idle)
+launch 1 profile 0.2% Dbhq_Machines_Nes_Dbhq_Machines_Nes_Ppu_LaySprite_int_int_int
+launch 1 profile 0.2% Dbhq_Cpu6502_Dbhq_Cpu6502_Cpu_NZ_byte
+launch 1 profile 0.2% Dbhq_Cpu6502_Dbhq_Cpu6502_Cpu_EnterHandler
+launch 1 profile 0.1% Dbhq_Machines_Nes_Dbhq_Machines_Nes_Apu_Write_int_byte
+launch 1 profile 0.1% Dbhq_Machines_Nes_Dbhq_Machines_Nes_SampleBuffer_Emit
+launch 1 profile 0.1% Dbhq_Machines_Nes_Dbhq_Machines_Nes_Ppu_WriteRegister_int_byte
+launch 1 profile 0.1% Dbhq_Machines_Nes_Dbhq_Machines_Nes_Ppu_DecayedLatch
+launch 1 profile 0.1% Dbhq_Machines_Nes_Dbhq_Machines_Nes_NesBus_Read_uint16
+launch 1 profile 0.1% Dbhq_Cpu6502_Dbhq_Cpu6502_Cpu_Branch_bool
+launch 1 profile 0.1% Dbhq_Cpu6502_Dbhq_Cpu6502_Cpu_Indexed_uint16_byte_Dbhq_Cpu6502_Cpu_Access
+launch 1 profile 0.1% Dbhq_Cpu6502_Dbhq_Cpu6502_Cpu_Zp
+launch 1 profile 0.1% Dbhq_Cpu6502_Dbhq_Cpu6502_Cpu_InterruptSequence
+launch 1 profile 0.0% Dbhq_Machines_Nes_Dbhq_Machines_Nes_NesBus_RunDma_uint16
+launch 1 profile 0.0% Dbhq_Machines_Nes_Dbhq_Machines_Nes_Ppu_Evaluate_int
+launch 1 profile 0.0% Dbhq_Cpu6502_Dbhq_Cpu6502_Cpu_AbsX_Dbhq_Cpu6502_Cpu_Access
+launch 1 profile 0.0% Dbhq_Cpu6502_Dbhq_Cpu6502_Cpu_Rti
+launch 1 profile 0.0% Dbhq_Machines_Nes_Dbhq_Machines_Nes_DmcChannel_ClockOutput_long
+launch 1 profile 0.0% Dbhq_Machines_Nes_Dbhq_Machines_Nes_Ppu_IncrementY_uint16
+launch 1 profile 0.0% Dbhq_Cpu6502_Dbhq_Cpu6502_Cpu_DecimalExtraCycle_uint16
+--- exit=0 end=2026-10-13T07:13:23Z loadavg=0.31 2.38 2.89 6/433 138524
+=== launch r0-p4-base folder=/tmp/nes77/prof-base region=0 start=2026-10-13T07:13:23Z loadavg=0.31 2.38 2.89 6/433 138529
+rom: other/snow.nes at 95d8f621ae55, 40976 bytes, sha256 7db551e868b2c0182941bd68adc447c2f0668098a4425e8e170b20e4327b7210, hash checked
+browser 153.0.8010.12
+launch 1 region 0 NTSC
+launch 1 Running as NTSC, as chosen here: the file does not say which.
+launch 1 boot cycles=5000000 frames=167 ms=1603.000 cycles_per_second=3119152 mhz=3.119 times_real=1.74
+launch 1 timed 1 cycles=1790000 frames=61 ms=510.900 cycles_per_second=3503621 mhz=3.504 times_real=1.96
+launch 1 timed 2 cycles=1790003 frames=60 ms=508.000 cycles_per_second=3523628 mhz=3.524 times_real=1.97
+launch 1 timed 3 cycles=1790001 frames=60 ms=566.000 cycles_per_second=3162546 mhz=3.163 times_real=1.77
+launch 1 timed 4 cycles=1790000 frames=60 ms=515.600 cycles_per_second=3471683 mhz=3.472 times_real=1.94
+launch 1 timed 5 cycles=1790002 frames=60 ms=510.700 cycles_per_second=3504997 mhz=3.505 times_real=1.96
+launch 1 thread 1 cycles=1790001 thread_ms=261.259 mhz=6.851 times_real=3.83
+launch 1 thread 2 cycles=1790000 thread_ms=255.625 mhz=7.002 times_real=3.91
+launch 1 thread 3 cycles=1790002 thread_ms=253.334 mhz=7.066 times_real=3.95
+launch 1 thread 4 cycles=1790002 thread_ms=251.905 mhz=7.106 times_real=3.97
+launch 1 thread 5 cycles=1790002 thread_ms=254.620 mhz=7.030 times_real=3.93
+launch 1 thread 6 cycles=1790002 thread_ms=253.799 mhz=7.053 times_real=3.94
+launch 1 thread 7 cycles=1790001 thread_ms=254.044 mhz=7.046 times_real=3.94
+launch 1 thread 8 cycles=1790003 thread_ms=252.558 mhz=7.087 times_real=3.96
+launch 1 profile 23.7% Dbhq_Machines_Nes_Dbhq_Machines_Nes_Ppu_RunDot
+launch 1 profile 14.9% Dbhq_Machines_Nes_Dbhq_Machines_Nes_NesBus_Cycle_bool_uint16_byte
+launch 1 profile 14.3% Dbhq_Machines_Nes_Dbhq_Machines_Nes_Apu_Tick
+launch 1 profile 7.8% Dbhq_Cpu6502_Dbhq_Cpu6502_Cpu_Step
+launch 1 profile 7.2% Dbhq_Machines_Nes_Dbhq_Machines_Nes_Ppu_CatchUp
+launch 1 profile 5.4% Dbhq_Cpu6502_Dbhq_Cpu6502_Cpu_Read_uint16
+launch 1 profile 4.8% Dbhq_Machines_Nes_Dbhq_Machines_Nes_NesBus_ReadAccess_uint16
+launch 1 profile 3.6% Dbhq_Machines_Nes_Dbhq_Machines_Nes_Nes_Run_long
+launch 1 profile 3.5% Dbhq_Machines_Nes_Dbhq_Machines_Nes_Ppu_FetchSprite_int
+launch 1 profile 3.2% (idle)
+launch 1 profile 2.6% (program)
+launch 1 profile 1.5% Dbhq_Machines_Nes_Dbhq_Machines_Nes_NesBus_WriteAccess_uint16_byte
+launch 1 profile 1.5% Dbhq_Machines_Nes_Dbhq_Machines_Nes_SampleBuffer_Step_double
+launch 1 profile 1.3% Dbhq_Machines_Nes_Dbhq_Machines_Nes_Ppu_EvaluationStep
+launch 1 profile 1.2% Dbhq_Machines_Nes_Dbhq_Machines_Nes_Ppu_RenderDot_bool
+launch 1 profile 0.7% Dbhq_Cpu6502_Dbhq_Cpu6502_Cpu_ExecuteOfficial_byte
+launch 1 profile 0.5% Dbhq_Machines_Nes_Dbhq_Machines_Nes_Apu_Remix
+launch 1 profile 0.4% Dbhq_Cpu6502_Dbhq_Cpu6502_Cpu_Write_uint16_byte
+launch 1 profile 0.3% Dbhq_Machines_Nes_Dbhq_Machines_Nes_Ppu_FetchBackground_int
+launch 1 profile 0.2% Dbhq_Machines_Nes_Dbhq_Machines_Nes_Ppu_LaySprite_int_int_int
+launch 1 profile 0.2% Dbhq_Machines_Nes_Dbhq_Machines_Nes_Apu_Write_int_byte
+launch 1 profile 0.2% Dbhq_Cpu6502_Dbhq_Cpu6502_Cpu_EnterHandler
+launch 1 profile 0.1% Dbhq_Machines_Nes_Dbhq_Machines_Nes_SampleBuffer_Emit
+launch 1 profile 0.1% Dbhq_Cpu6502_Dbhq_Cpu6502_Cpu_NZ_byte
+launch 1 profile 0.1% Dbhq_Cpu6502_Dbhq_Cpu6502_Cpu_Zp
+launch 1 profile 0.1% Dbhq_Machines_Nes_Dbhq_Machines_Nes_NesBus_Read_uint16
+launch 1 profile 0.1% Dbhq_Machines_Nes_Dbhq_Machines_Nes_Ppu_WriteRegister_int_byte
+launch 1 profile 0.1% Dbhq_Machines_Nes_Dbhq_Machines_Nes_Ppu_Evaluate_int
+launch 1 profile 0.1% (anonymous)
+launch 1 profile 0.1% Dbhq_Machines_Nes_Dbhq_Machines_Nes_Ppu_DecayedLatch
+launch 1 profile 0.1% Dbhq_Cpu6502_Dbhq_Cpu6502_Cpu_Indexed_uint16_byte_Dbhq_Cpu6502_Cpu_Access
+launch 1 profile 0.0% Dbhq_Machines_Nes_Dbhq_Machines_Nes_NesBus_RunDma_uint16
+launch 1 profile 0.0% Dbhq_Cpu6502_Dbhq_Cpu6502_Cpu_Branch_bool
+launch 1 profile 0.0% Dbhq_Cpu6502_Dbhq_Cpu6502_Cpu_InterruptSequence
+launch 1 profile 0.0% corlib_System_Array_Clear_System_Array
+launch 1 profile 0.0% Dbhq_Cpu6502_Dbhq_Cpu6502_Cpu_Push_byte
+launch 1 profile 0.0% Dbhq_Cpu6502_Dbhq_Cpu6502_Cpu_Rti
+launch 1 profile 0.0% Dbhq_Machines_Nes_Dbhq_Machines_Nes_Ppu_IncrementY_uint16
+launch 1 profile 0.0% Dbhq_Cpu6502_Dbhq_Cpu6502_Cpu_ZpX
+launch 1 profile 0.0% Dbhq_Cpu6502_Dbhq_Cpu6502_Cpu_FetchWord
+--- exit=0 end=2026-10-13T07:13:36Z loadavg=0.24 2.26 2.84 5/433 138670
+=== launch r0-p4-after folder=/tmp/nes77/prof-after region=0 start=2026-10-13T07:13:36Z loadavg=0.24 2.26 2.84 5/433 138675
+rom: other/snow.nes at 95d8f621ae55, 40976 bytes, sha256 7db551e868b2c0182941bd68adc447c2f0668098a4425e8e170b20e4327b7210, hash checked
+browser 153.0.8010.12
+launch 1 region 0 NTSC
+launch 1 Running as NTSC, as chosen here: the file does not say which.
+launch 1 boot cycles=5000000 frames=167 ms=1572.700 cycles_per_second=3179246 mhz=3.179 times_real=1.78
+launch 1 timed 1 cycles=1790000 frames=61 ms=510.200 cycles_per_second=3508428 mhz=3.508 times_real=1.96
+launch 1 timed 2 cycles=1790003 frames=60 ms=503.400 cycles_per_second=3555826 mhz=3.556 times_real=1.99
+launch 1 timed 3 cycles=1790001 frames=60 ms=503.200 cycles_per_second=3557236 mhz=3.557 times_real=1.99
+launch 1 timed 4 cycles=1790000 frames=60 ms=497.400 cycles_per_second=3598713 mhz=3.599 times_real=2.01
+launch 1 timed 5 cycles=1790002 frames=60 ms=511.300 cycles_per_second=3500884 mhz=3.501 times_real=1.96
+launch 1 thread 1 cycles=1790001 thread_ms=268.485 mhz=6.667 times_real=3.73
+launch 1 thread 2 cycles=1790000 thread_ms=256.070 mhz=6.990 times_real=3.91
+launch 1 thread 3 cycles=1790002 thread_ms=255.126 mhz=7.016 times_real=3.92
+launch 1 thread 4 cycles=1790002 thread_ms=254.975 mhz=7.020 times_real=3.92
+launch 1 thread 5 cycles=1790002 thread_ms=257.179 mhz=6.960 times_real=3.89
+launch 1 thread 6 cycles=1790002 thread_ms=255.639 mhz=7.002 times_real=3.91
+launch 1 thread 7 cycles=1790001 thread_ms=256.008 mhz=6.992 times_real=3.91
+launch 1 thread 8 cycles=1790003 thread_ms=255.571 mhz=7.004 times_real=3.91
+launch 1 profile 22.9% Dbhq_Machines_Nes_Dbhq_Machines_Nes_Ppu_RunDot
+launch 1 profile 14.8% Dbhq_Machines_Nes_Dbhq_Machines_Nes_NesBus_Cycle_bool_uint16_byte
+launch 1 profile 13.3% Dbhq_Cpu6502_Dbhq_Cpu6502_Cpu_Read_uint16
+launch 1 profile 11.6% Dbhq_Machines_Nes_Dbhq_Machines_Nes_Apu_Tick
+launch 1 profile 5.7% Dbhq_Machines_Nes_Dbhq_Machines_Nes_NesBus_ReadAccess_uint16
+launch 1 profile 4.6% Dbhq_Machines_Nes_Dbhq_Machines_Nes_Ppu_CatchUp
+launch 1 profile 3.8% Dbhq_Machines_Nes_Dbhq_Machines_Nes_Ppu_EvaluationStep
+launch 1 profile 3.2% (program)
+launch 1 profile 3.1% Dbhq_Cpu6502_Dbhq_Cpu6502_Cpu_Step
+launch 1 profile 2.6% Dbhq_Machines_Nes_Dbhq_Machines_Nes_Nes_Run_long
+launch 1 profile 2.5% Dbhq_Machines_Nes_Dbhq_Machines_Nes_Ppu_RenderDot_bool
+launch 1 profile 2.2% Dbhq_Machines_Nes_Dbhq_Machines_Nes_Ppu_FetchSprite_int
+launch 1 profile 1.8% Dbhq_Cpu6502_Dbhq_Cpu6502_Cpu_ExecuteOfficial_byte
+launch 1 profile 1.5% Dbhq_Cpu6502_Dbhq_Cpu6502_Cpu_Write_uint16_byte
+launch 1 profile 1.4% (idle)
+launch 1 profile 1.2% corlib_System_Array_Clear_System_Array
+launch 1 profile 0.5% Dbhq_Machines_Nes_Dbhq_Machines_Nes_Apu_Remix
+launch 1 profile 0.4% Dbhq_Machines_Nes_Dbhq_Machines_Nes_NesBus_WriteAccess_uint16_byte
+launch 1 profile 0.3% Dbhq_Machines_Nes_Dbhq_Machines_Nes_Ppu_FetchBackground_int
+launch 1 profile 0.3% Dbhq_Cpu6502_Dbhq_Cpu6502_Cpu_EnterHandler
+launch 1 profile 0.3% Dbhq_Machines_Nes_Dbhq_Machines_Nes_SampleBuffer_Step_double
+launch 1 profile 0.2% (anonymous)
+launch 1 profile 0.2% Dbhq_Machines_Nes_Dbhq_Machines_Nes_Ppu_LaySprite_int_int_int
+launch 1 profile 0.2% Dbhq_Machines_Nes_Dbhq_Machines_Nes_SampleBuffer_Emit
+launch 1 profile 0.2% Dbhq_Cpu6502_Dbhq_Cpu6502_Cpu_NZ_byte
+launch 1 profile 0.1% Dbhq_Machines_Nes_Dbhq_Machines_Nes_Apu_Write_int_byte
+launch 1 profile 0.1% Dbhq_Cpu6502_Dbhq_Cpu6502_Cpu_Indexed_uint16_byte_Dbhq_Cpu6502_Cpu_Access
+launch 1 profile 0.1% Dbhq_Machines_Nes_Dbhq_Machines_Nes_Ppu_WriteRegister_int_byte
+launch 1 profile 0.1% Dbhq_Cpu6502_Dbhq_Cpu6502_Cpu_Branch_bool
+launch 1 profile 0.1% Dbhq_Cpu6502_Dbhq_Cpu6502_Cpu_InterruptSequence
+launch 1 profile 0.1% Dbhq_Machines_Nes_Dbhq_Machines_Nes_Ppu_DecayedLatch
+launch 1 profile 0.1% Dbhq_Machines_Nes_Dbhq_Machines_Nes_NesBus_RunDma_uint16
+launch 1 profile 0.1% Dbhq_Machines_Nes_Dbhq_Machines_Nes_Ppu_Evaluate_int
+launch 1 profile 0.1% Dbhq_Cpu6502_Dbhq_Cpu6502_Cpu_Rti
+launch 1 profile 0.1% Dbhq_Machines_Nes_Dbhq_Machines_Nes_NesBus_Read_uint16
+launch 1 profile 0.1% Dbhq_Cpu6502_Dbhq_Cpu6502_Cpu_Zp
+launch 1 profile 0.0% Dbhq_Cpu6502_Dbhq_Cpu6502_Cpu_Ora_byte
+launch 1 profile 0.0% Dbhq_Cpu6502_Dbhq_Cpu6502_Cpu_FetchWord
+launch 1 profile 0.0% Dbhq_Machines_Nes_Dbhq_Machines_Nes_Ppu_IncrementY_uint16
+launch 1 profile 0.0% Dbhq_Cpu6502_Dbhq_Cpu6502_Cpu_Adc_byte
+--- exit=0 end=2026-10-13T07:13:49Z loadavg=0.21 2.19 2.81 8/435 138810
+=== launch r0-p5-base folder=/tmp/nes77/prof-base region=0 start=2026-10-13T07:13:49Z loadavg=0.21 2.19 2.81 8/435 138815
+rom: other/snow.nes at 95d8f621ae55, 40976 bytes, sha256 7db551e868b2c0182941bd68adc447c2f0668098a4425e8e170b20e4327b7210, hash checked
+browser 153.0.8010.12
+launch 1 region 0 NTSC
+launch 1 Running as NTSC, as chosen here: the file does not say which.
+launch 1 boot cycles=5000000 frames=167 ms=1888.800 cycles_per_second=2647183 mhz=2.647 times_real=1.48
+launch 1 timed 1 cycles=1790000 frames=61 ms=516.200 cycles_per_second=3467648 mhz=3.468 times_real=1.94
+launch 1 timed 2 cycles=1790003 frames=60 ms=571.700 cycles_per_second=3131018 mhz=3.131 times_real=1.75
+launch 1 timed 3 cycles=1790001 frames=60 ms=512.900 cycles_per_second=3489961 mhz=3.490 times_real=1.95
+launch 1 timed 4 cycles=1790000 frames=60 ms=508.600 cycles_per_second=3519465 mhz=3.519 times_real=1.97
+launch 1 timed 5 cycles=1790002 frames=60 ms=507.500 cycles_per_second=3527098 mhz=3.527 times_real=1.97
+launch 1 thread 1 cycles=1790001 thread_ms=265.632 mhz=6.739 times_real=3.77
+launch 1 thread 2 cycles=1790000 thread_ms=255.658 mhz=7.002 times_real=3.91
+launch 1 thread 3 cycles=1790002 thread_ms=253.432 mhz=7.063 times_real=3.95
+launch 1 thread 4 cycles=1790002 thread_ms=253.661 mhz=7.057 times_real=3.94
+launch 1 thread 5 cycles=1790002 thread_ms=255.777 mhz=6.998 times_real=3.91
+launch 1 thread 6 cycles=1790002 thread_ms=255.577 mhz=7.004 times_real=3.91
+launch 1 thread 7 cycles=1790001 thread_ms=256.029 mhz=6.991 times_real=3.91
+launch 1 thread 8 cycles=1790003 thread_ms=254.671 mhz=7.029 times_real=3.93
+launch 1 profile 24.0% Dbhq_Machines_Nes_Dbhq_Machines_Nes_Ppu_RunDot
+launch 1 profile 18.3% Dbhq_Machines_Nes_Dbhq_Machines_Nes_NesBus_Cycle_bool_uint16_byte
+launch 1 profile 13.1% Dbhq_Machines_Nes_Dbhq_Machines_Nes_Apu_Tick
+launch 1 profile 5.7% Dbhq_Machines_Nes_Dbhq_Machines_Nes_Ppu_CatchUp
+launch 1 profile 5.2% Dbhq_Cpu6502_Dbhq_Cpu6502_Cpu_Read_uint16
+launch 1 profile 4.1% Dbhq_Cpu6502_Dbhq_Cpu6502_Cpu_Step
+launch 1 profile 4.0% (program)
+launch 1 profile 3.6% Dbhq_Machines_Nes_Dbhq_Machines_Nes_Ppu_RenderDot_bool
+launch 1 profile 3.5% Dbhq_Machines_Nes_Dbhq_Machines_Nes_Nes_Run_long
+launch 1 profile 3.1% Dbhq_Machines_Nes_Dbhq_Machines_Nes_Ppu_FetchSprite_int
+launch 1 profile 2.5% Dbhq_Machines_Nes_Dbhq_Machines_Nes_Ppu_FetchBackground_int
+launch 1 profile 2.3% Dbhq_Machines_Nes_Dbhq_Machines_Nes_NesBus_ReadAccess_uint16
+launch 1 profile 1.9% Dbhq_Cpu6502_Dbhq_Cpu6502_Cpu_ExecuteOfficial_byte
+launch 1 profile 1.7% Dbhq_Machines_Nes_Dbhq_Machines_Nes_Apu_Remix
+launch 1 profile 1.6% Dbhq_Machines_Nes_Dbhq_Machines_Nes_Ppu_EvaluationStep
+launch 1 profile 1.4% Dbhq_Machines_Nes_Dbhq_Machines_Nes_NesBus_WriteAccess_uint16_byte
+launch 1 profile 1.3% Dbhq_Machines_Nes_Dbhq_Machines_Nes_Apu_Write_int_byte
+launch 1 profile 0.5% (idle)
+launch 1 profile 0.4% Dbhq_Cpu6502_Dbhq_Cpu6502_Cpu_Write_uint16_byte
+launch 1 profile 0.3% Dbhq_Cpu6502_Dbhq_Cpu6502_Cpu_EnterHandler
+launch 1 profile 0.2% (anonymous)
+launch 1 profile 0.2% Dbhq_Machines_Nes_Dbhq_Machines_Nes_SampleBuffer_Step_double
+launch 1 profile 0.1% Dbhq_Machines_Nes_Dbhq_Machines_Nes_Ppu_LaySprite_int_int_int
+launch 1 profile 0.1% Dbhq_Cpu6502_Dbhq_Cpu6502_Cpu_NZ_byte
+launch 1 profile 0.1% Dbhq_Machines_Nes_Dbhq_Machines_Nes_SampleBuffer_Emit
+launch 1 profile 0.1% Dbhq_Cpu6502_Dbhq_Cpu6502_Cpu_Branch_bool
+launch 1 profile 0.1% Dbhq_Cpu6502_Dbhq_Cpu6502_Cpu_Indexed_uint16_byte_Dbhq_Cpu6502_Cpu_Access
+launch 1 profile 0.1% Dbhq_Machines_Nes_Dbhq_Machines_Nes_Ppu_WriteRegister_int_byte
+launch 1 profile 0.1% Dbhq_Machines_Nes_Dbhq_Machines_Nes_NesBus_Read_uint16
+launch 1 profile 0.1% Dbhq_Cpu6502_Dbhq_Cpu6502_Cpu_Rti
+launch 1 profile 0.1% Dbhq_Cpu6502_Dbhq_Cpu6502_Cpu_Zp
+launch 1 profile 0.1% Dbhq_Machines_Nes_Dbhq_Machines_Nes_Ppu_DecayedLatch
+launch 1 profile 0.0% Dbhq_Machines_Nes_Dbhq_Machines_Nes_Ppu_Evaluate_int
+launch 1 profile 0.0% Dbhq_Cpu6502_Dbhq_Cpu6502_Cpu_InterruptSequence
+launch 1 profile 0.0% Dbhq_Cpu6502_Dbhq_Cpu6502_Cpu_Adc_byte
+launch 1 profile 0.0% Dbhq_Cpu6502_Dbhq_Cpu6502_Cpu_AbsX_Dbhq_Cpu6502_Cpu_Access
+launch 1 profile 0.0% Dbhq_Machines_Nes_Dbhq_Machines_Nes_NesBus_RunDma_uint16
+launch 1 profile 0.0% corlib_System_Array_Clear_System_Array
+launch 1 profile 0.0% Dbhq_Cpu6502_Dbhq_Cpu6502_Cpu_Ora_byte
+launch 1 profile 0.0% Dbhq_Cpu6502_Dbhq_Cpu6502_Cpu_AdcAt_uint16
+--- exit=0 end=2026-10-13T07:14:02Z loadavg=0.16 2.08 2.77 7/434 138945
+=== launch r0-p5-after folder=/tmp/nes77/prof-after region=0 start=2026-10-13T07:14:02Z loadavg=0.16 2.08 2.77 6/434 138950
+rom: other/snow.nes at 95d8f621ae55, 40976 bytes, sha256 7db551e868b2c0182941bd68adc447c2f0668098a4425e8e170b20e4327b7210, hash checked
+browser 153.0.8010.12
+launch 1 region 0 NTSC
+launch 1 Running as NTSC, as chosen here: the file does not say which.
+launch 1 boot cycles=5000000 frames=167 ms=1702.500 cycles_per_second=2936858 mhz=2.937 times_real=1.64
+launch 1 timed 1 cycles=1790000 frames=61 ms=573.500 cycles_per_second=3121186 mhz=3.121 times_real=1.74
+launch 1 timed 2 cycles=1790003 frames=60 ms=523.300 cycles_per_second=3420606 mhz=3.421 times_real=1.91
+launch 1 timed 3 cycles=1790001 frames=60 ms=570.700 cycles_per_second=3136501 mhz=3.137 times_real=1.75
+launch 1 timed 4 cycles=1790000 frames=60 ms=455.000 cycles_per_second=3934066 mhz=3.934 times_real=2.20
+launch 1 timed 5 cycles=1790002 frames=60 ms=547.300 cycles_per_second=3270605 mhz=3.271 times_real=1.83
+launch 1 thread 1 cycles=1790001 thread_ms=277.171 mhz=6.458 times_real=3.61
+launch 1 thread 2 cycles=1790000 thread_ms=269.550 mhz=6.641 times_real=3.71
+launch 1 thread 3 cycles=1790002 thread_ms=267.099 mhz=6.702 times_real=3.74
+launch 1 thread 4 cycles=1790002 thread_ms=264.888 mhz=6.758 times_real=3.78
+launch 1 thread 5 cycles=1790002 thread_ms=268.138 mhz=6.676 times_real=3.73
+launch 1 thread 6 cycles=1790002 thread_ms=268.973 mhz=6.655 times_real=3.72
+launch 1 thread 7 cycles=1790001 thread_ms=269.787 mhz=6.635 times_real=3.71
+launch 1 thread 8 cycles=1790003 thread_ms=266.274 mhz=6.722 times_real=3.76
+launch 1 profile 30.0% Dbhq_Machines_Nes_Dbhq_Machines_Nes_Ppu_RunDot
+launch 1 profile 15.0% Dbhq_Machines_Nes_Dbhq_Machines_Nes_NesBus_Cycle_bool_uint16_byte
+launch 1 profile 12.3% Dbhq_Machines_Nes_Dbhq_Machines_Nes_Apu_Tick
+launch 1 profile 6.4% Dbhq_Cpu6502_Dbhq_Cpu6502_Cpu_Read_uint16
+launch 1 profile 5.5% Dbhq_Machines_Nes_Dbhq_Machines_Nes_NesBus_ReadAccess_uint16
+launch 1 profile 4.9% (program)
+launch 1 profile 4.5% Dbhq_Machines_Nes_Dbhq_Machines_Nes_Ppu_CatchUp
+launch 1 profile 4.1% Dbhq_Cpu6502_Dbhq_Cpu6502_Cpu_Step
+launch 1 profile 2.1% Dbhq_Machines_Nes_Dbhq_Machines_Nes_Ppu_RenderDot_bool
+launch 1 profile 2.1% Dbhq_Machines_Nes_Dbhq_Machines_Nes_Ppu_FetchSprite_int
+launch 1 profile 1.9% Dbhq_Cpu6502_Dbhq_Cpu6502_Cpu_ExecuteOfficial_byte
+launch 1 profile 1.6% Dbhq_Machines_Nes_Dbhq_Machines_Nes_Ppu_EvaluationStep
+launch 1 profile 1.5% Dbhq_Machines_Nes_Dbhq_Machines_Nes_Apu_Remix
+launch 1 profile 1.4% Dbhq_Cpu6502_Dbhq_Cpu6502_Cpu_Write_uint16_byte
+launch 1 profile 1.3% Dbhq_Machines_Nes_Dbhq_Machines_Nes_SampleBuffer_Step_double
+launch 1 profile 1.2% Dbhq_Machines_Nes_Dbhq_Machines_Nes_Nes_Run_long
+launch 1 profile 1.1% Dbhq_Machines_Nes_Dbhq_Machines_Nes_Ppu_Evaluate_int
+launch 1 profile 0.6% Dbhq_Machines_Nes_Dbhq_Machines_Nes_NesBus_WriteAccess_uint16_byte
+launch 1 profile 0.5% (idle)
+launch 1 profile 0.3% Dbhq_Machines_Nes_Dbhq_Machines_Nes_Ppu_FetchBackground_int
+launch 1 profile 0.2% (anonymous)
+launch 1 profile 0.2% Dbhq_Cpu6502_Dbhq_Cpu6502_Cpu_NZ_byte
+launch 1 profile 0.2% Dbhq_Cpu6502_Dbhq_Cpu6502_Cpu_EnterHandler
+launch 1 profile 0.2% Dbhq_Machines_Nes_Dbhq_Machines_Nes_Ppu_LaySprite_int_int_int
+launch 1 profile 0.1% Dbhq_Machines_Nes_Dbhq_Machines_Nes_SampleBuffer_Emit
+launch 1 profile 0.1% Dbhq_Machines_Nes_Dbhq_Machines_Nes_Apu_Write_int_byte
+launch 1 profile 0.1% Dbhq_Cpu6502_Dbhq_Cpu6502_Cpu_Zp
+launch 1 profile 0.1% Dbhq_Cpu6502_Dbhq_Cpu6502_Cpu_Rti
+launch 1 profile 0.1% Dbhq_Machines_Nes_Dbhq_Machines_Nes_NesBus_Read_uint16
+launch 1 profile 0.1% Dbhq_Machines_Nes_Dbhq_Machines_Nes_NesBus_RunDma_uint16
+launch 1 profile 0.1% Dbhq_Machines_Nes_Dbhq_Machines_Nes_Ppu_WriteRegister_int_byte
+launch 1 profile 0.1% Dbhq_Cpu6502_Dbhq_Cpu6502_Cpu_Branch_bool
+launch 1 profile 0.1% Dbhq_Cpu6502_Dbhq_Cpu6502_Cpu_Indexed_uint16_byte_Dbhq_Cpu6502_Cpu_Access
+launch 1 profile 0.1% Dbhq_Machines_Nes_Dbhq_Machines_Nes_Ppu_DecayedLatch
+launch 1 profile 0.0% Dbhq_Cpu6502_Dbhq_Cpu6502_Cpu_AbsX_Dbhq_Cpu6502_Cpu_Access
+launch 1 profile 0.0% Dbhq_Cpu6502_Dbhq_Cpu6502_Cpu_InterruptSequence
+launch 1 profile 0.0% Dbhq_Cpu6502_Dbhq_Cpu6502_Cpu_Pull
+launch 1 profile 0.0% corlib_System_Array_Clear_System_Array
+launch 1 profile 0.0% Dbhq_Cpu6502_Dbhq_Cpu6502_Cpu_Ora_byte
+launch 1 profile 0.0% Dbhq_Cpu6502_Dbhq_Cpu6502_Cpu_Adc_byte
+--- exit=0 end=2026-10-13T07:14:15Z loadavg=0.13 2.01 2.74 5/439 139079
+=== launch r0-p6-base folder=/tmp/nes77/prof-base region=0 start=2026-10-13T07:14:15Z loadavg=0.13 2.01 2.74 5/439 139084
+rom: other/snow.nes at 95d8f621ae55, 40976 bytes, sha256 7db551e868b2c0182941bd68adc447c2f0668098a4425e8e170b20e4327b7210, hash checked
+browser 153.0.8010.12
+launch 1 region 0 NTSC
+launch 1 Running as NTSC, as chosen here: the file does not say which.
+launch 1 boot cycles=5000000 frames=167 ms=1499.700 cycles_per_second=3334000 mhz=3.334 times_real=1.86
+launch 1 timed 1 cycles=1790000 frames=61 ms=558.900 cycles_per_second=3202720 mhz=3.203 times_real=1.79
+launch 1 timed 2 cycles=1790003 frames=60 ms=518.400 cycles_per_second=3452938 mhz=3.453 times_real=1.93
+launch 1 timed 3 cycles=1790001 frames=60 ms=506.400 cycles_per_second=3534757 mhz=3.535 times_real=1.97
+launch 1 timed 4 cycles=1790000 frames=60 ms=506.500 cycles_per_second=3534057 mhz=3.534 times_real=1.97
+launch 1 timed 5 cycles=1790002 frames=60 ms=512.300 cycles_per_second=3494050 mhz=3.494 times_real=1.95
+launch 1 thread 1 cycles=1790001 thread_ms=261.487 mhz=6.845 times_real=3.82
+launch 1 thread 2 cycles=1790000 thread_ms=252.951 mhz=7.076 times_real=3.95
+launch 1 thread 3 cycles=1790002 thread_ms=256.997 mhz=6.965 times_real=3.89
+launch 1 thread 4 cycles=1790002 thread_ms=256.238 mhz=6.986 times_real=3.90
+launch 1 thread 5 cycles=1790002 thread_ms=258.820 mhz=6.916 times_real=3.86
+launch 1 thread 6 cycles=1790002 thread_ms=252.619 mhz=7.086 times_real=3.96
+launch 1 thread 7 cycles=1790001 thread_ms=252.622 mhz=7.086 times_real=3.96
+launch 1 thread 8 cycles=1790003 thread_ms=257.972 mhz=6.939 times_real=3.88
+launch 1 profile 25.7% Dbhq_Machines_Nes_Dbhq_Machines_Nes_Ppu_RunDot
+launch 1 profile 22.5% Dbhq_Machines_Nes_Dbhq_Machines_Nes_NesBus_Cycle_bool_uint16_byte
+launch 1 profile 11.8% Dbhq_Machines_Nes_Dbhq_Machines_Nes_Apu_Tick
+launch 1 profile 6.8% Dbhq_Machines_Nes_Dbhq_Machines_Nes_NesBus_ReadAccess_uint16
+launch 1 profile 6.3% Dbhq_Cpu6502_Dbhq_Cpu6502_Cpu_Read_uint16
+launch 1 profile 4.3% Dbhq_Machines_Nes_Dbhq_Machines_Nes_Ppu_FetchSprite_int
+launch 1 profile 4.0% (program)
+launch 1 profile 3.2% Dbhq_Cpu6502_Dbhq_Cpu6502_Cpu_Step
+launch 1 profile 2.5% Dbhq_Machines_Nes_Dbhq_Machines_Nes_Ppu_CatchUp
+launch 1 profile 1.3% Dbhq_Machines_Nes_Dbhq_Machines_Nes_Nes_Run_long
+launch 1 profile 1.3% Dbhq_Machines_Nes_Dbhq_Machines_Nes_Ppu_RenderDot_bool
+launch 1 profile 1.3% Dbhq_Machines_Nes_Dbhq_Machines_Nes_Ppu_EvaluationStep
+launch 1 profile 1.2% Dbhq_Machines_Nes_Dbhq_Machines_Nes_Ppu_Evaluate_int
+launch 1 profile 1.2% Dbhq_Cpu6502_Dbhq_Cpu6502_Cpu_Rti
+launch 1 profile 1.1% (anonymous)
+launch 1 profile 0.9% (idle)
+launch 1 profile 0.8% Dbhq_Cpu6502_Dbhq_Cpu6502_Cpu_ExecuteOfficial_byte
+launch 1 profile 0.5% Dbhq_Machines_Nes_Dbhq_Machines_Nes_Apu_Remix
+launch 1 profile 0.4% Dbhq_Cpu6502_Dbhq_Cpu6502_Cpu_Write_uint16_byte
+launch 1 profile 0.4% Dbhq_Machines_Nes_Dbhq_Machines_Nes_NesBus_WriteAccess_uint16_byte
+launch 1 profile 0.3% Dbhq_Machines_Nes_Dbhq_Machines_Nes_SampleBuffer_Step_double
+launch 1 profile 0.3% Dbhq_Machines_Nes_Dbhq_Machines_Nes_Ppu_FetchBackground_int
+launch 1 profile 0.2% Dbhq_Cpu6502_Dbhq_Cpu6502_Cpu_EnterHandler
+launch 1 profile 0.2% Dbhq_Machines_Nes_Dbhq_Machines_Nes_Apu_Write_int_byte
+launch 1 profile 0.2% Dbhq_Machines_Nes_Dbhq_Machines_Nes_SampleBuffer_Emit
+launch 1 profile 0.2% Dbhq_Machines_Nes_Dbhq_Machines_Nes_Ppu_LaySprite_int_int_int
+launch 1 profile 0.1% Dbhq_Cpu6502_Dbhq_Cpu6502_Cpu_NZ_byte
+launch 1 profile 0.1% Dbhq_Machines_Nes_Dbhq_Machines_Nes_Ppu_WriteRegister_int_byte
+launch 1 profile 0.1% Dbhq_Cpu6502_Dbhq_Cpu6502_Cpu_Zp
+launch 1 profile 0.1% Dbhq_Cpu6502_Dbhq_Cpu6502_Cpu_Branch_bool
+launch 1 profile 0.1% Dbhq_Machines_Nes_Dbhq_Machines_Nes_NesBus_Read_uint16
+launch 1 profile 0.1% Dbhq_Cpu6502_Dbhq_Cpu6502_Cpu_Indexed_uint16_byte_Dbhq_Cpu6502_Cpu_Access
+launch 1 profile 0.0% Dbhq_Machines_Nes_Dbhq_Machines_Nes_Ppu_DecayedLatch
+launch 1 profile 0.0% Dbhq_Cpu6502_Dbhq_Cpu6502_Cpu_AbsX_Dbhq_Cpu6502_Cpu_Access
+launch 1 profile 0.0% corlib_System_Array_Clear_System_Array
+launch 1 profile 0.0% Dbhq_Machines_Nes_Dbhq_Machines_Nes_NesBus_RunDma_uint16
+launch 1 profile 0.0% Dbhq_Cpu6502_Dbhq_Cpu6502_Cpu_InterruptSequence
+launch 1 profile 0.0% Dbhq_Cpu6502_Dbhq_Cpu6502_Cpu_Pull
+launch 1 profile 0.0% Dbhq_Cpu6502_Dbhq_Cpu6502_Cpu_FetchWord
+launch 1 profile 0.0% Dbhq_Cpu6502_Dbhq_Cpu6502_Cpu_Compare_byte_byte
+--- exit=0 end=2026-10-13T07:14:27Z loadavg=0.10 1.91 2.69 4/418 139214
+=== launch r0-p6-after folder=/tmp/nes77/prof-after region=0 start=2026-10-13T07:14:27Z loadavg=0.10 1.91 2.69 4/418 139219
+rom: other/snow.nes at 95d8f621ae55, 40976 bytes, sha256 7db551e868b2c0182941bd68adc447c2f0668098a4425e8e170b20e4327b7210, hash checked
+browser 153.0.8010.12
+launch 1 region 0 NTSC
+launch 1 Running as NTSC, as chosen here: the file does not say which.
+launch 1 boot cycles=5000000 frames=167 ms=1598.900 cycles_per_second=3127150 mhz=3.127 times_real=1.75
+launch 1 timed 1 cycles=1790000 frames=61 ms=507.800 cycles_per_second=3525010 mhz=3.525 times_real=1.97
+launch 1 timed 2 cycles=1790003 frames=60 ms=511.900 cycles_per_second=3496783 mhz=3.497 times_real=1.95
+launch 1 timed 3 cycles=1790001 frames=60 ms=566.200 cycles_per_second=3161429 mhz=3.161 times_real=1.77
+launch 1 timed 4 cycles=1790000 frames=60 ms=506.400 cycles_per_second=3534755 mhz=3.535 times_real=1.97
+launch 1 timed 5 cycles=1790002 frames=60 ms=510.600 cycles_per_second=3505684 mhz=3.506 times_real=1.96
+launch 1 thread 1 cycles=1790001 thread_ms=262.942 mhz=6.808 times_real=3.80
+launch 1 thread 2 cycles=1790000 thread_ms=256.324 mhz=6.983 times_real=3.90
+launch 1 thread 3 cycles=1790002 thread_ms=255.259 mhz=7.012 times_real=3.92
+launch 1 thread 4 cycles=1790002 thread_ms=254.443 mhz=7.035 times_real=3.93
+launch 1 thread 5 cycles=1790002 thread_ms=256.849 mhz=6.969 times_real=3.89
+launch 1 thread 6 cycles=1790002 thread_ms=255.618 mhz=7.003 times_real=3.91
+launch 1 thread 7 cycles=1790001 thread_ms=256.142 mhz=6.988 times_real=3.90
+launch 1 thread 8 cycles=1790003 thread_ms=256.094 mhz=6.990 times_real=3.91
+launch 1 profile 29.0% Dbhq_Machines_Nes_Dbhq_Machines_Nes_Ppu_RunDot
+launch 1 profile 18.7% Dbhq_Machines_Nes_Dbhq_Machines_Nes_NesBus_Cycle_bool_uint16_byte
+launch 1 profile 10.7% Dbhq_Machines_Nes_Dbhq_Machines_Nes_Apu_Tick
+launch 1 profile 6.5% Dbhq_Cpu6502_Dbhq_Cpu6502_Cpu_Read_uint16
+launch 1 profile 5.9% Dbhq_Machines_Nes_Dbhq_Machines_Nes_Ppu_CatchUp
+launch 1 profile 4.7% Dbhq_Machines_Nes_Dbhq_Machines_Nes_NesBus_ReadAccess_uint16
+launch 1 profile 4.5% Dbhq_Machines_Nes_Dbhq_Machines_Nes_Ppu_RenderDot_bool
+launch 1 profile 4.4% (program)
+launch 1 profile 2.3% corlib_System_Array_Clear_System_Array
+launch 1 profile 2.0% Dbhq_Cpu6502_Dbhq_Cpu6502_Cpu_Step
+launch 1 profile 1.5% Dbhq_Machines_Nes_Dbhq_Machines_Nes_Ppu_EvaluationStep
+launch 1 profile 1.4% Dbhq_Cpu6502_Dbhq_Cpu6502_Cpu_EnterHandler
+launch 1 profile 1.3% Dbhq_Machines_Nes_Dbhq_Machines_Nes_Nes_Run_long
+launch 1 profile 1.3% Dbhq_Machines_Nes_Dbhq_Machines_Nes_SampleBuffer_Emit
+launch 1 profile 1.0% Dbhq_Machines_Nes_Dbhq_Machines_Nes_Ppu_FetchSprite_int
+launch 1 profile 0.9% Dbhq_Cpu6502_Dbhq_Cpu6502_Cpu_ExecuteOfficial_byte
+launch 1 profile 0.5% Dbhq_Machines_Nes_Dbhq_Machines_Nes_Apu_Remix
+launch 1 profile 0.5% Dbhq_Cpu6502_Dbhq_Cpu6502_Cpu_Write_uint16_byte
+launch 1 profile 0.5% Dbhq_Machines_Nes_Dbhq_Machines_Nes_NesBus_WriteAccess_uint16_byte
+launch 1 profile 0.4% Dbhq_Machines_Nes_Dbhq_Machines_Nes_Ppu_FetchBackground_int
+launch 1 profile 0.3% (idle)
+launch 1 profile 0.3% (anonymous)
+launch 1 profile 0.3% Dbhq_Machines_Nes_Dbhq_Machines_Nes_SampleBuffer_Step_double
+launch 1 profile 0.2% Dbhq_Machines_Nes_Dbhq_Machines_Nes_Ppu_LaySprite_int_int_int
+launch 1 profile 0.2% Dbhq_Cpu6502_Dbhq_Cpu6502_Cpu_NZ_byte
+launch 1 profile 0.1% Dbhq_Machines_Nes_Dbhq_Machines_Nes_Apu_Write_int_byte
+launch 1 profile 0.1% Dbhq_Cpu6502_Dbhq_Cpu6502_Cpu_Zp
+launch 1 profile 0.1% Dbhq_Cpu6502_Dbhq_Cpu6502_Cpu_Branch_bool
+launch 1 profile 0.1% Dbhq_Machines_Nes_Dbhq_Machines_Nes_Ppu_DecayedLatch
+launch 1 profile 0.1% Dbhq_Machines_Nes_Dbhq_Machines_Nes_Ppu_Evaluate_int
+launch 1 profile 0.1% Dbhq_Cpu6502_Dbhq_Cpu6502_Cpu_Rti
+launch 1 profile 0.0% Dbhq_Machines_Nes_Dbhq_Machines_Nes_NesBus_Read_uint16
+launch 1 profile 0.0% Dbhq_Machines_Nes_Dbhq_Machines_Nes_Ppu_WriteRegister_int_byte
+launch 1 profile 0.0% Dbhq_Cpu6502_Dbhq_Cpu6502_Cpu_Indexed_uint16_byte_Dbhq_Cpu6502_Cpu_Access
+launch 1 profile 0.0% Dbhq_Machines_Nes_Dbhq_Machines_Nes_NesBus_RunDma_uint16
+launch 1 profile 0.0% Dbhq_Cpu6502_Dbhq_Cpu6502_Cpu_InterruptSequence
+launch 1 profile 0.0% Dbhq_Cpu6502_Dbhq_Cpu6502_Cpu_AbsX_Dbhq_Cpu6502_Cpu_Access
+launch 1 profile 0.0% Dbhq_Machines_Nes_Dbhq_Machines_Nes_Apu_Step
+launch 1 profile 0.0% Dbhq_Cpu6502_Dbhq_Cpu6502_Cpu_FetchWord
+launch 1 profile 0.0% Dbhq_Cpu6502_Dbhq_Cpu6502_Cpu_IzY_Dbhq_Cpu6502_Cpu_Access
+--- exit=0 end=2026-10-13T07:14:40Z loadavg=0.09 1.85 2.66 5/414 139350
