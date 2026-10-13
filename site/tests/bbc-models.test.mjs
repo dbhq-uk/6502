@@ -1156,14 +1156,15 @@ test('the legend lists every fitted IC once, in IC number order, with its part a
   assert.match(layout.COUNTED_WORDS.sound, /through the system VIA/);
 });
 
-test('the legend says in words what a mark means, why the CPU, RAM and OS ROM are never marked, what paged means, and which counted chips are not emulated', () => {
+test('the legend says in words what a mark means, why the CPU, RAM and OS ROM are never marked, what paged means, and which counted chips are not emulated or only partly', () => {
   const words = layout.LEGEND_WORDS.join(' ');
   assert.match(words, /read or written by the processor in the last quarter second/);
   assert.match(words, /not that the chip is working/);
   assert.match(words, /The processor, the RAM and the operating system's ROM are in use all the time/);
   assert.match(words, /so none of them is ever marked/);
   assert.match(words, /the paged ROM, BASIC or the DFS, is framed/);
-  assert.match(words, /the 6850, the serial ULA and the uPD7002, which the machine does not emulate/);
+  assert.match(words, /counts the 6850 and the uPD7002, which it does not emulate, and the serial ULA, which it emulates only in part: it keeps the control byte, which drives the cassette relay/);
+  assert.doesNotMatch(words, /serial ULA[^.]*does not emulate/);
   assert.match(words, /sound chip[^.]*through the system VIA/);
   assert.match(words, /heights of the parts are typical ones, not measured/);
   // each counted chip that the machine does not emulate is the one the legend names

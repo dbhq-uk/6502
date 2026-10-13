@@ -112,7 +112,7 @@ export const LEGEND_WORDS = [
   'A mark on a chip, on the model and in its row here, means the chip was read or written by the processor in the last quarter second, while the machine above runs. A mark says the processor talked to the chip, not that the chip is working: the video circuits draw every picture whether they are marked or not.',
   'The processor, the RAM and the operating system\'s ROM are in use all the time, so none of them is ever marked. Nor are the other chips the machine does not count: it counts only the chips the processor reaches at their own addresses in the &FE00 page, and the sound chip, which the processor writes a byte at a time through the system VIA.',
   'Of the paged ROMs, only one is in the memory map at a time: the paged ROM, BASIC or the DFS, is framed for as long as it is the one chosen.',
-  `The machine counts the ${ICS.find((i) => i.sheila === 'acia').part}, the serial ULA and the ${ICS.find((i) => i.sheila === 'adc').part}, which the machine does not emulate, whenever the processor reaches their addresses, so they are marked like the others.`,
+  `The machine counts the ${ICS.find((i) => i.sheila === 'acia').part} and the ${ICS.find((i) => i.sheila === 'adc').part}, which it does not emulate, and the serial ULA, which it emulates only in part: it keeps the control byte, which drives the cassette relay. It counts all three whenever the processor reaches their addresses, so they are marked like the others.`,
   'The copper on the board is traced to look at from the scans, and its connections are not verified: the checks that would have shown them failed. The heights of the parts are typical ones, not measured.',
 ];
 
