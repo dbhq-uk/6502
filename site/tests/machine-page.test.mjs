@@ -5,7 +5,9 @@ import path from 'node:path';
 import crypto from 'node:crypto';
 import { page, visibleText, DIST } from './helpers.mjs';
 import { loadRegistry } from '../src/lib/registry.mjs';
-import { KIM1_KEYS, loadTryIt, parseKeys } from '../src/lib/machines.mjs';
+import { KIM1_KEYS, TELETYPE_KEYS, loadTeletype, loadTryIt, parseKeys, parseTeletype, teletypeChars } from '../src/lib/machines.mjs';
+import { loadResults } from '../src/lib/results.mjs';
+import { Paper } from '../public/teletype-paper.js';
 import { kim1Roms } from '../src/lib/pins.mjs';
 
 // The KIM-1's own page, built against the real registry: the first page of a
@@ -134,6 +136,95 @@ test('keys are read as the manual writes them, the same way Kim1Keystrokes.Parse
   assert.deepEqual(parseKeys('AD'), ['A', 'D']);
   assert.throws(() => parseKeys('[XY]'));
   assert.throws(() => parseKeys('G'));
+});
+
+// The teletype: the panel's part of it, and the session on the page.
+const ttyPanel = (() => {
+  const at = html.indexOf('data-kim1-tty');
+  return at < 0 ? '' : html.slice(html.lastIndexOf('<div', at), html.indexOf('data-kim1-status', at));
+})();
+
+test('the teletype is on the panel: a labelled group with the TTY switch, the speed, the paper as a log, a labelled field and RUB OUT and LF, all disabled without JavaScript', () => {
+  assert.ok(ttyPanel, 'the panel has no teletype');
+  assert.match(ttyPanel, /role="group" aria-labelledby="kim1-tty-name"/);
+  assert.match(ttyPanel, /id="kim1-tty-name">Teletype</);
+  assert.match(ttyPanel, /<label class="kim1-tty-switch"><input type="checkbox" role="switch" data-kim1-mode aria-describedby="kim1-tty-about" disabled\/?> TTY switch<\/label>/);
+  assert.match(ttyPanel, /<div class="kim1-paper" role="log" aria-label="The teletype's paper" tabindex="0" data-kim1-paper><\/div>/);
+  assert.match(ttyPanel, /<label class="kim1-tty-input">Type to the KIM-1 <input type="text" data-kim1-type[^>]*disabled/);
+  const options = [...ttyPanel.matchAll(/<option value="(\d+)"( selected)?>/g)];
+  assert.deepEqual(options.map((o) => Number(o[1])), [110, 300, 1200]);
+  assert.equal(options.find((o) => o[2])?.[1], '110', 'the terminal does not start at 110 baud, the Teletype Model 33\'s speed');
+  assert.deepEqual([...ttyPanel.matchAll(/data-kim1-send="(\w+)"/g)].map((m) => m[1]), ['RUBOUT', 'LF']);
+  for (const m of ttyPanel.matchAll(/<(button|select|input)\b[^>]*>/g)) assert.match(m[0], /\bdisabled\b/, `${m[0]} is enabled without JavaScript`);
+});
+
+test('the page says the teletype is modelled, and the registry says only the cassette and the expansion bus are not', () => {
+  assert.doesNotMatch(kim.notes, /teletype interface, the cassette/);
+  assert.match(kim.notes, /Not modelled: the cassette interface and the expansion bus\./);
+  assert.match(kim.notes, /teletype/);
+  const text = visibleText(html);
+  assert.ok(text.includes(kim.notes), 'the page does not show the registry\'s notes');
+  assert.doesNotMatch(text, /teletype[^.]*not modelled/i);
+});
+
+test('the teletype session on the page is Kim1TeletypeTests\'s, step by step, from the same file, with that suite\'s count from the results', () => {
+  const { steps } = loadTeletype('kim-1');
+  const tests = fs.readFileSync(path.join(root, 'tests', 'Dbhq.Machines.Kim1.Tests', 'Kim1TeletypeTests.cs'), 'utf8');
+  assert.match(tests, /"machines", "kim-1", "teletype\.json"/, 'Kim1TeletypeTests no longer reads the page\'s session');
+  const at = html.indexOf('<h2 id="teletype">');
+  assert.ok(at > 0, 'the page has no teletype section');
+  const section = html.slice(at, html.indexOf('</section>', at));
+  const items = [...section.matchAll(/<li>([\s\S]*?)<\/li>/g)].map((m) => m[1]);
+  assert.equal(items.length, steps.length);
+  const names = { SPACE: 'SPACE', CR: 'RETURN', LF: 'LF', RUBOUT: 'RUB OUT' };
+  const kbds = (p) => [...(p ?? '').matchAll(/<kbd>([^<]*)<\/kbd>/g)].map((m) => decode(m[1]).replace('&#43;', '+'));
+  steps.forEach((step, i) => {
+    const keypad = /<p class="tty-keys">On the keypad:([\s\S]*?)<\/p>/.exec(items[i])?.[1];
+    const typed = /<p class="tty-keys">At the teletype:([\s\S]*?)<\/p>/.exec(items[i])?.[1];
+    assert.deepEqual(kbds(keypad), step.keypad ? parseKeys(step.keypad) : [], `step ${i + 1}'s keypad keys`);
+    assert.deepEqual(kbds(typed), step.type ? parseTeletype(step.type).map((p) => (p.key ? names[p.key] : p.text)) : [], `step ${i + 1}'s teletype keys`);
+    assert.ok(visibleText(items[i]).includes(step.says), `step ${i + 1} does not say "${step.says}"`);
+    assert.ok(items[i].includes(`<code>${step.prints.join('\n')}</code>`), `step ${i + 1} does not show what the paper prints`);
+  });
+  const passed = loadResults().suites.Kim1TeletypeTests?.passed;
+  assert.ok(passed > 0, 'Kim1TeletypeTests is not in the results');
+  assert.ok(visibleText(section).includes(`that suite has ${passed.toLocaleString('en-GB')} tests passing`), 'the page does not give Kim1TeletypeTests\'s count from the results');
+});
+
+test('teletype keys are read as Kim1Teletype.Parse reads them, with the same named keys', () => {
+  const cs = fs.readFileSync(path.join(root, 'src', 'Dbhq.Machines.Kim1', 'Kim1Teletype.cs'), 'utf8');
+  const named = Object.fromEntries([...cs.matchAll(/\["(\w+)"\] = (?:'(\\?.)'|\(char\)0x([0-9A-F]+))/g)].map((m) => [m[1], m[3] ? String.fromCharCode(parseInt(m[3], 16)) : JSON.parse(`"${m[2]}"`)]));
+  assert.deepEqual(named, TELETYPE_KEYS);
+  assert.deepEqual(parseTeletype('0200[SPACE]AD.'), [{ text: '0200' }, { key: 'SPACE' }, { text: 'AD.' }]);
+  assert.equal(teletypeChars('[RUBOUT]0200[SPACE]G[CR][LF]'), '\u007f0200 G\r\n');
+  for (const bad of ['0200 G', '[RUB OUT]', '[TAB]', '[SPACE', 'café']) assert.throws(() => parseTeletype(bad), bad);
+});
+
+test('the paper prints as a teletype does: CR to the start of the line, LF to a new one, nothing for NUL, RUB OUT or XOFF', () => {
+  const paper = new Paper();
+  const nuls = '\u0000'.repeat(6);
+  paper.print(`\u007f\r\n${nuls}KIM\r\n${nuls}0000 00 0002 `);
+  assert.deepEqual(paper.lines, ['', 'KIM', '0000 00 0002 ']);
+  paper.print('\r\n0002 00 \u0013');
+  assert.equal(paper.text(), '\nKIM\n0000 00 0002\n0002 00');
+  // A carriage return without a line feed prints over the line.
+  paper.print('\rX');
+  assert.equal(paper.lines.at(-1), 'X002 00 ');
+  // The oldest lines are torn off, and the change says how many.
+  // A line feed alone moves the paper and leaves the head where it was.
+  const feed = new Paper();
+  feed.print('A\nB');
+  assert.deepEqual(feed.lines, ['A', ' B']);
+  const short = new Paper(3);
+  assert.deepEqual(short.print('A\r\nB\r\nC\r\nD\r\nE'), { from: 0, torn: 2 });
+  assert.deepEqual(short.lines, ['C', 'D', 'E']);
+});
+
+test('typing at the teletype is never also a press of the keypad, and the field leaves Tab alone', () => {
+  const driver = fs.readFileSync(path.join(process.cwd(), 'public', 'kim-1.js'), 'utf8');
+  assert.match(driver, /tty\.contains\(event\.target\)\) return;/, 'the keypad\'s keyboard handler does not skip the teletype');
+  const keys = /const key = \{([^}]*)\}\[event\.key\]/.exec(driver)?.[1] ?? '';
+  assert.deepEqual([...keys.matchAll(/(\w+):/g)].map((m) => m[1]), ['Enter', 'Backspace', 'Delete']);
 });
 
 test('the page says whose ROM it runs, in the registry\'s own words, and where the copy came from', () => {

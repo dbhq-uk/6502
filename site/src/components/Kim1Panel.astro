@@ -8,6 +8,11 @@
 // The segments are drawn, not pictures: bit 0 of what the machine reports
 // is segment a (the top bar), round to bit 6, segment g (the middle bar).
 // The rows are shared with the 3D model, so the two keypads cannot differ.
+//
+// Under them, the teletype: the TTY/KB switch, the terminal's speed, the paper
+// (a log, one line to a row), a field that types at the teletype while it has
+// focus, and RUB OUT and LF, which a PC keyboard has no key for. Without
+// JavaScript all of it is disabled too.
 import { KEY_ROWS as rows } from '../models/kim-1-layout.mjs';
 
 interface Props {
@@ -55,6 +60,27 @@ const segments = [across(top), down(right, top, mid), down(right, mid, bottom), 
       ),
     )}
   </div>
-  <p class="kim1-status" role="status" data-kim1-status>The KIM-1 runs in your browser, and it needs JavaScript to do that. With JavaScript off, the keypad and the program below are shown, but nothing runs.</p>
+  <div class="kim1-tty" role="group" aria-labelledby="kim1-tty-name" data-kim1-tty>
+    <p class="kim1-tty-name" id="kim1-tty-name">Teletype</p>
+    <div class="kim1-tty-controls">
+      <label class="kim1-tty-switch"><input type="checkbox" role="switch" data-kim1-mode aria-describedby="kim1-tty-about" disabled /> TTY switch</label>
+      <label class="kim1-tty-speed">Speed
+        <select data-kim1-baud disabled>
+          <option value="110" selected>110 baud, a Teletype Model 33</option>
+          <option value="300">300 baud</option>
+          <option value="1200">1200 baud</option>
+        </select>
+      </label>
+      <button type="button" class="btn small" data-kim1-clear disabled>Clear the paper</button>
+    </div>
+    <p class="kim1-tty-about" id="kim1-tty-about">Off, the monitor uses the keypad and the digits. On, it uses the teletype: press RS, then RUB OUT, and it prints KIM.</p>
+    <div class="kim1-paper" role="log" aria-label="The teletype's paper" tabindex="0" data-kim1-paper></div>
+    <div class="kim1-tty-keys">
+      <label class="kim1-tty-input">Type to the KIM-1 <input type="text" data-kim1-type autocomplete="off" autocapitalize="characters" spellcheck="false" enterkeyhint="send" disabled /></label>
+      <button type="button" class="btn small" data-kim1-send="RUBOUT" disabled>RUB OUT</button>
+      <button type="button" class="btn small" data-kim1-send="LF" disabled>LF</button>
+    </div>
+  </div>
+  <p class="kim1-status" role="status" data-kim1-status>The KIM-1 runs in your browser, and it needs JavaScript to do that. With JavaScript off, the keypad, the teletype and the programs below are shown, but nothing runs.</p>
   <p class="kim1-speed" data-kim1-speed></p>
 </div>

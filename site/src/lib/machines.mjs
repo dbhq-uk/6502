@@ -44,6 +44,63 @@ export function parseKeys(keys) {
 }
 
 /**
+ * The teletype's keys with no printed character of their own, as the User
+ * Manual names them in brackets, and the character each sends. The same table
+ * as Kim1Teletype.Named.
+ */
+export const TELETYPE_KEYS = { SPACE: ' ', CR: '\r', LF: '\n', RUBOUT: '\u007f' };
+
+/**
+ * Splits keys typed at the KIM-1's teletype, written as the User Manual writes
+ * them, into parts: { key } for a bracketed key ([SPACE], [CR], [LF] or
+ * [RUBOUT]) and { text } for a run of other printable characters, the way
+ * Kim1Teletype.Parse reads them. "0200[SPACE]G" is three parts. A bare space
+ * is refused, because on a page it cannot be told from nothing.
+ */
+export function parseTeletype(keys) {
+  const parts = [];
+  for (const m of keys.matchAll(/\[([^\]]*)\]?|[^[]+/g)) {
+    const word = m[0];
+    if (word.startsWith('[')) {
+      if (!word.endsWith(']') || !(m[1] in TELETYPE_KEYS)) throw new Error(`"${word}" is not a bracketed teletype key`);
+      parts.push({ key: m[1] });
+    } else {
+      if (!/^[!-~]+$/.test(word)) throw new Error(`"${word}" has a character that must be written as a bracketed key`);
+      parts.push({ text: word });
+    }
+  }
+  return parts;
+}
+
+/** The characters keys written as parseTeletype reads them send, in order. */
+export const teletypeChars = (keys) => parseTeletype(keys).map((p) => (p.key ? TELETYPE_KEYS[p.key] : p.text)).join('');
+
+/**
+ * The session typed at a machine's teletype, from machines/<id>/teletype.json,
+ * or null when it has none: steps, each with keys pressed on the keypad first
+ * (`keypad`, as parseKeys reads them), keys typed at the teletype (`type`, as
+ * parseTeletype reads them), or both; the last lines the paper `prints` after
+ * it; and what it `says`. Kim1TeletypeTests runs the same file.
+ */
+export function loadTeletype(id, root = REPO_ROOT) {
+  const file = path.join(root, 'machines', id, 'teletype.json');
+  if (!fs.existsSync(file)) return null;
+  const session = JSON.parse(fs.readFileSync(file, 'utf8'));
+  if (!Array.isArray(session.steps) || session.steps.length === 0) throw new Error(`machines/${id}/teletype.json has no steps`);
+  for (const [i, step] of session.steps.entries()) {
+    const where = `machines/${id}/teletype.json, step ${i + 1}`;
+    if (!step.keypad && !step.type) throw new Error(`${where} presses no key and types nothing`);
+    if (step.keypad) parseKeys(step.keypad);
+    if (step.type) parseTeletype(step.type);
+    if (!Array.isArray(step.prints) || step.prints.length === 0 || !step.prints.every((l) => typeof l === 'string' && /^[ -~]*$/.test(l) && l === l.trimEnd())) {
+      throw new Error(`${where}: prints must be lines of plain printable text with no spaces at their ends`);
+    }
+    if (!words(step.says)) throw new Error(`${where} says nothing`);
+  }
+  return session;
+}
+
+/**
  * A machine's "try it" program, from machines/<id>/try-it.json, or null when it
  * has none. The KIM-1's is steps of keypad keys, each checked here as
  * Kim1Keystrokes.Parse reads them. The BBC Micro's is BASIC: `lines` to type,

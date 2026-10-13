@@ -9,8 +9,9 @@ Console.WriteLine("Dbhq.Machines.Kim1.Wasm ready");
 
 /// <summary>
 /// The KIM-1, as the page's JavaScript sees it: one machine, its keys, its
-/// SST switch, a call that runs it, and the six digits. Everything else,
-/// including when to run it and for how long, is the page's.
+/// SST switch, a call that runs it, the six digits, and the teletype on its
+/// 20 mA loops with the TTY/KB switch. Everything else, including when to run
+/// it and for how long, is the page's.
 /// </summary>
 public static partial class Kim1Host
 {
@@ -60,4 +61,28 @@ public static partial class Kim1Host
     /// <summary>The six digits as text, as the tests read them: a hex digit, a space where dark, '?' for any other shape.</summary>
     [JSExport]
     public static string Display() => Machine.ReadDisplay();
+
+    /// <summary>The TTY/KB switch: true closes it, for the teletype. The monitor reads it at RS, and in its keypad loop.</summary>
+    [JSExport]
+    public static void SetTeletypeMode(bool on) => Machine.Mode = on ? Kim1Mode.Teletype : Kim1Mode.Keypad;
+
+    /// <summary>Puts a terminal of <paramref name="baud"/> bits a second on the loops in place of the one there. Keys still queued are dropped.</summary>
+    [JSExport]
+    public static void SetTeletypeBaud(int baud) => Machine.Teletype = new Kim1Teletype(baud);
+
+    /// <summary>The terminal's speed, in bits a second.</summary>
+    [JSExport]
+    public static int TeletypeBaud() => Machine.Teletype.Baud;
+
+    /// <summary>Queues characters at the teletype's keyboard, sent as bits at its speed when the line is quiet (Kim1Teletype).</summary>
+    [JSExport]
+    public static void TeletypeSend(string text) => Machine.Teletype.Send(text);
+
+    /// <summary>Everything the teletype has printed since the last call, as it came off the line: CR, LF and NULs included.</summary>
+    [JSExport]
+    public static string TeletypePrinted() => Machine.ReadTeletype();
+
+    /// <summary>True when no key is queued or on the line and the monitor has stopped printing.</summary>
+    [JSExport]
+    public static bool TeletypeIdle() => Machine.Teletype.Idle(Machine.Cycles);
 }

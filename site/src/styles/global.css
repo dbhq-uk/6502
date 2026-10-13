@@ -184,6 +184,20 @@ footer .linkbtn:hover { color: var(--white); }
 .kim1-speed { color: var(--sage-60); text-align: center; font-family: var(--font-mono); font-size: 12.5px; letter-spacing: 0; max-width: 60ch; }
 .kim1-speed:empty { display: none; }
 @media (prefers-reduced-motion: reduce) { .kim1 .key { transition: none; } }
+/* The KIM-1's teletype: a rule above it, its controls on the iron panel, and the paper as the canvas, in the mono face. */
+.kim1-tty { justify-self: stretch; display: grid; gap: 12px; padding-top: 20px; border-top: 1px solid var(--hairline); }
+.kim1-tty-name { color: var(--white); font-weight: 500; }
+.kim1-tty-controls, .kim1-tty-keys { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; }
+.kim1-tty-switch, .kim1-tty-speed, .kim1-tty-input { display: inline-flex; flex-wrap: wrap; align-items: center; gap: 8px; color: var(--white); font-size: 14px; }
+.kim1-tty-switch input { width: 16px; height: 16px; margin: 0; }
+.kim1-tty select, .kim1-tty-input input { min-height: 44px; max-width: 100%; font: inherit; font-size: 14px; color: var(--white); background: var(--iron); border: 1px solid var(--circuit); border-radius: 8px; padding: 8px 12px; }
+.kim1-tty-input input { width: 14ch; font-family: var(--font-mono); letter-spacing: 0; text-transform: uppercase; }
+.kim1-tty select:disabled, .kim1-tty-input input:disabled { border-style: dashed; color: var(--moss-70); }
+.kim1 .btn { min-height: 44px; }
+.kim1 .btn:disabled { cursor: default; border-style: dashed; background: var(--iron); color: var(--moss-70); }
+.kim1-tty-about { color: var(--sage-60); font-size: 14px; max-width: 72ch; }
+.kim1-paper { min-height: 10.5em; max-height: 24em; overflow: auto; padding: 12px 14px; font-family: var(--font-mono); font-size: 14px; letter-spacing: 0; line-height: 1.5; color: var(--white); background: var(--void); border: 1px solid var(--hairline); border-radius: var(--r-card); }
+.kim1-paper > div { white-space: pre; min-height: 1.5em; }
 /* The BBC Micro's page: the screen on the black canvas, its controls and the disc drive below, on an iron panel like the KIM-1's. No lime but Start, the page's one fill, and the screen's focus ring. */
 .bbc { margin-top: 24px; padding: clamp(16px, 4vw, 32px); display: grid; gap: 14px; background: var(--iron); border: 1px solid var(--circuit); border-radius: var(--r-window); }
 .bbc-screen { background: var(--void); border: 1px solid var(--hairline); border-radius: var(--r-card); padding: clamp(6px, 1.5vw, 14px); outline-offset: 3px; }
@@ -263,6 +277,8 @@ footer .linkbtn:hover { color: var(--white); }
 .steps .keys { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 6px; }
 .steps kbd, .bbc-symbols kbd { font-family: var(--font-mono); font-size: 14px; letter-spacing: 0; color: var(--white); background: var(--iron); border: 1px solid var(--circuit); border-radius: 6px; padding: 1px 7px; }
 .steps .shows code { white-space: pre; }
+.steps .tty-keys { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-bottom: 6px; }
+.prose .steps .tty-prints { margin: 6px 0 0; padding: 10px 14px; border-radius: var(--r-card); }
 .roms code { overflow-wrap: anywhere; }
 .machine-head p { margin-top: 12px; }
 /* The head: the machine's details, and beside them a photograph of the original. */

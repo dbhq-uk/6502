@@ -43,6 +43,25 @@ public sealed class Kim1TeletypeTests(ITestOutputHelper output)
     }
 
     /// <summary>
+    /// RS turns every 6530 port pin into an input, and an input pin is pulled
+    /// up, so PB0 holds the printer loop at a mark until the monitor sets the
+    /// port up again: a reset prints nothing, and the line is never left at a
+    /// space for the printer to take as a long start bit.
+    /// </summary>
+    [Fact]
+    public void AfterRsThePullUpOnPB0HoldsThePrinterLoopAtAMark()
+    {
+        var kim = new Kim1Session();
+        kim.Machine.Mode = Kim1Mode.Teletype;
+        kim.Machine.PressReset();
+        Assert.Equal(0, kim.Machine.Bus.U2.PortBDirection);
+        Assert.True(kim.Machine.Teletype.OutputMark);
+        kim.Machine.Run(100_000);
+        Assert.Equal("", kim.Machine.ReadTeletype());
+        Assert.Equal(0, kim.Machine.Teletype.FramingErrors);
+    }
+
+    /// <summary>
     /// The User Manual's section 2.6, step 6: the same cells as the keypad's
     /// first program, through the teletype, with what the manual says is
     /// printed after each line.
