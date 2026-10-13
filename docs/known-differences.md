@@ -165,8 +165,8 @@ seen.
 
 **What.** The teletype (`Kim1Teletype`) is modelled from the User Manual, the
 board's schematic and a disassembly of the monitor. It is not measured against
-a real board and a real Teletype Model 33. Four things are simpler than the
-hardware:
+a real board and a real Teletype Model 33. Five things are simpler than on
+the board:
 
 - **Levels, not currents.** The two 20 mA loops are logic levels. There is no
   loop resistance, no slow edge and no external supply, so a 60 mA loop, a
@@ -177,6 +177,13 @@ hardware:
   quiet for four bit times. A person at a real Teletype does not wait, and a
   key typed while the monitor prints is lost, and garbles the line. Here it
   waits its turn, so a whole command can be queued at once.
+- **Teletype keys wait for the keypad.** The page's host holds characters
+  typed at the teletype until every keypad tap queued so far has been played
+  and rested (`Kim1Keystrokes.TypeAtTeletype`). A person does not do this
+  deliberately, but a person types after the monitor has answered a key, and
+  the polite keyboard cannot see an answer that has not begun: after ST, the
+  monitor takes a few milliseconds to start printing, and a character sent
+  into that gap is garbled. The hold stands in for the person's pause.
 - **Overprint by replacement.** The paper (`TeletypePaper` in the tests,
   `teletype-paper.js` on the page) puts a character where the head is and
   drops what was there. A real printer strikes over it. The paper also keeps
@@ -192,7 +199,11 @@ punch.
 through the teletype, and `Kim1TeletypeLineTests` runs the terminal alone with
 the line driven by hand. `QueuedKeysWaitForBothLinesToBeQuiet` and
 `KeysQueuedWhileTheMonitorIsPrintingAreNotLost` pin the polite keyboard, and
-a send with no wait (`quietBits: 0`) shows the loss it prevents. Nothing tests
+a send with no wait (`quietBits: 0`) shows the loss it prevents.
+`TeletypeKeysWaitForTheKeypadTapsQueuedBeforeThem` and
+`AStopKeyAndTypingQueuedTogetherAreNotGarbled` pin the hold, and
+`WithoutTheHoldAStopKeyAndTypingQueuedTogetherAreGarbled` shows the garbling it
+prevents. Nothing tests
 the electrics or the overprint, because nothing models them.
 
 ## The BBC Micro: the bus and the memory map, where the sources stop
