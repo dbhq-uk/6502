@@ -5677,6 +5677,2149 @@
      }
     }
    ]
+  },
+  "identities": {
+   "what": "Each IC's marking as read by hand on the crops board_parts.py --crops writes (each IC's body and 3 mm round it, drawn onto the board frame through the photograph's fit at 12 pixels a millimetre, enlarged twice, turned so its rows run across, in sheets of eight in out/, git-ignored); read on 13 October 2026, after the method was fixed. reading is every line read, in order, the maker's logo left out; null with why where nothing could be read. populated: the photograph shows a part in the place. socket: true where a socket shows clearly (an empty one, or a frame round the part); absent where none was seen, which does not mean there is none.",
+   "I5": {
+    "marks": [
+     {
+      "ref": "IC1",
+      "populated": true,
+      "reading": "R6502AP R6502-13 8304",
+      "crop": {
+       "sheet": "out/parts-i5-00.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC2",
+      "populated": true,
+      "reading": "2L1 HD46505SP JAPAN HD6845SP",
+      "crop": {
+       "sheet": "out/parts-i5-00.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC3",
+      "populated": true,
+      "reading": "R6522P01 R6522-31 8318",
+      "crop": {
+       "sheet": "out/parts-i5-00.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC4",
+      "populated": true,
+      "reading": "F6850P 8313 USA",
+      "crop": {
+       "sheet": "out/parts-i5-00.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC5",
+      "populated": true,
+      "reading": "SAA 5050 2188 DSG8314M5S",
+      "crop": {
+       "sheet": "out/parts-i5-00.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC6",
+      "populated": true,
+      "reading": null,
+      "why": "under a black cover (a heat sink), no marking shows",
+      "crop": {
+       "sheet": "out/parts-i5-00.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC7",
+      "populated": true,
+      "reading": "FERRANTI ULA 2C199E-7 8317",
+      "crop": {
+       "sheet": "out/parts-i5-00.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC8",
+      "populated": true,
+      "reading": "SB8312 DM81LS95AN",
+      "crop": {
+       "sheet": "out/parts-i5-00.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC9",
+      "populated": true,
+      "reading": "SB8312 DM81LS95AN",
+      "crop": {
+       "sheet": "out/parts-i5-01.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC10",
+      "populated": true,
+      "reading": "SB8312 DM81LS95AN",
+      "crop": {
+       "sheet": "out/parts-i5-01.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC11",
+      "populated": true,
+      "reading": "SB8312 DM81LS95AN",
+      "crop": {
+       "sheet": "out/parts-i5-01.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC12",
+      "populated": true,
+      "reading": "SB8312 DM81LS95AN",
+      "crop": {
+       "sheet": "out/parts-i5-01.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC13",
+      "populated": true,
+      "reading": "SB8312 DM81LS95AN",
+      "crop": {
+       "sheet": "out/parts-i5-01.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC14",
+      "populated": true,
+      "reading": "74LS245 PC",
+      "crop": {
+       "sheet": "out/parts-i5-01.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC15",
+      "populated": true,
+      "reading": "74LS273N K8240 SA",
+      "crop": {
+       "sheet": "out/parts-i5-01.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC16",
+      "populated": true,
+      "reading": null,
+      "why": "an 8-pin part, its marking too small and blurred on I5 to read (a TI mark shows)",
+      "crop": {
+       "sheet": "out/parts-i5-01.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC17",
+      "populated": true,
+      "reading": "MALAYSIA 319AC LM324N",
+      "crop": {
+       "sheet": "out/parts-i5-02.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC18",
+      "populated": true,
+      "reading": "ENGLAND 318A SN76489AN",
+      "crop": {
+       "sheet": "out/parts-i5-02.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC19",
+      "populated": true,
+      "reading": null,
+      "why": "an 8-pin part, its marking too small and blurred on I5 to read (LM shows, the rest not)",
+      "crop": {
+       "sheet": "out/parts-i5-02.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC20",
+      "populated": true,
+      "reading": "PORTUGAL 8319X SN74LS139N",
+      "crop": {
+       "sheet": "out/parts-i5-02.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC21",
+      "populated": true,
+      "reading": "SN74LS00N I8306",
+      "crop": {
+       "sheet": "out/parts-i5-02.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC22",
+      "populated": true,
+      "reading": "SN74LS30N I8322",
+      "crop": {
+       "sheet": "out/parts-i5-02.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC23",
+      "populated": true,
+      "reading": "SN74LS30N I8322",
+      "crop": {
+       "sheet": "out/parts-i5-02.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC24",
+      "populated": true,
+      "reading": "SN74LS138N 8239",
+      "crop": {
+       "sheet": "out/parts-i5-02.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC25",
+      "populated": true,
+      "reading": "SP8319 DM74LS20N",
+      "crop": {
+       "sheet": "out/parts-i5-03.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC26",
+      "populated": true,
+      "reading": "PORTUGAL 8319X SN74LS139N",
+      "socket": true,
+      "crop": {
+       "sheet": "out/parts-i5-03.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC27",
+      "populated": true,
+      "reading": "7438N K8251 SA",
+      "crop": {
+       "sheet": "out/parts-i5-03.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC28",
+      "populated": true,
+      "reading": "PORTUGAL 8319D SN74LS51N",
+      "crop": {
+       "sheet": "out/parts-i5-03.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC29",
+      "populated": true,
+      "reading": "SN74LS32N",
+      "crop": {
+       "sheet": "out/parts-i5-03.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC30",
+      "populated": true,
+      "reading": "74LS74AN K8309 SA",
+      "crop": {
+       "sheet": "out/parts-i5-03.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC31",
+      "populated": true,
+      "reading": "74LS74AN K8309 SA",
+      "crop": {
+       "sheet": "out/parts-i5-03.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC32",
+      "populated": true,
+      "reading": "SN74LS259N I8318",
+      "crop": {
+       "sheet": "out/parts-i5-03.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC33",
+      "populated": true,
+      "reading": "MALAYSIA 319C SN74LS04N",
+      "crop": {
+       "sheet": "out/parts-i5-04.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC34",
+      "populated": true,
+      "reading": "74LS74AN K8309 SA",
+      "crop": {
+       "sheet": "out/parts-i5-04.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC35",
+      "populated": true,
+      "reading": "S=M8320 LM324N",
+      "crop": {
+       "sheet": "out/parts-i5-04.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC36",
+      "populated": true,
+      "reading": "PORTUGAL 8314C SN74LS10N",
+      "crop": {
+       "sheet": "out/parts-i5-04.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC37",
+      "populated": true,
+      "reading": "MALAYSIA 319C SN74LS04N",
+      "crop": {
+       "sheet": "out/parts-i5-04.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC38",
+      "populated": true,
+      "reading": "SP8319 DM74LS86N",
+      "crop": {
+       "sheet": "out/parts-i5-04.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC39",
+      "populated": true,
+      "reading": "PORTUGAL 8314B SN74LS283N",
+      "socket": true,
+      "crop": {
+       "sheet": "out/parts-i5-04.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC40",
+      "populated": true,
+      "reading": "PORTUGAL 8314B SN74S00N",
+      "crop": {
+       "sheet": "out/parts-i5-04.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC41",
+      "populated": true,
+      "reading": "SP234 DM74LS02N",
+      "crop": {
+       "sheet": "out/parts-i5-05.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC42",
+      "populated": true,
+      "reading": "PORTUGAL 8314B SN74LS163AN",
+      "crop": {
+       "sheet": "out/parts-i5-05.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC43",
+      "populated": true,
+      "reading": "SP250 DM74S04N",
+      "crop": {
+       "sheet": "out/parts-i5-05.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC44",
+      "populated": true,
+      "reading": "74LS74AN K8309 SA",
+      "crop": {
+       "sheet": "out/parts-i5-05.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC45",
+      "populated": true,
+      "reading": "I8303 DM74S139N",
+      "crop": {
+       "sheet": "out/parts-i5-05.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC46",
+      "populated": true,
+      "reading": "ENGLAND 249E SN74S74N",
+      "crop": {
+       "sheet": "out/parts-i5-05.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC47",
+      "populated": true,
+      "reading": "SP8319 DM74LS86N",
+      "crop": {
+       "sheet": "out/parts-i5-05.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC48",
+      "populated": true,
+      "reading": "SP8319 DM74LS86N",
+      "crop": {
+       "sheet": "out/parts-i5-05.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC49",
+      "populated": true,
+      "reading": "SN74LS00N I8306",
+      "crop": {
+       "sheet": "out/parts-i5-06.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC50",
+      "populated": true,
+      "reading": "SN74LS00N I8306",
+      "crop": {
+       "sheet": "out/parts-i5-06.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC51",
+      "populated": true,
+      "reading": "8308 HN613128PB04 ACORN JAPAN COMPUTERS LTD",
+      "crop": {
+       "sheet": "out/parts-i5-06.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC52",
+      "populated": true,
+      "reading": "8308 HN613128PB05 ACORN JAPAN COMPUTERS LTD",
+      "crop": {
+       "sheet": "out/parts-i5-06.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC53",
+      "populated": true,
+      "reading": "JAPAN 3E3 HM4816AP-11",
+      "crop": {
+       "sheet": "out/parts-i5-06.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC54",
+      "populated": true,
+      "reading": "JAPAN 3E3 HM4816AP-11",
+      "crop": {
+       "sheet": "out/parts-i5-06.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC55",
+      "populated": true,
+      "reading": "JAPAN 3E3 HM4816AP-11",
+      "crop": {
+       "sheet": "out/parts-i5-06.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC56",
+      "populated": true,
+      "reading": "JAPAN 3E3 HM4816AP-11",
+      "crop": {
+       "sheet": "out/parts-i5-06.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC57",
+      "populated": true,
+      "reading": "JAPAN 3E3 HM4816AP-11",
+      "crop": {
+       "sheet": "out/parts-i5-07.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC58",
+      "populated": true,
+      "reading": "JAPAN 3E3 HM4816AP-11",
+      "crop": {
+       "sheet": "out/parts-i5-07.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC59",
+      "populated": true,
+      "reading": "JAPAN 3E3 HM4816AP-11",
+      "crop": {
+       "sheet": "out/parts-i5-07.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC60",
+      "populated": true,
+      "reading": "JAPAN 3E3 HM4816AP-11",
+      "crop": {
+       "sheet": "out/parts-i5-07.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC61",
+      "populated": true,
+      "reading": "MOSTEK 8405 MK4516N-11",
+      "crop": {
+       "sheet": "out/parts-i5-07.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC62",
+      "populated": true,
+      "reading": "MOSTEK 8405 MK4516N-11",
+      "crop": {
+       "sheet": "out/parts-i5-07.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC63",
+      "populated": true,
+      "reading": "MOSTEK 8405 MK4516N-11",
+      "crop": {
+       "sheet": "out/parts-i5-07.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC64",
+      "populated": true,
+      "reading": "MOSTEK 8405 MK4516N-11",
+      "crop": {
+       "sheet": "out/parts-i5-07.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC65",
+      "populated": true,
+      "reading": "MOSTEK 8405 MK4516N-11",
+      "crop": {
+       "sheet": "out/parts-i5-08.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC66",
+      "populated": true,
+      "reading": "MOSTEK 8405 MK4516N-11",
+      "crop": {
+       "sheet": "out/parts-i5-08.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC67",
+      "populated": true,
+      "reading": "MOSTEK 8405 MK4516N-11",
+      "crop": {
+       "sheet": "out/parts-i5-08.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC68",
+      "populated": true,
+      "reading": "MOSTEK 8405 MK4516N-11",
+      "crop": {
+       "sheet": "out/parts-i5-08.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC69",
+      "populated": true,
+      "reading": "8329 SY6522",
+      "crop": {
+       "sheet": "out/parts-i5-08.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC70",
+      "populated": true,
+      "reading": "74LS244N 8225 SA",
+      "crop": {
+       "sheet": "out/parts-i5-08.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC71",
+      "populated": true,
+      "reading": "74LS244N K8243 SA",
+      "crop": {
+       "sheet": "out/parts-i5-08.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC72",
+      "populated": true,
+      "reading": "PORTUGAL 8319D SN74LS245N",
+      "crop": {
+       "sheet": "out/parts-i5-08.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC73",
+      "populated": true,
+      "reading": "NEC JAPAN 8409K9 D7002C",
+      "crop": {
+       "sheet": "out/parts-i5-09.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC74",
+      "populated": true,
+      "reading": "I8408 DS88LS120N",
+      "crop": {
+       "sheet": "out/parts-i5-09.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC75",
+      "populated": true,
+      "reading": "SI8344 DS3691N AM26LS30PC",
+      "crop": {
+       "sheet": "out/parts-i5-09.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC76",
+      "populated": true,
+      "reading": "74LS163AN V8240 SA",
+      "crop": {
+       "sheet": "out/parts-i5-09.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC77",
+      "populated": true,
+      "reading": "74LS00N 8218 S",
+      "crop": {
+       "sheet": "out/parts-i5-09.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC78",
+      "populated": false,
+      "reading": null,
+      "why": "an empty socket on I5",
+      "socket": true,
+      "crop": {
+       "sheet": "out/parts-i5-09.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC79",
+      "populated": false,
+      "reading": null,
+      "why": "an empty socket on I5",
+      "socket": true,
+      "crop": {
+       "sheet": "out/parts-i5-09.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC80",
+      "populated": false,
+      "reading": null,
+      "why": "an empty socket on I5",
+      "socket": true,
+      "crop": {
+       "sheet": "out/parts-i5-09.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC81",
+      "populated": false,
+      "reading": null,
+      "why": "an empty socket on I5",
+      "socket": true,
+      "crop": {
+       "sheet": "out/parts-i5-10.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC82",
+      "populated": false,
+      "reading": null,
+      "why": "an empty socket on I5",
+      "socket": true,
+      "crop": {
+       "sheet": "out/parts-i5-10.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC83",
+      "populated": false,
+      "reading": null,
+      "why": "an empty socket on I5",
+      "socket": true,
+      "crop": {
+       "sheet": "out/parts-i5-10.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC84",
+      "populated": false,
+      "reading": null,
+      "why": "an empty socket on I5",
+      "socket": true,
+      "crop": {
+       "sheet": "out/parts-i5-10.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC85",
+      "populated": false,
+      "reading": null,
+      "why": "an empty socket on I5",
+      "socket": true,
+      "crop": {
+       "sheet": "out/parts-i5-10.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC86",
+      "populated": false,
+      "reading": null,
+      "why": "an empty socket on I5",
+      "socket": true,
+      "crop": {
+       "sheet": "out/parts-i5-10.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC87",
+      "populated": true,
+      "reading": "PORTUGAL 8314A SN74LS123N",
+      "crop": {
+       "sheet": "out/parts-i5-10.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC88",
+      "populated": true,
+      "reading": "M27C64A -15F1 SINGAPORE, with a hand label LFS 1.40",
+      "crop": {
+       "sheet": "out/parts-i5-10.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC89",
+      "populated": true,
+      "reading": "F68B54P 8313 PHILIPPINES",
+      "crop": {
+       "sheet": "out/parts-i5-11.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC91",
+      "populated": true,
+      "reading": "MALAYSIA 310K SN74LS132N",
+      "crop": {
+       "sheet": "out/parts-i5-11.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC93",
+      "populated": true,
+      "reading": "ENGLAND 314A SN75159N",
+      "crop": {
+       "sheet": "out/parts-i5-11.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC94",
+      "populated": true,
+      "reading": "S=M8319 LM319N",
+      "crop": {
+       "sheet": "out/parts-i5-11.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC95",
+      "populated": true,
+      "reading": "S=M8319 LM319N",
+      "crop": {
+       "sheet": "out/parts-i5-11.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC96",
+      "populated": true,
+      "reading": "74LS244N 8231 SA",
+      "crop": {
+       "sheet": "out/parts-i5-11.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC97",
+      "populated": true,
+      "reading": "74LS74AN K8309 SA",
+      "crop": {
+       "sheet": "out/parts-i5-11.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC98",
+      "populated": false,
+      "reading": null,
+      "why": "an empty socket on I5",
+      "socket": true,
+      "crop": {
+       "sheet": "out/parts-i5-11.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC99",
+      "populated": false,
+      "reading": null,
+      "why": "an empty socket on I5",
+      "socket": true,
+      "crop": {
+       "sheet": "out/parts-i5-12.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC100",
+      "populated": false,
+      "reading": null,
+      "why": "an empty socket on I5",
+      "socket": true,
+      "crop": {
+       "sheet": "out/parts-i5-12.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC101",
+      "populated": false,
+      "reading": null,
+      "why": "an empty socket on I5",
+      "socket": true,
+      "crop": {
+       "sheet": "out/parts-i5-12.png",
+       "by": "board_parts.py --crops"
+      }
+     }
+    ]
+   },
+   "I6": {
+    "marks": [
+     {
+      "ref": "IC1",
+      "populated": true,
+      "reading": "S 8434 SYU6502A",
+      "crop": {
+       "sheet": "out/parts-i6-00.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC2",
+      "populated": true,
+      "reading": "4H4 HD46505SP JAPAN HD6845SP",
+      "crop": {
+       "sheet": "out/parts-i6-00.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC3",
+      "populated": true,
+      "reading": "R6522AP R6522-33 8424",
+      "crop": {
+       "sheet": "out/parts-i6-00.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC4",
+      "populated": true,
+      "reading": null,
+      "why": "glare on its top",
+      "crop": {
+       "sheet": "out/parts-i6-00.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC5",
+      "populated": true,
+      "reading": "SAA 5050 5894 GSG8414M5S",
+      "crop": {
+       "sheet": "out/parts-i6-00.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC6",
+      "populated": true,
+      "reading": "VTI 423 V 2787 VC2069 201647 ACORN COMPUTER KOREA-A",
+      "crop": {
+       "sheet": "out/parts-i6-00.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC7",
+      "populated": true,
+      "reading": "FERRANTI ULA 2C199E-7 8420",
+      "crop": {
+       "sheet": "out/parts-i6-00.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC8",
+      "populated": true,
+      "reading": "SP8412 DM81LS95AN",
+      "crop": {
+       "sheet": "out/parts-i6-00.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC9",
+      "populated": true,
+      "reading": "SP8412 DM81LS95AN",
+      "crop": {
+       "sheet": "out/parts-i6-01.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC10",
+      "populated": true,
+      "reading": "SP8412 DM81LS95AN",
+      "crop": {
+       "sheet": "out/parts-i6-01.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC11",
+      "populated": true,
+      "reading": "SP8412 DM81LS95AN",
+      "crop": {
+       "sheet": "out/parts-i6-01.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC12",
+      "populated": true,
+      "reading": "SP8412 DM81LS95AN",
+      "crop": {
+       "sheet": "out/parts-i6-01.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC13",
+      "populated": true,
+      "reading": "SP8412 DM81LS95AN",
+      "crop": {
+       "sheet": "out/parts-i6-01.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC14",
+      "populated": true,
+      "reading": "MALAYSIA 4285R SN74LS245N",
+      "crop": {
+       "sheet": "out/parts-i6-01.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC15",
+      "populated": true,
+      "reading": "74LS273N A VV8433 BV",
+      "crop": {
+       "sheet": "out/parts-i6-01.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC16",
+      "populated": true,
+      "reading": null,
+      "why": "an 8-pin part, too small and dark to read",
+      "crop": {
+       "sheet": "out/parts-i6-01.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC17",
+      "populated": true,
+      "reading": "ENGLAND 432A LM324N",
+      "crop": {
+       "sheet": "out/parts-i6-02.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC18",
+      "populated": true,
+      "reading": "ENGLAND 419X SN76489AN",
+      "crop": {
+       "sheet": "out/parts-i6-02.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC19",
+      "populated": true,
+      "reading": "M8416 LM386N-1",
+      "crop": {
+       "sheet": "out/parts-i6-02.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC20",
+      "populated": true,
+      "reading": "P8428 DM74LS139N",
+      "crop": {
+       "sheet": "out/parts-i6-02.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC21",
+      "populated": true,
+      "reading": "74LS00N A KK8429 HU",
+      "crop": {
+       "sheet": "out/parts-i6-02.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC22",
+      "populated": true,
+      "reading": "74LS30N K8425 SA",
+      "crop": {
+       "sheet": "out/parts-i6-02.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC23",
+      "populated": true,
+      "reading": "74LS30N K8425 SA",
+      "crop": {
+       "sheet": "out/parts-i6-02.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC24",
+      "populated": true,
+      "reading": "74LS138N 8422 B",
+      "crop": {
+       "sheet": "out/parts-i6-02.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC25",
+      "populated": true,
+      "reading": "74LS20N K8427 SA",
+      "crop": {
+       "sheet": "out/parts-i6-03.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC26",
+      "populated": true,
+      "reading": "P8428 DM74LS139N",
+      "crop": {
+       "sheet": "out/parts-i6-03.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC27",
+      "populated": true,
+      "reading": "7438N A KK8430 EU",
+      "crop": {
+       "sheet": "out/parts-i6-03.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC28",
+      "populated": true,
+      "reading": "74LS51N A KK8423 ES",
+      "crop": {
+       "sheet": "out/parts-i6-03.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC29",
+      "populated": true,
+      "reading": "P8424 DM74LS32N",
+      "crop": {
+       "sheet": "out/parts-i6-03.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC30",
+      "populated": true,
+      "reading": "P8428 DM74LS74AN",
+      "crop": {
+       "sheet": "out/parts-i6-03.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC31",
+      "populated": true,
+      "reading": "P8428 DM74LS74AN",
+      "crop": {
+       "sheet": "out/parts-i6-03.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC32",
+      "populated": true,
+      "reading": null,
+      "why": "too faint to read",
+      "crop": {
+       "sheet": "out/parts-i6-03.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC33",
+      "populated": true,
+      "reading": "P8420 DM74LS04N",
+      "crop": {
+       "sheet": "out/parts-i6-04.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC34",
+      "populated": true,
+      "reading": "PORTUGAL 8435A SN74LS74AN",
+      "crop": {
+       "sheet": "out/parts-i6-04.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC35",
+      "populated": true,
+      "reading": "ENGLAND 435A LM324N",
+      "crop": {
+       "sheet": "out/parts-i6-04.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC36",
+      "populated": true,
+      "reading": "MALAYSIA 432CR SN74LS10N",
+      "crop": {
+       "sheet": "out/parts-i6-04.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC37",
+      "populated": true,
+      "reading": "P8420 DM74LS04N",
+      "crop": {
+       "sheet": "out/parts-i6-04.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC38",
+      "populated": true,
+      "reading": "74LS86N A KK8432 BU",
+      "crop": {
+       "sheet": "out/parts-i6-04.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC39",
+      "populated": true,
+      "reading": "P8428 DM74LS283N",
+      "crop": {
+       "sheet": "out/parts-i6-04.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC40",
+      "populated": true,
+      "reading": "74S00N A KK8433 EV",
+      "crop": {
+       "sheet": "out/parts-i6-04.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC41",
+      "populated": true,
+      "reading": null,
+      "why": "too faint to read",
+      "crop": {
+       "sheet": "out/parts-i6-05.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC42",
+      "populated": true,
+      "reading": "P8416 DM74LS163AN",
+      "crop": {
+       "sheet": "out/parts-i6-05.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC43",
+      "populated": true,
+      "reading": "MALAYSIA 432AR SN74S04N",
+      "crop": {
+       "sheet": "out/parts-i6-05.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC44",
+      "populated": true,
+      "reading": "P8428 DM74LS74AN",
+      "crop": {
+       "sheet": "out/parts-i6-05.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC45",
+      "populated": true,
+      "reading": "74S139N K8410 SA",
+      "crop": {
+       "sheet": "out/parts-i6-05.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC46",
+      "populated": true,
+      "reading": null,
+      "why": "the crop through the rough fit falls across two chips (no point was marked at that end of the board)",
+      "crop": {
+       "sheet": "out/parts-i6-05.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC47",
+      "populated": true,
+      "reading": null,
+      "why": "the crop through the rough fit falls across two chips (no point was marked at that end of the board)",
+      "crop": {
+       "sheet": "out/parts-i6-05.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC48",
+      "populated": true,
+      "reading": null,
+      "why": "the crop through the rough fit falls across two chips (no point was marked at that end of the board)",
+      "crop": {
+       "sheet": "out/parts-i6-05.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC49",
+      "populated": true,
+      "reading": null,
+      "why": "the crop through the rough fit falls across two chips (no point was marked at that end of the board)",
+      "crop": {
+       "sheet": "out/parts-i6-06.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC50",
+      "populated": true,
+      "reading": null,
+      "why": "the crop through the rough fit falls across two chips (no point was marked at that end of the board)",
+      "crop": {
+       "sheet": "out/parts-i6-06.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC51",
+      "populated": true,
+      "reading": "8438 HN613128PB04 ACORN W.GERMANY COMPUTERS LTD",
+      "crop": {
+       "sheet": "out/parts-i6-06.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC52",
+      "populated": true,
+      "reading": "8421 HN613128PB05 ACORN JAPAN COMPUTERS LTD",
+      "crop": {
+       "sheet": "out/parts-i6-06.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC53",
+      "populated": true,
+      "reading": null,
+      "why": "the crop through the rough fit is not centred on its own chip, though every RAM on I6 reads HM4816AP-11",
+      "crop": {
+       "sheet": "out/parts-i6-06.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC54",
+      "populated": true,
+      "reading": null,
+      "why": "the crop through the rough fit is not centred on its own chip, though every RAM on I6 reads HM4816AP-11",
+      "crop": {
+       "sheet": "out/parts-i6-06.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC55",
+      "populated": true,
+      "reading": null,
+      "why": "the crop through the rough fit is not centred on its own chip, though every RAM on I6 reads HM4816AP-11",
+      "crop": {
+       "sheet": "out/parts-i6-06.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC56",
+      "populated": true,
+      "reading": null,
+      "why": "the crop through the rough fit is not centred on its own chip, though every RAM on I6 reads HM4816AP-11",
+      "crop": {
+       "sheet": "out/parts-i6-06.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC57",
+      "populated": true,
+      "reading": null,
+      "why": "the crop through the rough fit is not centred on its own chip, though every RAM on I6 reads HM4816AP-11",
+      "crop": {
+       "sheet": "out/parts-i6-07.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC58",
+      "populated": true,
+      "reading": null,
+      "why": "the crop through the rough fit is not centred on its own chip, though every RAM on I6 reads HM4816AP-11",
+      "crop": {
+       "sheet": "out/parts-i6-07.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC59",
+      "populated": true,
+      "reading": null,
+      "why": "the crop through the rough fit is not centred on its own chip, though every RAM on I6 reads HM4816AP-11",
+      "crop": {
+       "sheet": "out/parts-i6-07.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC60",
+      "populated": true,
+      "reading": null,
+      "why": "the crop through the rough fit is not centred on its own chip, though every RAM on I6 reads HM4816AP-11",
+      "crop": {
+       "sheet": "out/parts-i6-07.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC61",
+      "populated": true,
+      "reading": null,
+      "why": "the crop through the rough fit is not centred on its own chip, though every RAM on I6 reads HM4816AP-11",
+      "crop": {
+       "sheet": "out/parts-i6-07.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC62",
+      "populated": true,
+      "reading": null,
+      "why": "the crop through the rough fit is not centred on its own chip, though every RAM on I6 reads HM4816AP-11",
+      "crop": {
+       "sheet": "out/parts-i6-07.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC63",
+      "populated": true,
+      "reading": null,
+      "why": "the crop through the rough fit is not centred on its own chip, though every RAM on I6 reads HM4816AP-11",
+      "crop": {
+       "sheet": "out/parts-i6-07.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC64",
+      "populated": true,
+      "reading": null,
+      "why": "the crop through the rough fit is not centred on its own chip, though every RAM on I6 reads HM4816AP-11",
+      "crop": {
+       "sheet": "out/parts-i6-07.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC65",
+      "populated": true,
+      "reading": null,
+      "why": "the crop through the rough fit is not centred on its own chip, though every RAM on I6 reads HM4816AP-11",
+      "crop": {
+       "sheet": "out/parts-i6-08.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC66",
+      "populated": true,
+      "reading": null,
+      "why": "the crop through the rough fit is not centred on its own chip, though every RAM on I6 reads HM4816AP-11",
+      "crop": {
+       "sheet": "out/parts-i6-08.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC67",
+      "populated": true,
+      "reading": null,
+      "why": "the crop through the rough fit is not centred on its own chip, though every RAM on I6 reads HM4816AP-11",
+      "crop": {
+       "sheet": "out/parts-i6-08.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC68",
+      "populated": true,
+      "reading": null,
+      "why": "the crop through the rough fit is not centred on its own chip, though every RAM on I6 reads HM4816AP-11",
+      "crop": {
+       "sheet": "out/parts-i6-08.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC69",
+      "populated": true,
+      "reading": "R6522AP R6522-33 8424",
+      "crop": {
+       "sheet": "out/parts-i6-08.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC70",
+      "populated": true,
+      "reading": "74LS244N A VV8429 FU",
+      "crop": {
+       "sheet": "out/parts-i6-08.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC71",
+      "populated": true,
+      "reading": "74LS244N A VV8429 FU",
+      "crop": {
+       "sheet": "out/parts-i6-08.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC72",
+      "populated": true,
+      "reading": "PORTUGAL SN74LS245N",
+      "crop": {
+       "sheet": "out/parts-i6-08.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC73",
+      "populated": true,
+      "reading": "NEC JAPAN 8420K9 D7002C",
+      "crop": {
+       "sheet": "out/parts-i6-09.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC74",
+      "populated": true,
+      "reading": "SI8420 DS88LS120N",
+      "crop": {
+       "sheet": "out/parts-i6-09.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC75",
+      "populated": true,
+      "reading": "SI8420 DS3691N AM26LS30PC",
+      "crop": {
+       "sheet": "out/parts-i6-09.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC76",
+      "populated": true,
+      "reading": "SP8416 DM74LS163AN",
+      "crop": {
+       "sheet": "out/parts-i6-09.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC77",
+      "populated": true,
+      "reading": "74LS00N A KK8429 HU",
+      "crop": {
+       "sheet": "out/parts-i6-09.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC78",
+      "populated": true,
+      "reading": "P8271 V4340008 INTEL 78",
+      "crop": {
+       "sheet": "out/parts-i6-09.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC79",
+      "populated": true,
+      "reading": "7438N A KK8425 ET",
+      "crop": {
+       "sheet": "out/parts-i6-09.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC80",
+      "populated": true,
+      "reading": "7438N A KK8425 ET",
+      "crop": {
+       "sheet": "out/parts-i6-09.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC81",
+      "populated": true,
+      "reading": "MALAYSIA 432AR SN74LS393N",
+      "crop": {
+       "sheet": "out/parts-i6-10.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC82",
+      "populated": true,
+      "reading": "MALAYSIA 432CR SN74LS10N",
+      "crop": {
+       "sheet": "out/parts-i6-10.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC83",
+      "populated": true,
+      "reading": null,
+      "why": "too dark to read",
+      "crop": {
+       "sheet": "out/parts-i6-10.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC84",
+      "populated": true,
+      "reading": null,
+      "why": "too dark to read",
+      "crop": {
+       "sheet": "out/parts-i6-10.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC85",
+      "populated": true,
+      "reading": "HEF4020BP HSS8422 1",
+      "crop": {
+       "sheet": "out/parts-i6-10.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC86",
+      "populated": true,
+      "reading": "MALAYSIA 432AR SN74LS393N",
+      "crop": {
+       "sheet": "out/parts-i6-10.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC87",
+      "populated": true,
+      "reading": "SN74LS123N",
+      "crop": {
+       "sheet": "out/parts-i6-10.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC88",
+      "populated": true,
+      "reading": "CN61014N 00201666-03 ACORN KK8430 -U",
+      "crop": {
+       "sheet": "out/parts-i6-10.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC89",
+      "populated": false,
+      "reading": null,
+      "why": "a bare footprint on I6: not fitted on that board",
+      "crop": {
+       "sheet": "out/parts-i6-11.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC91",
+      "populated": false,
+      "reading": null,
+      "why": "a bare footprint on I6: not fitted on that board",
+      "crop": {
+       "sheet": "out/parts-i6-11.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC93",
+      "populated": false,
+      "reading": null,
+      "why": "a bare footprint on I6: not fitted on that board",
+      "crop": {
+       "sheet": "out/parts-i6-11.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC94",
+      "populated": false,
+      "reading": null,
+      "why": "a bare footprint on I6: not fitted on that board",
+      "crop": {
+       "sheet": "out/parts-i6-11.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC95",
+      "populated": false,
+      "reading": null,
+      "why": "a bare footprint on I6: not fitted on that board",
+      "crop": {
+       "sheet": "out/parts-i6-11.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC96",
+      "populated": false,
+      "reading": null,
+      "why": "a bare footprint on I6: not fitted on that board",
+      "crop": {
+       "sheet": "out/parts-i6-11.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC97",
+      "populated": false,
+      "reading": null,
+      "why": "a bare footprint on I6: not fitted on that board",
+      "crop": {
+       "sheet": "out/parts-i6-11.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC98",
+      "populated": false,
+      "reading": null,
+      "why": "an empty socket on I6",
+      "socket": true,
+      "crop": {
+       "sheet": "out/parts-i6-11.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC99",
+      "populated": false,
+      "reading": null,
+      "why": "an empty socket on I6",
+      "socket": true,
+      "crop": {
+       "sheet": "out/parts-i6-12.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC100",
+      "populated": false,
+      "reading": null,
+      "why": "an empty socket on I6",
+      "socket": true,
+      "crop": {
+       "sheet": "out/parts-i6-12.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC101",
+      "populated": false,
+      "reading": null,
+      "why": "an empty socket on I6",
+      "socket": true,
+      "crop": {
+       "sheet": "out/parts-i6-12.png",
+       "by": "board_parts.py --crops"
+      }
+     }
+    ]
+   }
+  },
+  "i6Points": {
+   "what": "Corner pins of four chips on I6 (Chris's Acorns' photograph of a populated Issue 7 board in its case), in its pixels, each the middle of the leg read by eye on a crop enlarged three times with a 10 px grid labelled in I6's pixels; only for drawing the crops I6's markings are read on (I6 is oblique and its places are not judged). At about 5 to 6 pixels a millimetre a leg is read to 2 or 3 pixels.",
+   "marks": [
+    {
+     "ref": "IC2",
+     "pin": 1,
+     "i6Px": [
+      1022,
+      235
+     ],
+     "crop": {
+      "box": [
+       1000,
+       220,
+       1150,
+       520
+      ],
+      "zoom": 3
+     }
+    },
+    {
+     "ref": "IC2",
+     "pin": 20,
+     "i6Px": [
+      1022,
+      477
+     ],
+     "crop": {
+      "box": [
+       1000,
+       220,
+       1150,
+       520
+      ],
+      "zoom": 3
+     }
+    },
+    {
+     "ref": "IC2",
+     "pin": 21,
+     "i6Px": [
+      1106,
+      477
+     ],
+     "crop": {
+      "box": [
+       1000,
+       220,
+       1150,
+       520
+      ],
+      "zoom": 3
+     }
+    },
+    {
+     "ref": "IC2",
+     "pin": 40,
+     "i6Px": [
+      1106,
+      235
+     ],
+     "crop": {
+      "box": [
+       1000,
+       220,
+       1150,
+       520
+      ],
+      "zoom": 3
+     }
+    },
+    {
+     "ref": "IC78",
+     "pin": 1,
+     "i6Px": [
+      431,
+      561
+     ],
+     "crop": {
+      "box": [
+       400,
+       520,
+       530,
+       850
+      ],
+      "zoom": 3
+     }
+    },
+    {
+     "ref": "IC78",
+     "pin": 20,
+     "i6Px": [
+      416,
+      812
+     ],
+     "crop": {
+      "box": [
+       400,
+       520,
+       530,
+       850
+      ],
+      "zoom": 3
+     }
+    },
+    {
+     "ref": "IC78",
+     "pin": 21,
+     "i6Px": [
+      510,
+      812
+     ],
+     "crop": {
+      "box": [
+       400,
+       520,
+       530,
+       850
+      ],
+      "zoom": 3
+     }
+    },
+    {
+     "ref": "IC78",
+     "pin": 40,
+     "i6Px": [
+      517,
+      560
+     ],
+     "crop": {
+      "box": [
+       400,
+       520,
+       530,
+       850
+      ],
+      "zoom": 3
+     }
+    },
+    {
+     "ref": "IC51",
+     "pin": 1,
+     "i6Px": [
+      1366,
+      912
+     ],
+     "crop": {
+      "box": [
+       1350,
+       880,
+       1480,
+       1130
+      ],
+      "zoom": 3
+     }
+    },
+    {
+     "ref": "IC51",
+     "pin": 14,
+     "i6Px": [
+      1366,
+      1110
+     ],
+     "crop": {
+      "box": [
+       1350,
+       880,
+       1480,
+       1130
+      ],
+      "zoom": 3
+     }
+    },
+    {
+     "ref": "IC51",
+     "pin": 15,
+     "i6Px": [
+      1458,
+      1110
+     ],
+     "crop": {
+      "box": [
+       1350,
+       880,
+       1480,
+       1130
+      ],
+      "zoom": 3
+     }
+    },
+    {
+     "ref": "IC51",
+     "pin": 28,
+     "i6Px": [
+      1458,
+      912
+     ],
+     "crop": {
+      "box": [
+       1350,
+       880,
+       1480,
+       1130
+      ],
+      "zoom": 3
+     }
+    },
+    {
+     "ref": "IC73",
+     "pin": 1,
+     "i6Px": [
+      683,
+      155
+     ],
+     "crop": {
+      "box": [
+       660,
+       130,
+       790,
+       350
+      ],
+      "zoom": 3
+     }
+    },
+    {
+     "ref": "IC73",
+     "pin": 14,
+     "i6Px": [
+      680,
+      323
+     ],
+     "crop": {
+      "box": [
+       660,
+       130,
+       790,
+       350
+      ],
+      "zoom": 3
+     }
+    },
+    {
+     "ref": "IC73",
+     "pin": 15,
+     "i6Px": [
+      760,
+      323
+     ],
+     "crop": {
+      "box": [
+       660,
+       130,
+       790,
+       350
+      ],
+      "zoom": 3
+     }
+    },
+    {
+     "ref": "IC73",
+     "pin": 28,
+     "i6Px": [
+      764,
+      155
+     ],
+     "crop": {
+      "box": [
+       660,
+       130,
+       790,
+       350
+      ],
+      "zoom": 3
+     }
+    }
+   ]
   }
  }
 }

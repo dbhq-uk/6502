@@ -670,3 +670,239 @@ test('board_trace.py and common.py on disk are the method fixed before task 4\'s
     assert.equal(sha, recorded[f], `${f} is not the file the method was fixed with`);
   }
 });
+
+// --- Task 5: the parts, places and identities --------------------------------------------------
+
+const parts = JSON.parse(fs.readFileSync(path.join(TOOL, 'data', 'parts.json'), 'utf8'));
+const marks = JSON.parse(fs.readFileSync(path.join(TOOL, 'data', 'marks.json'), 'utf8'));
+const PARTS_MJS = path.join(REPO_ROOT, 'site', 'src', 'models', 'bbc-micro-board-parts.mjs');
+const JOURNAL = path.join(REPO_ROOT, 'docs', 'journal', '2026-10-04-the-bbc-micro-models.md');
+const MODELS_MD = path.join(REPO_ROOT, 'docs', 'bbc-micro', 'facts', 'models.md');
+// task 6's BbcChip, in its order, as the plan's task 5 note fixed the names
+const BBC_CHIPS = ['crtc', 'acia', 'serialUla', 'videoUla', 'romLatch', 'systemVia', 'userVia', 'fdc8271', 'adc', 'sound'];
+const byRef = (a, b) => Number(a.slice(2)) - Number(b.slice(2));
+
+function task5Hashes() {
+  const journal = fs.readFileSync(JOURNAL, 'utf8');
+  const section = journal.split('## Task 5: the parts, places and identities')[1] ?? '';
+  const block = section.split('### The method fixed')[1]?.split(/\n#{2,3} /)[0] ?? '';
+  return Object.fromEntries([...block.matchAll(/^([0-9a-f]{64}) (\S+)$/gm)].map(([, sha, f]) => [f, sha]));
+}
+
+test('parts.json was written by the method fixed before task 5\'s checks ran, and board_parts.py on disk is that method', () => {
+  const recorded = task5Hashes();
+  assert.ok(Object.keys(recorded).length >= 7, 'the journal records task 5\'s method\'s hashes');
+  assert.deepEqual(parts.methodFixed, recorded);
+  // A change to board_parts.py (a threshold such as MANUAL_LIMIT_MM, or the identities' rule) means parts.json no longer
+  // comes from the code in the repository, and needs a new check, fixed before it runs, and a journal entry.
+  for (const f of ['tools/bbc-micro-model/board_parts.py', 'tools/bbc-micro-model/common.py']) {
+    const sha = crypto.createHash('sha256').update(fs.readFileSync(path.join(REPO_ROOT, f))).digest('hex');
+    assert.equal(sha, recorded[f], `${f} is not the file task 5's method was fixed with`);
+  }
+});
+
+function footprintPads(ref) {
+  const f = registration.footprints.find((x) => x.ref === ref && x.kind === 'dip');
+  if (f) return f.pads.map((i) => [registration.pads[i].x, registration.pads[i].y]);
+  const m = marks.parts.eightPin.marks.find((x) => x.ref === ref);
+  if (!m) return null;
+  // a pad task 3 did not find goes on its row's line, at its place in the pitch (board_parts.py's marked_footprint)
+  const pts = m.pads.map((i) => (i === null ? null : [registration.pads[i].x, registration.pads[i].y]));
+  const half = pts.length / 2;
+  for (const row of [[...Array(half).keys()], [...Array(half).keys()].map((k) => k + half)]) {
+    const known = row.map((i, k) => [k, pts[i]]).filter(([, p]) => p);
+    for (const [k, i] of row.map((i, k) => [k, i])) {
+      if (pts[i]) continue;
+      const fit = (c) => { // least squares line through the row's known pads, by their place in the pitch
+        const n = known.length, sx = known.reduce((s, [q]) => s + q, 0), sy = known.reduce((s, [, p]) => s + p[c], 0);
+        const sxx = known.reduce((s, [q]) => s + q * q, 0), sxy = known.reduce((s, [q, p]) => s + q * p[c], 0);
+        const b = (n * sxy - sx * sy) / (n * sxx - sx * sx);
+        return (sy - b * sx) / n + b * k;
+      };
+      pts[i] = [fit(0), fit(1)];
+    }
+  }
+  return pts;
+}
+
+test('every placed IC sits on its footprint: its pads\' centre, its turn from pin 1 to pin N/2, a pad for each pin', () => {
+  const ics = parts.model.ics;
+  assert.equal(ics.length, Object.keys(parts.places).length);
+  for (const ic of ics) {
+    const pads = footprintPads(ic.ref);
+    assert.ok(pads, `${ic.ref} has no footprint`);
+    assert.equal(pads.length, ic.pins, `${ic.ref}: its footprint has ${pads.length} pads, its part ${ic.pins} pins`);
+    assert.equal(ic.pins, icTable.ics.find((x) => x.ref === ic.ref).pins, ic.ref);
+    const cx = pads.reduce((s, p) => s + p[0], 0) / pads.length, cy = pads.reduce((s, p) => s + p[1], 0) / pads.length;
+    assert.ok(Math.abs(cx - ic.x) < 0.002 && Math.abs(cy - ic.y) < 0.002, `${ic.ref} is not at its pads' centre`);
+    const end = pads[ic.pins / 2 - 1];
+    const turn = Math.atan2(end[1] - pads[0][1], end[0] - pads[0][0]) * 180 / Math.PI;
+    assert.ok(Math.abs(turn - ic.rotation) < 0.002, `${ic.ref}: turned ${ic.rotation}, its pins say ${turn}`);
+  }
+  // every fitted IC is placed; the two not placed are not fitted and have no footprint
+  const placed = new Set(ics.map((i) => i.ref));
+  assert.deepEqual(icTable.ics.filter((i) => !placed.has(i.ref)).map((i) => [i.ref, i.fitted]), [['IC90', false], ['IC92', false]]);
+  assert.equal(parts.verdicts.padCounts, 'pass');
+});
+
+function fittedRecord() {
+  const md = fs.readFileSync(MODELS_MD, 'utf8');
+  const section = md.split('\n## The fitted set\n')[1]?.split('\n## ')[0] ?? '';
+  const rows = [...section.matchAll(/^\| (IC\d+) \| ([^|]+) \| (yes|no) \| [^|]+ \| ([^|]*) \| ([^|]*) \|$/gm)];
+  return Object.fromEntries(rows.map(([, ref, part, fitted, sheila, paged]) =>
+    [ref, { part: part.trim(), fitted: fitted === 'yes', sheila: sheila.trim() || null, paged: paged.trim() || null }]));
+}
+
+test('the fitted set, the counters and the paged ROMs are models.md\'s record, in ic-table.json, parts.json and the module alike', async () => {
+  const record = fittedRecord();
+  assert.deepEqual(Object.keys(record), icTable.ics.map((i) => i.ref), 'models.md\'s fitted set has a row for every IC, in order');
+  for (const ic of icTable.ics) {
+    assert.deepEqual([ic.part, ic.fitted, ic.paged ?? null], [record[ic.ref].part, record[ic.ref].fitted, record[ic.ref].paged], ic.ref);
+    assert.ok(ic.fittedWhy && ic.fittedWhy.length > 20, `${ic.ref}: why it is fitted or not`);
+  }
+  const { ICS } = await import(PARTS_MJS);
+  for (const ics of [parts.model.ics, ICS]) {
+    for (const ic of ics) {
+      const r = record[ic.ref];
+      assert.deepEqual([ic.part, ic.fitted, ic.sheila, ic.paged ?? null], [r.part, r.fitted, r.sheila, r.paged], ic.ref);
+    }
+  }
+  assert.deepEqual(parts.fitted.fitted, icTable.ics.filter((i) => i.fitted).map((i) => i.ref));
+});
+
+test('the fitted set is the plan\'s: the 8271 and the DFS fitted, Econet and speech not, BASIC and the DFS in their sockets', () => {
+  const ic = Object.fromEntries(icTable.ics.map((i) => [i.ref, i]));
+  assert.equal(ic.IC78.fitted, true);
+  assert.equal(ic.IC78.part, '8271');
+  assert.deepEqual([ic.IC88.fitted, ic.IC88.paged], [true, 'DFS']);
+  assert.deepEqual([ic.IC52.fitted, ic.IC52.paged], [true, 'BASIC']);
+  for (const r of ['IC89', 'IC98', 'IC99']) assert.equal(ic[r].fitted, false, r);
+  // the disc interface's parts, as modification D lists them
+  for (let n = 78; n <= 87; n++) assert.equal(ic[`IC${n}`].fitted, true, `IC${n}`);
+});
+
+test('every counter is one of BbcChip\'s names and marks one IC', () => {
+  const used = parts.model.ics.filter((i) => i.sheila !== null).map((i) => i.sheila);
+  assert.deepEqual([...used].sort(), [...BBC_CHIPS].sort());
+  assert.deepEqual(parts.sheila.names, BBC_CHIPS);
+  for (const ic of parts.model.ics) if (ic.sheila) assert.equal(ic.fitted, true, `${ic.ref} is marked but not fitted`);
+});
+
+function corners(b) {
+  const t = b.rotation * Math.PI / 180, u = [Math.cos(t) * b.l / 2, Math.sin(t) * b.l / 2], v = [-Math.sin(t) * b.w / 2, Math.cos(t) * b.w / 2];
+  return [[-1, -1], [1, -1], [1, 1], [-1, 1]].map(([a, c]) => [b.x + a * u[0] + c * v[0], b.y + a * u[1] + c * v[1]]);
+}
+
+function insidePolygon(poly, [x, y]) {
+  let c = false;
+  for (let i = 0, j = poly.length - 1; i < poly.length; j = i++) {
+    const [xi, yi] = poly[i], [xj, yj] = poly[j];
+    if ((yi > y) !== (yj > y) && x < (xj - xi) * (y - yi) / (yj - yi) + xi) c = !c;
+  }
+  return c;
+}
+
+function overlaps(a, b) {
+  const A = corners(a), B = corners(b);
+  for (const P of [A, B]) {
+    for (let i = 0; i < 4; i++) {
+      const e = [P[(i + 1) % 4][0] - P[i][0], P[(i + 1) % 4][1] - P[i][1]], n = [-e[1], e[0]];
+      const pa = A.map((p) => p[0] * n[0] + p[1] * n[1]), pb = B.map((p) => p[0] * n[0] + p[1] * n[1]);
+      if (Math.max(...pa) <= Math.min(...pb) + 1e-6 || Math.max(...pb) <= Math.min(...pa) + 1e-6) return false;
+    }
+  }
+  return true;
+}
+
+test('every IC body and two-lead part lies inside the board\'s outline, and no two IC bodies overlap', () => {
+  const outline = parts.model.board.outline;
+  for (const ic of parts.model.ics) for (const c of corners(ic)) assert.ok(insidePolygon(outline, c), `${ic.ref} runs over the outline`);
+  for (const q of parts.model.passives) {
+    for (const c of corners({ x: q.x, y: q.y, l: q.length, w: q.diameter, rotation: q.rotation })) {
+      assert.ok(insidePolygon(outline, c), `a two-lead part at (${q.x}, ${q.y}) runs over the outline`);
+    }
+  }
+  const ics = parts.model.ics;
+  for (let i = 0; i < ics.length; i++) for (let j = i + 1; j < ics.length; j++) assert.ok(!overlaps(ics[i], ics[j]), `${ics[i].ref} and ${ics[j].ref} overlap`);
+  // what runs over the outline is the connectors at the rear and front edges and the modulator, as I5 shows them
+  const over = [...parts.model.connectors, ...parts.model.others].filter((b) => corners(b).some((c) => !insidePolygon(outline, c))).map((b) => b.ref);
+  assert.deepEqual(over, parts.overhang.refs);
+  assert.ok(over.every((r) => /^(SK\d|PL(8|9|10|11|12)|modulator)$/.test(r)), over.join(' '));
+  assert.deepEqual([parts.verdicts.inside, parts.verdicts.apart], ['pass', 'pass']);
+});
+
+// The best-fit similarity (a turn, one scale and a shift) taking src onto dst, by least squares.
+function similarity(src, dst) {
+  const n = src.length, ms = [0, 1].map((k) => src.reduce((s, p) => s + p[k], 0) / n), md = [0, 1].map((k) => dst.reduce((s, p) => s + p[k], 0) / n);
+  let a = 0, b = 0, d = 0;
+  for (let i = 0; i < n; i++) {
+    const x = src[i][0] - ms[0], y = src[i][1] - ms[1], u = dst[i][0] - md[0], v = dst[i][1] - md[1];
+    a += x * u + y * v; b += x * v - y * u; d += x * x + y * y;
+  }
+  a /= d; b /= d;
+  return (p) => [a * (p[0] - ms[0]) - b * (p[1] - ms[1]) + md[0], b * (p[0] - ms[0]) + a * (p[1] - ms[1]) + md[1]];
+}
+
+test('the manual\'s places stay the FAIL the plan records: on pin N/2, the same five ICs over 10 mm', () => {
+  // Recomputed here from the footprints and table 8.1: each placed IC's pin N/2 against the manual's place, Y flipped,
+  // after the similarity fitted to all of them. A swap of two ICs in parts.json or in the table moves them past 10 mm.
+  const refs = parts.model.ics.map((i) => i.ref).filter((r) => icTable.ics.find((x) => x.ref === r).manualXY);
+  const pts = refs.map((r) => footprintPads(r)[parts.places[r].pins / 2 - 1]);
+  const placed = refs.map((r) => { const ic = parts.model.ics.find((x) => x.ref === r); return [ic.x, ic.y]; });
+  refs.forEach((r, k) => assert.ok(Math.hypot(...footprintPads(r).reduce((s, p) => [s[0] + p[0], s[1] + p[1]], [0, 0]).map((v, c) => v / parts.places[r].pins - placed[k][c])) < 0.002, r));
+  const manual = refs.map((r) => { const [x, y] = icTable.ics.find((x) => x.ref === r).manualXY; return [x, -y]; });
+  const f = similarity(manual, pts);
+  const off = Object.fromEntries(refs.map((r, k) => [r, Math.hypot(f(manual[k])[0] - pts[k][0], f(manual[k])[1] - pts[k][1])]));
+  for (const r of refs) assert.ok(Math.abs(off[r] - parts.manual.check.perPart[r].offMm) < 0.01, `${r}: ${off[r]} against parts.json's ${parts.manual.check.perPart[r].offMm}`);
+  assert.equal(parts.manual.convention, 'pinHalf');
+  assert.equal(parts.manual.settle.chosen, 'pinHalf');
+  assert.deepEqual(parts.manual.settle.on, ['IC51', 'IC52', 'IC20', 'IC21']);
+  const over = refs.filter((r) => off[r] > 10).sort(byRef);
+  assert.deepEqual(over, ['IC39', 'IC42', 'IC74', 'IC75', 'IC94']);
+  assert.equal(parts.verdicts.manual, 'fail');
+  assert.equal(parts.manual.check.maxMm.toFixed(2), '97.22');
+  const outcome = PLAN.split('\n').find((l) => l.startsWith('- **Outcome, 13 October 2026 (the one run, 20:23:10')) ?? '';
+  assert.match(outcome, /\*\*The manual's places FAILED\*\* \(99 ICs on pin N\/2: largest 97\.22 mm, IC94, then IC74 18\.55, IC75 18\.34, IC42 11\.87 and IC39 10\.45; median 1\.44\)/);
+});
+
+test('the identities stay the FAIL the plan records, each reading marks.json\'s, and I6 is recorded, not judged', () => {
+  for (const k of ['I5', 'I6']) {
+    const read = Object.fromEntries(marks.parts.identities[k].marks.map((m) => [m.ref, m.reading]));
+    assert.deepEqual(Object.keys(parts.identities[k]).sort(byRef), Object.keys(read).sort(byRef));
+    for (const [r, v] of Object.entries(parts.identities[k])) assert.equal(v.reading, read[r], `${k} ${r}`);
+  }
+  const row = parts.identities.row;
+  assert.deepEqual([row.read, row.populated, row.verdict], [80, 83, 'fail']);
+  assert.deepEqual(row.disagree, ['IC5', 'IC31', 'IC61', 'IC62', 'IC63', 'IC64', 'IC65', 'IC66', 'IC67', 'IC68', 'IC77']);
+  assert.equal(parts.verdicts.identities, 'fail');
+  assert.ok(!('I6' in parts.verdicts) && !Object.keys(parts.verdicts).some((k) => /i6/i.test(k)));
+  // the model keeps table 8.1's identities whatever the photographs read
+  for (const ic of parts.model.ics) assert.equal(ic.part, icTable.ics.find((x) => x.ref === ic.ref).part, ic.ref);
+  const outcome = PLAN.split('\n').find((l) => l.startsWith('- **Outcome, 13 October 2026 (the one run, 20:23:10')) ?? '';
+  assert.match(outcome, /\*\*The identities FAILED\*\* \(80 read of the 83 ICs I5 shows populated; 11 disagree: IC5, IC31, IC61 to IC68 and IC77\)/);
+  assert.match(outcome, /The places stay the scan's footprints and the identities table 8\.1's/);
+});
+
+test('task 5\'s I5 registration is task 4\'s, and passes its row', () => {
+  assert.equal(parts.verdicts.i5Registration, 'pass');
+  const a = parts.i5.registration, b = copper.againstI5.registration;
+  assert.deepEqual([a.points, a.chips], [b.points, b.chips]);
+  for (const k of ['median', 'p90', 'max']) assert.ok(Math.abs(a.heldOutMm[k] - b.heldOutMm[k]) < 0.001, k);
+  assert.ok(a.heldOutMm.median <= 1.0);
+});
+
+test('the parts module is generated from parts.json, is not claimed by the page yet, and its heights are typical', async () => {
+  const mod = await import(PARTS_MJS);
+  const text = fs.readFileSync(PARTS_MJS, 'utf8');
+  assert.match(text, /^\/\/ GENERATED by tools\/bbc-micro-model\/board_parts\.py/);
+  assert.deepEqual(mod.BOARD, parts.model.board);
+  assert.deepEqual(mod.ICS, parts.model.ics);
+  assert.deepEqual(mod.CONNECTORS, parts.model.connectors);
+  assert.deepEqual(mod.PASSIVES, parts.model.passives);
+  assert.deepEqual(mod.OTHERS, parts.model.others);
+  assert.deepEqual(mod.HEIGHTS_TYPICAL, parts.model.heights);
+  for (const [k, h] of Object.entries(mod.HEIGHTS_TYPICAL)) assert.equal(h.measured, false, k);
+  for (const c of mod.CONNECTORS) assert.ok(c.label && ['rear', 'underside', 'board'].includes(c.edge), c.ref);
+  // only the page's entries are .js; the scene's data lands as .mjs until task 9b claims the models
+  assert.ok(!fs.readdirSync(path.join(REPO_ROOT, 'site', 'src', 'models')).some((f) => /^bbc-micro.*\.js$/.test(f)));
+});
