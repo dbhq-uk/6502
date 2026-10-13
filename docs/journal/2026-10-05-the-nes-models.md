@@ -3268,3 +3268,23 @@ cent, and now says "against the design patent's drawings it is good to about 3
 per cent", the reason `goodToWhy` records (`case.json`'s `widthSource` gives
 no reason, so it and `case.json` were left as they were); and a paragraph of
 `docs/known-differences.md` was rewrapped to the file's width.
+
+## Handover, 13 October 2026
+
+The work moved from the dev machine to a new agent on `dbhq-arm`, an idle
+4-core ARM machine, at Dan's request. Everything was committed and pushed first:
+`feat/nes-models` (pull request 76) and `fix/photo-credit-changes` (pull request
+75), both drafts, with `main` merged into the models branch. The working notes
+of the session (a ledger of the tasks, the rulings and the review findings) were
+kept in a git-ignored folder on the dev machine, so what they held that the
+journal did not is now in
+[`docs/superpowers/plans/2026-10-13-nes-models-handover.md`](../superpowers/plans/2026-10-13-nes-models-handover.md):
+where the work stands, the open items in order (first, the speed of the chip
+counters on the machine as it now is, which is issue 77), how to set up an ARM
+machine for this repository, and the decisions that are not to be reopened
+without Dan.
+
+Chosen against handing over with the working notes copied as they were: they
+name agents and scratch files of a session that no longer exists, so the
+handover says what was decided and why, and points at the plan and this journal
+for the rest.
