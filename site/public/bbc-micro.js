@@ -328,7 +328,8 @@ export function onScreenKeys(panel, bbc) {
   return { letGo, press };
 }
 
-/** The keyboard's lights from BbcHost.Leds()'s bits: 0 the cassette motor, 1 CAPS LOCK, 2 SHIFT LOCK. */
+/** The keyboard's lights from BbcHost.Leds()'s bits: 0 the cassette motor, 1 CAPS LOCK, 2 SHIFT LOCK.
+ * Before the machine boots, both lock lights read lit: SystemVia.Latch starts at 0 and a light is lit by a low latch bit. */
 export const lights = (bits) => ({ motor: (bits & 1) !== 0, caps: (bits & 2) !== 0, shiftLock: (bits & 4) !== 0 });
 
 // What panel.bbc gives a model besides the host (FOR THE MODELS, above). Exported for tests/bbc-micro.test.mjs.

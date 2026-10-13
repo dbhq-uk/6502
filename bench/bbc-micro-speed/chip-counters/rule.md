@@ -4,9 +4,21 @@ This is the design and the pass rule for timing the BBC Micro with and without t
 
 Written 2026-10-13 at 20:43 UTC, before any launch. No launch has run.
 
+## What differs from the NES's rule
+
+Added 2026-10-13, after the review of task 6 and after the CI run below, to say in one place what the sections below change. It changes no threshold and no step: the pass, fail and inconclusive lines are the NES's, and the run used them as written.
+
+- **The field.** The NES's rule takes the median of `times_real`. This one takes `mhz`, the field these `thread` lines print.
+- **The launch order.** The NES always launched the baseline first in a pair. Here pairs 1, 3, 5 and 7 launch the baseline first and pairs 2, 4, 6 and 8 the after build first, so drift in the host cannot favour one build.
+- **The cases.** Mode 7 and a dense page (the plan's "mode 7 / dense pair") in place of NTSC and PAL, each launched with its own arguments and its own check that the page came up.
+- **Exit 0 is required.** A launch counts only if it also ended with `exit=0`, as well as printing its prompt (and for dense its page) and eight `thread` lines.
+- **The seed.** 88, the number of the pull request, in place of the NES's 77.
+
 ## The host
 
 The host is not chosen. It is Dan's to name (the plan's "Decisions that are Dan's", item 2). The box task 6 was built on is ruled out: it is aarch64 and shared, and it has no Chrome. Until a host is named and the run is made, the speed run is owed, and the pull request does not merge without it. Whoever runs it records the host first: its processor, cores, operating system, the browser and its version, and the .NET SDK with its `wasm-tools` workload.
+
+Update, 2026-10-13: Dan chose a GitHub runner, and the series ran in CI. The host, the run and its verdict are in [the journal](../../../docs/journal/2026-10-04-the-bbc-micro-models.md), under "The browser speed run, in CI".
 
 ## The design
 

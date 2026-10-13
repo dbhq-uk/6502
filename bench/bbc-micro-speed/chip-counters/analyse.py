@@ -14,6 +14,19 @@ import sys
 CASES = (('mode7', 'mode 7'), ('dense', 'dense'))
 
 
+def repeated(text):
+    """The labels that head more than one launch, once each, in order. read() keeps the last
+    launch under a label; a repeat means a pair was run again, and the earlier launch is not
+    in the maths, so the run says so."""
+    seen, again = set(), []
+    for block in text.split('=== launch ')[1:]:
+        label = block.split()[0]
+        if label in seen and label not in again:
+            again.append(label)
+        seen.add(label)
+    return again
+
+
 def read(text):
     launches = {}
     for block in text.split('=== launch ')[1:]:
@@ -44,7 +57,10 @@ def verdict(median, low, high):
 
 
 def main(path):
-    launches = read(open(path).read())
+    text = open(path).read()
+    launches = read(text)
+    for label in repeated(text):
+        print(f'note: the label {label} heads more than one launch; the last one is used and the earlier is not in the maths')
     verdicts = []
     for case, name in CASES:
         pairs = sorted({int(m) for m in re.findall(rf'\b{case}-p(\d+)-', ' '.join(launches))})

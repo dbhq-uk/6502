@@ -192,9 +192,9 @@ jobs:
           # changes, the keys' mapping from the fork, O1, the front edge not measurable, the check point, the keys and
           # lights in the opening, the keys' placing and colours, the rear ports, the case module, the photographs);
           # 523 as at 13 Oct 2026, with the BBC Micro models' task 7 (sixteen tests: the shared access
-          # sampler, and the inside's scene, legend, caption, results file and note, unclaimed; 524 passed here);
+          # sampler, and the inside's scene, legend, caption, results file and note, unclaimed);
           # 507 as at 13 Oct 2026, with the BBC Micro models' task 6 (eleven tests: the page's bbc:key,
-          # bbc:start and panel.bbc, and the counters' names as BbcChip's; 508 passed here);
+          # bbc:start and panel.bbc, and the counters' names as BbcChip's);
           # 496 as at 13 Oct 2026, with task 5's review (two tests: the method's files and marks.json on
           # disk as the run read them; every description of the parts says both checks failed);
           # 494 as at 13 Oct 2026, with the BBC Micro models' task 5 (nine tests: the parts' method
