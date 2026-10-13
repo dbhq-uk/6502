@@ -2,6 +2,94 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
+## Re-plan of 13 October 2026
+
+This section re-plans tasks 4 to 10 so they can run on `main` as it stood on 13 October 2026 (`origin/main` at `8a30791`, merged into `feat/bbc-micro-models-2` at `3dad880`). Tasks 0 to 3 are done and are not changed. The NES built the same two models after this plan was written, and its later tasks were built, reviewed and merged (pull request 76); what it built and learned is used here. Where this section, or a task's "Re-plan" note, disagrees with the older text below it, this section wins. The older text stays as it was written.
+
+### What main now has, and what follows for this plan
+
+| Main now has | What follows |
+|---|---|
+| The rule "a machine that claims a model must state `case`" (`site/src/lib/registry.mjs`, added by the NES's task 9), beside the cased rule "a machine with a case that claims a model must claim both `outside` and `inside`", and "`case: false` cannot claim `outside` or `inside`" | **The BBC Micro cannot claim `inside` alone in any form.** With no `case` it fails the first rule, with `"case": true` the second, with `"case": false` the third. It claims `"case": true` with `outside` then `inside`, both in one commit, in task 9b. Old task 7's state (the inside claimed, no `case`) and old task 9's new rule are dropped: the rule is on main. A cased machine may still state `"case": true` with no models, but that gains nothing here, so the BBC's row stays unchanged until 9b |
+| `model.test.mjs` fails a `.js` file in `site/src/models/` that `MODELS` does not list, and a `MODELS` entry that no machine claims | No model's entry module can be committed before the claim. So tasks 7 and 9a build each model's scene, words and data as `.mjs` modules that export no `mount(root)` and are not bundled, tested in node (three.js builds a scene graph in node; only drawing needs WebGL). Task 9b adds the two thin `.js` entries, the `MODELS` entries and the claim together. Rejected: a red commit between tasks, a placeholder outside, and loosening the orphan or cased rules |
+| The two-view section (`site/src/components/MachineModel.astro`, `ModelPanel.astro`), the WAI-ARIA tab list and per-view lazy loading (`site/public/model-loader.js`, 3,491 of its 4,000 bytes), their styles, and their tests (`model.test.mjs`, `model-loader.test.mjs`) | **Reused unchanged.** Old task 9's step 3 (markup, loader, tab styles) is dropped. A change to those files needs a reason the NES would share, argued in review |
+| The generic legend table (any `MODELS` entry with `legend` and `legendWords`), `--model-active` (the access mark), `--model-led` and `--model-led-off` | Reused. The BBC's entry gives `legend: chipLegend` and `legendWords`, and `tracksHelp` if its copper is traced to look at (task 4) |
+| `site/src/models/nes-famicom-access.mjs` (`accessRates`, `createSampler`), NES-only through its fixed `COUNTED` | Task 7 lifts both into `site/src/models/access.mjs`, taking the list of counted chips. `nes-famicom-access.mjs` keeps its exports by binding `COUNTED`, and its tests pass unedited. Chosen over a third copy |
+| The NES's counters (`src/Dbhq.Machines.Nes/ChipAccesses.cs`): plain `uint` fields that the bus increments inline in its own decode, with no call. A call per access measured 2.8 per cent slower on ARM; the inline variant ("variant A") passed (13 October 2026) | Task 6 counts the same way. `Accesses(BbcChip)` stays as the way to read a count, and the counting itself is never a call |
+| `site/scripts/browser-check-nes.mjs`: `settled()`, and checks for views, tabs, reduced motion and the board | The BBC's model checks take that shape and import `settled`; they do not copy it |
+| Photograph credits end with "Changes: resized and converted to WebP for this page." (`MachinePhoto.astro`). The NES read Commons licences through the API and checked each file against Commons' SHA-1 before taking its SHA-256 | Task 8 does the same |
+| `references` entries need a `sha256`. A source is credited once, in `photos` or in `references`. Each view credits only the sources its own results file lists, matched by URL | Task 9b follows this; `results.py` lists each model's sources (tasks 7 and 9a) |
+| `model.test.mjs` asserts "the real registry no longer has a running machine with a model and one without" | Once the BBC claims, every running machine has a model. Task 9b replaces that guard with a made-up machine that has no models, so the no-model page path stays tested. It also rewrites `registry.test.mjs`'s "the BBC Micro claims none yet" |
+| `BUDGETS` in `model.test.mjs` holds each textured model's track-map budget | Task 9b adds `'bbc-micro-board': 600_000`. Task 4's map is committed before then, held by `bbc-models.test.mjs` |
+| Every stylesheet is inlined into every page, so a new token changes every page's `<style>` | The `cmp` rule as the NES revised it on 6 October 2026: the KIM-1's and the NES's pages are identical in markup with the `<style>` element left out, and the stylesheet changes only by the lines the task adds |
+| `page-weight.mjs` gives one "later" total, not one per view | Per-view figures are read from the files it lists, as the NES's task 10 reported them. The script is not changed |
+| Site floor 478 in both workflows | Each task raises both floors to the count it measured, never lowers them |
+| The NES's copper: its nets check failed; its map ships as "traced to look at"; a re-trace waits on a new check (#78) | Task 4 freezes its method before its checks run, and says now what a failure means |
+
+### Global Constraints, amended
+
+- **Branch `feat/bbc-micro-models-2`, pull request 88, draft.** It stays draft until task 10's last step. The rest of the branch rule stands.
+- **The venv is `~/venv-models`** (versions in the journal for 13 October). Inputs are in `~/bbc-model-inputs`, which `BBC_MODEL_INPUTS` names. Where a command below says `/tmp/bbcvenv`, use `~/venv-models`.
+- **The KIM-1 and the NES do not change.** Their pages, models, browser checks and tests pass without edits, except edits a task names. The `cmp` is in its revised form (table above).
+- **Thresholds and failed checks, in the NES's wording.** A STOP is a task outcome, reported as BLOCKED with the figures, never a failed test to tune around. A crossed stop stays recorded as crossed. A check may be revised only when it judged the wrong quantity; the revision is dated, says it was made after the figures were seen, and keeps the old verdict. A failed check is pinned in a site test with its figures and this plan's words, so a rerun that changes the result has to change the words too.
+- **A frozen method.** Before a task runs a held-out check on the real inputs, it writes the SHA-256 of each script involved and the UTC time in the journal. The check then runs once. A run after any code change is reported beside the first, never in place of it.
+- **Inputs:** the rule stands (no input committed except the resized photographs task 8 names). It is restated per input in the table below, with each input's rights position under AGENTS.md rules 3 and 4.
+
+### What runs on this box
+
+The box is aarch64 with no Chrome. On Dan's instruction, nothing that needs a browser is run here as evidence.
+
+| Work | Here | Elsewhere |
+|---|---|---|
+| The tools, pytest, the runs on the scans and photographs | Yes | |
+| Site build and `npm test` | Yes, with the machines and results artefacts of the latest Validate run (`gh run download`), as on 13 October | CI |
+| C# build and tests | Yes. For the whole solution, `dotnet test -c Release --filter "FullyQualifiedName!~Dormann"`, because `as65` is a 32-bit x86 program | CI runs everything |
+| The native fingerprint (`bench/bbc-micro-speed/native --fingerprint`) | Yes | |
+| `page-weight.mjs` | Yes: it reads a build | |
+| `node scripts/browser-check.mjs` | No | Validate in CI (ubuntu-latest, Google Chrome) is the record. A task whose steps need it pushes, reads the run's log, and is not done until that run is green |
+| The browser speed run (`bench/bbc-micro-speed/alternate.sh`) | No | Not CI either: AGENTS.md keeps `bench/` out of CI. The host is Dan's to name (task 6) |
+
+### The inputs, and their rights
+
+| Id | Task | State on 13 October 2026 | From | Rights (AGENTS.md rules 3 and 4) |
+|---|---|---|---|---|
+| I1, I2 | 4, 5; credited in 9b | Fetched by hand to `~/bbc-model-inputs`; SHA-256 as recorded | amb5l's Google Drive links in stardot t=23329 | No licence stated. Never committed, not even resized. The track map traced from them is ours and committed, credited, and `NOTICE.md` and the photographs' README say the scans state no licence, as the NES's map does. Builds and tests never fetch them |
+| I5 | 4 (I5 check), 5 | **Fetched 13 October**; SHA-256 equals the one recorded on 4 October | https://8bs.com/see/BBC_B_iss7.jpg | No licence stated. Never committed; credited as a reference |
+| I6 | 5 | **Fetched and hashed 13 October**, added to `sources.json` and `models.md` | Chris's Acorns, `Pics/BBCB7LL.jpg` | **Corrected 13 October:** the site's home page states "Information (including text and photos) presented on Chris's Acorns may be reused under the CC-BY-SA 3.0 license unless otherwise specified", asking for a byline. An older paragraph on the same page says the photographs "remain my copyright. If you want to use them please ask me first". `models.md` had "None stated". Not committed (no copy is needed); credited by name with the Chris's Acorns byline |
+| D1 | 4 (table 8.1 for the parts the nets check uses), 5, 8 (case size) | **Fetched and hashed 13 October** (47.7 MB, 222 pages, text layer); archive.org's MD5 matched. Table 8.1 is on PDF p.66 to 67, "3.11 Dimensions" on p.109 | archive.org `bbc-micro-service-manual` | Acorn's copyright notice. Facts only, credited; no page or drawing copied; not committed |
+| Datasheet pinouts | 4, 5 | Not model inputs: each pinout in `ic-table.json` names its source by URL | Makers' datasheets | Facts; nothing copied |
+| Advanced User Guide s.17 | 6 | Not fetched | Found by hand in task 6 | Facts for `bus.md`, cited |
+| O1, O2, O3 | 8 | Hashed on 4 October; not on this box | Wikimedia Commons | Public domain. Resized copies committed in task 8, credited |
+| O4, O5 | 8 | Not fetched; expected straightforward | Wikimedia Commons | Public domain, to be read through the Commons API in task 8. Resized copies committed |
+| O8 | 8 | Not fetched | Chris's Acorns `BBCB7I.jpg`, `BBCB7H.jpg` | As I6 (CC BY-SA 3.0 as the site states). Not committed, credited |
+| K1 | 8 | Hashed on 4 October; not on this box | github.com/dominicbeesley/bbc-keyboard at `5ec53df5` | MIT. **Rule 3: fetched from a `dbhq-uk` fork at the pinned commit**, as the NES did with OpenTendo. The fork does not exist yet; making it is outward-facing, so it waits for Dan |
+| K2 | 8 (cross-check) | Not fetched | Thingiverse thing 4867915 | CC BY 4.0. If the download needs a login, task 8 drops the cross-check and says so; nothing waits on it |
+| M1, M2 | | | | Never used |
+
+### Order, dependencies and sizes
+
+Sizes count agent-tasks: one build, one review, and the fix wave the NES's tasks of the same kind needed.
+
+| Task | What | Needs | Size | Runs here |
+|---|---|---|---|---|
+| 4 | The copper on both faces, and the print | Task 3; I1, I2, I5, D1 | Large, 3 | All |
+| 5 | The parts: places and identities | Task 3, task 4's `ic-table.json`; D1, I5, I6 | Medium, 2 | All |
+| 6 | The machine reports its LEDs, keys and chip accesses | Nothing in this plan (the `sheila` names are fixed in task 5's note); can run beside 4 and 5 | Medium, 2, plus 1 for the speed run | All but the browser check (CI) and the speed run (Dan's host) |
+| 7 | The inside's scene, words and data, not on the page | 4, 5, 6 | Medium, 2 | All |
+| 8 | The outside measured | 5 (the sockets' places); can run beside 7; O1 to O5, O8, K1 (fork), K2, D1 | Large, 3 | All |
+| 9a | The outside's scene, words and data, not on the page | 6, 8 | Medium, 2 | All |
+| 9b | Both views on the page: the claim, credits and browser check | 7, 9a | Large, 3 | All but the browser check (CI) |
+| 10 | The final pass | All | Medium, 3 (mutation pass, whole-branch review, fix wave) | All but the browser check (CI) |
+
+That is about 21 agent-tasks in all. The critical path is 4, 5, 7 (or 8), 9a, 9b, 10.
+
+### Decisions that are Dan's
+
+1. Fork `dominicbeesley/bbc-keyboard` into `dbhq-uk` (rule 3; outward-facing). Task 8 needs it.
+2. Where task 6's browser speed run happens, since `bench/` never runs in CI and this box is ruled out. The x64 host used on 7 October and this box's Playwright Chromium (the NES on 13 October) are the two used so far.
+
+Taken here, not asked: the BBC claims both views and `case` at once (the rules leave no other way); the scenes land unclaimed as `.mjs` (above); the access sampler is shared, not copied; the scans stay fetched by hand with their hashes and are not mirrored, because a public copy would redistribute files that state no licence, and the builds and tests never fetch them.
+
 **Goal:** Two models of the BBC Micro Model B on `/machines/bbc-micro/`, the outside (case, keys, LEDs, badge strip, ports) and the inside (the Issue 7 board with its chips and both faces of copper), offered as labelled views of the same machine with the same controls and lazy loading, each showing the running machine's state, as the design in [`../specs/2026-10-04-bbc-micro-models-design.md`](../specs/2026-10-04-bbc-micro-models-design.md) says. The registry says which models a machine has, and a test fails when a machine claims a model that is not built.
 
 **Architecture:** Offline Python in one folder, `tools/bbc-micro-model/`, measures both models from photographs, flatbed scans and an MIT KiCad keyboard, and writes what the site uses: a track map, two generated parts modules and two results files, all committed. The build never runs it. Each model is a browser module on the shared stage (`site/src/models/stage.mjs`), bundled with three.js by `site/scripts/build-models.mjs` and loaded by `site/public/model-loader.js` only when its view is shown. The registry gains `case`, `models` and `references`; `validateRegistry` and `site/tests/model.test.mjs` hold the rules. The machine gains three small host exports so the models can show its LEDs and its chip accesses.
@@ -229,6 +317,27 @@ A day's spike, before any pipeline is built. If any STOP threshold is crossed, t
 
 ### Task 4: The copper on both faces, and the print
 
+**Re-plan, 13 October 2026.** This note and the Re-plan section at the top of this plan win over the text below where they differ.
+
+- **Inputs, all present here:** I1, I2, I5 (`verify.py I1 I2 I5`), D1 for table 8.1, and `registration.json`'s saved map from I2 to the board frame. Each pinout in `data/ic-table.json` names its datasheet by URL. The ICs the nets check uses are DIPs whose reference and pin 1 task 3 fixed (97 DIPs). Their parts come from D1's table 8.1.
+- **What main changes:** the map goes in `site/src/assets/tracks/bbc-micro-board.webp` now. `BUDGETS` in `model.test.mjs` waits for task 9b, because that test only reads `MODELS`; until then `bbc-models.test.mjs` holds the map. `NOTICE.md` gains a section for the map: what it is traced from, and that the scans state no licence, as the NES's map has. `cwebp` is not installed here; Pillow on this venv writes lossless WebP (checked 13 October), and the journal names the call.
+- **What the NES learned, to apply.** The KIM-1's opening did not find the local mask level on the NES; a fitted surface did. A rim rule cut pads off their tracks, and the solder side's rim was wider than the gap between DIP pins, so start from task 3's pads. Thin solder-side tracks showed only as two dark edges, which a lightness threshold misses. Hatched pours were missed. One 269 mm² merge joined GND to +5V. The synthetic tests must use the scan's own lightness, measured on probes, or they prove nothing: the NES's made-up board scored 0.995 and predicted nothing.
+- **Fixed before running** (the table's rows, unchanged, with these additions):
+  - **Fixed now:** the nets row and its chip set.
+    - The nets row stands: at least 20 logic ICs; at least 90 per cent of their GND pins in one net and of their +5V pins in another; the two nets never connected.
+    - The ICs it uses, and those it excludes with each reason, are listed in `ic-table.json` before it runs.
+  - **Before the final run:** the map's resolution, the highest of 8, 7 or 6 px/mm inside 600,000 bytes, chosen on a size probe and recorded.
+  - **When the method freezes:** coverage and drills in copper are not held out, and may be looked at while tracing (the NES disclosed the same). The nets check and the I5 check (intersection over union at least 0.50, on I5 registered to I1 by chip pins, the "I5 to I1" row judging that registration) are held out. Neither runs until the method is frozen (Global Constraints, amended).
+  - **If the nets check fails,** the result is recorded as FAIL with its figures and kept. The map may then ship only as "traced to look at": every page sentence that describes the copper says so, and `tracksHelp` replaces the KIM-1's tracks sentence. A site test pins the FAIL to this note's words. A re-trace needs a new check, fixed before it runs, as the NES's #78.
+- **Runs here:** all of it.
+- **Size:** large, 3 agent-tasks.
+- **Review focus:**
+  1. Nothing was tuned against the held-out checks: compare the scripts' history with the freeze time.
+  2. The synthetic tests fail on the NES's failure modes: edges-only tracks, pads cut off, pours, a short.
+  3. Each pinout has its source, and each excluded chip's reason was written before the run.
+  4. The map's channel test can fail.
+  5. I5's registration is held out chip by chip.
+
 **Files:**
 - Create: `tools/bbc-micro-model/board_trace.py`, `tests/test_board_trace.py`, `data/copper.json`, `data/ic-table.json` (the pinouts the nets check needs, each with its datasheet; task 5 completes the file), `site/src/assets/tracks/bbc-micro-board.webp`; append to `run-board.sh`
 - Modify: `site/tests/bbc-models.test.mjs`, `site/src/assets/photos/README.md` (a section for the track map: what it is traced from, its terms)
@@ -249,6 +358,26 @@ A day's spike, before any pipeline is built. If any STOP threshold is crossed, t
 ---
 
 ### Task 5: The parts: places and identities
+
+**Re-plan, 13 October 2026.**
+
+- **Inputs, all present here:** D1, I5 and I6 (fetched and hashed on 13 October; D1 and I6 are in `sources.json`), `registration.json`'s footprints, and task 4's `ic-table.json`. I6 is CC BY-SA 3.0 as Chris's Acorns states. It is not committed, and it is credited by name with the site's byline. D1 is facts only.
+- **What main and the NES change:**
+  - **The record for the fitted set** is the table in `docs/bbc-micro/facts/models.md`. A site test holds `ic-table.json`, `parts.json` and `bbc-micro-board-parts.mjs` equal to it. The NES's mutation pass found that a part swapped the same way in all three generated files survived until its fact sheet became the record.
+  - **Heights:** every typical height carries `measured: false`, as the NES's parts do.
+  - **The `sheila` names, fixed now** so that task 6 can run beside this task. They are `crtc`, `acia`, `serialUla`, `videoUla`, `romLatch`, `systemVia`, `userVia`, `fdc8271`, `adc` and `sound`, in `BbcChip`'s order, as the test's fixed list.
+- **Fixed before running:**
+  - **The manual's convention** for (X, Y) is settled on IC51, IC52 and at least one 14 or 16 pin 74-series part. It is written in the journal before the 10 mm check runs, and that check is then run once.
+  - **I5 to I1:** registered on chip pins, each chip held out. The row stands (median at most 1.0 mm, STOP over 2.0).
+  - **I6** is oblique and in its case, so its places are not judged. Each fitted chip's marking is read on an I6 crop where visible, and recorded.
+  - The other rows (pad counts, identities, no IC more than 10 mm off) are unchanged.
+- **Runs here:** all of it.
+- **Size:** medium, 2.
+- **Review focus:**
+  1. Identities against table 8.1, spot-checked on I5 crops.
+  2. The fitted set's sources: the 8271's support chips and the DFS ROM, and any "taken as fitted" guess named.
+  3. The convention was not chosen to pass the 10 mm check.
+  4. The swap test can fail.
 
 **Files:**
 - Create: `tools/bbc-micro-model/board_parts.py`, `tests/test_board_parts.py`, `data/ic-table.json` (from task 4, completed), `data/parts.json`, `site/src/models/bbc-micro-board-parts.mjs`; append to `run-board.sh`
@@ -279,6 +408,31 @@ A day's spike, before any pipeline is built. If any STOP threshold is crossed, t
 
 ### Task 6: The machine tells the page its lights, its keys and its chips
 
+**Re-plan, 13 October 2026.**
+
+- **Inputs:** the Advanced User Guide s.17 and D1, for the serial ULA's motor bit. These are facts, cited in `bus.md`. Neither is a model input.
+- **What main and the NES change:**
+  - **The counters.** They are counted as the NES's variant A: plain `uint` fields that `BbcBus` increments inline in the SHEILA decode and at the sound strobe, never through a call. `Accesses(BbcChip)` reads them, and a snapshot gives `AccessCounts()`.
+  - **`RomSlot`.** It already exists (`BbcBus.RomSlot`) and is only exported here.
+  - **A start event.** The page dispatches one after every new machine (Start, a disc that powers on a new machine, anything that makes a new bus), and the sampler resets on it. Otherwise differences between samples go negative, as the NES found.
+  - **Waiting in panel tests.** The panel tests wait by polling with a time limit, not by counting event-loop turns (`site/tests/nes-panel.test.mjs`, 13 October).
+- **Fixed before running:**
+  - **The fingerprint.** `bench/bbc-micro-speed/native --fingerprint` gives byte-identical output before and after, with no tolerance.
+  - **The speed rule.** It is the NES's, written to a file under `bench/bbc-micro-speed/` before the first launch:
+    - Method: both builds compiled ahead of time and alternated, at least eight launches a side in mode 7 and with `screen=dense`, judged on the ratio of after to before of each pair's median.
+    - Pass: in each case the median is at least 0.98 and the 90 per cent interval's lower end at least 0.96.
+    - Fail: in any case the interval's upper end is below 0.98.
+    - Otherwise inconclusive, with one more batch allowed.
+    - A FAIL is recorded and Dan is told. The machine is not changed to pass without his say.
+- **Runs here:** C# and the fingerprint. The browser check runs in CI. The speed run waits for the host Dan names, and until then it is owed: it is listed in Deferred, and the pull request does not merge without it.
+- **Size:** medium, 2, plus 1 for the speed run.
+- **Review focus:**
+  1. No cycle or chip behaviour changed.
+  2. `Peek` counts nothing; a read-modify-write counts one read and two writes; a stretched access counts once.
+  3. The counting is inline.
+  4. The motor bit is sourced, or the LED is left dark with the reason.
+  5. The `bbc:key` actions match the on-screen keys, latches included.
+
 **Files:**
 - Create: `src/Dbhq.Machines.BbcMicro/BbcChip.cs`, `tests/Dbhq.Machines.BbcMicro.Tests/MachineStateTests.cs`
 - Modify: `src/Dbhq.Machines.BbcMicro/BbcBus.cs` (counters in `ReadSheila` and `WriteSheila`, one at the sound strobe; the last byte written to `$FE10-$FE17`), `BbcMachine.cs` (pass-throughs), `src/Dbhq.Machines.BbcMicro.Wasm/Program.cs`, `site/public/bbc-micro.js`, `site/tests/bbc-micro.test.mjs`, `docs/bbc-micro/facts/bus.md` (the serial ULA's motor bit, sourced), `bench/bbc-micro-speed/README.md` only if its workload's description changes (it should not)
@@ -308,6 +462,33 @@ A day's spike, before any pipeline is built. If any STOP threshold is crossed, t
 
 ### Task 7: The inside model on the page
 
+**Re-plan, 13 October 2026: now "The inside's scene, words and data, not on the page".** Main's rules leave no green state in which the inside alone is claimed, and no `.js` model can be committed unclaimed (the Re-plan section at the top).
+
+- **This task builds:**
+  - `site/src/models/bbc-micro-board-scene.mjs`: the board, its outline and holes, the map as colour, shine and relief per face, the ICs on sockets, connectors, passives, the modulator and crystal, and the access marks. It is a function of a three.js scene, a `token` reader and the data, and it exports no `mount`.
+  - `bbc-micro-board-layout.mjs`, with `describe()` and `chipLegend()`.
+  - `bbc-micro-board-notes.mjs`, with `made()`.
+  - `results.py`'s board half, which writes `site/src/data/bbc-micro-board-model.json` and lists the sources the model used, by URL.
+  - `site/src/models/access.mjs`: the NES sampler, generalised.
+  - The new `--model-*` tokens, and any text colour in `design.test.mjs`'s contrast table.
+- **It does not do:** the `.js` entry, the `MODELS` entry, the registry, the deploy list, the browser check or page weight. Those are task 9b's.
+- **Tests, in node:**
+  - The scene graph has a body for every fitted IC in the parts file and none for an unfitted one.
+  - The legend lists every fitted IC once, with its part and role from `ic-table.json`, and says in words what a mark means and why the CPU, RAM and OS ROM are never marked.
+  - The caption's sizes and counts come from the layout.
+  - Every figure in the note is read from the results file, and that file agrees with `frame.json`, `registration.json`, `copper.json` and `parts.json`.
+  - The three map channels are read as top, bottom and print.
+  - `access.mjs` gives the NES's results with the NES's list (its tests unedited), and the BBC's with `BbcChip`'s order.
+  - If task 4's nets check failed, the note and the caption say the copper is traced to look at, held to `copper.json`.
+- **Fixed before running:** nothing new is measured. The bundle budget (200,000 bytes gzipped) is checked in task 9b, once the bundle is built.
+- **Runs here:** all of it.
+- **Size:** medium, 2.
+- **Review focus:**
+  1. The scene module is all of the drawing, so that task 9b's entry stays thin.
+  2. No colour literal.
+  3. The words claim nothing the data does not show.
+  4. The NES is unchanged.
+
 After this task the BBC Micro's record has `"models": [{ "view": "inside", "module": "bbc-micro-board" }]` and **no `case` field**, so the cased rule (which fires only when `case` is set) does not apply, and the page shows the inside the way the KIM-1's shows its board, through the real page and browser check, with no preview mechanism. This is a state of the branch only: task 9 adds `"case": true`, the outside and the rule that a machine claiming a model states `case`, and the branch is not merged before task 9.
 
 **Files:**
@@ -333,6 +514,35 @@ After this task the BBC Micro's record has `"models": [{ "view": "inside", "modu
 ---
 
 ### Task 8: The outside measured: keys, case, profile and ports
+
+**Re-plan, 13 October 2026.**
+
+- **Inputs to acquire, each hashed into `sources.json` and `models.md` before it is read:**
+  - **O1, O2 and O3:** fetched again from Commons; their hashes are already recorded.
+  - **O4 and O5:** from Commons, with the licence read through the Commons API and each file checked against Commons' SHA-1 before its SHA-256 is taken, as the NES did.
+  - **O8:** from Chris's Acorns. It is CC BY-SA 3.0 as the site states. It is not committed, and it is credited.
+  - **K1:** from the `dbhq-uk` fork at `5ec53df5` (AGENTS.md rule 3). The task waits for the fork, which is Dan's to make.
+  - **K2:** from Thingiverse, CC BY 4.0. If its download needs a login, the cross-check is dropped and the journal says so.
+- **What main changes:**
+  - **Credits.** The photographs' credits end with "Changes: resized and converted to WebP for this page." by themselves (`MachinePhoto.astro`).
+  - **The registry.** The BBC's `photos` entries can be added now, because photographs do not need a model. The main photograph's `used` sentence ("because the BBC Micro has no 3D model") changes in task 9b, not here.
+  - **The resizing.** It uses `cwebp -q 82 -resize 1600 0 -metadata none` as before. `cwebp` is not installed on this box: install it, or record the exact Pillow call instead, before the copies are made.
+- **What the NES learned, to apply:**
+  - **Marks:** read on full-scale crops, with a grid labelled in the original's pixels. A shrunk overview put marks over 100 px out.
+  - **Keys:** consensus fits over least squares where there is glare.
+  - **Rear ports:** the NES's rear-connector check failed on one face scaled by a wrong width, so each scale this task uses is named in the journal before the check runs.
+- **Fixed before running:**
+  - **The rows that stand:** O1 to K1, O3 to K1, the front edge corrected for parallax with h and d recorded first, the side profile's check point at 2.0 mm, and the case top's plan size, recorded.
+  - **The rear ports:** each within 2 mm of its socket's x plus the board's offset in the case.
+  - **The offset's source:** it comes from O2 on the scale of the 15-way D shell, named before the ports are scored.
+  - **If the rear-port check fails,** it is recorded as FAIL and pinned, as the NES's was.
+- **Runs here:** all of it.
+- **Size:** large, 3.
+- **Review focus:**
+  1. h for the front edge is independent of the 415 mm.
+  2. Every key is mapped, and none is missing from K1.
+  3. The hashes of the committed photographs match their README.
+  4. No input with no stated licence, and neither O8 nor I6, is committed.
 
 **Files:**
 - Create: `tools/bbc-micro-model/keys.py`, `case_register.py`, `case_profile.py`, `case_parts.py`, `run-case.sh`, `tests/test_case.py`, `data/keys.json`, `data/case.json`, `site/src/models/bbc-micro-case-parts.mjs`
@@ -361,6 +571,66 @@ After this task the BBC Micro's record has `"models": [{ "view": "inside", "modu
 
 ### Task 9: The outside model, and the two views
 
+**Re-plan, 13 October 2026: split into 9a and 9b.** The tab markup, the loader and the tab styles are on main and are reused, so old step 3 is dropped. The new rule and its tests (old step 1's registry part) are on main.
+
+**Task 9a: the outside's scene, words and data, not on the page.**
+
+- **This task builds:**
+  - `site/src/models/bbc-micro-case-scene.mjs`, with no `mount`. It holds the shell, the keys as instanced sculpted caps, the legends atlas drawn from `LEGENDS` in `bbc-keys.js`, the LEDs, the badge strip with words and no owl, the grille, the labelled ports and underside connectors, and the feet.
+  - `bbc-micro-case-layout.mjs` and `bbc-micro-case-notes.mjs`.
+  - `results.py`'s case half, which writes `bbc-micro-case-model.json` with its sources.
+  - The case, keycap and LED tokens.
+- **Tests, in node:**
+  - The footprint and height are D1's.
+  - Every key is a `BBC_KEYS` name, BREAK or the second SHIFT; every `BBC_KEYS` name has a key; and every legend is `LEGENDS[name]`.
+  - The LEDs have their names and order.
+  - No owl: the module names none and loads no image but its atlas.
+  - Every port and underside connector has a label.
+  - The caption and note are read from the data.
+  - Pressing a key on `bbc:key` (down, up, tap 140 ms, latch-on, latch-off) gives the expected key state on a fake clock.
+- **Size:** medium, 2.
+- **Review focus:**
+  1. The legends cannot drift from the on-screen keys.
+  2. The key state machine.
+  3. No owl.
+  4. No colour literal.
+
+**Task 9b: both views on the page.**
+
+- **This task builds:**
+  - **The two entries.** `site/src/models/bbc-micro-board.js` and `bbc-micro-case.js`, each thin: `createStage`, the scene module, `panel.bbc` wiring, and the test hooks the older text lists.
+  - **`MODELS`.** Both entries: the case's with `help`; the board's with `texture`, `legend`, `legendWords`, and `tracksHelp` if task 4 failed its nets check.
+  - **The registry, in one commit.** `"case": true`, `models` with `outside` (`bbc-micro-case`) then `inside` (`bbc-micro-board`), and `references` for I1, I2, I5, I6 and D1, plus K1, K2 and O8 where used, each with `sha256`. The main photograph's `used` sentence is reworded.
+  - **The tests main pins.** `registry.test.mjs`'s "the BBC Micro claims none yet" is rewritten. `model.test.mjs`'s running-machine guard is replaced by a made-up machine without models. `'bbc-micro-board': 600_000` is added to `BUDGETS`.
+  - **The deploy list.** It gains `models/bbc-micro-case.js models/bbc-micro-board.js models/bbc-micro-board-tracks.webp`.
+  - **The browser check.** `browser-check-bbc.mjs`'s model steps import `settled` from `browser-check-nes.mjs`.
+  - **The rest.** `DESIGN.md`'s section, and the floors.
+- **Fixed before running** (the browser steps, merged from old task 7 step 4 and old task 9 step 5, unchanged in substance):
+  - **Loading:** nothing under `/models/` is fetched before scrolling. Scrolling fetches the outside's bundle only. The inside's bundle and map are fetched only when its tab is chosen.
+  - **Budgets:** each bundle at most 200,000 bytes gzipped, and the map at most 600,000 bytes.
+  - **The outside:**
+    - The LEDs follow CAPS LOCK and `*MOTOR` (or stay dark, as task 6 left them).
+    - On-screen A and real key events put keys down on the model.
+    - A click on C types C and adds one press.
+    - The underside draws.
+  - **The tabs:**
+    - Right selects Inside, which loads and runs.
+    - The `*CAT` sampling marks IC78 and the DFS as paged.
+    - Left returns to Outside with its camera where it was.
+    - There is no focus trap.
+    - Reduced motion loads and switches without error.
+  - **Overall:** no console error, failed request or CSP violation, and the KIM-1's and the NES's parts pass unedited.
+- **Runs here:** everything but the browser check. Push, read Validate's log, and do not call the task done until it is green.
+- **Size:** large, 3.
+- **Split point.** If review sends it back twice, split it in two:
+  - First, the entries, claim and credits, green, with the browser check's existing parts unchanged.
+  - Second, the model steps of the browser check.
+- **Review focus:**
+  1. The claim is both views and `case` at once.
+  2. Each view credits exactly its own sources.
+  3. The KIM-1's and the NES's pages are unchanged in markup.
+  4. The browser check's lines are read from CI's log, not assumed.
+
 The largest task. If its first review sends it back more than twice, split it at step 4: the case model first (steps 1 to 3, with the page's single view temporarily the outside), the views second.
 
 **Files:**
@@ -384,6 +654,25 @@ The largest task. If its first review sends it back more than twice, split it at
 ---
 
 ### Task 10: The final pass
+
+**Re-plan, 13 October 2026.**
+
+- **Mutations added to step 1's list:**
+  - The BBC claiming only `inside` with `"case": true`.
+  - The BBC with no `case`.
+  - `access.mjs` reading the counted list one place out.
+  - A counter on the wrong field in the inline decode.
+  - The `bbc:start` reset not sent after a new machine.
+  - The map's `BUDGETS` entry missing.
+  - A `references` entry without `sha256`.
+  - Task 4's pinned nets result changed without the plan's words.
+- **Step 3's speed** is task 6's run, on the host Dan named. If it has not run, the pull request is not marked ready.
+- **"What Dan must be told"** gains:
+  - Chris's Acorns' photographs are CC BY-SA 3.0 as that site states, with an older sentence asking to be asked first.
+  - Whether the copper is a verified trace or traced to look at.
+- **Runs here:** all but the browser check (CI).
+- **Size:** 3 (the mutation pass, the whole-branch review on the most capable model, a fix wave).
+- **Review focus:** the overclaim question in step 5, and every figure on the page traced to a results file.
 
 **Files:**
 - Modify: `docs/known-differences.md`, the day's journal, `README.md`, `AGENTS.md` (layout: `tools/bbc-micro-model/`), `docs/the-6502-family.md`, `site/DESIGN.md`, `site/README.md` if it describes the models, `tests/` and `site/tests/` as the pass requires
@@ -414,6 +703,8 @@ Nothing here needs a decision from him now; the choices are taken (`models.md`, 
 ## Deferred
 
 Recorded here, not built:
+
+- **Added 13 October 2026 (the re-plan):** task 6's browser speed run, owed until Dan names its host; the pull request does not merge without it. A copper re-trace under a new check fixed before it runs, if task 4's nets check fails (as the NES's #78).
 
 - A shared three.js chunk for the two bundles (needs a deploy list that tolerates hashed names).
 - Measured heights for the inside, from a pair of photographs of a populated Issue 7 board, if one is found.

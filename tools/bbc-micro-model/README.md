@@ -42,6 +42,8 @@ the name `data/sources.json` gives as its `file`:
 | I1 | `inside-1-bare-iss7-top-amb5l.jpg` | [amb5l's top scan](https://drive.google.com/file/d/1llcLHl_ax6rtZRWxdoSyA5jNjFOo_-3N/view), posted in [stardot t=23329](https://stardot.org.uk/forums/viewtopic.php?t=23329) |
 | I2 | `inside-supp-bare-iss7-bottom-amb5l.jpg` | [amb5l's bottom scan](https://drive.google.com/file/d/1EIRg4Ump3T5ixNCJtVkrz7DwODJ__YFn/view), the same post |
 | I5 | `inside-2-populated-iss7-8bs.jpg` | [8BS](https://8bs.com/see/BBC_B_iss7.jpg) |
+| I6 | `inside-6-cased-iss7-chrisacorns-BBCB7LL.jpg` | [Chris's Acorns](http://chrisacorns.computinghistory.org.uk/Pics/BBCB7LL.jpg), linked as the hi-res motherboard picture from [the Issue 7 page](http://chrisacorns.computinghistory.org.uk/Computers/BBCBI7.html). CC BY-SA 3.0 as [the site's home page](http://chrisacorns.computinghistory.org.uk/) states under "License to reuse"; an older paragraph there asks to be asked first. Not committed |
+| D1 | `document-1-bbc-micro-service-manual-acorn-1985.pdf` | [archive.org](https://archive.org/download/bbc-micro-service-manual/BBC-Micro-Service-Manual%20Sections-1-2-3.pdf), from [its item page](https://archive.org/details/bbc-micro-service-manual); archive.org's MD5 for it is `d64017d9f5d956500965648b354af6ee`. Acorn's copyright notice: read for facts only, not committed |
 | K1 | `bbc-keyboard/` | `git clone https://github.com/dominicbeesley/bbc-keyboard` into the folder, then `git checkout 5ec53df566c77424caa6be827d0831da3916ecfa` inside it; the file read is `bbc-keyboard/KiCad/bbc-keyboard/bbc-keyboard.kicad_pcb` |
 
 Later tasks add inputs (more photographs, the Service Manual) to

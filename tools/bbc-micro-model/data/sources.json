@@ -112,6 +112,38 @@
    "sha256": "35b34ac3ef0a04fb311ee1971eb9fc32cb1c323877377c4d1a74986c709b0929",
    "committed": null,
    "use": "Every key centre on the BBC layout, read from each switch footprint's 4 mm centre hole: the frame the photographs of the keyboard are registered to. Cloned at commit 5ec53df566c77424caa6be827d0831da3916ecfa"
+  },
+  {
+   "id": "I6",
+   "kind": "photograph",
+   "file": "inside-6-cased-iss7-chrisacorns-BBCB7LL.jpg",
+   "url": "http://chrisacorns.computinghistory.org.uk/Pics/BBCB7LL.jpg",
+   "page": "http://chrisacorns.computinghistory.org.uk/",
+   "author": "Chris Whytehead (Chris's Acorns)",
+   "licence": "CC BY-SA 3.0, as the site's home page states under 'License to reuse': 'Information (including text and photos) presented on Chris's Acorns may be reused under the CC-BY-SA 3.0 license unless otherwise specified'. An older paragraph on the same page says the photographs 'remain my copyright. If you want to use them please ask me first'",
+   "fetched": "2026-10-13",
+   "bytes": 530347,
+   "width": 2005,
+   "height": 1295,
+   "sha256": "bab4176aa727598ab70717ecf921e54773e5c14401cdd16b9dba8ae02c320863",
+   "committed": null,
+   "use": "A second Issue 7 board, populated and in its case, slightly oblique, linked from http://chrisacorns.computinghistory.org.uk/Computers/BBCBI7.html as the hi-res picture of the motherboard: a check on the parts' identities and places (task 5). Canon PowerShot S30, EXIF date 2008-03-26"
+  },
+  {
+   "id": "D1",
+   "kind": "document",
+   "file": "document-1-bbc-micro-service-manual-acorn-1985.pdf",
+   "url": "https://archive.org/download/bbc-micro-service-manual/BBC-Micro-Service-Manual%20Sections-1-2-3.pdf",
+   "page": "https://archive.org/details/bbc-micro-service-manual",
+   "author": "Acorn Computers Limited, 1985",
+   "licence": "Copyright ACORN Computers Limited 1985. Neither the whole or any part of the information contained in, or the product described in, this manual may be adapted or reproduced in any material form except with the prior written approval of ACORN Computers Limited",
+   "fetched": "2026-10-13",
+   "bytes": 47662305,
+   "width": null,
+   "height": null,
+   "sha256": "974550803fbce738b143ea0f1fdb6aa129a5c0a69c9e0072634d16f127a7fb99",
+   "committed": null,
+   "use": "Facts only, credited; no page or drawing is copied. Table 8.1 (PDF p.66 to 67): every IC's part and its approximate position from the board's SW corner; section 3.11 (PDF p.109): the case's height, width and depth. 222 pages, scanned with a text layer; archive.org's MD5 for the file, d64017d9f5d956500965648b354af6ee, matched the download"
   }
  ]
 }

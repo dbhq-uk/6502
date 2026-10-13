@@ -1186,3 +1186,38 @@ which had not been rerun, the references test fails. `cd site && npm test` on
 run 38423721729: 476 tests, 475 passed, one to-do, before; 478 tests, 477
 passed, the same to-do, after. Both workflows' floors are raised from 475 to
 477.
+
+## Re-plan of tasks 4 to 10 (13 October 2026)
+
+Main had moved on since this plan was written. The NES built its two models after it, reusing its design, and they were merged in pull request 76. Tasks 4 to 10 were re-planned to run on main as it stands. The plan has a dated "Re-plan of 13 October 2026" section at its top and a note at the head of each of those tasks. Tasks 0 to 3 are unchanged. This branch merged `origin/main` at `8a30791` first (merge `3dad880`).
+
+### What changed, and why
+
+- **The BBC Micro claims both views and `case` at once.** The plan had task 7 claim `inside` with no `case`, so the inside could go through the page and the browser check before the outside existed. Main now has the NES's rule that a machine claiming a model states `case`, beside the rule that a cased machine claims both views. So no form of an inside-only claim passes. The claim moves to a new task 9b.
+- **The scenes land before the claim, as `.mjs`.** `model.test.mjs` fails an unclaimed `.js` in `site/src/models/`. So tasks 7 and 9a build each model's drawing as a scene module with no `mount`, tested in node, and 9b adds the thin entries. Three other ways were rejected: a red commit between tasks, a placeholder outside, and loosening a rule.
+- **The NES's tab list, loader and two-view markup are reused unchanged.** Old task 9's step for them is dropped.
+- **The access sampler is lifted into a shared `access.mjs`**, so the BBC does not make a third copy of the NES's.
+- **The counters follow the NES's variant A.** These are plain `uint` fields incremented in the bus's own decode, because a counter behind a call measured 2.8 per cent slower in Chromium on ARM on 13 October.
+- **Task 4 freezes its method before its held-out checks run.** The scripts' SHA-256 and the time go in the journal first. It also says now what a failed nets check means: the map ships as "traced to look at", as the NES's did.
+- **Task 6's speed rule is the NES's,** written down before the first launch. Where it runs is Dan's to say: `bench/` never runs in CI, and this box is not to be used for browser figures.
+
+### The inputs for tasks 4 and 5
+
+Fetched by hand on 13 October 2026 into `~/bbc-model-inputs`, outside the repository, each into its own empty folder first:
+
+| Input | What | Check |
+|---|---|---|
+| I5 | `https://8bs.com/see/BBC_B_iss7.jpg`, 2,162,357 bytes | SHA-256 `7ae4b573...` equals the one recorded on 4 October |
+| I6 | `http://chrisacorns.computinghistory.org.uk/Pics/BBCB7LL.jpg`, 530,347 bytes, 2005 by 1295 | SHA-256 `bab4176a...`, new; added to `sources.json` and `models.md` |
+| D1 | archive.org `bbc-micro-service-manual`, 47,662,305 bytes, 222 pages with a text layer | SHA-256 `97455080...`, new; its MD5 equals archive.org's (`d64017d9...`). Its text layer shows table 8.1 on PDF p.66 to 67 and "3.11 Dimensions" (Height 73mm, Width 415mm, Depth 345mm) on p.109, the pages the research cited |
+
+Afterwards, `verify.py` reported I1, I2, I5, I6 and D1 present with their hashes matching. O1 to O3 and K1 were reported missing, because task 8 needs them and they were not fetched again. No input is committed.
+
+### A fact sheet that was wrong
+
+`models.md` said Chris's Acorns stated no licence for I6 and O8. Its home page has a section headed "License to reuse": photographs "may be reused under the CC-BY-SA 3.0 license unless otherwise specified", with a byline asked for. An older paragraph on the same page says they "remain my copyright. If you want to use them please ask me first". The research read the photographs' own pages, which say nothing. Both sentences are now quoted in `models.md` and `sources.json`. Neither photograph is to be committed, so the plan does not change, but each will be credited by name with the site's byline.
+
+### Waiting on Dan
+
+- A fork of `dominicbeesley/bbc-keyboard` in `dbhq-uk`. Rule 3 asks for it, and making it is outward-facing. Task 8 needs it.
+- A host for task 6's browser speed run.
