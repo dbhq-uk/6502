@@ -157,8 +157,10 @@ their own.
 
 ## The Electron page
 
-The fourth machine page, built on 5 October 2026 and shown once the registry
-says the Electron runs. It is the BBC Micro's panel again, rule for rule, under
+The fourth machine page, built on 5 October 2026 and shown since 13 October
+2026, when the registry said the Electron runs. Its head has the credited
+photograph of an original Electron, as every machine page does (see "The
+photographs" below). It is the BBC Micro's panel again, rule for rule, under
 its own class names (`.electron-*`), with a cassette recorder where the BBC
 Micro has its disc drive. Chosen over sharing the BBC Micro's classes because
 the two pages then change apart: a fix to one panel cannot move the other.

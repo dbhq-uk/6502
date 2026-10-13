@@ -41,8 +41,12 @@ console, the outside (the case) and the inside (the main board, showing which
 chips the processor is talking to), each drawn for the NTSC and the PAL
 console. They are measured from photographs, a design patent and scans of a bare
 board, and the note under each says how well each part is known. The Acorn
-Electron is under way: its operating system ROM and the record of its rights are
-in [`roms/`](roms/README.md), and its code is being built, so it does not count yet.
+Electron, the fourth, runs Acorn's OS 1.00 and BBC BASIC, passes its acceptance
+test, and runs in the browser at
+[6502.dbhq.uk/machines/electron/](https://6502.dbhq.uk/machines/electron/), with
+its keyboard, picture, one-bit sound and a cassette recorder that loads and saves
+tapes as UEF files in the browser, so it counts too. Its ROMs and the record of
+their rights are in [`roms/`](roms/README.md).
 The Atari 2600 and the Commodore 64 follow, one at a
 time and smallest first. The programme's design is in
 [`docs/superpowers/specs/2026-09-30-machines-and-site-design.md`](docs/superpowers/specs/2026-09-30-machines-and-site-design.md).
@@ -73,7 +77,7 @@ from somebody else's, and keep their own terms: the system ROMs in
 [`site/src/assets/photos/`](site/src/assets/photos/README.md), each under the
 licence its source gives it (CC BY-SA 2.0 fr, share-alike, for the Musée Bolo's
 KIM-1, none stated for the two from Hans Otten's site, CC BY 2.0 for the
-BBC Micro, public domain for the NTSC NES's two and CC BY 4.0 for the PAL
+BBC Micro and the Electron, public domain for the NTSC NES's two and CC BY 4.0 for the PAL
 NES's two); the KIM-1 model's track map, `site/src/assets/tracks/kim-1.webp`,
 traced from those photographs and from a replica of the board's layout, whose
 channels carry those terms and CC BY-NC 4.0 (the photographs' README says
