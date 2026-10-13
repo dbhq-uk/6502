@@ -26,7 +26,8 @@ namespace Dbhq.Machines.Kim1;
 /// <para>
 /// Characters for the teletype's keyboard (<see cref="TypeAtTeletype"/>) are
 /// held back while keypad taps are pending, and handed to the teletype once
-/// the last tap has been up for its full rest. The teletype's own rule, to send
+/// every tap queued by then, including any queued after the call, has been
+/// played and has been up for its full rest. The teletype's own rule, to send
 /// only on a quiet line, cannot see an answer that has not begun: after ST the
 /// monitor takes a few milliseconds to start printing KIM and the address, and
 /// a character queued at once arrives just as it stops listening and is lost or
@@ -60,6 +61,13 @@ public sealed class Kim1Keystrokes
     /// <summary>Characters waiting for the keypad taps before them to finish, before they go to the teletype's keyboard.</summary>
     public int HeldForTeletype => _held.Length;
 
+    /// <summary>
+    /// True when no key is held for the teletype, queued or on its line, and the
+    /// monitor has stopped printing. Unlike <see cref="Kim1Teletype.Idle"/> alone,
+    /// it is false across the handover from the held keys to the teletype.
+    /// </summary>
+    public bool TeletypeIdle => _held.Length == 0 && _machine.Teletype.Idle(_machine.Cycles);
+
     /// <summary>True when nothing is queued or held for the teletype and the last key has been up for its full rest.</summary>
     public bool Idle => _pending.Count == 0 && _down is null && _held.Length == 0 && _machine.Cycles >= _until;
 
@@ -76,8 +84,9 @@ public sealed class Kim1Keystrokes
 
     /// <summary>
     /// Queues characters at the teletype's keyboard (<see cref="Kim1Teletype.Send(string)"/>)
-    /// once the keypad taps already queued have been played and rested. With
-    /// none queued they go on the next <see cref="Run"/>.
+    /// once every keypad tap queued by then has been played and rested, taps
+    /// queued after this call included. With none queued they go on the next
+    /// <see cref="Run"/>.
     /// </summary>
     public void TypeAtTeletype(string text) => _held.Append(text);
 

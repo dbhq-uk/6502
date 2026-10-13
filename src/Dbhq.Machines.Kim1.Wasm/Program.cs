@@ -68,16 +68,13 @@ public static partial class Kim1Host
 
     /// <summary>
     /// Puts a terminal of <paramref name="baud"/> bits a second on the loops in place of the one there. Keys still queued are dropped.
-    /// A speed outside the 50 to 9600 a teletype runs at is refused, so the machine is left as it was.
+    /// A speed outside <see cref="Kim1Teletype.MinBaud"/> to <see cref="Kim1Teletype.MaxBaud"/> is refused, so the machine is left as it was.
+    /// What the terminal being replaced had printed is kept for the next <see cref="TeletypePrinted"/>.
     /// </summary>
     [JSExport]
     public static void SetTeletypeBaud(int baud)
     {
-        if (baud is < 50 or > 9600)
-        {
-            throw new ArgumentOutOfRangeException(nameof(baud), baud, "a teletype runs between 50 and 9600 baud");
-        }
-
+        Kim1Teletype.CheckBaud(baud);
         Keys.DropHeldForTeletype();
         Machine.Teletype = new Kim1Teletype(baud);
     }
@@ -99,5 +96,5 @@ public static partial class Kim1Host
 
     /// <summary>True when no key is held, queued or on the line and the monitor has stopped printing.</summary>
     [JSExport]
-    public static bool TeletypeIdle() => Keys.HeldForTeletype == 0 && Machine.Teletype.Idle(Machine.Cycles);
+    public static bool TeletypeIdle() => Keys.TeletypeIdle;
 }

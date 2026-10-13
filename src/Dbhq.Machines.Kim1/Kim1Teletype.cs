@@ -51,6 +51,12 @@ public sealed class Kim1Teletype
     /// <summary>The Teletype Model 33's speed, ten characters a second.</summary>
     public const int DefaultBaud = 110;
 
+    /// <summary>The slowest speed a teletype is taken to run at, in bits a second.</summary>
+    public const int MinBaud = 50;
+
+    /// <summary>The fastest speed a teletype is taken to run at, in bits a second.</summary>
+    public const int MaxBaud = 9600;
+
     /// <summary>How long both lines must be quiet, in bit times, before the next queued key is sent, unless the constructor says otherwise.</summary>
     public const int DefaultQuietBits = 4;
 
@@ -94,14 +100,20 @@ public sealed class Kim1Teletype
     /// <param name="quietBits">How long both lines must be quiet, in bit times, before the next queued key goes. 0 sends keys back to back, the way a tape reader would, whether the monitor is listening or not.</param>
     public Kim1Teletype(int baud = DefaultBaud, int quietBits = DefaultQuietBits)
     {
-        if (baud is < 50 or > 9600)
-        {
-            throw new ArgumentOutOfRangeException(nameof(baud), baud, "a teletype runs between 50 and 9600 baud");
-        }
+        CheckBaud(baud);
 
         ArgumentOutOfRangeException.ThrowIfNegative(quietBits);
         Baud = baud;
         QuietBits = quietBits;
+    }
+
+    /// <summary>Throws if <paramref name="baud"/> is outside <see cref="MinBaud"/> to <see cref="MaxBaud"/>.</summary>
+    public static void CheckBaud(int baud)
+    {
+        if (baud is < MinBaud or > MaxBaud)
+        {
+            throw new ArgumentOutOfRangeException(nameof(baud), baud, $"a teletype runs between {MinBaud} and {MaxBaud} baud");
+        }
     }
 
     /// <summary>How long both lines must be quiet, in bit times, before the next queued key is sent.</summary>

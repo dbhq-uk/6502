@@ -15,6 +15,8 @@ namespace Dbhq.Machines.Kim1;
 /// </remarks>
 public sealed class Kim1Machine
 {
+    private string _carried = "";
+
     /// <param name="rom002">The 1 KB ROM of the 6530-002, at $1C00-$1FFF.</param>
     /// <param name="rom003">The 1 KB ROM of the 6530-003, at $1800-$1BFF.</param>
     public Kim1Machine(ReadOnlySpan<byte> rom002, ReadOnlySpan<byte> rom003)
@@ -34,7 +36,13 @@ public sealed class Kim1Machine
     public Kim1Teletype Teletype
     {
         get => Bus.Teletype;
-        set => Bus.Teletype = value;
+        set
+        {
+            // What the terminal being replaced has printed is kept for the
+            // next ReadTeletype, not lost with it.
+            _carried = ReadTeletype();
+            Bus.Teletype = value;
+        }
     }
 
     /// <summary>The TTY/KB switch. The monitor reads it at reset, and again each time round its keypad loop.</summary>
@@ -95,7 +103,9 @@ public sealed class Kim1Machine
     public string ReadTeletype()
     {
         Bus.Teletype.CatchUp(Bus.Cycles);
-        return Bus.Teletype.Drain();
+        string text = _carried + Bus.Teletype.Drain();
+        _carried = "";
+        return text;
     }
 
     /// <summary>The six digits as they look now. See <see cref="Kim1Display.Read"/>.</summary>

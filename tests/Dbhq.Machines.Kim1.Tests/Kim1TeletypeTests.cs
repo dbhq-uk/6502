@@ -333,6 +333,37 @@ public sealed class Kim1TeletypeTests(ITestOutputHelper output)
     }
 
     /// <summary>
+    /// Swapping the terminal for one at another speed does not lose what the
+    /// old one had printed and the page had not yet read.
+    /// </summary>
+    [Fact]
+    public void ReplacingTheTerminalKeepsWhatItHadPrinted()
+    {
+        var kim = new Kim1Session();
+        kim.Machine.Mode = Kim1Mode.Teletype;
+        kim.Keys("[RS]");
+        kim.Machine.Teletype.Send(Kim1Teletype.Parse("[RUBOUT]"));
+        kim.Machine.Run(5_000_000);
+
+        // Nothing has read the paper yet. A terminal at another speed goes on.
+        kim.Machine.Teletype = new Kim1Teletype(300);
+        Assert.Equal(300, kim.Machine.Teletype.Baud);
+        Assert.Contains("KIM", kim.Machine.ReadTeletype());
+        Assert.Equal("", kim.Machine.ReadTeletype());
+    }
+
+    [Theory]
+    [InlineData(Kim1Teletype.MinBaud - 1)]
+    [InlineData(Kim1Teletype.MaxBaud + 1)]
+    public void ASpeedOutsideTheRangeIsRefusedWhereverItIsChecked(int baud)
+    {
+        Assert.Throws<ArgumentOutOfRangeException>(() => new Kim1Teletype(baud));
+        Assert.Throws<ArgumentOutOfRangeException>(() => Kim1Teletype.CheckBaud(baud));
+        Kim1Teletype.CheckBaud(Kim1Teletype.MinBaud);
+        Kim1Teletype.CheckBaud(Kim1Teletype.MaxBaud);
+    }
+
+    /// <summary>
     /// The page reads the paper every frame, between cycles. Doing so must not
     /// start a key typed since the last cycle on that cycle, which has run.
     /// </summary>
