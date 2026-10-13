@@ -44,6 +44,9 @@ keyboard registered to it; writes data/keys.json.
    clusters (k-means, from fixed starts); the cluster with the most red is
    "red", of the other two the lighter is "light" and the other "dark".
    Recorded as classes, not colours: the model's colours are tokens.
+   After the second run (the journal says why), the class each key is drawn
+   with is the one read by eye on O1 (case-marks.json "keyColours"), and the
+   clustered class is recorded beside it, with how many agree.
 """
 import argparse
 import hashlib
@@ -273,9 +276,13 @@ def measure(look=False):
           f"max {reg3['heldOutMm']['max']:.3f} mm over {reg3['n']} keys, {reg3['over3mm']} over 3 mm: {o3v} (recorded, not a stop)")
     H_o1_to_k1 = np.array(r1['params']['H'])
     classes, clusters = colour_classes(keys, np.linalg.inv(H_o1_to_k1))
+    seen = case_marks()['keyColours']
     for k, c in zip(keys, classes):
-        k['colour'] = c
-    print('colours: ' + ', '.join(f"{n} {v['keys']}" for n, v in clusters.items()))
+        k['colourClustered'] = c
+        k['colour'] = 'red' if k['name'] in seen['red'] else 'light' if k['name'] in seen['light'] else 'dark'
+    agree = sum(1 for k in keys if k['colour'] == k['colourClustered'])
+    print('colours clustered: ' + ', '.join(f"{n} {v['keys']}" for n, v in clusters.items())
+          + f"; read by eye: red {len(seen['red'])}, light {len(seen['light'])}, dark {len(keys) - len(seen['red']) - len(seen['light'])}; {agree} of {len(keys)} agree")
     return {
         'about': ('Task 8 of the BBC Micro models plan: every keycap from K1 (Dominic Beesley\'s MIT KiCad keyboard, from the dbhq-uk '
                   'fork at its pinned commit) mapped to the machine\'s keys, and O1 and O3 registered to it. Written by keys.py; every '
@@ -291,7 +298,7 @@ def measure(look=False):
         'frontEdgeMm': o1['frontEdgeMm'],
         'frontEdgeRepeatMm': o1['frontEdgeRepeatMm'],
         'parallax': o1['parallax'],
-        'colours': clusters,
+        'colours': clusters | {'drawnFrom': 'read by eye on O1 (case-marks.json keyColours); the clustered class is each key\'s colourClustered, recorded', 'agree': sum(1 for k in keys if k['colour'] == k['colourClustered'])},
         'thresholds': THRESHOLDS,
         'verdicts': {'mapping': mapping['verdict'], 'o1': o1v, 'o3': o3v},
     }

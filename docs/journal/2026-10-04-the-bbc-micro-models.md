@@ -1655,3 +1655,10 @@ Neither change touches a check: the mapping, O1, O3, the check point, d and the 
 cf4da9c9f09781a98c50e1c89d863617a1da9cd3eb0d3f0d72257149d71b4101 tools/bbc-micro-model/keys.py
 0a36447dff0f0fe2f4691a004d996cd664b3857a29cf209424040c5d4296fc00 tools/bbc-micro-model/case_parts.py
 ```
+
+**The second run** (2026-10-13T22:11:57Z to 22:12:15Z, on `ff3497e`) printed the first run's lines but one, `colours: light 6, red 4, dark 64`: now the cursor keys and COPY came out dark and six of the ten red keys light. The clustering of measured colours had disagreed with O1 twice, in two different ways. Rather than change it a third time against what O1 shows, which would be tuning by eye, each key's class is now read by eye on O1 at full scale (`case-marks.json` `keyColours`: the ten function keys red; the four cursor keys and COPY light, a dark brown lighter than the black keys; every other key dark, BREAK included), and the clustered class is kept beside it in `keys.json` (`colourClustered`), with how many agree. The checks are untouched again. Hashes at 2026-10-13T22:13:15Z, before the third run (only these two changed):
+
+```
+1c197719235ebde9e52ce611b287a07d904916db4a2caa199117d28b9f0efcbc tools/bbc-micro-model/keys.py
+a5ace72698341acbcc0b72ba3305a7df9fe3b3ad963baa4fe830d7b255ddb978 tools/bbc-micro-model/data/case-marks.json
+```

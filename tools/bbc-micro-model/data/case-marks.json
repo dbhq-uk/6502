@@ -792,5 +792,38 @@
    "disc drive"
   ],
   "auxiliary": "auxiliary power output"
+ },
+ "keyColours": {
+  "source": "O1",
+  "crop": {
+   "box": [
+    1700,
+    1000,
+    2080,
+    1480
+   ],
+   "zoom": 1.5
+  },
+  "what": "Each keycap's colour class, read by eye on O1 at full scale (added after the second run of task 8's method, whose clustering of measured colours disagreed with O1 twice, in two different ways: see the journal). Red: the ten function keys. Light: the four cursor keys and COPY, a dark brown, lighter than the black keys. Dark: every other key, BREAK included.",
+  "red": [
+   "F0",
+   "F1",
+   "F2",
+   "F3",
+   "F4",
+   "F5",
+   "F6",
+   "F7",
+   "F8",
+   "F9"
+  ],
+  "light": [
+   "Left",
+   "Right",
+   "Up",
+   "Down",
+   "Copy"
+  ],
+  "dark": "every other key"
  }
 }
