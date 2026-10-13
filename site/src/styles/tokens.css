@@ -63,6 +63,16 @@
   --model-nes-pcb-under: #476b36;
   --model-nes-print: #e4e8d6;
   --model-active: #f2b33d;
+  /* the BBC Micro's main board, Issue 7 (its inside model): the green lacquer
+     of the component side and the darker green of the solder side, the yellow
+     of its printed legend (the median colour of the print on the bare scan, task
+     4's probe) and the near-black of its chips' sockets, which is typical, not
+     read off a photograph. Its copper is --model-copper and its access mark
+     --model-active, as the NES's. None is a text colour. */
+  --model-bbc-pcb: #2a5b3c;
+  --model-bbc-pcb-under: #24503a;
+  --model-bbc-print: #d4b727;
+  --model-bbc-socket: #2b2926;
   /* the NES's case (its outside model), as made and not yellowed: the light
      grey of the upper shell and the cartridge door, the darker grey of the lower
      shell, the black band over the right, the grey of POWER and RESET, the red

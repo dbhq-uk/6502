@@ -954,3 +954,342 @@ test('every description of the BBC board\'s parts says both checks failed and wh
   assert.match(notice, /Credit: photograph by Chris Whytehead, Chris's Acorns/);
   assert.match(notice, /No image from either photograph is committed/);
 });
+
+// --- task 7: the inside's scene, words and data, not on the page ---------------------------
+//
+// The re-plan of 13 October 2026: main's rules leave no green state in which the
+// inside alone is claimed, so the scene, its words and its results file land as
+// .mjs modules no MODELS entry lists and no machine claims, tested here in node
+// (three.js builds a scene graph without a browser). Task 9b adds the thin .js
+// entry, the MODELS entry and the claim together.
+
+const layout = await import('../src/models/bbc-micro-board-layout.mjs');
+const sceneModule = await import('../src/models/bbc-micro-board-scene.mjs');
+const notes = await import('../src/models/bbc-micro-board-notes.mjs');
+const THREE = await import('three');
+const SCENE_MJS = path.join(process.cwd(), 'src', 'models', 'bbc-micro-board-scene.mjs');
+const RESULTS = path.join(process.cwd(), 'src', 'data', 'bbc-micro-board-model.json');
+const boardFigures = JSON.parse(fs.readFileSync(RESULTS, 'utf8'));
+const TOKENS_CSS = fs.readFileSync(path.join(process.cwd(), 'src', 'styles', 'tokens.css'), 'utf8');
+const tokenHex = (name) => new RegExp(`--${name}:\\s*(#[0-9a-f]{6});`).exec(TOKENS_CSS)?.[1];
+const fittedRefs = parts.model.ics.filter((i) => i.fitted).map((i) => i.ref).sort(byRef);
+
+// The stage's token reader, from tokens.css instead of the page's computed style: the names asked for are kept.
+function tokenReader() {
+  const asked = new Set();
+  const token = (name) => {
+    asked.add(name);
+    const hex = tokenHex(name);
+    if (!hex) throw new Error(`tokens.css has no --${name}`);
+    return new THREE.Color(hex);
+  };
+  return { token, asked };
+}
+
+function built() {
+  const scene = new THREE.Scene();
+  const { token, asked } = tokenReader();
+  const board = sceneModule.buildBoard(scene, token);
+  scene.updateMatrixWorld(true);
+  return { scene, board, asked };
+}
+
+test('the board\'s counters are BbcChip\'s, and each moving counter marks its one IC; the paged ROM is BASIC in slot 15 and the DFS in 14, as the bus pages them', () => {
+  assert.deepEqual(layout.COUNTED, BBC_CHIPS);
+  for (const chip of BBC_CHIPS) {
+    const rates = Object.fromEntries(BBC_CHIPS.map((c) => [c, { moved: c === chip, perSecond: c === chip ? 4 : 0 }]));
+    assert.deepEqual(layout.marksFrom(rates), [Object.entries(parts.sheila.of).find(([, c]) => c === chip)[0]], chip);
+  }
+  assert.deepEqual(layout.marksFrom(null), []);
+  const bus = fs.readFileSync(path.join(REPO_ROOT, 'src', 'Dbhq.Machines.BbcMicro', 'BbcBus.cs'), 'utf8');
+  assert.match(bus, /15 => _basic,\s*14 => _dfs,/);
+  assert.deepEqual(layout.PAGED_SLOTS, { 15: 'BASIC', 14: 'DFS' });
+  assert.equal(layout.pagedRef(15), parts.model.ics.find((i) => i.paged === 'BASIC').ref);
+  assert.equal(layout.pagedRef(14), parts.model.ics.find((i) => i.paged === 'DFS').ref);
+  assert.deepEqual([layout.pagedRef(15), layout.pagedRef(14)], ['IC52', 'IC88']);
+  for (const slot of [0, 1, 12, 13, null, undefined]) assert.equal(layout.pagedRef(slot), null, String(slot));
+});
+
+test('the scene draws a body for every fitted IC in the parts file and none for an unfitted one, each on a socket where the parts file has one', () => {
+  const { scene, board } = built();
+  const refs = new Map();
+  scene.traverse((o) => { if (o.userData.ref) refs.set(`${o.userData.ref} ${o.userData.kind}`, o); });
+  const bodies = [...refs.keys()].filter((k) => k.endsWith(' body')).map((k) => k.split(' ')[0]).sort(byRef);
+  assert.deepEqual(bodies, fittedRefs);
+  for (const ic of parts.model.ics.filter((i) => !i.fitted)) assert.ok(![...refs.keys()].some((k) => k.startsWith(`${ic.ref} `)), `${ic.ref} is not fitted but is drawn`);
+  const sockets = [...refs.keys()].filter((k) => k.endsWith(' socket')).map((k) => k.split(' ')[0]).sort(byRef);
+  assert.deepEqual(sockets, parts.model.ics.filter((i) => i.fitted && i.socketed).map((i) => i.ref).sort(byRef));
+  for (const ic of parts.model.ics.filter((i) => i.fitted)) {
+    const body = refs.get(`${ic.ref} body`);
+    const p = new THREE.Vector3();
+    body.getWorldPosition(p);
+    assert.ok(Math.abs(p.x - (ic.x - parts.model.board.width / 2) / 10) < 1e-6 && Math.abs(p.z - (ic.y - parts.model.board.depth / 2) / 10) < 1e-6, `${ic.ref} is not at its place`);
+    const box = new THREE.Box3().setFromObject(body);
+    assert.ok(Math.abs(box.max.y - ic.height / 10) < 1e-6, `${ic.ref}'s top is not at its height`);
+    assert.ok(box.min.y >= (ic.socketed ? parts.model.heights.socket.value / 10 - 1e-6 : 0), `${ic.ref} sinks into its socket or the board`);
+  }
+  assert.equal(board.chips.size, fittedRefs.length);
+  // the connectors by reference, those underneath below the board and the others on it
+  const T = parts.model.board.thickness / 10;
+  for (const c of parts.model.connectors) {
+    const o = refs.get(`${c.ref} connector`);
+    assert.ok(o, `${c.ref} is not drawn`);
+    const box = new THREE.Box3().setFromObject(o);
+    if (c.edge === 'underside') assert.ok(box.max.y <= -T + 1e-6, `${c.ref} is not under the board`);
+    else assert.ok(box.min.y >= -1e-6, `${c.ref} is not on the board`);
+  }
+  for (const o of parts.model.others) assert.ok(refs.get(`${o.ref} other`), `${o.ref} is not drawn`);
+  // the two-lead parts, one instance each, by kind
+  const counts = {};
+  scene.traverse((o) => { if (o.isInstancedMesh && o.userData.passives) counts[o.userData.passives] = o.count; });
+  assert.deepEqual(counts, parts.passives.byKind);
+  // the board is its outline with its holes cut through: the top face's area is the outline's less the holes'
+  const area = (pts) => Math.abs(pts.reduce((s, [x, y], i) => { const [u, v] = pts[(i + 1) % pts.length]; return s + x * v - u * y; }, 0)) / 2;
+  const outline = parts.model.board.outline.slice(0, -1);
+  const holes = parts.model.board.holes.map((h) => Array.from({ length: 28 }, (_, i) => [h.x + (h.d / 2) * Math.cos((i / 28) * 2 * Math.PI), h.y + (h.d / 2) * Math.sin((i / 28) * 2 * Math.PI)]));
+  const want = (area(outline) - holes.reduce((s, h) => s + area(h), 0)) / 100;
+  const g = board.board.geometry;
+  const top = g.groups[0];
+  const pos = g.getAttribute('position');
+  let got = 0;
+  for (let i = top.start; i < top.start + top.count; i += 3) {
+    const a = new THREE.Vector3().fromBufferAttribute(pos, i), b = new THREE.Vector3().fromBufferAttribute(pos, i + 1), c = new THREE.Vector3().fromBufferAttribute(pos, i + 2);
+    got += b.sub(a).cross(c.sub(a)).length() / 2;
+  }
+  assert.ok(Math.abs(got - want) / want < 1e-6, `the top face is ${got} cm2, not ${want}`);
+  assert.equal(g.groups.length, 3);
+  // the camera's bounds hold every part, with its margin
+  const [x0, , z0, x1, , z1] = sceneModule.stageOptions().bounds;
+  const all = new THREE.Box3().setFromObject(board.parts);
+  assert.ok(all.min.x >= x0 && all.max.x <= x1 && all.min.z >= z0 && all.max.z <= z1, 'a part is outside the camera\'s bounds');
+});
+
+test('the access tint marks exactly the chips named, the paged frame exactly the paged ROM, and Show tracks and Show tracks only switch as the NES\'s do', () => {
+  const { board } = built();
+  board.mark(['IC3', 'IC78']);
+  for (const [ref, c] of board.chips) assert.equal(c.tint.visible, ref === 'IC3' || ref === 'IC78', ref);
+  board.mark([]);
+  assert.ok([...board.chips.values()].every((c) => !c.tint.visible));
+  board.page('IC88');
+  for (const [ref, c] of board.chips) assert.equal(Boolean(c.frame?.visible), ref === 'IC88', ref);
+  board.page(null);
+  assert.ok([...board.chips.values()].every((c) => !c.frame?.visible));
+  assert.ok(board.chips.get('IC52').frame && board.chips.get('IC88').frame && !board.chips.get('IC1').frame, 'only the paged ROMs have a frame');
+  // the layers, with stand-in track materials
+  const top = new THREE.MeshStandardMaterial(), bottom = new THREE.MeshStandardMaterial();
+  const l = sceneModule.createLayers(board, { top, bottom });
+  assert.deepEqual(l.state(), { tracks: true, partsShown: true, partsLevel: 1 });
+  assert.equal(board.board.material[0], top);
+  assert.equal(board.board.material[1], bottom);
+  l.toggleOnly();
+  assert.deepEqual(l.state().partsShown, false);
+  l.step(0.1, false);
+  assert.ok(l.state().partsLevel > 0 && l.state().partsLevel < 1, 'the parts fade, not vanish');
+  l.step(1, false);
+  assert.equal(board.parts.visible, false);
+  l.toggleTracks();
+  assert.deepEqual([l.state().tracks, l.state().partsShown], [false, true], 'tracks off brings the parts back');
+  assert.equal(board.board.material[0], board.plain.top);
+  l.step(0.01, true);
+  assert.equal(l.state().partsLevel, 1, 'with reduced motion the parts come back at once');
+  l.toggleOnly();
+  assert.equal(l.state().tracks, true, 'tracks only puts the tracks on');
+  // no maps: the board stays plain and the buttons do nothing
+  const none = sceneModule.createLayers(built().board, { top: null, bottom: null });
+  none.toggleTracks();
+  assert.deepEqual(none.state(), { tracks: false, partsShown: true, partsLevel: 1 });
+});
+
+test('the board\'s colours are tokens of their own, the mark is --model-active and not the lime, and every token the scene reads is defined', () => {
+  const { asked, board } = built();
+  for (const name of ['model-bbc-pcb', 'model-bbc-pcb-under', 'model-bbc-socket', 'model-active']) assert.ok(asked.has(name), `the scene does not read --${name}`);
+  // the board's plain faces, its sockets and the mark are those tokens' colours
+  const hexOf = (m) => `#${m.color.getHexString()}`;
+  assert.deepEqual([hexOf(board.plain.top), hexOf(board.plain.bottom), hexOf(board.chips.get('IC52').socket.material), hexOf(board.chips.get('IC1').tint.material)],
+    ['model-bbc-pcb', 'model-bbc-pcb-under', 'model-bbc-socket', 'model-active'].map(tokenHex));
+  // and the faces' colours, which the track map is turned into
+  const reader = tokenReader();
+  for (const face of ['top', 'bottom']) sceneModule.faceColours(face, reader.token);
+  assert.deepEqual([...reader.asked].sort(), ['model-bbc-pcb', 'model-bbc-pcb-under', 'model-bbc-print', 'model-copper']);
+  for (const name of [...asked, ...reader.asked]) assert.ok(tokenHex(name), `--${name}`);
+  assert.notEqual(tokenHex('model-active'), tokenHex('lime'));
+  for (const name of ['model-bbc-pcb', 'model-bbc-pcb-under', 'model-bbc-print', 'model-bbc-socket']) assert.notEqual(tokenHex(name), tokenHex('lime'), name);
+  assert.doesNotMatch(fs.readFileSync(SCENE_MJS, 'utf8'), /emissive/, 'the tracks glow');
+});
+
+test('the track map is copper.json\'s, read as the component side\'s copper in red, the solder side\'s in green and the print in blue', () => {
+  assert.equal(layout.TRACKS.src, '/models/bbc-micro-board-tracks.webp');
+  assert.deepEqual([layout.TRACKS.width, layout.TRACKS.height, layout.TRACKS.pxPerMm], [copper.map.width, copper.map.height, copper.mapPxPerMm]);
+  assert.deepEqual(layout.TRACKS.originMm, copper.map.originMm);
+  const px = (r, g, b) => Uint8ClampedArray.from([r, g, b, 255]);
+  const { texel } = sceneModule;
+  assert.deepEqual([texel(px(255, 0, 0), 0, 'top'), texel(px(255, 0, 0), 0, 'bottom')], [{ copper: 1, print: 0 }, { copper: 0, print: 0 }]);
+  assert.deepEqual([texel(px(0, 255, 0), 0, 'top'), texel(px(0, 255, 0), 0, 'bottom')], [{ copper: 0, print: 0 }, { copper: 1, print: 0 }]);
+  assert.deepEqual([texel(px(0, 0, 255), 0, 'top'), texel(px(0, 0, 255), 0, 'bottom')], [{ copper: 0, print: 1 }, { copper: 0, print: 0 }]);
+  // and turned into colour from the tokens: copper is --model-copper, print --model-bbc-print, bare lacquer each face's
+  const { token } = tokenReader();
+  const srgb = (name) => tokenHex(name).match(/[0-9a-f]{2}/g).map((h) => parseInt(h, 16));
+  const near = (a, b) => a.every((v, i) => Math.abs(v - b[i]) <= 1);
+  const top = sceneModule.faceColours('top', token), bottom = sceneModule.faceColours('bottom', token);
+  assert.ok(near(sceneModule.shade({ copper: 0, print: 0 }, top).colour, srgb('model-bbc-pcb')));
+  assert.ok(near(sceneModule.shade({ copper: 0, print: 0 }, bottom).colour, srgb('model-bbc-pcb-under')));
+  assert.ok(near(sceneModule.shade({ copper: 1, print: 0 }, top).colour, srgb('model-copper')));
+  assert.ok(near(sceneModule.shade({ copper: 1, print: 0 }, bottom).colour, srgb('model-copper')));
+  assert.ok(near(sceneModule.shade({ copper: 1, print: 1 }, top).colour, srgb('model-bbc-print')), 'the print lies over the copper');
+});
+
+test('the legend lists every fitted IC once, in IC number order, with its part and role from ic-table.json, and its counter, its paged ROM or why it is never marked', () => {
+  const rows = layout.chipLegend();
+  assert.deepEqual(rows.map((r) => r.ref), fittedRefs);
+  for (const row of rows) {
+    const t = icTable.ics.find((i) => i.ref === row.ref);
+    const ic = parts.model.ics.find((i) => i.ref === row.ref);
+    assert.deepEqual([row.part, row.role], [t.part, t.role], row.ref);
+    assert.deepEqual([row.sheila, row.paged], [ic.sheila, ic.paged ?? null], row.ref);
+    if (row.sheila) assert.equal(row.mark, layout.COUNTED_WORDS[row.sheila], row.ref);
+    else if (row.paged) assert.match(row.mark, /^paged: /, row.ref);
+    else assert.match(row.mark, /^never: /, row.ref);
+  }
+  const mark = Object.fromEntries(rows.map((r) => [r.ref, r.mark]));
+  for (const ref of ['IC1', 'IC51', ...Array.from({ length: 16 }, (_, i) => `IC${53 + i}`)]) assert.match(mark[ref], /^never: in use all the time/, ref);
+  for (const chip of BBC_CHIPS) assert.match(layout.COUNTED_WORDS[chip], /^when the processor/, chip);
+  assert.match(layout.COUNTED_WORDS.sound, /through the system VIA/);
+});
+
+test('the legend says in words what a mark means, why the CPU, RAM and OS ROM are never marked, what paged means, and which counted chips are not emulated', () => {
+  const words = layout.LEGEND_WORDS.join(' ');
+  assert.match(words, /read or written by the processor in the last quarter second/);
+  assert.match(words, /not that the chip is working/);
+  assert.match(words, /The processor, the RAM and the operating system's ROM are in use all the time/);
+  assert.match(words, /so none of them is ever marked/);
+  assert.match(words, /the paged ROM, BASIC or the DFS, is framed/);
+  assert.match(words, /the 6850, the serial ULA and the uPD7002, which the machine does not emulate/);
+  assert.match(words, /sound chip[^.]*through the system VIA/);
+  assert.match(words, /heights of the parts are typical ones, not measured/);
+  // each counted chip that the machine does not emulate is the one the legend names
+  for (const [ref, part] of [['IC4', '6850'], ['IC73', 'uPD7002']]) assert.equal(icTable.ics.find((i) => i.ref === ref).part, part);
+  assert.equal(parts.sheila.of.IC7, 'serialUla');
+});
+
+test('the caption starts "Model, not a photograph." and its sizes and counts come from the layout', () => {
+  const about = layout.describe();
+  const cm = (mm) => (mm / 10).toLocaleString('en-GB', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+  assert.match(about, /^Model, not a photograph\. /);
+  assert.ok(about.includes(`${cm(parts.model.board.width)} by ${cm(parts.model.board.depth)} cm`));
+  const fitted = parts.model.ics.filter((i) => i.fitted);
+  assert.ok(about.includes(`the ${fitted.length} chips fitted`), 'the count of chips');
+  assert.ok(about.includes(`${fitted.filter((i) => i.socketed).length} of them in sockets`), 'the count of sockets');
+  assert.ok(about.includes(`${parts.model.connectors.length} connectors`));
+  assert.ok(about.includes(`${parts.model.passives.length} resistors and capacitors`));
+  for (const ref of ['IC1', 'IC78']) assert.ok(about.includes(parts.model.ics.find((i) => i.ref === ref).part), ref);
+  assert.match(about, /to look at: the copper's connections are not verified, and the checks that would have shown them failed/);
+  assert.match(about, /heights of the parts are typical ones, not measured/);
+  // nothing typed: a part file with one chip fewer gives another caption (the layout reads the module)
+  assert.ok(!/\b(88|32|13|258)\b/.test(fs.readFileSync(path.join(process.cwd(), 'src', 'models', 'bbc-micro-board-layout.mjs'), 'utf8').replace(/^\s*\/\/.*$/gm, '')), 'the layout types a count');
+});
+
+test('the results file is written from frame.json, registration.json, copper.json and parts.json, and agrees with them', () => {
+  const f = boardFigures;
+  const solder = registration.solder;
+  assert.deepEqual(f.board, { widthMm: frame.board.widthMm, depthMm: frame.board.depthMm });
+  assert.deepEqual(f.scale, {
+    yMedianMm: frame.heldOut.rowLengthErrMm.median, yRows: frame.heldOut.rowLengthErrMm.n,
+    xMedianMm: frame.heldOutX.scaledErrMm.median, xRows: frame.heldOutX.scaledErrMm.n, xLargestMm: frame.heldOutX.largest.scaledErrMm, xLargestRow: frame.heldOutX.largest.row,
+    xyPct: frame.ratioPct, xVerdict: frame.verdicts.find((v) => /as revised/.test(v.measure)).verdict,
+  });
+  assert.deepEqual(f.solder, { holes: solder.holes, heldOutMedianMm: solder.heldOutMm.median, heldOutP90Mm: solder.heldOutMm.p90, verdict: solder.verdict });
+  const n = copper.nets, i5 = copper.againstI5;
+  assert.deepEqual(f.copper, {
+    top: copper.coverage.top, bottom: copper.coverage.bottom, print: copper.coverage.print, drills: copper.drills.n, drillsTop: copper.drillsInCopper.top, drillsBottom: copper.drillsInCopper.bottom, mapPxPerMm: copper.mapPxPerMm,
+    printMm2: copper.print.areaMm2, recoveredMm2: copper.print.recoveredMm2,
+    nets: { chips: n.chips, gndPins: n.gnd.pins, gndInLargest: n.gnd.inLargest, vccPins: n.vcc.pins, vccInLargest: n.vcc.inLargest, touching: n.touching, verdict: copper.verdicts.nets },
+    againstI5: { iou: i5.iou, comparedMm2: i5.comparedMm2, verdict: copper.verdicts.againstI5 },
+    i5Registration: { chips: i5.registration.chips, points: i5.registration.points, heldOutMedianMm: i5.registration.heldOutMm.median, verdict: copper.verdicts.i5Registration },
+  });
+  const heights = Object.entries(parts.model.heights).filter(([k]) => k !== 'board').map(([, h]) => h);
+  const over = Object.entries(parts.manual.check.perPart).filter(([, p]) => p.offMm > parts.manual.check.limitMm).map(([r]) => r).sort(byRef);
+  assert.deepEqual(f.parts, {
+    ics: parts.model.ics.length, fitted: parts.model.ics.filter((i) => i.fitted).length, socketed: parts.model.ics.filter((i) => i.fitted && i.socketed).length,
+    connectors: parts.model.connectors.length, passives: parts.model.passives.length, axial: parts.passives.byKind.axial, radial: parts.passives.byKind.radial,
+    manual: { maxMm: parts.manual.check.maxMm, medianMm: parts.manual.check.medianMm, limitMm: parts.manual.check.limitMm, over, verdict: parts.verdicts.manual },
+    identities: { read: parts.identities.row.read, populated: parts.identities.row.populated, disagree: parts.identities.row.disagree.length, verdict: parts.verdicts.identities },
+    heightsTypical: heights.filter((h) => !h.measured).length, heightsMeasured: heights.filter((h) => h.measured).length,
+  });
+  assert.deepEqual(over, ['IC39', 'IC42', 'IC74', 'IC75', 'IC94']);
+  // every source the board used, by its address, as sources.json has it: the parts module's, then I6, read for markings
+  assert.deepEqual(f.sources.map((x) => x.id), [...parts.model.sources, 'I6']);
+  for (const x of f.sources) {
+    const s = sources.find((y) => y.id === x.id);
+    assert.deepEqual(x, { id: s.id, url: s.url, page: s.page, sha256: s.sha256, kind: s.kind, licence: s.licence, fetched: s.fetched });
+  }
+  assert.match(fs.readFileSync(path.join(TOOL, 'results.py'), 'utf8'), /bbc-micro-board-model\.json/);
+});
+
+test('the note is made() from the results file, every figure in it read from there, and it states the nets, I5 and both parts checks as failed', () => {
+  const f = boardFigures;
+  const { paragraphs, limits } = notes.made(f);
+  const text = [...paragraphs, ...limits].join(' ');
+  const mm = (v) => `${v.toLocaleString('en-GB', { maximumFractionDigits: 3 })} mm`;
+  const pc = (v) => `${Math.round(v * 100)}%`;
+  for (const v of [f.scale.yMedianMm, f.scale.xMedianMm, f.scale.xLargestMm, f.solder.heldOutMedianMm, f.solder.heldOutP90Mm, f.copper.i5Registration.heldOutMedianMm, f.parts.manual.maxMm, f.parts.manual.medianMm]) assert.ok(text.includes(mm(v)), `${mm(v)} is not in the note`);
+  for (const v of [f.copper.top, f.copper.bottom]) assert.ok(text.includes(pc(v)), `${pc(v)} is not in the note`);
+  assert.ok(text.includes(f.solder.holes.toLocaleString('en-GB')));
+  assert.ok(text.includes(f.scale.xVerdict), 'the x scale\'s verdict');
+  const sentence = notes.copperSentence(f);
+  assert.ok(text.includes(sentence));
+  const n = f.copper.nets;
+  assert.ok(sentence.includes(`${n.gndInLargest} of ${n.gndPins} ground pins`) && sentence.includes(`${n.vccInLargest} of ${n.vccPins} +5V pins`));
+  assert.ok(n.touching && /a ground pin and a \+5V pin came out in the same net/.test(sentence));
+  assert.ok(sentence.includes(`${f.copper.nets.chips} chips`));
+  assert.ok(sentence.includes(f.copper.againstI5.iou.toLocaleString('en-GB', { maximumFractionDigits: 3 })), 'the I5 comparison\'s figure');
+  assert.match(sentence, /not a netlist/);
+  assert.match(sentence, /failed[\s\S]*failed/, 'both the nets and the I5 comparison failed');
+  assert.deepEqual([f.copper.nets.verdict, f.copper.againstI5.verdict], ['fail', 'fail']);
+  assert.match(text, /optimistic, and not an independent check/);
+  const partsWords = notes.partsSentence(f);
+  assert.ok(text.includes(partsWords));
+  assert.match(partsWords, /the two checks on these parts failed/i);
+  assert.match(partsWords, /table 8\.1's parts/);
+  assert.match(partsWords, /not the board in I5/);
+  assert.ok(partsWords.includes(`${f.parts.identities.disagree} of the ${f.parts.identities.read}`));
+  assert.ok(partsWords.includes(f.parts.manual.over.join(', ').replace(/, (IC\d+)$/, ' and $1')));
+  assert.deepEqual([f.parts.manual.verdict, f.parts.identities.verdict], ['fail', 'fail']);
+  // the figures are read, not typed: a changed results file changes the note
+  const changed = structuredClone(f);
+  changed.copper.nets.gndInLargest += 1;
+  changed.parts.identities.disagree += 1;
+  changed.solder.heldOutMedianMm += 0.001;
+  assert.notEqual(notes.copperSentence(changed), sentence);
+  assert.notEqual(notes.partsSentence(changed), partsWords);
+  assert.notEqual(notes.made(changed).paragraphs.join(' '), paragraphs.join(' '));
+});
+
+test('every sentence the board model says about its copper says it is traced to look at and not verified, and the help says its checks failed', () => {
+  const { paragraphs, limits } = notes.made(boardFigures);
+  const blocks = [layout.describe(), layout.TRACKS_HELP, ...layout.LEGEND_WORDS, ...Object.values(layout.STATUS), ...paragraphs, ...limits];
+  const code = fs.readFileSync(SCENE_MJS, 'utf8').replace(/^\s*\/\/.*$/gm, '');
+  const said = [...code.matchAll(/'([A-Z][^'\n]*\.)'/g)].map((m) => m[1]);
+  const sentences = [...blocks, ...said].flatMap((b) => b.split(/(?<=\.)\s+(?=[A-Z])/)).filter((x) => /copper/i.test(x));
+  assert.ok(sentences.length >= 6, `only ${sentences.length} sentences about the copper`);
+  for (const x of sentences) assert.ok(/to look at|not a netlist/.test(x) && /not verified|failed/.test(x), `a sentence about the copper does not say it is traced to look at and not verified: ${x}`);
+  assert.match(layout.TRACKS_HELP, /traced to look at, with their connections not verified/);
+  assert.match(layout.TRACKS_HELP, /failed/);
+  for (const s of [layout.STATUS.tracksOn, layout.STATUS.partsHidden]) assert.match(s, /to look at[\s\S]*not verified/);
+});
+
+test('the scene, its words and its results land unclaimed: .mjs modules with no mount, no MODELS entry, no claim and nothing in the deploy list', async () => {
+  const src = fs.readFileSync(SCENE_MJS, 'utf8');
+  assert.equal(sceneModule.mount, undefined);
+  assert.doesNotMatch(src, /export (async )?function mount/);
+  assert.ok(fs.existsSync(RESULTS));
+  assert.ok(!fs.readdirSync(path.join(process.cwd(), 'src', 'models')).some((f) => /^bbc-micro.*\.js$/.test(f)));
+  const { MODELS } = await import('../src/models/models.mjs');
+  assert.ok(!Object.keys(MODELS).some((k) => k.startsWith('bbc-micro')));
+  const { loadRegistry } = await import('../src/lib/registry.mjs');
+  assert.deepEqual(loadRegistry().machines.find((m) => m.id === 'bbc-micro').models ?? [], []);
+  assert.doesNotMatch(fs.readFileSync(path.join(REPO_ROOT, '.github', 'workflows', 'deploy-site.yml'), 'utf8'), /bbc-micro-board/);
+  // the scene reads the layout and the shared sampler's list, never the notes (Node only) or a copy of the sampler
+  assert.match(src, /from '\.\/bbc-micro-board-layout\.mjs'/);
+  assert.doesNotMatch(src, /bbc-micro-board-notes|accessRates|createSampler/);
+  assert.doesNotMatch(fs.readFileSync(path.join(process.cwd(), 'src', 'models', 'bbc-micro-board-layout.mjs'), 'utf8'), /node:|accessRates =|function accessRates/);
+});

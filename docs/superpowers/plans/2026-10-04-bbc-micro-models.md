@@ -508,6 +508,7 @@ A day's spike, before any pipeline is built. If any STOP threshold is crossed, t
   2. No colour literal.
   3. The words claim nothing the data does not show.
   4. The NES is unchanged.
+- **Outcome, 13 October 2026.** Built and unclaimed: `bbc-micro-board-scene.mjs` (all of the drawing, no `mount`), `bbc-micro-board-layout.mjs`, `bbc-micro-board-notes.mjs`, `results.py`'s board half and `site/src/data/bbc-micro-board-model.json`, `access.mjs` with the NES bound to it (its tests unedited and passing; its source test now matches a comment in the NES file quoting the expression, which `access.test.mjs` holds in `access.mjs`, said in the journal), and four `--model-bbc-*` tokens. Every sentence about the copper says it is traced to look at and not verified, and the note gives the nets' and I5's failures and both parts checks' failures with their figures. Nothing was measured. The pages are unchanged but for the stylesheet's four new lines. What 9b's entry wires is listed in the journal's task 7 section.
 
 After this task the BBC Micro's record has `"models": [{ "view": "inside", "module": "bbc-micro-board" }]` and **no `case` field**, so the cased rule (which fires only when `case` is set) does not apply, and the page shows the inside the way the KIM-1's shows its board, through the real page and browser check, with no preview mechanism. This is a state of the branch only: task 9 adds `"case": true`, the outside and the rule that a machine claiming a model states `case`, and the branch is not merged before task 9.
 
