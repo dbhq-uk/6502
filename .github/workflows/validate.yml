@@ -213,6 +213,9 @@ jobs:
           PASS=$(count pass); FAILED=$(count fail)
           echo "pass=${PASS:-unread} fail=${FAILED:-unread}"
           [ "${FAILED:-1}" = "0" ]
+          # 533 as at 13 Oct 2026, with the BBC Micro models' task 8 (ten tests: the outside's method and its
+          # changes, the keys' mapping from the fork, O1, the front edge not measurable, the check point, the keys and
+          # lights in the opening, the keys' placing and colours, the rear ports, the case module, the photographs);
           # 523 as at 13 Oct 2026, with the BBC Micro models' task 7 (sixteen tests: the shared access
           # sampler, and the inside's scene, legend, caption, results file and note, unclaimed; 524 passed here);
           # 507 as at 13 Oct 2026, with the BBC Micro models' task 6 (eleven tests: the page's bbc:key,
@@ -260,7 +263,7 @@ jobs:
           # Adding tests is expected; losing them is the failure this floor catches.
           # Raise the number when the suite grows, here and in the same step of
           # deploy-site.yml, which must hold the same number.
-          [ "${PASS:-0}" -ge 523 ]
+          [ "${PASS:-0}" -ge 533 ]
       # The KIM-1 page in a real browser: the built site served on 127.0.0.1
       # with its own CSP, the try-it program clicked in through the page's own
       # keypad, and the digits read back. Then the page's photograph loads, and

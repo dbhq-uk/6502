@@ -1,0 +1,1435 @@
+{
+ "about": "Task 8 of the BBC Micro models plan: the outside measured. Written by case_parts.py; every figure is a measurement made on the date of the journal entry that quotes it, except where `typical` says it is not. The case frame: millimetres from the case's left rear corner at table level, x to the right, y towards the front, z up.",
+ "badge": {
+  "from": "O1 on the case top's registration; the strip lies a little below the top, so it is placed to a few millimetres. No owl is drawn or measured",
+  "strip": [
+   [
+    17.1554,
+    173.0228
+   ],
+   [
+    398.393,
+    173.0875
+   ],
+   [
+    396.6092,
+    202.2357
+   ],
+   [
+    18.9665,
+    203.4499
+   ]
+  ],
+  "words": [
+   "BRITISH BROADCASTING CORPORATION",
+   "MICROCOMPUTER SYSTEM"
+  ],
+  "wordsBox": [
+   304.2655,
+   178.3249,
+   368.7066,
+   197.8473
+  ]
+ },
+ "boardInCase": {
+  "from": {
+   "x": "O2: the median of each scored rear port's x in the case less its socket's x on the board",
+   "y": "typical, not measured: the board's rear edge from the case's rear face, a 3 mm wall and the DIN sockets' 1.5 mm overhang",
+   "z": "typical, not measured: the board's top face above the table"
+  },
+  "x": 104.6405,
+  "y": 4.5,
+  "z": 14.0
+ },
+ "caseTop": {
+  "matrix": [
+   [
+    1.0387,
+    -0.0015,
+    -4.3453
+   ],
+   [
+    0.0015,
+    1.0387,
+    86.2375
+   ]
+  ],
+  "n": 50,
+  "registeredOn": "O1's four case top corners, taken as 415 by 345 mm",
+  "residualMm": {
+   "max": 1.0855,
+   "median": 0.4999,
+   "p90": 0.9356
+  },
+  "rotationDeg": 0.0849,
+  "scale": 1.0387,
+  "what": "Task 0's 50 key marks on O1 read through the case top's registration, and the similarity from K1's key centres to them: its scale is how big the keyboard reads on the plane of the top, 1 if the key tops were in that plane and the case were 415 by 345 mm. Recorded, not judged: the key tops are not in that plane"
+ },
+ "feet": {
+  "from": "typical",
+  "heightMm": 5.0
+ },
+ "footprint": {
+  "depthMm": 345.0,
+  "source": "D1",
+  "widthMm": 415.0
+ },
+ "frontEdge": {
+  "correctedMm": null,
+  "d": {
+   "from": "O4 and O5 triangulated: minus the mean height of the opening's two front corners above the key plane, the case's front edge taken to be at that height",
+   "mm": 6.1848,
+   "seMm": 2.8027
+  },
+  "h": {
+   "from": "No measurement of h independent of the 415 mm was found. K2, the keycap model the plan suggested for the step in height between rows, could not be fetched: Thingiverse answered both its page and its download with a 403 challenge page, and its API asks for a token, so the cross-check was dropped as the plan says (13 October 2026). O1 has no Exif. O1 looks almost straight down: the case's front face shows as a strip about 5 px tall and its base is not seen, so no upright edge gives a vanishing point and no known height can be measured on it. O4's and O5's camera is another camera. The key fit's own camera gives h only from its right-angle constraint, which task 0 found loose (536 mm, jackknife standard error 355 mm) and the plan rules out.",
+   "mm": null,
+   "seMm": null
+  },
+  "rawMm": 403.4661,
+  "rawSeMm": 0.8475,
+  "verdict": "not measurable",
+  "why": "no h independent of the 415 mm could be had, so the check was dropped before any corrected width was computed (the plan, task 8 step 3a)"
+ },
+ "grille": {
+  "face": "rear",
+  "from": "O2, on the D shell's scale and the rear face's height",
+  "slots": [
+   {
+    "x0": 273.2675,
+    "x1": 375.1388,
+    "z0": 56.511,
+    "z1": 62.2345
+   },
+   {
+    "x0": 146.4043,
+    "x1": 249.4657,
+    "z0": 56.511,
+    "z1": 62.2345
+   }
+  ]
+ },
+ "heightMm": 73.0,
+ "k1ToCase": {
+  "from": "the rigid motion taking the opening's two front corners, triangulated in K1's frame from O4 and O5, to the same corners on O1's case top registration",
+  "impliedScale": 1.0373,
+  "matrix": [
+   [
+    1.0,
+    0.0061,
+    2.7685
+   ],
+   [
+    -0.0061,
+    1.0,
+    98.0342
+   ]
+  ],
+  "rotationDeg": -0.3484
+ },
+ "keyPlaneFrom": "the case's 73 mm plus d, the front edge's depth below the key plane triangulated from O4 and O5",
+ "keyPlaneZ": 79.1848,
+ "keys": [
+  {
+   "colour": "red",
+   "d": 19.05,
+   "name": "F0",
+   "rotation": -0.3484,
+   "row": 0,
+   "w": 19.05,
+   "x": 122.5624,
+   "y": 217.9581,
+   "z": 79.1848
+  },
+  {
+   "colour": "red",
+   "d": 19.05,
+   "name": "F1",
+   "rotation": -0.3484,
+   "row": 0,
+   "w": 19.05,
+   "x": 141.612,
+   "y": 217.8422,
+   "z": 79.1848
+  },
+  {
+   "colour": "red",
+   "d": 19.05,
+   "name": "F2",
+   "rotation": -0.3484,
+   "row": 0,
+   "w": 19.05,
+   "x": 160.6617,
+   "y": 217.7264,
+   "z": 79.1848
+  },
+  {
+   "colour": "red",
+   "d": 19.05,
+   "name": "F3",
+   "rotation": -0.3484,
+   "row": 0,
+   "w": 19.05,
+   "x": 179.7113,
+   "y": 217.6106,
+   "z": 79.1848
+  },
+  {
+   "colour": "red",
+   "d": 19.05,
+   "name": "F4",
+   "rotation": -0.3484,
+   "row": 0,
+   "w": 19.05,
+   "x": 198.761,
+   "y": 217.4948,
+   "z": 79.1848
+  },
+  {
+   "colour": "red",
+   "d": 19.05,
+   "name": "F5",
+   "rotation": -0.3484,
+   "row": 0,
+   "w": 19.05,
+   "x": 217.8106,
+   "y": 217.3789,
+   "z": 79.1848
+  },
+  {
+   "colour": "red",
+   "d": 19.05,
+   "name": "F6",
+   "rotation": -0.3484,
+   "row": 0,
+   "w": 19.05,
+   "x": 236.8603,
+   "y": 217.2631,
+   "z": 79.1848
+  },
+  {
+   "colour": "red",
+   "d": 19.05,
+   "name": "F7",
+   "rotation": -0.3484,
+   "row": 0,
+   "w": 19.05,
+   "x": 255.9099,
+   "y": 217.1473,
+   "z": 79.1848
+  },
+  {
+   "colour": "red",
+   "d": 19.05,
+   "name": "F8",
+   "rotation": -0.3484,
+   "row": 0,
+   "w": 19.05,
+   "x": 274.9596,
+   "y": 217.0315,
+   "z": 79.1848
+  },
+  {
+   "colour": "red",
+   "d": 19.05,
+   "name": "F9",
+   "rotation": -0.3484,
+   "row": 0,
+   "w": 19.05,
+   "x": 294.0092,
+   "y": 216.9156,
+   "z": 79.1848
+  },
+  {
+   "colour": "dark",
+   "d": 19.05,
+   "name": "Break",
+   "rotation": -0.3484,
+   "row": 0,
+   "w": 19.05,
+   "x": 313.0589,
+   "y": 216.7998,
+   "z": 79.1848
+  },
+  {
+   "colour": "dark",
+   "d": 19.05,
+   "name": "Escape",
+   "rotation": -0.3484,
+   "row": 1,
+   "w": 19.05,
+   "x": 79.8165,
+   "y": 237.2683,
+   "z": 79.1848
+  },
+  {
+   "colour": "dark",
+   "d": 19.05,
+   "name": "D1",
+   "rotation": -0.3484,
+   "row": 1,
+   "w": 19.05,
+   "x": 98.8661,
+   "y": 237.1525,
+   "z": 79.1848
+  },
+  {
+   "colour": "dark",
+   "d": 19.05,
+   "name": "D2",
+   "rotation": -0.3484,
+   "row": 1,
+   "w": 19.05,
+   "x": 117.9158,
+   "y": 237.0367,
+   "z": 79.1848
+  },
+  {
+   "colour": "dark",
+   "d": 19.05,
+   "name": "D3",
+   "rotation": -0.3484,
+   "row": 1,
+   "w": 19.05,
+   "x": 136.9654,
+   "y": 236.9208,
+   "z": 79.1848
+  },
+  {
+   "colour": "dark",
+   "d": 19.05,
+   "name": "D4",
+   "rotation": -0.3484,
+   "row": 1,
+   "w": 19.05,
+   "x": 156.0151,
+   "y": 236.805,
+   "z": 79.1848
+  },
+  {
+   "colour": "dark",
+   "d": 19.05,
+   "name": "D5",
+   "rotation": -0.3484,
+   "row": 1,
+   "w": 19.05,
+   "x": 175.0647,
+   "y": 236.6892,
+   "z": 79.1848
+  },
+  {
+   "colour": "dark",
+   "d": 19.05,
+   "name": "D6",
+   "rotation": -0.3484,
+   "row": 1,
+   "w": 19.05,
+   "x": 194.1144,
+   "y": 236.5734,
+   "z": 79.1848
+  },
+  {
+   "colour": "dark",
+   "d": 19.05,
+   "name": "D7",
+   "rotation": -0.3484,
+   "row": 1,
+   "w": 19.05,
+   "x": 213.164,
+   "y": 236.4575,
+   "z": 79.1848
+  },
+  {
+   "colour": "dark",
+   "d": 19.05,
+   "name": "D8",
+   "rotation": -0.3484,
+   "row": 1,
+   "w": 19.05,
+   "x": 232.2137,
+   "y": 236.3417,
+   "z": 79.1848
+  },
+  {
+   "colour": "dark",
+   "d": 19.05,
+   "name": "D9",
+   "rotation": -0.3484,
+   "row": 1,
+   "w": 19.05,
+   "x": 251.2633,
+   "y": 236.2259,
+   "z": 79.1848
+  },
+  {
+   "colour": "dark",
+   "d": 19.05,
+   "name": "D0",
+   "rotation": -0.3484,
+   "row": 1,
+   "w": 19.05,
+   "x": 270.313,
+   "y": 236.1101,
+   "z": 79.1848
+  },
+  {
+   "colour": "dark",
+   "d": 19.05,
+   "name": "Minus",
+   "rotation": -0.3484,
+   "row": 1,
+   "w": 19.05,
+   "x": 289.3626,
+   "y": 235.9942,
+   "z": 79.1848
+  },
+  {
+   "colour": "dark",
+   "d": 19.05,
+   "name": "Caret",
+   "rotation": -0.3484,
+   "row": 1,
+   "w": 19.05,
+   "x": 308.4123,
+   "y": 235.8784,
+   "z": 79.1848
+  },
+  {
+   "colour": "dark",
+   "d": 19.05,
+   "name": "Backslash",
+   "rotation": -0.3484,
+   "row": 1,
+   "w": 19.05,
+   "x": 327.4619,
+   "y": 235.7626,
+   "z": 79.1848
+  },
+  {
+   "colour": "light",
+   "d": 19.05,
+   "name": "Left",
+   "rotation": -0.3484,
+   "row": 1,
+   "w": 19.05,
+   "x": 346.5116,
+   "y": 235.6468,
+   "z": 79.1848
+  },
+  {
+   "colour": "light",
+   "d": 19.05,
+   "name": "Right",
+   "rotation": -0.3484,
+   "row": 1,
+   "w": 19.05,
+   "x": 365.5612,
+   "y": 235.5309,
+   "z": 79.1848
+  },
+  {
+   "colour": "dark",
+   "d": 19.05,
+   "name": "Tab",
+   "rotation": -0.3484,
+   "row": 2,
+   "w": 28.575,
+   "x": 84.6947,
+   "y": 256.289,
+   "z": 79.1848
+  },
+  {
+   "colour": "dark",
+   "d": 19.05,
+   "name": "Q",
+   "rotation": -0.3484,
+   "row": 2,
+   "w": 19.05,
+   "x": 108.5068,
+   "y": 256.1442,
+   "z": 79.1848
+  },
+  {
+   "colour": "dark",
+   "d": 19.05,
+   "name": "W",
+   "rotation": -0.3484,
+   "row": 2,
+   "w": 19.05,
+   "x": 127.5564,
+   "y": 256.0284,
+   "z": 79.1848
+  },
+  {
+   "colour": "dark",
+   "d": 19.05,
+   "name": "E",
+   "rotation": -0.3484,
+   "row": 2,
+   "w": 19.05,
+   "x": 146.6061,
+   "y": 255.9126,
+   "z": 79.1848
+  },
+  {
+   "colour": "dark",
+   "d": 19.05,
+   "name": "R",
+   "rotation": -0.3484,
+   "row": 2,
+   "w": 19.05,
+   "x": 165.6557,
+   "y": 255.7967,
+   "z": 79.1848
+  },
+  {
+   "colour": "dark",
+   "d": 19.05,
+   "name": "T",
+   "rotation": -0.3484,
+   "row": 2,
+   "w": 19.05,
+   "x": 184.7054,
+   "y": 255.6809,
+   "z": 79.1848
+  },
+  {
+   "colour": "dark",
+   "d": 19.05,
+   "name": "Y",
+   "rotation": -0.3484,
+   "row": 2,
+   "w": 19.05,
+   "x": 203.755,
+   "y": 255.5651,
+   "z": 79.1848
+  },
+  {
+   "colour": "dark",
+   "d": 19.05,
+   "name": "U",
+   "rotation": -0.3484,
+   "row": 2,
+   "w": 19.05,
+   "x": 222.8047,
+   "y": 255.4493,
+   "z": 79.1848
+  },
+  {
+   "colour": "dark",
+   "d": 19.05,
+   "name": "I",
+   "rotation": -0.3484,
+   "row": 2,
+   "w": 19.05,
+   "x": 241.8543,
+   "y": 255.3334,
+   "z": 79.1848
+  },
+  {
+   "colour": "dark",
+   "d": 19.05,
+   "name": "O",
+   "rotation": -0.3484,
+   "row": 2,
+   "w": 19.05,
+   "x": 260.904,
+   "y": 255.2176,
+   "z": 79.1848
+  },
+  {
+   "colour": "dark",
+   "d": 19.05,
+   "name": "P",
+   "rotation": -0.3484,
+   "row": 2,
+   "w": 19.05,
+   "x": 279.9536,
+   "y": 255.1018,
+   "z": 79.1848
+  },
+  {
+   "colour": "dark",
+   "d": 19.05,
+   "name": "At",
+   "rotation": -0.3484,
+   "row": 2,
+   "w": 19.05,
+   "x": 299.0033,
+   "y": 254.986,
+   "z": 79.1848
+  },
+  {
+   "colour": "dark",
+   "d": 19.05,
+   "name": "LeftBracket",
+   "rotation": -0.3484,
+   "row": 2,
+   "w": 19.05,
+   "x": 318.0529,
+   "y": 254.8701,
+   "z": 79.1848
+  },
+  {
+   "colour": "dark",
+   "d": 19.05,
+   "name": "Underscore",
+   "rotation": -0.3484,
+   "row": 2,
+   "w": 19.05,
+   "x": 337.1026,
+   "y": 254.7543,
+   "z": 79.1848
+  },
+  {
+   "colour": "light",
+   "d": 19.05,
+   "name": "Up",
+   "rotation": -0.3484,
+   "row": 2,
+   "w": 19.05,
+   "x": 356.1522,
+   "y": 254.6385,
+   "z": 79.1848
+  },
+  {
+   "colour": "light",
+   "d": 19.05,
+   "name": "Down",
+   "rotation": -0.3484,
+   "row": 2,
+   "w": 19.05,
+   "x": 375.2019,
+   "y": 254.5227,
+   "z": 79.1848
+  },
+  {
+   "colour": "dark",
+   "d": 19.05,
+   "name": "CapsLock",
+   "rotation": -0.3484,
+   "row": 3,
+   "w": 19.05,
+   "x": 75.2857,
+   "y": 275.3966,
+   "z": 79.1848
+  },
+  {
+   "colour": "dark",
+   "d": 19.05,
+   "name": "Ctrl",
+   "rotation": -0.3484,
+   "row": 3,
+   "w": 19.05,
+   "x": 94.3354,
+   "y": 275.2807,
+   "z": 79.1848
+  },
+  {
+   "colour": "dark",
+   "d": 19.05,
+   "name": "A",
+   "rotation": -0.3484,
+   "row": 3,
+   "w": 19.05,
+   "x": 113.385,
+   "y": 275.1649,
+   "z": 79.1848
+  },
+  {
+   "colour": "dark",
+   "d": 19.05,
+   "name": "S",
+   "rotation": -0.3484,
+   "row": 3,
+   "w": 19.05,
+   "x": 132.4347,
+   "y": 275.0491,
+   "z": 79.1848
+  },
+  {
+   "colour": "dark",
+   "d": 19.05,
+   "name": "D",
+   "rotation": -0.3484,
+   "row": 3,
+   "w": 19.05,
+   "x": 151.4843,
+   "y": 274.9333,
+   "z": 79.1848
+  },
+  {
+   "colour": "dark",
+   "d": 19.05,
+   "name": "F",
+   "rotation": -0.3484,
+   "row": 3,
+   "w": 19.05,
+   "x": 170.534,
+   "y": 274.8174,
+   "z": 79.1848
+  },
+  {
+   "colour": "dark",
+   "d": 19.05,
+   "name": "G",
+   "rotation": -0.3484,
+   "row": 3,
+   "w": 19.05,
+   "x": 189.5836,
+   "y": 274.7016,
+   "z": 79.1848
+  },
+  {
+   "colour": "dark",
+   "d": 19.05,
+   "name": "H",
+   "rotation": -0.3484,
+   "row": 3,
+   "w": 19.05,
+   "x": 208.6333,
+   "y": 274.5858,
+   "z": 79.1848
+  },
+  {
+   "colour": "dark",
+   "d": 19.05,
+   "name": "J",
+   "rotation": -0.3484,
+   "row": 3,
+   "w": 19.05,
+   "x": 227.6829,
+   "y": 274.47,
+   "z": 79.1848
+  },
+  {
+   "colour": "dark",
+   "d": 19.05,
+   "name": "K",
+   "rotation": -0.3484,
+   "row": 3,
+   "w": 19.05,
+   "x": 246.7326,
+   "y": 274.3541,
+   "z": 79.1848
+  },
+  {
+   "colour": "dark",
+   "d": 19.05,
+   "name": "L",
+   "rotation": -0.3484,
+   "row": 3,
+   "w": 19.05,
+   "x": 265.7822,
+   "y": 274.2383,
+   "z": 79.1848
+  },
+  {
+   "colour": "dark",
+   "d": 19.05,
+   "name": "Semicolon",
+   "rotation": -0.3484,
+   "row": 3,
+   "w": 19.05,
+   "x": 284.8319,
+   "y": 274.1225,
+   "z": 79.1848
+  },
+  {
+   "colour": "dark",
+   "d": 19.05,
+   "name": "Colon",
+   "rotation": -0.3484,
+   "row": 3,
+   "w": 19.05,
+   "x": 303.8815,
+   "y": 274.0067,
+   "z": 79.1848
+  },
+  {
+   "colour": "dark",
+   "d": 19.05,
+   "name": "RightBracket",
+   "rotation": -0.3484,
+   "row": 3,
+   "w": 19.05,
+   "x": 322.9312,
+   "y": 273.8908,
+   "z": 79.1848
+  },
+  {
+   "colour": "dark",
+   "d": 19.05,
+   "name": "Return",
+   "rotation": -0.3484,
+   "row": 3,
+   "w": 38.1,
+   "x": 351.5056,
+   "y": 273.7171,
+   "z": 79.1848
+  },
+  {
+   "colour": "dark",
+   "d": 19.05,
+   "name": "ShiftLock",
+   "rotation": -0.3484,
+   "row": 4,
+   "w": 19.05,
+   "x": 75.4016,
+   "y": 294.4462,
+   "z": 79.1848
+  },
+  {
+   "colour": "dark",
+   "d": 19.05,
+   "name": "Shift",
+   "rotation": -0.3484,
+   "row": 4,
+   "w": 28.575,
+   "x": 99.2136,
+   "y": 294.3014,
+   "z": 79.1848
+  },
+  {
+   "colour": "dark",
+   "d": 19.05,
+   "name": "Z",
+   "rotation": -0.3484,
+   "row": 4,
+   "w": 19.05,
+   "x": 123.0257,
+   "y": 294.1566,
+   "z": 79.1848
+  },
+  {
+   "colour": "dark",
+   "d": 19.05,
+   "name": "X",
+   "rotation": -0.3484,
+   "row": 4,
+   "w": 19.05,
+   "x": 142.0753,
+   "y": 294.0408,
+   "z": 79.1848
+  },
+  {
+   "colour": "dark",
+   "d": 19.05,
+   "name": "C",
+   "rotation": -0.3484,
+   "row": 4,
+   "w": 19.05,
+   "x": 161.125,
+   "y": 293.925,
+   "z": 79.1848
+  },
+  {
+   "colour": "dark",
+   "d": 19.05,
+   "name": "V",
+   "rotation": -0.3484,
+   "row": 4,
+   "w": 19.05,
+   "x": 180.1746,
+   "y": 293.8092,
+   "z": 79.1848
+  },
+  {
+   "colour": "dark",
+   "d": 19.05,
+   "name": "B",
+   "rotation": -0.3484,
+   "row": 4,
+   "w": 19.05,
+   "x": 199.2243,
+   "y": 293.6933,
+   "z": 79.1848
+  },
+  {
+   "colour": "dark",
+   "d": 19.05,
+   "name": "N",
+   "rotation": -0.3484,
+   "row": 4,
+   "w": 19.05,
+   "x": 218.2739,
+   "y": 293.5775,
+   "z": 79.1848
+  },
+  {
+   "colour": "dark",
+   "d": 19.05,
+   "name": "M",
+   "rotation": -0.3484,
+   "row": 4,
+   "w": 19.05,
+   "x": 237.3236,
+   "y": 293.4617,
+   "z": 79.1848
+  },
+  {
+   "colour": "dark",
+   "d": 19.05,
+   "name": "Comma",
+   "rotation": -0.3484,
+   "row": 4,
+   "w": 19.05,
+   "x": 256.3732,
+   "y": 293.3459,
+   "z": 79.1848
+  },
+  {
+   "colour": "dark",
+   "d": 19.05,
+   "name": "FullStop",
+   "rotation": -0.3484,
+   "row": 4,
+   "w": 19.05,
+   "x": 275.4229,
+   "y": 293.23,
+   "z": 79.1848
+  },
+  {
+   "colour": "dark",
+   "d": 19.05,
+   "name": "Slash",
+   "rotation": -0.3484,
+   "row": 4,
+   "w": 19.05,
+   "x": 294.4725,
+   "y": 293.1142,
+   "z": 79.1848
+  },
+  {
+   "colour": "dark",
+   "d": 19.05,
+   "name": "Shift2",
+   "rotation": -0.3484,
+   "row": 4,
+   "w": 28.575,
+   "x": 318.2846,
+   "y": 292.9694,
+   "z": 79.1848
+  },
+  {
+   "colour": "dark",
+   "d": 19.05,
+   "name": "Delete",
+   "rotation": -0.3484,
+   "row": 4,
+   "w": 19.05,
+   "x": 342.0966,
+   "y": 292.8247,
+   "z": 79.1848
+  },
+  {
+   "colour": "light",
+   "d": 19.05,
+   "name": "Copy",
+   "rotation": -0.3484,
+   "row": 4,
+   "w": 19.05,
+   "x": 361.1463,
+   "y": 292.7088,
+   "z": 79.1848
+  },
+  {
+   "colour": "dark",
+   "d": 19.05,
+   "name": "Space",
+   "rotation": -0.3484,
+   "row": 5,
+   "w": 123.825,
+   "x": 208.8649,
+   "y": 312.6851,
+   "z": 79.1848
+  }
+ ],
+ "leds": [
+  {
+   "name": "cassette motor",
+   "x": 79.5121,
+   "y": 322.967,
+   "z": 70.3937
+  },
+  {
+   "name": "caps lock",
+   "x": 99.3908,
+   "y": 323.4599,
+   "z": 71.4197
+  },
+  {
+   "name": "shift lock",
+   "x": 119.0887,
+   "y": 323.5568,
+   "z": 72.1225
+  }
+ ],
+ "ledsFrom": "triangulated from O4 and O5, placed in the case as the keys are",
+ "ledsOnTop": {
+  "order": [
+   "cassette motor",
+   "caps lock",
+   "shift lock"
+  ],
+  "points": [
+   [
+    74.0808,
+    322.6023
+   ],
+   [
+    94.9432,
+    322.6666
+   ],
+   [
+    115.522,
+    322.73
+   ]
+  ],
+  "what": "the three lights read through the case top's registration: recorded only, being below the top"
+ },
+ "mains": {
+  "words": [
+   "Manufactured to BS415 by BSR (UK)",
+   "220-240V~ 50/60Hz 50 watts",
+   "On",
+   "Off"
+  ],
+  "x0": 16.3994,
+  "x1": 79.2359,
+  "z0": 11.6501,
+  "z1": 53.622
+ },
+ "methodFixed": {
+  "tools/bbc-micro-model/case_parts.py": "0a36447dff0f0fe2f4691a004d996cd664b3857a29cf209424040c5d4296fc00",
+  "tools/bbc-micro-model/case_profile.py": "96557265aeb0ecc03ae549f8ece2992c26da05125aeb6ec15fca65e836ff13a6",
+  "tools/bbc-micro-model/case_register.py": "b30245d1a30c380cd41853390dec5fbbdca2ee59f21627c4b6cf996cbcb8fdb8",
+  "tools/bbc-micro-model/common.py": "d9d9e1bcea7e643c8a9c7b11a3035b8bd8f551ebd687eb930eef19b3f1e90dc9",
+  "tools/bbc-micro-model/data/case-marks.json": "a5ace72698341acbcc0b72ba3305a7df9fe3b3ad963baa4fe830d7b255ddb978",
+  "tools/bbc-micro-model/data/marks.json": "0cf894ecccf8b24327a37a13bb82419ed3f910340a53cb7972131015a1754904",
+  "tools/bbc-micro-model/data/parts.json": "4012160780e9a94477b184eb10194c150606780055e526575053d2d4543748eb",
+  "tools/bbc-micro-model/keys.py": "1c197719235ebde9e52ce611b287a07d904916db4a2caa199117d28b9f0efcbc",
+  "tools/bbc-micro-model/spike.py": "204afb5b91fbfec4b8fe9a95840a159245f5942ad0aed272419593e17d989ced"
+ },
+ "outline": {
+  "cornerRadiusMm": 3.0,
+  "depthMm": 345.0,
+  "from": "D1's footprint; the corners' radius typical",
+  "widthMm": 415.0
+ },
+ "profile": [
+  {
+   "y": 0.0,
+   "z": 5.0
+  },
+  {
+   "y": 0.0,
+   "z": 73.0
+  },
+  {
+   "y": 345.0,
+   "z": 73.0
+  },
+  {
+   "y": 345.0,
+   "z": 5.0
+  }
+ ],
+ "profileCheck": {
+  "errMm": 0.4496,
+  "fallback": false,
+  "k1": [
+   109.5375,
+   177.8,
+   0.0
+  ],
+  "limitMm": 2.0,
+  "triangulated": [
+   109.6422,
+   178.1263,
+   -0.291
+  ],
+  "verdict": "pass",
+  "what": "the key A's legend, left out of the camera fit, triangulated from O4 and O5 against K1's place on the key plane"
+ },
+ "profileFrom": "D1: the top level at 73 mm with the feet, front and rear upright; the feet typical; the key plane and the panel from the triangulation",
+ "rear": [
+  {
+   "errMm": 0.7773,
+   "h": 9.0,
+   "how": "the middle of its ring's left, right, top and bottom edges",
+   "kind": "phono",
+   "label": "UHF out",
+   "ref": "SK1",
+   "scored": true,
+   "w": 9.0,
+   "x": 381.0178,
+   "z": 24.6232
+  },
+  {
+   "h": 14.0,
+   "how": "the middle of its ring's edges; it stands out of the panel",
+   "kind": "bnc",
+   "label": "video out",
+   "ref": "SK2",
+   "scored": false,
+   "w": 14.0,
+   "x": 352.4558,
+   "z": 21.8978
+  },
+  {
+   "errMm": -0.3165,
+   "h": 16.0,
+   "how": "the circle through 6 points on its rim's lit arc (radius 43.8 px)",
+   "kind": "din",
+   "label": "RGB",
+   "ref": "SK3",
+   "scored": true,
+   "w": 16.0,
+   "x": 319.474,
+   "z": 29.0293
+  },
+  {
+   "errMm": 0.1826,
+   "h": 16.0,
+   "how": "the circle through 6 points on its rim's lit arc (radius 43.2 px)",
+   "kind": "din",
+   "label": "RS423",
+   "ref": "SK4",
+   "scored": true,
+   "w": 16.0,
+   "x": 298.8232,
+   "z": 28.7741
+  },
+  {
+   "errMm": 0.0,
+   "h": 16.0,
+   "how": "the circle through 6 points on its rim's lit arc (radius 44.1 px)",
+   "kind": "din",
+   "label": "cassette",
+   "ref": "SK5",
+   "scored": true,
+   "w": 16.0,
+   "x": 278.5905,
+   "z": 28.4479
+  },
+  {
+   "errMm": -0.4376,
+   "h": 12.5,
+   "how": "the middle of its two posts",
+   "kind": "dType",
+   "label": "analogue in",
+   "ref": "SK6",
+   "scored": true,
+   "w": 39.1,
+   "x": 208.7529,
+   "z": 23.9078
+  },
+  {
+   "h": 16.0,
+   "how": "the circle through 6 points on its rim's lit arc (radius 35.2 px)",
+   "kind": "din",
+   "label": "econet",
+   "ref": "SK7",
+   "scored": false,
+   "w": 16.0,
+   "x": 136.5658,
+   "z": 24.8749
+  }
+ ],
+ "rearCheck": {
+  "errMm": {
+   "SK1": 0.7773,
+   "SK3": -0.3165,
+   "SK4": 0.1826,
+   "SK5": 0.0,
+   "SK6": -0.4376
+  },
+  "limitMm": 2.0,
+  "n": 5,
+  "scored": [
+   "SK1",
+   "SK3",
+   "SK4",
+   "SK5",
+   "SK6"
+  ],
+  "verdict": "pass",
+  "within": 5,
+  "worstMm": 0.7773
+ },
+ "rearOrder": [
+  "UHF out",
+  "video out",
+  "RGB",
+  "RS423",
+  "cassette",
+  "analogue in",
+  "econet"
+ ],
+ "rearScale": {
+  "from": "the 15-way D's posts, 140.01 px apart, taken as 33.325 mm (P-TE_1757819)",
+  "pxPerMm": 4.2014
+ },
+ "recess": {
+  "from": "O1 on the case top's registration; the panel's height from the lights'",
+  "opening": [
+   [
+    17.1554,
+    173.0228
+   ],
+   [
+    398.393,
+    173.0875
+   ],
+   [
+    395.6257,
+    331.5677
+   ],
+   [
+    20.8456,
+    331.4825
+   ]
+  ],
+  "panelZ": 71.312
+ },
+ "sources": [
+  "D1",
+  "K1",
+  "O1",
+  "O2",
+  "O3",
+  "O4",
+  "O5",
+  "O8-I",
+  "P-TE_1757819"
+ ],
+ "thresholds": {
+  "caseTop": "O1 registered on the case top's four corners to 415 by 345 mm; the keys' scale on that plane recorded, not judged",
+  "checkPoint": "the key A's legend, left out of the camera fit and triangulated from O4 and O5, within 2.0 mm of K1's place for A on the key plane; else the profile is typical",
+  "frontEdge": "the front edge's width corrected for parallax, its interval plus or minus two standard errors (h, d and the raw width in quadrature): pass if all of it is within 1.5 per cent of 415 mm, stop if all of it is outside 2.5, else inconclusive; not measurable if no independent h, or if the factor (h + d) / h has an interval wider than 3 per cent of its value, decided before the width is computed",
+  "mapping": "every name in BBC_KEYS has exactly one K1 keycap, BREAK one and the second SHIFT one, and no keycap is left over; a machine key K1 lacks is a STOP",
+  "o1": "O1 to K1, each key held out: median at most 1.0 mm, 90th percentile at most 2.0, largest at most 3.0 to pass; STOP if the median is over 1.5 or more than five keys are over 3.0; at least 30 keys",
+  "o3": "O3 to K1, each key held out, as O1: recorded, not a stop",
+  "rear": "each scored rear port within 2.0 mm of its socket's x on the board plus the board's offset in the case, on the D shell's scale; else FAIL, recorded and pinned"
+ },
+ "triangulation": {
+  "fit": {
+   "cameraHeightMm": {
+    "O4": 502.4441,
+    "O5": 451.0198
+   },
+   "fPx": 2479.8106,
+   "legends": {
+    "O4": 35,
+    "O5": 27
+   },
+   "principalPoint": {
+    "O4": [
+     891.9436,
+     788.1834
+    ],
+    "O5": [
+     921.2578,
+     785.2884
+    ]
+   },
+   "reprojectionPx": {
+    "legends": {
+     "max": 3.2525,
+     "median": 0.9029,
+     "p90": 2.0736
+    },
+    "marked": {
+     "max": 0.5261,
+     "median": 0.1437,
+     "p90": 0.4781
+    }
+   }
+  },
+  "jackknife": 35,
+  "points": {
+   "ledCapsLock": {
+    "se": [
+     0.4627,
+     0.6753,
+     1.084
+    ],
+    "x": 95.2499,
+    "y": 226.009,
+    "z": -7.7652
+   },
+   "ledCassetteMotor": {
+    "se": [
+     0.6736,
+     0.7493,
+     1.281
+    ],
+    "x": 75.3745,
+    "y": 225.3952,
+    "z": -8.7911
+   },
+   "ledShiftLock": {
+    "se": [
+     0.3109,
+     0.6256,
+     0.9323
+    ],
+    "x": 114.9468,
+    "y": 226.2257,
+    "z": -7.0623
+   },
+   "openingFrontLeft": {
+    "se": [
+     1.27,
+     0.8659,
+     2.0735
+    ],
+    "x": 23.4036,
+    "y": 233.5965,
+    "z": -8.7576
+   },
+   "openingFrontRight": {
+    "se": [
+     0.7121,
+     0.6006,
+     0.8034
+    ],
+    "x": 384.6838,
+    "y": 235.8752,
+    "z": -3.6121
+   }
+  },
+  "topAtOpening": {
+   "se": [
+    2.0735,
+    0.8034
+   ],
+   "z": [
+    -8.7576,
+    -3.6121
+   ]
+  }
+ },
+ "typical": {
+  "boardY": {
+   "measured": false,
+   "value": 4.5,
+   "what": "typical, not measured: the board's rear edge from the case's rear face, a 3 mm wall and the DIN sockets' 1.5 mm overhang"
+  },
+  "boardZ": {
+   "measured": false,
+   "value": 14.0,
+   "what": "typical, not measured: the board's top face above the table"
+  },
+  "cornerRadius": {
+   "measured": false,
+   "value": 3.0,
+   "what": "typical, not measured: the radius of the case's corners seen from above"
+  },
+  "feet": {
+   "measured": false,
+   "value": 5.0,
+   "what": "typical, not measured: the feet's height; the case's 73 mm includes them (D1)"
+  },
+  "keyAboveTop": {
+   "measured": false,
+   "value": 5.0,
+   "what": "typical, used only if the side profile's check fails: how far the key tops stand above the case top"
+  },
+  "panelBelowKeys": {
+   "measured": false,
+   "value": 8.0,
+   "what": "typical, used only if the side profile's check fails: how far the panel round the keys lies below the key tops"
+  },
+  "portSize": {
+   "measured": false,
+   "value": {
+    "bnc": 14.0,
+    "dType": [
+     39.1,
+     12.5
+    ],
+    "din": 16.0,
+    "phono": 9.0
+   },
+   "what": "typical, not measured: a port's width and height on the rear face (the D's width is TE's flange, 38.76 to 39.52 mm)"
+  },
+  "undersideMargin": {
+   "measured": false,
+   "value": 10.0,
+   "what": "typical, not measured: the underside panel's margin round its connectors"
+  },
+  "wall": {
+   "measured": false,
+   "value": 3.0,
+   "what": "typical, not measured: the case's wall, which the underside panel stops at"
+  }
+ },
+ "underside": [
+  {
+   "boardLabel": "Tube",
+   "d": 14.0,
+   "label": "tube",
+   "ref": "PL12",
+   "w": 69.7,
+   "x": 379.4905,
+   "y": 230.0
+  },
+  {
+   "boardLabel": "1 MHz bus",
+   "d": 14.0,
+   "label": "1MHz BUS",
+   "ref": "PL11",
+   "w": 62.5,
+   "x": 312.8905,
+   "y": 230.0
+  },
+  {
+   "boardLabel": "user port",
+   "d": 14.0,
+   "label": "user port",
+   "ref": "PL10",
+   "w": 44.5,
+   "x": 258.3905,
+   "y": 230.0
+  },
+  {
+   "boardLabel": "printer",
+   "d": 14.0,
+   "label": "printer",
+   "ref": "PL9",
+   "w": 54.0,
+   "x": 193.1405,
+   "y": 230.0
+  },
+  {
+   "boardLabel": "disc drive",
+   "d": 14.0,
+   "label": "disc drive",
+   "ref": "PL8",
+   "w": 62.0,
+   "x": 134.6405,
+   "y": 230.0
+  }
+ ],
+ "undersidePanel": {
+  "from": "typical: a margin round the connectors; O8 shows them in one recessed panel under the front",
+  "x0": 93.6405,
+  "x1": 412.0,
+  "y0": 213.0,
+  "y1": 247.0
+ },
+ "verdicts": {
+  "frontEdge": "not measurable",
+  "mapping": "pass",
+  "o1": "pass",
+  "o3": "pass",
+  "profileCheck": "pass",
+  "rear": "pass"
+ },
+ "widthOnRear": {
+  "mm": 425.0986,
+  "what": "the case's width at y 580 on O2 on the D shell's scale, against D1's 415 mm: recorded, not judged"
+ }
+}

@@ -1,7 +1,7 @@
 ---
 title: "The BBC Micro's models: the inputs, and what they rest on"
 date: 2026-10-04
-summary: "Before the BBC Micro's two models are built, the work measures what both rest on: the scale of a flatbed scan of the bare board, how well the solder side lies on the component side, and how well a photograph of the keyboard fits an open keyboard layout. The keys, the scan's scale down the board, and the board's size and outline hold, and the solder side holds except for a few holes. Two checks failed and were revised the same day, each kept on record as it failed: the case's front edge, measured on the plane of the keys, which it does not lie in; and a row by row check of the board's width scale, which magnified the noise of short rows and met one long row off the pitch, and as revised lands between pass and stop. The solder side then lies on the component side within the plan's limits over every hole found, and the board's chips come out as footprints, pin one read from the print. Both faces' copper is then traced from the scans with its method fixed first, but its check on the board's power nets fails, and so does its comparison with a photograph of a populated board, so the track map is offered to look at, not as a netlist. Every chip is then placed on its footprint and named from the Service Manual, with the disc interface fitted and Econet left out; the places miss a few of the manual's approximate ones, and the markings on a populated board disagree with the manual for four causes, one a flaw in the rule, so both of those checks fail too, and are kept as they failed. The machine then reports its keyboard lights and how often the processor reaches each chip, counted without changing a single cycle; its speed in a browser is still to be measured, by a rule written down first. The inside model's drawing, its words and its figures are then built and tested, waiting off the page until the outside joins it; every word it says about the copper calls it traced to look at, and its note gives every failed check beside the figures."
+summary: "Before the BBC Micro's two models are built, the work measures what both rest on: the scale of a flatbed scan of the bare board, how well the solder side lies on the component side, and how well a photograph of the keyboard fits an open keyboard layout. The keys, the scan's scale down the board, and the board's size and outline hold, and the solder side holds except for a few holes. Two checks failed and were revised the same day, each kept on record as it failed: the case's front edge, measured on the plane of the keys, which it does not lie in; and a row by row check of the board's width scale, which magnified the noise of short rows and met one long row off the pitch, and as revised lands between pass and stop. The solder side then lies on the component side within the plan's limits over every hole found, and the board's chips come out as footprints, pin one read from the print. Both faces' copper is then traced from the scans with its method fixed first, but its check on the board's power nets fails, and so does its comparison with a photograph of a populated board, so the track map is offered to look at, not as a netlist. Every chip is then placed on its footprint and named from the Service Manual, with the disc interface fitted and Econet left out; the places miss a few of the manual's approximate ones, and the markings on a populated board disagree with the manual for four causes, one a flaw in the rule, so both of those checks fail too, and are kept as they failed. The machine then reports its keyboard lights and how often the processor reaches each chip, counted without changing a single cycle; its speed in a browser is still to be measured, by a rule written down first. The inside model's drawing, its words and its figures are then built and tested, waiting off the page until the outside joins it; every word it says about the copper calls it traced to look at, and its note gives every failed check beside the figures. The outside is then measured: every key of an open keyboard drawing is matched to the machine's, two photographs of one machine are triangulated to set the keys and lights in the case, and the rear ports are checked against their sockets on the board; both checks pass. The front edge's correction for parallax cannot be measured, for want of the camera's height, and three measures put the case a few per cent wider than the manual's size, which is recorded, not resolved."
 order: 28
 ---
 
@@ -1662,3 +1662,79 @@ cf4da9c9f09781a98c50e1c89d863617a1da9cd3eb0d3f0d72257149d71b4101 tools/bbc-micro
 1c197719235ebde9e52ce611b287a07d904916db4a2caa199117d28b9f0efcbc tools/bbc-micro-model/keys.py
 a5ace72698341acbcc0b72ba3305a7df9fe3b3ad963baa4fe830d7b255ddb978 tools/bbc-micro-model/data/case-marks.json
 ```
+
+### The run
+
+The third run, at 2026-10-13T22:13:26Z to 22:13:44Z, on `cbe712d` (the same command), wrote the committed `keys.json`, `case.json` and module. It printed the first run's lines but the colours line, which each run printed differently (above). Its lines, less `verify.py`'s eight "present, SHA-256 matches":
+
+```
+mapping: 74 keycaps for 72 machine keys and Break, Shift2; lacks [], twice [], other []: pass
+O1 to K1 (task 0's marks), each key held out: median 0.395, p90 0.632, max 0.989 mm over 50 keys, 0 over 3 mm: pass
+O3 to K1 (legends), each key held out: median 0.205, p90 0.329, max 0.588 mm over 36 keys, 0 over 3 mm: pass (recorded, not a stop)
+colours clustered: light 6, red 4, dark 64; read by eye: red 10, light 5, dark 59; 63 of 74 agree
+case top: O1 on its four corners to 415 by 345 mm; the keys on that plane: scale 1.0387, turn 0.08 deg, residual median 0.50 mm (recorded)
+opening: x 17.2 to 398.4, y 173.0 to 331.6 mm
+cameras: f 2479.8 px; principal points O4 [891.9 788.2], O5 [921.3 785.3]; legends {'O4': 35, 'O5': 27}; reprojection legends median 0.90 px (max 3.25), marked points median 0.14 px (max 0.53)
+check point A: triangulated [109.64 178.13  -0.29], K1 [109.54 177.8 ] at z 0: 0.45 mm (limit 2.0): pass
+the top at the opening's front: z [-8.76 -3.61] mm (se [2.07 0.8 ]); d 6.18 mm, se 2.80
+openingFrontLeft: [ 23.4  233.6   -8.76] se [1.27 0.87 2.07]
+openingFrontRight: [384.68 235.88  -3.61] se [0.71 0.6  0.8 ]
+ledCassetteMotor: [ 75.37 225.4   -8.79] se [0.67 0.75 1.28]
+ledCapsLock: [ 95.25 226.01  -7.77] se [0.46 0.68 1.08]
+ledShiftLock: [114.95 226.23  -7.06] se [0.31 0.63 0.93]
+front edge: raw 403.5 mm; h not obtained; d 6.18 mm (se 2.80): not measurable
+rear: scale 4.2014 px/mm; board offset x 104.64 mm; 5 of 5 within 2.0 mm, worst 0.78: pass
+  SK1 UHF out: case x 381.02, board x 275.60 plus offset, error +0.78 mm
+  SK2 video out: case x 352.46, not scored
+  SK3 RGB: case x 319.47, board x 215.15 plus offset, error -0.32 mm
+  SK4 RS423: case x 298.82, board x 194.00 plus offset, error +0.18 mm
+  SK5 cassette: case x 278.59, board x 173.95 plus offset, error +0.00 mm
+  SK6 analogue in: case x 208.75, board x 104.55 plus offset, error -0.44 mm
+  SK7 econet: case x 136.57, not scored
+the case's width on O2's scale: 425.1 mm (recorded)
+```
+
+| Check | Figure | Pass | Verdict |
+|---|---|---|---|
+| The keys' mapping | 74 keycaps: the 72 machine keys, BREAK and a second SHIFT; none lacking, none twice | every key once; a key K1 lacks is a STOP | pass |
+| O1 to K1, each key held out (task 0's marks again) | 50 keys: median 0.395 mm, 90th percentile 0.632, largest 0.989 | median at most 1.0, 90th percentile at most 2.0, largest at most 3.0 | pass |
+| O3 to K1, each key held out | 36 legends: median 0.205 mm, 90th percentile 0.329, largest 0.588 | as O1, recorded | pass, recorded (its figure was seen in development) |
+| The front edge, corrected for parallax | raw 403.5 mm; h not obtained; d 6.18 mm, standard error 2.80 | the corrected width's interval within 1.5 per cent of 415 mm | **not measurable**, decided before any width |
+| The side profile's check point | the key A, 0.45 mm from K1's place | within 2.0 mm | pass |
+| The rear ports | 5 of 5 within 2.0 mm; the worst 0.78 mm (SK1) | each within 2.0 mm | pass |
+| The case top's plan size | the keys read 1.0387 times K1's size on the top's registration | recorded | recorded |
+
+The commands, the order and the times are above; the figures are in `keys.json` and `case.json`, and the plan's task 8 note has the outcome.
+
+### What the figures say, and what they do not
+
+- **The key tops stand about 6 mm above the case top** (d 6.18 mm, standard error 2.80), and the panel round the keys, at the lights, about 7 to 9 mm below the key tops, so about 1 to 3 mm below the case top. The model takes these. The 2.80 is mostly the two front corners' 5 mm disagreement, which was not explained.
+- **The check point says the two cameras agree where the legends are.** A lies among them; the opening's corners lie well outside them, which is where the corners disagree. The pass does not cover the case's edges, as the method block said before the run.
+- **Three measures say the case is a few per cent wider than 415 mm, in K1's units and the D's.** On O1's top registered to 415 by 345 mm the keys read 3.87 per cent larger than K1; the turn and shift that put K1 in the case would need a scale of 1.0373 to take both triangulated front corners onto O1's; and on O2's D scale the case is 425.1 mm wide, 2.4 per cent over. The first two share K1 and O1, so they are not independent of each other; the third shares neither. So either the case is wider than the Service Manual's 415 mm (the Science Museum's 410 is narrower still), or K1's pitch and the D's spacing both read small, or something common to how the case's corners and ends were marked. Not resolved: the case's size rests on the manual, as the design says, and nothing was rescaled to fit. The rigid placing of K1 means the keys keep K1's size, and the opening's two front corners land about 6.7 mm from their triangulated places on each side: the keys still sit inside the opening.
+- **The board in the case.** On O2's scale the board's left edge is 104.64 mm from the case's left end, so its right edge is 0.36 mm inside the case's right end, which leaves no room for the wall. With the case reading 425.1 mm on the same scale, the board's place is good to a few millimetres, not to the wall. The underside connectors take that offset; PL12, the Tube's, ends 0.7 mm inside the case.
+- **The rear check passes,** but it judges how well five ports agree with five sockets after one shift, so it tests the D's scale over 170 mm, not the shift.
+
+### Typical, not measured
+
+The feet (5 mm), the case's corner radius (3 mm), the board's front to back place (4.5 mm from the rear face) and height (14 mm), the underside panel (10 mm round its connectors, stopping at a 3 mm wall), the ports' sizes, and the profile's shape (the top level, front and rear upright, at the Service Manual's 73 mm). Each is in `case.json` `typical`, with `measured: false`.
+
+### Tests
+
+pytest: `tests/test_case.py`, 14 tests (13 written after the scripts' first draft, the colour test after the first run); `~/venv-models/bin/python -m pytest tools/bbc-micro-model/tests -q`: 140 passed (13 October 2026), 126 before task 8.
+
+`site/tests/bbc-models.test.mjs` gains ten tests: the method's hashes as fixed and as changed after each run, against `case.json`, `keys.json` and the files on disk; every machine key one K1 keycap, with BREAK and the second SHIFT, read from the fork; `keys.json` passing O1's row and recording O3's and the raw front edge, with its verdicts its figures'; the front edge not measurable, with h's reason, d and no corrected width, pinned to the plan's outcome words; the check point within 2.0 mm, recomputed, pinned to the plan's words; the case's size, the keys and lights inside the opening and the opening inside the case, no two keycaps overlapping, the lights in O1's order; the keys K1's centres through the recorded turn and shift, their colours as read on O1; the rear ports in O2's order, each scored one within 2.0 mm of its socket plus the median offset, recomputed, pinned to the plan's words; the module generated from `case.json` and unclaimed; and the five photographs committed and credited, O8, I6, K1 and TE's drawing not committed, K1's notice in `NOTICE.md`. Each was seen to fail with a committed file broken one way at a time and restored after (a scratch script outside the repository; its log is not committed): a comment added to `case_parts.py` (1 test failed); the second SHIFT dropped from `keys.json` (2); K1's address set to the original repository (1); O1 said to be between pass and stop (1); the front edge said to pass (1); the check point set 2.5 mm off (1); the plan's rear outcome words changed (1); the cassette motor's light moved in the module (2); two keycaps overlapping (3); a key moved 1 mm in `case.json` (1); a cursor key read as dark (2); a rear port 3 mm off (1); the rear order swapped (1); a note dropped from the module (1); O4 not committed (1); K1's notice taken out of `NOTICE.md` (1). One tolerance was set after the data were seen: the keys' places through the turn and shift agree to 0.03 mm, not 0.01, because `case.json` keeps the turn to four places, which is 0.02 mm at 400 mm; that is rounding, not a check.
+
+Both workflows' floors rise by the ten new site tests, from 523 to 533.
+
+### Mistakes
+
+- I first wrote task 8's marks into `marks.json`, which a site test pins to task 5's run by hash; reverted before anything ran, and the marks moved to `case-marks.json`.
+- The camera fit's third axis points down into the key plane. The first look printed heights below the key plane as positive and the camera heights negative; both are now turned to up before they are written.
+- The pytest file came after the scripts' first draft, not before, as the plan's step asks.
+- A development run printed O3's held-out figure before the method was fixed (said in the method block).
+- The colours were sampled two ways that each disagreed with O1, and are now read by eye (above).
+- The typical underside panel ran past the case's right end in the first run.
+
+### Left for task 9a
+
+The scene draws the case from `CASE`, `RECESS` and `PROFILE`, the keys from `KEYS` with `LEGENDS[name]`, the lights from `LEDS`, the badge strip's words from `BADGE` and no owl, the rear vents from `GRILLE`, the ports and mains panel from `REAR`, the underside from `UNDERSIDE`, and the feet from `FEET`, each note into its words. The case's size is the manual's; the page says that the outside's measures disagree with it by a few per cent (above), and that the front edge's check was not measurable. K2 is not credited, being unused.

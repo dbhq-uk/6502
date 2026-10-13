@@ -1293,3 +1293,186 @@ test('the scene, its words and its results land unclaimed: .mjs modules with no 
   assert.doesNotMatch(src, /bbc-micro-board-notes|accessRates|createSampler/);
   assert.doesNotMatch(fs.readFileSync(path.join(process.cwd(), 'src', 'models', 'bbc-micro-board-layout.mjs'), 'utf8'), /node:|accessRates =|function accessRates/);
 });
+
+// --- Task 8: the outside measured ------------------------------------------------------------
+
+const keysJson = JSON.parse(fs.readFileSync(path.join(TOOL, 'data', 'keys.json'), 'utf8'));
+const caseJson = JSON.parse(fs.readFileSync(path.join(TOOL, 'data', 'case.json'), 'utf8'));
+const caseMarks = JSON.parse(fs.readFileSync(path.join(TOOL, 'data', 'case-marks.json'), 'utf8'));
+const caseParts = await import('../src/models/bbc-micro-case-parts.mjs');
+const { BBC_KEYS } = await import('../public/bbc-keys.js');
+const task8Outcome = () => PLAN.split('\n').find((l) => l.startsWith('- **Outcome, 13 October 2026 (the run, 22:08:29 UTC')) ?? '';
+
+function task8Hashes() {
+  const section = fs.readFileSync(JOURNAL, 'utf8').split('## Task 8: the outside measured')[1] ?? '';
+  const block = section.split('### Task 8\'s method fixed, and its checks')[1]?.split(/\n#{2,3} /)[0] ?? '';
+  const first = Object.fromEntries([...block.matchAll(/^([0-9a-f]{64}) (\S+)$/gm)].map(([, sha, f]) => [f, sha]));
+  // the changes after the first and second runs, each a block of the files it changed, in order
+  const later = (section.split('### The first run, and two changes after it')[1] ?? '').split(/\n## /)[0];
+  for (const [, sha, f] of later.matchAll(/^([0-9a-f]{64}) (\S+)$/gm)) first[f] = sha;
+  return first;
+}
+
+test('the outside was measured by the method fixed before its checks ran, changed only as the journal records, and the files on disk are that method', () => {
+  const recorded = task8Hashes();
+  assert.equal(Object.keys(recorded).length, 9);
+  assert.deepEqual(caseJson.methodFixed, recorded);
+  assert.deepEqual(keysJson.methodFixed, recorded);
+  for (const [f, sha] of Object.entries(recorded)) {
+    const got = crypto.createHash('sha256').update(fs.readFileSync(path.join(REPO_ROOT, f))).digest('hex');
+    assert.equal(got, sha, `${f} is not the file task 8's last run read`);
+  }
+  // the scripts the checks run in are unchanged since the method was fixed
+  const section = fs.readFileSync(JOURNAL, 'utf8').split('## Task 8: the outside measured')[1];
+  for (const f of ['case_profile.py', 'case_register.py']) assert.match(section, new RegExp(`^${recorded[`tools/bbc-micro-model/${f}`]} tools/bbc-micro-model/${f.replace('.', '\\.')}$`, 'm'));
+});
+
+test('every machine key has exactly one K1 keycap, with BREAK and a second SHIFT, from the dbhq-uk fork', () => {
+  const names = keysJson.keys.map((k) => k.name).sort();
+  assert.deepEqual(names, [...Object.keys(BBC_KEYS), 'Break', 'Shift2'].sort());
+  assert.equal(keysJson.mapping.verdict, 'pass');
+  assert.equal(keysJson.k1.commit, '5ec53df566c77424caa6be827d0831da3916ecfa');
+  const k1 = sources.find((s) => s.id === 'K1');
+  for (const u of [k1.url, k1.page]) assert.match(u, /^https:\/\/github\.com\/dbhq-uk\/bbc-keyboard\/blob\/5ec53df566c77424caa6be827d0831da3916ecfa\//);
+  assert.equal(keysJson.k1.sha256, k1.sha256);
+  // cells on the 19.05 mm pitch: every centre a whole number of quarter pitches from ESCAPE's
+  const esc = keysJson.keys.find((k) => k.name === 'Escape');
+  for (const k of keysJson.keys) {
+    for (const d of [k.x - esc.x, k.y - esc.y]) assert.ok(Math.abs(d / (19.05 / 8) - Math.round(d / (19.05 / 8))) < 0.01, `${k.name} is off the pitch`);
+    assert.ok(Math.abs(k.w - k.units * 19.05) < 1e-6 && k.d === 19.05);
+  }
+});
+
+test('keys.json passes the O1 row, records O3\'s and the raw front edge, and its verdicts are what its figures give', () => {
+  const judge = (k) => (k.heldOutMm.median > 1.5 || k.over3mm > 5 ? 'STOP' : k.heldOutMm.median <= 1.0 && k.heldOutMm.p90 <= 2.0 && k.heldOutMm.max <= 3.0 && k.n >= 30 ? 'pass' : 'between pass and stop');
+  assert.equal(judge(keysJson.o1), 'pass');
+  assert.equal(keysJson.o1.verdict, judge(keysJson.o1));
+  assert.equal(keysJson.o3.verdict, judge(keysJson.o3));
+  assert.equal(keysJson.o3.n, 36);
+  assert.deepEqual(keysJson.o1.heldOutMm, spike.keys.heldOutMm);
+  assert.equal(keysJson.frontEdgeMm, spike.keys.frontEdgeMm);
+  assert.equal(caseJson.frontEdge.rawMm, spike.keys.frontEdgeMm);
+});
+
+test('the front edge\'s parallax check is recorded as not measurable, with h\'s reason and d, and no corrected width', () => {
+  const f = caseJson.frontEdge;
+  assert.equal(f.verdict, 'not measurable');
+  assert.equal(f.correctedMm, null);
+  assert.equal(f.h.mm, null);
+  assert.match(f.h.from, /K2[\s\S]*403[\s\S]*Exif[\s\S]*right-angle constraint/);
+  assert.ok(f.d.mm > 0 && f.d.seMm > 0 && /O4 and O5/.test(f.d.from));
+  assert.equal(f.rawSeMm, spike.keys.parallax.rawWidthSeMm);
+  assert.match(task8Outcome(), /\*\*The front edge's parallax check is not measurable\*\* \(no h independent of the 415 mm\); d, the front edge's depth below the key plane, is 6\.18 mm with a standard error of 2\.80/);
+  assert.equal(f.d.mm.toFixed(2), '6.18');
+  assert.equal(f.d.seMm.toFixed(2), '2.80');
+});
+
+test('the side profile\'s check point is the key A, within 2.0 mm, and the profile and key plane come from the triangulation, not the fallback', () => {
+  const c = caseJson.profileCheck;
+  assert.equal(caseMarks.checkKey.key, 'A');
+  const a = keysJson.keys.find((k) => k.name === 'A');
+  assert.deepEqual(c.k1.slice(0, 2), [a.x, a.y]);
+  const err = Math.hypot(c.triangulated[0] - a.x, c.triangulated[1] - a.y, c.triangulated[2]);
+  assert.ok(Math.abs(err - c.errMm) < 0.001);
+  assert.equal(c.verdict, err <= 2.0 ? 'pass' : 'fail');
+  assert.equal(c.fallback, c.verdict !== 'pass');
+  assert.equal(c.verdict, 'pass');
+  assert.equal(caseParts.PROFILE.fallback, false);
+  assert.ok(Math.abs(caseJson.keyPlaneZ - (73 + caseJson.frontEdge.d.mm)) < 1e-6);
+  assert.match(task8Outcome(), /\*\*The side profile's check point passed:\*\* the key A, triangulated from O4 and O5, 0\.45 mm from K1's place, against 2\.0/);
+  assert.equal(c.errMm.toFixed(2), '0.45');
+});
+
+test('the case is the Service Manual\'s, and the keys and lights lie inside the opening, the opening inside the case, no two keycaps overlapping', () => {
+  assert.deepEqual([caseParts.CASE.width, caseParts.CASE.depth, caseParts.CASE.height], [415, 345, 73]);
+  assert.deepEqual(caseJson.footprint, { widthMm: 415, depthMm: 345, source: 'D1' });
+  const op = caseJson.recess.opening;
+  const inside = (x, y) => op.every((p, i) => { const q = op[(i + 1) % op.length]; return (q[0] - p[0]) * (y - p[1]) - (q[1] - p[1]) * (x - p[0]) >= 0; });
+  for (const p of op) assert.ok(p[0] > 0 && p[0] < 415 && p[1] > 0 && p[1] < 345);
+  const keysIn = caseParts.KEYS.keys;
+  for (const k of keysIn) {
+    for (const [dx, dy] of [[-1, -1], [1, -1], [1, 1], [-1, 1]]) assert.ok(inside(k.x + dx * k.w / 2, k.y + dy * k.d / 2), `${k.name}'s cell is not inside the opening`);
+  }
+  // keycaps overlap or not in K1's own frame, where their cells are square to the axes (in the case they are turned)
+  for (const a of keysJson.keys) for (const b of keysJson.keys) {
+    if (a === b) continue;
+    const ox = Math.min(a.x + a.w / 2, b.x + b.w / 2) - Math.max(a.x - a.w / 2, b.x - b.w / 2);
+    const oy = Math.min(a.y + a.d / 2, b.y + b.d / 2) - Math.max(a.y - a.d / 2, b.y - b.d / 2);
+    assert.ok(ox <= 1e-3 || oy <= 1e-3, `${a.name} and ${b.name} overlap`);
+  }
+  const leds = caseParts.LEDS.leds;
+  assert.deepEqual(leds.map((l) => l.name), ['cassette motor', 'caps lock', 'shift lock']);
+  assert.deepEqual(caseMarks.o1.leds.order, ['cassette motor', 'caps lock', 'shift lock']);
+  assert.ok(leds[0].x < leds[1].x && leds[1].x < leds[2].x, 'the lights are not in O1\'s order, left to right');
+  for (const l of leds) assert.ok(inside(l.x, l.y) && l.z < 73 && l.z > 60, `${l.name}`);
+});
+
+test('the keys are K1\'s centres put in the case by the recorded turn and shift, their colours as read on O1', () => {
+  const M = caseJson.k1ToCase.matrix;
+  const byName = Object.fromEntries(keysJson.keys.map((k) => [k.name, k]));
+  for (const k of caseParts.KEYS.keys) {
+    const s = byName[k.name];
+    // case.json keeps the motion to 4 places, so its turn is good to 0.00005, which is 0.02 mm at 400 mm
+    assert.ok(Math.hypot(M[0][0] * s.x + M[0][1] * s.y + M[0][2] - k.x, M[1][0] * s.x + M[1][1] * s.y + M[1][2] - k.y) < 0.03, k.name);
+    assert.ok(Math.abs(Math.hypot(M[0][0], M[1][0]) - 1) < 1e-4, 'the motion has a scale');
+    assert.equal(k.colour, caseMarks.keyColours.red.includes(k.name) ? 'red' : caseMarks.keyColours.light.includes(k.name) ? 'light' : 'dark');
+    assert.ok(Math.abs(k.z - caseJson.keyPlaneZ) < 0.001);
+  }
+  assert.deepEqual(caseMarks.keyColours.light, ['Left', 'Right', 'Up', 'Down', 'Copy']);
+  assert.equal(keysJson.colours.agree, keysJson.keys.filter((k) => k.colour === k.colourClustered).length);
+});
+
+test('the rear ports are in O2\'s order, each scored one within 2.0 mm of its socket plus the board\'s offset, on the D shell\'s scale', () => {
+  assert.deepEqual(caseJson.rearOrder, ['UHF out', 'video out', 'RGB', 'RS423', 'cassette', 'analogue in', 'econet']);
+  const posts = caseMarks.o2.dsubPosts;
+  assert.ok(Math.abs(caseJson.rearScale.pxPerMm - Math.hypot(posts.right[0] - posts.left[0], posts.right[1] - posts.left[1]) / 33.325) < 1e-4);
+  const board = Object.fromEntries(parts.model.connectors.map((c) => [c.ref, c.x]));
+  const scored = caseJson.rear.filter((p) => p.scored);
+  assert.deepEqual(scored.map((p) => p.ref).sort(), ['SK1', 'SK3', 'SK4', 'SK5', 'SK6']);
+  const offs = scored.map((p) => p.x - board[p.ref]).sort((a, b) => a - b);
+  assert.ok(Math.abs(offs[2] - caseJson.boardInCase.x) < 0.001, 'the board\'s offset is not the median');
+  for (const p of scored) {
+    assert.ok(Math.abs(p.x - (board[p.ref] + caseJson.boardInCase.x) - p.errMm) < 0.001, p.ref);
+    assert.ok(Math.abs(p.errMm) <= 2.0, `${p.ref} is ${p.errMm} mm off`);
+  }
+  assert.equal(caseJson.rearCheck.verdict, 'pass');
+  assert.match(task8Outcome(), /\*\*The rear ports passed:\*\* 5 of 5 within 2\.0 mm of their sockets plus the board's offset, the worst 0\.78 mm \(SK1\)/);
+  assert.equal(caseJson.rearCheck.worstMm.toFixed(2), '0.78');
+  for (const p of caseJson.rear) assert.ok(p.label && p.x > 0 && p.x < 415 && p.z > 5 && p.z < 73, p.ref);
+  for (const u of caseJson.underside) assert.ok(u.label && u.x - u.w / 2 > 0 && u.x + u.w / 2 < 415, u.ref);
+  assert.ok(caseJson.undersidePanel.x0 >= 3 && caseJson.undersidePanel.x1 <= 412);
+});
+
+test('the case parts module is generated from case.json, and lands unclaimed', async () => {
+  const near = (a, b, where) => {
+    if (typeof a === 'number') return assert.ok(Math.abs(a - b) <= 0.0011, `${where}: ${a} against ${b}`);
+    if (a && typeof a === 'object') { assert.deepEqual(Object.keys(a).sort(), Object.keys(b).sort(), where); for (const k of Object.keys(a)) near(a[k], b[k], `${where}.${k}`); return undefined; }
+    return assert.equal(a, b, where);
+  };
+  near(caseParts.KEYS.keys, caseJson.keys, 'KEYS');
+  near(caseParts.RECESS.opening, caseJson.recess.opening, 'RECESS');
+  near(caseParts.LEDS.leds, caseJson.leds.map(({ name, x, y, z }) => ({ name, x, y, z })), 'LEDS');
+  assert.deepEqual(caseParts.REAR.ports.map((p) => p.ref), caseJson.rear.map((p) => p.ref));
+  assert.deepEqual(caseParts.UNDERSIDE.connectors.map((u) => u.label), ['tube', '1MHz BUS', 'user port', 'printer', 'disc drive']);
+  for (const [name, v] of Object.entries(caseParts)) assert.ok(typeof v.note === 'string' && v.note.length > 0, `${name} has no note`);
+  assert.match(fs.readFileSync(path.join(process.cwd(), 'src', 'models', 'bbc-micro-case-parts.mjs'), 'utf8'), /^\/\/ GENERATED by tools\/bbc-micro-model\/case_parts\.py/);
+  const { MODELS } = await import('../src/models/models.mjs');
+  assert.ok(!Object.keys(MODELS).some((k) => k.startsWith('bbc-micro')));
+});
+
+test('the outside\'s photographs are committed, credited and are the resized originals; O8 and I6 are not committed', async () => {
+  const { loadRegistry } = await import('../src/lib/registry.mjs');
+  const bbc = loadRegistry().machines.find((m) => m.id === 'bbc-micro');
+  const files = { O1: 'bbc-micro-top.webp', O2: 'bbc-micro-rear.webp', O3: 'bbc-micro-keyboard.webp', O4: 'bbc-micro-front.webp', O5: 'bbc-micro-left.webp' };
+  for (const [id, file] of Object.entries(files)) {
+    const s = sources.find((x) => x.id === id);
+    assert.equal(s.committed, file);
+    assert.equal(s.licence, 'Public domain');
+    const p = bbc.photos.find((x) => x.file === file);
+    assert.ok(p, `${file} is not credited in the registry`);
+    assert.equal(p.sourceUrl, s.page);
+  }
+  for (const id of ['O8-I', 'O8-H', 'I6', 'K1', 'P-TE_1757819']) assert.equal(sources.find((x) => x.id === id).committed, null, id);
+  assert.equal(bbc.photos[0].file, 'bbc-micro.webp');
+  assert.match(fs.readFileSync(path.join(REPO_ROOT, 'NOTICE.md'), 'utf8'), /## The BBC Micro's key centres, from Dominic Beesley's keyboard \(MIT\)[\s\S]*github\.com\/dbhq-uk\/bbc-keyboard[\s\S]*Copyright \(c\) 2023 dominicbeesley/);
+});
