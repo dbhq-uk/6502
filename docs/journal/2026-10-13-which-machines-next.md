@@ -1,7 +1,7 @@
 ---
 title: "Which machines next, after the Electron"
 date: 2026-10-13
-summary: "A research pass weighed nine machines for the place after the Electron, against the repository's rules on ROMs and inputs, what the core and the browser host already cover, the test material that exists, and the BBC Micro's and NES's records as the yardstick. It recommends keeping the Atari 2600 next, as published on 4 October, and moving the Atari 8-bit family ahead of the Commodore 64. It is a recommendation for Dan, not a decision, and no machine code was started."
+summary: "A research pass weighed nine machines for the place after the Electron, against the repository's rules on ROMs and inputs, what the core and the browser host already cover, the test material that exists, and the BBC Micro's and NES's records as the yardstick. It recommends keeping the Atari VCS next, as published in October, and moving the Atari eight-bit family ahead of the Commodore Sixty-Four. It is a recommendation for Dan, not a decision, and no machine code was started."
 order: 41
 ---
 
