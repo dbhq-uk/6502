@@ -1024,3 +1024,153 @@ every DIP has an even pin count from 14 to 40, a pad per pin, pin 1 first and
 rows the right length; IC1 to IC7, IC51, IC52, IC69 and IC78 each have a DIP
 footprint whose reference was marked by hand with a reason; and the
 mounting holes are refitted, with the move from task 2 recorded.
+
+## Task 3's review, and the fix wave (5 and 13 October 2026)
+
+Task 3 was reviewed on 5 October 2026. Pull request 48, which held tasks 0 to
+3, was merged on 6 October before the review's fixes landed, so they are on a
+second branch, `feat/bbc-micro-models-2` (pull request 88). An implementer
+started them and stopped part-way on a usage limit; its work was committed
+unverified as `9be4b55` on 13 October. This section records what the review
+found, what `9be4b55` did, and what was finished and checked on 13 October.
+No written copy of the review survives outside the repository: its findings
+are read from the plan's notes dated 5 October, the code comments that cite
+it, and `9be4b55`'s message.
+
+### What the review found
+
+- **A drill test that could not fail.** "Every drill has a pad on both faces
+  within 0.2 mm" held because each drill's pad is placed at the drill (the
+  task 3 section above says so). The plan's step 4 was revised: each drill
+  records both faces' centres and sits at their mean; an open drill's faces
+  must each be within 0.2 mm of it; for a drill filled with solder, at most 5
+  per cent may have a face further off, because the solder sits off the hole,
+  not the registration (93 of 2522, 3.7 per cent, was measured before the
+  ceiling was set).
+- **The fitted map was not saved.** Task 4 has to draw I2's copper through
+  the registration, and `registration.json` kept only its figures. It now
+  keeps the model's parameters unrounded, how I2 is flipped, and each drill's
+  solder-side pixel.
+- **Most chips had no reference.** 12 footprints were named; the plan now
+  asks for every DIP to have a reference read from the print, or to say it is
+  unread and why, with no reference twice.
+- **Footprints were missed or wrong.** IC30 and the three DIPs right of the
+  row below the RAM block had been left as rows for task 5; IC48's 14 pins
+  and the pads of the parts below it made one 24-pin run; and the 18-pad
+  group task 3 marked "not a DIP" (two columns of resistor and capacitor
+  pads) is IC35, a 14-pin DIP whose outline and label are plain on the scan,
+  with one pad of the parts above and below it at each end of its run.
+- **A test that read a variable name.** The check that the outlier rule never
+  looks at a residual asserted that no variable of the function was called
+  `residual`. It is replaced by a test that moves every solder-side hole,
+  changing every residual, and requires the same holes to be excluded.
+- **The solder side's figure to cite.** The plan's Global Constraints now say
+  that from task 3 on the figure cited is the one without exclusion. The rule
+  fixed before task 3 sits at about the 70th to 80th percentile of the blobs'
+  axis ratios, and its one area median per face mixes solder blobs with open
+  rings, so it mostly excludes the rings, the most precise holes.
+- **The manual's positions.** Task 5's note: the Service Manual's places for
+  the 40-pin parts are a constant offset of about (+7.5, -26) mm from their
+  footprints' centres, so task 5 settles the manual's convention on a smaller
+  part before it uses the 10 mm check.
+
+### What `9be4b55` did
+
+The drill report (`drillFaces`) and each drill's two faces; the saved map
+with a test that puts a drill's I2 pixel through it; references for every
+DIP marked by hand in `marks.json` (its footprint marks went from 14 to 107,
+each with its crop and why), with `unread` and a pin count a mark can cut a
+run to; a second grouping pass in which spare blobs of solder join the pads
+still free; a run whose outline scores under 0.7 tried trimmed to the
+stretch its outline covers; a mark for a DIP whose printed outline is too faint on one side
+(IC61); the behavioural outlier test; a test of the tie between the models;
+the plan's notes. It did not run the tools on the scans, change the site
+tests or write the journal.
+
+### What was finished on 13 October
+
+**The inputs.** This host had none of them. I1 and I2 were fetched again by
+hand from the Google Drive links in `data/sources.json`, as the tool's README
+says, into a folder outside the repository; `verify.py` found both SHA-256 as
+recorded. Nothing from them is committed. The virtual environment, made on 13
+October 2026 on an aarch64 host with `python3 -m venv ~/venv-models &&
+~/venv-models/bin/pip install numpy opencv-python-headless pillow scipy
+pytest`: Python 3.12.3, numpy 2.5.4, opencv-python-headless 5.0.0.93, Pillow
+12.3.0, scipy 1.18.1, pytest 9.1.1.
+
+**The run.** `BBC_MODEL_INPUTS=~/bbc-model-inputs
+PYTHON=~/venv-models/bin/python tools/bbc-micro-model/run-board.sh`, on 13
+October 2026, took 1 minute 10 seconds. `frame.json` came back byte for byte.
+The solder side printed the same figures as on 4 October (cubic, 2367 holes,
+held out median 0.114, 90th percentile 0.258, largest 0.766 mm: pass), and
+every rounded number in `registration.json` outside the pads and footprints
+is unchanged; the unrounded parameters differ from `9be4b55`'s, which came
+from another host, by at most 1.4 parts in a million. It printed `drills
+2797, pads 3050, footprints 175 (97 DIPs)`.
+
+- **The drills' faces.** Open (275): largest 0.103 mm from the drill, none
+  over 0.2. Filled with solder (2522): median 0.062, 90th percentile 0.145,
+  largest 0.499 mm, and 93 over 0.2 mm, 3.7 per cent, under the 5 per cent
+  ceiling.
+- **Footprints.** 97 DIPs (38 of 14 pins, 29 of 16, 12 of 20, 1 of 24, 12 of
+  28 and 5 of 40), 21 connectors and 57 SIPs, where task 3 had 92, 25 and 58.
+  The new DIPs are IC30, IC12, IC53 and IC61 (the last three right of the RAM
+  block, where task 3 found one row of each as a connector), IC48 at 14 pins
+  in place of the 24-pin run, and IC35. Pin 1 is from the print on 92 and
+  marked by hand on 5 (IC21, IC35, IC61, IC69 and IC89). 17 pads came from a
+  spare blob and 7 were inferred, where task 3 had 8 and 6.
+- **References.** All 97 DIPs have a reference read from the print and none
+  is unread; no reference is used twice; 10 connectors and resistor packs are
+  named too (PL8 to PL14, SK6, RP1 and RP2). The 28-pin footprint at the left
+  edge, whose label task 0 could not read, is IC89: its digit was compared at
+  six times with IC39's 3. 12 of the new marks (IC8, IC10, IC23, IC39, IC43,
+  IC45, IC61, IC89, IC94, IC100, IC101 and IC35) were looked at again on
+  their crops on 13 October, and each label reads as marked.
+
+**Two changes that changed nothing, removed.** `9be4b55` also added a step
+that retried a candidate running into a DIP already taken, with the taken
+slots dropped, and a rule that a blob seen only on the solder side never sets
+where a row ends. No test reached either. Run on the scans with each switched
+off in turn, the DIPs came out the same, so both were removed, and the run
+gave `registration.json` back byte for byte.
+
+**A test that did not test its case.** The test for a stray blob beside a row
+(IC68) still passed with the pads-only first pass removed. On the scans, with
+that pass removed, IC68 is lost (96 DIPs). Its pads show why: pin 11 of the
+right row has no pad, a spare blob sits 0.39 mm short of its place and pin
+12's pad 0.16 mm short, so chained with the pads the blob is pin 12's next
+link and has no next of its own (pin 10 is 0.36 mm off the pitch, over the
+0.35 tolerance), and the row breaks in two. The test now draws that layout,
+and fails with the first pass removed.
+
+### Tests
+
+`~/venv-models/bin/python -m pytest tools/bbc-micro-model/tests -q`: 58
+passed (13 October 2026). Each test added in the fix wave was seen to fail
+with the code broken the way it guards against, one break at a time, with the
+file restored after each: the outlier rule also taking holes with a residual
+over 0.1 mm; no tie margin between the models; the drill report never
+counting a filled, or an open, drill off; no second grouping pass; no
+pads-only first pass; no trim to the outline; the faint mark ignored, and a
+faint outline accepted with no mark; a marked run cut from its first slot;
+`unread` not kept. The saved map's test failed with the parameters rounded to
+4 places, as the file was written before: a drill's solder side then lands
+0.017 mm off.
+
+`site/tests/bbc-models.test.mjs` gains two tests and rewrites one. The drill
+test now checks each drill against its two faces as the plan revised it (a
+face within 0.002 mm of the 0.2 mm limit is counted either way, since the
+file is rounded to a micron), and that `drillFaces` says the same; a new test
+recomputes the held-out figures by kind of hole from the matched holes; and a
+new test requires every DIP to have a reference with its mark, crop and
+reason, or an `unread` reason, with no mark unused. Each was seen to fail on
+copies of `registration.json` broken its way (an open drill's faces 0.25 mm
+off, 60 more filled drills 0.25 mm off, a drill off its faces' mean, the
+report's count 10 short, the rings' median 0.01 out, IC40's reference
+dropped, and a mark that found nothing), and to pass with IC40 said unread
+with a reason. On main's `registration.json` all three fail; on `9be4b55`'s,
+which had not been rerun, the references test fails. `cd site && npm test` on
+13 October 2026, with the results and machines artefacts of main's Validate
+run 38423721729: 476 tests, 475 passed, one to-do, before; 478 tests, 477
+passed, the same to-do, after. Both workflows' floors are raised from 475 to
+477.
