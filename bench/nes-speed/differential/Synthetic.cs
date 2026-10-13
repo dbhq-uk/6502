@@ -1289,6 +1289,17 @@ internal sealed class ProgramBuilder(Workload workload, BoardKind board, int see
                 a.Lda(Frame);
                 a.OraI(1);
                 a.Sta(0x2003);
+
+                // Then about two lines on, a read of $2004 (OAM at OAMADDR), so the PPU is seen
+                // after a whole line with no sprite on it and before any line with one could
+                // set OAMADDR to 0 again.
+                a.LdaI(0);
+                a.Sta(DelayLo);
+                a.LdaI(1);
+                a.Sta(DelayHi);
+                a.Jsr("delay");
+                a.Lda(0x2004);
+                a.Sta(0x0301);
                 break;
             case Workload.Mask:
                 a.Lda(Frame);
