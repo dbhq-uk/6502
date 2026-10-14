@@ -44,7 +44,12 @@ docs/superpowers/plans/     # the plan for each spec
 docs/journal/               # the record of how it was built; the site's source
 docs/known-differences.md   # where the core knowingly differs from a reference
 docs/the-6502-family.md     # every 6502-family chip and machine, and what runs
+docs/research/              # decision memos, such as which machines to build next
+roadmap.md                  # what comes next and why, written by the deskwork skill from the issues; do not edit by hand
+.github/deskwork.toml       # opts the repository into deskwork: issue types, labels, the roadmap's path
 ```
+
+Work is tracked in GitHub issues: one epic (label `epic`) per machine, plus Site and CI, Speed, Models (3D) and Machines to come. Every open issue is a sub-issue of exactly one epic. File new issues with the `deskwork` skill, under the right epic; see `docs/journal/2026-10-14-how-the-work-is-tracked.md`.
 
 More arrives with the code. Keep this section true as it does.
 
