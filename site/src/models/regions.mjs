@@ -35,14 +35,23 @@ export function shownFor(entry, region) {
  * draw keeps its first console, and the status line says so. Returns the
  * console now drawn; `current` is the one drawn before, null at mount. A
  * region that is not a word (no detail on an event) changes nothing.
+ *
+ * When the page's region comes back to one the model draws, the sentence goes
+ * from the status line: `restore()` gives the line the model would show now
+ * (its own words about the machine, or about its tracks not loading), and
+ * with no `restore` the line is left empty rather than keeping a sentence that
+ * is no longer true.
  */
-export function followRegion(root, regions, next, current) {
+export function followRegion(root, regions, next, current, restore = () => '') {
   if (typeof next !== 'string') return current;
   const { region, missing } = shownRegion(regions, next);
   if (missing) {
     root.querySelector('[data-model-status]').textContent = missing;
     root.dataset.modelMissing = next;
-  } else delete root.dataset.modelMissing;
+  } else if (root.dataset.modelMissing) {
+    delete root.dataset.modelMissing;
+    root.querySelector('[data-model-status]').textContent = restore();
+  }
   if (region === current) return current;
   const stage = root.querySelector('[data-model-stage]');
   root.dataset.modelRegion = region;
@@ -53,4 +62,15 @@ export function followRegion(root, regions, next, current) {
   const about = root.querySelector(`.model-about[data-model-region="${region}"]`);
   if (about) stage.setAttribute('aria-describedby', about.id);
   return region;
+}
+
+/**
+ * The line a model writes once it is mounted: `line` when the page's console
+ * is drawn. When the sentence about a missing console is up it stays, and
+ * `problem`, if the model has one that must be seen (its tracks could not
+ * load), follows it.
+ */
+export function settleStatus(root, status, line, problem = null) {
+  if (!root.dataset.modelMissing) status.textContent = line;
+  else if (problem) status.textContent += ` ${problem}`;
 }

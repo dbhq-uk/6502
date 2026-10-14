@@ -1,7 +1,7 @@
 ---
 title: "The KIM-1's teletype"
 date: 2026-10-08
-summary: "The KIM-1 gets the terminal most of its owners used: a teletype on its 20 mA loops, its bits sent and decoded in machine cycles while the original monitor bit-bangs the line itself. The monitor times RUB OUT, prints KIM, and takes a program typed at the teletype, runs it and prints the result; the page has the terminal, with the session from the test's own file."
+summary: "The KIM-1 gets the terminal most of its owners used: a teletype on its twenty milliamp loops, its bits sent and decoded in machine cycles while the original monitor bit-bangs the line itself. The monitor times RUB OUT, prints KIM, and takes a program typed at the teletype, runs it and prints the result; the page has the terminal, with the session from the test's own file."
 order: 37
 ---
 

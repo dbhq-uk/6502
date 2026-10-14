@@ -28,7 +28,7 @@ import { SITE } from '../lib/site.mjs';
   <p class="analytics-notice-text">
     This site counts visits with Google Analytics to see which pages are useful. No advertising, and nothing shared with advertisers. <a href={`${SITE.privacy}#analytics`}>How it works</a>
   </p>
-  <p class="analytics-notice-status" data-analytics-status hidden></p>
+  <p class="analytics-notice-status" data-analytics-status role="status" hidden></p>
   <div class="analytics-notice-actions">
     <button type="button" class="btn ghost" data-analytics-off>Opt out</button>
     <button type="button" class="btn" data-analytics-on>OK</button>

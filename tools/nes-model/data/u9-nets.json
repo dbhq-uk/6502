@@ -1,0 +1,250 @@
+{
+ "about": "Issue 81, 13 October 2026, replacing the by-hand reading of 5 October: U9, the hex inverter, in OpenTendo's KiCad redrawing of the board (I2, checked against its SHA-256 in sources.json). For each pin of U9 its net, its pin type and every other part's pin on that net (not for the power pins); then each job the page names, with the inverter it uses (an input pin and an output pin), and `holds` true when those pins are the right way round and the parts it must reach are on their nets. A cross-check, not the scan: the redrawing's U9 is a 74LS04, the boards photographed carry a 74HCU04. Written by board_nets.py",
+ "jobs": [
+  {
+   "holds": true,
+   "in": {
+    "net": "Net-(C7-Pad2)",
+    "pin": 1,
+    "type": "input",
+    "with": [
+     "X2.3"
+    ]
+   },
+   "job": "runs the lockout chips' 4 MHz oscillator, with X2",
+   "out": {
+    "net": "Net-(R1-Pad1)",
+    "pin": 2,
+    "type": "output",
+    "with": [
+     "R1.1"
+    ]
+   }
+  },
+  {
+   "holds": true,
+   "in": {
+    "net": "Net-(R1-Pad1)",
+    "pin": 13,
+    "type": "input",
+    "with": [
+     "R1.1"
+    ]
+   },
+   "job": "clocks the lockout chip",
+   "out": {
+    "net": "Net-(U10-CLK_IN)",
+    "pin": 12,
+    "type": "output",
+    "with": [
+     "U10.6"
+    ]
+   }
+  },
+  {
+   "holds": true,
+   "in": {
+    "net": "Net-(R1-Pad1)",
+    "pin": 3,
+    "type": "input",
+    "with": [
+     "R1.1"
+    ]
+   },
+   "job": "buffers that clock to the cartridge and the expansion port",
+   "out": {
+    "net": "/CIC-CLK",
+    "pin": 4,
+    "type": "output",
+    "with": [
+     "P1.71",
+     "P2.24"
+    ]
+   }
+  },
+  {
+   "holds": true,
+   "in": {
+    "net": "/PPU-A13",
+    "pin": 5,
+    "type": "input",
+    "with": [
+     "U5.25"
+    ]
+   },
+   "job": "inverts the PPU's address line A13",
+   "out": {
+    "net": "/PPU-~{A13}",
+    "pin": 6,
+    "type": "output",
+    "with": [
+     "P1.58"
+    ]
+   }
+  },
+  {
+   "holds": true,
+   "in": {
+    "net": "/~{RST}",
+    "pin": 9,
+    "type": "input",
+    "with": [
+     "U10.9",
+     "U5.22",
+     "U6.3"
+    ]
+   },
+   "job": "inverts the reset line",
+   "out": {
+    "net": "Net-(R5-Pad1)",
+    "pin": 8,
+    "type": "output",
+    "with": [
+     "R5.1"
+    ]
+   }
+  },
+  {
+   "holds": true,
+   "in": {
+    "net": "Net-(C20-Pad1)",
+    "pin": 11,
+    "type": "input",
+    "with": [
+     "R6.1"
+    ]
+   },
+   "job": "amplifies the expansion port's audio",
+   "out": {
+    "net": "/EXP-AUDIO-OUT",
+    "pin": 10,
+    "type": "output",
+    "with": [
+     "P2.22",
+     "R6.2"
+    ]
+   }
+  }
+ ],
+ "pins": {
+  "1": {
+   "net": "Net-(C7-Pad2)",
+   "type": "input",
+   "with": [
+    "C7.2",
+    "R1.2",
+    "X2.3"
+   ]
+  },
+  "10": {
+   "net": "/EXP-AUDIO-OUT",
+   "type": "output",
+   "with": [
+    "C20.2",
+    "FC1.1",
+    "P2.22",
+    "R6.2"
+   ]
+  },
+  "11": {
+   "net": "Net-(C20-Pad1)",
+   "type": "input",
+   "with": [
+    "C20.1",
+    "C21.2",
+    "C23.1",
+    "R6.1"
+   ]
+  },
+  "12": {
+   "net": "Net-(U10-CLK_IN)",
+   "type": "output",
+   "with": [
+    "U10.6"
+   ]
+  },
+  "13": {
+   "net": "Net-(R1-Pad1)",
+   "type": "input",
+   "with": [
+    "R1.1",
+    "R17.1",
+    "U9.2",
+    "U9.3"
+   ]
+  },
+  "14": {
+   "net": "/VCC",
+   "type": "power_in"
+  },
+  "2": {
+   "net": "Net-(R1-Pad1)",
+   "type": "output",
+   "with": [
+    "R1.1",
+    "R17.1",
+    "U9.13",
+    "U9.3"
+   ]
+  },
+  "3": {
+   "net": "Net-(R1-Pad1)",
+   "type": "input",
+   "with": [
+    "R1.1",
+    "R17.1",
+    "U9.13",
+    "U9.2"
+   ]
+  },
+  "4": {
+   "net": "/CIC-CLK",
+   "type": "output",
+   "with": [
+    "P1.71",
+    "P2.24"
+   ]
+  },
+  "5": {
+   "net": "/PPU-A13",
+   "type": "input",
+   "with": [
+    "P1.65",
+    "RA2.3",
+    "U5.25"
+   ]
+  },
+  "6": {
+   "net": "/PPU-~{A13}",
+   "type": "output",
+   "with": [
+    "P1.58"
+   ]
+  },
+  "7": {
+   "net": "/GND",
+   "type": "power_in"
+  },
+  "8": {
+   "net": "Net-(R5-Pad1)",
+   "type": "output",
+   "with": [
+    "R5.1"
+   ]
+  },
+  "9": {
+   "net": "/~{RST}",
+   "type": "input",
+   "with": [
+    "U10.9",
+    "U5.22",
+    "U6.3"
+   ]
+  }
+ },
+ "source": {
+  "id": "I2",
+  "sha256": "9cce8323c9c18f0c583f99d1e07d7650f85858ca2599cbf52b2c75f384e8224a"
+ },
+ "value": "74LS04"
+}
