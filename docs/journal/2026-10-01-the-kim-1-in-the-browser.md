@@ -2,7 +2,7 @@
 title: "The KIM-1 in the browser"
 date: 2026-10-01
 summary: "The KIM-1 gets its page: the machine compiled to WebAssembly ahead of time, MOS Technology's monitor ROM fetched at build time, a drawn keypad and display, and a headless browser that types the acceptance test's program in through the page and reads the answer off the digits. It is the first machine to count."
-order: 8
+order: 9
 ---
 
 # 1 October 2026: the KIM-1 in the browser

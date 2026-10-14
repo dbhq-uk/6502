@@ -19,3 +19,4 @@ nothing on the site should need anyone to remember what happened.
   39 checks" can be rerun and checked. A figure describing the current state
   of the project belongs on the site, generated from test output, and never
   here.
+- **Each entry has an `order` in its front matter, and on any one date no two entries share one.** The site lists entries newest first by date, then by `order`, then by file name. Within a day, `order` is the sequence the work happened in, so give a new entry a number above every other entry of that day. The numbers need not run on from one day to the next. If you find a tie, or a merge makes one, renumber the entry that was filed later and move any later entry of that day up with it. A test in `site/tests/journal.test.mjs` fails on a tie.

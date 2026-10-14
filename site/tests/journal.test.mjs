@@ -21,6 +21,25 @@ test('every journal entry has front matter: a title, a date and a summary', () =
   }
 });
 
+// The entries that share a date and an order, as sentences. Empty means every day's order is unique.
+const orderTies = (entries) => {
+  const seen = new Map();
+  for (const { file, date, order } of entries) seen.set(`${date} order ${order}`, [...(seen.get(`${date} order ${order}`) ?? []), file]);
+  return [...seen].filter(([, names]) => names.length > 1).map(([key, names]) => `${key}: ${names.join(', ')}`);
+};
+
+test('no two journal entries on the same date share an order', () => {
+  const entries = files.map((f) => {
+    const front = fs.readFileSync(path.join(dir, f), 'utf8');
+    return { file: f, date: /^date: (\S+)/m.exec(front)[1], order: Number(/^order: (\d+)/m.exec(front)[1]) };
+  });
+  assert.deepEqual(orderTies(entries), [], 'give each entry on a day its own order, in the order the work happened');
+  // The check can fail: a copy of one entry's date and order on another entry is found.
+  const [first, second] = entries.filter((e) => e.date === entries[1].date);
+  assert.deepEqual(orderTies([first, { ...second, order: first.order }]).length, 1);
+  assert.deepEqual(orderTies([first, { ...second, date: '2000-01-01', order: first.order }]), [], 'the same order on different days is not a tie');
+});
+
 test('every journal entry is built as a page, and listed on the journal page', () => {
   assert.ok(files.length > 0);
   const index = page('/journal/').html;
