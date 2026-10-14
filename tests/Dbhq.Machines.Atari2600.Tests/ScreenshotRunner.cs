@@ -52,10 +52,7 @@ internal static class ScreenshotRunner
     /// <exception cref="InvalidOperationException">The frame has no lines.</exception>
     public static byte[][] Run(string test, Region region)
     {
-        var machine = new Atari2600(Cartridge.Load(SuiteRunner.Rom(test, region)), region);
-        machine.PowerOn();
-        machine.RunFrames(Frame);
-        FrameBuffer frame = machine.Bus.Tia.Frame;
+        FrameBuffer frame = RunMachine(test, region).Bus.Tia.Frame;
         if (frame.Lines == 0)
         {
             throw new InvalidOperationException($"{test} ({SuiteRunner.Build(region)}): frame {Frame} has no lines.");
@@ -68,6 +65,15 @@ internal static class ScreenshotRunner
         }
 
         return rows;
+    }
+
+    /// <summary>The machine with the test in <paramref name="region"/>, powered on and run to the end of frame <see cref="Frame"/>.</summary>
+    public static Atari2600 RunMachine(string test, Region region)
+    {
+        var machine = new Atari2600(Cartridge.Load(SuiteRunner.Rom(test, region)), region);
+        machine.PowerOn();
+        machine.RunFrames(Frame);
+        return machine;
     }
 
     /// <summary>

@@ -68,10 +68,19 @@ public class ScreenshotTests(ITestOutputHelper output)
         }
     }
 
+    [Theory]
+    [MemberData(nameof(Regions))]
+    public void The_runner_compares_the_eighth_frame_after_power_on(string region)
+    {
+        // The plan's item 3, fixed before running: the harness runs eight frames and keeps the last.
+        Atari2600 machine = ScreenshotRunner.RunMachine(ScreenshotRunner.Calibration, TestPrograms.RegionNamed(region));
+        Assert.Equal(8, machine.Bus.Tia.Frame.Frames);
+    }
+
     [Fact]
     public void Every_screenshot_test_has_a_reference_in_each_region_compared()
     {
-        // suite.md section 9: 27 sources have pictures; the manifest must give each its two.
+        // suite.md section 9: every source with a picture; the manifest must give each its two.
         Assert.NotEmpty(ScreenshotRunner.Tests);
         Assert.Contains(ScreenshotRunner.Calibration, ScreenshotRunner.Tests);
         foreach (string test in ScreenshotRunner.Tests)

@@ -15,7 +15,8 @@ namespace Dbhq.Machines.Atari2600;
 /// <list type="bullet">
 /// <item><b>The start, SEC.</b> A write to HMOVE is taken on the first colour clock of the line's
 /// grid (the horizontal counter's two-phase clock, quarter 2) at least four clocks after the write
-/// lands, so the first extra clock falls on the first slot at or after W + 7 (section 15). SEC
+/// lands, so the first extra clock falls on the first slot at or after W + 7 (section 15), a fit to
+/// section 16's table and the comb's boundaries [guessing - verify]. SEC
 /// loads the ripple counter with 15 if it is at rest, and sets every more-motion latch and the
 /// HMOVE latch. A count already running is not started again [inferring from jigo2600, Visual
 /// Objects: "triggering SEC multiple times while the counter is running has no effect";
@@ -43,7 +44,7 @@ namespace Dbhq.Machines.Atari2600;
 /// move, but its pixel for that clock is skipped and the next one shown twice: a one-pixel dot two
 /// clocks after a slot is swallowed and one three after is widened (section 16) [inferring: the
 /// placement fits the suite's residues, and makes a reset and an extra clock fall on one clock in
-/// <c>hmove-reset-merge</c>, tia.md open item 4].
+/// <c>hmove-reset-merge</c>, tia.md open item 4; guessing - verify].
 /// </para>
 /// </remarks>
 public sealed class TiaMotion : IReportsState
