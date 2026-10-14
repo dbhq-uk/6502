@@ -48,8 +48,7 @@ public class SuiteSelfTests(ITestOutputHelper output)
         "cartridge/bank-f6",
         "cartridge/bank-f4",
 
-        // Task 6, the objects, priority and the collisions (suite.md section 9: two in cpu/, three
-        // in tia-timing/, eight in tia-render/ and five in collision/).
+        // Task 6, the objects, priority and the collisions: the rows suite.md section 9 gives task 6.
         "cpu/rmw-strobe",
         "cpu/stack-aliases-tia",
         "tia-timing/reset-same-line",
@@ -72,10 +71,10 @@ public class SuiteSelfTests(ITestOutputHelper output)
         // Two that pass from task 6, before the task suite.md gives them, and are not claimed as
         // task 6's: their task must keep them passing. cpu/partial-drive (task 9) reads only the
         // inputs at rest, which task 5 fixed (a dumped INPT0 reads 0, an open fire button 1), and
-        // its collision checks are task 6's. collision/blank-gating (task 7) needs objects whose
-        // outputs fire inside the horizontal blank; in this model a start held as its counter waits
-        // through the blank does that without HMOVE, which task 7 builds and the test was written
-        // for, so its pass here is not yet the mechanism the header describes.
+        // its collision checks are task 6's. collision/blank-gating (task 7) passes on a visible
+        // overlap: with HMOVE doing nothing, its group 2 missiles meet at pixel 2, not in the blank,
+        // so its pass does not show latching in the blank. Task 7 must prove the blank mechanism;
+        // until then TiaCollisionTests.Section_14_the_latches_set_in_the_blank is its only guard.
         "cpu/partial-drive",
         "collision/blank-gating",
     ];

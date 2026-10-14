@@ -122,15 +122,17 @@ internal sealed class TiaPositionCounter : IReportsState
     /// <summary>
     /// A reset strobe has landed: the counter is held for four clocks and then starts at count 0.
     /// The ball's reset also sends a start (<paramref name="sendsStart"/>, tia.md section 12), so
-    /// the ball draws where its count restarts, on the same line. A start being drawn is cut off
-    /// [guessing - verify: the suite's <c>collision/resbl-kill</c>, task 7's, says a ball pixel
-    /// not yet shown is erased]; a decode already held rides through.
+    /// the ball draws where its count restarts, on the same line. A start being drawn, or one a
+    /// player's scan counter has not taken yet, is cut off [guessing - verify: the suite's
+    /// <c>collision/resbl-kill</c>, task 7's, says a ball pixel not yet shown is erased; the model
+    /// does the same for every object]; a decode already held rides through.
     /// </summary>
     internal void Reset(bool sendsStart)
     {
         _reset = ResetClocks;
         _start = false;
         _startBefore = false;
+        _startUntaken = false;
         if (sendsStart)
         {
             _held = Main;

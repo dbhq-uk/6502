@@ -229,6 +229,22 @@ public class TiaPlayerTests
     }
 
     [Fact]
+    public void Section_9_a_reset_cuts_off_a_start_the_scan_has_not_taken()
+    {
+        // A player at 145 with a close copy: the copy's start comes as each line ends and waits
+        // through the next line's blank for the scan counter's first clock, to draw at pixels 1 to
+        // 8 (line 1 shows the one the strobe line's decode made). A RESP0 in
+        // that blank cuts it off, as a reset cuts off a start being drawn (tia.md section 9.1)
+        // [guessing - verify: the suite's resbl-kill says so for the ball only].
+        var scene = new TiaScene().Write(Reg.Nusiz0, 0b001).Write(Reg.Grp0, 0xFF).At(0, 208, Reg.Resp0, 0);
+        byte[][] rows = scene.At(2, 30, Reg.Resp0, 0).Rows(4);
+        Assert.Equal(Spans((1, 8), (145, 152)), Lit(rows[1], P0));
+        // Line 2 shows only the new reset's close copy, decoded before its counter wraps.
+        Assert.Equal(Span(19, 26), Lit(rows[2], P0));
+        Assert.Equal(Spans((3, 10), (19, 26)), Lit(rows[3], P0));
+    }
+
+    [Fact]
     public void Section_9_a_reset_before_the_decode_loses_the_copy()
     {
         // A second reset landing at 108, before the first reset's close decode at 109: the counter

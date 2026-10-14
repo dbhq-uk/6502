@@ -14,7 +14,8 @@ namespace Dbhq.Machines.Atari2600;
 /// quad width its quarter 1 only. The start is taken on the first clock the gate lets through, so a
 /// single-width player's first pixel is one clock after the start signal and a stretched one's two,
 /// which is section 9's "one clock later still" for double and quad width; a NUSIZ write takes
-/// effect on the next clock, mid-player too (section 10). The quarters chosen for the gates are
+/// effect on the next clock, mid-player too (section 10). A start that arrives while the scan is
+/// running restarts it at 0; no source says [guessing - verify]. The quarters chosen for the gates are
 /// the ones that give those first pixels and widths [inferring from Towers, who names the phases of
 /// the two-phase clock without their order; guessing - verify].
 /// </para>
@@ -103,6 +104,7 @@ public sealed class TiaPlayer : IReportsState
         {
             if (_counter.TakeStart())
             {
+                // A new start restarts a running scan [guessing - verify].
                 _scanning = true;
                 _scan = 0;
                 _scanMain = _counter.StartMain;

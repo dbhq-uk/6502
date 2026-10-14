@@ -289,6 +289,8 @@ public sealed class Tia : IReportsState
             lit |= PfBit;
         }
 
+        // Only VBLANK's gate stops the latches (section 14); the model takes it as the picture
+        // does, a colour clock after the write [guessing - verify].
         if (!_vblank)
         {
             _collisions |= CollisionsOf[lit];
