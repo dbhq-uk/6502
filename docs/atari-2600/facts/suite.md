@@ -369,7 +369,7 @@ Measured in the clone at `891c079` with `tools/probes/atari-2600/counts.sh`, whi
 | `tia-timing` | 9 | 21 | 30 |
 | all | 100 | 27 | 127 |
 
-By the rule in section 1.6, on that day, the trusted self-tests fall to tasks as: task 4, 18 (4 in `cpu/`, 11 in `riot/`, `harness/sanity`, `wsync`, `wsync-line-end`); task 6, 18 (2 in `cpu/`, 3 in `tia-timing/`, 8 in `tia-render/`, 5 in `collision/`); task 7, 17 (4 in `tia-timing/`, 2 in `tia-render/`, 11 in `collision/`); task 9, 1 (`cpu/partial-drive`); and the 4 trusted cartridge tests from task 4 [inferring: the rows of section 5]. These are a reading of the headers on that day, not a claim about the machine.
+By the rule in section 1.6, on that day, the trusted self-tests fall to tasks as: task 4, 18 (4 in `cpu/`, 11 in `riot/`, `harness/sanity`, `wsync`, `wsync-line-end`); task 6, 18 (2 in `cpu/`, 3 in `tia-timing/`, 8 in `tia-render/`, 5 in `collision/`); task 7, 17 (4 in `tia-timing/`, 2 in `tia-render/`, 11 in `collision/`); task 9, 1 (`cpu/partial-drive`); and the 4 trusted cartridge tests from task 4 [inferring: the rows of section 5]. These are a reading of the headers on that day, not a claim about the machine. (Added by task 6, 14 October 2026: two tests pass a task early, `cpu/partial-drive`, whose input checks read only the inputs at rest that task 5 fixed, and `collision/blank-gating`, whose objects reach the blank in the model without HMOVE; `SuiteSelfTests` holds both as trusted, and the task 6 journal entry says why.)
 
 ## 10. Where the headers differ from the plan and the spec
 
