@@ -53,9 +53,9 @@ const fullTitle = path === '/' ? title : `${title} | 6502`;
   </head>
   <body>
     <a class="skip" href="#main">Skip to content</a>
+    <AnalyticsNotice />
     <Header path={path} />
     <main id="main"><slot /></main>
     <Footer />
-    <AnalyticsNotice />
   </body>
 </html>
