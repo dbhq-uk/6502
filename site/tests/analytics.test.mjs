@@ -100,7 +100,10 @@ function browser({
     Date: class extends Date { static now() { return now; } },
   };
   window.window = window;
-  vm.runInNewContext(analyticsSrc, window);
+  // The page loads analytics.js as type="module", where a top-level function is
+  // not a global. Run as a classic script it would be, and `window.gtag = gtag`
+  // could be deleted without a test noticing. A strict function scope is the module's.
+  vm.runInNewContext(`(function () { "use strict";\n${analyticsSrc}\n})();`, window);
   if (withNotice) vm.runInNewContext(consentSrc, window);
   // gtag pushes Arguments objects; turn each into a plain array to compare.
   // Array.from, so the arrays belong to this realm and deepEqual can compare them.
@@ -134,6 +137,15 @@ test('a new visitor on the live host is measured, configured for analytics only'
   assert.equal(config[2]?.allow_google_signals, false, 'Google Signals is not off in the config');
   assert.equal(config[2]?.allow_ad_personalization_signals, false, 'ad personalisation is not off in the config');
   assert.ok(calls.indexOf(def) < calls.indexOf(config), 'the consent default must come before the config');
+  // The whole order, not only consent before config: gtag.js wants js between them.
+  assert.deepEqual(calls.map((c) => c[0]), ['consent', 'js', 'config'], 'the calls are not consent, js, config in that order');
+  assert.ok(calls[1][1] instanceof b.window.Date, 'the js call carries no date');
+  // gtag.js reads Arguments objects from the data layer and ignores plain arrays,
+  // and calls() flattens both to arrays, so the type is checked on the raw entries.
+  assert.ok(b.window.dataLayer.length > 0, 'nothing reached the data layer');
+  for (const entry of b.window.dataLayer) assert.equal(Object.prototype.toString.call(entry), '[object Arguments]', 'a data layer entry is not an Arguments object');
+  assert.equal(typeof b.window.gtag, 'function', 'window.gtag is not a function');
+  assert.equal(b.appended[0].async, true, 'the injected script is not async');
   assert.equal(b.writes.length, 0, 'a cookie was written before the visitor answered');
   assert.equal(b.api.choice(), null);
 });
@@ -283,6 +295,12 @@ test('off the estate the choice cookie is host-only', () => {
   const choice = b.writes.find((w) => w.startsWith('dbhq_analytics='));
   assert.ok(choice, 'no choice cookie was written');
   assert.ok(!/Domain=/i.test(choice), 'a pages.dev preview tried to set a dbhq.uk cookie');
+  // A host that only ends in dbhq.uk is not on the estate: an unanchored test would let it set the cookie.
+  const lookalike = browser({ hostname: 'evil-dbhq.uk' });
+  lookalike.api.optOut();
+  const lookalikeChoice = lookalike.writes.find((w) => w.startsWith('dbhq_analytics='));
+  assert.ok(lookalikeChoice, 'no choice cookie was written on evil-dbhq.uk');
+  assert.ok(!/Domain=/i.test(lookalikeChoice), 'evil-dbhq.uk tried to set a dbhq.uk cookie');
   // And on the estate it is not: the positive control for the line above.
   const live = browser();
   live.api.optOut();
