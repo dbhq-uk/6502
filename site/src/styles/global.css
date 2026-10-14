@@ -183,6 +183,11 @@ footer .linkbtn:hover { color: var(--white); }
 .kim1-status { color: var(--moss-80); text-align: center; max-width: 52ch; }
 .kim1-speed { color: var(--sage-60); text-align: center; font-family: var(--font-mono); font-size: 12.5px; letter-spacing: 0; max-width: 60ch; }
 .kim1-speed:empty { display: none; }
+/* Every machine's speed line (public/machine-host.js): the sentence and, hidden under it in the same cell, the longest it can be of each kind, so the line's height does not change with what it says. */
+.speed-line { display: grid; }
+.speed-line > *, .speed-room > * { grid-area: 1 / 1; }
+.speed-room { display: contents; }
+.speed-room > * { visibility: hidden; }
 @media (prefers-reduced-motion: reduce) { .kim1 .key { transition: none; } }
 /* The KIM-1's teletype: a rule above it, its controls on the iron panel, and the paper as the canvas, in the mono face. */
 .kim1-tty { justify-self: stretch; display: grid; gap: 12px; padding-top: 20px; border-top: 1px solid var(--hairline); }

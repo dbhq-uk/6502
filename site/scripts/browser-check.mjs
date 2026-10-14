@@ -27,7 +27,8 @@
 // pixels showing, both from the keyboard too. Then in an emulated phone: one finger
 // scrolls the page until a tap focuses the model, after which one finger turns
 // it and two fingers pinch-zoom, and the canvas is touch-action none only while
-// it has focus.
+// it has focus. There too, the machine's speed line must be the same height
+// whatever it says, or the page under the finger moves as it changes.
 //
 // Then the underside, from below: the model is turned over and the canvas is
 // sampled where the track map says the underside has copper and where it says
@@ -773,6 +774,24 @@ try {
     await cdp.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] });
   };
   const mat = async (fx, fy) => { const b = await mobile.locator('[data-model-canvas]').boundingBox(); return { x: b.x + b.width * fx, y: b.y + b.height * fy }; };
+  // The machine's speed line keeps its height whatever it says (issue 80): one
+  // more line of it moved this page 19 px under a finger on the model, by the
+  // browser's scroll anchoring. Every kind of sentence, at every width of its
+  // figure, from the page's own module, is put in the line in turn, and the
+  // line's height read; then what it said is put back.
+  await mobile.waitForFunction(() => ['running', 'failed'].includes(document.querySelector('[data-kim1]')?.dataset.state), null, { timeout: STEP_TIMEOUT_MS });
+  const speedLine =await mobile.locator('[data-kim1-speed]').evaluate(async (el) => {
+    const { speedSentence } = await import('/machine-host.js');
+    const clock = Number(el.closest('[data-kim1]').dataset.clockMhz);
+    const box = el.closest('.speed-line') ?? el;
+    const said = el.textContent;
+    const sentences = [0.5, 1.5, 2.5, 9.5, 10.5, 99.5, 100.5, 999.5, 1000.5, 9999.5].map((m) => speedSentence(m * clock, Math.min(m, 0.99) * clock, clock));
+    const heights = sentences.map((s) => { el.textContent = s; return box.getBoundingClientRect().height; });
+    el.textContent = said;
+    return { held: box !== el, heights };
+  });
+  console.log(`phone, the speed line: held in its line ${speedLine.held}, ${speedLine.heights.map((h) => h.toFixed(2)).join(', ')} px tall for the sentences from a browser behind the clock to one about 9,999 times as fast`);
+  if (new Set(speedLine.heights).size !== 1) problems.push(`phone: the speed line changes height with what it says (${[...new Set(speedLine.heights)].map((h) => h.toFixed(2)).join(', ')} px)`);
   await mbring();
   const m0 = await msettle();
   const mhint = await mobile.locator('.model-hint').evaluate((h) => ({ text: h.innerText, shown: getComputedStyle(h).display !== 'none' }));
@@ -794,11 +813,15 @@ try {
   console.log(`phone, after a tap on the model: focused ${m2.focused}, touch-action "${await mtouch()}"`);
   if (!m2.focused || (await mtouch()) !== 'none') problems.push('phone: a tap did not focus the model and set touch-action none');
   await mbring();
-  const ms2 = await mobile.evaluate(() => scrollY);
+  // The page's height and the speed line's sentence, with the scroll, so a page that moves can be told from a finger that scrolls it.
+  const mpage = () => mobile.evaluate(() => ({ y: scrollY, height: document.documentElement.scrollHeight, speed: document.querySelector('[data-kim1-speed]')?.textContent }));
+  const mp2 = await mpage();
+  const ms2 = mp2.y;
   await finger(await mat(0.8, 0.3), await mat(0.3, 0.45));
   const m3 = await msettle();
-  const ms3 = await mobile.evaluate(() => scrollY);
-  console.log(`phone, one finger dragged on the focused model: azimuth ${f3(m2.azimuth)} to ${f3(m3.azimuth)}, polar ${f3(m2.polar)} to ${f3(m3.polar)}; scrollY ${ms2} to ${ms3}`);
+  const mp3 = await mpage();
+  const ms3 = mp3.y;
+  console.log(`phone, one finger dragged on the focused model: azimuth ${f3(m2.azimuth)} to ${f3(m3.azimuth)}, polar ${f3(m2.polar)} to ${f3(m3.polar)}; scrollY ${ms2} to ${ms3}; the page ${mp2.height} to ${mp3.height} px tall; the speed line "${mp2.speed}" to "${mp3.speed}"`);
   if (near(m3.azimuth, m2.azimuth, 0.05)) problems.push('phone: a finger on the focused model did not turn it');
   if (ms3 !== ms2) problems.push('phone: a finger on the focused model scrolled the page');
   await pinch(await mat(0.5, 0.5), 30, 120);
