@@ -34,7 +34,7 @@ Task 2 of [the Atari 2600 plan](../superpowers/plans/2026-10-14-atari-2600.md): 
 
 ## The tests, test first
 
-Each test file was written before its code; the first build failed to compile, naming `Region`, `IBoard`, `Cartridge` and the `Boards` namespace as missing. With the code written, the project passed on the first run. The test files: `RegionTests`, `CartridgeTests`, `PlainTests`, `BankedBoardTests`, `FaTests`, `SuperchipTests` and `BoardContractTests`, with `TestImages` building every image (each 4K bank holds its own bank number, so a read shows which bank answered) and `BoardBus` putting the core on a board.
+In the author's order of work, each test file was written before its code; the tests and the code landed in one commit, so the history cannot show that order. The first build failed to compile, naming `Region`, `IBoard`, `Cartridge` and the `Boards` namespace as missing. With the code written, the project passed on the first run. The test files: `RegionTests`, `CartridgeTests`, `PlainTests`, `BankedBoardTests`, `FaTests`, `SuperchipTests` and `BoardContractTests`, with `TestImages` building every image (each 4K bank holds its own bank number, so a read shows which bank answered) and `BoardBus` putting the core on a board.
 
 On 14 October 2026 `dotnet test -c Release tests/Dbhq.Machines.Atari2600.Tests --filter "FullyQualifiedName!~SuiteManifestTests"` passed 198 test cases, the sixteen rows that read the suite's files among them; the whole project, with task 1's tests, passed 206. `dotnet build -c Release` of the solution gave no warnings.
 

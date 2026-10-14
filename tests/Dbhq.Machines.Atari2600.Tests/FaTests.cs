@@ -64,6 +64,9 @@ public class FaTests
     [InlineData(2)]
     public void A_hotspot_written_with_d0_clear_changes_nothing(int to)
     {
+        // The sources disagree here (cartridge.md section 7.2): CBS's patent, US 4,485,457, and the
+        // suite's bank-fa gate the switch on D0, and Horton and Korth say any access switches. This
+        // test follows the patent, as the sheet does; under Horton and Korth it would fail.
         // D1 to D7 are ignored: $FE has every bit but D0.
         foreach (byte value in new byte[] { 0x00, 0x02, 0xFE })
         {
