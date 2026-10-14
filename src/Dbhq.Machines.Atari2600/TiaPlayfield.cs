@@ -39,12 +39,20 @@ public sealed class TiaPlayfield : IReportsState
     private bool _next;
     private bool _output;
 
+    // The half of the line the fetched and the shown cell are in: true for the right half, from
+    // the CNT decode (score mode's colours, tia.md section 13).
+    private bool _nextRight;
+    private bool _right;
+
     internal TiaPlayfield()
     {
     }
 
     /// <summary>True while the cell being drawn is lit.</summary>
     public bool Output => _output;
+
+    /// <summary>True while the cell being drawn is in the right half, from the CNT decode on.</summary>
+    public bool RightHalf => _right;
 
     /// <summary>A write to PF0, PF1 or PF2 (<c>$0D</c> to <c>$0F</c>) or CTRLPF (<c>$0A</c>).</summary>
     internal void Write(int register, byte value)
@@ -72,6 +80,7 @@ public sealed class TiaPlayfield : IReportsState
     /// <summary>Reads the bit of the cell shown at <paramref name="count"/> of the horizontal sync counter; no cell, no bit.</summary>
     internal void Fetch(int count)
     {
+        _nextRight = count >= RightStart;
         int cell;
         if (count >= LeftStart && count < LeftStart + Cells)
         {
@@ -91,7 +100,11 @@ public sealed class TiaPlayfield : IReportsState
     }
 
     /// <summary>The fetched bit becomes the one shown.</summary>
-    internal void Show() => _output = _next;
+    internal void Show()
+    {
+        _output = _next;
+        _right = _nextRight;
+    }
 
     internal void PowerOn()
     {
@@ -99,6 +112,8 @@ public sealed class TiaPlayfield : IReportsState
         _reflect = false;
         _next = false;
         _output = false;
+        _nextRight = false;
+        _right = false;
     }
 
     /// <inheritdoc />
@@ -108,6 +123,8 @@ public sealed class TiaPlayfield : IReportsState
         sink.Add(nameof(_reflect), _reflect);
         sink.Add(nameof(_next), _next);
         sink.Add(nameof(_output), _output);
+        sink.Add(nameof(_nextRight), _nextRight);
+        sink.Add(nameof(_right), _right);
     }
 
     private static int Reverse(byte value)

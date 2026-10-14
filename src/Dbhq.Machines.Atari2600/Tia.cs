@@ -1,12 +1,12 @@
 namespace Dbhq.Machines.Atari2600;
 
 /// <summary>
-/// The TIA, as far as task 5 of the plan builds it: its write registers, the horizontal sync
+/// The TIA, as far as task 6 of the plan builds it: its write registers, the horizontal sync
 /// counter and the blank it decodes, WSYNC's latch that holds the CPU's RDY low, RSYNC, VSYNC ending
-/// a frame, VBLANK, the playfield, the background, and a frame of colour numbers written a pixel a
-/// colour clock; with the collision latches as the read registers show them and the lines each read
-/// drives. Task 6 adds the objects that set the latches, task 7 HMOVE, task 9 the inputs and task
-/// 10 the sound.
+/// a frame, VBLANK, the playfield, the two players, the two missiles and the ball, priority and
+/// score mode, the fifteen collision latches, and a frame of colour numbers written a pixel a
+/// colour clock; with the lines each read drives. Task 7 adds HMOVE, task 9 the inputs and task 10
+/// the sound.
 /// </summary>
 /// <remarks>
 /// <para>
@@ -30,10 +30,19 @@ namespace Dbhq.Machines.Atari2600;
 /// </para>
 /// <para>
 /// <b>What a pixel is</b>: black (colour 0) in the blank or while VBLANK's output gate is on;
-/// otherwise COLUPF where the playfield is lit and COLUBK where it is not, read on the clock itself,
-/// so a colour write shows from the clock it lands on (tia.md section 4). VBLANK's gate is taken on
-/// the clock after, as section 4 reads from the suite's <c>midline-vblank</c> picture
-/// [guessing - verify]. Score mode and priority are task 6's.
+/// otherwise the colour register of the front object lit on that clock, by section 13's priority,
+/// and COLUBK where none is. The colour registers are read on the clock itself, so a colour write
+/// shows from the clock it lands on (tia.md section 4). VBLANK's gate is taken on the clock after,
+/// as section 4 reads from the suite's <c>midline-vblank</c> picture [guessing - verify].
+/// </para>
+/// <para>
+/// <b>The objects and the collisions</b> (sections 9 to 14). Each clock, the five objects and the
+/// playfield give their serial outputs; the picture takes the front one, and the collision latches
+/// take every pair that is on together, from the same six signals, so a collision is never worked
+/// out apart from what is drawn. The latches set in the horizontal blank too, where the objects'
+/// outputs hold as their counters wait, and only VBLANK's gate stops them (section 14). The objects'
+/// counters are clocked by MOTCK, which runs while the blank is off; RSYNC restarts the line and
+/// not them (section 6).
 /// </para>
 /// </remarks>
 public sealed class Tia : IReportsState
@@ -54,13 +63,42 @@ public sealed class Tia : IReportsState
     private const int Vblank = 0x01;
     private const int Wsync = 0x02;
     private const int Rsync = 0x03;
+    private const int Nusiz0 = 0x04;
+    private const int Nusiz1 = 0x05;
+    private const int Colup0 = 0x06;
+    private const int Colup1 = 0x07;
     private const int Colupf = 0x08;
     private const int Colubk = 0x09;
     private const int Ctrlpf = 0x0A;
     private const int Pf0 = 0x0D;
     private const int Pf1 = 0x0E;
     private const int Pf2 = 0x0F;
+    private const int Refp0 = 0x0B;
+    private const int Refp1 = 0x0C;
+    private const int Resp0 = 0x10;
+    private const int Resp1 = 0x11;
+    private const int Resm0 = 0x12;
+    private const int Resm1 = 0x13;
+    private const int Resbl = 0x14;
+    private const int Grp0 = 0x1B;
+    private const int Grp1 = 0x1C;
+    private const int Enam0 = 0x1D;
+    private const int Enam1 = 0x1E;
+    private const int Enabl = 0x1F;
+    private const int Vdelp0 = 0x25;
+    private const int Vdelp1 = 0x26;
+    private const int Vdelbl = 0x27;
+    private const int Resmp0 = 0x28;
+    private const int Resmp1 = 0x29;
     private const int Cxclr = 0x2C;
+
+    // The six serial outputs, as bits of the mask the collision table is indexed by.
+    private const int P0Bit = 1;
+    private const int P1Bit = 2;
+    private const int M0Bit = 4;
+    private const int M1Bit = 8;
+    private const int BlBit = 16;
+    private const int PfBit = 32;
 
     // The decoded states of the horizontal sync counter, as Towers prints them (tia.md section 3).
     private const int Rhb = 0b011100;
@@ -73,10 +111,18 @@ public sealed class Tia : IReportsState
     /// <summary>The count of each state of the horizontal sync counter, 0 to 62 from 000000; the illegal state counts as 0.</summary>
     private static readonly byte[] CountOf = Counts();
 
+    /// <summary>The latches each set of lit outputs sets: indexed by the six-bit mask of P0Bit to PfBit.</summary>
+    private static readonly ushort[] CollisionsOf = CollisionTable();
+
     // What each write register last had written to it.
     private readonly byte[] _registers = new byte[WriteRegisters];
 
     private readonly TiaPlayfield _playfield = new();
+    private readonly TiaPlayer _player0 = new();
+    private readonly TiaPlayer _player1 = new();
+    private readonly TiaMissile _missile0 = new();
+    private readonly TiaMissile _missile1 = new();
+    private readonly TiaBall _ball = new();
     private readonly FrameBuffer _frame = new();
 
     // The horizontal sync counter's state, and which of its four colour clocks the next Tick runs.
@@ -131,13 +177,28 @@ public sealed class Tia : IReportsState
     /// <summary>The playfield, for the tests.</summary>
     internal TiaPlayfield Playfield => _playfield;
 
+    /// <summary>Player 0, for the tests.</summary>
+    internal TiaPlayer Player0 => _player0;
+
+    /// <summary>Player 1, for the tests.</summary>
+    internal TiaPlayer Player1 => _player1;
+
+    /// <summary>Missile 0, for the tests.</summary>
+    internal TiaMissile Missile0 => _missile0;
+
+    /// <summary>Missile 1, for the tests.</summary>
+    internal TiaMissile Missile1 => _missile1;
+
+    /// <summary>The ball, for the tests.</summary>
+    internal TiaBall Ball => _ball;
+
     /// <summary>True while the horizontal blank is on, for the colour clock the next <see cref="Tick"/> runs.</summary>
     internal bool HorizontalBlank => _hblank;
 
     /// <summary>The horizontal sync counter's six bits, as Towers prints them (tia.md section 3).</summary>
     internal int PolynomialCounter => _counter;
 
-    /// <summary>The collision latches as the read registers show them, for the tests until task 6 sets them.</summary>
+    /// <summary>The collision latches as the read registers show them, for the tests.</summary>
     internal ushort CollisionLatches
     {
         get => _collisions;
@@ -175,8 +236,9 @@ public sealed class Tia : IReportsState
     }
 
     /// <summary>
-    /// One colour clock: RDY released if a line starts here, the playfield's bit moved on, the pixel
-    /// drawn, VBLANK's gate taken, and every fourth clock the counter stepped. Allocates nothing.
+    /// One colour clock: RDY released if a line starts here, the playfield's bit moved on, the six
+    /// outputs taken, the collision latches set and the pixel drawn from them, the objects clocked,
+    /// VBLANK's gate taken, and every fourth clock the counter stepped. Allocates nothing.
     /// </summary>
     public void Tick()
     {
@@ -195,14 +257,68 @@ public sealed class Tia : IReportsState
             _playfield.Fetch(CountOf[_counter] + 1);
         }
 
+        byte[] r = _registers;
+        int lit = 0;
+        if (_player0.Output(r[Refp0], r[Vdelp0]))
+        {
+            lit |= P0Bit;
+        }
+
+        if (_player1.Output(r[Refp1], r[Vdelp1]))
+        {
+            lit |= P1Bit;
+        }
+
+        if (_missile0.Output(r[Enam0], r[Resmp0], r[Nusiz0]))
+        {
+            lit |= M0Bit;
+        }
+
+        if (_missile1.Output(r[Enam1], r[Resmp1], r[Nusiz1]))
+        {
+            lit |= M1Bit;
+        }
+
+        if (_ball.Output(r[Vdelbl], r[Ctrlpf]))
+        {
+            lit |= BlBit;
+        }
+
+        if (_playfield.Output)
+        {
+            lit |= PfBit;
+        }
+
+        if (!_vblank)
+        {
+            _collisions |= CollisionsOf[lit];
+        }
+
         uint x = (uint)(_clock - FirstPixel);
         if (x < FrameBuffer.Width)
         {
-            byte colour = _hblank || _vblank ? (byte)0 : _registers[_playfield.Output ? Colupf : Colubk];
+            byte colour = _hblank || _vblank ? (byte)0 : r[ColourRegister(lit, r[Ctrlpf], _playfield.RightHalf)];
             _frame.Put((int)x, (byte)(colour & 0xFE));
         }
 
-        _vblank = (_registers[Vblank] & 0x02) != 0;
+        // The objects' counters run on MOTCK, while the blank is off; a player's lock point resets
+        // its missile's counter when RESMP is set (sections 9 and 11).
+        bool motionClock = !_hblank;
+        if (_player0.Clock(motionClock, r[Nusiz0]) && (r[Resmp0] & 0x02) != 0)
+        {
+            _missile0.LockToPlayer();
+        }
+
+        if (_player1.Clock(motionClock, r[Nusiz1]) && (r[Resmp1] & 0x02) != 0)
+        {
+            _missile1.LockToPlayer();
+        }
+
+        _missile0.Clock(motionClock, r[Nusiz0]);
+        _missile1.Clock(motionClock, r[Nusiz1]);
+        _ball.Clock(motionClock);
+
+        _vblank = (r[Vblank] & 0x02) != 0;
         _clock++;
         if (++_phase == 4)
         {
@@ -265,6 +381,35 @@ public sealed class Tia : IReportsState
                 _rsync = true;
                 _phase = 1;
                 break;
+            case Resp0:
+                _player0.Reset();
+                break;
+            case Resp1:
+                _player1.Reset();
+                break;
+            case Resm0:
+                _missile0.Reset();
+                break;
+            case Resm1:
+                _missile1.Reset();
+                break;
+            case Resbl:
+                _ball.Reset();
+                break;
+            case Grp0:
+                // GRP0 writes player 0's new register and copies player 1's new to its old.
+                _player0.WriteGraphics(value);
+                _player1.CopyNewToOld();
+                break;
+            case Grp1:
+                // GRP1 writes player 1's new register and copies player 0's and the ball's new to old.
+                _player1.WriteGraphics(value);
+                _player0.CopyNewToOld();
+                _ball.CopyNewToOld();
+                break;
+            case Enabl:
+                _ball.WriteEnable(value);
+                break;
             case Ctrlpf:
             case Pf0:
             case Pf1:
@@ -282,13 +427,19 @@ public sealed class Tia : IReportsState
 
     /// <summary>
     /// The power-on state, none of which a source gives: every register 0, the latches clear, the
-    /// counter at 000000 and colour clock 0, the blank on, and no frame yet; a choice recorded in
+    /// counter at 000000 and colour clock 0, the blank on, every object's counter at count 0 and
+    /// quarter 0 with nothing held or drawing, and no frame yet; a choice recorded in
     /// <c>docs/known-differences.md</c> [guessing - verify].
     /// </summary>
     public void PowerOn()
     {
         Array.Clear(_registers);
         _playfield.PowerOn();
+        _player0.PowerOn();
+        _player1.PowerOn();
+        _missile0.PowerOn();
+        _missile1.PowerOn();
+        _ball.PowerOn();
         _frame.PowerOn();
         _counter = 0;
         _phase = 0;
@@ -305,6 +456,11 @@ public sealed class Tia : IReportsState
     {
         sink.Add(nameof(_registers), _registers);
         sink.Add(nameof(_playfield), _playfield);
+        sink.Add(nameof(_player0), _player0);
+        sink.Add(nameof(_player1), _player1);
+        sink.Add(nameof(_missile0), _missile0);
+        sink.Add(nameof(_missile1), _missile1);
+        sink.Add(nameof(_ball), _ball);
         sink.Add(nameof(_frame), _frame);
         sink.Add(nameof(_counter), _counter);
         sink.Add(nameof(_phase), _phase);
@@ -337,6 +493,72 @@ public sealed class Tia : IReportsState
         }
 
         _counter = NextState(state);
+    }
+
+    /// <summary>
+    /// The colour register a pixel takes from the lit outputs (tia.md section 13). With CTRLPF D2
+    /// clear, P0 and M0 are in front, then P1 and M1, then the playfield and the ball; with it set
+    /// the playfield and the ball are in front. Score mode, D1 with D2 clear, draws the playfield's
+    /// left half in COLUP0 at player 0's place and its right half in COLUP1 at player 1's, and the
+    /// ball keeps COLUPF (2k6specs, the one source for all three [guessing - verify]).
+    /// </summary>
+    private static int ColourRegister(int lit, byte ctrlpf, bool rightHalf)
+    {
+        bool pf = (lit & PfBit) != 0;
+        if ((ctrlpf & 0x04) != 0)
+        {
+            if ((lit & (PfBit | BlBit)) != 0)
+            {
+                return Colupf;
+            }
+        }
+        else if (pf && (ctrlpf & 0x02) != 0)
+        {
+            // Score mode: the playfield is player 0's on the left and player 1's on the right.
+            lit = (lit & ~PfBit) | (rightHalf ? P1Bit : P0Bit);
+        }
+
+        if ((lit & (P0Bit | M0Bit)) != 0)
+        {
+            return Colup0;
+        }
+
+        if ((lit & (P1Bit | M1Bit)) != 0)
+        {
+            return Colup1;
+        }
+
+        return (lit & (PfBit | BlBit)) != 0 ? Colupf : Colubk;
+    }
+
+    // The fifteen latches each pair of outputs sets (tia.md section 2.2): bit 2r + 1 is read
+    // register r's D7 and bit 2r its D6.
+    private static ushort[] CollisionTable()
+    {
+        (int A, int B, int Latch)[] pairs =
+        [
+            (M0Bit, P1Bit, 1), (M0Bit, P0Bit, 0),
+            (M1Bit, P0Bit, 3), (M1Bit, P1Bit, 2),
+            (P0Bit, PfBit, 5), (P0Bit, BlBit, 4),
+            (P1Bit, PfBit, 7), (P1Bit, BlBit, 6),
+            (M0Bit, PfBit, 9), (M0Bit, BlBit, 8),
+            (M1Bit, PfBit, 11), (M1Bit, BlBit, 10),
+            (BlBit, PfBit, 13),
+            (P0Bit, P1Bit, 15), (M0Bit, M1Bit, 14),
+        ];
+        var table = new ushort[64];
+        for (int lit = 0; lit < 64; lit++)
+        {
+            foreach ((int a, int b, int latch) in pairs)
+            {
+                if ((lit & a) != 0 && (lit & b) != 0)
+                {
+                    table[lit] |= (ushort)(1 << latch);
+                }
+            }
+        }
+
+        return table;
     }
 
     private static byte[] Counts()
