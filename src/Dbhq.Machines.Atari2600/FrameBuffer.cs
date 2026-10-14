@@ -16,8 +16,9 @@ namespace Dbhq.Machines.Atari2600;
 /// <para>
 /// <b>Where a frame starts and ends</b> (the plan's "Fixed before running", items 2 and 4). A frame
 /// ends when VSYNC's D1 goes from 1 to 0, and the line it ends on, the first after the VSYNC lines,
-/// is the next frame's row 0; so a program that makes 262 lines makes frames of 262 rows. A frame
-/// with no end of VSYNC ends as its 400th line is done.
+/// is the next frame's row 0, a choice over the line after it [guessing - verify]; so a program that
+/// makes 262 lines makes frames of 262 rows. A frame with no end of VSYNC ends as its 400th line is
+/// done.
 /// </para>
 /// <para>
 /// Two buffers: the TIA draws into one while <see cref="ColourNumbers"/> shows the other, the last

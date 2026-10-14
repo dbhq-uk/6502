@@ -5,8 +5,9 @@ namespace Dbhq.Machines.Atari2600.Tests;
 /// <summary>
 /// The palette, computed from each region's colour signal as <c>docs/atari-2600/facts/tia.md</c>
 /// sections 19.4 and 19.5 give it, never copied from a table. The worked examples are the sheet's
-/// section 19.6, which <c>tools/probes/atari-2600/tia_palette.py</c> prints from the same formulas;
-/// the properties are the ones the sheet says tests can take from it. Colours are
+/// section 19.6, which <c>tools/probes/atari-2600/tia_palette.py</c> prints from the same formulas,
+/// so they catch a slip in coding the formula, not an error in the formula itself; the properties
+/// are the ones the sheet says tests can take from it. Colours are
 /// <c>0xAABBGGRR</c>.
 /// </summary>
 public class TiaPaletteTests

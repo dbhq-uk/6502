@@ -101,6 +101,24 @@ The fault pass ran on 14 October 2026 in a scratch copy outside the repository (
 
 **Two faults survived the first run.** B14: `Peek_changes_nothing_anywhere` peeked every address in order, so on an F8 board a `Peek` that switched banks passed `$1FF8` and then `$1FF9` and ended back in bank 1; the test now peeks bank 0's hotspot last. B15: the machine's power on runs the CPU's reset, whose reads overwrite the data bus, so a bus that kept its old byte through power on could not be seen through the machine; `Section_4_the_residue_is_the_last_byte_read_or_written` now powers the bus on alone and reads it. Run again with each fault (`... bus-faults.py <scratch> B14 B15`), both were caught.
 
+**The probe after task 5.** Task 5 rewrote the TIA and the cycle, and 13 of the probe's 38 patterns stopped matching the code (task 5's review found it). They were ported to the new code on 14 October 2026, each naming the same fault where the code still has the thing it broke. T2, a WSYNC latch never reset, now halts the machine for ever and only a timeout would catch it, so it became a release a count early. Rerun with `python3 -I tools/probes/atari-2600/bus-faults.py <scratch> B6 B8 B9 B10 H3 H5 H6 S2 T1 T2 T4 T9 M3`, all 13 were caught:
+
+| Fault | Now planted | Test files that failed |
+|---|---|---|
+| B6 | the halt releases one cycle late | `CycleOrderTests` (6), `ObserverTests` (1), `SuiteSelfTests` (2), `WsyncHaltTests` (160) |
+| B8 | the halted cycles are not cycles | `Atari2600BusTests` (1), `CycleOrderTests` (6), `ObserverTests` (2), `SuiteSelfTests` (10), `WsyncHaltTests` (160) |
+| B9 | the RIOT ticked after the access | `Atari2600BusTests` (1), `WsyncHaltTests` (2) |
+| B10 | two colour clocks a cycle | `Atari2600BusTests` (4), `CycleOrderTests` (6), `ObserverTests` (2), `SuiteSelfTests` (10), `WsyncHaltTests` (160) |
+| H3 | the halt's end is not told | `ObserverTests` (1), `WsyncHaltTests` (2) |
+| H5 | observing clears the timer flag | `StateReportTests` (2) |
+| H6 | the reference option adds a colour clock | `StateReportTests` (2) |
+| S2 | the TIA does not report its counter | `StateReportTests` (9) |
+| T1 | WSYNC released a count late | `CycleOrderTests` (6), `ObserverTests` (1), `TiaLineTests` (3), `WsyncHaltTests` (160) |
+| T2 | WSYNC released a count early | `CycleOrderTests` (6), `ObserverTests` (1), `TiaLineTests` (3), `WsyncHaltTests` (160) |
+| T4 | the line limit one line late | `Atari2600BusTests` (3), `ObserverTests` (1), `SuiteSelfTests` (2), `TiaLineTests` (1) |
+| T9 | power on leaves the counter | `Atari2600BusTests` (2), `TiaLineTests` (1) |
+| M3 | `RunFrames` one frame long | `Atari2600BusTests` (2), `FrameBufferTests` (4), `ObserverTests` (1) |
+
 The faults each test file caught: `Atari2600BusTests` (B1 to B5, B11 to B16, T4 to T9, M1, M3), `WsyncHaltTests` (B6 to B10, T1, T2), `ObserverTests` (H1 to H4, T3), `StateReportTests` (H5, H6, S1 to S4) and `SuiteSelfTests` (B1 to B4, B6 to B10, M2). In all, 38 faults were planted and all 38 were caught, two of them only after their test was strengthened. Two faults were left out as no fault at all: dropping the thirteen-line mask changes nothing a part can see, because no decode reads A13 to A15 and each part decodes its own low lines, but the observer is the exception, since it is told the address the bus keeps (the task 4 review found the fault survived; `ObserverTests.The_observer_is_told_the_thirteen_bit_address` now catches it); and a WSYNC release one colour clock late never comes, because a cycle starts on a multiple of three clocks until task 5's RSYNC, so the halt would never end.
 
 ## The task 4 review

@@ -106,7 +106,12 @@ public sealed class Tia : IReportsState
     /// <summary>A chip at its power-on state (<see cref="PowerOn"/>).</summary>
     public Tia() => PowerOn();
 
-    /// <summary>The colour clock of the line the next <see cref="Tick"/> runs, 0 to 227; 0 starts the horizontal blank.</summary>
+    /// <summary>
+    /// The colour clock of the line the next <see cref="Tick"/> runs, 0 to 227; 0 starts the
+    /// horizontal blank. In the three clocks between an RSYNC and the line it starts, the count runs
+    /// on from where it was, so an RSYNC landing at colour clock 227 reads 228 and 229 before the new
+    /// line's 0: the beam's place on a line cut short, not a clock of a 228-clock line.
+    /// </summary>
     public int HorizontalCounter => _clock;
 
     /// <summary>True while WSYNC's latch holds the CPU's RDY line low (tia.md section 5).</summary>
