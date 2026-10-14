@@ -109,11 +109,11 @@ public class ObserverTests
         }
 
         Assert.Equal([machine.Bus.Cycles], observer.Frames);
-        Assert.Equal(1, machine.Bus.Tia.Frames);
+        Assert.Equal(1, machine.Bus.Tia.Frame.Frames);
 
         machine.RunFrames(1);
         Assert.Equal(2, observer.Frames.Count);
-        Assert.Equal(Tia.MaxLines, machine.Bus.Tia.LastFrameLines);
+        Assert.Equal(Tia.MaxLines, machine.Bus.Tia.Frame.Lines);
 
         // The limit is reached as the counter wraps from colour clock 227 to 0, in the last of the
         // three clocks of a line's cycle 76; from power on, cycle c runs clocks 3c - 3 to 3c - 1.

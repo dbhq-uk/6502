@@ -26,15 +26,20 @@ namespace Dbhq.Machines.Atari2600;
 /// <para>
 /// <b>One place runs a cycle: <see cref="Cycle"/>.</b> It is the only code that counts a cycle, so
 /// a cycle never passes without an access and an access never happens outside one (AGENTS.md rule
-/// 1). It runs the TIA's three colour clocks, then ticks the RIOT, then makes the access. All three
-/// colour clocks before the access is the first version, the split the sources state (tia.md
-/// section 4); task 5 settles it by the plan's rule. The RIOT is ticked before the access, as
-/// <see cref="Riot6532"/> asks, so a timer written on one cycle first falls on the next.
+/// 1). It runs <see cref="ClocksBeforeAccess"/> of the TIA's three colour clocks, ticks the RIOT,
+/// makes the access, then runs the rest. Task 5 chose all three before the access by the plan's
+/// rule ("Fixed before running", item 8): every split passed the suite's two WSYNC self-tests, and
+/// the tie went to the split the sources state, the write at the end of the cycle (tia.md section
+/// 4, which records the table). The RIOT is ticked before the access, as <see cref="Riot6532"/>
+/// asks, so a timer written on one cycle first falls on the next.
 /// </para>
 /// <para>
 /// <b>The WSYNC halt</b> (section 5) is the NES's DMA halt in shape: a write to WSYNC sets the
-/// TIA's latch, and the next <see cref="Read"/> repeats its read, each repeat a whole cycle through
-/// <see cref="Cycle"/>, until the TIA reaches the line's start; then it makes the read. Each
+/// TIA's latch, and a read cycle whose access finds RDY low is a held read: <see cref="Read"/>
+/// repeats it, each repeat a whole cycle through <see cref="Cycle"/>, until a cycle's access finds
+/// RDY high, which the TIA makes on the next line's colour clock 0; that read is the CPU's. RDY is
+/// sampled at the access, after the cycle's clocks before it, so the halt ends on the line's start
+/// wherever RSYNC has put it against the cycles. Each
 /// repeat reaches the cartridge as an access, as the 6502 data sheet's held address suggests and no
 /// 2600 source confirms (bus.md section 8 item 2) [guessing - verify]. A write is never held, so
 /// <c>DEC WSYNC</c> writes twice and halts on the next read.
@@ -164,23 +169,34 @@ public sealed class Atari2600Bus : Bus, IReportsState
     }
 
     /// <summary>
-    /// One CPU read: one cycle. If a WSYNC write has pulled RDY low, the read is first repeated, a
-    /// cycle at a time, until the TIA reaches the line's start (bus.md section 5).
+    /// The colour clocks of a cycle that run before its access; the rest run after it. Task 5's
+    /// choice by the plan's item 8 (tia.md section 4).
+    /// </summary>
+    internal const int ClocksBeforeAccess = 3;
+
+    /// <summary>
+    /// One CPU read: one cycle, or, while a WSYNC write holds RDY low, the same read repeated a
+    /// whole cycle at a time until a cycle's access finds RDY high (bus.md section 5). Each repeat
+    /// is a full access of the held address, so the board and the chips see it (section 8 item 2,
+    /// where that the cartridge sees them is [guessing - verify]).
     /// </summary>
     public override byte Read(ushort address)
     {
-        if (_tia.RdyLow)
+        bool held = !_tia.HaltReleaseDue;
+        while (true)
         {
-            Halt(address);
+            byte value = Cycle(false, address, 0, held, out bool halted);
+            if (!halted)
+            {
+                return value;
+            }
         }
-
-        return Cycle(false, address, 0);
     }
 
     /// <summary>One CPU write: one cycle. RDY never holds a write (bus.md section 5).</summary>
     public override void Write(ushort address, byte value)
     {
-        Cycle(true, address, value);
+        Cycle(true, address, value, held: false, out _);
     }
 
     /// <summary>
@@ -223,19 +239,29 @@ public sealed class Atari2600Bus : Bus, IReportsState
     }
 
     /// <summary>
-    /// The one cycle. Counts it, runs the TIA's three colour clocks, ticks the RIOT, makes the access
-    /// and keeps the byte on the data bus. Returns the byte a read gave, and <paramref name="value"/>
-    /// for a write.
+    /// The one cycle. Counts it, runs the TIA's colour clocks before the access, ticks the RIOT,
+    /// makes the access and keeps the byte on the data bus, then runs the rest of the colour clocks.
+    /// A read whose access finds RDY low is <paramref name="halted"/>: it is made all the same, and
+    /// its caller repeats it. <paramref name="held"/> says RDY was low as the read began, so the
+    /// observer hears of the halt's end, however many cycles it took. Returns the byte a read gave,
+    /// and <paramref name="value"/> for a write.
     /// </summary>
-    private byte Cycle(bool write, ushort address, byte value)
+    private byte Cycle(bool write, ushort address, byte value, bool held, out bool halted)
     {
         _cycles++;
         _colourClocks += 3;
-        long frames = _tia.Frames;
-        _tia.Tick();
-        _tia.Tick();
-        _tia.Tick();
+        long frames = _tia.Frame.Frames;
+        for (int i = 0; i < ClocksBeforeAccess; i++)
+        {
+            _tia.Tick();
+        }
+
         _riot.Tick();
+        halted = !write && !_tia.HaltReleaseDue;
+        if (held && !halted && Observable && _observer is not null)
+        {
+            _observer.HaltReleased(_cycles - 1);
+        }
 
         ushort line = (ushort)(address & AddressMask);
         Chip chip = Decode(line);
@@ -287,6 +313,11 @@ public sealed class Atari2600Bus : Bus, IReportsState
             _dataBus = value;
         }
 
+        for (int i = ClocksBeforeAccess; i < 3; i++)
+        {
+            _tia.Tick();
+        }
+
         if (Observable && _observer is not null)
         {
             Observe(chip, line, write, value, bank, frames);
@@ -304,26 +335,9 @@ public sealed class Atari2600Bus : Bus, IReportsState
             _observer!.Accessed(line, write, value);
         }
 
-        if (_tia.Frames != frames)
+        if (_tia.Frame.Frames != frames)
         {
             _observer!.FrameEnded(_cycles);
-        }
-    }
-
-    // The CPU's read of address held while RDY is low: the same read, a cycle at a time, until the
-    // cycle about to run starts the line (Tia.HaltReleaseDue). Each is a full bus access, so the
-    // board and the chips see it (bus.md section 5; section 8 item 2 for the board, where that the
-    // cartridge sees the held reads is [guessing - verify]).
-    private void Halt(ushort address)
-    {
-        while (!_tia.HaltReleaseDue)
-        {
-            Cycle(false, address, 0);
-        }
-
-        if (Observable && _observer is not null)
-        {
-            _observer.HaltReleased(_cycles);
         }
     }
 

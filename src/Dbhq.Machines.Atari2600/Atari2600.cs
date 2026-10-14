@@ -69,8 +69,8 @@ public sealed class Atari2600
     public void RunFrames(int frames)
     {
         ArgumentOutOfRangeException.ThrowIfNegative(frames);
-        long end = Bus.Tia.Frames + frames;
-        while (Bus.Tia.Frames < end)
+        long end = Bus.Tia.Frame.Frames + frames;
+        while (Bus.Tia.Frame.Frames < end)
         {
             Step();
         }

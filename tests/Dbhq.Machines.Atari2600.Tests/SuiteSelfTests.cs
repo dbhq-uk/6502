@@ -62,6 +62,10 @@ public class SuiteSelfTests(ITestOutputHelper output)
         ("cpu/partial-drive", 6, 0x05, 0x10, 0x50),
         ("cpu/rmw-strobe", 6, 0x01, 0x00, 0x04),
         ("cpu/stack-aliases-tia", 6, 0x03, 0x00, 0x80),
+
+        // From task 5, which builds RSYNC: its header needs a missile and the M0-PF latch too,
+        // which task 6 builds (suite.md section 10 moved it there).
+        ("tia-timing/rsync", 6, 0x02, 0x00, 0x80),
     ];
 
     /// <summary>

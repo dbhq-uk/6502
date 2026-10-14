@@ -371,10 +371,10 @@ public class Atari2600BusTests
         machine.Run(1000);
         // An instruction after a WSYNC write may wait up to 75 halted cycles.
         Assert.InRange(machine.Bus.Cycles, 1007, 1007 + 80);
-        long frames = machine.Bus.Tia.Frames;
+        long frames = machine.Bus.Tia.Frame.Frames;
         machine.RunFrames(3);
-        Assert.Equal(frames + 3, machine.Bus.Tia.Frames);
-        Assert.Equal(203, machine.Bus.Tia.LastFrameLines);
+        Assert.Equal(frames + 3, machine.Bus.Tia.Frame.Frames);
+        Assert.Equal(203, machine.Bus.Tia.Frame.Lines);
     }
 
     [Fact]
@@ -383,8 +383,8 @@ public class Atari2600BusTests
         // STA WSYNC; JMP back: one line a loop, and no VSYNC.
         Atari2600 machine = TestPrograms.Machine(Region.Ntsc, 0x85, 0x02, 0x4C, 0x00, 0xF0);
         machine.RunFrames(2);
-        Assert.Equal(2, machine.Bus.Tia.Frames);
-        Assert.Equal(Tia.MaxLines, machine.Bus.Tia.LastFrameLines);
+        Assert.Equal(2, machine.Bus.Tia.Frame.Frames);
+        Assert.Equal(Tia.MaxLines, machine.Bus.Tia.Frame.Lines);
         Assert.InRange(machine.Bus.ColourClocks, 2L * Tia.MaxLines * 228, (2L * Tia.MaxLines * 228) + 228);
     }
 

@@ -13,7 +13,8 @@ namespace Dbhq.Machines.Atari2600;
 /// </para>
 /// <para>
 /// One number is kept per clock, the colour clock, as an exact expression of the colour
-/// subcarrier it comes from; the CPU clock is computed from it (section 1). Task 5 adds the palette.
+/// subcarrier it comes from; the CPU clock is computed from it (section 1). The palette is computed
+/// from the region's colour signal (<see cref="TiaPalette"/>; tia.md section 19).
 /// </para>
 /// </remarks>
 public sealed class Region
@@ -25,7 +26,8 @@ public sealed class Region
         int firstShownLine,
         int shownLines,
         int pixelWidth,
-        int pixelHeight)
+        int pixelHeight,
+        Func<int, double?> hueAngle)
     {
         Name = name;
         ColourClockHz = colourClockHz;
@@ -34,6 +36,7 @@ public sealed class Region
         ShownLines = shownLines;
         PixelWidth = pixelWidth;
         PixelHeight = pixelHeight;
+        Palette = new TiaPalette(hueAngle);
     }
 
     /// <summary>
@@ -47,7 +50,8 @@ public sealed class Region
         firstShownLine: 19,
         shownLines: 228,
         pixelWidth: 12,
-        pixelHeight: 7);
+        pixelHeight: 7,
+        hueAngle: TiaPalette.NtscHueAngle);
 
     /// <summary>
     /// The PAL console: the colour clock is four fifths of the PAL colour subcarrier of
@@ -61,7 +65,8 @@ public sealed class Region
         firstShownLine: 27,
         shownLines: 264,
         pixelWidth: 52,
-        pixelHeight: 25);
+        pixelHeight: 25,
+        hueAngle: TiaPalette.PalHueAngle);
 
     /// <summary>"NTSC" or "PAL", for the page to show. No code chooses by it.</summary>
     public string Name { get; }
@@ -93,4 +98,10 @@ public sealed class Region
 
     /// <summary>The height of one pixel, against <see cref="PixelWidth"/> (region.md 4).</summary>
     public int PixelHeight { get; }
+
+    /// <summary>
+    /// The 128 colours this region's TIA shows, computed from its colour signal (tia.md sections
+    /// 19.4 and 19.5), which is where the two TIAs differ (region.md section 5).
+    /// </summary>
+    public TiaPalette Palette { get; }
 }
