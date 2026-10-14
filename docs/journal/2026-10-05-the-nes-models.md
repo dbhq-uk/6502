@@ -2,7 +2,7 @@
 title: "The NES's models: the inputs, and the eight checks they rest on"
 date: 2026-10-05
 summary: "Before the NES's two models are built, the work measures what they rest on. The bare board scan's scale holds, its solder side lies on its component side, and the European board's chips sit where the American board's do. The case took three tries. Read from the two corner photographs, its depth came out well short of the published figure, and Dan ruled that this measured the camera, not the case. Judged on the design patent's drawings it was still just over the limit, and the European front then stopped against the drawing too. The sources disagree with each other by more than those limits could resolve, so the check was turned back to its purpose, catching a gross error of scale, with wider limits set after the drawings were seen and said so. On those it passes, and every stop stays on record. On the way, the cartridge connector's fingers turned out to be on a metric pitch, not the tenth of an inch the plan assumed."
-order: 30
+order: 31
 ---
 
 # 5 October 2026: the NES's models, the inputs and what they rest on
