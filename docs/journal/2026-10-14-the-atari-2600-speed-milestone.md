@@ -1,7 +1,7 @@
 ---
 title: "The Atari VCS's speed milestone: the rule, the bench and the workflow"
 date: 2026-10-14
-summary: "The eighth task of the Atari VCS: the machine as WebAssembly, a browser bench that times the suite's calibration program in both regions, compiled ahead of time and in the interpreter, the rule that judges it, committed before any launch, and a workflow started by hand that runs it on a GitHub runner and never on this box."
+summary: "The eighth task of the Atari VCS: the machine as WebAssembly, a browser bench that times the suite's calibration program in both regions, compiled ahead of time and in the interpreter, the rule that judges it, committed before any launch, and a workflow started by hand that runs it on a GitHub runner and never on this box. Its first run, judged by that rule, says stop: Dan decides before the sound is built."
 order: 62
 ---
 
@@ -37,4 +37,29 @@ Nothing was timed on this box (the brief: no speed figure from here; it is an aa
 
 ## The workflow, and Dan's approval
 
-`AGENTS.md` allows a speed workflow started by hand and never part of a pull request check, one per machine that needs one, each approved by Dan when it is built. GitHub offers a `workflow_dispatch` workflow only once the file is on the default branch, so the workflow goes to `main` in a small pull request of its own, and it is merged only on Dan's approval. Until then nothing is measured.
+`AGENTS.md` allows a speed workflow started by hand and never part of a pull request check, one per machine that needs one, each approved by Dan when it is built. GitHub offers a `workflow_dispatch` workflow only once the file is on the default branch, so the workflow goes to `main` in a small pull request of its own, and it is merged only on Dan's approval. Dan approved the workflow and its rule as they stood on 14 October 2026, and pull request #170 was merged (`d88b7eb`).
+
+## The run, and the verdict: STOP
+
+Run [38634166609](https://github.com/dbhq-uk/6502/actions/runs/38634166609), started on 14 October 2026 at 20:41 UTC with
+
+```sh
+gh workflow run atari-2600-speed-run.yml --repo dbhq-uk/6502 --ref main -f ref=7812989b87dffa901c7f9216c61d3d1d96aa8edf
+```
+
+The ref was given as the commit, the head of `feat/atari-2600` when the run started, so a push to the branch during the run could not change what was measured.
+
+**The host**, from the artefact's `host.txt`, recorded at 20:42:43 UTC before anything was timed: a GitHub-hosted runner, image `ubuntu24` 20261004.327.1, Ubuntu 24.04.5 LTS, Linux 6.17.0-1022-azure, x86_64, an AMD EPYC 9V45 96-Core Processor under Microsoft's hypervisor, 4 CPUs; Chrome 154.0.8037.97. The load gate let each launch through with the one-minute load under 1.00 (0.97, 0.94, 0.94 and 0.87 at the four starts). Every launch counted on its first try.
+
+**The figures**, as `analyse.py` printed them in the artefact's `analysis.txt`, times real time from `Region.CpuHz`:
+
+| Launch | The five timed runs | Best | Median |
+|---|---|---|---|
+| AOT, NTSC | 8.47 8.31 8.36 8.40 8.48 | 8.48 | 8.40 |
+| AOT, PAL | 8.10 8.30 8.15 8.22 8.22 | 8.30 | 8.22 |
+| Interpreter, NTSC | 0.59 0.57 0.58 0.58 0.58 | 0.59 | 0.58 |
+| Interpreter, PAL | 0.59 0.59 0.58 0.58 0.58 | 0.59 | 0.58 |
+
+The lower AOT median is 8.22 times real time, under the rule's line of 10, so **the verdict is STOP**, and the run ended red as the rule says it must. Each timed run ended 59 or 60 frames of 262 lines on NTSC and 49 or 50 of 312 on PAL, so the program was drawing throughout. The interpreter runs under real time, about 0.58 times, so in the interpreter the machine cannot keep up at all.
+
+**What follows.** The plan's step 6: under 10 times, stop and tell Dan, with the figure and the run's link, before task 10 (the sound) is built. The spec already plans the speed pass after the count (issue #130), as the NES's lazy chips came after its machine counted, so the expected answer is to go on and do the speed pass later; it is Dan's call, and nothing past this task is started on this verdict. The rule is not loosened, and no launch is dropped. For comparison only, and from another day, another host and another program: the NES's own milestone, measured on 5 October 2026 on the development box, gave about two times real time (its journal entry, [the NES speed](2026-10-05-the-nes-speed.md)).
