@@ -1,11 +1,11 @@
 ---
-title: "The order of the machines after the Atari 2600"
+title: "The order of the machines after the Atari VCS"
 date: 2026-10-14
 summary: "Dan fixed the order of the machines after the Atari VCS. The Atari eight-bit family is next, and the rest follow the research memo of the day before. The Commodore machine starts only when its ROM question is settled."
 order: 60
 ---
 
-# 14 October 2026: the order of the machines after the Atari 2600
+# 14 October 2026: the order of the machines after the Atari VCS
 
 This records a decision. The reasons are in [the memo](../research/NextMachines_20261013/NextMachines_20261013.md) and in [which machines next](2026-10-13-which-machines-next.md); they are not repeated here.
 
