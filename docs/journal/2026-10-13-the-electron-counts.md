@@ -2,7 +2,7 @@
 title: "The Electron counts"
 date: 2026-10-13
 summary: "The Electron's page goes live in the build: a credited photograph of an original machine, the registry switched to running, and the home page's count of machines going up by one, from the registry and never typed. The preview that built the page before it counted is deleted again, and the page's tests and the browser check read the site that deploys."
-order: 39
+order: 46
 ---
 
 # 13 October 2026: the Electron counts
