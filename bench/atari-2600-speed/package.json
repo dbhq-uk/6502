@@ -1,0 +1,9 @@
+{
+  "name": "dbhq-atari-2600-speed-driver",
+  "private": true,
+  "description": "Drives the Atari 2600's browser speed check in a real Chrome, on a GitHub runner by the hand-started workflow atari-2600-speed-run.yml, or on a host of your own.",
+  "type": "module",
+  "dependencies": {
+    "playwright-core": "1.63.0"
+  }
+}
