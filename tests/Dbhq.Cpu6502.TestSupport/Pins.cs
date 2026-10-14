@@ -195,6 +195,17 @@ public static class Pins
         ["other/snow.nes"] = "7db551e868b2c0182941bd68adc447c2f0668098a4425e8e170b20e4327b7210",
     };
 
+    // The Atari 2600's test suite, missingno-vcs-tests (MIT), from two forks, each at one
+    // commit: dbhq-uk/missingno-vcs-tests gives the tests' sources, their headers and the
+    // reference pictures; dbhq-uk/missingno gives the built binaries, which the suite's own
+    // repository does not hold, and nothing else of it is read. Every file is listed with its
+    // git blob hash in atari-2600-suite.manifest (written by tools/atari-2600-suite-manifest.sh
+    // from the forks' trees at these commits), and the manifest's own SHA-256 is pinned here, so
+    // every file is pinned through this one file (Atari2600Suite.Read checks both).
+    public const string Atari2600SuiteCommit = "891c079976a2f68033ca4af2fe2fd85aaf1906c9";
+    public const string Atari2600BinariesCommit = "a4159f47ce7ef6f9c3d5402a8c58b18940045adc";
+    public const string Atari2600SuiteManifestSha256 = "712efc45a303b42577362ad172416af8d669f3c470e97a2d4c9fa1728b73e532";
+
     // The KIM-1 monitor ROM, MOS Technology's, as Hans Otten dumped it from
     // real 6530-002 and 6530-003 chips, with their $00 filler bytes. The files
     // are committed under roms/, with where they came from and what is known
