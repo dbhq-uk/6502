@@ -31,8 +31,8 @@ sed -i 's/ missingno crates\/systems\/vcs\/tests\/accuracy\/roms\/riot\/ram_pal.
 run "a binary claimed by the suite's fork"
 sed -i 's/^[0-9a-f]\{40\}\( missingno-vcs-tests roms\/riot\/ram.asm\)$/abc\1/' "$m"; repin
 run "a short blob hash"
-sed -i 's/\[\.\. Manifest.Value.Keys.Order(StringComparer.Ordinal)\]/[.. Manifest.Value.Keys.OrderDescending(StringComparer.Ordinal)]/' "$s"
-run "the names in reverse order"
+sed -i '1{h;d};2{G}' "$m"; repin
+run "the manifest's first two lines swapped"
 sed -i 's/throw new ArgumentException(\$"{name} is not in {ManifestPath}", nameof(name));/entry = Manifest.Value.Values.First();/' "$s"
 run "an unknown name read as the first entry"
 sed -i 's/return File.ReadAllBytes(PinnedFiles.Fetch(url, local, PinnedFiles.GitBlob(entry.BlobSha)));/return [.. File.ReadAllBytes(PinnedFiles.Fetch(url, local, PinnedFiles.GitBlob(entry.BlobSha))).Reverse()];/' "$s"

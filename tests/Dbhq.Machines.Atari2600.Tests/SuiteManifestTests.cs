@@ -74,10 +74,14 @@ public class SuiteManifestTests
     }
 
     [Fact]
-    public void The_names_are_sorted_and_each_is_held_once()
+    public void The_manifest_file_is_in_path_order_and_holds_each_name_once()
     {
+        // The file's own order, not Atari2600Suite.Names (which sorts in code): the tool writes
+        // the lines sorted by path, ordinally, so a hand edit or a second tool shows here.
+        string[] paths = [.. File.ReadAllLines(Path.Combine(RepoPaths.Root, Atari2600Suite.ManifestPath)).Select(line => line.Split(' ')[2])];
+        Assert.Equal(paths.Order(StringComparer.Ordinal), paths);
         IReadOnlyList<string> names = Atari2600Suite.Names;
-        Assert.Equal(names.Order(StringComparer.Ordinal), names);
+        Assert.Equal(paths.Length, names.Count);
         Assert.Equal(names.Count, names.Distinct(StringComparer.Ordinal).Count());
     }
 

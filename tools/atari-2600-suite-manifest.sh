@@ -38,7 +38,7 @@ tmp="$(mktemp)"
 trap 'rm -f "$tmp"' EXIT
 tree missingno-vcs-tests "$suite_commit" '^roms/[a-z0-9-]+/[a-z0-9-]+(\\.asm|_ntsc\\.png|_pal\\.png)$' > "$tmp"
 tree missingno "$binaries_commit" '^crates/systems/vcs/tests/accuracy/roms/[a-z0-9-]+/[a-z0-9-]+_(ntsc|pal|secam)\\.a26$' >> "$tmp"
-sort -k3 "$tmp" > "$out"
+LC_ALL=C sort -k3,3 "$tmp" > "$out"
 
 suite=$(grep -c ' missingno-vcs-tests ' "$out" || true)
 binaries=$(grep -c ' missingno ' "$out" || true)

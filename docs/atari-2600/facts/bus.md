@@ -69,11 +69,11 @@ The stack page is `$0100-$01FF`. With the stack pointer at `$FF`, `PHA` writes `
 |---|---|---|
 | The cartridge's ROM | all eight | [inferring: a ROM drives its whole byte] |
 | The RIOT (RAM, ports, timer) | all eight | [inferring from `riot.md`: an eight-bit data bus] |
-| A TIA collision register | D7 and D6, except CXBLPF, which drives D7 (`tia.md` section 2.2) | [from the suite: roms/cpu/open-bus.asm, roms/cpu/partial-drive.asm; SPG 2.0: "data bits 6 or 7"] |
+| A TIA collision register | D7 and D6; CXBLPF, whose D6 is unused, perhaps D7 only [inferring from "most"; guessing - verify] (`tia.md` section 2.2) | [from the suite: roms/cpu/open-bus.asm, roms/cpu/partial-drive.asm; SPG 2.0: "data bits 6 or 7"] |
 | A TIA input port, INPT0 to INPT5 | D7 only | [from the suite: roms/cpu/open-bus.asm, roms/cpu/partial-drive.asm] |
 | A TIA read address with low bits `$E` or `$F` | none | [from the suite: roms/cpu/open-bus.asm, roms/cpu/floating-bus.asm] |
 
-- Every line a chip does not drive returns the residue [from the suite: roms/cpu/open-bus.asm]. CXBLPF, whose D6 is unused, drives only D7 (`tia.md` section 2.2).
+- Every line a chip does not drive returns the residue [from the suite: roms/cpu/open-bus.asm]. Whether CXBLPF, whose D6 is unused, drives D6 is not stated: the suite says only that "most" collision registers drive D7 and D6 [inferring from "most"; guessing - verify] (`tia.md` section 2.2).
 - **This corrects the spec**, which says "a TIA read drives only data bits 7 and 6": an input port drives D7 alone, and `$xE` and `$xF` drive nothing [from the suite: roms/cpu/partial-drive.asm, roms/cpu/open-bus.asm].
 - A write puts the CPU's byte on the bus, so the residue after a write is the byte written [inferring: the CPU drives the bus on a write; SPG TIA 1A 1].
 

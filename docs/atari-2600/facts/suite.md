@@ -9,14 +9,14 @@ Written 14 October 2026 for the Atari 2600 plan, task 1. Tags and sources are in
 ### 1.1 The two forks
 
 - The sources, headers and reference pictures are in `dbhq-uk/missingno-vcs-tests` at `891c079976a2f68033ca4af2fe2fd85aaf1906c9`. Every `.asm` under `roms/` opens with a comment block that states the behaviour, the expected result and how a wrong model shows [from the suite: README.md].
-- The prebuilt binaries are in `dbhq-uk/missingno` at `a4159f47ce7ef6f9c3d5402a8c58b18940045adc`, under `crates/systems/vcs/tests/accuracy/roms/<folder>/`. There are 381 `.a26` files, three per test: `_ntsc`, `_pal` and `_secam` [from the binaries] (counted with `ls crates/systems/vcs/tests/accuracy/roms/*/ | grep -c a26`, 14 October 2026).
+- The prebuilt binaries are in `dbhq-uk/missingno` at `a4159f47ce7ef6f9c3d5402a8c58b18940045adc`, under `crates/systems/vcs/tests/accuracy/roms/<folder>/`. There are 381 `.a26` files, three per test: `_ntsc`, `_pal` and `_secam` [from the binaries] (counted with `ls crates/systems/vcs/tests/accuracy/roms/*/ | grep -c a26`, 14 October 2026, as of the pinned commits and the manifest's hash).
 - A test's header is its leading comment block, up to the first line that is neither a comment nor blank. It was printed for all 127 sources with `tools/probes/atari-2600/headers.sh`, an `awk` filter that keeps exactly that block.
 
 ### 1.2 Kind
 
 - **Self-test**: the source includes `result.h` and writes its verdict to RAM at `$80` [from the suite: include/result.h].
 - **Screenshot**: a `_ntsc.png` sits beside the source. Each one also has a `_pal.png`, a `_secam.png` and a `_pal_capture.png` [from the suite: README.md].
-- The two kinds do not overlap. 100 sources include `result.h` and have no picture; 27 have all four pictures and do not include `result.h`. No test is both a self-test and a screenshot test (14 October 2026, a loop over `roms/*/*.asm` that tested `grep -c 'include "result.h"'` and the existence of each picture). A test whose header calls itself a diagnostic is marked in the Kind column.
+- The two kinds do not overlap. 100 sources include `result.h` and have no picture; 27 have all four pictures and do not include `result.h`. No test is both a self-test and a screenshot test (14 October 2026, as of the pinned commits and the manifest's hash, a loop over `roms/*/*.asm` that tested `grep -c 'include "result.h"'` and the existence of each picture). A test whose header calls itself a diagnostic is marked in the Kind column.
 
 ### 1.3 Status
 
@@ -30,11 +30,11 @@ By the spec's table "Which suite results are trusted" [from the spec]:
 | Screenshot tests (all in `tia-timing/`, `tia-render/` and `harness/calibration`) | Recorded |
 | Every other `cartridge/` test (an unmodelled board), and every SECAM build | Not run |
 
-The trust split gives 58 trusted tests (54 self-tests outside `cartridge/` and 4 in it), 31 recorded (4 cartridge self-tests and 27 screenshot tests) and 38 not run [inferring: the table above applied to the rows of section 5].
+As of the pinned commits and the manifest's hash, the trust split gives 58 trusted tests (54 self-tests outside `cartridge/` and 4 in it), 31 recorded (4 cartridge self-tests and 27 screenshot tests) and 38 not run [inferring: the table above applied to the rows of section 5].
 
 ### 1.4 Board
 
-The board is the header's `; mapper:` line. All 46 sources in `cartridge/` carry one, and no source outside `cartridge/` does (`grep -l -i '; *mapper' roms/*/*.asm | wc -l` gives 46, 14 October 2026). An unmarked source is a plain 4K board [from the harness: crates/systems/vcs/tests/accuracy/common/mod.rs, the comment on the stated board: "an unmarked source is a plain 4K board"]. That agrees with the binaries: all 243 non-cartridge `.a26` files are 4096 bytes [from the binaries] (`stat -c %s` over the six folders, 14 October 2026).
+The board is the header's `; mapper:` line. All 46 sources in `cartridge/` carry one, and no source outside `cartridge/` does (`grep -l -i '; *mapper' roms/*/*.asm | wc -l` gives 46, 14 October 2026, as of the pinned commits and the manifest's hash). An unmarked source is a plain 4K board [from the harness: crates/systems/vcs/tests/accuracy/common/mod.rs, the comment on the stated board: "an unmarked source is a plain 4K board"]. That agrees with the binaries: all 243 non-cartridge `.a26` files are 4096 bytes [from the binaries] (`stat -c %s` over the six folders, 14 October 2026, as of the pinned commits and the manifest's hash).
 
 ### 1.5 Parts, and the task that builds each
 
@@ -92,7 +92,7 @@ Worked example: `riot/timer` fails with CODE `$02` if one line of `TIM1T` does n
 
 [from the suite: include/region.h; Makefile] Every line is 228 colour clocks, 76 CPU cycles, in every build; only the line counts differ [from the suite: include/region.h].
 
-- `frame.asm` gives the shape: `vertical_sync` sets VSYNC, waits three `WSYNC`s and clears it; `vblank_lines` sets VBLANK bit 1 for `VBLANK_LINES` lines; the test draws `VISIBLE_LINES`; `overscan_lines` sets VBLANK for `OVERSCAN_LINES` [from the suite: include/frame.asm]. 112 sources include it (`grep -h 'include "frame.asm"' roms/*/*.asm | wc -l`, 14 October 2026).
+- `frame.asm` gives the shape: `vertical_sync` sets VSYNC, waits three `WSYNC`s and clears it; `vblank_lines` sets VBLANK bit 1 for `VBLANK_LINES` lines; the test draws `VISIBLE_LINES`; `overscan_lines` sets VBLANK for `OVERSCAN_LINES` [from the suite: include/frame.asm]. 112 sources include it (`grep -h 'include "frame.asm"' roms/*/*.asm | wc -l`, 14 October 2026, as of the pinned commits and the manifest's hash).
 - The pass and fail screens use the same counts from `region.h` [from the suite: include/result_screen.asm].
 - The region changes only the line counts and the result-screen colours: the pass green is `$C8` on NTSC and `$58` on PAL, because hue `$C` shows violet on a PAL console [from the suite: include/region.h, which says this was confirmed on a PAL console on 16 July 2026].
 - Self-test verdicts do not depend on the region [from the suite: include/region.h; README.md].
@@ -101,7 +101,7 @@ Worked example: the NTSC frame is 3 + 37 + 192 + 30 = 262 lines; a picture of ev
 
 ## 4. The reference pictures
 
-Measured on 14 October 2026 with `tools/probes/atari-2600/pnginfo.py`, which decodes each PNG with the standard library:
+Measured on 14 October 2026, as of the pinned commits and the manifest's hash, with `tools/probes/atari-2600/pnginfo.py`, which decodes each PNG with the standard library:
 
 | File | Count | Size | Format |
 |---|---|---|---|
@@ -298,7 +298,7 @@ The AR images are not raw ROMs: `dasm` builds one 2K RAM bank, and `scripts/buil
 
 ## 6. The cartridge binaries and the Superchip filler
 
-Sizes of the `_ntsc.a26` files, `stat -c %s`, 14 October 2026 [from the binaries: crates/systems/vcs/tests/accuracy/roms/cartridge/]:
+Sizes of the `_ntsc.a26` files, `stat -c %s`, 14 October 2026, as of the pinned commits and the manifest's hash [from the binaries: crates/systems/vcs/tests/accuracy/roms/cartridge/]:
 
 | Test | Status | Bytes | First 256 bytes of every 4K bank one repeated byte? |
 |---|---|---|---|
@@ -349,10 +349,12 @@ Every self-test header but one ends "region-independent"; `wsync-line-end` adds 
 
 - The README says every ROM begins with `CLEAN_START`, whose stack wipe passes through the TIA mirror at `$0100-$017F` and strobes several TIA registers, RSYNC twice among them; a model without the full mirror decode, or with an RSYNC fault, shifts whole frames, so scrambled first frames point to the mirror decode and RSYNC first [from the suite: README.md].
 - One header says the same: `cpu/stack-aliases-tia` notes that every `CLEAN_START` ROM relies on the mirror, because the wipe strobes RSYNC as it passes `$0143` and `$0103` [from the suite: roms/cpu/stack-aliases-tia.asm]. `harness/sanity` says `CLEAN_START` zeroes RAM, the registers and the decimal flag [from the suite: roms/harness/sanity.asm]. No other header mentions the wipe or the mirror decode.
-- Not every ROM uses it. Nine sources never call `CLEAN_START`: `cartridge/bank-fe`, and in `collision/` `blanked-reset`, `copy-adjacency`, `merge-delivery`, `merge-delivery-replant`, `merge-delivery-stretch`, `merge-delivery-train`, `resbl-kill` and `reset-phase` (`tools/probes/atari-2600/regs.sh`, the `clean_start` count, 14 October 2026). Their code comments, not their headers, say why: on FE the wipe's write to `$01FE` would switch banks [from the suite: roms/cartridge/bank-fe.asm, the comment at `Main`]; in seven of the collision tests a long clearing loop moves every later strobe onto one phase of the TIA's clock and could hide a phase-dependent fault, "a spurious pass" in `reset-phase`'s words [from the suite: the comment at `Reset` in roms/collision/reset-phase.asm, blanked-reset.asm, copy-adjacency.asm, merge-delivery.asm, merge-delivery-stretch.asm, merge-delivery-train.asm and resbl-kill.asm]. `merge-delivery-replant` starts the same short way with no comment [from the suite: roms/collision/merge-delivery-replant.asm].
+- Not every ROM uses it. Nine sources never call `CLEAN_START`: `cartridge/bank-fe`, and in `collision/` `blanked-reset`, `copy-adjacency`, `merge-delivery`, `merge-delivery-replant`, `merge-delivery-stretch`, `merge-delivery-train`, `resbl-kill` and `reset-phase` (`tools/probes/atari-2600/regs.sh`, the `clean_start` count, 14 October 2026, as of the pinned commits and the manifest's hash). Their code comments, not their headers, say why: on FE the wipe's write to `$01FE` would switch banks [from the suite: roms/cartridge/bank-fe.asm, the comment at `Main`]; in seven of the collision tests a long clearing loop moves every later strobe onto one phase of the TIA's clock and could hide a phase-dependent fault, "a spurious pass" in `reset-phase`'s words [from the suite: the comment at `Reset` in roms/collision/reset-phase.asm, blanked-reset.asm, copy-adjacency.asm, merge-delivery.asm, merge-delivery-stretch.asm, merge-delivery-train.asm and resbl-kill.asm]. `merge-delivery-replant` starts the same short way with no comment [from the suite: roms/collision/merge-delivery-replant.asm].
 - So the outcome of those eight trusted collision tests depends on where the TIA's clocks stand against the CPU when the program starts: the power-on state of the TIA and the order inside a cycle [inferring: the comments above with the plan's task 5 and its power-on choices]. A trusted failure there is read against the power-on alignment as well as the mechanism.
 
 ## 9. Counts, dated 14 October 2026
+
+Every count in this sheet is as of the pinned commits (`891c079` and `a4159f4`) and the manifest's hash in `Pins.Atari2600SuiteManifestSha256`; a new pin means counting again.
 
 Measured in the clone at `891c079` with `tools/probes/atari-2600/counts.sh`, which counts `roms/<folder>/*.asm` and, as screenshot tests, `roms/<folder>/*_ntsc.png`:
 

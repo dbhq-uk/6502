@@ -19,7 +19,7 @@ The suite's headers describe one PAL console; its reference pictures are missing
 
 The TIA has six address lines, A0 to A5, and is selected where A12 and A7 are both low [from SPG TIA 1A detailed description, section 1: "the six (6) real address lines"; from 2k6specs: Memory Mirrors, "addressed by A12=0, A7=0"]. There is no register that is both read and written; one address can hold a write register and a different read register [from SPG TIA 1A section 1].
 
-**Decoding.** Writes use all six lines, so each write register appears twice in each 128-byte window, at `$xx00` and `$xx40` [from 2k6specs: TIA Mirrors]. Reads use A0 to A3 only, so each read register answers at every `$10` step from `$00` to `$3F` [from the suite: roms/cpu/partial-drive.asm, "decodes reads from address lines A0-A3 only, ignoring A4, A5 and A6"; from 2k6specs: "input port are mirrored eight times in each window"]. The SPG lists the read registers as six-bit addresses `0` to `D` and does not say A4 and A5 are ignored for reads [from SPG TIA read address summary]. This sheet follows the suite and 2k6specs, which agree, and the suite's `cpu/partial-drive` self-test reads INPT4 at `$3C` and `$1C` and CXM0P at `$10`, `$20` and `$30`.
+**Decoding.** Writes use all six lines, so each write register appears twice in each 128-byte window, at `$xx00` and `$xx40` [from 2k6specs: TIA Mirrors]. Reads use A0 to A3 only, so each read register answers at every `$10` step from `$00` to `$7F` of its window (`bus.md` section 2) [from the suite: roms/cpu/partial-drive.asm, "decodes reads from address lines A0-A3 only, ignoring A4, A5 and A6"; from 2k6specs: "input port are mirrored eight times in each window"]. The SPG lists the read registers as six-bit addresses `0` to `D` and does not say A4 and A5 are ignored for reads [from SPG TIA read address summary]. This sheet follows the suite and 2k6specs, which agree, and the suite's `cpu/partial-drive` self-test reads INPT4 at `$3C` and `$1C` and CXM0P at `$10`, `$20` and `$30`.
 
 ### 2.1 Write registers, `$00` to `$2C`
 
@@ -87,7 +87,7 @@ Bits are D7 to D0; `1` is a bit the register uses, `.` one it ignores. A strobe 
 | `$03` | CXP1FB | P1-PF | P1-BL | D7, D6 |
 | `$04` | CXM0FB | M0-PF | M0-BL | D7, D6 |
 | `$05` | CXM1FB | M1-PF | M1-BL | D7, D6 |
-| `$06` | CXBLPF | BL-PF | unused | D7 (see below) |
+| `$06` | CXBLPF | BL-PF | unused | D7, and D6 not stated [inferring from "most"; guessing - verify] |
 | `$07` | CXPPMM | P0-P1 | M0-M1 | D7, D6 |
 | `$08` | INPT0 | paddle 0 | | D7 |
 | `$09` | INPT1 | paddle 1 | | D7 |
@@ -106,7 +106,7 @@ Bits are D7 to D0; `1` is a bit the register uses, `.` one it ignores. A strobe 
 The horizontal timing comes from one 6-bit polynomial counter (a linear feedback shift register), not a binary counter [from Towers: "Polynomial Counters" and "Horizontal Sync Counter"; from SPG TIA 1A 2A: "a total count of 228"].
 
 - **The clock.** Beside the counter a two-phase clock divides the colour clock by 4 and gives two non-overlapping pulses, H@1 and H@2, once each per 4 colour clocks. The counter steps on each H@1, H@2 pair, so it changes state once every 4 colour clocks [from Towers: "two-phase clock generator"].
-- **The sequence.** Written as Towers prints the states (six bits, left to right), each step shifts the bits one place right and puts a new bit on the left, which is 1 when the two rightmost bits are equal and 0 when they differ. From `000000` this gives `100000`, `110000`, `111000`, `111100`, `111110`, `011111`, and so on through 63 states [inferring: the rule was checked by script against all 63 rows of Towers's table on 14 October 2026; Towers says only that the feedback is "a single two-input XNOR gate"].
+- **The sequence.** Written as Towers prints the states (six bits, left to right), each step shifts the bits one place right and puts a new bit on the left, which is 1 when the two rightmost bits are equal and 0 when they differ. From `000000` this gives `100000`, `110000`, `111000`, `111100`, `111110`, `011111`, and so on through 63 states [inferring: the rule matches all 63 rows of Towers's table (`python3 -I tools/probes/atari-2600/towers_lfsr.py TIA_HW_Notes.txt`, 14 October 2026); Towers says only that the feedback is "a single two-input XNOR gate"].
 - **The decodes.** A decode matrix beside the shift register watches for states. `111111` (the illegal state, possible at power on) forces a reset to `000000` [from Towers]. The line's events, at the colour clock where the counter enters the state [from Towers: the HSync counter table and its key]:
 
 | Count | State | Colour clock | Decode | Effect |
@@ -144,9 +144,9 @@ The plan's fixed item 8 chooses how many of a cycle's three colour clocks run be
 | Register | First colour clock that shows the new value | Source |
 |---|---|---|
 | COLUBK (and the other colour registers) | W | [from the suite: roms/tia-timing/midline-color.asm header, x 91 for cycle 53] |
-| VBLANK D1 | W + 1 | [from the suite: roms/tia-timing/midline-vblank_ntsc.png, rows 37 to 46 against its kernel: set on cycle 45 (W 135, pixel 67), the stripe pixel 67 still shows; cleared on cycle 44 (W 132, pixel 64), pixel 64 is still blanked; inferring the cycles from the kernel] |
-| GRP0 | W + 1 | [from the suite: roms/tia-timing/midline-grp_ntsc.png, rows 39 to 44: GRP0 = 0 on cycle 41 (W 123, pixel 55) leaves pixels 28 to 55 lit and 56 dark; inferring the cycles from the kernel] |
-| PF0, PF1, PF2 | A cell whose first pixel is at colour clock P shows the new bit if W is at most P - 3, the old bit if W is at least P - 1 | [from the suite: roms/tia-timing/midline-pf_ntsc.png, rows 37 to 44; see section 8] |
+| VBLANK D1 | W + 1 | [from the suite: roms/tia-timing/midline-vblank_ntsc.png, rows 37 to 46 (`tools/probes/atari-2600/png_rows.py`) against its kernel: set on cycle 45 (W 135, pixel 67), the stripe pixel 67 still shows; cleared on cycle 44 (W 132, pixel 64), pixel 64 is still blanked; inferring the cycles from the kernel] |
+| GRP0 | W + 1 | [from the suite: roms/tia-timing/midline-grp_ntsc.png, rows 39 to 44 (`png_rows.py`): GRP0 = 0 on cycle 41 (W 123, pixel 55) leaves pixels 28 to 55 lit and 56 dark; inferring the cycles from the kernel] |
+| PF0, PF1, PF2 | A cell whose first pixel is at colour clock P shows the new bit if W is at most P - 3, the old bit if W is at least P - 1 | [from the suite: roms/tia-timing/midline-pf_ntsc.png, rows 37 to 44 (`png_rows.py`); see section 8] |
 | RESP0, RESM0, RESBL | The object's first pixel at W + 5 (player) or W + 4 (missile, ball) | Section 9 |
 | HMOVE | First motion pulse at the first grid slot at or after W + 7 | Section 16 |
 
@@ -494,7 +494,7 @@ On each divided pulse:
 
 ### 18.5 Each `AUDC` value, worked
 
-Derived by stepping the rules of 18.4 from all nine bits 1, with `AUDF` = 0 so that each divided pulse is one audio step. "First 64" is `C8` after each of the first 64 pulses. Period and the count of 1s are over one period once the start-up has passed [inferring from jigo2600 Sound, by stepping the rules; the script is not part of the sheet].
+Derived by stepping the rules of 18.4 from all nine bits 1, with `AUDF` = 0 so that each divided pulse is one audio step. "First 64" is `C8` after each of the first 64 pulses. Period and the count of 1s are over one period once the start-up has passed [inferring from jigo2600 Sound, by stepping the rules; `python3 -I tools/probes/atari-2600/tia_sound.py` prints this table, 14 October 2026].
 
 | `AUDC` | Counters used | Period (pulses) | 1s per period | First 64 output bits |
 |---|---|---|---|---|
@@ -516,7 +516,7 @@ Derived by stepping the rules of 18.4 from all nine bits 1, with `AUDF` = 0 so t
 | `$F` | divide by 6 clocked by poly5's output | 93 | 46 | `1110000001111000000000111111000001111110000111110000000000111110` |
 
 - Every period matches the guide's names: 15 and 31 for the 4-bit and 5-bit counters, 2, 6, 31 and 93 for the "div" tones, 511 for the 9-bit counter, and 465 (15 times 31) for `$2` and `$3` [inferring: the table against SPG AUDC0]. 2k6specs lists the same repeat lengths for all 16 values [from 2k6specs, "AUDC Pattern Shapes"].
-- **Cross-check.** For every value 2k6specs draws (`$1`, `$2`, `$3`, `$6` to `$A`, `$C`, `$E`, `$F`), its 70-step drawing is a stretch of the model's repeating sequence, or of its inverse for `$6`, `$7`, `$E` and `$F` [inferring: compared by program on 14 October 2026; 2k6specs, "AUDC Pattern Shapes"]. The inverse appears only where the output is a toggle, whose polarity depends on the starting state. Stolberg's sequences for `$1`, `$6` and `$9` are also a stretch of the model's or its inverse [from Stolberg freqform]. Stolberg's `$E` (each bit of the 13-and-18 `$6` pattern held for three steps, 39 and 54) differs from the model's 44 and 49; Stolberg says his tables were calculated from Ron Fries's TIASOUND emulation, and 2k6specs's drawing of `$E` (49 one way) agrees with the model, so the sheet follows the model [from Stolberg freqform; 2k6specs].
+- **Cross-check.** For every value 2k6specs draws (`$1`, `$2`, `$3`, `$6` to `$A`, `$C`, `$E`, `$F`), its 70-step drawing is a stretch of the model's repeating sequence, or of its inverse for `$6`, `$7`, `$E` and `$F` [inferring: `python3 -I tools/probes/atari-2600/tia_sound.py 2k6specs.txt` compares each, 14 October 2026; 2k6specs, "AUDC Pattern Shapes"]. The inverse appears only where the output is a toggle, whose polarity depends on the starting state. Stolberg's sequences for `$1`, `$6` and `$9` are also a stretch of the model's or its inverse [from Stolberg freqform; compared by eye, unreproduced: no script makes this comparison]. Stolberg's `$E` (each bit of the 13-and-18 `$6` pattern held for three steps, 39 and 54) differs from the model's 44 and 49; Stolberg says his tables were calculated from Ron Fries's TIASOUND emulation, and 2k6specs's drawing of `$E` (49 one way) agrees with the model, so the sheet follows the model [from Stolberg freqform; 2k6specs].
 - Values that sound the same are the same here: `$4` and `$5`, `$C` and `$D`, `$0` and `$B` give identical output; `$7` sounds as `$9` [from 2k6specs, "AUDC Pattern Type Notes"; agrees with the table up to inversion].
 - `$6` and `$A` are both a 31-step tone made of a run of 13 and a run of 18 [from 2k6specs: "18 HIGH and 13 LOW cycles"; Stolberg freqform: 13 then 18]. On SECAM, `AUDC` = 0 is reported to give a background noise; PAL and NTSC are silent [from SPG, PAL/SECAM conversions, SECAM item 2; 2k6specs]. SECAM is not modelled.
 
@@ -597,7 +597,7 @@ Chosen because it reproduces every documented name and every hardware-confirmed 
 
 ### 19.6 Worked examples
 
-Computed from 19.4 and 19.5 on 14 October 2026 [inferring; the model is a choice as marked].
+Computed from 19.4 and 19.5 by `python3 -I tools/probes/atari-2600/tia_palette.py` on 14 October 2026 [inferring; the model is a choice as marked].
 
 | Region | Colour | `Y'` | `U` | `V` | RGB | What the sources call it |
 |---|---|---|---|---|---|---|
@@ -615,7 +615,7 @@ Computed from 19.4 and 19.5 on 14 October 2026 [inferring; the model is a choice
 | PAL | `$C8` | 0.5714 | +0.3315 | +0.0888 | `#AC63FF` | violet [from the suite: include/region.h] |
 | PAL | `$E8` | 0.5714 | 0 | 0 | `#929292` | grey [from 2k6specs] |
 
-What tests can take from this, in both regions: hue 0 is grey (`R = G = B`) at every `L`; every RGB component is non-decreasing as `L` rises within a hue, and their sum strictly rises (checked for all 16 hues in both regions, 14 October 2026); `$xy` and `$xy + 1` are the same colour; on PAL, hues 0, 1, 14 and 15 are grey at every `L`; NTSC and PAL differ. The model gives 120 colours on NTSC and 104 on PAL.
+What tests can take from this, in both regions: hue 0 is grey (`R = G = B`) at every `L`; every RGB component is non-decreasing as `L` rises within a hue, and their sum strictly rises (`tia_palette.py` checks these for all 16 hues in both regions, and counts the colours, 14 October 2026); `$xy` and `$xy + 1` are the same colour; on PAL, hues 0, 1, 14 and 15 are grey at every `L`; NTSC and PAL differ. The model gives 120 colours on NTSC and 104 on PAL.
 
 ## 20. The inputs
 
