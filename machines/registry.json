@@ -443,6 +443,17 @@
       "acceptance": "BbcAcceptanceTests",
       "rights": "The three ROMs are Acorn's: the operating system, MOS 1.20, BBC BASIC 2 and the Disc Filing System, DFS 1.20. The operating system's own text says copyright 1981 Acorn Computers Ltd. and BASIC's copyright 1982 Acorn. Who holds that copyright now was not established, and no licence or permission from any holder was found. Our copies are from jsbeeb's ROM folder at a pinned commit, kept in this repository under roms/, with where they came from, and checked by SHA-256 each time they are read. The position is documented, not cleared: if a rights holder asks, the ROMs will be removed.",
       "notes": "The keyboard, the picture in all eight screen modes, teletext included, the sound chip, and the disc drive with Acorn's DFS, on MOS 1.20 and BBC BASIC 2. Not modelled: the serial port, the analogue port, the Tube, the cassette interface, the printer port and the 1 MHz bus.",
+      "case": true,
+      "models": [
+        {
+          "view": "outside",
+          "module": "bbc-micro-case"
+        },
+        {
+          "view": "inside",
+          "module": "bbc-micro-board"
+        }
+      ],
       "photos": [
         {
           "file": "bbc-micro.webp",
@@ -454,7 +465,141 @@
           "caption": "an original Acorn BBC Micro Model B",
           "alt": "An original Acorn BBC Micro Model B seen from the front left and slightly above on a blue cloth: a beige case with a black keyboard panel, a row of ten red function keys along the top, the \"British Broadcasting Corporation Microcomputer System\" badge above them, and three indicator lights for cassette motor, caps lock and shift lock below the bottom left of the keyboard, to the left of the space bar.",
           "fetched": "2026-10-04",
-          "used": "the photograph of the machine at the head of its page; nothing is traced or measured from it, because the BBC Micro has no 3D model"
+          "used": "the photograph of the machine at the head of its page; neither 3D model is traced or measured from it"
+        },
+        {
+          "file": "bbc-micro-top.webp",
+          "author": "Daniel Beardsmore",
+          "sourceUrl": "https://commons.wikimedia.org/wiki/File:Acorn_BBC_Microcomputer.jpg",
+          "licence": "Public domain",
+          "date": "2016-02-04",
+          "caption": "a BBC Micro, Issue 7, from straight above",
+          "alt": "A BBC Micro seen from almost straight above on a dark red carpet: the beige case top, plain at the back, and at the front a dark grey panel with the keyboard: ten red function keys and a black BREAK key in the top row, black keys below with white legends, light brown cursor keys and COPY at the right, and a long space bar. Across the back of the panel runs a clear strip with a ribbed design at the left and, at the right, the words British Broadcasting Corporation Microcomputer System beside an owl. Three small red lights under the words cassette motor, caps lock and shift lock sit at the panel's front left.",
+          "fetched": "2026-10-13",
+          "used": "measured on its full-size original for the outside model: the case top registered on its four corners to the Service Manual's 415 by 345 mm, the keyboard's opening, the badge strip and its words, the order of the three lights, the keys registered to the MIT keyboard drawing and their colours"
+        },
+        {
+          "file": "bbc-micro-rear.webp",
+          "author": "Stuart Brady (assumed by Commons)",
+          "sourceUrl": "https://commons.wikimedia.org/wiki/File:BBC_Micro_rear.jpeg",
+          "licence": "Public domain",
+          "date": "2005-12-26",
+          "caption": "the rear of a BBC Micro, with its ports",
+          "alt": "The rear of a BBC Micro on a white background, seen nearly square on and a little from above, the keyboard showing upside down beyond the case top. Along the black rear panel, left to right, are a small round UHF out socket, a metal video out socket, three round DIN sockets for RGB, RS423 and cassette, a 15-pin D socket for analogue in and a round Econet socket, each with its name printed above it, and two long ventilation slots run across the top of the panel. At the right is the mains panel with its On and Off switch and the mains lead.",
+          "fetched": "2026-10-13",
+          "used": "measured on its full-size original for the outside model: each rear port's place and height on the scale of the 15-way D socket, each scored port checked against its socket on the board, and the ventilation slots and the mains panel"
+        },
+        {
+          "file": "bbc-micro-keyboard.webp",
+          "author": "Daniel Beardsmore",
+          "sourceUrl": "https://commons.wikimedia.org/wiki/File:BBC_Micro_Type_1.jpg",
+          "licence": "Public domain",
+          "date": "2013-06-24",
+          "caption": "a BBC Micro keyboard out of its case",
+          "alt": "A BBC Micro keyboard out of its case, on a wooden table: its cream circuit board with the speaker in a black housing at the top left, a grey ribbon cable at the top, a few chips along the top edge, and the keys: ten red function keys and BREAK, black keys with white legends, brown cursor keys and COPY, and a long black space bar. Three red lights stand on a black plate at the front left.",
+          "fetched": "2026-10-13",
+          "used": "measured on its full-size original for the outside model: its keys' legends registered to the MIT keyboard drawing, as a check that is recorded"
+        },
+        {
+          "file": "bbc-micro-front.webp",
+          "author": "Stuart Brady (assumed by Commons)",
+          "sourceUrl": "https://commons.wikimedia.org/wiki/File:BBC_Micro.jpeg",
+          "licence": "Public domain",
+          "date": "2005-12-26",
+          "caption": "a BBC Micro from the front and above",
+          "alt": "A BBC Micro on a white background, seen from the front and above: the beige case, its plain top at the back, and the dark keyboard panel at the front with ten red function keys, black keys with light legends, a slot at the left of the keys, and three lights at the front left under the words cassette motor, caps lock and shift lock. The badge strip across the back of the panel reads British Broadcasting Corporation Microcomputer System.",
+          "fetched": "2026-10-13",
+          "used": "measured on its full-size original for the outside model: with the next photograph, one camera fitted to both, which places the keys, the opening and the three lights in height"
+        },
+        {
+          "file": "bbc-micro-left.webp",
+          "author": "Stuart Brady (assumed by Commons)",
+          "sourceUrl": "https://commons.wikimedia.org/wiki/File:BBC_Micro_left.jpeg",
+          "licence": "Public domain",
+          "date": "2005-12-26",
+          "caption": "the same BBC Micro from the front left",
+          "alt": "The same BBC Micro on a white background, seen from the front left and above, so that its plain left side and its front edge show as well as the top: the dark keyboard panel with its red function keys runs away to the right, with the slot at the left of the keys and the three lights at the panel's front left.",
+          "fetched": "2026-10-13",
+          "used": "measured on its full-size original for the outside model: the second view for the camera fitted with the one before it"
+        }
+      ],
+      "references": [
+        {
+          "title": "a flatbed scan of a bare BBC Micro board, Issue 7, its component side, at 400 dots an inch, posted to the stardot forum",
+          "author": "amb5l",
+          "sourceUrl": "https://drive.google.com/file/d/1llcLHl_ax6rtZRWxdoSyA5jNjFOo_-3N/view",
+          "licence": null,
+          "fetched": "2026-10-04",
+          "sha256": "5edc89d95872c9e70a1adb0b8d968fbccd3459816cacd64a630d95afd02e7b0e",
+          "used": "the inside model's board: its outline, holes, pads and scale, the component side's copper and the printed legend, traced to look at, with their connections not verified, and the place of every chip"
+        },
+        {
+          "title": "the same board's solder side, scanned the same way, posted to the stardot forum",
+          "author": "amb5l",
+          "sourceUrl": "https://drive.google.com/file/d/1EIRg4Ump3T5ixNCJtVkrz7DwODJ__YFn/view",
+          "licence": null,
+          "fetched": "2026-10-04",
+          "sha256": "c9a36223ca7d3d28cbceb6cb25f625e3989655283e6bf4b4602c5199612b5bb6",
+          "used": "the inside model's solder side copper, traced to look at after the scan was turned over and fitted to the component side by its drilled holes, with its connections not verified"
+        },
+        {
+          "title": "a photograph of a populated BBC Micro board, Issue 7, from above",
+          "author": "8BS",
+          "sourceUrl": "https://8bs.com/see/BBC_B_iss7.jpg",
+          "licence": null,
+          "fetched": "2026-10-04",
+          "sha256": "7ae4b57399e9576d46bcfe0d4e2b39ddb362d7bb33782c002a39adffab208263",
+          "used": "the chips' markings and the boxes of the larger parts, read by eye, and two checks that failed: the component side's copper against this photograph, and the markings against the Service Manual's parts"
+        },
+        {
+          "title": "a photograph of a second Issue 7 board, populated and in its case",
+          "author": "Chris Whytehead (Chris's Acorns)",
+          "sourceUrl": "http://chrisacorns.computinghistory.org.uk/Pics/BBCB7LL.jpg",
+          "authorUrl": "http://chrisacorns.computinghistory.org.uk/",
+          "licence": "CC BY-SA 3.0, as the site's home page states (an older paragraph on the same page asks to be asked first)",
+          "licenceUrl": "https://creativecommons.org/licenses/by-sa/3.0/",
+          "fetched": "2026-10-13",
+          "sha256": "bab4176aa727598ab70717ecf921e54773e5c14401cdd16b9dba8ae02c320863",
+          "used": "the chips' markings only, read by eye, recorded beside the other photograph's and not judged; nothing of the photograph is drawn"
+        },
+        {
+          "title": "Acorn's BBC Microcomputer Service Manual: table 8.1 of its chips, and the case's dimensions",
+          "author": "Acorn Computers Limited, 1985",
+          "sourceUrl": "https://archive.org/download/bbc-micro-service-manual/BBC-Micro-Service-Manual%20Sections-1-2-3.pdf",
+          "licence": "Copyright Acorn Computers Limited 1985: may not be adapted or reproduced without Acorn's prior written approval: facts read from it, nothing copied",
+          "fetched": "2026-10-13",
+          "sha256": "974550803fbce738b143ea0f1fdb6aa129a5c0a69c9e0072634d16f127a7fb99",
+          "used": "facts only: every chip's part and role for the inside model, from its table 8.1, and the case's width, depth and height for the outside model, which its section on the Model B+ gives and is taken to hold for the Model B"
+        },
+        {
+          "title": "Dominic Beesley's KiCad keyboard for the BBC Micro, as this project's fork of it holds it",
+          "author": "Dominic Beesley",
+          "sourceUrl": "https://github.com/dbhq-uk/bbc-keyboard/blob/5ec53df566c77424caa6be827d0831da3916ecfa/KiCad/bbc-keyboard/bbc-keyboard.kicad_pcb",
+          "licence": "MIT",
+          "licenceUrl": "https://github.com/dbhq-uk/bbc-keyboard/blob/5ec53df566c77424caa6be827d0831da3916ecfa/LICENSE",
+          "fetched": "2026-10-13",
+          "sha256": "35b34ac3ef0a04fb311ee1971eb9fc32cb1c323877377c4d1a74986c709b0929",
+          "used": "the outside model's keys: every keycap's centre and size, matched to the machine's keys, and the frame the photographs of the keyboard are registered to"
+        },
+        {
+          "title": "a photograph of the underside of an Issue 7 machine",
+          "author": "Chris Whytehead (Chris's Acorns)",
+          "sourceUrl": "http://chrisacorns.computinghistory.org.uk/Pics/BBCB7I.jpg",
+          "authorUrl": "http://chrisacorns.computinghistory.org.uk/",
+          "licence": "CC BY-SA 3.0, as the site's home page states (an older paragraph on the same page asks to be asked first)",
+          "licenceUrl": "https://creativecommons.org/licenses/by-sa/3.0/",
+          "fetched": "2026-10-13",
+          "sha256": "4f1a5dbd9a698aa7445dfbacd96e47aa2260f4ad723fdf55567c9df3a9fae3bd",
+          "used": "the names of the five connectors under the front, read by eye in their order, and that they sit in one panel; nothing of the photograph is drawn"
+        },
+        {
+          "title": "TE Connectivity's drawing 1757819 of its Amplimite D-subminiature plugs",
+          "author": "TE Connectivity (drawing 1757819, rev. F, 2013)",
+          "sourceUrl": "https://www.farnell.com/datasheets/1917994.pdf",
+          "licence": null,
+          "fetched": "2026-10-13",
+          "sha256": "6c70fc080dafcc4dcfab667cf79beec7ce85c07fea8d78037726a1caa067a8b2",
+          "used": "one dimension: the 15-way D socket's two mounting holes, 33.20 to 33.45 mm apart, the scale the rear photograph's ports are placed on"
         }
       ]
     },

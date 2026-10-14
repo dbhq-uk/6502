@@ -1,0 +1,190 @@
+name: BBC Micro speed run
+# The BBC Micro's browser speed A/B for the chip counters (the models plan's
+# task 6), run once on a GitHub runner by hand. It applies the rule fixed in
+# bench/bbc-micro-speed/chip-counters/rule.md and prints its verdict; it never
+# changes the rule. AGENTS.md keeps bench/ out of CI; Dan approved this one
+# exception on 13 October 2026: "in CI, as a manually triggered
+# (workflow_dispatch) one-off workflow, not part of any PR check". So it runs
+# only when started by hand, never on a push or a pull request.
+# bench/bbc-micro-speed/chip-counters/README.md says how to start it and what
+# it writes.
+on:
+  workflow_dispatch:
+    inputs:
+      base:
+        description: "The baseline commit or branch. Empty: the rule's baseline, git merge-base origin/main <after>."
+        required: false
+        default: ''
+      after:
+        description: "The commit or branch with the counters. Its bench/bbc-micro-speed is the harness for both builds."
+        required: false
+        default: 'main'
+
+# One run at a time, and a second run waits rather than cancelling the first:
+# two runs on one runner would load each other's host.
+concurrency:
+  group: bbc-speed-run
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  speed:
+    runs-on: ubuntu-latest
+    # Two AOT builds, then the rule's launches, each behind the load gate.
+    timeout-minutes: 300
+    env:
+      OUT: ${{ github.workspace }}/out
+      DOTNET_CLI_TELEMETRY_OPTOUT: '1'
+      DOTNET_NOLOGO: '1'
+    steps:
+      # The whole history, so both refs and their merge-base can be found.
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          path: repo
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Which commits
+        id: refs
+        env:
+          BASE_REF: ${{ inputs.base }}
+          AFTER_REF: ${{ inputs.after || 'main' }}
+        working-directory: repo
+        run: |
+          set -euo pipefail
+          resolve() {
+            [[ $1 != -* ]] || { echo "not a ref: $1" >&2; exit 1; }
+            git rev-parse --verify --quiet "origin/$1^{commit}" || git rev-parse --verify --quiet "$1^{commit}" || { echo "no such commit: $1" >&2; exit 1; }
+          }
+          after=$(resolve "$AFTER_REF")
+          if [[ -n $BASE_REF ]]; then base=$(resolve "$BASE_REF"); else base=$(git merge-base origin/main "$after"); fi
+          echo "base $base ($(git log -1 --format=%s "$base"))"
+          echo "after $after ($(git log -1 --format=%s "$after"))"
+          echo "base=$base" >> "$GITHUB_OUTPUT"
+          echo "after=$after" >> "$GITHUB_OUTPUT"
+      # Each build from its own tree, exported with git archive, as rule.md says.
+      - name: Export both trees
+        env:
+          BASE: ${{ steps.refs.outputs.base }}
+          AFTER: ${{ steps.refs.outputs.after }}
+        run: |
+          set -euo pipefail
+          mkdir -p base after "$OUT"
+          git -C repo archive "$BASE" | tar -x -C base
+          git -C repo archive "$AFTER" | tar -x -C after
+      # The SDK and the workload pinned as validate.yml pins them.
+      - uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6
+        with:
+          dotnet-version: '10.0.400'
+      - name: The wasm-tools workload, pinned
+        run: dotnet workload install wasm-tools --version 10.0.401
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: '22.22'
+      # rule.md: whoever runs it records the host first.
+      - name: The host
+        env:
+          BASE: ${{ steps.refs.outputs.base }}
+          AFTER: ${{ steps.refs.outputs.after }}
+        run: |
+          set -euo pipefail
+          chrome=/usr/bin/google-chrome
+          [[ -x $chrome ]] || { echo "no Chrome at $chrome on this runner" >&2; exit 1; }
+          {
+            echo "recorded $(date -u +%Y-%m-%dT%H:%M:%SZ)"
+            echo "run ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID} attempt ${GITHUB_RUN_ATTEMPT}"
+            echo "base $BASE"
+            echo "after $AFTER"
+            echo "runner ${RUNNER_NAME:-} ${RUNNER_OS:-} ${RUNNER_ARCH:-}, image ${ImageOS:-} ${ImageVersion:-}"
+            echo "nproc $(nproc)"
+            echo "loadavg $(cat /proc/loadavg)"
+            uname -a
+            grep -E '^(PRETTY_NAME|VERSION_ID)=' /etc/os-release
+            lscpu
+            free -m
+            echo "browser $("$chrome" --version)"
+            echo "node $(node --version)"
+            echo "dotnet $(dotnet --version)"
+            dotnet workload list
+          } | tee "$OUT/host.txt"
+      # rule.md: each build after deleting its tree's obj/Release and bin/Release.
+      # The build servers are stopped afterwards so nothing of the build stays
+      # running into the launches.
+      - name: Build both, compiled ahead of time
+        run: |
+          set -euo pipefail
+          for tree in base after; do
+            project="$tree/src/Dbhq.Machines.BbcMicro.Wasm"
+            rm -rf "$project/obj/Release" "$project/bin/Release"
+            dotnet publish "$project" -c Release -p:RunAOTCompilation=true -o "$RUNNER_TEMP/publish-$tree"
+          done
+          dotnet build-server shutdown
+      # The after tree's bench is the harness for both builds (rule.md).
+      - name: The harness
+        working-directory: after/bench/bbc-micro-speed
+        run: npm ci
+      # Started from the workflow's own checkout, so the script and analyse.py
+      # are the ones on the branch this was started from.
+      - name: The smoke launch
+        working-directory: after/bench/bbc-micro-speed
+        run: bash "$GITHUB_WORKSPACE/repo/bench/bbc-micro-speed/chip-counters/run-series.sh" smoke "$RUNNER_TEMP/publish-after" "$OUT"
+      - name: Pairs 1 to 8, mode 7 then dense
+        working-directory: after/bench/bbc-micro-speed
+        run: bash "$GITHUB_WORKSPACE/repo/bench/bbc-micro-speed/chip-counters/run-series.sh" pairs "$RUNNER_TEMP/publish-base" "$RUNNER_TEMP/publish-after" "$OUT" 1 8
+      - name: The rule on pairs 1 to 8
+        id: first
+        run: |
+          set -euo pipefail
+          python3 repo/bench/bbc-micro-speed/chip-counters/analyse.py "$OUT/launches.txt" | tee "$OUT/analysis-pairs-1-8.txt"
+          verdict=$(sed -n 's/^VERDICT: //p' "$OUT/analysis-pairs-1-8.txt")
+          echo "verdict=${verdict:-none}" >> "$GITHUB_OUTPUT"
+      # rule.md: INCONCLUSIVE gets one more batch of eight pairs in each case,
+      # in the same order, judged on all sixteen, and then it stops.
+      - name: Pairs 9 to 16, only if the first eight were inconclusive
+        if: steps.first.outputs.verdict == 'INCONCLUSIVE'
+        working-directory: after/bench/bbc-micro-speed
+        run: bash "$GITHUB_WORKSPACE/repo/bench/bbc-micro-speed/chip-counters/run-series.sh" pairs "$RUNNER_TEMP/publish-base" "$RUNNER_TEMP/publish-after" "$OUT" 9 16
+      - name: The rule on all sixteen
+        if: steps.first.outputs.verdict == 'INCONCLUSIVE'
+        run: python3 repo/bench/bbc-micro-speed/chip-counters/analyse.py "$OUT/launches.txt" | tee "$OUT/analysis-pairs-1-16.txt"
+      # Supplementary, not part of the verdict (rule.md): both trees' native
+      # fingerprints, compared. Run after the series so it cannot load the host
+      # during it.
+      - name: The native fingerprints
+        continue-on-error: true
+        run: |
+          set -uo pipefail
+          for tree in base after; do
+            dotnet run -c Release --project "$tree/bench/bbc-micro-speed/native" -- --fingerprint > "$OUT/fingerprint-$tree.txt"
+          done
+          if cmp "$OUT/fingerprint-base.txt" "$OUT/fingerprint-after.txt"; then echo "fingerprints: the same"; else echo "fingerprints: they differ"; fi | tee "$OUT/fingerprints.txt"
+      - name: The load after the series
+        if: always()
+        run: echo "loadavg after $(date -u +%Y-%m-%dT%H:%M:%SZ) $(cat /proc/loadavg)" | tee -a "$OUT/host.txt"
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        if: always()
+        with:
+          name: bbc-speed-run
+          path: out
+      # The verdict as analyse.py printed it, in the run's summary. The job is
+      # green only on PASS, so a red run is never read as a pass.
+      - name: The verdict
+        run: |
+          set -euo pipefail
+          final="$OUT/analysis-pairs-1-16.txt"
+          [[ -f $final ]] || final="$OUT/analysis-pairs-1-8.txt"
+          {
+            echo '## BBC Micro speed run'
+            echo
+            echo '```'
+            cat "$final"
+            echo '```'
+            echo
+            echo '```'
+            head -n 12 "$OUT/host.txt"
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+          verdict=$(sed -n 's/^VERDICT: //p' "$final")
+          echo "VERDICT: ${verdict:-none, a case had no pair that counted}"
+          [[ $verdict == PASS ]]

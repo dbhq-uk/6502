@@ -1,0 +1,54 @@
+boot cycles=6000010 instructions=1681181 irq_steps=29248 steps=18B3B71E06EFD0C9 checkpoints=A340322134C60133
+program cycles=90320900 instructions=25133349 irq_steps=310793 steps=75411C5A03B49E88 checkpoints=62013A8E040B4B1B
+screen                 59 100 251 255 74 236
+screen                 60 68 60 255 144 240
+screen         >
+screen          255 206 144
+screen 37 68 37 255 8 148
+screen 38 68 38 255 97 152
+screen 39 68 39 255 84 156
+screen 40 100 23 255 152 160
+screen 41 100 24 255 5 164
+screen 42 100 25 255 86 168
+screen 43 100 26 255 249 172
+screen 44 68 44 255 133 176
+screen 45 68 45 255 88 180
+screen 46 68 46 255 121 184
+screen 47 68 47 255 113 188
+screen 48 100 31 255 3 192
+screen 49 100 32 255 116 196
+screen 50 100 33 255 12 200
+screen 51 100 34 255 1 76
+screen 52 68 52 255 177 208
+screen 53 68 53 255 207 212
+screen 54 68 54 255 118 216
+screen 55 68 55 255 87 220
+screen 56 100 38 255 66 224
+screen 57 100 193 255 177 228
+break cycles=96320907 instructions=26796508 irq_steps=343669 steps=DA6C387E3E94C1FD checkpoints=DDCBBC531A5EDDA2
+rerun cycles=116960932 instructions=32513241 irq_steps=409496 steps=D7CE4E494E825F88 checkpoints=838DC94503540734
+screen 
+screen BBC Computer
+screen 
+screen Acorn DFS
+screen 
+screen BASIC
+screen 
+screen >RUN
+screen >
+screen 
+screen 
+screen 
+screen 
+screen 
+screen 
+screen 
+screen 
+screen 
+screen 
+screen 
+screen 
+screen 
+screen 
+screen 
+screen 

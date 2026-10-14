@@ -1,0 +1,136 @@
+{
+ "about": "Made by tools/bbc-micro-model/results.py from the measurements in tools/bbc-micro-model/data/. The BBC Micro page quotes these for the board model; nothing on it is typed by hand.",
+ "board": {
+  "depthMm": 229.4045,
+  "widthMm": 309.9945
+ },
+ "copper": {
+  "againstI5": {
+   "comparedMm2": 17127.3887,
+   "iou": 0.4112,
+   "verdict": "fail"
+  },
+  "bottom": 0.3507,
+  "drills": 2797,
+  "drillsBottom": 1.0,
+  "drillsTop": 1.0,
+  "i5Registration": {
+   "chips": 14,
+   "heldOutMedianMm": 0.363,
+   "points": 56,
+   "verdict": "pass"
+  },
+  "mapPxPerMm": 8,
+  "nets": {
+   "chips": 51,
+   "gndInLargest": 39,
+   "gndPins": 51,
+   "touching": true,
+   "vccInLargest": 30,
+   "vccPins": 51,
+   "verdict": "fail"
+  },
+  "print": 0.1218,
+  "printMm2": 8624.2227,
+  "recoveredMm2": 700.2188,
+  "top": 0.3222
+ },
+ "parts": {
+  "axial": 61,
+  "connectors": 13,
+  "fitted": 88,
+  "heightsMeasured": 0,
+  "heightsTypical": 12,
+  "ics": 99,
+  "identities": {
+   "disagree": 11,
+   "populated": 83,
+   "read": 80,
+   "verdict": "fail"
+  },
+  "manual": {
+   "limitMm": 10.0,
+   "maxMm": 97.216,
+   "medianMm": 1.437,
+   "over": [
+    "IC39",
+    "IC42",
+    "IC74",
+    "IC75",
+    "IC94"
+   ],
+   "verdict": "fail"
+  },
+  "passives": 258,
+  "radial": 197,
+  "socketed": 32
+ },
+ "scale": {
+  "xLargestMm": 0.502,
+  "xLargestRow": "PL11",
+  "xMedianMm": 0.136,
+  "xRows": 7,
+  "xVerdict": "between pass and stop",
+  "xyPct": 0.1704,
+  "yMedianMm": 0.0303,
+  "yRows": 7
+ },
+ "solder": {
+  "heldOutMedianMm": 0.114,
+  "heldOutP90Mm": 0.258,
+  "holes": 2367,
+  "verdict": "pass"
+ },
+ "sources": [
+  {
+   "author": "amb5l",
+   "fetched": "2026-10-04",
+   "id": "I1",
+   "kind": "scan",
+   "licence": null,
+   "page": "https://stardot.org.uk/forums/viewtopic.php?t=23329",
+   "sha256": "5edc89d95872c9e70a1adb0b8d968fbccd3459816cacd64a630d95afd02e7b0e",
+   "url": "https://drive.google.com/file/d/1llcLHl_ax6rtZRWxdoSyA5jNjFOo_-3N/view"
+  },
+  {
+   "author": "amb5l",
+   "fetched": "2026-10-04",
+   "id": "I2",
+   "kind": "scan",
+   "licence": null,
+   "page": "https://stardot.org.uk/forums/viewtopic.php?t=23329",
+   "sha256": "c9a36223ca7d3d28cbceb6cb25f625e3989655283e6bf4b4602c5199612b5bb6",
+   "url": "https://drive.google.com/file/d/1EIRg4Ump3T5ixNCJtVkrz7DwODJ__YFn/view"
+  },
+  {
+   "author": "8BS",
+   "fetched": "2026-10-04",
+   "id": "I5",
+   "kind": "photograph",
+   "licence": null,
+   "page": "https://8bs.com/see/BBC_B_iss7.jpg",
+   "sha256": "7ae4b57399e9576d46bcfe0d4e2b39ddb362d7bb33782c002a39adffab208263",
+   "url": "https://8bs.com/see/BBC_B_iss7.jpg"
+  },
+  {
+   "author": "Acorn Computers Limited, 1985",
+   "fetched": "2026-10-13",
+   "id": "D1",
+   "kind": "document",
+   "licence": "Copyright ACORN Computers Limited 1985. Neither the whole or any part of the information contained in, or the product described in, this manual may be adapted or reproduced in any material form except with the prior written approval of ACORN Computers Limited",
+   "page": "https://archive.org/details/bbc-micro-service-manual",
+   "sha256": "974550803fbce738b143ea0f1fdb6aa129a5c0a69c9e0072634d16f127a7fb99",
+   "url": "https://archive.org/download/bbc-micro-service-manual/BBC-Micro-Service-Manual%20Sections-1-2-3.pdf"
+  },
+  {
+   "author": "Chris Whytehead (Chris's Acorns)",
+   "fetched": "2026-10-13",
+   "id": "I6",
+   "kind": "photograph",
+   "licence": "CC BY-SA 3.0, as the site's home page states under 'License to reuse': 'Information (including text and photos) presented on Chris's Acorns may be reused under the CC-BY-SA 3.0 license unless otherwise specified'. An older paragraph on the same page says the photographs 'remain my copyright. If you want to use them please ask me first'",
+   "page": "http://chrisacorns.computinghistory.org.uk/",
+   "sha256": "bab4176aa727598ab70717ecf921e54773e5c14401cdd16b9dba8ae02c320863",
+   "url": "http://chrisacorns.computinghistory.org.uk/Pics/BBCB7LL.jpg"
+  }
+ ]
+}

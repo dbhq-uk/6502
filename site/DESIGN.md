@@ -435,6 +435,17 @@ stage as the KIM-1's.
   `src/data/nes-famicom-board-model.json`), with the credits of exactly the
   sources that view was made from.
 
+## The BBC Micro's 3D models
+
+Two models of the BBC Micro Model B on its page, the outside (the case and its keyboard) and the inside (the Issue 7 main board), as two views of one machine, in the section, tabs, loader and styles the NES's models use, unchanged.
+
+- **The same views.** Outside, then Inside, the registry's order; each view loads only when its panel is shown and nears the screen, so the inside's bundle and its track map are fetched only once its tab is chosen. A view keeps its camera when the visitor switches away and back.
+- **The outside is the case at the Service Manual's size.** Its colours are tokens of its own: the cream case `--model-bbc-case`, the charcoal panel round the keys `--model-bbc-panel`, the badge strip `--model-bbc-badge`, the keys `--model-bbc-key-red`, `--model-bbc-key-light` and `--model-bbc-key-dark` as each key's colour was read on a photograph, and their legends `--model-bbc-legend`. The three lights are the KIM-1's `--model-led` lit and `--model-led-off` dark. None is a text colour on the page, and none is the lime.
+- **Its words are ours, and its legends are the page's.** Every legend, the badge strip's words, the lights' names and the ports' labels are drawn by the model in the site's own type, into one canvas. A key's legend is the on-screen key's (`LEGENDS` in `public/bbc-keys.js`), so the two cannot drift apart. The owl is not drawn.
+- **It shows the machine's state.** A key pressed on the machine, from the PC keyboard, the on-screen keys or the model, goes down on the model; SHIFT puts both SHIFT keycaps down. The three lights are the machine's. A click on a key presses it on the machine, as the on-screen key does; before Start it presses nothing and the status line says why.
+- **The inside is the board with its chips marked.** The board's copper on both faces and its print, traced to look at, with their connections not verified, and the page says so wherever it speaks of the copper, beside the checks that failed. Its own tokens are `--model-bbc-pcb`, `--model-bbc-pcb-under`, `--model-bbc-print` and `--model-bbc-socket`. A chip the processor read or wrote in the last quarter second is tinted `--model-active`, as the NES's are; the paged ROM, BASIC or the DFS, is framed in the same colour, a shape and not a second colour. The legend under it gives each chip, when it is marked, and each counted chip's rate.
+- **Each view says how it was made, and what is uncertain.** A caption that starts "Model, not a photograph.", and a note whose every figure is read from the view's results file (`src/data/bbc-micro-case-model.json`, `src/data/bbc-micro-board-model.json`), with the credits of exactly the sources that view was made from: the photographs it was measured on, and the references that are not committed, each with its SHA-256.
+
 ## The chip page
 
 `/inside/` is a 3D diagram of the chip, drawn in three.js, on the same black canvas.

@@ -1,12 +1,6 @@
 # Notices
 
-This repository is MIT (see `LICENSE`). Three things in it were taken from
-outside under different terms, and are recorded here: the teletext glyph table,
-the BBC Micro's preset discs, and the NES board's track map, traced from
-OpenTendo's scans of a bare board under the TAPR Open Hardware License. The
-system ROMs, and the NES's bundled homebrew, Lan Master, which its author
-released into the public domain, are recorded separately, in
-[`roms/README.md`](roms/README.md).
+This repository is MIT (see `LICENSE`). What in it was taken from outside under different terms, or rests on work that states none, is recorded here, a section each: the teletext glyph table, the BBC Micro's preset discs, the NES board's track map, traced from OpenTendo's scans of a bare board under the TAPR Open Hardware License, the BBC Micro board's track map, traced from amb5l's scans of a bare board, which state no licence, the BBC Micro board's IC table, facts from Acorn's Service Manual, its parts, read from two photographs of populated boards, and the BBC Micro's key centres, read from Dominic Beesley's keyboard under the MIT licence, whose notice is kept below. The system ROMs, and the NES's bundled homebrew, Lan Master, which its author released into the public domain, are recorded separately, in [`roms/README.md`](roms/README.md).
 
 ## The SAA5050 teletext glyph table, from Bedstead
 
@@ -149,3 +143,50 @@ are copper and which are print. Everything else in the NES models (the code,
 the measurements in `tools/nes-model/data/`, the generated parts) is ours and
 MIT, and the KiCad redrawing in OpenTendo is only compared with, never drawn
 from.
+
+## The BBC Micro board's track map, traced from amb5l's scans
+
+**What.** `site/src/assets/tracks/bbc-micro-board.webp`: the copper on both faces of the BBC Micro Model B's main board, Issue 7, and its printed legend, as one lossless WebP, 8 pixels to the millimetre, edge to edge in the board frame. Red is the component side's copper, green the solder side's, blue the print. **The copper is traced to look at: its connections are not verified.** The check on its known nets failed, and so did the check of the component side against a photograph of a populated board (13 October 2026; the figures are in `tools/bbc-micro-model/data/copper.json` and the journal). It is ours in the sense that our code traced it (`tools/bbc-micro-model/board_trace.py`, 13 October 2026), but **the map is traced from amb5l's scans**, so it is derived from them.
+
+**Where it came from.** Two flat scans at 400 dpi of a bare Issue 7 board, one of each face, posted by amb5l to the stardot forum on 18 September 2021 (<https://stardot.org.uk/forums/viewtopic.php?t=23329>, the files on Google Drive). The scans are not committed here; their URLs, sizes and SHA-256 are in `tools/bbc-micro-model/data/sources.json` (I1 and I2).
+
+**Rights.** The scans state no licence, and none was found in the post or the thread. Nothing of them is committed: not the scans, not a resized copy, not a crop. What is derived from them is the map's pixels: which parts of each face are copper and which are print. The map is published with amb5l credited as the source of the scans, and if amb5l asks for it to be removed, it will be. Everything else in the BBC Micro models (the code, the measurements in `tools/bbc-micro-model/data/`) is ours and MIT. The board's design, and the legend the map shows as it is printed (Acorn's name and copyright line included), are Acorn's.
+
+
+## The BBC Micro board's IC table, facts from Acorn's Service Manual
+
+`tools/bbc-micro-model/data/ic-table.json` holds facts read from table 8.1, "Integrated circuits", of Acorn's BBC Microcomputer Service Manual (1985; D1 in `tools/bbc-micro-model/data/sources.json`): each IC's reference, its part number and its place on the board as the table gives them. The roles are in our words. The manual carries Acorn's copyright notice; none of its text, tables as laid out, or drawings is copied, and the manual is not committed. The GND and +5V pin numbers in the same file are facts read from the makers' data sheets each entry names, with their SHA-256 in `sources.json`; nothing of those sheets is copied or committed either.
+
+## The BBC Micro board's parts, and the two photographs of populated boards read for them
+
+`tools/bbc-micro-model/data/parts.json`, `marks.json`'s `parts` section and `site/src/models/bbc-micro-board-parts.mjs` record what was read by eye on two photographs of populated Issue 7 boards: each chip's marking, and boxes round the connectors and the large parts. No image from either photograph is committed, not even a crop; only the readings and the boxes, in our words and numbers. I5 is 8BS's photograph, https://8bs.com/see/BBC_B_iss7.jpg , which states no licence; its markings and the parts' boxes were read from it. I6 is Chris Whytehead's photograph from Chris's Acorns, http://chrisacorns.computinghistory.org.uk/Pics/BBCB7LL.jpg , which that site says may be reused under CC BY-SA 3.0 with a byline (an older paragraph on the same site asks to be asked first); only its markings were read. Credit: photograph by Chris Whytehead, Chris's Acorns. Both are listed with their SHA-256 in `tools/bbc-micro-model/data/sources.json`.
+
+## The BBC Micro's key centres, from Dominic Beesley's keyboard (MIT)
+
+`tools/bbc-micro-model/data/keys.json`, `data/case.json` and `site/src/models/bbc-micro-case-parts.mjs` hold every key's centre and footprint size read from Dominic Beesley's KiCad keyboard, github.com/dominicbeesley/bbc-keyboard, as its fork github.com/dbhq-uk/bbc-keyboard holds it at commit `5ec53df566c77424caa6be827d0831da3916ecfa` (K1 in `tools/bbc-micro-model/data/sources.json`). The KiCad file itself is not committed. Its licence is MIT, and its notice is kept here:
+
+```
+MIT License
+
+Copyright (c) 2023 dominicbeesley
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+```
+
+The outside model's other readings are ours: the words and places read on Chris Whytehead's underside photograph from Chris's Acorns (O8-I, CC BY-SA 3.0 as that site states, credited, not committed), and one dimension of a D-subminiature shell read from TE Connectivity's drawing 1757819 (a fact; nothing of the drawing is copied).

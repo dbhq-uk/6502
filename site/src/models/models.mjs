@@ -5,7 +5,7 @@
 // ways (tests/model.test.mjs). A machine has at most one model per view:
 // `board` for a machine with no case, `outside` and `inside` for one with a case.
 //
-// To add a model (the NES's outside and the BBC Micro's two are next):
+// To add a model:
 //   1. Write src/models/<module>.js, a browser module that exports
 //      `mount(root)`. It builds the scene with createStage() from ./stage.mjs,
 //      which every model shares (renderer, camera controls and their keyboard,
@@ -40,6 +40,10 @@ import { describe as describeBoard, chipLegend, LABELS as BOARD_LABELS, LEGEND_W
 import { made as madeBoard } from './nes-famicom-board-notes.mjs';
 import { describe as describeCase, LABELS_FOR as CASE_LABELS, HELP as CASE_HELP, REGIONS as CASE_REGIONS } from './nes-famicom-case-layout.mjs';
 import { made as madeCase } from './nes-famicom-case-notes.mjs';
+import { describe as describeBbcBoard, chipLegend as bbcChipLegend, LABEL as BBC_BOARD_LABEL, LEGEND_WORDS as BBC_LEGEND_WORDS, TRACKS as BBC_TRACKS, TRACKS_HELP as BBC_TRACKS_HELP } from './bbc-micro-board-layout.mjs';
+import { made as madeBbcBoard } from './bbc-micro-board-notes.mjs';
+import { describe as describeBbcCase, LABEL as BBC_CASE_LABEL, HELP as BBC_CASE_HELP } from './bbc-micro-case-layout.mjs';
+import { made as madeBbcCase } from './bbc-micro-case-notes.mjs';
 
 /**
  * What the visitor is told about the controls, once, so the visible text under
@@ -104,6 +108,32 @@ export const MODELS = {
     /** The chip legend under the model: chipLegend(region) gives its rows, and these words follow it. */
     legend: chipLegend,
     legendWords: LEGEND_WORDS,
+  },
+  'bbc-micro-case': {
+    machine: 'bbc-micro',
+    view: 'outside',
+    label: BBC_CASE_LABEL,
+    about: describeBbcCase(),
+    /** What a click on a key does, and what the keys and lights follow, said under it. */
+    help: BBC_CASE_HELP,
+    made: madeBbcCase,
+  },
+  'bbc-micro-board': {
+    machine: 'bbc-micro',
+    view: 'inside',
+    label: BBC_BOARD_LABEL,
+    about: describeBbcBoard(),
+    texture: BBC_TRACKS.src,
+    /** What its track buttons do, in place of CONTROLS.tracks: its copper is traced to look at. */
+    tracksHelp: BBC_TRACKS_HELP,
+    made: madeBbcBoard,
+    /**
+     * The chip legend: chipLegend()'s rows, each counted chip named by its counter
+     * as `chip`, the name the legend table (ModelPanel.astro) gives its mark and its
+     * rate cell, and the model writes the rate into.
+     */
+    legend: () => bbcChipLegend().map((row) => ({ ...row, chip: row.sheila })),
+    legendWords: BBC_LEGEND_WORDS,
   },
 };
 

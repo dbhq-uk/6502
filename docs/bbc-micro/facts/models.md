@@ -11,6 +11,8 @@ Researched on 4 October 2026 for issue [#28](https://github.com/dbhq-uk/6502/iss
 | **Inside** | Measure from photographs to about 1 mm; the copper better than that | Flatbed scans at 400 dpi of a **bare** original Issue 7 board, both sides, so no parts hide copper and every IC number is printed on the board. Better than the KIM-1's photographs. No open CAD replica exists, so the scans are the reference |
 | **Outside** | Published dimensions are enough for the case; keys, ports and a few heights from photographs to about 1 to 2 mm | Acorn publishes the case size, an MIT KiCad file gives every key centre, and public-domain photographs cover the top, the keyboard out of its case and the rear |
 
+*Corrected 14 October 2026 (models plan, task 10): the inside's "the copper better than that" did not hold. The copper was traced from the scans, but both held-out checks on it failed (the known nets and the comparison with I5, the journal for 4 October 2026, task 4), so it is offered traced to look at, its connections not verified; see `docs/known-differences.md`, "The BBC Micro: its two 3D models, where they stop".*
+
 **A correction to the issue's wording.** The Model B has **nothing on its left side**. The Tube, 1 MHz bus, user port, printer, disc drive and auxiliary power connectors face down, under the front of the case. The rear carries UHF, video, RGB, RS423, cassette, analogue in and Econet, with the mains switch at the rear right [from the underside and rear photographs `BBCB7I.jpg` and `BBCB7H.jpg` at http://chrisacorns.computinghistory.org.uk/Computers/BBCBI7.html].
 
 ## Outside: sources
@@ -22,10 +24,10 @@ Researched on 4 October 2026 for issue [#28](https://github.com/dbhq-uk/6502/iss
 | O3 | https://commons.wikimedia.org/wiki/File:BBC_Micro_Type_1.jpg | Daniel Beardsmore, 2013-06-24 | "Public domain" | 1996x1512, from above | The keyboard out of its case: keycap shapes, the plate, the LEDs, the speaker |
 | O4, O5 | `File:BBC_Micro.jpeg`, `File:BBC_Micro_left.jpeg` | Stuart Brady, 2005-12-26 16:03:25 and 16:04:45 | "Public domain" | 1929x1338 and 1756x1239 | One camera (Olympus C760UZ, 6.3 mm) 80 s apart [from the Exif]: a triangulation pair for the side profile. The left side is plain |
 | O6 | `File:Acorn_BBC_Micro.jpg` | simon.inns | CC BY 2.0 | 5195x3463 | Already the page's photograph |
-| O8 | Chris's Acorns `BBCB7I` (underside), `BBCB7H` (rear) | Not named | None stated | 640 px wide | The only underside view found: connector labels |
+| O8 | Chris's Acorns `BBCB7I` (underside), `BBCB7H` (rear) | Chris Whytehead (Chris's Acorns) | CC BY-SA 3.0, as the site states (corrected 13 October 2026: see the note under the inside's sources) | 640 px wide | The only underside view found: connector labels |
 | D1 | Acorn BBC Microcomputer Service Manual, 1985, https://archive.org/details/bbc-micro-service-manual | Acorn | "Copyright ACORN Computers Limited 1985. Neither the whole or any part of the information contained in, or the product described in, this manual may be adapted or reproduced in any material form except with the prior written approval of ACORN Computers Limited" | Text and drawings | Case size "Height 73mm (including feet) Width 415mm Depth 345mm" [from the B+ section, PDF p.109; the B+ is assumed to share the case: guessing - verify]. Exploded views 9.2 and 9.3 (PDF p.79, 81) have no dimensions. Facts such as dimensions are used, with credit; the drawings are not copied |
 | D3 | Science Museum object co64142 https://collection.sciencemuseumgroup.org.uk/objects/co64142/bbc-model-b-microcomputer | Science Museum Group | n/a | Text | 75 x 410 x 345 mm. Other published sizes disagree on depth by 13 mm, so D1 and this figure are used |
-| K1 | https://github.com/dominicbeesley/bbc-keyboard at `5ec53df566c77424caa6be827d0831da3916ecfa` | Dominic Beesley, 2023 to 2024 | "MIT License / Copyright (c) 2023 dominicbeesley" | KiCad 6, 72 Cherry MX switches, plate and two "ears" | Every key centre on the BBC layout at a 19.05 mm pitch; six row offsets agree with O1 to about 1 mm [inferring]. "with the extra ears in the project it fits nicely in a Beeb case" [from stardot t=29178]. MIT: usable with the notice kept |
+| K1 | https://github.com/dominicbeesley/bbc-keyboard at `5ec53df566c77424caa6be827d0831da3916ecfa`, read from its fork https://github.com/dbhq-uk/bbc-keyboard at that commit (added 13 October 2026) | Dominic Beesley, 2023 to 2024 | "MIT License / Copyright (c) 2023 dominicbeesley" | KiCad 6, 72 Cherry MX switches, plate and two "ears" | Every key centre on the BBC layout at a 19.05 mm pitch; six row offsets agree with O1 to about 1 mm [inferring]. "with the extra ears in the project it fits nicely in a Beeb case" [from stardot t=29178]. MIT: usable with the notice kept |
 | K2 | https://www.thingiverse.com/thing:4867915 (Type 1 keycaps) | Pledg, 2021 | `"license":"http://creativecommons.org/licenses/by/4.0/"` | STL | A cross-check for the keycap profile only, with credit |
 | M1 | https://www.printables.com/model/197766-bbc-micro-miniature | antirez, 2022 | "Creative Commons - Attribution - Noncommercial" | STL | **Not usable** |
 | M2 | https://virtual.bbcmic.ro/ | "Models: Ant Mercer" | "CC BY-NC-SA 4.0" | 3D in the browser | **Not usable**: a visual cross-check only |
@@ -38,11 +40,13 @@ Researched on 4 October 2026 for issue [#28](https://github.com/dbhq-uk/6502/iss
 | I2 | Bare Issue 7, solder side, same post | amb5l | None stated | 5014x3736 | Bottom copper, with solder on many pads ("PCB MANUF BEPI 84 20") |
 | I3, I4 | amb5l's Allegro `.brd` and OrCAD schematic, same thread | amb5l, 2016 and 2021 | None stated | Binary / PDF | The `.brd` is only partly traced. Not needed: I1 and I2 are better. The schematic gives connectivity only |
 | I5 | https://8bs.com/see/BBC_B_iss7.jpg | 8BS, Canon A75, 2004-05-04 | None stated | 1536x2048, about 6 px/mm, from above | A populated Issue 7 with every marking readable (R6502AP, HD6845SP, both 6522s, SAA5050, 2C199E, 6850, D7002C, 68B54, the ROMs, RAM, the modulator). The 8271 socket is empty |
-| I6 | Chris's Acorns `Pics/BBCB7LL.jpg` | Not named | None stated | 2005x1295, slightly oblique | A second board, in its case |
+| I6 | Chris's Acorns `Pics/BBCB7LL.jpg`, http://chrisacorns.computinghistory.org.uk/Pics/BBCB7LL.jpg | Chris Whytehead (Chris's Acorns), Canon PowerShot S30, EXIF date 2008-03-26 | CC BY-SA 3.0, as the site states (corrected 13 October 2026: see the note below) | 2005x1295, slightly oblique | A second board, in its case |
 | I8 | Service Manual table 8.1, PDF p.66 to 67 | Acorn 1985 | As D1 | Text | Each IC's identity and an approximate position |
 | I9 | Service Manual 9.4 "Main PCB layout", PDF p.83 | Acorn 1985 | As D1 | About 3 px/mm | Part outlines with item numbers; no copper |
 | I10 | Bob's Bits replica board on Tindie | PeepoUK | Files withheld: "I won't be releasing the gerbers any time soon" [from https://stardot.org.uk/forums/viewtopic.php?t=24839] | n/a | **Unusable** |
 | I11 | GitHub and web searches | n/a | n/a | n/a | **No open KiCad or Gerber replica of a Model B exists.** The nearest open work is a BBC Master 128 schematic (`Domesday86/Acorn-Master-AIV`, CC BY-SA 4.0), not a board |
+
+**A correction, 13 October 2026.** I6 and O8 said "None stated". The home page of Chris's Acorns, http://chrisacorns.computinghistory.org.uk/ , has a section "License to reuse": "Information (including text and photos) presented on Chris's Acorns may be reused under the CC-BY-SA 3.0 license unless otherwise specified", with "Chris's Acorns should be acknowledged as the source of the material by use of an appropriate byline/photo/image credit". An older paragraph on the same page says the photographs "remain my copyright. If you want to use them please ask me first". Neither is committed, so the plan does not change; both are credited by name with the site's byline. The research missed the section because it read the photographs' own pages, which state nothing.
 
 **Key ICs (Service Manual table 8.1; positions are mm from the SW corner and approximate: take places from the scan and identities from the manual)** [inferring: on a rough check IC1, IC2, IC5 and IC6 sit right relative to each other but the offset from the scan's corner differs between chips]:
 
@@ -62,7 +66,11 @@ Researched on 4 October 2026 for issue [#28](https://github.com/dbhq-uk/6502/iss
 
 **Inside.** The bare scan I1 is the reference frame (no CAD to register to; scale from pin pitch, separate x and y scales). Register the solder side I2 to I1 by hundreds of drill-hole centres, the leftover error being the check. Find pads and drills as bright rings and group them into footprints by the printed outlines. Trace both copper layers (the yellow print hides copper on the top, solder on the bottom). Parts: places from the printed outlines and pads, identities from I8 and I5 (registered by homography), I6 and the manual's coordinates as checks. **Measured:** outline, holes, pads, both copper layers, part places, identities, connector places. **Typical:** all heights (a 1.6 mm board, DIP bodies about 4 mm, about 3 mm more where socketed, connectors from their makers' drawings [guessing - verify]), the board's thickness, passive body sizes.
 
+*Corrected 14 October 2026 (models plan, task 10): of that list, both copper layers are traced to look at, not verified (both checks on them failed), and the part places and identities were checked and both checks failed: the places are the scan's footprints and the identities table 8.1's parts, not measured identities (the journal, tasks 4 and 5; `docs/known-differences.md`). Connector places came from boxes read by eye on I5, and the two-lead parts are inferred from the print.*
+
 **Outside.** Key centres from K1; register O1 and O3 to them by a homography on the key plane with a held-out error per key (this also places the LEDs, the badge strip and the recess). Sculpted keycaps in a typical profile checked against K2, legends drawn by us. Case footprint from D1; outline and recess from the rectified O1; side profile triangulated from O4 and O5 (one camera fitted to both, about 1 to 2 mm [guessing - verify by a check point]). Rear ports are soldered to the board, so their x positions come from scan I1 (SK1 to SK7), heights from O2 scaled by the standard 15-way D shell. Underside connectors: x from PL8 to PL12 on the scan, the panel from O8 (typical to a few mm). The three LEDs and key presses are driven by the emulator. **Typical:** keycap profile and travel, edge radii, the recess slope away from the triangulated points, socket depth, the feet.
+
+*Corrected 14 October 2026 (models plan, task 10): the keycaps are not sculpted and were not checked against K2. K2 could not be fetched (Thingiverse answered with a 403 challenge, the journal for 4 October 2026, task 8), so they are tapered blocks with flat tops of a typical shape. The rear ports' x positions are not from scan I1: they were read on O2, on the scale of the 15-way D socket's posts, and checked against their sockets' x on the board plus the board's offset in the case, which O2 gave (task 8; `case.json` `rearCheck`).*
 
 **Order.** Inside first: it gives the outside its connector positions. Effort estimated at about 3 to 4 agent-days for the inside and 2 to 3 for the outside, roughly twice the KIM-1's.
 
@@ -78,6 +86,122 @@ Taken on 4 October 2026 at the researcher's recommendations, Dan having said to 
 
 **Not usable, and not to be used:** M1 (non-commercial) and M2 (non-commercial, share-alike). K2 only as a cross-check.
 
+## The fitted set
+
+Added by task 5 of the models plan on 13 October 2026. This table is the record of which ICs the inside model shows fitted, which counter of the machine marks each (`sheila`, task 6's `BbcChip` names) and which socket holds which paged ROM. `tools/bbc-micro-model/data/ic-table.json`, `data/parts.json` and `site/src/models/bbc-micro-board-parts.mjs` are generated or edited to agree with it, and `site/tests/bbc-models.test.mjs` fails if any of them differs from it.
+
+The board is the Model B the page runs: a Model B with the 8271 disc interface and the DFS, and without Econet or speech (the choice "Which board the inside shows" above). Each IC is fitted or not by the upgrade in the Service Manual's section 4 that fits it [from D1, PDF pages 35 to 40]: modification B, "Convert Model A to Model B", fits IC61 to IC77; modification D, "Add 5 1/4 inch Disc Interface to Basic Model B", fits IC78 to IC87 and "1 off 2764 EPROM (DFS) IC88"; modification E, "Add Econet Interface", fits IC87, IC89, IC91, IC93 to IC97 and the NFS in IC88; modification C, "Add Speech Option", fits IC98 and IC99. An IC no upgrade adds is on every Model B. Table 8.1 itself says IC90 and IC92 are not fitted. IC100 and IC101 are sideways ROM sockets, left empty because the machine runs BASIC and the DFS only. The board in I5 differs: it has Econet and no disc interface (its 8271 socket and the disc chips' sockets are empty), so it is a check on identities and places, not on which ICs are fitted.
+
+**The two checks on these parts failed** (task 5, 13 October 2026; the figures are in `tools/bbc-micro-model/data/parts.json` and the journal). After a best-fit similarity, five ICs are more than 10 mm from table 8.1's places (IC94 97.22 mm, where the table's "45,93" is probably a misprint of 193 [inferring]; IC74 and IC75, which lie across the board; IC42 and IC39). Of the 80 markings read on I5, 11 disagree with table 8.1 by the rule fixed before they were read. So the model's places are the scan's footprints, checked against nothing else, and its identities are table 8.1's parts, as this table records them. The fitted set follows the machine the page emulates (the disc interface fitted, no Econet or speech), not the board in I5.
+
+The counters come from the Service Manual's strobe list for SHEILA's select lines [from D1, PDF page 58, "DEFPROC strobe select lines": `&FE00` IC2, `&FE08` IC4, `&FE10` IC7, `&FE20` IC6, `&FE30` IC76, `&FE40` IC3, `&FE60` IC69, `&FE80` IC78, `&FEC0` IC73], and the sound chip, IC18, is written through the system VIA (`via.md`). Which socket holds BASIC is table 8.1's role for IC52; the DFS's socket is modification D's.
+
+| IC | Part (table 8.1) | Fitted | Why | Counter | Paged ROM |
+|---|---|---|---|---|---|
+| IC1 | 6502A | yes | Model B (no upgrade adds it) |  |  |
+| IC2 | 6845 | yes | Model B (no upgrade adds it) | crtc |  |
+| IC3 | 6522 | yes | Model B (no upgrade adds it) | systemVia |  |
+| IC4 | 6850 | yes | Model B (no upgrade adds it) | acia |  |
+| IC5 | SAA5050 | yes | Model B (no upgrade adds it) |  |  |
+| IC6 | 5C094 | yes | Model B (no upgrade adds it) | videoUla |  |
+| IC7 | 2C199 | yes | Model B (no upgrade adds it) | serialUla |  |
+| IC8 | 81LS95 | yes | Model B (no upgrade adds it) |  |  |
+| IC9 | 81LS95 | yes | Model B (no upgrade adds it) |  |  |
+| IC10 | 81LS95 | yes | Model B (no upgrade adds it) |  |  |
+| IC11 | 81LS95 | yes | Model B (no upgrade adds it) |  |  |
+| IC12 | 81LS95 | yes | Model B (no upgrade adds it) |  |  |
+| IC13 | 81LS95 | yes | Model B (no upgrade adds it) |  |  |
+| IC14 | 74LS245 | yes | Model B (no upgrade adds it) |  |  |
+| IC15 | 74LS273 | yes | Model B (no upgrade adds it) |  |  |
+| IC16 | LM555 | yes | Model B (no upgrade adds it) |  |  |
+| IC17 | LM324 | yes | Model B (no upgrade adds it) |  |  |
+| IC18 | 76489 | yes | Model B (no upgrade adds it) | sound |  |
+| IC19 | LM386 | yes | Model B (no upgrade adds it) |  |  |
+| IC20 | 74LS139 | yes | Model B (no upgrade adds it) |  |  |
+| IC21 | 74LS00 | yes | Model B (no upgrade adds it) |  |  |
+| IC22 | 74LS30 | yes | Model B (no upgrade adds it) |  |  |
+| IC23 | 74LS30 | yes | Model B (no upgrade adds it) |  |  |
+| IC24 | 74LS138 | yes | Model B (no upgrade adds it) |  |  |
+| IC25 | 74LS20 | yes | Model B (no upgrade adds it) |  |  |
+| IC26 | 74LS139 | yes | Model B (no upgrade adds it) |  |  |
+| IC27 | 7438 | yes | Model B (no upgrade adds it) |  |  |
+| IC28 | 74LS51 | yes | Model B (no upgrade adds it) |  |  |
+| IC29 | 74LS32 | yes | Model B (no upgrade adds it) |  |  |
+| IC30 | 74LS74 | yes | Model B (no upgrade adds it) |  |  |
+| IC31 | 74LS34 | yes | Model B (no upgrade adds it) |  |  |
+| IC32 | 74LS259 | yes | Model B (no upgrade adds it) |  |  |
+| IC33 | 74LS04 | yes | Model B (no upgrade adds it) |  |  |
+| IC34 | 74LS74 | yes | Model B (no upgrade adds it) |  |  |
+| IC35 | LM324 | yes | Model B (no upgrade adds it) |  |  |
+| IC36 | 74LS10 | yes | Model B (no upgrade adds it) |  |  |
+| IC37 | 74LS04 | yes | Model B (no upgrade adds it) |  |  |
+| IC38 | 74LS86 | yes | Model B (no upgrade adds it) |  |  |
+| IC39 | 74LS283 | yes | Model B (no upgrade adds it) |  |  |
+| IC40 | 74S00 | yes | Model B (no upgrade adds it) |  |  |
+| IC41 | 74LS02 | yes | Model B (no upgrade adds it) |  |  |
+| IC42 | 74LS163 | yes | Model B (no upgrade adds it) |  |  |
+| IC43 | 74S04 | yes | Model B (no upgrade adds it) |  |  |
+| IC44 | 74LS74 | yes | Model B (no upgrade adds it) |  |  |
+| IC45 | 74S139 | yes | Model B (no upgrade adds it) |  |  |
+| IC46 | 74S74 | yes | Model B (no upgrade adds it) |  |  |
+| IC47 | 74LS86 | yes | Model B (no upgrade adds it) |  |  |
+| IC48 | 74LS86 | yes | Model B (no upgrade adds it) |  |  |
+| IC49 | 74LS00 | yes | Model B (no upgrade adds it) |  |  |
+| IC50 | 74LS00 | yes | Model B (no upgrade adds it) |  |  |
+| IC51 | (27128) | yes | Model B (no upgrade adds it) |  |  |
+| IC52 | (27128) | yes | Model B (no upgrade adds it) |  | BASIC |
+| IC53 | 4816 | yes | Model B (no upgrade adds it) |  |  |
+| IC54 | 4816 | yes | Model B (no upgrade adds it) |  |  |
+| IC55 | 4816 | yes | Model B (no upgrade adds it) |  |  |
+| IC56 | 4816 | yes | Model B (no upgrade adds it) |  |  |
+| IC57 | 4816 | yes | Model B (no upgrade adds it) |  |  |
+| IC58 | 4816 | yes | Model B (no upgrade adds it) |  |  |
+| IC59 | 4816 | yes | Model B (no upgrade adds it) |  |  |
+| IC60 | 4816 | yes | Model B (no upgrade adds it) |  |  |
+| IC61 | 4816 | yes | modification B, page 35 |  |  |
+| IC62 | 4816 | yes | modification B, page 35 |  |  |
+| IC63 | 4816 | yes | modification B, page 35 |  |  |
+| IC64 | 4816 | yes | modification B, page 35 |  |  |
+| IC65 | 4816 | yes | modification B, page 35 |  |  |
+| IC66 | 4816 | yes | modification B, page 35 |  |  |
+| IC67 | 4816 | yes | modification B, page 35 |  |  |
+| IC68 | 4816 | yes | modification B, page 35 |  |  |
+| IC69 | 6522 | yes | modification B, page 35 | userVia |  |
+| IC70 | 74LS244 | yes | modification B, page 35 |  |  |
+| IC71 | 74LS244 | yes | modification B, page 35 |  |  |
+| IC72 | 74LS245 | yes | modification B, page 35 |  |  |
+| IC73 | uPD7002 | yes | modification B, page 35 | adc |  |
+| IC74 | 88LS120 | yes | modification B, page 35 |  |  |
+| IC75 | 3691 | yes | modification B, page 35 |  |  |
+| IC76 | 74LS163 | yes | modification B, page 35 | romLatch |  |
+| IC77 | 74S00 | yes | modification B, page 35 |  |  |
+| IC78 | 8271 | yes | modification D, page 38 | fdc8271 |  |
+| IC79 | 7438 | yes | modification D, page 38 |  |  |
+| IC80 | 7438 | yes | modification D, page 38 |  |  |
+| IC81 | 74LS393 | yes | modification D, page 38 |  |  |
+| IC82 | 74LS10 | yes | modification D, page 38 |  |  |
+| IC83 | 4013 | yes | modification D, page 38 |  |  |
+| IC84 | 4013 | yes | modification D, page 38 |  |  |
+| IC85 | 4020 | yes | modification D, page 38 |  |  |
+| IC86 | 74LS393 | yes | modification D, page 38 |  |  |
+| IC87 | 74LS123 | yes | modification D, page 38 |  |  |
+| IC88 | 2764 | yes | modification D (the DFS), page 38 |  | DFS |
+| IC89 | 68B54 | no | Econet, modification E, page 39 |  |  |
+| IC90 | 40178 | no | table 8.1: not fitted |  |  |
+| IC91 | 74LS132 | no | Econet, modification E, page 39 |  |  |
+| IC92 | 74LS74 | no | table 8.1: not fitted |  |  |
+| IC93 | 75159 | no | Econet, modification E, page 39 |  |  |
+| IC94 | LM319 | no | Econet, modification E, page 39 |  |  |
+| IC95 | LM319 | no | Econet, modification E, page 39 |  |  |
+| IC96 | 74LS244 | no | Econet, modification E, page 39 |  |  |
+| IC97 | 74LS74 | no | Econet, modification E, page 39 |  |  |
+| IC98 | TMS6100 | no | speech, modification C, page 37 |  |  |
+| IC99 | TMS5220 | no | speech, modification C, page 37 |  |  |
+| IC100 | (27128) | no | an empty sideways ROM socket |  |  |
+| IC101 | (27128) | no | an empty sideways ROM socket |  |  |
+
+**Marked as, on the boards photographed.** Two ICs carry another part than table 8.1 gives, on both I5 and I6, and the model keeps the table's: IC31 is marked 74LS74 (74LS74AN on I5, DM74LS74AN on I6) where the table says 74LS34, and IC31's neighbours IC30 and IC34 are 74LS74s too, so the table's 34 may be a misprint [inferring]; IC77 is marked 74LS00 (74LS00N on both) where the table says 74S00, and the manual's own modification B lists "1 off 74LS00 IC77" [from D1, PDF page 35]. The RAMs IC61 to IC68 on I5 are Mostek MK4516N-11s, a second source for the 4816 the table names; I6's are all HM4816AP-11.
+
 ## Downloaded for the work
 
 SHA-256 of the files the research downloaded (kept at `~/dbhq-previews/bbc-model-research/`, not committed: the scans are 13 to 15 MB with no stated licence):
@@ -91,7 +215,16 @@ SHA-256 of the files the research downloaded (kept at `~/dbhq-previews/bbc-model
 | `inside-2-populated-iss7-8bs.jpg` | `7ae4b57399e9576d46bcfe0d4e2b39ddb362d7bb33782c002a39adffab208263` |
 | `inside-supp-bare-iss7-bottom-amb5l.jpg` | `c9a36223ca7d3d28cbceb6cb25f625e3989655283e6bf4b4602c5199612b5bb6` |
 | `bbc-keyboard/KiCad/bbc-keyboard/bbc-keyboard.kicad_pcb` | `35b34ac3ef0a04fb311ee1971eb9fc32cb1c323877377c4d1a74986c709b0929` |
+| `inside-6-cased-iss7-chrisacorns-BBCB7LL.jpg` | `bab4176aa727598ab70717ecf921e54773e5c14401cdd16b9dba8ae02c320863` |
+| `document-1-bbc-micro-service-manual-acorn-1985.pdf` | `974550803fbce738b143ea0f1fdb6aa129a5c0a69c9e0072634d16f127a7fb99` |
+| `outside-4-front-BBC_Micro.jpeg` | `4129306b45dda6b403e4cbab6fa4e96e305e0f9eaa5eb93c223e3dc74fa968c4` |
+| `outside-5-left-BBC_Micro_left.jpeg` | `7370967288c56ff10355a754f5dca5f73b1caf8285749fd0deb263cde7986e94` |
+| `outside-8-underside-chrisacorns-BBCB7I.jpg` | `4f1a5dbd9a698aa7445dfbacd96e47aa2260f4ad723fdf55567c9df3a9fae3bd` |
+| `outside-8-rear-chrisacorns-BBCB7H.jpg` | `4ba8776121497fe59006e0e252c6789059810f28ea4f6574d81ea0c32dd34e1b` |
+| `datasheets/te-1757819-amplimite-plug.pdf` | `6c70fc080dafcc4dcfab667cf79beec7ce85c07fea8d78037726a1caa067a8b2` |
 
-The last row is K1's board file, fetched by task 0 of the models plan on 4 October 2026 (`git clone` of the repository above, then `git checkout` of the pinned commit); its hash is the one the research had recorded for the same file in its own checksum list. From then on every input here is listed, with its URL, author, licence as stated, size and fetch date, in `tools/bbc-micro-model/data/sources.json`, and checked against its hash before it is read.
+The rows for I6 and D1 were fetched by hand on 13 October 2026 for tasks 4 and 5 of the plan's re-plan; D1's file matched archive.org's MD5 for it. The row before them is K1's board file, fetched by task 0 of the models plan on 4 October 2026 (`git clone` of the repository above, then `git checkout` of the pinned commit); its hash is the one the research had recorded for the same file in its own checksum list. From then on every input here is listed, with its URL, author, licence as stated, size and fetch date, in `tools/bbc-micro-model/data/sources.json`, and checked against its hash before it is read.
+
+**Added by task 8 (13 October 2026).** The last five rows were fetched by hand for task 8: O4 and O5 from Commons, each checked against the SHA-1 Commons' API gives and its licence read there (`LicenseShortName` "Public domain"); O8, Chris's Acorns' underside and rear pictures of an Issue 7 machine (`BBCB7I.jpg`, `BBCB7H.jpg`, ids O8-I and O8-H), on the site's CC BY-SA 3.0 terms and not committed; and TE Connectivity's drawing 1757819 of its D-subminiature plugs, for the 15-way D's hole spacing. O1, O2 and O3 were fetched again from Commons, their SHA-1 Commons' and their SHA-256 the rows above. K1 is now read from the fork in the `dbhq-uk` organisation, github.com/dbhq-uk/bbc-keyboard, at the same commit (AGENTS.md rule 3), through GitHub's API; the file's SHA-256 is the row above. **K2 could not be fetched:** Thingiverse answered both its page and its download with a 403 challenge page, and its API asks for a token tied to an account, so the keycap cross-check is dropped, as the plan says, and K2 is not used.
 
 **A note added by task 0 (4 October 2026).** O1's row above infers a front edge of about 412 mm from the key pitch. Measured on a registration of 50 keys to K1, the front edge came out shorter, and outside the plan's stop threshold; the figures and the likely reason (the case's front edge is not in the plane of the key tops) are in the journal for that day, `docs/journal/2026-10-04-the-bbc-micro-models.md`.

@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
+import { tmpdir } from 'node:os';
 import path from 'node:path';
 import vm from 'node:vm';
 import { register } from 'node:module';
@@ -133,11 +134,14 @@ test('the symbol table says where each symbol is on a PC keyboard, from the key 
 const savedDocument = Object.getOwnPropertyDescriptor(globalThis, 'document');
 const listeners = [];
 Object.defineProperty(globalThis, 'document', { configurable: true, writable: true, value: { querySelectorAll: () => [], hidden: false, addEventListener: (t, f) => listeners.push([t, f]) } });
-const { keyboard, onScreenKeys, disc } = await import(pathToFileURL(path.join(PUBLIC, 'bbc-micro.js')).href);
+const { keyboard, onScreenKeys, disc, machineState, lights } = await import(pathToFileURL(path.join(PUBLIC, 'bbc-micro.js')).href);
 test.after(() => {
   if (savedDocument) Object.defineProperty(globalThis, 'document', savedDocument);
   else delete globalThis.document;
 });
+
+/** The `bbc:key` events a made-up panel was sent, each as [name, action]. */
+const keyEvents = (events) => events.filter((e) => e.type === 'bbc:key').map((e) => [e.detail.name, e.detail.action]);
 
 /** The screen, a machine that records its keys, and a way to fire key events at the screen. */
 function wired() {
@@ -145,14 +149,15 @@ function wired() {
   const screen = { addEventListener: (type, fn) => { on[type] = fn; } };
   const calls = [];
   const bbc = { KeyDown: (k) => calls.push(['down', k]), KeyUp: (k) => calls.push(['up', k]), Break: () => calls.push(['break']) };
-  const panel = { dataset: {} };
+  const events = [];
+  const panel = { dataset: {}, dispatchEvent: (e) => events.push(e) };
   keyboard(screen, bbc, panel);
   const fire = (type, code, mods = {}) => {
     const event = { code, key: 'x', repeat: false, ctrlKey: false, altKey: false, metaKey: false, ...mods, prevented: false, preventDefault() { this.prevented = true; } };
     on[type](event);
     return event;
   };
-  return { screen, calls, panel, fire, on };
+  return { screen, calls, panel, fire, on, events };
 }
 
 test('a key goes down and up by its place: event.code, not event.key, picks the BBC key', () => {
@@ -230,12 +235,13 @@ function onScreen() {
     b.setAttribute = (name, value) => { b.attrs[name] = value; };
     return b;
   });
-  const panel = { querySelectorAll: () => buttons };
+  const events = [];
+  const panel = { querySelectorAll: () => buttons, dispatchEvent: (e) => events.push(e) };
   const calls = [];
-  const bbc = { KeyDown: (k) => calls.push(['down', k]), KeyUp: (k) => calls.push(['up', k]) };
+  const bbc = { KeyDown: (k) => calls.push(['down', k]), KeyUp: (k) => calls.push(['up', k]), Break: () => calls.push(['break']) };
   const keys = onScreenKeys(panel, bbc);
   const button = (key) => buttons.find((b) => b.dataset.bbcKey === key);
-  return { calls, button, tap: (key) => button(key).on.click(), buttons, keys };
+  return { calls, button, tap: (key) => button(key).on.click(), buttons, keys, events, panel, bbc };
 }
 
 test('an on-screen key is a press and a release, and every key is enabled once the machine runs', () => {
@@ -274,6 +280,118 @@ test('a latched SHIFT or CTRL lets go without typing when the page lets go of it
   assert.deepEqual(calls, [], 'letting go typed something');
   tap('A');
   assert.deepEqual(calls, [['down', BBC_KEYS.A], ['up', BBC_KEYS.A]], 'the latch was still held for the next key');
+});
+
+// ---- What the page tells a model: the keys, the lights and the chips ----
+
+test('the PC keyboard tells the page each BBC key going down and up, by name, as bbc:key events', () => {
+  const { fire, on, events } = wired();
+  fire('keydown', 'KeyA');
+  fire('keyup', 'KeyA');
+  fire('keydown', 'ShiftLeft');
+  fire('keydown', 'ShiftRight');
+  fire('keyup', 'ShiftLeft');
+  fire('keyup', 'ShiftRight');
+  fire('keydown', 'Quote');
+  on.blur();
+  assert.ok(events.every((e) => e instanceof CustomEvent), 'an event was not a CustomEvent');
+  assert.deepEqual(keyEvents(events), [
+    ['A', 'down'], ['A', 'up'],
+    ['Shift', 'down'], ['Shift', 'up'],
+    ['Colon', 'down'], ['Colon', 'up'],
+  ]);
+});
+
+test('CAPS LOCK and the Pause key are taps: CAPS LOCK is one press, and Pause is BREAK', () => {
+  const { fire, events } = wired();
+  fire('keydown', 'CapsLock');
+  fire('keyup', 'CapsLock');
+  fire('keydown', 'Pause');
+  assert.deepEqual(keyEvents(events), [['CapsLock', 'tap'], ['Break', 'tap']]);
+});
+
+test('an on-screen key is a tap, and a latched SHIFT is latch-on, then latch-off once the key it shifts is tapped', () => {
+  const { tap, events } = onScreen();
+  tap('Q');
+  tap('Shift');
+  tap('D2');
+  tap('Ctrl');
+  tap('Ctrl');
+  assert.deepEqual(keyEvents(events), [
+    ['Q', 'tap'],
+    ['Shift', 'latch-on'], ['D2', 'tap'], ['Shift', 'latch-off'],
+    ['Ctrl', 'latch-on'], ['Ctrl', 'latch-off'],
+  ]);
+});
+
+test('letting go of a latched key on screen tells the page it is let go', () => {
+  const { tap, keys, events } = onScreen();
+  tap('Shift');
+  tap('Ctrl');
+  keys.letGo();
+  assert.deepEqual(keyEvents(events), [['Shift', 'latch-on'], ['Ctrl', 'latch-on'], ['Shift', 'latch-off'], ['Ctrl', 'latch-off']]);
+});
+
+test('panel.bbc.tap(name) does exactly what a click on that key does, a latched SHIFT held round it', () => {
+  const clicked = onScreen();
+  clicked.tap('Shift');
+  clicked.tap('A');
+  const tapped = onScreen();
+  const state = machineState(tapped.bbc, tapped.keys);
+  state.tap('Shift');
+  state.tap('A');
+  assert.deepEqual(tapped.calls, [['down', BBC_KEYS.Shift], ['down', BBC_KEYS.A], ['up', BBC_KEYS.A], ['up', BBC_KEYS.Shift]]);
+  assert.deepEqual(tapped.calls, clicked.calls);
+  assert.deepEqual(keyEvents(tapped.events), keyEvents(clicked.events));
+  assert.equal(tapped.button('Shift').attrs['aria-pressed'], 'false', 'the on-screen SHIFT still shows latched');
+  assert.throws(() => state.tap('Owl'), /no key called Owl/);
+});
+
+test('panel.bbc.tap(\'Break\') presses BREAK as the Break button does: a latched key let go, then the reset', () => {
+  const { tap, events, calls, bbc, keys } = onScreen();
+  tap('Shift');
+  machineState(bbc, keys).tap('Break');
+  assert.deepEqual(calls, [['break']], 'the latched SHIFT was pressed, or BREAK was not');
+  assert.deepEqual(keyEvents(events), [['Shift', 'latch-on'], ['Shift', 'latch-off'], ['Break', 'tap']]);
+});
+
+test('leds() reads the host\'s three bits: the cassette motor, CAPS LOCK and SHIFT LOCK', () => {
+  assert.deepEqual(lights(0), { motor: false, caps: false, shiftLock: false });
+  assert.deepEqual(lights(1), { motor: true, caps: false, shiftLock: false });
+  assert.deepEqual(lights(2), { motor: false, caps: true, shiftLock: false });
+  assert.deepEqual(lights(4), { motor: false, caps: false, shiftLock: true });
+  assert.deepEqual(lights(7), { motor: true, caps: true, shiftLock: true });
+  let bits = 6;
+  const state = machineState({ Leds: () => bits }, onScreen().keys);
+  assert.deepEqual(state.leds(), { motor: false, caps: true, shiftLock: true });
+  bits = 1;
+  assert.deepEqual(state.leds(), { motor: true, caps: false, shiftLock: false }, 'leds() is not read afresh each time');
+});
+
+// Added in task 10 of the models plan (14 October 2026), for a mutation that survived: BbcLeds' two lock values
+// swapped in C# passed every test, the C# tests reading the lights by name and the page's tests by made-up bits.
+test('leds() decodes the bits the host sends: BbcLeds\' values in BbcChip.cs, which BbcHost.Leds() returns as they are', () => {
+  const chip = fs.readFileSync(path.join(REPO_ROOT, 'src', 'Dbhq.Machines.BbcMicro', 'BbcChip.cs'), 'utf8');
+  const body = chip.slice(chip.indexOf('public enum BbcLeds'));
+  const value = (name) => Number(body.match(new RegExp(`^\\s+${name} = (\\d+),`, 'm'))?.[1]);
+  const off = { motor: false, caps: false, shiftLock: false };
+  assert.deepEqual(lights(value('CassetteMotor')), { ...off, motor: true });
+  assert.deepEqual(lights(value('CapsLock')), { ...off, caps: true });
+  assert.deepEqual(lights(value('ShiftLock')), { ...off, shiftLock: true });
+  const host = fs.readFileSync(path.join(REPO_ROOT, 'src', 'Dbhq.Machines.BbcMicro.Wasm', 'Program.cs'), 'utf8');
+  assert.match(host, /public static int Leds\(\) => \(int\)Machine\.Bus\.Leds;/);
+});
+
+test('accessCounts() and romSlot() are the host\'s, read afresh each time', () => {
+  let counts = new Int32Array([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
+  let slot = 15;
+  const state = machineState({ AccessCounts: () => counts, RomSlot: () => slot }, onScreen().keys);
+  assert.deepEqual([...state.accessCounts()], [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
+  assert.equal(state.romSlot(), 15);
+  counts = new Int32Array([-1, 0, 0, 0, 0, 0, 0, 0, 0, 0]);
+  slot = 14;
+  assert.equal(state.accessCounts()[0], -1);
+  assert.equal(state.romSlot(), 14);
 });
 
 // ---- The sound worklet ----
@@ -475,4 +593,127 @@ test('a file read that fails after a later insert has started says nothing: the 
   assert.deepEqual(inserted, [[3, 3]]);
   assert.equal(panel.dataset.disc, 'fast.ssd');
   assert.match(els['[data-bbc-drive]'].textContent, /^In drive 0: fast\.ssd/);
+});
+
+// ---- The page: Start, panel.bbc and its events, for the models ----
+//
+// The page script run as the browser runs it, from its own `prepare` to the
+// machine running, in a fake browser just big enough for it, as
+// nes-panel.test.mjs runs the NES's: made-up elements, a fake .NET runtime at
+// <base>_framework/dotnet.js that hands over a made-up BbcHost, and a fetch
+// that gives three ROMs. The run loop's animation frames are never turned.
+
+const pageDir = fs.mkdtempSync(path.join(tmpdir(), 'bbc-page-'));
+fs.mkdirSync(path.join(pageDir, '_framework'), { recursive: true });
+fs.writeFileSync(path.join(pageDir, '_framework', 'dotnet.js'), 'export const dotnet = { create: () => globalThis.fakeBbcDotnet.create() };\n');
+const PAGE_BASE = `${pathToFileURL(pageDir).href}/`;
+test.after(() => fs.rmSync(pageDir, { recursive: true, force: true }));
+
+/** A made-up element: listeners, a dataset, and click() dispatching a click. */
+class FakeElement extends EventTarget {
+  constructor(props = {}) {
+    super();
+    Object.assign(this, { dataset: {}, style: {}, disabled: true, hidden: false, textContent: '' }, props);
+  }
+  focus() {}
+  blur() {}
+  click() { this.dispatchEvent(new Event('click')); }
+  setAttribute(name, value) { this[name] = value; }
+}
+
+/** Waits until `done()` is true, for at most `ms` of real time (as nes-panel.test.mjs, issue 91). */
+async function until(done, ms = 10_000) {
+  const end = Date.now() + ms;
+  while (!done() && Date.now() < end) await new Promise((resolve) => setTimeout(resolve, 2));
+}
+
+let pages = 0;
+
+/** The BBC Micro's page with one panel, one Break button and the on-screen A key, and `host` as its machine. */
+async function bbcPage(t, host) {
+  const saved = ['document', 'window', 'fetch', 'requestAnimationFrame', 'cancelAnimationFrame'].map((k) => [k, Object.getOwnPropertyDescriptor(globalThis, k)]);
+  t.after(() => {
+    for (const [k, d] of saved) {
+      if (d) Object.defineProperty(globalThis, k, d);
+      else delete globalThis[k];
+    }
+    delete globalThis.fakeBbcDotnet;
+  });
+  const elements = new Map();
+  const breakButton = new FakeElement();
+  const keyA = new FakeElement({ dataset: { bbcKey: 'A' } });
+  const panel = new FakeElement({ dataset: { download: '3.1 MB', base: PAGE_BASE, clockMhz: '2', roms: 'os.rom basic.rom dfs.rom' } });
+  panel.querySelectorAll = (selector) => (selector === '[data-bbc-break]' ? [breakButton] : selector === '[data-bbc-key]' ? [keyA] : []);
+  panel.querySelector = (selector) => {
+    if (!elements.has(selector)) {
+      elements.set(selector, new FakeElement(selector === '[data-bbc-canvas]'
+        ? { getContext: () => ({ createImageData: (w, h) => ({ data: new Uint8ClampedArray(w * h * 4) }), putImageData() {} }) }
+        : {}));
+    }
+    return elements.get(selector);
+  };
+  const events = [];
+  for (const type of ['bbc:ready', 'bbc:start', 'bbc:key']) {
+    panel.addEventListener(type, (event) => events.push([type, event.detail ?? null, Boolean(panel.bbc)]));
+  }
+  const define = (k, value) => Object.defineProperty(globalThis, k, { value, configurable: true, writable: true });
+  define('document', { hidden: false, querySelectorAll: (s) => (s === '[data-bbc]' ? [panel] : []), addEventListener() {}, removeEventListener() {} });
+  define('window', { addEventListener() {} });
+  define('fetch', async () => ({ ok: true, arrayBuffer: async () => new ArrayBuffer(16) }));
+  define('requestAnimationFrame', () => 1);
+  define('cancelAnimationFrame', () => {});
+  globalThis.fakeBbcDotnet = {
+    create: async () => ({ getAssemblyExports: async () => ({ BbcHost: host }), setModuleImports() {} }),
+  };
+  await import(`${pathToFileURL(path.join(PUBLIC, 'bbc-micro.js')).href}?page=${++pages}`);
+  const start = async () => {
+    panel.querySelector('[data-bbc-start]').click();
+    await until(() => panel.dataset.state === 'running');
+    assert.equal(panel.dataset.state, 'running', `the page did not start: ${panel.querySelector('[data-bbc-status]').textContent}`);
+  };
+  return { panel, events, start, breakButton, keyA };
+}
+
+/** A BbcHost for the whole page: what Start and the panel's controls call, recorded. */
+function pageHost() {
+  const calls = [];
+  return {
+    calls,
+    Load: (...args) => calls.push(['Load', args.length]),
+    Cycles: () => 0, Run: () => 0, Frames: () => 0, Picture: () => 0, Sound: () => 0, DropSound: () => 0,
+    ScreenWidth: () => 640, ScreenHeight: () => 512, ScreenRow: (row) => `row ${row}`,
+    KeyDown: (k) => calls.push(['down', k]), KeyUp: (k) => calls.push(['up', k]), Break: () => calls.push(['break']),
+    Leds: () => 2, AccessCounts: () => new Int32Array([5, 0, 0, 7, 9, 11, 3, 0, 0, 1]), RomSlot: () => 15,
+  };
+}
+
+test('Start runs the machine and then sends bbc:ready and bbc:start, with panel.bbc in place for both', async (t) => {
+  const host = pageHost();
+  const { panel, events, start } = await bbcPage(t, host);
+  assert.equal(panel.bbc, undefined, 'panel.bbc was there before Start');
+  await start();
+  assert.deepEqual(events.map((e) => [e[0], e[2]]), [['bbc:ready', true], ['bbc:start', true]]);
+  assert.equal(panel.bbc.host, host);
+  assert.equal(panel.bbc.screenRow(3), 'row 3');
+  assert.deepEqual(panel.bbc.leds(), { motor: false, caps: true, shiftLock: false });
+  assert.deepEqual([...panel.bbc.accessCounts()], [5, 0, 0, 7, 9, 11, 3, 0, 0, 1]);
+  assert.equal(panel.bbc.romSlot(), 15);
+});
+
+test('on the running page the on-screen keys, the Break button and panel.bbc.tap all tell the page as bbc:key', async (t) => {
+  const host = pageHost();
+  const { panel, events, start, breakButton, keyA } = await bbcPage(t, host);
+  await start();
+  events.length = 0;
+  keyA.click();
+  panel.bbc.tap('A');
+  breakButton.click();
+  panel.bbc.tap('Break');
+  assert.deepEqual(events.map((e) => [e[0], e[1]]), [
+    ['bbc:key', { name: 'A', action: 'tap' }], ['bbc:key', { name: 'A', action: 'tap' }],
+    ['bbc:key', { name: 'Break', action: 'tap' }], ['bbc:key', { name: 'Break', action: 'tap' }],
+  ]);
+  assert.deepEqual(host.calls.filter((c) => c[0] !== 'Load'), [
+    ['down', BBC_KEYS.A], ['up', BBC_KEYS.A], ['down', BBC_KEYS.A], ['up', BBC_KEYS.A], ['break'], ['break'],
+  ]);
 });

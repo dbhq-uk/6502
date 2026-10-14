@@ -221,6 +221,43 @@ jobs:
           PASS=$(count pass); FAILED=$(count fail)
           echo "pass=${PASS:-unread} fail=${FAILED:-unread}"
           [ "${FAILED:-1}" = "0" ]
+          # 640 as at 14 Oct 2026, measured on the BBC Micro models' branch with main
+          # merged in (the NES models' notes, the BBC Micro's robustness, the KIM-1's
+          # teletype and the Electron, pull requests 93, 94, 87, 52 and 54);
+          # 568 as at 14 Oct 2026, with task 10's fix wave (one test: known-differences.md's section on the BBC
+          # models gives each figure and verdict as its data file has it);
+          # 567 as at 14 Oct 2026, with the BBC Micro models' task 10 (five tests for mutations that survived:
+          # the keys in the machine's layout, the lights' bits from BbcLeds, no figure typed in either note, every
+          # copper credit traced to look at, and the browser check's judgements on the inside and the lights);
+          # 562 as at 13 Oct 2026, with the BBC Micro models' task 9b (eight tests: the two entries and their modules
+          # import, the claim of both views and the MODELS entries, each view's credits, the words on the page, each
+          # entry thin and following the machine, the first load and the budgets, the browser check's models steps);
+          # 554 as at 13 Oct 2026, with task 9a's review (eight tests: each BBC model module loads, with its main exports);
+          # 546 as at 13 Oct 2026, with the BBC Micro models' task 9a (thirteen tests: the outside's keys and
+          # legends, its shell and opening, its lights, its key state on bbc:key, a click on a key, no owl, the
+          # rear's and underside's labels, the words atlas, its tokens, caption, results file and note, unclaimed);
+          # 533 as at 13 Oct 2026, with the BBC Micro models' task 8 (ten tests: the outside's method and its
+          # changes, the keys' mapping from the fork, O1, the front edge not measurable, the check point, the keys and
+          # lights in the opening, the keys' placing and colours, the rear ports, the case module, the photographs);
+          # 523 as at 13 Oct 2026, with the BBC Micro models' task 7 (sixteen tests: the shared access
+          # sampler, and the inside's scene, legend, caption, results file and note, unclaimed);
+          # 507 as at 13 Oct 2026, with the BBC Micro models' task 6 (eleven tests: the page's bbc:key,
+          # bbc:start and panel.bbc, and the counters' names as BbcChip's);
+          # 496 as at 13 Oct 2026, with task 5's review (two tests: the method's files and marks.json on
+          # disk as the run read them; every description of the parts says both checks failed);
+          # 494 as at 13 Oct 2026, with the BBC Micro models' task 5 (nine tests: the parts' method
+          # pinned to its hashes, places on footprints, the fitted set against models.md, the counters,
+          # the outline and overlaps, the manual's places and the identities pinned as failed, I5, the module);
+          # 485 as at 13 Oct 2026, with task 4's review (a test that board_trace.py and common.py
+          # on disk are the method whose hashes the journal recorded before the run);
+          # 484 as at 13 Oct 2026, with the BBC Micro models' task 4 (six tests: the board's track map,
+          # copper.json's verdicts and figures, its nets and I5 FAILs pinned, ic-table.json, the method's
+          # hashes, and NOTICE.md's section on the map);
+          # 478 as at 13 Oct 2026, with the BBC Micro models' task 3 review minors (a test that
+          # registration.json keeps the solder side's model, unrounded parameters and transform);
+          # 477 as at 13 Oct 2026, with the BBC Micro models' task 3 fix wave (the drills'
+          # faces as the plan revised them, the held-out figures by kind of hole, and every
+          # DIP's reference read or said unread);
           # 546 as at 14 Oct 2026, measured on the Electron's branch with main merged
           # in again (the NES models' notes, the BBC Micro's robustness and the KIM-1's
           # teletype, pull requests 93, 94 and 87);
@@ -271,7 +308,7 @@ jobs:
           # Adding tests is expected; losing them is the failure this floor catches.
           # Raise the number when the suite grows, here and in the same step of
           # deploy-site.yml, which must hold the same number.
-          [ "${PASS:-0}" -ge 546 ]
+          [ "${PASS:-0}" -ge 640 ]
       # The KIM-1 page in a real browser: the built site served on 127.0.0.1
       # with its own CSP, the try-it program clicked in through the page's own
       # keypad, and the digits read back. Then the page's photograph loads, and
@@ -284,6 +321,12 @@ jobs:
       # turns on and off, a disc lists with *CAT and saves, Break restarts it,
       # and a preset disc from the library starts with Insert and run while the
       # visitor's own file still goes in after it (scripts/browser-check-bbc.mjs).
+      # Then the BBC Micro's two 3D models, on a page of their own: nothing of them
+      # until scrolled to, the outside alone then; its lights and keys follow the
+      # machine and a click on a key types it; the tabs switch to the inside, which
+      # only then loads, marks the 8271 and frames the DFS during *CAT, and shows
+      # its solder side's copper from below; each camera rests and is kept; no
+      # focus trap; and both views load with reduced motion (checkBbcModels).
       # Then the NES's page: Start puts its game in, the frame recorded in
       # machines/nes/expected-frames.json is on the canvas to the pixel in both
       # regions, Start on the keyboard changes the picture, a test cartridge

@@ -9,12 +9,17 @@ import { REPO_ROOT } from '../src/lib/registry.mjs';
 // organisation (a fork we hold; ROMs are committed under roms/), pinned to a commit and a hash.
 // This reads the places that fetch and fails on any other host.
 
+// .js and .html joined the list in the BBC models' task 10 fix wave (14 October 2026): the browser benches are
+// a page and its script (bench/bbc-micro-speed/index.html and main.js), and the workflows run code too. A
+// workflow's `uses:` names an action by owner/repo@sha, not a URL, so the scan of .github/workflows sees only
+// the addresses a step fetches or prints.
 const SCANNED = [
-  ['tests', /\.(cs|sh|py|mjs)$/],
-  ['tools', /\.(cs|sh|py|mjs)$/],
-  ['bench', /\.(cs|sh|py|mjs)$/],
-  ['src', /\.(cs|sh|py|mjs)$/],
+  ['tests', /\.(cs|sh|py|mjs|js|html)$/],
+  ['tools', /\.(cs|sh|py|mjs|js|html)$/],
+  ['bench', /\.(cs|sh|py|mjs|js|html)$/],
+  ['src', /\.(cs|sh|py|mjs|js|html)$/],
   ['site/scripts', /\.(mjs|sh)$/],
+  ['.github/workflows', /\.ya?ml$/],
 ];
 const SKIP = new Set(['node_modules', 'bin', 'obj', 'publish', 'dist', '.astro', '.testdata']);
 const ALLOWED = [
@@ -25,6 +30,12 @@ const ALLOWED = [
   /^https:\/\/6502\.dbhq\.uk\b/,
   /^https?:\/\/(www\.)?w3\.org\//, // XML namespaces, never fetched
 ];
+
+// Addresses one file may name that are not inputs: the deploy purges the site's own cache at its host
+// (Cloudflare's API, the zone the site is served from), which no test or build fetches anything from.
+const ALLOWED_IN = {
+  [path.join('.github', 'workflows', 'deploy-site.yml')]: [/^https:\/\/api\.cloudflare\.com\/client\/v4\/zones\/\$\{CF_ZONE\}\/purge_cache$/],
+};
 
 function* walk(dir, pattern) {
   const full = path.join(REPO_ROOT, dir);
@@ -48,7 +59,7 @@ test('every file the tests and the build fetch comes from a dbhq-uk repository',
         if (isComment(line)) return;
         for (const m of line.matchAll(/https?:\/\/[^\s"'`)<>]+/g)) {
           found.push(m[0]);
-          if (!ALLOWED.some((re) => re.test(m[0]))) foreign.push(`${file}:${i + 1} ${m[0]}`);
+          if (!ALLOWED.some((re) => re.test(m[0])) && !(ALLOWED_IN[file] ?? []).some((re) => re.test(m[0]))) foreign.push(`${file}:${i + 1} ${m[0]}`);
         }
       });
     }

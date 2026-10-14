@@ -83,6 +83,13 @@ namespace Dbhq.Machines.BbcMicro;
 /// bytes: within each eight, A2 set is the data register and A2 clear the chip's registers by A1
 /// and A0 (disc.md s1a, bus.md s1c).
 /// </para>
+/// <para>
+/// <b>The chip counters</b> (<see cref="Accesses"/>, for the inside model) are added to in the
+/// SHEILA decode, one plain field a chip, with no call, and the sound chip's where the system VIA
+/// strobes a byte into it. They count only: no cycle, value or latch depends on them, and nothing
+/// in the machine reads them. The serial ULA's control byte (<see cref="SerialUlaControl"/>) is
+/// kept the same way, for the cassette motor's light (<see cref="Leds"/>).
+/// </para>
 /// </remarks>
 public sealed class BbcBus : Bus
 {
@@ -103,6 +110,19 @@ public sealed class BbcBus : Bus
     // The video ULA's next line end, as it was when the bus last looked: a write that moves it (a
     // CRTC register, the ULA's clock bit) is a chip access, so the bus looks again at its end.
     private long _lineEnd;
+
+    // The CPU's accesses to each SHEILA chip since power on, for the inside model (Accesses). Plain
+    // fields added to in the decode with no call, the way the NES's counters passed its speed rule
+    // (docs/journal/2026-10-13-the-nes-counters-on-arm.md). The sound chip's is SystemVia.SoundStrobes.
+    private uint _crtcAccesses;
+    private uint _aciaAccesses;
+    private uint _serialUlaAccesses;
+    private uint _videoUlaAccesses;
+    private uint _romLatchAccesses;
+    private uint _systemViaAccesses;
+    private uint _userViaAccesses;
+    private uint _fdcAccesses;
+    private uint _adcAccesses;
 
     public BbcBus(BbcRoms roms, BbcOptions? options = null)
     {
@@ -185,6 +205,61 @@ public sealed class BbcBus : Bus
     /// <summary>The paged ROM latch, 0 to 15. Slot 15 is BASIC and slot 14 the DFS.</summary>
     public int RomSlot { get; private set; }
 
+    /// <summary>
+    /// The CPU's reads and writes of <paramref name="chip"/> since power on, wrapping: every bus
+    /// access in the chip's block of SHEILA, whatever register it names and whether or not the
+    /// chip is modelled, and for <see cref="BbcChip.Sound"/> each byte the system VIA strobes into
+    /// it. A stretched access counts once, a read-modify-write three times, and
+    /// <see cref="Peek"/> never. Counting adds no cycle and changes nothing a chip does.
+    /// </summary>
+    /// <remarks>
+    /// A reader takes the difference of two readings, which stays right across a wrap as long as
+    /// fewer than 2^32 accesses fall between them.
+    /// </remarks>
+    public uint Accesses(BbcChip chip) => chip switch
+    {
+        BbcChip.Crtc => _crtcAccesses,
+        BbcChip.Acia => _aciaAccesses,
+        BbcChip.SerialUla => _serialUlaAccesses,
+        BbcChip.VideoUla => _videoUlaAccesses,
+        BbcChip.RomLatch => _romLatchAccesses,
+        BbcChip.SystemVia => _systemViaAccesses,
+        BbcChip.UserVia => _userViaAccesses,
+        BbcChip.Fdc8271 => _fdcAccesses,
+        BbcChip.Adc => _adcAccesses,
+        BbcChip.Sound => SystemVia.SoundStrobes,
+        _ => throw new ArgumentOutOfRangeException(nameof(chip)),
+    };
+
+    /// <summary>Every <see cref="Accesses"/> count, in <see cref="BbcChip"/> order, as signed 32-bit ints for the page.</summary>
+    public int[] AccessCounts() =>
+        Enum.GetValues<BbcChip>().Select(chip => unchecked((int)Accesses(chip))).ToArray();
+
+    /// <summary>
+    /// The last byte the CPU wrote to the serial ULA, anywhere in <c>$FE10-$FE17</c>. Nothing else
+    /// of the chip is modelled: the byte is kept for its bit 7, the cassette motor relay and its
+    /// light (<c>bus.md</c> s1c). It reads 0 until the first write and no reset changes it
+    /// [guessing: no source read says what the chip holds at power on].
+    /// </summary>
+    public byte SerialUlaControl { get; private set; }
+
+    /// <summary>
+    /// The keyboard's three lights as the machine drives them: the cassette motor's from serial ULA
+    /// control bit 7, set to light it (AUG s.20.9.4), and CAPS LOCK's and SHIFT LOCK's from latch
+    /// IC32 bits 6 and 7, each lit while its bit is low, as the OS writes them (<c>bus.md</c>, "The
+    /// keyboard's lights").
+    /// </summary>
+    public BbcLeds Leds
+    {
+        get
+        {
+            int latch = SystemVia.Latch;
+            return ((SerialUlaControl & 0x80) != 0 ? BbcLeds.CassetteMotor : BbcLeds.None)
+                | ((latch & 0x40) == 0 ? BbcLeds.CapsLock : BbcLeds.None)
+                | ((latch & 0x80) == 0 ? BbcLeds.ShiftLock : BbcLeds.None);
+        }
+    }
+
     public override byte Read(ushort address)
     {
         // Memory first, which is nearly every access: one cycle, never stretched, and no chip
@@ -254,7 +329,8 @@ public sealed class BbcBus : Bus
 
     /// <summary>
     /// The power-on reset: both VIAs and the CRTC, the video ULA's registers to zero, the sound
-    /// chip to its power-on state and the 8271 as after its reset. The latch IC32 and the ROM latch
+    /// chip to its power-on state and the 8271 as after its reset; and the chip counters
+    /// (<see cref="Accesses"/>) to zero. The latch IC32 and the ROM latch
     /// are not reset (via.md section 3(a), bus.md section 6 item 4).
     /// </summary>
     /// <remarks>
@@ -266,6 +342,11 @@ public sealed class BbcBus : Bus
     /// </remarks>
     public void PowerOnReset()
     {
+        // The chip counters count from power on; they are not part of any chip.
+        _crtcAccesses = _aciaAccesses = _serialUlaAccesses = _videoUlaAccesses = _romLatchAccesses = 0;
+        _systemViaAccesses = _userViaAccesses = _fdcAccesses = _adcAccesses = 0;
+        SystemVia.SoundStrobes = 0;
+
         SystemVia.Reset();
         UserVia.Reset();
         Crtc.Reset();
@@ -427,19 +508,49 @@ public sealed class BbcBus : Bus
     /// A read from SHEILA, $FE00-$FEFF, by offset. Each chip adds a case. A device
     /// that is not fitted answers as the bus does: the high byte of the address for a
     /// fast device ($FE) and $00 for a slow one, whose weak pull-downs have time
-    /// to discharge (bus.md section 1d).
+    /// to discharge (bus.md section 1d). Each counted chip's block adds one to its counter
+    /// (<see cref="Accesses"/>), modelled or not.
     /// </summary>
-    private byte ReadSheila(int offset) => offset switch
+    private byte ReadSheila(int offset)
     {
-        <= 0x07 => ReadCrtc(offset),
+        switch (offset)
+        {
+            case <= 0x07:
+                unchecked { _crtcAccesses++; }
+                return ReadCrtc(offset);
+            case <= 0x0F:
+                unchecked { _aciaAccesses++; }
+                break;
+            case <= 0x17:
+                unchecked { _serialUlaAccesses++; }
+                break;
+            case < 0x20:
+                break;
+            case <= 0x2F:
+                unchecked { _videoUlaAccesses++; }
+                break;
+            case <= 0x3F:
+                unchecked { _romLatchAccesses++; }
+                break;
 
-        // A4 is not decoded, so each VIA's sixteen registers repeat in the upper half of its
-        // block (bus.md section 1c).
-        >= 0x40 and <= 0x5F => ReadVia(SystemVia, offset),
-        >= 0x60 and <= 0x7F => ReadVia(UserVia, offset),
-        >= 0x80 and <= 0x9F => ReadFdc(offset),
-        _ => AbsentSheila(offset),
-    };
+            // A4 is not decoded, so each VIA's sixteen registers repeat in the upper half of its
+            // block (bus.md section 1c).
+            case <= 0x5F:
+                unchecked { _systemViaAccesses++; }
+                return ReadVia(SystemVia, offset);
+            case <= 0x7F:
+                unchecked { _userViaAccesses++; }
+                return ReadVia(UserVia, offset);
+            case <= 0x9F:
+                unchecked { _fdcAccesses++; }
+                return ReadFdc(offset);
+            case >= 0xC0 and <= 0xDF:
+                unchecked { _adcAccesses++; }
+                break;
+        }
+
+        return AbsentSheila(offset);
+    }
 
     /// <summary>
     /// An 8271 read: status, result, or the data register at A2 set. The reset register and the
@@ -495,12 +606,17 @@ public sealed class BbcBus : Bus
         return value;
     }
 
-    /// <summary>A write to SHEILA by offset. Each chip adds a case; the ROM latch is the first.</summary>
+    /// <summary>
+    /// A write to SHEILA by offset. Each chip adds a case; the ROM latch is the first. Each counted
+    /// chip's block adds one to its counter (<see cref="Accesses"/>), modelled or not.
+    /// </summary>
     private void WriteSheila(int offset, byte value)
     {
         switch (offset)
         {
             case <= 0x07:
+                unchecked { _crtcAccesses++; }
+
                 // Even addresses are the address register and odd ones the data register (video.md s1.2).
                 if ((offset & 1) == 0)
                 {
@@ -512,7 +628,17 @@ public sealed class BbcBus : Bus
                     ChipAccessed();
                 }
                 break;
+            case <= 0x0F:
+                unchecked { _aciaAccesses++; }
+                break;
+            case <= 0x17:
+                // Only the control byte is kept, for the cassette motor's light (bus.md s1c).
+                unchecked { _serialUlaAccesses++; }
+                SerialUlaControl = value;
+                break;
             case >= 0x20 and <= 0x2F:
+                unchecked { _videoUlaAccesses++; }
+
                 // A0 chooses the control register or the palette (video.md s2.1). The ULA draws up
                 // to this cycle with what it had before taking the write.
                 if ((offset & 1) == 0)
@@ -527,22 +653,31 @@ public sealed class BbcBus : Bus
                 }
                 break;
             case >= 0x30 and <= 0x3F:
+                unchecked { _romLatchAccesses++; }
+
                 // Write only, and the whole block of sixteen is the one latch (S1 s.17, s.21).
                 RomSlot = value & 0x0F;
                 _paged = PagedRom(RomSlot);
                 break;
             case >= 0x40 and <= 0x5F:
+                unchecked { _systemViaAccesses++; }
+
                 // ORB and DDRB strobe the latch; if its screen start bits change, the system VIA
                 // has the ULA draw up to this cycle with the bits it had first.
                 SystemVia.Write(offset & 0x0F, value);
                 ChipAccessed();
                 break;
             case >= 0x60 and <= 0x7F:
+                unchecked { _userViaAccesses++; }
                 UserVia.Write(offset & 0x0F, value);
                 ChipAccessed();
                 break;
             case >= 0x80 and <= 0x9F:
+                unchecked { _fdcAccesses++; }
                 WriteFdc(offset, value);
+                break;
+            case >= 0xC0 and <= 0xDF:
+                unchecked { _adcAccesses++; }
                 break;
         }
     }

@@ -49,11 +49,12 @@ const text = (v) => typeof v === 'string' && v.trim() !== '';
 const webLink = (v) => text(v) && /^https?:\/\/\S+$/.test(v);
 const day = (v) => /^\d{4}-\d{2}-\d{2}$/.test(String(v ?? ''));
 
-/** The credit every photograph and drawing carries: who, where from, the licence as stated, when fetched, and what it was used for. */
+/** The credit every photograph and drawing carries: who (and, when its byline asks for one, a link to them, authorUrl), where from, the licence as stated, when fetched, and what it was used for. */
 function creditProblems(item, where) {
   const errors = [];
   if (!text(item.author)) errors.push(`${where}: must name its author (author)`);
   if (!webLink(item.sourceUrl)) errors.push(`${where}: must link its source (sourceUrl, an http or https link)`);
+  if (item.authorUrl !== undefined && !webLink(item.authorUrl)) errors.push(`${where}: authorUrl, when given, must be an http or https link`);
   if (!('licence' in item) || (item.licence !== null && !text(item.licence))) errors.push(`${where}: licence must be the licence as the source states it, or null when it states none`);
   if (item.licenceUrl !== undefined && (!text(item.licenceUrl) || !/^https:\/\/\S+$/.test(item.licenceUrl))) errors.push(`${where}: licenceUrl must be an https link`);
   if (item.licenceUrl !== undefined && item.licence === null) errors.push(`${where}: licenceUrl is set but no licence is named`);

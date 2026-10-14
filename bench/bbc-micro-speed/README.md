@@ -18,6 +18,7 @@ This file is how to run it again.
 | `run-in-browser.mjs`, `package.json` | Reads the three ROMs from `roms/bbc-micro/`, checks each against its SHA-256 in `Pins.cs`, serves them with the page and a published copy of the app on `127.0.0.1`, and runs it in a headless Chrome, a fresh launch each time. |
 | `native/` | The same workload as a console program, in the solution so CI builds it. `--fingerprint` runs a scripted session (boot, a typed BASIC program that drives the user VIA, BREAK) and hashes every instruction and, every 100,000 cycles, all of RAM and every VIA register, so two builds can be shown to do the same thing. `--profile` compares the machine with the bare CPU on a flat copy of its memory. |
 | `alternate.sh` | Runs two or more builds in turn, a launch of each at a time, in the browser or natively, so the shared machine's load falls on all of them, and prints each build's median. |
+| `chip-counters/` | The rule for timing the machine with and without the chip counters the models plan's task 6 adds to the bus, fixed before any launch, and the script that applies it. |
 
 ## The workload
 

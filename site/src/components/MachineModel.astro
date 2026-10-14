@@ -23,7 +23,7 @@
 import ModelPanel from './ModelPanel.astro';
 import { CONTROLS, MODELS, modelSrc } from '../models/models.mjs';
 
-interface Source { author: string; sourceUrl: string; licence: string | null; licenceUrl?: string; used: string; caption?: string; title?: string; sha256?: string }
+interface Source { author: string; authorUrl?: string; sourceUrl: string; licence: string | null; licenceUrl?: string; used: string; caption?: string; title?: string; sha256?: string }
 interface Props {
   /** The models the machine claims in the registry, { view, module }, in its order. */
   models: { view: string; module: string }[];

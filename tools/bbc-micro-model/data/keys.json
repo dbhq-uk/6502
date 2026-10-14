@@ -1,0 +1,1315 @@
+{
+ "about": "Task 8 of the BBC Micro models plan: every keycap from K1 (Dominic Beesley's MIT KiCad keyboard, from the dbhq-uk fork at its pinned commit) mapped to the machine's keys, and O1 and O3 registered to it. Written by keys.py; every figure is a measurement made on the date of the journal entry that quotes it. Coordinates are K1's millimetres (x to the right, y towards the front, from above); case_parts.py places them in the case.",
+ "colours": {
+  "agree": 63,
+  "dark": {
+   "chroma": 0.0139,
+   "keys": 64,
+   "oklab": [
+    0.2753,
+    0.0056,
+    0.0127
+   ]
+  },
+  "drawnFrom": "read by eye on O1 (case-marks.json keyColours); the clustered class is each key's colourClustered, recorded",
+  "light": {
+   "chroma": 0.1611,
+   "keys": 6,
+   "oklab": [
+    0.5037,
+    0.1411,
+    0.0776
+   ]
+  },
+  "red": {
+   "chroma": 0.1715,
+   "keys": 4,
+   "oklab": [
+    0.5224,
+    0.15,
+    0.083
+   ]
+  }
+ },
+ "frontEdgeMm": 403.4661,
+ "frontEdgeRepeatMm": 403.1661,
+ "k1": {
+  "commit": "5ec53df566c77424caa6be827d0831da3916ecfa",
+  "sha256": "35b34ac3ef0a04fb311ee1971eb9fc32cb1c323877377c4d1a74986c709b0929",
+  "switches": 74
+ },
+ "keys": [
+  {
+   "colour": "red",
+   "colourClustered": "light",
+   "d": 19.05,
+   "k1": "SW3",
+   "k1Value": "F0",
+   "name": "F0",
+   "row": 0,
+   "units": 1.0,
+   "w": 19.05,
+   "x": 119.0625,
+   "y": 120.65
+  },
+  {
+   "colour": "red",
+   "colourClustered": "light",
+   "d": 19.05,
+   "k1": "SW8",
+   "k1Value": "f1",
+   "name": "F1",
+   "row": 0,
+   "units": 1.0,
+   "w": 19.05,
+   "x": 138.1125,
+   "y": 120.65
+  },
+  {
+   "colour": "red",
+   "colourClustered": "red",
+   "d": 19.05,
+   "k1": "SW15",
+   "k1Value": "f2",
+   "name": "F2",
+   "row": 0,
+   "units": 1.0,
+   "w": 19.05,
+   "x": 157.1625,
+   "y": 120.65
+  },
+  {
+   "colour": "red",
+   "colourClustered": "red",
+   "d": 19.05,
+   "k1": "SW22",
+   "k1Value": "f3",
+   "name": "F3",
+   "row": 0,
+   "units": 1.0,
+   "w": 19.05,
+   "x": 176.2125,
+   "y": 120.65
+  },
+  {
+   "colour": "red",
+   "colourClustered": "light",
+   "d": 19.05,
+   "k1": "SW30",
+   "k1Value": "F4",
+   "name": "F4",
+   "row": 0,
+   "units": 1.0,
+   "w": 19.05,
+   "x": 195.2625,
+   "y": 120.65
+  },
+  {
+   "colour": "red",
+   "colourClustered": "red",
+   "d": 19.05,
+   "k1": "SW29",
+   "k1Value": "f5",
+   "name": "F5",
+   "row": 0,
+   "units": 1.0,
+   "w": 19.05,
+   "x": 214.3125,
+   "y": 120.65
+  },
+  {
+   "colour": "red",
+   "colourClustered": "light",
+   "d": 19.05,
+   "k1": "SW36",
+   "k1Value": "f6",
+   "name": "F6",
+   "row": 0,
+   "units": 1.0,
+   "w": 19.05,
+   "x": 233.3625,
+   "y": 120.65
+  },
+  {
+   "colour": "red",
+   "colourClustered": "light",
+   "d": 19.05,
+   "k1": "SW44",
+   "k1Value": "f7",
+   "name": "F7",
+   "row": 0,
+   "units": 1.0,
+   "w": 19.05,
+   "x": 252.4125,
+   "y": 120.65
+  },
+  {
+   "colour": "red",
+   "colourClustered": "red",
+   "d": 19.05,
+   "k1": "SW43",
+   "k1Value": "f8",
+   "name": "F8",
+   "row": 0,
+   "units": 1.0,
+   "w": 19.05,
+   "x": 271.4625,
+   "y": 120.65
+  },
+  {
+   "colour": "red",
+   "colourClustered": "light",
+   "d": 19.05,
+   "k1": "SW50",
+   "k1Value": "f9",
+   "name": "F9",
+   "row": 0,
+   "units": 1.0,
+   "w": 19.05,
+   "x": 290.5125,
+   "y": 120.65
+  },
+  {
+   "colour": "dark",
+   "colourClustered": "dark",
+   "d": 19.05,
+   "k1": "SW75",
+   "k1Value": "break",
+   "name": "Break",
+   "row": 0,
+   "units": 1.0,
+   "w": 19.05,
+   "x": 309.5625,
+   "y": 120.65
+  },
+  {
+   "colour": "dark",
+   "colourClustered": "dark",
+   "d": 19.05,
+   "k1": "SW1",
+   "k1Value": "escape",
+   "name": "Escape",
+   "row": 1,
+   "units": 1.0,
+   "w": 19.05,
+   "x": 76.2,
+   "y": 139.7
+  },
+  {
+   "colour": "dark",
+   "colourClustered": "dark",
+   "d": 19.05,
+   "k1": "SW4",
+   "k1Value": "1",
+   "name": "D1",
+   "row": 1,
+   "units": 1.0,
+   "w": 19.05,
+   "x": 95.25,
+   "y": 139.7
+  },
+  {
+   "colour": "dark",
+   "colourClustered": "dark",
+   "d": 19.05,
+   "k1": "SW11",
+   "k1Value": "2",
+   "name": "D2",
+   "row": 1,
+   "units": 1.0,
+   "w": 19.05,
+   "x": 114.3,
+   "y": 139.7
+  },
+  {
+   "colour": "dark",
+   "colourClustered": "dark",
+   "d": 19.05,
+   "k1": "SW9",
+   "k1Value": "3",
+   "name": "D3",
+   "row": 1,
+   "units": 1.0,
+   "w": 19.05,
+   "x": 133.35,
+   "y": 139.7
+  },
+  {
+   "colour": "dark",
+   "colourClustered": "dark",
+   "d": 19.05,
+   "k1": "SW16",
+   "k1Value": "4",
+   "name": "D4",
+   "row": 1,
+   "units": 1.0,
+   "w": 19.05,
+   "x": 152.4,
+   "y": 139.7
+  },
+  {
+   "colour": "dark",
+   "colourClustered": "dark",
+   "d": 19.05,
+   "k1": "SW23",
+   "k1Value": "5",
+   "name": "D5",
+   "row": 1,
+   "units": 1.0,
+   "w": 19.05,
+   "x": 171.45,
+   "y": 139.7
+  },
+  {
+   "colour": "dark",
+   "colourClustered": "dark",
+   "d": 19.05,
+   "k1": "SW32",
+   "k1Value": "6",
+   "name": "D6",
+   "row": 1,
+   "units": 1.0,
+   "w": 19.05,
+   "x": 190.5,
+   "y": 139.7
+  },
+  {
+   "colour": "dark",
+   "colourClustered": "dark",
+   "d": 19.05,
+   "k1": "SW31",
+   "k1Value": "7",
+   "name": "D7",
+   "row": 1,
+   "units": 1.0,
+   "w": 19.05,
+   "x": 209.55,
+   "y": 139.7
+  },
+  {
+   "colour": "dark",
+   "colourClustered": "dark",
+   "d": 19.05,
+   "k1": "SW37",
+   "k1Value": "8",
+   "name": "D8",
+   "row": 1,
+   "units": 1.0,
+   "w": 19.05,
+   "x": 228.6,
+   "y": 139.7
+  },
+  {
+   "colour": "dark",
+   "colourClustered": "dark",
+   "d": 19.05,
+   "k1": "SW38",
+   "k1Value": "9",
+   "name": "D9",
+   "row": 1,
+   "units": 1.0,
+   "w": 19.05,
+   "x": 247.65,
+   "y": 139.7
+  },
+  {
+   "colour": "dark",
+   "colourClustered": "dark",
+   "d": 19.05,
+   "k1": "SW52",
+   "k1Value": "0",
+   "name": "D0",
+   "row": 1,
+   "units": 1.0,
+   "w": 19.05,
+   "x": 266.7,
+   "y": 139.7
+  },
+  {
+   "colour": "dark",
+   "colourClustered": "dark",
+   "d": 19.05,
+   "k1": "SW51",
+   "k1Value": "=-",
+   "name": "Minus",
+   "row": 1,
+   "units": 1.0,
+   "w": 19.05,
+   "x": 285.75,
+   "y": 139.7
+  },
+  {
+   "colour": "dark",
+   "colourClustered": "dark",
+   "d": 19.05,
+   "k1": "SW58",
+   "k1Value": "~^",
+   "name": "Caret",
+   "row": 1,
+   "units": 1.0,
+   "w": 19.05,
+   "x": 304.8,
+   "y": 139.7
+  },
+  {
+   "colour": "dark",
+   "colourClustered": "dark",
+   "d": 19.05,
+   "k1": "SW57",
+   "k1Value": "\\\\|",
+   "name": "Backslash",
+   "row": 1,
+   "units": 1.0,
+   "w": 19.05,
+   "x": 323.85,
+   "y": 139.7
+  },
+  {
+   "colour": "light",
+   "colourClustered": "dark",
+   "d": 19.05,
+   "k1": "SW65",
+   "k1Value": "left",
+   "name": "Left",
+   "row": 1,
+   "units": 1.0,
+   "w": 19.05,
+   "x": 342.9,
+   "y": 139.7
+  },
+  {
+   "colour": "light",
+   "colourClustered": "dark",
+   "d": 19.05,
+   "k1": "SW64",
+   "k1Value": "right",
+   "name": "Right",
+   "row": 1,
+   "units": 1.0,
+   "w": 19.05,
+   "x": 361.95,
+   "y": 139.7
+  },
+  {
+   "colour": "dark",
+   "colourClustered": "dark",
+   "d": 19.05,
+   "k1": "SW7",
+   "k1Value": "tab",
+   "name": "Tab",
+   "row": 2,
+   "units": 1.5,
+   "w": 28.575,
+   "x": 80.9625,
+   "y": 158.75
+  },
+  {
+   "colour": "dark",
+   "colourClustered": "dark",
+   "d": 19.05,
+   "k1": "SW2",
+   "k1Value": "Q",
+   "name": "Q",
+   "row": 2,
+   "units": 1.0,
+   "w": 19.05,
+   "x": 104.775,
+   "y": 158.75
+  },
+  {
+   "colour": "dark",
+   "colourClustered": "dark",
+   "d": 19.05,
+   "k1": "SW10",
+   "k1Value": "W",
+   "name": "W",
+   "row": 2,
+   "units": 1.0,
+   "w": 19.05,
+   "x": 123.825,
+   "y": 158.75
+  },
+  {
+   "colour": "dark",
+   "colourClustered": "dark",
+   "d": 19.05,
+   "k1": "SW17",
+   "k1Value": "E",
+   "name": "E",
+   "row": 2,
+   "units": 1.0,
+   "w": 19.05,
+   "x": 142.875,
+   "y": 158.75
+  },
+  {
+   "colour": "dark",
+   "colourClustered": "dark",
+   "d": 19.05,
+   "k1": "SW25",
+   "k1Value": "R",
+   "name": "R",
+   "row": 2,
+   "units": 1.0,
+   "w": 19.05,
+   "x": 161.925,
+   "y": 158.75
+  },
+  {
+   "colour": "dark",
+   "colourClustered": "dark",
+   "d": 19.05,
+   "k1": "SW24",
+   "k1Value": "T",
+   "name": "T",
+   "row": 2,
+   "units": 1.0,
+   "w": 19.05,
+   "x": 180.975,
+   "y": 158.75
+  },
+  {
+   "colour": "dark",
+   "colourClustered": "dark",
+   "d": 19.05,
+   "k1": "SW33",
+   "k1Value": "Y",
+   "name": "Y",
+   "row": 2,
+   "units": 1.0,
+   "w": 19.05,
+   "x": 200.025,
+   "y": 158.75
+  },
+  {
+   "colour": "dark",
+   "colourClustered": "dark",
+   "d": 19.05,
+   "k1": "SW39",
+   "k1Value": "U",
+   "name": "U",
+   "row": 2,
+   "units": 1.0,
+   "w": 19.05,
+   "x": 219.075,
+   "y": 158.75
+  },
+  {
+   "colour": "dark",
+   "colourClustered": "dark",
+   "d": 19.05,
+   "k1": "SW45",
+   "k1Value": "I",
+   "name": "I",
+   "row": 2,
+   "units": 1.0,
+   "w": 19.05,
+   "x": 238.125,
+   "y": 158.75
+  },
+  {
+   "colour": "dark",
+   "colourClustered": "dark",
+   "d": 19.05,
+   "k1": "SW46",
+   "k1Value": "O",
+   "name": "O",
+   "row": 2,
+   "units": 1.0,
+   "w": 19.05,
+   "x": 257.175,
+   "y": 158.75
+  },
+  {
+   "colour": "dark",
+   "colourClustered": "dark",
+   "d": 19.05,
+   "k1": "SW53",
+   "k1Value": "P",
+   "name": "P",
+   "row": 2,
+   "units": 1.0,
+   "w": 19.05,
+   "x": 276.225,
+   "y": 158.75
+  },
+  {
+   "colour": "dark",
+   "colourClustered": "dark",
+   "d": 19.05,
+   "k1": "SW54",
+   "k1Value": "@",
+   "name": "At",
+   "row": 2,
+   "units": 1.0,
+   "w": 19.05,
+   "x": 295.275,
+   "y": 158.75
+  },
+  {
+   "colour": "dark",
+   "colourClustered": "dark",
+   "d": 19.05,
+   "k1": "SW60",
+   "k1Value": "{[",
+   "name": "LeftBracket",
+   "row": 2,
+   "units": 1.0,
+   "w": 19.05,
+   "x": 314.325,
+   "y": 158.75
+  },
+  {
+   "colour": "dark",
+   "colourClustered": "dark",
+   "d": 19.05,
+   "k1": "SW59",
+   "k1Value": "_£",
+   "name": "Underscore",
+   "row": 2,
+   "units": 1.0,
+   "w": 19.05,
+   "x": 333.375,
+   "y": 158.75
+  },
+  {
+   "colour": "light",
+   "colourClustered": "dark",
+   "d": 19.05,
+   "k1": "SW67",
+   "k1Value": "up",
+   "name": "Up",
+   "row": 2,
+   "units": 1.0,
+   "w": 19.05,
+   "x": 352.425,
+   "y": 158.75
+  },
+  {
+   "colour": "light",
+   "colourClustered": "dark",
+   "d": 19.05,
+   "k1": "SW66",
+   "k1Value": "down",
+   "name": "Down",
+   "row": 2,
+   "units": 1.0,
+   "w": 19.05,
+   "x": 371.475,
+   "y": 158.75
+  },
+  {
+   "colour": "dark",
+   "colourClustered": "dark",
+   "d": 19.05,
+   "k1": "SW5",
+   "k1Value": "caps lk",
+   "name": "CapsLock",
+   "row": 3,
+   "units": 1.0,
+   "w": 19.05,
+   "x": 71.4375,
+   "y": 177.8
+  },
+  {
+   "colour": "dark",
+   "colourClustered": "dark",
+   "d": 19.05,
+   "k1": "SW73",
+   "k1Value": "ctrl",
+   "name": "Ctrl",
+   "row": 3,
+   "units": 1.0,
+   "w": 19.05,
+   "x": 90.4875,
+   "y": 177.8
+  },
+  {
+   "colour": "dark",
+   "colourClustered": "dark",
+   "d": 19.05,
+   "k1": "SW12",
+   "k1Value": "A",
+   "name": "A",
+   "row": 3,
+   "units": 1.0,
+   "w": 19.05,
+   "x": 109.5375,
+   "y": 177.8
+  },
+  {
+   "colour": "dark",
+   "colourClustered": "dark",
+   "d": 19.05,
+   "k1": "SW13",
+   "k1Value": "S",
+   "name": "S",
+   "row": 3,
+   "units": 1.0,
+   "w": 19.05,
+   "x": 128.5875,
+   "y": 177.8
+  },
+  {
+   "colour": "dark",
+   "colourClustered": "dark",
+   "d": 19.05,
+   "k1": "SW18",
+   "k1Value": "D",
+   "name": "D",
+   "row": 3,
+   "units": 1.0,
+   "w": 19.05,
+   "x": 147.6375,
+   "y": 177.8
+  },
+  {
+   "colour": "dark",
+   "colourClustered": "dark",
+   "d": 19.05,
+   "k1": "SW26",
+   "k1Value": "F",
+   "name": "F",
+   "row": 3,
+   "units": 1.0,
+   "w": 19.05,
+   "x": 166.6875,
+   "y": 177.8
+  },
+  {
+   "colour": "dark",
+   "colourClustered": "dark",
+   "d": 19.05,
+   "k1": "SW27",
+   "k1Value": "G",
+   "name": "G",
+   "row": 3,
+   "units": 1.0,
+   "w": 19.05,
+   "x": 185.7375,
+   "y": 177.8
+  },
+  {
+   "colour": "dark",
+   "colourClustered": "dark",
+   "d": 19.05,
+   "k1": "SW34",
+   "k1Value": "H",
+   "name": "H",
+   "row": 3,
+   "units": 1.0,
+   "w": 19.05,
+   "x": 204.7875,
+   "y": 177.8
+  },
+  {
+   "colour": "dark",
+   "colourClustered": "dark",
+   "d": 19.05,
+   "k1": "SW40",
+   "k1Value": "J",
+   "name": "J",
+   "row": 3,
+   "units": 1.0,
+   "w": 19.05,
+   "x": 223.8375,
+   "y": 177.8
+  },
+  {
+   "colour": "dark",
+   "colourClustered": "dark",
+   "d": 19.05,
+   "k1": "SW47",
+   "k1Value": "K",
+   "name": "K",
+   "row": 3,
+   "units": 1.0,
+   "w": 19.05,
+   "x": 242.8875,
+   "y": 177.8
+  },
+  {
+   "colour": "dark",
+   "colourClustered": "dark",
+   "d": 19.05,
+   "k1": "SW48",
+   "k1Value": "L",
+   "name": "L",
+   "row": 3,
+   "units": 1.0,
+   "w": 19.05,
+   "x": 261.9375,
+   "y": 177.8
+  },
+  {
+   "colour": "dark",
+   "colourClustered": "dark",
+   "d": 19.05,
+   "k1": "SW55",
+   "k1Value": ";+",
+   "name": "Semicolon",
+   "row": 3,
+   "units": 1.0,
+   "w": 19.05,
+   "x": 280.9875,
+   "y": 177.8
+  },
+  {
+   "colour": "dark",
+   "colourClustered": "dark",
+   "d": 19.05,
+   "k1": "SW61",
+   "k1Value": "*:",
+   "name": "Colon",
+   "row": 3,
+   "units": 1.0,
+   "w": 19.05,
+   "x": 300.0375,
+   "y": 177.8
+  },
+  {
+   "colour": "dark",
+   "colourClustered": "dark",
+   "d": 19.05,
+   "k1": "SW62",
+   "k1Value": "}]",
+   "name": "RightBracket",
+   "row": 3,
+   "units": 1.0,
+   "w": 19.05,
+   "x": 319.0875,
+   "y": 177.8
+  },
+  {
+   "colour": "dark",
+   "colourClustered": "dark",
+   "d": 19.05,
+   "k1": "SW68",
+   "k1Value": "return",
+   "name": "Return",
+   "row": 3,
+   "units": 2.0,
+   "w": 38.1,
+   "x": 347.6625,
+   "y": 177.8
+  },
+  {
+   "colour": "dark",
+   "colourClustered": "dark",
+   "d": 19.05,
+   "k1": "SW6",
+   "k1Value": "shift lk",
+   "name": "ShiftLock",
+   "row": 4,
+   "units": 1.0,
+   "w": 19.05,
+   "x": 71.4375,
+   "y": 196.85
+  },
+  {
+   "colour": "dark",
+   "colourClustered": "dark",
+   "d": 19.05,
+   "k1": "SW72",
+   "k1Value": "shift",
+   "name": "Shift",
+   "row": 4,
+   "units": 1.5,
+   "w": 28.575,
+   "x": 95.25,
+   "y": 196.85
+  },
+  {
+   "colour": "dark",
+   "colourClustered": "dark",
+   "d": 19.05,
+   "k1": "SW14",
+   "k1Value": "Z",
+   "name": "Z",
+   "row": 4,
+   "units": 1.0,
+   "w": 19.05,
+   "x": 119.0625,
+   "y": 196.85
+  },
+  {
+   "colour": "dark",
+   "colourClustered": "dark",
+   "d": 19.05,
+   "k1": "SW19",
+   "k1Value": "X",
+   "name": "X",
+   "row": 4,
+   "units": 1.0,
+   "w": 19.05,
+   "x": 138.1125,
+   "y": 196.85
+  },
+  {
+   "colour": "dark",
+   "colourClustered": "dark",
+   "d": 19.05,
+   "k1": "SW20",
+   "k1Value": "C",
+   "name": "C",
+   "row": 4,
+   "units": 1.0,
+   "w": 19.05,
+   "x": 157.1625,
+   "y": 196.85
+  },
+  {
+   "colour": "dark",
+   "colourClustered": "dark",
+   "d": 19.05,
+   "k1": "SW28",
+   "k1Value": "V",
+   "name": "V",
+   "row": 4,
+   "units": 1.0,
+   "w": 19.05,
+   "x": 176.2125,
+   "y": 196.85
+  },
+  {
+   "colour": "dark",
+   "colourClustered": "dark",
+   "d": 19.05,
+   "k1": "SW35",
+   "k1Value": "B",
+   "name": "B",
+   "row": 4,
+   "units": 1.0,
+   "w": 19.05,
+   "x": 195.2625,
+   "y": 196.85
+  },
+  {
+   "colour": "dark",
+   "colourClustered": "dark",
+   "d": 19.05,
+   "k1": "SW41",
+   "k1Value": "N",
+   "name": "N",
+   "row": 4,
+   "units": 1.0,
+   "w": 19.05,
+   "x": 214.3125,
+   "y": 196.85
+  },
+  {
+   "colour": "dark",
+   "colourClustered": "dark",
+   "d": 19.05,
+   "k1": "SW42",
+   "k1Value": "M",
+   "name": "M",
+   "row": 4,
+   "units": 1.0,
+   "w": 19.05,
+   "x": 233.3625,
+   "y": 196.85
+  },
+  {
+   "colour": "dark",
+   "colourClustered": "dark",
+   "d": 19.05,
+   "k1": "SW49",
+   "k1Value": "<,",
+   "name": "Comma",
+   "row": 4,
+   "units": 1.0,
+   "w": 19.05,
+   "x": 252.4125,
+   "y": 196.85
+  },
+  {
+   "colour": "dark",
+   "colourClustered": "dark",
+   "d": 19.05,
+   "k1": "SW56",
+   "k1Value": ">.",
+   "name": "FullStop",
+   "row": 4,
+   "units": 1.0,
+   "w": 19.05,
+   "x": 271.4625,
+   "y": 196.85
+  },
+  {
+   "colour": "dark",
+   "colourClustered": "dark",
+   "d": 19.05,
+   "k1": "SW63",
+   "k1Value": "?/",
+   "name": "Slash",
+   "row": 4,
+   "units": 1.0,
+   "w": 19.05,
+   "x": 290.5125,
+   "y": 196.85
+  },
+  {
+   "colour": "dark",
+   "colourClustered": "dark",
+   "d": 19.05,
+   "k1": "SW71",
+   "k1Value": "shift",
+   "name": "Shift2",
+   "row": 4,
+   "units": 1.5,
+   "w": 28.575,
+   "x": 314.325,
+   "y": 196.85
+  },
+  {
+   "colour": "dark",
+   "colourClustered": "dark",
+   "d": 19.05,
+   "k1": "SW69",
+   "k1Value": "delete",
+   "name": "Delete",
+   "row": 4,
+   "units": 1.0,
+   "w": 19.05,
+   "x": 338.1375,
+   "y": 196.85
+  },
+  {
+   "colour": "light",
+   "colourClustered": "dark",
+   "d": 19.05,
+   "k1": "SW70",
+   "k1Value": "copy",
+   "name": "Copy",
+   "row": 4,
+   "units": 1.0,
+   "w": 19.05,
+   "x": 357.1875,
+   "y": 196.85
+  },
+  {
+   "colour": "dark",
+   "colourClustered": "dark",
+   "d": 19.05,
+   "k1": "SW21",
+   "k1Value": "space",
+   "name": "Space",
+   "row": 5,
+   "units": 6.5,
+   "w": 123.825,
+   "x": 204.7875,
+   "y": 215.9
+  }
+ ],
+ "mapping": {
+  "keys": 74,
+  "lacks": [],
+  "machineKeys": 72,
+  "other": [],
+  "twice": [],
+  "verdict": "pass"
+ },
+ "methodFixed": {
+  "tools/bbc-micro-model/case_parts.py": "0a36447dff0f0fe2f4691a004d996cd664b3857a29cf209424040c5d4296fc00",
+  "tools/bbc-micro-model/case_profile.py": "96557265aeb0ecc03ae549f8ece2992c26da05125aeb6ec15fca65e836ff13a6",
+  "tools/bbc-micro-model/case_register.py": "b30245d1a30c380cd41853390dec5fbbdca2ee59f21627c4b6cf996cbcb8fdb8",
+  "tools/bbc-micro-model/common.py": "d9d9e1bcea7e643c8a9c7b11a3035b8bd8f551ebd687eb930eef19b3f1e90dc9",
+  "tools/bbc-micro-model/data/case-marks.json": "a5ace72698341acbcc0b72ba3305a7df9fe3b3ad963baa4fe830d7b255ddb978",
+  "tools/bbc-micro-model/data/marks.json": "0cf894ecccf8b24327a37a13bb82419ed3f910340a53cb7972131015a1754904",
+  "tools/bbc-micro-model/data/parts.json": "4012160780e9a94477b184eb10194c150606780055e526575053d2d4543748eb",
+  "tools/bbc-micro-model/keys.py": "1c197719235ebde9e52ce611b287a07d904916db4a2caa199117d28b9f0efcbc",
+  "tools/bbc-micro-model/spike.py": "204afb5b91fbfec4b8fe9a95840a159245f5942ad0aed272419593e17d989ced"
+ },
+ "o1": {
+  "fitMm": {
+   "max": 0.9295,
+   "median": 0.3614,
+   "p90": 0.5444
+  },
+  "from": "task 0's 50 marks (marks.json keys), spike.keys",
+  "heldOutMm": {
+   "max": 0.9892,
+   "median": 0.3951,
+   "p90": 0.6321
+  },
+  "model": "homography",
+  "n": 50,
+  "over3mm": 0,
+  "verdict": "pass",
+  "worst": [
+   [
+    "Q",
+    0.9892
+   ],
+   [
+    "RETURN",
+    0.8933
+   ],
+   [
+    "U",
+    0.8846
+   ],
+   [
+    "SHIFT (left)",
+    0.6872
+   ],
+   [
+    "BREAK",
+    0.6808
+   ],
+   [
+    "CAPS LOCK",
+    0.6267
+   ],
+   [
+    "DOWN",
+    0.615
+   ],
+   [
+    "f3",
+    0.5846
+   ],
+   [
+    "Z",
+    0.5845
+   ],
+   [
+    "DELETE",
+    0.5537
+   ]
+  ]
+ },
+ "o3": {
+  "fitMm": {
+   "max": 0.5238,
+   "median": 0.1864,
+   "p90": 0.312
+  },
+  "from": "the legends of the 26 letter keys and the ten function keys, found by legend_centre",
+  "heldOutMm": {
+   "max": 0.588,
+   "median": 0.2047,
+   "p90": 0.3294
+  },
+  "legends": {
+   "A": [
+    516.0,
+    801.5
+   ],
+   "B": [
+    961.5,
+    895.5
+   ],
+   "C": [
+    764.0,
+    893.0
+   ],
+   "D": [
+    716.0,
+    802.0
+   ],
+   "E": [
+    690.5,
+    711.5
+   ],
+   "F": [
+    814.0,
+    802.0
+   ],
+   "F0": [
+    573.5,
+    533.5
+   ],
+   "F1": [
+    670.5,
+    534.5
+   ],
+   "F2": [
+    766.0,
+    535.5
+   ],
+   "F3": [
+    862.5,
+    534.5
+   ],
+   "F4": [
+    961.0,
+    535.5
+   ],
+   "F5": [
+    1054.5,
+    537.5
+   ],
+   "F6": [
+    1151.0,
+    537.0
+   ],
+   "F7": [
+    1245.0,
+    539.0
+   ],
+   "F8": [
+    1341.0,
+    539.5
+   ],
+   "F9": [
+    1435.5,
+    540.0
+   ],
+   "G": [
+    913.0,
+    803.5
+   ],
+   "H": [
+    1010.0,
+    803.5
+   ],
+   "I": [
+    1179.5,
+    715.5
+   ],
+   "J": [
+    1110.0,
+    803.5
+   ],
+   "K": [
+    1206.5,
+    804.5
+   ],
+   "L": [
+    1304.0,
+    805.0
+   ],
+   "M": [
+    1160.0,
+    895.0
+   ],
+   "N": [
+    1064.0,
+    894.5
+   ],
+   "O": [
+    1275.5,
+    714.5
+   ],
+   "P": [
+    1371.0,
+    716.0
+   ],
+   "Q": [
+    494.5,
+    709.5
+   ],
+   "R": [
+    788.0,
+    711.5
+   ],
+   "S": [
+    615.5,
+    800.5
+   ],
+   "T": [
+    886.5,
+    712.5
+   ],
+   "U": [
+    1081.5,
+    713.5
+   ],
+   "V": [
+    863.5,
+    893.5
+   ],
+   "W": [
+    593.0,
+    710.5
+   ],
+   "X": [
+    664.5,
+    893.5
+   ],
+   "Y": [
+    983.5,
+    712.5
+   ],
+   "Z": [
+    565.5,
+    893.0
+   ]
+  },
+  "model": "homography",
+  "n": 36,
+  "over3mm": 0,
+  "verdict": "pass",
+  "worst": [
+   [
+    "N",
+    0.588
+   ],
+   [
+    "F4",
+    0.5506
+   ],
+   [
+    "P",
+    0.4108
+   ],
+   [
+    "R",
+    0.3383
+   ],
+   [
+    "I",
+    0.3206
+   ],
+   [
+    "Y",
+    0.3138
+   ],
+   [
+    "J",
+    0.3038
+   ],
+   [
+    "F6",
+    0.3036
+   ],
+   [
+    "B",
+    0.2918
+   ],
+   [
+    "Z",
+    0.2759
+   ]
+  ]
+ },
+ "parallax": {
+  "fPx": 2470.9141,
+  "hMm": 535.6403,
+  "jackknife": {
+   "fPxSe": 1670.6609,
+   "hMmSe": 354.894,
+   "n": 50
+  },
+  "rawWidthSeMm": 0.8475,
+  "what": "Camera from the key fit alone (square pixels, principal point at the centre, f from the right-angle constraint), with a jackknife over the keys; the edge depths are assumed",
+  "widthIfDepthAssumedMm": {
+   "10": 410.9985,
+   "15": 414.7647,
+   "20": 418.5309,
+   "25": 422.2972
+  }
+ },
+ "thresholds": {
+  "mapping": "every name in BBC_KEYS has exactly one K1 keycap, BREAK one and the second SHIFT one, and no keycap is left over; a machine key K1 lacks is a STOP",
+  "o1": "O1 to K1, each key held out: median at most 1.0 mm, 90th percentile at most 2.0, largest at most 3.0 to pass; STOP if the median is over 1.5 or more than five keys are over 3.0; at least 30 keys",
+  "o3": "O3 to K1, each key held out, as O1: recorded, not a stop"
+ },
+ "verdicts": {
+  "mapping": "pass",
+  "o1": "pass",
+  "o3": "pass"
+ }
+}

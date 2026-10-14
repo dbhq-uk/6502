@@ -1,0 +1,3340 @@
+{
+ "afterRun": {"text": "Both held-out checks failed on the one run (13 October 2026): the manual's places (IC94 97.22 mm off, four more over 10 mm) and the markings read on I5 (11 of 80 disagree). The model keeps the scan's footprints as places and table 8.1's parts as identities, and its fitted set follows the machine the page emulates (the disc interface fitted, no Econet or speech), not the board in I5.", "what": "Added by hand after the run, on 13 October 2026 after review; nothing the run wrote was changed"},
+ "about": "Task 5 of the BBC Micro models plan: every part on the Issue 7 board, placed on the bare scans' footprints (registration.json) in the board frame (frame.json), named from table 8.1 of the Service Manual (D1, through ic-table.json), and checked against the manual's places and the markings on I5; I6 read and recorded. Written by board_parts.py; every figure here is a measurement made on the date of the journal entry that quotes it. `model` is what site/src/models/bbc-micro-board-parts.mjs exports.",
+ "clashes": [],
+ "fitted": {
+  "fitted": ["IC1", "IC2", "IC3", "IC4", "IC5", "IC6", "IC7", "IC8", "IC9", "IC10", "IC11", "IC12", "IC13", "IC14", "IC15", "IC16", "IC17", "IC18", "IC19", "IC20", "IC21", "IC22", "IC23", "IC24", "IC25", "IC26", "IC27", "IC28", "IC29", "IC30", "IC31", "IC32", "IC33", "IC34", "IC35", "IC36", "IC37", "IC38", "IC39", "IC40", "IC41", "IC42", "IC43", "IC44", "IC45", "IC46", "IC47", "IC48", "IC49", "IC50", "IC51", "IC52", "IC53", "IC54", "IC55", "IC56", "IC57", "IC58", "IC59", "IC60", "IC61", "IC62", "IC63", "IC64", "IC65", "IC66", "IC67", "IC68", "IC69", "IC70", "IC71", "IC72", "IC73", "IC74", "IC75", "IC76", "IC77", "IC78", "IC79", "IC80", "IC81", "IC82", "IC83", "IC84", "IC85", "IC86", "IC87", "IC88"],
+  "notFitted": [
+   ["IC89","not fitted: an Econet part, which modification E, \"Add Econet Interface\" (D1 PDF page 39), fits; the machine has no Econet"],
+   ["IC90","not fitted: table 8.1 says not fitted"],
+   ["IC91","not fitted: an Econet part, which modification E, \"Add Econet Interface\" (D1 PDF page 39), fits; the machine has no Econet"],
+   ["IC92","not fitted: table 8.1 says not fitted"],
+   ["IC93","not fitted: an Econet part, which modification E, \"Add Econet Interface\" (D1 PDF page 39), fits; the machine has no Econet"],
+   ["IC94","not fitted: an Econet part, which modification E, \"Add Econet Interface\" (D1 PDF page 39), fits; the machine has no Econet"],
+   ["IC95","not fitted: an Econet part, which modification E, \"Add Econet Interface\" (D1 PDF page 39), fits; the machine has no Econet"],
+   ["IC96","not fitted: an Econet part, which modification E, \"Add Econet Interface\" (D1 PDF page 39), fits; the machine has no Econet"],
+   ["IC97","not fitted: an Econet part, which modification E, \"Add Econet Interface\" (D1 PDF page 39), fits; the machine has no Econet"],
+   ["IC98","not fitted: a speech part, which modification C, \"Add Speech Option\" (D1 PDF page 37), fits; the machine has no speech"],
+   ["IC99","not fitted: a speech part, which modification C, \"Add Speech Option\" (D1 PDF page 37), fits; the machine has no speech"],
+   ["IC100","not fitted: a sideways ROM socket left empty, as the machine runs BASIC and the DFS only"],
+   ["IC101","not fitted: a sideways ROM socket left empty, as the machine runs BASIC and the DFS only"]
+  ],
+  "what": "ic-table.json's fitted set, as docs/bbc-micro/facts/models.md \"The fitted set\" records it"
+ },
+ "i5": {
+  "registration": {
+   "chips": 14,
+   "fitMm": {
+    "max": 0.854,
+    "median": 0.35,
+    "p90": 0.694
+   },
+   "folds": "each chip held out in turn",
+   "heldOutMm": {
+    "max": 1.036,
+    "median": 0.363,
+    "p90": 0.842
+   },
+   "model": "homography",
+   "params": {
+    "H": [
+     [0.18184604797517315,-0.0005406559316087455,-31.051232169092295],
+     [0.0008775706209253107,0.18035295779758026,-26.79232503081796],
+     [2.1740144412574053e-06,-9.267609267348232e-07,1.0]
+    ]
+   },
+   "points": 56,
+   "worst": [
+    [55,1.036],
+    [33,1.01],
+    [35,0.991],
+    [53,0.922],
+    [49,0.912],
+    [36,0.849],
+    [51,0.835],
+    [38,0.823],
+    [2,0.772],
+    [50,0.76]
+   ]
+  },
+  "verdict": "pass",
+  "what": "Task 4's registration of I5 to the board frame, refitted unrounded on the same marks (marks.json i5Pins), each chip held out: the same fit, not a new check"
+ },
+ "identities": {
+  "I5": {
+   "IC1": {
+    "reading": "R6502AP R6502-13 8304",
+    "verdict": "agrees",
+    "why": null
+   },
+   "IC10": {
+    "reading": "SB8312 DM81LS95AN",
+    "verdict": "agrees",
+    "why": null
+   },
+   "IC100": {
+    "reading": null,
+    "verdict": "not compared",
+    "why": "a ROM socket: its identity on the machine is the ROM in it"
+   },
+   "IC101": {
+    "reading": null,
+    "verdict": "not compared",
+    "why": "a ROM socket: its identity on the machine is the ROM in it"
+   },
+   "IC11": {
+    "reading": "SB8312 DM81LS95AN",
+    "verdict": "agrees",
+    "why": null
+   },
+   "IC12": {
+    "reading": "SB8312 DM81LS95AN",
+    "verdict": "agrees",
+    "why": null
+   },
+   "IC13": {
+    "reading": "SB8312 DM81LS95AN",
+    "verdict": "agrees",
+    "why": null
+   },
+   "IC14": {
+    "reading": "74LS245 PC",
+    "verdict": "agrees",
+    "why": null
+   },
+   "IC15": {
+    "reading": "74LS273N K8240 SA",
+    "verdict": "agrees",
+    "why": null
+   },
+   "IC16": {
+    "reading": null,
+    "verdict": "unread",
+    "why": "an 8-pin part, its marking too small and blurred on I5 to read (a TI mark shows)"
+   },
+   "IC17": {
+    "reading": "MALAYSIA 319AC LM324N",
+    "verdict": "agrees",
+    "why": null
+   },
+   "IC18": {
+    "reading": "ENGLAND 318A SN76489AN",
+    "verdict": "agrees",
+    "why": null
+   },
+   "IC19": {
+    "reading": null,
+    "verdict": "unread",
+    "why": "an 8-pin part, its marking too small and blurred on I5 to read (LM shows, the rest not)"
+   },
+   "IC2": {
+    "reading": "2L1 HD46505SP JAPAN HD6845SP",
+    "verdict": "agrees",
+    "why": null
+   },
+   "IC20": {
+    "reading": "PORTUGAL 8319X SN74LS139N",
+    "verdict": "agrees",
+    "why": null
+   },
+   "IC21": {
+    "reading": "SN74LS00N I8306",
+    "verdict": "agrees",
+    "why": null
+   },
+   "IC22": {
+    "reading": "SN74LS30N I8322",
+    "verdict": "agrees",
+    "why": null
+   },
+   "IC23": {
+    "reading": "SN74LS30N I8322",
+    "verdict": "agrees",
+    "why": null
+   },
+   "IC24": {
+    "reading": "SN74LS138N 8239",
+    "verdict": "agrees",
+    "why": null
+   },
+   "IC25": {
+    "reading": "SP8319 DM74LS20N",
+    "verdict": "agrees",
+    "why": null
+   },
+   "IC26": {
+    "reading": "PORTUGAL 8319X SN74LS139N",
+    "verdict": "agrees",
+    "why": null
+   },
+   "IC27": {
+    "reading": "7438N K8251 SA",
+    "verdict": "agrees",
+    "why": null
+   },
+   "IC28": {
+    "reading": "PORTUGAL 8319D SN74LS51N",
+    "verdict": "agrees",
+    "why": null
+   },
+   "IC29": {
+    "reading": "SN74LS32N",
+    "verdict": "agrees",
+    "why": null
+   },
+   "IC3": {
+    "reading": "R6522P01 R6522-31 8318",
+    "verdict": "agrees",
+    "why": null
+   },
+   "IC30": {
+    "reading": "74LS74AN K8309 SA",
+    "verdict": "agrees",
+    "why": null
+   },
+   "IC31": {
+    "reading": "74LS74AN K8309 SA",
+    "verdict": "disagrees",
+    "why": null
+   },
+   "IC32": {
+    "reading": "SN74LS259N I8318",
+    "verdict": "agrees",
+    "why": null
+   },
+   "IC33": {
+    "reading": "MALAYSIA 319C SN74LS04N",
+    "verdict": "agrees",
+    "why": null
+   },
+   "IC34": {
+    "reading": "74LS74AN K8309 SA",
+    "verdict": "agrees",
+    "why": null
+   },
+   "IC35": {
+    "reading": "S=M8320 LM324N",
+    "verdict": "agrees",
+    "why": null
+   },
+   "IC36": {
+    "reading": "PORTUGAL 8314C SN74LS10N",
+    "verdict": "agrees",
+    "why": null
+   },
+   "IC37": {
+    "reading": "MALAYSIA 319C SN74LS04N",
+    "verdict": "agrees",
+    "why": null
+   },
+   "IC38": {
+    "reading": "SP8319 DM74LS86N",
+    "verdict": "agrees",
+    "why": null
+   },
+   "IC39": {
+    "reading": "PORTUGAL 8314B SN74LS283N",
+    "verdict": "agrees",
+    "why": null
+   },
+   "IC4": {
+    "reading": "F6850P 8313 USA",
+    "verdict": "agrees",
+    "why": null
+   },
+   "IC40": {
+    "reading": "PORTUGAL 8314B SN74S00N",
+    "verdict": "agrees",
+    "why": null
+   },
+   "IC41": {
+    "reading": "SP234 DM74LS02N",
+    "verdict": "agrees",
+    "why": null
+   },
+   "IC42": {
+    "reading": "PORTUGAL 8314B SN74LS163AN",
+    "verdict": "agrees",
+    "why": null
+   },
+   "IC43": {
+    "reading": "SP250 DM74S04N",
+    "verdict": "agrees",
+    "why": null
+   },
+   "IC44": {
+    "reading": "74LS74AN K8309 SA",
+    "verdict": "agrees",
+    "why": null
+   },
+   "IC45": {
+    "reading": "I8303 DM74S139N",
+    "verdict": "agrees",
+    "why": null
+   },
+   "IC46": {
+    "reading": "ENGLAND 249E SN74S74N",
+    "verdict": "agrees",
+    "why": null
+   },
+   "IC47": {
+    "reading": "SP8319 DM74LS86N",
+    "verdict": "agrees",
+    "why": null
+   },
+   "IC48": {
+    "reading": "SP8319 DM74LS86N",
+    "verdict": "agrees",
+    "why": null
+   },
+   "IC49": {
+    "reading": "SN74LS00N I8306",
+    "verdict": "agrees",
+    "why": null
+   },
+   "IC5": {
+    "reading": "SAA 5050 2188 DSG8314M5S",
+    "verdict": "disagrees",
+    "why": null
+   },
+   "IC50": {
+    "reading": "SN74LS00N I8306",
+    "verdict": "agrees",
+    "why": null
+   },
+   "IC51": {
+    "reading": "8308 HN613128PB04 ACORN JAPAN COMPUTERS LTD",
+    "verdict": "not compared",
+    "why": "a ROM socket: its identity on the machine is the ROM in it"
+   },
+   "IC52": {
+    "reading": "8308 HN613128PB05 ACORN JAPAN COMPUTERS LTD",
+    "verdict": "not compared",
+    "why": "a ROM socket: its identity on the machine is the ROM in it"
+   },
+   "IC53": {
+    "reading": "JAPAN 3E3 HM4816AP-11",
+    "verdict": "agrees",
+    "why": null
+   },
+   "IC54": {
+    "reading": "JAPAN 3E3 HM4816AP-11",
+    "verdict": "agrees",
+    "why": null
+   },
+   "IC55": {
+    "reading": "JAPAN 3E3 HM4816AP-11",
+    "verdict": "agrees",
+    "why": null
+   },
+   "IC56": {
+    "reading": "JAPAN 3E3 HM4816AP-11",
+    "verdict": "agrees",
+    "why": null
+   },
+   "IC57": {
+    "reading": "JAPAN 3E3 HM4816AP-11",
+    "verdict": "agrees",
+    "why": null
+   },
+   "IC58": {
+    "reading": "JAPAN 3E3 HM4816AP-11",
+    "verdict": "agrees",
+    "why": null
+   },
+   "IC59": {
+    "reading": "JAPAN 3E3 HM4816AP-11",
+    "verdict": "agrees",
+    "why": null
+   },
+   "IC6": {
+    "reading": null,
+    "verdict": "unread",
+    "why": "under a black cover (a heat sink), no marking shows"
+   },
+   "IC60": {
+    "reading": "JAPAN 3E3 HM4816AP-11",
+    "verdict": "agrees",
+    "why": null
+   },
+   "IC61": {
+    "reading": "MOSTEK 8405 MK4516N-11",
+    "verdict": "disagrees",
+    "why": null
+   },
+   "IC62": {
+    "reading": "MOSTEK 8405 MK4516N-11",
+    "verdict": "disagrees",
+    "why": null
+   },
+   "IC63": {
+    "reading": "MOSTEK 8405 MK4516N-11",
+    "verdict": "disagrees",
+    "why": null
+   },
+   "IC64": {
+    "reading": "MOSTEK 8405 MK4516N-11",
+    "verdict": "disagrees",
+    "why": null
+   },
+   "IC65": {
+    "reading": "MOSTEK 8405 MK4516N-11",
+    "verdict": "disagrees",
+    "why": null
+   },
+   "IC66": {
+    "reading": "MOSTEK 8405 MK4516N-11",
+    "verdict": "disagrees",
+    "why": null
+   },
+   "IC67": {
+    "reading": "MOSTEK 8405 MK4516N-11",
+    "verdict": "disagrees",
+    "why": null
+   },
+   "IC68": {
+    "reading": "MOSTEK 8405 MK4516N-11",
+    "verdict": "disagrees",
+    "why": null
+   },
+   "IC69": {
+    "reading": "8329 SY6522",
+    "verdict": "agrees",
+    "why": null
+   },
+   "IC7": {
+    "reading": "FERRANTI ULA 2C199E-7 8317",
+    "verdict": "agrees",
+    "why": null
+   },
+   "IC70": {
+    "reading": "74LS244N 8225 SA",
+    "verdict": "agrees",
+    "why": null
+   },
+   "IC71": {
+    "reading": "74LS244N K8243 SA",
+    "verdict": "agrees",
+    "why": null
+   },
+   "IC72": {
+    "reading": "PORTUGAL 8319D SN74LS245N",
+    "verdict": "agrees",
+    "why": null
+   },
+   "IC73": {
+    "reading": "NEC JAPAN 8409K9 D7002C",
+    "verdict": "agrees",
+    "why": null
+   },
+   "IC74": {
+    "reading": "I8408 DS88LS120N",
+    "verdict": "agrees",
+    "why": null
+   },
+   "IC75": {
+    "reading": "SI8344 DS3691N AM26LS30PC",
+    "verdict": "agrees",
+    "why": null
+   },
+   "IC76": {
+    "reading": "74LS163AN V8240 SA",
+    "verdict": "agrees",
+    "why": null
+   },
+   "IC77": {
+    "reading": "74LS00N 8218 S",
+    "verdict": "disagrees",
+    "why": null
+   },
+   "IC78": {
+    "reading": null,
+    "verdict": "unread",
+    "why": "an empty socket on I5"
+   },
+   "IC79": {
+    "reading": null,
+    "verdict": "unread",
+    "why": "an empty socket on I5"
+   },
+   "IC8": {
+    "reading": "SB8312 DM81LS95AN",
+    "verdict": "agrees",
+    "why": null
+   },
+   "IC80": {
+    "reading": null,
+    "verdict": "unread",
+    "why": "an empty socket on I5"
+   },
+   "IC81": {
+    "reading": null,
+    "verdict": "unread",
+    "why": "an empty socket on I5"
+   },
+   "IC82": {
+    "reading": null,
+    "verdict": "unread",
+    "why": "an empty socket on I5"
+   },
+   "IC83": {
+    "reading": null,
+    "verdict": "unread",
+    "why": "an empty socket on I5"
+   },
+   "IC84": {
+    "reading": null,
+    "verdict": "unread",
+    "why": "an empty socket on I5"
+   },
+   "IC85": {
+    "reading": null,
+    "verdict": "unread",
+    "why": "an empty socket on I5"
+   },
+   "IC86": {
+    "reading": null,
+    "verdict": "unread",
+    "why": "an empty socket on I5"
+   },
+   "IC87": {
+    "reading": "PORTUGAL 8314A SN74LS123N",
+    "verdict": "agrees",
+    "why": null
+   },
+   "IC88": {
+    "reading": "M27C64A -15F1 SINGAPORE, with a hand label LFS 1.40",
+    "verdict": "not compared",
+    "why": "a ROM socket: its identity on the machine is the ROM in it"
+   },
+   "IC89": {
+    "reading": "F68B54P 8313 PHILIPPINES",
+    "verdict": "agrees",
+    "why": null
+   },
+   "IC9": {
+    "reading": "SB8312 DM81LS95AN",
+    "verdict": "agrees",
+    "why": null
+   },
+   "IC91": {
+    "reading": "MALAYSIA 310K SN74LS132N",
+    "verdict": "agrees",
+    "why": null
+   },
+   "IC93": {
+    "reading": "ENGLAND 314A SN75159N",
+    "verdict": "agrees",
+    "why": null
+   },
+   "IC94": {
+    "reading": "S=M8319 LM319N",
+    "verdict": "agrees",
+    "why": null
+   },
+   "IC95": {
+    "reading": "S=M8319 LM319N",
+    "verdict": "agrees",
+    "why": null
+   },
+   "IC96": {
+    "reading": "74LS244N 8231 SA",
+    "verdict": "agrees",
+    "why": null
+   },
+   "IC97": {
+    "reading": "74LS74AN K8309 SA",
+    "verdict": "agrees",
+    "why": null
+   },
+   "IC98": {
+    "reading": null,
+    "verdict": "unread",
+    "why": "an empty socket on I5"
+   },
+   "IC99": {
+    "reading": null,
+    "verdict": "unread",
+    "why": "an empty socket on I5"
+   }
+  },
+  "I6": {
+   "IC1": {
+    "reading": "S 8434 SYU6502A",
+    "verdict": "agrees",
+    "why": null
+   },
+   "IC10": {
+    "reading": "SP8412 DM81LS95AN",
+    "verdict": "agrees",
+    "why": null
+   },
+   "IC100": {
+    "reading": null,
+    "verdict": "not compared",
+    "why": "a ROM socket: its identity on the machine is the ROM in it"
+   },
+   "IC101": {
+    "reading": null,
+    "verdict": "not compared",
+    "why": "a ROM socket: its identity on the machine is the ROM in it"
+   },
+   "IC11": {
+    "reading": "SP8412 DM81LS95AN",
+    "verdict": "agrees",
+    "why": null
+   },
+   "IC12": {
+    "reading": "SP8412 DM81LS95AN",
+    "verdict": "agrees",
+    "why": null
+   },
+   "IC13": {
+    "reading": "SP8412 DM81LS95AN",
+    "verdict": "agrees",
+    "why": null
+   },
+   "IC14": {
+    "reading": "MALAYSIA 4285R SN74LS245N",
+    "verdict": "agrees",
+    "why": null
+   },
+   "IC15": {
+    "reading": "74LS273N A VV8433 BV",
+    "verdict": "agrees",
+    "why": null
+   },
+   "IC16": {
+    "reading": null,
+    "verdict": "unread",
+    "why": "an 8-pin part, too small and dark to read"
+   },
+   "IC17": {
+    "reading": "ENGLAND 432A LM324N",
+    "verdict": "agrees",
+    "why": null
+   },
+   "IC18": {
+    "reading": "ENGLAND 419X SN76489AN",
+    "verdict": "agrees",
+    "why": null
+   },
+   "IC19": {
+    "reading": "M8416 LM386N-1",
+    "verdict": "agrees",
+    "why": null
+   },
+   "IC2": {
+    "reading": "4H4 HD46505SP JAPAN HD6845SP",
+    "verdict": "agrees",
+    "why": null
+   },
+   "IC20": {
+    "reading": "P8428 DM74LS139N",
+    "verdict": "agrees",
+    "why": null
+   },
+   "IC21": {
+    "reading": "74LS00N A KK8429 HU",
+    "verdict": "agrees",
+    "why": null
+   },
+   "IC22": {
+    "reading": "74LS30N K8425 SA",
+    "verdict": "agrees",
+    "why": null
+   },
+   "IC23": {
+    "reading": "74LS30N K8425 SA",
+    "verdict": "agrees",
+    "why": null
+   },
+   "IC24": {
+    "reading": "74LS138N 8422 B",
+    "verdict": "agrees",
+    "why": null
+   },
+   "IC25": {
+    "reading": "74LS20N K8427 SA",
+    "verdict": "agrees",
+    "why": null
+   },
+   "IC26": {
+    "reading": "P8428 DM74LS139N",
+    "verdict": "agrees",
+    "why": null
+   },
+   "IC27": {
+    "reading": "7438N A KK8430 EU",
+    "verdict": "agrees",
+    "why": null
+   },
+   "IC28": {
+    "reading": "74LS51N A KK8423 ES",
+    "verdict": "agrees",
+    "why": null
+   },
+   "IC29": {
+    "reading": "P8424 DM74LS32N",
+    "verdict": "agrees",
+    "why": null
+   },
+   "IC3": {
+    "reading": "R6522AP R6522-33 8424",
+    "verdict": "agrees",
+    "why": null
+   },
+   "IC30": {
+    "reading": "P8428 DM74LS74AN",
+    "verdict": "agrees",
+    "why": null
+   },
+   "IC31": {
+    "reading": "P8428 DM74LS74AN",
+    "verdict": "disagrees",
+    "why": null
+   },
+   "IC32": {
+    "reading": null,
+    "verdict": "unread",
+    "why": "too faint to read"
+   },
+   "IC33": {
+    "reading": "P8420 DM74LS04N",
+    "verdict": "agrees",
+    "why": null
+   },
+   "IC34": {
+    "reading": "PORTUGAL 8435A SN74LS74AN",
+    "verdict": "agrees",
+    "why": null
+   },
+   "IC35": {
+    "reading": "ENGLAND 435A LM324N",
+    "verdict": "agrees",
+    "why": null
+   },
+   "IC36": {
+    "reading": "MALAYSIA 432CR SN74LS10N",
+    "verdict": "agrees",
+    "why": null
+   },
+   "IC37": {
+    "reading": "P8420 DM74LS04N",
+    "verdict": "agrees",
+    "why": null
+   },
+   "IC38": {
+    "reading": "74LS86N A KK8432 BU",
+    "verdict": "agrees",
+    "why": null
+   },
+   "IC39": {
+    "reading": "P8428 DM74LS283N",
+    "verdict": "agrees",
+    "why": null
+   },
+   "IC4": {
+    "reading": null,
+    "verdict": "unread",
+    "why": "glare on its top"
+   },
+   "IC40": {
+    "reading": "74S00N A KK8433 EV",
+    "verdict": "agrees",
+    "why": null
+   },
+   "IC41": {
+    "reading": null,
+    "verdict": "unread",
+    "why": "too faint to read"
+   },
+   "IC42": {
+    "reading": "P8416 DM74LS163AN",
+    "verdict": "agrees",
+    "why": null
+   },
+   "IC43": {
+    "reading": "MALAYSIA 432AR SN74S04N",
+    "verdict": "agrees",
+    "why": null
+   },
+   "IC44": {
+    "reading": "P8428 DM74LS74AN",
+    "verdict": "agrees",
+    "why": null
+   },
+   "IC45": {
+    "reading": "74S139N K8410 SA",
+    "verdict": "agrees",
+    "why": null
+   },
+   "IC46": {
+    "reading": null,
+    "verdict": "unread",
+    "why": "the crop through the rough fit falls across two chips (no point was marked at that end of the board)"
+   },
+   "IC47": {
+    "reading": null,
+    "verdict": "unread",
+    "why": "the crop through the rough fit falls across two chips (no point was marked at that end of the board)"
+   },
+   "IC48": {
+    "reading": null,
+    "verdict": "unread",
+    "why": "the crop through the rough fit falls across two chips (no point was marked at that end of the board)"
+   },
+   "IC49": {
+    "reading": null,
+    "verdict": "unread",
+    "why": "the crop through the rough fit falls across two chips (no point was marked at that end of the board)"
+   },
+   "IC5": {
+    "reading": "SAA 5050 5894 GSG8414M5S",
+    "verdict": "disagrees",
+    "why": null
+   },
+   "IC50": {
+    "reading": null,
+    "verdict": "unread",
+    "why": "the crop through the rough fit falls across two chips (no point was marked at that end of the board)"
+   },
+   "IC51": {
+    "reading": "8438 HN613128PB04 ACORN W.GERMANY COMPUTERS LTD",
+    "verdict": "not compared",
+    "why": "a ROM socket: its identity on the machine is the ROM in it"
+   },
+   "IC52": {
+    "reading": "8421 HN613128PB05 ACORN JAPAN COMPUTERS LTD",
+    "verdict": "not compared",
+    "why": "a ROM socket: its identity on the machine is the ROM in it"
+   },
+   "IC53": {
+    "reading": null,
+    "verdict": "unread",
+    "why": "the crop through the rough fit is not centred on its own chip, though every RAM on I6 reads HM4816AP-11"
+   },
+   "IC54": {
+    "reading": null,
+    "verdict": "unread",
+    "why": "the crop through the rough fit is not centred on its own chip, though every RAM on I6 reads HM4816AP-11"
+   },
+   "IC55": {
+    "reading": null,
+    "verdict": "unread",
+    "why": "the crop through the rough fit is not centred on its own chip, though every RAM on I6 reads HM4816AP-11"
+   },
+   "IC56": {
+    "reading": null,
+    "verdict": "unread",
+    "why": "the crop through the rough fit is not centred on its own chip, though every RAM on I6 reads HM4816AP-11"
+   },
+   "IC57": {
+    "reading": null,
+    "verdict": "unread",
+    "why": "the crop through the rough fit is not centred on its own chip, though every RAM on I6 reads HM4816AP-11"
+   },
+   "IC58": {
+    "reading": null,
+    "verdict": "unread",
+    "why": "the crop through the rough fit is not centred on its own chip, though every RAM on I6 reads HM4816AP-11"
+   },
+   "IC59": {
+    "reading": null,
+    "verdict": "unread",
+    "why": "the crop through the rough fit is not centred on its own chip, though every RAM on I6 reads HM4816AP-11"
+   },
+   "IC6": {
+    "reading": "VTI 423 V 2787 VC2069 201647 ACORN COMPUTER KOREA-A",
+    "verdict": "disagrees",
+    "why": null
+   },
+   "IC60": {
+    "reading": null,
+    "verdict": "unread",
+    "why": "the crop through the rough fit is not centred on its own chip, though every RAM on I6 reads HM4816AP-11"
+   },
+   "IC61": {
+    "reading": null,
+    "verdict": "unread",
+    "why": "the crop through the rough fit is not centred on its own chip, though every RAM on I6 reads HM4816AP-11"
+   },
+   "IC62": {
+    "reading": null,
+    "verdict": "unread",
+    "why": "the crop through the rough fit is not centred on its own chip, though every RAM on I6 reads HM4816AP-11"
+   },
+   "IC63": {
+    "reading": null,
+    "verdict": "unread",
+    "why": "the crop through the rough fit is not centred on its own chip, though every RAM on I6 reads HM4816AP-11"
+   },
+   "IC64": {
+    "reading": null,
+    "verdict": "unread",
+    "why": "the crop through the rough fit is not centred on its own chip, though every RAM on I6 reads HM4816AP-11"
+   },
+   "IC65": {
+    "reading": null,
+    "verdict": "unread",
+    "why": "the crop through the rough fit is not centred on its own chip, though every RAM on I6 reads HM4816AP-11"
+   },
+   "IC66": {
+    "reading": null,
+    "verdict": "unread",
+    "why": "the crop through the rough fit is not centred on its own chip, though every RAM on I6 reads HM4816AP-11"
+   },
+   "IC67": {
+    "reading": null,
+    "verdict": "unread",
+    "why": "the crop through the rough fit is not centred on its own chip, though every RAM on I6 reads HM4816AP-11"
+   },
+   "IC68": {
+    "reading": null,
+    "verdict": "unread",
+    "why": "the crop through the rough fit is not centred on its own chip, though every RAM on I6 reads HM4816AP-11"
+   },
+   "IC69": {
+    "reading": "R6522AP R6522-33 8424",
+    "verdict": "agrees",
+    "why": null
+   },
+   "IC7": {
+    "reading": "FERRANTI ULA 2C199E-7 8420",
+    "verdict": "agrees",
+    "why": null
+   },
+   "IC70": {
+    "reading": "74LS244N A VV8429 FU",
+    "verdict": "agrees",
+    "why": null
+   },
+   "IC71": {
+    "reading": "74LS244N A VV8429 FU",
+    "verdict": "agrees",
+    "why": null
+   },
+   "IC72": {
+    "reading": "PORTUGAL SN74LS245N",
+    "verdict": "agrees",
+    "why": null
+   },
+   "IC73": {
+    "reading": "NEC JAPAN 8420K9 D7002C",
+    "verdict": "agrees",
+    "why": null
+   },
+   "IC74": {
+    "reading": "SI8420 DS88LS120N",
+    "verdict": "agrees",
+    "why": null
+   },
+   "IC75": {
+    "reading": "SI8420 DS3691N AM26LS30PC",
+    "verdict": "agrees",
+    "why": null
+   },
+   "IC76": {
+    "reading": "SP8416 DM74LS163AN",
+    "verdict": "agrees",
+    "why": null
+   },
+   "IC77": {
+    "reading": "74LS00N A KK8429 HU",
+    "verdict": "disagrees",
+    "why": null
+   },
+   "IC78": {
+    "reading": "P8271 V4340008 INTEL 78",
+    "verdict": "agrees",
+    "why": null
+   },
+   "IC79": {
+    "reading": "7438N A KK8425 ET",
+    "verdict": "agrees",
+    "why": null
+   },
+   "IC8": {
+    "reading": "SP8412 DM81LS95AN",
+    "verdict": "agrees",
+    "why": null
+   },
+   "IC80": {
+    "reading": "7438N A KK8425 ET",
+    "verdict": "agrees",
+    "why": null
+   },
+   "IC81": {
+    "reading": "MALAYSIA 432AR SN74LS393N",
+    "verdict": "agrees",
+    "why": null
+   },
+   "IC82": {
+    "reading": "MALAYSIA 432CR SN74LS10N",
+    "verdict": "agrees",
+    "why": null
+   },
+   "IC83": {
+    "reading": null,
+    "verdict": "unread",
+    "why": "too dark to read"
+   },
+   "IC84": {
+    "reading": null,
+    "verdict": "unread",
+    "why": "too dark to read"
+   },
+   "IC85": {
+    "reading": "HEF4020BP HSS8422 1",
+    "verdict": "agrees",
+    "why": null
+   },
+   "IC86": {
+    "reading": "MALAYSIA 432AR SN74LS393N",
+    "verdict": "agrees",
+    "why": null
+   },
+   "IC87": {
+    "reading": "SN74LS123N",
+    "verdict": "agrees",
+    "why": null
+   },
+   "IC88": {
+    "reading": "CN61014N 00201666-03 ACORN KK8430 -U",
+    "verdict": "not compared",
+    "why": "a ROM socket: its identity on the machine is the ROM in it"
+   },
+   "IC89": {
+    "reading": null,
+    "verdict": "unread",
+    "why": "a bare footprint on I6: not fitted on that board"
+   },
+   "IC9": {
+    "reading": "SP8412 DM81LS95AN",
+    "verdict": "agrees",
+    "why": null
+   },
+   "IC91": {
+    "reading": null,
+    "verdict": "unread",
+    "why": "a bare footprint on I6: not fitted on that board"
+   },
+   "IC93": {
+    "reading": null,
+    "verdict": "unread",
+    "why": "a bare footprint on I6: not fitted on that board"
+   },
+   "IC94": {
+    "reading": null,
+    "verdict": "unread",
+    "why": "a bare footprint on I6: not fitted on that board"
+   },
+   "IC95": {
+    "reading": null,
+    "verdict": "unread",
+    "why": "a bare footprint on I6: not fitted on that board"
+   },
+   "IC96": {
+    "reading": null,
+    "verdict": "unread",
+    "why": "a bare footprint on I6: not fitted on that board"
+   },
+   "IC97": {
+    "reading": null,
+    "verdict": "unread",
+    "why": "a bare footprint on I6: not fitted on that board"
+   },
+   "IC98": {
+    "reading": null,
+    "verdict": "unread",
+    "why": "an empty socket on I6"
+   },
+   "IC99": {
+    "reading": null,
+    "verdict": "unread",
+    "why": "an empty socket on I6"
+   }
+  },
+  "row": {
+   "disagree": ["IC5", "IC31", "IC61", "IC62", "IC63", "IC64", "IC65", "IC66", "IC67", "IC68", "IC77"],
+   "populated": 83,
+   "read": 80,
+   "verdict": "fail"
+  },
+  "what": "Each IC's marking read by hand on a crop (marks.json parts.identities), against table 8.1's part by the rule fixed before any crop was read (board_parts.py, step 4); I6 recorded, not judged"
+ },
+ "manual": {
+  "check": {
+   "limitMm": 10.0,
+   "matrix": [
+    [0.998,-0.014,-1.546],
+    [0.014,0.998,224.419]
+   ],
+   "maxMm": 97.216,
+   "medianMm": 1.437,
+   "perPart": {
+    "IC1": {
+     "dxMm": -0.58,
+     "dyMm": -2.411,
+     "offMm": 2.479
+    },
+    "IC10": {
+     "dxMm": -0.813,
+     "dyMm": 0.627,
+     "offMm": 1.027
+    },
+    "IC100": {
+     "dxMm": -0.523,
+     "dyMm": 0.505,
+     "offMm": 0.727
+    },
+    "IC101": {
+     "dxMm": -1.507,
+     "dyMm": 0.814,
+     "offMm": 1.713
+    },
+    "IC11": {
+     "dxMm": -0.223,
+     "dyMm": -0.099,
+     "offMm": 0.244
+    },
+    "IC12": {
+     "dxMm": -0.657,
+     "dyMm": 2.001,
+     "offMm": 2.106
+    },
+    "IC13": {
+     "dxMm": -0.188,
+     "dyMm": 1.817,
+     "offMm": 1.826
+    },
+    "IC14": {
+     "dxMm": 0.217,
+     "dyMm": -0.798,
+     "offMm": 0.826
+    },
+    "IC15": {
+     "dxMm": -0.56,
+     "dyMm": -0.591,
+     "offMm": 0.814
+    },
+    "IC16": {
+     "dxMm": 2.131,
+     "dyMm": -2.308,
+     "offMm": 3.141
+    },
+    "IC17": {
+     "dxMm": -0.124,
+     "dyMm": -3.721,
+     "offMm": 3.723
+    },
+    "IC18": {
+     "dxMm": -0.333,
+     "dyMm": -2.905,
+     "offMm": 2.924
+    },
+    "IC19": {
+     "dxMm": 0.068,
+     "dyMm": -1.819,
+     "offMm": 1.82
+    },
+    "IC2": {
+     "dxMm": 0.069,
+     "dyMm": -0.126,
+     "offMm": 0.144
+    },
+    "IC20": {
+     "dxMm": -0.774,
+     "dyMm": -0.69,
+     "offMm": 1.037
+    },
+    "IC21": {
+     "dxMm": -0.419,
+     "dyMm": -1.003,
+     "offMm": 1.087
+    },
+    "IC22": {
+     "dxMm": -1.087,
+     "dyMm": -0.738,
+     "offMm": 1.314
+    },
+    "IC23": {
+     "dxMm": 0.01,
+     "dyMm": -0.577,
+     "offMm": 0.577
+    },
+    "IC24": {
+     "dxMm": -2.653,
+     "dyMm": -0.893,
+     "offMm": 2.8
+    },
+    "IC25": {
+     "dxMm": 0.381,
+     "dyMm": -0.638,
+     "offMm": 0.743
+    },
+    "IC26": {
+     "dxMm": -0.46,
+     "dyMm": 0.031,
+     "offMm": 0.461
+    },
+    "IC27": {
+     "dxMm": 0.876,
+     "dyMm": -3.078,
+     "offMm": 3.2
+    },
+    "IC28": {
+     "dxMm": 1.054,
+     "dyMm": -2.246,
+     "offMm": 2.481
+    },
+    "IC29": {
+     "dxMm": 0.738,
+     "dyMm": -2.113,
+     "offMm": 2.238
+    },
+    "IC3": {
+     "dxMm": 0.658,
+     "dyMm": -1.188,
+     "offMm": 1.358
+    },
+    "IC30": {
+     "dxMm": 0.989,
+     "dyMm": -1.969,
+     "offMm": 2.204
+    },
+    "IC31": {
+     "dxMm": 1.434,
+     "dyMm": -1.784,
+     "offMm": 2.29
+    },
+    "IC32": {
+     "dxMm": 1.129,
+     "dyMm": -1.525,
+     "offMm": 1.898
+    },
+    "IC33": {
+     "dxMm": 1.613,
+     "dyMm": -2.733,
+     "offMm": 3.174
+    },
+    "IC34": {
+     "dxMm": 1.823,
+     "dyMm": -2.598,
+     "offMm": 3.174
+    },
+    "IC35": {
+     "dxMm": 2.194,
+     "dyMm": -1.808,
+     "offMm": 2.843
+    },
+    "IC36": {
+     "dxMm": 1.37,
+     "dyMm": -0.427,
+     "offMm": 1.435
+    },
+    "IC37": {
+     "dxMm": 0.373,
+     "dyMm": -0.236,
+     "offMm": 0.442
+    },
+    "IC38": {
+     "dxMm": 0.661,
+     "dyMm": -0.003,
+     "offMm": 0.661
+    },
+    "IC39": {
+     "dxMm": 10.437,
+     "dyMm": 0.446,
+     "offMm": 10.447
+    },
+    "IC4": {
+     "dxMm": 1.124,
+     "dyMm": -1.617,
+     "offMm": 1.969
+    },
+    "IC40": {
+     "dxMm": 0.434,
+     "dyMm": -0.844,
+     "offMm": 0.949
+    },
+    "IC41": {
+     "dxMm": 0.703,
+     "dyMm": -0.512,
+     "offMm": 0.87
+    },
+    "IC42": {
+     "dxMm": 0.997,
+     "dyMm": -11.823,
+     "offMm": 11.865
+    },
+    "IC43": {
+     "dxMm": 0.825,
+     "dyMm": -0.737,
+     "offMm": 1.107
+    },
+    "IC44": {
+     "dxMm": 0.732,
+     "dyMm": -0.427,
+     "offMm": 0.848
+    },
+    "IC45": {
+     "dxMm": 1.065,
+     "dyMm": -0.624,
+     "offMm": 1.235
+    },
+    "IC46": {
+     "dxMm": 0.812,
+     "dyMm": 0.156,
+     "offMm": 0.827
+    },
+    "IC47": {
+     "dxMm": 1.486,
+     "dyMm": 0.437,
+     "offMm": 1.549
+    },
+    "IC48": {
+     "dxMm": 0.985,
+     "dyMm": 0.595,
+     "offMm": 1.151
+    },
+    "IC49": {
+     "dxMm": 0.489,
+     "dyMm": 0.802,
+     "offMm": 0.939
+    },
+    "IC5": {
+     "dxMm": -0.07,
+     "dyMm": -1.183,
+     "offMm": 1.185
+    },
+    "IC50": {
+     "dxMm": 0.994,
+     "dyMm": 0.959,
+     "offMm": 1.381
+    },
+    "IC51": {
+     "dxMm": -1.156,
+     "dyMm": -0.301,
+     "offMm": 1.194
+    },
+    "IC52": {
+     "dxMm": -1.305,
+     "dyMm": -0.155,
+     "offMm": 1.314
+    },
+    "IC53": {
+     "dxMm": -0.036,
+     "dyMm": 0.238,
+     "offMm": 0.241
+    },
+    "IC54": {
+     "dxMm": 0.399,
+     "dyMm": 0.495,
+     "offMm": 0.635
+    },
+    "IC55": {
+     "dxMm": -0.3,
+     "dyMm": 0.281,
+     "offMm": 0.411
+    },
+    "IC56": {
+     "dxMm": 0.674,
+     "dyMm": 1.12,
+     "offMm": 1.307
+    },
+    "IC57": {
+     "dxMm": 1.104,
+     "dyMm": 0.92,
+     "offMm": 1.437
+    },
+    "IC58": {
+     "dxMm": 0.457,
+     "dyMm": 0.626,
+     "offMm": 0.775
+    },
+    "IC59": {
+     "dxMm": 0.966,
+     "dyMm": 0.504,
+     "offMm": 1.09
+    },
+    "IC6": {
+     "dxMm": -0.33,
+     "dyMm": -0.302,
+     "offMm": 0.448
+    },
+    "IC60": {
+     "dxMm": 0.382,
+     "dyMm": 0.305,
+     "offMm": 0.489
+    },
+    "IC61": {
+     "dxMm": -0.346,
+     "dyMm": 1.569,
+     "offMm": 1.607
+    },
+    "IC62": {
+     "dxMm": 0.07,
+     "dyMm": 0.646,
+     "offMm": 0.65
+    },
+    "IC63": {
+     "dxMm": 0.256,
+     "dyMm": 0.133,
+     "offMm": 0.289
+    },
+    "IC64": {
+     "dxMm": 0.267,
+     "dyMm": 0.967,
+     "offMm": 1.004
+    },
+    "IC65": {
+     "dxMm": 0.715,
+     "dyMm": 0.731,
+     "offMm": 1.022
+    },
+    "IC66": {
+     "dxMm": 0.075,
+     "dyMm": 0.56,
+     "offMm": 0.565
+    },
+    "IC67": {
+     "dxMm": 0.702,
+     "dyMm": 0.4,
+     "offMm": 0.808
+    },
+    "IC68": {
+     "dxMm": 0.31,
+     "dyMm": 0.237,
+     "offMm": 0.39
+    },
+    "IC69": {
+     "dxMm": -1.485,
+     "dyMm": -1.13,
+     "offMm": 1.866
+    },
+    "IC7": {
+     "dxMm": 1.705,
+     "dyMm": -2.067,
+     "offMm": 2.679
+    },
+    "IC70": {
+     "dxMm": -1.62,
+     "dyMm": -1.509,
+     "offMm": 2.214
+    },
+    "IC71": {
+     "dxMm": -0.405,
+     "dyMm": -0.697,
+     "offMm": 0.806
+    },
+    "IC72": {
+     "dxMm": -0.66,
+     "dyMm": -0.542,
+     "offMm": 0.854
+    },
+    "IC73": {
+     "dxMm": 1.777,
+     "dyMm": -2.338,
+     "offMm": 2.937
+    },
+    "IC74": {
+     "dxMm": -18.158,
+     "dyMm": -3.775,
+     "offMm": 18.546
+    },
+    "IC75": {
+     "dxMm": -18.293,
+     "dyMm": -1.259,
+     "offMm": 18.336
+    },
+    "IC76": {
+     "dxMm": -0.705,
+     "dyMm": -2.226,
+     "offMm": 2.335
+    },
+    "IC77": {
+     "dxMm": 1.662,
+     "dyMm": -2.428,
+     "offMm": 2.943
+    },
+    "IC78": {
+     "dxMm": -0.104,
+     "dyMm": -1.642,
+     "offMm": 1.646
+    },
+    "IC79": {
+     "dxMm": -0.634,
+     "dyMm": -2.08,
+     "offMm": 2.175
+    },
+    "IC8": {
+     "dxMm": -0.214,
+     "dyMm": 1.417,
+     "offMm": 1.433
+    },
+    "IC80": {
+     "dxMm": -0.954,
+     "dyMm": -1.865,
+     "offMm": 2.095
+    },
+    "IC81": {
+     "dxMm": -0.226,
+     "dyMm": -1.428,
+     "offMm": 1.445
+    },
+    "IC82": {
+     "dxMm": -0.537,
+     "dyMm": -1.21,
+     "offMm": 1.323
+    },
+    "IC83": {
+     "dxMm": -0.22,
+     "dyMm": -2.65,
+     "offMm": 2.659
+    },
+    "IC84": {
+     "dxMm": -0.616,
+     "dyMm": -2.272,
+     "offMm": 2.354
+    },
+    "IC85": {
+     "dxMm": -0.929,
+     "dyMm": -1.652,
+     "offMm": 1.895
+    },
+    "IC86": {
+     "dxMm": -1.302,
+     "dyMm": -0.967,
+     "offMm": 1.622
+    },
+    "IC87": {
+     "dxMm": 1.898,
+     "dyMm": -2.986,
+     "offMm": 3.538
+    },
+    "IC88": {
+     "dxMm": -1.314,
+     "dyMm": 0.169,
+     "offMm": 1.325
+    },
+    "IC89": {
+     "dxMm": 1.374,
+     "dyMm": -3.866,
+     "offMm": 4.103
+    },
+    "IC9": {
+     "dxMm": 0.143,
+     "dyMm": -0.175,
+     "offMm": 0.226
+    },
+    "IC91": {
+     "dxMm": 1.226,
+     "dyMm": -2.7,
+     "offMm": 2.965
+    },
+    "IC93": {
+     "dxMm": 1.21,
+     "dyMm": -2.89,
+     "offMm": 3.133
+    },
+    "IC94": {
+     "dxMm": 0.322,
+     "dyMm": 97.216,
+     "offMm": 97.216
+    },
+    "IC95": {
+     "dxMm": 2.258,
+     "dyMm": -2.943,
+     "offMm": 3.709
+    },
+    "IC96": {
+     "dxMm": 0.391,
+     "dyMm": -1.843,
+     "offMm": 1.884
+    },
+    "IC97": {
+     "dxMm": 2.553,
+     "dyMm": -2.852,
+     "offMm": 3.828
+    },
+    "IC98": {
+     "dxMm": 0.711,
+     "dyMm": -2.236,
+     "offMm": 2.346
+    },
+    "IC99": {
+     "dxMm": 0.347,
+     "dyMm": -1.941,
+     "offMm": 1.972
+    }
+   },
+   "rotationDeg": 0.811,
+   "scale": 0.998,
+   "verdict": "fail"
+  },
+  "convention": "pinHalf",
+  "settle": {
+   "byConvention": {
+    "bodyCorner": {
+     "maxMm": 0.833,
+     "medianMm": 0.47,
+     "perPart": {
+      "IC20": 0.833,
+      "IC21": 0.788,
+      "IC51": 0.123,
+      "IC52": 0.151
+     },
+     "rotationDeg": 0.694,
+     "scale": 1.002
+    },
+    "centre": {
+     "maxMm": 1.678,
+     "medianMm": 1.315,
+     "perPart": {
+      "IC20": 1.678,
+      "IC21": 1.654,
+      "IC51": 0.976,
+      "IC52": 0.472
+     },
+     "rotationDeg": -4.012,
+     "scale": 1.026
+    },
+    "pin1": {
+     "maxMm": 2.56,
+     "medianMm": 2.158,
+     "perPart": {
+      "IC20": 2.554,
+      "IC21": 2.56,
+      "IC51": 1.763,
+      "IC52": 0.995
+     },
+     "rotationDeg": -8.165,
+     "scale": 0.987
+    },
+    "pinHalf": {
+     "maxMm": 0.247,
+     "medianMm": 0.148,
+     "perPart": {
+      "IC20": 0.247,
+      "IC21": 0.234,
+      "IC51": 0.022,
+      "IC52": 0.062
+     },
+     "rotationDeg": 0.412,
+     "scale": 1.003
+    }
+   },
+   "chosen": "pinHalf",
+   "on": ["IC51", "IC52", "IC20", "IC21"],
+   "tieMm": 0.2
+  },
+  "what": "Table 8.1's places (mm from the SW corner, Y towards the rear) against each IC's point on the board under the convention settled on IC51, IC52, IC20 and IC21 alone, after the similarity fitted to every placed IC with a place in the table (the manual's Y flipped); none may be more than 10 mm off"
+ },
+ "methodFixed": {
+  "tools/bbc-micro-model/board_frame.py": "e2754725ff1b859da595ad43ef33ac3983e956bc07ade8b19e9634089177407f",
+  "tools/bbc-micro-model/board_parts.py": "76a3882e894f5ed7548dbbf4215f3678414ce219c11a1bd5ef1fe90b99580fce",
+  "tools/bbc-micro-model/board_trace.py": "f7ff0fbdee5143e29f4dba34ef8d41125869181cf6af3c040dc0534922701e85",
+  "tools/bbc-micro-model/common.py": "d9d9e1bcea7e643c8a9c7b11a3035b8bd8f551ebd687eb930eef19b3f1e90dc9",
+  "tools/bbc-micro-model/data/frame.json": "1c8b2fff24351fd3b521f0f283eeefa29fd86edcfe82930d1350d2a20bf01872",
+  "tools/bbc-micro-model/data/ic-table.json": "85f63e9f642d5730d0cc71bd64776163b85c7169e895a74a2635bb3d09d31e36",
+  "tools/bbc-micro-model/data/registration.json": "4327f2c19b0d21e49ccac75989172e2618a3a58b54a3c942626ef1f76ca2d5fb"
+ },
+ "model": {
+  "board": {
+   "depth": 229.405,
+   "holes": [
+    {"d":3.804,"x":5.023,"y":5.081},
+    {"d":3.779,"x":88.66,"y":11.158},
+    {"d":3.747,"x":121.914,"y":11.242},
+    {"d":3.956,"x":6.053,"y":29.112},
+    {"d":3.941,"x":289.208,"y":55.177},
+    {"d":3.896,"x":153.6,"y":212.567},
+    {"d":3.909,"x":69.6,"y":215.245},
+    {"d":3.999,"x":237.173,"y":215.017},
+    {"d":3.885,"x":5.072,"y":224.406}
+   ],
+   "outline": [
+    [0.0,0.0],
+    [0.018,229.58],
+    [115.429,229.327],
+    [115.58,215.884],
+    [130.868,215.773],
+    [131.107,229.224],
+    [136.38,229.189],
+    [136.792,224.612],
+    [137.905,224.607],
+    [137.907,229.352],
+    [181.748,229.344],
+    [182.154,224.514],
+    [183.397,224.509],
+    [183.547,229.413],
+    [303.751,229.275],
+    [304.611,224.297],
+    [305.515,224.293],
+    [305.586,229.32],
+    [309.977,229.184],
+    [310.03,-0.049],
+    [0.0,0.0]
+   ],
+   "thickness": 1.6,
+   "width": 309.995
+  },
+  "connectors": [
+   {"edge":"rear","h":12.0,"kind":"phono","l":7.4,"label":"UHF out, the modulator's socket","ref":"SK1","rotation":0.0,"w":7.2,"x":275.6,"y":-3.9},
+   {"edge":"rear","h":13.0,"kind":"din","l":22.3,"label":"RGB","ref":"SK3","rotation":0.0,"w":17.5,"x":215.15,"y":7.25},
+   {"edge":"rear","h":13.0,"kind":"din","l":20.0,"label":"RS423","ref":"SK4","rotation":0.0,"w":18.0,"x":194.0,"y":7.5},
+   {"edge":"rear","h":13.0,"kind":"din","l":20.1,"label":"cassette","ref":"SK5","rotation":0.0,"w":22.5,"x":173.95,"y":9.75},
+   {"edge":"rear","h":12.5,"kind":"dType","l":38.3,"label":"analogue in","ref":"SK6","rotation":0.0,"w":20.9,"x":104.55,"y":3.75},
+   {"edge":"underside","h":9.0,"kind":"idc","l":62.0,"label":"disc drive","ref":"PL8","rotation":0.0,"w":14.0,"x":30.0,"y":225.5},
+   {"edge":"underside","h":9.0,"kind":"idc","l":54.0,"label":"printer","ref":"PL9","rotation":0.0,"w":14.0,"x":88.5,"y":225.5},
+   {"edge":"underside","h":9.0,"kind":"idc","l":44.5,"label":"user port","ref":"PL10","rotation":0.0,"w":14.0,"x":153.75,"y":225.5},
+   {"edge":"underside","h":9.0,"kind":"idc","l":62.5,"label":"1 MHz bus","ref":"PL11","rotation":0.0,"w":14.0,"x":208.25,"y":225.5},
+   {"edge":"underside","h":9.0,"kind":"idc","l":69.7,"label":"Tube","ref":"PL12","rotation":0.0,"w":14.0,"x":274.85,"y":225.5},
+   {"edge":"board","h":8.5,"kind":"header","l":43.5,"label":"keyboard","ref":"PL13","rotation":0.0,"w":2.7,"x":88.95,"y":158.25},
+   {"edge":"board","h":8.5,"kind":"header","l":25.3,"label":"serial ROM","ref":"PL14","rotation":0.0,"w":2.7,"x":22.75,"y":158.35},
+   {"edge":"board","h":8.5,"kind":"header","l":12.6,"label":"loudspeaker","ref":"PL15","rotation":0.0,"w":4.9,"x":49.5,"y":214.05}
+  ],
+  "heights": {
+   "axial": {
+    "measured": false,
+    "value": 2.5,
+    "what": "typical, not measured: an axial part lying on the board: its body's diameter"
+   },
+   "board": {
+    "measured": false,
+    "value": 1.6,
+    "what": "typical, not measured: the board's thickness, the usual for a two-layer board"
+   },
+   "crystal": {
+    "measured": false,
+    "value": 4.5,
+    "what": "typical, not measured: a crystal can lying flat"
+   },
+   "dType": {
+    "measured": false,
+    "value": 12.5,
+    "what": "typical, not measured: the 15-way D socket's housing"
+   },
+   "din": {
+    "measured": false,
+    "value": 13.0,
+    "what": "typical, not measured: a DIN socket's housing"
+   },
+   "dip": {
+    "measured": false,
+    "value": 4.0,
+    "what": "typical, not measured: a plastic DIP seated on the board, to the top of its body"
+   },
+   "header": {
+    "measured": false,
+    "value": 8.5,
+    "what": "typical, not measured: a pin header"
+   },
+   "idc": {
+    "measured": false,
+    "value": 9.0,
+    "what": "typical, not measured: a boxed header with latches"
+   },
+   "modulator": {
+    "measured": false,
+    "value": 17.0,
+    "what": "typical, not measured: the UHF modulator's can"
+   },
+   "phono": {
+    "measured": false,
+    "value": 12.0,
+    "what": "typical, not measured: the modulator's output socket"
+   },
+   "radial": {
+    "measured": false,
+    "value": 6.0,
+    "what": "typical, not measured: a disc or dipped capacitor standing on its leads"
+   },
+   "relay": {
+    "measured": false,
+    "value": 11.0,
+    "what": "typical, not measured: the cassette motor's relay"
+   },
+   "socket": {
+    "measured": false,
+    "value": 3.0,
+    "what": "typical, not measured: what a socket adds under a DIP"
+   }
+  },
+  "ics": [
+   {"fitted":true,"height":4.0,"l":52.1,"part":"6502A","pins":40,"ref":"IC1","role":"the processor","rotation":90.08,"sheila":null,"socketed":false,"w":13.97,"x":167.655,"y":120.124},
+   {"fitted":true,"height":4.0,"l":52.1,"part":"6845","pins":40,"ref":"IC2","role":"the CRT controller","rotation":90.104,"sheila":"crtc","socketed":false,"w":13.97,"x":167.692,"y":63.003},
+   {"fitted":true,"height":4.0,"l":52.1,"part":"6522","pins":40,"ref":"IC3","role":"the internal (system) VIA","rotation":90.116,"sheila":"systemVia","socketed":false,"w":13.97,"x":96.477,"y":127.811},
+   {"fitted":true,"height":4.0,"l":31.75,"part":"6850","pins":24,"ref":"IC4","role":"the serial interface (ACIA)","rotation":89.942,"sheila":"acia","socketed":false,"w":13.97,"x":134.61,"y":73.215},
+   {"fitted":true,"height":4.0,"l":36.8,"part":"SAA5050","pins":28,"ref":"IC5","role":"the teletext character generator","rotation":90.012,"sheila":null,"socketed":false,"w":13.97,"x":194.333,"y":109.95},
+   {"fitted":true,"height":4.0,"l":36.8,"part":"5C094","pins":28,"ref":"IC6","role":"the video ULA","rotation":90.141,"sheila":"videoUla","socketed":false,"w":13.97,"x":221.058,"y":140.364},
+   {"fitted":true,"height":4.0,"l":36.8,"part":"2C199","pins":28,"ref":"IC7","role":"the serial ULA","rotation":89.983,"sheila":"serialUla","socketed":false,"w":13.97,"x":134.703,"y":30.061},
+   {"fitted":true,"height":4.0,"l":24.9,"part":"81LS95","pins":20,"ref":"IC8","role":"an octal buffer","rotation":89.933,"sheila":null,"socketed":false,"w":6.35,"x":243.926,"y":153.014},
+   {"fitted":true,"height":4.0,"l":24.9,"part":"81LS95","pins":20,"ref":"IC9","role":"an octal buffer","rotation":89.902,"sheila":null,"socketed":false,"w":6.35,"x":243.954,"y":123.806},
+   {"fitted":true,"height":4.0,"l":24.9,"part":"81LS95","pins":20,"ref":"IC10","role":"an octal buffer","rotation":89.642,"sheila":null,"socketed":false,"w":6.35,"x":255.458,"y":152.992},
+   {"fitted":true,"height":4.0,"l":24.9,"part":"81LS95","pins":20,"ref":"IC11","role":"an octal buffer","rotation":90.19,"sheila":null,"socketed":false,"w":6.35,"x":255.461,"y":123.771},
+   {"fitted":true,"height":4.0,"l":24.9,"part":"81LS95","pins":20,"ref":"IC12","role":"an octal buffer","rotation":89.783,"sheila":null,"socketed":false,"w":6.35,"x":278.289,"y":152.94},
+   {"fitted":true,"height":4.0,"l":24.9,"part":"81LS95","pins":20,"ref":"IC13","role":"an octal buffer","rotation":89.812,"sheila":null,"socketed":false,"w":6.35,"x":266.853,"y":152.943},
+   {"fitted":true,"height":4.0,"l":24.9,"part":"74LS245","pins":20,"ref":"IC14","role":"an octal bus transceiver","rotation":89.621,"sheila":null,"socketed":false,"w":6.35,"x":186.683,"y":145.509},
+   {"fitted":true,"height":4.0,"l":24.9,"part":"74LS273","pins":20,"ref":"IC15","role":"an octal D flip-flop","rotation":89.794,"sheila":null,"socketed":false,"w":6.35,"x":199.412,"y":145.494},
+   {"fitted":true,"height":4.0,"l":9.3,"part":"LM555","pins":8,"ref":"IC16","role":"a timer","rotation":89.81,"sheila":null,"socketed":false,"w":6.35,"x":10.054,"y":13.374},
+   {"fitted":true,"height":4.0,"l":19.05,"part":"LM324","pins":14,"ref":"IC17","role":"four operational amplifiers","rotation":89.751,"sheila":null,"socketed":false,"w":6.35,"x":8.771,"y":192.659},
+   {"fitted":true,"height":4.0,"l":19.3,"part":"76489","pins":16,"ref":"IC18","role":"the sound generator","rotation":90.048,"sheila":"sound","socketed":false,"w":6.35,"x":25.211,"y":174.859},
+   {"fitted":true,"height":4.0,"l":9.3,"part":"LM386","pins":8,"ref":"IC19","role":"an audio amplifier","rotation":89.325,"sheila":null,"socketed":false,"w":6.35,"x":54.4,"y":200.199},
+   {"fitted":true,"height":4.0,"l":19.3,"part":"74LS139","pins":16,"ref":"IC20","role":"two 2 to 4 line decoders","rotation":89.802,"sheila":null,"socketed":false,"w":6.35,"x":123.182,"y":195.037},
+   {"fitted":true,"height":4.0,"l":19.05,"part":"74LS00","pins":14,"ref":"IC21","role":"decodes the ROMs' addresses","rotation":89.729,"sheila":null,"socketed":false,"w":6.35,"x":123.2,"y":164.594},
+   {"fitted":true,"height":4.0,"l":19.05,"part":"74LS30","pins":14,"ref":"IC22","role":"an 8-input NAND gate","rotation":90.049,"sheila":null,"socketed":false,"w":6.35,"x":140.975,"y":164.574},
+   {"fitted":true,"height":4.0,"l":19.05,"part":"74LS30","pins":14,"ref":"IC23","role":"an 8-input NAND gate","rotation":89.669,"sheila":null,"socketed":false,"w":6.35,"x":123.208,"y":139.227},
+   {"fitted":true,"height":4.0,"l":19.3,"part":"74LS138","pins":16,"ref":"IC24","role":"a 3 to 8 line decoder","rotation":90.671,"sheila":null,"socketed":false,"w":6.35,"x":140.986,"y":140.476},
+   {"fitted":true,"height":4.0,"l":19.05,"part":"74LS20","pins":14,"ref":"IC25","role":"two 4-input NAND gates","rotation":90.13,"sheila":null,"socketed":false,"w":6.35,"x":123.243,"y":111.296},
+   {"fitted":true,"height":7.0,"l":19.3,"part":"74LS139","pins":16,"ref":"IC26","role":"two 2 to 4 line decoders","rotation":90.304,"sheila":null,"socketed":true,"w":6.35,"x":141.018,"y":112.541},
+   {"fitted":true,"height":4.0,"l":19.05,"part":"7438","pins":14,"ref":"IC27","role":"four open-collector NAND buffers","rotation":90.109,"sheila":null,"socketed":false,"w":6.35,"x":6.214,"y":96.111},
+   {"fitted":true,"height":4.0,"l":19.05,"part":"74LS51","pins":14,"ref":"IC28","role":"AND-OR-invert gates","rotation":90.23,"sheila":null,"socketed":false,"w":6.35,"x":53.269,"y":77.031},
+   {"fitted":true,"height":4.0,"l":19.05,"part":"74LS32","pins":14,"ref":"IC29","role":"four 2-input OR gates","rotation":90.161,"sheila":null,"socketed":false,"w":6.35,"x":68.5,"y":77.016},
+   {"fitted":true,"height":4.0,"l":19.05,"part":"74LS74","pins":14,"ref":"IC30","role":"two D flip-flops","rotation":89.944,"sheila":null,"socketed":false,"w":6.35,"x":81.217,"y":77.022},
+   {"fitted":true,"height":4.0,"l":19.05,"part":"74LS34","pins":14,"ref":"IC31","role":"six buffers","rotation":89.899,"sheila":null,"socketed":false,"w":6.35,"x":92.711,"y":77.023},
+   {"fitted":true,"height":4.0,"l":19.3,"part":"74LS259","pins":16,"ref":"IC32","role":"an 8-bit addressable latch","rotation":89.743,"sheila":null,"socketed":false,"w":6.35,"x":107.96,"y":75.761},
+   {"fitted":true,"height":4.0,"l":19.05,"part":"74LS04","pins":14,"ref":"IC33","role":"six inverters","rotation":90.0,"sheila":null,"socketed":false,"w":6.35,"x":60.93,"y":56.675},
+   {"fitted":true,"height":4.0,"l":19.05,"part":"74LS74","pins":14,"ref":"IC34","role":"two D flip-flops","rotation":89.651,"sheila":null,"socketed":false,"w":6.35,"x":73.603,"y":56.689},
+   {"fitted":true,"height":4.0,"l":19.05,"part":"LM324","pins":14,"ref":"IC35","role":"amplifies and shapes the cassette signal","rotation":90.158,"sheila":null,"socketed":false,"w":6.35,"x":153.732,"y":16.104},
+   {"fitted":true,"height":4.0,"l":19.05,"part":"74LS10","pins":14,"ref":"IC36","role":"three 3-input NAND gates","rotation":89.454,"sheila":null,"socketed":false,"w":6.35,"x":217.24,"y":98.459},
+   {"fitted":true,"height":4.0,"l":19.05,"part":"74LS04","pins":14,"ref":"IC37","role":"six inverters","rotation":89.996,"sheila":null,"socketed":false,"w":6.35,"x":231.267,"y":98.436},
+   {"fitted":true,"height":4.0,"l":19.05,"part":"74LS86","pins":14,"ref":"IC38","role":"four exclusive-OR gates","rotation":90.82,"sheila":null,"socketed":false,"w":6.35,"x":243.989,"y":98.404},
+   {"fitted":true,"height":7.0,"l":19.3,"part":"74LS283","pins":16,"ref":"IC39","role":"a 4-bit adder","rotation":89.839,"sheila":null,"socketed":true,"w":6.35,"x":190.554,"y":73.16},
+   {"fitted":true,"height":4.0,"l":19.05,"part":"74S00","pins":14,"ref":"IC40","role":"four 2-input NAND gates","rotation":90.226,"sheila":null,"socketed":false,"w":6.35,"x":209.655,"y":71.846},
+   {"fitted":true,"height":4.0,"l":19.05,"part":"74LS02","pins":14,"ref":"IC41","role":"four 2-input NOR gates","rotation":89.97,"sheila":null,"socketed":false,"w":6.35,"x":231.281,"y":71.776},
+   {"fitted":true,"height":4.0,"l":19.3,"part":"74LS163","pins":16,"ref":"IC42","role":"divides the 16 MHz clock by 13 for the serial ULA","rotation":89.881,"sheila":null,"socketed":false,"w":6.35,"x":243.99,"y":73.024},
+   {"fitted":true,"height":4.0,"l":19.05,"part":"74S04","pins":14,"ref":"IC43","role":"with its crystal, the 16 MHz clock oscillator","rotation":90.151,"sheila":null,"socketed":false,"w":6.35,"x":190.592,"y":46.501},
+   {"fitted":true,"height":4.0,"l":19.05,"part":"74LS74","pins":14,"ref":"IC44","role":"two D flip-flops","rotation":89.932,"sheila":null,"socketed":false,"w":6.35,"x":209.66,"y":46.456},
+   {"fitted":true,"height":4.0,"l":19.3,"part":"74S139","pins":16,"ref":"IC45","role":"two 2 to 4 line decoders","rotation":89.968,"sheila":null,"socketed":false,"w":6.35,"x":231.299,"y":47.689},
+   {"fitted":true,"height":4.0,"l":19.05,"part":"74S74","pins":14,"ref":"IC46","role":"two D flip-flops","rotation":89.322,"sheila":null,"socketed":false,"w":6.35,"x":255.502,"y":37.491},
+   {"fitted":true,"height":4.0,"l":19.05,"part":"74LS86","pins":14,"ref":"IC47","role":"four exclusive-OR gates","rotation":89.748,"sheila":null,"socketed":false,"w":6.35,"x":266.898,"y":37.398},
+   {"fitted":true,"height":4.0,"l":19.05,"part":"74LS86","pins":14,"ref":"IC48","role":"four exclusive-OR gates","rotation":89.542,"sheila":null,"socketed":false,"w":6.35,"x":278.319,"y":37.36},
+   {"fitted":true,"height":4.0,"l":19.05,"part":"74LS00","pins":14,"ref":"IC49","role":"four 2-input NAND gates","rotation":89.371,"sheila":null,"socketed":false,"w":6.35,"x":289.768,"y":37.335},
+   {"fitted":true,"height":4.0,"l":19.05,"part":"74LS00","pins":14,"ref":"IC50","role":"four 2-input NAND gates","rotation":89.49,"sheila":null,"socketed":false,"w":6.35,"x":301.284,"y":37.349},
+   {"fitted":true,"height":7.0,"l":36.8,"part":"(27128)","pins":28,"ref":"IC51","role":"the operating system ROM","rotation":89.661,"sheila":null,"socketed":true,"w":13.97,"x":221.128,"y":187.327},
+   {"fitted":true,"height":7.0,"l":36.8,"paged":"BASIC","part":"(27128)","pins":28,"ref":"IC52","role":"the BASIC ROM","rotation":89.695,"sheila":null,"socketed":true,"w":13.97,"x":240.214,"y":187.32},
+   {"fitted":true,"height":4.0,"l":19.3,"part":"4816","pins":16,"ref":"IC53","role":"a 16K by 1 dynamic RAM","rotation":89.753,"sheila":null,"socketed":false,"w":6.35,"x":289.722,"y":150.31},
+   {"fitted":true,"height":4.0,"l":19.3,"part":"4816","pins":16,"ref":"IC54","role":"a 16K by 1 dynamic RAM","rotation":90.01,"sheila":null,"socketed":false,"w":6.35,"x":289.729,"y":126.173},
+   {"fitted":true,"height":4.0,"l":19.3,"part":"4816","pins":16,"ref":"IC55","role":"a 16K by 1 dynamic RAM","rotation":89.467,"sheila":null,"socketed":false,"w":6.35,"x":278.266,"y":126.21},
+   {"fitted":true,"height":4.0,"l":19.3,"part":"4816","pins":16,"ref":"IC56","role":"a 16K by 1 dynamic RAM","rotation":90.039,"sheila":null,"socketed":false,"w":6.35,"x":301.192,"y":72.856},
+   {"fitted":true,"height":4.0,"l":19.3,"part":"4816","pins":16,"ref":"IC57","role":"a 16K by 1 dynamic RAM","rotation":89.994,"sheila":null,"socketed":false,"w":6.35,"x":289.71,"y":72.855},
+   {"fitted":true,"height":4.0,"l":19.3,"part":"4816","pins":16,"ref":"IC58","role":"a 16K by 1 dynamic RAM","rotation":89.431,"sheila":null,"socketed":false,"w":6.35,"x":278.283,"y":72.876},
+   {"fitted":true,"height":4.0,"l":19.3,"part":"4816","pins":16,"ref":"IC59","role":"a 16K by 1 dynamic RAM","rotation":89.75,"sheila":null,"socketed":false,"w":6.35,"x":266.824,"y":72.913},
+   {"fitted":true,"height":4.0,"l":19.3,"part":"4816","pins":16,"ref":"IC60","role":"a 16K by 1 dynamic RAM","rotation":89.724,"sheila":null,"socketed":false,"w":6.35,"x":255.438,"y":72.979},
+   {"fitted":true,"height":7.0,"l":19.3,"part":"4816","pins":16,"ref":"IC61","role":"a 16K by 1 dynamic RAM","rotation":89.961,"sheila":null,"socketed":true,"w":6.35,"x":301.09,"y":150.339},
+   {"fitted":true,"height":7.0,"l":19.3,"part":"4816","pins":16,"ref":"IC62","role":"a 16K by 1 dynamic RAM","rotation":90.302,"sheila":null,"socketed":true,"w":6.35,"x":301.142,"y":126.181},
+   {"fitted":true,"height":7.0,"l":19.3,"part":"4816","pins":16,"ref":"IC63","role":"a 16K by 1 dynamic RAM","rotation":89.784,"sheila":null,"socketed":true,"w":6.35,"x":266.845,"y":126.25},
+   {"fitted":true,"height":7.0,"l":19.3,"part":"4816","pins":16,"ref":"IC64","role":"a 16K by 1 dynamic RAM","rotation":89.601,"sheila":null,"socketed":true,"w":6.35,"x":301.142,"y":96.96},
+   {"fitted":true,"height":7.0,"l":19.3,"part":"4816","pins":16,"ref":"IC65","role":"a 16K by 1 dynamic RAM","rotation":89.577,"sheila":null,"socketed":true,"w":6.35,"x":289.732,"y":96.964},
+   {"fitted":true,"height":7.0,"l":19.3,"part":"4816","pins":16,"ref":"IC66","role":"a 16K by 1 dynamic RAM","rotation":89.306,"sheila":null,"socketed":true,"w":6.35,"x":278.283,"y":96.98},
+   {"fitted":true,"height":7.0,"l":19.3,"part":"4816","pins":16,"ref":"IC67","role":"a 16K by 1 dynamic RAM","rotation":90.051,"sheila":null,"socketed":true,"w":6.35,"x":266.894,"y":97.024},
+   {"fitted":true,"height":7.0,"l":19.3,"part":"4816","pins":16,"ref":"IC68","role":"a 16K by 1 dynamic RAM","rotation":90.446,"sheila":null,"socketed":true,"w":6.35,"x":255.352,"y":97.052},
+   {"fitted":true,"height":7.0,"l":52.1,"part":"6522","pins":40,"ref":"IC69","role":"the external (user) VIA","rotation":90.167,"sheila":"userVia","socketed":true,"w":13.97,"x":167.674,"y":174.707},
+   {"fitted":true,"height":7.0,"l":24.9,"part":"74LS244","pins":20,"ref":"IC70","role":"buffers the printer port's data lines","rotation":90.374,"sheila":null,"socketed":true,"w":6.35,"x":141.014,"y":192.46},
+   {"fitted":true,"height":7.0,"l":24.9,"part":"74LS244","pins":20,"ref":"IC71","role":"an octal buffer","rotation":89.761,"sheila":null,"socketed":true,"w":6.35,"x":186.706,"y":187.38},
+   {"fitted":true,"height":7.0,"l":24.9,"part":"74LS245","pins":20,"ref":"IC72","role":"an octal bus transceiver","rotation":89.877,"sheila":null,"socketed":true,"w":6.35,"x":201.998,"y":187.363},
+   {"fitted":true,"height":7.0,"l":36.8,"part":"uPD7002","pins":28,"ref":"IC73","role":"the analogue to digital converter","rotation":90.234,"sheila":"adc","socketed":true,"w":13.97,"x":106.738,"y":38.944},
+   {"fitted":true,"height":7.0,"l":19.3,"part":"88LS120","pins":16,"ref":"IC74","role":"RS423 line receivers","rotation":0.118,"sheila":null,"socketed":true,"w":6.35,"x":193.116,"y":26.214},
+   {"fitted":true,"height":7.0,"l":19.3,"part":"3691","pins":16,"ref":"IC75","role":"RS423 line drivers","rotation":-0.616,"sheila":null,"socketed":true,"w":6.35,"x":217.281,"y":26.145},
+   {"fitted":true,"height":7.0,"l":19.3,"part":"74LS163","pins":16,"ref":"IC76","role":"the paged ROM select latch (ROMSEL, at &FE30)","rotation":90.141,"sheila":"romLatch","socketed":true,"w":6.35,"x":73.516,"y":174.81},
+   {"fitted":true,"height":7.0,"l":19.05,"part":"74S00","pins":14,"ref":"IC77","role":"four 2-input NAND gates","rotation":89.76,"sheila":null,"socketed":true,"w":6.35,"x":40.547,"y":76.991},
+   {"fitted":true,"height":7.0,"l":52.1,"part":"8271","pins":40,"ref":"IC78","role":"the disc controller","rotation":89.812,"sheila":"fdc8271","socketed":true,"w":13.97,"x":67.176,"y":127.84},
+   {"fitted":true,"height":7.0,"l":19.05,"part":"7438","pins":14,"ref":"IC79","role":"drives the disc drive's lines (open collector)","rotation":90.271,"sheila":null,"socketed":true,"w":6.35,"x":45.531,"y":173.547},
+   {"fitted":true,"height":7.0,"l":19.05,"part":"7438","pins":14,"ref":"IC80","role":"drives the disc drive's lines (open collector)","rotation":89.917,"sheila":null,"socketed":true,"w":6.35,"x":60.811,"y":173.535},
+   {"fitted":true,"height":7.0,"l":19.05,"part":"74LS393","pins":14,"ref":"IC81","role":"separates the disc's data (a digital monostable, with IC82)","rotation":89.864,"sheila":null,"socketed":true,"w":6.35,"x":84.985,"y":173.506},
+   {"fitted":true,"height":7.0,"l":19.05,"part":"74LS10","pins":14,"ref":"IC82","role":"separates the disc's data (a digital monostable, with IC81)","rotation":89.943,"sheila":null,"socketed":true,"w":6.35,"x":100.274,"y":173.498},
+   {"fitted":true,"height":7.0,"l":19.05,"part":"4013","pins":14,"ref":"IC83","role":"detects the disc drive's index pulses (with IC84 and IC85)","rotation":90.12,"sheila":null,"socketed":true,"w":6.35,"x":69.781,"y":196.365},
+   {"fitted":true,"height":7.0,"l":19.05,"part":"4013","pins":14,"ref":"IC84","role":"detects the disc drive's index pulses (with IC83 and IC85)","rotation":89.492,"sheila":null,"socketed":true,"w":6.35,"x":85.008,"y":196.316},
+   {"fitted":true,"height":7.0,"l":19.3,"part":"4020","pins":16,"ref":"IC85","role":"detects the disc drive's index pulses (with IC83 and IC84)","rotation":90.01,"sheila":null,"socketed":true,"w":6.35,"x":100.338,"y":197.578},
+   {"fitted":true,"height":7.0,"l":19.05,"part":"74LS393","pins":14,"ref":"IC86","role":"divides the 8 MHz clock to 31.25 kHz for the disc interface","rotation":90.266,"sheila":null,"socketed":true,"w":6.35,"x":111.751,"y":196.306},
+   {"fitted":true,"height":7.0,"l":19.3,"part":"74LS123","pins":16,"ref":"IC87","role":"shapes the disc drive's read pulses (a monostable)","rotation":90.119,"sheila":null,"socketed":true,"w":6.35,"x":45.664,"y":55.395},
+   {"fitted":true,"height":7.0,"l":36.8,"paged":"DFS","part":"2764","pins":28,"ref":"IC88","role":"a sideways ROM socket: the DFS","rotation":89.856,"sheila":null,"socketed":true,"w":13.97,"x":259.291,"y":187.302},
+   {"fitted":false,"height":4.0,"l":36.8,"part":"68B54","pins":28,"ref":"IC89","role":"the Econet interface (ADLC)","rotation":89.9,"sheila":null,"socketed":false,"w":13.97,"x":21.438,"y":87.173},
+   {"fitted":false,"height":4.0,"l":19.05,"part":"74LS132","pins":14,"ref":"IC91","role":"four Schmitt-trigger NAND gates","rotation":89.855,"sheila":null,"socketed":false,"w":6.35,"x":30.352,"y":54.083},
+   {"fitted":false,"height":4.0,"l":19.05,"part":"75159","pins":14,"ref":"IC93","role":"an Econet line driver","rotation":89.78,"sheila":null,"socketed":false,"w":6.35,"x":16.365,"y":54.068},
+   {"fitted":false,"height":4.0,"l":19.05,"part":"LM319","pins":14,"ref":"IC94","role":"two comparators","rotation":90.458,"sheila":null,"socketed":false,"w":6.35,"x":48.251,"y":27.405},
+   {"fitted":false,"height":4.0,"l":19.05,"part":"LM319","pins":14,"ref":"IC95","role":"two comparators","rotation":90.334,"sheila":null,"socketed":false,"w":6.35,"x":22.756,"y":27.364},
+   {"fitted":false,"height":4.0,"l":24.9,"part":"74LS244","pins":20,"ref":"IC96","role":"an octal buffer","rotation":90.005,"sheila":null,"socketed":false,"w":6.35,"x":86.381,"y":31.311},
+   {"fitted":false,"height":4.0,"l":19.05,"part":"74LS74","pins":14,"ref":"IC97","role":"two D flip-flops","rotation":89.82,"sheila":null,"socketed":false,"w":6.35,"x":6.187,"y":49.001},
+   {"fitted":false,"height":7.0,"l":36.8,"part":"TMS6100","pins":28,"ref":"IC98","role":"the speech ROM","rotation":89.991,"sheila":null,"socketed":true,"w":13.97,"x":21.427,"y":135.485},
+   {"fitted":false,"height":7.0,"l":36.8,"part":"TMS5220","pins":28,"ref":"IC99","role":"the speech synthesiser","rotation":90.099,"sheila":null,"socketed":true,"w":13.97,"x":41.737,"y":135.475},
+   {"fitted":false,"height":7.0,"l":36.8,"part":"(27128)","pins":28,"ref":"IC100","role":"a sideways ROM socket","rotation":89.509,"sheila":null,"socketed":true,"w":13.97,"x":278.331,"y":187.264},
+   {"fitted":false,"height":7.0,"l":36.8,"part":"(27128)","pins":28,"ref":"IC101","role":"a sideways ROM socket","rotation":89.769,"sheila":null,"socketed":true,"w":13.97,"x":297.393,"y":187.253}
+  ],
+  "others": [
+   {"h":17.0,"kind":"modulator","l":40.5,"label":"the UHF modulator (Astec UM1233 E36, as I5 shows it)","ref":"modulator","rotation":0.0,"w":27.8,"x":289.75,"y":13.6},
+   {"h":4.5,"kind":"crystal","l":3.7,"label":"the 16 MHz crystal","ref":"X1","rotation":0.0,"w":9.9,"x":180.85,"y":41.25},
+   {"h":11.0,"kind":"relay","l":15.5,"label":"the cassette motor's relay","ref":"RELAY","rotation":0.0,"w":10.3,"x":172.55,"y":29.85}
+  ],
+  "passives": [
+   {"diameter":3.0,"kind":"radial","length":5.0,"rotation":93.467,"x":279.553,"y":58.849},
+   {"diameter":3.0,"kind":"radial","length":5.0,"rotation":-3.911,"x":135.894,"y":153.328},
+   {"diameter":3.0,"kind":"radial","length":5.0,"rotation":175.319,"x":193.183,"y":19.886},
+   {"diameter":3.0,"kind":"radial","length":5.0,"rotation":88.402,"x":226.138,"y":167.014},
+   {"diameter":3.0,"kind":"radial","length":5.0,"rotation":87.715,"x":231.282,"y":8.383},
+   {"diameter":3.0,"kind":"radial","length":5.0,"rotation":-90.326,"x":250.377,"y":23.483},
+   {"diameter":3.0,"kind":"radial","length":5.0,"rotation":88.928,"x":199.425,"y":18.551},
+   {"diameter":3.0,"kind":"radial","length":5.0,"rotation":92.758,"x":198.125,"y":75.664},
+   {"diameter":3.0,"kind":"radial","length":5.0,"rotation":0.758,"x":156.337,"y":3.367},
+   {"diameter":3.0,"kind":"radial","length":5.0,"rotation":89.198,"x":232.62,"y":23.608},
+   {"diameter":3.0,"kind":"radial","length":5.0,"rotation":2.148,"x":69.806,"y":40.173},
+   {"diameter":3.0,"kind":"radial","length":5.0,"rotation":-0.183,"x":275.8,"y":113.581},
+   {"diameter":3.0,"kind":"radial","length":5.0,"rotation":90.913,"x":223.614,"y":167.035},
+   {"diameter":3.0,"kind":"radial","length":5.0,"rotation":90.569,"x":216.067,"y":67.972},
+   {"diameter":3.0,"kind":"radial","length":5.0,"rotation":89.204,"x":181.651,"y":29.994},
+   {"diameter":3.0,"kind":"radial","length":5.0,"rotation":1.136,"x":156.274,"y":5.996},
+   {"diameter":3.0,"kind":"radial","length":5.0,"rotation":87.758,"x":233.82,"y":8.341},
+   {"diameter":3.0,"kind":"radial","length":5.0,"rotation":89.119,"x":18.924,"y":177.404},
+   {"diameter":3.0,"kind":"radial","length":5.0,"rotation":1.378,"x":54.543,"y":206.507},
+   {"diameter":3.0,"kind":"radial","length":5.0,"rotation":3.265,"x":297.355,"y":60.227},
+   {"diameter":3.0,"kind":"radial","length":5.0,"rotation":177.664,"x":66.049,"y":24.992},
+   {"diameter":3.0,"kind":"radial","length":5.0,"rotation":88.361,"x":7.518,"y":174.883},
+   {"diameter":3.0,"kind":"radial","length":5.0,"rotation":-0.022,"x":224.938,"y":19.848},
+   {"diameter":3.0,"kind":"radial","length":5.0,"rotation":86.442,"x":207.118,"y":122.617},
+   {"diameter":3.0,"kind":"radial","length":5.0,"rotation":90.38,"x":83.868,"y":13.544},
+   {"diameter":3.0,"kind":"radial","length":5.0,"rotation":82.875,"x":124.453,"y":45.265},
+   {"diameter":3.0,"kind":"radial","length":5.0,"rotation":-95.192,"x":255.335,"y":21.03},
+   {"diameter":3.0,"kind":"radial","length":5.0,"rotation":90.578,"x":228.674,"y":166.901},
+   {"diameter":3.0,"kind":"radial","length":5.0,"rotation":0.644,"x":146.083,"y":178.504},
+   {"diameter":3.0,"kind":"radial","length":5.0,"rotation":89.045,"x":231.23,"y":13.46},
+   {"diameter":3.0,"kind":"radial","length":5.0,"rotation":0.044,"x":8.787,"y":206.621},
+   {"diameter":3.0,"kind":"radial","length":5.0,"rotation":92.794,"x":53.134,"y":159.593},
+   {"diameter":3.0,"kind":"radial","length":5.0,"rotation":-0.244,"x":148.683,"y":5.992},
+   {"diameter":3.0,"kind":"radial","length":5.0,"rotation":178.25,"x":48.094,"y":160.822},
+   {"diameter":3.0,"kind":"radial","length":5.0,"rotation":91.061,"x":106.662,"y":167.114},
+   {"diameter":3.0,"kind":"radial","length":5.0,"rotation":2.564,"x":46.876,"y":163.448},
+   {"diameter":3.0,"kind":"radial","length":5.0,"rotation":88.146,"x":120.688,"y":45.267},
+   {"diameter":3.0,"kind":"radial","length":5.0,"rotation":90.463,"x":123.222,"y":182.361},
+   {"diameter":3.0,"kind":"radial","length":5.0,"rotation":90.592,"x":51.901,"y":63.038},
+   {"diameter":3.0,"kind":"radial","length":5.0,"rotation":88.686,"x":15.149,"y":193.91},
+   {"diameter":3.0,"kind":"radial","length":5.0,"rotation":0.153,"x":161.382,"y":16.084},
+   {"diameter":3.0,"kind":"radial","length":5.0,"rotation":0.262,"x":209.705,"y":18.637},
+   {"diameter":3.0,"kind":"radial","length":5.0,"rotation":92.108,"x":31.657,"y":115.165},
+   {"diameter":3.0,"kind":"radial","length":5.0,"rotation":1.711,"x":148.727,"y":46.505},
+   {"diameter":3.0,"kind":"radial","length":5.0,"rotation":1.45,"x":198.258,"y":64.293},
+   {"diameter":3.0,"kind":"radial","length":5.0,"rotation":179.545,"x":156.321,"y":26.181},
+   {"diameter":3.0,"kind":"radial","length":5.0,"rotation":-2.959,"x":143.621,"y":5.909},
+   {"diameter":3.0,"kind":"radial","length":5.0,"rotation":94.299,"x":305.058,"y":208.822},
+   {"diameter":3.0,"kind":"radial","length":5.0,"rotation":0.257,"x":240.214,"y":14.75},
+   {"diameter":3.0,"kind":"radial","length":5.0,"rotation":87.994,"x":76.096,"y":189.906},
+   {"diameter":3.0,"kind":"radial","length":5.0,"rotation":-0.959,"x":283.394,"y":113.512},
+   {"diameter":3.0,"kind":"radial","length":5.0,"rotation":-3.225,"x":97.843,"y":66.845},
+   {"diameter":3.0,"kind":"radial","length":5.0,"rotation":91.35,"x":39.273,"y":50.203},
+   {"diameter":3.0,"kind":"radial","length":5.0,"rotation":91.602,"x":305.041,"y":164.242},
+   {"diameter":3.0,"kind":"radial","length":5.0,"rotation":113.888,"x":228.175,"y":16.072},
+   {"diameter":3.0,"kind":"radial","length":5.0,"rotation":0.518,"x":100.352,"y":184.969},
+   {"diameter":3.0,"kind":"radial","length":5.0,"rotation":-1.792,"x":65.948,"y":45.305},
+   {"diameter":3.0,"kind":"radial","length":5.0,"rotation":4.446,"x":246.626,"y":19.852},
+   {"diameter":3.0,"kind":"radial","length":5.0,"rotation":-0.382,"x":123.414,"y":88.422},
+   {"diameter":3.0,"kind":"radial","length":5.0,"rotation":1.081,"x":185.57,"y":59.237},
+   {"diameter":3.0,"kind":"radial","length":5.0,"rotation":134.513,"x":218.511,"y":64.118},
+   {"diameter":3.0,"kind":"radial","length":5.0,"rotation":45.429,"x":135.965,"y":8.501},
+   {"diameter":3.0,"kind":"radial","length":5.0,"rotation":44.898,"x":130.904,"y":8.524},
+   {"diameter":3.0,"kind":"radial","length":5.0,"rotation":134.35,"x":245.255,"y":32.451},
+   {"diameter":3.0,"kind":"radial","length":5.0,"rotation":-44.722,"x":219.78,"y":167.057},
+   {"diameter":3.0,"kind":"radial","length":5.0,"rotation":44.588,"x":256.62,"y":26.126},
+   {"diameter":3.0,"kind":"radial","length":5.0,"rotation":87.907,"x":3.733,"y":213.005},
+   {"diameter":3.0,"kind":"radial","length":5.0,"rotation":1.102,"x":48.231,"y":41.362},
+   {"diameter":3.0,"kind":"radial","length":5.0,"rotation":91.06,"x":148.654,"y":201.322},
+   {"diameter":3.0,"kind":"radial","length":5.0,"rotation":86.888,"x":184.297,"y":51.565},
+   {"diameter":3.0,"kind":"radial","length":5.0,"rotation":0.272,"x":18.963,"y":5.741},
+   {"diameter":3.0,"kind":"radial","length":5.0,"rotation":90.011,"x":31.492,"y":149.391},
+   {"diameter":3.0,"kind":"radial","length":5.0,"rotation":90.62,"x":96.59,"y":32.572},
+   {"diameter":3.0,"kind":"radial","length":5.0,"rotation":91.486,"x":184.251,"y":90.893},
+   {"diameter":3.0,"kind":"radial","length":5.0,"rotation":-0.247,"x":21.421,"y":187.529},
+   {"diameter":3.0,"kind":"radial","length":5.0,"rotation":90.135,"x":120.74,"y":22.428},
+   {"diameter":3.0,"kind":"radial","length":5.0,"rotation":0.448,"x":168.981,"y":22.42},
+   {"diameter":3.0,"kind":"radial","length":5.0,"rotation":91.333,"x":18.966,"y":192.605},
+   {"diameter":3.0,"kind":"radial","length":5.0,"rotation":89.149,"x":6.294,"y":211.687},
+   {"diameter":3.0,"kind":"radial","length":5.0,"rotation":0.123,"x":45.589,"y":201.488},
+   {"diameter":3.0,"kind":"radial","length":5.0,"rotation":0.569,"x":50.797,"y":16.017},
+   {"diameter":3.0,"kind":"radial","length":5.0,"rotation":179.287,"x":45.647,"y":206.51},
+   {"diameter":3.0,"kind":"radial","length":5.0,"rotation":178.553,"x":21.511,"y":38.807},
+   {"diameter":3.0,"kind":"radial","length":5.0,"rotation":90.51,"x":277.025,"y":55.099},
+   {"diameter":3.0,"kind":"radial","length":5.0,"rotation":89.482,"x":52.008,"y":51.618},
+   {"diameter":3.0,"kind":"radial","length":5.0,"rotation":0.781,"x":176.583,"y":22.463},
+   {"diameter":2.4,"kind":"axial","length":6.3,"rotation":91.119,"x":117.023,"y":74.461},
+   {"diameter":2.4,"kind":"axial","length":6.3,"rotation":0.282,"x":59.064,"y":32.613},
+   {"diameter":2.4,"kind":"axial","length":6.3,"rotation":-0.135,"x":78.651,"y":206.525},
+   {"diameter":2.4,"kind":"axial","length":6.3,"rotation":179.567,"x":17.643,"y":204.089},
+   {"diameter":2.4,"kind":"axial","length":6.3,"rotation":-0.385,"x":214.723,"y":215.257},
+   {"diameter":2.4,"kind":"axial","length":6.3,"rotation":-179.778,"x":31.572,"y":192.625},
+   {"diameter":2.4,"kind":"axial","length":6.3,"rotation":-0.598,"x":13.87,"y":65.589},
+   {"diameter":2.4,"kind":"axial","length":6.3,"rotation":-0.131,"x":12.524,"y":165.988},
+   {"diameter":2.4,"kind":"axial","length":6.3,"rotation":-0.032,"x":35.484,"y":35.058},
+   {"diameter":2.4,"kind":"axial","length":6.3,"rotation":-0.05,"x":60.995,"y":27.495},
+   {"diameter":2.4,"kind":"axial","length":6.3,"rotation":-89.694,"x":31.539,"y":138.041},
+   {"diameter":2.4,"kind":"axial","length":6.3,"rotation":-0.238,"x":12.556,"y":163.46},
+   {"diameter":2.4,"kind":"axial","length":6.3,"rotation":0.197,"x":35.496,"y":22.302},
+   {"diameter":2.4,"kind":"axial","length":6.3,"rotation":-0.628,"x":25.232,"y":210.423},
+   {"diameter":2.4,"kind":"axial","length":6.3,"rotation":-0.004,"x":83.733,"y":211.577},
+   {"diameter":2.4,"kind":"axial","length":6.3,"rotation":179.545,"x":37.974,"y":155.72},
+   {"diameter":2.4,"kind":"axial","length":6.3,"rotation":0.69,"x":67.209,"y":186.315},
+   {"diameter":2.4,"kind":"axial","length":6.3,"rotation":91.023,"x":108.029,"y":175.983},
+   {"diameter":2.4,"kind":"axial","length":6.3,"rotation":90.0,"x":152.406,"y":120.138},
+   {"diameter":2.4,"kind":"axial","length":6.3,"rotation":-0.202,"x":31.613,"y":190.062},
+   {"diameter":2.4,"kind":"axial","length":6.3,"rotation":0.198,"x":35.479,"y":40.099},
+   {"diameter":2.4,"kind":"axial","length":6.3,"rotation":-89.762,"x":106.602,"y":145.598},
+   {"diameter":2.4,"kind":"axial","length":6.3,"rotation":-179.798,"x":35.425,"y":19.761},
+   {"diameter":2.4,"kind":"axial","length":6.3,"rotation":89.923,"x":10.05,"y":127.885},
+   {"diameter":2.4,"kind":"axial","length":6.3,"rotation":0.032,"x":25.258,"y":207.822},
+   {"diameter":2.4,"kind":"axial","length":6.3,"rotation":90.027,"x":54.464,"y":52.85},
+   {"diameter":2.4,"kind":"axial","length":6.3,"rotation":-0.169,"x":60.911,"y":30.053},
+   {"diameter":2.4,"kind":"axial","length":6.3,"rotation":0.212,"x":50.724,"y":38.904},
+   {"diameter":2.4,"kind":"axial","length":6.3,"rotation":0.404,"x":35.5,"y":27.419},
+   {"diameter":2.4,"kind":"axial","length":6.3,"rotation":0.429,"x":26.555,"y":197.728},
+   {"diameter":2.4,"kind":"axial","length":6.3,"rotation":0.185,"x":60.986,"y":35.067},
+   {"diameter":2.4,"kind":"axial","length":6.3,"rotation":0.578,"x":61.023,"y":22.329},
+   {"diameter":3.0,"kind":"radial","length":5.0,"rotation":90.113,"x":18.971,"y":11.392},
+   {"diameter":3.0,"kind":"radial","length":5.0,"rotation":2.779,"x":280.221,"y":109.737},
+   {"diameter":2.4,"kind":"axial","length":6.3,"rotation":89.402,"x":210.873,"y":120.02},
+   {"diameter":2.4,"kind":"axial","length":6.3,"rotation":-179.788,"x":35.496,"y":32.501},
+   {"diameter":2.4,"kind":"axial","length":6.3,"rotation":89.491,"x":168.911,"y":208.96},
+   {"diameter":2.4,"kind":"axial","length":6.3,"rotation":90.56,"x":157.568,"y":40.197},
+   {"diameter":2.4,"kind":"axial","length":6.3,"rotation":-0.09,"x":21.426,"y":200.265},
+   {"diameter":2.4,"kind":"axial","length":6.3,"rotation":179.255,"x":25.291,"y":42.609},
+   {"diameter":3.0,"kind":"radial","length":5.0,"rotation":90.451,"x":16.422,"y":14.581},
+   {"diameter":3.0,"kind":"radial","length":5.0,"rotation":0.109,"x":4.963,"y":168.545},
+   {"diameter":3.0,"kind":"radial","length":5.0,"rotation":0.056,"x":144.885,"y":8.524},
+   {"diameter":3.0,"kind":"radial","length":5.0,"rotation":88.738,"x":223.589,"y":55.29},
+   {"diameter":3.0,"kind":"radial","length":5.0,"rotation":90.167,"x":222.389,"y":76.843},
+   {"diameter":3.0,"kind":"radial","length":5.0,"rotation":0.133,"x":157.534,"y":30.024},
+   {"diameter":3.0,"kind":"radial","length":5.0,"rotation":90.365,"x":200.677,"y":74.421},
+   {"diameter":3.0,"kind":"radial","length":5.0,"rotation":92.075,"x":31.594,"y":126.659},
+   {"diameter":3.0,"kind":"radial","length":5.0,"rotation":89.517,"x":199.487,"y":54.114},
+   {"diameter":3.0,"kind":"radial","length":5.0,"rotation":179.793,"x":246.589,"y":36.197},
+   {"diameter":2.4,"kind":"axial","length":6.3,"rotation":90.554,"x":36.786,"y":52.843},
+   {"diameter":2.4,"kind":"axial","length":6.3,"rotation":179.897,"x":32.868,"y":186.233},
+   {"diameter":2.4,"kind":"axial","length":6.3,"rotation":-0.323,"x":8.765,"y":110.047},
+   {"diameter":2.4,"kind":"axial","length":6.3,"rotation":179.529,"x":15.202,"y":1.913},
+   {"diameter":3.0,"kind":"radial","length":5.0,"rotation":137.65,"x":231.312,"y":18.575},
+   {"diameter":3.0,"kind":"radial","length":5.0,"rotation":0.289,"x":187.502,"y":17.352},
+   {"diameter":2.4,"kind":"axial","length":6.3,"rotation":0.257,"x":35.511,"y":24.857},
+   {"diameter":3.0,"kind":"radial","length":5.0,"rotation":89.709,"x":237.57,"y":109.809},
+   {"diameter":3.0,"kind":"radial","length":5.0,"rotation":90.222,"x":298.652,"y":52.502},
+   {"diameter":3.0,"kind":"radial","length":5.0,"rotation":90.011,"x":256.645,"y":4.484},
+   {"diameter":3.0,"kind":"radial","length":5.0,"rotation":0.477,"x":264.295,"y":24.757},
+   {"diameter":3.0,"kind":"radial","length":5.0,"rotation":143.389,"x":299.995,"y":211.118},
+   {"diameter":3.0,"kind":"radial","length":5.0,"rotation":89.478,"x":144.892,"y":21.166},
+   {"diameter":3.0,"kind":"radial","length":5.0,"rotation":-179.845,"x":105.513,"y":18.73},
+   {"diameter":2.4,"kind":"axial","length":6.3,"rotation":88.556,"x":14.032,"y":31.108},
+   {"diameter":3.0,"kind":"radial","length":5.0,"rotation":1.031,"x":214.699,"y":111.236},
+   {"diameter":3.0,"kind":"radial","length":5.0,"rotation":86.971,"x":305.029,"y":109.582},
+   {"diameter":3.0,"kind":"radial","length":5.0,"rotation":-1.048,"x":161.401,"y":26.17},
+   {"diameter":3.0,"kind":"radial","length":5.0,"rotation":175.903,"x":21.31,"y":111.382},
+   {"diameter":3.0,"kind":"radial","length":5.0,"rotation":179.65,"x":266.935,"y":137.751},
+   {"diameter":3.0,"kind":"radial","length":5.0,"rotation":177.45,"x":239.006,"y":166.952},
+   {"diameter":3.0,"kind":"radial","length":5.0,"rotation":43.171,"x":302.471,"y":51.232},
+   {"diameter":3.0,"kind":"radial","length":5.0,"rotation":1.057,"x":244.005,"y":27.306},
+   {"diameter":3.0,"kind":"radial","length":5.0,"rotation":-0.461,"x":8.758,"y":106.345},
+   {"diameter":3.0,"kind":"radial","length":5.0,"rotation":0.591,"x":179.05,"y":208.963},
+   {"diameter":3.0,"kind":"radial","length":5.0,"rotation":89.585,"x":301.211,"y":56.269},
+   {"diameter":3.0,"kind":"radial","length":5.0,"rotation":0.217,"x":208.363,"y":149.292},
+   {"diameter":3.0,"kind":"radial","length":5.0,"rotation":-12.169,"x":244.038,"y":24.521},
+   {"diameter":3.0,"kind":"radial","length":5.0,"rotation":44.101,"x":236.363,"y":23.599},
+   {"diameter":2.4,"kind":"axial","length":6.3,"rotation":179.604,"x":83.744,"y":214.073},
+   {"diameter":3.0,"kind":"radial","length":5.0,"rotation":-0.291,"x":264.33,"y":58.984},
+   {"diameter":2.4,"kind":"axial","length":6.3,"rotation":89.932,"x":79.875,"y":129.101},
+   {"diameter":2.4,"kind":"axial","length":6.3,"rotation":-0.005,"x":35.505,"y":29.941},
+   {"diameter":2.4,"kind":"axial","length":6.3,"rotation":0.014,"x":53.243,"y":192.572},
+   {"diameter":3.0,"kind":"radial","length":5.0,"rotation":89.671,"x":269.385,"y":55.157},
+   {"diameter":3.0,"kind":"radial","length":5.0,"rotation":90.481,"x":221.1,"y":51.528},
+   {"diameter":3.0,"kind":"radial","length":5.0,"rotation":2.212,"x":246.49,"y":168.242},
+   {"diameter":3.0,"kind":"radial","length":5.0,"rotation":-1.878,"x":253.05,"y":84.434},
+   {"diameter":3.0,"kind":"radial","length":5.0,"rotation":87.785,"x":79.92,"y":47.811},
+   {"diameter":3.0,"kind":"radial","length":5.0,"rotation":1.887,"x":275.801,"y":47.528},
+   {"diameter":3.0,"kind":"radial","length":5.0,"rotation":0.514,"x":233.891,"y":60.388},
+   {"diameter":3.0,"kind":"radial","length":5.0,"rotation":172.399,"x":146.191,"y":41.357},
+   {"diameter":3.0,"kind":"radial","length":5.0,"rotation":88.844,"x":123.249,"y":77.023},
+   {"diameter":3.0,"kind":"radial","length":5.0,"rotation":91.197,"x":282.085,"y":51.309},
+   {"diameter":3.0,"kind":"radial","length":5.0,"rotation":133.408,"x":251.691,"y":15.949},
+   {"diameter":2.4,"kind":"axial","length":6.3,"rotation":89.396,"x":237.595,"y":98.433},
+   {"diameter":2.4,"kind":"axial","length":6.3,"rotation":-0.189,"x":35.464,"y":37.568},
+   {"diameter":3.0,"kind":"radial","length":5.0,"rotation":89.374,"x":77.532,"y":8.599},
+   {"diameter":2.4,"kind":"axial","length":6.3,"rotation":89.902,"x":24.011,"y":52.743},
+   {"diameter":2.4,"kind":"axial","length":6.3,"rotation":90.489,"x":16.484,"y":181.223},
+   {"diameter":2.4,"kind":"axial","length":6.3,"rotation":89.824,"x":156.204,"y":125.217},
+   {"diameter":3.0,"kind":"radial","length":5.0,"rotation":45.314,"x":305.036,"y":56.33},
+   {"diameter":3.0,"kind":"radial","length":5.0,"rotation":-0.054,"x":199.433,"y":41.41},
+   {"diameter":2.4,"kind":"axial","length":6.3,"rotation":-179.886,"x":16.401,"y":213.01},
+   {"diameter":2.4,"kind":"axial","length":6.3,"rotation":-0.095,"x":214.717,"y":217.799},
+   {"diameter":2.4,"kind":"axial","length":6.3,"rotation":90.186,"x":10.1,"y":74.395},
+   {"diameter":3.0,"kind":"radial","length":5.0,"rotation":1.115,"x":255.538,"y":168.269},
+   {"diameter":3.0,"kind":"radial","length":5.0,"rotation":89.406,"x":264.338,"y":52.608},
+   {"diameter":3.0,"kind":"radial","length":5.0,"rotation":52.571,"x":164.559,"y":23.711},
+   {"diameter":3.0,"kind":"radial","length":5.0,"rotation":93.089,"x":217.354,"y":42.585},
+   {"diameter":3.0,"kind":"radial","length":5.0,"rotation":-117.962,"x":231.308,"y":24.918},
+   {"diameter":3.0,"kind":"radial","length":5.0,"rotation":44.339,"x":106.64,"y":162.066},
+   {"diameter":3.0,"kind":"radial","length":5.0,"rotation":44.955,"x":3.639,"y":201.572},
+   {"diameter":2.4,"kind":"axial","length":6.3,"rotation":89.447,"x":78.63,"y":195.067},
+   {"diameter":3.0,"kind":"radial","length":5.0,"rotation":0.396,"x":208.337,"y":144.211},
+   {"diameter":3.0,"kind":"radial","length":5.0,"rotation":0.132,"x":81.317,"y":103.7},
+   {"diameter":3.0,"kind":"radial","length":5.0,"rotation":3.27,"x":161.375,"y":18.573},
+   {"diameter":3.0,"kind":"radial","length":5.0,"rotation":92.193,"x":146.105,"y":12.27},
+   {"diameter":3.0,"kind":"radial","length":5.0,"rotation":-0.438,"x":207.07,"y":140.401},
+   {"diameter":3.0,"kind":"radial","length":5.0,"rotation":91.352,"x":282.039,"y":56.373},
+   {"diameter":3.0,"kind":"radial","length":5.0,"rotation":-178.159,"x":218.558,"y":163.257},
+   {"diameter":3.0,"kind":"radial","length":5.0,"rotation":90.67,"x":11.337,"y":36.27},
+   {"diameter":3.0,"kind":"radial","length":5.0,"rotation":92.919,"x":306.411,"y":51.227},
+   {"diameter":3.0,"kind":"radial","length":5.0,"rotation":134.223,"x":302.397,"y":51.237},
+   {"diameter":2.4,"kind":"axial","length":6.3,"rotation":134.046,"x":277.014,"y":55.145},
+   {"diameter":3.0,"kind":"radial","length":5.0,"rotation":-28.99,"x":250.349,"y":21.047},
+   {"diameter":3.0,"kind":"radial","length":5.0,"rotation":0.067,"x":208.337,"y":156.871},
+   {"diameter":3.0,"kind":"radial","length":5.0,"rotation":178.361,"x":3.727,"y":19.733},
+   {"diameter":3.0,"kind":"radial","length":5.0,"rotation":118.746,"x":261.226,"y":18.486},
+   {"diameter":3.0,"kind":"radial","length":5.0,"rotation":115.563,"x":221.731,"y":66.763},
+   {"diameter":3.0,"kind":"radial","length":5.0,"rotation":135.371,"x":133.317,"y":164.532},
+   {"diameter":2.4,"kind":"axial","length":6.3,"rotation":135.46,"x":5.519,"y":185.732},
+   {"diameter":2.4,"kind":"axial","length":6.3,"rotation":51.923,"x":176.626,"y":22.956},
+   {"diameter":3.0,"kind":"radial","length":5.0,"rotation":152.866,"x":133.361,"y":158.892},
+   {"diameter":3.0,"kind":"radial","length":5.0,"rotation":26.682,"x":4.92,"y":179.312},
+   {"diameter":3.0,"kind":"radial","length":5.0,"rotation":44.694,"x":119.407,"y":177.281},
+   {"diameter":3.0,"kind":"radial","length":5.0,"rotation":-44.718,"x":148.609,"y":102.397},
+   {"diameter":3.0,"kind":"radial","length":5.0,"rotation":69.581,"x":153.774,"y":33.16},
+   {"diameter":3.0,"kind":"radial","length":5.0,"rotation":-81.353,"x":231.472,"y":155.653},
+   {"diameter":3.0,"kind":"radial","length":5.0,"rotation":-95.946,"x":233.709,"y":13.583},
+   {"diameter":3.0,"kind":"radial","length":5.0,"rotation":5.662,"x":264.269,"y":113.496},
+   {"diameter":3.0,"kind":"radial","length":5.0,"rotation":-3.257,"x":242.679,"y":109.897},
+   {"diameter":3.0,"kind":"radial","length":5.0,"rotation":19.915,"x":4.3,"y":181.896},
+   {"diameter":3.0,"kind":"radial","length":5.0,"rotation":114.96,"x":251.597,"y":24.817},
+   {"diameter":3.0,"kind":"radial","length":5.0,"rotation":178.857,"x":238.31,"y":84.427},
+   {"diameter":3.0,"kind":"radial","length":5.0,"rotation":118.016,"x":121.92,"y":181.067},
+   {"diameter":3.0,"kind":"radial","length":5.0,"rotation":63.546,"x":200.783,"y":17.325},
+   {"diameter":3.0,"kind":"radial","length":5.0,"rotation":154.108,"x":132.142,"y":162.02},
+   {"diameter":3.0,"kind":"radial","length":5.0,"rotation":116.746,"x":273.203,"y":52.558},
+   {"diameter":3.0,"kind":"radial","length":5.0,"rotation":-105.404,"x":258.69,"y":12.71},
+   {"diameter":3.0,"kind":"radial","length":5.0,"rotation":57.445,"x":130.867,"y":167.728},
+   {"diameter":3.0,"kind":"radial","length":5.0,"rotation":2.203,"x":139.659,"y":129.053},
+   {"diameter":3.0,"kind":"radial","length":5.0,"rotation":91.166,"x":296.142,"y":51.225},
+   {"diameter":3.0,"kind":"radial","length":5.0,"rotation":-2.899,"x":151.239,"y":26.288},
+   {"diameter":3.0,"kind":"radial","length":5.0,"rotation":93.061,"x":219.827,"y":75.549},
+   {"diameter":3.0,"kind":"radial","length":5.0,"rotation":1.125,"x":208.32,"y":154.322},
+   {"diameter":3.0,"kind":"radial","length":5.0,"rotation":88.046,"x":307.683,"y":30.877},
+   {"diameter":3.0,"kind":"radial","length":5.0,"rotation":45.124,"x":201.978,"y":165.803},
+   {"diameter":2.4,"kind":"axial","length":6.3,"rotation":10.878,"x":268.167,"y":23.532},
+   {"diameter":3.0,"kind":"radial","length":5.0,"rotation":122.186,"x":298.562,"y":164.895},
+   {"diameter":3.0,"kind":"radial","length":5.0,"rotation":135.533,"x":236.372,"y":23.52},
+   {"diameter":3.0,"kind":"radial","length":5.0,"rotation":36.278,"x":299.901,"y":164.81},
+   {"diameter":3.0,"kind":"radial","length":5.0,"rotation":54.704,"x":150.884,"y":37.697},
+   {"diameter":3.0,"kind":"radial","length":5.0,"rotation":61.916,"x":275.753,"y":57.604},
+   {"diameter":3.0,"kind":"radial","length":5.0,"rotation":175.813,"x":258.067,"y":137.697},
+   {"diameter":3.0,"kind":"radial","length":5.0,"rotation":-23.172,"x":80.017,"y":34.505},
+   {"diameter":3.0,"kind":"radial","length":5.0,"rotation":1.618,"x":290.985,"y":164.344},
+   {"diameter":3.0,"kind":"radial","length":5.0,"rotation":89.412,"x":156.259,"y":52.853},
+   {"diameter":3.0,"kind":"radial","length":5.0,"rotation":153.506,"x":274.469,"y":51.322},
+   {"diameter":3.0,"kind":"radial","length":5.0,"rotation":124.452,"x":301.06,"y":164.971},
+   {"diameter":3.0,"kind":"radial","length":5.0,"rotation":90.426,"x":22.751,"y":192.63},
+   {"diameter":3.0,"kind":"radial","length":5.0,"rotation":30.437,"x":250.763,"y":26.12}
+  ],
+  "sources": ["I1", "I2", "I5", "D1"]
+ },
+ "outside": {
+  "ics": [],
+  "passives": []
+ },
+ "overhang": {
+  "refs": ["SK1", "SK3", "SK4", "SK5", "SK6", "PL8", "PL9", "PL10", "PL11", "PL12", "modulator"],
+  "what": "Connector and other bodies that run past the board's outline, as I5 shows them"
+ },
+ "passives": {
+  "byKind": {
+   "axial": 61,
+   "radial": 197
+  },
+  "freePads": 1080,
+  "n": 258,
+  "padsUsed": 516,
+  "parts": [
+   {"diameter":3.0,"kind":"radial","leadSpanMm":2.381,"length":5.0,"pads":[670,2861],"printShare":1.0,"rotation":93.467,"x":279.553,"y":58.849},
+   {"diameter":3.0,"kind":"radial","leadSpanMm":2.405,"length":5.0,"pads":[1709,1710],"printShare":1.0,"rotation":-3.911,"x":135.894,"y":153.328},
+   {"diameter":3.0,"kind":"radial","leadSpanMm":2.414,"length":5.0,"pads":[145,2907],"printShare":1.0,"rotation":175.319,"x":193.183,"y":19.886},
+   {"diameter":3.0,"kind":"radial","leadSpanMm":2.439,"length":5.0,"pads":[1873,1908],"printShare":1.0,"rotation":88.402,"x":226.138,"y":167.014},
+   {"diameter":3.0,"kind":"radial","leadSpanMm":2.458,"length":5.0,"pads":[22,44],"printShare":1.0,"rotation":87.715,"x":231.282,"y":8.383},
+   {"diameter":3.0,"kind":"radial","leadSpanMm":2.458,"length":5.0,"pads":[218,2910],"printShare":1.0,"rotation":-90.326,"x":250.377,"y":23.483},
+   {"diameter":3.0,"kind":"radial","leadSpanMm":2.458,"length":5.0,"pads":[108,146],"printShare":1.0,"rotation":88.928,"x":199.425,"y":18.551},
+   {"diameter":3.0,"kind":"radial","leadSpanMm":2.473,"length":5.0,"pads":[877,915],"printShare":1.0,"rotation":92.758,"x":198.125,"y":75.664},
+   {"diameter":3.0,"kind":"radial","leadSpanMm":2.495,"length":5.0,"pads":[3,4],"printShare":1.0,"rotation":0.758,"x":156.337,"y":3.367},
+   {"diameter":3.0,"kind":"radial","leadSpanMm":2.5,"length":5.0,"pads":[191,227],"printShare":1.0,"rotation":89.198,"x":232.62,"y":23.608},
+   {"diameter":3.0,"kind":"radial","leadSpanMm":2.508,"length":5.0,"pads":[420,424],"printShare":1.0,"rotation":2.148,"x":69.806,"y":40.173},
+   {"diameter":3.0,"kind":"radial","leadSpanMm":2.509,"length":5.0,"pads":[1271,1272],"printShare":1.0,"rotation":-0.183,"x":275.8,"y":113.581},
+   {"diameter":3.0,"kind":"radial","leadSpanMm":2.51,"length":5.0,"pads":[1872,1907],"printShare":1.0,"rotation":90.913,"x":223.614,"y":167.035},
+   {"diameter":3.0,"kind":"radial","leadSpanMm":2.518,"length":5.0,"pads":[773,803],"printShare":1.0,"rotation":90.569,"x":216.067,"y":67.972},
+   {"diameter":3.0,"kind":"radial","leadSpanMm":2.519,"length":5.0,"pads":[262,309],"printShare":1.0,"rotation":89.204,"x":181.651,"y":29.994},
+   {"diameter":3.0,"kind":"radial","leadSpanMm":2.522,"length":5.0,"pads":[12,17],"printShare":1.0,"rotation":1.136,"x":156.274,"y":5.996},
+   {"diameter":3.0,"kind":"radial","leadSpanMm":2.531,"length":5.0,"pads":[23,46],"printShare":1.0,"rotation":87.758,"x":233.82,"y":8.341},
+   {"diameter":3.0,"kind":"radial","leadSpanMm":2.535,"length":5.0,"pads":[1975,2010],"printShare":1.0,"rotation":89.119,"x":18.924,"y":177.404},
+   {"diameter":3.0,"kind":"radial","leadSpanMm":2.536,"length":5.0,"pads":[2385,2386],"printShare":1.0,"rotation":1.378,"x":54.543,"y":206.507},
+   {"diameter":3.0,"kind":"radial","leadSpanMm":2.546,"length":5.0,"pads":[701,708],"printShare":1.0,"rotation":3.265,"x":297.355,"y":60.227},
+   {"diameter":3.0,"kind":"radial","leadSpanMm":2.551,"length":5.0,"pads":[211,2632],"printShare":1.0,"rotation":177.664,"x":66.049,"y":24.992},
+   {"diameter":3.0,"kind":"radial","leadSpanMm":2.552,"length":5.0,"pads":[1950,1976],"printShare":1.0,"rotation":88.361,"x":7.518,"y":174.883},
+   {"diameter":3.0,"kind":"radial","leadSpanMm":2.559,"length":5.0,"pads":[150,151],"printShare":1.0,"rotation":-0.022,"x":224.938,"y":19.848},
+   {"diameter":3.0,"kind":"radial","leadSpanMm":2.562,"length":5.0,"pads":[1348,1371],"printShare":1.0,"rotation":86.442,"x":207.118,"y":122.617},
+   {"diameter":3.0,"kind":"radial","leadSpanMm":2.563,"length":5.0,"pads":[56,78],"printShare":1.0,"rotation":90.38,"x":83.868,"y":13.544},
+   {"diameter":3.0,"kind":"radial","leadSpanMm":2.572,"length":5.0,"pads":[477,517],"printShare":1.0,"rotation":82.875,"x":124.453,"y":45.265},
+   {"diameter":3.0,"kind":"radial","leadSpanMm":2.575,"length":5.0,"pads":[197,2906],"printShare":1.0,"rotation":-95.192,"x":255.335,"y":21.03},
+   {"diameter":3.0,"kind":"radial","leadSpanMm":2.576,"length":5.0,"pads":[1874,1911],"printShare":1.0,"rotation":90.578,"x":228.674,"y":166.901},
+   {"diameter":3.0,"kind":"radial","leadSpanMm":2.578,"length":5.0,"pads":[2026,2027],"printShare":1.0,"rotation":0.644,"x":146.083,"y":178.504},
+   {"diameter":3.0,"kind":"radial","leadSpanMm":2.579,"length":5.0,"pads":[66,82],"printShare":1.0,"rotation":89.045,"x":231.23,"y":13.46},
+   {"diameter":3.0,"kind":"radial","leadSpanMm":2.58,"length":5.0,"pads":[2381,2382],"printShare":1.0,"rotation":0.044,"x":8.787,"y":206.621},
+   {"diameter":3.0,"kind":"radial","leadSpanMm":2.585,"length":5.0,"pads":[1764,1799],"printShare":1.0,"rotation":92.794,"x":53.134,"y":159.593},
+   {"diameter":3.0,"kind":"radial","leadSpanMm":2.586,"length":5.0,"pads":[15,16],"printShare":1.0,"rotation":-0.244,"x":148.683,"y":5.992},
+   {"diameter":3.0,"kind":"radial","leadSpanMm":2.586,"length":5.0,"pads":[1797,1798],"printShare":1.0,"rotation":178.25,"x":48.094,"y":160.822},
+   {"diameter":3.0,"kind":"radial","leadSpanMm":2.592,"length":5.0,"pads":[1866,1904],"printShare":1.0,"rotation":91.061,"x":106.662,"y":167.114},
+   {"diameter":3.0,"kind":"radial","leadSpanMm":2.593,"length":5.0,"pads":[1825,1827],"printShare":1.0,"rotation":2.564,"x":46.876,"y":163.448},
+   {"diameter":3.0,"kind":"radial","leadSpanMm":2.596,"length":5.0,"pads":[476,516],"printShare":1.0,"rotation":88.146,"x":120.688,"y":45.267},
+   {"diameter":3.0,"kind":"radial","leadSpanMm":2.6,"length":5.0,"pads":[2067,2098],"printShare":1.0,"rotation":90.463,"x":123.222,"y":182.361},
+   {"diameter":3.0,"kind":"radial","leadSpanMm":2.615,"length":5.0,"pads":[710,724],"printShare":1.0,"rotation":90.592,"x":51.901,"y":63.038},
+   {"diameter":3.0,"kind":"radial","leadSpanMm":2.616,"length":5.0,"pads":[2219,2253],"printShare":1.0,"rotation":88.686,"x":15.149,"y":193.91},
+   {"diameter":3.0,"kind":"radial","leadSpanMm":2.626,"length":5.0,"pads":[97,98],"printShare":1.0,"rotation":0.153,"x":161.382,"y":16.084},
+   {"diameter":3.0,"kind":"radial","leadSpanMm":2.626,"length":5.0,"pads":[129,130],"printShare":1.0,"rotation":0.262,"x":209.705,"y":18.637},
+   {"diameter":3.0,"kind":"radial","leadSpanMm":2.637,"length":5.0,"pads":[1256,1281],"printShare":1.0,"rotation":92.108,"x":31.657,"y":115.165},
+   {"diameter":3.0,"kind":"radial","leadSpanMm":2.645,"length":5.0,"pads":[514,521],"printShare":1.0,"rotation":1.711,"x":148.727,"y":46.505},
+   {"diameter":3.0,"kind":"radial","leadSpanMm":2.647,"length":5.0,"pads":[2863,2864],"printShare":1.0,"rotation":1.45,"x":198.258,"y":64.293},
+   {"diameter":3.0,"kind":"radial","leadSpanMm":2.647,"length":5.0,"pads":[231,233],"printShare":1.0,"rotation":179.545,"x":156.321,"y":26.181},
+   {"diameter":3.0,"kind":"radial","leadSpanMm":2.654,"length":5.0,"pads":[13,14],"printShare":1.0,"rotation":-2.959,"x":143.621,"y":5.909},
+   {"diameter":3.0,"kind":"radial","leadSpanMm":2.654,"length":5.0,"pads":[2395,2413],"printShare":1.0,"rotation":94.299,"x":305.058,"y":208.822},
+   {"diameter":3.0,"kind":"radial","leadSpanMm":2.673,"length":5.0,"pads":[84,85],"printShare":1.0,"rotation":0.257,"x":240.214,"y":14.75},
+   {"diameter":3.0,"kind":"radial","leadSpanMm":2.686,"length":5.0,"pads":[2150,2188],"printShare":1.0,"rotation":87.994,"x":76.096,"y":189.906},
+   {"diameter":3.0,"kind":"radial","leadSpanMm":2.687,"length":5.0,"pads":[1273,1274],"printShare":1.0,"rotation":-0.959,"x":283.394,"y":113.512},
+   {"diameter":3.0,"kind":"radial","leadSpanMm":2.702,"length":5.0,"pads":[751,752],"printShare":1.0,"rotation":-3.225,"x":97.843,"y":66.845},
+   {"diameter":3.0,"kind":"radial","leadSpanMm":2.716,"length":5.0,"pads":[536,579],"printShare":1.0,"rotation":91.35,"x":39.273,"y":50.203},
+   {"diameter":3.0,"kind":"radial","leadSpanMm":2.718,"length":5.0,"pads":[1832,1875],"printShare":1.0,"rotation":91.602,"x":305.041,"y":164.242},
+   {"diameter":3.0,"kind":"radial","leadSpanMm":2.729,"length":5.0,"pads":[87,111],"printShare":1.0,"rotation":113.888,"x":228.175,"y":16.072},
+   {"diameter":3.0,"kind":"radial","leadSpanMm":2.763,"length":5.0,"pads":[2117,2118],"printShare":1.0,"rotation":0.518,"x":100.352,"y":184.969},
+   {"diameter":3.0,"kind":"radial","leadSpanMm":2.781,"length":5.0,"pads":[490,2855],"printShare":1.0,"rotation":-1.792,"x":65.948,"y":45.305},
+   {"diameter":3.0,"kind":"radial","leadSpanMm":2.799,"length":5.0,"pads":[147,152],"printShare":1.0,"rotation":4.446,"x":246.626,"y":19.852},
+   {"diameter":3.0,"kind":"radial","leadSpanMm":2.852,"length":5.0,"pads":[1037,2869],"printShare":1.0,"rotation":-0.382,"x":123.414,"y":88.422},
+   {"diameter":3.0,"kind":"radial","leadSpanMm":2.864,"length":5.0,"pads":[690,691],"printShare":1.0,"rotation":1.081,"x":185.57,"y":59.237},
+   {"diameter":3.0,"kind":"radial","leadSpanMm":3.576,"length":5.0,"pads":[717,748],"printShare":1.0,"rotation":134.513,"x":218.511,"y":64.118},
+   {"diameter":3.0,"kind":"radial","leadSpanMm":3.585,"length":5.0,"pads":[19,43],"printShare":1.0,"rotation":45.429,"x":135.965,"y":8.501},
+   {"diameter":3.0,"kind":"radial","leadSpanMm":3.587,"length":5.0,"pads":[20,42],"printShare":1.0,"rotation":44.898,"x":130.904,"y":8.524},
+   {"diameter":3.0,"kind":"radial","leadSpanMm":3.615,"length":5.0,"pads":[311,344],"printShare":1.0,"rotation":134.35,"x":245.255,"y":32.451},
+   {"diameter":3.0,"kind":"radial","leadSpanMm":3.644,"length":5.0,"pads":[2663,3011],"printShare":1.0,"rotation":-44.722,"x":219.78,"y":167.057},
+   {"diameter":3.0,"kind":"radial","leadSpanMm":3.735,"length":5.0,"pads":[221,259],"printShare":1.0,"rotation":44.588,"x":256.62,"y":26.126},
+   {"diameter":3.0,"kind":"radial","leadSpanMm":4.982,"length":5.0,"pads":[2403,2427],"printShare":1.0,"rotation":87.907,"x":3.733,"y":213.005},
+   {"diameter":3.0,"kind":"radial","leadSpanMm":4.992,"length":5.0,"pads":[442,444],"printShare":1.0,"rotation":1.102,"x":48.231,"y":41.362},
+   {"diameter":3.0,"kind":"radial","leadSpanMm":5.026,"length":5.0,"pads":[2302,2370],"printShare":1.0,"rotation":91.06,"x":148.654,"y":201.322},
+   {"diameter":3.0,"kind":"radial","leadSpanMm":5.047,"length":5.0,"pads":[555,627],"printShare":1.0,"rotation":86.888,"x":184.297,"y":51.565},
+   {"diameter":3.0,"kind":"radial","leadSpanMm":5.06,"length":5.0,"pads":[9,10],"printShare":1.0,"rotation":0.272,"x":18.963,"y":5.741},
+   {"diameter":3.0,"kind":"radial","leadSpanMm":5.073,"length":5.0,"pads":[1634,1689],"printShare":1.0,"rotation":90.011,"x":31.492,"y":149.391},
+   {"diameter":3.0,"kind":"radial","leadSpanMm":5.08,"length":5.0,"pads":[276,357],"printShare":1.0,"rotation":90.62,"x":96.59,"y":32.572},
+   {"diameter":3.0,"kind":"radial","leadSpanMm":5.089,"length":5.0,"pads":[1043,1071],"printShare":1.0,"rotation":91.486,"x":184.251,"y":90.893},
+   {"diameter":3.0,"kind":"radial","leadSpanMm":5.094,"length":5.0,"pads":[2147,2148],"printShare":1.0,"rotation":-0.247,"x":21.421,"y":187.529},
+   {"diameter":3.0,"kind":"radial","leadSpanMm":5.105,"length":5.0,"pads":[143,217],"printShare":1.0,"rotation":90.135,"x":120.74,"y":22.428},
+   {"diameter":3.0,"kind":"radial","leadSpanMm":5.114,"length":5.0,"pads":[170,171],"printShare":1.0,"rotation":0.448,"x":168.981,"y":22.42},
+   {"diameter":3.0,"kind":"radial","leadSpanMm":5.115,"length":5.0,"pads":[2179,2252],"printShare":1.0,"rotation":91.333,"x":18.966,"y":192.605},
+   {"diameter":3.0,"kind":"radial","leadSpanMm":5.117,"length":5.0,"pads":[2399,2425],"printShare":1.0,"rotation":89.149,"x":6.294,"y":211.687},
+   {"diameter":3.0,"kind":"radial","leadSpanMm":5.132,"length":5.0,"pads":[2325,2326],"printShare":1.0,"rotation":0.123,"x":45.589,"y":201.488},
+   {"diameter":3.0,"kind":"radial","leadSpanMm":5.137,"length":5.0,"pads":[89,2721],"printShare":1.0,"rotation":0.569,"x":50.797,"y":16.017},
+   {"diameter":3.0,"kind":"radial","leadSpanMm":5.14,"length":5.0,"pads":[2379,2384],"printShare":1.0,"rotation":179.287,"x":45.647,"y":206.51},
+   {"diameter":3.0,"kind":"radial","leadSpanMm":5.149,"length":5.0,"pads":[405,406],"printShare":1.0,"rotation":178.553,"x":21.511,"y":38.807},
+   {"diameter":3.0,"kind":"radial","leadSpanMm":5.167,"length":5.0,"pads":[604,669],"printShare":1.0,"rotation":90.51,"x":277.025,"y":55.099},
+   {"diameter":3.0,"kind":"radial","leadSpanMm":5.199,"length":5.0,"pads":[545,624],"printShare":1.0,"rotation":89.482,"x":52.008,"y":51.618},
+   {"diameter":3.0,"kind":"radial","leadSpanMm":5.209,"length":5.0,"pads":[174,2835],"printShare":1.0,"rotation":0.781,"x":176.583,"y":22.463},
+   {"diameter":2.4,"kind":"axial","leadSpanMm":7.781,"length":6.3,"pads":[818,2705],"printShare":1.0,"rotation":91.119,"x":117.023,"y":74.461},
+   {"diameter":2.4,"kind":"axial","leadSpanMm":8.924,"length":6.3,"pads":[318,2620],"printShare":1.0,"rotation":0.282,"x":59.064,"y":32.613},
+   {"diameter":2.4,"kind":"axial","leadSpanMm":10.185,"length":6.3,"pads":[2388,2389],"printShare":1.0,"rotation":-0.135,"x":78.651,"y":206.525},
+   {"diameter":2.4,"kind":"axial","leadSpanMm":10.19,"length":6.3,"pads":[2354,2355],"printShare":1.0,"rotation":179.567,"x":17.643,"y":204.089},
+   {"diameter":2.4,"kind":"axial","leadSpanMm":10.276,"length":6.3,"pads":[2437,2438],"printShare":1.0,"rotation":-0.385,"x":214.723,"y":215.257},
+   {"diameter":2.4,"kind":"axial","leadSpanMm":12.643,"length":6.3,"pads":[2215,2220],"printShare":1.0,"rotation":-179.778,"x":31.572,"y":192.625},
+   {"diameter":2.4,"kind":"axial","leadSpanMm":12.647,"length":6.3,"pads":[747,2928],"printShare":1.0,"rotation":-0.598,"x":13.87,"y":65.589},
+   {"diameter":2.4,"kind":"axial","leadSpanMm":12.694,"length":6.3,"pads":[1853,1854],"printShare":1.0,"rotation":-0.131,"x":12.524,"y":165.988},
+   {"diameter":2.4,"kind":"axial","leadSpanMm":12.718,"length":6.3,"pads":[348,349],"printShare":1.0,"rotation":-0.032,"x":35.484,"y":35.058},
+   {"diameter":2.4,"kind":"axial","leadSpanMm":12.721,"length":6.3,"pads":[244,245],"printShare":1.0,"rotation":-0.05,"x":60.995,"y":27.495},
+   {"diameter":2.4,"kind":"axial","leadSpanMm":12.745,"length":6.3,"pads":[1599,2985],"printShare":1.0,"rotation":-89.694,"x":31.539,"y":138.041},
+   {"diameter":2.4,"kind":"axial","leadSpanMm":12.751,"length":6.3,"pads":[1823,1824],"printShare":1.0,"rotation":-0.238,"x":12.556,"y":163.46},
+   {"diameter":2.4,"kind":"axial","leadSpanMm":12.78,"length":6.3,"pads":[162,2833],"printShare":1.0,"rotation":0.197,"x":35.496,"y":22.302},
+   {"diameter":2.4,"kind":"axial","leadSpanMm":12.781,"length":6.3,"pads":[2404,2405],"printShare":1.0,"rotation":-0.628,"x":25.232,"y":210.423},
+   {"diameter":2.4,"kind":"axial","leadSpanMm":12.817,"length":6.3,"pads":[2416,2417],"printShare":1.0,"rotation":-0.004,"x":83.733,"y":211.577},
+   {"diameter":2.4,"kind":"axial","leadSpanMm":12.837,"length":6.3,"pads":[1729,1730],"printShare":1.0,"rotation":179.545,"x":37.974,"y":155.72},
+   {"diameter":2.4,"kind":"axial","leadSpanMm":12.868,"length":6.3,"pads":[2122,2123],"printShare":0.991,"rotation":0.69,"x":67.209,"y":186.315},
+   {"diameter":2.4,"kind":"axial","leadSpanMm":12.716,"length":6.3,"pads":[1915,2088],"printShare":0.991,"rotation":91.023,"x":108.029,"y":175.983},
+   {"diameter":2.4,"kind":"axial","leadSpanMm":12.737,"length":6.3,"pads":[1266,1395],"printShare":0.991,"rotation":90.0,"x":152.406,"y":120.138},
+   {"diameter":2.4,"kind":"axial","leadSpanMm":12.757,"length":6.3,"pads":[2184,2185],"printShare":0.991,"rotation":-0.202,"x":31.613,"y":190.062},
+   {"diameter":2.4,"kind":"axial","leadSpanMm":12.76,"length":6.3,"pads":[421,422],"printShare":0.991,"rotation":0.198,"x":35.479,"y":40.099},
+   {"diameter":2.4,"kind":"axial","leadSpanMm":12.763,"length":6.3,"pads":[1696,2879],"printShare":0.991,"rotation":-89.762,"x":106.602,"y":145.598},
+   {"diameter":2.4,"kind":"axial","leadSpanMm":12.794,"length":6.3,"pads":[134,137],"printShare":0.991,"rotation":-179.798,"x":35.425,"y":19.761},
+   {"diameter":2.4,"kind":"axial","leadSpanMm":12.687,"length":6.3,"pads":[1335,1470],"printShare":0.991,"rotation":89.923,"x":10.05,"y":127.885},
+   {"diameter":2.4,"kind":"axial","leadSpanMm":12.692,"length":6.3,"pads":[2392,2393],"printShare":0.991,"rotation":0.032,"x":25.258,"y":207.822},
+   {"diameter":2.4,"kind":"axial","leadSpanMm":12.696,"length":6.3,"pads":[513,682],"printShare":0.991,"rotation":90.027,"x":54.464,"y":52.85},
+   {"diameter":2.4,"kind":"axial","leadSpanMm":12.853,"length":6.3,"pads":[269,271],"printShare":0.982,"rotation":-0.169,"x":60.911,"y":30.053},
+   {"diameter":2.4,"kind":"axial","leadSpanMm":12.711,"length":6.3,"pads":[407,408],"printShare":0.982,"rotation":0.212,"x":50.724,"y":38.904},
+   {"diameter":2.4,"kind":"axial","leadSpanMm":12.758,"length":6.3,"pads":[240,241],"printShare":0.982,"rotation":0.404,"x":35.5,"y":27.419},
+   {"diameter":2.4,"kind":"axial","leadSpanMm":12.693,"length":6.3,"pads":[2287,2288],"printShare":0.982,"rotation":0.429,"x":26.555,"y":197.728},
+   {"diameter":2.4,"kind":"axial","leadSpanMm":12.697,"length":6.3,"pads":[350,351],"printShare":0.982,"rotation":0.185,"x":60.986,"y":35.067},
+   {"diameter":2.4,"kind":"axial","leadSpanMm":12.596,"length":6.3,"pads":[160,165],"printShare":0.981,"rotation":0.578,"x":61.023,"y":22.329},
+   {"diameter":3.0,"kind":"radial","leadSpanMm":6.565,"length":5.0,"pads":[21,76],"printShare":0.979,"rotation":90.113,"x":18.971,"y":11.392},
+   {"diameter":3.0,"kind":"radial","leadSpanMm":6.187,"length":5.0,"pads":[1228,1231],"printShare":0.977,"rotation":2.779,"x":280.221,"y":109.737},
+   {"diameter":2.4,"kind":"axial","leadSpanMm":12.832,"length":6.3,"pads":[1270,1400],"printShare":0.973,"rotation":89.402,"x":210.873,"y":120.02},
+   {"diameter":2.4,"kind":"axial","leadSpanMm":12.711,"length":6.3,"pads":[314,315],"printShare":0.973,"rotation":-179.788,"x":35.496,"y":32.501},
+   {"diameter":2.4,"kind":"axial","leadSpanMm":12.717,"length":6.3,"pads":[2351,2436],"printShare":0.973,"rotation":89.491,"x":168.911,"y":208.96},
+   {"diameter":2.4,"kind":"axial","leadSpanMm":12.682,"length":6.3,"pads":[339,520],"printShare":0.972,"rotation":90.56,"x":157.568,"y":40.197},
+   {"diameter":2.4,"kind":"axial","leadSpanMm":12.694,"length":6.3,"pads":[2320,2321],"printShare":0.972,"rotation":-0.09,"x":21.426,"y":200.265},
+   {"diameter":2.4,"kind":"axial","leadSpanMm":12.695,"length":6.3,"pads":[458,459],"printShare":0.972,"rotation":179.255,"x":25.291,"y":42.609},
+   {"diameter":3.0,"kind":"radial","leadSpanMm":5.21,"length":5.0,"pads":[51,101],"printShare":0.971,"rotation":90.451,"x":16.422,"y":14.581},
+   {"diameter":3.0,"kind":"radial","leadSpanMm":5.257,"length":5.0,"pads":[1890,1893],"printShare":0.971,"rotation":0.109,"x":4.963,"y":168.545},
+   {"diameter":3.0,"kind":"radial","leadSpanMm":5.121,"length":5.0,"pads":[26,27],"printShare":0.971,"rotation":0.056,"x":144.885,"y":8.524},
+   {"diameter":3.0,"kind":"radial","leadSpanMm":5.129,"length":5.0,"pads":[601,667],"printShare":0.971,"rotation":88.738,"x":223.589,"y":55.29},
+   {"diameter":3.0,"kind":"radial","leadSpanMm":5.161,"length":5.0,"pads":[881,951],"printShare":0.971,"rotation":90.167,"x":222.389,"y":76.843},
+   {"diameter":3.0,"kind":"radial","leadSpanMm":5.18,"length":5.0,"pads":[282,286],"printShare":0.971,"rotation":0.133,"x":157.534,"y":30.024},
+   {"diameter":3.0,"kind":"radial","leadSpanMm":5.184,"length":5.0,"pads":[839,916],"printShare":0.971,"rotation":90.365,"x":200.677,"y":74.421},
+   {"diameter":3.0,"kind":"radial","leadSpanMm":5.082,"length":5.0,"pads":[1361,1421],"printShare":0.97,"rotation":92.075,"x":31.594,"y":126.659},
+   {"diameter":3.0,"kind":"radial","leadSpanMm":5.096,"length":5.0,"pads":[592,661],"printShare":0.97,"rotation":89.517,"x":199.487,"y":54.114},
+   {"diameter":3.0,"kind":"radial","leadSpanMm":4.981,"length":5.0,"pads":[383,384],"printShare":0.969,"rotation":179.793,"x":246.589,"y":36.197},
+   {"diameter":2.4,"kind":"axial","leadSpanMm":12.825,"length":6.3,"pads":[507,678],"printShare":0.964,"rotation":90.554,"x":36.786,"y":52.843},
+   {"diameter":2.4,"kind":"axial","leadSpanMm":12.765,"length":6.3,"pads":[2119,2121],"printShare":0.964,"rotation":179.897,"x":32.868,"y":186.233},
+   {"diameter":2.4,"kind":"axial","leadSpanMm":12.762,"length":6.3,"pads":[1226,1227],"printShare":0.955,"rotation":-0.323,"x":8.765,"y":110.047},
+   {"diameter":2.4,"kind":"axial","leadSpanMm":12.662,"length":6.3,"pads":[0,1],"printShare":0.954,"rotation":179.529,"x":15.202,"y":1.913},
+   {"diameter":3.0,"kind":"radial","leadSpanMm":3.824,"length":5.0,"pads":[112,2832],"printShare":0.952,"rotation":137.65,"x":231.312,"y":18.575},
+   {"diameter":3.0,"kind":"radial","leadSpanMm":3.761,"length":5.0,"pads":[105,106],"printShare":0.95,"rotation":0.289,"x":187.502,"y":17.352},
+   {"diameter":2.4,"kind":"axial","leadSpanMm":12.721,"length":6.3,"pads":[207,2839],"printShare":0.945,"rotation":0.257,"x":35.511,"y":24.857},
+   {"diameter":3.0,"kind":"radial","leadSpanMm":5.115,"length":5.0,"pads":[1213,1251],"printShare":0.941,"rotation":89.709,"x":237.57,"y":109.809},
+   {"diameter":3.0,"kind":"radial","leadSpanMm":5.155,"length":5.0,"pads":[570,641],"printShare":0.941,"rotation":90.222,"x":298.652,"y":52.502},
+   {"diameter":3.0,"kind":"radial","leadSpanMm":5.182,"length":5.0,"pads":[2,24],"printShare":0.941,"rotation":90.011,"x":256.645,"y":4.484},
+   {"diameter":3.0,"kind":"radial","leadSpanMm":5.048,"length":5.0,"pads":[222,223],"printShare":0.939,"rotation":0.477,"x":264.295,"y":24.757},
+   {"diameter":3.0,"kind":"radial","leadSpanMm":3.228,"length":5.0,"pads":[2410,2422],"printShare":0.933,"rotation":143.389,"x":299.995,"y":211.118},
+   {"diameter":3.0,"kind":"radial","leadSpanMm":5.161,"length":5.0,"pads":[123,200],"printShare":0.912,"rotation":89.478,"x":144.892,"y":21.166},
+   {"diameter":3.0,"kind":"radial","leadSpanMm":5.166,"length":5.0,"pads":[118,2565],"printShare":0.912,"rotation":-179.845,"x":105.513,"y":18.73},
+   {"diameter":2.4,"kind":"axial","leadSpanMm":12.536,"length":6.3,"pads":[205,385],"printShare":0.907,"rotation":88.556,"x":14.032,"y":31.108},
+   {"diameter":3.0,"kind":"radial","leadSpanMm":2.722,"length":5.0,"pads":[1247,1248],"printShare":0.9,"rotation":1.031,"x":214.699,"y":111.236},
+   {"diameter":3.0,"kind":"radial","leadSpanMm":2.725,"length":5.0,"pads":[1225,1249],"printShare":0.9,"rotation":86.971,"x":305.029,"y":109.582},
+   {"diameter":3.0,"kind":"radial","leadSpanMm":2.734,"length":5.0,"pads":[234,235],"printShare":0.9,"rotation":-1.048,"x":161.401,"y":26.17},
+   {"diameter":3.0,"kind":"radial","leadSpanMm":2.757,"length":5.0,"pads":[1232,1234],"printShare":0.9,"rotation":175.903,"x":21.31,"y":111.382},
+   {"diameter":3.0,"kind":"radial","leadSpanMm":2.783,"length":5.0,"pads":[1534,1536],"printShare":0.9,"rotation":179.65,"x":266.935,"y":137.751},
+   {"diameter":3.0,"kind":"radial","leadSpanMm":2.787,"length":5.0,"pads":[1879,1886],"printShare":0.9,"rotation":177.45,"x":239.006,"y":166.952},
+   {"diameter":3.0,"kind":"radial","leadSpanMm":3.745,"length":5.0,"pads":[571,610],"printShare":0.9,"rotation":43.171,"x":302.471,"y":51.232},
+   {"diameter":3.0,"kind":"radial","leadSpanMm":2.601,"length":5.0,"pads":[257,258],"printShare":0.889,"rotation":1.057,"x":244.005,"y":27.306},
+   {"diameter":3.0,"kind":"radial","leadSpanMm":2.608,"length":5.0,"pads":[1184,1185],"printShare":0.889,"rotation":-0.461,"x":8.758,"y":106.345},
+   {"diameter":3.0,"kind":"radial","leadSpanMm":2.617,"length":5.0,"pads":[2400,2401],"printShare":0.889,"rotation":0.591,"x":179.05,"y":208.963},
+   {"diameter":3.0,"kind":"radial","leadSpanMm":2.624,"length":5.0,"pads":[642,672],"printShare":0.889,"rotation":89.585,"x":301.211,"y":56.269},
+   {"diameter":3.0,"kind":"radial","leadSpanMm":2.641,"length":5.0,"pads":[1671,1675],"printShare":0.889,"rotation":0.217,"x":208.363,"y":149.292},
+   {"diameter":3.0,"kind":"radial","leadSpanMm":2.68,"length":5.0,"pads":[219,220],"printShare":0.889,"rotation":-12.169,"x":244.038,"y":24.521},
+   {"diameter":3.0,"kind":"radial","leadSpanMm":3.561,"length":5.0,"pads":[192,226],"printShare":0.889,"rotation":44.101,"x":236.363,"y":23.599},
+   {"diameter":2.4,"kind":"axial","leadSpanMm":12.889,"length":6.3,"pads":[2424,2426],"printShare":0.883,"rotation":179.604,"x":83.744,"y":214.073},
+   {"diameter":3.0,"kind":"radial","leadSpanMm":5.122,"length":5.0,"pads":[692,693],"printShare":0.882,"rotation":-0.291,"x":264.33,"y":58.984},
+   {"diameter":2.4,"kind":"axial","leadSpanMm":12.703,"length":6.3,"pads":[1349,1494],"printShare":0.882,"rotation":89.932,"x":79.875,"y":129.101},
+   {"diameter":2.4,"kind":"axial","leadSpanMm":12.717,"length":6.3,"pads":[265,266],"printShare":0.882,"rotation":-0.005,"x":35.505,"y":29.941},
+   {"diameter":2.4,"kind":"axial","leadSpanMm":12.685,"length":6.3,"pads":[2221,2222],"printShare":0.881,"rotation":0.014,"x":53.243,"y":192.572},
+   {"diameter":3.0,"kind":"radial","leadSpanMm":5.053,"length":5.0,"pads":[603,664],"printShare":0.879,"rotation":89.671,"x":269.385,"y":55.157},
+   {"diameter":3.0,"kind":"radial","leadSpanMm":2.503,"length":5.0,"pads":[565,600],"printShare":0.875,"rotation":90.481,"x":221.1,"y":51.528},
+   {"diameter":3.0,"kind":"radial","leadSpanMm":2.513,"length":5.0,"pads":[1903,3014],"printShare":0.875,"rotation":2.212,"x":246.49,"y":168.242},
+   {"diameter":3.0,"kind":"radial","leadSpanMm":2.532,"length":5.0,"pads":[2867,2868],"printShare":0.875,"rotation":-1.878,"x":253.05,"y":84.434},
+   {"diameter":3.0,"kind":"radial","leadSpanMm":2.536,"length":5.0,"pads":[515,548],"printShare":0.875,"rotation":87.785,"x":79.92,"y":47.811},
+   {"diameter":3.0,"kind":"radial","leadSpanMm":2.551,"length":5.0,"pads":[534,535],"printShare":0.875,"rotation":1.887,"x":275.801,"y":47.528},
+   {"diameter":3.0,"kind":"radial","leadSpanMm":2.565,"length":5.0,"pads":[694,698],"printShare":0.875,"rotation":0.514,"x":233.891,"y":60.388},
+   {"diameter":3.0,"kind":"radial","leadSpanMm":2.571,"length":5.0,"pads":[443,2727],"printShare":0.875,"rotation":172.399,"x":146.191,"y":41.357},
+   {"diameter":3.0,"kind":"radial","leadSpanMm":2.578,"length":5.0,"pads":[896,934],"printShare":0.875,"rotation":88.844,"x":123.249,"y":77.023},
+   {"diameter":3.0,"kind":"radial","leadSpanMm":2.586,"length":5.0,"pads":[568,606],"printShare":0.875,"rotation":91.197,"x":282.085,"y":51.309},
+   {"diameter":3.0,"kind":"radial","leadSpanMm":3.334,"length":5.0,"pads":[88,2828],"printShare":0.875,"rotation":133.408,"x":251.691,"y":15.949},
+   {"diameter":2.4,"kind":"axial","leadSpanMm":12.705,"length":6.3,"pads":[1065,1183],"printShare":0.873,"rotation":89.396,"x":237.595,"y":98.433},
+   {"diameter":2.4,"kind":"axial","leadSpanMm":12.724,"length":6.3,"pads":[387,388],"printShare":0.873,"rotation":-0.189,"x":35.464,"y":37.568},
+   {"diameter":3.0,"kind":"radial","leadSpanMm":5.403,"length":5.0,"pads":[11,47],"printShare":0.865,"rotation":89.374,"x":77.532,"y":8.599},
+   {"diameter":2.4,"kind":"axial","leadSpanMm":12.879,"length":6.3,"pads":[495,675],"printShare":0.865,"rotation":89.902,"x":24.011,"y":52.743},
+   {"diameter":2.4,"kind":"axial","leadSpanMm":12.666,"length":6.3,"pads":[1974,2146],"printShare":0.862,"rotation":90.489,"x":16.484,"y":181.223},
+   {"diameter":2.4,"kind":"axial","leadSpanMm":12.7,"length":6.3,"pads":[1318,1454],"printShare":0.845,"rotation":89.824,"x":156.204,"y":125.217},
+   {"diameter":3.0,"kind":"radial","leadSpanMm":3.609,"length":5.0,"pads":[643,2924],"printShare":0.842,"rotation":45.314,"x":305.036,"y":56.33},
+   {"diameter":3.0,"kind":"radial","leadSpanMm":5.275,"length":5.0,"pads":[454,455],"printShare":0.829,"rotation":-0.054,"x":199.433,"y":41.41},
+   {"diameter":2.4,"kind":"axial","leadSpanMm":12.599,"length":6.3,"pads":[2418,2419],"printShare":0.824,"rotation":-179.886,"x":16.401,"y":213.01},
+   {"diameter":2.4,"kind":"axial","leadSpanMm":10.23,"length":6.3,"pads":[2439,2440],"printShare":0.824,"rotation":-0.095,"x":214.717,"y":217.799},
+   {"diameter":2.4,"kind":"axial","leadSpanMm":12.914,"length":6.3,"pads":[772,964],"printShare":0.821,"rotation":90.186,"x":10.1,"y":74.395},
+   {"diameter":3.0,"kind":"radial","leadSpanMm":2.828,"length":5.0,"pads":[1909,1912],"printShare":0.818,"rotation":1.115,"x":255.538,"y":168.269},
+   {"diameter":3.0,"kind":"radial","leadSpanMm":5.019,"length":5.0,"pads":[561,639],"printShare":0.818,"rotation":89.406,"x":264.338,"y":52.608},
+   {"diameter":3.0,"kind":"radial","leadSpanMm":6.397,"length":5.0,"pads":[158,236],"printShare":0.804,"rotation":52.571,"x":164.559,"y":23.711},
+   {"diameter":3.0,"kind":"radial","leadSpanMm":2.709,"length":5.0,"pads":[448,489],"printShare":0.8,"rotation":93.089,"x":217.354,"y":42.585},
+   {"diameter":3.0,"kind":"radial","leadSpanMm":5.724,"length":5.0,"pads":[255,2836],"printShare":0.8,"rotation":-117.962,"x":231.308,"y":24.918},
+   {"diameter":3.0,"kind":"radial","leadSpanMm":3.619,"length":5.0,"pads":[1801,1828],"printShare":0.789,"rotation":44.339,"x":106.64,"y":162.066},
+   {"diameter":3.0,"kind":"radial","leadSpanMm":3.639,"length":5.0,"pads":[2322,2349],"printShare":0.789,"rotation":44.955,"x":3.639,"y":201.572},
+   {"diameter":2.4,"kind":"axial","leadSpanMm":12.651,"length":6.3,"pads":[2155,2332],"printShare":0.78,"rotation":89.447,"x":78.63,"y":195.067},
+   {"diameter":3.0,"kind":"radial","leadSpanMm":2.603,"length":5.0,"pads":[1612,1618],"printShare":0.778,"rotation":0.396,"x":208.337,"y":144.211},
+   {"diameter":3.0,"kind":"radial","leadSpanMm":2.608,"length":5.0,"pads":[1156,1159],"printShare":0.778,"rotation":0.132,"x":81.317,"y":103.7},
+   {"diameter":3.0,"kind":"radial","leadSpanMm":2.612,"length":5.0,"pads":[126,127],"printShare":0.778,"rotation":3.27,"x":161.375,"y":18.573},
+   {"diameter":3.0,"kind":"radial","leadSpanMm":2.613,"length":5.0,"pads":[48,68],"printShare":0.778,"rotation":92.193,"x":146.105,"y":12.27},
+   {"diameter":3.0,"kind":"radial","leadSpanMm":2.617,"length":5.0,"pads":[1562,1563],"printShare":0.778,"rotation":-0.438,"x":207.07,"y":140.401},
+   {"diameter":3.0,"kind":"radial","leadSpanMm":2.628,"length":5.0,"pads":[638,666],"printShare":0.778,"rotation":91.352,"x":282.039,"y":56.373},
+   {"diameter":3.0,"kind":"radial","leadSpanMm":2.645,"length":5.0,"pads":[1835,3008],"printShare":0.778,"rotation":-178.159,"x":218.558,"y":163.257},
+   {"diameter":3.0,"kind":"radial","leadSpanMm":2.65,"length":5.0,"pads":[343,386],"printShare":0.778,"rotation":90.67,"x":11.337,"y":36.27},
+   {"diameter":3.0,"kind":"radial","leadSpanMm":2.651,"length":5.0,"pads":[573,611],"printShare":0.778,"rotation":92.919,"x":306.411,"y":51.227},
+   {"diameter":3.0,"kind":"radial","leadSpanMm":3.597,"length":5.0,"pads":[572,609],"printShare":0.778,"rotation":134.223,"x":302.397,"y":51.237},
+   {"diameter":2.4,"kind":"axial","leadSpanMm":7.472,"length":6.3,"pads":[605,665],"printShare":0.772,"rotation":134.046,"x":277.014,"y":55.145},
+   {"diameter":3.0,"kind":"radial","leadSpanMm":5.622,"length":5.0,"pads":[196,2831],"printShare":0.769,"rotation":-28.99,"x":250.349,"y":21.047},
+   {"diameter":3.0,"kind":"radial","leadSpanMm":2.577,"length":5.0,"pads":[1740,1741],"printShare":0.75,"rotation":0.067,"x":208.337,"y":156.871},
+   {"diameter":3.0,"kind":"radial","leadSpanMm":2.587,"length":5.0,"pads":[131,133],"printShare":0.75,"rotation":178.361,"x":3.727,"y":19.733},
+   {"diameter":3.0,"kind":"radial","leadSpanMm":2.926,"length":5.0,"pads":[115,153],"printShare":0.75,"rotation":118.746,"x":261.226,"y":18.486},
+   {"diameter":3.0,"kind":"radial","leadSpanMm":2.941,"length":5.0,"pads":[749,2792],"printShare":0.75,"rotation":115.563,"x":221.731,"y":66.763},
+   {"diameter":3.0,"kind":"radial","leadSpanMm":3.715,"length":5.0,"pads":[1826,1867],"printShare":0.75,"rotation":135.371,"x":133.317,"y":164.532},
+   {"diameter":2.4,"kind":"axial","leadSpanMm":9.068,"length":6.3,"pads":[2089,2153],"printShare":0.74,"rotation":135.46,"x":5.519,"y":185.732},
+   {"diameter":2.4,"kind":"axial","leadSpanMm":8.213,"length":6.3,"pads":[136,237],"printShare":0.738,"rotation":51.923,"x":176.626,"y":22.956},
+   {"diameter":3.0,"kind":"radial","leadSpanMm":2.835,"length":5.0,"pads":[1781,2564],"printShare":0.727,"rotation":152.866,"x":133.361,"y":158.892},
+   {"diameter":3.0,"kind":"radial","leadSpanMm":2.855,"length":5.0,"pads":[2009,2044],"printShare":0.727,"rotation":26.682,"x":4.92,"y":179.312},
+   {"diameter":3.0,"kind":"radial","leadSpanMm":3.576,"length":5.0,"pads":[1989,2022],"printShare":0.722,"rotation":44.694,"x":119.407,"y":177.281},
+   {"diameter":3.0,"kind":"radial","leadSpanMm":3.586,"length":5.0,"pads":[1162,2675],"printShare":0.722,"rotation":-44.718,"x":148.609,"y":102.397},
+   {"diameter":3.0,"kind":"radial","leadSpanMm":6.779,"length":5.0,"pads":[285,382],"printShare":0.72,"rotation":69.581,"x":153.774,"y":33.16},
+   {"diameter":3.0,"kind":"radial","leadSpanMm":2.414,"length":5.0,"pads":[1744,3000],"printShare":0.714,"rotation":-81.353,"x":231.472,"y":155.653},
+   {"diameter":3.0,"kind":"radial","leadSpanMm":2.471,"length":5.0,"pads":[83,2899],"printShare":0.714,"rotation":-95.946,"x":233.709,"y":13.583},
+   {"diameter":3.0,"kind":"radial","leadSpanMm":2.473,"length":5.0,"pads":[1257,1276],"printShare":0.714,"rotation":5.662,"x":264.269,"y":113.496},
+   {"diameter":3.0,"kind":"radial","leadSpanMm":2.482,"length":5.0,"pads":[1233,2961],"printShare":0.714,"rotation":-3.257,"x":242.679,"y":109.897},
+   {"diameter":3.0,"kind":"radial","leadSpanMm":3.893,"length":5.0,"pads":[2051,2086],"printShare":0.714,"rotation":19.915,"x":4.3,"y":181.896},
+   {"diameter":3.0,"kind":"radial","leadSpanMm":5.939,"length":5.0,"pads":[193,253],"printShare":0.714,"rotation":114.96,"x":251.597,"y":24.817},
+   {"diameter":3.0,"kind":"radial","leadSpanMm":6.467,"length":5.0,"pads":[1009,2755],"printShare":0.702,"rotation":178.857,"x":238.31,"y":84.427},
+   {"diameter":3.0,"kind":"radial","leadSpanMm":5.74,"length":5.0,"pads":[2023,2892],"printShare":0.7,"rotation":118.016,"x":121.92,"y":181.067},
+   {"diameter":3.0,"kind":"radial","leadSpanMm":5.771,"length":5.0,"pads":[80,149],"printShare":0.7,"rotation":63.546,"x":200.783,"y":17.325},
+   {"diameter":3.0,"kind":"radial","leadSpanMm":5.67,"length":5.0,"pads":[1802,1830],"printShare":0.692,"rotation":154.108,"x":132.142,"y":162.02},
+   {"diameter":3.0,"kind":"radial","leadSpanMm":5.675,"length":5.0,"pads":[563,637],"printShare":0.692,"rotation":116.746,"x":273.203,"y":52.558},
+   {"diameter":3.0,"kind":"radial","leadSpanMm":3.942,"length":5.0,"pads":[86,2821],"printShare":0.682,"rotation":-105.404,"x":258.69,"y":12.71},
+   {"diameter":3.0,"kind":"radial","leadSpanMm":4.521,"length":5.0,"pads":[1868,1916],"printShare":0.679,"rotation":57.445,"x":130.867,"y":167.728},
+   {"diameter":3.0,"kind":"radial","leadSpanMm":2.394,"length":5.0,"pads":[1427,1428],"printShare":0.667,"rotation":2.203,"x":139.659,"y":129.053},
+   {"diameter":3.0,"kind":"radial","leadSpanMm":2.604,"length":5.0,"pads":[569,608],"printShare":0.667,"rotation":91.166,"x":296.142,"y":51.225},
+   {"diameter":3.0,"kind":"radial","leadSpanMm":2.629,"length":5.0,"pads":[230,232],"printShare":0.667,"rotation":-2.899,"x":151.239,"y":26.288},
+   {"diameter":3.0,"kind":"radial","leadSpanMm":2.641,"length":5.0,"pads":[880,918],"printShare":0.667,"rotation":93.061,"x":219.827,"y":75.549},
+   {"diameter":3.0,"kind":"radial","leadSpanMm":2.648,"length":5.0,"pads":[1719,1720],"printShare":0.667,"rotation":1.125,"x":208.32,"y":154.322},
+   {"diameter":3.0,"kind":"radial","leadSpanMm":2.698,"length":5.0,"pads":[303,335],"printShare":0.667,"rotation":88.046,"x":307.683,"y":30.877},
+   {"diameter":3.0,"kind":"radial","leadSpanMm":3.6,"length":5.0,"pads":[1843,1884],"printShare":0.667,"rotation":45.124,"x":201.978,"y":165.803},
+   {"diameter":2.4,"kind":"axial","leadSpanMm":12.818,"length":6.3,"pads":[195,2795],"printShare":0.658,"rotation":10.878,"x":268.167,"y":23.532},
+   {"diameter":3.0,"kind":"radial","leadSpanMm":4.639,"length":5.0,"pads":[1837,1887],"printShare":0.655,"rotation":122.186,"x":298.562,"y":164.895},
+   {"diameter":3.0,"kind":"radial","leadSpanMm":3.724,"length":5.0,"pads":[173,225],"printShare":0.65,"rotation":135.533,"x":236.372,"y":23.52},
+   {"diameter":3.0,"kind":"radial","leadSpanMm":6.29,"length":5.0,"pads":[1836,1889],"printShare":0.644,"rotation":36.278,"x":299.901,"y":164.81},
+   {"diameter":3.0,"kind":"radial","leadSpanMm":3.167,"length":5.0,"pads":[381,416],"printShare":0.643,"rotation":54.704,"x":150.884,"y":37.697},
+   {"diameter":3.0,"kind":"radial","leadSpanMm":5.667,"length":5.0,"pads":[640,697],"printShare":0.641,"rotation":61.916,"x":275.753,"y":57.604},
+   {"diameter":3.0,"kind":"radial","leadSpanMm":2.807,"length":5.0,"pads":[1531,1535],"printShare":0.636,"rotation":175.813,"x":258.067,"y":137.697},
+   {"diameter":3.0,"kind":"radial","leadSpanMm":2.879,"length":5.0,"pads":[353,2681],"printShare":0.636,"rotation":-23.172,"x":80.017,"y":34.505},
+   {"diameter":3.0,"kind":"radial","leadSpanMm":2.514,"length":5.0,"pads":[1850,1851],"printShare":0.625,"rotation":1.618,"x":290.985,"y":164.344},
+   {"diameter":3.0,"kind":"radial","leadSpanMm":2.534,"length":5.0,"pads":[586,625],"printShare":0.625,"rotation":89.412,"x":156.259,"y":52.853},
+   {"diameter":3.0,"kind":"radial","leadSpanMm":5.739,"length":5.0,"pads":[564,607],"printShare":0.625,"rotation":153.506,"x":274.469,"y":51.322},
+   {"diameter":3.0,"kind":"radial","leadSpanMm":4.608,"length":5.0,"pads":[1838,1888],"printShare":0.621,"rotation":124.452,"x":301.06,"y":164.971},
+   {"diameter":3.0,"kind":"radial","leadSpanMm":5.111,"length":5.0,"pads":[2183,2254],"printShare":0.618,"rotation":90.426,"x":22.751,"y":192.63},
+   {"diameter":3.0,"kind":"radial","leadSpanMm":5.205,"length":5.0,"pads":[2841,2844],"printShare":0.6,"rotation":30.437,"x":250.763,"y":26.12}
+  ],
+  "underOtherParts": 7,
+  "what": "Two-lead parts inferred from the print: pairs of free pads with print along the line between them (board_parts.py, step 7); typical bodies"
+ },
+ "places": {
+  "IC1": {
+   "footprint": "task 3",
+   "padCount": 40,
+   "padsInferred": [],
+   "pins": 40,
+   "rotation": 90.08,
+   "x": 167.655,
+   "y": 120.124
+  },
+  "IC10": {
+   "footprint": "task 3",
+   "padCount": 20,
+   "padsInferred": [],
+   "pins": 20,
+   "rotation": 89.642,
+   "x": 255.458,
+   "y": 152.992
+  },
+  "IC100": {
+   "footprint": "task 3",
+   "padCount": 28,
+   "padsInferred": [],
+   "pins": 28,
+   "rotation": 89.509,
+   "x": 278.331,
+   "y": 187.264
+  },
+  "IC101": {
+   "footprint": "task 3",
+   "padCount": 28,
+   "padsInferred": [],
+   "pins": 28,
+   "rotation": 89.769,
+   "x": 297.393,
+   "y": 187.253
+  },
+  "IC11": {
+   "footprint": "task 3",
+   "padCount": 20,
+   "padsInferred": [],
+   "pins": 20,
+   "rotation": 90.19,
+   "x": 255.461,
+   "y": 123.771
+  },
+  "IC12": {
+   "footprint": "task 3",
+   "padCount": 20,
+   "padsInferred": [],
+   "pins": 20,
+   "rotation": 89.783,
+   "x": 278.289,
+   "y": 152.94
+  },
+  "IC13": {
+   "footprint": "task 3",
+   "padCount": 20,
+   "padsInferred": [],
+   "pins": 20,
+   "rotation": 89.812,
+   "x": 266.853,
+   "y": 152.943
+  },
+  "IC14": {
+   "footprint": "task 3",
+   "padCount": 20,
+   "padsInferred": [],
+   "pins": 20,
+   "rotation": 89.621,
+   "x": 186.683,
+   "y": 145.509
+  },
+  "IC15": {
+   "footprint": "task 3",
+   "padCount": 20,
+   "padsInferred": [],
+   "pins": 20,
+   "rotation": 89.794,
+   "x": 199.412,
+   "y": 145.494
+  },
+  "IC16": {
+   "footprint": "pads named by hand (marks.json parts.eightPin)",
+   "padCount": 8,
+   "padsInferred": [],
+   "pins": 8,
+   "rotation": 89.81,
+   "x": 10.054,
+   "y": 13.374
+  },
+  "IC17": {
+   "footprint": "task 3",
+   "padCount": 14,
+   "padsInferred": [],
+   "pins": 14,
+   "rotation": 89.751,
+   "x": 8.771,
+   "y": 192.659
+  },
+  "IC18": {
+   "footprint": "task 3",
+   "padCount": 16,
+   "padsInferred": [],
+   "pins": 16,
+   "rotation": 90.048,
+   "x": 25.211,
+   "y": 174.859
+  },
+  "IC19": {
+   "footprint": "pads named by hand (marks.json parts.eightPin)",
+   "padCount": 8,
+   "padsInferred": [3],
+   "pins": 8,
+   "rotation": 89.325,
+   "x": 54.4,
+   "y": 200.199
+  },
+  "IC2": {
+   "footprint": "task 3",
+   "padCount": 40,
+   "padsInferred": [],
+   "pins": 40,
+   "rotation": 90.104,
+   "x": 167.692,
+   "y": 63.003
+  },
+  "IC20": {
+   "footprint": "task 3",
+   "padCount": 16,
+   "padsInferred": [],
+   "pins": 16,
+   "rotation": 89.802,
+   "x": 123.182,
+   "y": 195.037
+  },
+  "IC21": {
+   "footprint": "task 3",
+   "padCount": 14,
+   "padsInferred": [],
+   "pins": 14,
+   "rotation": 89.729,
+   "x": 123.2,
+   "y": 164.594
+  },
+  "IC22": {
+   "footprint": "task 3",
+   "padCount": 14,
+   "padsInferred": [],
+   "pins": 14,
+   "rotation": 90.049,
+   "x": 140.975,
+   "y": 164.574
+  },
+  "IC23": {
+   "footprint": "task 3",
+   "padCount": 14,
+   "padsInferred": [],
+   "pins": 14,
+   "rotation": 89.669,
+   "x": 123.208,
+   "y": 139.227
+  },
+  "IC24": {
+   "footprint": "task 3",
+   "padCount": 16,
+   "padsInferred": [],
+   "pins": 16,
+   "rotation": 90.671,
+   "x": 140.986,
+   "y": 140.476
+  },
+  "IC25": {
+   "footprint": "task 3",
+   "padCount": 14,
+   "padsInferred": [],
+   "pins": 14,
+   "rotation": 90.13,
+   "x": 123.243,
+   "y": 111.296
+  },
+  "IC26": {
+   "footprint": "task 3",
+   "padCount": 16,
+   "padsInferred": [],
+   "pins": 16,
+   "rotation": 90.304,
+   "x": 141.018,
+   "y": 112.541
+  },
+  "IC27": {
+   "footprint": "task 3",
+   "padCount": 14,
+   "padsInferred": [],
+   "pins": 14,
+   "rotation": 90.109,
+   "x": 6.214,
+   "y": 96.111
+  },
+  "IC28": {
+   "footprint": "task 3",
+   "padCount": 14,
+   "padsInferred": [],
+   "pins": 14,
+   "rotation": 90.23,
+   "x": 53.269,
+   "y": 77.031
+  },
+  "IC29": {
+   "footprint": "task 3",
+   "padCount": 14,
+   "padsInferred": [],
+   "pins": 14,
+   "rotation": 90.161,
+   "x": 68.5,
+   "y": 77.016
+  },
+  "IC3": {
+   "footprint": "task 3",
+   "padCount": 40,
+   "padsInferred": [],
+   "pins": 40,
+   "rotation": 90.116,
+   "x": 96.477,
+   "y": 127.811
+  },
+  "IC30": {
+   "footprint": "task 3",
+   "padCount": 14,
+   "padsInferred": [],
+   "pins": 14,
+   "rotation": 89.944,
+   "x": 81.217,
+   "y": 77.022
+  },
+  "IC31": {
+   "footprint": "task 3",
+   "padCount": 14,
+   "padsInferred": [],
+   "pins": 14,
+   "rotation": 89.899,
+   "x": 92.711,
+   "y": 77.023
+  },
+  "IC32": {
+   "footprint": "task 3",
+   "padCount": 16,
+   "padsInferred": [],
+   "pins": 16,
+   "rotation": 89.743,
+   "x": 107.96,
+   "y": 75.761
+  },
+  "IC33": {
+   "footprint": "task 3",
+   "padCount": 14,
+   "padsInferred": [],
+   "pins": 14,
+   "rotation": 90.0,
+   "x": 60.93,
+   "y": 56.675
+  },
+  "IC34": {
+   "footprint": "task 3",
+   "padCount": 14,
+   "padsInferred": [],
+   "pins": 14,
+   "rotation": 89.651,
+   "x": 73.603,
+   "y": 56.689
+  },
+  "IC35": {
+   "footprint": "task 3",
+   "padCount": 14,
+   "padsInferred": [],
+   "pins": 14,
+   "rotation": 90.158,
+   "x": 153.732,
+   "y": 16.104
+  },
+  "IC36": {
+   "footprint": "task 3",
+   "padCount": 14,
+   "padsInferred": [],
+   "pins": 14,
+   "rotation": 89.454,
+   "x": 217.24,
+   "y": 98.459
+  },
+  "IC37": {
+   "footprint": "task 3",
+   "padCount": 14,
+   "padsInferred": [],
+   "pins": 14,
+   "rotation": 89.996,
+   "x": 231.267,
+   "y": 98.436
+  },
+  "IC38": {
+   "footprint": "task 3",
+   "padCount": 14,
+   "padsInferred": [],
+   "pins": 14,
+   "rotation": 90.82,
+   "x": 243.989,
+   "y": 98.404
+  },
+  "IC39": {
+   "footprint": "task 3",
+   "padCount": 16,
+   "padsInferred": [],
+   "pins": 16,
+   "rotation": 89.839,
+   "x": 190.554,
+   "y": 73.16
+  },
+  "IC4": {
+   "footprint": "task 3",
+   "padCount": 24,
+   "padsInferred": [],
+   "pins": 24,
+   "rotation": 89.942,
+   "x": 134.61,
+   "y": 73.215
+  },
+  "IC40": {
+   "footprint": "task 3",
+   "padCount": 14,
+   "padsInferred": [],
+   "pins": 14,
+   "rotation": 90.226,
+   "x": 209.655,
+   "y": 71.846
+  },
+  "IC41": {
+   "footprint": "task 3",
+   "padCount": 14,
+   "padsInferred": [],
+   "pins": 14,
+   "rotation": 89.97,
+   "x": 231.281,
+   "y": 71.776
+  },
+  "IC42": {
+   "footprint": "task 3",
+   "padCount": 16,
+   "padsInferred": [],
+   "pins": 16,
+   "rotation": 89.881,
+   "x": 243.99,
+   "y": 73.024
+  },
+  "IC43": {
+   "footprint": "task 3",
+   "padCount": 14,
+   "padsInferred": [],
+   "pins": 14,
+   "rotation": 90.151,
+   "x": 190.592,
+   "y": 46.501
+  },
+  "IC44": {
+   "footprint": "task 3",
+   "padCount": 14,
+   "padsInferred": [],
+   "pins": 14,
+   "rotation": 89.932,
+   "x": 209.66,
+   "y": 46.456
+  },
+  "IC45": {
+   "footprint": "task 3",
+   "padCount": 16,
+   "padsInferred": [],
+   "pins": 16,
+   "rotation": 89.968,
+   "x": 231.299,
+   "y": 47.689
+  },
+  "IC46": {
+   "footprint": "task 3",
+   "padCount": 14,
+   "padsInferred": [],
+   "pins": 14,
+   "rotation": 89.322,
+   "x": 255.502,
+   "y": 37.491
+  },
+  "IC47": {
+   "footprint": "task 3",
+   "padCount": 14,
+   "padsInferred": [],
+   "pins": 14,
+   "rotation": 89.748,
+   "x": 266.898,
+   "y": 37.398
+  },
+  "IC48": {
+   "footprint": "task 3",
+   "padCount": 14,
+   "padsInferred": [],
+   "pins": 14,
+   "rotation": 89.542,
+   "x": 278.319,
+   "y": 37.36
+  },
+  "IC49": {
+   "footprint": "task 3",
+   "padCount": 14,
+   "padsInferred": [],
+   "pins": 14,
+   "rotation": 89.371,
+   "x": 289.768,
+   "y": 37.335
+  },
+  "IC5": {
+   "footprint": "task 3",
+   "padCount": 28,
+   "padsInferred": [],
+   "pins": 28,
+   "rotation": 90.012,
+   "x": 194.333,
+   "y": 109.95
+  },
+  "IC50": {
+   "footprint": "task 3",
+   "padCount": 14,
+   "padsInferred": [],
+   "pins": 14,
+   "rotation": 89.49,
+   "x": 301.284,
+   "y": 37.349
+  },
+  "IC51": {
+   "footprint": "task 3",
+   "padCount": 28,
+   "padsInferred": [],
+   "pins": 28,
+   "rotation": 89.661,
+   "x": 221.128,
+   "y": 187.327
+  },
+  "IC52": {
+   "footprint": "task 3",
+   "padCount": 28,
+   "padsInferred": [],
+   "pins": 28,
+   "rotation": 89.695,
+   "x": 240.214,
+   "y": 187.32
+  },
+  "IC53": {
+   "footprint": "task 3",
+   "padCount": 16,
+   "padsInferred": [],
+   "pins": 16,
+   "rotation": 89.753,
+   "x": 289.722,
+   "y": 150.31
+  },
+  "IC54": {
+   "footprint": "task 3",
+   "padCount": 16,
+   "padsInferred": [],
+   "pins": 16,
+   "rotation": 90.01,
+   "x": 289.729,
+   "y": 126.173
+  },
+  "IC55": {
+   "footprint": "task 3",
+   "padCount": 16,
+   "padsInferred": [],
+   "pins": 16,
+   "rotation": 89.467,
+   "x": 278.266,
+   "y": 126.21
+  },
+  "IC56": {
+   "footprint": "task 3",
+   "padCount": 16,
+   "padsInferred": [],
+   "pins": 16,
+   "rotation": 90.039,
+   "x": 301.192,
+   "y": 72.856
+  },
+  "IC57": {
+   "footprint": "task 3",
+   "padCount": 16,
+   "padsInferred": [],
+   "pins": 16,
+   "rotation": 89.994,
+   "x": 289.71,
+   "y": 72.855
+  },
+  "IC58": {
+   "footprint": "task 3",
+   "padCount": 16,
+   "padsInferred": [],
+   "pins": 16,
+   "rotation": 89.431,
+   "x": 278.283,
+   "y": 72.876
+  },
+  "IC59": {
+   "footprint": "task 3",
+   "padCount": 16,
+   "padsInferred": [],
+   "pins": 16,
+   "rotation": 89.75,
+   "x": 266.824,
+   "y": 72.913
+  },
+  "IC6": {
+   "footprint": "task 3",
+   "padCount": 28,
+   "padsInferred": [],
+   "pins": 28,
+   "rotation": 90.141,
+   "x": 221.058,
+   "y": 140.364
+  },
+  "IC60": {
+   "footprint": "task 3",
+   "padCount": 16,
+   "padsInferred": [],
+   "pins": 16,
+   "rotation": 89.724,
+   "x": 255.438,
+   "y": 72.979
+  },
+  "IC61": {
+   "footprint": "task 3",
+   "padCount": 16,
+   "padsInferred": [],
+   "pins": 16,
+   "rotation": 89.961,
+   "x": 301.09,
+   "y": 150.339
+  },
+  "IC62": {
+   "footprint": "task 3",
+   "padCount": 16,
+   "padsInferred": [],
+   "pins": 16,
+   "rotation": 90.302,
+   "x": 301.142,
+   "y": 126.181
+  },
+  "IC63": {
+   "footprint": "task 3",
+   "padCount": 16,
+   "padsInferred": [],
+   "pins": 16,
+   "rotation": 89.784,
+   "x": 266.845,
+   "y": 126.25
+  },
+  "IC64": {
+   "footprint": "task 3",
+   "padCount": 16,
+   "padsInferred": [],
+   "pins": 16,
+   "rotation": 89.601,
+   "x": 301.142,
+   "y": 96.96
+  },
+  "IC65": {
+   "footprint": "task 3",
+   "padCount": 16,
+   "padsInferred": [],
+   "pins": 16,
+   "rotation": 89.577,
+   "x": 289.732,
+   "y": 96.964
+  },
+  "IC66": {
+   "footprint": "task 3",
+   "padCount": 16,
+   "padsInferred": [],
+   "pins": 16,
+   "rotation": 89.306,
+   "x": 278.283,
+   "y": 96.98
+  },
+  "IC67": {
+   "footprint": "task 3",
+   "padCount": 16,
+   "padsInferred": [],
+   "pins": 16,
+   "rotation": 90.051,
+   "x": 266.894,
+   "y": 97.024
+  },
+  "IC68": {
+   "footprint": "task 3",
+   "padCount": 16,
+   "padsInferred": [],
+   "pins": 16,
+   "rotation": 90.446,
+   "x": 255.352,
+   "y": 97.052
+  },
+  "IC69": {
+   "footprint": "task 3",
+   "padCount": 40,
+   "padsInferred": [],
+   "pins": 40,
+   "rotation": 90.167,
+   "x": 167.674,
+   "y": 174.707
+  },
+  "IC7": {
+   "footprint": "task 3",
+   "padCount": 28,
+   "padsInferred": [],
+   "pins": 28,
+   "rotation": 89.983,
+   "x": 134.703,
+   "y": 30.061
+  },
+  "IC70": {
+   "footprint": "task 3",
+   "padCount": 20,
+   "padsInferred": [],
+   "pins": 20,
+   "rotation": 90.374,
+   "x": 141.014,
+   "y": 192.46
+  },
+  "IC71": {
+   "footprint": "task 3",
+   "padCount": 20,
+   "padsInferred": [],
+   "pins": 20,
+   "rotation": 89.761,
+   "x": 186.706,
+   "y": 187.38
+  },
+  "IC72": {
+   "footprint": "task 3",
+   "padCount": 20,
+   "padsInferred": [],
+   "pins": 20,
+   "rotation": 89.877,
+   "x": 201.998,
+   "y": 187.363
+  },
+  "IC73": {
+   "footprint": "task 3",
+   "padCount": 28,
+   "padsInferred": [],
+   "pins": 28,
+   "rotation": 90.234,
+   "x": 106.738,
+   "y": 38.944
+  },
+  "IC74": {
+   "footprint": "task 3",
+   "padCount": 16,
+   "padsInferred": [],
+   "pins": 16,
+   "rotation": 0.118,
+   "x": 193.116,
+   "y": 26.214
+  },
+  "IC75": {
+   "footprint": "task 3",
+   "padCount": 16,
+   "padsInferred": [],
+   "pins": 16,
+   "rotation": -0.616,
+   "x": 217.281,
+   "y": 26.145
+  },
+  "IC76": {
+   "footprint": "task 3",
+   "padCount": 16,
+   "padsInferred": [],
+   "pins": 16,
+   "rotation": 90.141,
+   "x": 73.516,
+   "y": 174.81
+  },
+  "IC77": {
+   "footprint": "task 3",
+   "padCount": 14,
+   "padsInferred": [],
+   "pins": 14,
+   "rotation": 89.76,
+   "x": 40.547,
+   "y": 76.991
+  },
+  "IC78": {
+   "footprint": "task 3",
+   "padCount": 40,
+   "padsInferred": [],
+   "pins": 40,
+   "rotation": 89.812,
+   "x": 67.176,
+   "y": 127.84
+  },
+  "IC79": {
+   "footprint": "task 3",
+   "padCount": 14,
+   "padsInferred": [],
+   "pins": 14,
+   "rotation": 90.271,
+   "x": 45.531,
+   "y": 173.547
+  },
+  "IC8": {
+   "footprint": "task 3",
+   "padCount": 20,
+   "padsInferred": [],
+   "pins": 20,
+   "rotation": 89.933,
+   "x": 243.926,
+   "y": 153.014
+  },
+  "IC80": {
+   "footprint": "task 3",
+   "padCount": 14,
+   "padsInferred": [],
+   "pins": 14,
+   "rotation": 89.917,
+   "x": 60.811,
+   "y": 173.535
+  },
+  "IC81": {
+   "footprint": "task 3",
+   "padCount": 14,
+   "padsInferred": [],
+   "pins": 14,
+   "rotation": 89.864,
+   "x": 84.985,
+   "y": 173.506
+  },
+  "IC82": {
+   "footprint": "task 3",
+   "padCount": 14,
+   "padsInferred": [],
+   "pins": 14,
+   "rotation": 89.943,
+   "x": 100.274,
+   "y": 173.498
+  },
+  "IC83": {
+   "footprint": "task 3",
+   "padCount": 14,
+   "padsInferred": [],
+   "pins": 14,
+   "rotation": 90.12,
+   "x": 69.781,
+   "y": 196.365
+  },
+  "IC84": {
+   "footprint": "task 3",
+   "padCount": 14,
+   "padsInferred": [],
+   "pins": 14,
+   "rotation": 89.492,
+   "x": 85.008,
+   "y": 196.316
+  },
+  "IC85": {
+   "footprint": "task 3",
+   "padCount": 16,
+   "padsInferred": [],
+   "pins": 16,
+   "rotation": 90.01,
+   "x": 100.338,
+   "y": 197.578
+  },
+  "IC86": {
+   "footprint": "task 3",
+   "padCount": 14,
+   "padsInferred": [],
+   "pins": 14,
+   "rotation": 90.266,
+   "x": 111.751,
+   "y": 196.306
+  },
+  "IC87": {
+   "footprint": "task 3",
+   "padCount": 16,
+   "padsInferred": [],
+   "pins": 16,
+   "rotation": 90.119,
+   "x": 45.664,
+   "y": 55.395
+  },
+  "IC88": {
+   "footprint": "task 3",
+   "padCount": 28,
+   "padsInferred": [],
+   "pins": 28,
+   "rotation": 89.856,
+   "x": 259.291,
+   "y": 187.302
+  },
+  "IC89": {
+   "footprint": "task 3",
+   "padCount": 28,
+   "padsInferred": [],
+   "pins": 28,
+   "rotation": 89.9,
+   "x": 21.438,
+   "y": 87.173
+  },
+  "IC9": {
+   "footprint": "task 3",
+   "padCount": 20,
+   "padsInferred": [],
+   "pins": 20,
+   "rotation": 89.902,
+   "x": 243.954,
+   "y": 123.806
+  },
+  "IC91": {
+   "footprint": "task 3",
+   "padCount": 14,
+   "padsInferred": [],
+   "pins": 14,
+   "rotation": 89.855,
+   "x": 30.352,
+   "y": 54.083
+  },
+  "IC93": {
+   "footprint": "task 3",
+   "padCount": 14,
+   "padsInferred": [],
+   "pins": 14,
+   "rotation": 89.78,
+   "x": 16.365,
+   "y": 54.068
+  },
+  "IC94": {
+   "footprint": "task 3",
+   "padCount": 14,
+   "padsInferred": [],
+   "pins": 14,
+   "rotation": 90.458,
+   "x": 48.251,
+   "y": 27.405
+  },
+  "IC95": {
+   "footprint": "task 3",
+   "padCount": 14,
+   "padsInferred": [],
+   "pins": 14,
+   "rotation": 90.334,
+   "x": 22.756,
+   "y": 27.364
+  },
+  "IC96": {
+   "footprint": "task 3",
+   "padCount": 20,
+   "padsInferred": [],
+   "pins": 20,
+   "rotation": 90.005,
+   "x": 86.381,
+   "y": 31.311
+  },
+  "IC97": {
+   "footprint": "task 3",
+   "padCount": 14,
+   "padsInferred": [],
+   "pins": 14,
+   "rotation": 89.82,
+   "x": 6.187,
+   "y": 49.001
+  },
+  "IC98": {
+   "footprint": "task 3",
+   "padCount": 28,
+   "padsInferred": [],
+   "pins": 28,
+   "rotation": 89.991,
+   "x": 21.427,
+   "y": 135.485
+  },
+  "IC99": {
+   "footprint": "task 3",
+   "padCount": 28,
+   "padsInferred": [],
+   "pins": 28,
+   "rotation": 90.099,
+   "x": 41.737,
+   "y": 135.475
+  }
+ },
+ "problems": [
+  {"problem":"no footprint: not placed","ref":"IC92"}
+ ],
+ "sheila": {
+  "from": "D1 PDF page 58, \"DEFPROC strobe select lines\" (each SHEILA address and the IC pin its select line reaches); the sound chip, IC18, is written through the system VIA (docs/bbc-micro/facts/via.md)",
+  "names": ["crtc", "acia", "serialUla", "videoUla", "romLatch", "systemVia", "userVia", "fdc8271", "adc", "sound"],
+  "of": {
+   "IC18": "sound",
+   "IC2": "crtc",
+   "IC3": "systemVia",
+   "IC4": "acia",
+   "IC6": "videoUla",
+   "IC69": "userVia",
+   "IC7": "serialUla",
+   "IC73": "adc",
+   "IC76": "romLatch",
+   "IC78": "fdc8271"
+  }
+ },
+ "thresholds": {
+  "apart": "no two IC bodies overlap",
+  "i5Registration": "I5 to the board frame on chip pins, each chip held out: median at most 1.0 mm passes, over 2.0 mm stops",
+  "identities": "every IC's marking read on I5 is table 8.1's part by the fixed rule (ROM sockets not compared), and at least three quarters of the ICs I5 shows populated are read; under that, not measured",
+  "inside": "every IC body and every two-lead part inside the outline; a connector or other part over it is recorded",
+  "manual": "after a best-fit similarity, no placed IC more than 10 mm from table 8.1's place, on the convention settled first",
+  "padCounts": "every placed IC's pad count is its part's pin count; a fitted IC not placed fails"
+ },
+ "verdicts": {
+  "apart": "pass",
+  "i5Registration": "pass",
+  "identities": "fail",
+  "inside": "pass",
+  "manual": "fail",
+  "padCounts": "pass"
+ }
+}

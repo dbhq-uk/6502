@@ -57,9 +57,36 @@
 // one that finishes after a later insert has started is dropped, so a file the
 // visitor picks while a library disc downloads is not then replaced by it.
 //
-// For the site's browser check, once running the panel carries `panel.bbc`:
-// `screenRow(n)` is mode 7 text row n read from screen memory, and `host` is
-// the machine.
+// FOR THE MODELS AND THE SITE'S BROWSER CHECK, once running the panel carries
+// `panel.bbc`:
+//   host           the machine (BbcHost).
+//   screenRow(n)   mode 7 text row n, read from screen memory.
+//   tap(name)      exactly what a click on that on-screen key does, a latched
+//                  SHIFT or CTRL included, by its name in BBC_KEYS; 'Break'
+//                  does what the Break button does.
+//   leds()         the keyboard's lights, { motor, caps, shiftLock }, each
+//                  true when lit (BbcHost.Leds: bit 0 the cassette motor, bit 1
+//                  CAPS LOCK, bit 2 SHIFT LOCK).
+//   accessCounts() the CPU's accesses to each chip since the machine's power
+//                  on, BbcHost.AccessCounts: ten wrapping counters as signed
+//                  32-bit ints, in BbcChip order (crtc, acia, serialUla,
+//                  videoUla, romLatch, systemVia, userVia, fdc8271, adc,
+//                  sound). A reader takes differences, wrapped: (b - a) | 0.
+//                  BREAK keeps them.
+//   romSlot()      the paged ROM latch, 0 to 15: 15 is BASIC, 14 the DFS.
+//
+// THE EVENTS, each a CustomEvent on the panel:
+//   bbc:ready      once running, as panel.bbc is set.
+//   bbc:start      after it: a machine is running with its counters from zero.
+//                  A model takes a fresh baseline for accessCounts() on it. The
+//                  page makes one machine, at Start; anything that ever makes
+//                  another must send it again.
+//   bbc:key        detail { name, action }: a key the visitor or tap() pressed,
+//                  by its name in BBC_KEYS, or 'Break'. action is 'down' and
+//                  'up' for the PC keyboard; 'tap' for an on-screen key, CAPS
+//                  LOCK from the PC keyboard (one press) and BREAK; and
+//                  'latch-on' and 'latch-off' for SHIFT and CTRL latched on
+//                  screen.
 import { startMachine } from '/machine-host.js';
 import { BBC_KEYS, PC_KEYS, STICKY } from '/bbc-keys.js';
 
@@ -172,16 +199,14 @@ async function run(panel, say) {
   screen.addEventListener('focus', keys.letGo);
   for (const b of panel.querySelectorAll('[data-bbc-break]')) {
     b.disabled = false;
-    b.addEventListener('click', () => {
-      keys.letGo();
-      bbc.Break();
-    });
+    b.addEventListener('click', () => keys.press('Break'));
   }
   sound.wire();
   disc(panel, bbc, { screen, letGo: keys.letGo });
 
-  panel.bbc = { host: bbc, screenRow: (row) => bbc.ScreenRow(row) };
+  panel.bbc = { host: bbc, screenRow: (row) => bbc.ScreenRow(row), ...machineState(bbc, keys) };
   panel.dispatchEvent(new CustomEvent('bbc:ready'));
+  panel.dispatchEvent(new CustomEvent('bbc:start'));
   say('Running. The screen has the keyboard: type into the BBC Micro, or press Tab to move on.', 'running');
   // Start was the visitor asking to use the machine, so the keyboard goes to it.
   screen.focus({ preventScroll: true });
@@ -189,28 +214,40 @@ async function run(panel, say) {
 
 // ---- The keyboard ----
 
+/** Tells the page a key was pressed (THE EVENTS, bbc:key, above). */
+function tellKey(panel, name, action) {
+  panel.dispatchEvent(new CustomEvent('bbc:key', { detail: { name, action } }));
+}
+
 // Exported for tests/bbc-micro.test.mjs, which plays key events into it.
 export function keyboard(screen, bbc, panel) {
   screen.tabIndex = 0;
-  // Each BBC key down, with the PC keys holding it: two PC keys can press one
-  // BBC key (both Shifts), and it comes up only when the last of them does.
+  // Each BBC key down, by name, with the PC keys holding it: two PC keys can
+  // press one BBC key (both Shifts), and it comes up only when the last of them does.
   const held = new Map();
   const down = (code) => {
-    const key = BBC_KEYS[PC_KEYS[code]];
-    const codes = held.get(key) ?? new Set();
-    if (codes.size === 0) bbc.KeyDown(key);
+    const name = PC_KEYS[code];
+    const codes = held.get(name) ?? new Set();
+    if (codes.size === 0) {
+      bbc.KeyDown(BBC_KEYS[name]);
+      tellKey(panel, name, 'down');
+    }
     codes.add(code);
-    held.set(key, codes);
+    held.set(name, codes);
   };
   const up = (code) => {
-    const key = BBC_KEYS[PC_KEYS[code]];
-    const codes = held.get(key);
+    const name = PC_KEYS[code];
+    const codes = held.get(name);
     if (!codes?.delete(code) || codes.size > 0) return;
-    held.delete(key);
-    bbc.KeyUp(key);
+    held.delete(name);
+    bbc.KeyUp(BBC_KEYS[name]);
+    tellKey(panel, name, 'up');
   };
   const letGo = () => {
-    for (const key of held.keys()) bbc.KeyUp(key);
+    for (const name of held.keys()) {
+      bbc.KeyUp(BBC_KEYS[name]);
+      tellKey(panel, name, 'up');
+    }
     held.clear();
   };
 
@@ -219,6 +256,7 @@ export function keyboard(screen, bbc, panel) {
     if (event.code === 'Pause') {
       event.preventDefault();
       bbc.Break();
+      tellKey(panel, 'Break', 'tap');
       return;
     }
     if (!(event.code in PC_KEYS)) return;
@@ -229,6 +267,7 @@ export function keyboard(screen, bbc, panel) {
     if (event.code === 'CapsLock') {
       bbc.KeyDown(BBC_KEYS.CapsLock);
       bbc.KeyUp(BBC_KEYS.CapsLock);
+      tellKey(panel, 'CapsLock', 'tap');
       return;
     }
     down(event.code);
@@ -244,37 +283,63 @@ export function keyboard(screen, bbc, panel) {
   document.addEventListener('visibilitychange', () => { if (document.hidden) letGo(); });
 }
 
-// Exported for tests/bbc-micro.test.mjs.
+// Exported for tests/bbc-micro.test.mjs. Returns letGo(), and press(name),
+// which is what a click on that key does ('Break' is the Break button).
 export function onScreenKeys(panel, bbc) {
   const latched = new Set();
   const buttons = [...panel.querySelectorAll('[data-bbc-key]')];
   const show = () => {
     for (const b of buttons) if (STICKY.includes(b.dataset.bbcKey)) b.setAttribute('aria-pressed', String(latched.has(b.dataset.bbcKey)));
   };
-  for (const b of buttons) {
-    b.disabled = false;
-    b.addEventListener('click', () => {
-      const name = b.dataset.bbcKey;
-      if (STICKY.includes(name)) {
-        if (latched.has(name)) latched.delete(name);
-        else latched.add(name);
-      } else {
-        const held = [...latched];
-        for (const m of held) bbc.KeyDown(BBC_KEYS[m]);
-        bbc.KeyDown(BBC_KEYS[name]);
-        bbc.KeyUp(BBC_KEYS[name]);
-        for (const m of held.reverse()) bbc.KeyUp(BBC_KEYS[m]);
-        latched.clear();
-      }
-      show();
-    });
-  }
   // Lets go of a latched SHIFT or CTRL without typing anything.
   const letGo = () => {
+    for (const m of latched) tellKey(panel, m, 'latch-off');
     latched.clear();
     show();
   };
-  return { letGo };
+  const press = (name) => {
+    if (name === 'Break') {
+      letGo();
+      bbc.Break();
+      tellKey(panel, 'Break', 'tap');
+      return;
+    }
+    if (!(name in BBC_KEYS)) throw new Error(`no key called ${name}`);
+    if (STICKY.includes(name)) {
+      if (latched.has(name)) latched.delete(name);
+      else latched.add(name);
+      tellKey(panel, name, latched.has(name) ? 'latch-on' : 'latch-off');
+    } else {
+      const held = [...latched];
+      for (const m of held) bbc.KeyDown(BBC_KEYS[m]);
+      bbc.KeyDown(BBC_KEYS[name]);
+      bbc.KeyUp(BBC_KEYS[name]);
+      for (const m of [...held].reverse()) bbc.KeyUp(BBC_KEYS[m]);
+      latched.clear();
+      tellKey(panel, name, 'tap');
+      for (const m of held) tellKey(panel, m, 'latch-off');
+    }
+    show();
+  };
+  for (const b of buttons) {
+    b.disabled = false;
+    b.addEventListener('click', () => press(b.dataset.bbcKey));
+  }
+  return { letGo, press };
+}
+
+/** The keyboard's lights from BbcHost.Leds()'s bits: 0 the cassette motor, 1 CAPS LOCK, 2 SHIFT LOCK.
+ * Before the machine boots, both lock lights read lit: SystemVia.Latch starts at 0 and a light is lit by a low latch bit. */
+export const lights = (bits) => ({ motor: (bits & 1) !== 0, caps: (bits & 2) !== 0, shiftLock: (bits & 4) !== 0 });
+
+// What panel.bbc gives a model besides the host (FOR THE MODELS, above). Exported for tests/bbc-micro.test.mjs.
+export function machineState(bbc, keys) {
+  return {
+    tap: (name) => keys.press(name),
+    leds: () => lights(bbc.Leds()),
+    accessCounts: () => bbc.AccessCounts(),
+    romSlot: () => bbc.RomSlot(),
+  };
 }
 
 // ---- The sound ----

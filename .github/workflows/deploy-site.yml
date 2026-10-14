@@ -197,6 +197,43 @@ jobs:
           PASS=$(count pass); FAILED=$(count fail)
           echo "pass=${PASS:-unread} fail=${FAILED:-unread}"
           [ "${FAILED:-1}" = "0" ]
+          # 640 as at 14 Oct 2026, measured on the BBC Micro models' branch with main
+          # merged in (the NES models' notes, the BBC Micro's robustness, the KIM-1's
+          # teletype and the Electron, pull requests 93, 94, 87, 52 and 54);
+          # 568 as at 14 Oct 2026, with task 10's fix wave (one test: known-differences.md's section on the BBC
+          # models gives each figure and verdict as its data file has it);
+          # 567 as at 14 Oct 2026, with the BBC Micro models' task 10 (five tests for mutations that survived:
+          # the keys in the machine's layout, the lights' bits from BbcLeds, no figure typed in either note, every
+          # copper credit traced to look at, and the browser check's judgements on the inside and the lights);
+          # 562 as at 13 Oct 2026, with the BBC Micro models' task 9b (eight tests: the two entries and their modules
+          # import, the claim of both views and the MODELS entries, each view's credits, the words on the page, each
+          # entry thin and following the machine, the first load and the budgets, the browser check's models steps);
+          # 554 as at 13 Oct 2026, with task 9a's review (eight tests: each BBC model module loads, with its main exports);
+          # 546 as at 13 Oct 2026, with the BBC Micro models' task 9a (thirteen tests: the outside's keys and
+          # legends, its shell and opening, its lights, its key state on bbc:key, a click on a key, no owl, the
+          # rear's and underside's labels, the words atlas, its tokens, caption, results file and note, unclaimed);
+          # 533 as at 13 Oct 2026, with the BBC Micro models' task 8 (ten tests: the outside's method and its
+          # changes, the keys' mapping from the fork, O1, the front edge not measurable, the check point, the keys and
+          # lights in the opening, the keys' placing and colours, the rear ports, the case module, the photographs);
+          # 523 as at 13 Oct 2026, with the BBC Micro models' task 7 (sixteen tests: the shared access
+          # sampler, and the inside's scene, legend, caption, results file and note, unclaimed);
+          # 507 as at 13 Oct 2026, with the BBC Micro models' task 6 (eleven tests: the page's bbc:key,
+          # bbc:start and panel.bbc, and the counters' names as BbcChip's);
+          # 496 as at 13 Oct 2026, with task 5's review (two tests: the method's files and marks.json on
+          # disk as the run read them; every description of the parts says both checks failed);
+          # 494 as at 13 Oct 2026, with the BBC Micro models' task 5 (nine tests: the parts' method
+          # pinned to its hashes, places on footprints, the fitted set against models.md, the counters,
+          # the outline and overlaps, the manual's places and the identities pinned as failed, I5, the module);
+          # 485 as at 13 Oct 2026, with task 4's review (a test that board_trace.py and common.py
+          # on disk are the method whose hashes the journal recorded before the run);
+          # 484 as at 13 Oct 2026, with the BBC Micro models' task 4 (six tests: the board's track map,
+          # copper.json's verdicts and figures, its nets and I5 FAILs pinned, ic-table.json, the method's
+          # hashes, and NOTICE.md's section on the map);
+          # 478 as at 13 Oct 2026, with the BBC Micro models' task 3 review minors (a test that
+          # registration.json keeps the solder side's model, unrounded parameters and transform);
+          # 477 as at 13 Oct 2026, with the BBC Micro models' task 3 fix wave (the drills'
+          # faces as the plan revised them, the held-out figures by kind of hole, and every
+          # DIP's reference read or said unread);
           # 546 as at 14 Oct 2026, measured on the Electron's branch with main merged
           # in again (the NES models' notes, the BBC Micro's robustness and the KIM-1's
           # teletype, pull requests 93, 94 and 87);
@@ -247,7 +284,7 @@ jobs:
           # Adding tests is expected; losing them is the failure this floor catches.
           # Raise the number when the suite grows, here and in the same step of
           # validate.yml, which must hold the same number.
-          [ "${PASS:-0}" -ge 546 ]
+          [ "${PASS:-0}" -ge 640 ]
 
       # The same floor as "Every machine file must be serving" below, checked on
       # the build itself, so a build that is missing a machine fails here and
@@ -359,7 +396,7 @@ jobs:
           # a file new in this deploy can answer 404 for a few seconds (the BBC
           # Micro's two merges on 4 Oct 2026 both met it). Each try has its own
           # cache-buster. A file that never reaches 200 still fails.
-          for f in sitemap-index.xml sitemap-0.xml robots.txt analytics.js consent.js machines-table.js table-sort.js chip.js kim-1.js machine-host.js teletype-paper.js bbc-micro.js bbc-keys.js bbc-audio.js nes.js nes-keys.js nes-audio.js electron.js electron-keys.js electron-audio.js model-loader.js models/kim-1.js models/kim-1-tracks.webp models/nes-famicom-case.js models/nes-famicom-board.js models/nes-famicom-board-tracks.webp; do
+          for f in sitemap-index.xml sitemap-0.xml robots.txt analytics.js consent.js machines-table.js table-sort.js chip.js kim-1.js machine-host.js teletype-paper.js bbc-micro.js bbc-keys.js bbc-audio.js nes.js nes-keys.js nes-audio.js electron.js electron-keys.js electron-audio.js model-loader.js models/kim-1.js models/kim-1-tracks.webp models/nes-famicom-case.js models/nes-famicom-board.js models/nes-famicom-board-tracks.webp models/bbc-micro-case.js models/bbc-micro-board.js models/bbc-micro-board-tracks.webp; do
             TRY=0
             while :; do
               CODE=$(curl -s --max-time 20 --retry 3 --retry-delay 5 -o /dev/null -w "%{http_code}" "https://6502.dbhq.uk/${f}?cb=${GITHUB_SHA}-${TRY}")

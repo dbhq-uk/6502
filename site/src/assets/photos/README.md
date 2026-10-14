@@ -18,15 +18,7 @@ in for one: generated images live in `../imagery/`, are captioned
 below and on the page, or none, where the source states none. A file here is a
 resized copy of the source, which is a derivative under that licence.
 
-**What the 3D model takes from each**, for a machine that has one (the KIM-1),
-is in its section below and on the page. The analysis that does it is in
-`tools/kim1-model/` (its `README.md` says how to run it), and the journal for 2
-October 2026 has every figure. The BBC Micro has no model, so its photograph is
-shown and nothing is taken from it, and the same is true of the Electron. The NES has two: its board's model,
-which takes nothing from the photographs here, being measured from scans and
-photographs that are not committed, listed in their own section below; and its
-outside's, which takes from `nes.webp`, `nes-rear-right.webp`, `nes-pal-front.webp` and
-`nes-pal-underside.webp`, each measured on its full-size original.
+**What the 3D models take from each**, for a machine that has them (the KIM-1, the BBC Micro and the NES), is in its section below and on the page. The KIM-1's analysis is in `tools/kim1-model/` (its `README.md` says how to run it), and the journal for 2 October 2026 has every figure. The BBC Micro's main photograph, `bbc-micro.webp`, is shown and nothing is taken from it. The Electron has no model, so its photograph is shown and nothing is taken from it. The others listed for it below are measured, on their full-size originals, for its outside model (task 8 of its models plan, 13 October 2026; on the page since task 9b), in `tools/bbc-micro-model/` (the journal for 4 October 2026, task 8, has every figure). The NES has two: its board's model, which takes nothing from the photographs here, being measured from scans and photographs that are not committed, listed in their own section below; and its outside's, which takes from `nes.webp`, `nes-rear-right.webp`, `nes-pal-front.webp` and `nes-pal-underside.webp`, each measured on its full-size original.
 
 ## kim-1.webp
 
@@ -106,6 +98,71 @@ outside's, which takes from `nes.webp`, `nes-rear-right.webp`, `nes-pal-front.we
 | Fetched | 4 October 2026, from `upload.wikimedia.org/wikipedia/commons/e/e7/Acorn_BBC_Micro.jpg`: 5195 by 3463 pixels, 2,257,642 bytes, SHA-1 `71f6dfdfee2a4a43d207936c310a57b30e0b4b39` (the SHA-1 Commons records for the file), SHA-256 `2329615eda5436b6836132a4f08ba46be18ea30df990866d3c9ac69d9006ca91` |
 | This copy | Cropped to the machine and a margin of 110 pixels of cloth on every side, then resized: `cwebp -q 82 -crop 152 60 4991 3342 -resize 1600 0 -metadata none`: 1600 by 1072 pixels, 88,150 bytes, SHA-256 `8796aa341c38d9399788f5d86b4a7e720c8334b331772405a0c093ee33416bfb`. Colours are the source's. The original is not committed, being over 1.5 MB; the line above is enough to fetch it again and check it |
 | Used for | The photograph of the machine at the head of its page. Nothing is traced or measured from it |
+
+## bbc-micro-top.webp
+
+| | |
+|---|---|
+| What | A BBC Micro, Issue 7, with the Type 1 keyboard (the file page's words), from almost straight above on a dark red carpet: the case top, the keyboard, the badge strip and the three lights |
+| Source | Wikimedia Commons, [`File:Acorn_BBC_Microcomputer.jpg`](https://commons.wikimedia.org/wiki/File:Acorn_BBC_Microcomputer.jpg), which credits Deskthority's wiki as where it came from |
+| Author | Daniel Beardsmore, as the file page names him ("Daniel beardsmore") |
+| Licence | Public domain, as the file page states it: "Public Domain. If your country doesn't have any such notion, treat the work as having all rights waived." Checked on Commons' API on 13 October 2026 (`LicenseShortName` is `Public domain`). No credit is owed; the page gives one anyway |
+| Taken | 4 February 2016 (the file page's date). Uploaded to Commons on 9 February 2022 |
+| Fetched | 13 October 2026 (first on 4 October), from `upload.wikimedia.org/wikipedia/commons/f/f8/Acorn_BBC_Microcomputer.jpg`: 2490 by 1868 pixels, 654,984 bytes, SHA-1 `f8ee3ba32bb3ea9c107a34e64282caca21c533e8` (the SHA-1 Commons records for the file; the file here matches it), SHA-256 `a616c736c51c4bf0f796be21ba426d435acdbf2d6b692cbf0cc3256f5782949a` |
+| This copy | Not cropped. Resized with sharp 0.35.5 (libvips 8.18.7, libwebp 1.6.0) from `site/node_modules`, as `cwebp` is not installed on the machine that made it: `sharp(original).resize({ width: 1600 }).webp({ quality: 82 })`, which keeps no metadata, the same settings as the other photographs' `cwebp -q 82 -resize 1600 0 -metadata none`: 1600 by 1200 pixels, 176,898 bytes, SHA-256 `345d2df5d810254d3117a927377deade39423d522a47a2ba3ad714afdab5f36c`. Colours are the source's. The original is not committed; the line above is enough to fetch it again and check it |
+| Used for | The outside model, measured on the full-size original (task 8 of the BBC Micro models plan): the case top registered on its four corners to the Service Manual's 415 by 345 mm, the keyboard's opening, the badge strip and its words, the order of the three lights, and the keys registered to Dominic Beesley's MIT keyboard drawing (K1) and their colours. The owl is not drawn |
+
+## bbc-micro-rear.webp
+
+| | |
+|---|---|
+| What | The rear of a BBC Micro on a white background (painted in), nearly square on: the ports along the black rear panel, each with its name, the two ventilation slots and the mains panel |
+| Source | Wikimedia Commons, [`File:BBC_Micro_rear.jpeg`](https://commons.wikimedia.org/wiki/File:BBC_Micro_rear.jpeg) |
+| Author | Stuart Brady (assumed by Commons): Commons names the uploader, StuartBrady, as the author, assumed from the copyright claims |
+| Licence | Public domain, as the file page states it, the uploader's own work assumed by Commons from its copyright claims. Checked on Commons' API on 13 October 2026 (`LicenseShortName` is `Public domain`, `Artist` "StuartBrady assumed (based on copyright claims)"). No credit is owed; the page gives one anyway |
+| Taken | 26 December 2005 (the file page's date, the day it was uploaded; the file has no Exif) |
+| Fetched | 13 October 2026 (first on 4 October), from `upload.wikimedia.org/wikipedia/commons/2/29/BBC_Micro_rear.jpeg`: 2048 by 994 pixels, 107,231 bytes, SHA-1 `3dad0bd9d8efedc7b9f6f6297ee94c32c6e3d572` (as Commons records it; the file here matches it), SHA-256 `4072a59af7f7fab834ca2b912b0f6e3449aa8bdaa01bb621d9d556579dd5937e` |
+| This copy | Not cropped. Resized with sharp 0.35.5 (libvips 8.18.7, libwebp 1.6.0) from `site/node_modules`, as `cwebp` is not installed on the machine that made it: `sharp(original).resize({ width: 1600 }).webp({ quality: 82 })`, which keeps no metadata, the same settings as the other photographs' `cwebp -q 82 -resize 1600 0 -metadata none`: 1600 by 777 pixels, 41,976 bytes, SHA-256 `1f3a684c81e09d5932864c5177e731ebede49858f922e7d874f02f9b72f9719a`. The original is not committed |
+| Used for | The outside model's rear, measured on the full-size original: each port's place and height on the scale of the 15-way D socket, each scored port checked against its socket on the board (the video and Econet sockets are not), the ventilation slots and the mains panel |
+
+## bbc-micro-keyboard.webp
+
+| | |
+|---|---|
+| What | A BBC Micro keyboard, the Type 1 (Futaba simplified linear, the file page's words), out of its case on a wooden table |
+| Source | Wikimedia Commons, [`File:BBC_Micro_Type_1.jpg`](https://commons.wikimedia.org/wiki/File:BBC_Micro_Type_1.jpg), which credits Deskthority's wiki as where it came from |
+| Author | Daniel Beardsmore, as the file page names him ("Daniel beardsmore") |
+| Licence | Public domain, as the file page states it ("Public domain or nearest equivalent"). Checked on Commons' API on 13 October 2026 (`LicenseShortName` is `Public domain`). No credit is owed; the page gives one anyway |
+| Taken | 24 June 2013 (the file page's date). Uploaded to Commons on 13 February 2022 |
+| Fetched | 13 October 2026 (first on 4 October), from `upload.wikimedia.org/wikipedia/commons/4/41/BBC_Micro_Type_1.jpg`: 1996 by 1512 pixels, 355,138 bytes, SHA-1 `5bd4df29308488c8e34f24483f46bf96c71c746b` (as Commons records it; the file here matches it), SHA-256 `745b34357b2befd5d1bcc501bb48ad9c3e345e2b876d59b3f812cec48d2e2403` |
+| This copy | Not cropped. Resized with sharp 0.35.5 (libvips 8.18.7, libwebp 1.6.0) from `site/node_modules`, as `cwebp` is not installed on the machine that made it: `sharp(original).resize({ width: 1600 }).webp({ quality: 82 })`, which keeps no metadata, the same settings as the other photographs' `cwebp -q 82 -resize 1600 0 -metadata none`: 1600 by 1212 pixels, 147,632 bytes, SHA-256 `62400e527ae21ad2b7f462a1f62fab8e02092017c4e8b2625b2ad0f20f630d3f`. The original is not committed |
+| Used for | A check for the outside model, measured on the full-size original: its keys' legends registered to K1, recorded |
+
+## bbc-micro-front.webp
+
+| | |
+|---|---|
+| What | A BBC Micro on a white background (painted in, across some of the case's corners), from the front and above: the case top, the keyboard panel with its slot at the left, the badge strip and the three lights |
+| Source | Wikimedia Commons, [`File:BBC_Micro.jpeg`](https://commons.wikimedia.org/wiki/File:BBC_Micro.jpeg) |
+| Author | Stuart Brady (assumed by Commons): Commons names the uploader, StuartBrady, as the author, assumed from the copyright claims |
+| Licence | Public domain, as the file page states it, the uploader's own work assumed by Commons from its copyright claims. Checked on Commons' API on 13 October 2026 (`LicenseShortName` is `Public domain`, `Artist` "StuartBrady assumed (based on copyright claims)"). No credit is owed; the page gives one anyway |
+| Taken | 26 December 2005, 16:03:25 (Exif: Olympus C760UZ at 6.3 mm, a crop of its 2048 by 1536 frame) |
+| Fetched | 13 October 2026, from `upload.wikimedia.org/wikipedia/commons/3/37/BBC_Micro.jpeg`: 1929 by 1338 pixels, 210,220 bytes, SHA-1 `6b13abeb0250c0fce17b7e8bf0a0d6f8388dc343` (as Commons records it; the file here matches it), SHA-256 `4129306b45dda6b403e4cbab6fa4e96e305e0f9eaa5eb93c223e3dc74fa968c4` |
+| This copy | Not cropped. Resized with sharp 0.35.5 (libvips 8.18.7, libwebp 1.6.0) from `site/node_modules`, as `cwebp` is not installed on the machine that made it: `sharp(original).resize({ width: 1600 }).webp({ quality: 82 })`, which keeps no metadata, the same settings as the other photographs' `cwebp -q 82 -resize 1600 0 -metadata none`: 1600 by 1110 pixels, 100,960 bytes, SHA-256 `2aef9e41131bd73f801ca2a279787adbce106baa6759766a864bf291a9aba884`. The original is not committed |
+| Used for | The outside model, measured on the full-size original: with `bbc-micro-left.webp`, one camera fitted to both on the keys' legends, which places the keys, the keyboard's opening and the three lights in height |
+
+## bbc-micro-left.webp
+
+| | |
+|---|---|
+| What | The same BBC Micro on a white background (painted in), from the front left and above, 80 seconds after `bbc-micro-front.webp` by the two files' Exif |
+| Source | Wikimedia Commons, [`File:BBC_Micro_left.jpeg`](https://commons.wikimedia.org/wiki/File:BBC_Micro_left.jpeg), whose page says "Photographed by me. Released for the public domain." |
+| Author | Stuart Brady (assumed by Commons): Commons names the uploader, StuartBrady, as the author, assumed from the copyright claims |
+| Licence | Public domain, as the file page states it, the uploader's own work assumed by Commons from its copyright claims. Checked on Commons' API on 13 October 2026 (`LicenseShortName` is `Public domain`, `Artist` "StuartBrady assumed (based on copyright claims)"). No credit is owed; the page gives one anyway |
+| Taken | 26 December 2005, 16:04:45 (Exif: Olympus C760UZ at 6.3 mm, a crop of its 2048 by 1536 frame) |
+| Fetched | 13 October 2026, from `upload.wikimedia.org/wikipedia/commons/8/8a/BBC_Micro_left.jpeg`: 1756 by 1239 pixels, 118,678 bytes, SHA-1 `e29fb1ed2a95230eae211c3492407f46e6f20ad7` (as Commons records it; the file here matches it), SHA-256 `7370967288c56ff10355a754f5dca5f73b1caf8285749fd0deb263cde7986e94` |
+| This copy | Not cropped. Resized with sharp 0.35.5 (libvips 8.18.7, libwebp 1.6.0) from `site/node_modules`, as `cwebp` is not installed on the machine that made it: `sharp(original).resize({ width: 1600 }).webp({ quality: 82 })`, which keeps no metadata, the same settings as the other photographs' `cwebp -q 82 -resize 1600 0 -metadata none`: 1600 by 1129 pixels, 69,102 bytes, SHA-256 `a4d1e06629bce60bc26d9e2bbea72ceb5485d225c84890b6b605401e14c57b34`. The original is not committed |
+| Used for | The outside model, measured on the full-size original: the second view for the camera fitted with `bbc-micro-front.webp` |
 
 ## nes.webp
 
@@ -251,6 +308,25 @@ fetches a scan. The NES board's model draws the map, served as
 `/models/nes-famicom-board-tracks.webp` beside its bundle by
 `scripts/build-models.mjs` and fetched with the model, never with the page.
 
+## The BBC Micro board's track map, src/assets/tracks/bbc-micro-board.webp
+
+The copper on both faces of the BBC Micro Model B's main board, Issue 7, for the BBC Micro's inside 3D model, and its printed legend. **The map is traced from amb5l's scans**, the bare board scanned on both faces at 400 dpi and posted to the stardot forum ([thread 23329](https://stardot.org.uk/forums/viewtopic.php?t=23329)). The scans state no licence and are not committed, not even resized.
+
+| Channel | What | From | Terms |
+|---|---|---|---|
+| Red | The component side's copper | I1, amb5l's scan of the component side, traced | No licence stated for the scan; `NOTICE.md` says what is derived from it |
+| Green | The solder side's copper | I2, amb5l's scan of the solder side, registered to I1 and traced | The same |
+| Blue | The printed legend, as it is printed, Acorn's name included | I1, traced | The same |
+
+| | |
+|---|---|
+| Made by | `tools/bbc-micro-model/board_trace.py` on 13 October 2026, from the full-size scans, in the board frame of `tools/bbc-micro-model/data/frame.json`. Its `README.md` says how to run it; `tools/bbc-micro-model/data/copper.json` holds the map's size, bytes and SHA-256 and the checks on it; the journal for 4 October 2026 has the figures, under task 4 |
+| This copy | 8 pixels to the millimetre, lossless, covering the board edge to edge; each channel 255 or 0 |
+| Connections | The copper is traced to look at: its connections are not verified (the check on its known nets failed, and so did the check of the component side against I5, 8BS's photograph of a populated board, 13 October 2026) |
+| Terms | amb5l credited as the source of the scans, which state no licence; `NOTICE.md` says what is derived from them |
+
+The build does not run the analysis, and nothing in the tests or the build fetches a scan.
+
 ## The NES board's sources, which are not committed
 
 The NES board's model is measured from these, and none of them is in the
@@ -269,3 +345,26 @@ October 2026.
 | I4 | A photograph of a populated NES-CPU-07, from above | <https://commons.wikimedia.org/wiki/File:Nintendo-NES-Mk1-Motherboard-Top.jpg> | Evan-Amos | Public domain | `2158318ca6e7c913fce4220e8763dc8df4b37e70fea50cf29a1c975556a5b46c` | The NTSC console's parts and their markings, the chips' bodies, and a check that each sits on the scanned board's footprint of the same name |
 | I5 | A photograph of the same NES-CPU-07's solder side | <https://commons.wikimedia.org/wiki/File:Nintendo-NES-Mk1-Motherboard-Bottom.jpg> | Evan-Amos | Public domain | `64d52d1dbedfd123a56780def11821ef4157694e4d88d701924d567e2cb1ae10` | A check, from below, that the NTSC console's parts sit on the scanned board's footprints |
 | I2 | OpenTendo's redrawing of the front-loader's main board in KiCad, as this project's fork of it holds it | <https://github.com/dbhq-uk/OpenTendo/raw/3bd0b0be5c9ed6fc6a36d9e458bc58d9976b2009/Board%20Files/Motherboard.kicad_pcb> | Redherring32 and the OpenTendo contributors | TAPR Open Hardware License (the repository's README) | `9cce8323c9c18f0c583f99d1e07d7650f85858ca2599cbf52b2c75f384e8224a` | A cross-check only, from which nothing is drawn: the board's outline and the chips' places compared with the scan's, U9's jobs read from its nets, and which buffer serves which controller port checked against them |
+
+## The BBC Micro board's sources, which are not committed
+
+The BBC Micro's inside model is measured from these, and none of them is in the repository: the scans and 8BS's photograph state no licence, Chris Whytehead's photograph is read for markings only, and the Service Manual carries Acorn's copyright. Each is credited under the inside model (and D1 under the outside too), from the BBC Micro's `references` in `machines/registry.json`, which give the same address and SHA-256; `tools/bbc-micro-model/data/sources.json` has every input, and the tools check each against its SHA-256 before reading it.
+
+| Id | What | Address | Author | Licence, as stated | SHA-256 of the original | Used for |
+|---|---|---|---|---|---|---|
+| I1 | A flatbed scan of a bare Issue 7 board, its component side, at 400 dpi, posted to the stardot forum (thread 23329) | <https://drive.google.com/file/d/1llcLHl_ax6rtZRWxdoSyA5jNjFOo_-3N/view> | amb5l | None stated | `5edc89d95872c9e70a1adb0b8d968fbccd3459816cacd64a630d95afd02e7b0e` | The board's outline, holes, pads and scale, the component side's copper and the print, traced to look at, and every chip's place |
+| I2 | The same board's solder side, scanned the same way | <https://drive.google.com/file/d/1EIRg4Ump3T5ixNCJtVkrz7DwODJ__YFn/view> | amb5l | None stated | `c9a36223ca7d3d28cbceb6cb25f625e3989655283e6bf4b4602c5199612b5bb6` | The solder side's copper, traced to look at after the scan was turned over and fitted to the component side by its drilled holes |
+| I5 | A photograph of a populated Issue 7 board | <https://8bs.com/see/BBC_B_iss7.jpg> | 8BS | None stated | `7ae4b57399e9576d46bcfe0d4e2b39ddb362d7bb33782c002a39adffab208263` | The chips' markings and the larger parts' boxes, read by eye, and two checks that failed: the copper against it, and the markings against the manual |
+| I6 | A photograph of a second Issue 7 board, populated and in its case | <http://chrisacorns.computinghistory.org.uk/Pics/BBCB7LL.jpg> | Chris Whytehead, Chris's Acorns | CC BY-SA 3.0, as the site's home page states (an older paragraph there asks to be asked first) | `bab4176aa727598ab70717ecf921e54773e5c14401cdd16b9dba8ae02c320863` | The chips' markings only, recorded and not judged |
+| D1 | Acorn's BBC Microcomputer Service Manual, 1985 | <https://archive.org/download/bbc-micro-service-manual/BBC-Micro-Service-Manual%20Sections-1-2-3.pdf> | Acorn Computers Limited | Acorn's copyright notice; facts read from it, nothing copied | `974550803fbce738b143ea0f1fdb6aa129a5c0a69c9e0072634d16f127a7fb99` | Every chip's part and role (table 8.1), and the case's size (section 3.11) |
+
+## The BBC Micro's outside model's sources, which are not committed
+
+The BBC Micro's outside model is measured from these too (task 8 of its models plan, 13 October 2026), and none of them is in the repository. `tools/bbc-micro-model/data/sources.json` has every input with its address, size and SHA-256, and the tools check each against its SHA-256 before reading it. Fetched on 13 October 2026. Since task 9b (13 October 2026) each is credited under the outside model, from the BBC Micro's `references` in `machines/registry.json`, which give the same address and SHA-256; the Service Manual, D1, is in the board's table above and is credited under both views.
+
+| Id | What | Address | Author | Licence, as stated | SHA-256 of the original | Used for |
+|---|---|---|---|---|---|---|
+| K1 | Dominic Beesley's KiCad keyboard for the BBC Micro, as this project's fork of it holds it at commit `5ec53df566c77424caa6be827d0831da3916ecfa` | <https://github.com/dbhq-uk/bbc-keyboard/blob/5ec53df566c77424caa6be827d0831da3916ecfa/KiCad/bbc-keyboard/bbc-keyboard.kicad_pcb> | Dominic Beesley | MIT (its notice is in `NOTICE.md`) | `35b34ac3ef0a04fb311ee1971eb9fc32cb1c323877377c4d1a74986c709b0929` | Every key's centre and size |
+| O8-I | The underside of an Issue 7 machine, 640 px wide | <http://chrisacorns.computinghistory.org.uk/Pics/BBCB7I.jpg> | Chris Whytehead, Chris's Acorns | CC BY-SA 3.0, as the site's home page states (an older paragraph there asks to be asked first) | `4f1a5dbd9a698aa7445dfbacd96e47aa2260f4ad723fdf55567c9df3a9fae3bd` | The words beside the five connectors under the front, in their order |
+| O8-H | The rear of the same machine, 640 px wide | <http://chrisacorns.computinghistory.org.uk/Pics/BBCB7H.jpg> | Chris Whytehead, Chris's Acorns | As O8-I | `4ba8776121497fe59006e0e252c6789059810f28ea4f6574d81ea0c32dd34e1b` | Fetched, not used: looked at, nothing measured or read from it |
+| P-TE_1757819 | TE Connectivity's drawing 1757819 of its Amplimite D-subminiature plugs | <https://www.farnell.com/datasheets/1917994.pdf> | TE Connectivity | None stated | `6c70fc080dafcc4dcfab667cf79beec7ce85c07fea8d78037726a1caa067a8b2` | One dimension: the 15-way D's mounting holes, 33.20 to 33.45 mm apart, the scale on the rear photograph |

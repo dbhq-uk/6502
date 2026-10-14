@@ -1,7 +1,7 @@
 ---
 title: "The BBC Micro's models: the inputs, and what they rest on"
 date: 2026-10-04
-summary: "Before the BBC Micro's two models are built, the work measures what both rest on: the scale of a flatbed scan of the bare board, how well the solder side lies on the component side, and how well a photograph of the keyboard fits an open keyboard layout. The keys, the scan's scale down the board, and the board's size and outline hold, and the solder side holds except for a few holes. Two checks failed and were revised the same day, each kept on record as it failed: the case's front edge, measured on the plane of the keys, which it does not lie in; and a row by row check of the board's width scale, which magnified the noise of short rows and met one long row off the pitch, and as revised lands between pass and stop. The solder side then lies on the component side within the plan's limits over every hole found, and the board's chips come out as footprints, pin one read from the print."
+summary: "Before the BBC Micro's two models are built, the work measures what both rest on: the scale of a flatbed scan of the bare board, how well the solder side lies on the component side, and how well a photograph of the keyboard fits an open keyboard layout. The keys, the scan's scale down the board, and the board's size and outline hold, and the solder side holds except for a few holes. Two checks failed and were revised the same day, each kept on record as it failed: the case's front edge, measured on the plane of the keys, which it does not lie in; and a row by row check of the board's width scale, which magnified the noise of short rows and met one long row off the pitch, and as revised lands between pass and stop. The solder side then lies on the component side within the plan's limits over every hole found, and the board's chips come out as footprints, pin one read from the print. Both faces' copper is then traced from the scans with its method fixed first, but its check on the board's power nets fails, and so does its comparison with a photograph of a populated board, so the track map is offered to look at, not as a netlist. Every chip is then placed on its footprint and named from the Service Manual, with the disc interface fitted and Econet left out; the places miss a few of the manual's approximate ones, and the markings on a populated board disagree with the manual for four causes, one a flaw in the rule, so both of those checks fail too, and are kept as they failed. The machine then reports its keyboard lights and how often the processor reaches each chip, counted without changing a single cycle; its speed in a browser, measured afterwards in CI against a rule written down first, passed that rule. The inside model's drawing, its words and its figures are then built and tested, waiting off the page until the outside joins it; every word it says about the copper calls it traced to look at, and its note gives every failed check beside the figures. The outside is then measured: every key of an open keyboard drawing is matched to the machine's, two photographs of one machine are triangulated to set the keys and lights in the case, and the rear ports are checked against their sockets on the board; both checks pass. The front edge's correction for parallax cannot be measured, for want of the camera's height, and three measures of the case's width point different ways, two narrower than the manual's size if the keyboard drawing is true to size and one wider, which is recorded, not resolved. The outside's drawing, its words and its figures are then built and tested off the page, as the inside's were: its keys go down as the machine's are pressed, its lights are the machine's, and its note says the case's size is the manual's and that the photographs' measures disagree with it. Both views then go on the machine's page together, as tabs, the machine claiming its case and both models at once, each view crediting exactly what it was made from, and a browser in CI checks that each loads only when it is reached and follows the machine. Last, faults are planted one at a time in a copy of the work to see which tests notice each, every fault no test noticed gains a test that does, and the known differences gain the models' limits."
 order: 28
 ---
 
@@ -1012,7 +1012,7 @@ passed (4 October 2026). `run-board.sh` was run end to end from the inputs
 and gave `frame.json` and `registration.json` back byte for byte. Each new
 site test was seen to fail on a copy of `registration.json` broken its way (an
 excluded hole dropped, the verdict changed, IC5's reference removed, a
-drill's pad moved 0.3 mm, a DIP's last pad dropped). `cd site && npm test`:
+drill's pad moved 0.3 mm, a DIP's last pad dropped). The logs of these runs were kept outside the repository and are not committed, so the claims in this paragraph rest on the record made at the time, not on a file anyone can open. `cd site && npm test`:
 286 passed before this task, 292 after, one to-do, none failed; both
 workflows' floors are raised to 292. `site/tests/bbc-models.test.mjs` gains six
 tests: the solder row passes on the figures without exclusion, with the model
@@ -1024,3 +1024,1002 @@ every DIP has an even pin count from 14 to 40, a pad per pin, pin 1 first and
 rows the right length; IC1 to IC7, IC51, IC52, IC69 and IC78 each have a DIP
 footprint whose reference was marked by hand with a reason; and the
 mounting holes are refitted, with the move from task 2 recorded.
+
+## Task 3's review, and the fix wave (5 and 13 October 2026)
+
+Task 3 was reviewed on 5 October 2026. Pull request 48, which held tasks 0 to 3, was merged on 6 October before the review's fixes landed, so they are on a second branch, `feat/bbc-micro-models-2` (pull request 88). An implementer started them and stopped part-way on a usage limit; its work was committed unverified as `9be4b55` on 13 October. This section records what the review found, what `9be4b55` did, and what was finished and checked on 13 October. No written copy of the review survives outside the repository: its findings are read from the plan's notes dated 5 October, the code comments that cite it, and `9be4b55`'s message.
+
+### What the review found
+
+- **A drill test that could not fail.** "Every drill has a pad on both faces within 0.2 mm" held because each drill's pad is placed at the drill (the task 3 section above says so). The plan's step 4 was revised: each drill records both faces' centres and sits at their mean; an open drill's faces must each be within 0.2 mm of it; for a drill filled with solder, at most 5 per cent may have a face further off, because the solder sits off the hole, not the registration (93 of 2522, 3.7 per cent, was measured before the ceiling was set).
+- **The fitted map was not saved.** Task 4 has to draw I2's copper through the registration, and `registration.json` kept only its figures. It now keeps the model's parameters unrounded, how I2 is flipped, and each drill's solder-side pixel.
+- **Most chips had no reference.** 12 footprints were named; the plan now asks for every DIP to have a reference read from the print, or to say it is unread and why, with no reference twice.
+- **Footprints were missed or wrong.** IC30 and the three DIPs right of the row below the RAM block had been left as rows for task 5; IC48's 14 pins and the pads of the parts below it made one 24-pin run; and the 18-pad group task 3 marked "not a DIP" (two columns of resistor and capacitor pads) is IC35, a 14-pin DIP whose outline and label are plain on the scan, with one pad of the parts above and below it at each end of its run.
+- **A test that read a variable name.** The check that the outlier rule never looks at a residual asserted that no variable of the function was called `residual`. It is replaced by a test that moves every solder-side hole, changing every residual, and requires the same holes to be excluded.
+- **The solder side's figure to cite.** The plan's Global Constraints now say that from task 3 on the figure cited is the one without exclusion. The rule fixed before task 3 sits at about the 70th to 80th percentile of the blobs' axis ratios, and its one area median per face mixes solder blobs with open rings, so it mostly excludes the rings, the most precise holes.
+- **The manual's positions.** Task 5's note: the Service Manual's places for the 40-pin parts are a constant offset of about (+7.5, -26) mm from their footprints' centres, so task 5 settles the manual's convention on a smaller part before it uses the 10 mm check.
+
+### What `9be4b55` did
+
+The drill report (`drillFaces`) and each drill's two faces; the saved map with a test that puts a drill's I2 pixel through it; references for every DIP marked by hand in `marks.json` (its footprint marks went from 14 to 107, each with its crop and why), with `unread` and a pin count a mark can cut a run to; a second grouping pass in which spare blobs of solder join the pads still free; a run whose outline scores under 0.7 tried trimmed to the stretch its outline covers; a mark for a DIP whose printed outline is too faint on one side (IC61); the behavioural outlier test; a test of the tie between the models; the plan's notes. It did not run the tools on the scans, change the site tests or write the journal.
+
+### What was finished on 13 October
+
+**The inputs.** This host had none of them. I1 and I2 were fetched again by hand from the Google Drive links in `data/sources.json`, as the tool's README says, into a folder outside the repository; `verify.py` found both SHA-256 as recorded. Nothing from them is committed. The virtual environment, made on 13 October 2026 on an aarch64 host with `python3 -m venv ~/venv-models && ~/venv-models/bin/pip install numpy opencv-python-headless pillow scipy pytest`: Python 3.12.3, numpy 2.5.4, opencv-python-headless 5.0.0.93, Pillow 12.3.0, scipy 1.18.1, pytest 9.1.1.
+
+**The run.** `BBC_MODEL_INPUTS=~/bbc-model-inputs PYTHON=~/venv-models/bin/python tools/bbc-micro-model/run-board.sh`, on 13 October 2026, took 1 minute 10 seconds. `frame.json` came back byte for byte (the run's log is not committed). The solder side printed the same figures as on 4 October (cubic, 2367 holes, held out median 0.114, 90th percentile 0.258, largest 0.766 mm: pass), and every rounded number in `registration.json` outside the pads and footprints is unchanged; the unrounded parameters differ from `9be4b55`'s, which came from another host, by at most 1.4 parts in a million. It printed `drills 2797, pads 3050, footprints 175 (97 DIPs)`.
+
+- **The drills' faces.** Open (275): largest 0.103 mm from the drill, none over 0.2. Filled with solder (2522): median 0.062, 90th percentile 0.145, largest 0.499 mm, and 93 over 0.2 mm, 3.7 per cent, under the 5 per cent ceiling.
+- **Footprints.** 97 DIPs (38 of 14 pins, 29 of 16, 12 of 20, 1 of 24, 12 of 28 and 5 of 40), 21 connectors and 57 SIPs, where task 3 had 92, 25 and 58. The new DIPs are IC30, IC12, IC53 and IC61 (the last three right of the RAM block, where task 3 found one row of each as a connector), IC48 at 14 pins in place of the 24-pin run, and IC35. Pin 1 is from the print on 92 and marked by hand on 5 (IC21, IC35, IC61, IC69 and IC89). 17 pads came from a spare blob and 7 were inferred, where task 3 had 8 and 6.
+- **References.** All 97 DIPs have a reference read from the print and none is unread; no reference is used twice; 10 connectors and resistor packs are named too (PL8 to PL14, SK6, RP1 and RP2). The 28-pin footprint at the left edge, whose label task 0 could not read, is IC89: its digit was compared at six times with IC39's 3. 12 of the new marks (IC8, IC10, IC23, IC39, IC43, IC45, IC61, IC89, IC94, IC100, IC101 and IC35) were looked at again on their crops on 13 October, and each label reads as marked.
+
+**Two changes that changed nothing, removed.** `9be4b55` also added a step that retried a candidate running into a DIP already taken, with the taken slots dropped, and a rule that a blob seen only on the solder side never sets where a row ends. No test reached either. Run on the scans with each switched off in turn, the DIPs came out the same, so both were removed, and the run gave `registration.json` back byte for byte. To reproduce it: copy `tools/bbc-micro-model/` to a scratch folder, replace its `board_register.py` with the one from before the change (`git show 793731e^:tools/bbc-micro-model/board_register.py`), run that copy's `board_register.py` with `BBC_MODEL_INPUTS` set, and `cmp` the copy's `data/registration.json` with the one at HEAD. A reviewer did this on 13 October 2026 and got identical files in 56 seconds; it was run again the same day and gave identical files in 1 minute 20 seconds.
+
+**A test that did not test its case.** The test for a stray blob beside a row (IC68) still passed with the pads-only first pass removed. On the scans, with that pass removed, IC68 is lost (96 DIPs). Its pads show why: pin 11 of the right row has no pad, a spare blob sits 0.39 mm short of its place and pin 12's pad 0.16 mm short, so chained with the pads the blob is pin 12's next link and has no next of its own (pin 10 is 0.36 mm off the pitch, over the 0.35 tolerance), and the row breaks in two. The test now draws that layout, and fails with the first pass removed.
+
+### Tests
+
+`~/venv-models/bin/python -m pytest tools/bbc-micro-model/tests -q`: 58 passed (13 October 2026). Each test added in the fix wave was seen to fail with the code broken the way it guards against, one break at a time, with the file restored after each (the log of that run is not committed): the outlier rule also taking holes with a residual over 0.1 mm; no tie margin between the models; the drill report never counting a filled, or an open, drill off; no second grouping pass; no pads-only first pass; no trim to the outline; the faint mark ignored, and a faint outline accepted with no mark; a marked run cut from its first slot; `unread` not kept. The saved map's test failed with the parameters rounded to 4 places, as the file was written before: a drill's solder side then lands 0.017 mm off.
+
+**Review minors, 13 October 2026.** The saved map's test now samples every 7th drill, not every 97th. The tie test gained the boundary, 0.115 against 0.120: the code is `c < a - TIE_MM`, a strict comparison, so exactly `TIE_MM` lower is a tie and the affine wins (in floats 0.120 - 0.005 is 0.11499999999999999, so the case is not below it), and 0.1149 gives the cubic. A site test now requires `solder.model`, `solder.params` (unrounded) and `solder.transform`, the names the plan's interface gives. The held-out-by-kind test says in a comment that it catches figures that disagree with their rows, not a wrong `kind`. Each was seen to fail on a break: drill 7 moved 0.01 mm; `TIE_MM` at 0.0049 and at 0.0051; `params` removed, rounded to 4 places, and `transform` removed.
+
+`site/tests/bbc-models.test.mjs` gains two tests and rewrites one. The drill test now checks each drill against its two faces as the plan revised it (a face within 0.002 mm of the 0.2 mm limit is counted either way, since the file is rounded to a micron), and that `drillFaces` says the same; a new test recomputes the held-out figures by kind of hole from the matched holes; and a new test requires every DIP to have a reference with its mark, crop and reason, or an `unread` reason, with no mark unused. Each was seen to fail on copies of `registration.json` broken its way (an open drill's faces 0.25 mm off, 60 more filled drills 0.25 mm off, a drill off its faces' mean, the report's count 10 short, the rings' median 0.01 out, IC40's reference dropped, and a mark that found nothing), and to pass with IC40 said unread with a reason. On main's `registration.json` all three fail; on `9be4b55`'s, which had not been rerun, the references test fails. `cd site && npm test` on 13 October 2026, with the results and machines artefacts of main's Validate run 38423721729: 476 tests, 475 passed, one to-do, before; 478 tests, 477 passed, the same to-do, after. Both workflows' floors are raised from 475 to 477.
+
+## Re-plan of tasks 4 to 10 (13 October 2026)
+
+Main had moved on since this plan was written. The NES built its two models after it, reusing its design, and they were merged in pull request 76. Tasks 4 to 10 were re-planned to run on main as it stands. The plan has a dated "Re-plan of 13 October 2026" section at its top and a note at the head of each of those tasks. Tasks 0 to 3 are unchanged. This branch merged `origin/main` at `8a30791` first (merge `3dad880`).
+
+### What changed, and why
+
+- **The BBC Micro claims both views and `case` at once.** The plan had task 7 claim `inside` with no `case`, so the inside could go through the page and the browser check before the outside existed. Main now has the NES's rule that a machine claiming a model states `case`, beside the rule that a cased machine claims both views. So no form of an inside-only claim passes. The claim moves to a new task 9b.
+- **The scenes land before the claim, as `.mjs`.** `model.test.mjs` fails an unclaimed `.js` in `site/src/models/`. So tasks 7 and 9a build each model's drawing as a scene module with no `mount`, tested in node, and 9b adds the thin entries. Three other ways were rejected: a red commit between tasks, a placeholder outside, and loosening a rule.
+- **The NES's tab list, loader and two-view markup are reused unchanged.** Old task 9's step for them is dropped.
+- **The access sampler is lifted into a shared `access.mjs`**, so the BBC does not make a third copy of the NES's.
+- **The counters follow the NES's variant A.** These are plain `uint` fields incremented in the bus's own decode, because a counter behind a call measured 2.8 per cent slower in Chromium on ARM on 13 October.
+- **Task 4 freezes its method before its held-out checks run.** The scripts' SHA-256 and the time go in the journal first. It also says now what a failed nets check means: the map ships as "traced to look at", as the NES's did.
+- **Task 6's speed rule is the NES's,** written down before the first launch. Where it runs is Dan's to say: `bench/` never runs in CI, and this box is not to be used for browser figures.
+
+### The inputs for tasks 4 and 5
+
+Fetched by hand on 13 October 2026 into `~/bbc-model-inputs`, outside the repository, each into its own empty folder first:
+
+| Input | What | Check |
+|---|---|---|
+| I5 | `https://8bs.com/see/BBC_B_iss7.jpg`, 2,162,357 bytes | SHA-256 `7ae4b573...` equals the one recorded on 4 October |
+| I6 | `http://chrisacorns.computinghistory.org.uk/Pics/BBCB7LL.jpg`, 530,347 bytes, 2005 by 1295 | SHA-256 `bab4176a...`, new; added to `sources.json` and `models.md` |
+| D1 | archive.org `bbc-micro-service-manual`, 47,662,305 bytes, 222 pages with a text layer | SHA-256 `97455080...`, new; its MD5 equals archive.org's (`d64017d9...`). Its text layer shows table 8.1 on PDF p.66 to 67 and "3.11 Dimensions" (Height 73mm, Width 415mm, Depth 345mm) on p.109, the pages the research cited |
+
+Afterwards, `verify.py` reported I1, I2, I5, I6 and D1 present with their hashes matching. O1 to O3 and K1 were reported missing, because task 8 needs them and they were not fetched again. No input is committed.
+
+### A fact sheet that was wrong
+
+`models.md` said Chris's Acorns stated no licence for I6 and O8. Its home page has a section headed "License to reuse": photographs "may be reused under the CC-BY-SA 3.0 license unless otherwise specified", with a byline asked for. An older paragraph on the same page says they "remain my copyright. If you want to use them please ask me first". The research read the photographs' own pages, which say nothing. Both sentences are now quoted in `models.md` and `sources.json`. Neither photograph is to be committed, so the plan does not change, but each will be credited by name with the site's byline.
+
+### Waiting on Dan
+
+- A fork of `dominicbeesley/bbc-keyboard` in `dbhq-uk`. Rule 3 asks for it, and making it is outward-facing. Task 8 needs it.
+- A host for task 6's browser speed run.
+
+*Both done, noted 14 October 2026 (task 10's fix wave): the fork is `dbhq-uk/bbc-keyboard`, read at commit `5ec53df` on 13 October 2026 (task 8, "The inputs"); the host was a GitHub runner, Dan's choice of 13 October 2026, and the run is CI run 38472729370, which passed (task 6, "The browser speed run, in CI").*
+
+## Task 4: the copper on both faces, and the print (13 October 2026)
+
+`tools/bbc-micro-model/board_trace.py` traces the copper on both faces of the bare Issue 7 board and its yellow print, from the scans I1 and I2, runs the plan's checks on them, and writes the track map, `site/src/assets/tracks/bbc-micro-board.webp`, with `data/copper.json` beside it. Both faces are resampled onto one grid at 16 pixels per millimetre over the outline's box: the component side through task 2's frame, the solder side, flipped, through task 3's saved cubic map, inverted by a fixed-point iteration (a test puts points through the map and back to within a millionth of a pixel). `data/ic-table.json` holds Acorn's table 8.1 and the GND and +5V pins the nets check needs, each with its data sheet. It was built the NES's way, and with its lessons: the NES's task 4 is the precedent for every step here.
+
+### The ICs, and where their pinouts come from
+
+Table 8.1 ("Integrated circuits", D1, PDF pages 66 and 67) was transcribed by hand from the page images, which were extracted from the PDF with `pypdf` in a scratch environment outside the repository (`python3 -m venv /tmp/pdfvenv && /tmp/pdfvenv/bin/pip install pypdf pypdfium2`). The PDF's own text layer is an OCR with errors ("74800" for 74S00, "7T4S74" for 74S74), so it was not used. The table lists IC1 to IC101 with each one's part, its place in millimetres from the SW corner, and a comment; all 101 are in `ic-table.json` with the page.
+
+The nets check takes an IC only if its GND and +5V pins come from a maker's data sheet that was read. The data sheets were fetched on 13 October 2026 into a scratch folder outside the repository and read as page images: Texas Instruments' for every 74-series part on the board (`https://www.ti.com/lit/ds/symlink/sn74ls00.pdf` and the like, one per part; the S and plain TTL parts are in the LS sheets), its CD4013B and CD4020B sheets, and Rockwell's R6502 (Document 29000D39) and R6522 (Document 29000D47) sheets from `archive.6502.org`. Every pinout is the usual corner one (GND 7 and VCC 14 of 14 pins, 8 and 16 of 16, 10 and 20 of 20); the 6502's VSS is pin 1 (and 21) and VCC pin 8; the 6522's VSS pin 1 and VCC pin 20. That gives 51 ICs. The other 50 are listed with why, before the run: no data sheet could be fetched for the 81LS95 buffers, the 6845, the 6850, the SAA5050, the 76489, the 4816 RAM, the ROMs, the uPD7002, the 8271 or the 68B54; table 8.1's "74LS34" (IC31) is a part no maker's sheet was found for; the ULAs are custom; the LM324, LM319, LM555 and LM386 are not logic ICs; the RS423 and Econet line parts may run from -5V; IC90 and IC92 are not fitted and task 3 found no footprint for IC92. Every one of the 51 has a footprint from task 3 with the package's pin count and pin 1.
+
+### How the copper is traced
+
+The NES's method (`tools/nes-model/board_trace.py`) is the starting point: OKLab, a smooth level fitted to the laminate, Otsu's threshold with its hysteresis, pads kept, specks dropped, and copper under the print recovered only in line. Three things are different here, each set from what these scans show, measured on probes whose boxes and figures are in the script's comments.
+
+- **The cue is greenness, not lightness.** Copper under the lacquer is a strong green on both faces (OKLab a about -0.10; thin tracks peak at -0.08 to -0.12) and the laminate is nearly black and grey-green (a about -0.017). On the solder side every pad sits in an olive halo where the lacquer stops short of it, as light as copper (L about 0.40, against 0.43 to 0.66 for copper), and along a DIP's rows the halos touch. A lightness cue would join every pin of a row through them, which is how the NES's rims joined its pins. In -a the halo (0.020) sits with the laminate. Chosen over lightness, and over the NES's rim rule.
+- **Pads come from task 3, not from the light round them.** Every pad task 3 found is a disc of its solder's radius and 0.15 mm more, which takes in the dark rim round the solder (the pads' radial profile on both faces, 400 pads a face: solder to 0.75 mm, the rim darkest at 0.85 to 0.94 mm). A track joins a pad where its green reaches the disc. The NES's rim rule cut its pads off their tracks; there is no rim rule here.
+- **Tin is copper.** Solder (grey, chroma under 0.035, L 0.60 or more) counts as copper wherever it is: every pad, and solder run over the copper on the solder side.
+
+No track on either scan was seen shown only by its two edges, as the NES's solder side showed its thin tracks: here a track is a bright line, often with a lighter stripe down its middle. The level of the laminate's greenness is the NES's smooth surface; its blocks scatter round it by a robust 0.0052 on both faces. Otsu put the threshold at 0.0271 over the level on the component side and 0.0262 on the solder side.
+
+### The tests, and the NES's failure modes
+
+`tests/test_board_trace.py` draws a made-up board in the scans' own colours (each a probe's median sRGB), with the light falling by 15 per cent across it, noise and a little blur. The plan's review asks that the tests fail on the NES's failure modes, so each is drawn: a track shown as two bright edges with a dim middle (it must come back whole and as one piece); pads with the dark rim and the halo or grey ring round them, joined to tracks through the rim (each must stay joined, and a row of pads in touching halos must stay apart, with a track passing between two of them); a hatched pour (one piece, intersection over union at least 0.85); and a drawn short (caught). There are two nets, GND through a via and +5V, with a GND stub whose edge is 0.3 mm from the +5V track. Run before the module existed, the file failed on the import. The first implementation failed one test, which found a real fault: where solder runs over a track, the one pixel where they meet is a mix of the two colours, neither grey enough for tin nor green enough for copper, and it cut the track from the solder. That pixel is now copper when it has tin and green on either side.
+
+Then each of the 19 tests was shown to fail with the code broken the way it guards against, one break at a time, the file restored after each (a scratch script outside the repository; its log is not committed): the threshold tripled; tin taken down to L 0.35, so the halo became tin; the print's threshold raised past the print; recovery under the print without the in-line rule; hysteresis without its low threshold; the smoothing at 3 pixels; the pads' discs 0.1 mm short of the solder, and the seam pixel left out; the discs grown 0.6 mm, and lightness as the cue; the drills not joining the faces; `touching` always false; 19 ICs enough, and the I5 stop at 2.5 mm; a drill in copper with no copper round it; the inverse map with one iteration; the map's red and green swapped; a pin off by one, and a footprint of the wrong size accepted; I5's teal rule dropped, and its copper without the threshold; the component side drawn into I5 with x and y swapped. One break survived at first: the I5 registration's test still passed with each pin held out alone instead of each chip. The test now requires every pin of a chip shifted 3 mm to read over 3.5 mm held out, which held out together they do (about 4.1 mm) and held out alone they do not (about 3.0 mm), and it then failed on that break. `~/venv-models/bin/python -m pytest tools/bbc-micro-model/tests -q`: 77 passed (13 October 2026).
+
+### What the overlays showed, before the method was fixed
+
+Three `--look` runs traced both faces, drew the overlays in `out/` and printed each face's copper share and the map's size at 8, 7 and 6 px/mm; they run no check. Looked at closely: the processor (IC1), the RAM block, the video ULA and the data bus buffers on both faces, and the solder side's upper left.
+
+- On the solder side the tracks come back as single bright lines, joined to their pads; the halos are not copper; the vias' rings are joined to their tracks. The upper left is a copper pour shiny with flux, traced as one piece with its pads standing apart in their dark islands; the streaks of glare in it leave small holes, which do not cut it.
+- On the component side the tracks between IC1's rows come back as separate pieces and are recovered under the outline's print where they cross it.
+- **A track lost to the specks rule** (component side, grid x 3880, y 1690 to 1780, a track crossing an IC's outline and its "A"): the print cut it into pieces under 1 square mm, which the specks rule dropped before recovery under the print could join them. Recovery now runs before the specks are dropped. Part of that track is still lost where it runs along the outline's chamfer, under more print than the in-line rule reaches.
+
+Coverage is not held out, and it was seen: the component side's copper was 31.9 per cent of the board at the first run and 32.2 at the last, the solder side's 35.1 both times. No change was made to move it. The map at 8 px/mm was 376,968 bytes at the last run, under the 600,000 budget, so 8, the highest offered, is the resolution.
+
+### I5's pins, marked before the check
+
+I5 is stored 2048 by 1536 with EXIF orientation 8; stored that way it lies as I1 does, rear connectors at the top, so its pixels are used as stored. Its chip pins show as bright legs. A leg is a blob of OKLab L over 0.75 and chroma under 0.05, 8 to 150 pixels; its centroid is the mark. Candidates for each chip's corner pins were proposed by a rough fit (an affine from eight chips' centres read by eye on a reduced copy, then a homography refitted on the candidates within 3 pixels), and each was checked by eye on a crop with the pin numbers drawn. Two corner legs were hidden or in shadow, so the pin next to each was taken (IC2's 39, IC5's 16). The packed RAM chips (IC53, IC56, IC68), IC20 (whose candidates were wrong), IC6 (in a socket) and IC78 (an empty socket) were left out. That gives 56 pins on 14 chips spread over the board, in `marks.json` `i5Pins` with each crop. The I5 check had not been run when they were marked. A leg seen from above can sit up to about half a millimetre outside its pad, away from the chip's body, so some of the registration's error will be that.
+
+### The method fixed, and the checks as fixed
+
+The plan's Task 4 note gained a dated block, "Fixed on 13 October 2026", with every check's pass and stop: coverage 10 to 50 per cent each face; drills in copper at least 95 per cent each face (weak by construction, and said so there); the nets at least 20 ICs (51 are used), 90 per cent of their GND pins in one net and of their +5V pins in another, never touching; I5 to I1 median at most 1.0 mm to pass, over 2.0 mm a STOP; the component side against I5 an intersection over union of at least 0.50; the map at 8 px/mm. `board_trace.py --hashes` printed, at 2026-10-13T19:16:43Z, before the nets or the I5 check had ever been run:
+
+```
+f7ff0fbdee5143e29f4dba34ef8d41125869181cf6af3c040dc0534922701e85 tools/bbc-micro-model/board_trace.py
+d9d9e1bcea7e643c8a9c7b11a3035b8bd8f551ebd687eb930eef19b3f1e90dc9 tools/bbc-micro-model/common.py
+e2754725ff1b859da595ad43ef33ac3983e956bc07ade8b19e9634089177407f tools/bbc-micro-model/board_frame.py
+1c8b2fff24351fd3b521f0f283eeefa29fd86edcfe82930d1350d2a20bf01872 tools/bbc-micro-model/data/frame.json
+4327f2c19b0d21e49ccac75989172e2618a3a58b54a3c942626ef1f76ca2d5fb tools/bbc-micro-model/data/registration.json
+6d991b2c828d4dad5b369f3d0941ca305b362c8d63f671376868b452cf2d0361 tools/bbc-micro-model/data/ic-table.json
+e8683a74d1bb4d82fb0251b02aac0a517b6df70799159ab698051be5ce2e9fe4 tools/bbc-micro-model/data/marks.json
+```
+
+The same hashes are written into `copper.json` (`methodFixed`) by the run, so a reader can see that the run used the fixed method. These files were committed as they are before the run.
+
+### The run, once
+
+Run once, at 2026-10-13T19:17:50Z, on the committed and pushed method (`b0b4644`), from the inputs in `~/bbc-model-inputs`:
+
+```
+cd tools/bbc-micro-model && BBC_MODEL_INPUTS=~/bbc-model-inputs nice -n 10 ~/venv-models/bin/python board_trace.py --map-ppm 8
+top: Otsu d(-a) 0.0271; level from 2600 of 2736 blocks, robust sd 0.0052; copper 32.2% of the board (green 17.9%, tin 6.6%, pads 12.1%)
+bottom: Otsu d(-a) 0.0262; level from 2607 of 2741 blocks, robust sd 0.0052; copper 35.1% of the board (green 21.0%, tin 8.1%, pads 12.3%)
+coverage: top 32.2%, bottom 35.1%, print 12.2%: pass
+drills in copper: top 100.0%, bottom 100.0% of 2797: pass
+nets: 51 ICs; excluded 50; GND 39 of 51 in one net, +5V 30 of 51; touching True: fail
+I5 to the board frame: 56 pins on 14 chips, each chip held out: median 0.363, p90 0.842, max 1.036 mm: pass
+top against I5: intersection over union 0.411 over 17127 mm2: fail
+print 8624 mm2, copper recovered under it 700 mm2; map 8 px/mm, 2480 x 1837, 376968 bytes
+```
+
+| Check | Figure | Pass | Verdict |
+|---|---|---|---|
+| Copper coverage, each face | component side 32.2 per cent, solder side 35.1 | 10 to 50 per cent | pass |
+| Drills in copper | 100.0 per cent of 2797 on each face | at least 95 per cent each | pass (weak by construction) |
+| Known nets | 51 ICs; GND 39 of 51 pins in the largest net, +5V 30 of 51; a GND pin and a +5V pin in one net | at least 20 ICs; 90 per cent each; never connected | **fail** |
+| I5 to I1, each chip held out | 56 pins on 14 chips: median 0.363 mm, 90th percentile 0.842, largest 1.036 | median at most 1.0 mm; STOP over 2.0 | pass |
+| The component side against I5 | intersection over union 0.411, over 17,127 square mm where I5 shows the board | at least 0.50 | **fail** |
+
+Both failures stand as measured. Nothing in the method has been changed since.
+
+**The I5 registration's pass is optimistic, and not an independent check** (added after review, 13 October 2026). The pins were chosen in a way that favours a good fit: the candidates came from a homography refitted on candidates already within 3 pixels of it, and the chips whose legs were ambiguous on their crops were left out. Holding each chip out of the final fit does not undo that choice. So the median of 0.363 mm says the marked legs are consistent with one homography; it does not measure how well I5 lies on the board elsewhere. As the plan's note says, the map ships traced to look at, its connections not verified: `NOTICE.md` and the photographs' README say so, and the plan's task 4 note records the outcome, which a site test pins with its figures. The page's sentences about the copper are tasks 7 and 9b's to write, and the plan now tells them to say it, I5's failure with the nets'. A re-trace needs a new check, fixed before it runs, as the NES's #78. The run's log was kept outside the repository and is not committed; the lines above are copied from it.
+
+### Why the nets fail
+
+Looked at after the run, without changing anything. The first look used a scratch script; after review it was committed as `tools/bbc-micro-model/diagnose_nets.py`, which rebuilds the nets check's pieces from the masks the run wrote to `out/` and prints what is below (`cd tools/bbc-micro-model && ~/venv-models/bin/python diagnose_nets.py`, 13 October 2026; it writes nothing and is no part of the method). Two faults.
+
+- **A merge.** One piece of the component side's copper, 264 square mm, holds the GND pins of IC21, IC81 and IC82 and the +5V pins of IC82, IC84 and IC85. It runs along the row of chips from IC76 to IC82 and through the selection links S14, S17 and S18. That is how the largest net comes to hold 39 GND pins and 30 +5V pins at once. Where in the piece the two nets meet was not found: it may be a real merge in the trace, or a link the board makes with copper that the trace cannot tell from a track. Not looked into further, because that would be tuning after the check.
+- **Breaks.** In `copper.json`'s `pinNets` the net with the most GND pins and the net with the most +5V pins are the same net (`bottom:1781`, 39 GND pins and 30 +5V pins). Taking copper away can only split a net, so without the merge no net could hold more than 39 of the 51 GND pins, under the 90 per cent; how many it would hold cannot be known from this run. Some power pins sit on their pad alone (under 6 square mm on both faces: IC1's +5V, IC86's +5V, IC70's GND, IC97's GND, and others). The five chips IC46 to IC50 have their GND pins on one piece of 99.6 square mm and four of their +5V pins on one of 162.8, each joined to the rest of the board nowhere (`bottom:635` holds those five GND pins, `bottom:342` those four +5V pins), so each rail is broken somewhere between the row and the rest of the board; where was not found.
+
+This trace is much nearer a netlist than the NES's was (its largest nets held 1 and 2 of 10 pins), but it is not one, and the check says so.
+
+### Why I5 does not agree
+
+Looked at after the run on its overlay (`out/trace-against-i5.png`: red the component side alone, blue I5 alone, white both). Thin tracks agree in place, but nearly every one has a blue edge on the same side: an offset of about a pixel of I5's (0.2 mm), under the registration's 0.36 mm median, and I5's tracks read about a pixel wider than I1's from the photograph's blur. At about 5.4 pixels to the millimetre a 0.3 mm track is under two pixels wide, so a pixel's offset or spread halves its overlap. I5 alone covers 95,940 of its pixels, I1 alone 61,617 and both 110,023. A band of tracks just above IC1 is copper on I1 and is not found on I5; why was not looked into. The comparison was fixed at I5's resolution before the run, and it fails there; it is not run again at another.
+
+### What the print hid
+
+The print covers 8,624 square mm of the component side, 12.2 per cent of the board (under the 15 per cent the map's blue may take). Copper was recovered under 700 square mm of it, 8.1 per cent: where tracks cross an IC's outline or a thin stroke of a label. The wide blocks (the outlines' corners and chamfers where strokes meet, the large lettering of "ACORN COMPUTERS Ltd" and "203,000 Issue 7", the logo) hide what is under them, and the map shows them blue only.
+
+### Mistakes
+
+- The first implementation joined solder to green copper nowhere, because the pixel where they meet is neither. The made-up board's solder over a track found it.
+- Recovery under the print first ran after the specks rule, which had already dropped a track cut into short pieces by print. Seen on an overlay.
+- The I5 registration's test first passed whether each chip or each pin was held out. The break found it.
+- A test of mine on the made-up I5 checked that the gaps between a chip's legs were not board, when they are. The test was wrong, not the code.
+- I wrote "about 6.6 px/mm" for I5 in a first draft of a comment before measuring; it is about 5.4. Corrected before the method was fixed.
+- I saw each face's copper share on every `--look` run, so coverage was seen before the method was fixed (above). Nothing was changed to move it.
+
+### Tests
+
+`~/venv-models/bin/python -m pytest tools/bbc-micro-model/tests -q`: 77 passed (13 October 2026), 58 before this task.
+
+`site/tests/bbc-models.test.mjs` gains six tests: the map is committed, WebP, its size and SHA-256 those `copper.json` gives, inside 600,000 bytes, at 8 px/mm, covering the outline's box, red and green each 10 to 50 per cent and blue under 15, each channel 255 or 0; the verdicts `copper.json` records are the ones its figures give against the fixed rows, and the shares, nets, pins and I5 marks are its own; coverage, drills and the I5 registration pass, and the nets and the I5 comparison are pinned to their FAILs, with their figures and the plan's outcome words; `ic-table.json` is table 8.1's 101 rows, a dozen parts read again from the page images, each IC of the nets check with its data sheet's address and pins; `copper.json`'s `methodFixed` equals the hashes recorded above; and `NOTICE.md` and the photographs' README name the map, amb5l's scans and that it is traced to look at. Each was seen to fail on a copy broken its way, restored after each: the map's SHA-256 changed, and its resolution said 7; one more GND pin in the largest net, and an I5 mark on a chip with no footprint; the nets verdict set to pass, and the plan's outcome words taken out; IC3's GND pin set to 2, and IC40 read as 74LS00; one hash changed in the journal; "traced to look at" taken out of `NOTICE.md`.
+
+## Task 4's review, and what was changed (13 October 2026)
+
+The review found nothing critical. What it found, and what was done:
+
+- **Nothing in CI held the method to the files.** The reviewer changed `NETS_MIN_SHARE` and `I5_IOU_MIN` in a copy of `board_trace.py` and every site test still passed. A site test now hashes `board_trace.py` and `common.py` on disk against the hashes recorded above, before the run. Only those two are pinned: task 5 changes `ic-table.json` and `registration.json` on purpose. It failed with `NETS_MIN_SHARE` set to 0.75, and with a comment line added to `common.py`, each restored after.
+- **A sentence the committed data did not support.** "Why the nets fail" said the largest GND net would hold 39 of 51 pins without the merge. `copper.json`'s `pinNets` shows the nets with the most GND and the most +5V pins are one net, so that cannot be known from this run; the bullet now says what the data shows (no net could hold more than 39). The scratch script behind the 264 and 99.6 square mm figures is committed as `tools/bbc-micro-model/diagnose_nets.py`, and its output on the run's masks is what that section quotes.
+- **The I5 registration's pass is flattered by how its pins were picked.** Said now in "The run, once" and in the plan's outcome line.
+- **The data sheets had no hashes.** The 26 sheets the pinouts were read from (24 from Texas Instruments, Rockwell's R6502 and R6522) are now inputs in `sources.json`, each with its address, size and SHA-256, under ids `P-...`, and each pinout in `ic-table.json` names its sheet's id. They are the copies fetched on 13 October 2026 for the pinouts, kept outside the repository. "(in the SN74LS00 data sheet)" and the like are as found: Texas Instruments' addresses for the SN74S00, SN74S04, SN74S74 and SN74S139A sheets return files with the same SHA-256 as the SN74LS00, SN74LS04, SN74LS74A and SN74LS139A sheets, and each of those sheets lists the S part on its pinout.
+- **The reasons for leaving ICs out.** IC31's now says a data sheet was not found in the search made, which is a gap in the search, not evidence about the part. The ROMs' reasons say no ROM data sheet was read, and that a socket may be set by links for more than one type of ROM, marked as a guess to verify. The review also suggested that the 4816 RAM needs -5V and +12V rails. That was not checked, and the BBC Micro's supply has no +12V, so it is not given as a reason: the 4816's reason stays that no data sheet was read.
+- **NOTICE.md** gains a section saying `ic-table.json` holds facts from table 8.1 of Acorn's Service Manual and from the makers' data sheets, and copies nothing. The table's comment column is restated as each IC's `role`, in our words.
+
+**`ic-table.json` changed after the run, as documentation only.** The reasons above, the roles and `pinoutSourceId` were edited after the run. The set of ICs, every pin number and every source address are as the run used them. Its SHA-256 is now different from the `6d991b2c...` recorded before the run, which `copper.json` keeps. To show the edit changes no figure, the method was run again on a scratch copy of `tools/bbc-micro-model/` outside the repository (`BBC_MODEL_INPUTS=~/bbc-model-inputs nice -n 10 ~/venv-models/bin/python board_trace.py --map-ppm 8`, 13 October 2026). It printed the same lines, and the map came out byte for byte the same (`cmp`). Its `copper.json` differs from the committed one only in `ic-table.json`'s hash under `methodFixed` and in the wording of 22 of the 50 reasons under `nets.excluded`. The committed `copper.json` is left as the run wrote it, with the reasons as they were worded then.
+
+## Task 5: the parts, places and identities (13 October 2026)
+
+`tools/bbc-micro-model/board_parts.py` puts every IC on the footprint of its reference that task 3 found, names it from the Service Manual's table 8.1 through `data/ic-table.json`, places the connectors and the large parts from boxes read on I5, infers the two-lead parts from the print, and writes `data/parts.json` and the module the page will read, `site/src/models/bbc-micro-board-parts.mjs`. The NES's task 5 (`tools/nes-model/board_parts.py`) is the precedent; the BBC has no KiCad redrawing to check places against, so the Service Manual's places take that role, as the plan says.
+
+### Decisions
+
+- **An IC's place is its pads' centre, its turn from pin 1 to pin N/2.** Every DIP on the board lies with pin 1 at the rear left and its row running towards the front (90 degrees), except IC74 and IC75, which lie across. A footprint whose pad count is not its part's pin count is reported and not placed.
+- **The two 8-pin DIPs.** Task 3 grouped DIPs of 14 to 40 pins, so IC16 (LM555) and IC19 (LM386) had no footprint; each row of IC16 was grouped as a 4-pad SIP. Their pads are named by hand in `marks.json` `parts.eightPin`, each read on a crop of the rectified scan with the pad numbers drawn on it: pin 1 at the printed chamfer, as on every other DIP. IC19's pin 3 pad shows on the crop but task 3 did not find it, so it is put on the pitch between its row's others and listed as inferred.
+- **The fitted set** is the Model B the page runs: the 8271 disc interface and the DFS, no Econet, no speech. The Service Manual's section 4 lists, upgrade by upgrade, which ICs each fits (PDF pages 35 to 40), so each IC is fitted or not by the upgrade that fits it, and `fittedWhy` quotes it. That gives 88 fitted ICs; IC89 to IC101 are not. The plan's interface said "what I5 shows fitted, plus the 8271 ... the Econet and speech parts are not fitted". I5's board has Econet fitted and the disc interface empty, so "what I5 shows" and "no Econet" disagree; the more specific words, and the machine the page emulates, win. Where the plan feared it would have to guess (the empty footprints in the 8271's area taken as fitted), modification D names every part, so nothing is taken as fitted on a guess. The record is a new section of `docs/bbc-micro/facts/models.md`, "The fitted set", one row per IC.
+- **Which counter marks which IC** comes from the Service Manual's own test program for SHEILA's select lines (PDF page 58), which names the IC pin each address reaches: `&FE30` is IC76 (ROMSEL), `&FE80` IC78, and so on. The sound chip is IC18. The names are the plan's fixed list.
+- **The paged ROMs.** IC52 holds BASIC (table 8.1's role) and IC88 the DFS (modification D). The emulator calls them slots 15 and 14; which physical socket answers which slot number on a real board was not looked into, and `paged` names the ROM, not the slot.
+- **Roles.** Table 8.1 gives a role for 17 ICs. Every other IC now has one: from the circuit description where it names the IC by number (for example IC76, "the ROM select latch", and the disc interface's chips, PDF pages 20, 29 and 32), else what the part is by its type ("four 2-input NAND gates"). `roleFrom` says which.
+- **Pins.** The 50 ICs without a data sheet now have the pin count of the part's usual DIP. That is not read from a data sheet; `pinsFrom` says so, and the pad-count check compares it with the footprint.
+- **Bodies and heights are typical.** No photograph of a populated Issue 7 board from the side was found. Each DIP is drawn at a typical size for its package; each height carries `measured: false`.
+- **Connectors and the large parts** are boxes read by hand on I5 drawn onto the board frame through task 4's fit (`marks.json` `parts.outlines`), each with where its label comes from. SK2, the composite video BNC, is on the case and wired to the board (the parts list, PDF page 91), so it is not drawn; SK7 (Econet) is not fitted. Three labels take the socket's number from the B+ section of the manual, and say `[inferring]`.
+- **Two-lead parts are inferred from the print.** On the bare scan every resistor and capacitor is printed as a line between its two pads. A pair of pads not in an IC or a named connector, 2.3 to 16 mm apart, with print along at least 60 per cent of the line between them and no other pad on the way, is taken as a part. Looking at the first overlay (`--look`) showed two kinds of false pair, so two rules were added before the method was fixed: two pads in one of task 3's rows are never a part (a header's or a link's pins), and nor is a pair under an IC's body or a connector's box. The capacitors' body was first a 5 mm square; one at the board's right edge (C60) then ran 0.2 mm over the outline, and the body was changed to the flat 5 by 3 mm the dipped capacitors on I5 show. None of this touches a held-out check. The two-lead parts are a picture, not a measurement: the journal's run section says how many.
+- **copper.json's I5 fit cannot be reused.** Task 4 wrote the homography's parameters rounded to 4 places, which drops its perspective terms (about 2e-6 a pixel, about 1 mm across I5). `board_parts.py` refits it unrounded from the same marks, which gives task 4's figures. A finding about task 4's data file, not changed here.
+
+### The manual's convention, settled before the check
+
+Task 3's review found that the manual's places for the 40-pin parts sit near the far end of pin 1's row, and that with only 40-pin parts a corner cannot be told from a shifted origin. The plan asks for the convention to be settled on IC51, IC52 and at least one 14 or 16 pin 74-series part before the 10 mm check runs. `board_parts.py --settle` fits a similarity to IC51, IC52 (28 pins, 600 mil), IC20 (74LS139, 16 pins) and IC21 (74LS00, 14 pins) alone, under each of four conventions, and takes the smallest largest residual, a tie within 0.2 mm going to the earlier in the list. The manual measures from the SW corner, the front left, so its Y runs towards the rear and is flipped first. On 13 October 2026 (`cd tools/bbc-micro-model && BBC_MODEL_INPUTS=~/bbc-model-inputs ~/venv-models/bin/python board_parts.py --settle`):
+
+```
+centre: largest 1.68 mm, median 1.31, scale 1.0262, turn -4.01 deg; IC51 0.98, IC52 0.47, IC20 1.68, IC21 1.65
+pin1: largest 2.56 mm, median 2.16, scale 0.9870, turn -8.16 deg; IC51 1.76, IC52 1.00, IC20 2.55, IC21 2.56
+pinHalf: largest 0.25 mm, median 0.15, scale 1.0028, turn 0.41 deg; IC51 0.02, IC52 0.06, IC20 0.25, IC21 0.23
+bodyCorner: largest 0.83 mm, median 0.47, scale 1.0020, turn 0.69 deg; IC51 0.12, IC52 0.15, IC20 0.83, IC21 0.79
+chosen: pinHalf (on IC51, IC52, IC20, IC21; a tie within 0.2 mm goes to the earlier)
+```
+
+The manual gives each IC's place at pin N/2, the far end of pin 1's row, the package's front left pin. The other three need a turn of 4 to 8 degrees or a scale 2.6 per cent off to come near, and still miss by more. A disclosure: while finding which ICs had a footprint, before this, I printed a list of every footprint's centre and pin 1 beside the manual's place. I did not compute any residual from it, and the convention was chosen on the four parts above by the rule above; but the list was seen.
+
+### The identities' rule, and what was seen first
+
+The rule is in `identity` and the plan's task 5 note: letters and digits only; the table's part with its leading letters dropped must appear in the marking, not followed by a digit; a bare 68-family part matches its speed grades; the 74 families match exactly; the table's "previously" part is recorded as that; the ROM sockets are not compared. It has no list of second sources. While I located the connectors on I5, before the rule was written, I saw some markings: IC88 holds a 27C64 EPROM labelled "LFS 1.40", the RAMs are Mostek MK4516s and Hitachi HM4816s, and IC75 reads both DS3691N and AM26LS30PC. The ROM sockets were already to be left out (on the machine the page runs a socket's identity is its ROM, which a photograph of another board cannot show). The rule was not given a second-source list to pass the MK4516s; a disagreement it finds will be recorded as one.
+
+### The method fixed
+
+The plan's task 5 note gained a dated block, "Fixed on 13 October 2026, by task 5's build", with each check's pass and stop. `board_parts.py --hashes` printed, at 2026-10-13T20:17:29Z, before the manual check or the identity check had been run, and before any marking was read for the check:
+
+```
+76a3882e894f5ed7548dbbf4215f3678414ce219c11a1bd5ef1fe90b99580fce tools/bbc-micro-model/board_parts.py
+d9d9e1bcea7e643c8a9c7b11a3035b8bd8f551ebd687eb930eef19b3f1e90dc9 tools/bbc-micro-model/common.py
+f7ff0fbdee5143e29f4dba34ef8d41125869181cf6af3c040dc0534922701e85 tools/bbc-micro-model/board_trace.py
+e2754725ff1b859da595ad43ef33ac3983e956bc07ade8b19e9634089177407f tools/bbc-micro-model/board_frame.py
+1c8b2fff24351fd3b521f0f283eeefa29fd86edcfe82930d1350d2a20bf01872 tools/bbc-micro-model/data/frame.json
+4327f2c19b0d21e49ccac75989172e2618a3a58b54a3c942626ef1f76ca2d5fb tools/bbc-micro-model/data/registration.json
+85f63e9f642d5730d0cc71bd64776163b85c7169e895a74a2635bb3d09d31e36 tools/bbc-micro-model/data/ic-table.json
+```
+
+`board_parts.py` writes the same hashes into `parts.json` (`methodFixed`) when it runs.
+
+### The tests, first
+
+`tests/test_board_parts.py` was written before the module and failed on its import. It draws footprints as task 3 holds them and the manual's places as a similarity of them with Y flipped: a place is the pads' centre and the turn runs from pin 1 to pin N/2; a footprint one pad short is reported, not placed; an 8-pin DIP's missing pad is put on the pitch; each convention's point; the manual check passes on places within 1.5 mm of noise and fails on two chips swapped 30 mm apart and on two only 12 mm apart, naming them; `--settle` finds each convention it was given; nineteen markings against the rule, the earlier part, the ROM sockets and an unread marking; the row's verdicts; bodies that touch and that overlap; the outline's edge; the two-lead parts (a pair with print, a pair without, a via on the way, a header's pins, each pad once, axial or radial); the print's share along a line; the module's exports. `~/venv-models/bin/python -m pytest tools/bbc-micro-model/tests -q`: 122 passed (13 October 2026), 77 before. Each of 20 breaks of `board_parts.py` was then made in a scratch copy, one at a time, and at least one of these tests failed on each: the turn to pin N; the pad count not checked; a missing pad copied from a neighbour; the body's corner on the wrong side; the manual's Y not flipped; `--settle` taking the largest; the 74 families' letters dropped; no speed grades; a digit allowed after the part; the earlier part ignored; the ROM sockets compared; no minimum read; touching bodies taken as overlapping; a point on the edge taken as inside; no on-the-way rule; no same-row rule; a pad used twice; every part radial; the print not cleared off the pads; `HEIGHTS_TYPICAL` not exported. The on-the-way break survived at first: the test's via had print to both ends, so the shorter pairs took its pads first. The test now has the via with no print of its own, and it failed on that break.
+
+**A test that read past its section.** Task 4's two tests that pin its method's hashes took every hash line after the heading "The method fixed, and the checks as fixed" to the end of this file, so this section's hashes joined task 4's and both failed. Each now stops at the next heading. Seen to fail still, with one of task 4's recorded hashes changed by one digit (two tests failed), and the file restored.
+
+### The markings read, after the method was fixed
+
+`board_parts.py --crops` drew each placed IC's body on I5 and on I6 (13 sheets each, in `out/`, git-ignored), and every one was read by eye on 13 October 2026 after the commit above; `marks.json` `parts.identities` holds each reading, line by line, with the sheet it was read on. I6 is drawn through a homography on 16 corner pins of four chips marked by hand (`parts.i6Points`); with no point at the right of the board its crops of IC46 to IC50 and of the RAM fall across two chips, and those are recorded unread.
+
+On I5, 83 ICs are populated outside the ROM sockets and 80 were read. IC6 is under a black cover; IC16 and IC19, the 8-pin parts, are too small and blurred to read. The disc interface's 9 sockets, IC98, IC99, IC100 and IC101 are empty. Some of what the crops showed, beyond the part numbers: the processor is Rockwell's R6502AP, the CRTC Hitachi's HD6845SP (marked HD46505SP too), the ULAs Ferranti's (2C199E-7 for the serial ULA), the ROMs Hitachi mask ROMs HN613128PB04 (OS) and PB05 (BASIC), and eight RAMs are Hitachi HM4816AP-11 and eight Mostek MK4516N-11. On I6 the 8271 is fitted (Intel P8271), the video ULA is VTI's VC2069 where I5's cannot be seen, and IC88 holds an Acorn mask ROM (CN61014N 00201666-03), which on that board is presumably its DFS [inferring].
+
+### The run, once
+
+Run once, at 2026-10-13T20:23:10Z, on the method committed and pushed as `6a15e74` (the hashes above, unchanged at the run):
+
+```
+cd tools/bbc-micro-model && BBC_MODEL_INPUTS=~/bbc-model-inputs nice -n 10 ~/venv-models/bin/python board_parts.py
+pad counts: pass (99 placed; problems: [{'ref': 'IC92', 'problem': 'no footprint: not placed'}])
+I5 to the board frame: 56 pins on 14 chips, each chip held out: median 0.363, p90 0.842, max 1.036 mm: pass
+identities on I5: 80 read of 83 populated; disagree ['IC5', 'IC31', 'IC61', 'IC62', 'IC63', 'IC64', 'IC65', 'IC66', 'IC67', 'IC68', 'IC77']: fail
+manual places (pinHalf): 99 ICs, largest 97.22 mm, median 1.44, scale 0.9984, turn 0.81 deg: fail
+largest: IC94 97.22, IC74 18.55, IC75 18.34, IC42 11.87, IC39 10.45
+inside: pass (ICs out [], two-lead parts out 0); overhang ['SK1', 'SK3', 'SK4', 'SK5', 'SK6', 'PL8', 'PL9', 'PL10', 'PL11', 'PL12', 'modulator']; apart: pass []
+ICs 99 (88 fitted), connectors 13, two-lead parts 258, others 3
+```
+
+| Check | Figure | Pass | Verdict |
+|---|---|---|---|
+| Pad counts | 99 ICs placed, each with its part's pin count; every fitted IC placed | all | pass |
+| I5 to I1 (task 4's fit, refitted) | 56 pins on 14 chips: median 0.363 mm, 90th percentile 0.842, largest 1.036 | median at most 1.0 mm; STOP over 2.0 | pass |
+| Identities on I5 | 80 read of 83 populated; 11 disagree | none disagrees, three quarters read | **fail** |
+| The manual's places, on pin N/2 | 99 ICs: largest 97.22 mm (IC94), median 1.44; five over 10 mm | none over 10 mm | **fail** |
+| Inside the outline, apart | no IC body or two-lead part outside; no two IC bodies overlap | | pass |
+
+Both failures stand as measured. Nothing in the method has been changed since. The model's places stay the scan's footprints and its identities table 8.1's, as the plan's note said before the run. `parts.json` has 258 two-lead parts (61 axial, 197 radial), 13 connectors and 3 other parts.
+
+### Why the two checks fail
+
+Looked at after the run, without changing anything.
+
+**The manual's places.** IC94 is 97 mm off because table 8.1 gives it at (45, 93) (PDF page 67, read again on the page image after the run: it does say 45,93), where the board prints IC94 beside the footprint at about (48, 27) in the board frame, which is near Y 193 in the manual's frame; IC95, the same part beside it, is at (20, 193). So the table's 93 is probably a misprint of 193 [inferring]. IC74 and IC75 are the two DIPs that lie across the board; for them pin N/2 is at the far end of a row running to the right, not at the package's front left, so the convention settled on parts lying down the board does not fit them, and they are off by about a 16-pin package's length. IC39 is 10 mm off in X and IC42 10 mm off in Y against their neighbours in the same rows, which the table's own figures show (IC39 at X 197 beside IC40 at 206, where the board has 19 mm between them; IC42 at Y 158 in a row the table gives as 149 and 145). Without IC94, IC74 and IC75 the check would still fail on IC42 and IC39, so the verdict does not rest on any one cause. The places the manual calls approximate are approximate; the median of 1.44 mm says the rest agree.
+
+**The identities.** Four causes, one of them the rule's own. IC5's marking reads "SAA 5050" on one line and "2188" on the next; the rule joins the lines before it looks, so "5050" is followed by a digit and fails. That is a flaw in the rule, found after the run, and it is not changed: the row fails without IC5. IC61 to IC68 are Mostek MK4516N-11s where table 8.1 says 4816 (I5's other eight RAMs are HM4816AP-11s, and I6's sixteen all read HM4816AP-11), a second source the rule has no list for. IC31 reads 74LS74AN on I5 and DM74LS74AN on I6, where table 8.1 says 74LS34; IC31's neighbours IC30 and IC34 are 74LS74s too, so the table's 34 may be a misprint [inferring]. IC77 reads 74LS00N on both boards, where table 8.1 says 74S00; the manual's own modification B lists "1 off 74LS00 IC77" (PDF page 35), so the manual disagrees with itself. None looks like two ICs swapped: where a marking is another IC's part (IC31's 74LS74 is IC30's, IC77's 74LS00 is IC21's), that other IC reads its own part too.
+
+These go in `docs/known-differences.md` when task 10 writes the models' section; until then they are here and in `parts.json`. A re-check needs a new rule, fixed before it runs (kept lines apart, a second-source list typed from the data sheets first).
+
+### Tests, and what lands unclaimed
+
+The module the page will read is `site/src/models/bbc-micro-board-parts.mjs`. It is a `.mjs` that no `MODELS` entry lists and no machine claims, as the re-plan says the scene's data must land until task 9b; `model.test.mjs` fails only an unclaimed `.js`.
+
+`site/tests/bbc-models.test.mjs` gains nine tests: `parts.json`'s `methodFixed` is the hash block above, and `board_parts.py` and `common.py` on disk are those files; every placed IC is at its footprint's pads' centre, turned from pin 1 to pin N/2, with a pad for each pin, recomputed from `registration.json` and the 8-pin marks, and only IC90 and IC92, neither fitted, are not placed; the fitted set, the counters and the paged ROMs in `ic-table.json`, `parts.json` and the module all equal the table in `models.md`; the fitted set is the plan's (IC78 to IC87 and the DFS fitted, IC89, IC98 and IC99 not); every counter is one of `BbcChip`'s names and marks one fitted IC; every IC body and two-lead part is inside the outline, no two IC bodies overlap, and only the edge connectors and the modulator run over it; the manual's places, recomputed in the test with its own similarity, give `parts.json`'s offsets to 0.01 mm and the same five ICs over 10 mm, pinned with the plan's outcome words; the identities equal `marks.json`'s readings and stay the recorded FAIL, the model keeping table 8.1's parts; the I5 registration is task 4's; the module equals `parts.json`'s model, its heights all `measured: false`, and no `bbc-micro*.js` exists. Each was seen to fail with a committed file broken one way at a time and restored after (a scratch script outside the repository; its log is not committed): a comment added to `board_parts.py` (1 test failed); IC3 and IC69 swapped in `parts.json` (3); IC78 made not fitted in `models.md` (1); IC89 made fitted in `ic-table.json` (2); IC2 counted as the ACIA (3); a two-lead part moved off the board (2); IC74 moved onto IC75 (4); IC3's and IC69's manual places swapped (1); IC5 read differently in `marks.json` (1); the identities said to pass (1); I5's median changed (1); the module edited by hand (2); the plan's outcome words taken out (1); IC2 named MC6845 (3); a height said measured (1).
+
+`cd site && npm run build && npm test` on 13 October 2026, with the machines built and `src/data/results.json` from `scripts/make-results.mjs` as before: 496 tests, 495 passed, 0 failed, one to-do (task 2's x median). Both workflows' floors rise by the nine new tests, from 485 to 494.
+
+### Mistakes
+
+- The connectors' boxes were first written with their width and length the wrong way round for a body at rotation 0, so the first `--look` dropped 17 two-lead parts as under a box; seen when the list of dropped pairs was printed, and fixed before the method was fixed (7 are dropped now).
+- The identities' rule joins a marking's lines before it looks, so a date code on the next line can follow the part number as a digit (IC5). Found after the run; not changed.
+- `copper.json` keeps task 4's I5 fit rounded so that it cannot be reused; the first look at I5 drawn onto the board went through it and was about a millimetre out at the edges, before the fit was refitted from the marks.
+- The private-names check in the plan's hygiene list could not be run: its rules file is not on this host.
+
+## Task 5's review, and what was changed (13 October 2026)
+
+The review found nothing critical and found the run's integrity sound. What it found, and what was done:
+
+- **Descriptions that did not say the checks failed.** The tool's README, the data README, `parts.json`, the module's header and `models.md` described the parts as placed and named, and two of them as checked, without saying that both held-out checks failed, that the model keeps table 8.1's identities, or that the fitted set follows the emulated machine and not the board in I5. Each now says so. `parts.json` gained a field, `afterRun`, written by hand: its `about` and every figure the run wrote are unchanged. The module gained six comment lines after its generated header, written by hand and saying so; `board_parts.py` does not write them, so a rerun drops them, and the method's files are not touched. `models.md` gained a paragraph on the two failed checks and a note on what IC31 and IC77 are marked as on both boards (74LS74 and 74LS00, against the table's 74LS34 and 74S00). `NOTICE.md` gained a section on I5 and I6: what was read from each, that no image of either is committed, and the credit to Chris Whytehead.
+- **The manual's similarity includes IC94.** The check fits one similarity to all 99 ICs, IC94's 97 mm included, which pulls the fit. Recomputed after the run without IC94, as a second figure and not a verdict (`board_parts.manual_check` on the same points less IC94, 13 October 2026): largest 19.31 mm (IC74), then IC75 19.17, IC42 11.66 and IC39 10.16; median 0.70 mm, scale 0.9994, turn 0.24 degrees. So IC74 and IC75 are off by the convention, not by the outlier, and IC42 and IC39 are still over 10 mm. The verdict, FAIL, does not change, and the recorded figures stay the run's.
+- **marks.json was not among the method's hashes.** The readings and the boxes are data the run read, so the record of what it read is its hash as committed in `f865ab6`, the commit of the run's outputs, taken now and labelled as added after the run. The method's seven hashes above are not changed. A site test now checks all seven files on disk against them, and `marks.json` against this line:
+
+```
+added after the run: 0cf894ecccf8b24327a37a13bb82419ed3f910340a53cb7972131015a1754904 tools/bbc-micro-model/data/marks.json
+```
+
+- **The "not claimed" test** now also requires that no `MODELS` entry and no machine in the registry names `bbc-micro-board-parts`.
+- **The summary** now says the markings disagree for four causes, one a flaw in the rule.
+
+`site/tests/bbc-models.test.mjs` gains two tests (the seven method files and `marks.json` on disk against the journal's hashes; every description of the parts says both checks failed, that the identities are table 8.1's and that the fitted set is not the board in I5's, with the `NOTICE.md` section and its credit), and the "not claimed" test is strengthened. Each was seen to fail with one file broken at a time and restored: a space added to `marks.json`, and to `frame.json`; a `MODELS` entry and a registry claim for `bbc-micro-board`; the failures' sentence weakened in the tool README and in the module; IC31's marking note and the credit to Chris Whytehead taken out. Both workflows' floors rise by the two new tests, from 494 to 496.
+
+## Task 6: the machine tells the page its lights, its keys and its chips (13 October 2026)
+
+The machine now reports what the two models need from it: which chips the processor talks to, which paged ROM is in, and the keyboard's three lights; and the page tells a model every key pressed. The browser speed run was owed when this section was written; it was made in CI the same day and passed (below, "The browser speed run, in CI").
+
+### What was built
+
+- **`BbcChip`** (`src/Dbhq.Machines.BbcMicro/BbcChip.cs`): the ten chips in the order task 5's note fixed, `Crtc` to `Sound`, and **`BbcLeds`**, the three lights as flags.
+- **`BbcBus.Accesses(chip)`** and **`AccessCounts()`**: nine plain `uint` fields that `ReadSheila` and `WriteSheila` add to inline, one per chip block, and the sound chip's count, `SystemVia.SoundStrobes`, added to where the system VIA strobes a byte into it. `ReadSheila` became a statement switch so each case can count; its values and calls are as before. The counts start at zero at power on; BREAK keeps them.
+- **`BbcBus.SerialUlaControl`**, the last byte written to `$FE10-$FE17`, and **`BbcBus.Leds`**, the three lights read from it and from latch IC32.
+- **The host** (`src/Dbhq.Machines.BbcMicro.Wasm/Program.cs`): `Leds()`, `AccessCounts()` and `RomSlot()`.
+- **The page** (`site/public/bbc-micro.js`): `panel.bbc` gains `tap(name)`, `leds()`, `accessCounts()` and `romSlot()`; the panel sends `bbc:start` after `bbc:ready`, and `bbc:key` with `{ name, action }` for every key the PC keyboard, the on-screen keys, the Break button or `tap` presses. The header comment lists them all.
+
+### Decisions, and what they were chosen over
+
+- **Counted the NES's faster way, as the re-plan says:** a plain field added to in the decode, with no call. Chosen over the NES's first counter (`Note`, a call per access), which cost about three per cent in one region on ARM ([the NES's entry](2026-10-13-the-nes-counters-on-arm.md)). The fields are the bus's own, not an object's as on the NES, so a count is one add with no extra load.
+- **The sound chip counted at the strobe, in the system VIA,** chosen over a wrapper on the `SoundWrite` event, which would add a call for every byte, and over a count in `Sn76489.Write`, which the benches call directly to start their tone load, which is no access by the CPU.
+- **Every access in a chip's block counts, modelled or not.** The ACIA, the serial ULA and the ADC are not modelled, but they are on the board and the OS reaches them at boot; the inside model marks chips on the board, not chips in the code. A read of a write-only chip counts too: no source read says whether its select is gated by R/W (`bus.md` s1f, and `known-differences.md`).
+- **The lights are worked out in the machine** (`BbcBus.Leds`), not in the page, so a C# test can hold them to what the OS does.
+- **`bbc:start` is its own event,** sent after `bbc:ready`, as the NES has `nes:start`. The page makes one machine, at Start; a disc or BREAK makes none, so neither sends it.
+- **BREAK is a key event too** (`{ name: 'Break', action: 'tap' }`) from the Break button, the Pause key and `tap('Break')`, so the outside model can press its BREAK key. CAPS LOCK from the PC keyboard is a `tap`, because the page sends it as one press. `tap` of a name the machine has no key for throws, rather than doing nothing.
+
+### The motor's light, sourced
+
+The plan pointed at the Advanced User Guide's s.17 for the motor bit. Section 17 is the SHEILA table; the bit is in s.20.9.4: "The cassette motor relay and LED can be turned on by setting this bit to 1, or off by setting it to 0". The guide was read from archive.org's OCR text, `BBC-Micro Advanced-User-Guide_djvu.txt`, fetched on 13 October 2026, 544,083 bytes, SHA-256 `d801fb6e98ce3793615ddab28b4ce278e174a2fde463df95cb26cc7d41bd8ae4`. The Service Manual (D1, read through its text layer with `pypdf` in a scratch environment) agrees: s.3.5, PDF pages 29 to 30, "and so is the motor control (bit7)", and the keyboard connector's pin 13 is "cassette LED" (PDF page 164). The sources agree, so the light is not left dark. `bus.md` gains s.1e, the lights, and s.1f, what the counters count.
+
+### The lock lights' polarity, as the ROM shows it
+
+The OS's routine at `$EEEB` writes latch bit 6 from keyboard status bit 4 and bit 7 from status bit 5, and those bits are 0 while CAPS LOCK and SHIFT LOCK are engaged (the guide's OSBYTE &CA). So a lock light is lit by a low latch bit. The MOS reassembly's notes on port B say the same ("6 Turn on CAPS LOCK LED", "14 Turn off"), and the machine shows it: after boot CAPS LOCK is on, latch bit 6 is 0, and `A` types a capital (`MachineStateTests`). The reassembly's KEYV also settled what the plan marked to verify: SHIFT LOCK disengages CAPS LOCK and shifts every key, so `1` types `!`; the test asserts that and it passes.
+
+### Nothing else changed
+
+- **The native fingerprint.** `dotnet run -c Release --project bench/bbc-micro-speed/native -- --fingerprint`, on `origin/main` (`9c12535`, exported with `git archive`; its BBC Micro code is the branch's merge base's) and on this change: both outputs 54 lines, byte-identical, SHA-256 `2c6c0b01d9d369eba54bb09ad9862dca8219a75425c6fdc08712747ad7be40a8`.
+- **The trace test.** `BusTraceTests` runs a session that reaches every chip (boot, `*MOTOR 1` and `0`, a sound, `MODE 1` and `MODE 7`, both lock keys, a BASIC loop on the user VIA, `*CAT` on a blank disc, BREAK) with the CPU on a recorder that passes each access to the bus and hashes its address, value, direction, the cycle count after it and both interrupt lines. The file uses nothing the counters added, so it was copied into the `main` tree and run there first: `5FF95E1A116CE11C after 36536146 accesses`. That string is pinned in the test, and the branch gives it. `MachineStateTests` then counts the same session again by address, from the recorder, and by the system VIA's own strobe event, and every counter equals it.
+
+### The tests, and that each can fail
+
+`MachineStateTests` (16) and `BusTraceTests` (1) were written first. Against stubs that returned nothing, 12 of the 17 failed. The five that passed against stubs were each seen to fail with one thing broken at a time and put back: a peek of `$FE40` counting (`APeekCountsNothing`); the counters not zeroed at power on (the power-on test); CAPS LOCK's polarity inverted (four light tests); the motor read from bit 6 (four light tests); a member added before `Crtc` (nine tests, the names test among them); a stretch made one cycle longer after 30 million cycles, and an absent fast device read as `$FF` instead of `$FE` (the trace test, each time). Also seen failing: the ADC's reads counted on the ACIA's field (two tests) and the sound strobe not counted (three tests).
+
+In the site's tests, `bbc-micro.test.mjs` gains ten: the PC keyboard's down and up events, CAPS LOCK and Pause as taps, the on-screen taps and latches, letting go, `tap(name)` doing what a click does, `tap('Break')`, `leds()`, `accessCounts()` and `romSlot()`, and two on the whole page in a fake browser, as `nes-panel.test.mjs` runs the NES's: Start sends `bbc:ready` then `bbc:start` with `panel.bbc` in place, and the running page's keys send `bbc:key`. All ten failed before the page script changed, and the Start test failed again with the `bbc:start` line taken out. `bbc-models.test.mjs` gains one: the counters' names are `BbcChip`'s members, in order, read from `BbcChip.cs`; it failed with a member renamed.
+
+### The speed: owed
+
+The browser speed rule was written before any launch, at 20:43 UTC, and committed in `0554ff6`: [`bench/bbc-micro-speed/chip-counters/rule.md`](../../bench/bbc-micro-speed/chip-counters/rule.md), the NES's two per cent rule with mode 7 and the dense page as its two cases, and `analyse.py`, which applies it (checked only on made-up launch files: equal builds pass, a five per cent and a two and a half per cent slowdown fail). **No launch has run.** This box is aarch64 and shared, with no Chrome, and the re-plan rules it out; where the run happens is Dan's to say. Until then the run is owed, and the pull request does not merge without it. No speed figure was taken here, and none is claimed.
+
+Superseded the same day: the run was made in CI and passed, as the next section records.
+
+### The browser speed run, in CI
+
+Added 13 October 2026, after the section above, which is the record of the time before the run and is left as written. Dan chose a GitHub runner as the host on 13 October 2026. AGENTS.md keeps `bench/` out of CI, so he approved one exception: the run is a workflow started by hand (`workflow_dispatch`), not part of any pull request's checks. The branch `ci/bbc-speed-run` carried it, and it is merged here. Its final form has only the `workflow_dispatch` trigger (checked: no `pull_request`, `push` or `schedule` in `.github/workflows/bbc-speed-run.yml`); the `pull_request` trigger that one commit added to start the run was taken out again by the next.
+
+GitHub offers a `workflow_dispatch` workflow only when its file is on the default branch, and it was not on `main`. So the run went through a throwaway pull request, number 96, whose trigger started it, and which was closed unmerged. The run is CI run 38472729370, on 13 October 2026. The baseline was `8a30791`, `git merge-base origin/main` of the branch, and the after build was `0d9e1ab`, the head of the branch then. The harness was the after tree's `bench/bbc-micro-speed`, for both builds.
+
+The host, from the run's `host.txt`: the ubuntu runner image 20261004.327.1, x86_64, an AMD EPYC 9V45 virtual machine with 4 CPUs, Chrome 154.0.8037.97 and .NET 10.0.401 with `wasm-tools`. The one-minute load average before each launch was between 0.77 and 0.97, under the rule's gate of 1.00. All 33 launches (32 for the series and the one smoke launch the rule keeps and does not count) exited 0, and every one of the 32 counted.
+
+The verdict, from `analyse.py` on the run's `launches.txt` (`python3 bench/bbc-micro-speed/chip-counters/analyse.py bench/bbc-micro-speed/chip-counters/runs/2026-10-13-ci-38472729370/launches.txt`, which prints what the workflow printed):
+
+| Case | Pairs | Median ratio, after over baseline | 90 per cent interval | Case verdict |
+| --- | --- | --- | --- | --- |
+| mode 7 | 8 | 0.9977 | 0.9774 to 1.0177 | pass |
+| dense | 8 | 0.9981 | 0.9834 to 1.0291 | pass |
+
+**VERDICT PASS.** The rule was applied as it was fixed: no threshold moved and no launch was dropped. The native fingerprints of the two trees are the same. The pairs in one case range widely (mode 7 from 0.9602 to 1.0528, dense from 0.9135 to 1.0372), which is why the rule uses the median of eight and an interval, and why a single pair says nothing.
+
+Two limits. The load average cannot see other tenants on the same physical hardware, so a quiet figure here does not prove a quiet host. And the run covers the machine as of `0d9e1ab`: a later change to the machine, in the bus or in anything the CPU calls, would need the run repeated. The run's files are kept in [`bench/bbc-micro-speed/chip-counters/runs/2026-10-13-ci-38472729370/`](../../bench/bbc-micro-speed/chip-counters/runs/2026-10-13-ci-38472729370/) (the artefact `bbc-speed-run`, 92 KB, downloaded with `gh run download 38472729370 --repo dbhq-uk/6502 -n bbc-speed-run`): the launches, the analysis, the host, the fingerprints and the watch log.
+
+### The checks before this was pushed
+
+On 13 October 2026, on this box: `dotnet build -c Release`, 0 warnings and 0 errors; `dotnet test -c Release tests/Dbhq.Machines.BbcMicro.Tests`, 997 passed and 0 failed; in `site/`, `node scripts/build-machines.mjs bbc-micro`, then `npm test` (with the results artefact already in `src/data/`), 509 tests: 508 passed, 0 failed, 1 to-do. Both workflows' floors rise by the eleven new site tests, from 496 to 507; the suite passed 508 here, one more than the old floor plus the new tests, which this task did not add. The core (`src/Dbhq.Cpu6502`) is not touched. The browser check was not run here (it needs Chrome); Validate in CI is its record.
+
+## Task 7: the inside's scene, words and data, not on the page (13 October 2026)
+
+The inside model's drawing, its words and its results file are built, and none of it is on the page yet. Under main's rules the BBC Micro cannot claim the inside alone, and a model's `.js` cannot be committed unclaimed (the plan's re-plan), so everything here is a `.mjs` module that no `MODELS` entry lists and no machine claims, tested in Node. Task 9b adds the thin entry, the `MODELS` entry and the claim together.
+
+### What was built
+
+- **`site/src/models/bbc-micro-board-scene.mjs`**, all of the drawing, with no `mount`. `buildBoard(scene, token)` draws the board from its measured outline with its nine holes cut through (the NES's geometry, three groups: top, underside, edges), every fitted IC as a body on its legs or on a socket, the connectors, the 258 two-lead parts as two instanced meshes, and the modulator, crystal and relay. It returns the handles the entry needs: the chips by reference, the meshes a pointer names a chip by, `mark(refs)` for the access tint and `page(ref)` for the paged ROM's frame. Beside it: `stageOptions()` (the start view and the camera's bounds, computed from the parts), `texel` and `shade` (one pixel of the track map turned into a face's colour, shine and relief), `trackMaps` and `trackMaterials` (the browser half of the same, as the NES's), `createLayers` (Show tracks and Show tracks only, and the fade) and `canvasPrinter` (each chip's part printed on its top).
+- **`bbc-micro-board-layout.mjs`**: the parts module's exports, `FITTED`, `COUNTED` (the host's order), `PAGED_SLOTS` and `pagedRef(slot)`, `marksFrom(rates)`, `TRACKS`, `chipLegend()`, `LEGEND_WORDS`, `TRACKS_HELP`, `LABEL`, `STATUS`, `pointWords()` and `describe()`.
+- **`bbc-micro-board-notes.mjs`**: `made(figures)`, with `copperSentence()` and `partsSentence()`.
+- **`tools/bbc-micro-model/results.py`**, the board half, which writes `site/src/data/bbc-micro-board-model.json`, and `tests/test_results.py`. It is the last line of `run-board.sh`.
+- **`site/src/models/access.mjs`**: the NES's access sampler, shared (below).
+- **Four tokens**: `--model-bbc-pcb`, `--model-bbc-pcb-under`, `--model-bbc-print` and `--model-bbc-socket`. None is a text colour, so the contrast table in `design.test.mjs` does not change.
+
+### Decisions, and what they were chosen over
+
+- **The scene is a function of a scene, a token reader and the layout,** and holds everything that draws, the track map's turning into colour included. Chosen over keeping `trackMaps` and the layers in the entry as the NES does, so that 9b's entry is the stage, this module, `panel.bbc` and the test hooks. The page wiring (the `bbc:start` reset, the quarter-second sampling, the status line, pointing) is left to the entry, because it needs the page; its words are in the layout (`STATUS`, `pointWords`), where a test reads them.
+- **The paged ROM is framed, not tinted.** The plan asks for BASIC or the DFS to be marked as paged. A frame of four bars round the chip's top, in `--model-active`, is a shape as well as a colour and cannot be taken for the access tint. Chosen over a second colour token, which would be a colour alone.
+- **Only fitted chips are drawn.** An unfitted IC has no body and no socket (the plan's Deferred list has empty sockets as a later idea). Sockets are the ones the parts file has, which are the ones the Service Manual names (`board_parts.py`, `MANUAL_SOCKETS`). A socketed chip has no legs drawn: they are inside the socket.
+- **The ribbon connectors, PL8 to PL12, hang under the board,** as their `edge: 'underside'` says; the rear sockets and the headers stand on the component side.
+- **A standing capacitor is a flat box,** 5 by 3 mm as task 5 drew its body, not the NES's cylinder.
+- **The colours.** `--model-bbc-print` is the print's median colour on the bare scan, the probe task 4 recorded in `board_trace.py` (sRGB 212, 183, 39). The two greens and the socket's near-black are chosen to look like the board, not measured: the scan shows the lacquer over bare laminate nearly black, which would not read as a board. The copper is `--model-copper` and the mark `--model-active`, as the NES's.
+- **The results file's sources** are the parts module's (I1, I2, I5 and D1), then I6, whose markings task 5 read and recorded. The 26 data sheets behind the nets check's pinouts are not in it: they gave facts to a check, not anything drawn, and `ic-table.json` lists each. Task 9b credits the sources by this list.
+
+### The shared sampler
+
+`site/src/models/access.mjs` is `accessRates` and `createSampler` from `nes-famicom-access.mjs`, word for word except that each takes the list of counted chips (`counted`) instead of reading the NES's `COUNTED`, and the sampler refuses to be made without one. `nes-famicom-access.mjs` now binds its `COUNTED` to the two and keeps its three exports. Chosen over a third copy, as the re-plan says. The NES's tests in `nes-famicom-access.test.mjs` pass, with one edit made in the fix batch after review (below).
+
+One of them read the NES file's source for the expression `(after[i] - before[i]) | 0`. The expression now lives in `access.mjs`; the NES file's header comment says that and quotes it, so that test still passes on the NES file, and it now holds only the comment. What it guarded is held elsewhere: `access.test.mjs` requires the expression in `access.mjs`, and the NES's behavioural tests fail when it is `>>> 0` (three failed with that break, below). This is said here because a test that matches a comment can look like a test bent to pass.
+
+The review of this task (13 October 2026) found that a test which passes on a comment guards nothing, and was right: it also meant that "unedited" above overstated it. The fix batch dropped the two source asserts on the NES file (the expression and the absence of `>>> 0`) from `nes-famicom-access.test.mjs`, leaving its assert on `public/nes.js`, and renamed the test to say so. `access.test.mjs` holds both source asserts on `access.mjs`. Checked by breaking each by hand and reverting: `(b - a) | 0` changed to `| 1` in `public/nes.js` fails the NES test (12 of 13 pass across the two files); `| 0` changed to `>>> 0` in `access.mjs` fails three (10 of 13 pass). The number of tests is the same, so no floor moves.
+
+The NES's board bundle changed by the move: 631,639 bytes before and 631,824 after, 162,050 and 162,138 gzipped (`node scripts/build-models.mjs` on the tree before and after this task, 13 October 2026). The NES's case bundle and the KIM-1's are byte for byte the same.
+
+### The words
+
+The caption starts "Model, not a photograph.", as the KIM-1's does and the plan's step asks, and every size, count and part in it is read from the layout. Every sentence about the copper, in the caption, the legend's words, `TRACKS_HELP`, the status lines and the note, says it is traced to look at and not verified; the caption and `TRACKS_HELP` add that the checks that would have shown its connections failed, and the note gives both failures with their figures, the nets' and the comparison with I5, and says the I5 registration's median is optimistic and not an independent check. The note's parts paragraph says the two checks on the parts failed, with the five ICs over 10 mm and the eleven markings that disagree, that the chips are named with table 8.1's parts, and that the fitted set is the emulated machine's, not the board in I5. The legend says what a mark means; that the processor, the RAM and the OS ROM are in use all the time and are never marked; that the paged ROM is framed; that the 6850, the serial ULA and the uPD7002 are counted though the machine does not emulate them (`bus.md` s1f); and that the sound chip is counted through the system VIA.
+
+### What was checked, and how
+
+Nothing was measured, so no threshold was fixed and no held-out check ran. The KIM-1's, the NES's and the BBC Micro's pages and the home page were built before and after this task (`npx astro build`, the tree before taken with `git stash -u`), and are the same byte for byte with their `<style>` elements taken out; the inlined stylesheet differs by the four new tokens' lines only.
+
+### Tests, and that each can fail
+
+`site/tests/access.test.mjs` (four tests, new) and twelve new tests at the end of `bbc-models.test.mjs` were written before the modules and failed on their imports. `tools/bbc-micro-model/tests/test_results.py` (four tests) failed the same way. Each was then seen to fail with one thing broken at a time and restored after, by a scratch script outside the repository whose log is not committed: in `access.mjs`, the difference unsigned (three tests, two of them the NES's), the rates keyed in another order (two), the sampler made with no list (one); in the NES file, its own rounding (one) and its list one place out (one); in the layout, two counters swapped, the paged slots swapped, the legend listing unfitted ICs, the RAM's part misread, the legend's "so none of them is ever marked" taken out, the caption's chip count typed as a number, the caption's opening changed, `TRACKS_HELP` without "traced to look at", and the map's width; in the scene, unfitted ICs drawn, no sockets, the ribbon connectors on top, the holes not cut, the tint on every chip, Show tracks off leaving the parts hidden, and the solder side's copper read from red; a figure in the results file, and I6 missing from it; in the notes, the nets' figures typed, and the I5 comparison's failure dropped (two); and a `mount` added to the scene. One break survived at first: the scene's board drawn in the KIM-1's green still passed, because the test pooled the tokens the board and the track map read and the map reads the BBC's green. The test now holds the board's plain faces, a socket and the tint to their own tokens, and failed on that break. In pytest, counting sockets on unfitted chips survived, because the made-up parts had no unfitted socket; one was added, and the break then failed.
+
+`cd site && npm test` on 13 October 2026, with the machines built and `src/data/results.json` as before: 525 tests, 524 passed, 0 failed, one to-do (task 2's x median). `~/venv-models/bin/python -m pytest tools/bbc-micro-model/tests -q`: 126 passed, 122 before. Both workflows' floors rise by the sixteen new site tests, from 507 to 523. The browser check was not run here; nothing in it changes until 9b.
+
+### What is left for task 9b
+
+The entry, `site/src/models/bbc-micro-board.js`: `createStage(root, stageOptions())`, `buildBoard` with `canvasPrinter`, `trackMaps` and `trackMaterials` into `createLayers`, the two buttons, a sampler from `access.mjs` with `COUNTED` reset on `bbc:start`, `marksFrom` into `mark()` and the legend rows, `pagedRef(romSlot())` into `page()`, `pointWords` on the status line, and the test hooks. Then the `MODELS` entry with `texture`, `legend: chipLegend`, `legendWords` and `tracksHelp`; the claim with the outside; the references from the results file's sources; the map's budget; the deploy list; and the browser check.
+
+### Mistakes
+
+- The first draft of the note said the I5 comparison "failed too" in a sentence about the copper that did not say it was traced to look at, and the print's limit did the same; the copper sentences test found both.
+- The first draft of the legend's words for the serial ULA and the video ULA said the processor "writes to" them; the counters count a read of a write-only chip too (`bus.md` s1f), so every counted chip's words now say "reads or writes".
+- The first pytest data held URLs, which `mirrors.test.mjs` would have failed in a `.py` under `tools/`; they were made plain strings before the site's tests were run.
+
+## Task 8: the outside measured: keys, case, profile and ports (13 October 2026)
+
+Task 8 measures the outside model: which K1 keycap is which key, where the keys, the lights, the opening and the badge strip sit in the case, how high the key tops stand, and where the rear ports and the underside connectors are. Four scripts do it (`keys.py`, `case_register.py`, `case_profile.py`, `case_parts.py`, run in that order by `run-case.sh`), and they write `data/keys.json`, `data/case.json` and `site/src/models/bbc-micro-case-parts.mjs`, which no machine claims (that is task 9b). The NES's task 8 is the precedent.
+
+### The inputs
+
+Fetched by hand on 13 October 2026 into `~/bbc-model-inputs`, outside the repository, each into its own empty folder first:
+
+| Input | From | Check |
+|---|---|---|
+| O1, O2, O3 | Commons, again | Commons' API (`prop=imageinfo`, `iiprop=url\|size\|sha1\|extmetadata`): each file's SHA-1 is Commons', and its SHA-256 is the one recorded on 4 October |
+| O4, O5 | Commons: `File:BBC_Micro.jpeg`, `File:BBC_Micro_left.jpeg` | The same API: `LicenseShortName` "Public domain" for both, the author "StuartBrady assumed (based on copyright claims)", each SHA-1 Commons'; SHA-256 new, in `sources.json` and `models.md` |
+| O8-I, O8-H | Chris's Acorns, `Pics/BBCB7I.jpg` (underside) and `Pics/BBCB7H.jpg` (rear), 640 px wide | CC BY-SA 3.0 as the site states, as for I6. Not committed; credited. The site is now an archived copy hosted by The Centre for Computing History |
+| K1 | The fork, `dbhq-uk/bbc-keyboard`, at `5ec53df5`: `gh api -H "Accept: application/vnd.github.raw" "repos/dbhq-uk/bbc-keyboard/contents/KiCad/bbc-keyboard/bbc-keyboard.kicad_pcb?ref=5ec53df566c77424caa6be827d0831da3916ecfa"` and the LICENSE the same way | The fork's API says it is a fork of `dominicbeesley/bbc-keyboard`, MIT; the file's git blob SHA-1 is the one the API lists, its SHA-256 the one task 0 recorded from the original. Nothing was fetched from the original repository. `sources.json` now names the fork |
+| P-TE_1757819 | TE Connectivity's drawing 1757819 (Amplimite plugs, size 1 to 5), the source German Wikipedia's D-Sub article cites for its sizes | Read for one fact: shell size 2, 15 positions, dimension C (the mounting holes' spacing) 1.307 to 1.317 inch, 33.20 to 33.45 mm |
+
+**K2 is dropped.** `https://www.thingiverse.com/thing:4867915` and its `/zip` answered with HTTP 403 and a "Just a moment..." challenge page, and Thingiverse's API answered 403 too; its API needs a token tied to an account. The plan says to drop the cross-check if the download needs a login, and not to work round it, so K2 is not used and nothing waits on it.
+
+### Decisions, and what they were chosen over
+
+- **Task 8's marks are in a file of their own,** `data/case-marks.json`, because `marks.json` is pinned by hash to task 5's run and a site test holds it there. Chosen over changing that pin.
+- **Keys by reference, checked by value.** Each K1 footprint is mapped to the machine's key by its reference (`K1_KEYS`), and the value K1 prints on it must be the one the table expects, so a mistyped row fails. K1 has 74 keycaps: the 72 machine keys, BREAK, and a second SHIFT; O1 shows a SHIFT at each end of the bottom letter row, so the plan's `Shift2` exists.
+- **No legend in `keys.json`.** The model draws `LEGENDS[name]` from `bbc-keys.js`, so the legends cannot drift from the on-screen keys; a copy here could.
+- **O3's points are its legends, found in code,** not marks by hand: the middle of the bounding box of each legend's light pixels, for the 26 letters and the ten function keys. A legend is printed in the middle of its keycap's top. The bounding box, not the centroid: a centroid sits where the ink is, which for L, J or F is off the middle.
+- **The keys are placed by triangulation, not by O1's top.** O1's registration on the case top's four corners is exact for the top's plane only; the key tops are not in it. So the keys, the lights and the key tops' height come from one camera fitted to O4 and O5, and K1's frame is put in the case by the turn and shift that take the opening's two front corners, triangulated, onto the same corners read on O1's top. Chosen over reading the keys on O1's top, which the plan's recorded row shows is a few per cent off scale.
+- **O4 and O5 have painted backgrounds.** Their backgrounds are painted white, and the paint cuts across the case's front corners at an angle. So no point on the case's outline is used from them: only the legends, the opening's front corners and the lights.
+- **One focal length, a principal point each.** Both photographs are crops of the camera's 2048 by 1536 frame (their Exif's size) by amounts no record gives, so each principal point is free. A soft L1 loss of scale 2 px keeps a legend found wrongly from pulling the fit. A radial distortion term was tried in a look run and moved nothing that mattered (the opening's corners by under a millimetre), so it is not in the method.
+- **The rear's scale is the 15-way D's posts,** as the plan says: 33.325 mm, the middle of TE's 33.20 to 33.45 mm. The posts stand in the D's mounting holes, which a plug and its socket share. The D's outer width was not used: TE's figure is the plug's, and the socket's D is larger. Heights are read on the rear face's own height (its top at 73 mm, its bottom at the feet's typical 5 mm), because O2 looks down on the rear and a scale taken across would read heights short.
+
+### Task 8's method fixed, and its checks
+
+The plan's task 8 note gained a dated block, "Fixed on 13 October 2026, by task 8's build", with each check: the keys' mapping (a key K1 lacks is a STOP); O1 to K1 on the plan's row (task 0's marks again, not a new check); O3 to K1 on the same row, recorded; the front edge's parallax check **not measurable**, decided from h alone before any corrected width, because no h independent of the 415 mm exists here (K2 unobtainable, O1 without Exif and looking almost straight down with its case's base unseen, O4's and O5's camera another camera, the key fit's own camera ruled out by the plan); the side profile's check point, the key A, left out of the camera fit and triangulated, within 2.0 mm of K1's place on the key plane, else the typical profile; d recorded with its standard error; the case top's plan size recorded; and the rear ports, each scored port within 2.0 mm of its socket's x plus the board's offset, on the D's scale.
+
+Three things were seen before the method was fixed, and are said here:
+
+- **O3 to K1's figure.** While the legend finder was being written, one development run printed O3's held-out figure. That row is recorded, not a stop, and its numbers were the plan's since 4 October; but the method that gives it was chosen after the figure was seen.
+- **The opening's two front corners disagree in height by about 5 mm** once the cameras are fitted (look runs), though the case top is level. Each corner moves about 0.2 to 0.5 mm in height for a pixel of its mark, so 5 mm is more than marking noise. Why was not found. It goes into d's standard error, and it means a pass of the check point says the cameras agree where the legends are, not at the case's edges.
+- **The case's width on the D's scale.** Reading the marks, the case's ends were about 1786 px apart and the posts about 140 px, so the case reads about 425 mm on that scale against the manual's 415. The scale had been chosen first and was not changed.
+
+The pytest file (`tests/test_case.py`, 13 tests) was written after a first draft of the scripts, not before, which the plan's step asks for; each test was then seen to fail with the scripts broken one way at a time in a scratch copy outside the repository (15 breaks, all caught; the log is not committed): the mapping ignoring BREAK and the second SHIFT; the second SHIFT mapped as SHIFT; a legend by its centroid; glare kept in a legend; the keys registered by an affine; the focal length not fitted; triangulation from its linear start only; triangulation from one view; the D's posts taken as its flange; the rear check always passing; heights on the photograph's scale; the machine's ends swapped; a rim's circle by the mean of its points; the rigid motion with no turn; a module export without its note. Four breaks first survived (glare kept, the linear start, the D's scale, and heights on the photograph's scale), and the tests were strengthened until each failed. A dry run of the whole method, printing nothing, ran end to end before the method was fixed. It computed both the check point's and the rear check's verdicts in memory, unprinted and unseen; so "before ... had ever been run" below means before any figure or verdict of either had been printed or read, not that the code had never computed them (reworded after review, 13 October 2026). `~/venv-models/bin/python -m pytest tools/bbc-micro-model/tests -q`: 139 passed (13 October 2026), 126 before.
+
+`case_parts.py --hashes` printed, at 2026-10-13T22:05:05Z, before any figure or verdict of the check point or the rear check had been seen (the dry run above had computed both, unprinted):
+
+```
+a8f53d5828cfa89b60aadc5bf3cc62870de54ed5e8c3dd947a8e8d69ff7e2033 tools/bbc-micro-model/keys.py
+b30245d1a30c380cd41853390dec5fbbdca2ee59f21627c4b6cf996cbcb8fdb8 tools/bbc-micro-model/case_register.py
+96557265aeb0ecc03ae549f8ece2992c26da05125aeb6ec15fca65e836ff13a6 tools/bbc-micro-model/case_profile.py
+84456ccfcf968c0886b6715a038cdbbe5c36562d20d7d199c739894f0c71f06f tools/bbc-micro-model/case_parts.py
+d9d9e1bcea7e643c8a9c7b11a3035b8bd8f551ebd687eb930eef19b3f1e90dc9 tools/bbc-micro-model/common.py
+204afb5b91fbfec4b8fe9a95840a159245f5942ad0aed272419593e17d989ced tools/bbc-micro-model/spike.py
+f12fe6159a9872a81cca73b0b4796db9acf515c0d19bf22c093dc32f999e4318 tools/bbc-micro-model/data/case-marks.json
+0cf894ecccf8b24327a37a13bb82419ed3f910340a53cb7972131015a1754904 tools/bbc-micro-model/data/marks.json
+4012160780e9a94477b184eb10194c150606780055e526575053d2d4543748eb tools/bbc-micro-model/data/parts.json
+```
+
+`case.json` and `keys.json` carry the same hashes (`methodFixed`). These files are committed as they are before the run.
+
+### The first run, and two changes after it
+
+Run once, at 2026-10-13T22:08:29Z to 22:08:47Z, on the method committed and pushed as `5e35042` (`BBC_MODEL_INPUTS=~/bbc-model-inputs PYTHON=~/venv-models/bin/python nice -n 10 tools/bbc-micro-model/run-case.sh`). Its lines are below, under "The run", because the second run printed the same lines but one. Two things in its outputs were wrong, and neither is a check:
+
+- **Colours.** The colour classes put 15 black keys with large legends (W, R, A, S, G, K, X, V, B, N, M, 0, @, CAPS LOCK, SHIFT LOCK) in "light" with the five cursor keys and COPY: in the small disc sampled, the white legend covered over half the pixels, so the median was the legend's. Changed to the median of the darker half of the disc by count (the cap; its legend is lighter), with a new pytest that fails on the first run's sampling (a black cap whose legend covers over half the disc). Its line was `colours: red 10, light 20, dark 44`.
+- **The underside panel** is typical: a 10 mm margin round its connectors. With the board's offset from O2, PL12's right end lands 0.7 mm inside the case's right end, so the panel ran 9.3 mm past the case. It now stops at a typical 3 mm wall.
+
+Neither change touches a check: the mapping, O1, O3, the check point, d and the rear check are computed by code that did not change. `case_parts.py --hashes` printed, at 2026-10-13T22:11:37Z, before the second run (only `keys.py` and `case_parts.py` changed):
+
+```
+cf4da9c9f09781a98c50e1c89d863617a1da9cd3eb0d3f0d72257149d71b4101 tools/bbc-micro-model/keys.py
+0a36447dff0f0fe2f4691a004d996cd664b3857a29cf209424040c5d4296fc00 tools/bbc-micro-model/case_parts.py
+```
+
+**The second run** (2026-10-13T22:11:57Z to 22:12:15Z, on `ff3497e`) printed the first run's lines but one, `colours: light 6, red 4, dark 64`: now the cursor keys and COPY came out dark and six of the ten red keys light. The clustering of measured colours had disagreed with O1 twice, in two different ways. Rather than change it a third time against what O1 shows, which would be tuning by eye, each key's class is now read by eye on O1 at full scale (`case-marks.json` `keyColours`: the ten function keys red; the four cursor keys and COPY light, a dark brown lighter than the black keys; every other key dark, BREAK included), and the clustered class is kept beside it in `keys.json` (`colourClustered`), with how many agree. The checks are untouched again. Hashes at 2026-10-13T22:13:15Z, before the third run (only these two changed):
+
+```
+1c197719235ebde9e52ce611b287a07d904916db4a2caa199117d28b9f0efcbc tools/bbc-micro-model/keys.py
+a5ace72698341acbcc0b72ba3305a7df9fe3b3ad963baa4fe830d7b255ddb978 tools/bbc-micro-model/data/case-marks.json
+```
+
+### The run
+
+The third run, at 2026-10-13T22:13:26Z to 22:13:44Z, on `cbe712d` (the same command), wrote the committed `keys.json`, `case.json` and module. It printed the first run's lines but the colours line, which each run printed differently (above). Its lines, less `verify.py`'s eight "present, SHA-256 matches":
+
+```
+mapping: 74 keycaps for 72 machine keys and Break, Shift2; lacks [], twice [], other []: pass
+O1 to K1 (task 0's marks), each key held out: median 0.395, p90 0.632, max 0.989 mm over 50 keys, 0 over 3 mm: pass
+O3 to K1 (legends), each key held out: median 0.205, p90 0.329, max 0.588 mm over 36 keys, 0 over 3 mm: pass (recorded, not a stop)
+colours clustered: light 6, red 4, dark 64; read by eye: red 10, light 5, dark 59; 63 of 74 agree
+case top: O1 on its four corners to 415 by 345 mm; the keys on that plane: scale 1.0387, turn 0.08 deg, residual median 0.50 mm (recorded)
+opening: x 17.2 to 398.4, y 173.0 to 331.6 mm
+cameras: f 2479.8 px; principal points O4 [891.9 788.2], O5 [921.3 785.3]; legends {'O4': 35, 'O5': 27}; reprojection legends median 0.90 px (max 3.25), marked points median 0.14 px (max 0.53)
+check point A: triangulated [109.64 178.13  -0.29], K1 [109.54 177.8 ] at z 0: 0.45 mm (limit 2.0): pass
+the top at the opening's front: z [-8.76 -3.61] mm (se [2.07 0.8 ]); d 6.18 mm, se 2.80
+openingFrontLeft: [ 23.4  233.6   -8.76] se [1.27 0.87 2.07]
+openingFrontRight: [384.68 235.88  -3.61] se [0.71 0.6  0.8 ]
+ledCassetteMotor: [ 75.37 225.4   -8.79] se [0.67 0.75 1.28]
+ledCapsLock: [ 95.25 226.01  -7.77] se [0.46 0.68 1.08]
+ledShiftLock: [114.95 226.23  -7.06] se [0.31 0.63 0.93]
+front edge: raw 403.5 mm; h not obtained; d 6.18 mm (se 2.80): not measurable
+rear: scale 4.2014 px/mm; board offset x 104.64 mm; 5 of 5 within 2.0 mm, worst 0.78: pass
+  SK1 UHF out: case x 381.02, board x 275.60 plus offset, error +0.78 mm
+  SK2 video out: case x 352.46, not scored
+  SK3 RGB: case x 319.47, board x 215.15 plus offset, error -0.32 mm
+  SK4 RS423: case x 298.82, board x 194.00 plus offset, error +0.18 mm
+  SK5 cassette: case x 278.59, board x 173.95 plus offset, error +0.00 mm
+  SK6 analogue in: case x 208.75, board x 104.55 plus offset, error -0.44 mm
+  SK7 econet: case x 136.57, not scored
+the case's width on O2's scale: 425.1 mm (recorded)
+```
+
+| Check | Figure | Pass | Verdict |
+|---|---|---|---|
+| The keys' mapping | 74 keycaps: the 72 machine keys, BREAK and a second SHIFT; none lacking, none twice | every key once; a key K1 lacks is a STOP | pass |
+| O1 to K1, each key held out (task 0's marks again) | 50 keys: median 0.395 mm, 90th percentile 0.632, largest 0.989 | median at most 1.0, 90th percentile at most 2.0, largest at most 3.0 | pass |
+| O3 to K1, each key held out | 36 legends: median 0.205 mm, 90th percentile 0.329, largest 0.588 | as O1, recorded | pass, recorded (its figure was seen in development) |
+| The front edge, corrected for parallax | raw 403.5 mm; h not obtained; d 6.18 mm, standard error 2.80 | the corrected width's interval within 1.5 per cent of 415 mm | **not measurable**, decided before any width |
+| The side profile's check point | the key A, 0.45 mm from K1's place | within 2.0 mm | pass |
+| The rear ports | 5 of 5 within 2.0 mm; the worst 0.78 mm (SK1) | each within 2.0 mm | pass |
+| The case top's plan size | the keys read 1.0387 times K1's size on the top's registration | recorded | recorded |
+
+The commands, the order and the times are above; the figures are in `keys.json` and `case.json`, and the plan's task 8 note has the outcome.
+
+### What the figures say, and what they do not
+
+- **The key tops stand about 6 mm above the case top** (d 6.18 mm, standard error 2.80), and the panel round the keys, at the lights, about 7 to 9 mm below the key tops, so about 1 to 3 mm below the case top. The model takes these. The 2.80 is mostly the two front corners' 5 mm disagreement, which was not explained.
+- **The check point says the two cameras agree where the legends are.** A lies among them; the opening's corners lie well outside them, which is where the corners disagree. The pass does not cover the case's edges, as the method block said before the run.
+- **Corrected after task 9a's review (13 October 2026):** this paragraph read the three measures as saying the case is wider. They point different ways. The first two are K1's size on O1's frame, which takes the case as 415 mm: keys reading 1.0387 times K1 there mean that, if K1 is true to size, the case is narrower, about 400 mm (and the first may be partly parallax, since the key tops stand above the plane registered, as `case.json` `caseTop.what` says). Only the D scale says wider. The paragraph as written that day follows.
+- **Three measures say the case is a few per cent wider than 415 mm, in K1's units and the D's.** On O1's top registered to 415 by 345 mm the keys read 3.87 per cent larger than K1; the turn and shift that put K1 in the case would need a scale of 1.0373 to take both triangulated front corners onto O1's; and on O2's D scale the case is 425.1 mm wide, 2.4 per cent over. The first two share K1 and O1, so they are not independent of each other; the third shares neither. So either the case is wider than the Service Manual's 415 mm (the Science Museum's 410 is narrower still), or K1's pitch and the D's spacing both read small, or something common to how the case's corners and ends were marked. Not resolved: the case's size rests on the manual, as the design says, and nothing was rescaled to fit. The rigid placing of K1 means the keys keep K1's size, and the opening's two front corners land about 6.7 mm from their triangulated places on each side: the keys still sit inside the opening.
+- **The board in the case.** On O2's scale the board's left edge is 104.64 mm from the case's left end, so its right edge is 0.36 mm inside the case's right end, which leaves no room for the wall. With the case reading 425.1 mm on the same scale, the board's place is good to a few millimetres, not to the wall. The underside connectors take that offset; PL12, the Tube's, ends 0.7 mm inside the case.
+- **The rear check passes,** but it judges how well five ports agree with five sockets after one shift, so it tests the D's scale over 170 mm, not the shift.
+
+### Typical, not measured
+
+The feet (5 mm), the case's corner radius (3 mm), the board's front to back place (4.5 mm from the rear face) and height (14 mm), the underside panel (10 mm round its connectors, stopping at a 3 mm wall), the ports' sizes, and the profile's shape (the top level, front and rear upright, at the Service Manual's 73 mm). Each is in `case.json` `typical`, with `measured: false`.
+
+### Tests
+
+pytest: `tests/test_case.py`, 14 tests (13 written after the scripts' first draft, the colour test after the first run); `~/venv-models/bin/python -m pytest tools/bbc-micro-model/tests -q`: 140 passed (13 October 2026), 126 before task 8.
+
+`site/tests/bbc-models.test.mjs` gains ten tests: the method's hashes as fixed and as changed after each run, against `case.json`, `keys.json` and the files on disk; every machine key one K1 keycap, with BREAK and the second SHIFT, read from the fork; `keys.json` passing O1's row and recording O3's and the raw front edge, with its verdicts its figures'; the front edge not measurable, with h's reason, d and no corrected width, pinned to the plan's outcome words; the check point within 2.0 mm, recomputed, pinned to the plan's words; the case's size, the keys and lights inside the opening and the opening inside the case, no two keycaps overlapping, the lights in O1's order; the keys K1's centres through the recorded turn and shift, their colours as read on O1; the rear ports in O2's order, each scored one within 2.0 mm of its socket plus the median offset, recomputed, pinned to the plan's words; the module generated from `case.json` and unclaimed; and the five photographs committed and credited, O8, I6, K1 and TE's drawing not committed, K1's notice in `NOTICE.md`. Each was seen to fail with a committed file broken one way at a time and restored after (a scratch script outside the repository; its log is not committed): a comment added to `case_parts.py` (1 test failed); the second SHIFT dropped from `keys.json` (2); K1's address set to the original repository (1); O1 said to be between pass and stop (1); the front edge said to pass (1); the check point set 2.5 mm off (1); the plan's rear outcome words changed (1); the cassette motor's light moved in the module (2); two keycaps overlapping (3); a key moved 1 mm in `case.json` (1); a cursor key read as dark (2); a rear port 3 mm off (1); the rear order swapped (1); a note dropped from the module (1); O4 not committed (1); K1's notice taken out of `NOTICE.md` (1). One tolerance was set after the data were seen: the keys' places through the turn and shift agree to 0.03 mm, not 0.01, because `case.json` keeps the turn to four places, which is 0.02 mm at 400 mm; that is rounding, not a check.
+
+Both workflows' floors rise by the ten new site tests, from 523 to 533.
+
+### Mistakes
+
+- I first wrote task 8's marks into `marks.json`, which a site test pins to task 5's run by hash; reverted before anything ran, and the marks moved to `case-marks.json`.
+- The camera fit's third axis points down into the key plane. The first look printed heights below the key plane as positive and the camera heights negative; both are now turned to up before they are written.
+- The pytest file came after the scripts' first draft, not before, as the plan's step asks.
+- A development run printed O3's held-out figure before the method was fixed (said in the method block).
+- The colours were sampled two ways that each disagreed with O1, and are now read by eye (above).
+- The typical underside panel ran past the case's right end in the first run.
+
+### Left for task 9a
+
+The scene draws the case from `CASE`, `RECESS` and `PROFILE`, the keys from `KEYS` with `LEGENDS[name]`, the lights from `LEDS`, the badge strip's words from `BADGE` and no owl, the rear vents from `GRILLE`, the ports and mains panel from `REAR`, the underside from `UNDERSIDE`, and the feet from `FEET`, each note into its words. The case's size is the manual's; the page says that the outside's measures disagree with it by a few per cent (above), and that the front edge's check was not measurable. K2 is not credited, being unused.
+
+## The fix batch after the reviews of tasks 6 and 7 (13 October 2026)
+
+The reviews of tasks 6 and 7 left a short list. Each item, and how it was checked:
+
+- **The legend's serial ULA.** The legend said the serial ULA is not emulated. It is emulated in part: the machine keeps its control byte, and bit 7 of it drives the cassette relay (`bus.md`, 1e). The sentence now says "emulates only in part" and names the control byte and the relay, and keeps the 6850 and the uPD7002 as not emulated. The test that pinned the old words now pins the new and refuses the old; it failed against the old sentence (60 of 62 tests in that file passed with the new test and the old words, one failed) and passes with the new one.
+- **The results file's sources lacked `author`.** `results.py` copied six keys of each source and not its author, so task 9b could not credit the board's inputs from the file. The key is added, the Python test and the site test both require it (each failed first), and `site/src/data/bbc-micro-board-model.json` is regenerated: five sources gain an `author`, and nothing else in the file changes.
+- **The plan said the record has `models` "after this task".** It does not until task 9b claims; the plan now says after task 9b.
+- **`rule.md` and the NES's rule.** `rule.md` now lists what it changes from the NES's rule (the field `mhz`, the alternating launch order, the two cases, exit 0 required, seed 88). No threshold changed.
+- **`analyse.py` and a repeated label.** A label that heads two launches was silently taken as the later one. It now prints a note naming it. There is no test harness for the `bench` scripts, so this was checked by a small self-check on made-up launch files: with no repeat, the new script's output and the old script's are identical; with a repeated `mode7-p2-after`, the new script prints the note and the rest of its output is identical to the old script's. The maths is unchanged.
+- **`bus.md` 1e.** The step "so a light is lit by a low latch bit" is an inference from the power-on state and the OS routine, not something a source states. It is tagged `[inferring]`.
+- **`lights()`.** `site/public/bbc-micro.js` now says in a comment that both lock lights read lit before boot, because `SystemVia.Latch` starts at 0.
+- **The floors' comments.** The notes in `validate.yml` and `deploy-site.yml` gave "524 passed here" and "508 passed here" for two tasks. Those are numbers of one day's run on one tree, not floors, and they drift; they are removed, and the dated floor convention is kept. No floor moves in this batch, as it adds no site test.
+
+### Task 8's review, and what was changed (13 October 2026)
+
+The review found nothing critical, and checked the method's times and hashes. Nothing below changes a recorded check, threshold, figure or hash of the three runs; `case.json` and `keys.json` are the third run's, unchanged.
+
+- **The dry run.** The method block said the hashes were printed before the checks "had ever been run", though the dry run before it computed both. Reworded above: the dry run computed both verdicts unseen.
+- **The width in the module.** The disagreement over the case's width was in the journal, the plan and `case.json`, not in the module the page will read. `case_parts.py` now writes it into the notes of `CASE`, `RECESS` and `REAR` (the Service Manual's size, with the range the three measures read it at, from `case.json`, not resolved), and `REAR`'s note says its x values are on the 15-way D's scale, on which the case reads 425.1 mm, and are not rescaled to 415 mm, while the opening and the keys are on a frame that takes 415 mm: SK1, at 381 mm, would land about 9 mm differently on a 415 mm scale. The module was written again from `case.json` by a new `case_parts.py --module`, which measures nothing. Because `case.json` keeps 4 places and the module 3, writing it from the file moved a few coordinates by 0.001 mm in the last place and put each key's fields in sorted order; the notes are the change. `case_parts.py` changed in its notes, its comments and the new option only; its hash after the change, taken at 2026-10-13T22:36:40Z:
+
+```
+changed after task 8's last run, the module's notes only: 2f17081a4cd1e7f7a6f8fc7b5144cc14e6ec5434ed7b5dcd2b74368ba4e15513 tools/bbc-micro-model/case_parts.py
+```
+
+- **A clause never evaluated.** `THRESHOLDS['frontEdge']` in `case_parts.py`, and so `case.json`'s `thresholds.frontEdge`, still carry the plan's rule that the check is not measurable if the factor (h + d) / h has an interval wider than 3 per cent of its value. With no h, that clause was never evaluated: the verdict is the constant "not measurable" decided before the run. The clause is kept, being part of the fixed method, with a comment saying so.
+- **The route replaced.** "Not measurable" replaces the plan's first route for the front edge, where a result that could not pass went back to the plan; the plan's step 3a allows it when no independent h can be had.
+- **The plan's outcome line** said the three width measures "agree"; the first two share K1 and O1, so it now says they point the same way. (That was wrong too: they point different ways; corrected after task 9a's review, below.)
+- **The photographs' authors.** The registry named O2, O4 and O5's author "StuartBrady", where `sources.json` has "Stuart Brady (assumed by Commons)". The registry and the photographs' README now say the latter, and a test holds each photograph's registry author to `sources.json`'s.
+- **O8-H** is marked "Fetched, not used" in `sources.json` and the photographs' README.
+- **`judge_keys`** has a pytest of its own: the pass, between and STOP bands of the plan's row.
+
+Tests. pytest: one new test, `test_judge_keys_gives_the_plan_s_three_bands`; `~/venv-models/bin/python -m pytest tools/bbc-micro-model/tests -q`: 141 passed. It passed against the existing code, and failed with `KEYS_PASS` loosened to a median of 3.0, a 90th percentile of 3.0 and a largest of 9.0 in a scratch copy. The module's pytest now also requires the width and scale words in the three notes, and failed with them dropped in a scratch copy. Site: no new test; three changed. The method test now takes a file changed after the last run from its own labelled line; it failed before that line was written. The module test now requires the width and scale words in the three notes; it failed on the module as the third run wrote it. The photographs test now holds the authors to `sources.json` and O8-H to "Fetched, not used"; it failed on the registry as it was. Each was also seen to fail with the change undone one at a time and restored. The floors do not move, there being no new site test.
+
+## Task 9a: the outside's scene, words and data, not on the page (13 October 2026)
+
+The outside model's drawing, its words and its results file are built, and none of it is on the page. As for the inside (task 7), main's rules leave no state in which the BBC Micro claims one view, and a model's `.js` cannot be committed unclaimed, so everything here is a `.mjs` module that no `MODELS` entry lists and no machine claims, tested in Node. Task 9b adds the two thin entries, the `MODELS` entries, the claim of both views with `"case": true`, the credits and the browser check together.
+
+### What was built
+
+- **`site/src/models/bbc-micro-case-scene.mjs`**, all of the drawing, with no `mount`. `buildCase(scene, token, { atlas })` draws the shell at the Service Manual's size with its corners rounded, the opening cut through its top (`RECESS.opening`), the charcoal panel in it at the triangulated panel height, and the badge strip at the opening's rear; every one of the keycaps at its K1 place, standing on the panel with its top at the key plane, in its colour class as read on O1, its legend on its top; the three lights, their names printed behind them as O1 shows; the rear's ports, each with its label above it, the two vent slots (`GRILLE`) and the mains panel with its words; the underside's panel and its connectors, each labelled; and four feet. It returns the handles the entry needs: the caps by key name, the lights by name, the ports by reference, `pickable`, `setKeys(names)`, `setLeds(names)` and `keyTop(name)`. Beside it: `stageOptions()`, `atlasItems()` (every word the case carries), `layoutAtlas()` (where each goes in the one canvas) and `drawAtlas()` (the browser half: the words drawn in the site's own type once it has loaded).
+- **`bbc-micro-case-layout.mjs`**: the parts module's exports, `legendOf`, `machineKey`, `capsOf`, `TAP_MS`, `createKeyState` (the keys down, from `bbc:key`), `LED_OF`, `litLeds`, `ledWords`, `LABEL`, `HELP`, `STATUS`, `press` (a click on a key), `pointWords` and `describe()`.
+- **`bbc-micro-case-notes.mjs`**: `made(figures)`, with `sizeSentence()`.
+- **`tools/bbc-micro-model/results.py`**, the case half, which writes `site/src/data/bbc-micro-case-model.json` from `keys.json` and `case.json`, with its sources and their authors. `run-case.sh` now ends with it, as `run-board.sh` does.
+- **Seven tokens**: `--model-bbc-case`, `--model-bbc-panel`, `--model-bbc-badge`, `--model-bbc-key-red`, `--model-bbc-key-light`, `--model-bbc-key-dark` and `--model-bbc-legend`. None is a text colour on the page, so the contrast table in `design.test.mjs` does not change. The lights are `--model-led` and `--model-led-off`, as the plan says.
+
+### Decisions, and what they were chosen over
+
+- **The legends are `LEGENDS[name]`,** imported from `public/bbc-keys.js`, so they cannot drift from the on-screen keys. The second SHIFT prints SHIFT's legend, and BREAK, which `LEGENDS` does not have (it is not in the matrix), prints its own name in capitals, as the keyboard prints its words. One exception, decided here: the space bar is blank, as O1 shows it, though the on-screen key says SPACE. Chosen over printing SPACE, which the machine does not.
+- **SHIFT puts both SHIFT keycaps down.** They share one matrix place, so the machine cannot tell which was pressed. Chosen over moving the left one only, which would claim to know.
+- **The key state is a function of time, with no timers.** `createKeyState()` takes each `bbc:key` event with the time it came, and `down(at)` says which caps are down then: `down` holds a key until `up`, `tap` for 140 ms, `latch-on` until `latch-off`, and a key is down while anything holds it. The entry will call it each frame with `performance.now()`, so a test runs it on a fake clock and reduced motion needs nothing: a key goes down at once either way. `presses` counts the events that start a hold. A click on the model calls `panel.bbc.tap`, which sends `bbc:key` `tap`, so a click is counted once, by its event.
+- **Each keycap is a mesh of its own,** sharing one geometry per size and one material per colour. Chosen over instanced caps, which the plan suggested: each cap carries its own legend and goes down alone, and an instanced cap's legend needs a shader of its own for 74 caps. The trial bundle below is inside the budget.
+- **The caps are tapered blocks with flat tops, of a typical shape,** not sculpted row by row. The plan wanted the profile checked against K2's numbers, and K2 could not be fetched (task 8). The note says so.
+- **The rear's labels are printed above their ports,** where O2 shows them, in the charcoal on the case's cream. On the machine they sit on a dark panel round the ports, which was not measured and is not drawn; the note lists it. The rear's x values stay on the D socket's scale, as `REAR`'s note says.
+- **The feet's places, their diameter, the keys' travel and the caps' taper are typical,** constants in the scene, and the note says so beside the typical values `case.json` lists.
+- **The colours.** The red is between the centres of the two clusters O1's ten function keys fell into, and the black the centre of the cluster nearly every other key fell into (`keys.json` `colours`, converted from Oklab to sRGB by the standard formula); the clusters are where the measured colours sit, though the classes come from reading O1 by eye. The brown of the cursor keys and COPY, the cream, the charcoal, the strip and the legends' white were chosen by eye on O1.
+- **The results file's `typical`** lists the typical values the model draws. `keyAboveTop` and `panelBelowKeys` are left out, because they are `case_parts.py`'s fallback, drawn only if the side profile's check had failed, and it passed; a pytest holds that they come back if it fails.
+
+### The words
+
+The caption starts "Model, not a photograph.", reads every size and count from the layout, and says the size is the Service Manual's, "though three measures on the photographs read the case a few per cent wider, which is not resolved" (corrected in the review below: the measures point different ways). The note's first paragraph is `sizeSentence()`: the manual's size, taken from its Model B+ section to hold for the Model B, then the three measures with their figures from the results file (the keys' scale on O1's top, the scale the opening's front corners imply, the case's width on O2's D socket scale), that the first two are not independent, and that it is not resolved and nothing was rescaled. Then the keys' mapping and O1's and O3's held-out figures, the colours read by eye with the clustering's agreement, the triangulated heights and the check point (with the words for a failed check ready, held by a test, though it passed), the front edge's check as not measurable and why, and the rear check with what it does and does not test. The limits list the size again, the front edge, the typical values, the caps' shape, the legends (one each, the shifted symbols not drawn), the badge's owl not drawn, the parts not measured and not drawn, and that the inside's copper is traced to look at, with its connections not verified.
+
+### What was checked, and how
+
+Nothing was measured, so no threshold was fixed and no held-out check ran. The site was built before and after this task (`npx astro build`, the tree before taken with `git stash -u`, 13 October 2026): every page is the same byte for byte with its `<style>` elements taken out, every other file in `dist` is the same, and the inlined stylesheet gains the seven tokens' lines only.
+
+A trial bundle of the scene, the layout and the stage, built as `build-models.mjs` builds a model (esbuild, `bundle`, `format: 'esm'`, `minify`) from a scratch entry outside the repository on 13 October 2026, was 642,731 bytes and 166,790 gzipped. It is not task 9b's check of the budget (the entry adds its wiring); it says only that the bundle starts inside 200,000 bytes gzipped.
+
+### Tests, and that each can fail
+
+Thirteen tests at the end of `site/tests/bbc-models.test.mjs` and three in `tools/bbc-micro-model/tests/test_results.py` were written before the modules and the case half: the site's file then stopped at its import of the missing layout module, and the three pytests failed on the missing `case_results`. Each was then seen to fail with one thing broken at a time and restored after, by scratch scripts outside the repository whose logs are not committed. In the layout: the second SHIFT's legend, the space bar given SPACE (two tests), SHIFT putting down one cap, the lock lights swapped, a tap held 1400 ms, `up` letting nothing go, `latch-off` ignored, the second SHIFT tapped as itself, a click before Start reported as pressed, the caption typing the key count, and the caption without "not resolved". In the scene: the red keys drawn black, the opening not cut, the shell standing on the table, the caps 1 mm high, the lights reversed, every light lit, every cap down, an owl named in a comment, a second canvas, a rear label under its port, the underside's labels missing (two), the vents on the front, the atlas never starting a new row, the case in the NES's grey, and a `mount` added. Elsewhere: the red keys' token set to the lime's colour, O1's median changed in the results file, a source's author dropped from it, `run-case.sh` without `results.py`, the deploy list naming the case, and in the notes the width typed, "not independent" dropped, the inside's copper not said to be traced to look at, and the front edge's verdict dropped. In `results.py`: the rear ratio not rounded, the fallback's typical values always listed, the author not copied (which also failed the board's test), and the fallback flag not read. Every break failed at least one test.
+
+`cd site && npm test` on 13 October 2026, with the machines built and `src/data/results.json` as before: 548 tests, 547 passed, 0 failed, one to-do (task 2's x median); 535 tests and 534 passed before. Both workflows' floors rise by the thirteen new site tests, from 533 to 546. `~/venv-models/bin/python -m pytest tools/bbc-micro-model/tests -q`: 144 passed, 141 before. The browser check was not run here; nothing in it changes until 9b.
+
+### What is left for task 9b
+
+The entry, `site/src/models/bbc-micro-case.js`: `createStage(root, stageOptions())`; `drawAtlas(atlasItems(), token, the page's --font-body)` into `buildCase`; a `createKeyState()` fed by the panel's `bbc:key` events and reset on `bbc:start`, with `setKeys(state.down(performance.now()))` each frame; `setLeds(litLeds(panel.bbc?.leds()))` each frame; a click on a cap through `press(name, panel)` onto the status line, and `pointWords` for what the pointer is over; and the hooks the plan lists (`data-model-pressed`, `data-model-presses` from `state.presses`, `data-model-down`, `data-model-leds` from `ledWords`, `root.modelKeyPoint` from `keyTop`, `root.modelView`). Then the `MODELS` entry with `label: LABEL`, `about: describe()`, `made` and `help: HELP`; the claim with the inside; the credits from the results file's sources (D1, K1, O1 to O5, O8-I and TE's drawing, each with its author); the deploy list; the bundle's budget; and the browser check.
+
+### Mistakes
+
+- The key state test first expected seven presses where its own events make eight (A down, C tap, SHIFT latched, CTRL latched, 2 tapped, BREAK tapped, Q down, Q tapped). The test was wrong, not the code; it now says eight.
+- Three of the first breaks proved nothing: one changed no behaviour, one did not apply (a comment's capital), and one was a syntax error. The syntax error is worth saying: when a module that `bbc-models.test.mjs` imports at its top level fails to load, node's runner reports the tests after the import as neither passed nor failed, and the file's summary says 0 failed. Only the suite's floor catches that, by the passes it loses. The three were redone as real breaks, and each failed its test.
+
+### Task 9a's review, and what was changed (13 October 2026)
+
+The review found nothing critical. Each item, and how it was checked:
+
+- **The case's width pointed the wrong way.** The words said the photographs' three measures read the case 2.4 to 3.9 per cent wider. Two of them are not widths at all but K1's size: on O1's case top, registered to 415 by 345 mm, the keys read 1.0387 times K1, and the opening's front corners imply 1.0373. With the case taken as 415 mm, keys that read large mean that, if K1 is true to size, the case is narrower, about 400 mm; and the first may be partly parallax, since the key tops stand above the plane O1 was registered on (`case.json` `caseTop.what`). Only O2's D socket scale, 425.1 mm, says wider. So the measures point different ways. The parts module's notes (`case_parts.py` `width_words`, the module written again by `case_parts.py --module`, which measures nothing), the results file (`width` now holds `k1Mm`, the case's width in K1's units, beside `rearMm`; `low` and `high` are gone), the caption, the note's size sentence and its first limit now say so, each direction with what it rests on, and that it is not resolved. The plan's task 8 outcome and this entry's task 8 paragraph had said the three "point the same way"; both now say they point different ways, the paragraph keeping its first wording below a dated correction, and the summary is changed to match.
+- **A module that fails to load.** `site/tests/bbc-models-load.test.mjs` (new) imports each of the BBC models' eight modules in a test of its own and checks its main exports, so a syntax error fails a test named after the module, where in `bbc-models.test.mjs` it made the later tests vanish (task 9a's mistakes, above).
+- **The key state:** a new check, A down, B down, A up leaves B down, which fails if `up` clears every key; and `reset()` now starts `presses` and `last` again, as a new machine has pressed nothing, with a check.
+- **The note's limits,** each now held by the note's test: the size "the Service Manual's, not measured", the dark panel round the rear's ports not drawn, the rear check testing the D socket's scale and not the offset, and the video and Econet sockets placed from the photograph alone. The scene's test now also holds every foot inside the footprint, under the case and off the underside panel.
+- **TE's drawing's licence** is "none stated" in `sources.json`, not null, so the credits say so; the sources test treats "none stated" as no licence, as it does null, so such a source can never be committed.
+- **What each source gave.** Each source in the case's results file now has `used`, from `results.py`'s `CASE_USED`, and one from Chris's Acorns a `byline`, "Chris's Acorns", as that site asks: O8-I's says the connector names only, and that the photograph itself is not shown. A source with no `CASE_USED` entry stops the run.
+
+`case_parts.py` changed in `width_words` and its docstring only; its hash after the change, taken at 2026-10-13T23:04:03Z:
+
+```
+changed after task 8's last run, the module's notes only: bcda7b46b0f9cdbb58e3731394d9a80ff317acaa68c8030810636167ec0ef396 tools/bbc-micro-model/case_parts.py
+```
+
+Tests, and that each can fail. Each changed test was changed first and failed against the code as it was (the caption's, the note's, the key state's and the method's hashes, the last until the line above was written); the module's and the results file's failed against their files as task 9a left them, and `test_case.py`'s and `test_results.py`'s failed until `width_words` and `results.py` changed. Each was then seen to fail with one thing broken at a time and restored after, in a scratch copy outside the repository made from the last commit plus this fix's files only, because task 9b's build was in the same worktree: the module saying all wider, `k1Mm` 0.1 mm off, O8-I's `used`, its byline and TE's licence each undone in the results file, the note without the dark panel, the offset sentence, the video and Econet sentence, "not measured" or its parallax, or saying all three read wider, the caption saying a few per cent wider, `up` clearing every key, `reset()` keeping its count, a foot outside the footprint and a foot on the underside panel, TE's drawing committed under "none stated", and `((` appended to each of the eight modules, which failed that module's load test and those of the modules that import it. In pytest, the width words all wider, `k1Mm` from the smaller scale, no byline, and a source without `CASE_USED` let through.
+
+`~/venv-models/bin/python -m pytest tools/bbc-micro-model/tests -q`: 144 passed, as before, the tests being changed, not added. `npm test` in the scratch copy on 13 October 2026: 556 tests, 554 passed, one to-do (task 2's x median), and one failure that is the copy's, not the code's: the disc image test runs `git ls-files`, and the copy has no `.git`. 548 tests and 547 passed before. Both workflows' floors rise by the eight new site tests, from 546 to 554.
+
+## Task 9b: both views on the page (13 October 2026)
+
+The BBC Micro's two models go on its page together, as the NES's did: the two thin entries, their `MODELS` entries, the registry's claim of both views with `"case": true`, the credits, the deploy list, the browser check's models steps, the budgets and `DESIGN.md`'s section, in one commit. Main's rules leave no other way: a claim with no `case` fails, and a cased claim of one view fails.
+
+### What was built
+
+- **`site/src/models/bbc-micro-board.js`**, the inside's entry, as task 7's section listed it: `createStage(root, stageOptions())`, `buildBoard` with `canvasPrinter`, `trackMaps` and `trackMaterials` into `createLayers` and the two buttons, a sampler from `access.mjs` with `COUNTED`, reset on `bbc:start`, every quarter second `marksFrom` into the tint and the legend rows and the rates into their cells, `pagedRef(romSlot())` into the frame, `pointWords` on the status line, and the hooks (`data-model-accessed`, `data-model-paged`, `data-model-rates`, `data-model-tracks`, `data-model-parts`, `modelChipPoint`, `modelBoardPoint`, `modelLayers`).
+- **`site/src/models/bbc-micro-case.js`**, the outside's entry, as task 9a's section listed it: `drawAtlas` in the page's `--font-body` into `buildCase`; a `createKeyState()` fed by `bbc:key` with `performance.now()` and reset on `bbc:start`; each frame `setKeys(keys.down(now))` and `setLeds(litLeds(panel.bbc.leds()))`; a click on a keycap through `press()`, on a port its name; pointing names a keycap, port or connector; and the hooks (`data-model-pressed`, `data-model-presses`, `data-model-down`, `data-model-leds`, `modelKeyPoint`).
+- **`MODELS`**: `bbc-micro-case` (outside, with `help`) and `bbc-micro-board` (inside, with `texture`, `tracksHelp`, `legend` and `legendWords`).
+- **The registry**: `"case": true`, `models` outside then inside, and eight `references`, each with its SHA-256 from `sources.json`: I1, I2, I5, I6 and D1 for the inside (D1 for the outside too), and K1 (at the `dbhq-uk` fork), O8-I and TE's drawing 1757819 for the outside. O1 to O5 were already `photos`. The head photograph's `used` no longer says the BBC Micro has no 3D model.
+- **The deploy list** gains `models/bbc-micro-case.js models/bbc-micro-board.js models/bbc-micro-board-tracks.webp`; `model.test.mjs`'s `BUDGETS` gains `'bbc-micro-board': 600_000`.
+- **`checkBbcModels`** in `scripts/browser-check-bbc.mjs`, called by `browser-check.mjs` after `checkBbcMicro`; the KIM-1's, the BBC Micro's machine and the NES's sections are not changed.
+- **`site/DESIGN.md`**: "The BBC Micro's 3D models". **The photographs' README**: a table of the board's sources, which are not committed, and the outside's table now says it is credited on the page.
+
+### Decisions, and what they were chosen over
+
+- **The legend's `chip` is added in the `MODELS` entry,** not in the layout. The shared legend table (`ModelPanel.astro`) marks a row and gives it a rate cell by its `chip`, the NES's word; the BBC's `chipLegend()` calls it `sheila`. The entry's `legend` maps each row to `{ ...row, chip: row.sheila }`. Chosen over renaming the field in the layout, which task 9a's fix wave was editing at the same time in the same worktree, and over changing the shared table, which the plan keeps unchanged.
+- **The references' licences are said short, and agree with `sources.json`'s.** Chris's Acorns' as "CC BY-SA 3.0, as the site's home page states (an older paragraph on the same page asks to be asked first)", with its licence linked, and its author "Chris Whytehead (Chris's Acorns)", the byline the site asks for; K1's as MIT, linked to the fork's LICENSE; D1's as Acorn's copyright notice, "with reproduction reserved: facts read from it, nothing copied". The scans, I5 and TE's drawing state none, and the page says "no licence stated". A test holds each against `sources.json` (null or "none stated" as none; else the same opening words).
+- **Each view credits exactly its own sources,** by the rule main already has: a view whose results file lists its `sources` credits only the registry's photographs and references whose address is one of them. So the inside credits the five references it was made from and no photograph, and the outside the five photographs and its four references; neither credits the photograph at the head of the page.
+- **The tests for this task are in a file of their own,** `tests/bbc-models-page.test.mjs`, which imports every module inside a test. Task 9a's review added `bbc-models-load.test.mjs` for the eight `.mjs` modules; this file's first test imports the two entries and checks each exports `mount` alone, so a module that fails to import fails a test, loudly, rather than ending the file's run silently.
+- **The page without a model** is held, now that every running machine has one, by a made-up machine with none (`modelsOf` gives none) and by `[id].astro`'s own lines: the section, the loader and the photographs' "used for the model" only when a machine has models. Chosen over keeping a running machine without a model, which there is no longer.
+- **The browser check's camera rest is the NES's `settled()`, imported.** It reports a camera that never rests with the NES's prefix, so `checkBbcModels` passes it a list of its own and reports each line as the BBC Micro's.
+- **`*CAT` up to three times.** The DFS is the paged ROM only while it runs, and the model reads the ROM latch every quarter second; a `*CAT` on the 8271 as emulated takes about a revolution of the disc (`Fdc8271.RevolutionCycles`, a fifth of a second at 2 MHz) or more. So the check types `*CAT` and looks every 50 ms for up to ten seconds, and does so at most three times, until IC78, its row and the DFS's frame have each been seen. The three and the ten seconds are a timeout for the disc to be read, written into the check before it ever ran, not a judged figure; the log says how many it took.
+
+### What was checked, and how
+
+The site was built before this task (`git archive 2eba934` into a scratch folder, with this tree's `public/machines/` and `src/data/results.json`, `npm run build`) and after. The KIM-1's and the NES's pages are the same byte for byte with their `<style>` elements taken out; every other file in `dist` outside `machines/` is the same, but the three new files under `models/`.
+
+`node scripts/page-weight.mjs /machines/bbc-micro/`, before (13 October 2026) and after (re-measured on 14 October 2026, on the tree of the review's fixes below: the first figures, taken on `0d5d7a6`, went stale with the click fix and the review's words), in bytes, then gzipped at level 9:
+
+| | Before | After |
+|---|---|---|
+| When it opens, total | 161,029; 60,965 | 211,509; 71,971 |
+| The page's HTML | 84,802; 18,387 | 131,791; 27,863 |
+| `/model-loader.js` | not loaded | 3,491; 1,530 |
+| Later: `/models/bbc-micro-case.js` | | 644,623; 166,480 |
+| Later: `/models/bbc-micro-board.js` | | 660,224; 169,046 |
+| Later: `/models/bbc-micro-board-tracks.webp` | | 376,968; 377,106 |
+
+Nothing under `/models/` is in the first load. Each bundle is inside the 200,000 bytes gzipped and the map inside its 600,000 bytes; a test computes all three from the build. The HTML grows by the two panels, their legend table of every fitted chip and their notes.
+
+### Tests, and that each can fail
+
+New: `tests/bbc-models-page.test.mjs`, eight tests, written before the entries, `MODELS` and the claim, and run once to fail (all eight failed). Changed: `registry.test.mjs`'s "the BBC Micro claims none yet" now holds the claim and that either view alone is refused; `model.test.mjs`'s guard for a running machine without a model is the made-up machine above, and its `BUDGETS` has the BBC board's; and task 7's, task 8's and task 9a's four "unclaimed" tests in `bbc-models.test.mjs` now hold the claim, the two entries as the only `.js` files, the `MODELS` entries and the deploy list. Each was seen to fail with one thing broken at a time in a scratch copy outside the repository (a script whose log is not committed): an entry exporting more than `mount`, an entry that does not parse, the views claimed inside first (two tests), K1's reference dropped, a reference's SHA-256 changed, the legend's words and the outside's caption changed in the source and not on the page, the sampler at 500 ms, no reset on `bbc:start`, the lights never set, a model bundle put in the first load, the models' browser check not called, `settled` copied rather than imported, the BBC board's budget missing and set to 1,000 bytes, the loader on every page, `"case": false` (three tests), a third `bbc-micro` `.js` file, the map and the outside's bundle each left out of the deploy list, and an extra `bbc-micro` `MODELS` entry. Every break failed at least one test.
+
+`cd site && npm test` on 13 October 2026, with the machines built and `src/data/results.json` as before: 564 tests, 563 passed, 0 failed, one to-do (task 2's x median). Both workflows' floors rise by the eight new site tests, from 554 to 562.
+
+The browser check cannot run here (no Chrome); Validate in CI is its record, below.
+
+### The browser check in CI, round by round
+
+**Round 1** (Validate run 38482989461, on `0d5d7a6`). Every models step passed but one, and the KIM-1's, the BBC Micro's machine and the NES's sections passed unchanged. Its lines, read from the job's log: no model file before scrolling; the outside running 202 ms after it, its bundle alone fetched, 37.6% of its canvas drawn; after the boot the caps lock light lit, the on-screen CAPS LOCK putting it out and lighting it again; `*MOTOR 1` lighting the cassette motor's light and `*MOTOR 0` putting it out; the on-screen A going down and up on the model as one press; a real Z down while held; a click on the model's C typing `>C` as one press; under the case at polar pi, 50.9% drawn; Right on the Outside tab selecting Inside, which then fetched its bundle and map, 38.1% drawn; pointing at IC78 naming it and marking its row; two `*CAT`s marking IC78 and its row and framing the DFS (IC88) and BASIC (IC52); the track buttons as they should be; from below, the solder side's copper and bare board 102.2 apart against 5.3 mirrored; both cameras kept across the tabs; Tab leaving the section; and both views with reduced motion.
+
+The failure was the model's, not the check's: **a click on the model's C before Start did not say the machine is not running.** The status line read "C: click to press it on the machine.", the hover's words. The mouse's move to the key queued a frame to name what it points at; the click then said the machine is not running, and the queued frame, run after it, put the hover's name over it. A visitor clicking a key before Start would have seen the same. Fixed in the entry: a click drops the pointing frame the same movement queued and counts the part clicked as pointed, so the hover does not say its name again until the pointer moves to another part. The outside entry's test gained the assert first, and it failed (7 of 8 passed) before the fix and passed after. The check was not changed.
+
+**Round 2** (Validate run 38483987854, on `6b8339e`): green, every job. The site suite passed 563 with none failed, and every models step passed with the lines of round 1, but the click before Start, which now says "The machine above is not running, so the key did nothing: press Start first." In both rounds the first `*CAT` marked IC78 but the DFS was not seen framed until the second: the latch is read every quarter second and the DFS is paged only while it works, which is why the check allows up to three. The check was not changed between the rounds.
+
+**Round 3** (Validate run 38485006986, on `79b57e7`, a commit of words only, so the code was round 2's): failed, on two steps that had passed twice. Every other line was round 2's.
+
+- **"the camera never came to rest in #model-panel-outside".** The line for the view from under the case is missing, so it was the wait after the fourteen presses of the down arrow that ran out its 30 seconds; the outside's camera was compared later and had been kept. Why it did not rest was not found: the log does not say where the camera was. The stage moves its camera only while it is on screen, and the step focused the stage straight after the screen had been scrolled to for typing, where the NES's check scrolls its stage into view first. Changed: the step now scrolls the stage into view before it focuses it, and when a camera does not rest the check prints its `modelView()` and where its stage is on the screen, so that a next failure can be read. The judgement (rest within 30 seconds, polar over pi less 0.05, over 5 per cent drawn) is unchanged.
+- **"*CAT never framed IC88, the DFS, as the paged ROM (in 3 *CATs)".** IC78 and its row were marked; the frame never was. Rounds 1 and 2 had each needed two `*CAT`s for it. The DFS is the paged ROM only for the fraction of a second a `*CAT` takes, and the model reads the latch every quarter second, so a `*CAT` shows the frame only by luck. Retrying more often would have been tuning the check to pass. Changed, after this failure was seen: the step puts a disc of its own in the drive, the test disc with its one file made 2 KB long, runs `*CAT` for IC78 and its row as before, and then `*DUMP HELLO`, which keeps the DFS paged for seconds while it prints, and looks for the frame then, every 50 ms for up to ten seconds; then Escape. What is judged is the same, that the model frames the DFS while the DFS is paged; the action that pages it is a longer one. The plan's step names `*CAT` for both marks; it is changed here for the frame only, and this round's failure stays recorded.
+
+**Round 4** (Validate run 38486096965, on `93c5fc7`): green, every job, the site suite 563 passed. The view from under the case rested (polar 3.142, 50.9% drawn); `*CAT` marked IC78 and its row; `*DUMP HELLO` showed IC88, the DFS, framed. Reading the log I found my own mistake in the round 3 change: the frames seen were gathered from the `*CAT` on, and in this run the `*CAT` had already framed IC88, so the `*DUMP` step judged what the `*CAT` had shown. The set of frames is now emptied before `*DUMP`, so the step judges what `*DUMP` shows; this was pushed and run again (below).
+
+**Round 5** (Validate run 38487089331, on `7fab362`, 14 October 2026): green, every job, the site suite 563 passed. This time `*CAT` marked IC78 and its row and did not frame the DFS (BASIC, IC52, only), and `*DUMP HELLO` then framed IC88 on its own, the screen still printing the file (`0010 52 4F 57 53 45 52 20 43 ROWSER C`): the case round 3 met, now judged on what pages the DFS long enough to be seen. The view from under the case rested again (polar 3.142, 50.9% drawn). The KIM-1's, the BBC Micro's machine and the NES's sections passed unchanged in all five rounds.
+
+### Task 9b's review, and what was changed (14 October 2026)
+
+The review found nothing critical: the page honest, the credits right, the weights matching, the deploy list exact. What it found, and what was done, each test changed first and seen to fail against the code as it was, then seen to fail with the fix undone one thing at a time in a scratch copy outside the repository (its log not committed):
+
+- **The limits were not pinned.** Changing "point different ways" to "are close", or "could not be measured" to "matches", in the case's notes passed every test, because the page test compared the page with the notes, which a rebuild makes agree. The words test now holds every limit of both notes by its key phrases, in the notes as `made()` writes them and on the page. Shown: the first of those breaks, built, fails it on the limit's own phrase; so does dropping "not as a netlist" from the board's first limit.
+- **The guard for a page without a model had lost its power.** It had been a real running machine with no model whose built page was read; task 9b replaced it with source patterns on `[id].astro`. It now renders the machine page itself through Astro's container and Vite's module loader (`tests/render-page.mjs`), for the BBC Micro's record with its claim taken away, and finds no model section, no loader and no "Used for the model"; the same render of the real record has all three. Shown: the loader on every page, the section on every page, and the photographs always saying what the model took, each fail it.
+- **The `*DUMP` step and its disc** are pinned: the frames are cleared before `*DUMP`, and `dumpDisc()` is the test disc but for a file of 2 KB. Shown: each undone fails the browser check's test.
+- **Minors.** D1's licence now reads "Copyright Acorn Computers Limited 1985: may not be adapted or reproduced without Acorn's prior written approval: facts read from it, nothing copied", and the credits test compares each licence in full, with the terms `sources.json` records the source stating, and a photograph's licence as `sources.json` has it (shown: the old D1 wording, and a photograph's licence changed, each fail). Chris's Acorns' byline links its site: a credit may carry `authorUrl`, which `ModelPanel.astro` makes the author's name a link and the registry requires to be a web link (shown: no link, and the rule removed, each fail); the KIM-1's and the NES's pages are unchanged, having none. The note said the x scale's verdict as "which the plan judges between pass and stop"; it is now in a visitor's words, `VERDICT_WORDS` in the board's notes (shown: the old words fail two tests). The photographs' README no longer says the outside is not on the page, `site/README.md` no longer types the counted chips' number, and the 9a section's "a few per cent wider" is marked corrected. The page weights above are re-measured.
+
+`cd site && npm test` on 14 October 2026: 564 tests, 563 passed, 0 failed, one to-do. No test was added, only changed, so the floors stay at 562.
+
+### The models' browser check run many times (14 October 2026)
+
+Round 3's two failures had been met once each, so the review asked how often they happen. A throwaway workflow on a throwaway branch, `ci/bbc-models-stress` (its workflow and its script, `site/scripts/stress-bbc-models.mjs`, never merged into this branch; run through a draft pull request, 97, titled "DO NOT MERGE" and closed afterwards), built the site once on this branch's `a79cb9e`, with the machines from Validate run 38488067039, and ran `checkBbcModels` alone 25 times, then 25 times more with Chrome's CPU throttled four times through the DevTools protocol, counting the runs in which a camera never came to rest, the DFS was never framed, or anything else was reported.
+
+| Run 38490348651 | Runs | Clean | A camera never rested | The DFS never framed | Anything else |
+|---|---|---|---|---|---|
+| Not throttled (job 115613804053) | 25 | 25 | 0 | 0 | 0 |
+| Throttled four times (job 115613803795) | 25 | 25 | 0 | 0 | 0 |
+
+What that does and does not show. It is the check as round 3 left it, with the stage scrolled on screen before it turns and the DFS looked for during `*DUMP`; it says nothing about the check before those changes. None in 25 bounds the rate of each failure only loosely: a failure that came once in ten runs would pass 25 runs clean about one time in fourteen, so each pass of 25 puts each rate, under its own conditions, below about one in nine, at 95 per cent, and no lower. Why the case's camera did not rest in round 3 is still not known; the scroll was a guess at it, and the check now logs where the camera and the stage were if it happens again. The throttled runs took 55 to 92 seconds each and the unthrottled 92 to 115, so the throttling slowed the page less than four times, if at all, by that measure; it was asked for on every page the check opened, and the log does not show whether it took.
+
+## Task 10: the final pass, its first four steps (14 October 2026)
+
+Task 10 of the plan has seven steps. This section is the first four, as the controller asked for them on 14 October 2026: the mutation pass, the known differences, the size and speed record, and the documents. The final whole-branch review (step 5) is a separate reviewer's, and the pull request stays a draft (step 6 is not done here).
+
+### The mutation pass
+
+**How.** In a scratch worktree outside the repository (`git worktree add ~/mut-bbc-models --detach HEAD`, at `50964e1`, with this checkout's `node_modules` linked in and the built machines in `site/public/machines/` and `site/src/data/results.json` copied in, as `npm test` needs them), one fault at a time, by a script committed for anyone to run again: [`tools/probes/bbc_models_mutations.py`](../../tools/probes/bbc_models_mutations.py), in the style of the KIM-1 teletype's and the Electron's. Each fault is one or more exact replacements, each checked to match once (or every time, where it says so), or a function that edits the files; then the suites the fault names run, and the worktree is put back with `git checkout -- .` and checked clean. The suites: the site's, after `npm run build` (a build that fails counts as caught, since `npm test` builds first, in CI too), with every failing test named and a run with fewer tests than the unmutated one reported, because a module that no longer loads drops the tests after it (task 9a's mistake); the tools' pytest, `~/venv-models/bin/python -m pytest tools/bbc-micro-model/tests -q`; for a fault in C#, the BBC Micro's whole test project, `dotnet test tests/Dbhq.Machines.BbcMicro.Tests -c Release`; and for one fault, `board_register.py` itself on the real scans. The command:
+
+```
+python3 tools/probes/bbc_models_mutations.py --root ~/mut-bbc-models
+```
+
+It first runs the site suite and pytest unmutated, and stops if either fails: 564 site tests, none failing, and pytest passing. It ran from 01:36 to 02:15 UTC on 14 October 2026, on this aarch64 box at a load average near 0.
+
+**Which faults.** Every mutation the plan lists, mapped to the code as it is (the ids M1 to M20, in the plan's order, and R1 to R8, the re-plan's additions), and more where the controller's brief named a part of the work the plan's list does not reach: the scene, layout and notes modules and the two entries (S), the credits (C), the tools' judge functions and the generators of the keys, the case and the results (T), and the browser check's parts a node test can reach (B). None was skipped. Where one of the plan's words maps to more than one place in the code, each place is a fault of its own: "x and y scales swapped" is the data (M1a) and the script that fits them (M1b); "the solder side not mirrored" is the data's record of the flip (M2a) and the script, run for real (M2b); "a counter on the wrong chip" is the C# decode (M10a), the parts script (M10b) and the parts module (M10c). "A module claimed by two machines" cannot be written as such: a module must be named for its machine, so a second machine's claim of `bbc-micro-board` fails that rule first; it is mapped to the registry claiming one module for both views (M14a) and to the duplicate check taken out (M14b). The C# faults are the plan's (the LED bits, the motor bit, a counter on the wrong chip, `Peek` counting) and the re-plan's (a counter on the wrong field).
+
+| Fault | What was broken | Caught by |
+|---|---|---|
+| M1a | x and y scales swapped in frame.json | `bbc-models` "frame.json records the verdicts its figures give against the plan's scale thresholds, ..."; the method's hash pin |
+| M1b | board_frame.py's fit_scale returning y then x | `test_board_frame` `test_a_held_out_x_row_is_never_in_its_own_fit`; `test_board_frame` `test_scale_from_exact_rows`; and 4 more pytest tests; the method's hash pin |
+| M2a | the solder side not mirrored: registration.json's transform says y is flipped, not x | the method's hash pin only |
+| M2b | the solder side not mirrored: board_register.py reads I2 unflipped, run on the real scans | `board_register.py` itself stopped, exit 3: held out without the rule's exclusion, the cubic's median 0.585 mm and the affine's 0.581 against a stop over 0.25, and found 650 drills and 80 DIPs where the committed run has 2797 and 97; then, on what it wrote, `bbc-models` "registration.json passes the plan's solder row ...", "every DIP footprint in registration.json has an even pin count ..." and 7 more site tests; the method's hash pin |
+| M3a | one drill's component-side centre moved 0.5 mm, the drill kept at its faces' mean | `bbc-models` "every drill in registration.json records both faces' centres, sits at their mean, and ..."; the method's hash pin |
+| M3b | one matched hole's held-out error 0.5 mm larger | `bbc-models` "registration.json passes the plan's solder row on the figures without exclusion, and ..."; `bbc-models` "the excluded holes are exactly those the roundness rule names, counted, with both sets ..."; the method's hash pin |
+| M4a | one key centre moved 3 mm (Q's x), in case.json and the parts module | `bbc-models` "the keys are K1's centres put in the case by the recorded turn and shift, their ..." |
+| M4b | one key centre moved 3 mm in keys.json (K1's centre for Q) | `bbc-models` "every machine key has exactly one K1 keycap, with BREAK and a second SHIFT, from the ..."; `bbc-models` "the case is the Service Manual's, and the keys and lights lie inside the opening, the ..."; `bbc-models` "the keys are K1's centres put in the case by the recorded turn and shift, their ..." |
+| M5a | two keys' names swapped (Q and W) in keys.json, case.json and the parts module alike | **survived**; now `bbc-models` "the case's keys are the machine's layout" |
+| M5b | two keys swapped in keys.py's map from K1's references (Q and W, with K1's values) | the method's hash pin only |
+| M6 | a legend not from LEGENDS: the layout prints the key's name | `bbc-models` "the outside's keys are the machine's"; `bbc-models` "the words atlas holds every legend, label and word the scene draws, each in a box of ..." |
+| M7a | the case width 410 in the parts module | `bbc-models` "the case is the Service Manual's, and the keys and lights lie inside the opening, the ..."; `bbc-models` "the case scene is the Service Manual's footprint and height, its opening cut through ..." |
+| M7b | the case width 410 in case.json, the results file and the parts module together | `bbc-models` "the case is the Service Manual's, and the keys and lights lie inside the opening, the ..."; `bbc-models` "the case results file is written from keys.json and case.json and agrees with them, ..." |
+| M7c | the case width 410 typed into the scene | `bbc-models` "every rear port and underside connector has its label drawn on the case beside it, and ..."; `bbc-models` "the case scene is the Service Manual's footprint and height, its opening cut through ..." |
+| M8a | the LED bits swapped in the page's decoding (CAPS LOCK bit 2, SHIFT LOCK bit 1) | `bbc-micro` "Start runs the machine and then sends bbc"; `bbc-micro` "leds() reads the host's three bits" |
+| M8b | the LED bits swapped in the machine's BbcLeds (CAPS LOCK 4, SHIFT LOCK 2) | **survived**; now `bbc-micro` "leds() decodes the bits the host sends" |
+| M8c | the lights' names swapped in the outside's layout (motor and CAPS LOCK) | `bbc-models` "the lights are the cassette motor, CAPS LOCK and SHIFT LOCK, left to right, each lit ..." |
+| M9 | the motor bit read from bit 6 | `MachineStateTests.AfterBootCapsLockIsOnItsLightIsLitAndALetterTypesACapital`; `MachineStateTests.CapsLockPressedPutsItsLightOutAndALetterTypesSmall`; `MachineStateTests.ShiftLockLightsItsOwnLightPutsCapsLockOutAndShiftsEveryKey`; `MachineStateTests.StarMotorOneLightsTheCassetteMotorLightAndStarMotorZeroPutsItOut` |
+| M10a | a counter on the wrong chip: the ADC's reads counted as the ACIA's | `MachineStateTests.EachCpuReadOrWriteAddsOneToTheChipItsAddressSelectsAndNothingToTheOthers`; `MachineStateTests.OverAWholeSessionEachCounterIsTheAccessesTheCpuMadeToItsChip` |
+| M10b | a counter on the wrong chip in the parts: IC3 counted as the user VIA and IC69 as the system VIA, in board_parts.py's SHEILA_OF | the method's hash pin only |
+| M10c | a counter on the wrong chip in the parts module (IC3 and IC69's counters swapped) | `bbc-models` "the board's counters are BbcChip's, and each moving counter marks its one IC"; `bbc-models` "the fitted set, the counters and the paged ROMs are models.md's record, in ..."; and 2 more site tests |
+| M11 | Peek counting: a peek of the system VIA adds to its counter | `MachineStateTests.APeekCountsNothing` |
+| M12a | IC3 and IC69 swapped in the parts module (each at the other's place) | `bbc-models` "the board's counters are BbcChip's, and each moving counter marks its one IC"; `bbc-models` "the fitted set, the counters and the paged ROMs are models.md's record, in ..."; and 3 more site tests |
+| M12b | IC3 and IC69 swapped the same way in parts.json and the parts module together | `bbc-models` "the board's counters are BbcChip's, and each moving counter marks its one IC"; `bbc-models` "the fitted set, the counters and the paged ROMs are models.md's record, in ..."; and 5 more site tests; the method's hash pin |
+| M13a | IC78 marked not fitted in the parts module | `bbc-models-page` "the words that must reach the page do"; `bbc-models` "the board's counters are BbcChip's, and each moving counter marks its one IC"; and 5 more site tests |
+| M13b | IC78 not fitted everywhere: the parts module, parts.json's list and the fact sheet's table | `bbc-models-page` "the words that must reach the page do"; `bbc-models` "the board's counters are BbcChip's, and each moving counter marks its one IC"; and 5 more site tests; the method's hash pin |
+| M14a | a module claimed twice: the BBC Micro claims bbc-micro-case for both views | the site's build, on the registry's rule (`npm test` builds first, as CI does) |
+| M14b | a module claimed by two machines: validateRegistry's check taken out | `registry` "a module is claimed once in the whole registry" |
+| M15 | the cased rule removed (a cased machine that claims a model claims both) | `registry` "a machine that claims a model states case"; `registry` "a machine with a case that claims a model claims both, the outside and the inside"; `registry` "the real registry" |
+| M16 | the rule that a machine claiming a model states case removed | `registry` "a machine that claims a model states case" |
+| M17 | a running machine required to claim a model | `machines` "a running machine with a passing acceptance suite is valid and is counted as implemented"; `registry` "a machine with no models and no case is valid, running or not"; and 2 more site tests |
+| M18a | the inside's track map missing from the deploy list | `bbc-models` "the scene, its words"; `model` "the track map is loaded with the model, never with the page, and the deploy checks it ..." |
+| M18b | the outside's bundle missing from the deploy list | `bbc-models` "the outside's scene, words and results are .mjs modules with no mount, put on the page ..."; `model` "the deploy checks that the model loader and every model bundle are serving" |
+| M19a | a colour literal in the outside's scene (the lit light) | `bbc-models` "the lights are the cassette motor, CAPS LOCK and SHIFT LOCK, left to right, each lit ..."; `bbc-models` "the outside's colours are tokens of their own, none the lime, and every token its ..."; `model` "the model" |
+| M19b | a colour literal in the inside's scene (the access tint) | `bbc-models` "the board's colours are tokens of their own, the mark is `--model-active` ..."; `model` "the model" |
+| M20 | the track map over budget (600,001 bytes, copper.json's size and hash made to match) | `bbc-models-page` "nothing of either model is in the page's first load, and each later file is inside its ..."; `bbc-models` "the BBC Micro board's track map is committed, WebP, the size copper.json gives, inside ..."; `model` "every model with a track map has it committed, inside the budget its plan set, and ..." |
+| R1 | the BBC Micro claiming only the inside, with "case": true | the site's build, on the registry's rule (`npm test` builds first, as CI does) |
+| R2 | the BBC Micro with no case | the site's build, on the registry's rule (`npm test` builds first, as CI does) |
+| R3 | access.mjs reading the counted list one place out | `access` "the shared rates take the list of counted chips"; `access` "the shared sampler takes the counted list, divides by the time it measured, and takes ..."; and 7 more site tests |
+| R3b | the board layout's COUNTED one place out (the ACIA and the serial ULA swapped) | `bbc-models` "the board's counters are BbcChip's, and each moving counter marks its one IC" |
+| R4 | a counter on the wrong field in the inline decode: a user VIA write counted on the system VIA's field | `MachineStateTests.AReadModifyWriteCountsItsReadAndBothItsWrites`; `MachineStateTests.EachCpuReadOrWriteAddsOneToTheChipItsAddressSelectsAndNothingToTheOthers`; `MachineStateTests.OverAWholeSessionEachCounterIsTheAccessesTheCpuMadeToItsChip` |
+| R5a | the bbc:start event not sent after a new machine (the page) | `bbc-micro` "Start runs the machine and then sends bbc" |
+| R5b | the inside not taking a fresh baseline on bbc:start | `bbc-models-page` "the inside's entry is thin and follows the machine" |
+| R5c | the outside not letting its keys go on bbc:start | `bbc-models-page` "the outside's entry is thin and follows the machine" |
+| R6 | the map's BUDGETS entry missing | `model` "every model with a track map has it committed, inside the budget its plan set, and ..." |
+| R7 | a references entry without its sha256 (K1) | the site's build, on the registry's rule (`npm test` builds first, as CI does) |
+| R8a | task 4's nets result changed to pass in copper.json | `bbc-models` "copper.json passes the coverage, drills and I5 registration rows,"; `bbc-models` "copper.json records the verdicts its figures give against the plan's rows,"; `bbc-models` "the results file is written from frame.json, registration.json, copper.json and ..." |
+| R8b | task 4's nets result changed in the plan's words (the outcome says it passed) | `bbc-models` "copper.json passes the coverage, drills and I5 registration rows," |
+| S1 | the inside draws the unfitted ICs too | `bbc-models` "the caption starts "Model, not a photograph.""; `bbc-models` "the legend lists every fitted IC once, in IC number order, with its part and role from ..."; `bbc-models` "the scene draws a body for every fitted IC in the parts file and none for an unfitted ..." |
+| S2 | the paged slots swapped (15 the DFS, 14 BASIC) | `bbc-models` "the board's counters are BbcChip's, and each moving counter marks its one IC" |
+| S3 | the legend says the processor is marked like the others | `bbc-models` "the legend lists every fitted IC once, in IC number order, with its part and role from ..." |
+| S4 | the inside's sampler every 500 ms | `bbc-models-page` "the inside's entry is thin and follows the machine" |
+| S5 | the inside's caption without "traced to look at" | `bbc-models` "every sentence the board model says about its copper says it is traced to look at and ..."; `bbc-models` "the caption starts "Model, not a photograph."" |
+| S6 | the inside's caption typing the chip count | `bbc-models` "the caption starts "Model, not a photograph."" |
+| S7 | the board's note says the nets check passed | `bbc-models-page` "the words that must reach the page do"; `bbc-models` "the note is made() from the results file, every figure in it read from there, and it ..." |
+| S8 | the board's first limit without "not as a netlist" | `bbc-models-page` "the words that must reach the page do" |
+| S9 | the board's note says the parts checks passed | `bbc-models` "the note is made() from the results file, every figure in it read from there, and it ..." |
+| S10 | the board's note types the I5 registration's median | **survived**; now `bbc-models` "neither note types a figure" |
+| S11 | the case's size limit says the measures agree | `bbc-models-page` "the words that must reach the page do" |
+| S12 | the case's front edge limit says it matched | `bbc-models-page` "the words that must reach the page do" |
+| S13 | the case's note types the case top's scale | **survived**; now `bbc-models` "neither note types a figure" |
+| S14 | the case's limits drop the owl | `bbc-models-page` "the words that must reach the page do"; `bbc-models` "the outside's note is made() from its results file, and says the size is the manual's, ..." |
+| S15 | an owl in the case scene (a comment naming it) | `bbc-models` "no owl" |
+| S16 | a tap held 1400 ms on the model | `bbc-models` "a key goes down on bbc" |
+| S17 | the outside's lights never set (the entry) | `bbc-models-page` "the outside's entry is thin and follows the machine" |
+| S18 | the outside's caption says the measures agree | `bbc-models` "the outside's caption starts "Model, not a photograph.", reads its sizes and counts ..." |
+| S19 | the space bar given SPACE | `bbc-models` "the outside's keys are the machine's"; `bbc-models` "the words atlas holds every legend, label and word the scene draws, each in a box of ..." |
+| S20 | SHIFT puts down only one keycap | `bbc-models` "the outside's keys are the machine's" |
+| S21 | MODELS: the inside without its tracksHelp | `bbc-models-page` "the BBC Micro states its case and claims both views at once, outside then inside, and ..."; `bbc-models-page` "the words that must reach the page do" |
+| C1 | I6's author without the byline Chris's Acorns asks for | `bbc-models-page` "each view credits exactly the sources its results file lists, each once, as ..." |
+| C2 | I5's licence given as public domain | `bbc-models-page` "each view credits exactly the sources its results file lists, each once, as ..." |
+| C3 | the outside's results file without O8-I among its sources | `bbc-models-page` "each view credits exactly the sources its results file lists, each once, as ..."; `bbc-models` "the case results file is written from keys.json and case.json and agrees with them, ..." |
+| C4 | I1's credit no longer says the copper is traced to look at | **survived**; now `bbc-models` "every credit of the BBC Micro's that speaks of the copper ..." |
+| T1 | board_trace.py's nets judge at 75 per cent | `test_board_trace` `test_the_verdicts_are_the_plans`; the method's hash pin |
+| T2 | board_trace.py's nets judge ignoring a GND pin and a +5V pin in one net | `test_board_trace` `test_the_verdicts_are_the_plans`; the method's hash pin |
+| T3 | board_parts.py's manual check at 20 mm | the method's hash pin only; now also `test_board_parts` `test_the_manual_check_s_own_limit_is_the_plan_s_ten_millimetres` |
+| T4 | board_parts.py's identity rule letting a digit follow the part | `test_board_parts` `test_a_marking_agrees_with_the_tables_part_only_by_the_fixed_rule[74LS1630-74LS163-disagrees]`; the method's hash pin |
+| T5 | keys.py's judge_keys passing a median of 3 mm | `test_case` `test_judge_keys_gives_the_plan_s_three_bands`; the method's hash pin |
+| T6 | case_parts.py's rear check at 6 mm | `test_case` `test_a_port_three_millimetres_off_fails_the_rear_check_and_is_named`; the method's hash pin |
+| T7 | case_profile.py's check point at 5 mm | `test_case` `test_the_check_point_fails_when_its_legend_is_found_off_its_place`; the method's hash pin |
+| T8 | results.py taking the x verdict as first written, not as revised | `test_results` `test_the_board_figures_are_the_data_files_own`; `test_results` `test_the_x_scale_verdict_must_be_found_once` |
+| T9 | results.py's k1Mm from the smaller of the two K1 scales | `test_results` `test_the_case_figures_are_the_data_files_own` |
+| T10 | case_parts.py's module without CASE's note | `test_case` `test_the_module_exports_every_part_with_a_note`; the method's hash pin |
+| T11 | board_parts.py's module without each IC's counter | the method's hash pin only |
+| T12 | the results file's board figure edited by hand (the y median) | `bbc-models` "the results file is written from frame.json, registration.json, copper.json and ..." |
+| B1 | the frames not cleared before *DUMP | `bbc-models-page` "the browser check runs the BBC Micro's models after its machine, with the NES's ..." |
+| B2 | the *DUMP disc's file 1 KB, not 2 | `bbc-models-page` "the browser check runs the BBC Micro's models after its machine, with the NES's ..." |
+| B3 | the DFS looked for in the slot BASIC is in | **survived**; now `bbc-models-page` "the browser check's judgements on the inside and the lights ..." |
+| B4 | the *CAT judged on IC78's row alone, not its mark on the model | **survived**; now the same test |
+| B5 | the motor light judged on *MOTOR 1 only | **survived**; now the same test |
+
+**The totals.** 90 faults. 82 were caught. 8 survived: M5a, M8b, S10, S13, C4, B3, B4 and B5. 5 of the 82 were caught only by the site tests that pin the tools' method files and data to the hashes this journal recorded before each check ran (M2a, M5b, M10b, T3 and T11), and by no test of what the change does.
+
+**Why the eight survived, and what was done.** Each now has a test, written after the fault was seen to survive, and each new test was shown both ways in the scratch worktree: the five new site tests and the new pytest pass on the code as it stands, and each fault, run again through the script with the new tests committed in the scratch worktree (`python3 tools/probes/bbc_models_mutations.py --root ~/mut-bbc-models M5a M8b S10 S13 C4 B3 B4 B5`, 02:15 to 02:20 UTC), is caught by its new test and by no other: the unmutated run first, 569 site tests and none failing, then "survived: none".
+
+- **M5a, two keys' names swapped the same way in `keys.json`, `case.json` and the parts module.** The tests compared the three files with each other, so a swap made in all three passed, the NES's lesson (its mutation 3b) met again on the keys. The record is now the page's own: `bbc-models` "the case's keys are the machine's layout" holds each main row of `ON_SCREEN_ROWS` in `public/bbc-keys.js`, the on-screen keys in the machine's layout, to one row of keycaps in the same order left to right, in all three files. A re-run of `keys.py` with its map swapped (M5b) would now fail it too.
+- **M8b, `BbcLeds`' two lock values swapped in C#.** The C# tests read the lights by name, and the page's tests decode made-up bits, so the two ends of the host's bits were never held together. `bbc-micro` "leds() decodes the bits the host sends" reads `BbcLeds`' values from `BbcChip.cs`, checks that `lights()` decodes each to its own light, and that `BbcHost.Leds()` returns `(int)Machine.Bus.Leds` as it is.
+- **S10 and S13, a figure typed into a note's code,** equal to the results file's (the I5 registration's median in the board's note, the case top's scale in the case's). The note tests looked for the right figures in the words, and changed only a few fields to see the words move. `bbc-models` "neither note types a figure" moves every number in each results file and requires every number in the note's words to move, but for the few that are words, not figures (the board's "Issue 7", "table 8.1" and "40-pin", the case's "15-way"), which the test lists and also requires to be there.
+- **C4, I1's credit no longer saying the copper is traced to look at.** The copper test read the model's own words, not the credits the page shows under the same model. `bbc-models` "every credit of the BBC Micro's that speaks of the copper" requires each such credit to say traced to look at and not verified, or to name the check that failed.
+- **B3, B4 and B5, the browser check's judgements** (the DFS looked for in BASIC's slot, the `*CAT` judged on the legend row alone, `*MOTOR 0` not judged). The check runs only in a browser, in CI. `bbc-models-page` "the browser check's judgements on the inside and the lights" holds those lines by their text, as the `*DUMP` step's already were, the DFS's slot read from the layout's `PAGED_SLOTS`. A judgement weakened another way is for review and the check's log; `docs/known-differences.md` says so.
+
+**The five caught only by a hash pin.** M2a changes the words in `registration.json` that record the flip; the file is a run's output, pinned, and no run makes it. M5b, M10b and T11 change what `keys.py` and `board_parts.py` would write; the pin fails on the script, and a re-run would write outputs that the data tests fail (the keys' layout test for M5b, the fitted set and counters against `models.md`'s table for M10b, the module's counters for T11). T3, the manual check's limit at 20 mm, was a judge function whose pytest passed its own limit every time; `test_the_manual_check_s_own_limit_is_the_plan_s_ten_millimetres` now calls it with the module's own, and fails on T3 (checked on 14 October 2026 by setting `MANUAL_LIMIT_MM` to 20.0 in place and running `tests/test_board_parts.py`: 1 failed, 45 passed; then put back). The other four stay pinned, not tested, which `docs/known-differences.md` says.
+
+**What else the pass shows.** The plan's C# faults (M9, M10a, M11, R4) are all caught by `MachineStateTests`, and only there. The registry's rules (M14a, R1, R2, R7) are caught by the site's build, which validates the registry and stops with the rule's sentence (for R2, "a machine that claims a model must state case, true or false"), before any test. M2b, the one fault run for real, was caught by the script itself, as task 3's stop rule says it should be: the unflipped solder side matched only a fraction of the holes and stopped on its median. **A finding about the code: none.** No fault survived because the code was wrong in the same way, and the pass changed no line of the models, the tools or the machine; it added tests only.
+
+**Run again after two fixes to the script** (Mistakes, below), on the scratch worktree with this task's tests committed in it, on 14 October 2026: the tool faults, `... --root ~/mut-bbc-models M1b M5b M10b T1 T2 T3 T4 T5 T6 T7 T8 T9 T10 T11`, now with no bytecode written, and C1 and C2 in their new form. Each was caught by the same tests as in the first run, and T3 now by its new pytest as well; "survived: none" both times.
+
+### The speed run, checked against the branch
+
+Task 6's browser speed run was made in CI on 13 October 2026 (run 38472729370, base `8a30791`, after `0d9e1ab`) and passed, as "The browser speed run, in CI" above records. The run covers the machine as of `0d9e1ab`, so on 14 October 2026 this task checked that the machine has not changed since: `git diff 0d9e1ab..HEAD -- src/` printed nothing (at `50964e1`, and this task changes nothing under `src/`). So the run does not need repeating. The places that still said the run was owed were brought up to date with a dated line, the record of the time before the run kept: the plan's task 6 note, its Deferred list and its task 10 note, the summary of this entry, and the opening of task 6's section above. `bench/bbc-micro-speed/chip-counters/rule.md` already had its update of 13 October.
+
+### Where the models stop
+
+`docs/known-differences.md` has a new section, "The BBC Micro: its two 3D models, where they stop", after the BBC Micro's page in the browser. Every figure in it is quoted with the data file and key it was read from: the copper's two failed checks, the nets' and I5's, with the I5 registration's pass called optimistic; the print hiding copper; both parts checks failed, with the causes this entry's task 5 section found; table 8.1's apparent misprints (IC94's (45, 93), IC31's 74LS34, IC77's 74S00, which the manual's own modification B contradicts); the fitted set being the emulated machine's (the disc interface, no Econet or speech) where I5's board is the other way round, and the paged ROM slots not traced to sockets; the x scale between pass and stop, and PL11's pitch; the resistors and capacitors inferred from the print, the inferred DIP pins and the typical heights; the case's size from the Service Manual's B+ section against the Science Museum's, and the photographs' three measures pointing different ways; the two frames the outside mixes (the rear's ports on the D socket's scale) and the board's place across the case; the front edge not measurable; the cameras agreeing only where the legends are; K1 being a replacement keyboard; the typical and simplified parts of the outside; and the machine's state as the models read it, pointing to the bus section for the serial ULA's control byte reading 0 at power on and the counters counting a read of a write-only chip. Its last paragraph says how the tests treat it, with the mutation pass's two limits.
+
+The page's "What it does not show" lists, from each `made()`, were checked against the section item by item. Each of the board's six limits and the case's eight has its paragraph there. Two of the board's were not said in the section's first draft, the track map's resolution and the unfitted chips not drawn, and are now. What the section says beyond the page is the history of the checks and the figures behind each limit.
+
+### What the documents now say
+
+- **`README.md`**: under "Where it stands", that the BBC Micro's page has two 3D models, the outside and the inside, what each shows and what they were measured from, and that the board's copper is traced to look at. In the licences: the BBC Micro's main photograph CC BY 2.0 and its others public domain; the BBC board model's track map, traced from scans that state no licence, credited and not MIT; and K1's MIT notice in `NOTICE.md`. No figure. The two paragraphs touched are now one line each.
+- **`AGENTS.md`**'s layout: `site/src/models/` with the BBC Micro's two models and `access.mjs`; a `site/tests/` line naming the BBC models' test files and pointing to `site/README.md`'s list; `bench/bbc-micro-speed/` with its `chip-counters/` and the one CI run Dan approved; `tools/bbc-micro-model/`; `NOTICE.md`'s BBC sections; and `docs/bbc-micro/facts/models.md`.
+- **`NOTICE.md`**'s opening said "Five things" and listed five; it has seven sections now that stand on outside work. It lists them without a count.
+- **`site/README.md`**: the BBC Micro's models measured by `tools/bbc-micro-model/`, and a paragraph on what the browser check checks of them, read from `checkBbcModels`.
+- **`docs/the-6502-family.md`**: the BBC Micro's line says its page has two 3D models that follow the running machine.
+- **The photographs' README**: "for a machine that has one (the KIM-1)" now names the three machines with models, and "Its five others" no longer types the count.
+- **`tools/bbc-micro-model/README.md`** no longer says "so far": `results.py` writes both results files, `run-case.sh` ends with it, every input is in `sources.json`, and it points to the known differences and the mutation pass's real run of `board_register.py`.
+- **`tools/probes/README.md`** has a line for the mutation script.
+- **`site/DESIGN.md`**'s "The BBC Micro's 3D models", from task 9b, was read against the page and is still true; unchanged.
+
+**Stale statements looked for.** `grep -rn "wider" docs site/src site/public tools machines`: every hit about the case's width is either the corrected wording (the measures point different ways) or this entry's task 8 paragraph kept below its dated correction; nothing changed. "Not on the page yet" and "not on the page": only the headings of tasks 7 and 9a, which describe those tasks, and unrelated uses. "Owed": the speed run's, above.
+
+### What the page weighs
+
+`cd site && node scripts/page-weight.mjs /machines/bbc-micro/` and `/machines/kim-1/`, on this task's build (`npm run build`, with the machines and results file as for the tests), 14 October 2026, 01:42 UTC. Bytes, then gzipped at level 9:
+
+| | BBC Micro | KIM-1 |
+|---|---|---|
+| When the page opens, total | 211,509; 71,971 | 183,381; 114,815 |
+| of which the HTML | 131,791; 27,863 | 65,007; 14,595 |
+| When scrolled to, the other photographs | 117,840; 117,839 | 301,402; 301,442 |
+| Later, the outside's bundle | 644,623; 166,480 | |
+| Later, the inside's bundle and track map | 660,224; 169,046 and 376,968; 377,106 | 637,898; 163,048 and 314,614; 314,732 (the board, its only model) |
+
+The BBC Micro's figures are the ones task 9b re-measured after its review: nothing this task changed reaches the page. Nothing under `/models/` is in either page's first load, each bundle is inside 200,000 bytes gzipped, and each track map inside its budget.
+
+### Mistakes
+
+- The first version of the mutation script wrote two credits' addresses into its faults, and `mirrors.test.mjs` failed the suite on them, as it should for any address outside `dbhq-uk` in a `.py` under `tools/`. C1 and C2 now find their registry entry by its SHA-256 and change it there; the edit is the same.
+- While showing the new pytest kills T3, I set `MANUAL_LIMIT_MM` to 20.0 in this checkout and put the file back with `cp` in the same second. Python's cached bytecode for the file then still held 20.0, since its check is the source's size and time to the second, and the whole pytest run failed the new test on the code as it stands. Deleting `__pycache__` cleared it. The mutation script now runs pytest with `PYTHONDONTWRITEBYTECODE=1`. Its first run did not, but there a fault and its restore are always more than a second apart (a pytest run takes about 26 seconds), and the tool faults were run again with the setting (below).
+- Markdown turned a `--model-active` quoted in this section's table into a dash, which the site's test for dashes caught on the built page. It is in a code span now.
+
+### Tests and floors
+
+- **Five site tests added**, each for a mutation that survived (above): three in `bbc-models.test.mjs`, one in `bbc-micro.test.mjs`, one in `bbc-models-page.test.mjs`. Both workflows' floors rise by exactly those five, from 562 to 567, with a dated comment.
+- **One pytest added**, in `tests/test_board_parts.py`, for T3.
+- `cd site && npm test` (which builds first), on 14 October 2026 at 02:36 UTC, with the machines built and `src/data/results.json` as before: 569 tests, 568 passed, 0 failed, one to-do (task 2's x median); 564 and 563 before this task. `~/venv-models/bin/python -m pytest tools/bbc-micro-model/tests -q`: 145 passed, 144 before. No C# changed, so the C# suite was not run again as a whole; the C# faults ran the BBC Micro's whole test project, 997 tests, which pass unmutated.
+- Validate on the pushed commit is the record for the browser check, which this box cannot run: run 38501959350, on `c0c313d`, green in every job (test, machines, dashes, nes-gate and site).
+
+### Task 10's final review, and what was changed (14 October 2026)
+
+The final review of the whole branch found nothing on the page that claims more than its evidence, and found one claim in the documents that did: `docs/known-differences.md`'s new section said `bbc-models.test.mjs` pinned each of its figures, and that nothing was left for want of a test, but no test read that file. The reviewer planted 97.22 as 97.2, and "both held-out checks on it failed" as "passed", there, and both survived. What was done, each changed test changed first and seen to fail before the change it guards, and each new test seen to fail on a fault planted in place and put back:
+
+- **The known differences, read back.** `bbc-models` "docs/known-differences.md's section on the BBC Micro's models gives each figure and verdict as its data file has it" reads the section and checks every figure in it against its data key, formatted as the section gives it, and each verdict word against the verdict its file records: the copper's and the parts' two FAILs, the x scale between pass and stop, the rear check and the check point passed, the front edge not measurable. It failed on 97.22 as 97.2, on "failed" as "passed", on "between the 0.10 pass" as "beyond", and on 0.411 as 0.41. Writing it showed three figures the section could not source: PL11's pitch of 2.590 mm, from a line fit the journal quotes but no data file holds, is now the row's error, 0.423 mm, from `frame.json`; the board's right edge "0.36 mm" inside the case is now "about 0.4 mm", worked out from `boardInCase.x` and `board.widthMm`; and IC94's printed place "(48, 193)" is dropped, the sentence resting on IC95's place in the table. The section's last paragraph now says what the test holds. The key it cited for the inferred pins, `footprintCounts.inferred`, does not exist: it is `padCounts.bySource.inferred`, 7. Site floors 567 to 568, the one new test.
+- **The fact sheet's own claims.** `docs/bbc-micro/facts/models.md` was written before the work and said the inside's copper would be better than 1 mm, that both copper layers, the part places and the identities would be measured, that the keycaps would be sculpted and checked against K2, and that the rear ports' x would come from scan I1. Each now has a dated correction under it, as the sheet's I6 and O8 rows have.
+- **Smaller claims.** O2's credit said each rear port was checked against its socket; five of the seven were, and it now says each scored port (the photographs' README too, naming the two that were not). The board's first limit said the trace joins copper that is apart "in places"; the journal found one merge, so it says "in at least one place", and the page test's phrases for that limit require it (it failed against the old words). `site/README.md` still said the inside was not yet on the page. The journal's task 10 heading said three steps where it did four; this entry's "Waiting on Dan" and the plan's re-plan rows named the fork and the speed run's host as pending, and each has a dated note that both are done (the fork `dbhq-uk/bbc-keyboard` at `5ec53df`, 13 October 2026; the host a GitHub runner, CI run 38472729370). The summary's two narrower measures now say "if the keyboard drawing is true to size".
+- **The mirror test's reach.** `mirrors.test.mjs` read `.cs`, `.sh`, `.py` and `.mjs` files only. It now reads `.js` and `.html` under `tests/`, `tools/`, `bench/` and `src/` too, and the workflows under `.github/workflows/`. A workflow's actions are named `owner/repo@sha`, not by address, so the only address that scan found was the deploy's call to Cloudflare's API to purge the site's own cache; that one address is allowed in `deploy-site.yml` alone, by name. Shown able to fail: an address outside `dbhq-uk` appended to `bench/bbc-micro-speed/main.js`, to its `index.html` and to `bbc-speed-run.yml` each failed it.
+- **The speed workflow's default.** `bbc-speed-run.yml`'s `after` input defaulted to this branch, which will not exist after the merge; it defaults to `main`, and the chip counters' README says that the default baseline is then `main` itself.
+- **One convention.** `sources.json` gave TE's drawing the licence "none stated", where every other source that states none has null, and two tests accepted both. It is null, the results file is written again from it by `results.py` (one line changes), and the tests take null alone; the credit on the page still says "no licence stated". Each changed test failed against "none stated" first.
+- **Words.** The photographs' README pointed "below" to a table above it; "artifact" is "artefact" in the chip counters' README and in this entry, outside code; and this branch's hard-wrapped paragraphs in task 3's review are one line each, the lines the branch did not add left as they were.
+
+Nothing that the frozen methods' hashes cover was changed. `cd site && npm test`, 14 October 2026: 570 tests, 569 passed, 0 failed, one to-do. `~/venv-models/bin/python -m pytest tools/bbc-micro-model/tests -q`: 145 passed.

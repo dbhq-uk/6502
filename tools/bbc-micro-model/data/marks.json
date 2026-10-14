@@ -2463,7 +2463,7 @@
   "what": "Four pads marked on I1 and on I2 mirrored (I2 flipped left to right, x' = 5013 - x, so that it lies as the component side does), to seed the solder side's first affine fit. They are corners of four footprints far apart."
  },
  "footprints": {
-  "what": "Footprints' references, read from I1's print by hand because nothing in board_register.py reads text: each mark is a point in I1 pixels inside the footprint it names, with the crop (I1 pixels, enlarged by zoom, a grid every 100 pixels) the label was read on. A mark with pin1 also names pin 1, for a footprint whose print chamfer the code could not find. The references are the footprints the plan requires (task 3: IC1 to IC7, IC51, IC52, IC69, IC78) and IC21; task 5 names the rest. A mark with kind says the grouping took something for a DIP that is not one, and why; a mark with ref null names no reference.",
+  "what": "Footprints' references, read from I1's print by hand because nothing in board_register.py reads text: each mark is a point in I1 pixels inside the footprint it names, with the crop (I1 pixels, enlarged by zoom; a label on the side of a footprint is turned upright) the label was read on, and the reason. A mark with pin1 also names pin 1, for a footprint whose print chamfer the code could not find. A mark with pins says how many pins a DIP has where the grouping's run is longer than its printed outline, and keeps that many slots round the point. A mark with outlineFaint says the outline's print is too faint on one side for the grouping's outline test, which the stronger side then passes alone. A mark with kind says the grouping took something for a DIP that is not one. A mark with ref null and unread true says the reference is on the board and cannot be read; none is needed in this run, every DIP's was read. Every DIP footprint has a mark; the connectors PL8 to PL14 and SK6 and the resistor packs RP1 and RP2 are marked too, where the print is legible; no other connector or single row is.",
   "source": "I1",
   "marks": [
    {
@@ -2679,44 +2679,5147 @@
     "reason": "The label IC21 is printed left of the left row; pin 1 is the top left pad, at the print's chamfer, which is larger than the box the code looks in"
    },
    {
-    "ref": null,
+    "ref": "IC8",
     "at": [
-     412,
-     1435
+     3912.3,
+     2484.8
     ],
+    "crop": {
+     "box": [
+      3768,
+      2272,
+      3849,
+      2697
+     ],
+     "zoom": 2.4
+    },
+    "reason": "The label IC8 is printed left of the footprint's left row (read on the crop, enlarged and, for a label on a side, turned upright); the mark is the middle of the footprint's pads"
+   },
+   {
+    "ref": "IC9",
+    "at": [
+     3914.6,
+     2025.5
+    ],
+    "crop": {
+     "box": [
+      3770,
+      1813,
+      3852,
+      2236
+     ],
+     "zoom": 2.4
+    },
+    "reason": "The label IC9 is printed left of the footprint's left row (read on the crop, enlarged and, for a label on a side, turned upright); the mark is the middle of the footprint's pads"
+   },
+   {
+    "ref": "IC10",
+    "at": [
+     4093.9,
+     2485.2
+    ],
+    "crop": {
+     "box": [
+      3951,
+      2273,
+      4032,
+      2697
+     ],
+     "zoom": 2.4
+    },
+    "reason": "The label IC10 is printed left of the footprint's left row; as every label in this row does, it stands left of its own chip, between it and the chip before (read on the crop, enlarged and, for a label on a side, turned upright); the mark is the middle of the footprint's pads"
+   },
+   {
+    "ref": "IC11",
+    "at": [
+     4095.8,
+     2025.7
+    ],
+    "crop": {
+     "box": [
+      3951,
+      1813,
+      4032,
+      2238
+     ],
+     "zoom": 2.4
+    },
+    "reason": "The label IC11 is printed left of the footprint's left row (read on the crop, enlarged and, for a label on a side, turned upright); the mark is the middle of the footprint's pads"
+   },
+   {
+    "ref": "IC12",
+    "at": [
+     4453.6,
+     2485.8
+    ],
+    "crop": {
+     "box": [
+      4309,
+      2273,
+      4390,
+      2698
+     ],
+     "zoom": 2.4
+    },
+    "reason": "The label IC12 is printed left of the footprint's left row; as every label in this row does, it stands left of its own chip, between it and the chip before (read on the crop, enlarged and, for a label on a side, turned upright); the mark is the middle of the footprint's pads"
+   },
+   {
+    "ref": "IC13",
+    "at": [
+     4273.4,
+     2485.1
+    ],
+    "crop": {
+     "box": [
+      4131,
+      2273,
+      4212,
+      2698
+     ],
+     "zoom": 2.4
+    },
+    "reason": "The label IC13 is printed left of the footprint's left row; as every label in this row does, it stands left of its own chip, between it and the chip before (read on the crop, enlarged and, for a label on a side, turned upright); the mark is the middle of the footprint's pads"
+   },
+   {
+    "ref": "IC14",
+    "at": [
+     3011.0,
+     2363.2
+    ],
+    "crop": {
+     "box": [
+      2868,
+      2150,
+      2949,
+      2575
+     ],
+     "zoom": 2.4
+    },
+    "reason": "The label IC14 is printed left of the footprint's left row (read on the crop, enlarged and, for a label on a side, turned upright); the mark is the middle of the footprint's pads"
+   },
+   {
+    "ref": "IC15",
+    "at": [
+     3211.5,
+     2363.7
+    ],
+    "crop": {
+     "box": [
+      3069,
+      2151,
+      3150,
+      2575
+     ],
+     "zoom": 2.4
+    },
+    "reason": "The label IC15 is printed left of the footprint's left row; as every label in this row does, it stands left of its own chip, between it and the chip before (read on the crop, enlarged and, for a label on a side, turned upright); the mark is the middle of the footprint's pads"
+   },
+   {
+    "ref": "IC17",
+    "at": [
+     205.5,
+     3093.3
+    ],
+    "crop": {
+     "box": [
+      112,
+      3220,
+      361,
+      3309
+     ],
+     "zoom": 2.4
+    },
+    "reason": "The label IC17 is printed below the footprint (read on the crop, enlarged and, for a label on a side, turned upright); the mark is the middle of the footprint's pads"
+   },
+   {
+    "ref": "IC18",
+    "at": [
+     465.6,
+     2814.5
+    ],
+    "crop": {
+     "box": [
+      322,
+      2642,
+      403,
+      2985
+     ],
+     "zoom": 2.4
+    },
+    "reason": "The label IC18 is printed left of the footprint's left row (read on the crop, enlarged and, for a label on a side, turned upright); the mark is the middle of the footprint's pads"
+   },
+   {
+    "ref": "IC20",
+    "at": [
+     2007.6,
+     3138.0
+    ],
+    "crop": {
+     "box": [
+      1864,
+      2966,
+      1946,
+      3309
+     ],
+     "zoom": 2.4
+    },
+    "reason": "The label IC20 is printed left of the footprint's left row; as every label in this row does, it stands left of its own chip, between it and the chip before (read on the crop, enlarged and, for a label on a side, turned upright); the mark is the middle of the footprint's pads"
+   },
+   {
+    "ref": "IC22",
+    "at": [
+     2289.8,
+     2660.1
+    ],
+    "crop": {
+     "box": [
+      2351,
+      2508,
+      2433,
+      2812
+     ],
+     "zoom": 2.4
+    },
+    "reason": "The label IC22 is printed just right of the footprint's right row, 1 mm from it; the nearest other footprint is 20 mm away (read on the crop, enlarged and, for a label on a side, turned upright); the mark is the middle of the footprint's pads"
+   },
+   {
+    "ref": "IC23",
+    "at": [
+     2011.5,
+     2260.3
+    ],
+    "crop": {
+     "box": [
+      2074,
+      2109,
+      2156,
+      2413
+     ],
+     "zoom": 2.4
+    },
+    "reason": "The label IC23 is printed just right of the footprint's right row, 1 mm from it; the next footprint to the right, IC24's, has its own label on its left (read on the crop, enlarged and, for a label on a side, turned upright); the mark is the middle of the footprint's pads"
+   },
+   {
+    "ref": "IC24",
+    "at": [
+     2291.5,
+     2281.1
+    ],
+    "crop": {
+     "box": [
+      2147,
+      2108,
+      2228,
+      2452
+     ],
+     "zoom": 2.4
+    },
+    "reason": "The label IC24 is printed left of the footprint's left row (read on the crop, enlarged and, for a label on a side, turned upright); the mark is the middle of the footprint's pads"
+   },
+   {
+    "ref": "IC25",
+    "at": [
+     2013.9,
+     1821.1
+    ],
+    "crop": {
+     "box": [
+      1871,
+      1667,
+      1952,
+      1973
+     ],
+     "zoom": 2.4
+    },
+    "reason": "The label IC25 is printed left of the footprint's left row (read on the crop, enlarged and, for a label on a side, turned upright); the mark is the middle of the footprint's pads"
+   },
+   {
+    "ref": "IC26",
+    "at": [
+     2293.8,
+     1841.8
+    ],
+    "crop": {
+     "box": [
+      2150,
+      1669,
+      2232,
+      2015
+     ],
+     "zoom": 2.4
+    },
+    "reason": "The label IC26 is printed left of the footprint's left row (read on the crop, enlarged and, for a label on a side, turned upright); the mark is the middle of the footprint's pads"
+   },
+   {
+    "ref": "IC27",
+    "at": [
+     171.4,
+     1574.9
+    ],
+    "crop": {
+     "box": [
+      79,
+      1312,
+      174,
+      1447
+     ],
+     "zoom": 2.4
+    },
+    "reason": "The label IC27 is printed above the footprint, turned on its side, reading up (read on the crop, enlarged and, for a label on a side, turned upright); the mark is the middle of the footprint's pads"
+   },
+   {
+    "ref": "IC28",
+    "at": [
+     913.8,
+     1277.9
+    ],
+    "crop": {
+     "box": [
+      770,
+      1125,
+      852,
+      1430
+     ],
+     "zoom": 2.4
+    },
+    "reason": "The label IC28 is printed left of the footprint's left row; as every label in this row does, it stands left of its own chip, between it and the chip before (read on the crop, enlarged and, for a label on a side, turned upright); the mark is the middle of the footprint's pads"
+   },
+   {
+    "ref": "IC29",
+    "at": [
+     1153.7,
+     1278.6
+    ],
+    "crop": {
+     "box": [
+      1010,
+      1126,
+      1091,
+      1431
+     ],
+     "zoom": 2.4
+    },
+    "reason": "The label IC29 is printed left of the footprint's left row (read on the crop, enlarged and, for a label on a side, turned upright); the mark is the middle of the footprint's pads"
+   },
+   {
+    "ref": "IC30",
+    "at": [
+     1354.1,
+     1279.5
+    ],
+    "crop": {
+     "box": [
+      1210,
+      1125,
+      1292,
+      1433
+     ],
+     "zoom": 2.4
+    },
+    "reason": "The label IC30 is printed left of the footprint's left row; as every label in this row does, it stands left of its own chip, between it and the chip before (read on the crop, enlarged and, for a label on a side, turned upright); the mark is the middle of the footprint's pads"
+   },
+   {
+    "ref": "IC31",
+    "at": [
+     1535.1,
+     1280.2
+    ],
+    "crop": {
+     "box": [
+      1391,
+      1127,
+      1473,
+      1433
+     ],
+     "zoom": 2.4
+    },
+    "reason": "The label IC31 is printed left of the footprint's left row; as every label in this row does, it stands left of its own chip, between it and the chip before (read on the crop, enlarged and, for a label on a side, turned upright); the mark is the middle of the footprint's pads"
+   },
+   {
+    "ref": "IC32",
+    "at": [
+     1775.4,
+     1261.4
+    ],
+    "crop": {
+     "box": [
+      1632,
+      1089,
+      1713,
+      1433
+     ],
+     "zoom": 2.4
+    },
+    "reason": "The label IC32 is printed left of the footprint's left row (read on the crop, enlarged and, for a label on a side, turned upright); the mark is the middle of the footprint's pads"
+   },
+   {
+    "ref": "IC33",
+    "at": [
+     1035.8,
+     958.2
+    ],
+    "crop": {
+     "box": [
+      944,
+      743,
+      1195,
+      831
+     ],
+     "zoom": 2.4
+    },
+    "reason": "The label IC33 is printed above the footprint (read on the crop, enlarged and, for a label on a side, turned upright); the mark is the middle of the footprint's pads"
+   },
+   {
+    "ref": "IC34",
+    "at": [
+     1235.4,
+     959.3
+    ],
+    "crop": {
+     "box": [
+      1143,
+      744,
+      1393,
+      832
+     ],
+     "zoom": 2.4
+    },
+    "reason": "The label IC34 is printed above the footprint (read on the crop, enlarged and, for a label on a side, turned upright); the mark is the middle of the footprint's pads"
+   },
+   {
+    "ref": "IC35",
+    "at": [
+     2503.5,
+     322.3
+    ],
+    "crop": {
+     "box": [
+      2351,
+      134,
+      2432,
+      519
+     ],
+     "zoom": 2.4
+    },
+    "reason": "The label IC35 is printed left of the footprint's left row, beside two A marks (read on the crop, enlarged and, for a label on a side, turned upright); the mark is the middle of the footprint's pads; the grouping's run has two more pads than the 14-pin outline (R79, R82, R161 and their neighbours' pads at the ends), so the mark says 14 pins and the body's middle, and pin 1 is the top left pad, at the print's chamfer",
+    "pin1": [
+     2441.6,
+     205.6
+    ],
+    "pins": 14
+   },
+   {
+    "ref": "IC36",
+    "at": [
+     3495.4,
+     1625.2
+    ],
+    "crop": {
+     "box": [
+      3351,
+      1471,
+      3433,
+      1777
+     ],
+     "zoom": 2.4
+    },
+    "reason": "The label IC36 is printed left of the footprint's left row (read on the crop, enlarged and, for a label on a side, turned upright); the mark is the middle of the footprint's pads"
+   },
+   {
+    "ref": "IC37",
+    "at": [
+     3716.3,
+     1625.7
+    ],
+    "crop": {
+     "box": [
+      3573,
+      1471,
+      3655,
+      1778
+     ],
+     "zoom": 2.4
+    },
+    "reason": "The label IC37 is printed left of the footprint's left row; as every label in this row does, it stands left of its own chip, between it and the chip before (read on the crop, enlarged and, for a label on a side, turned upright); the mark is the middle of the footprint's pads"
+   },
+   {
+    "ref": "IC38",
+    "at": [
+     3916.7,
+     1626.0
+    ],
+    "crop": {
+     "box": [
+      3769,
+      1410,
+      3904,
+      1506
+     ],
+     "zoom": 2.4
+    },
+    "reason": "The label IC38 is printed at the top left corner of the footprint, left of its first row (the print is partly under a pad) (read on the crop, enlarged and, for a label on a side, turned upright); the mark is the middle of the footprint's pads"
+   },
+   {
+    "ref": "IC39",
+    "at": [
+     3076.6,
+     1225.7
+    ],
+    "crop": {
+     "box": [
+      2932,
+      1053,
+      3014,
+      1397
+     ],
+     "zoom": 2.4
+    },
+    "reason": "The label IC39 is printed left of the footprint's left row; its digit is 3, compared at 6x with IC89's 8 (read on the crop, enlarged and, for a label on a side, turned upright); the mark is the middle of the footprint's pads"
+   },
+   {
+    "ref": "IC40",
+    "at": [
+     3377.6,
+     1206.2
+    ],
+    "crop": {
+     "box": [
+      3234,
+      1054,
+      3316,
+      1357
+     ],
+     "zoom": 2.4
+    },
+    "reason": "The label IC40 is printed left of the footprint's left row (read on the crop, enlarged and, for a label on a side, turned upright); the mark is the middle of the footprint's pads"
+   },
+   {
+    "ref": "IC41",
+    "at": [
+     3718.2,
+     1206.5
+    ],
+    "crop": {
+     "box": [
+      3625,
+      1334,
+      3876,
+      1422
+     ],
+     "zoom": 2.4
+    },
+    "reason": "The label IC41 is printed below the footprint (read on the crop, enlarged and, for a label on a side, turned upright); the mark is the middle of the footprint's pads"
+   },
+   {
+    "ref": "IC42",
+    "at": [
+     3918.3,
+     1226.9
+    ],
+    "crop": {
+     "box": [
+      3776,
+      1054,
+      3857,
+      1399
+     ],
+     "zoom": 2.4
+    },
+    "reason": "The label IC42 is printed left of the footprint's left row; as every label in this row does, it stands left of its own chip, between it and the chip before (read on the crop, enlarged and, for a label on a side, turned upright); the mark is the middle of the footprint's pads"
+   },
+   {
+    "ref": "IC43",
+    "at": [
+     3078.9,
+     806.5
+    ],
+    "crop": {
+     "box": [
+      2983,
+      933,
+      3237,
+      1021
+     ],
+     "zoom": 2.4
+    },
+    "reason": "The label IC43 is printed below the footprint, 3 mm from it; IC39 is printed on the left of the footprint below, so this label is this footprint's by elimination, which is the nearer of the two as well [inferring] (read on the crop, enlarged and, for a label on a side, turned upright); the mark is the middle of the footprint's pads"
+   },
+   {
+    "ref": "IC44",
+    "at": [
+     3379.3,
+     806.9
+    ],
+    "crop": {
+     "box": [
+      3236,
+      654,
+      3317,
+      959
+     ],
+     "zoom": 2.4
+    },
+    "reason": "The label IC44 is printed left of the footprint's left row (read on the crop, enlarged and, for a label on a side, turned upright); the mark is the middle of the footprint's pads"
+   },
+   {
+    "ref": "IC45",
+    "at": [
+     3720.0,
+     827.7
+    ],
+    "crop": {
+     "box": [
+      3782,
+      655,
+      3863,
+      1000
+     ],
+     "zoom": 2.4
+    },
+    "reason": "The label IC45 is printed just right of the footprint's right row, 1 mm from it; the next footprint to the right, IC46's, has its own label on its left (read on the crop, enlarged and, for a label on a side, turned upright); the mark is the middle of the footprint's pads"
+   },
+   {
+    "ref": "IC46",
+    "at": [
+     4101.9,
+     668.9
+    ],
+    "crop": {
+     "box": [
+      3958,
+      516,
+      4040,
+      821
+     ],
+     "zoom": 2.4
+    },
+    "reason": "The label IC46 is printed left of the footprint's left row (read on the crop, enlarged and, for a label on a side, turned upright); the mark is the middle of the footprint's pads"
+   },
+   {
+    "ref": "IC47",
+    "at": [
+     4281.5,
+     668.1
+    ],
+    "crop": {
+     "box": [
+      4137,
+      514,
+      4219,
+      820
+     ],
+     "zoom": 2.4
+    },
+    "reason": "The label IC47 is printed left of the footprint's left row; as every label in this row does, it stands left of its own chip, between it and the chip before (read on the crop, enlarged and, for a label on a side, turned upright); the mark is the middle of the footprint's pads"
+   },
+   {
+    "ref": "IC48",
+    "at": [
+     4461.4,
+     668.2
+    ],
+    "crop": {
+     "box": [
+      4318,
+      514,
+      4399,
+      1022
+     ],
+     "zoom": 2.4
+    },
+    "reason": "The label IC48 is printed left of the footprint's left row; as every label in this row does, it stands left of its own chip, between it and the chip before (read on the crop, enlarged and, for a label on a side, turned upright); the mark is the middle of the footprint's pads"
+   },
+   {
+    "ref": "IC49",
+    "at": [
+     4641.7,
+     668.6
+    ],
+    "crop": {
+     "box": [
+      4498,
+      515,
+      4579,
+      820
+     ],
+     "zoom": 2.4
+    },
+    "reason": "The label IC49 is printed left of the footprint's left row; as every label in this row does, it stands left of its own chip, between it and the chip before (read on the crop, enlarged and, for a label on a side, turned upright); the mark is the middle of the footprint's pads"
+   },
+   {
+    "ref": "IC50",
+    "at": [
+     4823.1,
+     669.5
+    ],
+    "crop": {
+     "box": [
+      4680,
+      517,
+      4762,
+      821
+     ],
+     "zoom": 2.4
+    },
+    "reason": "The label IC50 is printed left of the footprint's left row; as every label in this row does, it stands left of its own chip, between it and the chip before (read on the crop, enlarged and, for a label on a side, turned upright); the mark is the middle of the footprint's pads"
+   },
+   {
+    "ref": "IC53",
+    "at": [
+     4633.8,
+     2445.2
+    ],
+    "crop": {
+     "box": [
+      4488,
+      2269,
+      4569,
+      2619
+     ],
+     "zoom": 2.4
+    },
+    "reason": "The label IC53 is printed left of the footprint's left row; the print here is faint and tan, and legible (read on the crop, enlarged and, for a label on a side, turned upright); the mark is the middle of the footprint's pads"
+   },
+   {
+    "ref": "IC54",
+    "at": [
+     4635.5,
+     2065.6
+    ],
+    "crop": {
+     "box": [
+      4491,
+      1888,
+      4573,
+      2238
+     ],
+     "zoom": 2.4
+    },
+    "reason": "The label IC54 is printed left of the footprint's left row; as every label in this row does, it stands left of its own chip, between it and the chip before (read on the crop, enlarged and, for a label on a side, turned upright); the mark is the middle of the footprint's pads"
+   },
+   {
+    "ref": "IC55",
+    "at": [
+     4454.9,
+     2065.5
+    ],
+    "crop": {
+     "box": [
+      4312,
+      1888,
+      4394,
+      2238
+     ],
+     "zoom": 2.4
+    },
+    "reason": "The label IC55 is printed left of the footprint's left row; as every label in this row does, it stands left of its own chip, between it and the chip before (read on the crop, enlarged and, for a label on a side, turned upright); the mark is the middle of the footprint's pads"
+   },
+   {
+    "ref": "IC56",
+    "at": [
+     4819.4,
+     1227.9
+    ],
+    "crop": {
+     "box": [
+      4676,
+      1055,
+      4757,
+      1400
+     ],
+     "zoom": 2.4
+    },
+    "reason": "The label IC56 is printed left of the footprint's left row; as every label in this row does, it stands left of its own chip, between it and the chip before (read on the crop, enlarged and, for a label on a side, turned upright); the mark is the middle of the footprint's pads"
+   },
+   {
+    "ref": "IC57",
+    "at": [
+     4638.6,
+     1227.1
+    ],
+    "crop": {
+     "box": [
+      4494,
+      1052,
+      4576,
+      1400
+     ],
+     "zoom": 2.4
+    },
+    "reason": "The label IC57 is printed left of the footprint's left row; as every label in this row does, it stands left of its own chip, between it and the chip before (read on the crop, enlarged and, for a label on a side, turned upright); the mark is the middle of the footprint's pads"
+   },
+   {
+    "ref": "IC58",
+    "at": [
+     4458.5,
+     1226.7
+    ],
+    "crop": {
+     "box": [
+      4316,
+      1050,
+      4397,
+      1401
+     ],
+     "zoom": 2.4
+    },
+    "reason": "The label IC58 is printed left of the footprint's left row; as every label in this row does, it stands left of its own chip, between it and the chip before (read on the crop, enlarged and, for a label on a side, turned upright); the mark is the middle of the footprint's pads"
+   },
+   {
+    "ref": "IC59",
+    "at": [
+     4278.0,
+     1226.6
+    ],
+    "crop": {
+     "box": [
+      4135,
+      1052,
+      4217,
+      1400
+     ],
+     "zoom": 2.4
+    },
+    "reason": "The label IC59 is printed left of the footprint's left row; as every label in this row does, it stands left of its own chip, between it and the chip before (read on the crop, enlarged and, for a label on a side, turned upright); the mark is the middle of the footprint's pads"
+   },
+   {
+    "ref": "IC60",
+    "at": [
+     4098.7,
+     1226.9
+    ],
+    "crop": {
+     "box": [
+      3956,
+      1052,
+      4038,
+      1399
+     ],
+     "zoom": 2.4
+    },
+    "reason": "The label IC60 is printed left of the footprint's left row; as every label in this row does, it stands left of its own chip, between it and the chip before (read on the crop, enlarged and, for a label on a side, turned upright); the mark is the middle of the footprint's pads"
+   },
+   {
+    "ref": "IC61",
+    "at": [
+     4812.9,
+     2446.3
+    ],
+    "crop": {
+     "box": [
+      4670,
+      2274,
+      4751,
+      2619
+     ],
+     "zoom": 2.4
+    },
+    "reason": "The label IC61 is printed left of the footprint's left row; the print here is faint and tan, and legible (read on the crop, enlarged and, for a label on a side, turned upright); the mark is the middle of the footprint's pads; the outline's print is too faint on its left side for the grouping's test (its yellow is washed out: OKLab b 0.03 to 0.05 against the 0.08 the print is found at) and the mark says so; pin 1 is the top left pad, at the chamfer",
+    "outlineFaint": true,
+    "pin1": [
+     4752.7,
+     2306.3
+    ]
+   },
+   {
+    "ref": "IC62",
+    "at": [
+     4815.2,
+     2066.4
+    ],
+    "crop": {
+     "box": [
+      4671,
+      1892,
+      4753,
+      2239
+     ],
+     "zoom": 2.4
+    },
+    "reason": "The label IC62 is printed left of the footprint's left row; as every label in this row does, it stands left of its own chip, between it and the chip before (read on the crop, enlarged and, for a label on a side, turned upright); the mark is the middle of the footprint's pads"
+   },
+   {
+    "ref": "IC63",
+    "at": [
+     4275.0,
+     2065.4
+    ],
+    "crop": {
+     "box": [
+      4131,
+      1891,
+      4213,
+      2237
+     ],
+     "zoom": 2.4
+    },
+    "reason": "The label IC63 is printed left of the footprint's left row; as every label in this row does, it stands left of its own chip, between it and the chip before (read on the crop, enlarged and, for a label on a side, turned upright); the mark is the middle of the footprint's pads"
+   },
+   {
+    "ref": "IC64",
+    "at": [
+     4817.1,
+     1606.9
+    ],
+    "crop": {
+     "box": [
+      4673,
+      1434,
+      4755,
+      1779
+     ],
+     "zoom": 2.4
+    },
+    "reason": "The label IC64 is printed left of the footprint's left row; as every label in this row does, it stands left of its own chip, between it and the chip before (read on the crop, enlarged and, for a label on a side, turned upright); the mark is the middle of the footprint's pads"
+   },
+   {
+    "ref": "IC65",
+    "at": [
+     4637.4,
+     1606.3
+    ],
+    "crop": {
+     "box": [
+      4494,
+      1432,
+      4576,
+      1779
+     ],
+     "zoom": 2.4
+    },
+    "reason": "The label IC65 is printed left of the footprint's left row; as every label in this row does, it stands left of its own chip, between it and the chip before (read on the crop, enlarged and, for a label on a side, turned upright); the mark is the middle of the footprint's pads"
+   },
+   {
+    "ref": "IC66",
+    "at": [
+     4457.0,
+     1605.8
+    ],
+    "crop": {
+     "box": [
+      4313,
+      1431,
+      4395,
+      1779
+     ],
+     "zoom": 2.4
+    },
+    "reason": "The label IC66 is printed left of the footprint's left row; as every label in this row does, it stands left of its own chip, between it and the chip before (read on the crop, enlarged and, for a label on a side, turned upright); the mark is the middle of the footprint's pads"
+   },
+   {
+    "ref": "IC67",
+    "at": [
+     4277.6,
+     1605.8
+    ],
+    "crop": {
+     "box": [
+      4133,
+      1434,
+      4215,
+      1778
+     ],
+     "zoom": 2.4
+    },
+    "reason": "The label IC67 is printed left of the footprint's left row; as every label in this row does, it stands left of its own chip, between it and the chip before (read on the crop, enlarged and, for a label on a side, turned upright); the mark is the middle of the footprint's pads"
+   },
+   {
+    "ref": "IC68",
+    "at": [
+     4095.8,
+     1605.5
+    ],
+    "crop": {
+     "box": [
+      3952,
+      1431,
+      4034,
+      1778
+     ],
+     "zoom": 2.4
+    },
+    "reason": "The label IC68 is printed left of the footprint's left row; as every label in this row does, it stands left of its own chip, between it and the chip before (read on the crop, enlarged and, for a label on a side, turned upright); the mark is the middle of the footprint's pads"
+   },
+   {
+    "ref": "IC70",
+    "at": [
+     2288.7,
+     3098.6
+    ],
+    "crop": {
+     "box": [
+      2146,
+      2885,
+      2228,
+      3310
+     ],
+     "zoom": 2.4
+    },
+    "reason": "The label IC70 is printed left of the footprint's left row (read on the crop, enlarged and, for a label on a side, turned upright); the mark is the middle of the footprint's pads"
+   },
+   {
+    "ref": "IC71",
+    "at": [
+     3008.7,
+     3021.6
+    ],
+    "crop": {
+     "box": [
+      2865,
+      2809,
+      2946,
+      3233
+     ],
+     "zoom": 2.4
+    },
+    "reason": "The label IC71 is printed left of the footprint's left row (read on the crop, enlarged and, for a label on a side, turned upright); the mark is the middle of the footprint's pads"
+   },
+   {
+    "ref": "IC72",
+    "at": [
+     3249.6,
+     3022.3
+    ],
+    "crop": {
+     "box": [
+      3107,
+      2807,
+      3188,
+      3234
+     ],
+     "zoom": 2.4
+    },
+    "reason": "The label IC72 is printed left of the footprint's left row (read on the crop, enlarged and, for a label on a side, turned upright); the mark is the middle of the footprint's pads"
+   },
+   {
+    "ref": "IC73",
+    "at": [
+     1758.5,
+     682.3
+    ],
+    "crop": {
+     "box": [
+      1603,
+      949,
+      1974,
+      1038
+     ],
+     "zoom": 2.4
+    },
+    "reason": "The label IC73 is printed below the footprint (read on the crop, enlarged and, for a label on a side, turned upright); the mark is the middle of the footprint's pads"
+   },
+   {
+    "ref": "IC74",
+    "at": [
+     3119.9,
+     487.6
+    ],
+    "crop": {
+     "box": [
+      2946,
+      556,
+      3356,
+      645
+     ],
+     "zoom": 2.4
+    },
+    "reason": "The label IC74 is printed below the footprint (read on the crop, enlarged and, for a label on a side, turned upright); the mark is the middle of the footprint's pads"
+   },
+   {
+    "ref": "IC75",
+    "at": [
+     3500.6,
+     488.0
+    ],
+    "crop": {
+     "box": [
+      3328,
+      331,
+      3736,
+      421
+     ],
+     "zoom": 2.4
+    },
+    "reason": "The label IC75 is printed above the footprint (read on the crop, enlarged and, for a label on a side, turned upright); the mark is the middle of the footprint's pads"
+   },
+   {
+    "ref": "IC76",
+    "at": [
+     1226.5,
+     2816.8
+    ],
+    "crop": {
+     "box": [
+      1084,
+      2643,
+      1166,
+      2988
+     ],
+     "zoom": 2.4
+    },
+    "reason": "The label IC76 is printed left of the footprint's left row; as every label in this row does, it stands left of its own chip, between it and the chip before (read on the crop, enlarged and, for a label on a side, turned upright); the mark is the middle of the footprint's pads"
+   },
+   {
+    "ref": "IC77",
+    "at": [
+     713.4,
+     1276.4
+    ],
+    "crop": {
+     "box": [
+      569,
+      1124,
+      651,
+      1428
+     ],
+     "zoom": 2.4
+    },
+    "reason": "The label IC77 is printed left of the footprint's left row (read on the crop, enlarged and, for a label on a side, turned upright); the mark is the middle of the footprint's pads"
+   },
+   {
+    "ref": "IC79",
+    "at": [
+     785.8,
+     2795.1
+    ],
+    "crop": {
+     "box": [
+      643,
+      2641,
+      725,
+      2947
+     ],
+     "zoom": 2.4
+    },
+    "reason": "The label IC79 is printed left of the footprint's left row (read on the crop, enlarged and, for a label on a side, turned upright); the mark is the middle of the footprint's pads"
+   },
+   {
+    "ref": "IC80",
+    "at": [
+     1026.5,
+     2795.9
+    ],
+    "crop": {
+     "box": [
+      883,
+      2642,
+      965,
+      2948
+     ],
+     "zoom": 2.4
+    },
+    "reason": "The label IC80 is printed left of the footprint's left row (read on the crop, enlarged and, for a label on a side, turned upright); the mark is the middle of the footprint's pads"
+   },
+   {
+    "ref": "IC81",
+    "at": [
+     1407.3,
+     2797.0
+    ],
+    "crop": {
+     "box": [
+      1265,
+      2645,
+      1346,
+      2948
+     ],
+     "zoom": 2.4
+    },
+    "reason": "The label IC81 is printed left of the footprint's left row; as every label in this row does, it stands left of its own chip, between it and the chip before (read on the crop, enlarged and, for a label on a side, turned upright); the mark is the middle of the footprint's pads"
+   },
+   {
+    "ref": "IC82",
+    "at": [
+     1648.1,
+     2797.8
+    ],
+    "crop": {
+     "box": [
+      1506,
+      2645,
+      1588,
+      2951
+     ],
+     "zoom": 2.4
+    },
+    "reason": "The label IC82 is printed left of the footprint's left row (read on the crop, enlarged and, for a label on a side, turned upright); the mark is the middle of the footprint's pads"
+   },
+   {
+    "ref": "IC83",
+    "at": [
+     1166.3,
+     3155.5
+    ],
+    "crop": {
+     "box": [
+      1023,
+      3002,
+      1105,
+      3308
+     ],
+     "zoom": 2.4
+    },
+    "reason": "The label IC83 is printed left of the footprint's left row (read on the crop, enlarged and, for a label on a side, turned upright); the mark is the middle of the footprint's pads"
+   },
+   {
+    "ref": "IC84",
+    "at": [
+     1406.2,
+     3155.7
+    ],
+    "crop": {
+     "box": [
+      1312,
+      2939,
+      1564,
+      3028
+     ],
+     "zoom": 2.4
+    },
+    "reason": "The label IC84 is printed above the footprint (read on the crop, enlarged and, for a label on a side, turned upright); the mark is the middle of the footprint's pads"
+   },
+   {
+    "ref": "IC85",
+    "at": [
+     1647.6,
+     3176.5
+    ],
+    "crop": {
+     "box": [
+      1505,
+      3003,
+      1587,
+      3348
+     ],
+     "zoom": 2.4
+    },
+    "reason": "The label IC85 is printed left of the footprint's left row (read on the crop, enlarged and, for a label on a side, turned upright); the mark is the middle of the footprint's pads"
+   },
+   {
+    "ref": "IC86",
+    "at": [
+     1827.5,
+     3157.2
+    ],
+    "crop": {
+     "box": [
+      1685,
+      3005,
+      1766,
+      3309
+     ],
+     "zoom": 2.4
+    },
+    "reason": "The label IC86 is printed left of the footprint's left row; as every label in this row does, it stands left of its own chip, between it and the chip before (read on the crop, enlarged and, for a label on a side, turned upright); the mark is the middle of the footprint's pads"
+   },
+   {
+    "ref": "IC87",
+    "at": [
+     795.4,
+     937.1
+    ],
+    "crop": {
+     "box": [
+      703,
+      702,
+      953,
+      790
+     ],
+     "zoom": 2.4
+    },
+    "reason": "The label IC87 is printed above the footprint (read on the crop, enlarged and, for a label on a side, turned upright); the mark is the middle of the footprint's pads"
+   },
+   {
+    "ref": "IC88",
+    "at": [
+     4152.1,
+     3024.9
+    ],
+    "crop": {
+     "box": [
+      3949,
+      2731,
+      4030,
+      3317
+     ],
+     "zoom": 2.4
+    },
+    "reason": "The label IC88 is printed left of the footprint's left row; as every label in this row does, it stands left of its own chip, between it and the chip before (read on the crop, enlarged and, for a label on a side, turned upright); the mark is the middle of the footprint's pads"
+   },
+   {
+    "ref": "IC89",
+    "at": [
+     411.7,
+     1435.3
+    ],
+    "crop": {
+     "box": [
+      208,
+      1142,
+      289,
+      1727
+     ],
+     "zoom": 2.4
+    },
+    "reason": "The label IC89 is printed left of the 28-pin footprint at the board's left edge; the digit is 8, not 3 (compared at 6x with IC39's 3 on another crop), and the earlier mark here that left the label unread is replaced (read on the crop, enlarged and, for a label on a side, turned upright); the mark is the middle of the footprint's pads; pin 1 is the top left pad, at the print's chamfer, which is larger than the box the code looks in (the bottom end, crop 250, 1660, 580, 1750, has a plain corner)",
     "pin1": [
      291,
      1171
-    ],
-    "crop": {
-     "box": [
-      250,
-      1120,
-      580,
-      1210
-     ],
-     "zoom": 3
-    },
-    "reason": "The 28-pin footprint at the left edge (task 0's L28, its label not read with confidence): pin 1 is the top left pad, at the print's chamfer; the bottom end (crop 250, 1660, 580, 1750) has a plain corner"
+    ]
    },
    {
-    "ref": null,
+    "ref": "IC91",
     "at": [
-     2497,
-     327
+     554.3,
+     915.5
     ],
-    "kind": "other",
     "crop": {
      "box": [
-      2480,
-      120,
-      2700,
-      540
+      462,
+      700,
+      711,
+      788
      ],
-     "zoom": 2
+     "zoom": 2.4
     },
-    "reason": "two columns of resistor and capacitor pads (R85 to R87, C32, C33 printed between them), not a DIP: the print beside the rows is their labels, not an outline"
+    "reason": "The label IC91 is printed above the footprint (read on the crop, enlarged and, for a label on a side, turned upright); the mark is the middle of the footprint's pads"
+   },
+   {
+    "ref": "IC93",
+    "at": [
+     333.9,
+     914.4
+    ],
+    "crop": {
+     "box": [
+      242,
+      697,
+      491,
+      786
+     ],
+     "zoom": 2.4
+    },
+    "reason": "The label IC93 is printed above the footprint (read on the crop, enlarged and, for a label on a side, turned upright); the mark is the middle of the footprint's pads"
+   },
+   {
+    "ref": "IC94",
+    "at": [
+     837.9,
+     497.2
+    ],
+    "crop": {
+     "box": [
+      746,
+      281,
+      996,
+      369
+     ],
+     "zoom": 2.4
+    },
+    "reason": "The label IC94 is printed above the footprint; the 4 is partly under a blob of solder and is read from the shape that shows (read on the crop, enlarged and, for a label on a side, turned upright); the mark is the middle of the footprint's pads"
+   },
+   {
+    "ref": "IC95",
+    "at": [
+     436.3,
+     494.9
+    ],
+    "crop": {
+     "box": [
+      344,
+      279,
+      593,
+      368
+     ],
+     "zoom": 2.4
+    },
+    "reason": "The label IC95 is printed above the footprint (read on the crop, enlarged and, for a label on a side, turned upright); the mark is the middle of the footprint's pads"
+   },
+   {
+    "ref": "IC96",
+    "at": [
+     1438.3,
+     561.0
+    ],
+    "crop": {
+     "box": [
+      1346,
+      287,
+      1596,
+      375
+     ],
+     "zoom": 2.4
+    },
+    "reason": "The label IC96 is printed above the footprint (read on the crop, enlarged and, for a label on a side, turned upright); the mark is the middle of the footprint's pads"
+   },
+   {
+    "ref": "IC97",
+    "at": [
+     173.9,
+     834.1
+    ],
+    "crop": {
+     "box": [
+      80,
+      618,
+      331,
+      707
+     ],
+     "zoom": 2.4
+    },
+    "reason": "The label IC97 is printed above the footprint (read on the crop, enlarged and, for a label on a side, turned upright); the mark is the middle of the footprint's pads"
+   },
+   {
+    "ref": "IC98",
+    "at": [
+     408.5,
+     2195.1
+    ],
+    "crop": {
+     "box": [
+      206,
+      1901,
+      287,
+      2486
+     ],
+     "zoom": 2.4
+    },
+    "reason": "The label IC98 is printed left of the footprint's left row (read on the crop, enlarged and, for a label on a side, turned upright); the mark is the middle of the footprint's pads"
+   },
+   {
+    "ref": "IC99",
+    "at": [
+     728.4,
+     2196.2
+    ],
+    "crop": {
+     "box": [
+      576,
+      1841,
+      946,
+      1930
+     ],
+     "zoom": 2.4
+    },
+    "reason": "The label IC99 is printed above the footprint (read on the crop, enlarged and, for a label on a side, turned upright); the mark is the middle of the footprint's pads"
+   },
+   {
+    "ref": "IC100",
+    "at": [
+     4452.1,
+     3025.6
+    ],
+    "crop": {
+     "box": [
+      4248,
+      2732,
+      4329,
+      3317
+     ],
+     "zoom": 2.4
+    },
+    "reason": "The label IC100 is printed left of the footprint's left row; as every label in this row does, it stands left of its own chip, between it and the chip before (read on the crop, enlarged and, for a label on a side, turned upright); the mark is the middle of the footprint's pads"
+   },
+   {
+    "ref": "IC101",
+    "at": [
+     4752.3,
+     3026.6
+    ],
+    "crop": {
+     "box": [
+      4549,
+      2733,
+      4630,
+      3319
+     ],
+     "zoom": 2.4
+    },
+    "reason": "The label IC101 is printed left of the footprint's left row; as every label in this row does, it stands left of its own chip, between it and the chip before (read on the crop, enlarged and, for a label on a side, turned upright); the mark is the middle of the footprint's pads"
+   },
+   {
+    "ref": "PL8",
+    "at": [
+     544.8,
+     3572.1
+    ],
+    "crop": {
+     "box": [
+      175,
+      3460,
+      916,
+      3681
+     ],
+     "zoom": 2.0
+    },
+    "reason": "The label PL8 is printed above the row of pads (read on the crop, enlarged); the mark is the middle of the footprint's pads"
+   },
+   {
+    "ref": "PL9",
+    "at": [
+     1465.9,
+     3574.8
+    ],
+    "crop": {
+     "box": [
+      1177,
+      3466,
+      1755,
+      3685
+     ],
+     "zoom": 2.0
+    },
+    "reason": "The label PL9 is printed above the row of pads (read on the crop, enlarged); the mark is the middle of the footprint's pads"
+   },
+   {
+    "ref": "PL10",
+    "at": [
+     2488.2,
+     3558.0
+    ],
+    "crop": {
+     "box": [
+      2261,
+      3469,
+      2714,
+      3646
+     ],
+     "zoom": 2.0
+    },
+    "reason": "The label PL10 is printed above the row of pads (read on the crop, enlarged); the mark is the middle of the footprint's pads"
+   },
+   {
+    "ref": "PL11",
+    "at": [
+     3348.6,
+     3561.2
+    ],
+    "crop": {
+     "box": [
+      2980,
+      3471,
+      3718,
+      3650
+     ],
+     "zoom": 2.0
+    },
+    "reason": "The label PL11 is printed above, left of the D14 pad the row of pads (read on the crop, enlarged); the last 1 is partly under a pad of D14 and is read from the shape that shows, and from PL8 to PL12 being in order; the mark is the middle of the footprint's pads"
+   },
+   {
+    "ref": "PL12",
+    "at": [
+     4412.3,
+     3564.7
+    ],
+    "crop": {
+     "box": [
+      3986,
+      3475,
+      4840,
+      3655
+     ],
+     "zoom": 2.0
+    },
+    "reason": "The label PL12 is printed above the row of pads (read on the crop, enlarged); the mark is the middle of the footprint's pads"
+   },
+   {
+    "ref": "PL13",
+    "at": [
+     1469.2,
+     2557.5
+    ],
+    "crop": {
+     "box": [
+      1102,
+      2468,
+      1840,
+      2647
+     ],
+     "zoom": 2.0
+    },
+    "reason": "The label PL13 is printed below the row of pads (read on the crop, enlarged); the mark is the middle of the footprint's pads"
+   },
+   {
+    "ref": "PL14",
+    "at": [
+     427.7,
+     2554.3
+    ],
+    "crop": {
+     "box": [
+      201,
+      2465,
+      654,
+      2644
+     ],
+     "zoom": 2.0
+    },
+    "reason": "The label PL14 is printed below the row of pads (read on the crop, enlarged); the mark is the middle of the footprint's pads"
+   },
+   {
+    "ref": "SK6",
+    "at": [
+     1740.4,
+     262.4
+    ],
+    "crop": {
+     "box": [
+      1542,
+      173,
+      1939,
+      354
+     ],
+     "zoom": 2.0
+    },
+    "reason": "The label SK6 is printed below the row of pads (read on the crop, enlarged); SK6 is the 15-way socket's two staggered rows, 8 pads here and 7 in the next footprint along, which carries no reference of its own so that none is given twice; the mark is the middle of the footprint's pads"
+   },
+   {
+    "ref": "RP1",
+    "at": [
+     888.7,
+     2196.9
+    ],
+    "crop": {
+     "box": [
+      809,
+      2009,
+      968,
+      2384
+     ],
+     "zoom": 2.0
+    },
+    "reason": "The label RP1 is printed beside the single row of pads, turned on its side (read on the crop, enlarged); the mark is the middle of the footprint's pads"
+   },
+   {
+    "ref": "RP2",
+    "at": [
+     1237.6,
+     460.3
+    ],
+    "crop": {
+     "box": [
+      1158,
+      254,
+      1317,
+      668
+     ],
+     "zoom": 2.0
+    },
+    "reason": "The label RP2 is printed beside the single row of pads, turned on its side (read on the crop, enlarged); the mark is the middle of the footprint's pads"
    }
   ]
+ },
+ "i5Pins": {
+  "what": "Chip pins on I5 (8BS's photograph of a populated Issue 7 board, in its pixels as stored, 2048 by 1536, not turned by its EXIF orientation: stored that way it lies as I1 does, rear connectors at the top), for registering I5 to the board frame (task 4's \"I5 to I1\" check). Each is the centroid of a pin's leg where it shows as a bright blob (OKLab L over 0.75, chroma under 0.05, 8 to 150 pixels), the blob picked by eye on the crop as the leg of the named pin: the corner pins of 14 chips spread over the board, or the pin next to a corner whose leg is hidden. The candidates were proposed by a rough fit (an affine from eight chips' centres read by eye on a reduced copy, then a homography refitted on the candidates within 3 pixels) and each was checked on its crop; the chips whose legs were ambiguous on their crops (the packed RAM, IC20, IC53, IC56, IC68), in sockets (IC6) or empty (IC78) were left out. Marked on 13 October 2026, before the check was run. The leg is seen from above, so its centroid can sit up to about half a millimetre outside the pad's centre, away from the chip's body.",
+  "source": "I5",
+  "marks": [
+   {
+    "ref": "IC1",
+    "pin": 1,
+    "i5Px": [
+     1058.0,
+     676.31
+    ],
+    "crop": {
+     "box": [
+      1038,
+      654,
+      1158,
+      698
+     ],
+     "zoom": 4
+    }
+   },
+   {
+    "ref": "IC1",
+    "pin": 40,
+    "i5Px": [
+     1138.57,
+     677.0
+    ],
+    "crop": {
+     "box": [
+      1038,
+      654,
+      1158,
+      698
+     ],
+     "zoom": 4
+    }
+   },
+   {
+    "ref": "IC1",
+    "pin": 20,
+    "i5Px": [
+     1058.4,
+     943.42
+    ],
+    "crop": {
+     "box": [
+      1038,
+      921,
+      1158,
+      965
+     ],
+     "zoom": 4
+    }
+   },
+   {
+    "ref": "IC1",
+    "pin": 21,
+    "i5Px": [
+     1138.45,
+     943.39
+    ],
+    "crop": {
+     "box": [
+      1038,
+      921,
+      1158,
+      965
+     ],
+     "zoom": 4
+    }
+   },
+   {
+    "ref": "IC2",
+    "pin": 1,
+    "i5Px": [
+     1055.95,
+     359.15
+    ],
+    "crop": {
+     "box": [
+      1036,
+      343,
+      1156,
+      387
+     ],
+     "zoom": 4
+    }
+   },
+   {
+    "ref": "IC2",
+    "pin": 39,
+    "i5Px": [
+     1137.44,
+     372.56
+    ],
+    "crop": {
+     "box": [
+      1036,
+      343,
+      1156,
+      387
+     ],
+     "zoom": 4
+    },
+    "why": "pin 40, the corner, is half hidden and its leg was not found as a bright blob; pin 39, next to it, is plain"
+   },
+   {
+    "ref": "IC2",
+    "pin": 20,
+    "i5Px": [
+     1058.07,
+     626.33
+    ],
+    "crop": {
+     "box": [
+      1037,
+      604,
+      1157,
+      648
+     ],
+     "zoom": 4
+    }
+   },
+   {
+    "ref": "IC2",
+    "pin": 21,
+    "i5Px": [
+     1137.57,
+     626.04
+    ],
+    "crop": {
+     "box": [
+      1037,
+      604,
+      1157,
+      648
+     ],
+     "zoom": 4
+    }
+   },
+   {
+    "ref": "IC3",
+    "pin": 1,
+    "i5Px": [
+     662.94,
+     721.2
+    ],
+    "crop": {
+     "box": [
+      643,
+      699,
+      763,
+      743
+     ],
+     "zoom": 4
+    }
+   },
+   {
+    "ref": "IC3",
+    "pin": 40,
+    "i5Px": [
+     743.5,
+     721.27
+    ],
+    "crop": {
+     "box": [
+      643,
+      699,
+      763,
+      743
+     ],
+     "zoom": 4
+    }
+   },
+   {
+    "ref": "IC3",
+    "pin": 20,
+    "i5Px": [
+     662.05,
+     988.15
+    ],
+    "crop": {
+     "box": [
+      642,
+      966,
+      762,
+      1010
+     ],
+     "zoom": 4
+    }
+   },
+   {
+    "ref": "IC3",
+    "pin": 21,
+    "i5Px": [
+     743.94,
+     987.91
+    ],
+    "crop": {
+     "box": [
+      642,
+      966,
+      762,
+      1010
+     ],
+     "zoom": 4
+    }
+   },
+   {
+    "ref": "IC69",
+    "pin": 1,
+    "i5Px": [
+     1057.56,
+     979.58
+    ],
+    "crop": {
+     "box": [
+      1037,
+      957,
+      1157,
+      1001
+     ],
+     "zoom": 4
+    }
+   },
+   {
+    "ref": "IC69",
+    "pin": 40,
+    "i5Px": [
+     1137.0,
+     979.5
+    ],
+    "crop": {
+     "box": [
+      1037,
+      957,
+      1157,
+      1001
+     ],
+     "zoom": 4
+    }
+   },
+   {
+    "ref": "IC69",
+    "pin": 20,
+    "i5Px": [
+     1057.11,
+     1246.26
+    ],
+    "crop": {
+     "box": [
+      1037,
+      1224,
+      1157,
+      1268
+     ],
+     "zoom": 4
+    }
+   },
+   {
+    "ref": "IC69",
+    "pin": 21,
+    "i5Px": [
+     1138.36,
+     1245.96
+    ],
+    "crop": {
+     "box": [
+      1037,
+      1224,
+      1157,
+      1268
+     ],
+     "zoom": 4
+    }
+   },
+   {
+    "ref": "IC5",
+    "pin": 1,
+    "i5Px": [
+     1199.09,
+     663.36
+    ],
+    "crop": {
+     "box": [
+      1182,
+      640,
+      1302,
+      684
+     ],
+     "zoom": 4
+    }
+   },
+   {
+    "ref": "IC5",
+    "pin": 28,
+    "i5Px": [
+     1285.02,
+     662.23
+    ],
+    "crop": {
+     "box": [
+      1182,
+      640,
+      1302,
+      684
+     ],
+     "zoom": 4
+    }
+   },
+   {
+    "ref": "IC5",
+    "pin": 14,
+    "i5Px": [
+     1203.29,
+     844.71
+    ],
+    "crop": {
+     "box": [
+      1184,
+      815,
+      1304,
+      859
+     ],
+     "zoom": 4
+    }
+   },
+   {
+    "ref": "IC5",
+    "pin": 16,
+    "i5Px": [
+     1285.0,
+     830.5
+    ],
+    "crop": {
+     "box": [
+      1184,
+      815,
+      1304,
+      859
+     ],
+     "zoom": 4
+    },
+    "why": "pin 15, the corner, is in shadow and its leg was not found as a bright blob; pin 16, next to it, is plain"
+   },
+   {
+    "ref": "IC51",
+    "pin": 1,
+    "i5Px": [
+     1352.95,
+     1092.15
+    ],
+    "crop": {
+     "box": [
+      1333,
+      1070,
+      1453,
+      1114
+     ],
+     "zoom": 4
+    }
+   },
+   {
+    "ref": "IC51",
+    "pin": 28,
+    "i5Px": [
+     1434.23,
+     1092.97
+    ],
+    "crop": {
+     "box": [
+      1333,
+      1070,
+      1453,
+      1114
+     ],
+     "zoom": 4
+    }
+   },
+   {
+    "ref": "IC51",
+    "pin": 14,
+    "i5Px": [
+     1352.84,
+     1274.53
+    ],
+    "crop": {
+     "box": [
+      1332,
+      1252,
+      1452,
+      1296
+     ],
+     "zoom": 4
+    }
+   },
+   {
+    "ref": "IC51",
+    "pin": 15,
+    "i5Px": [
+     1433.03,
+     1274.81
+    ],
+    "crop": {
+     "box": [
+      1332,
+      1252,
+      1452,
+      1296
+     ],
+     "zoom": 4
+    }
+   },
+   {
+    "ref": "IC52",
+    "pin": 1,
+    "i5Px": [
+     1458.25,
+     1091.0
+    ],
+    "crop": {
+     "box": [
+      1438,
+      1069,
+      1558,
+      1113
+     ],
+     "zoom": 4
+    }
+   },
+   {
+    "ref": "IC52",
+    "pin": 28,
+    "i5Px": [
+     1538.81,
+     1091.14
+    ],
+    "crop": {
+     "box": [
+      1438,
+      1069,
+      1558,
+      1113
+     ],
+     "zoom": 4
+    }
+   },
+   {
+    "ref": "IC52",
+    "pin": 14,
+    "i5Px": [
+     1459.07,
+     1273.6
+    ],
+    "crop": {
+     "box": [
+      1439,
+      1251,
+      1559,
+      1295
+     ],
+     "zoom": 4
+    }
+   },
+   {
+    "ref": "IC52",
+    "pin": 15,
+    "i5Px": [
+     1539.05,
+     1273.15
+    ],
+    "crop": {
+     "box": [
+      1439,
+      1251,
+      1559,
+      1295
+     ],
+     "zoom": 4
+    }
+   },
+   {
+    "ref": "IC4",
+    "pin": 1,
+    "i5Px": [
+     871.73,
+     474.49
+    ],
+    "crop": {
+     "box": [
+      853,
+      451,
+      973,
+      495
+     ],
+     "zoom": 4
+    }
+   },
+   {
+    "ref": "IC4",
+    "pin": 24,
+    "i5Px": [
+     955.12,
+     473.38
+    ],
+    "crop": {
+     "box": [
+      853,
+      451,
+      973,
+      495
+     ],
+     "zoom": 4
+    }
+   },
+   {
+    "ref": "IC4",
+    "pin": 12,
+    "i5Px": [
+     872.09,
+     628.56
+    ],
+    "crop": {
+     "box": [
+      854,
+      606,
+      974,
+      650
+     ],
+     "zoom": 4
+    }
+   },
+   {
+    "ref": "IC4",
+    "pin": 13,
+    "i5Px": [
+     956.49,
+     628.08
+    ],
+    "crop": {
+     "box": [
+      854,
+      606,
+      974,
+      650
+     ],
+     "zoom": 4
+    }
+   },
+   {
+    "ref": "IC89",
+    "pin": 1,
+    "i5Px": [
+     249.38,
+     538.65
+    ],
+    "crop": {
+     "box": [
+      228,
+      516,
+      348,
+      560
+     ],
+     "zoom": 4
+    }
+   },
+   {
+    "ref": "IC89",
+    "pin": 28,
+    "i5Px": [
+     327.83,
+     537.54
+    ],
+    "crop": {
+     "box": [
+      228,
+      516,
+      348,
+      560
+     ],
+     "zoom": 4
+    }
+   },
+   {
+    "ref": "IC89",
+    "pin": 14,
+    "i5Px": [
+     248.87,
+     720.07
+    ],
+    "crop": {
+     "box": [
+      229,
+      697,
+      349,
+      741
+     ],
+     "zoom": 4
+    }
+   },
+   {
+    "ref": "IC89",
+    "pin": 15,
+    "i5Px": [
+     329.71,
+     719.5
+    ],
+    "crop": {
+     "box": [
+      229,
+      697,
+      349,
+      741
+     ],
+     "zoom": 4
+    }
+   },
+   {
+    "ref": "IC97",
+    "pin": 1,
+    "i5Px": [
+     184.92,
+     380.42
+    ],
+    "crop": {
+     "box": [
+      146,
+      357,
+      266,
+      401
+     ],
+     "zoom": 4
+    }
+   },
+   {
+    "ref": "IC97",
+    "pin": 14,
+    "i5Px": [
+     227.9,
+     378.2
+    ],
+    "crop": {
+     "box": [
+      146,
+      357,
+      266,
+      401
+     ],
+     "zoom": 4
+    }
+   },
+   {
+    "ref": "IC97",
+    "pin": 7,
+    "i5Px": [
+     187.48,
+     463.64
+    ],
+    "crop": {
+     "box": [
+      147,
+      440,
+      267,
+      484
+     ],
+     "zoom": 4
+    }
+   },
+   {
+    "ref": "IC97",
+    "pin": 8,
+    "i5Px": [
+     227.05,
+     461.85
+    ],
+    "crop": {
+     "box": [
+      147,
+      440,
+      267,
+      484
+     ],
+     "zoom": 4
+    }
+   },
+   {
+    "ref": "IC33",
+    "pin": 1,
+    "i5Px": [
+     488.4,
+     419.13
+    ],
+    "crop": {
+     "box": [
+      449,
+      397,
+      569,
+      441
+     ],
+     "zoom": 4
+    }
+   },
+   {
+    "ref": "IC33",
+    "pin": 14,
+    "i5Px": [
+     530.49,
+     419.04
+    ],
+    "crop": {
+     "box": [
+      449,
+      397,
+      569,
+      441
+     ],
+     "zoom": 4
+    }
+   },
+   {
+    "ref": "IC33",
+    "pin": 7,
+    "i5Px": [
+     486.75,
+     503.5
+    ],
+    "crop": {
+     "box": [
+      446,
+      481,
+      566,
+      525
+     ],
+     "zoom": 4
+    }
+   },
+   {
+    "ref": "IC33",
+    "pin": 8,
+    "i5Px": [
+     526.96,
+     502.65
+    ],
+    "crop": {
+     "box": [
+      446,
+      481,
+      566,
+      525
+     ],
+     "zoom": 4
+    }
+   },
+   {
+    "ref": "IC87",
+    "pin": 1,
+    "i5Px": [
+     400.54,
+     406.46
+    ],
+    "crop": {
+     "box": [
+      362,
+      383,
+      482,
+      427
+     ],
+     "zoom": 4
+    }
+   },
+   {
+    "ref": "IC87",
+    "pin": 16,
+    "i5Px": [
+     443.62,
+     404.77
+    ],
+    "crop": {
+     "box": [
+      362,
+      383,
+      482,
+      427
+     ],
+     "zoom": 4
+    }
+   },
+   {
+    "ref": "IC87",
+    "pin": 8,
+    "i5Px": [
+     403.23,
+     503.25
+    ],
+    "crop": {
+     "box": [
+      363,
+      481,
+      483,
+      525
+     ],
+     "zoom": 4
+    }
+   },
+   {
+    "ref": "IC87",
+    "pin": 9,
+    "i5Px": [
+     444.65,
+     503.61
+    ],
+    "crop": {
+     "box": [
+      363,
+      481,
+      483,
+      525
+     ],
+     "zoom": 4
+    }
+   },
+   {
+    "ref": "IC73",
+    "pin": 1,
+    "i5Px": [
+     719.56,
+     267.02
+    ],
+    "crop": {
+     "box": [
+      699,
+      245,
+      819,
+      289
+     ],
+     "zoom": 4
+    }
+   },
+   {
+    "ref": "IC73",
+    "pin": 28,
+    "i5Px": [
+     798.58,
+     267.08
+    ],
+    "crop": {
+     "box": [
+      699,
+      245,
+      819,
+      289
+     ],
+     "zoom": 4
+    }
+   },
+   {
+    "ref": "IC73",
+    "pin": 14,
+    "i5Px": [
+     719.44,
+     450.09
+    ],
+    "crop": {
+     "box": [
+      698,
+      428,
+      818,
+      472
+     ],
+     "zoom": 4
+    }
+   },
+   {
+    "ref": "IC73",
+    "pin": 15,
+    "i5Px": [
+     798.46,
+     450.68
+    ],
+    "crop": {
+     "box": [
+      698,
+      428,
+      818,
+      472
+     ],
+     "zoom": 4
+    }
+   },
+   {
+    "ref": "IC61",
+    "pin": 1,
+    "i5Px": [
+     1815.35,
+     928.7
+    ],
+    "crop": {
+     "box": [
+      1774,
+      906,
+      1894,
+      950
+     ],
+     "zoom": 4
+    }
+   },
+   {
+    "ref": "IC61",
+    "pin": 16,
+    "i5Px": [
+     1853.0,
+     928.5
+    ],
+    "crop": {
+     "box": [
+      1774,
+      906,
+      1894,
+      950
+     ],
+     "zoom": 4
+    }
+   },
+   {
+    "ref": "IC61",
+    "pin": 8,
+    "i5Px": [
+     1815.0,
+     1023.69
+    ],
+    "crop": {
+     "box": [
+      1773,
+      1001,
+      1893,
+      1045
+     ],
+     "zoom": 4
+    }
+   },
+   {
+    "ref": "IC61",
+    "pin": 9,
+    "i5Px": [
+     1852.93,
+     1023.0
+    ],
+    "crop": {
+     "box": [
+      1773,
+      1001,
+      1893,
+      1045
+     ],
+     "zoom": 4
+    }
+   }
+  ]
+ },
+ "parts": {
+  "what": "Task 5's marks. Unless a mark says otherwise, each was read on the rectified copy of I1 that board_frame.py writes to out/ (16 px/mm in the board frame), or on I5 drawn onto the board frame through task 4's fit (refitted unrounded, as board_parts.py does), each crop given as a box in board millimetres (x0, y0, x1, y1) with a 5 mm grid drawn on it and its zoom.",
+  "eightPin": {
+   "what": "The two 8-pin DIPs, which task 3 did not group (it grouped DIPs of 14 to 40 pins): each pad, in pin order, as its index in registration.json's pads, or null for a pad task 3 did not find. Pin 1 is at the outline's printed chamfer, as on every DIP on the board, and the reference is printed beside the outline.",
+   "marks": [
+    {
+     "ref": "IC16",
+     "pads": [
+      33,
+      54,
+      74,
+      100,
+      99,
+      75,
+      55,
+      34
+     ],
+     "crop": {
+      "boxMm": [
+       0,
+       2,
+       25,
+       25
+      ],
+      "zoom": 3,
+      "on": "I1"
+     },
+     "reason": "IC16 is printed beside the outline, the chamfer at its rear left over pad 33; task 3 grouped the two rows as two 4-pad SIPs"
+    },
+    {
+     "ref": "IC19",
+     "pads": [
+      2256,
+      2289,
+      null,
+      2357,
+      2358,
+      2327,
+      2290,
+      2257
+     ],
+     "crop": {
+      "boxMm": [
+       42,
+       186,
+       66,
+       212
+      ],
+      "zoom": 3,
+      "on": "I1"
+     },
+     "reason": "IC19 is printed beside the outline, the chamfer at its rear left over pad 2256; pin 3's pad shows on the crop at about (50.5, 201.4) but task 3 did not find it, so its place is inferred from the pitch"
+    }
+   ]
+  },
+  "outlines": {
+   "what": "Bodies read by hand on I5 drawn onto the board frame through task 4's fit (board_parts.py's i5 fit), each box [x0, y0, x1, y1] in board millimetres, read on crops at 20 or 30 pixels a millimetre with a 2 mm grid; PL13 and PL14 instead from task 3's footprints (their pads' box, 0.3 mm round). The fit is the board's plane: a body's top, which a view from above shows, leans away from the photograph's middle by its height times its distance from the middle over the camera's distance, by up to a few millimetres for the tall parts at the edges; not corrected. Not drawn: SK2, the composite video BNC, which is on the case and wired to the board (D1 PDF page 91, the parts list: \"B.N.C. CONNECTOR ... PANEL MOUNT SK2\"); SK7, Econet's socket, not fitted (modification E, D1 PDF page 39); PL16 and the links (S1 to S39), not read. A label marked [inferring] takes the socket's number from the B+ section of D1, whose circuit description names the same sockets.",
+   "boxes": [
+    {
+     "ref": "SK1",
+     "group": "connector",
+     "kind": "phono",
+     "edge": "rear",
+     "box": [
+      271.9,
+      -7.5,
+      279.3,
+      -0.3
+     ],
+     "label": "UHF out, the modulator's socket",
+     "labelFrom": "D1 PDF page 94, the parts list: \"SK1 (UHF MODULATOR)\"",
+     "crop": {
+      "boxMm": [
+       260,
+       -12,
+       315,
+       36
+      ],
+      "zoom": 2
+     }
+    },
+    {
+     "ref": "SK3",
+     "group": "connector",
+     "kind": "din",
+     "edge": "rear",
+     "box": [
+      204.0,
+      -1.5,
+      226.3,
+      16.0
+     ],
+     "label": "RGB",
+     "labelFrom": "D1 PDF page 29: \"the RGB connector (SK 3)\"; SK3 printed beside it",
+     "crop": {
+      "boxMm": [
+       148,
+       -6,
+       230,
+       30
+      ],
+      "zoom": 2
+     }
+    },
+    {
+     "ref": "SK4",
+     "group": "connector",
+     "kind": "din",
+     "edge": "rear",
+     "box": [
+      184.0,
+      -1.5,
+      204.0,
+      16.5
+     ],
+     "label": "RS423",
+     "labelFrom": "D1 PDF page 126, the B+ section: \"the cassette (SK5) and RS423 (SK4)\" [inferring]; SK4 printed beside it",
+     "crop": {
+      "boxMm": [
+       148,
+       -6,
+       230,
+       30
+      ],
+      "zoom": 2
+     }
+    },
+    {
+     "ref": "SK5",
+     "group": "connector",
+     "kind": "din",
+     "edge": "rear",
+     "box": [
+      163.9,
+      -1.5,
+      184.0,
+      21.0
+     ],
+     "label": "cassette",
+     "labelFrom": "D1 PDF page 126, the B+ section: \"the cassette (SK5)\" [inferring]; SK5 printed beside it",
+     "crop": {
+      "boxMm": [
+       148,
+       -6,
+       230,
+       30
+      ],
+      "zoom": 2
+     }
+    },
+    {
+     "ref": "SK6",
+     "group": "connector",
+     "kind": "dType",
+     "edge": "rear",
+     "box": [
+      85.4,
+      -6.7,
+      123.7,
+      14.2
+     ],
+     "label": "analogue in",
+     "labelFrom": "D1 PDF page 35, \"15-way D-type socket ... SK6\", and page 127, the B+ section: \"four analogue inputs, from SK6\" [inferring]",
+     "crop": {
+      "boxMm": [
+       20,
+       -10,
+       130,
+       20
+      ],
+      "zoom": 2
+     }
+    },
+    {
+     "ref": "PL8",
+     "group": "connector",
+     "kind": "idc",
+     "edge": "underside",
+     "box": [
+      -1.0,
+      218.5,
+      61.0,
+      232.5
+     ],
+     "label": "disc drive",
+     "labelFrom": "D1 PDF page 41, link 8: \"links disc head load signal to PL8\"",
+     "crop": {
+      "boxMm": [
+       -6,
+       205,
+       100,
+       242
+      ],
+      "zoom": 2
+     }
+    },
+    {
+     "ref": "PL9",
+     "group": "connector",
+     "kind": "idc",
+     "edge": "underside",
+     "box": [
+      61.5,
+      218.5,
+      115.5,
+      232.5
+     ],
+     "label": "printer",
+     "labelFrom": "D1 PDF page 46: \"PL9, the printer port\"",
+     "crop": {
+      "boxMm": [
+       95,
+       205,
+       200,
+       242
+      ],
+      "zoom": 2
+     }
+    },
+    {
+     "ref": "PL10",
+     "group": "connector",
+     "kind": "idc",
+     "edge": "underside",
+     "box": [
+      131.5,
+      218.5,
+      176.0,
+      232.5
+     ],
+     "label": "user port",
+     "labelFrom": "D1 PDF page 125, the B+ section: the user port's lines \"connecting to PL10\" [inferring]",
+     "crop": {
+      "boxMm": [
+       95,
+       205,
+       200,
+       242
+      ],
+      "zoom": 2
+     }
+    },
+    {
+     "ref": "PL11",
+     "group": "connector",
+     "kind": "idc",
+     "edge": "underside",
+     "box": [
+      177.0,
+      218.5,
+      239.5,
+      232.5
+     ],
+     "label": "1 MHz bus",
+     "labelFrom": "D1 PDF page 58: FRED and JIM at PL11 pins 10 and 12",
+     "crop": {
+      "boxMm": [
+       195,
+       205,
+       315,
+       242
+      ],
+      "zoom": 2
+     }
+    },
+    {
+     "ref": "PL12",
+     "group": "connector",
+     "kind": "idc",
+     "edge": "underside",
+     "box": [
+      240.0,
+      218.5,
+      309.7,
+      232.5
+     ],
+     "label": "Tube",
+     "labelFrom": "D1 PDF page 58: the Tube at PL12 pin 8",
+     "crop": {
+      "boxMm": [
+       195,
+       205,
+       315,
+       242
+      ],
+      "zoom": 2
+     }
+    },
+    {
+     "ref": "PL13",
+     "group": "connector",
+     "kind": "header",
+     "edge": "board",
+     "box": [
+      67.2,
+      156.9,
+      110.7,
+      159.6
+     ],
+     "label": "keyboard",
+     "labelFrom": "D1 PDF page 31: \"The keyboard circuit ... connects via PL 13\"",
+     "crop": null
+    },
+    {
+     "ref": "PL14",
+     "group": "connector",
+     "kind": "header",
+     "edge": "board",
+     "box": [
+      10.1,
+      157.0,
+      35.4,
+      159.7
+     ],
+     "label": "serial ROM",
+     "labelFrom": "D1 PDF page 94, the parts list: \"PL14 (SERIAL ROM)\"",
+     "crop": null
+    },
+    {
+     "ref": "PL15",
+     "group": "connector",
+     "kind": "header",
+     "edge": "board",
+     "box": [
+      43.2,
+      211.6,
+      55.8,
+      216.5
+     ],
+     "label": "loudspeaker",
+     "labelFrom": "D1 PDF page 31: \"to drive a speaker from PL15\"",
+     "crop": {
+      "boxMm": [
+       -6,
+       205,
+       100,
+       242
+      ],
+      "zoom": 2
+     }
+    },
+    {
+     "ref": "modulator",
+     "group": "other",
+     "kind": "modulator",
+     "box": [
+      269.5,
+      -0.3,
+      310.0,
+      27.5
+     ],
+     "label": "the UHF modulator (Astec UM1233 E36, as I5 shows it)",
+     "labelFrom": "I5's label; D1 PDF page 29: a UHF signal on channel 36",
+     "crop": {
+      "boxMm": [
+       260,
+       -12,
+       315,
+       36
+      ],
+      "zoom": 2
+     }
+    },
+    {
+     "ref": "X1",
+     "group": "other",
+     "kind": "crystal",
+     "box": [
+      179.0,
+      36.3,
+      182.7,
+      46.2
+     ],
+     "label": "the 16 MHz crystal",
+     "labelFrom": "D1 PDF page 19: \"a 16 MHz crystal oscillator (IC43)\"; X printed beside it",
+     "crop": {
+      "boxMm": [
+       160,
+       20,
+       190,
+       48
+      ],
+      "zoom": 3
+     }
+    },
+    {
+     "ref": "RELAY",
+     "group": "other",
+     "kind": "relay",
+     "box": [
+      164.8,
+      24.7,
+      180.3,
+      35.0
+     ],
+     "label": "the cassette motor's relay",
+     "labelFrom": "D1 PDF page 29: motor control \"by using a small relay\"; RELAY printed on the board",
+     "crop": {
+      "boxMm": [
+       160,
+       20,
+       190,
+       48
+      ],
+      "zoom": 3
+     }
+    }
+   ]
+  },
+  "identities": {
+   "what": "Each IC's marking as read by hand on the crops board_parts.py --crops writes (each IC's body and 3 mm round it, drawn onto the board frame through the photograph's fit at 12 pixels a millimetre, enlarged twice, turned so its rows run across, in sheets of eight in out/, git-ignored); read on 13 October 2026, after the method was fixed. reading is every line read, in order, the maker's logo left out; null with why where nothing could be read. populated: the photograph shows a part in the place. socket: true where a socket shows clearly (an empty one, or a frame round the part); absent where none was seen, which does not mean there is none.",
+   "I5": {
+    "marks": [
+     {
+      "ref": "IC1",
+      "populated": true,
+      "reading": "R6502AP R6502-13 8304",
+      "crop": {
+       "sheet": "out/parts-i5-00.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC2",
+      "populated": true,
+      "reading": "2L1 HD46505SP JAPAN HD6845SP",
+      "crop": {
+       "sheet": "out/parts-i5-00.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC3",
+      "populated": true,
+      "reading": "R6522P01 R6522-31 8318",
+      "crop": {
+       "sheet": "out/parts-i5-00.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC4",
+      "populated": true,
+      "reading": "F6850P 8313 USA",
+      "crop": {
+       "sheet": "out/parts-i5-00.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC5",
+      "populated": true,
+      "reading": "SAA 5050 2188 DSG8314M5S",
+      "crop": {
+       "sheet": "out/parts-i5-00.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC6",
+      "populated": true,
+      "reading": null,
+      "why": "under a black cover (a heat sink), no marking shows",
+      "crop": {
+       "sheet": "out/parts-i5-00.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC7",
+      "populated": true,
+      "reading": "FERRANTI ULA 2C199E-7 8317",
+      "crop": {
+       "sheet": "out/parts-i5-00.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC8",
+      "populated": true,
+      "reading": "SB8312 DM81LS95AN",
+      "crop": {
+       "sheet": "out/parts-i5-00.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC9",
+      "populated": true,
+      "reading": "SB8312 DM81LS95AN",
+      "crop": {
+       "sheet": "out/parts-i5-01.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC10",
+      "populated": true,
+      "reading": "SB8312 DM81LS95AN",
+      "crop": {
+       "sheet": "out/parts-i5-01.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC11",
+      "populated": true,
+      "reading": "SB8312 DM81LS95AN",
+      "crop": {
+       "sheet": "out/parts-i5-01.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC12",
+      "populated": true,
+      "reading": "SB8312 DM81LS95AN",
+      "crop": {
+       "sheet": "out/parts-i5-01.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC13",
+      "populated": true,
+      "reading": "SB8312 DM81LS95AN",
+      "crop": {
+       "sheet": "out/parts-i5-01.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC14",
+      "populated": true,
+      "reading": "74LS245 PC",
+      "crop": {
+       "sheet": "out/parts-i5-01.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC15",
+      "populated": true,
+      "reading": "74LS273N K8240 SA",
+      "crop": {
+       "sheet": "out/parts-i5-01.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC16",
+      "populated": true,
+      "reading": null,
+      "why": "an 8-pin part, its marking too small and blurred on I5 to read (a TI mark shows)",
+      "crop": {
+       "sheet": "out/parts-i5-01.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC17",
+      "populated": true,
+      "reading": "MALAYSIA 319AC LM324N",
+      "crop": {
+       "sheet": "out/parts-i5-02.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC18",
+      "populated": true,
+      "reading": "ENGLAND 318A SN76489AN",
+      "crop": {
+       "sheet": "out/parts-i5-02.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC19",
+      "populated": true,
+      "reading": null,
+      "why": "an 8-pin part, its marking too small and blurred on I5 to read (LM shows, the rest not)",
+      "crop": {
+       "sheet": "out/parts-i5-02.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC20",
+      "populated": true,
+      "reading": "PORTUGAL 8319X SN74LS139N",
+      "crop": {
+       "sheet": "out/parts-i5-02.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC21",
+      "populated": true,
+      "reading": "SN74LS00N I8306",
+      "crop": {
+       "sheet": "out/parts-i5-02.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC22",
+      "populated": true,
+      "reading": "SN74LS30N I8322",
+      "crop": {
+       "sheet": "out/parts-i5-02.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC23",
+      "populated": true,
+      "reading": "SN74LS30N I8322",
+      "crop": {
+       "sheet": "out/parts-i5-02.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC24",
+      "populated": true,
+      "reading": "SN74LS138N 8239",
+      "crop": {
+       "sheet": "out/parts-i5-02.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC25",
+      "populated": true,
+      "reading": "SP8319 DM74LS20N",
+      "crop": {
+       "sheet": "out/parts-i5-03.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC26",
+      "populated": true,
+      "reading": "PORTUGAL 8319X SN74LS139N",
+      "socket": true,
+      "crop": {
+       "sheet": "out/parts-i5-03.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC27",
+      "populated": true,
+      "reading": "7438N K8251 SA",
+      "crop": {
+       "sheet": "out/parts-i5-03.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC28",
+      "populated": true,
+      "reading": "PORTUGAL 8319D SN74LS51N",
+      "crop": {
+       "sheet": "out/parts-i5-03.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC29",
+      "populated": true,
+      "reading": "SN74LS32N",
+      "crop": {
+       "sheet": "out/parts-i5-03.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC30",
+      "populated": true,
+      "reading": "74LS74AN K8309 SA",
+      "crop": {
+       "sheet": "out/parts-i5-03.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC31",
+      "populated": true,
+      "reading": "74LS74AN K8309 SA",
+      "crop": {
+       "sheet": "out/parts-i5-03.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC32",
+      "populated": true,
+      "reading": "SN74LS259N I8318",
+      "crop": {
+       "sheet": "out/parts-i5-03.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC33",
+      "populated": true,
+      "reading": "MALAYSIA 319C SN74LS04N",
+      "crop": {
+       "sheet": "out/parts-i5-04.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC34",
+      "populated": true,
+      "reading": "74LS74AN K8309 SA",
+      "crop": {
+       "sheet": "out/parts-i5-04.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC35",
+      "populated": true,
+      "reading": "S=M8320 LM324N",
+      "crop": {
+       "sheet": "out/parts-i5-04.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC36",
+      "populated": true,
+      "reading": "PORTUGAL 8314C SN74LS10N",
+      "crop": {
+       "sheet": "out/parts-i5-04.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC37",
+      "populated": true,
+      "reading": "MALAYSIA 319C SN74LS04N",
+      "crop": {
+       "sheet": "out/parts-i5-04.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC38",
+      "populated": true,
+      "reading": "SP8319 DM74LS86N",
+      "crop": {
+       "sheet": "out/parts-i5-04.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC39",
+      "populated": true,
+      "reading": "PORTUGAL 8314B SN74LS283N",
+      "socket": true,
+      "crop": {
+       "sheet": "out/parts-i5-04.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC40",
+      "populated": true,
+      "reading": "PORTUGAL 8314B SN74S00N",
+      "crop": {
+       "sheet": "out/parts-i5-04.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC41",
+      "populated": true,
+      "reading": "SP234 DM74LS02N",
+      "crop": {
+       "sheet": "out/parts-i5-05.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC42",
+      "populated": true,
+      "reading": "PORTUGAL 8314B SN74LS163AN",
+      "crop": {
+       "sheet": "out/parts-i5-05.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC43",
+      "populated": true,
+      "reading": "SP250 DM74S04N",
+      "crop": {
+       "sheet": "out/parts-i5-05.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC44",
+      "populated": true,
+      "reading": "74LS74AN K8309 SA",
+      "crop": {
+       "sheet": "out/parts-i5-05.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC45",
+      "populated": true,
+      "reading": "I8303 DM74S139N",
+      "crop": {
+       "sheet": "out/parts-i5-05.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC46",
+      "populated": true,
+      "reading": "ENGLAND 249E SN74S74N",
+      "crop": {
+       "sheet": "out/parts-i5-05.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC47",
+      "populated": true,
+      "reading": "SP8319 DM74LS86N",
+      "crop": {
+       "sheet": "out/parts-i5-05.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC48",
+      "populated": true,
+      "reading": "SP8319 DM74LS86N",
+      "crop": {
+       "sheet": "out/parts-i5-05.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC49",
+      "populated": true,
+      "reading": "SN74LS00N I8306",
+      "crop": {
+       "sheet": "out/parts-i5-06.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC50",
+      "populated": true,
+      "reading": "SN74LS00N I8306",
+      "crop": {
+       "sheet": "out/parts-i5-06.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC51",
+      "populated": true,
+      "reading": "8308 HN613128PB04 ACORN JAPAN COMPUTERS LTD",
+      "crop": {
+       "sheet": "out/parts-i5-06.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC52",
+      "populated": true,
+      "reading": "8308 HN613128PB05 ACORN JAPAN COMPUTERS LTD",
+      "crop": {
+       "sheet": "out/parts-i5-06.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC53",
+      "populated": true,
+      "reading": "JAPAN 3E3 HM4816AP-11",
+      "crop": {
+       "sheet": "out/parts-i5-06.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC54",
+      "populated": true,
+      "reading": "JAPAN 3E3 HM4816AP-11",
+      "crop": {
+       "sheet": "out/parts-i5-06.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC55",
+      "populated": true,
+      "reading": "JAPAN 3E3 HM4816AP-11",
+      "crop": {
+       "sheet": "out/parts-i5-06.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC56",
+      "populated": true,
+      "reading": "JAPAN 3E3 HM4816AP-11",
+      "crop": {
+       "sheet": "out/parts-i5-06.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC57",
+      "populated": true,
+      "reading": "JAPAN 3E3 HM4816AP-11",
+      "crop": {
+       "sheet": "out/parts-i5-07.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC58",
+      "populated": true,
+      "reading": "JAPAN 3E3 HM4816AP-11",
+      "crop": {
+       "sheet": "out/parts-i5-07.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC59",
+      "populated": true,
+      "reading": "JAPAN 3E3 HM4816AP-11",
+      "crop": {
+       "sheet": "out/parts-i5-07.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC60",
+      "populated": true,
+      "reading": "JAPAN 3E3 HM4816AP-11",
+      "crop": {
+       "sheet": "out/parts-i5-07.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC61",
+      "populated": true,
+      "reading": "MOSTEK 8405 MK4516N-11",
+      "crop": {
+       "sheet": "out/parts-i5-07.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC62",
+      "populated": true,
+      "reading": "MOSTEK 8405 MK4516N-11",
+      "crop": {
+       "sheet": "out/parts-i5-07.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC63",
+      "populated": true,
+      "reading": "MOSTEK 8405 MK4516N-11",
+      "crop": {
+       "sheet": "out/parts-i5-07.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC64",
+      "populated": true,
+      "reading": "MOSTEK 8405 MK4516N-11",
+      "crop": {
+       "sheet": "out/parts-i5-07.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC65",
+      "populated": true,
+      "reading": "MOSTEK 8405 MK4516N-11",
+      "crop": {
+       "sheet": "out/parts-i5-08.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC66",
+      "populated": true,
+      "reading": "MOSTEK 8405 MK4516N-11",
+      "crop": {
+       "sheet": "out/parts-i5-08.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC67",
+      "populated": true,
+      "reading": "MOSTEK 8405 MK4516N-11",
+      "crop": {
+       "sheet": "out/parts-i5-08.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC68",
+      "populated": true,
+      "reading": "MOSTEK 8405 MK4516N-11",
+      "crop": {
+       "sheet": "out/parts-i5-08.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC69",
+      "populated": true,
+      "reading": "8329 SY6522",
+      "crop": {
+       "sheet": "out/parts-i5-08.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC70",
+      "populated": true,
+      "reading": "74LS244N 8225 SA",
+      "crop": {
+       "sheet": "out/parts-i5-08.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC71",
+      "populated": true,
+      "reading": "74LS244N K8243 SA",
+      "crop": {
+       "sheet": "out/parts-i5-08.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC72",
+      "populated": true,
+      "reading": "PORTUGAL 8319D SN74LS245N",
+      "crop": {
+       "sheet": "out/parts-i5-08.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC73",
+      "populated": true,
+      "reading": "NEC JAPAN 8409K9 D7002C",
+      "crop": {
+       "sheet": "out/parts-i5-09.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC74",
+      "populated": true,
+      "reading": "I8408 DS88LS120N",
+      "crop": {
+       "sheet": "out/parts-i5-09.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC75",
+      "populated": true,
+      "reading": "SI8344 DS3691N AM26LS30PC",
+      "crop": {
+       "sheet": "out/parts-i5-09.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC76",
+      "populated": true,
+      "reading": "74LS163AN V8240 SA",
+      "crop": {
+       "sheet": "out/parts-i5-09.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC77",
+      "populated": true,
+      "reading": "74LS00N 8218 S",
+      "crop": {
+       "sheet": "out/parts-i5-09.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC78",
+      "populated": false,
+      "reading": null,
+      "why": "an empty socket on I5",
+      "socket": true,
+      "crop": {
+       "sheet": "out/parts-i5-09.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC79",
+      "populated": false,
+      "reading": null,
+      "why": "an empty socket on I5",
+      "socket": true,
+      "crop": {
+       "sheet": "out/parts-i5-09.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC80",
+      "populated": false,
+      "reading": null,
+      "why": "an empty socket on I5",
+      "socket": true,
+      "crop": {
+       "sheet": "out/parts-i5-09.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC81",
+      "populated": false,
+      "reading": null,
+      "why": "an empty socket on I5",
+      "socket": true,
+      "crop": {
+       "sheet": "out/parts-i5-10.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC82",
+      "populated": false,
+      "reading": null,
+      "why": "an empty socket on I5",
+      "socket": true,
+      "crop": {
+       "sheet": "out/parts-i5-10.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC83",
+      "populated": false,
+      "reading": null,
+      "why": "an empty socket on I5",
+      "socket": true,
+      "crop": {
+       "sheet": "out/parts-i5-10.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC84",
+      "populated": false,
+      "reading": null,
+      "why": "an empty socket on I5",
+      "socket": true,
+      "crop": {
+       "sheet": "out/parts-i5-10.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC85",
+      "populated": false,
+      "reading": null,
+      "why": "an empty socket on I5",
+      "socket": true,
+      "crop": {
+       "sheet": "out/parts-i5-10.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC86",
+      "populated": false,
+      "reading": null,
+      "why": "an empty socket on I5",
+      "socket": true,
+      "crop": {
+       "sheet": "out/parts-i5-10.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC87",
+      "populated": true,
+      "reading": "PORTUGAL 8314A SN74LS123N",
+      "crop": {
+       "sheet": "out/parts-i5-10.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC88",
+      "populated": true,
+      "reading": "M27C64A -15F1 SINGAPORE, with a hand label LFS 1.40",
+      "crop": {
+       "sheet": "out/parts-i5-10.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC89",
+      "populated": true,
+      "reading": "F68B54P 8313 PHILIPPINES",
+      "crop": {
+       "sheet": "out/parts-i5-11.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC91",
+      "populated": true,
+      "reading": "MALAYSIA 310K SN74LS132N",
+      "crop": {
+       "sheet": "out/parts-i5-11.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC93",
+      "populated": true,
+      "reading": "ENGLAND 314A SN75159N",
+      "crop": {
+       "sheet": "out/parts-i5-11.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC94",
+      "populated": true,
+      "reading": "S=M8319 LM319N",
+      "crop": {
+       "sheet": "out/parts-i5-11.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC95",
+      "populated": true,
+      "reading": "S=M8319 LM319N",
+      "crop": {
+       "sheet": "out/parts-i5-11.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC96",
+      "populated": true,
+      "reading": "74LS244N 8231 SA",
+      "crop": {
+       "sheet": "out/parts-i5-11.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC97",
+      "populated": true,
+      "reading": "74LS74AN K8309 SA",
+      "crop": {
+       "sheet": "out/parts-i5-11.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC98",
+      "populated": false,
+      "reading": null,
+      "why": "an empty socket on I5",
+      "socket": true,
+      "crop": {
+       "sheet": "out/parts-i5-11.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC99",
+      "populated": false,
+      "reading": null,
+      "why": "an empty socket on I5",
+      "socket": true,
+      "crop": {
+       "sheet": "out/parts-i5-12.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC100",
+      "populated": false,
+      "reading": null,
+      "why": "an empty socket on I5",
+      "socket": true,
+      "crop": {
+       "sheet": "out/parts-i5-12.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC101",
+      "populated": false,
+      "reading": null,
+      "why": "an empty socket on I5",
+      "socket": true,
+      "crop": {
+       "sheet": "out/parts-i5-12.png",
+       "by": "board_parts.py --crops"
+      }
+     }
+    ]
+   },
+   "I6": {
+    "marks": [
+     {
+      "ref": "IC1",
+      "populated": true,
+      "reading": "S 8434 SYU6502A",
+      "crop": {
+       "sheet": "out/parts-i6-00.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC2",
+      "populated": true,
+      "reading": "4H4 HD46505SP JAPAN HD6845SP",
+      "crop": {
+       "sheet": "out/parts-i6-00.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC3",
+      "populated": true,
+      "reading": "R6522AP R6522-33 8424",
+      "crop": {
+       "sheet": "out/parts-i6-00.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC4",
+      "populated": true,
+      "reading": null,
+      "why": "glare on its top",
+      "crop": {
+       "sheet": "out/parts-i6-00.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC5",
+      "populated": true,
+      "reading": "SAA 5050 5894 GSG8414M5S",
+      "crop": {
+       "sheet": "out/parts-i6-00.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC6",
+      "populated": true,
+      "reading": "VTI 423 V 2787 VC2069 201647 ACORN COMPUTER KOREA-A",
+      "crop": {
+       "sheet": "out/parts-i6-00.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC7",
+      "populated": true,
+      "reading": "FERRANTI ULA 2C199E-7 8420",
+      "crop": {
+       "sheet": "out/parts-i6-00.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC8",
+      "populated": true,
+      "reading": "SP8412 DM81LS95AN",
+      "crop": {
+       "sheet": "out/parts-i6-00.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC9",
+      "populated": true,
+      "reading": "SP8412 DM81LS95AN",
+      "crop": {
+       "sheet": "out/parts-i6-01.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC10",
+      "populated": true,
+      "reading": "SP8412 DM81LS95AN",
+      "crop": {
+       "sheet": "out/parts-i6-01.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC11",
+      "populated": true,
+      "reading": "SP8412 DM81LS95AN",
+      "crop": {
+       "sheet": "out/parts-i6-01.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC12",
+      "populated": true,
+      "reading": "SP8412 DM81LS95AN",
+      "crop": {
+       "sheet": "out/parts-i6-01.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC13",
+      "populated": true,
+      "reading": "SP8412 DM81LS95AN",
+      "crop": {
+       "sheet": "out/parts-i6-01.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC14",
+      "populated": true,
+      "reading": "MALAYSIA 4285R SN74LS245N",
+      "crop": {
+       "sheet": "out/parts-i6-01.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC15",
+      "populated": true,
+      "reading": "74LS273N A VV8433 BV",
+      "crop": {
+       "sheet": "out/parts-i6-01.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC16",
+      "populated": true,
+      "reading": null,
+      "why": "an 8-pin part, too small and dark to read",
+      "crop": {
+       "sheet": "out/parts-i6-01.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC17",
+      "populated": true,
+      "reading": "ENGLAND 432A LM324N",
+      "crop": {
+       "sheet": "out/parts-i6-02.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC18",
+      "populated": true,
+      "reading": "ENGLAND 419X SN76489AN",
+      "crop": {
+       "sheet": "out/parts-i6-02.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC19",
+      "populated": true,
+      "reading": "M8416 LM386N-1",
+      "crop": {
+       "sheet": "out/parts-i6-02.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC20",
+      "populated": true,
+      "reading": "P8428 DM74LS139N",
+      "crop": {
+       "sheet": "out/parts-i6-02.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC21",
+      "populated": true,
+      "reading": "74LS00N A KK8429 HU",
+      "crop": {
+       "sheet": "out/parts-i6-02.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC22",
+      "populated": true,
+      "reading": "74LS30N K8425 SA",
+      "crop": {
+       "sheet": "out/parts-i6-02.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC23",
+      "populated": true,
+      "reading": "74LS30N K8425 SA",
+      "crop": {
+       "sheet": "out/parts-i6-02.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC24",
+      "populated": true,
+      "reading": "74LS138N 8422 B",
+      "crop": {
+       "sheet": "out/parts-i6-02.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC25",
+      "populated": true,
+      "reading": "74LS20N K8427 SA",
+      "crop": {
+       "sheet": "out/parts-i6-03.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC26",
+      "populated": true,
+      "reading": "P8428 DM74LS139N",
+      "crop": {
+       "sheet": "out/parts-i6-03.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC27",
+      "populated": true,
+      "reading": "7438N A KK8430 EU",
+      "crop": {
+       "sheet": "out/parts-i6-03.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC28",
+      "populated": true,
+      "reading": "74LS51N A KK8423 ES",
+      "crop": {
+       "sheet": "out/parts-i6-03.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC29",
+      "populated": true,
+      "reading": "P8424 DM74LS32N",
+      "crop": {
+       "sheet": "out/parts-i6-03.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC30",
+      "populated": true,
+      "reading": "P8428 DM74LS74AN",
+      "crop": {
+       "sheet": "out/parts-i6-03.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC31",
+      "populated": true,
+      "reading": "P8428 DM74LS74AN",
+      "crop": {
+       "sheet": "out/parts-i6-03.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC32",
+      "populated": true,
+      "reading": null,
+      "why": "too faint to read",
+      "crop": {
+       "sheet": "out/parts-i6-03.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC33",
+      "populated": true,
+      "reading": "P8420 DM74LS04N",
+      "crop": {
+       "sheet": "out/parts-i6-04.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC34",
+      "populated": true,
+      "reading": "PORTUGAL 8435A SN74LS74AN",
+      "crop": {
+       "sheet": "out/parts-i6-04.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC35",
+      "populated": true,
+      "reading": "ENGLAND 435A LM324N",
+      "crop": {
+       "sheet": "out/parts-i6-04.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC36",
+      "populated": true,
+      "reading": "MALAYSIA 432CR SN74LS10N",
+      "crop": {
+       "sheet": "out/parts-i6-04.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC37",
+      "populated": true,
+      "reading": "P8420 DM74LS04N",
+      "crop": {
+       "sheet": "out/parts-i6-04.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC38",
+      "populated": true,
+      "reading": "74LS86N A KK8432 BU",
+      "crop": {
+       "sheet": "out/parts-i6-04.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC39",
+      "populated": true,
+      "reading": "P8428 DM74LS283N",
+      "crop": {
+       "sheet": "out/parts-i6-04.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC40",
+      "populated": true,
+      "reading": "74S00N A KK8433 EV",
+      "crop": {
+       "sheet": "out/parts-i6-04.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC41",
+      "populated": true,
+      "reading": null,
+      "why": "too faint to read",
+      "crop": {
+       "sheet": "out/parts-i6-05.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC42",
+      "populated": true,
+      "reading": "P8416 DM74LS163AN",
+      "crop": {
+       "sheet": "out/parts-i6-05.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC43",
+      "populated": true,
+      "reading": "MALAYSIA 432AR SN74S04N",
+      "crop": {
+       "sheet": "out/parts-i6-05.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC44",
+      "populated": true,
+      "reading": "P8428 DM74LS74AN",
+      "crop": {
+       "sheet": "out/parts-i6-05.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC45",
+      "populated": true,
+      "reading": "74S139N K8410 SA",
+      "crop": {
+       "sheet": "out/parts-i6-05.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC46",
+      "populated": true,
+      "reading": null,
+      "why": "the crop through the rough fit falls across two chips (no point was marked at that end of the board)",
+      "crop": {
+       "sheet": "out/parts-i6-05.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC47",
+      "populated": true,
+      "reading": null,
+      "why": "the crop through the rough fit falls across two chips (no point was marked at that end of the board)",
+      "crop": {
+       "sheet": "out/parts-i6-05.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC48",
+      "populated": true,
+      "reading": null,
+      "why": "the crop through the rough fit falls across two chips (no point was marked at that end of the board)",
+      "crop": {
+       "sheet": "out/parts-i6-05.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC49",
+      "populated": true,
+      "reading": null,
+      "why": "the crop through the rough fit falls across two chips (no point was marked at that end of the board)",
+      "crop": {
+       "sheet": "out/parts-i6-06.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC50",
+      "populated": true,
+      "reading": null,
+      "why": "the crop through the rough fit falls across two chips (no point was marked at that end of the board)",
+      "crop": {
+       "sheet": "out/parts-i6-06.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC51",
+      "populated": true,
+      "reading": "8438 HN613128PB04 ACORN W.GERMANY COMPUTERS LTD",
+      "crop": {
+       "sheet": "out/parts-i6-06.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC52",
+      "populated": true,
+      "reading": "8421 HN613128PB05 ACORN JAPAN COMPUTERS LTD",
+      "crop": {
+       "sheet": "out/parts-i6-06.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC53",
+      "populated": true,
+      "reading": null,
+      "why": "the crop through the rough fit is not centred on its own chip, though every RAM on I6 reads HM4816AP-11",
+      "crop": {
+       "sheet": "out/parts-i6-06.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC54",
+      "populated": true,
+      "reading": null,
+      "why": "the crop through the rough fit is not centred on its own chip, though every RAM on I6 reads HM4816AP-11",
+      "crop": {
+       "sheet": "out/parts-i6-06.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC55",
+      "populated": true,
+      "reading": null,
+      "why": "the crop through the rough fit is not centred on its own chip, though every RAM on I6 reads HM4816AP-11",
+      "crop": {
+       "sheet": "out/parts-i6-06.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC56",
+      "populated": true,
+      "reading": null,
+      "why": "the crop through the rough fit is not centred on its own chip, though every RAM on I6 reads HM4816AP-11",
+      "crop": {
+       "sheet": "out/parts-i6-06.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC57",
+      "populated": true,
+      "reading": null,
+      "why": "the crop through the rough fit is not centred on its own chip, though every RAM on I6 reads HM4816AP-11",
+      "crop": {
+       "sheet": "out/parts-i6-07.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC58",
+      "populated": true,
+      "reading": null,
+      "why": "the crop through the rough fit is not centred on its own chip, though every RAM on I6 reads HM4816AP-11",
+      "crop": {
+       "sheet": "out/parts-i6-07.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC59",
+      "populated": true,
+      "reading": null,
+      "why": "the crop through the rough fit is not centred on its own chip, though every RAM on I6 reads HM4816AP-11",
+      "crop": {
+       "sheet": "out/parts-i6-07.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC60",
+      "populated": true,
+      "reading": null,
+      "why": "the crop through the rough fit is not centred on its own chip, though every RAM on I6 reads HM4816AP-11",
+      "crop": {
+       "sheet": "out/parts-i6-07.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC61",
+      "populated": true,
+      "reading": null,
+      "why": "the crop through the rough fit is not centred on its own chip, though every RAM on I6 reads HM4816AP-11",
+      "crop": {
+       "sheet": "out/parts-i6-07.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC62",
+      "populated": true,
+      "reading": null,
+      "why": "the crop through the rough fit is not centred on its own chip, though every RAM on I6 reads HM4816AP-11",
+      "crop": {
+       "sheet": "out/parts-i6-07.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC63",
+      "populated": true,
+      "reading": null,
+      "why": "the crop through the rough fit is not centred on its own chip, though every RAM on I6 reads HM4816AP-11",
+      "crop": {
+       "sheet": "out/parts-i6-07.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC64",
+      "populated": true,
+      "reading": null,
+      "why": "the crop through the rough fit is not centred on its own chip, though every RAM on I6 reads HM4816AP-11",
+      "crop": {
+       "sheet": "out/parts-i6-07.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC65",
+      "populated": true,
+      "reading": null,
+      "why": "the crop through the rough fit is not centred on its own chip, though every RAM on I6 reads HM4816AP-11",
+      "crop": {
+       "sheet": "out/parts-i6-08.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC66",
+      "populated": true,
+      "reading": null,
+      "why": "the crop through the rough fit is not centred on its own chip, though every RAM on I6 reads HM4816AP-11",
+      "crop": {
+       "sheet": "out/parts-i6-08.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC67",
+      "populated": true,
+      "reading": null,
+      "why": "the crop through the rough fit is not centred on its own chip, though every RAM on I6 reads HM4816AP-11",
+      "crop": {
+       "sheet": "out/parts-i6-08.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC68",
+      "populated": true,
+      "reading": null,
+      "why": "the crop through the rough fit is not centred on its own chip, though every RAM on I6 reads HM4816AP-11",
+      "crop": {
+       "sheet": "out/parts-i6-08.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC69",
+      "populated": true,
+      "reading": "R6522AP R6522-33 8424",
+      "crop": {
+       "sheet": "out/parts-i6-08.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC70",
+      "populated": true,
+      "reading": "74LS244N A VV8429 FU",
+      "crop": {
+       "sheet": "out/parts-i6-08.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC71",
+      "populated": true,
+      "reading": "74LS244N A VV8429 FU",
+      "crop": {
+       "sheet": "out/parts-i6-08.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC72",
+      "populated": true,
+      "reading": "PORTUGAL SN74LS245N",
+      "crop": {
+       "sheet": "out/parts-i6-08.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC73",
+      "populated": true,
+      "reading": "NEC JAPAN 8420K9 D7002C",
+      "crop": {
+       "sheet": "out/parts-i6-09.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC74",
+      "populated": true,
+      "reading": "SI8420 DS88LS120N",
+      "crop": {
+       "sheet": "out/parts-i6-09.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC75",
+      "populated": true,
+      "reading": "SI8420 DS3691N AM26LS30PC",
+      "crop": {
+       "sheet": "out/parts-i6-09.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC76",
+      "populated": true,
+      "reading": "SP8416 DM74LS163AN",
+      "crop": {
+       "sheet": "out/parts-i6-09.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC77",
+      "populated": true,
+      "reading": "74LS00N A KK8429 HU",
+      "crop": {
+       "sheet": "out/parts-i6-09.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC78",
+      "populated": true,
+      "reading": "P8271 V4340008 INTEL 78",
+      "crop": {
+       "sheet": "out/parts-i6-09.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC79",
+      "populated": true,
+      "reading": "7438N A KK8425 ET",
+      "crop": {
+       "sheet": "out/parts-i6-09.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC80",
+      "populated": true,
+      "reading": "7438N A KK8425 ET",
+      "crop": {
+       "sheet": "out/parts-i6-09.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC81",
+      "populated": true,
+      "reading": "MALAYSIA 432AR SN74LS393N",
+      "crop": {
+       "sheet": "out/parts-i6-10.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC82",
+      "populated": true,
+      "reading": "MALAYSIA 432CR SN74LS10N",
+      "crop": {
+       "sheet": "out/parts-i6-10.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC83",
+      "populated": true,
+      "reading": null,
+      "why": "too dark to read",
+      "crop": {
+       "sheet": "out/parts-i6-10.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC84",
+      "populated": true,
+      "reading": null,
+      "why": "too dark to read",
+      "crop": {
+       "sheet": "out/parts-i6-10.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC85",
+      "populated": true,
+      "reading": "HEF4020BP HSS8422 1",
+      "crop": {
+       "sheet": "out/parts-i6-10.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC86",
+      "populated": true,
+      "reading": "MALAYSIA 432AR SN74LS393N",
+      "crop": {
+       "sheet": "out/parts-i6-10.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC87",
+      "populated": true,
+      "reading": "SN74LS123N",
+      "crop": {
+       "sheet": "out/parts-i6-10.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC88",
+      "populated": true,
+      "reading": "CN61014N 00201666-03 ACORN KK8430 -U",
+      "crop": {
+       "sheet": "out/parts-i6-10.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC89",
+      "populated": false,
+      "reading": null,
+      "why": "a bare footprint on I6: not fitted on that board",
+      "crop": {
+       "sheet": "out/parts-i6-11.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC91",
+      "populated": false,
+      "reading": null,
+      "why": "a bare footprint on I6: not fitted on that board",
+      "crop": {
+       "sheet": "out/parts-i6-11.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC93",
+      "populated": false,
+      "reading": null,
+      "why": "a bare footprint on I6: not fitted on that board",
+      "crop": {
+       "sheet": "out/parts-i6-11.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC94",
+      "populated": false,
+      "reading": null,
+      "why": "a bare footprint on I6: not fitted on that board",
+      "crop": {
+       "sheet": "out/parts-i6-11.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC95",
+      "populated": false,
+      "reading": null,
+      "why": "a bare footprint on I6: not fitted on that board",
+      "crop": {
+       "sheet": "out/parts-i6-11.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC96",
+      "populated": false,
+      "reading": null,
+      "why": "a bare footprint on I6: not fitted on that board",
+      "crop": {
+       "sheet": "out/parts-i6-11.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC97",
+      "populated": false,
+      "reading": null,
+      "why": "a bare footprint on I6: not fitted on that board",
+      "crop": {
+       "sheet": "out/parts-i6-11.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC98",
+      "populated": false,
+      "reading": null,
+      "why": "an empty socket on I6",
+      "socket": true,
+      "crop": {
+       "sheet": "out/parts-i6-11.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC99",
+      "populated": false,
+      "reading": null,
+      "why": "an empty socket on I6",
+      "socket": true,
+      "crop": {
+       "sheet": "out/parts-i6-12.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC100",
+      "populated": false,
+      "reading": null,
+      "why": "an empty socket on I6",
+      "socket": true,
+      "crop": {
+       "sheet": "out/parts-i6-12.png",
+       "by": "board_parts.py --crops"
+      }
+     },
+     {
+      "ref": "IC101",
+      "populated": false,
+      "reading": null,
+      "why": "an empty socket on I6",
+      "socket": true,
+      "crop": {
+       "sheet": "out/parts-i6-12.png",
+       "by": "board_parts.py --crops"
+      }
+     }
+    ]
+   }
+  },
+  "i6Points": {
+   "what": "Corner pins of four chips on I6 (Chris's Acorns' photograph of a populated Issue 7 board in its case), in its pixels, each the middle of the leg read by eye on a crop enlarged three times with a 10 px grid labelled in I6's pixels; only for drawing the crops I6's markings are read on (I6 is oblique and its places are not judged). At about 5 to 6 pixels a millimetre a leg is read to 2 or 3 pixels.",
+   "marks": [
+    {
+     "ref": "IC2",
+     "pin": 1,
+     "i6Px": [
+      1022,
+      235
+     ],
+     "crop": {
+      "box": [
+       1000,
+       220,
+       1150,
+       520
+      ],
+      "zoom": 3
+     }
+    },
+    {
+     "ref": "IC2",
+     "pin": 20,
+     "i6Px": [
+      1022,
+      477
+     ],
+     "crop": {
+      "box": [
+       1000,
+       220,
+       1150,
+       520
+      ],
+      "zoom": 3
+     }
+    },
+    {
+     "ref": "IC2",
+     "pin": 21,
+     "i6Px": [
+      1106,
+      477
+     ],
+     "crop": {
+      "box": [
+       1000,
+       220,
+       1150,
+       520
+      ],
+      "zoom": 3
+     }
+    },
+    {
+     "ref": "IC2",
+     "pin": 40,
+     "i6Px": [
+      1106,
+      235
+     ],
+     "crop": {
+      "box": [
+       1000,
+       220,
+       1150,
+       520
+      ],
+      "zoom": 3
+     }
+    },
+    {
+     "ref": "IC78",
+     "pin": 1,
+     "i6Px": [
+      431,
+      561
+     ],
+     "crop": {
+      "box": [
+       400,
+       520,
+       530,
+       850
+      ],
+      "zoom": 3
+     }
+    },
+    {
+     "ref": "IC78",
+     "pin": 20,
+     "i6Px": [
+      416,
+      812
+     ],
+     "crop": {
+      "box": [
+       400,
+       520,
+       530,
+       850
+      ],
+      "zoom": 3
+     }
+    },
+    {
+     "ref": "IC78",
+     "pin": 21,
+     "i6Px": [
+      510,
+      812
+     ],
+     "crop": {
+      "box": [
+       400,
+       520,
+       530,
+       850
+      ],
+      "zoom": 3
+     }
+    },
+    {
+     "ref": "IC78",
+     "pin": 40,
+     "i6Px": [
+      517,
+      560
+     ],
+     "crop": {
+      "box": [
+       400,
+       520,
+       530,
+       850
+      ],
+      "zoom": 3
+     }
+    },
+    {
+     "ref": "IC51",
+     "pin": 1,
+     "i6Px": [
+      1366,
+      912
+     ],
+     "crop": {
+      "box": [
+       1350,
+       880,
+       1480,
+       1130
+      ],
+      "zoom": 3
+     }
+    },
+    {
+     "ref": "IC51",
+     "pin": 14,
+     "i6Px": [
+      1366,
+      1110
+     ],
+     "crop": {
+      "box": [
+       1350,
+       880,
+       1480,
+       1130
+      ],
+      "zoom": 3
+     }
+    },
+    {
+     "ref": "IC51",
+     "pin": 15,
+     "i6Px": [
+      1458,
+      1110
+     ],
+     "crop": {
+      "box": [
+       1350,
+       880,
+       1480,
+       1130
+      ],
+      "zoom": 3
+     }
+    },
+    {
+     "ref": "IC51",
+     "pin": 28,
+     "i6Px": [
+      1458,
+      912
+     ],
+     "crop": {
+      "box": [
+       1350,
+       880,
+       1480,
+       1130
+      ],
+      "zoom": 3
+     }
+    },
+    {
+     "ref": "IC73",
+     "pin": 1,
+     "i6Px": [
+      683,
+      155
+     ],
+     "crop": {
+      "box": [
+       660,
+       130,
+       790,
+       350
+      ],
+      "zoom": 3
+     }
+    },
+    {
+     "ref": "IC73",
+     "pin": 14,
+     "i6Px": [
+      680,
+      323
+     ],
+     "crop": {
+      "box": [
+       660,
+       130,
+       790,
+       350
+      ],
+      "zoom": 3
+     }
+    },
+    {
+     "ref": "IC73",
+     "pin": 15,
+     "i6Px": [
+      760,
+      323
+     ],
+     "crop": {
+      "box": [
+       660,
+       130,
+       790,
+       350
+      ],
+      "zoom": 3
+     }
+    },
+    {
+     "ref": "IC73",
+     "pin": 28,
+     "i6Px": [
+      764,
+      155
+     ],
+     "crop": {
+      "box": [
+       660,
+       130,
+       790,
+       350
+      ],
+      "zoom": 3
+     }
+    }
+   ]
+  }
  }
 }
