@@ -15,15 +15,14 @@ issue_types = ["Bug", "Feature", "Task"]
 # once the issue has been read and accepted.
 triage_label = "triage"
 
+# The Projects v2 board is the org board "6502" (https://github.com/orgs/dbhq-uk/projects/1),
+# made on 14 October 2026. It is addressed by node id, never by title. Its Status
+# options are GitHub's three (Todo, In Progress, Done) plus Triage, which init adds.
+project = "PVT_kwDOEdX0bM4BnApc"
+triage_status = "Triage"
+
 [labels]
 # capture --area X applies the label area:X. These are kinds of work that cut
 # across machines. The machines keep their own labels (kim-1, bbc-micro, nes,
 # electron, atari-2600) and the site keeps `site`; they are not repeated here.
 area = ["core", "ci", "models", "speed", "rights"]
-
-# The Projects v2 board is not set yet: the gh token lacked the project scope
-# on 14 October 2026. To add it: gh auth refresh -s project, create the org
-# board "6502" (Status: Triage, Backlog, Next, In progress, Done), put its node
-# id below, run init and then intake.
-# project = "PVT_..."
-# triage_status = "Triage"
