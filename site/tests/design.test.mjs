@@ -132,6 +132,16 @@ const ON = {
   '.kim1 .key': ['veil', 'card', 'void', 'iron'],
   '.kim1-status': ['iron'],
   '.kim1-speed': ['iron'],
+  // The teletype: its name, labels, fields and disabled buttons on the iron
+  // panel; a field disabled before the machine loads is iron too; the paper is
+  // the black canvas.
+  '.kim1-tty-name': ['iron'],
+  '.kim1-tty-switch, .kim1-tty-speed, .kim1-tty-input': ['iron'],
+  '.kim1-tty select, .kim1-tty-input input': ['iron'],
+  '.kim1-tty select:disabled, .kim1-tty-input input:disabled': ['iron'],
+  '.kim1 .btn:disabled': ['iron'],
+  '.kim1-tty-about': ['iron'],
+  '.kim1-paper': ['void'],
   '.steps kbd, .bbc-symbols kbd, .electron-symbols kbd': ['iron'],
   // The BBC Micro's page. Its lines sit on the iron panel; a disabled button is
   // iron too, before the machine loads. The symbol table's keys are on iron

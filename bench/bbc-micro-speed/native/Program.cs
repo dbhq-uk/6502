@@ -266,7 +266,7 @@ internal static class Fingerprint
                     | (via.Ca2Out ? 1UL << 17 : 0) | (via.Cb2Out ? 1UL << 18 : 0));
             }
 
-            Mix(ref _checkpoints, bus.SystemVia.Latch | ((ulong)bus.RomSlot << 8) | (bus.Irq ? 1UL << 16 : 0));
+            Mix(ref _checkpoints, bus.SystemVia.Latch | ((ulong)bus.RomSlot << 8) | (bus.SystemVia.Irq || bus.UserVia.Irq ? 1UL << 16 : 0));
         }
 
         private static void Mix(ref ulong hash, ulong value)

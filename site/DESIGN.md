@@ -64,6 +64,20 @@ on the black canvas and the keypad below them.
   for 400 ms.
 - The new text colours, the keys, the status and speed lines and the key caps
   in the program, are in the contrast table in `tests/design.test.mjs`.
+- **The teletype** (8 October 2026) sits under the keypad, across the panel,
+  behind a hairline rule: the TTY switch (a checkbox with `role="switch"`, like
+  SST), the speed, a Clear button, then the paper and the field that types at
+  it, with RUB OUT and LF beside the field. The paper is the black canvas with
+  `--white` text in the mono face, a `role="log"` with one row to a printed
+  line. The log is set to `aria-live="off"`, because its open line is
+  rewritten a character at a time and a screen reader would read fragments. A
+  separate polite region is given each line once it is complete, so a line is
+  heard whole and once, and not the whole paper again.
+  Its labels and fields are `--white` on iron, the sentence under the switch
+  `--sage-60`, disabled fields and buttons dashed with `--moss-70`, as the BBC
+  Micro's are. Still no lime: the field's focus ring is the only lime in it.
+  The paper is drawn in the site's green, not as a printed page, for the same
+  reason the digits are not red. Every new colour rule is in the contrast table.
 
 ## The BBC Micro page
 

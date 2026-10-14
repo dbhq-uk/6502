@@ -9,6 +9,7 @@
 | `copper.json` | Task 4: the copper on both faces and the print, traced from I1-front and I1-back: each face's coverage, the drills in copper, the known nets (each IC's GND and +5V pins, joined through both faces) with the verdict against each of the plan's rows, the thresholds and probe figures behind the trace, and the track map's size, bytes and SHA-256 | MIT (ours): numbers about the inputs, not copies of them. The track map it describes is not: see below |
 | `parts.json` | Task 5: every part's place in the board frame, both consoles' parts, how each photograph was fitted to the board and each part held out, the places against the KiCad redrawing's, the bodies measured on I4, the passives at their pads, and the verdicts; its `model` is what `site/src/models/nes-famicom-board-parts.mjs` exports | MIT (ours): numbers about the inputs, not copies of them |
 | `ic-table.json` | Each IC's reference, role, pin count, package, and its GND and +5V pins with the data sheet or page each was read from (task 4; task 5 adds each console's part) | MIT (ours): facts, each with its source |
+| `u9-nets.json` | U9, the hex inverter, in the KiCad redrawing's nets (I2): each pin's net, pin type and the other parts' pins on that net, and each job the page names with whether it holds; written by `board_nets.py` | MIT (ours): numbers about an input, not a copy of it |
 | `case.json` | Task 8: the case, both consoles, in millimetres in the case frame: its published size (not Nintendo's), the end profile and its held-out check, every feature with where it came from (a photograph's face rectified, or the patent's view scaled), the board's place in the case, the rear connectors' check against the board, the words on each console, and the PAL console's differences; its `model` is what `site/src/models/nes-famicom-case-parts.mjs` exports | MIT (ours): numbers about the inputs, and the words printed on the consoles, not copies of the photographs |
 | `spike.json` | Task 0's measurements: the scan's scale, its outline against the KiCad redrawing's, the solder side's registration, the PAL board's layout, the case's proportions on the patent's views and on the photographs, and the PAL front, with the verdict against each of the plan's thresholds as revised on 5 October 2026 and the first verdicts kept | MIT (ours): numbers about the inputs, not copies of them |
 
@@ -24,7 +25,7 @@ No input is committed. Their own terms, as each states them, are in
   domain, and **the design patent O1** is a United States design patent.
 - **The photographs O4, O5, O9, O10, I3 and I6** (PantheraLeo1359531) are CC BY 4.0.
 
-`marks.json`, `spike.json`, `frame.json`, `registration.json`, `copper.json`, `parts.json`, `case.json` and `ic-table.json` hold coordinates,
+`marks.json`, `spike.json`, `frame.json`, `registration.json`, `copper.json`, `parts.json`, `u9-nets.json`, `case.json` and `ic-table.json` hold coordinates,
 measurements and facts read from those inputs, not any part of them.
 
 **The track map** that `board_trace.py` writes, `site/src/assets/tracks/nes-famicom-board.webp`,

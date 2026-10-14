@@ -176,8 +176,8 @@ public sealed class BbcBus : Bus
         }
     }
 
-    /// <summary>The 6502's IRQ line as the chips drive it: the OR of both VIAs. The ACIA is absent.</summary>
-    public bool Irq => SystemVia.Irq || UserVia.Irq;
+    /// <summary>The 6502's IRQ line as the chips drive it: the OR of both VIAs. The ACIA is absent. Internal: the CPU is given this line by the bus, and a machine reads the VIAs.</summary>
+    internal bool Irq => SystemVia.Irq || UserVia.Irq;
 
     /// <summary>2 MHz CPU cycles since power on, stretch cycles included.</summary>
     public long Cycles => _clock.Cycles;

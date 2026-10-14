@@ -10,7 +10,7 @@ import MachinePhotos from '../../components/MachinePhotos.astro';
 import { modelsOf } from '../../models/models.mjs';
 import { registry, results } from '../../lib/data.mjs';
 import { fmt } from '../../lib/figures.mjs';
-import { acceptanceSummary, loadTryIt, machineDownloadBytes, parseKeys, runningMachines } from '../../lib/machines.mjs';
+import { acceptanceSummary, loadTeletype, loadTryIt, machineDownloadBytes, parseKeys, parseTeletype, runningMachines } from '../../lib/machines.mjs';
 import { bbcRoms, electronRoms, kim1Roms, nesRoms } from '../../lib/pins.mjs';
 import { NOT_MODELLED, downloadBytes, issueUrl, symbolTable } from '../../lib/bbc-micro.mjs';
 import { discFolderUrl, discLibrary, discLicenceUrl, discSourceUrl, needsSource } from '../../lib/bbc-discs.mjs';
@@ -44,6 +44,12 @@ const clockMhz = Number(/([\d.]+) MHz/.exec(machine.cpu ?? '')?.[1]);
 if (!(clockMhz > 0)) throw new Error(`machine ${machine.id}: its cpu field names no clock in MHz, and the page runs it at that clock`);
 const program = loadTryIt(machine.id);
 const kim = machine.id === 'kim-1';
+// The KIM-1's teletype session, from the file Kim1TeletypeTests runs, and that
+// suite's count from the results, never typed.
+const teletype = kim ? loadTeletype(machine.id) : null;
+const teletypeTests = teletype ? results.suites.Kim1TeletypeTests : null;
+if (teletype && !teletypeTests) throw new Error('machine kim-1: Kim1TeletypeTests, which runs the teletype session on its page, is not in the test results');
+const ttyKeyNames = { SPACE: 'SPACE', CR: 'RETURN', LF: 'LF', RUBOUT: 'RUB OUT' };
 const bbc = machine.id === 'bbc-micro';
 const nes = machine.id === 'nes';
 const electron = machine.id === 'electron';
@@ -124,6 +130,29 @@ const notOnAPc = Object.entries(NOT_ON_A_PC).reduce((groups, [key, why]) => grou
           ))}
         </ol>
         <p>With focus on the machine, the keys 0 to 9 and A to F on a keyboard press the same keys on the keypad.</p>
+        </div>
+      </div>
+    </section>
+  )}
+
+  {teletype && (
+    <section aria-labelledby="teletype">
+      <div class="wrap narrow">
+        <h2 id="teletype">The teletype</h2>
+        <div class="prose">
+        <p>Most KIM-1s were used from a teletype, a Teletype Model 33 or a terminal like one, on the board's 20 mA current loops: the monitor prints on it and reads from it at ten characters a second, sending and timing every bit itself on two pins of the 6530. The machine here has that terminal. Turn the TTY switch on, press RS, then RUB OUT: the monitor times the RUB OUT to learn the line's speed, and prints KIM. The paper shows what the machine printed, decoded from the bits it sent, and what you type, which the board's wiring echoes back to the printer as a real one does.</p>
+        <p>Type in the field under the paper. It types in capitals, as the Teletype did; Enter is RETURN and Backspace is RUB OUT, and LF has a button of its own. Keys typed while the monitor is printing wait their turn, so none is lost. The commands are the User Manual's: four hex digits and SPACE open an address, two hex digits and a full stop store a byte and move on, RETURN moves on without storing, LF moves back, G runs from the open address, and RUB OUT starts again. The speed can be raised to 300 or 1200 baud; press RS and RUB OUT after changing it, so the monitor measures it again.</p>
+        <p>This session enters the try-it program through the teletype, runs it and reads the result back. After each line the paper should end with what is written beside it: x is any hex digit. It is the session Kim1TeletypeTests types in, from the same file, so the two cannot disagree; that suite has {fmt(teletypeTests.passed)} tests passing.</p>
+        <ol class="steps">
+          {teletype.steps.map((step) => (
+            <li>
+              {step.keypad && <p class="tty-keys">On the keypad: {parseKeys(step.keypad).map((k) => <kbd>{k}</kbd>)}</p>}
+              {step.type && <p class="tty-keys">At the teletype: {parseTeletype(step.type).map((p) => <kbd>{p.key ? ttyKeyNames[p.key] : p.text}</kbd>)}</p>}
+              <p>{step.says}</p>
+              <pre class="tty-prints"><code>{step.prints.join('\n')}</code></pre>
+            </li>
+          ))}
+        </ol>
         </div>
       </div>
     </section>

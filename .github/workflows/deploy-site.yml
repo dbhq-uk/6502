@@ -120,7 +120,7 @@ jobs:
         name: The wasm-tools workload, pinned
         run: dotnet workload install wasm-tools --version 10.0.401
       - if: steps.which.outputs.ids != ''
-        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version: '22.22'
       # Every machine whose cache missed: the KIM-1, the BBC Micro, the NES and
@@ -132,7 +132,7 @@ jobs:
           IDS: ${{ steps.which.outputs.ids }}
         working-directory: site
         run: node scripts/build-machines.mjs $IDS
-      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: machines
           path: site/public/machines
@@ -155,7 +155,7 @@ jobs:
       - uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6
         with:
           dotnet-version: '10.0.x'
-      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version: '22.22'
           cache: npm
@@ -176,7 +176,7 @@ jobs:
       - name: Make the site's results.json
         run: node site/scripts/make-results.mjs TestResults site/src/data/results.json
 
-      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         with:
           name: machines
           path: site/public/machines
@@ -197,12 +197,28 @@ jobs:
           PASS=$(count pass); FAILED=$(count fail)
           echo "pass=${PASS:-unread} fail=${FAILED:-unread}"
           [ "${FAILED:-1}" = "0" ]
+          # 546 as at 14 Oct 2026, measured on the Electron's branch with main merged
+          # in again (the NES models' notes, the BBC Micro's robustness and the KIM-1's
+          # teletype, pull requests 93, 94 and 87);
           # 525 as at 13 Oct 2026, when the Electron was switched on in the registry
           # (`npm test` in site/: 526 tests, 525 pass, 1 todo): its preview and the
           # tests that only the preview gave meaning went, and five came in;
           # 528 as at 13 Oct 2026, measured on the Electron's branch with main merged
           # in (`npm test` in site/: 529 tests, 528 pass, 1 todo): main's 475 and the
           # Electron page's tests, its preview build's whole suite among them;
+          # 496 as at 14 Oct 2026, measured once main (the NES models' notes and the
+          # BBC Micro's robustness, pull requests 93 and 94) was merged into the KIM-1
+          # teletype;
+          # 483 as at 13 Oct 2026, read from the passing count in CI's log of
+          # the KIM-1 teletype branch after main was merged into it (the site job's
+          # pass=483);
+          # 486 as at 14 Oct 2026, measured once main (pull requests 84, 89 and 90)
+          # was merged into the NES models' notes;
+          # 482 as at 13 Oct 2026, with the NES models' notes (issue 81: seven tests,
+          # the frame's corners against their marks, the footprint furthest from its
+          # spacing, the outside model's simplifications, the stage's green tint, the PAL
+          # photographs' lens, U9's jobs from the redrawing's nets, and the status line
+          # once a missing console is drawn again);
           # 475 as at 6 Oct 2026, after the NES models' final fix wave (two tests of the
           # NES browser check's wait for a camera to come to rest);
           # 473 as at 6 Oct 2026, with task 10 of the NES models (five tests for
@@ -231,7 +247,7 @@ jobs:
           # Adding tests is expected; losing them is the failure this floor catches.
           # Raise the number when the suite grows, here and in the same step of
           # validate.yml, which must hold the same number.
-          [ "${PASS:-0}" -ge 525 ]
+          [ "${PASS:-0}" -ge 546 ]
 
       # The same floor as "Every machine file must be serving" below, checked on
       # the build itself, so a build that is missing a machine fails here and
@@ -343,7 +359,7 @@ jobs:
           # a file new in this deploy can answer 404 for a few seconds (the BBC
           # Micro's two merges on 4 Oct 2026 both met it). Each try has its own
           # cache-buster. A file that never reaches 200 still fails.
-          for f in sitemap-index.xml sitemap-0.xml robots.txt analytics.js consent.js machines-table.js table-sort.js chip.js kim-1.js machine-host.js bbc-micro.js bbc-keys.js bbc-audio.js nes.js nes-keys.js nes-audio.js electron.js electron-keys.js electron-audio.js model-loader.js models/kim-1.js models/kim-1-tracks.webp models/nes-famicom-case.js models/nes-famicom-board.js models/nes-famicom-board-tracks.webp; do
+          for f in sitemap-index.xml sitemap-0.xml robots.txt analytics.js consent.js machines-table.js table-sort.js chip.js kim-1.js machine-host.js teletype-paper.js bbc-micro.js bbc-keys.js bbc-audio.js nes.js nes-keys.js nes-audio.js electron.js electron-keys.js electron-audio.js model-loader.js models/kim-1.js models/kim-1-tracks.webp models/nes-famicom-case.js models/nes-famicom-board.js models/nes-famicom-board-tracks.webp; do
             TRY=0
             while :; do
               CODE=$(curl -s --max-time 20 --retry 3 --retry-delay 5 -o /dev/null -w "%{http_code}" "https://6502.dbhq.uk/${f}?cb=${GITHUB_SHA}-${TRY}")
