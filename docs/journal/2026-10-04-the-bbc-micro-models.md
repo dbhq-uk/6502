@@ -2128,4 +2128,4 @@ The BBC Micro's figures are the ones task 9b re-measured after its review: nothi
 - **Five site tests added**, each for a mutation that survived (above): three in `bbc-models.test.mjs`, one in `bbc-micro.test.mjs`, one in `bbc-models-page.test.mjs`. Both workflows' floors rise by exactly those five, from 562 to 567, with a dated comment.
 - **One pytest added**, in `tests/test_board_parts.py`, for T3.
 - `cd site && npm test` (which builds first), on 14 October 2026 at 02:36 UTC, with the machines built and `src/data/results.json` as before: 569 tests, 568 passed, 0 failed, one to-do (task 2's x median); 564 and 563 before this task. `~/venv-models/bin/python -m pytest tools/bbc-micro-model/tests -q`: 145 passed, 144 before. No C# changed, so the C# suite was not run again as a whole; the C# faults ran the BBC Micro's whole test project, 997 tests, which pass unmutated.
-- Validate on the pushed commit is the record for the browser check, which this box cannot run.
+- Validate on the pushed commit is the record for the browser check, which this box cannot run: run 38501959350, on `c0c313d`, green in every job (test, machines, dashes, nes-gate and site).
