@@ -27,7 +27,7 @@ site/                       # 6502.dbhq.uk: the Astro site, its tests, and the s
   src/models/               # the 3D models, one browser module each with its layout, generated parts and notes: kim-1, the NES's nes-famicom-case (outside) and nes-famicom-board (inside), and the BBC Micro's bbc-micro-case (outside) and bbc-micro-board (inside), whose drawing is in their -scene.mjs modules; access.mjs is the chip-access sampler both boards share
   tests/                    # the site's node tests, one file per subject, each listed in site/README.md (the BBC Micro's models: bbc-models, bbc-models-load and bbc-models-page; the shared sampler: access)
 tests/                      # the tests and the library they share, one project per machine
-bench/                      # the speed benchmarks (native, and the browser speed checks), run locally and never in CI; the .NET ones are in the solution, so CI builds them (bench/nes-speed/ from the NES's task 6; in it, differential/ is the gate for the NES's lazy chips and CI's nes-gate job runs it against its baseline on amd64, lazy-chips/ their measurements, and chip-counters/ the NES models' counters' speed run on ARM; bench/bbc-micro-speed/ the BBC Micro's, with chip-counters/ the rule for its models' counters and the one run of it, on a GitHub runner by the hand-started workflow bbc-speed-run.yml, the single exception Dan approved on 13 October 2026)
+bench/                      # the speed benchmarks (native, and the browser speed checks), run locally and never in CI, except speed workflows that are started by hand and never part of a pull request check, one per machine that needs one and each approved by Dan when it is built; the .NET ones are in the solution, so CI builds them (bench/nes-speed/ from the NES's task 6; in it, differential/ is the gate for the NES's lazy chips and CI's nes-gate job runs it against its baseline on amd64, lazy-chips/ their measurements, and chip-counters/ the NES models' counters' speed run on ARM; bench/bbc-micro-speed/ the BBC Micro's, with chip-counters/ the rule for its models' counters and the one run of it, on a GitHub runner by the hand-started workflow bbc-speed-run.yml, the first such workflow, approved by Dan on 13 October 2026)
 tools/                      # scripts that make test data and check assumptions
   Dbhq.Cpu6502.ChipTrace/   # records the core's bus cycles for the site's chip page
   probes/                   # scripts that check assumptions against test data
@@ -82,7 +82,8 @@ fetch from another host. Commercial games and software are never committed. The
 one kind of program that is committed is a preset disc the site bundles under
 rule 4 (Dan, 4 October 2026: "put them in the repo"): it is small, the site serves
 it and the tests boot it, so it lives in `machines/<id>/discs/` with its licence
-and, under the GPL or LGPL, its source beside it. This
+and, under the GPL or LGPL, its source beside it. A bundled cartridge is covered
+by this rule the same way a disc is, in `machines/<id>/cartridges/`. This
 covers data inputs; package registries and GitHub Actions are a separate question,
 pinned and locked as before.
 
@@ -104,7 +105,9 @@ licence is not enough, because DBHQ is a company. Each bundled disc is kept in
 README giving the statement verbatim, where the image came from (address, date,
 SHA-256) and what was changed, and its source when its licence asks for it; the
 manifest there names the licence as an SPDX id, and the machine's page credits
-every disc and links its licence. A disc that does not meet this is dropped, not
+every disc and links its licence. A cartridge is covered by this paragraph the same way, kept in
+`machines/<id>/cartridges/<slug>/` with the same files and a `manifest.json` beside
+them. A disc that does not meet this is dropped, not
 argued for.
 
 **5. No figure is typed by hand.** A pass count, a percentage or a speed that
