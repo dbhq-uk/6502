@@ -1,0 +1,62 @@
+name: KIM-1 phone step, stress (DO NOT MERGE)
+# THROWAWAY, for issue 80 (14 October 2026): builds the site and runs only the
+# KIM-1's phone step of the browser check 25 times, with the runner's CPUs
+# loaded by 16 busy processes, on the page as main has it (old: main's
+# machine-host.js and global.css) and on the fixed page (new). The step's checks
+# are the same in both. It lives on the branch ci/kim1-phone-stress only, and is
+# never merged.
+on:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  stress:
+    strategy:
+      fail-fast: false
+      matrix:
+        page: [old, new]
+    runs-on: ubuntu-latest
+    timeout-minutes: 150
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+      - name: The page as main has it
+        if: matrix.page == 'old'
+        run: git checkout 59a4ca4c8b5aa1dd94d2c7a502eaeae1a2867fc5 -- site/public/machine-host.js site/src/styles/global.css && git status --short
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: '22.22'
+          cache: npm
+          cache-dependency-path: site/package-lock.json
+      # The machines and the test results from Validate run 38567201276 (main at 59a4ca4): the machines do not change on this branch.
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: results
+          path: site/src/data
+          run-id: 38567201276
+          github-token: ${{ github.token }}
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: machines
+          path: site/public/machines
+          run-id: 38567201276
+          github-token: ${{ github.token }}
+      - name: Install and build
+        working-directory: site
+        run: npm ci && npm run build
+      - name: The KIM-1's phone step, 25 times, under load
+        working-directory: site
+        run: |
+          nproc
+          for i in $(seq 16); do yes > /dev/null & done
+          sleep 90
+          cat /proc/loadavg
+          node scripts/stress-kim1-phone.mjs --runs 25 --label ${{ matrix.page }} || true
+          cat /proc/loadavg
+          kill $(jobs -p) || true
