@@ -1,0 +1,140 @@
+{
+  "about": "Written by the recorder (ATARI_RECORD=1 dotnet test tests/Dbhq.Machines.Atari2600.Tests --filter Record), never by hand. Each recorded test of the suite, in each region: a self-test\u0027s verdict, or a screenshot test\u0027s count of mismatched pixels by the partition rule. A change fails CI; it goes in the journal before the file is recorded again.",
+  "suiteCommit": "891c079976a2f68033ca4af2fe2fd85aaf1906c9",
+  "binariesCommit": "a4159f47ce7ef6f9c3d5402a8c58b18940045adc",
+  "manifestSha256": "712efc45a303b42577362ad172416af8d669f3c470e97a2d4c9fa1728b73e532",
+  "selfTests": {
+    "cartridge/bank-fa": {
+      "NTSC": "pass",
+      "PAL": "pass"
+    },
+    "cartridge/bank-hotspot-window": {
+      "NTSC": "pass",
+      "PAL": "pass"
+    },
+    "cartridge/power-on-bank": {
+      "NTSC": {
+        "outcome": "pass",
+        "observed": "$B1"
+      },
+      "PAL": {
+        "outcome": "pass",
+        "observed": "$B1"
+      }
+    },
+    "cartridge/ram-superchip": {
+      "NTSC": "pass",
+      "PAL": "pass"
+    }
+  },
+  "screenshots": {
+    "harness/calibration": {
+      "NTSC": 0,
+      "PAL": 407
+    },
+    "tia-render/colors": {
+      "NTSC": 0,
+      "PAL": 3680
+    },
+    "tia-render/draw-delay": {
+      "NTSC": 0,
+      "PAL": 0
+    },
+    "tia-render/object-priority": {
+      "NTSC": 0,
+      "PAL": 0
+    },
+    "tia-render/pf-priority": {
+      "NTSC": 0,
+      "PAL": 0
+    },
+    "tia-render/score-mode": {
+      "NTSC": 0,
+      "PAL": 0
+    },
+    "tia-timing/hmove-comb": {
+      "NTSC": 0,
+      "PAL": 0
+    },
+    "tia-timing/hmove-late": {
+      "NTSC": 0,
+      "PAL": 0
+    },
+    "tia-timing/hmove-line-end": {
+      "NTSC": 0,
+      "PAL": 0
+    },
+    "tia-timing/hmove-live-reach": {
+      "NTSC": 0,
+      "PAL": 0
+    },
+    "tia-timing/hmove-live-seam": {
+      "NTSC": 0,
+      "PAL": 0
+    },
+    "tia-timing/hmove-rewrite-race": {
+      "NTSC": 0,
+      "PAL": 0
+    },
+    "tia-timing/hmove-strobe-line": {
+      "NTSC": 0,
+      "PAL": 0
+    },
+    "tia-timing/hmove-stuck-grid": {
+      "NTSC": 0,
+      "PAL": 0
+    },
+    "tia-timing/hmove-stuck-latch": {
+      "NTSC": 0,
+      "PAL": 0
+    },
+    "tia-timing/hmove-stuck-player": {
+      "NTSC": 143,
+      "PAL": 143
+    },
+    "tia-timing/hmove-stuck-release": {
+      "NTSC": 0,
+      "PAL": 0
+    },
+    "tia-timing/hmove-stuck-straddle": {
+      "NTSC": 143,
+      "PAL": 170
+    },
+    "tia-timing/hmove-stuck-stretch": {
+      "NTSC": 184,
+      "PAL": 184
+    },
+    "tia-timing/hmove-stuck-widths": {
+      "NTSC": 5,
+      "PAL": 5
+    },
+    "tia-timing/hmove-values": {
+      "NTSC": 0,
+      "PAL": 0
+    },
+    "tia-timing/midline-color": {
+      "NTSC": 0,
+      "PAL": 0
+    },
+    "tia-timing/midline-grp": {
+      "NTSC": 0,
+      "PAL": 0
+    },
+    "tia-timing/midline-pf": {
+      "NTSC": 0,
+      "PAL": 0
+    },
+    "tia-timing/midline-resp": {
+      "NTSC": 0,
+      "PAL": 0
+    },
+    "tia-timing/midline-vblank": {
+      "NTSC": 0,
+      "PAL": 0
+    },
+    "tia-timing/nusiz-draw": {
+      "NTSC": 0,
+      "PAL": 0
+    }
+  }
+}

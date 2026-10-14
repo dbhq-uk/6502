@@ -8,7 +8,8 @@ namespace Dbhq.Machines.Atari2600.Tests;
 /// The suite's screenshot tests (the plan's task 7): first the alignment, fixed once on
 /// <c>harness/calibration</c> in both regions (item 4), then every screenshot test in both regions,
 /// frame eight (item 3), giving its count of mismatched pixels by the partition rule (item 5). No
-/// count is asserted here: task 11 records them. A failure of the runner itself (no frame, a
+/// count is asserted here: <see cref="SuiteRecordedTests"/> compares each with the count recorded
+/// in <c>machines/atari-2600/suite-outcomes.json</c>. A failure of the runner itself (no frame, a
 /// reference of the wrong width, an unreadable PNG) fails the test. For a count that is not zero,
 /// our frame and the reference are written side by side to <c>TestResults/atari-2600/</c>, to be
 /// looked at.
