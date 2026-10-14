@@ -571,7 +571,7 @@ Derived by stepping the rules of 18.4 from all nine bits 1, with `AUDF` = 0 so t
 - `AUDC` = `$4`, `AUDF` = 3: each output bit lasts 4 audio steps, so a full cycle of the square wave is 8 steps: 31399.5 / 8 = 3924.9 Hz on NTSC and 31113.1 / 8 = 3889.1 Hz on PAL [inferring from 18.2 and 18.3].
 - `AUDC` = `$4`, `AUDF` = 0: 15699.8 Hz on NTSC, the highest tone [inferring; Stolberg freqform gives "15720 Hz" from its rounded clock].
 - `AUDC` = `$1`, `AUDF` = 0: 31399.5 / 15 = 2093.3 Hz on NTSC; Stolberg's table gives 2096 Hz and 2080 Hz on PAL from his rounded clocks; the model gives 2074.2 Hz on PAL [inferring; from Stolberg freqform].
-- Counter at 20, then `AUDF` written as 5: the next divided pulse comes 17 audio steps later (21 to 31, then 0 to 5) [inferring from 18.3; guessing - verify].
+- Counter at 20, then `AUDF` written as 5: the counter runs 21 to 31, then 0 to 5, reaching 5 on the 17th audio step, and the divided pulse comes on the 18th [inferring from 18.3; guessing - verify]. (Corrected by task 10, 14 October 2026: the first version said the pulse came on the 17th. jigo2600 Sound's sequence raises the latch's input on the step that brings the count to `AUDF` and makes the pulse on the next step, which is also what makes a steady `AUDF` divide by `AUDF` + 1; `TiaSoundTests` holds the 18.)
 
 ### 18.7 Volume and the mix
 
@@ -580,6 +580,10 @@ Derived by stepping the rules of 18.4 from all nine bits 1, with `AUDF` = 0 so t
 - Each channel has its own pad, `AUD0` on pin 13 and `AUD1` on pin 12 ("2 PADS") [from TIA schematic sheet 4; SPG TIA 1A 11: outputs "could be combined externally"]. On NTSC boards the two pins are joined [from 2k6specs, "Composite Video Mod": "TIA.Pin13+12"; FSM, the audio flowchart treats "pin 12/13 of A201" as one line]. The PAL TIA joins them inside the chip on one pin [from 2k6specs, "Chipset Pin-Outs": "AUD is audio AUD0+AUD1 merged on one pin"]. Either way the program cannot see it [inferring].
 - **The mix.** Two current sinks on one node add their conductances, so the mixed output depends only on `s = AUDV0 x bit0 + AUDV1 x bit1`, 0 to 30 [inferring from the two bullets above]. The pull-up the pads work against, and so the curve from `s` to voltage, was not found [guessing - verify]. The model makes the output linear in `s`, `s / 30`.
 - Worked: `AUDV0` = 15 with bit 1 and `AUDV1` = 0: `s` = 15, output 0.5. Both 15 with both bits 1: 30, output 1.0. `AUDV0` = 6 with bit 1 and `AUDV1` = 9 with bit 0: `s` = 6, output 0.2. Volume 0 gives 0 whatever `AUDC` is [from SPG 11.3: "turns sound off completely"].
+
+### 18.8 The sound in the model, as task 10 built it
+
+`TiaSound` holds the two channels: each its nine bits and its divider count, stepped by the rules of 18.3 and 18.4, the divider compared with `AUDF` at the step itself (the latch between the compare and the pulse, which jigo2600 Sound describes, is not modelled apart from the step it delays). `Tia` steps both on the horizontal sync counter's step that leaves count 8 (RHS) or count 36 (CNT), so the new output bits hold from colour clocks 36 and 148; RSYNC moves those with the line, and HMOVE does not. The level is the mix of 18.7, `s` / 30, worked out at each step and at each `AUDV` write, which takes effect from the colour clock it lands on (a choice: the volume gates the drivers directly, and no source says it waits for the audio clock [guessing - verify]). `AUDC`, `AUDF` and `AUDV` use their low four, five and four bits. Only at those points is the sample buffer told, with the colour clocks since it was last told, so the sound adds nothing to the colour clocks between. The machine's samples, their resampler and its choice by measurement are in the task 10 journal entry (`docs/journal/2026-10-14-the-atari-2600-sound.md`).
 
 ## 19. The colour signal and the palette
 

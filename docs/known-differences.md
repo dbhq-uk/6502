@@ -1633,3 +1633,18 @@ that moves any of them fails until the words move too.
 - **The machine takes any combination**, opposite directions together included, as a keyboard can press them and a real joystick cannot; it refuses only a bit that names no input.
 
 **How the tests treat it.** `TiaInputTests` holds section 20's worked example, both latches, the power-on choice and the paddle ports; `ControllersTests` every direction, button and switch on its bit, the worked examples, any combination, the inputs through power on, the port A decision and the PA7 edge from the left stick.
+
+## The Atari 2600: the sound, where the model stops
+
+**What.** Task 10 of the Atari 2600 plan: `TiaSound`, the TIA's two channels, stepped by the `Tia` twice a line, and `SampleBuffer`, the samples at the host's rate, built from `docs/atari-2600/facts/tia.md` section 18 (section 18.8 says how). Where the sources are silent, the model makes a choice:
+
+- **Each channel powers on with all nine bits 1 and its divider at 0** (`tia.md` open item 13) `[guessing - verify]`. All nine bits 1 is the state a program reaches by holding `AUDC` at 0, so a program that sets its sound up that way does not see the difference.
+- **Every bit of a divided pulse is worked out from the bits before it** (`tia.md` open item 14) `[guessing - verify]`. No period changes with the order; the phase of the first output bits for `AUDC` `$2`, `$6`, `$A` and `$E` does.
+- **The divider is compared with `AUDF` at each audio step.** jigo2600's reading puts a latch, sampled on the audio clock's other phase, between the compare and the pulse; a write to `AUDF` between the two phases is taken at the next step here [guessing - verify].
+- **A write to `AUDV0` or `AUDV1` changes the level from the colour clock it lands on**, not at the next audio step: the volume gates the pad's drivers directly, and no source says it waits for the audio clock (`tia.md` section 18.8) `[guessing - verify]`.
+- **The mix is linear**, `s` / 30 with `s` = `AUDV0` x bit 0 + `AUDV1` x bit 1; the curve the pads work against was not found (`tia.md` section 18.7, open item 15) `[guessing - verify]`.
+- **No filter of the console's or the television's is modelled.** The samples run from 0 to 1, silence at volume 0 is 0, and a held level is a steady offset; the sheet gives no audio filter. How the page removes the offset is task 13's.
+- **The samples are band-limited steps**, 16 samples behind the level (a third of a millisecond at 48,000 a second), chosen by measurement over the box filter (the task 10 journal entry). They are made when the channels step or a volume is written, inside those cycles, and at the end of each `Run` and `RunFrames`, so after `Step` alone they can stop up to one audio step, 116 colour clocks, short of now.
+- **SECAM's background noise at `AUDC` 0** is not modelled, with SECAM (#106).
+
+**How the tests treat it.** `TiaSoundTests` holds section 18.5's table for every `AUDC` value on both channels, the divider and section 18.6's worked example, the power-on choice, the mix's worked examples, volume 0 silent and 15 the loudest, the steps at colour clocks 36 and 148 with RSYNC and HMOVE, and the volume write at once. `SampleBufferTests` holds item 11's count in both regions and at two rates, the region switch mid-stream, the order, the bound with no reader, a steady level, a step's place, that the samples do not depend on how a run is divided, and power on. `ResamplerTests` holds item 12.
