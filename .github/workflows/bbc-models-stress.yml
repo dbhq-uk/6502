@@ -1,0 +1,52 @@
+name: BBC models browser check, stress (DO NOT MERGE)
+# THROWAWAY, for the review of task 9b of the BBC Micro models plan
+# (14 October 2026): builds the site once and runs only the BBC Micro models'
+# part of the browser check 25 times, unthrottled and with Chrome's CPU
+# throttled 4 times, counting the runs whose camera never rested and whose DFS
+# was never framed. It lives on the branch ci/bbc-models-stress only, and is
+# never merged into the models' branch.
+on:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  stress:
+    strategy:
+      fail-fast: false
+      matrix:
+        throttle: [1, 4]
+    runs-on: ubuntu-latest
+    timeout-minutes: 300
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: '22.22'
+          cache: npm
+          cache-dependency-path: site/package-lock.json
+      # The machines and the test results from Validate run 38488067039 (the models' branch at 9cef598): the machines
+      # do not change between it and this branch's tree.
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          name: results
+          path: site/src/data
+          run-id: 38488067039
+          github-token: ${{ github.token }}
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          name: machines
+          path: site/public/machines
+          run-id: 38488067039
+          github-token: ${{ github.token }}
+      - name: Install and build
+        working-directory: site
+        run: npm ci && npm run build
+      - name: The BBC Micro's models, 25 times
+        working-directory: site
+        run: node scripts/stress-bbc-models.mjs --runs 25 --throttle ${{ matrix.throttle }}
