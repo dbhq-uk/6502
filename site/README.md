@@ -168,11 +168,9 @@ and the page shows it, credited. A 3D model is optional and per machine: see
 | `design.test.mjs` | Contrast from the real tokens, on the black canvas, the cards and the worst pixel of the traces texture; no raw colours in the stylesheet; no shadows but the navigation bar's |
 | `chip.test.mjs` | The chip page: 40 pins and every bus line has a pad and a wire; every frame is exactly what the core recorded, and registers change on an instruction's last cycle; the page calls itself a diagram and not the die, its figures are the trace's, and its script holds no colour of its own; the bundle is built and carries its licences |
 | `html.test.mjs` | Every built page is valid HTML |
-| `build.test.mjs` | The pages, the sitemap, `robots.txt` and the 404 page were built, and the sitemap lists exactly the pages that exist; the deploy checks every script the pages load; both workflows hold the same test floor; no local path or private address is published; this table lists every test file |
+| `build.test.mjs` | The pages, the sitemap, `robots.txt` and the 404 page were built, and the sitemap lists exactly the pages that exist; the deploy checks every script the pages load; both workflows read the test floor from `tests/floor.json` and hold no number of their own, shown by the check failing on broken copies; no local path or private address is published; this table lists every test file |
 
-CI reads the number of passing tests back and fails below a floor, in `validate.yml`
-and `deploy-site.yml`. The floor is the same number in both and must be raised when
-the suite grows.
+CI reads the number of passing tests back and fails below a floor. The floor is one number, `floor` in `tests/floor.json`. `validate.yml` and `deploy-site.yml` both read it with `jq` and hold no number of their own, and `build.test.mjs` fails if either does. Raise it in that file when the suite grows. Its history is in the journal entry "The test floor in one file". Two branches that each raise it conflict on that one line, and the fix is to measure the count again on the merged tree.
 
 `DESIGN.md` records the look, including the fork from the DBHQ brand, and how
 each image was made.
