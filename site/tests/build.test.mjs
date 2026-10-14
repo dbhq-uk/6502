@@ -2,7 +2,9 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
+import os from 'node:os';
 import { page, pages, DIST } from './helpers.mjs';
+import { readFloor, floorProblems } from './floor.mjs';
 
 test('the expected pages were built', () => {
   for (const url of ['/', '/journal/', '/machines/', '/chips/', '/family/', '/status/', '/about/', '/404.html']) {
@@ -48,13 +50,43 @@ test('the deploy checks that every script a page loads, and every script those i
   for (const f of loaded) assert.ok(listed.includes(f), `deploy-site.yml does not check that ${f} is serving`);
 });
 
-test('the test floor is the same number in both workflows, and both read the count back', () => {
-  const floor = (text) => Number(/"\$\{PASS:-0\}" -ge (\d+)/.exec(text)?.[1]);
-  assert.ok(floor(deploy) > 0, 'deploy-site.yml has no test floor');
-  assert.equal(floor(validate), floor(deploy), 'validate.yml and deploy-site.yml have different test floors');
+test('the test floor is one number in tests/floor.json, and both workflows read the count back and compare it with that', () => {
+  assert.ok(readFloor() > 0);
   assert.match(validate, /count\(\) \{/);
-  assert.match(deploy, /Raise the number when the suite grows/);
-  assert.match(validate, /Raise the number when the suite grows/);
+  assert.match(deploy, /count\(\) \{/);
+  assert.deepEqual(floorProblems('validate.yml', validate), []);
+  assert.deepEqual(floorProblems('deploy-site.yml', deploy), []);
+});
+
+// The check above can only be trusted if it can fail. Each case breaks a scratch copy
+// of a workflow in one way, and the check must say so; a bad floor file must throw.
+test('neither workflow holds a floor of its own, and the check shows it by failing on broken copies', () => {
+  const read = 'FLOOR=$(jq -r .floor tests/floor.json)';
+  const compare = '[ "${PASS:-0}" -ge "$FLOOR" ]';
+  for (const [name, text] of [['validate.yml', validate], ['deploy-site.yml', deploy]]) {
+    assert.ok(text.includes(read) && text.includes(compare), `${name} does not read the floor and compare with it`);
+    const broken = {
+      'a typed number in the comparison': text.replace(compare, '[ "${PASS:-0}" -ge 641 ]'),
+      'a typed number for the floor': text.replace(read, 'FLOOR=641'),
+      'a floor read from another file': text.replace(read, read.replace('floor.json', 'other.json')),
+      'the comparison removed': text.replace(compare, 'true'),
+      'a second comparison with a number': text.replace(compare, `${compare}\n          [ "\${PASS:-0}" -ge 641 ]`),
+    };
+    for (const [how, copy] of Object.entries(broken)) {
+      assert.notEqual(copy, text, `${how}: the scratch copy was not changed`);
+      assert.notDeepEqual(floorProblems(name, copy), [], `${name} with ${how} was not caught`);
+    }
+  }
+  const scratch = fs.mkdtempSync(path.join(os.tmpdir(), 'floor-'));
+  try {
+    for (const bad of ['{"floor": "641"}', '{"floor": 0}', '{"floor": 6.5}', '{}']) {
+      const file = path.join(scratch, 'floor.json');
+      fs.writeFileSync(file, bad);
+      assert.throws(() => readFloor(file), /positive whole number/, `${bad} was accepted as a floor`);
+    }
+  } finally {
+    fs.rmSync(scratch, { recursive: true, force: true });
+  }
 });
 
 test('no local path and no private address is published in the docs the site renders, its README or its manifest', () => {
