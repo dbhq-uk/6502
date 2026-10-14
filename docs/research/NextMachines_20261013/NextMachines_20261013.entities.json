@@ -1,0 +1,532 @@
+{
+ "Atari 2600: recognised emulator test ROMs or test suites for the TIA and 6532 RIOT, their licences and where they are hosted, and freely licensed homebrew cartridges that could be bundled": {
+  "rounds": [
+   {
+    "entities": 18,
+    "new_entities": [
+     "missingno-vcs-tests (ajoneil, MIT, GitHub)",
+     "AtariTestCartridgeBR (giacomeli, MIT, GitHub)",
+     "Gopher2600 test ROM collection (unpublished, permissions pending)",
+     "Paul Slocum console test cartridge",
+     "AtariAge cycle-75 HMOVE test ROM (Doctor Who Berzerk thread)",
+     "2048-2600 (chesterbr, MIT)",
+     "Berta And Butterflies (vandalton, MIT)",
+     "genemedic (MIT)",
+     "Core-Escape (CC0-1.0)",
+     "vcs-game-maker output games (MIT tool)",
+     "doorframe (GPL-3.0 homebrew)",
+     "WashingtonProject (GPL-3.0 homebrew)",
+     "lord-of-the-rings-2600-prologue (GPL-3.0)",
+     "Space Treat Deluxe (source released, licence unknown)",
+     "Star Fire (source released, licence unknown)",
+     "Upp Plus Plus (free download, licence not stated)",
+     "Defend Your Castle (free ROM, licence not stated)",
+     "8bitworkshop VCS examples (GPL-3.0 repo)"
+    ],
+    "new_parties": [
+     "atariage.com",
+     "github.com/8bitworkshop",
+     "github.com/ajoneil",
+     "github.com/chesterbr",
+     "github.com/giacomeli",
+     "github.com/haroldo-ok",
+     "github.com/jetsetilly",
+     "github.com/moorejh28",
+     "github.com/murilomgrosso",
+     "github.com/vandalton",
+     "nluug.nl"
+    ]
+   }
+  ],
+  "entities": {
+   "missingno-vcs-tests": "missingno-vcs-tests (ajoneil, MIT, GitHub)",
+   "ataritestcartridgebr": "AtariTestCartridgeBR (giacomeli, MIT, GitHub)",
+   "gopher2600": "Gopher2600 test ROM collection (unpublished, permissions pending)",
+   "paul": "Paul Slocum console test cartridge",
+   "atariage": "AtariAge cycle-75 HMOVE test ROM (Doctor Who Berzerk thread)",
+   "2048-2600": "2048-2600 (chesterbr, MIT)",
+   "berta": "Berta And Butterflies (vandalton, MIT)",
+   "genemedic": "genemedic (MIT)",
+   "core-escape": "Core-Escape (CC0-1.0)",
+   "vcs-game-maker": "vcs-game-maker output games (MIT tool)",
+   "doorframe": "doorframe (GPL-3.0 homebrew)",
+   "washingtonproject": "WashingtonProject (GPL-3.0 homebrew)",
+   "lord-of-the-rings-2600-prologue": "lord-of-the-rings-2600-prologue (GPL-3.0)",
+   "space": "Space Treat Deluxe (source released, licence unknown)",
+   "star": "Star Fire (source released, licence unknown)",
+   "upp": "Upp Plus Plus (free download, licence not stated)",
+   "defend": "Defend Your Castle (free ROM, licence not stated)",
+   "8bitworkshop": "8bitworkshop VCS examples (GPL-3.0 repo)"
+  },
+  "parties": [
+   "atariage.com",
+   "github.com/8bitworkshop",
+   "github.com/ajoneil",
+   "github.com/chesterbr",
+   "github.com/giacomeli",
+   "github.com/haroldo-ok",
+   "github.com/jetsetilly",
+   "github.com/moorejh28",
+   "github.com/murilomgrosso",
+   "github.com/vandalton",
+   "nluug.nl"
+  ],
+  "out_of_scope": {
+   "stella": {
+    "name": "Stella",
+    "reason": "emulator; its RIOT code does not emulate the IRQ line, but it ships no named test suite"
+   },
+   "javatari.js": {
+    "name": "Javatari.js",
+    "reason": "emulator (GPL-2.0)"
+   },
+   "6502.ts": {
+    "name": "6502.ts",
+    "reason": "emulator; runs Dormann's CPU tests, not TIA/RIOT"
+   },
+   "singlesteptests": {
+    "name": "SingleStepTests",
+    "reason": "6507 instruction tests, covered by the existing 6502 work; missingno defers CPU to it"
+   },
+   "sim2600": {
+    "name": "Sim2600 (gregjames, CC0)",
+    "reason": "transistor-level simulator, not a cartridge; could serve as a reference"
+   },
+   "entombed": {
+    "name": "Entombed (aycock, MIT)",
+    "reason": "code for a paper about a commercial game, not a bundleable cartridge"
+   },
+   "otaku-flash": {
+    "name": "Otaku-flash, ClassicJoystickAdaptor, vcsreaderfw",
+    "reason": "hardware or firmware, not cartridges"
+   },
+   "andrew": {
+    "name": "Andrew Towers TIA Hardware Notes, Stella Programmer's Guide",
+    "reason": "reference documents, not test ROMs"
+   }
+  }
+ },
+ "Commodore 64: who holds the KERNAL and BASIC ROM rights, open replacement ROMs, which public repositories carry pinned copies, and the licences and hosting of the Lorenz and VICE test suites": {
+  "rounds": [
+   {
+    "entities": 15,
+    "new_entities": [
+     "Amiga Corporation (named by Cloanto as owner of the C64 system ROMs)",
+     "Cloanto (licensee; C64 Forever; contact for KERNAL and BASIC per the X16 licence)",
+     "Commodore Business Machines / Commodore International (original authors)",
+     "Microsoft Corporation (BASIC V2 base; 6502 BASIC 1.1 released under MIT in microsoft/BASIC-M6502)",
+     "Tulip (named in the Debian VICE description as ROM copyright holder)",
+     "MEGA65 Open ROMs (LGPLv3 replacement KERNAL and BASIC, github.com/MEGA65/open-roms)",
+     "Commander X16 ROM (licensed KERNAL and BASIC for X16 use only; bundles Open ROMs code as GPLv3)",
+     "ksim65 free-c64-roms directory (unopened lead)",
+     "VICE SVN trunk data/C64 on SourceForge (carries kernal-901227-01/02/03.bin and basic-901226-01.bin)",
+     "VICE-Team/svn-mirror on GitHub (official git mirror of VICE trunk; top level shows only vice/)",
+     "Wolfgang Lorenz C64 Emulator Test Suite (readme: Public Domain, no Copyright)",
+     "Tom Seddon's site (named by nesdev as a host of the Lorenz suite; not opened)",
+     "Christer Palm repackaging of the Lorenz suite (cbm-hackers post, 2002; not opened)",
+     "C64 Forever (Cloanto's licensed ROM product)"
+    ],
+    "new_parties": [
+     "applefritter.com",
+     "c64.org",
+     "c64forever.com",
+     "debian.org",
+     "github.com/dualbrain",
+     "github.com/mega65",
+     "github.com/microsoft",
+     "github.com/vice-team",
+     "githubusercontent.com/mega65",
+     "linuxmint.com",
+     "nesdev.org",
+     "netbsd.org",
+     "sourceforge.net/p",
+     "techrepublic.com"
+    ]
+   }
+  ],
+  "entities": {
+   "amiga": "Amiga Corporation (named by Cloanto as owner of the C64 system ROMs)",
+   "cloanto": "Cloanto (licensee; C64 Forever; contact for KERNAL and BASIC per the X16 licence)",
+   "commodore": "Commodore Business Machines / Commodore International (original authors)",
+   "microsoft": "Microsoft Corporation (BASIC V2 base; 6502 BASIC 1.1 released under MIT in microsoft/BASIC-M6502)",
+   "tulip": "Tulip (named in the Debian VICE description as ROM copyright holder)",
+   "mega65": "MEGA65 Open ROMs (LGPLv3 replacement KERNAL and BASIC, github.com/MEGA65/open-roms)",
+   "commander": "Commander X16 ROM (licensed KERNAL and BASIC for X16 use only; bundles Open ROMs code as GPLv3)",
+   "ksim65": "ksim65 free-c64-roms directory (unopened lead)",
+   "vice": "VICE SVN trunk data/C64 on SourceForge (carries kernal-901227-01/02/03.bin and basic-901226-01.bin)",
+   "vice-team": "VICE-Team/svn-mirror on GitHub (official git mirror of VICE trunk; top level shows only vice/)",
+   "wolfgang": "Wolfgang Lorenz C64 Emulator Test Suite (readme: Public Domain, no Copyright)",
+   "tom": "Tom Seddon's site (named by nesdev as a host of the Lorenz suite; not opened)",
+   "christer": "Christer Palm repackaging of the Lorenz suite (cbm-hackers post, 2002; not opened)",
+   "c64": "C64 Forever (Cloanto's licensed ROM product)"
+  },
+  "parties": [
+   "applefritter.com",
+   "c64.org",
+   "c64forever.com",
+   "debian.org",
+   "github.com/dualbrain",
+   "github.com/mega65",
+   "github.com/microsoft",
+   "github.com/vice-team",
+   "githubusercontent.com/mega65",
+   "linuxmint.com",
+   "nesdev.org",
+   "netbsd.org",
+   "sourceforge.net/p",
+   "techrepublic.com"
+  ],
+  "out_of_scope": {
+   "click": {
+    "name": "Click Here Software",
+    "reason": "GEOS rights holder, not KERNAL or BASIC"
+   },
+   "vicesharp": {
+    "name": "ViceSharp (sharpninja/vice-sharp)",
+    "reason": "third-party emulator wiki, only secondhand ROM claims"
+   },
+   "viciious": {
+    "name": "viciious",
+    "reason": "another emulator's Lorenz runner, not a host or licence source"
+   }
+  }
+ },
+ "VIC-20 and Commodore PET: ROM rights position, public repositories carrying copies, and recognised emulator test programs": {
+  "rounds": [
+   {
+    "entities": 12,
+    "new_entities": [
+     "Amiga Corporation (current claimed holder of CBM 8-bit ROM copyrights, per Cloanto KB and Hackaday)",
+     "Commodore Business Machines (named as copyright holder in VICE README and FreeBSD port)",
+     "Tulip (named as copyright holder in Debian vice package description)",
+     "Cloanto / C64 Forever (licensee distributing PET and VIC-20 ROMs)",
+     "VICE upstream (VICE-Team/svn-mirror carries VIC-20 and PET ROMs in vice/data)",
+     "FreeBSD emulators/vice port (installs VIC-20 and PET ROMs)",
+     "Debian vice package (ROMs stripped, dfsg)",
+     "zimmers.net CBM firmware archive (VIC-20 and PET ROM dumps)",
+     "libsidplayfp/VICE-testprogs (GitHub mirror of VICE testprogs)",
+     "vpelletier/vice-emu-testprogs (unofficial GitHub clone)"
+    ],
+    "new_parties": [
+     "c64forever.com",
+     "debian.org",
+     "freshports.org",
+     "github.com/libsidplayfp",
+     "github.com/sharpninja",
+     "github.com/vice-team",
+     "github.com/vpelletier",
+     "hackaday.com",
+     "lemon20.com",
+     "sourceforge.io",
+     "zimmers.net"
+    ]
+   }
+  ],
+  "entities": {
+   "amiga": "Amiga Corporation (current claimed holder of CBM 8-bit ROM copyrights, per Cloanto KB and Hackaday)",
+   "commodore": "Commodore Business Machines (named as copyright holder in VICE README and FreeBSD port)",
+   "tulip": "Tulip (named as copyright holder in Debian vice package description)",
+   "cloanto": "Cloanto / C64 Forever (licensee distributing PET and VIC-20 ROMs)",
+   "vice": "VICE upstream (VICE-Team/svn-mirror carries VIC-20 and PET ROMs in vice/data)",
+   "freebsd": "FreeBSD emulators/vice port (installs VIC-20 and PET ROMs)",
+   "debian": "Debian vice package (ROMs stripped, dfsg)",
+   "zimmers.net": "zimmers.net CBM firmware archive (VIC-20 and PET ROM dumps)",
+   "libsidplayfp": "libsidplayfp/VICE-testprogs (GitHub mirror of VICE testprogs)",
+   "vpelletier": "vpelletier/vice-emu-testprogs (unofficial GitHub clone)"
+  },
+  "parties": [
+   "c64forever.com",
+   "debian.org",
+   "freshports.org",
+   "github.com/libsidplayfp",
+   "github.com/sharpninja",
+   "github.com/vice-team",
+   "github.com/vpelletier",
+   "hackaday.com",
+   "lemon20.com",
+   "sourceforge.io",
+   "zimmers.net"
+  ],
+  "out_of_scope": {
+   "hyperion": {
+    "name": "Hyperion Entertainment",
+    "reason": "AmigaOS 4.x rights, not 8-bit ROMs"
+   },
+   "senbei64": {
+    "name": "Senbei64/VIC20UnitTests",
+    "reason": "unit tests for a user's own VIC-20 assembly code, not an emulator test suite; seen only in a search summary"
+   },
+   "sim6502": {
+    "name": "sim6502 (cc65)",
+    "reason": "cc65's simulator for its own regression tests, not a VIC-20 or PET machine test; seen only in a search summary"
+   },
+   "z64k": {
+    "name": "Z64K",
+    "reason": "closed-source emulator, not a ROM source or test suite; seen only in a search summary"
+   }
+  }
+ },
+ "Apple I and Apple II: ROM rights position, public repositories carrying copies, open replacement ROMs, and recognised emulator test material": {
+  "rounds": [
+   {
+    "entities": 16,
+    "new_entities": [
+     "AppleWin (GitHub repository commits Apple II, II+, J-Plus, IIe and enhanced IIe ROM images under resource/)",
+     "microsoft/BASIC-M6502 (Microsoft 6502 BASIC 1.1 source with Apple II build option, MIT licence, archived 2025-09-05)",
+     "a2audit (Zellyn Hunter, MIT, Apple II/II+/IIe/IIc audit and emulator test disk)",
+     "tomcw/a2audit (fork of a2audit)",
+     "mb-audit (Tom Charlesworth, Mockingboard test suite, named in a2audit README)",
+     "Wozanium pack (Mike Willegal, source and ROM image for Apple II emulators, runs Apple 1 programs)",
+     "Replica 1 (Vince Briel, Apple I clone shipping the Woz Monitor and Apple I BASIC with Wozniak's approval)",
+     "ntvao (Apple 1 emulator shipping wozmon.hex, seen in search only)",
+     "Ryukojiro-apple1 (Apple 1 emulator whose LICENSE links to ROM source, seen in search only)",
+     "yae (Apple II emulator package that includes ROM images, seen in search only)",
+     "Apple II MiSTer (FPGA core said to include D000-FFFF Applesoft and Monitor ROMs, seen in search only)",
+     "izapple2 (Apple II emulator reported to pass A2AUDIT 1.06, seen in search only)",
+     "OpenEmulator (named in a2audit README as the emulator a2audit was built to support)",
+     "zserge/bsoz (MIT 6502 emulator with Apple 1 mode running WozMon, seen in search only)",
+     "sma/dart6502 (6502 simulator able to run Wozmon, seen in search only)",
+     "davervw/wozmon_cbm (WozMon ported to Commodore machines, seen in search only)"
+    ],
+    "new_parties": [
+     "a2central.com",
+     "applefritter.com",
+     "dwheeler.com",
+     "github.com/applewin",
+     "github.com/davidly",
+     "github.com/microsoft",
+     "github.com/mister-devel",
+     "github.com/tomcw",
+     "github.com/zellyn",
+     "go.dev",
+     "macg.co",
+     "salixos.org",
+     "slashdot.org",
+     "wikipedia.org"
+    ]
+   }
+  ],
+  "entities": {
+   "applewin": "AppleWin (GitHub repository commits Apple II, II+, J-Plus, IIe and enhanced IIe ROM images under resource/)",
+   "microsoft": "microsoft/BASIC-M6502 (Microsoft 6502 BASIC 1.1 source with Apple II build option, MIT licence, archived 2025-09-05)",
+   "a2audit": "a2audit (Zellyn Hunter, MIT, Apple II/II+/IIe/IIc audit and emulator test disk)",
+   "tomcw": "tomcw/a2audit (fork of a2audit)",
+   "mb-audit": "mb-audit (Tom Charlesworth, Mockingboard test suite, named in a2audit README)",
+   "wozanium": "Wozanium pack (Mike Willegal, source and ROM image for Apple II emulators, runs Apple 1 programs)",
+   "replica": "Replica 1 (Vince Briel, Apple I clone shipping the Woz Monitor and Apple I BASIC with Wozniak's approval)",
+   "ntvao": "ntvao (Apple 1 emulator shipping wozmon.hex, seen in search only)",
+   "ryukojiro-apple1": "Ryukojiro-apple1 (Apple 1 emulator whose LICENSE links to ROM source, seen in search only)",
+   "yae": "yae (Apple II emulator package that includes ROM images, seen in search only)",
+   "apple": "Apple II MiSTer (FPGA core said to include D000-FFFF Applesoft and Monitor ROMs, seen in search only)",
+   "izapple2": "izapple2 (Apple II emulator reported to pass A2AUDIT 1.06, seen in search only)",
+   "openemulator": "OpenEmulator (named in a2audit README as the emulator a2audit was built to support)",
+   "zserge": "zserge/bsoz (MIT 6502 emulator with Apple 1 mode running WozMon, seen in search only)",
+   "sma": "sma/dart6502 (6502 simulator able to run Wozmon, seen in search only)",
+   "davervw": "davervw/wozmon_cbm (WozMon ported to Commodore machines, seen in search only)"
+  },
+  "parties": [
+   "a2central.com",
+   "applefritter.com",
+   "dwheeler.com",
+   "github.com/applewin",
+   "github.com/davidly",
+   "github.com/microsoft",
+   "github.com/mister-devel",
+   "github.com/tomcw",
+   "github.com/zellyn",
+   "go.dev",
+   "macg.co",
+   "salixos.org",
+   "slashdot.org",
+   "wikipedia.org"
+  ],
+  "out_of_scope": {
+   "romx": {
+    "name": "ROMX / ROMX+",
+    "reason": "commercial hardware ROM switcher that holds user-supplied images, not an open ROM or test suite"
+   },
+   "franklin": {
+    "name": "Franklin Ace 100",
+    "reason": "historical 1982 hardware clone that copied Apple ROMs; relevant only as the subject of the Franklin case"
+   },
+   "danb91": {
+    "name": "DanB91/Wozmon64",
+    "reason": "new monitor written for 64-bit machines in WozMon style, not an Apple I or Apple II ROM replacement"
+   },
+   "tom": {
+    "name": "Tom Harte ProcessorTests / SingleStepTests",
+    "reason": "CPU-generic 6502/65C02 tests, not Apple-specific material"
+   },
+   "simonsunnyboy": {
+    "name": "simonsunnyboy/bin2woz",
+    "reason": "MIT tool that converts binaries to WozMon hex input, not a ROM or test suite"
+   },
+   "clock": {
+    "name": "Clock Signal, MAME, LinApple, KEGS",
+    "reason": "emulators recalled as background, not surfaced in any result this round"
+   }
+  }
+ },
+ "Atari 8-bit computers: OS and BASIC ROM rights, open replacement OS such as AltirraOS and its licence, and recognised emulator test suites": {
+  "rounds": [
+   {
+    "entities": 10,
+    "new_entities": [
+     "Original Atari OS ROMs (400/800 OS-A/OS-B, XL/XE OS)",
+     "PC Xformer / Xformer ROM images (Darek Mihocka redistribution grant)",
+     "AltirraOS (Altirra kernel ROM replacement, 800 and XL/XE builds, plus 5200 OS)",
+     "Altirra BASIC",
+     "OS++ (Thomas Richter, built into Atari++, packaged as atari800_os++)",
+     "Acid800",
+     "Acid5200",
+     "AcidSAP",
+     "atari800 DOC/BUGS list of timing-sensitive titles used as regression cases"
+    ],
+    "new_parties": [
+     "atariarchives.org",
+     "atarimagazines.com",
+     "codeweavers.com",
+     "fedoraproject.org",
+     "gametechwiki.com",
+     "githubusercontent.com/atari800",
+     "mametesters.org",
+     "slackbuilds.org",
+     "slackware.uk",
+     "virtualdub.org"
+    ]
+   }
+  ],
+  "entities": {
+   "original": "Original Atari OS ROMs (400/800 OS-A/OS-B, XL/XE OS)",
+   "xformer": "PC Xformer / Xformer ROM images (Darek Mihocka redistribution grant)",
+   "altirraos": "AltirraOS (Altirra kernel ROM replacement, 800 and XL/XE builds, plus 5200 OS)",
+   "altirra": "Altirra BASIC",
+   "os": "OS++ (Thomas Richter, built into Atari++, packaged as atari800_os++)",
+   "acid800": "Acid800",
+   "acid5200": "Acid5200",
+   "acidsap": "AcidSAP",
+   "atari800": "atari800 DOC/BUGS list of timing-sensitive titles used as regression cases"
+  },
+  "parties": [
+   "atariarchives.org",
+   "atarimagazines.com",
+   "codeweavers.com",
+   "fedoraproject.org",
+   "gametechwiki.com",
+   "githubusercontent.com/atari800",
+   "mametesters.org",
+   "slackbuilds.org",
+   "slackware.uk",
+   "virtualdub.org"
+  ],
+  "out_of_scope": {
+   "singlesteptests": {
+    "name": "SingleStepTests/65x02",
+    "reason": "generic 6502 CPU test suite, not Atari 8-bit machine specific (seen only in a search summary citing an HN post)"
+   },
+   "atari": {
+    "name": "Atari++ (emulator)",
+    "reason": "emulator; relevant only as the host of OS++"
+   },
+   "mame": {
+    "name": "MAME",
+    "reason": "emulator whose Acid800 results appear on mametesters.org; not a ROM or test suite"
+   },
+   "kat5200": {
+    "name": "kat5200",
+    "reason": "emulator named in the Acid800 README's compatibility notes"
+   }
+  }
+ },
+ "Oric-1 and Atmos, and BBC Master: ROM rights position, public repositories carrying copies, and recognised emulator test material": {
+  "rounds": [
+   {
+    "entities": 15,
+    "new_entities": [
+     "mattgodbolt/jsbeeb (carries Master MOS 3.20 MegaROM)",
+     "stardot/b-em (carries mos320, mos320p, mos323, mos350, mos350p, mos353)",
+     "tom-seddon/b2 (carries M128 3.20 and 3.50, and MCompact ROM sets)",
+     "pete-gordon/oricutron (Oric BASIC ROMs only as .pch patches and .sym files in Git; ships Orix kernel and shell ROMs)",
+     "flaxcottage.com BBC ROMs archive (not opened)",
+     "TomHarte/CLK (Oric support, expects user ROMs; not opened)",
+     "SingleStepTests/65x02 synertek65c02 (65SC02 per-instruction tests)",
+     "b2 etc/cmos_adc_sbc (65C12 ADC/SBC results captured on a real Master 128)",
+     "DefenceForce Encounter testing mode (Oric, a game's performance mode)"
+    ],
+    "new_parties": [
+     "applefritter.com",
+     "batocera.org",
+     "flaxcottage.com",
+     "github.com/mattgodbolt",
+     "github.com/pete-gordon",
+     "github.com/singlesteptests",
+     "github.com/stardot",
+     "github.com/tom-seddon",
+     "itch.io",
+     "recalbox.com",
+     "riscoopen.org",
+     "riscosopen.org",
+     "textfiles.com",
+     "wikipedia.org"
+    ]
+   }
+  ],
+  "entities": {
+   "mattgodbolt": "mattgodbolt/jsbeeb (carries Master MOS 3.20 MegaROM)",
+   "stardot": "stardot/b-em (carries mos320, mos320p, mos323, mos350, mos350p, mos353)",
+   "tom-seddon": "tom-seddon/b2 (carries M128 3.20 and 3.50, and MCompact ROM sets)",
+   "pete-gordon": "pete-gordon/oricutron (Oric BASIC ROMs only as .pch patches and .sym files in Git; ships Orix kernel and shell ROMs)",
+   "flaxcottage.com": "flaxcottage.com BBC ROMs archive (not opened)",
+   "tomharte": "TomHarte/CLK (Oric support, expects user ROMs; not opened)",
+   "singlesteptests": "SingleStepTests/65x02 synertek65c02 (65SC02 per-instruction tests)",
+   "etc": "b2 etc/cmos_adc_sbc (65C12 ADC/SBC results captured on a real Master 128)",
+   "defenceforce": "DefenceForce Encounter testing mode (Oric, a game's performance mode)"
+  },
+  "parties": [
+   "applefritter.com",
+   "batocera.org",
+   "flaxcottage.com",
+   "github.com/mattgodbolt",
+   "github.com/pete-gordon",
+   "github.com/singlesteptests",
+   "github.com/stardot",
+   "github.com/tom-seddon",
+   "itch.io",
+   "recalbox.com",
+   "riscoopen.org",
+   "riscosopen.org",
+   "textfiles.com",
+   "wikipedia.org"
+  ],
+  "out_of_scope": {
+   "castle": {
+    "name": "Castle Technology",
+    "reason": "named in a 2007 forum as holder of the BBC sources; a rights holder, not a repository or test set"
+   },
+   "eureka": {
+    "name": "Eureka Informatique / ASN",
+    "reason": "later owners of the Oric brand; rights holders, not repositories"
+   },
+   "batocera": {
+    "name": "Batocera and Recalbox wikis",
+    "reason": "frontends that tell users to supply ROMs; they carry no copies"
+   },
+   "amstrad": {
+    "name": "Amstrad CPC/Spectrum ROM permission",
+    "reason": "a precedent cited for another maker, not Oric or Acorn"
+   },
+   "mega65": {
+    "name": "MEGA65 open-roms",
+    "reason": "Commodore replacement ROMs, other machine"
+   },
+   "qemu": {
+    "name": "QEMU mos6522 patches",
+    "reason": "6522 timer work for Mac/m68k, not Oric"
+   },
+   "oric": {
+    "name": "Oric diagnostic PCB (pcbway)",
+    "reason": "a hardware test board, not emulator test material"
+   }
+  }
+ }
+}
