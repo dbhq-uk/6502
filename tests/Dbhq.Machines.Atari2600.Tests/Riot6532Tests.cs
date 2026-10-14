@@ -86,6 +86,23 @@ public class Riot6532Tests
         }
     }
 
+    [Fact]
+    public void Ram_offsets_above_127_reach_the_cell_a0_to_a6_pick()
+    {
+        // The bus may pass a mirror's address whole: $0180 + i is cell i (riot.md section 3, mirrors).
+        var riot = new Riot6532();
+        for (int i = 0; i < Riot6532.RamSize; i++)
+        {
+            riot.WriteRam(0x180 + i, (byte)(i ^ 0x3C));
+        }
+
+        for (int i = 0; i < Riot6532.RamSize; i++)
+        {
+            Assert.Equal((byte)(i ^ 0x3C), riot.ReadRam(i));
+            Assert.Equal((byte)(i ^ 0x3C), riot.ReadRam(0x0D80 + i));
+        }
+    }
+
     // Section 3, worked example 1: the decode inside the I/O half.
 
     [Fact]
@@ -479,8 +496,15 @@ public class Riot6532Tests
         Assert.True(enabled.Riot.TimerFlag);
         Assert.True(enabled.Riot.Irq);
 
-        // A TIMINT read does not touch the enable.
-        enabled.Read(5, 0x028D);
+        // A TIMINT read does not touch the enable, whatever its A3: at $0285 A3 is 0, which on an
+        // INTIM read would turn the enable off.
+        enabled.Read(5, 0x0285);
+        Assert.True(enabled.Riot.Irq);
+        enabled.Read(6, 0x028D);
+        Assert.True(enabled.Riot.Irq);
+
+        // Nor does an edge control write, which has A3 0 at $0286 (A1 turns the edge's own enable on).
+        enabled.Write(7, 0x0286, 0);
         Assert.True(enabled.Riot.Irq);
 
         Assert.Equal(0xF8, enabled.Read(10, Intim));
@@ -598,8 +622,12 @@ public class Riot6532Tests
         clock.Read(4, 0x028C);
         clock.Write(5, Pa7Positive, 0);
         clock.Write(6, Pa7Negative, 0);
+        clock.Read(7, Swcha);
+        clock.Read(8, Swchb);
+        clock.Read(9, Swacnt);
+        clock.Read(10, Swbcnt);
         Assert.True(clock.Riot.EdgeFlag);
-        Assert.Equal(0x40, clock.Read(7, Timint) & 0x40);
+        Assert.Equal(0x40, clock.Read(11, Timint) & 0x40);
         Assert.False(clock.Riot.EdgeFlag);
     }
 
