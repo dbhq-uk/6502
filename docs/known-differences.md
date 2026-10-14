@@ -1567,7 +1567,20 @@ that moves any of them fails until the words move too.
 - **The WSYNC halt's repeated reads reach the cartridge**, one access a cycle at the held address, as the 6502 data sheet's "address lines hold the current address" suggests. No 2600 source confirms it (`bus.md` section 8 item 2) `[guessing - verify]`; a board that switches on a read of the next opcode's address would see each.
 - **CXBLPF drives D7 only.** Its D6 is unused, and whether it floats or is driven 0 is not stated; the model lets it float, so it reads the bus residue (`tia.md` section 2.2) `[guessing - verify]`.
 - **A write to `$2D` to `$3F` of the TIA does nothing** (`tia.md` section 2.1) `[guessing - verify]`.
-- **Until task 5 settles it, all three colour clocks of a cycle run before its access**, the split the sources state (`tia.md` section 4).
+- **All three colour clocks of a cycle run before its access**, the split the sources state (`tia.md` section 4); task 5 kept it by the plan's rule (below).
 - **Until task 9 builds the inputs**, INPT0 to INPT3 read D7 = 0, as ports with no paddle connected do, and INPT4 and INPT5 read D7 = 1, both fire buttons up with the latch off.
 
 **How the tests treat it.** `Atari2600BusTests` holds the residue at power on, CXBLPF and the TIA's power-on counter (through the CPU's reset, which leaves it at colour clock 21); `WsyncHaltTests` holds the halted reads as the slot sees them.
+
+## The Atari 2600: the TIA's line, the palette and the frame, where the model stops
+
+**What.** Task 5 of the Atari 2600 plan: the TIA's horizontal sync counter and its blank, RSYNC, VSYNC and VBLANK, the playfield, the background, the palette and the frame, built from `docs/atari-2600/facts/tia.md` and `region.md`. Where the sources are silent, the model makes a choice:
+
+- **The palette is computed from each region's colour signal**, by the formula in `tia.md` sections 19.4 and 19.5, not taken from any emulator's table. The colours a television shows depend on its tint, colour and contrast controls and on the console's colour delay setting, so these are the model's colours and not a measurement. The NTSC step between hues is 360/14 degrees, so hue 15 is hue 1 (24 degrees is the design figure); the PAL hue angles are fitted to the documented names and to the colours the suite's author confirmed on one PAL console; the contrast scale makes luminance 7 white; no gamma step is applied. All are `[guessing - verify]`.
+- **The order inside a cycle is all three colour clocks before the access.** Every split passed the suite's trusted tests the line allows, and the tie went to the split the sources state. The split is seen only with the TIA's power-on phase, which is a choice too (task 4's section above), and not at all after `CLEAN_START`'s RSYNC (`tia.md` section 4.1).
+- **RSYNC restarts the line three colour clocks after its write lands**, where Towers gives a four-clock cycle of the two-phase clock from the strobe, and its line start releases a pending WSYNC (`tia.md` section 6) `[guessing - verify]`. Three keeps a store on cycle k at colour clock 3k after `CLEAN_START`, as the suite's headers place it.
+- **A playfield cell takes its bit two colour clocks before its first pixel**, so a write landing exactly then shows; the suite's picture does not cover that clock. **The reflect bit is read with each cell's bit.** No source states either (`tia.md` section 8) `[guessing - verify]`.
+- **VBLANK's output gate acts one colour clock after the write**, as `tia.md` section 4 reads it from the suite's recorded `midline-vblank` picture, a reference and not a trusted test `[guessing - verify]`.
+- **A frame's row 0 is the line VSYNC ends on**, the first after the VSYNC lines, so a program of 262 lines makes frames of 262 rows; the plan fixes the alignment against the suite's pictures once, on `harness/calibration`, in task 7.
+
+**How the tests treat it.** `TiaPaletteTests` holds the formula's worked examples and properties, `CycleOrderTests` the split and the RSYNC choice, `TiaPlayfieldTests` the playfield's read clock and the reflect bit, `TiaLineTests` VBLANK's delay and RSYNC, and `FrameBufferTests` the frame's rows and window.

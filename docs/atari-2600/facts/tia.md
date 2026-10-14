@@ -162,6 +162,20 @@ The plan's fixed item 8 chooses how many of a cycle's three colour clocks run be
 | `sta RESP0` | 55 | 165 | Player 0 at pixels 102 onward from the next line |
 | `sta RESM0` | 55 | 165 | Missile 0 at pixel 101 from the next line |
 
+### 4.1 The split, as task 5 settled it
+
+Task 5 ran the plan's rule ("Fixed before running", item 8) on 14 October 2026 with `python3 -I tools/probes/atari-2600/cycle-split.py <scratch>`, which builds the machine with each split as the one constant `Atari2600Bus.ClocksBeforeAccess`, then runs every trusted suite row and `CycleOrderTests`. In the model RDY is sampled at the access, after the cycle's clocks before it, and the TIA releases it on colour clock 0 of the next line (section 5), for every split.
+
+| Clocks before the access | `tia-timing/wsync` (NTSC, PAL) | `tia-timing/wsync-line-end` (NTSC, PAL) | Other trusted rows | COLUBK on cycle 53 from power on | The same after `CLEAN_START` |
+|---|---|---|---|---|---|
+| 0 | pass, pass | pass, pass | all pass | pixel 91 | pixel 91 |
+| 1 | pass, pass | pass, pass | all pass | not pixel 91 | pixel 91 |
+| 2 | pass, pass | pass, pass | all pass | not pixel 91 | pixel 91 |
+| 3 | pass, pass | pass, pass | all pass | pixel 91 | pixel 91 |
+
+All four splits pass both trusted `tia-timing/` self-tests the line allows, so the tie rule decides: the sources state the end of the cycle (the table above), and **all three colour clocks run before the access**. The table shows why the tie was certain [inferring]: the split only moves the accesses against the colour clocks by a constant, which is the same as a different power-on phase. Split 0 is split 3 with the cycles counted one later. After `CLEAN_START`'s two RSYNC strobes every split behaves alike, because RSYNC restarts the line at a fixed distance from the write. Only a program that never strobes RSYNC, such as the eight collision tests that skip `CLEAN_START` (`suite.md` section 8), can see the split, and then only together with the TIA's power-on phase.
+
+
 ## 5. WSYNC and the halt
 
 Writing WSYNC sets a one-bit latch that drives the CPU's RDY line low [from SPG TIA 1A 2D; from SPG WSYNC: "halts microprocessor by clearing RDY latch to zero"]. The latch is reset "by the leading edge of the next horizontal blank", which releases RDY [from SPG TIA 1A 2D and WSYNC]. On the 6507 RDY stops only read cycles; a write cycle always completes, and the CPU then holds at its next read, the following opcode fetch [from the suite: roms/cpu/rmw-wsync.asm]. So `inc WSYNC` strobes WSYNC twice on one line and still costs one line [from the suite: roms/cpu/rmw-wsync.asm]. Consecutive line starts are 76 cycles apart [from the suite: roms/tia-timing/wsync.asm].
@@ -184,6 +198,8 @@ Writing WSYNC sets a one-bit latch that drives the CPU's RDY line low [from SPG 
 ## 6. RSYNC
 
 RSYNC "resets the horizontal sync counter to define the beginning of horizontal blank time, and is used in chip testing" [from SPG RSYNC; from 2k6specs, the same]. Towers reads the schematic as: the strobe resets the counter's two-phase clock to the H@1 edge, and "a full H@1-H@2 cycle after RSYNC is strobed" the counter is reset to `000000` and horizontal blank turns on; he adds that it "requires more investigation" [from Towers: Horizontal Sync Counter]. The object position counters are not reset, so a mid-line RSYNC moves the playfield and not the objects [from the suite: roms/tia-timing/rsync.asm]. `CLEAN_START` strobes RSYNC twice through the stack's TIA mirror, and the suite's README warns that a wrong RSYNC shifts whole frames [from the suite: README.md, "A note on initialisation"].
+
+**The model's choice (task 5)** [guessing - verify]: the line restarts **three** colour clocks after W, with the blank on and RDY released, as at any line start. Towers counts a full four-clock cycle of the two-phase clock from the strobe; the model counts it from one clock before the write lands, where the strobe is seen while phase two is high (SPG TIA 1A section 1). Three keeps the alignment the suite's headers give: every `CLEAN_START` program strobes RSYNC, and `tia-timing/midline-color`, one of them, states its pulse at x 91 for a write on cycle 53, which is W = 3k (section 1). Four would move every write of such a program one clock earlier. `CycleOrderTests` checks both, and task 6's `rsync` test bears on it. Whether RSYNC's line start releases a pending WSYNC is not stated; the model releases it.
 
 **Worked example.** RSYNC written on cycle 36 (W 108, pixel 40): about 4 colour clocks later (colour clock 112) the counter is at 0 and the line restarts with 68 clocks of blank; the playfield block of PF0 is redrawn from the new line's pixel 0, while missile 0, parked near pixel 120 by a RESM0 on cycle 61 (the header says about 121; section 9 gives 119), keeps its own counter, so the two now meet and CXM0FB D7 sets [from the suite: roms/tia-timing/rsync.asm; the 4-clock delay from Towers; the exact clock is guessing - verify].
 
@@ -209,7 +225,7 @@ The playfield is 20 bits, each drawn 4 pixels wide, over the left half of the li
 
 The scan starts at the end of horizontal blank and the right half starts at the CNT decode (section 3) [from Towers; from SPG TIA 1A 3B and 3C]. The registers can be written at any time; a write while the register is being scanned changes only the cells not yet drawn [from SPG TIA 1A 3D; from the suite: roms/tia-timing/midline-pf.asm].
 
-**When a mid-line write shows.** A cell whose first pixel is at colour clock P takes its bit from the register as it stands 2 colour clocks earlier: a write landing at W ≤ P - 3 shows in that cell, one at W ≥ P - 1 does not [from the suite: roms/tia-timing/midline-pf_ntsc.png, rows 37 to 44, against the kernel's cycles 45 and 48, 43 and 46, 41 and 44, 39 and 42, 37 and 40, 35 and 38; inferring the rule, which fits all six rows; recorded, not trusted]. W = P - 2 never occurs in that test (W is odd there), so [guessing - verify] which value a cell takes then. Towers says the playfield scan starts on RHB at colour clock 64, 4 clocks before its first pixel, without saying when the bits are read [from Towers].
+**When a mid-line write shows.** A cell whose first pixel is at colour clock P takes its bit from the register as it stands 2 colour clocks earlier: a write landing at W ≤ P - 3 shows in that cell, one at W ≥ P - 1 does not [from the suite: roms/tia-timing/midline-pf_ntsc.png, rows 37 to 44, against the kernel's cycles 45 and 48, 43 and 46, 41 and 44, 39 and 42, 37 and 40, 35 and 38; inferring the rule, which fits all six rows; recorded, not trusted]. W = P - 2 never occurs in that test (W is odd there), so [guessing - verify] which value a cell takes then. Task 5's model reads each cell's bit on clock P - 2, so a write at W = P - 2 shows; it reads CTRLPF's reflect bit with the cell's bit, which no source states [guessing - verify]. Towers says the playfield scan starts on RHB at colour clock 64, 4 clocks before its first pixel, without saying when the bits are read [from Towers].
 
 **Worked examples.**
 
@@ -675,7 +691,7 @@ The keyboard controller reads its columns on `INPT0`, `INPT1` and `INPT4` (left 
 
 ## Open items
 
-1. **RSYNC's exact timing**: how many clocks after the write the counter restarts, the length of the shortened line, and whether its blank releases a pending WSYNC. Towers says it needs more investigation; no other source gives clocks.
+1. **RSYNC's exact timing**: how many clocks after the write the counter restarts, the length of the shortened line, and whether its blank releases a pending WSYNC. Towers says it needs more investigation; no other source gives clocks. Task 5 chose three clocks after W and a release (section 6).
 2. **The HMOVE latch's set and clear clocks.** Only the boundaries are known: cycle 20 combs and 21 does not; 74 does not and 75 combs the next line.
 3. **The first pulse at the first slot at or after W + 7**, and the comparator read at P - 3 and P + 1, are fits to Mott's table and two suite tests, not read from the schematic. The TIA schematics were not opened.
 4. **The pulse grid's residue.** The suite gives 225 as the last slot (1 modulo 4) and also says the RESBL at W = 18 in `hmove-reset-merge` shares a clock with a pulse; one of the two is off by a clock in this sheet's numbering.
