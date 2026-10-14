@@ -84,7 +84,7 @@ namespace Dbhq.Machines.BbcMicro;
 /// and A0 (disc.md s1a, bus.md s1c).
 /// </para>
 /// </remarks>
-public sealed class BbcBus : IBus
+public sealed class BbcBus : Bus
 {
     private readonly byte[] _ram = new byte[0x8000];
     private readonly byte[] _os;
@@ -176,8 +176,8 @@ public sealed class BbcBus : IBus
         }
     }
 
-    /// <summary>The 6502's IRQ line as the chips drive it: the OR of both VIAs. The ACIA is absent.</summary>
-    public bool Irq => SystemVia.Irq || UserVia.Irq;
+    /// <summary>The 6502's IRQ line as the chips drive it: the OR of both VIAs. The ACIA is absent. Internal: the CPU is given this line by the bus, and a machine reads the VIAs.</summary>
+    internal bool Irq => SystemVia.Irq || UserVia.Irq;
 
     /// <summary>2 MHz CPU cycles since power on, stretch cycles included.</summary>
     public long Cycles => _clock.Cycles;
@@ -185,7 +185,7 @@ public sealed class BbcBus : IBus
     /// <summary>The paged ROM latch, 0 to 15. Slot 15 is BASIC and slot 14 the DFS.</summary>
     public int RomSlot { get; private set; }
 
-    public byte Read(ushort address)
+    public override byte Read(ushort address)
     {
         // Memory first, which is nearly every access: one cycle, never stretched, and no chip
         // sees it, so the only other work is the look at the event horizon.
@@ -222,7 +222,7 @@ public sealed class BbcBus : IBus
         return value;
     }
 
-    public void Write(ushort address, byte value)
+    public override void Write(ushort address, byte value)
     {
         BbcClock clock = _clock;
         if (address < 0x8000)

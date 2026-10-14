@@ -17,7 +17,7 @@ public sealed partial class Cpu
             // A taken branch that stays on its page decides about interrupts
             // at its operand cycle, not its last, so one that arrives on the
             // last cycle waits for another instruction.
-            _pollFrozen = true;
+            FreezePoll();
         }
 
         Read(PC);

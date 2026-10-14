@@ -64,6 +64,20 @@ on the black canvas and the keypad below them.
   for 400 ms.
 - The new text colours, the keys, the status and speed lines and the key caps
   in the program, are in the contrast table in `tests/design.test.mjs`.
+- **The teletype** (8 October 2026) sits under the keypad, across the panel,
+  behind a hairline rule: the TTY switch (a checkbox with `role="switch"`, like
+  SST), the speed, a Clear button, then the paper and the field that types at
+  it, with RUB OUT and LF beside the field. The paper is the black canvas with
+  `--white` text in the mono face, a `role="log"` with one row to a printed
+  line. The log is set to `aria-live="off"`, because its open line is
+  rewritten a character at a time and a screen reader would read fragments. A
+  separate polite region is given each line once it is complete, so a line is
+  heard whole and once, and not the whole paper again.
+  Its labels and fields are `--white` on iron, the sentence under the switch
+  `--sage-60`, disabled fields and buttons dashed with `--moss-70`, as the BBC
+  Micro's are. Still no lime: the field's focus ring is the only lime in it.
+  The paper is drawn in the site's green, not as a printed page, for the same
+  reason the digits are not red. Every new colour rule is in the contrast table.
 
 ## The BBC Micro page
 
@@ -117,6 +131,42 @@ disc drive in a hairline box of its own.
 - **Credits and licences** for every disc are a section of their own further
   down the page, a plain prose list built from the manifest, so they can be read
   without loading anything.
+- The new text colours are in the contrast table in `tests/design.test.mjs`.
+
+## The NES page
+
+The third machine page, built on 6 October 2026: the panel on 6 October in
+task 14 of the NES plan, the page around it in task 15, shown once the registry
+says the NES runs. The same iron panel with a hairline border as the BBC
+Micro's, holding the screen on the black canvas, the controls below it, the
+controller as buttons, and the region and the cartridge in hairline boxes of
+their own.
+
+- **The screen is a canvas, and it is the machine's own picture,** 256 by 240
+  pixels as the PPU draws them, scaled up with `image-rendering: pixelated` so
+  each pixel stays square-edged, and shown in the region's pixel shape: 8:7 on
+  NTSC, wider on PAL. Nothing is added, no scan lines, glow, curve or colour
+  bleed, and a line under it says it models the picture, not a television. It is
+  not recoloured: the NES's palette is the thing the page shows.
+- **Start is the page's one lime fill,** as on the BBC Micro's page: the one
+  thing to do first, saying how much it downloads, read from the built files,
+  and gone once pressed. Reset, Power and the sound are the site's small
+  buttons; disabled, they have a dashed edge and a dimmer label.
+- **The controller is real buttons under the screen,** for a phone or a mouse:
+  the d-pad as a cross on the left, Select and Start in the middle, and B and A
+  as circles on the right, as on the pad, at least 44 pixels each, `--veil` with
+  a `--circuit` edge like the BBC Micro's keys. On a narrow screen Select and
+  Start drop below. Held while a finger is on them, several at once.
+- **Focus on the screen is the keyboard,** so the screen shows the lime focus
+  ring whenever it has it, as the BBC Micro's does. Escape lets go and Tab moves
+  on.
+- **The region and the cartridge** are fieldsets with a hairline edge and a
+  white legend: two radio buttons, each saying which console it is, and the
+  picker with the sentence about what is in and the note that saving is not
+  built.
+- **The rest of the page uses the site's prose:** the try-it steps as the
+  KIM-1's steps without key caps, the controls as a prose table whose caption is
+  the BBC Micro's symbols table's, and the not-modelled list with its issues.
 - The new text colours are in the contrast table in `tests/design.test.mjs`.
 
 ## The imagery
@@ -275,6 +325,70 @@ same black canvas, using the stage every machine's model shares
   reduced motion) and leaves the board and its tracks; turning the tracks off
   brings the parts back, and Show tracks only turns them on. No lime: the
   buttons spend none of it. The pressed colour pair is in the contrast table.
+
+## The NES's 3D models
+
+Two models of the NES on its page, the outside and the inside (the case and
+its main board), each drawn for the NTSC NES-001 and the PAL NESE-001 and
+following the page's region, on the same black canvas and the same shared
+stage as the KIM-1's.
+
+- **Two views of one machine, as tabs.** A machine with a case offers its
+  models in one section, "Models of the machine", with a tab list named
+  "Views of the model": Outside, then Inside, the registry's order. Each tab
+  controls a panel that holds everything the KIM-1's single section holds, its
+  stage, Reset the view, status line, caption and note, with its ids suffixed
+  by the view; the paragraph of controls, the same for both, is said once
+  under the panels. A machine with one model, the KIM-1, keeps the section it
+  always had. Built for the NES on 6 October 2026 to the BBC Micro's models
+  design, for the BBC Micro to take up.
+- **The tabs are the site's quiet text, and the selected one is a shape as
+  well as a colour.** An unselected tab is `--moss-80` on the black canvas,
+  `--white` when hovered; the selected tab is `--white` on `--veil` with a bar
+  of its own colour under it, the pair a pressed toggle uses. No lime. No
+  transition, so there is nothing to ease with reduced motion. The three colour
+  rules are in the contrast table in `tests/design.test.mjs`.
+- **The keys are WAI-ARIA's.** A click, Enter or Space selects a tab; Left and
+  Right move to the next and select it, round the ends; Home and End go to the
+  ends. Only the selected tab is in the Tab order, and Tab goes from it into its
+  panel's stage and on out of the section: nothing traps the focus, and Escape
+  on a stage lets go of it as on the KIM-1's. A key with Alt, Ctrl or Meta
+  held is left to the browser, so Alt and Left still goes back.
+- **Each view loads late, on its own.** The loader shows the section and loads
+  a view's bundle only when its panel nears the screen or its Load button is
+  pressed. A hidden panel never nears the screen, so the inside's bundle and
+  track map are fetched only once its tab is chosen. A view keeps its camera
+  when the visitor switches away and back, and a hidden stage does not draw.
+- **The outside is the case as made, in greys.** Its colours are tokens of its
+  own: the upper shell and the door `--model-nes-case`, the lower shell
+  `--model-nes-case-dark`, the black band `--model-nes-band`, POWER and RESET
+  `--model-nes-button`, its printed words `--model-nes-ink` and the paper of the
+  PAL console's labels underneath `--model-nes-sticker`; its power light the
+  KIM-1's `--model-led` lit and `--model-led-off` dark. None is a text colour.
+  The PAL console photographed has yellowed; the model is not.
+  On the canvas the stage's light, the same for every model on this site
+  (`--white`, the phosphor's, and a moss ground light), tints the greys a
+  little green; the note under the model says so.
+- **Its words are ours.** Every word on the case is drawn by the model, in the
+  site's own type once it has loaded, into one canvas: no image, no outline of
+  Nintendo's lettering. The photograph at the head of the page shows the real
+  one.
+- **It shows the machine's state.** The power light is lit, and POWER in, while
+  the machine runs; RESET goes down for a moment whenever the machine is reset,
+  by the page's button or the model's. A click on POWER does what the page's
+  Start does, and a click on RESET resets the running machine; before Start,
+  RESET does nothing and the status line says why.
+- **The inside is the board with its chips marked.** As task 7 built it: the
+  board's copper and print, traced to look at, its chips with their parts for
+  the console shown, an amber mark (`--model-active`, not the lime) on a chip
+  the processor read or wrote in the last quarter second, and a legend under
+  it with each counted chip's rate.
+- **Each view says how it was made, and what is uncertain.** Under each, a
+  caption that starts "Model, not a photograph, of" the console, and a note
+  whose every figure is read from the view's results file
+  (`src/data/nes-famicom-case-model.json` and
+  `src/data/nes-famicom-board-model.json`), with the credits of exactly the
+  sources that view was made from.
 
 ## The chip page
 

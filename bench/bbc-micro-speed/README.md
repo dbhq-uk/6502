@@ -77,6 +77,10 @@ node run-in-browser.mjs publish/interpreter 3   # folder, launches, timed cycles
 node run-in-browser.mjs publish/aot 3
 ```
 
+`PROFILE=<n>` and `THREAD_TIME=<n>` in the environment profile the run and make n
+more runs timed in the main thread's CPU time, as in
+[`../nes-speed/`](../nes-speed/README.md); its thread lines end in `mhz=<x>`.
+
 `publish/` is git-ignored. `run-in-browser.mjs` uses `/usr/bin/google-chrome`;
 set `CHROME_PATH` to use another. Run one build at a time, leave the machine
 otherwise idle, and note `uptime` before and after. If an AOT publish follows an

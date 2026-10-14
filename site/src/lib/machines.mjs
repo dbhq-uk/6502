@@ -1,8 +1,8 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
-import { REPO_ROOT } from './registry.mjs';
-import { kim1Roms, bbcRoms } from './pins.mjs';
+import { REPO_ROOT, SITE_ROOT } from './registry.mjs';
+import { kim1Roms, bbcRoms, nesRoms } from './pins.mjs';
 
 // The rules about which machines get a page, kept out of the templates so a
 // test can run them on a made-up registry.
@@ -44,11 +44,68 @@ export function parseKeys(keys) {
 }
 
 /**
+ * The teletype's keys with no printed character of their own, as the User
+ * Manual names them in brackets, and the character each sends. The same table
+ * as Kim1Teletype.Named.
+ */
+export const TELETYPE_KEYS = { SPACE: ' ', CR: '\r', LF: '\n', RUBOUT: '\u007f' };
+
+/**
+ * Splits keys typed at the KIM-1's teletype, written as the User Manual writes
+ * them, into parts: { key } for a bracketed key ([SPACE], [CR], [LF] or
+ * [RUBOUT]) and { text } for a run of other printable characters, the way
+ * Kim1Teletype.Parse reads them. "0200[SPACE]G" is three parts. A bare space
+ * is refused, because on a page it cannot be told from nothing.
+ */
+export function parseTeletype(keys) {
+  const parts = [];
+  for (const m of keys.matchAll(/\[([^\]]*)\]?|[^[]+/g)) {
+    const word = m[0];
+    if (word.startsWith('[')) {
+      if (!word.endsWith(']') || !Object.hasOwn(TELETYPE_KEYS, m[1])) throw new Error(`"${word}" is not a bracketed teletype key`);
+      parts.push({ key: m[1] });
+    } else {
+      if (!/^[!-~]+$/.test(word)) throw new Error(`"${word}" has a character that must be written as a bracketed key`);
+      parts.push({ text: word });
+    }
+  }
+  return parts;
+}
+
+/** The characters keys written as parseTeletype reads them send, in order. */
+export const teletypeChars = (keys) => parseTeletype(keys).map((p) => (p.key ? TELETYPE_KEYS[p.key] : p.text)).join('');
+
+/**
+ * The session typed at a machine's teletype, from machines/<id>/teletype.json,
+ * or null when it has none: steps, each with keys pressed on the keypad first
+ * (`keypad`, as parseKeys reads them), keys typed at the teletype (`type`, as
+ * parseTeletype reads them), or both; the last lines the paper `prints` after
+ * it; and what it `says`. Kim1TeletypeTests runs the same file.
+ */
+export function loadTeletype(id, root = REPO_ROOT) {
+  const file = path.join(root, 'machines', id, 'teletype.json');
+  if (!fs.existsSync(file)) return null;
+  const session = JSON.parse(fs.readFileSync(file, 'utf8'));
+  if (!Array.isArray(session.steps) || session.steps.length === 0) throw new Error(`machines/${id}/teletype.json has no steps`);
+  for (const [i, step] of session.steps.entries()) {
+    const where = `machines/${id}/teletype.json, step ${i + 1}`;
+    if (!step.keypad && !step.type) throw new Error(`${where} presses no key and types nothing`);
+    if (step.keypad) parseKeys(step.keypad);
+    if (step.type) parseTeletype(step.type);
+    if (!Array.isArray(step.prints) || step.prints.length === 0 || !step.prints.every((l) => typeof l === 'string' && /^[ -~]*$/.test(l) && l === l.trimEnd())) {
+      throw new Error(`${where}: prints must be lines of plain printable text with no spaces at their ends`);
+    }
+    if (!words(step.says)) throw new Error(`${where} says nothing`);
+  }
+  return session;
+}
+
+/**
  * A machine's "try it" program, from machines/<id>/try-it.json, or null when it
  * has none. The KIM-1's is steps of keypad keys, each checked here as
  * Kim1Keystrokes.Parse reads them. The BBC Micro's is BASIC: `lines` to type,
  * each followed by RETURN, and `shows`, what the screen shows after them, each
- * line plain printable text.
+ * line plain printable text. The NES's is a game to play: see checkNesTryIt.
  */
 export function loadTryIt(id, root = REPO_ROOT) {
   const file = path.join(root, 'machines', id, 'try-it.json');
@@ -62,7 +119,43 @@ export function loadTryIt(id, root = REPO_ROOT) {
     }
     return program;
   }
+  if (id === 'nes') return checkNesTryIt(program, root);
   for (const step of program.steps) parseKeys(step.keys);
+  return program;
+}
+
+const words = (v) => typeof v === 'string' && v.trim() !== '';
+
+/**
+ * The buttons a try-it file may name for the NES pad: the D-pad as one, and the
+ * other four. Typed here rather than read from public/nes-keys.js, because the
+ * build script imports this file and reads nothing under public/;
+ * tests/nes.test.mjs checks the two agree.
+ */
+export const NES_PAD = ['D-pad', 'A', 'B', 'Select', 'Start'];
+
+/**
+ * The NES's try-it file: the game Start puts in (`rom`, the pinned file, read
+ * and checked against its hash, with its `title`, `author` and `licence`),
+ * `steps` of what to do and what the page then shows, and `controls`, what each
+ * of the pad's buttons does in the game (one of NES_PAD).
+ */
+function checkNesTryIt(program, root) {
+  const where = 'machines/nes/try-it.json';
+  for (const name of ['title', 'author', 'licence']) if (!words(program[name])) throw new Error(`${where}: needs its ${name}, the bundled game's`);
+  if (!Array.isArray(program.steps) || program.steps.length === 0) throw new Error(`${where}: steps must be a list of { do, says }`);
+  program.steps.forEach((step, i) => {
+    if (!words(step?.do) || !words(step?.says)) throw new Error(`${where}: step ${i + 1} needs do and says, each a sentence`);
+  });
+  if (!Array.isArray(program.controls) || program.controls.length === 0) throw new Error(`${where}: controls must be a list of { button, does }`);
+  program.controls.forEach((control, i) => {
+    if (!words(control?.button) || !words(control?.does)) throw new Error(`${where}: control ${i + 1} needs button and does`);
+    if (!NES_PAD.includes(control.button)) throw new Error(`${where}: "${control.button}" is not a button on the NES pad`);
+  });
+  // Last, as it reads the file: the game named is the pinned one, and its bytes are the pin's.
+  const [game] = nesRoms();
+  if (program.rom !== game.path) throw new Error(`${where}: names ${program.rom}, not the pinned ${game.path}`);
+  readRom(game, root);
   return program;
 }
 
@@ -88,6 +181,7 @@ export function runningSentence(registry) {
 export const MACHINE_BUILDS = {
   'kim-1': { project: 'Dbhq.Machines.Kim1.Wasm', roms: kim1Roms, discs: false },
   'bbc-micro': { project: 'Dbhq.Machines.BbcMicro.Wasm', roms: bbcRoms, discs: true },
+  nes: { project: 'Dbhq.Machines.Nes.Wasm', roms: nesRoms, discs: false },
 };
 
 /** The build for each id named, in the order named. Throws on an id with no build, or on none at all. */
@@ -108,4 +202,28 @@ export function readRom({ path: relative, sha256: want }, root = REPO_ROOT) {
   const got = crypto.createHash('sha256').update(bytes).digest('hex');
   if (got !== want) throw new Error(`${relative} does not match its pinned hash ${want}`);
   return bytes;
+}
+
+/**
+ * How many bytes a machine's Start button downloads: every file the build put
+ * in public/machines/<id>/, the WebAssembly and the ROMs, as built (the edge may
+ * compress them on the way, so this is the most it can be), but for the
+ * folders named in `skip`, which Start does not fetch (the BBC Micro's preset
+ * discs). Null when the machine was not built into this copy of the site,
+ * which the page says.
+ */
+export function machineDownloadBytes(id, root = SITE_ROOT, skip = []) {
+  const dir = path.join(root, 'public', 'machines', id);
+  if (!fs.existsSync(path.join(dir, '_framework'))) return null;
+  let total = 0;
+  const walk = (d) => {
+    for (const e of fs.readdirSync(d, { withFileTypes: true })) {
+      if (d === dir && skip.includes(e.name)) continue;
+      const full = path.join(d, e.name);
+      if (e.isDirectory()) walk(full);
+      else total += fs.statSync(full).size;
+    }
+  };
+  walk(dir);
+  return total;
 }

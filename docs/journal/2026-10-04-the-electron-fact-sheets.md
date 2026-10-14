@@ -2,7 +2,7 @@
 title: "The Electron's fact sheets and plan"
 date: 2026-10-04
 summary: "Two fact sheets and a plan for the Electron, written before any code: what the ROM search and the sources settled, a contention rule that reproduces real timings, and what is left to be found by running the ROM."
-order: 31
+order: 32
 ---
 
 # 4 October 2026: the Electron's fact sheets and plan

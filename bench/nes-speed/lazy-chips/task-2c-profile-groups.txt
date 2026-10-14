@@ -1,0 +1,400 @@
+### lazy 6a98780, runs region 0 (three profiles)
+group	#1	#2	#3	median
+PPU RunDot (the baseline build calls it Tick), own code and what the compiler inlined	26.0	26.0	26.3	26.0
+PPU RenderDot (pixel output)	2.7	2.8	2.9	2.8
+PPU sprite evaluation (EvaluationStep, Evaluate)	2.7	2.7	2.7	2.7
+PPU sprite fetch and laying (FetchSprite, LaySprite)	2.9	3.1	2.9	2.9
+PPU background fetch (FetchBackground)	0.7	0.7	0.7	0.7
+PPU CatchUp (the loop that calls RunDot)	4.7	4.6	4.6	4.6
+PPU registers and the rest (WriteRegister, DecayedLatch, increments, ...)	0.4	0.3	0.4	0.4
+NesBus.Cycle	19.3	18.7	18.5	18.7
+NesBus reads and writes (ReadAccess, WriteAccess, Read, Write, DMA)	4.3	4.2	4.5	4.3
+Nes.Run and Nes.Step (the machine loop)	2.3	2.4	2.4	2.4
+APU Tick	10.8	11.1	10.3	10.8
+APU rest (Remix, Write, channels)	1.6	1.4	1.9	1.6
+SampleBuffer (Step, Impulse, Emit, Add, kernel)	1.1	1.1	1.1	1.1
+Mapper (Board, Nrom and the others)	0.0	0.0	0.0	0.0
+Other NES code	0.0	0.0	0.0	0.0
+CPU core (Cpu.*)	14.1	14.5	14.6	14.5
+(program): the browser, outside JS and WebAssembly	3.9	3.8	3.5	3.8
+(idle)	2.1	2.4	2.4	2.4
+(garbage collector)	0.0	0.0	0.0	0.0
+JS glue and page (js-to-wasm, wasm-to-js, dotnet.js, main.js, anonymous)	0.1	0.2	0.1	0.1
+The .NET runtime and libc in the WebAssembly (mono_*, memset, corlib_*, ...)	0.1	0.1	0.2	0.1
+subtotals
+PPU, all (the first seven groups)	40.2	40.1	40.6	40.2
+PPU, per-dot work a scanline loop would replace (all but registers)	39.7	39.8	40.2	39.8
+NesBus and the machine loop (Cycle, reads and writes, Run and Step)	26.0	25.3	25.5	25.5
+APU and SampleBuffer (the four groups, excluding what Cycle inlined)	13.5	13.5	13.2	13.5
+CPU core	14.1	14.5	14.6	14.5
+Browser, page, runtime and idle (program, idle, GC, JS glue, .NET runtime)	6.2	6.5	6.2	6.2
+samples (ms)	3123	2589	2967
+
+mean share by function:
+26.12	Machines_Nes.Ppu_RunDot	[PPU]
+18.83	Machines_Nes.NesBus_Cycle	[NesBus.Cycle]
+10.72	Machines_Nes.Apu_Tick	[APU]
+5.09	Cpu6502.Cpu_Read	[CPU]
+4.69	Cpu6502.Cpu_Step	[CPU]
+4.63	Machines_Nes.Ppu_CatchUp	[PPU]
+3.73	(program)	[(program):]
+3.63	Machines_Nes.NesBus_ReadAccess	[NesBus]
+2.80	Machines_Nes.Ppu_RenderDot	[PPU]
+2.59	Cpu6502.Cpu_ExecuteOfficial	[CPU]
+2.53	Machines_Nes.Ppu_FetchSprite	[PPU]
+2.52	Machines_Nes.Ppu_EvaluationStep	[PPU]
+2.37	Machines_Nes.Nes_Run	[Nes.Run]
+2.29	(idle)	[(idle)]
+1.16	Machines_Nes.Apu_Remix	[APU]
+0.70	Machines_Nes.Ppu_FetchBackground	[PPU]
+
+### lazy 6a98780, page region 0 (three profiles)
+group	#1	#2	#3	median
+PPU RunDot (the baseline build calls it Tick), own code and what the compiler inlined	20.1	20.8	19.9	20.1
+PPU RenderDot (pixel output)	2.3	2.3	2.2	2.3
+PPU sprite evaluation (EvaluationStep, Evaluate)	2.4	2.2	2.0	2.2
+PPU sprite fetch and laying (FetchSprite, LaySprite)	2.2	2.3	2.1	2.2
+PPU background fetch (FetchBackground)	0.6	0.5	0.7	0.6
+PPU CatchUp (the loop that calls RunDot)	3.9	3.2	3.5	3.5
+PPU registers and the rest (WriteRegister, DecayedLatch, increments, ...)	0.3	0.4	0.3	0.3
+NesBus.Cycle	14.0	14.7	14.6	14.6
+NesBus reads and writes (ReadAccess, WriteAccess, Read, Write, DMA)	3.7	3.0	3.2	3.2
+Nes.Run and Nes.Step (the machine loop)	2.2	2.1	2.2	2.2
+APU Tick	12.0	12.3	11.3	12.0
+APU rest (Remix, Write, channels)	1.3	1.0	1.3	1.3
+SampleBuffer (Step, Impulse, Emit, Add, kernel)	1.5	1.4	1.7	1.5
+Mapper (Board, Nrom and the others)	0.0	0.0	0.0	0.0
+Other NES code	0.1	0.1	0.1	0.1
+CPU core (Cpu.*)	10.6	11.8	11.1	11.1
+(program): the browser, outside JS and WebAssembly	12.3	11.9	12.9	12.3
+(idle)	2.3	3.5	2.6	2.6
+(garbage collector)	0.1	0.1	0.1	0.1
+JS glue and page (js-to-wasm, wasm-to-js, dotnet.js, main.js, anonymous)	5.5	4.3	5.5	5.5
+The .NET runtime and libc in the WebAssembly (mono_*, memset, corlib_*, ...)	2.6	2.0	2.7	2.6
+subtotals
+PPU, all (the first seven groups)	31.8	31.7	30.6	31.7
+PPU, per-dot work a scanline loop would replace (all but registers)	31.4	31.3	30.4	31.3
+NesBus and the machine loop (Cycle, reads and writes, Run and Step)	20.0	19.8	20.1	20.0
+APU and SampleBuffer (the four groups, excluding what Cycle inlined)	14.9	14.8	14.3	14.8
+CPU core	10.6	11.8	11.1	11.1
+Browser, page, runtime and idle (program, idle, GC, JS glue, .NET runtime)	22.7	21.8	23.8	22.7
+samples (ms)	3556	3119	3420
+
+mean share by function:
+20.30	Machines_Nes.Ppu_RunDot	[PPU]
+14.45	Machines_Nes.NesBus_Cycle	[NesBus.Cycle]
+12.36	(program)	[(program):]
+11.86	Machines_Nes.Apu_Tick	[APU]
+4.71	Cpu6502.Cpu_Read	[CPU]
+3.51	Machines_Nes.Ppu_CatchUp	[PPU]
+2.80	(idle)	[(idle)]
+2.73	Machines_Nes.NesBus_ReadAccess	[NesBus]
+2.25	Machines_Nes.Ppu_RenderDot	[PPU]
+2.25	Cpu6502.Cpu_Step	[CPU]
+2.09	Cpu6502.Cpu_ExecuteOfficial	[CPU]
+2.06	Machines_Nes.Ppu_EvaluationStep	[PPU]
+1.87	Machines_Nes.Ppu_FetchSprite	[PPU]
+1.45	Machines_Nes.Nes_Run	[Nes.Run]
+0.95	D	[JS]
+0.79	Machines_Nes.Apu_Remix	[APU]
+
+### lazy 6a98780, runs region 1 (three profiles)
+group	#1	#2	#3	median
+PPU RunDot (the baseline build calls it Tick), own code and what the compiler inlined	24.8	24.4	24.8	24.8
+PPU RenderDot (pixel output)	2.4	2.4	2.4	2.4
+PPU sprite evaluation (EvaluationStep, Evaluate)	2.6	3.0	2.6	2.6
+PPU sprite fetch and laying (FetchSprite, LaySprite)	2.7	2.2	2.4	2.4
+PPU background fetch (FetchBackground)	0.7	0.9	0.6	0.7
+PPU CatchUp (the loop that calls RunDot)	5.0	5.4	5.1	5.1
+PPU registers and the rest (WriteRegister, DecayedLatch, increments, ...)	0.4	0.4	0.4	0.4
+NesBus.Cycle	19.2	19.7	19.5	19.5
+NesBus reads and writes (ReadAccess, WriteAccess, Read, Write, DMA)	3.9	4.6	4.0	4.0
+Nes.Run and Nes.Step (the machine loop)	2.1	2.3	2.4	2.3
+APU Tick	11.6	11.9	11.6	11.6
+APU rest (Remix, Write, channels)	1.7	1.7	1.9	1.7
+SampleBuffer (Step, Impulse, Emit, Add, kernel)	1.2	1.1	1.2	1.2
+Mapper (Board, Nrom and the others)	0.0	0.0	0.0	0.0
+Other NES code	0.0	0.0	0.0	0.0
+CPU core (Cpu.*)	14.8	13.5	14.3	14.3
+(program): the browser, outside JS and WebAssembly	3.9	4.3	4.2	4.2
+(idle)	2.7	2.1	2.4	2.4
+(garbage collector)	0.0	0.0	0.0	0.0
+JS glue and page (js-to-wasm, wasm-to-js, dotnet.js, main.js, anonymous)	0.2	0.1	0.1	0.1
+The .NET runtime and libc in the WebAssembly (mono_*, memset, corlib_*, ...)	0.1	0.1	0.1	0.1
+subtotals
+PPU, all (the first seven groups)	38.5	38.6	38.3	38.5
+PPU, per-dot work a scanline loop would replace (all but registers)	38.1	38.2	37.9	38.1
+NesBus and the machine loop (Cycle, reads and writes, Run and Step)	25.2	26.5	25.9	25.9
+APU and SampleBuffer (the four groups, excluding what Cycle inlined)	14.6	14.7	14.6	14.6
+CPU core	14.8	13.5	14.3	14.3
+Browser, page, runtime and idle (program, idle, GC, JS glue, .NET runtime)	6.9	6.7	6.9	6.9
+samples (ms)	2602	3090	2612
+
+mean share by function:
+24.67	Machines_Nes.Ppu_RunDot	[PPU]
+19.43	Machines_Nes.NesBus_Cycle	[NesBus.Cycle]
+11.70	Machines_Nes.Apu_Tick	[APU]
+5.16	Machines_Nes.Ppu_CatchUp	[PPU]
+4.96	Cpu6502.Cpu_Read	[CPU]
+4.82	Cpu6502.Cpu_Step	[CPU]
+4.12	(program)	[(program):]
+3.43	Machines_Nes.NesBus_ReadAccess	[NesBus]
+2.53	Machines_Nes.Ppu_EvaluationStep	[PPU]
+2.43	(idle)	[(idle)]
+2.39	Machines_Nes.Ppu_RenderDot	[PPU]
+2.39	Cpu6502.Cpu_ExecuteOfficial	[CPU]
+2.27	Machines_Nes.Nes_Run	[Nes.Run]
+2.06	Machines_Nes.Ppu_FetchSprite	[PPU]
+1.20	Machines_Nes.Apu_Remix	[APU]
+0.73	Machines_Nes.Ppu_FetchBackground	[PPU]
+
+### lazy 6a98780, page region 1 (three profiles)
+group	#1	#2	#3	median
+PPU RunDot (the baseline build calls it Tick), own code and what the compiler inlined	21.1	19.3	18.2	19.3
+PPU RenderDot (pixel output)	1.8	2.3	2.1	2.1
+PPU sprite evaluation (EvaluationStep, Evaluate)	1.9	2.0	2.0	2.0
+PPU sprite fetch and laying (FetchSprite, LaySprite)	1.9	2.1	1.9	1.9
+PPU background fetch (FetchBackground)	0.5	0.5	0.7	0.5
+PPU CatchUp (the loop that calls RunDot)	3.5	3.9	4.5	3.9
+PPU registers and the rest (WriteRegister, DecayedLatch, increments, ...)	0.3	0.3	0.3	0.3
+NesBus.Cycle	14.4	14.9	15.0	14.9
+NesBus reads and writes (ReadAccess, WriteAccess, Read, Write, DMA)	3.1	3.5	3.2	3.2
+Nes.Run and Nes.Step (the machine loop)	2.3	2.4	2.2	2.3
+APU Tick	12.0	11.3	11.5	11.5
+APU rest (Remix, Write, channels)	1.5	2.1	1.3	1.5
+SampleBuffer (Step, Impulse, Emit, Add, kernel)	1.5	1.6	1.9	1.6
+Mapper (Board, Nrom and the others)	0.0	0.0	0.0	0.0
+Other NES code	0.1	0.1	0.1	0.1
+CPU core (Cpu.*)	11.4	11.0	12.0	11.4
+(program): the browser, outside JS and WebAssembly	12.1	12.6	12.4	12.4
+(idle)	2.5	2.3	2.4	2.4
+(garbage collector)	0.1	0.1	0.1	0.1
+JS glue and page (js-to-wasm, wasm-to-js, dotnet.js, main.js, anonymous)	5.5	5.2	5.6	5.5
+The .NET runtime and libc in the WebAssembly (mono_*, memset, corlib_*, ...)	2.5	2.5	2.6	2.5
+subtotals
+PPU, all (the first seven groups)	31.1	30.4	29.6	30.4
+PPU, per-dot work a scanline loop would replace (all but registers)	30.8	30.1	29.3	30.1
+NesBus and the machine loop (Cycle, reads and writes, Run and Step)	19.8	20.8	20.5	20.5
+APU and SampleBuffer (the four groups, excluding what Cycle inlined)	15.0	15.0	14.7	15.0
+CPU core	11.4	11.0	12.0	11.4
+Browser, page, runtime and idle (program, idle, GC, JS glue, .NET runtime)	22.6	22.6	23.1	22.6
+samples (ms)	3351	4065	3500
+
+mean share by function:
+19.51	Machines_Nes.Ppu_RunDot	[PPU]
+14.78	Machines_Nes.NesBus_Cycle	[NesBus.Cycle]
+12.36	(program)	[(program):]
+11.63	Machines_Nes.Apu_Tick	[APU]
+4.79	Cpu6502.Cpu_Read	[CPU]
+3.96	Machines_Nes.Ppu_CatchUp	[PPU]
+2.67	Machines_Nes.NesBus_ReadAccess	[NesBus]
+2.37	(idle)	[(idle)]
+2.26	Cpu6502.Cpu_Step	[CPU]
+2.22	Cpu6502.Cpu_ExecuteOfficial	[CPU]
+2.08	Machines_Nes.Ppu_RenderDot	[PPU]
+1.83	Machines_Nes.Ppu_EvaluationStep	[PPU]
+1.64	Machines_Nes.Ppu_FetchSprite	[PPU]
+1.58	D	[JS]
+1.54	Machines_Nes.Nes_Run	[Nes.Run]
+1.08	Machines_Nes.Apu_Remix	[APU]
+
+### baseline 5e48505, runs region 0 (three profiles)
+group	#1	#2	#3	median
+PPU RunDot (the baseline build calls it Tick), own code and what the compiler inlined	30.2	31.5	30.1	30.2
+PPU RenderDot (pixel output)	3.7	3.9	3.6	3.7
+PPU sprite evaluation (EvaluationStep, Evaluate)	3.6	3.6	3.7	3.6
+PPU sprite fetch and laying (FetchSprite, LaySprite)	4.1	4.1	3.8	4.1
+PPU background fetch (FetchBackground)	1.1	1.1	1.2	1.1
+PPU CatchUp (the loop that calls RunDot)	0.0	0.0	0.0	0.0
+PPU registers and the rest (WriteRegister, DecayedLatch, increments, ...)	0.3	0.3	0.3	0.3
+NesBus.Cycle	17.6	17.5	18.2	17.6
+NesBus reads and writes (ReadAccess, WriteAccess, Read, Write, DMA)	4.5	4.5	4.9	4.5
+Nes.Run and Nes.Step (the machine loop)	1.6	2.0	1.8	1.8
+APU Tick	13.2	11.1	13.1	13.1
+APU rest (Remix, Write, channels)	1.3	1.4	1.1	1.3
+SampleBuffer (Step, Impulse, Emit, Add, kernel)	0.9	1.0	1.0	1.0
+Mapper (Board, Nrom and the others)	0.0	0.0	0.0	0.0
+Other NES code	0.0	0.0	0.0	0.0
+CPU core (Cpu.*)	12.5	12.9	11.9	12.5
+(program): the browser, outside JS and WebAssembly	3.1	2.8	3.1	3.1
+(idle)	1.8	1.8	1.9	1.8
+(garbage collector)	0.0	0.0	0.0	0.0
+JS glue and page (js-to-wasm, wasm-to-js, dotnet.js, main.js, anonymous)	0.1	0.1	0.1	0.1
+The .NET runtime and libc in the WebAssembly (mono_*, memset, corlib_*, ...)	0.2	0.2	0.2	0.2
+subtotals
+PPU, all (the first seven groups)	43.0	44.6	42.8	43.0
+PPU, per-dot work a scanline loop would replace (all but registers)	42.7	44.3	42.5	42.7
+NesBus and the machine loop (Cycle, reads and writes, Run and Step)	23.7	24.1	24.9	24.1
+APU and SampleBuffer (the four groups, excluding what Cycle inlined)	15.5	13.6	15.2	15.2
+CPU core	12.5	12.9	11.9	12.5
+Browser, page, runtime and idle (program, idle, GC, JS glue, .NET runtime)	5.2	4.9	5.3	5.2
+samples (ms)	3728	3409	3335
+
+mean share by function:
+30.61	Machines_Nes.Ppu_Tick	[PPU]
+17.77	Machines_Nes.NesBus_Cycle	[NesBus.Cycle]
+12.47	Machines_Nes.Apu_Tick	[APU]
+4.21	Cpu6502.Cpu_Step	[CPU]
+4.02	Cpu6502.Cpu_Read	[CPU]
+3.77	Machines_Nes.Ppu_RenderDot	[PPU]
+3.63	Machines_Nes.NesBus_ReadAccess	[NesBus]
+3.58	Machines_Nes.Ppu_FetchSprite	[PPU]
+3.49	Machines_Nes.Ppu_EvaluationStep	[PPU]
+3.00	(program)	[(program):]
+2.45	Cpu6502.Cpu_ExecuteOfficial	[CPU]
+1.82	(idle)	[(idle)]
+1.80	Machines_Nes.Nes_Run	[Nes.Run]
+1.11	Machines_Nes.Ppu_FetchBackground	[PPU]
+0.85	Machines_Nes.NesBus_WriteAccess	[NesBus]
+0.84	Machines_Nes.Apu_Remix	[APU]
+
+### baseline 5e48505, page region 0 (three profiles)
+group	#1	#2	#3	median
+PPU RunDot (the baseline build calls it Tick), own code and what the compiler inlined	25.1	25.1	24.9	25.1
+PPU RenderDot (pixel output)	3.1	2.8	3.1	3.1
+PPU sprite evaluation (EvaluationStep, Evaluate)	3.0	3.5	3.0	3.0
+PPU sprite fetch and laying (FetchSprite, LaySprite)	3.4	3.1	3.2	3.2
+PPU background fetch (FetchBackground)	1.0	0.9	1.1	1.0
+PPU CatchUp (the loop that calls RunDot)	0.0	0.0	0.0	0.0
+PPU registers and the rest (WriteRegister, DecayedLatch, increments, ...)	0.3	0.3	0.2	0.3
+NesBus.Cycle	14.0	14.6	14.6	14.6
+NesBus reads and writes (ReadAccess, WriteAccess, Read, Write, DMA)	3.9	4.0	3.7	3.9
+Nes.Run and Nes.Step (the machine loop)	2.1	2.3	2.2	2.2
+APU Tick	13.3	13.0	12.7	13.0
+APU rest (Remix, Write, channels)	1.1	1.1	0.9	1.1
+SampleBuffer (Step, Impulse, Emit, Add, kernel)	1.5	1.5	1.5	1.5
+Mapper (Board, Nrom and the others)	0.0	0.0	0.0	0.0
+Other NES code	0.1	0.1	0.0	0.1
+CPU core (Cpu.*)	10.1	10.4	10.6	10.4
+(program): the browser, outside JS and WebAssembly	9.7	9.5	9.9	9.7
+(idle)	2.7	2.1	2.2	2.2
+(garbage collector)	0.1	0.1	0.1	0.1
+JS glue and page (js-to-wasm, wasm-to-js, dotnet.js, main.js, anonymous)	3.7	3.6	4.1	3.7
+The .NET runtime and libc in the WebAssembly (mono_*, memset, corlib_*, ...)	1.8	2.0	2.0	2.0
+subtotals
+PPU, all (the first seven groups)	36.0	35.7	35.5	35.7
+PPU, per-dot work a scanline loop would replace (all but registers)	35.7	35.4	35.2	35.4
+NesBus and the machine loop (Cycle, reads and writes, Run and Step)	20.0	20.9	20.5	20.5
+APU and SampleBuffer (the four groups, excluding what Cycle inlined)	15.8	15.5	15.1	15.5
+CPU core	10.1	10.4	10.6	10.4
+Browser, page, runtime and idle (program, idle, GC, JS glue, .NET runtime)	18.0	17.3	18.3	18.0
+samples (ms)	3980	4043	4058
+
+mean share by function:
+25.02	Machines_Nes.Ppu_Tick	[PPU]
+14.42	Machines_Nes.NesBus_Cycle	[NesBus.Cycle]
+12.98	Machines_Nes.Apu_Tick	[APU]
+9.72	(program)	[(program):]
+4.22	Cpu6502.Cpu_Read	[CPU]
+3.07	Machines_Nes.Ppu_EvaluationStep	[PPU]
+3.00	Machines_Nes.Ppu_RenderDot	[PPU]
+2.95	Machines_Nes.Ppu_FetchSprite	[PPU]
+2.86	Machines_Nes.NesBus_ReadAccess	[NesBus]
+2.33	(idle)	[(idle)]
+2.20	Cpu6502.Cpu_ExecuteOfficial	[CPU]
+1.96	Cpu6502.Cpu_Step	[CPU]
+1.49	Machines_Nes.Nes_Run	[Nes.Run]
+0.98	Machines_Nes.Ppu_FetchBackground	[PPU]
+0.90	D	[JS]
+0.80	Machines_Nes.NesBus_WriteAccess	[NesBus]
+
+### baseline 5e48505, runs region 1 (three profiles)
+group	#1	#2	#3	median
+PPU RunDot (the baseline build calls it Tick), own code and what the compiler inlined	28.1	29.5	29.7	29.5
+PPU RenderDot (pixel output)	2.9	3.2	3.1	3.1
+PPU sprite evaluation (EvaluationStep, Evaluate)	3.4	3.7	3.4	3.4
+PPU sprite fetch and laying (FetchSprite, LaySprite)	3.4	3.3	3.3	3.3
+PPU background fetch (FetchBackground)	1.0	1.0	1.1	1.0
+PPU CatchUp (the loop that calls RunDot)	0.0	0.0	0.0	0.0
+PPU registers and the rest (WriteRegister, DecayedLatch, increments, ...)	0.3	0.3	0.3	0.3
+NesBus.Cycle	20.0	18.9	19.2	19.2
+NesBus reads and writes (ReadAccess, WriteAccess, Read, Write, DMA)	4.8	4.9	5.0	4.9
+Nes.Run and Nes.Step (the machine loop)	2.0	2.1	1.7	2.0
+APU Tick	12.0	13.3	12.8	12.8
+APU rest (Remix, Write, channels)	1.3	1.3	1.6	1.3
+SampleBuffer (Step, Impulse, Emit, Add, kernel)	0.9	1.0	0.8	0.9
+Mapper (Board, Nrom and the others)	0.0	0.0	0.0	0.0
+Other NES code	0.0	0.0	0.0	0.0
+CPU core (Cpu.*)	13.9	12.0	12.2	12.2
+(program): the browser, outside JS and WebAssembly	3.8	3.2	3.6	3.6
+(idle)	1.7	2.0	1.9	1.9
+(garbage collector)	0.0	0.0	0.0	0.0
+JS glue and page (js-to-wasm, wasm-to-js, dotnet.js, main.js, anonymous)	0.1	0.1	0.1	0.1
+The .NET runtime and libc in the WebAssembly (mono_*, memset, corlib_*, ...)	0.1	0.1	0.1	0.1
+subtotals
+PPU, all (the first seven groups)	39.2	41.0	41.1	41.0
+PPU, per-dot work a scanline loop would replace (all but registers)	38.9	40.7	40.8	40.7
+NesBus and the machine loop (Cycle, reads and writes, Run and Step)	26.8	25.9	25.9	25.9
+APU and SampleBuffer (the four groups, excluding what Cycle inlined)	14.3	15.6	15.2	15.2
+CPU core	13.9	12.0	12.2	12.2
+Browser, page, runtime and idle (program, idle, GC, JS glue, .NET runtime)	5.8	5.4	5.7	5.7
+samples (ms)	3445	3539	3344
+
+mean share by function:
+29.09	Machines_Nes.Ppu_Tick	[PPU]
+19.36	Machines_Nes.NesBus_Cycle	[NesBus.Cycle]
+12.70	Machines_Nes.Apu_Tick	[APU]
+4.34	Cpu6502.Cpu_Read	[CPU]
+4.29	Cpu6502.Cpu_Step	[CPU]
+3.82	Machines_Nes.NesBus_ReadAccess	[NesBus]
+3.55	(program)	[(program):]
+3.42	Machines_Nes.Ppu_EvaluationStep	[PPU]
+3.07	Machines_Nes.Ppu_RenderDot	[PPU]
+3.03	Machines_Nes.Ppu_FetchSprite	[PPU]
+2.31	Cpu6502.Cpu_ExecuteOfficial	[CPU]
+1.96	Machines_Nes.Nes_Run	[Nes.Run]
+1.86	(idle)	[(idle)]
+1.06	Machines_Nes.Ppu_FetchBackground	[PPU]
+1.00	Machines_Nes.Apu_Remix	[APU]
+0.88	Machines_Nes.NesBus_WriteAccess	[NesBus]
+
+### baseline 5e48505, page region 1 (three profiles)
+group	#1	#2	#3	median
+PPU RunDot (the baseline build calls it Tick), own code and what the compiler inlined	24.8	26.5	24.8	24.8
+PPU RenderDot (pixel output)	2.9	2.9	2.7	2.9
+PPU sprite evaluation (EvaluationStep, Evaluate)	2.7	2.6	2.9	2.7
+PPU sprite fetch and laying (FetchSprite, LaySprite)	2.9	3.0	3.0	3.0
+PPU background fetch (FetchBackground)	0.8	0.9	1.0	0.9
+PPU CatchUp (the loop that calls RunDot)	0.0	0.0	0.0	0.0
+PPU registers and the rest (WriteRegister, DecayedLatch, increments, ...)	0.2	0.3	0.3	0.3
+NesBus.Cycle	16.4	15.8	16.2	16.2
+NesBus reads and writes (ReadAccess, WriteAccess, Read, Write, DMA)	4.0	4.5	4.2	4.2
+Nes.Run and Nes.Step (the machine loop)	2.1	2.3	2.3	2.3
+APU Tick	13.3	12.8	12.8	12.8
+APU rest (Remix, Write, channels)	1.2	1.1	1.3	1.2
+SampleBuffer (Step, Impulse, Emit, Add, kernel)	1.5	1.6	1.3	1.5
+Mapper (Board, Nrom and the others)	0.0	0.0	0.0	0.0
+Other NES code	0.1	0.1	0.1	0.1
+CPU core (Cpu.*)	9.7	10.6	10.3	10.3
+(program): the browser, outside JS and WebAssembly	9.3	8.2	8.3	8.3
+(idle)	2.5	1.8	2.5	2.5
+(garbage collector)	0.1	0.0	0.1	0.1
+JS glue and page (js-to-wasm, wasm-to-js, dotnet.js, main.js, anonymous)	3.7	3.4	4.1	3.7
+The .NET runtime and libc in the WebAssembly (mono_*, memset, corlib_*, ...)	1.9	1.7	2.0	1.9
+subtotals
+PPU, all (the first seven groups)	34.4	36.1	34.7	34.7
+PPU, per-dot work a scanline loop would replace (all but registers)	34.2	35.9	34.4	34.4
+NesBus and the machine loop (Cycle, reads and writes, Run and Step)	22.4	22.7	22.6	22.6
+APU and SampleBuffer (the four groups, excluding what Cycle inlined)	16.0	15.4	15.4	15.4
+CPU core	9.7	10.6	10.3	10.3
+Browser, page, runtime and idle (program, idle, GC, JS glue, .NET runtime)	17.4	15.1	16.9	16.9
+samples (ms)	4267	5032	4346
+
+mean share by function:
+25.39	Machines_Nes.Ppu_Tick	[PPU]
+16.12	Machines_Nes.NesBus_Cycle	[NesBus.Cycle]
+12.97	Machines_Nes.Apu_Tick	[APU]
+8.58	(program)	[(program):]
+4.17	Cpu6502.Cpu_Read	[CPU]
+3.18	Machines_Nes.NesBus_ReadAccess	[NesBus]
+2.84	Machines_Nes.Ppu_RenderDot	[PPU]
+2.67	Machines_Nes.Ppu_FetchSprite	[PPU]
+2.60	Machines_Nes.Ppu_EvaluationStep	[PPU]
+2.26	(idle)	[(idle)]
+2.14	Cpu6502.Cpu_ExecuteOfficial	[CPU]
+1.93	Cpu6502.Cpu_Step	[CPU]
+1.46	Machines_Nes.Nes_Run	[Nes.Run]
+0.88	Machines_Nes.Ppu_FetchBackground	[PPU]
+0.87	Machines_Nes.NesBus_WriteAccess	[NesBus]
+0.76	Machines_Nes.Nes_Step	[Nes.Run]
+

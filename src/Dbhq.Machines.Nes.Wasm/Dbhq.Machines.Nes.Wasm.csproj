@@ -1,0 +1,24 @@
+<Project Sdk="Microsoft.NET.Sdk.WebAssembly">
+  <!--
+    The NES as .NET WebAssembly, for its page on 6502.dbhq.uk (site/public/nes.js) and for the
+    browser speed check in bench/nes-speed/. A plain WebAssembly app, not Blazor, in the shape of
+    Dbhq.Machines.BbcMicro.Wasm. The cartridge is not in here: the caller gives it to Load as
+    bytes (AGENTS.md rules 3 and 4).
+  -->
+  <PropertyGroup>
+    <IsPackable>false</IsPackable>
+    <!-- The JavaScript interop generator writes unsafe code for [JSExport], and refuses to compile without this. -->
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <AssemblyName>Dbhq.Machines.Nes.Wasm</AssemblyName>
+    <RootNamespace>Dbhq.Machines.Nes.Wasm</RootNamespace>
+    <!-- No culture data: nothing here formats or compares text by culture, and the ICU files would be the biggest download. -->
+    <InvariantGlobalization>true</InvariantGlobalization>
+    <!-- No symbols in the published site. -->
+    <DebugType>none</DebugType>
+    <CopyOutputSymbolsToPublishDirectory>false</CopyOutputSymbolsToPublishDirectory>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../Dbhq.Machines.Nes/Dbhq.Machines.Nes.csproj" />
+  </ItemGroup>
+</Project>

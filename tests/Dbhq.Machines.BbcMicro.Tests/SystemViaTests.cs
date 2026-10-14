@@ -1,3 +1,4 @@
+using System.Reflection;
 using Xunit;
 using Dbhq.Cpu6502;
 using Dbhq.Cpu6502.TestSupport;
@@ -455,5 +456,35 @@ public class SystemViaTests
         }
 
         Assert.Equal(20000, bus.Cycles - first);
+    }
+
+    [Fact]
+    public void AnExceptionInACatchUpLeavesTheChipSayingWhatWentWrongEachTime()
+    {
+        // Nothing the machine does can throw inside a catch-up, so the fault is put there: the
+        // keyboard the chip reads each cycle is taken away. The first look throws the null
+        // reference. The second must throw it again. Without a reset of the guard in a finally,
+        // the second throws the guard's own message, which names a reentrant look that never was.
+        var via = new SystemVia(new BbcKeyboard(7));
+        typeof(SystemVia).GetField("_keyboard", BindingFlags.NonPublic | BindingFlags.Instance)!.SetValue(via, null);
+        via.Tick();
+
+        Assert.Throws<NullReferenceException>(() => via.Read(0xE));
+        Assert.Throws<NullReferenceException>(() => via.Read(0xE));
+    }
+
+    [Fact]
+    public void Ca1FromOutsideAndTheBusIrqLineAreNotPublic()
+    {
+        // VsyncInput would put CA1 out of step with the CRTC in a machine, and the bus gives the
+        // CPU its IRQ line itself. The tests reach both through InternalsVisibleTo.
+        const BindingFlags Any = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance;
+        var vsync = typeof(SystemVia).GetProperty("VsyncInput", Any);
+        var irq = typeof(BbcBus).GetProperty("Irq", Any);
+
+        Assert.NotNull(vsync);
+        Assert.NotNull(irq);
+        Assert.False(vsync.SetMethod!.IsPublic, "SystemVia.VsyncInput is public");
+        Assert.False(irq.GetMethod!.IsPublic, "BbcBus.Irq is public");
     }
 }

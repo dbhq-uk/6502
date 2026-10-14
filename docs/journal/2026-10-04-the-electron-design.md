@@ -2,7 +2,7 @@
 title: "The Electron's design"
 date: 2026-10-04
 summary: "The Acorn Electron is written up as the third machine: tape for storage, the ULA holding the CPU off modelled exactly, and a search for ROMs that found them in a place other than where the BBC's came from."
-order: 30
+order: 31
 ---
 
 # 4 October 2026: the Electron's design

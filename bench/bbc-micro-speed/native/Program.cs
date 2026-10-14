@@ -266,7 +266,7 @@ internal static class Fingerprint
                     | (via.Ca2Out ? 1UL << 17 : 0) | (via.Cb2Out ? 1UL << 18 : 0));
             }
 
-            Mix(ref _checkpoints, bus.SystemVia.Latch | ((ulong)bus.RomSlot << 8) | (bus.Irq ? 1UL << 16 : 0));
+            Mix(ref _checkpoints, bus.SystemVia.Latch | ((ulong)bus.RomSlot << 8) | (bus.SystemVia.Irq || bus.UserVia.Irq ? 1UL << 16 : 0));
         }
 
         private static void Mix(ref ulong hash, ulong value)
@@ -378,11 +378,11 @@ internal static class Profile
     }
 
     /// <summary>64 KB and nothing else: every access is one array read or write.</summary>
-    private sealed class FlatBus(byte[] memory) : Dbhq.Cpu6502.IBus
+    private sealed class FlatBus(byte[] memory) : Dbhq.Cpu6502.Bus
     {
-        public byte Read(ushort address) => memory[address];
+        public override byte Read(ushort address) => memory[address];
 
-        public void Write(ushort address, byte value) => memory[address] = value;
+        public override void Write(ushort address, byte value) => memory[address] = value;
     }
 }
 

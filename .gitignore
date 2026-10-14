@@ -31,5 +31,15 @@ infra/.terraform/
 tools/kim1-model/out/
 __pycache__/
 
+# The BBC Micro model tools' working images (overlays to look at), and pytest's cache.
+tools/bbc-micro-model/out/
+.pytest_cache/
+
+# The NES model tools' working images (overlays to look at).
+tools/nes-model/out/
+
 # Published output of the BBC Micro browser speed check, made locally.
 bench/bbc-micro-speed/publish/
+
+# Published output of the NES browser speed check, made locally.
+bench/nes-speed/publish/

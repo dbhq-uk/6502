@@ -29,7 +29,23 @@
 // keyboard or the model, is announced on the panel as a `kim1:key` event, so the
 // model's key goes down whichever way it was pressed. The panel says
 // `kim1:ready` when the machine has started.
+//
+// The teletype. The machine models the terminal on the board's 20 mA loops
+// (src/Dbhq.Machines.Kim1/Kim1Teletype.cs): the TTY switch, the terminal's
+// speed, the keys sent to it as bits and the characters it decodes from the
+// bits the monitor sends. Each frame this file takes what was printed and puts
+// it on the paper (teletype-paper.js), a row to a line in a log. The field types
+// at the teletype only while it has focus, in capitals, as a Teletype Model 33
+// does; Enter is CR and Backspace or Delete is RUB OUT. Tab is never taken.
+// panel.dataset.ttyIdle is "1" once nothing is waiting to be sent and the
+// monitor has stopped printing. The log is not live: its open line is
+// rewritten a character at a time, which a screen reader would read out as
+// fragments. A separate polite region is given each line once it is complete
+// (once a line feed has moved the paper on), so a line is heard whole, once.
+// At start the switch and the speed on the page are pushed into the machine,
+// so a browser that restored them on a reload cannot disagree with it.
 import { startMachine } from '/machine-host.js';
+import { Announcer, Paper } from '/teletype-paper.js';
 
 const SETTLE_MS = 400;
 
@@ -44,6 +60,18 @@ async function start(panel) {
   const digits = [...panel.querySelectorAll('[data-digit]')].map((d) => [...d.querySelectorAll('[data-seg]')]);
   const base = panel.dataset.base;
   const clockMhz = Number(panel.dataset.clockMhz);
+  const mode = panel.querySelector('[data-kim1-mode]');
+  const baud = panel.querySelector('[data-kim1-baud]');
+  const clear = panel.querySelector('[data-kim1-clear]');
+  const paperEl = panel.querySelector('[data-kim1-paper]');
+  const typing = panel.querySelector('[data-kim1-type]');
+  const sends = [...panel.querySelectorAll('[data-kim1-send]')];
+  const tty = panel.querySelector('[data-kim1-tty]');
+  const paper = new Paper();
+  const lineEl = panel.querySelector('[data-kim1-line]');
+  const announcer = new Announcer((text) => {
+    lineEl.textContent = text;
+  });
 
   const say = (text, state) => {
     status.textContent = text;
@@ -84,6 +112,27 @@ async function start(panel) {
     }
 
     panel.dataset.pending = String(kim.Pending());
+    const printed = kim.TeletypePrinted();
+    if (printed) draw(paper.print(printed));
+    announcer.frame();
+    panel.dataset.ttyIdle = kim.TeletypeIdle() ? '1' : '0';
+  };
+
+  // The paper's rows follow its lines: torn-off lines leave the top, changed
+  // and new ones are written, and the log keeps to its foot unless the reader
+  // has scrolled up.
+  const draw = ({ from, torn }) => {
+    const atFoot = paperEl.scrollHeight - paperEl.scrollTop - paperEl.clientHeight < 24;
+    for (let i = 0; i < torn && paperEl.firstChild; i++) paperEl.firstChild.remove();
+    const rows = paperEl.children;
+    for (let i = from; i < paper.lines.length; i++) {
+      const row = rows[i] ?? paperEl.appendChild(document.createElement('div'));
+      if (row.textContent !== paper.lines[i]) row.textContent = paper.lines[i];
+    }
+    panel.dataset.paper = paper.text();
+    if (atFoot) paperEl.scrollTop = paperEl.scrollHeight;
+    // Every line but the last is complete: the paper has moved on from it.
+    announcer.say(paper.takeCompleted());
   };
 
   const started = await startMachine({
@@ -115,14 +164,51 @@ async function start(panel) {
   }
   sst.disabled = false;
   sst.addEventListener('change', () => kim.SetSingleStep(sst.checked));
-  // With focus anywhere on the machine, the hex keys on a keyboard press the
-  // keypad's hex keys. Nothing else is taken over, so Tab, Enter and Space
-  // keep their usual meanings.
+  // With focus anywhere on the machine but the teletype, the hex keys on a
+  // keyboard press the keypad's hex keys. Nothing else is taken over, so Tab,
+  // Enter and Space keep their usual meanings.
   panel.addEventListener('keydown', (event) => {
     if (event.ctrlKey || event.metaKey || event.altKey || event.repeat) return;
-    if (!/^[0-9a-f]$/i.test(event.key) || event.target === sst) return;
+    if (!/^[0-9a-f]$/i.test(event.key) || event.target === sst || tty.contains(event.target)) return;
     event.preventDefault();
     tap(event.key.toUpperCase());
+  });
+
+  // The teletype. Characters go as the machine's queue sends them, a key at a
+  // time when the line is quiet, so typing ahead of the monitor loses nothing.
+  const send = (text) => kim.TeletypeSend(text);
+  for (const el of [mode, baud, clear, typing, ...sends]) el.disabled = false;
+  paperEl.setAttribute('aria-live', 'off');
+  kim.SetTeletypeBaud(Number(baud.value));
+  kim.SetTeletypeMode(mode.checked);
+  mode.addEventListener('change', () => {
+    kim.SetTeletypeMode(mode.checked);
+    say(mode.checked ? 'TTY switch on. Press RS, then RUB OUT, and the monitor prints KIM on the teletype.' : 'TTY switch off. The monitor goes back to the keypad and the digits.', 'teletype');
+  });
+  baud.addEventListener('change', () => {
+    kim.SetTeletypeBaud(Number(baud.value));
+    say(`The teletype now runs at ${baud.value} baud. Press RS, then RUB OUT, so the monitor measures the new speed.`, 'teletype');
+  });
+  clear.addEventListener('click', () => {
+    paper.clear();
+    paperEl.replaceChildren();
+    panel.dataset.paper = '';
+    announcer.clear();
+  });
+  for (const b of sends) b.addEventListener('click', () => send({ RUBOUT: '\u007f', LF: '\n' }[b.dataset.kim1Send]));
+  // What is typed in the field goes to the teletype, in capitals, and leaves
+  // the field: it is a keyboard, not a place to edit a line.
+  typing.addEventListener('input', () => {
+    const text = typing.value.toUpperCase().replace(/[^ -~]/g, '');
+    typing.value = '';
+    if (text) send(text);
+  });
+  typing.addEventListener('keydown', (event) => {
+    if (event.ctrlKey || event.metaKey || event.altKey) return;
+    const key = { Enter: '\r', Backspace: '\u007f', Delete: '\u007f' }[event.key];
+    if (!key) return;
+    event.preventDefault();
+    send(key);
   });
 
   // startMachine resolves before its first frame, so all of this is in place
@@ -130,6 +216,10 @@ async function start(panel) {
   panel.kim1 = { tap, segments: (digit) => shown[digit] };
   panel.dispatchEvent(new CustomEvent('kim1:ready'));
   say('Running. Press RS to start the monitor.', 'running');
+  // A browser may have kept the switch or the speed from before a reload. They
+  // are in the machine now, but the monitor reads them at RS.
+  if (mode.checked) say('TTY switch on, kept by the browser from before. Press RS, then RUB OUT, and the monitor prints KIM on the teletype.', 'teletype');
+  else if (baud.value !== '110') say(`The teletype runs at ${baud.value} baud, kept by the browser from before. Press RS, then RUB OUT, so the monitor measures it.`, 'teletype');
 }
 
 async function bytes(url) {

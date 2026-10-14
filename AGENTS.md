@@ -17,18 +17,23 @@ src/Dbhq.Machines.Kim1/     # the KIM-1: its 6530s, keypad, display and bus, on 
 src/Dbhq.Machines.Kim1.Wasm/  # the KIM-1 as .NET WebAssembly, for its page on the site
 src/Dbhq.Machines.BbcMicro/  # the BBC Micro Model B: its chips, keyboard, screen, sound and disc drive, on the core
 src/Dbhq.Machines.BbcMicro.Wasm/  # the BBC Micro as .NET WebAssembly; the ROMs are given to it as bytes
-machines/                   # registry.json, and per machine its "try it" program, which the page shows and the acceptance test runs
+src/Dbhq.Machines.Nes/      # the NES, NTSC and PAL, on the core; its PPU is caught up lazily (rule 1), whole lines with no sprite on them at once
+src/Dbhq.Machines.Nes.Wasm/  # the NES as .NET WebAssembly: NesHost, for its page (site/public/nes.js) and the speed bench
+machines/                   # registry.json, and per machine its "try it" program, which the page shows and the acceptance test runs (machines/kim-1/teletype.json is the KIM-1's teletype session, which its page shows and its tests and browser check run; machines/nes/ holds the NES's, and its recorded frame hashes)
   bbc-micro/discs/          # the BBC Micro page's preset discs: one folder each with its image, licence, README and (if copyleft) source; manifest.json lists them
 site/                       # 6502.dbhq.uk: the Astro site, its tests, and the scripts that build the machines into it
+  src/models/               # the 3D models, one browser module each with its layout, generated parts and notes: kim-1, and the NES's nes-famicom-case (outside) and nes-famicom-board (inside)
 tests/                      # the tests and the library they share, one project per machine
-bench/                      # the speed benchmarks (native, and the browser speed checks), run locally and never in CI; the .NET ones are in the solution, so CI builds them
+bench/                      # the speed benchmarks (native, and the browser speed checks), run locally and never in CI; the .NET ones are in the solution, so CI builds them (bench/nes-speed/ from the NES's task 6; in it, differential/ is the gate for the NES's lazy chips and CI's nes-gate job runs it against its baseline on amd64, lazy-chips/ their measurements, and chip-counters/ the NES models' counters' speed run on ARM)
 tools/                      # scripts that make test data and check assumptions
   Dbhq.Cpu6502.ChipTrace/   # records the core's bus cycles for the site's chip page
   probes/                   # scripts that check assumptions against test data
   kim1-model/               # offline Python that measures the KIM-1's 3D model from photographs; its outputs are committed
-roms/                       # system ROMs with their provenance and rights in roms/README.md: kim-1/, bbc-micro/
-NOTICE.md                   # anything else taken from outside under other terms: the teletext glyph table (CC0)
+  nes-model/                # offline Python that measures the NES's two 3D models from bare board scans, photographs and a design patent; its outputs are committed, its inputs never
+roms/                       # system ROMs with their provenance and rights in roms/README.md: kim-1/, bbc-micro/, and nes/ (the NES's bundled homebrew, Lan Master)
+NOTICE.md                   # anything else taken from outside under other terms: the teletext glyph table (CC0), the BBC Micro's preset discs, and the NES board's track map (the TAPR Open Hardware License's terms)
 docs/bbc-micro/facts/       # the BBC Micro's fact sheets, written before its code
+docs/nes/facts/             # the NES's fact sheets, from the nesdev wiki, written before its code; models.md, the 3D models' sources, licences and findings
 docs/superpowers/specs/     # the design; each stage gets its own spec here
 docs/superpowers/plans/     # the plan for each spec
 docs/journal/               # the record of how it was built; the site's source
@@ -43,9 +48,12 @@ More arrives with the code. Keep this section true as it does.
 Everything else here is a preference. These are not.
 
 **1. Every bus access is one cycle.** The CPU does one `Read` or one `Write`
-per cycle, and the machine advances its other chips inside each call. A cycle
-that happens without a bus access, or a bus access that is not a cycle, is a
-bug.
+per cycle, and the machine advances its other chips as of each call. A chip may
+be advanced lazily, in a batch, only if nothing can see it between catch-up
+points and its state at each catch-up is exactly what advancing it inside every
+call would have given; a differential test over real programs proves that. A
+cycle that happens without a bus access, or a bus access that is not a cycle,
+is still a bug.
 
 **2. The core knows no machine.** Nothing in the core refers to the KIM-1, the
 BBC Micro, the NES or any other machine. Machine behaviour, including stalls

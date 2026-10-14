@@ -132,6 +132,16 @@ const ON = {
   '.kim1 .key': ['veil', 'card', 'void', 'iron'],
   '.kim1-status': ['iron'],
   '.kim1-speed': ['iron'],
+  // The teletype: its name, labels, fields and disabled buttons on the iron
+  // panel; a field disabled before the machine loads is iron too; the paper is
+  // the black canvas.
+  '.kim1-tty-name': ['iron'],
+  '.kim1-tty-switch, .kim1-tty-speed, .kim1-tty-input': ['iron'],
+  '.kim1-tty select, .kim1-tty-input input': ['iron'],
+  '.kim1-tty select:disabled, .kim1-tty-input input:disabled': ['iron'],
+  '.kim1 .btn:disabled': ['iron'],
+  '.kim1-tty-about': ['iron'],
+  '.kim1-paper': ['void'],
   '.steps kbd, .bbc-symbols kbd': ['iron'],
   // The BBC Micro's page. Its lines sit on the iron panel; a disabled button is
   // iron too, before the machine loads. The symbol table's keys are on iron
@@ -152,11 +162,24 @@ const ON = {
   '.bbc-preset-about': ['iron'],
   '.bbc-preset-disc b': ['iron'],
   '.bbc-preset-note': ['iron'],
-  '.bbc-symbols caption': ['void'],
+  '.bbc-symbols caption, .nes-pad-table caption': ['void'],
   // The on-screen keys: veil, card when hovered or latched, the black canvas
   // while pressed; disabled, before the machine runs, iron.
   '.bbc-key': ['veil', 'card', 'void'],
   '.bbc-key:disabled': ['iron'],
+  // The NES's page, as the BBC Micro's: its lines on the iron panel, a disabled
+  // button iron, the region's and the cartridge's legends and choices on iron.
+  '.nes .btn:disabled': ['iron'],
+  '.nes-status': ['iron'],
+  '.nes-line': ['iron'],
+  '.nes-note': ['iron'],
+  '.nes-speed': ['iron'],
+  '.nes-region legend, .nes-cartridge legend': ['iron'],
+  '.nes-choice': ['iron'],
+  // Controller 1's buttons: veil, card when hovered, the black canvas while
+  // pressed; disabled, before the machine runs, iron.
+  '.nes-button': ['veil', 'card', 'void'],
+  '.nes-button:disabled': ['iron'],
   // The machine page's 3D model: its label sits on an iron tag over the canvas,
   // and its status line on the black canvas.
   '.model-tag': ['iron'],
@@ -165,6 +188,12 @@ const ON = {
   '.model-help': ['void'],
   // Show tracks and Show tracks only, pressed: white on veil, the same pair as a hovered button.
   '.model-toggle[aria-pressed="true"]': ['veil'],
+  // The chip legend's caption, on the black canvas, as the other tables' captions.
+  '.model-legend caption': ['void'],
+  // A cased machine's views as tabs, on the black canvas; the selected one white on veil, as a pressed toggle.
+  '.model-tab': ['void'],
+  '.model-tab:hover': ['void'],
+  '.model-tab[aria-selected="true"]': ['veil'],
 };
 
 test('every text colour rule is placed on a surface, and reaches AA on each one it is set on', () => {

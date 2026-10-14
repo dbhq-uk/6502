@@ -102,10 +102,14 @@ test('every row of the speed table is exactly the value computed from the measur
 });
 
 // The design's target is 25 times. It is written once on each page, inside the
-// sentence that says whether it is met, and nowhere else.
+// sentence that says whether it is met, and nowhere else. The status page's
+// table of test suites is left out of the search: a suite's pass count is a
+// figure from the results, and a suite of 25 tests (SampleBufferTests, from 5
+// October 2026) is not the target written twice.
+const withoutSuites = (html) => html.replace(/<h2>Test suites<\/h2>[\s\S]*?<\/table>/, ' ');
 test('the design target appears once per page, inside a sentence that says whether it is met', () => {
   for (const url of ['/', '/status/']) {
-    const text = withoutDocument(url, readable(page(url).html.replace(/<time\b[\s\S]*?<\/time>/g, ' ')));
+    const text = withoutDocument(url, readable(withoutSuites(page(url).html).replace(/<time\b[\s\S]*?<\/time>/g, ' ')));
     const at = [...text.matchAll(/(?<![A-Za-z\d.,-])25(?![A-Za-z\d,]|\.\d)/g)];
     assert.equal(at.length, 1, `${url} should show ${fmt(f.speedTarget)} exactly once, found ${at.length}`);
     const around = text.slice(Math.max(0, at[0].index - 120), at[0].index + 260);

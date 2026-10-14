@@ -1,0 +1,8 @@
+{
+  "rom": "roms/nes/Lan_Master.nes",
+  "frames": 120,
+  "hashes": {
+    "NTSC": "6d9ab95799598a9d9543e68eb9e24acca6a871ba465afe60765168c1aa062cc7",
+    "PAL": "6d9ab95799598a9d9543e68eb9e24acca6a871ba465afe60765168c1aa062cc7"
+  }
+}

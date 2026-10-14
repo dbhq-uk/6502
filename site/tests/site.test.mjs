@@ -118,6 +118,8 @@ test('every photograph is captioned as a photograph, never an illustration, and 
         assert.match(caption, /^Photograph: /, `${p.url}: the photograph ${name} is not captioned as a photograph`);
         assert.doesNotMatch(caption, /illustration/i, `${p.url}: the photograph ${name} is captioned as an illustration`);
         assert.match(caption, /\bBy .+\. Source: .+\. Licence: .+\./, `${p.url}: the photograph ${name} is not credited`);
+        // CC BY and CC BY-SA ask that a change is indicated; every photograph here is a resized copy (7 Oct 2026).
+        assert.match(caption, /\bLicence: .+\. Changes: resized and converted to WebP for this page\./, `${p.url}: the credit for ${name} does not say it is a resized copy`);
       }
     }
     assert.ok(shown > 0, `the photograph ${name} is in src/assets/photos/ but no page shows it`);
@@ -139,10 +141,11 @@ test('there is no inline script: the CSP allows none', () => {
 // accent, and so does not count against the one fill. The focus rings are lime
 // too, as an interaction state: the model's is a rule of its own because focus
 // is what gives it the wheel, and a mouse click does not raise :focus-visible;
-// the BBC Micro's screen has one for the same reason, as focus gives it the keyboard.
+// the BBC Micro's screen has one for the same reason, as focus gives it the keyboard,
+// and so has the NES's, whose keyboard is its controller 1.
 // Any other rule that takes the lime fails here,
-// so a third use has to be argued for in this test.
-const LIME_RULES = new Set(['.btn.pill', '.btn.pill:hover', '.win .k', ':focus-visible', '.data th button:focus-visible', '.model-stage[data-active]', '.bbc-screen:focus']);
+// so a further use has to be argued for in this test.
+const LIME_RULES = new Set(['.btn.pill', '.btn.pill:hover', '.win .k', ':focus-visible', '.data th button:focus-visible', '.model-stage[data-active]', '.bbc-screen:focus', '.nes-screen:focus']);
 
 test('the lime accent fills at most one element on any page, and its other uses are named', () => {
   for (const p of all) assert.ok((p.html.match(/class="[^"]*\bpill\b/g) ?? []).length <= 1, `${p.url} uses the lime more than once`);

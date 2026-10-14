@@ -179,16 +179,19 @@ this project built, and it runs in the browser.
 |---|---|---|---|
 | Atari 2600 | 1977 | 6507 | Core |
 | Atari 5200 | 1982 | 6502C "Sally" | Core |
-| **NES, Famicom** | 1983 | Ricoh 2A03 (NTSC), 2A07 (PAL) | Core, no decimal |
+| **NES** | 1983 | Ricoh 2A03 (NTSC), 2A07 (PAL) | Core, no decimal |
 | Atari 7800 | 1986 | 6502C "Sally" | Core |
 | PC Engine, TurboGrafx-16 | 1987 | HuC6280 | Other |
 | Atari Lynx | 1989 | VL65NC02 | 65C02 |
 | SNES, Super Famicom | 1990 | Ricoh 5A22 (65C816) | Other |
 | Watara Supervision | 1992 | KS5360 (65C02) | 65C02 |
 
-Famicom clones, such as the Dendy that was widely sold in Russia from 1992,
-and the NES-on-a-chip plug-and-play TV games carry 2A03-compatible CPUs. The
-NES is the third machine this project builds.
+The NES is Nintendo's console: the Famicom in Japan from 1983, redesigned as
+the NES for North America in 1985 and then Europe and Australia, where the PAL
+console has the 2A07. Famicom clones, such as the Dendy that was widely sold in
+Russia from 1992, and the NES-on-a-chip plug-and-play TV games carry
+2A03-compatible CPUs. The NES, in both its NTSC and PAL forms, is the third
+machine this project built, and it runs in the browser.
 
 ## Arcade
 

@@ -388,3 +388,66 @@ test('a page that starts hidden is not resumed when it is first shown: it was ne
   assert.deepEqual(calls, []);
   assert.deepEqual(machine.runs, [16_000]);
 });
+
+// ---- What the NES needs: a clock that changes with the region, and a hold for its test hook ----
+
+test('the clock can be a function, read each frame, so a machine whose clock changes (the NES, by region) runs and reports at the new one', async (t) => {
+  const browser = fakeBrowser(t);
+  const machine = fakeMachine(browser, 1e9);
+  let mhz = 1;
+  const { panel, speedEl } = await start(browser, { exports: { FakeHost: machine }, clockMhz: () => mhz, clockOf: "the NES's" });
+  browser.frame(16);
+  assert.equal(machine.runs.at(-1), 16_000);
+  mhz = 2;
+  browser.frame(16);
+  assert.equal(machine.runs.at(-1), 32_000, 'the frame after the change did not run at the new clock');
+  machine.capacityMhz = 5;
+  untilReport(browser, panel);
+  assert.equal(speedEl.textContent, "Running at the NES's own 2 MHz. This browser could run it about 2 times as fast.");
+});
+
+test('hold() stops running the machine until it is let go, and a hidden page shown again does not let it go', async (t) => {
+  const browser = fakeBrowser(t);
+  const machine = fakeMachine(browser, 5);
+  const calls = [];
+  const { result } = await start(browser, { exports: { FakeHost: machine }, onPause: () => calls.push('pause'), onResume: () => calls.push('resume') });
+  browser.frame(16);
+  result.hold(true);
+  assert.equal(browser.pending(), 0);
+  assert.deepEqual(calls, ['pause']);
+  browser.hide();
+  browser.show();
+  assert.equal(browser.pending(), 0, 'showing the page let go of the hold');
+  assert.equal(machine.runs.length, 1);
+  browser.advance(5000);
+  result.hold(false);
+  assert.deepEqual(calls, ['pause', 'resume']);
+  browser.frame(16);
+  assert.equal(machine.runs.at(-1), 16_000, 'the time held was run');
+  // Let go while the page is hidden, it waits for the page to be shown.
+  result.hold(true);
+  browser.hide();
+  result.hold(false);
+  assert.equal(browser.pending(), 0);
+  browser.show();
+  assert.equal(browser.pending(), 1);
+  // After stop(), hold does nothing.
+  result.stop();
+  result.hold(false);
+  assert.equal(browser.pending(), 0);
+});
+
+test('cycles the machine runs outside the loop while held are not counted as the next frame\'s, nor in the speed', async (t) => {
+  const browser = fakeBrowser(t);
+  const machine = fakeMachine(browser, 5);
+  const { result, frames, panel } = await start(browser, { exports: { FakeHost: machine } });
+  browser.frame(16);
+  result.hold(true);
+  // The NES's stepTo: millions of cycles run by the page itself, not by the loop, taking no loop time.
+  machine.cycles += 3_600_000;
+  result.hold(false);
+  browser.frame(16);
+  assert.equal(frames.at(-1).cycles, machine.runs.at(-1) + OVERRUN, 'the first frame after the hold counted the cycles run while held');
+  untilReport(browser, panel);
+  assert.equal(panel.dataset.capacityMhz, '5.00', 'the cycles run while held inflated the speed');
+});
