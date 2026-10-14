@@ -1,0 +1,146 @@
+name: Atari 2600 speed run
+# The Atari 2600's browser speed milestone (task 8 of
+# docs/superpowers/plans/2026-10-14-atari-2600.md), run on a GitHub runner by
+# hand. It builds the given ref's src/Dbhq.Machines.Atari2600.Wasm, AOT and
+# interpreter, runs that ref's bench/atari-2600-speed/ under the rule fixed in
+# its rule.md before the first launch, and prints the verdict; it never changes
+# the rule. AGENTS.md keeps bench/ out of CI, except speed workflows started by
+# hand and never part of a pull request check, one per machine that needs one,
+# each approved by Dan when it is built. So it runs only when started by hand,
+# never on a push or a pull request. bench/atari-2600-speed/README.md says how
+# to start it and what it writes.
+on:
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: "The branch or commit to measure. Its bench/atari-2600-speed is the harness and the rule."
+        required: true
+
+# One run at a time, and a second run waits rather than cancelling the first:
+# two runs on one runner would load each other's host.
+concurrency:
+  group: atari-2600-speed-run
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  speed:
+    runs-on: ubuntu-latest
+    # Two publishes, one of them AOT, then four launches behind the load gate.
+    timeout-minutes: 180
+    env:
+      OUT: ${{ github.workspace }}/out
+      DOTNET_CLI_TELEMETRY_OPTOUT: '1'
+      DOTNET_NOLOGO: '1'
+    steps:
+      # The whole history, so a branch or a commit can be found.
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          path: repo
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Which commit
+        id: refs
+        env:
+          REF: ${{ inputs.ref }}
+        working-directory: repo
+        run: |
+          set -euo pipefail
+          [[ -n $REF && $REF != -* ]] || { echo "not a ref: $REF" >&2; exit 1; }
+          commit=$(git rev-parse --verify --quiet "origin/$REF^{commit}" || git rev-parse --verify --quiet "$REF^{commit}") || { echo "no such commit: $REF" >&2; exit 1; }
+          echo "measured $commit ($(git log -1 --format=%s "$commit"))"
+          echo "commit=$commit" >> "$GITHUB_OUTPUT"
+      # The measured tree, exported with git archive, as rule.md says.
+      - name: Export the tree
+        env:
+          COMMIT: ${{ steps.refs.outputs.commit }}
+        run: |
+          set -euo pipefail
+          mkdir -p tree "$OUT"
+          git -C repo archive "$COMMIT" | tar -x -C tree
+          [[ -f tree/bench/atari-2600-speed/rule.md ]] || { echo "$COMMIT has no bench/atari-2600-speed/rule.md" >&2; exit 1; }
+      # The SDK and the workload pinned as validate.yml pins them.
+      - uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6
+        with:
+          dotnet-version: '10.0.400'
+      - name: The wasm-tools workload, pinned
+        run: dotnet workload install wasm-tools --version 10.0.401
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: '22.22'
+      # rule.md: the host is recorded first.
+      - name: The host
+        env:
+          REF: ${{ inputs.ref }}
+          COMMIT: ${{ steps.refs.outputs.commit }}
+        run: |
+          set -euo pipefail
+          chrome=/usr/bin/google-chrome
+          [[ -x $chrome ]] || { echo "no Chrome at $chrome on this runner" >&2; exit 1; }
+          {
+            echo "recorded $(date -u +%Y-%m-%dT%H:%M:%SZ)"
+            echo "run ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID} attempt ${GITHUB_RUN_ATTEMPT}"
+            echo "ref $REF"
+            echo "commit $COMMIT"
+            echo "runner ${RUNNER_NAME:-} ${RUNNER_OS:-} ${RUNNER_ARCH:-}, image ${ImageOS:-} ${ImageVersion:-}"
+            echo "nproc $(nproc)"
+            echo "loadavg $(cat /proc/loadavg)"
+            uname -a
+            grep -E '^(PRETTY_NAME|VERSION_ID)=' /etc/os-release
+            lscpu
+            free -m
+            echo "browser $("$chrome" --version)"
+            echo "node $(node --version)"
+            echo "dotnet $(dotnet --version)"
+            dotnet workload list
+          } | tee "$OUT/host.txt"
+      # rule.md: each publish after deleting obj/Release and bin/Release. The
+      # build servers are stopped afterwards so nothing of the build stays
+      # running into the launches.
+      - name: Publish, compiled ahead of time and in the interpreter
+        run: |
+          set -euo pipefail
+          project=tree/src/Dbhq.Machines.Atari2600.Wasm
+          rm -rf "$project/obj/Release" "$project/bin/Release"
+          dotnet publish "$project" -c Release -p:RunAOTCompilation=true -o "$RUNNER_TEMP/publish-aot"
+          rm -rf "$project/obj/Release" "$project/bin/Release"
+          dotnet publish "$project" -c Release -o "$RUNNER_TEMP/publish-interpreter"
+          dotnet build-server shutdown
+      - name: The harness
+        working-directory: tree/bench/atari-2600-speed
+        run: npm ci
+      - name: The four launches
+        working-directory: tree/bench/atari-2600-speed
+        run: bash run-series.sh "$RUNNER_TEMP/publish-aot" "$RUNNER_TEMP/publish-interpreter" "$OUT"
+      - name: The rule
+        run: python3 tree/bench/atari-2600-speed/analyse.py "$OUT/launches.txt" | tee "$OUT/analysis.txt"
+      - name: The load after the series
+        if: always()
+        run: echo "loadavg after $(date -u +%Y-%m-%dT%H:%M:%SZ) $(cat /proc/loadavg)" | tee -a "$OUT/host.txt"
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        if: always()
+        with:
+          name: atari-2600-speed-run
+          path: out
+      # The verdict as analyse.py printed it, in the run's summary. The job is
+      # green only when the rule says continue, so a red run is never read as
+      # a pass.
+      - name: The verdict
+        run: |
+          set -euo pipefail
+          {
+            echo '## Atari 2600 speed run'
+            echo
+            echo '```'
+            cat "$OUT/analysis.txt"
+            echo '```'
+            echo
+            echo '```'
+            head -n 12 "$OUT/host.txt"
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+          verdict=$(sed -n 's/^VERDICT: //p' "$OUT/analysis.txt")
+          echo "VERDICT: ${verdict:-none}"
+          [[ $verdict == CONTINUE || $verdict == 'CONTINUE, HEADROOM' ]]
