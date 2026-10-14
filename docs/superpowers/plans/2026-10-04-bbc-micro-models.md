@@ -47,7 +47,7 @@ The box is aarch64 with no Chrome. On Dan's instruction, nothing that needs a br
 | The native fingerprint (`bench/bbc-micro-speed/native --fingerprint`) | Yes | |
 | `page-weight.mjs` | Yes: it reads a build | |
 | `node scripts/browser-check.mjs` | No | Validate in CI (ubuntu-latest, Google Chrome) is the record. A task whose steps need it pushes, reads the run's log, and is not done until that run is green |
-| The browser speed run (`bench/bbc-micro-speed/alternate.sh`) | No | Not CI either: AGENTS.md keeps `bench/` out of CI. The host is Dan's to name (task 6) |
+| The browser speed run (`bench/bbc-micro-speed/alternate.sh`) | No | Not CI either: AGENTS.md keeps `bench/` out of CI. The host is Dan's to name (task 6) (Done, noted 14 October 2026: Dan chose a GitHub runner on 13 October 2026, and the run is CI run 38472729370, which passed; task 6's outcome.) |
 
 ### The inputs, and their rights
 
@@ -62,7 +62,7 @@ The box is aarch64 with no Chrome. On Dan's instruction, nothing that needs a br
 | O1, O2, O3 | 8 | Hashed on 4 October; not on this box | Wikimedia Commons | Public domain. Resized copies committed in task 8, credited |
 | O4, O5 | 8 | Not fetched; expected straightforward | Wikimedia Commons | Public domain, to be read through the Commons API in task 8. Resized copies committed |
 | O8 | 8 | Not fetched | Chris's Acorns `BBCB7I.jpg`, `BBCB7H.jpg` | As I6 (CC BY-SA 3.0 as the site states). Not committed, credited |
-| K1 | 8 | Hashed on 4 October; not on this box | github.com/dominicbeesley/bbc-keyboard at `5ec53df5` | MIT. **Rule 3: fetched from a `dbhq-uk` fork at the pinned commit**, as the NES did with OpenTendo. The fork does not exist yet; making it is outward-facing, so it waits for Dan |
+| K1 | 8 | Hashed on 4 October; not on this box | github.com/dominicbeesley/bbc-keyboard at `5ec53df5` | MIT. **Rule 3: fetched from a `dbhq-uk` fork at the pinned commit**, as the NES did with OpenTendo. The fork does not exist yet; making it is outward-facing, so it waits for Dan (Done, noted 14 October 2026: the fork is `dbhq-uk/bbc-keyboard`, and task 8 read K1 from it at `5ec53df` on 13 October 2026.) |
 | K2 | 8 (cross-check) | Not fetched | Thingiverse thing 4867915 | CC BY 4.0. If the download needs a login, task 8 drops the cross-check and says so; nothing waits on it |
 | M1, M2 | | | | Never used |
 
@@ -74,7 +74,7 @@ Sizes count agent-tasks: one build, one review, and the fix wave the NES's tasks
 |---|---|---|---|---|
 | 4 | The copper on both faces, and the print | Task 3; I1, I2, I5, D1 | Large, 3 | All |
 | 5 | The parts: places and identities | Task 3, task 4's `ic-table.json`; D1, I5, I6 | Medium, 2 | All |
-| 6 | The machine reports its LEDs, keys and chip accesses | Nothing in this plan (the `sheila` names are fixed in task 5's note); can run beside 4 and 5 | Medium, 2, plus 1 for the speed run | All but the browser check (CI) and the speed run (Dan's host) |
+| 6 | The machine reports its LEDs, keys and chip accesses | Nothing in this plan (the `sheila` names are fixed in task 5's note); can run beside 4 and 5 | Medium, 2, plus 1 for the speed run | All but the browser check (CI) and the speed run (Dan's host) (Done, noted 14 October 2026: Dan chose a GitHub runner on 13 October 2026, and the run is CI run 38472729370, which passed; task 6's outcome.) |
 | 7 | The inside's scene, words and data, not on the page | 4, 5, 6 | Medium, 2 | All |
 | 8 | The outside measured | 5 (the sockets' places); can run beside 7; O1 to O5, O8, K1 (fork), K2, D1 | Large, 3 | All |
 | 9a | The outside's scene, words and data, not on the page | 6, 8 | Medium, 2 | All |
@@ -85,8 +85,8 @@ That is about 21 agent-tasks in all. The critical path is 4, 5, 7 (or 8), 9a, 9b
 
 ### Decisions that are Dan's
 
-1. Fork `dominicbeesley/bbc-keyboard` into `dbhq-uk` (rule 3; outward-facing). Task 8 needs it.
-2. Where task 6's browser speed run happens, since `bench/` never runs in CI and this box is ruled out. The x64 host used on 7 October and this box's Playwright Chromium (the NES on 13 October) are the two used so far.
+1. Fork `dominicbeesley/bbc-keyboard` into `dbhq-uk` (rule 3; outward-facing). Task 8 needs it. (Done, noted 14 October 2026: the fork is `dbhq-uk/bbc-keyboard`, and task 8 read K1 from it at `5ec53df` on 13 October 2026.)
+2. Where task 6's browser speed run happens, since `bench/` never runs in CI and this box is ruled out. The x64 host used on 7 October and this box's Playwright Chromium (the NES on 13 October) are the two used so far. (Done, noted 14 October 2026: Dan chose a GitHub runner on 13 October 2026, and the run is CI run 38472729370, which passed; task 6's outcome.)
 
 Taken here, not asked: the BBC claims both views and `case` at once (the rules leave no other way); the scenes land unclaimed as `.mjs` (above); the access sampler is shared, not copied; the scans stay fetched by hand with their hashes and are not mirrored, because a public copy would redistribute files that state no licence, and the builds and tests never fetch them.
 

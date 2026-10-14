@@ -101,8 +101,8 @@ test('each view credits exactly the sources its results file lists, each once, a
       assert.ok(item, `${module}: no credit links ${s.id} (${r.sourceUrl})`);
       const text = visibleText(item).replace(/\s+([.,:])/g, '$1');
       assert.ok(text.includes(`by ${s.author}`), `${module}: ${s.id}'s credit does not name ${s.author}: ${text}`);
-      // sources.json records a source that states no licence as null or as "none stated"; the page says "no licence stated".
-      if (s.licence === null || /^none stated/i.test(s.licence)) assert.match(text, /no licence stated\.$/, `${module}: ${s.id}`);
+      // sources.json records a source that states no licence as null; the page says "no licence stated".
+      if (s.licence === null) assert.match(text, /no licence stated\.$/, `${module}: ${s.id}`);
       else if (r.file) assert.equal(r.licence, s.licence, `${module}: ${s.id}, a photograph on the page, is not credited with its licence as sources.json records it`);
       else {
         // Said short on the page, in full here: the registry's words, and the terms sources.json records the source stating.
@@ -152,7 +152,7 @@ test('the words that must reach the page do: each caption, note and limit word f
   // reworded to say less fails here even when the page is built from it.
   const LIMITS = {
     outside: [[/the Service Manual's, not measured/, /measures point different ways/, /that is not resolved/], [/front edge's check could not be measured/], [/^These are typical, not measured:/], [/tapered blocks with flat tops, not sculpted/], [/shifted symbols[^.]*are not drawn/, /space bar is blank/, /not in Acorn's or the BBC's lettering/], [/owl[^.]*is not drawn/], [/not measured are not drawn/], [/copper is traced to look at, with its connections not verified/]],
-    inside: [[/traced to look at, not as a netlist: its connections are not verified/], [/print hides the copper under it/, /drawn as print only/], [/typical ones for their packages, not measured/], [/plain cylinders and boxes of typical sizes/], [/are not drawn\.$/], [/traced to look at, has \d+ pixels to the millimetre/]],
+    inside: [[/traced to look at, not as a netlist: its connections are not verified/, /joins copper that is apart on the board in at least one place/], [/print hides the copper under it/, /drawn as print only/], [/typical ones for their packages, not measured/], [/plain cylinders and boxes of typical sizes/], [/are not drawn\.$/], [/traced to look at, has \d+ pixels to the millimetre/]],
   };
   for (const [view, note, text] of [['outside', caseNotes.made(caseFigures), outside], ['inside', boardNotes.made(boardFigures), inside]]) {
     assert.equal(note.limits.length, LIMITS[view].length, `${view}: a limit added or dropped`);

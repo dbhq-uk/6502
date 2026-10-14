@@ -188,6 +188,8 @@ jobs:
           PASS=$(count pass); FAILED=$(count fail)
           echo "pass=${PASS:-unread} fail=${FAILED:-unread}"
           [ "${FAILED:-1}" = "0" ]
+          # 568 as at 14 Oct 2026, with task 10's fix wave (one test: known-differences.md's section on the BBC
+          # models gives each figure and verdict as its data file has it);
           # 567 as at 14 Oct 2026, with the BBC Micro models' task 10 (five tests for mutations that survived:
           # the keys in the machine's layout, the lights' bits from BbcLeds, no figure typed in either note, every
           # copper credit traced to look at, and the browser check's judgements on the inside and the lights);
@@ -248,7 +250,7 @@ jobs:
           # Adding tests is expected; losing them is the failure this floor catches.
           # Raise the number when the suite grows, here and in the same step of
           # validate.yml, which must hold the same number.
-          [ "${PASS:-0}" -ge 567 ]
+          [ "${PASS:-0}" -ge 568 ]
 
       # The same floor as "Every machine file must be serving" below, checked on
       # the build itself, so a build that is missing a machine fails here and

@@ -123,7 +123,7 @@ resized copy of the source, which is a derivative under that licence.
 | Taken | 26 December 2005 (the file page's date, the day it was uploaded; the file has no Exif) |
 | Fetched | 13 October 2026 (first on 4 October), from `upload.wikimedia.org/wikipedia/commons/2/29/BBC_Micro_rear.jpeg`: 2048 by 994 pixels, 107,231 bytes, SHA-1 `3dad0bd9d8efedc7b9f6f6297ee94c32c6e3d572` (as Commons records it; the file here matches it), SHA-256 `4072a59af7f7fab834ca2b912b0f6e3449aa8bdaa01bb621d9d556579dd5937e` |
 | This copy | Not cropped. Resized with sharp 0.35.5 (libvips 8.18.7, libwebp 1.6.0) from `site/node_modules`, as `cwebp` is not installed on the machine that made it: `sharp(original).resize({ width: 1600 }).webp({ quality: 82 })`, which keeps no metadata, the same settings as the other photographs' `cwebp -q 82 -resize 1600 0 -metadata none`: 1600 by 777 pixels, 41,976 bytes, SHA-256 `1f3a684c81e09d5932864c5177e731ebede49858f922e7d874f02f9b72f9719a`. The original is not committed |
-| Used for | The outside model's rear, measured on the full-size original: each port's place and height on the scale of the 15-way D socket, checked against its socket on the board, the ventilation slots and the mains panel |
+| Used for | The outside model's rear, measured on the full-size original: each port's place and height on the scale of the 15-way D socket, each scored port checked against its socket on the board (the video and Econet sockets are not), the ventilation slots and the mains panel |
 
 ## bbc-micro-keyboard.webp
 
@@ -346,7 +346,7 @@ The BBC Micro's inside model is measured from these, and none of them is in the 
 
 ## The BBC Micro's outside model's sources, which are not committed
 
-The BBC Micro's outside model is measured from these too (task 8 of its models plan, 13 October 2026), and none of them is in the repository. `tools/bbc-micro-model/data/sources.json` has every input with its address, size and SHA-256, and the tools check each against its SHA-256 before reading it. Fetched on 13 October 2026. Since task 9b (13 October 2026) each is credited under the outside model, from the BBC Micro's `references` in `machines/registry.json`, which give the same address and SHA-256; the Service Manual, D1, is in the board's table below and is credited under both views.
+The BBC Micro's outside model is measured from these too (task 8 of its models plan, 13 October 2026), and none of them is in the repository. `tools/bbc-micro-model/data/sources.json` has every input with its address, size and SHA-256, and the tools check each against its SHA-256 before reading it. Fetched on 13 October 2026. Since task 9b (13 October 2026) each is credited under the outside model, from the BBC Micro's `references` in `machines/registry.json`, which give the same address and SHA-256; the Service Manual, D1, is in the board's table above and is credited under both views.
 
 | Id | What | Address | Author | Licence, as stated | SHA-256 of the original | Used for |
 |---|---|---|---|---|---|---|

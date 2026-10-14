@@ -1,7 +1,7 @@
 ---
 title: "The BBC Micro's models: the inputs, and what they rest on"
 date: 2026-10-04
-summary: "Before the BBC Micro's two models are built, the work measures what both rest on: the scale of a flatbed scan of the bare board, how well the solder side lies on the component side, and how well a photograph of the keyboard fits an open keyboard layout. The keys, the scan's scale down the board, and the board's size and outline hold, and the solder side holds except for a few holes. Two checks failed and were revised the same day, each kept on record as it failed: the case's front edge, measured on the plane of the keys, which it does not lie in; and a row by row check of the board's width scale, which magnified the noise of short rows and met one long row off the pitch, and as revised lands between pass and stop. The solder side then lies on the component side within the plan's limits over every hole found, and the board's chips come out as footprints, pin one read from the print. Both faces' copper is then traced from the scans with its method fixed first, but its check on the board's power nets fails, and so does its comparison with a photograph of a populated board, so the track map is offered to look at, not as a netlist. Every chip is then placed on its footprint and named from the Service Manual, with the disc interface fitted and Econet left out; the places miss a few of the manual's approximate ones, and the markings on a populated board disagree with the manual for four causes, one a flaw in the rule, so both of those checks fail too, and are kept as they failed. The machine then reports its keyboard lights and how often the processor reaches each chip, counted without changing a single cycle; its speed in a browser, measured afterwards in CI against a rule written down first, passed that rule. The inside model's drawing, its words and its figures are then built and tested, waiting off the page until the outside joins it; every word it says about the copper calls it traced to look at, and its note gives every failed check beside the figures. The outside is then measured: every key of an open keyboard drawing is matched to the machine's, two photographs of one machine are triangulated to set the keys and lights in the case, and the rear ports are checked against their sockets on the board; both checks pass. The front edge's correction for parallax cannot be measured, for want of the camera's height, and three measures of the case's width point different ways, two narrower than the manual's size and one wider, which is recorded, not resolved. The outside's drawing, its words and its figures are then built and tested off the page, as the inside's were: its keys go down as the machine's are pressed, its lights are the machine's, and its note says the case's size is the manual's and that the photographs' measures disagree with it. Both views then go on the machine's page together, as tabs, the machine claiming its case and both models at once, each view crediting exactly what it was made from, and a browser in CI checks that each loads only when it is reached and follows the machine. Last, faults are planted one at a time in a copy of the work to see which tests notice each, every fault no test noticed gains a test that does, and the known differences gain the models' limits."
+summary: "Before the BBC Micro's two models are built, the work measures what both rest on: the scale of a flatbed scan of the bare board, how well the solder side lies on the component side, and how well a photograph of the keyboard fits an open keyboard layout. The keys, the scan's scale down the board, and the board's size and outline hold, and the solder side holds except for a few holes. Two checks failed and were revised the same day, each kept on record as it failed: the case's front edge, measured on the plane of the keys, which it does not lie in; and a row by row check of the board's width scale, which magnified the noise of short rows and met one long row off the pitch, and as revised lands between pass and stop. The solder side then lies on the component side within the plan's limits over every hole found, and the board's chips come out as footprints, pin one read from the print. Both faces' copper is then traced from the scans with its method fixed first, but its check on the board's power nets fails, and so does its comparison with a photograph of a populated board, so the track map is offered to look at, not as a netlist. Every chip is then placed on its footprint and named from the Service Manual, with the disc interface fitted and Econet left out; the places miss a few of the manual's approximate ones, and the markings on a populated board disagree with the manual for four causes, one a flaw in the rule, so both of those checks fail too, and are kept as they failed. The machine then reports its keyboard lights and how often the processor reaches each chip, counted without changing a single cycle; its speed in a browser, measured afterwards in CI against a rule written down first, passed that rule. The inside model's drawing, its words and its figures are then built and tested, waiting off the page until the outside joins it; every word it says about the copper calls it traced to look at, and its note gives every failed check beside the figures. The outside is then measured: every key of an open keyboard drawing is matched to the machine's, two photographs of one machine are triangulated to set the keys and lights in the case, and the rear ports are checked against their sockets on the board; both checks pass. The front edge's correction for parallax cannot be measured, for want of the camera's height, and three measures of the case's width point different ways, two narrower than the manual's size if the keyboard drawing is true to size and one wider, which is recorded, not resolved. The outside's drawing, its words and its figures are then built and tested off the page, as the inside's were: its keys go down as the machine's are pressed, its lights are the machine's, and its note says the case's size is the manual's and that the photographs' measures disagree with it. Both views then go on the machine's page together, as tabs, the machine claiming its case and both models at once, each view crediting exactly what it was made from, and a browser in CI checks that each loads only when it is reached and follows the machine. Last, faults are planted one at a time in a copy of the work to see which tests notice each, every fault no test noticed gains a test that does, and the known differences gain the models' limits."
 order: 28
 ---
 
@@ -1012,10 +1012,7 @@ passed (4 October 2026). `run-board.sh` was run end to end from the inputs
 and gave `frame.json` and `registration.json` back byte for byte. Each new
 site test was seen to fail on a copy of `registration.json` broken its way (an
 excluded hole dropped, the verdict changed, IC5's reference removed, a
-drill's pad moved 0.3 mm, a DIP's last pad dropped). The logs of these runs
-were kept outside the repository and are not committed, so the claims in this
-paragraph rest on the record made at the time, not on a file anyone can open.
-`cd site && npm test`:
+drill's pad moved 0.3 mm, a DIP's last pad dropped). The logs of these runs were kept outside the repository and are not committed, so the claims in this paragraph rest on the record made at the time, not on a file anyone can open. `cd site && npm test`:
 286 passed before this task, 292 after, one to-do, none failed; both
 workflows' floors are raised to 292. `site/tests/bbc-models.test.mjs` gains six
 tests: the solder row passes on the figures without exclusion, with the model
@@ -1030,162 +1027,43 @@ mounting holes are refitted, with the move from task 2 recorded.
 
 ## Task 3's review, and the fix wave (5 and 13 October 2026)
 
-Task 3 was reviewed on 5 October 2026. Pull request 48, which held tasks 0 to
-3, was merged on 6 October before the review's fixes landed, so they are on a
-second branch, `feat/bbc-micro-models-2` (pull request 88). An implementer
-started them and stopped part-way on a usage limit; its work was committed
-unverified as `9be4b55` on 13 October. This section records what the review
-found, what `9be4b55` did, and what was finished and checked on 13 October.
-No written copy of the review survives outside the repository: its findings
-are read from the plan's notes dated 5 October, the code comments that cite
-it, and `9be4b55`'s message.
+Task 3 was reviewed on 5 October 2026. Pull request 48, which held tasks 0 to 3, was merged on 6 October before the review's fixes landed, so they are on a second branch, `feat/bbc-micro-models-2` (pull request 88). An implementer started them and stopped part-way on a usage limit; its work was committed unverified as `9be4b55` on 13 October. This section records what the review found, what `9be4b55` did, and what was finished and checked on 13 October. No written copy of the review survives outside the repository: its findings are read from the plan's notes dated 5 October, the code comments that cite it, and `9be4b55`'s message.
 
 ### What the review found
 
-- **A drill test that could not fail.** "Every drill has a pad on both faces
-  within 0.2 mm" held because each drill's pad is placed at the drill (the
-  task 3 section above says so). The plan's step 4 was revised: each drill
-  records both faces' centres and sits at their mean; an open drill's faces
-  must each be within 0.2 mm of it; for a drill filled with solder, at most 5
-  per cent may have a face further off, because the solder sits off the hole,
-  not the registration (93 of 2522, 3.7 per cent, was measured before the
-  ceiling was set).
-- **The fitted map was not saved.** Task 4 has to draw I2's copper through
-  the registration, and `registration.json` kept only its figures. It now
-  keeps the model's parameters unrounded, how I2 is flipped, and each drill's
-  solder-side pixel.
-- **Most chips had no reference.** 12 footprints were named; the plan now
-  asks for every DIP to have a reference read from the print, or to say it is
-  unread and why, with no reference twice.
-- **Footprints were missed or wrong.** IC30 and the three DIPs right of the
-  row below the RAM block had been left as rows for task 5; IC48's 14 pins
-  and the pads of the parts below it made one 24-pin run; and the 18-pad
-  group task 3 marked "not a DIP" (two columns of resistor and capacitor
-  pads) is IC35, a 14-pin DIP whose outline and label are plain on the scan,
-  with one pad of the parts above and below it at each end of its run.
-- **A test that read a variable name.** The check that the outlier rule never
-  looks at a residual asserted that no variable of the function was called
-  `residual`. It is replaced by a test that moves every solder-side hole,
-  changing every residual, and requires the same holes to be excluded.
-- **The solder side's figure to cite.** The plan's Global Constraints now say
-  that from task 3 on the figure cited is the one without exclusion. The rule
-  fixed before task 3 sits at about the 70th to 80th percentile of the blobs'
-  axis ratios, and its one area median per face mixes solder blobs with open
-  rings, so it mostly excludes the rings, the most precise holes.
-- **The manual's positions.** Task 5's note: the Service Manual's places for
-  the 40-pin parts are a constant offset of about (+7.5, -26) mm from their
-  footprints' centres, so task 5 settles the manual's convention on a smaller
-  part before it uses the 10 mm check.
+- **A drill test that could not fail.** "Every drill has a pad on both faces within 0.2 mm" held because each drill's pad is placed at the drill (the task 3 section above says so). The plan's step 4 was revised: each drill records both faces' centres and sits at their mean; an open drill's faces must each be within 0.2 mm of it; for a drill filled with solder, at most 5 per cent may have a face further off, because the solder sits off the hole, not the registration (93 of 2522, 3.7 per cent, was measured before the ceiling was set).
+- **The fitted map was not saved.** Task 4 has to draw I2's copper through the registration, and `registration.json` kept only its figures. It now keeps the model's parameters unrounded, how I2 is flipped, and each drill's solder-side pixel.
+- **Most chips had no reference.** 12 footprints were named; the plan now asks for every DIP to have a reference read from the print, or to say it is unread and why, with no reference twice.
+- **Footprints were missed or wrong.** IC30 and the three DIPs right of the row below the RAM block had been left as rows for task 5; IC48's 14 pins and the pads of the parts below it made one 24-pin run; and the 18-pad group task 3 marked "not a DIP" (two columns of resistor and capacitor pads) is IC35, a 14-pin DIP whose outline and label are plain on the scan, with one pad of the parts above and below it at each end of its run.
+- **A test that read a variable name.** The check that the outlier rule never looks at a residual asserted that no variable of the function was called `residual`. It is replaced by a test that moves every solder-side hole, changing every residual, and requires the same holes to be excluded.
+- **The solder side's figure to cite.** The plan's Global Constraints now say that from task 3 on the figure cited is the one without exclusion. The rule fixed before task 3 sits at about the 70th to 80th percentile of the blobs' axis ratios, and its one area median per face mixes solder blobs with open rings, so it mostly excludes the rings, the most precise holes.
+- **The manual's positions.** Task 5's note: the Service Manual's places for the 40-pin parts are a constant offset of about (+7.5, -26) mm from their footprints' centres, so task 5 settles the manual's convention on a smaller part before it uses the 10 mm check.
 
 ### What `9be4b55` did
 
-The drill report (`drillFaces`) and each drill's two faces; the saved map
-with a test that puts a drill's I2 pixel through it; references for every
-DIP marked by hand in `marks.json` (its footprint marks went from 14 to 107,
-each with its crop and why), with `unread` and a pin count a mark can cut a
-run to; a second grouping pass in which spare blobs of solder join the pads
-still free; a run whose outline scores under 0.7 tried trimmed to the
-stretch its outline covers; a mark for a DIP whose printed outline is too faint on one side
-(IC61); the behavioural outlier test; a test of the tie between the models;
-the plan's notes. It did not run the tools on the scans, change the site
-tests or write the journal.
+The drill report (`drillFaces`) and each drill's two faces; the saved map with a test that puts a drill's I2 pixel through it; references for every DIP marked by hand in `marks.json` (its footprint marks went from 14 to 107, each with its crop and why), with `unread` and a pin count a mark can cut a run to; a second grouping pass in which spare blobs of solder join the pads still free; a run whose outline scores under 0.7 tried trimmed to the stretch its outline covers; a mark for a DIP whose printed outline is too faint on one side (IC61); the behavioural outlier test; a test of the tie between the models; the plan's notes. It did not run the tools on the scans, change the site tests or write the journal.
 
 ### What was finished on 13 October
 
-**The inputs.** This host had none of them. I1 and I2 were fetched again by
-hand from the Google Drive links in `data/sources.json`, as the tool's README
-says, into a folder outside the repository; `verify.py` found both SHA-256 as
-recorded. Nothing from them is committed. The virtual environment, made on 13
-October 2026 on an aarch64 host with `python3 -m venv ~/venv-models &&
-~/venv-models/bin/pip install numpy opencv-python-headless pillow scipy
-pytest`: Python 3.12.3, numpy 2.5.4, opencv-python-headless 5.0.0.93, Pillow
-12.3.0, scipy 1.18.1, pytest 9.1.1.
+**The inputs.** This host had none of them. I1 and I2 were fetched again by hand from the Google Drive links in `data/sources.json`, as the tool's README says, into a folder outside the repository; `verify.py` found both SHA-256 as recorded. Nothing from them is committed. The virtual environment, made on 13 October 2026 on an aarch64 host with `python3 -m venv ~/venv-models && ~/venv-models/bin/pip install numpy opencv-python-headless pillow scipy pytest`: Python 3.12.3, numpy 2.5.4, opencv-python-headless 5.0.0.93, Pillow 12.3.0, scipy 1.18.1, pytest 9.1.1.
 
-**The run.** `BBC_MODEL_INPUTS=~/bbc-model-inputs
-PYTHON=~/venv-models/bin/python tools/bbc-micro-model/run-board.sh`, on 13
-October 2026, took 1 minute 10 seconds. `frame.json` came back byte for byte (the run's log is not committed).
-The solder side printed the same figures as on 4 October (cubic, 2367 holes,
-held out median 0.114, 90th percentile 0.258, largest 0.766 mm: pass), and
-every rounded number in `registration.json` outside the pads and footprints
-is unchanged; the unrounded parameters differ from `9be4b55`'s, which came
-from another host, by at most 1.4 parts in a million. It printed `drills
-2797, pads 3050, footprints 175 (97 DIPs)`.
+**The run.** `BBC_MODEL_INPUTS=~/bbc-model-inputs PYTHON=~/venv-models/bin/python tools/bbc-micro-model/run-board.sh`, on 13 October 2026, took 1 minute 10 seconds. `frame.json` came back byte for byte (the run's log is not committed). The solder side printed the same figures as on 4 October (cubic, 2367 holes, held out median 0.114, 90th percentile 0.258, largest 0.766 mm: pass), and every rounded number in `registration.json` outside the pads and footprints is unchanged; the unrounded parameters differ from `9be4b55`'s, which came from another host, by at most 1.4 parts in a million. It printed `drills 2797, pads 3050, footprints 175 (97 DIPs)`.
 
-- **The drills' faces.** Open (275): largest 0.103 mm from the drill, none
-  over 0.2. Filled with solder (2522): median 0.062, 90th percentile 0.145,
-  largest 0.499 mm, and 93 over 0.2 mm, 3.7 per cent, under the 5 per cent
-  ceiling.
-- **Footprints.** 97 DIPs (38 of 14 pins, 29 of 16, 12 of 20, 1 of 24, 12 of
-  28 and 5 of 40), 21 connectors and 57 SIPs, where task 3 had 92, 25 and 58.
-  The new DIPs are IC30, IC12, IC53 and IC61 (the last three right of the RAM
-  block, where task 3 found one row of each as a connector), IC48 at 14 pins
-  in place of the 24-pin run, and IC35. Pin 1 is from the print on 92 and
-  marked by hand on 5 (IC21, IC35, IC61, IC69 and IC89). 17 pads came from a
-  spare blob and 7 were inferred, where task 3 had 8 and 6.
-- **References.** All 97 DIPs have a reference read from the print and none
-  is unread; no reference is used twice; 10 connectors and resistor packs are
-  named too (PL8 to PL14, SK6, RP1 and RP2). The 28-pin footprint at the left
-  edge, whose label task 0 could not read, is IC89: its digit was compared at
-  six times with IC39's 3. 12 of the new marks (IC8, IC10, IC23, IC39, IC43,
-  IC45, IC61, IC89, IC94, IC100, IC101 and IC35) were looked at again on
-  their crops on 13 October, and each label reads as marked.
+- **The drills' faces.** Open (275): largest 0.103 mm from the drill, none over 0.2. Filled with solder (2522): median 0.062, 90th percentile 0.145, largest 0.499 mm, and 93 over 0.2 mm, 3.7 per cent, under the 5 per cent ceiling.
+- **Footprints.** 97 DIPs (38 of 14 pins, 29 of 16, 12 of 20, 1 of 24, 12 of 28 and 5 of 40), 21 connectors and 57 SIPs, where task 3 had 92, 25 and 58. The new DIPs are IC30, IC12, IC53 and IC61 (the last three right of the RAM block, where task 3 found one row of each as a connector), IC48 at 14 pins in place of the 24-pin run, and IC35. Pin 1 is from the print on 92 and marked by hand on 5 (IC21, IC35, IC61, IC69 and IC89). 17 pads came from a spare blob and 7 were inferred, where task 3 had 8 and 6.
+- **References.** All 97 DIPs have a reference read from the print and none is unread; no reference is used twice; 10 connectors and resistor packs are named too (PL8 to PL14, SK6, RP1 and RP2). The 28-pin footprint at the left edge, whose label task 0 could not read, is IC89: its digit was compared at six times with IC39's 3. 12 of the new marks (IC8, IC10, IC23, IC39, IC43, IC45, IC61, IC89, IC94, IC100, IC101 and IC35) were looked at again on their crops on 13 October, and each label reads as marked.
 
-**Two changes that changed nothing, removed.** `9be4b55` also added a step
-that retried a candidate running into a DIP already taken, with the taken
-slots dropped, and a rule that a blob seen only on the solder side never sets
-where a row ends. No test reached either. Run on the scans with each switched
-off in turn, the DIPs came out the same, so both were removed, and the run
-gave `registration.json` back byte for byte. To reproduce it: copy
-`tools/bbc-micro-model/` to a scratch folder, replace its `board_register.py`
-with the one from before the change (`git show
-793731e^:tools/bbc-micro-model/board_register.py`), run that copy's
-`board_register.py` with `BBC_MODEL_INPUTS` set, and `cmp` the copy's
-`data/registration.json` with the one at HEAD. A reviewer did this on 13
-October 2026 and got identical files in 56 seconds; it was run again the same
-day and gave identical files in 1 minute 20 seconds.
+**Two changes that changed nothing, removed.** `9be4b55` also added a step that retried a candidate running into a DIP already taken, with the taken slots dropped, and a rule that a blob seen only on the solder side never sets where a row ends. No test reached either. Run on the scans with each switched off in turn, the DIPs came out the same, so both were removed, and the run gave `registration.json` back byte for byte. To reproduce it: copy `tools/bbc-micro-model/` to a scratch folder, replace its `board_register.py` with the one from before the change (`git show 793731e^:tools/bbc-micro-model/board_register.py`), run that copy's `board_register.py` with `BBC_MODEL_INPUTS` set, and `cmp` the copy's `data/registration.json` with the one at HEAD. A reviewer did this on 13 October 2026 and got identical files in 56 seconds; it was run again the same day and gave identical files in 1 minute 20 seconds.
 
-**A test that did not test its case.** The test for a stray blob beside a row
-(IC68) still passed with the pads-only first pass removed. On the scans, with
-that pass removed, IC68 is lost (96 DIPs). Its pads show why: pin 11 of the
-right row has no pad, a spare blob sits 0.39 mm short of its place and pin
-12's pad 0.16 mm short, so chained with the pads the blob is pin 12's next
-link and has no next of its own (pin 10 is 0.36 mm off the pitch, over the
-0.35 tolerance), and the row breaks in two. The test now draws that layout,
-and fails with the first pass removed.
+**A test that did not test its case.** The test for a stray blob beside a row (IC68) still passed with the pads-only first pass removed. On the scans, with that pass removed, IC68 is lost (96 DIPs). Its pads show why: pin 11 of the right row has no pad, a spare blob sits 0.39 mm short of its place and pin 12's pad 0.16 mm short, so chained with the pads the blob is pin 12's next link and has no next of its own (pin 10 is 0.36 mm off the pitch, over the 0.35 tolerance), and the row breaks in two. The test now draws that layout, and fails with the first pass removed.
 
 ### Tests
 
-`~/venv-models/bin/python -m pytest tools/bbc-micro-model/tests -q`: 58
-passed (13 October 2026). Each test added in the fix wave was seen to fail
-with the code broken the way it guards against, one break at a time, with the
-file restored after each (the log of that run is not committed): the outlier rule also taking holes with a residual
-over 0.1 mm; no tie margin between the models; the drill report never
-counting a filled, or an open, drill off; no second grouping pass; no
-pads-only first pass; no trim to the outline; the faint mark ignored, and a
-faint outline accepted with no mark; a marked run cut from its first slot;
-`unread` not kept. The saved map's test failed with the parameters rounded to
-4 places, as the file was written before: a drill's solder side then lands
-0.017 mm off.
+`~/venv-models/bin/python -m pytest tools/bbc-micro-model/tests -q`: 58 passed (13 October 2026). Each test added in the fix wave was seen to fail with the code broken the way it guards against, one break at a time, with the file restored after each (the log of that run is not committed): the outlier rule also taking holes with a residual over 0.1 mm; no tie margin between the models; the drill report never counting a filled, or an open, drill off; no second grouping pass; no pads-only first pass; no trim to the outline; the faint mark ignored, and a faint outline accepted with no mark; a marked run cut from its first slot; `unread` not kept. The saved map's test failed with the parameters rounded to 4 places, as the file was written before: a drill's solder side then lands 0.017 mm off.
 
 **Review minors, 13 October 2026.** The saved map's test now samples every 7th drill, not every 97th. The tie test gained the boundary, 0.115 against 0.120: the code is `c < a - TIE_MM`, a strict comparison, so exactly `TIE_MM` lower is a tie and the affine wins (in floats 0.120 - 0.005 is 0.11499999999999999, so the case is not below it), and 0.1149 gives the cubic. A site test now requires `solder.model`, `solder.params` (unrounded) and `solder.transform`, the names the plan's interface gives. The held-out-by-kind test says in a comment that it catches figures that disagree with their rows, not a wrong `kind`. Each was seen to fail on a break: drill 7 moved 0.01 mm; `TIE_MM` at 0.0049 and at 0.0051; `params` removed, rounded to 4 places, and `transform` removed.
 
-`site/tests/bbc-models.test.mjs` gains two tests and rewrites one. The drill
-test now checks each drill against its two faces as the plan revised it (a
-face within 0.002 mm of the 0.2 mm limit is counted either way, since the
-file is rounded to a micron), and that `drillFaces` says the same; a new test
-recomputes the held-out figures by kind of hole from the matched holes; and a
-new test requires every DIP to have a reference with its mark, crop and
-reason, or an `unread` reason, with no mark unused. Each was seen to fail on
-copies of `registration.json` broken its way (an open drill's faces 0.25 mm
-off, 60 more filled drills 0.25 mm off, a drill off its faces' mean, the
-report's count 10 short, the rings' median 0.01 out, IC40's reference
-dropped, and a mark that found nothing), and to pass with IC40 said unread
-with a reason. On main's `registration.json` all three fail; on `9be4b55`'s,
-which had not been rerun, the references test fails. `cd site && npm test` on
-13 October 2026, with the results and machines artefacts of main's Validate
-run 38423721729: 476 tests, 475 passed, one to-do, before; 478 tests, 477
-passed, the same to-do, after. Both workflows' floors are raised from 475 to
-477.
+`site/tests/bbc-models.test.mjs` gains two tests and rewrites one. The drill test now checks each drill against its two faces as the plan revised it (a face within 0.002 mm of the 0.2 mm limit is counted either way, since the file is rounded to a micron), and that `drillFaces` says the same; a new test recomputes the held-out figures by kind of hole from the matched holes; and a new test requires every DIP to have a reference with its mark, crop and reason, or an `unread` reason, with no mark unused. Each was seen to fail on copies of `registration.json` broken its way (an open drill's faces 0.25 mm off, 60 more filled drills 0.25 mm off, a drill off its faces' mean, the report's count 10 short, the rings' median 0.01 out, IC40's reference dropped, and a mark that found nothing), and to pass with IC40 said unread with a reason. On main's `registration.json` all three fail; on `9be4b55`'s, which had not been rerun, the references test fails. `cd site && npm test` on 13 October 2026, with the results and machines artefacts of main's Validate run 38423721729: 476 tests, 475 passed, one to-do, before; 478 tests, 477 passed, the same to-do, after. Both workflows' floors are raised from 475 to 477.
 
 ## Re-plan of tasks 4 to 10 (13 October 2026)
 
@@ -1221,6 +1099,8 @@ Afterwards, `verify.py` reported I1, I2, I5, I6 and D1 present with their hashes
 
 - A fork of `dominicbeesley/bbc-keyboard` in `dbhq-uk`. Rule 3 asks for it, and making it is outward-facing. Task 8 needs it.
 - A host for task 6's browser speed run.
+
+*Both done, noted 14 October 2026 (task 10's fix wave): the fork is `dbhq-uk/bbc-keyboard`, read at commit `5ec53df` on 13 October 2026 (task 8, "The inputs"); the host was a GitHub runner, Dan's choice of 13 October 2026, and the run is CI run 38472729370, which passed (task 6, "The browser speed run, in CI").*
 
 ## Task 4: the copper on both faces, and the print (13 October 2026)
 
@@ -1545,7 +1425,7 @@ The verdict, from `analyse.py` on the run's `launches.txt` (`python3 bench/bbc-m
 
 **VERDICT PASS.** The rule was applied as it was fixed: no threshold moved and no launch was dropped. The native fingerprints of the two trees are the same. The pairs in one case range widely (mode 7 from 0.9602 to 1.0528, dense from 0.9135 to 1.0372), which is why the rule uses the median of eight and an interval, and why a single pair says nothing.
 
-Two limits. The load average cannot see other tenants on the same physical hardware, so a quiet figure here does not prove a quiet host. And the run covers the machine as of `0d9e1ab`: a later change to the machine, in the bus or in anything the CPU calls, would need the run repeated. The run's files are kept in [`bench/bbc-micro-speed/chip-counters/runs/2026-10-13-ci-38472729370/`](../../bench/bbc-micro-speed/chip-counters/runs/2026-10-13-ci-38472729370/) (the artifact `bbc-speed-run`, 92 KB, downloaded with `gh run download 38472729370 --repo dbhq-uk/6502 -n bbc-speed-run`): the launches, the analysis, the host, the fingerprints and the watch log.
+Two limits. The load average cannot see other tenants on the same physical hardware, so a quiet figure here does not prove a quiet host. And the run covers the machine as of `0d9e1ab`: a later change to the machine, in the bus or in anything the CPU calls, would need the run repeated. The run's files are kept in [`bench/bbc-micro-speed/chip-counters/runs/2026-10-13-ci-38472729370/`](../../bench/bbc-micro-speed/chip-counters/runs/2026-10-13-ci-38472729370/) (the artefact `bbc-speed-run`, 92 KB, downloaded with `gh run download 38472729370 --repo dbhq-uk/6502 -n bbc-speed-run`): the launches, the analysis, the host, the fingerprints and the watch log.
 
 ### The checks before this was pushed
 
@@ -1954,7 +1834,7 @@ Round 3's two failures had been met once each, so the review asked how often the
 
 What that does and does not show. It is the check as round 3 left it, with the stage scrolled on screen before it turns and the DFS looked for during `*DUMP`; it says nothing about the check before those changes. None in 25 bounds the rate of each failure only loosely: a failure that came once in ten runs would pass 25 runs clean about one time in fourteen, so each pass of 25 puts each rate, under its own conditions, below about one in nine, at 95 per cent, and no lower. Why the case's camera did not rest in round 3 is still not known; the scroll was a guess at it, and the check now logs where the camera and the stage were if it happens again. The throttled runs took 55 to 92 seconds each and the unthrottled 92 to 115, so the throttling slowed the page less than four times, if at all, by that measure; it was asked for on every page the check opened, and the log does not show whether it took.
 
-## Task 10: the final pass, its first three steps (14 October 2026)
+## Task 10: the final pass, its first four steps (14 October 2026)
 
 Task 10 of the plan has seven steps. This section is the first four, as the controller asked for them on 14 October 2026: the mutation pass, the known differences, the size and speed record, and the documents. The final whole-branch review (step 5) is a separate reviewer's, and the pull request stays a draft (step 6 is not done here).
 
@@ -2129,3 +2009,17 @@ The BBC Micro's figures are the ones task 9b re-measured after its review: nothi
 - **One pytest added**, in `tests/test_board_parts.py`, for T3.
 - `cd site && npm test` (which builds first), on 14 October 2026 at 02:36 UTC, with the machines built and `src/data/results.json` as before: 569 tests, 568 passed, 0 failed, one to-do (task 2's x median); 564 and 563 before this task. `~/venv-models/bin/python -m pytest tools/bbc-micro-model/tests -q`: 145 passed, 144 before. No C# changed, so the C# suite was not run again as a whole; the C# faults ran the BBC Micro's whole test project, 997 tests, which pass unmutated.
 - Validate on the pushed commit is the record for the browser check, which this box cannot run: run 38501959350, on `c0c313d`, green in every job (test, machines, dashes, nes-gate and site).
+
+### Task 10's final review, and what was changed (14 October 2026)
+
+The final review of the whole branch found nothing on the page that claims more than its evidence, and found one claim in the documents that did: `docs/known-differences.md`'s new section said `bbc-models.test.mjs` pinned each of its figures, and that nothing was left for want of a test, but no test read that file. The reviewer planted 97.22 as 97.2, and "both held-out checks on it failed" as "passed", there, and both survived. What was done, each changed test changed first and seen to fail before the change it guards, and each new test seen to fail on a fault planted in place and put back:
+
+- **The known differences, read back.** `bbc-models` "docs/known-differences.md's section on the BBC Micro's models gives each figure and verdict as its data file has it" reads the section and checks every figure in it against its data key, formatted as the section gives it, and each verdict word against the verdict its file records: the copper's and the parts' two FAILs, the x scale between pass and stop, the rear check and the check point passed, the front edge not measurable. It failed on 97.22 as 97.2, on "failed" as "passed", on "between the 0.10 pass" as "beyond", and on 0.411 as 0.41. Writing it showed three figures the section could not source: PL11's pitch of 2.590 mm, from a line fit the journal quotes but no data file holds, is now the row's error, 0.423 mm, from `frame.json`; the board's right edge "0.36 mm" inside the case is now "about 0.4 mm", worked out from `boardInCase.x` and `board.widthMm`; and IC94's printed place "(48, 193)" is dropped, the sentence resting on IC95's place in the table. The section's last paragraph now says what the test holds. The key it cited for the inferred pins, `footprintCounts.inferred`, does not exist: it is `padCounts.bySource.inferred`, 7. Site floors 567 to 568, the one new test.
+- **The fact sheet's own claims.** `docs/bbc-micro/facts/models.md` was written before the work and said the inside's copper would be better than 1 mm, that both copper layers, the part places and the identities would be measured, that the keycaps would be sculpted and checked against K2, and that the rear ports' x would come from scan I1. Each now has a dated correction under it, as the sheet's I6 and O8 rows have.
+- **Smaller claims.** O2's credit said each rear port was checked against its socket; five of the seven were, and it now says each scored port (the photographs' README too, naming the two that were not). The board's first limit said the trace joins copper that is apart "in places"; the journal found one merge, so it says "in at least one place", and the page test's phrases for that limit require it (it failed against the old words). `site/README.md` still said the inside was not yet on the page. The journal's task 10 heading said three steps where it did four; this entry's "Waiting on Dan" and the plan's re-plan rows named the fork and the speed run's host as pending, and each has a dated note that both are done (the fork `dbhq-uk/bbc-keyboard` at `5ec53df`, 13 October 2026; the host a GitHub runner, CI run 38472729370). The summary's two narrower measures now say "if the keyboard drawing is true to size".
+- **The mirror test's reach.** `mirrors.test.mjs` read `.cs`, `.sh`, `.py` and `.mjs` files only. It now reads `.js` and `.html` under `tests/`, `tools/`, `bench/` and `src/` too, and the workflows under `.github/workflows/`. A workflow's actions are named `owner/repo@sha`, not by address, so the only address that scan found was the deploy's call to Cloudflare's API to purge the site's own cache; that one address is allowed in `deploy-site.yml` alone, by name. Shown able to fail: an address outside `dbhq-uk` appended to `bench/bbc-micro-speed/main.js`, to its `index.html` and to `bbc-speed-run.yml` each failed it.
+- **The speed workflow's default.** `bbc-speed-run.yml`'s `after` input defaulted to this branch, which will not exist after the merge; it defaults to `main`, and the chip counters' README says that the default baseline is then `main` itself.
+- **One convention.** `sources.json` gave TE's drawing the licence "none stated", where every other source that states none has null, and two tests accepted both. It is null, the results file is written again from it by `results.py` (one line changes), and the tests take null alone; the credit on the page still says "no licence stated". Each changed test failed against "none stated" first.
+- **Words.** The photographs' README pointed "below" to a table above it; "artifact" is "artefact" in the chip counters' README and in this entry, outside code; and this branch's hard-wrapped paragraphs in task 3's review are one line each, the lines the branch did not add left as they were.
+
+Nothing that the frozen methods' hashes cover was changed. `cd site && npm test`, 14 October 2026: 570 tests, 569 passed, 0 failed, one to-do. `~/venv-models/bin/python -m pytest tools/bbc-micro-model/tests -q`: 145 passed.

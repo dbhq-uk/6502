@@ -35,8 +35,10 @@ test('every input in the BBC models\' sources.json is fully described', () => {
     assert.ok(typeof s.author === 'string' && s.author.length > 0, `${s.id}: author`);
     assert.ok(typeof s.file === 'string' && s.file.length > 0 && !path.isAbsolute(s.file), `${s.id}: file`);
     assert.ok(typeof s.use === 'string' && s.use.length > 0, `${s.id}: use`);
-    // 'none stated' (added after task 9a's review, 13 October 2026, for a source the page credits) is no licence, as null is
-    if (s.licence === null || s.licence === 'none stated' || s.kind === 'scan') assert.equal(s.committed, null, `${s.id} has no stated licence or is a scan, so it is never committed`);
+    // a source that states no licence is null, the file's one convention (task 10's fix wave, 14 October 2026: TE's
+    // drawing had 'none stated', which this test also took as none); a string here is always a licence
+    assert.notEqual(s.licence, 'none stated', `${s.id}: a source that states no licence is null`);
+    if (s.licence === null || s.kind === 'scan') assert.equal(s.committed, null, `${s.id} has no stated licence or is a scan, so it is never committed`);
     if (s.committed !== null) assert.ok(fs.existsSync(path.join(process.cwd(), 'src', 'assets', 'photos', s.committed)), `${s.id}: ${s.committed} is not in src/assets/photos`);
   }
 });
@@ -1852,12 +1854,14 @@ test('the case results file is written from keys.json and case.json and agrees w
     const { used, byline, ...rest } = x;
     assert.deepEqual(rest, { id: s.id, url: s.url, page: s.page, sha256: s.sha256, kind: s.kind, licence: s.licence, author: s.author, fetched: s.fetched });
     assert.ok(x.author, `${x.id} has no author to credit`);
-    // added after task 9a's review: each says its licence (or that none is stated) and what the case took from it
-    assert.ok(typeof x.licence === 'string' && x.licence.length > 0, `${x.id} states no licence, not even none`);
+    // added after task 9a's review: each says its licence, or null where it states none (the page then says "no
+    // licence stated", which bbc-models-page.test.mjs holds; null since task 10's fix wave, 'none stated' before), and what the case took from it
+    assert.ok(x.licence === null || (typeof x.licence === 'string' && x.licence.length > 0 && x.licence !== 'none stated'), `${x.id}'s licence is neither stated nor null`);
     assert.ok(typeof used === 'string' && used.length > 0, `${x.id} does not say what the case took from it`);
     assert.equal(byline, /chrisacorns/.test(x.url) ? "Chris's Acorns" : undefined, x.id);
   }
-  assert.equal(f.sources.find((x) => x.id === 'P-TE_1757819').licence, 'none stated');
+  // null, the file's convention for a source that states none (task 10's fix wave, 14 October 2026; it was 'none stated')
+  assert.equal(f.sources.find((x) => x.id === 'P-TE_1757819').licence, null);
   const o8 = f.sources.find((x) => x.id === 'O8-I');
   assert.match(o8.used, /^The connector names only: /);
   assert.match(o8.used, /the photograph itself is not shown/);
@@ -1963,4 +1967,86 @@ test('every credit of the BBC Micro\'s that speaks of the copper says it is trac
   const said = [...bbc.references, ...bbc.photos].map((c) => c.used).filter((u) => /copper|track/i.test(u));
   assert.ok(said.length >= 3, `only ${said.length} credits speak of the copper`);
   for (const u of said) assert.ok((/to look at/.test(u) && /not verified/.test(u)) || /failed/.test(u), `a credit speaks of the copper without saying it is traced to look at and not verified: ${u}`);
+});
+
+// Added in task 10's fix wave (14 October 2026), after the final review planted 97.22 -> 97.2 and "failed" ->
+// "passed" in docs/known-differences.md's section on these models and no test noticed: nothing read that file. Each
+// figure and verdict there is now read back from its data key, formatted as the section gives it.
+test('docs/known-differences.md\'s section on the BBC Micro\'s models gives each figure and verdict as its data file has it', () => {
+  const doc = fs.readFileSync(path.join(REPO_ROOT, 'docs', 'known-differences.md'), 'utf8');
+  const start = doc.indexOf('## The BBC Micro: its two 3D models, where they stop');
+  assert.ok(start >= 0, 'the section is missing');
+  const section = doc.slice(start, doc.indexOf('\n## ', start + 1));
+  const has = (text, why) => assert.ok(section.includes(text), `the section does not say "${text}" (${why})`);
+  const fixed = (v, n) => v.toFixed(n);
+  const grouped = (v) => Math.round(v).toLocaleString('en-GB');
+  // The copper: both checks failed.
+  assert.deepEqual([copper.verdicts.nets, copper.verdicts.againstI5], ['fail', 'fail']);
+  has('Both held-out checks on it failed, and both stay recorded as failed.', 'the copper\'s two verdicts');
+  has(`${copper.nets.gnd.inLargest} of ${copper.nets.gnd.pins} ground pins in the largest ground net`, 'nets.gnd');
+  has(`${copper.nets.vcc.inLargest} of ${copper.nets.vcc.pins} +5V pins in the largest +5V net`, 'nets.vcc');
+  assert.equal(copper.nets.touching, true);
+  has('a ground pin and a +5V pin in one net', 'nets.touching');
+  has(`an intersection over union of ${fixed(copper.againstI5.iou, 3)} over about ${grouped(copper.againstI5.comparedMm2)} square mm, against 0.50`, 'againstI5');
+  assert.match(copper.thresholds.againstI5, /at least 0\.50/);
+  has(`Of about ${grouped(copper.print.areaMm2)} square mm of print`, 'print.areaMm2');
+  has(`recovered under about ${grouped(copper.print.recoveredMm2)},`, 'print.recoveredMm2');
+  // The parts: both checks failed.
+  const pm = boardFigures.parts.manual, pid = boardFigures.parts.identities;
+  assert.deepEqual([parts.verdicts.manual, parts.verdicts.identities], ['fail', 'fail']);
+  has('**Both checks on the parts failed,', 'the parts\' two verdicts');
+  const worst = Object.entries(parts.manual.check.perPart).sort((a, b) => b[1].offMm - a[1].offMm).filter(([, e]) => e.offMm > pm.limitMm).map(([r]) => r);
+  const words = ['none', 'one', 'two', 'three', 'four', 'five', 'six'];
+  has(`${words[worst.length]} are more than ${pm.limitMm} mm from table 8.1's place, the worst ${worst[0]} at ${fixed(pm.maxMm, 2)} mm, then ${worst.slice(1, -1).join(', ')} and ${worst.at(-1)}, with the median ${fixed(pm.medianMm, 2)} mm`, 'manual.check');
+  has(`${pid.read} read of the ${pid.populated} chips I5 shows populated outside the ROM sockets, and ${pid.disagree} disagree with table 8.1`, 'identities');
+  const disagree = Object.entries(parts.identities.I5).filter(([, e]) => e.verdict === 'disagrees').map(([r]) => r);
+  assert.equal(disagree.length, pid.disagree);
+  for (const r of disagree) assert.ok(section.includes(r) || (/^IC6[1-8]$/.test(r) && section.includes('IC61 to IC68')), r);
+  // Table 8.1's apparent misprints, as the table and the readings have them.
+  const ic = Object.fromEntries(icTable.ics.map((i) => [i.ref, i]));
+  has(`IC94 is given at (${ic.IC94.manualXY.join(', ')})`, 'ic-table IC94');
+  has(`which the table gives at (${ic.IC95.manualXY.join(', ')})`, 'ic-table IC95');
+  has(`IC31 is given as a ${ic.IC31.part}`, 'ic-table IC31');
+  has(`IC77 is given as a ${ic.IC77.part}`, 'ic-table IC77');
+  assert.match(parts.identities.I5.IC31.reading, /^74LS74AN/);
+  assert.match(parts.identities.I6.IC31.reading, /DM74LS74AN/);
+  for (const b of ['I5', 'I6']) assert.match(parts.identities[b].IC77.reading, /^74LS00N/);
+  has('reads 74LS74AN on I5 and DM74LS74AN on I6', 'IC31\'s readings');
+  has('reads 74LS00N on both boards', 'IC77\'s readings');
+  // The paged slots the machine fills.
+  has('paged ROM slots 14 and 15', 'PAGED_SLOTS');
+  // The board's scale across it, PL11, the inferred pins and the map.
+  const xv = frame.verdicts.find((v) => /as revised/.test(v.measure));
+  assert.equal(xv.verdict, 'between pass and stop');
+  has(`is ${fixed(frame.heldOutX.scaledErrMm.median, 3)} mm, between the 0.10 pass and the 0.20 stop`, 'heldOutX');
+  const pl11 = frame.heldOutX.rows.find((r) => r.row === 'PL11');
+  has(`PL11, ${pl11.lengthMm} mm long by its pitch, reads ${fixed(pl11.errMm, 3)} mm long end to end`, 'PL11');
+  has(`The pads of ${registration.padCounts.bySource.inferred} DIP pins were inferred`, 'padCounts.bySource.inferred');
+  has(`The track map has ${copper.mapPxPerMm} pixels to the millimetre`, 'mapPxPerMm');
+  // The case.
+  const cf = caseFigures;
+  has(`The model is ${caseJson.footprint.widthMm} by ${caseJson.footprint.depthMm} mm and ${caseJson.heightMm} mm high`, 'footprint');
+  const d3 = fs.readFileSync(path.join(REPO_ROOT, 'docs', 'bbc-micro', 'facts', 'models.md'), 'utf8').match(/^\| D3 \|.*?\| (\d+) x (\d+) x (\d+) mm\./m);
+  has(`the Science Museum gives ${d3[2]} by ${d3[3]} by ${d3[1]} mm`, 'D3');
+  has(`the keys read ${caseJson.caseTop.scale} times K1`, 'caseTop.scale');
+  has(`imply ${caseJson.k1ToCase.impliedScale}`, 'k1ToCase.impliedScale');
+  has(`about ${Math.round(cf.width.k1Mm / 10) * 10} mm`, 'k1Mm');
+  has(`makes it wider, ${fixed(caseJson.widthOnRear.mm, 1)} mm`, 'widthOnRear');
+  has(`on which the case reads about ${Math.round(caseJson.widthOnRear.mm)} mm`, 'widthOnRear');
+  const sk1 = caseJson.rear.find((p) => p.ref === 'SK1');
+  has(`SK1, at about ${Math.round(sk1.x)} mm, would land about ${Math.round(sk1.x * (1 - caseJson.footprint.widthMm / caseJson.widthOnRear.mm))} mm differently`, 'SK1');
+  has(`the board's left edge is ${fixed(caseJson.boardInCase.x, 2)} mm`, 'boardInCase.x');
+  has(`the board ${fixed(frame.board.widthMm, 2)} mm wide`, 'board.widthMm');
+  has(`about ${fixed(caseJson.footprint.widthMm - caseJson.boardInCase.x - frame.board.widthMm, 1)} mm inside the case's ${caseJson.footprint.widthMm} mm`, 'the board\'s right edge');
+  assert.equal(caseJson.rearCheck.verdict, 'pass');
+  has(`The rear check passed (${caseJson.rearCheck.within} of ${caseJson.rearCheck.n} ports within ${fixed(caseJson.rearCheck.limitMm, 1)} mm`, 'rearCheck');
+  assert.equal(caseJson.frontEdge.verdict, 'not measurable');
+  has('`frontEdge.verdict` "not measurable"', 'frontEdge.verdict');
+  has(`The raw width on the key plane, ${fixed(keysJson.frontEdgeMm, 1)} mm`, 'frontEdgeMm');
+  has(`${fixed(caseJson.frontEdge.d.mm, 2)} mm with a standard error of ${fixed(caseJson.frontEdge.d.seMm, 2)}`, 'frontEdge.d');
+  assert.equal(caseJson.profileCheck.verdict, 'pass');
+  has(`lands ${fixed(caseJson.profileCheck.errMm, 2)} mm from K1's place, inside ${fixed(caseJson.profileCheck.limitMm, 1)} mm`, 'profileCheck');
+  const [zl, zr] = caseJson.triangulation.topAtOpening.z;
+  has(`about ${Math.round(Math.abs(zl - zr))} mm apart in height`, 'topAtOpening');
+  has(`${fixed(keysJson.o1.heldOutMm.median, 3)} mm at the median over ${keysJson.o1.n} keys on O1 and ${fixed(keysJson.o3.heldOutMm.median, 3)} mm over ${keysJson.o3.n} legends on O3`, 'o1, o3');
 });

@@ -53,7 +53,7 @@ export function made(figures) {
     `Every chip is placed on its footprint in the scan, and named from table 8.1 of Acorn's Service Manual: ${parts.ics} chips have a place there, and the model draws the ${parts.fitted} fitted, ${parts.socketed} of them in sockets the manual names. ${partsSentence(figures)}`,
   ];
   const limits = [
-    'The copper is traced to look at, not as a netlist: its connections are not verified, and the trace joins copper that is apart on the board in places and breaks copper that is joined in others.',
+    'The copper is traced to look at, not as a netlist: its connections are not verified, and the trace joins copper that is apart on the board in at least one place and breaks copper that is joined in others.',
     `The print hides the copper under it: of ${n(Math.round(copper.printMm2))} square millimetres of print, the copper, traced to look at and not verified, was recovered under ${n(Math.round(copper.recoveredMm2))}, where a track runs on in line either side of it, and the rest is drawn as print only.`,
     `The heights of the parts are typical ones for their packages, not measured, for all ${parts.heightsTypical} kinds of part and connector the model draws: no photograph of a populated Issue 7 board from the side was found.`,
     `The ${parts.passives} resistors and capacitors, ${parts.axial} lying down and ${parts.radial} standing, are read from the print between pairs of pads, and drawn as plain cylinders and boxes of typical sizes, without their bands or printing; the connectors, the modulator, the crystal and the relay are plain boxes.`,

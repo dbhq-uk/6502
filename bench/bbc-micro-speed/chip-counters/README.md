@@ -26,7 +26,7 @@ gh run watch --repo dbhq-uk/6502 "$(gh run list --repo dbhq-uk/6502 --workflow b
 
 The inputs:
 
-- `after`: the commit or branch with the counters. Default `feat/bbc-micro-models-2`. Its `bench/bbc-micro-speed` is the harness for both builds.
+- `after`: the commit or branch with the counters. Default `main` (until 14 October 2026 it was the models' branch, `feat/bbc-micro-models-2`). Its `bench/bbc-micro-speed` is the harness for both builds. With `after` on `main`, the default baseline below is `main` itself, so give `base` to compare against an earlier commit.
 - `base`: the baseline. Empty by default, which means the rule's baseline, `git merge-base origin/main <after>`. Give a commit only to repeat an earlier run.
 
 The script and `analyse.py` are taken from the ref the workflow is started from, so start it from a ref that has this folder.
@@ -41,7 +41,7 @@ The script and `analyse.py` are taken from the ref the workflow is started from,
 6. Runs the smoke launch, then pairs 1 to 8 of mode 7 and then of dense, and applies `analyse.py`.
 7. If the verdict is INCONCLUSIVE, runs pairs 9 to 16 in the same order and applies `analyse.py` to all sixteen. Then it stops, whatever that says.
 8. As a supplement, not part of the verdict, runs both trees' native fingerprints and compares them.
-9. Uploads everything in `out/` as the artifact `bbc-speed-run`, even when a step failed, and puts the final analysis and the head of `host.txt` in the run's summary.
+9. Uploads everything in `out/` as the artefact `bbc-speed-run`, even when a step failed, and puts the final analysis and the head of `host.txt` in the run's summary.
 
 The job is green only on PASS. FAIL, INCONCLUSIVE after sixteen pairs, or no verdict all end red, so a red run is never read as a pass. One run at a time: a second run waits for the first.
 
@@ -51,7 +51,7 @@ A GitHub-hosted runner is a virtual machine on shared hardware. The rule's gate 
 
 The load average sees only this virtual machine. Neighbours on the same hardware do not show in it, and this is the main thing the run cannot rule out. The pairs alternate their order so that drift falls on both builds, and the ratio of the two builds on the same host in the same minutes is all the rule judges.
 
-## The artifact
+## The artefact
 
 | File | What it holds |
 | --- | --- |

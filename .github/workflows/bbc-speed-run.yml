@@ -18,7 +18,7 @@ on:
       after:
         description: "The commit or branch with the counters. Its bench/bbc-micro-speed is the harness for both builds."
         required: false
-        default: 'feat/bbc-micro-models-2'
+        default: 'main'
 
 # One run at a time, and a second run waits rather than cancelling the first:
 # two runs on one runner would load each other's host.
@@ -49,7 +49,7 @@ jobs:
         id: refs
         env:
           BASE_REF: ${{ inputs.base }}
-          AFTER_REF: ${{ inputs.after || 'feat/bbc-micro-models-2' }}
+          AFTER_REF: ${{ inputs.after || 'main' }}
         working-directory: repo
         run: |
           set -euo pipefail

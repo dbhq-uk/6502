@@ -487,7 +487,7 @@
           "caption": "the rear of a BBC Micro, with its ports",
           "alt": "The rear of a BBC Micro on a white background, seen nearly square on and a little from above, the keyboard showing upside down beyond the case top. Along the black rear panel, left to right, are a small round UHF out socket, a metal video out socket, three round DIN sockets for RGB, RS423 and cassette, a 15-pin D socket for analogue in and a round Econet socket, each with its name printed above it, and two long ventilation slots run across the top of the panel. At the right is the mains panel with its On and Off switch and the mains lead.",
           "fetched": "2026-10-13",
-          "used": "measured on its full-size original for the outside model: each rear port's place and height on the scale of the 15-way D socket, checked against its socket on the board, and the ventilation slots and the mains panel"
+          "used": "measured on its full-size original for the outside model: each rear port's place and height on the scale of the 15-way D socket, each scored port checked against its socket on the board, and the ventilation slots and the mains panel"
         },
         {
           "file": "bbc-micro-keyboard.webp",
