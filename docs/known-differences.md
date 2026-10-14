@@ -1557,3 +1557,17 @@ that moves any of them fails until the words move too.
 - **PB2, PB4 and PB5 read 1** as inputs, through the chip's pull-ups, since the 2600 leaves them unconnected; no source states the value read on a 2600 (`riot.md` section 12 item 6) `[guessing - verify]`.
 
 **How the tests treat it.** `Riot6532Tests` holds each choice with the section it comes from: `Section_9_power_on`, `Worked_example_5_the_flags_clearing_rules` (the phase), `Section_12_item_2_an_intim_read_on_the_flags_cycle_does_not_end_the_free_run`, `Section_6_the_free_run_wraps_and_only_the_first_pass_of_zero_protects_a_read` and `Section_5_a_port_a_output_reads_low_while_its_switch_pulls_it_low`.
+
+## The Atari 2600: the bus and the first TIA, where the model stops
+
+**What.** Task 4 of the Atari 2600 plan: `Atari2600Bus`, the machine and a first `Tia`, built from `docs/atari-2600/facts/bus.md` and the parts of `tia.md` the bus needs. Where the sources are silent, the model makes a choice:
+
+- **The data bus holds `$00` at power on.** Its real value is not documented (`bus.md` section 8 item 3) `[guessing - verify]`. A program that reads an undriven line before anything has crossed the bus sees 0 here.
+- **The TIA powers on at colour clock 0**, with every register 0 and no latch set. No source gives its power-on state; the real counter may start in any state, the illegal one included (`tia.md` section 3) `[guessing - verify]`. The suite's tests that skip `CLEAN_START` depend on this phase (`suite.md` section 8), and none of them runs before task 6.
+- **The WSYNC halt's repeated reads reach the cartridge**, one access a cycle at the held address, as the 6502 data sheet's "address lines hold the current address" suggests. No 2600 source confirms it (`bus.md` section 8 item 2) `[guessing - verify]`; a board that switches on a read of the next opcode's address would see each.
+- **CXBLPF drives D7 only.** Its D6 is unused, and whether it floats or is driven 0 is not stated; the model lets it float, so it reads the bus residue (`tia.md` section 2.2) `[guessing - verify]`.
+- **A write to `$2D` to `$3F` of the TIA does nothing** (`tia.md` section 2.1) `[guessing - verify]`.
+- **Until task 5 settles it, all three colour clocks of a cycle run before its access**, the split the sources state (`tia.md` section 4).
+- **Until task 9 builds the inputs**, INPT0 to INPT3 read D7 = 0, as ports with no paddle connected do, and INPT4 and INPT5 read D7 = 1, both fire buttons up with the latch off.
+
+**How the tests treat it.** `Atari2600BusTests` holds the residue at power on, CXBLPF and the TIA's power-on counter (through the CPU's reset, which leaves it at colour clock 21); `WsyncHaltTests` holds the halted reads as the slot sees them.
