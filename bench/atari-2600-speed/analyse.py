@@ -8,7 +8,8 @@ python3 analyse.py --counts <output-file> <exit-code> <NTSC|PAL>
 
 Per timed run: times_real = (cycles / seconds) / the CPU clock the page printed from the machine
 (Region.CpuHz). Per launch: the best and the median of the five. The verdict is set by the lower
-of the two regions' AOT medians: at least 25 CONTINUE, at least 10 CONTINUE, HEADROOM, under 10
+of the two regions' AOT medians, each rounded to the two decimal places it is printed with, so the
+figure printed is the figure judged: at least 25 CONTINUE, at least 10 CONTINUE, HEADROOM, under 10
 STOP; with a launch missing, NONE. The interpreter is measured and judged by nothing.
 """
 import re
@@ -79,7 +80,8 @@ def main(path):
             print(f'  {label}: no launch counts')
             continue
         print(f"  {label}: {' '.join(f'{t:.2f}' for t in times)}; best {max(times):.2f}; median {statistics.median(times):.2f}")
-    medians = [statistics.median(judged[label]) for label in ('aot-ntsc', 'aot-pal') if label in judged]
+    # Rounded as printed, so a median that prints 25.00 is judged as 25.00 (task 8's review, finding 4).
+    medians = [round(statistics.median(judged[label]), 2) for label in ('aot-ntsc', 'aot-pal') if label in judged]
     if len(medians) < 2 or not all(label in judged for label, _ in LAUNCHES):
         print('VERDICT: NONE')
         return
