@@ -5,8 +5,8 @@ namespace Dbhq.Machines.Atari2600;
 /// counter and the blank it decodes, WSYNC's latch that holds the CPU's RDY low, RSYNC, VSYNC ending
 /// a frame, VBLANK, the playfield, the two players, the two missiles and the ball, priority and
 /// score mode, the fifteen collision latches, and a frame of colour numbers written a pixel a
-/// colour clock; with the lines each read drives. Task 7 adds HMOVE, task 9 the inputs and task 10
-/// the sound.
+/// colour clock; with the lines each read drives; HMOVE (task 7) and the six input ports (task 9).
+/// Task 10 adds the sound.
 /// </summary>
 /// <remarks>
 /// <para>
@@ -155,6 +155,12 @@ public sealed class Tia : IReportsState
     private const ushort Latches = 0xEFFF;
     private ushort _collisions;
 
+    // The fire buttons' pins, bit 0 INPT4's and bit 1 INPT5's, 1 high (up); the outside world, so
+    // power on leaves them. And the two latches VBLANK D6 enables, 1 while nothing has pulled them.
+    private const byte FireBoth = 0b11;
+    private byte _firePins = FireBoth;
+    private byte _fireLatches = FireBoth;
+
     /// <summary>A chip at its power-on state (<see cref="PowerOn"/>).</summary>
     public Tia() => PowerOn();
 
@@ -206,6 +212,21 @@ public sealed class Tia : IReportsState
 
     /// <summary>The horizontal sync counter's six bits, as Towers prints them (tia.md section 3).</summary>
     internal int PolynomialCounter => _counter;
+
+    /// <summary>
+    /// The fire buttons' pins, INPT4's on bit 0 and INPT5's on bit 1, 1 high, the button up (tia.md
+    /// section 20.1); set by <see cref="Controllers"/>. While VBLANK D6 enables the latches, a pin
+    /// that goes low clears its latch, which stays 0 until D6 is cleared (section 20.2).
+    /// </summary>
+    internal byte FirePins
+    {
+        get => _firePins;
+        set
+        {
+            _firePins = (byte)(value & FireBoth);
+            CatchFire();
+        }
+    }
 
     /// <summary>The collision latches as the read registers show them, for the tests.</summary>
     internal ushort CollisionLatches
@@ -340,9 +361,9 @@ public sealed class Tia : IReportsState
     /// <summary>
     /// A read of <paramref name="register"/> (A0 to A3, already decoded): the bits it drives, the
     /// others 0; the bus puts the residue on the lines <see cref="DrivenLines"/> leaves. Reads have
-    /// no side effect. Until task 9 the inputs are fixed: INPT0 to INPT3 read 0, as ports with no
-    /// paddle connected do (tia.md section 20.3), and INPT4 and INPT5 read 1, both fire buttons up
-    /// with the latch off (section 20.2).
+    /// no side effect. INPT0 to INPT3 read 0, as ports with no paddle connected do, the dump on or off
+    /// (tia.md section 20.3). INPT4 and INPT5 read their fire button's pin, or its latch while VBLANK
+    /// D6 enables it (section 20.2).
     /// </summary>
     public byte Read(int register)
     {
@@ -351,7 +372,13 @@ public sealed class Tia : IReportsState
             return (byte)(((_collisions >> (2 * register)) & 0x03) << 6);
         }
 
-        return register is 0x0C or 0x0D ? (byte)0x80 : (byte)0x00;
+        if (register is not (0x0C or 0x0D))
+        {
+            return 0x00;
+        }
+
+        byte level = (_registers[Vblank] & 0x40) != 0 ? _fireLatches : _firePins;
+        return (byte)(((level >> (register - 0x0C)) & 1) << 7);
     }
 
     /// <summary>
@@ -375,6 +402,19 @@ public sealed class Tia : IReportsState
                 if ((old & 0x02) != 0 && (value & 0x02) == 0)
                 {
                     _frame.EndOfVsync();
+                }
+
+                break;
+            case Vblank:
+                // D6 clear removes the latches and resets them to 1; D6 set brings them in, and a
+                // button already held clears its latch at once (tia.md section 20.2).
+                if ((value & 0x40) == 0)
+                {
+                    _fireLatches = FireBoth;
+                }
+                else
+                {
+                    CatchFire();
                 }
 
                 break;
@@ -445,8 +485,9 @@ public sealed class Tia : IReportsState
     /// <summary>
     /// The power-on state, none of which a source gives: every register 0, the latches clear, the
     /// counter at 000000 and colour clock 0, the blank on, every object's counter at count 0 and
-    /// quarter 0 with nothing held or drawing, and no frame yet; a choice recorded in
-    /// <c>docs/known-differences.md</c> [guessing - verify].
+    /// quarter 0 with nothing held or drawing, the fire latches disabled and at 1 (VBLANK D6 is 0),
+    /// and no frame yet; a choice recorded in <c>docs/known-differences.md</c> [guessing - verify].
+    /// The fire buttons' pins are left as they are: they are the outside world.
     /// </summary>
     public void PowerOn()
     {
@@ -467,6 +508,7 @@ public sealed class Tia : IReportsState
         _rdyLow = false;
         _vblank = false;
         _collisions = 0;
+        _fireLatches = FireBoth;
     }
 
     /// <inheritdoc />
@@ -489,6 +531,19 @@ public sealed class Tia : IReportsState
         sink.Add(nameof(_rdyLow), _rdyLow);
         sink.Add(nameof(_vblank), _vblank);
         sink.Add(nameof(_collisions), _collisions);
+        sink.Add(nameof(_firePins), _firePins);
+        sink.Add(nameof(_fireLatches), _fireLatches);
+    }
+
+    // While VBLANK D6 enables the latches, a fire pin that is low clears its latch (tia.md section
+    // 20.2). The pins change only between the CPU's accesses and D6 only by a write, so the latches
+    // are worked out there and not every colour clock, and a read sees them as it would if they were.
+    private void CatchFire()
+    {
+        if ((_registers[Vblank] & 0x40) != 0)
+        {
+            _fireLatches &= _firePins;
+        }
     }
 
     // The counter's step, every fourth colour clock, where the decoded state it leaves acts.

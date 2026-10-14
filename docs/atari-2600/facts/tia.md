@@ -715,7 +715,11 @@ Worked, left joystick, reading `INPT4` with `LDA $0C` (so the low seven bits are
 
 A real port left floating may drift, through leakage, to 1 after a long time; no document gives a figure [guessing - verify]. The model reads 0 always. A connected paddle at rest would instead read 1 a fixed time after each dump ends; that is the paddles' issue, #108, and is not modelled.
 
-### 20.4 Not modelled
+### 20.4 The inputs in the model, as task 9 built it
+
+The TIA keeps the two fire pins and the two latches. A pin change (from `Controllers`) and a VBLANK write are the only events that move a latch, and both happen between the CPU's bus accesses, so the latches are worked out there, not every colour clock: D6 cleared sets both latches to 1; D6 set, or a pin change while it is set, clears a latch whose pin is low. A read of INPT4 or INPT5 gives the latch while D6 is set and the pin otherwise. INPT0 to INPT3 read 0 always. The pins are the outside world, so power on leaves them; the latches power on disabled and at 1 (open item 13). `TiaInputTests` holds the worked example of section 20.2 step by step.
+
+### 20.5 Not modelled
 
 The keyboard controller reads its columns on `INPT0`, `INPT1` and `INPT4` (left port) [from SPG, PIA 5.5; 2k6specs], the paddles' pots on `INPT0` to `INPT3` [from SPG 12.1], and the three-button adapter's extra buttons on `INPT0` to `INPT3` [from 2k6specs]. None is modelled (spec, "Controllers"; issues #108 and #124).
 

@@ -1552,7 +1552,7 @@ that moves any of them fails until the words move too.
 - **The divider's phase after a read ends the free run**: the first fall comes a whole divider after the read (`riot.md` section 12 item 1). No source or suite test says `[guessing - verify]`.
 - **A read of the count on the cycle the flag is set** leaves the free run going, as it leaves the flag (`riot.md` section 12 item 2). Untested on hardware; for TIM1T it makes no difference `[guessing - verify]`.
 - **Only the first pass of zero protects a read.** In the free run the count wraps past `$00` again with the flag still set; a read on that cycle clears the flag as any other read does. No source reaches it `[guessing - verify]`.
-- **A port A output at 1 reads 0 while its switch is closed**, because the chip's output cannot hold a grounded pin high (`riot.md` section 5, an inference) `[guessing - verify]`. Task 9 decides it for the joysticks.
+- **A port A output at 1 reads 0 while its switch is closed**, because the chip's output cannot hold a grounded pin high (`riot.md` section 5, an inference) `[guessing - verify]`. Task 9 kept it for the joysticks (`riot.md` section 12 item 4).
 - **The PA7 edge is seen on the cycle the pin changes**, so a read on any later cycle finds the flag. When the real flag becomes visible is not stated (`riot.md` section 12 item 5); the suite never reads sooner than the next instruction `[guessing - verify]`.
 - **PB2, PB4 and PB5 read 1** as inputs, through the chip's pull-ups, since the 2600 leaves them unconnected; no source states the value read on a 2600 (`riot.md` section 12 item 6) `[guessing - verify]`.
 
@@ -1568,7 +1568,7 @@ that moves any of them fails until the words move too.
 - **CXBLPF drives D7 only.** Its D6 is unused, and whether it floats or is driven 0 is not stated; the model lets it float, so it reads the bus residue (`tia.md` section 2.2) `[guessing - verify]`.
 - **A write to `$2D` to `$3F` of the TIA does nothing** (`tia.md` section 2.1) `[guessing - verify]`.
 - **All three colour clocks of a cycle run before its access**, the split the sources state (`tia.md` section 4); task 5 kept it by the plan's rule (below).
-- **Until task 9 builds the inputs**, INPT0 to INPT3 read D7 = 0, as ports with no paddle connected do, and INPT4 and INPT5 read D7 = 1, both fire buttons up with the latch off.
+- **Until task 9 builds the inputs**, INPT0 to INPT3 read D7 = 0, as ports with no paddle connected do, and INPT4 and INPT5 read D7 = 1, both fire buttons up with the latch off. (Task 9 built them; the section on the inputs below says where they stop.)
 
 **How the tests treat it.** `Atari2600BusTests` holds the residue at power on, CXBLPF and the TIA's power-on counter (through the CPU's reset, which leaves it at colour clock 21); `WsyncHaltTests` holds the halted reads as the slot sees them.
 
@@ -1620,3 +1620,16 @@ that moves any of them fails until the words move too.
 - **The PAL pictures of `harness/calibration` and `tia-render/colors` mismatch by the partition rule** because the suite's PAL references draw hues 0, 1, 14 and 15 as one grey, so colour numbers the TIA keeps apart share one reference colour. That is the rule meeting the PAL palette, not the TIA; the counts are task 7's journal entry's and task 11 records them.
 
 **How the tests treat it.** `TiaMotionTests` holds sections 15 to 17's worked examples and section 16's table; `TiaBallTests` and `TiaMissileTests` the reset's cut; `SuiteSelfTests` keeps the four `merge-delivery` tests failing exactly as they do now; `ScreenshotTests` reports every picture's count.
+
+## The Atari 2600: the joysticks, the fire buttons and the console switches, where the model stops
+
+**What.** Task 9 of the Atari 2600 plan: `Controllers`, the two joysticks on the RIOT's port A, the fire buttons on the TIA's INPT4 and INPT5 with the latch VBLANK D6 enables, the paddle ports INPT0 to INPT3 with nothing connected, and the console switches on port B, built from `docs/atari-2600/facts/riot.md` section 10 and `tia.md` section 20. Where the sources are silent, the model makes a choice:
+
+- **A press, a release and a VBLANK write reach the latch at once.** When either shows in a read, to the colour clock, is not documented (`tia.md` section 20.2) `[guessing - verify]`. The host changes an input only between two of the CPU's bus accesses, so a read sees every change made before it.
+- **The fire latches power on disabled and at 1**, so the ports read the pins; the latch's power-on state is not documented (`tia.md` open item 13) `[guessing - verify]`.
+- **INPT0 to INPT3 read 0 for ever**, with joysticks in both ports. A real floating port may drift to 1 through leakage after a long time; no document gives a figure (`tia.md` section 20.3) `[guessing - verify]`. A connected paddle is issue #108.
+- **A port A output at 1 reads 0 while its stick holds the pin low** (the RIOT's section above; `riot.md` section 12 item 4) `[guessing - verify]`.
+- **The joysticks and the switches hold through power on.** They are the outside world, and the console's Reset is a switch the program reads, not a reset line (`riot.md` section 2).
+- **The machine takes any combination**, opposite directions together included, as a keyboard can press them and a real joystick cannot; it refuses only a bit that names no input.
+
+**How the tests treat it.** `TiaInputTests` holds section 20's worked example, both latches, the power-on choice and the paddle ports; `ControllersTests` every direction, button and switch on its bit, the worked examples, any combination, the inputs through power on, the port A decision and the PA7 edge from the left stick.

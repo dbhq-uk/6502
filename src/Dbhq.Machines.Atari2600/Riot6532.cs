@@ -76,7 +76,7 @@ public sealed class Riot6532 : IReportsState
     /// The level on each port A pin. An input pin is what drives it. An output pin is its ORA bit,
     /// pulled to 0 by a closed switch, because port A's output sources too little current to hold
     /// a grounded pin high (riot.md section 5, an inference the sheet marks [guessing - verify];
-    /// task 9 decides it for the joysticks).
+    /// task 9 kept it for the joysticks, riot.md section 12 item 4).
     /// </summary>
     public byte PortAPins => (byte)(_portAInput & (_ora | ~_ddra));
 

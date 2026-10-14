@@ -9,7 +9,7 @@ namespace Dbhq.Machines.Atari2600;
 /// <remarks>
 /// The machine starts with the power off: call <see cref="PowerOn"/> before the first
 /// <see cref="Step"/>. The console has no reset line to the CPU other than power on; its Reset
-/// switch is read by the program through the RIOT (task 9).
+/// switch is read by the program through the RIOT (<see cref="SetSwitches"/>).
 /// </remarks>
 public sealed class Atari2600
 {
@@ -19,7 +19,10 @@ public sealed class Atari2600
         ArgumentNullException.ThrowIfNull(cartridge);
         Bus = new Atari2600Bus(cartridge, region ?? Region.Ntsc, options);
         Cpu = new Cpu(Bus, CpuVariant.Nmos6502);
+        _controllers = new Controllers(Bus.Riot, Bus.Tia);
     }
+
+    private readonly Controllers _controllers;
 
     public Atari2600Bus Bus { get; }
 
@@ -42,6 +45,32 @@ public sealed class Atari2600
         Cpu.Cycles = 0;
         Cpu.Reset();
     }
+
+    /// <summary>The console switches as last set (<see cref="SetSwitches"/>).</summary>
+    public ConsoleSwitches Switches => _controllers.Switches;
+
+    /// <summary>
+    /// Holds the joystick in port <paramref name="stick"/>, 0 the left and 1 the right, as
+    /// <paramref name="state"/> says until the next call: its directions on the RIOT's port A and
+    /// its button on the TIA's INPT4 or INPT5, active low. Any combination is taken as written,
+    /// opposite directions together included. It holds through <see cref="PowerOn"/>.
+    /// </summary>
+    /// <exception cref="ArgumentOutOfRangeException">
+    /// <paramref name="stick"/> is not 0 or 1, or <paramref name="state"/> has a bit that names no input.
+    /// </exception>
+    public void SetJoystick(int stick, Joystick state) => _controllers.SetStick(stick, state);
+
+    /// <summary>The joystick in port <paramref name="stick"/> as last set (<see cref="SetJoystick"/>).</summary>
+    /// <exception cref="ArgumentOutOfRangeException"><paramref name="stick"/> is not 0 or 1.</exception>
+    public Joystick JoystickState(int stick) => _controllers.Stick(stick);
+
+    /// <summary>
+    /// Sets the console switches on the RIOT's port B until the next call: Reset and Select are
+    /// pressed while their flag is set, and the colour and difficulty switches stay where this puts
+    /// them. They hold through <see cref="PowerOn"/>.
+    /// </summary>
+    /// <exception cref="ArgumentOutOfRangeException"><paramref name="state"/> has a bit that names no switch.</exception>
+    public void SetSwitches(ConsoleSwitches state) => _controllers.SetSwitches(state);
 
     /// <summary>Runs one instruction and returns the CPU cycles it took, a WSYNC halt before it included.</summary>
     public int Step()

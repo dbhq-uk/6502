@@ -242,7 +242,8 @@ public class Riot6532Tests
     [Fact]
     public void Section_5_a_port_a_output_reads_low_while_its_switch_pulls_it_low()
     {
-        // riot.md section 5, an inference the sheet marks [guessing - verify]; task 9 decides.
+        // riot.md section 5, an inference the sheet marks [guessing - verify]; task 9 kept it
+        // (riot.md section 12 item 4), and ControllersTests holds it through the joystick.
         var riot = new Riot6532 { PortAInput = 0x7F };
         riot.WriteRegister(Swacnt, 0xFF);
         riot.WriteRegister(Swcha, 0xFF);

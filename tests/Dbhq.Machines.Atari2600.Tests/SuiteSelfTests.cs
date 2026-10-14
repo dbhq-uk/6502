@@ -68,10 +68,10 @@ public class SuiteSelfTests(ITestOutputHelper output)
         "collision/per-pixel",
         "collision/reset-phase",
 
-        // One that passes from task 6, before the task suite.md gives it, and is not claimed as
-        // task 6's: task 9 must keep it passing. cpu/partial-drive (task 9) reads only the inputs
-        // at rest, which task 5 fixed (a dumped INPT0 reads 0, an open fire button 1), and its
-        // collision checks are task 6's.
+        // Task 9, the inputs: cpu/partial-drive, the one row suite.md gives task 9. It passed from
+        // task 6, because it reads only the inputs at rest (a dumped INPT0 reads 0, an open fire
+        // button 1), which task 5 had fixed; with the joysticks, the fire latch and the paddle ports
+        // built from tia.md section 20 it still passes.
         "cpu/partial-drive",
 
         // Task 7, HMOVE and the motion clocks: the rows suite.md section 9 gives task 7, but the
