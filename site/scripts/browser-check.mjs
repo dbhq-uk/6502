@@ -42,6 +42,8 @@
 // same way: scripts/browser-check-bbc.mjs says what it checks. Then the NES,
 // the same way again: scripts/browser-check-nes.mjs.
 //
+// Then the Electron, the same way again: scripts/browser-check-electron.mjs.
+//
 //   node scripts/browser-check.mjs [--throttle N] [--measure seconds]
 //
 // --throttle N slows the browser's CPU N times (Chrome's own CPU throttling),
@@ -56,6 +58,7 @@ import sharp from 'sharp';
 import { loadTryIt, parseKeys } from '../src/lib/machines.mjs';
 import { checkBbcMicro } from './browser-check-bbc.mjs';
 import { checkNes } from './browser-check-nes.mjs';
+import { checkElectron } from './browser-check-electron.mjs';
 import { checkKim1Teletype } from './browser-check-kim1-tty.mjs';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
@@ -811,6 +814,9 @@ try {
 
   // ---- The NES ----
   await checkNes({ browser, watch, problems, origin });
+
+  // ---- The Electron ----
+  await checkElectron({ browser, watch, problems, origin });
 } catch (error) {
   problems.push(error.message);
 } finally {

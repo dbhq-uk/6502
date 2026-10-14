@@ -97,10 +97,10 @@ jobs:
           dotnet run --no-build --configuration Release --project bench/nes-speed/differential -- --check "${files[0]}" --oracle
 
   # The machines' browser builds, alongside the tests: the KIM-1, the BBC
-  # Micro and the NES as .NET WebAssembly, compiled ahead of time, and their
-  # ROMs (for the NES, its bundled game), read from roms/ and checked against
-  # the pins in Pins.cs. The site job below puts them where the Astro build
-  # copies them into dist. Nothing here is committed.
+  # Micro, the NES and the Electron as .NET WebAssembly, compiled ahead of
+  # time, and their ROMs (for the NES, its bundled game), read from roms/ and
+  # checked against the pins in Pins.cs. The site job below puts them where the
+  # Astro build copies them into dist. Nothing here is committed.
   machines:
     runs-on: ubuntu-latest
     timeout-minutes: 30
@@ -134,6 +134,12 @@ jobs:
         with:
           path: site/public/machines/nes
           key: machine-nes-sdk-10.0.400-wasm-tools-10.0.401-${{ hashFiles('src/Dbhq.Machines.Nes/**', 'src/Dbhq.Machines.Nes.Wasm/**', 'src/Dbhq.Cpu6502/**', 'Directory.Build.props', 'tests/Dbhq.Cpu6502.TestSupport/Pins.cs', 'site/scripts/build-machines.mjs', 'site/src/lib/pins.mjs', 'site/src/lib/machines.mjs') }}
+      - name: Cache the Electron's browser build
+        id: electron
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
+        with:
+          path: site/public/machines/electron
+          key: machine-electron-sdk-10.0.400-wasm-tools-10.0.401-${{ hashFiles('src/Dbhq.Machines.Electron/**', 'src/Dbhq.Machines.Electron.Wasm/**', 'src/Dbhq.Cpu6502/**', 'Directory.Build.props', 'tests/Dbhq.Cpu6502.TestSupport/Pins.cs', 'site/scripts/build-machines.mjs', 'site/src/lib/pins.mjs', 'site/src/lib/machines.mjs') }}
       # The machines whose cache missed, by registry id, for the build below.
       - name: Which machines to build
         id: which
@@ -141,11 +147,13 @@ jobs:
           KIM1_HIT: ${{ steps.kim-1.outputs.cache-hit }}
           BBC_HIT: ${{ steps.bbc-micro.outputs.cache-hit }}
           NES_HIT: ${{ steps.nes.outputs.cache-hit }}
+          ELECTRON_HIT: ${{ steps.electron.outputs.cache-hit }}
         run: |
           IDS=""
           [ "$KIM1_HIT" = "true" ] || IDS="$IDS kim-1"
           [ "$BBC_HIT" = "true" ] || IDS="$IDS bbc-micro"
           [ "$NES_HIT" = "true" ] || IDS="$IDS nes"
+          [ "$ELECTRON_HIT" = "true" ] || IDS="$IDS electron"
           echo "building:${IDS:- none, all restored}"
           echo "ids=${IDS# }" >> "$GITHUB_OUTPUT"
       # The SDK is pinned here, not left at 10.0.x, because a workload version
@@ -161,9 +169,9 @@ jobs:
         uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version: '22.22'
-      # Every machine whose cache missed: the KIM-1, the BBC Micro and the NES.
-      # A machine's files are published with the site, but linked from no page
-      # until the registry says it runs.
+      # Every machine whose cache missed: the KIM-1, the BBC Micro, the NES and
+      # the Electron. A machine's files are published with the site, but linked
+      # from no page until the registry says it runs.
       - if: steps.which.outputs.ids != ''
         name: Build the machines and fetch their ROMs
         env:
@@ -213,6 +221,15 @@ jobs:
           PASS=$(count pass); FAILED=$(count fail)
           echo "pass=${PASS:-unread} fail=${FAILED:-unread}"
           [ "${FAILED:-1}" = "0" ]
+          # 546 as at 14 Oct 2026, measured on the Electron's branch with main merged
+          # in again (the NES models' notes, the BBC Micro's robustness and the KIM-1's
+          # teletype, pull requests 93, 94 and 87);
+          # 525 as at 13 Oct 2026, when the Electron was switched on in the registry
+          # (`npm test` in site/: 526 tests, 525 pass, 1 todo): its preview and the
+          # tests that only the preview gave meaning went, and five came in;
+          # 528 as at 13 Oct 2026, measured on the Electron's branch with main merged
+          # in (`npm test` in site/: 529 tests, 528 pass, 1 todo): main's 475 and the
+          # Electron page's tests, its preview build's whole suite among them;
           # 496 as at 14 Oct 2026, measured once main (the NES models' notes and the
           # BBC Micro's robustness, pull requests 93 and 94) was merged into the KIM-1
           # teletype;
@@ -254,7 +271,7 @@ jobs:
           # Adding tests is expected; losing them is the failure this floor catches.
           # Raise the number when the suite grows, here and in the same step of
           # deploy-site.yml, which must hold the same number.
-          [ "${PASS:-0}" -ge 496 ]
+          [ "${PASS:-0}" -ge 546 ]
       # The KIM-1 page in a real browser: the built site served on 127.0.0.1
       # with its own CSP, the try-it program clicked in through the page's own
       # keypad, and the digits read back. Then the page's photograph loads, and
@@ -272,7 +289,11 @@ jobs:
       # regions, Start on the keyboard changes the picture, a test cartridge
       # built from bytes goes in through the picker, and a bad file and one too
       # big are refused with the machine carrying on (scripts/browser-check-nes.mjs).
-      - name: The KIM-1, the BBC Micro and the NES run in a browser
+      # Then the Electron's page, on the same build: Start downloads it, it boots to BASIC, PRINT 6*7 typed through the page's
+      # keys shows 42, damaged tapes are refused in the reader's words, and a
+      # program saved with SAVE downloads, drops back in, LOADs and runs
+      # (scripts/browser-check-electron.mjs).
+      - name: The KIM-1, the BBC Micro, the NES and the Electron run in a browser
         working-directory: site
         run: node scripts/browser-check.mjs
 

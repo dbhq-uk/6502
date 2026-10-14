@@ -43,3 +43,6 @@ bench/bbc-micro-speed/publish/
 
 # Published output of the NES browser speed check, made locally.
 bench/nes-speed/publish/
+
+# Published output of the Acorn Electron browser speed check, made locally.
+bench/electron-speed/publish/

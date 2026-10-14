@@ -6,7 +6,7 @@ Guidance for AI agents (and people) working in this repository.
 
 A cycle-accurate 6502 core in C# on .NET 10, covering the NMOS 6502 and the
 CMOS 65C02, and the machines built on it: the KIM-1 first, then the BBC Micro,
-then the Acorn Electron, the Atari 2600, the NES and the Commodore 64. Built in public, with the journey written up at 6502.dbhq.uk.
+then the NES, then the Acorn Electron, with the Atari 2600 and the Commodore 64 to come. Built in public, with the journey written up at 6502.dbhq.uk.
 
 ## Layout
 
@@ -19,6 +19,8 @@ src/Dbhq.Machines.BbcMicro/  # the BBC Micro Model B: its chips, keyboard, scree
 src/Dbhq.Machines.BbcMicro.Wasm/  # the BBC Micro as .NET WebAssembly; the ROMs are given to it as bytes
 src/Dbhq.Machines.Nes/      # the NES, NTSC and PAL, on the core; its PPU is caught up lazily (rule 1), whole lines with no sprite on them at once
 src/Dbhq.Machines.Nes.Wasm/  # the NES as .NET WebAssembly: NesHost, for its page (site/public/nes.js) and the speed bench
+src/Dbhq.Machines.Electron/  # the Acorn Electron: its ULA, keyboard, screen, sound and cassette, on the core
+src/Dbhq.Machines.Electron.Wasm/  # the Electron as .NET WebAssembly, for its page (site/public/electron.js) and the speed bench
 machines/                   # registry.json, and per machine its "try it" program, which the page shows and the acceptance test runs (machines/kim-1/teletype.json is the KIM-1's teletype session, which its page shows and its tests and browser check run; machines/nes/ holds the NES's, and its recorded frame hashes)
   bbc-micro/discs/          # the BBC Micro page's preset discs: one folder each with its image, licence, README and (if copyleft) source; manifest.json lists them
 site/                       # 6502.dbhq.uk: the Astro site, its tests, and the scripts that build the machines into it
@@ -30,10 +32,11 @@ tools/                      # scripts that make test data and check assumptions
   probes/                   # scripts that check assumptions against test data
   kim1-model/               # offline Python that measures the KIM-1's 3D model from photographs; its outputs are committed
   nes-model/                # offline Python that measures the NES's two 3D models from bare board scans, photographs and a design patent; its outputs are committed, its inputs never
-roms/                       # system ROMs with their provenance and rights in roms/README.md: kim-1/, bbc-micro/, and nes/ (the NES's bundled homebrew, Lan Master)
+roms/                       # system ROMs with their provenance and rights in roms/README.md: kim-1/, bbc-micro/, electron/, and nes/ (the NES's bundled homebrew, Lan Master)
 NOTICE.md                   # anything else taken from outside under other terms: the teletext glyph table (CC0), the BBC Micro's preset discs, and the NES board's track map (the TAPR Open Hardware License's terms)
 docs/bbc-micro/facts/       # the BBC Micro's fact sheets, written before its code
 docs/nes/facts/             # the NES's fact sheets, from the nesdev wiki, written before its code; models.md, the 3D models' sources, licences and findings
+docs/electron/facts/        # the Electron's fact sheets, written before its code
 docs/superpowers/specs/     # the design; each stage gets its own spec here
 docs/superpowers/plans/     # the plan for each spec
 docs/journal/               # the record of how it was built; the site's source

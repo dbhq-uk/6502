@@ -1,7 +1,7 @@
 ---
 title: "The Electron's design"
 date: 2026-10-04
-summary: "The Acorn Electron is written up as the third machine: tape for storage, the ULA holding the CPU off modelled exactly, and a search for ROMs that found them in a place other than where the BBC's came from."
+summary: "The Acorn Electron is written up as the third machine: tape for storage, the ULA holding the CPU off modelled access by access, and a search for ROMs that found them in a place other than where the BBC's came from."
 order: 31
 ---
 
@@ -20,7 +20,7 @@ expansion, a disc controller and a second ROM before the machine can count, and
 over no storage at all, which would drop the save-and-load proof the BBC
 set. Disc is a later issue.
 
-**Contention, exactly.** The ULA and the CPU share RAM that is four bits wide,
+**Contention, access by access.** The ULA and the CPU share RAM that is four bits wide,
 so while the ULA fetches the picture the CPU waits, and how often depends on the
 screen mode. The model decides this on every bus access from the display's
 position. Chosen over one average slowdown per mode, which would be wrong inside

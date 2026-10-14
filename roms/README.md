@@ -113,3 +113,30 @@ Nothing in the archive or on the software page says otherwise. A public-domain
 release asks for nothing in return, so no notice is owed. The credit is given
 anyway, here, and the page is to give it too. Dan can overrule the choice
 before the work is merged.
+
+## Acorn Electron ROMs
+
+| File | SHA-256 | What it is |
+|---|---|---|
+| `electron/os.rom` | `b63f851d79498f598999d923b7c9f62e2525c34f0b9cd2d4b328b89d622dcda4` | The Electron's operating system, OS 1.00 (16 KB, at `$C000` to `$FFFF`, with `$FC00` to `$FEFF` hidden by I/O) |
+
+The Electron's BASIC is `bbc-micro/BASIC.ROM`: the same file, the same SHA-256
+(`45bd55dc0f6f0f8f1fe9e2481de7def206565eec8f600ba3068b849ca4132079`), kept once
+and not copied again. It sits in paged ROM slots 10 and 11, one chip in both.
+
+**Where it came from.** The `dmcoles/elkjs` repository, at commit
+`ff123355407f79a91f808e31222dcca5d51ea87f`, fetched with `curl` on 5 October
+2026:
+
+- `https://raw.githubusercontent.com/dmcoles/elkjs/ff123355407f79a91f808e31222dcca5d51ea87f/os.rom`
+
+That commit's `basic.rom` was fetched too, to check it: its SHA-256 is the BBC's
+BASIC hash above, so it was deleted and not committed. Only the ROM file is taken.
+elkjs is GPL-2.0 and this repository is MIT, so none of its code is used.
+
+**Rights.** The copyright is Acorn's: the ROM's own text reads `(C) 1983 Acorn
+Computers Ltd.` Who holds it now was not established. The elkjs repository is
+GPL-2.0 and says nothing about the ROMs, so **that licence is not a licence for
+them**. No permission from any holder was found. The ROM is here because Dan
+decided on 1 October 2026 that a ROM is used when its position is documented, and
+this is that document. If a rights holder asks for it to be removed, it will be.

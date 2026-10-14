@@ -49,10 +49,11 @@ permissions:
 
 jobs:
   # The machines' browser builds, in a job of their own that holds no token:
-  # the KIM-1, the BBC Micro and the NES as .NET WebAssembly, compiled ahead of
-  # time, and their ROMs (for the NES, its bundled game), read from roms/ and
-  # checked against the pins in Pins.cs. The same job as validate.yml's. The
-  # deploy job puts its output where the Astro build copies it into dist.
+  # the KIM-1, the BBC Micro, the NES and the Electron as .NET WebAssembly,
+  # compiled ahead of time, and their ROMs (for the NES, its bundled game), read
+  # from roms/ and checked against the pins in Pins.cs. The same job as
+  # validate.yml's. The deploy job puts its output where the Astro build copies
+  # it into dist.
   machines:
     if: vars.SITE_DEPLOY == 'true' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
@@ -87,6 +88,12 @@ jobs:
         with:
           path: site/public/machines/nes
           key: machine-nes-sdk-10.0.400-wasm-tools-10.0.401-${{ hashFiles('src/Dbhq.Machines.Nes/**', 'src/Dbhq.Machines.Nes.Wasm/**', 'src/Dbhq.Cpu6502/**', 'Directory.Build.props', 'tests/Dbhq.Cpu6502.TestSupport/Pins.cs', 'site/scripts/build-machines.mjs', 'site/src/lib/pins.mjs', 'site/src/lib/machines.mjs') }}
+      - name: Cache the Electron's browser build
+        id: electron
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
+        with:
+          path: site/public/machines/electron
+          key: machine-electron-sdk-10.0.400-wasm-tools-10.0.401-${{ hashFiles('src/Dbhq.Machines.Electron/**', 'src/Dbhq.Machines.Electron.Wasm/**', 'src/Dbhq.Cpu6502/**', 'Directory.Build.props', 'tests/Dbhq.Cpu6502.TestSupport/Pins.cs', 'site/scripts/build-machines.mjs', 'site/src/lib/pins.mjs', 'site/src/lib/machines.mjs') }}
       # The machines whose cache missed, by registry id, for the build below.
       - name: Which machines to build
         id: which
@@ -94,11 +101,13 @@ jobs:
           KIM1_HIT: ${{ steps.kim-1.outputs.cache-hit }}
           BBC_HIT: ${{ steps.bbc-micro.outputs.cache-hit }}
           NES_HIT: ${{ steps.nes.outputs.cache-hit }}
+          ELECTRON_HIT: ${{ steps.electron.outputs.cache-hit }}
         run: |
           IDS=""
           [ "$KIM1_HIT" = "true" ] || IDS="$IDS kim-1"
           [ "$BBC_HIT" = "true" ] || IDS="$IDS bbc-micro"
           [ "$NES_HIT" = "true" ] || IDS="$IDS nes"
+          [ "$ELECTRON_HIT" = "true" ] || IDS="$IDS electron"
           echo "building:${IDS:- none, all restored}"
           echo "ids=${IDS# }" >> "$GITHUB_OUTPUT"
       # The SDK is pinned here, not left at 10.0.x, because a workload version
@@ -114,9 +123,9 @@ jobs:
         uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version: '22.22'
-      # Every machine whose cache missed: the KIM-1, the BBC Micro and the NES.
-      # A machine's files are published with the site, but linked from no page
-      # until the registry says it runs.
+      # Every machine whose cache missed: the KIM-1, the BBC Micro, the NES and
+      # the Electron. A machine's files are published with the site, but linked
+      # from no page until the registry says it runs.
       - if: steps.which.outputs.ids != ''
         name: Build the machines and fetch their ROMs
         env:
@@ -188,6 +197,15 @@ jobs:
           PASS=$(count pass); FAILED=$(count fail)
           echo "pass=${PASS:-unread} fail=${FAILED:-unread}"
           [ "${FAILED:-1}" = "0" ]
+          # 546 as at 14 Oct 2026, measured on the Electron's branch with main merged
+          # in again (the NES models' notes, the BBC Micro's robustness and the KIM-1's
+          # teletype, pull requests 93, 94 and 87);
+          # 525 as at 13 Oct 2026, when the Electron was switched on in the registry
+          # (`npm test` in site/: 526 tests, 525 pass, 1 todo): its preview and the
+          # tests that only the preview gave meaning went, and five came in;
+          # 528 as at 13 Oct 2026, measured on the Electron's branch with main merged
+          # in (`npm test` in site/: 529 tests, 528 pass, 1 todo): main's 475 and the
+          # Electron page's tests, its preview build's whole suite among them;
           # 496 as at 14 Oct 2026, measured once main (the NES models' notes and the
           # BBC Micro's robustness, pull requests 93 and 94) was merged into the KIM-1
           # teletype;
@@ -229,7 +247,7 @@ jobs:
           # Adding tests is expected; losing them is the failure this floor catches.
           # Raise the number when the suite grows, here and in the same step of
           # validate.yml, which must hold the same number.
-          [ "${PASS:-0}" -ge 496 ]
+          [ "${PASS:-0}" -ge 546 ]
 
       # The same floor as "Every machine file must be serving" below, checked on
       # the build itself, so a build that is missing a machine fails here and
@@ -237,6 +255,7 @@ jobs:
       # edge shows the content types.
       # The BBC Micro's preset discs are counted from the manifest, not typed:
       # every one must be in the build, and the floor rises by one for each.
+      # The floor is the edge check's, and the note there says how it is made.
       - name: Every machine must be in the build
         working-directory: site
         run: |
@@ -247,7 +266,7 @@ jobs:
           [ "$BUILT" -eq "$DISCS" ] || { echo "the build has ${BUILT} of the ${DISCS} preset discs"; exit 1; }
           COUNT=$(find dist/machines -type f ! -name index.html | wc -l)
           echo "machine files in the build: ${COUNT}"
-          [ "$COUNT" -ge $((30 + DISCS)) ] || { echo "only $COUNT machine files in the build - a machine is missing"; exit 1; }
+          [ "$COUNT" -ge $((40 + DISCS)) ] || { echo "only $COUNT machine files in the build - a machine is missing"; exit 1; }
 
       - name: Deploy to Cloudflare Pages
         working-directory: site
@@ -321,7 +340,8 @@ jobs:
       # bbc-audio.js are the BBC Micro's page: its driver, the key table the
       # driver imports, and the sound worklet it loads with addModule, which no
       # import names. nes.js, nes-keys.js and nes-audio.js are the NES's page,
-      # the same three for the same reasons.
+      # the same three for the same reasons. electron.js, electron-keys.js and
+      # electron-audio.js are the Electron's, the same three.
       # site/tests/build.test.mjs derives the required list from the built pages.
       # analytics.js and consent.js are in this list for a sharp reason. A 404 on
       # analytics.js means no analytics and nothing to opt out of. A 404 on
@@ -339,7 +359,7 @@ jobs:
           # a file new in this deploy can answer 404 for a few seconds (the BBC
           # Micro's two merges on 4 Oct 2026 both met it). Each try has its own
           # cache-buster. A file that never reaches 200 still fails.
-          for f in sitemap-index.xml sitemap-0.xml robots.txt analytics.js consent.js machines-table.js table-sort.js chip.js kim-1.js machine-host.js teletype-paper.js bbc-micro.js bbc-keys.js bbc-audio.js nes.js nes-keys.js nes-audio.js model-loader.js models/kim-1.js models/kim-1-tracks.webp models/nes-famicom-case.js models/nes-famicom-board.js models/nes-famicom-board-tracks.webp; do
+          for f in sitemap-index.xml sitemap-0.xml robots.txt analytics.js consent.js machines-table.js table-sort.js chip.js kim-1.js machine-host.js teletype-paper.js bbc-micro.js bbc-keys.js bbc-audio.js nes.js nes-keys.js nes-audio.js electron.js electron-keys.js electron-audio.js model-loader.js models/kim-1.js models/kim-1-tracks.webp models/nes-famicom-case.js models/nes-famicom-board.js models/nes-famicom-board-tracks.webp; do
             TRY=0
             while :; do
               CODE=$(curl -s --max-time 20 --retry 3 --retry-delay 5 -o /dev/null -w "%{http_code}" "https://6502.dbhq.uk/${f}?cb=${GITHUB_SHA}-${TRY}")
@@ -394,22 +414,27 @@ jobs:
             esac
             COUNT=$((COUNT + 1))
           done
-          # 43 files as at 4 Oct 2026, with the preset discs: the KIM-1's 13 and
-          # the BBC Micro's 30 (three ROMs, ten framework files and 17 discs);
-          # 26 before the discs, 13 for each machine. The floor is what the
-          # machines must publish at the least: their ROMs (two halves for the
-          # KIM-1, three for the BBC Micro, and the NES's bundled game) and, for
-          # each, the four runtime files (dotnet.js, dotnet.native's .js and
-          # .wasm, dotnet.runtime.js), CoreLib, the core, the machine and its
-          # host, which is 30 with the NES (6 Oct 2026; 21 for the first two).
-          # Two machines' files alone cannot meet it, so a missing machine fails
-          # here. (It was 6, set for the KIM-1 alone.) Since 4 Oct 2026 the BBC
-          # Micro also publishes its preset discs, one .ssd each, served as
-          # plain bytes; the floor adds one for each disc in the manifest, read
-          # here rather than typed, so a missing disc fails as a missing machine
-          # does.
+          # 69 files as at 13 Oct 2026, measured in the build with the Electron
+          # switched on: the KIM-1's 13, the BBC Micro's 30 (three ROMs, ten
+          # framework files and 17 discs), the NES's 12 and the Electron's 14
+          # (two ROMs, the OS and BASIC, and twelve framework files); 43 on 4 Oct
+          # 2026 with the preset discs and two machines, 26 before the discs.
+          # The floor is what the machines must publish at the least: their ROMs
+          # (two halves for the KIM-1, three for the BBC Micro, the NES's bundled
+          # game, and the Electron's two) and, for each, the four runtime files
+          # (dotnet.js, dotnet.native's .js and .wasm, dotnet.runtime.js),
+          # CoreLib, the core, the machine and its host, which is 40 with the
+          # Electron (13 Oct 2026; 30 with the NES, 6 Oct 2026; 21 for the first
+          # two). Not the measured 52 without the discs, because a .NET update
+          # that drops an assembly the machine does not name (System.Linq,
+          # System.Console) would fail a deploy that is fine. Three machines'
+          # files alone cannot meet it, so a missing machine fails here. (It was
+          # 6, set for the KIM-1 alone.) Since 4 Oct 2026 the BBC Micro also
+          # publishes its preset discs, one .ssd each, served as plain bytes; the
+          # floor adds one for each disc in the manifest, read here rather than
+          # typed, so a missing disc fails as a missing machine does.
           DISCS=$(node -p "require('../../machines/bbc-micro/discs/manifest.json').discs.length")
-          [ "$COUNT" -ge $((30 + DISCS)) ] || { echo "only $COUNT machine files found, fewer than 30 and ${DISCS} discs - the derivation is broken"; exit 1; }
+          [ "$COUNT" -ge $((40 + DISCS)) ] || { echo "only $COUNT machine files found, fewer than 40 and ${DISCS} discs - the derivation is broken"; exit 1; }
           [ "$FAIL" = "0" ]
 
       # Headers only apply at the Cloudflare edge, so they can only be checked

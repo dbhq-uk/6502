@@ -2,7 +2,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
 import { REPO_ROOT, SITE_ROOT } from './registry.mjs';
-import { kim1Roms, bbcRoms, nesRoms } from './pins.mjs';
+import { kim1Roms, bbcRoms, nesRoms, electronRoms } from './pins.mjs';
 
 // The rules about which machines get a page, kept out of the templates so a
 // test can run them on a made-up registry.
@@ -42,6 +42,9 @@ export function parseKeys(keys) {
   }
   return names;
 }
+
+/** The machines whose "try it" program is BASIC lines rather than keypad steps. */
+export const BASIC_TRY_IT = ['bbc-micro', 'electron'];
 
 /**
  * The teletype's keys with no printed character of their own, as the User
@@ -103,15 +106,16 @@ export function loadTeletype(id, root = REPO_ROOT) {
 /**
  * A machine's "try it" program, from machines/<id>/try-it.json, or null when it
  * has none. The KIM-1's is steps of keypad keys, each checked here as
- * Kim1Keystrokes.Parse reads them. The BBC Micro's is BASIC: `lines` to type,
- * each followed by RETURN, and `shows`, what the screen shows after them, each
- * line plain printable text. The NES's is a game to play: see checkNesTryIt.
+ * Kim1Keystrokes.Parse reads them. The BBC Micro's and the Electron's are BASIC
+ * (BASIC_TRY_IT): `lines` to type, each followed by RETURN, and `shows`, what the
+ * screen shows after them, each line plain printable text. The NES's is a game to
+ * play: see checkNesTryIt.
  */
 export function loadTryIt(id, root = REPO_ROOT) {
   const file = path.join(root, 'machines', id, 'try-it.json');
   if (!fs.existsSync(file)) return null;
   const program = JSON.parse(fs.readFileSync(file, 'utf8'));
-  if (id === 'bbc-micro') {
+  if (BASIC_TRY_IT.includes(id)) {
     for (const name of ['lines', 'shows']) {
       const list = program[name];
       if (!Array.isArray(list) || list.length === 0) throw new Error(`machines/${id}/try-it.json: ${name} must be a list of lines`);
@@ -176,19 +180,22 @@ export function runningSentence(registry) {
  * machine's registry id: the WebAssembly project under src/, and the ROMs, in
  * the order the host's Load takes them, as their pins in Pins.cs give them.
  * `discs` is true for a machine with preset discs: the BBC Micro's, listed in
- * machines/bbc-micro/discs/manifest.json (src/lib/bbc-micro.mjs).
+ * machines/bbc-micro/discs/manifest.json (src/lib/bbc-micro.mjs). The
+ * Electron's BASIC is the BBC Micro's file, so both publish a copy of it.
  */
 export const MACHINE_BUILDS = {
   'kim-1': { project: 'Dbhq.Machines.Kim1.Wasm', roms: kim1Roms, discs: false },
   'bbc-micro': { project: 'Dbhq.Machines.BbcMicro.Wasm', roms: bbcRoms, discs: true },
   nes: { project: 'Dbhq.Machines.Nes.Wasm', roms: nesRoms, discs: false },
+  electron: { project: 'Dbhq.Machines.Electron.Wasm', roms: electronRoms, discs: false },
 };
 
 /** The build for each id named, in the order named. Throws on an id with no build, or on none at all. */
 export function machineBuilds(ids) {
   const known = Object.keys(MACHINE_BUILDS);
-  if (ids.length === 0) throw new Error(`name the machines to build: ${known.join(' or ')}, or several`);
-  for (const id of ids) if (!MACHINE_BUILDS[id]) throw new Error(`no build for "${id}": the machines are ${known.join(' and ')}`);
+  const last = (word) => `${known.slice(0, -1).join(', ')} ${word} ${known.at(-1)}`;
+  if (ids.length === 0) throw new Error(`name the machines to build: ${last('or')}, or several`);
+  for (const id of ids) if (!MACHINE_BUILDS[id]) throw new Error(`no build for "${id}": the machines are ${last('and')}`);
   return [...new Set(ids)].map((id) => ({ id, ...MACHINE_BUILDS[id] }));
 }
 
