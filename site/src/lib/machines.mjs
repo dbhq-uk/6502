@@ -2,7 +2,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
 import { REPO_ROOT, SITE_ROOT } from './registry.mjs';
-import { kim1Roms, bbcRoms, nesRoms } from './pins.mjs';
+import { kim1Roms, bbcRoms, nesRoms, electronRoms } from './pins.mjs';
 
 // The rules about which machines get a page, kept out of the templates so a
 // test can run them on a made-up registry.
@@ -43,18 +43,79 @@ export function parseKeys(keys) {
   return names;
 }
 
+/** The machines whose "try it" program is BASIC lines rather than keypad steps. */
+export const BASIC_TRY_IT = ['bbc-micro', 'electron'];
+
+/**
+ * The teletype's keys with no printed character of their own, as the User
+ * Manual names them in brackets, and the character each sends. The same table
+ * as Kim1Teletype.Named.
+ */
+export const TELETYPE_KEYS = { SPACE: ' ', CR: '\r', LF: '\n', RUBOUT: '\u007f' };
+
+/**
+ * Splits keys typed at the KIM-1's teletype, written as the User Manual writes
+ * them, into parts: { key } for a bracketed key ([SPACE], [CR], [LF] or
+ * [RUBOUT]) and { text } for a run of other printable characters, the way
+ * Kim1Teletype.Parse reads them. "0200[SPACE]G" is three parts. A bare space
+ * is refused, because on a page it cannot be told from nothing.
+ */
+export function parseTeletype(keys) {
+  const parts = [];
+  for (const m of keys.matchAll(/\[([^\]]*)\]?|[^[]+/g)) {
+    const word = m[0];
+    if (word.startsWith('[')) {
+      if (!word.endsWith(']') || !Object.hasOwn(TELETYPE_KEYS, m[1])) throw new Error(`"${word}" is not a bracketed teletype key`);
+      parts.push({ key: m[1] });
+    } else {
+      if (!/^[!-~]+$/.test(word)) throw new Error(`"${word}" has a character that must be written as a bracketed key`);
+      parts.push({ text: word });
+    }
+  }
+  return parts;
+}
+
+/** The characters keys written as parseTeletype reads them send, in order. */
+export const teletypeChars = (keys) => parseTeletype(keys).map((p) => (p.key ? TELETYPE_KEYS[p.key] : p.text)).join('');
+
+/**
+ * The session typed at a machine's teletype, from machines/<id>/teletype.json,
+ * or null when it has none: steps, each with keys pressed on the keypad first
+ * (`keypad`, as parseKeys reads them), keys typed at the teletype (`type`, as
+ * parseTeletype reads them), or both; the last lines the paper `prints` after
+ * it; and what it `says`. Kim1TeletypeTests runs the same file.
+ */
+export function loadTeletype(id, root = REPO_ROOT) {
+  const file = path.join(root, 'machines', id, 'teletype.json');
+  if (!fs.existsSync(file)) return null;
+  const session = JSON.parse(fs.readFileSync(file, 'utf8'));
+  if (!Array.isArray(session.steps) || session.steps.length === 0) throw new Error(`machines/${id}/teletype.json has no steps`);
+  for (const [i, step] of session.steps.entries()) {
+    const where = `machines/${id}/teletype.json, step ${i + 1}`;
+    if (!step.keypad && !step.type) throw new Error(`${where} presses no key and types nothing`);
+    if (step.keypad) parseKeys(step.keypad);
+    if (step.type) parseTeletype(step.type);
+    if (!Array.isArray(step.prints) || step.prints.length === 0 || !step.prints.every((l) => typeof l === 'string' && /^[ -~]*$/.test(l) && l === l.trimEnd())) {
+      throw new Error(`${where}: prints must be lines of plain printable text with no spaces at their ends`);
+    }
+    if (!words(step.says)) throw new Error(`${where} says nothing`);
+  }
+  return session;
+}
+
 /**
  * A machine's "try it" program, from machines/<id>/try-it.json, or null when it
  * has none. The KIM-1's is steps of keypad keys, each checked here as
- * Kim1Keystrokes.Parse reads them. The BBC Micro's is BASIC: `lines` to type,
- * each followed by RETURN, and `shows`, what the screen shows after them, each
- * line plain printable text. The NES's is a game to play: see checkNesTryIt.
+ * Kim1Keystrokes.Parse reads them. The BBC Micro's and the Electron's are BASIC
+ * (BASIC_TRY_IT): `lines` to type, each followed by RETURN, and `shows`, what the
+ * screen shows after them, each line plain printable text. The NES's is a game to
+ * play: see checkNesTryIt.
  */
 export function loadTryIt(id, root = REPO_ROOT) {
   const file = path.join(root, 'machines', id, 'try-it.json');
   if (!fs.existsSync(file)) return null;
   const program = JSON.parse(fs.readFileSync(file, 'utf8'));
-  if (id === 'bbc-micro') {
+  if (BASIC_TRY_IT.includes(id)) {
     for (const name of ['lines', 'shows']) {
       const list = program[name];
       if (!Array.isArray(list) || list.length === 0) throw new Error(`machines/${id}/try-it.json: ${name} must be a list of lines`);
@@ -119,19 +180,22 @@ export function runningSentence(registry) {
  * machine's registry id: the WebAssembly project under src/, and the ROMs, in
  * the order the host's Load takes them, as their pins in Pins.cs give them.
  * `discs` is true for a machine with preset discs: the BBC Micro's, listed in
- * machines/bbc-micro/discs/manifest.json (src/lib/bbc-micro.mjs).
+ * machines/bbc-micro/discs/manifest.json (src/lib/bbc-micro.mjs). The
+ * Electron's BASIC is the BBC Micro's file, so both publish a copy of it.
  */
 export const MACHINE_BUILDS = {
   'kim-1': { project: 'Dbhq.Machines.Kim1.Wasm', roms: kim1Roms, discs: false },
   'bbc-micro': { project: 'Dbhq.Machines.BbcMicro.Wasm', roms: bbcRoms, discs: true },
   nes: { project: 'Dbhq.Machines.Nes.Wasm', roms: nesRoms, discs: false },
+  electron: { project: 'Dbhq.Machines.Electron.Wasm', roms: electronRoms, discs: false },
 };
 
 /** The build for each id named, in the order named. Throws on an id with no build, or on none at all. */
 export function machineBuilds(ids) {
   const known = Object.keys(MACHINE_BUILDS);
-  if (ids.length === 0) throw new Error(`name the machines to build: ${known.join(' or ')}, or several`);
-  for (const id of ids) if (!MACHINE_BUILDS[id]) throw new Error(`no build for "${id}": the machines are ${known.join(' and ')}`);
+  const last = (word) => `${known.slice(0, -1).join(', ')} ${word} ${known.at(-1)}`;
+  if (ids.length === 0) throw new Error(`name the machines to build: ${last('or')}, or several`);
+  for (const id of ids) if (!MACHINE_BUILDS[id]) throw new Error(`no build for "${id}": the machines are ${last('and')}`);
   return [...new Set(ids)].map((id) => ({ id, ...MACHINE_BUILDS[id] }));
 }
 

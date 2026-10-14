@@ -322,9 +322,14 @@ def test_the_outline_comes_back_with_its_notches(measured):
     assert np.allclose(outline[0], outline[-1]), 'the outline is closed'
     assert np.allclose(outline[0], [0, 0]), 'it starts at the origin'
     got = outline[:-1]
-    # every corner is found within 0.1 mm, the tabs' remains left out
-    for corner in OUTLINE:
-        assert np.hypot(*(got - corner).T).min() < 0.1, (corner, got.round(3).tolist())
+    # Corner i is found within 0.1 mm of the true corner i, the tabs' remains left out. Each is compared with
+    # its own, by index: matched to the nearest point of the outline of any kind, a corner found at another
+    # corner's place, or at a point on a notch, would pass.
+    corners = np.array(result['corners'], float)
+    assert len(corners) == len(OUTLINE)
+    for i, corner in enumerate(OUTLINE):
+        assert math.hypot(*(corners[i] - corner)) < 0.1, (i, corner, corners[i].round(3).tolist())
+        assert np.hypot(*(got - corners[i]).T).min() < 1e-6, f'corner {i} is on the outline'
     # every point of the outline is a corner or on a notch
     near_corner = np.array([np.hypot(*(np.array(OUTLINE, float) - p).T).min() < 0.1 for p in got])
     on_notch = np.zeros(len(got), bool)
@@ -364,3 +369,53 @@ def test_an_outline_marked_with_two_edges_on_one_line_running_on_is_refused(scan
                tabs=[], notches=[])
     with pytest.raises(ValueError, match='turn'):
         board_frame.outline_edges(bad, SX, SY, math.radians(THETA_DEG))
+
+
+# --- the corners against the marks, and the notes the file carries ----------------------
+
+def test_each_corner_through_the_frame_is_near_the_mark_it_came_from(measured):
+    result, frame, _ = measured
+    _, _, outline = marked()
+    marks = np.array(outline['corners'], float)
+    off = result['cornersAgainstMarks']
+    assert len(off['mm']) == len(OUTLINE)
+    # worked out here from the frame, apart from the function that wrote it: the pixel distance in millimetres
+    d = frame.to_px(result['corners']) - marks
+    expected = np.hypot(d[:, 0] / frame.sx, d[:, 1] / frame.sy)
+    assert np.allclose(off['mm'], expected, atol=1e-6)
+    assert off['max'] == pytest.approx(expected.max(), abs=1e-6)
+    assert off['max'] < 1.0          # the marks were made by eye, a few pixels off (3 px is 0.25 mm)
+
+
+def test_corner_offsets_are_measured_in_millimetres_not_pixels():
+    f = board_frame.Frame(10.0, 20.0, 0.0, (100.0, 200.0))
+    # corner (1, 1) mm is at pixel (110, 220); a mark 10 px away in x is 1 mm, 10 px away in y is 0.5 mm
+    off = board_frame.corner_offsets([(1.0, 1.0), (1.0, 1.0)], f, [(100.0, 220.0), (110.0, 210.0)])
+    assert off == pytest.approx([1.0, 0.5])
+
+
+def test_an_edge_whose_two_corners_are_both_far_from_their_marks_says_so():
+    edges = [{'index': i} for i in range(4)]
+    off = [0.1, 0.6, 0.7, 0.4]           # corners 1 and 2 are over 0.5 mm; edge i runs from corner i to corner i + 1
+    board_frame.note_far_corners(edges, off, 0.5)
+    assert [('note' in e) for e in edges] == [False, True, False, False]
+    assert '0.60' in edges[1]['note'] and '0.70' in edges[1]['note']
+    # a corner over the limit on one end only is not enough, and the last edge runs round to the first corner
+    edges = [{'index': i} for i in range(3)]
+    board_frame.note_far_corners(edges, [0.9, 0.1, 0.8], 0.5)
+    assert [('note' in e) for e in edges] == [False, False, True]
+
+
+def test_the_largest_footprint_error_is_named_with_its_sign():
+    held = [{'ref': 'U1', 'errPct': 0.4}, {'ref': 'U2', 'errPct': -0.98}, {'ref': 'U3', 'errPct': 0.5}]
+    big = board_frame.largest_footprint(held)
+    assert big['ref'] == 'U2' and big['errPct'] == -0.98
+    assert 'U2' in big['note'] and '0.98' in big['note'] and 'narrow' in big['note']
+    assert 'wide' in board_frame.largest_footprint([{'ref': 'U9', 'errPct': 0.7}])['note']
+
+
+def test_the_result_carries_both(measured):
+    result = measured[0]
+    assert result['heldOutY']['largest']['ref'] == max(result['heldOutY']['footprints'], key=lambda f: abs(f['errPct']))['ref']
+    # no corner of the made-up board is far from its mark, so no edge has a note
+    assert not any('note' in e for e in result['edges'])

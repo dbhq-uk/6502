@@ -155,11 +155,11 @@ included, and the 8-inch drives for the PET had two.
 |---|---|---|---|
 | Atom | 1980 | 6502 | Core |
 | **BBC Micro** | 1981 | 6502, 2 MHz | Core |
-| Electron | 1983 | 6502 | Core |
+| **Electron** | 1983 | 6502, 2 MHz | Core |
 | BBC Micro B+ | 1985 | 6512 | Core |
 | BBC Master | 1986 | G65SC12 | 65C02 |
 
-The BBC Micro's 6502 second processor, attached through Acorn's Tube interface, is a 65C02 at 3 MHz. The BBC Micro Model B is the second machine this project built, and it runs in the browser, with two 3D models of it on its page, the outside and the main board inside, which follow the running machine.
+The BBC Micro's 6502 second processor, attached through Acorn's Tube interface, is a 65C02 at 3 MHz. The BBC Micro Model B is the second machine this project built, and it runs in the browser, with two 3D models of it on its page, the outside and the main board inside, which follow the running machine. The Electron, which runs the same BBC BASIC with an operating system of its own, is the fourth machine this project built, and it runs in the browser too.
 
 ### Others
 

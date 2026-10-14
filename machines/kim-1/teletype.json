@@ -1,0 +1,46 @@
+{
+  "about": "The session a visitor types at the KIM-1's teletype on its page at 6502.dbhq.uk, with the TTY switch on. The page renders these steps, Kim1TeletypeTests runs them on the machine and checks what is printed after every step, and the site's browser check types them into the page's own terminal. keypad is pressed on the KIM-1's keypad first, written as try-it.json writes keys. type is typed at the teletype after it: [SPACE], [CR], [LF] and [RUBOUT] in brackets, every other character as itself. prints is the last lines on the paper once the monitor has finished answering, with spaces at the ends of lines left off; x is any hex digit.",
+  "steps": [
+    {
+      "keypad": "[RS]",
+      "type": "[RUBOUT]",
+      "prints": ["KIM", "xxxx xx"],
+      "says": "With the TTY switch on, press RS, then RUB OUT. The monitor times RUB OUT to learn the speed of the line, then prints KIM, an address and the byte stored there."
+    },
+    {
+      "type": "17FA[SPACE]",
+      "prints": ["xxxx xx 17FA", "17FA xx"],
+      "says": "Open the NMI vector at $17FA: type the address, then a space. The monitor prints the address on a new line, with the byte there."
+    },
+    {
+      "type": "00.1C.",
+      "prints": ["17FA xx 00.", "17FB xx 1C.", "17FC xx"],
+      "says": "Point it at the monitor, at $1C00, so that ST can stop a program: type each byte, then a full stop to store it and move on."
+    },
+    {
+      "type": "0200[SPACE]AD.10.02.18.6D.11.02.8D.12.02.4C.0A.02.",
+      "prints": ["020B xx 0A.", "020C xx 02.", "020D xx"],
+      "says": "Enter the program at $0200: LDA $0210, CLC, ADC $0211, STA $0212, then JMP $020A, which loops for ever. It is the program the keypad's try-it types."
+    },
+    {
+      "type": "0210[SPACE]27.15.",
+      "prints": ["0210 xx 27.", "0211 xx 15.", "0212 xx"],
+      "says": "Enter the two numbers it adds, $27 at $0210 and $15 at $0211."
+    },
+    {
+      "type": "0200[SPACE]G",
+      "prints": ["0212 xx 0200", "0200 AD G"],
+      "says": "Open $0200 and type G to run the program from there. The monitor stops listening while it runs."
+    },
+    {
+      "keypad": "[ST]",
+      "prints": ["KIM", "020A 4C"],
+      "says": "Stop it with ST on the keypad. The monitor prints KIM and where the program stopped: the JMP at $020A."
+    },
+    {
+      "type": "0212[SPACE]",
+      "prints": ["020A 4C 0212", "0212 3C"],
+      "says": "Read the result at $0212: $27 plus $15 is $3C."
+    }
+  ]
+}

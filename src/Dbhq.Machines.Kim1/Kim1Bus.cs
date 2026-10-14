@@ -36,6 +36,7 @@ public sealed class Kim1Bus : Bus
     private readonly byte[] _ram = new byte[0x400];
     private byte _dataBus;
     private bool _syncNext;
+    private Kim1Teletype _teletype = new();
 
     public Kim1Bus(ReadOnlySpan<byte> rom002, ReadOnlySpan<byte> rom003)
     {
@@ -50,6 +51,29 @@ public sealed class Kim1Bus : Bus
     public Rriot6530 U3 { get; }
 
     public Kim1Keypad Keypad { get; } = new();
+
+    /// <summary>
+    /// The terminal on the 20 mA loops. One is always attached; with the
+    /// switch at <see cref="Kim1Mode.Keypad"/> the monitor ignores it, as it
+    /// ignores a teletype left plugged in. Attaching another (at another
+    /// speed) puts it on the lines as they are now.
+    /// </summary>
+    public Kim1Teletype Teletype
+    {
+        get => _teletype;
+        set
+        {
+            _teletype = value;
+            DriveTeletype();
+        }
+    }
+
+    /// <summary>
+    /// The TTY/KB switch between pins A-21 and A-V of the application
+    /// connector (User Manual, figure 2.4): closed, it ties PA0 to output 3 of
+    /// the 74145, and the monitor reads that as "use the teletype".
+    /// </summary>
+    public Kim1Mode Mode { get; set; } = Kim1Mode.Keypad;
 
     public Kim1Display Display { get; } = new();
 
@@ -71,6 +95,24 @@ public sealed class Kim1Bus : Bus
     /// 15 select nothing.
     /// </summary>
     public int DecoderOutput => (U2.PortBPins >> 1) & 0x0F;
+
+    /// <summary>
+    /// What drives the 6530-002's port A pins from outside: the key columns on
+    /// PA0 to PA6 for the row selected, PA0 pulled low through the TTY/KB
+    /// switch while output 3 is selected, and the teletype's keyboard loop on
+    /// PA7.
+    /// </summary>
+    public byte PortAInputs()
+    {
+        int row = DecoderOutput;
+        byte inputs = Keypad.Columns(row);
+        if (Mode == Kim1Mode.Teletype && row == 3)
+        {
+            inputs &= 0xFE;
+        }
+
+        return _teletype.Pa7 ? inputs : (byte)(inputs & 0x7F);
+    }
 
     /// <summary>
     /// Marks the next access as an opcode fetch, when the CPU's SYNC line is
@@ -133,6 +175,7 @@ public sealed class Kim1Bus : Bus
         U2.Reset();
         U3.Reset();
         ObserveDisplay();
+        DriveTeletype();
     }
 
     private void BeginCycle(ushort address)
@@ -140,6 +183,11 @@ public sealed class Kim1Bus : Bus
         Cycles++;
         U2.Tick();
         U3.Tick();
+        if (Cycles >= _teletype.Due)
+        {
+            _teletype.Advance(Cycles);
+        }
+
         bool sync = _syncNext;
         _syncNext = false;
         if (Cpu is not null)
@@ -168,7 +216,7 @@ public sealed class Kim1Bus : Bus
 
         if (chip == U2)
         {
-            U2.PortAInput = Keypad.Columns(DecoderOutput);
+            U2.PortAInput = PortAInputs();
         }
 
         return chip.ReadRegister(a & 0x0F);
@@ -192,13 +240,21 @@ public sealed class Kim1Bus : Bus
         if (chip == U2)
         {
             ObserveDisplay();
+            DriveTeletype();
         }
     }
 
     private void ObserveDisplay()
     {
-        int output = DecoderOutput;
-        U2.PortAInput = Keypad.Columns(output);
-        Display.Observe(Cycles, output, U2.PortAPins);
+        U2.PortAInput = PortAInputs();
+        Display.Observe(Cycles, DecoderOutput, U2.PortAPins);
+    }
+
+    // PB0 closes the printer loop and PB5 shuts the keyboard out of PA7. A pin
+    // set as an input floats high, through the 6530's pull-up.
+    private void DriveTeletype()
+    {
+        byte pins = U2.PortBPins;
+        _teletype.Drive(Cycles, (pins & 0x01) != 0, (pins & 0x20) != 0);
     }
 }

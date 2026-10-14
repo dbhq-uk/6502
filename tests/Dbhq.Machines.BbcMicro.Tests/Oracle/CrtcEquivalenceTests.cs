@@ -117,6 +117,134 @@ public class CrtcEquivalenceTests
     }
 
     /// <summary>
+    /// The chip on the machine's clock, where an event carries the CPU cycle it happened in: the
+    /// cycle of the character's clock, so character n is cycle 2n at 1 MHz (modes 4 to 7) and
+    /// cycle n at 2 MHz. The clock is given a phase, because the CPU's cycle at a look is not
+    /// always the even one the character falls on. The oracle is ticked a character at a time;
+    /// both lazy chips must raise every VSYNC edge, with its level, and every frame start at the
+    /// cycle the oracle's character puts it in. A reset carries the cycle it was made in.
+    /// </summary>
+    [Theory]
+    [InlineData(false, 0)]
+    [InlineData(false, 1)]
+    [InlineData(true, 0)]
+    public void EventsCarryTheCycleTheOraclesCharacterFallsIn(bool twoMhz, int phase)
+    {
+        int perCharacter = twoMhz ? 1 : 2;
+        var clock = new BbcClock { Cycles = phase };
+        var oracle = new ReferenceCrtc6845();
+        var watched = new Crtc6845(clock);
+        var unwatched = new Crtc6845(clock);
+        watched.SetCharacterClock(twoMhz);
+        unwatched.SetCharacterClock(twoMhz);
+
+        long eventCycle = clock.Cycles;
+        var expectedEdges = new List<(long Cycle, bool Level)>();
+        var expectedFrames = new List<long>();
+        var edges = new[] { new List<(long Cycle, bool Level)>(), new List<(long Cycle, bool Level)>() };
+        var frames = new[] { new List<long>(), new List<long>() };
+        oracle.FrameStarted += () => expectedFrames.Add(eventCycle);
+        var chips = new[] { watched, unwatched };
+        for (int i = 0; i < 2; i++)
+        {
+            int which = i;
+            chips[i].VsyncDriven += (cycle, level) => edges[which].Add((cycle, level));
+            // Inside an event the chip stands at the event's cycle.
+            chips[i].FrameStarted += () => frames[which].Add(chips[which].StateCycle);
+        }
+
+        bool level = oracle.VSync;
+        void OracleSawLevel()
+        {
+            if (oracle.VSync != level)
+            {
+                level = oracle.VSync;
+                expectedEdges.Add((eventCycle, level));
+            }
+        }
+
+        var comparedEdges = new int[2];
+        var comparedFrames = new int[2];
+        void Compare(int which, string name, long characters)
+        {
+            chips[which].Sync();
+            Assert.True(edges[which].Count == expectedEdges.Count && frames[which].Count == expectedFrames.Count,
+                $"{name} at character {characters}: {edges[which].Count} edges and {frames[which].Count} frame starts, expected {expectedEdges.Count} and {expectedFrames.Count}");
+            for (; comparedEdges[which] < expectedEdges.Count; comparedEdges[which]++)
+            {
+                int k = comparedEdges[which];
+                Assert.True(edges[which][k] == expectedEdges[k], $"{name} edge {k}: carried {edges[which][k]}, expected {expectedEdges[k]}");
+            }
+            for (; comparedFrames[which] < expectedFrames.Count; comparedFrames[which]++)
+            {
+                int k = comparedFrames[which];
+                Assert.True(frames[which][k] == expectedFrames[k], $"{name} frame start {k}: carried cycle {frames[which][k]}, expected {expectedFrames[k]}");
+            }
+        }
+
+        var random = new Random(6845 + 2 + phase + (twoMhz ? 10 : 0));
+        long characters = 0, nextLook = 1, looks = 0;
+
+        void Write(int register, byte value)
+        {
+            oracle.WriteAddress((byte)register);
+            watched.WriteAddress((byte)register);
+            unwatched.WriteAddress((byte)register);
+            oracle.WriteData(value);
+            watched.WriteData(value);
+            unwatched.WriteData(value);
+        }
+
+        while (characters < 4_000_000)
+        {
+            RandomProgram(random, Write);
+            Write(14, (byte)random.Next(64));
+            Write(15, (byte)random.Next(256));
+            if (random.Next(4) == 0)
+            {
+                // A reset's event carries the cycle it was made in, not a character's.
+                eventCycle = clock.Cycles;
+                oracle.Reset();
+                OracleSawLevel();
+                watched.Reset();
+                unwatched.Reset();
+                Compare(0, "watched", characters);
+                Compare(1, "unwatched", characters);
+            }
+
+            long span = random.Next(4) == 0 ? random.Next(200_000) : random.Next(5_000);
+            bool busy = random.Next(2) == 0;
+            for (long i = 0; i < span; i++)
+            {
+                characters++;
+                eventCycle = characters * perCharacter;
+                oracle.Tick();
+                OracleSawLevel();
+                clock.Cycles = eventCycle + phase;
+                Compare(0, "watched", characters);
+                if (characters >= nextLook)
+                {
+                    Compare(1, "unwatched", characters);
+                    looks++;
+                    nextLook = characters + (random.Next(100) == 0 ? random.Next(1, 300_000) : random.Next(1, 500));
+                }
+
+                if (busy && random.Next(40) == 0)
+                {
+                    int r = random.Next(4) == 0 ? random.Next(16) : new[] { 0, 4, 5, 7, 8, 9, 12, 13, 14, 15 }[random.Next(10)];
+                    Write(r, (byte)random.Next(r is 0 or 2 or 13 or 15 ? 40 : 12));
+                }
+            }
+        }
+
+        Compare(0, "watched", characters);
+        Compare(1, "unwatched", characters);
+        Assert.True(expectedEdges.Count > 1_000, $"only {expectedEdges.Count} VSYNC edges");
+        Assert.True(expectedFrames.Count > 1_000, $"only {expectedFrames.Count} frame starts");
+        Assert.True(looks > 1_000, $"only {looks} looks at the unwatched chip");
+    }
+
+    /// <summary>
     /// Asks the lazy chip for its state at random cycles from where it stands to now, in order, and
     /// compares each with what the plain model was at that cycle. The plain model's states are
     /// recorded every character, so any past cycle can be checked; a register write is made only

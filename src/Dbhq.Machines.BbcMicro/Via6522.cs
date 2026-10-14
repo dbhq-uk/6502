@@ -824,21 +824,29 @@ public class Via6522
         }
 
         _catchingUp = true;
-        long due = now - _ticksDone;
-        if (NeedsEveryCycle)
+        try
         {
-            for (; due > 0; due--)
+            long due = now - _ticksDone;
+            if (NeedsEveryCycle)
             {
-                TickOnce();
+                for (; due > 0; due--)
+                {
+                    TickOnce();
+                }
             }
-        }
-        else
-        {
-            Advance(due);
-        }
+            else
+            {
+                Advance(due);
+            }
 
-        _ticksDone = now;
-        _catchingUp = false;
+            _ticksDone = now;
+        }
+        finally
+        {
+            // An exception in the catch-up must not leave the guard set: the next look would
+            // throw the reentrancy message above and hide the real fault.
+            _catchingUp = false;
+        }
     }
 
     /// <summary>

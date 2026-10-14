@@ -219,6 +219,14 @@ public static class Pins
     public const string BbcDfsPath = "roms/bbc-micro/DFS-1.2.rom";
     public const string BbcDfsSha256 = "e745e34895225a6650b712c1dd0656cb0b0b15f072a8ae6d9ea8d1ac257eb3d6";
 
+    // The Acorn Electron's operating system (OS 1.00), 16 KB. Acorn's work, taken from
+    // dmcoles/elkjs at commit ff123355407f79a91f808e31222dcca5d51ea87f and committed
+    // under roms/electron/, with where it came from and what is known about its rights
+    // in roms/README.md (AGENTS.md rules 3 and 4). Its BASIC is the BBC's, byte for
+    // byte, so it reuses BbcBasicPath and BbcBasicSha256 and is kept once.
+    public const string ElectronOsPath = "roms/electron/os.rom";
+    public const string ElectronOsSha256 = "b63f851d79498f598999d923b7c9f62e2525c34f0b9cd2d4b328b89d622dcda4";
+
     // The NES's bundled homebrew: Lan Master, by Shiru, released by him into the public
     // domain (its manual and its title screen say so). Taken from the Internet Archive's
     // copy of his lan_master.zip and committed under roms/nes/, with where it came from

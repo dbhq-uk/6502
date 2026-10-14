@@ -1,0 +1,16 @@
+{
+  "about": "The program a visitor types into the Electron on its page at 6502.dbhq.uk. The page shows these lines and what the screen shows after them, and ElectronAcceptanceTests types the same lines into the machine and reads the screen back off its picture. Type each line as written, then press RETURN. The Electron's BASIC is the BBC Micro's, byte for byte, so its rule for PRINT is the BBC Microcomputer User Guide's: a number printed after a semicolon has no padding, so the count follows the space in the string directly.",
+  "lines": [
+    "10 FOR I=1 TO 5",
+    "20 PRINT \"HELLO \";I",
+    "30 NEXT I",
+    "RUN"
+  ],
+  "shows": [
+    "HELLO 1",
+    "HELLO 2",
+    "HELLO 3",
+    "HELLO 4",
+    "HELLO 5"
+  ]
+}

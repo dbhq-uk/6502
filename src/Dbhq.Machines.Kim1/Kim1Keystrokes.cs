@@ -1,3 +1,5 @@
+using System.Text;
+
 namespace Dbhq.Machines.Kim1;
 
 /// <summary>
@@ -21,6 +23,17 @@ namespace Dbhq.Machines.Kim1;
 /// <c>AD</c>, <c>DA</c>, <c>+</c>, <c>GO</c> and <c>PC</c> in the key matrix,
 /// and <c>ST</c> and <c>RS</c>, which are wired to the CPU instead.
 /// </para>
+/// <para>
+/// Characters for the teletype's keyboard (<see cref="TypeAtTeletype"/>) are
+/// held back while keypad taps are pending, and handed to the teletype once
+/// every tap queued by then, including any queued after the call, has been
+/// played and has been up for its full rest. The teletype's own rule, to send
+/// only on a quiet line, cannot see an answer that has not begun: after ST the
+/// monitor takes a few milliseconds to start printing KIM and the address, and
+/// a character queued at once arrives just as it stops listening and is lost or
+/// garbled. A person types after the monitor has answered, so the page's keys
+/// wait for the keypad as a person's would.
+/// </para>
 /// </remarks>
 public sealed class Kim1Keystrokes
 {
@@ -29,6 +42,7 @@ public sealed class Kim1Keystrokes
 
     private readonly Kim1Machine _machine;
     private readonly Queue<string> _pending = new();
+    private readonly StringBuilder _held = new();
     private string? _down;
     private long _until;
 
@@ -44,8 +58,18 @@ public sealed class Kim1Keystrokes
     /// <summary>Taps waiting to be played, and the one being played, if any.</summary>
     public int Pending => _pending.Count + (_down is null ? 0 : 1);
 
-    /// <summary>True when nothing is queued and the last key has been up for its full rest.</summary>
-    public bool Idle => _pending.Count == 0 && _down is null && _machine.Cycles >= _until;
+    /// <summary>Characters waiting for the keypad taps before them to finish, before they go to the teletype's keyboard.</summary>
+    public int HeldForTeletype => _held.Length;
+
+    /// <summary>
+    /// True when no key is held for the teletype, queued or on its line, and the
+    /// monitor has stopped printing. Unlike <see cref="Kim1Teletype.Idle"/> alone,
+    /// it is false across the handover from the held keys to the teletype.
+    /// </summary>
+    public bool TeletypeIdle => _held.Length == 0 && _machine.Teletype.Idle(_machine.Cycles);
+
+    /// <summary>True when nothing is queued or held for the teletype and the last key has been up for its full rest.</summary>
+    public bool Idle => _pending.Count == 0 && _down is null && _held.Length == 0 && _machine.Cycles >= _until;
 
     /// <summary>Queues one tap of the key called <paramref name="name"/>.</summary>
     public void Tap(string name)
@@ -57,6 +81,17 @@ public sealed class Kim1Keystrokes
 
         _pending.Enqueue(name);
     }
+
+    /// <summary>
+    /// Queues characters at the teletype's keyboard (<see cref="Kim1Teletype.Send(string)"/>)
+    /// once every keypad tap queued by then has been played and rested, taps
+    /// queued after this call included. With none queued they go on the next
+    /// <see cref="Run"/>.
+    /// </summary>
+    public void TypeAtTeletype(string text) => _held.Append(text);
+
+    /// <summary>Drops characters still held for the teletype, as the terminal being replaced would drop its own queue.</summary>
+    public void DropHeldForTeletype() => _held.Clear();
 
     /// <summary>
     /// Splits keys written as the User Manual writes them into key names:
@@ -146,6 +181,12 @@ public sealed class Kim1Keystrokes
             _down = _pending.Dequeue();
             Press(_down);
             _until = now + HoldCycles;
+        }
+
+        if (_held.Length > 0 && _down is null && _pending.Count == 0 && now >= _until)
+        {
+            _machine.Teletype.Send(_held.ToString());
+            _held.Clear();
         }
     }
 
