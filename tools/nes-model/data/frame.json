@@ -78,6 +78,30 @@
    119.2599
   ]
  ],
+ "cornersAgainstMarks": {
+  "max": 0.6901,
+  "mm": [
+   0.1396,
+   0.0341,
+   0.0219,
+   0.0161,
+   0.0383,
+   0.0067,
+   0.6901,
+   0.688,
+   0.0081,
+   0.0263,
+   0.0126,
+   0.0195,
+   0.0153,
+   0.1733,
+   0.1198,
+   0.1271,
+   0.0125,
+   0.0087
+  ],
+  "what": "Each corner above, mapped back through the frame to the scan's pixels, against the mark it was fitted from (marks.json), in millimetres. The marks are placed by eye and say only where to look, so a corner over 0.5 mm from its mark is noted on its edge; the site test asks that none be over 1.0 mm. Recorded, not judged"
+ },
  "edges": [
   {
    "a": 0.0,
@@ -203,6 +227,7 @@
    "index": 6,
    "lightFound": 9,
    "notches": [],
+   "note": "Corners 6 and 7 are 0.69 and 0.69 mm from where they were marked, over the 0.5 mm that the marks are good to by eye. On the NES-CPU-10 scan this is the short stretch at the step in the right edge, whose edge lies in deep shadow, so the light puts its ends less surely than the other edges'. Recorded, not judged",
    "points": 9,
    "rmsMm": 0.1103,
    "shiftMm": 0.6883,
@@ -746,6 +771,11 @@
     "spacingMm": 7.62
    }
   ],
+  "largest": {
+   "errPct": -0.9813,
+   "note": "U6 is the footprint furthest from its own spacing, 0.98 per cent narrow. Recorded, not judged: the verdict is on the median of them all",
+   "ref": "U6"
+  },
   "refusedPairs": {
    "U10": [
     1,

@@ -47,7 +47,7 @@ import {
 } from 'three';
 import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
 import { createStage } from './stage.mjs';
-import { followRegion } from './regions.mjs';
+import { followRegion, settleStatus } from './regions.mjs';
 import { BOARD, ICS, CONNECTORS, PASSIVES, OTHERS, HEIGHTS, REGIONS, CONSOLES, TRACKS } from './nes-famicom-board-layout.mjs';
 import { COUNTED, createSampler } from './nes-famicom-access.mjs';
 
@@ -372,7 +372,7 @@ export async function mount(root) {
   // status line. Then the scene: the console's own crystal and modulator, and each chip's part printed on it.
   const setRegion = (next) => {
     const was = region;
-    region = followRegion(root, REGIONS, next, region);
+    region = followRegion(root, REGIONS, next, region, () => settled());
     if (region === was) return;
     for (const r of REGIONS) consoles[r].visible = r === region;
     for (const { ic, label } of chips.values()) label.print(ic.parts[region]);
@@ -384,6 +384,11 @@ export async function mount(root) {
   const regionNow = () => nes()?.region?.()?.toLowerCase() ?? REGIONS[0];
   setRegion(regionNow());
   let running = Boolean(nes()?.running?.());
+  // What the status line says when the page's console is drawn: the tracks' failure if there was one (set below, once
+  // they have tried to load), otherwise the machine's state. Asked for when a missing console's sentence goes.
+  let tracksError = null;
+  const tracksProblem = () => `The model is running, without its tracks, which could not load: ${tracksError.message}`;
+  const settled = () => (tracksError ? tracksProblem() : running ? words.running : words.idle);
   const sampler = createSampler({ counts: () => nes()?.accessCounts?.() ?? null, now: () => performance.now() });
   const words = {
     idle: 'The model is running. The machine above is not running, so no chip is marked: press Start, and the chips the processor reads and writes are marked here.',
@@ -462,7 +467,6 @@ export async function mount(root) {
   const tracksButton = root.querySelector('[data-toggle-tracks]');
   const onlyButton = root.querySelector('[data-toggle-tracks-only]');
   let top_ = null, bottom_ = null;
-  let tracksError = null;
   try {
     const maps = await trackMaps(TRACKS.src, {
       top: { copperOf: (d, i) => d[i], printOf: (d, i) => d[i + 2], mask: token('model-nes-pcb'), copper: token('model-copper'), print: token('model-nes-print') },
@@ -550,8 +554,6 @@ export async function mount(root) {
   /** Where a point on the board, in mm as the layout has it, is on the screen: on the top face, or the underside when `below`. */
   root.modelBoardPoint = (x, y, below = false) => onScreen(new Vector3(X(x), below ? -T : 0, Z(y)));
 
-  if (!root.dataset.modelMissing) status.textContent = tracksError
-    ? `The model is running, without its tracks, which could not load: ${tracksError.message}`
-    : running ? words.running : words.idle;
+  settleStatus(root, status, settled(), tracksError ? tracksProblem() : null);
   s.start();
 }

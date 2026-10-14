@@ -42,7 +42,7 @@ import {
   Mesh, Group, MeshStandardMaterial, MeshBasicMaterial, CanvasTexture, SRGBColorSpace, Vector3,
 } from 'three';
 import { createStage } from './stage.mjs';
-import { followRegion } from './regions.mjs';
+import { followRegion, settleStatus } from './regions.mjs';
 import { CASE, PROFILE, DOOR, VENTS, BUTTONS, LED, PORTS, REAR, LABELS, UNDERSIDE, FEET, REGIONS, PRESS_MS, STATUS, press } from './nes-famicom-case-layout.mjs';
 
 // The case frame (mm, from the left rear corner at table level, x right, y to
@@ -355,7 +355,7 @@ export async function mount(root) {
   // a region this model does not draw keeps the first console and says so on the status line. Then the scene.
   const setRegion = (next) => {
     const was = region;
-    region = followRegion(root, REGIONS, next, region);
+    region = followRegion(root, REGIONS, next, region, () => (running() ? STATUS.running : STATUS.idle));
     if (region === was) return;
     for (const r of REGIONS) consoles[r].visible = words[r].visible = r === region;
     for (const button of buttons.values()) for (const child of button.children) if (child.userData.region) child.visible = child.userData.region === region;
@@ -416,6 +416,6 @@ export async function mount(root) {
     return { x: rect.left + ((v.x + 1) / 2) * rect.width, y: rect.top + ((1 - v.y) / 2) * rect.height };
   };
 
-  if (!root.dataset.modelMissing) status.textContent = running() ? STATUS.running : STATUS.idle;
+  settleStatus(root, status, running() ? STATUS.running : STATUS.idle);
   s.start();
 }

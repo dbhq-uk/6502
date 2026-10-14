@@ -156,16 +156,52 @@ test('a model that does not draw the page\'s console, on the page: its first con
   assert.match(status.textContent, /^There is no model of the PAL console, because none was built, so this is the NTSC console's\.$/);
   assert.equal(root.dataset.modelMissing, 'pal');
   // Back to NTSC: the sentence's flag goes, and nothing else moves.
-  assert.equal(followRegion(root, ['ntsc'], 'ntsc', 'ntsc'), 'ntsc');
+  assert.equal(followRegion(root, ['ntsc'], 'ntsc', 'ntsc', () => 'The model is running.'), 'ntsc');
   assert.equal(root.dataset.modelMissing, undefined);
+  assert.equal(status.textContent, 'The model is running.', 'the sentence about the missing console does not outlast the missing console');
   // An event with no region changes nothing.
   assert.equal(followRegion(root, ['ntsc'], undefined, 'ntsc'), 'ntsc');
   // Both NES modules go through it, in their setRegion, and do not write over its sentence when they start.
   const fs = await import('node:fs');
   for (const f of ['nes-famicom-case.js', 'nes-famicom-board.js']) {
     const src = fs.readFileSync(new URL(`../src/models/${f}`, import.meta.url), 'utf8');
-    assert.match(src, /import \{ followRegion \} from '\.\/regions\.mjs';/, f);
-    assert.match(src, /region = followRegion\(root, REGIONS, next, region\);/, f);
-    assert.match(src, /if \(!root\.dataset\.modelMissing\) status\.textContent = /, f);
+    assert.match(src, /import \{ followRegion, settleStatus \} from '\.\/regions\.mjs';/, f);
+    assert.match(src, /region = followRegion\(root, REGIONS, next, region, /, f);
+    assert.match(src, /settleStatus\(root, status, /, f);
+    assert.doesNotMatch(src, /if \(!root\.dataset\.modelMissing\) status\.textContent = /, f);
   }
+});
+
+// Two paths in the models' status line that no page reaches today, because both NES modules draw both consoles: the
+// sentence about a missing console outlasted it, and a tracks error was dropped while the sentence was up.
+test('the status line: the sentence about a missing console goes when the console is drawn again, and says what the model could not do', async () => {
+  const { followRegion, settleStatus } = await import('../src/models/regions.mjs');
+  const status = new Node_('p', { 'data-model-status': '' }, 'before');
+  const root = new Node_('div', { 'data-model': 'm' }).add(new Node_('section', { 'data-model-stage': '' }), status);
+  // A region that is drawn changes nothing on the line, and the restore is not asked for.
+  let asked = 0;
+  followRegion(root, ['ntsc'], 'ntsc', null, () => { asked++; return 'x'; });
+  assert.equal(status.textContent, 'before');
+  assert.equal(asked, 0);
+  // The model's words follow what is true now: the restore is asked when the sentence goes, not when it came.
+  let words = 'The model is running.';
+  followRegion(root, ['ntsc'], 'pal', 'ntsc', () => words);
+  assert.match(status.textContent, /^There is no model of the PAL console/);
+  words = 'The model is running, and so is the machine.';
+  followRegion(root, ['ntsc'], 'ntsc', 'ntsc', () => words);
+  assert.equal(status.textContent, 'The model is running, and so is the machine.');
+  assert.equal(root.dataset.modelMissing, undefined);
+  // A caller with no restore gets an empty line, not a stale sentence.
+  followRegion(root, ['ntsc'], 'pal', 'ntsc');
+  followRegion(root, ['ntsc'], 'ntsc', 'ntsc');
+  assert.equal(status.textContent, '');
+  // Mounting: the settled line is written when nothing is missing; when the sentence is up it stays, with the problem after it.
+  settleStatus(root, status, 'The model is running.');
+  assert.equal(status.textContent, 'The model is running.');
+  followRegion(root, ['ntsc'], 'pal', 'ntsc');
+  const sentence = status.textContent;
+  settleStatus(root, status, 'The model is running.');
+  assert.equal(status.textContent, sentence, 'no problem: the sentence is left as it is');
+  settleStatus(root, status, 'The model is running, without its tracks.', 'The tracks could not load: offline.');
+  assert.equal(status.textContent, `${sentence} The tracks could not load: offline.`);
 });
