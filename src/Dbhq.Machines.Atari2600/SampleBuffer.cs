@@ -28,7 +28,8 @@ namespace Dbhq.Machines.Atari2600;
 /// a Kaiser window (beta 9) over 16 samples each side, cut off at 0.42 of the sample rate, the
 /// edge placed to 1/4096 of a sample. A change costs 33 multiply-adds into a small ring of future
 /// samples; a sample costs an add. The output runs <see cref="LatencySamples"/> behind the level.
-/// No filter of the console's is modelled: the fact sheet gives none.
+/// No filter of the console's is modelled: the fact sheet gives none, so a held level is a steady
+/// offset [guessing - verify].
 /// </para>
 /// <para>
 /// <b>The ring never grows</b> (the plan's Review Focus 5). When it is full the oldest sample is

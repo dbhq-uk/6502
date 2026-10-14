@@ -1643,7 +1643,7 @@ that moves any of them fails until the words move too.
 - **The divider is compared with `AUDF` at each audio step.** jigo2600's reading puts a latch, sampled on the audio clock's other phase, between the compare and the pulse; a write to `AUDF` between the two phases is taken at the next step here [guessing - verify].
 - **A write to `AUDV0` or `AUDV1` changes the level from the colour clock it lands on**, not at the next audio step: the volume gates the pad's drivers directly, and no source says it waits for the audio clock (`tia.md` section 18.8) `[guessing - verify]`.
 - **The mix is linear**, `s` / 30 with `s` = `AUDV0` x bit 0 + `AUDV1` x bit 1; the curve the pads work against was not found (`tia.md` section 18.7, open item 15) `[guessing - verify]`.
-- **No filter of the console's or the television's is modelled.** The samples run from 0 to 1, silence at volume 0 is 0, and a held level is a steady offset; the sheet gives no audio filter. How the page removes the offset is task 13's.
+- **No filter of the console's or the television's is modelled.** The samples run from 0 to 1, silence at volume 0 is 0, and a held level is a steady offset; the sheet gives no audio filter `[guessing - verify]`. How the page removes the offset is task 13's.
 - **The samples are band-limited steps**, 16 samples behind the level (a third of a millisecond at 48,000 a second), chosen by measurement over the box filter (the task 10 journal entry). They are made when the channels step or a volume is written, inside those cycles, and at the end of each `Run` and `RunFrames`, so after `Step` alone they can stop up to one audio step, 116 colour clocks, short of now.
 - **SECAM's background noise at `AUDC` 0** is not modelled, with SECAM (#106).
 

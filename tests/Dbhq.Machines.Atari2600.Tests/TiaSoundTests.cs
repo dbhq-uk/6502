@@ -274,25 +274,61 @@ public class TiaSoundTests
     [Fact]
     public void Section_18_2_RSYNC_moves_the_audio_clocks_with_the_line_and_HMOVE_does_not()
     {
-        var scene = new TiaScene();
-        scene.Write(Audc0, 0x4).Write(Audv0, 15);
-        scene.At(3, 100, Rsync, 0);
-        scene.At(5, 8, Hmove, 0);
-        var clocks = new List<int>();
-        scene.RunTo(6, 0);
-        for (int clock = 0; clock < 228 * 6; clock++)
+        // Recorded from line 2, past AUDC 4's start-up, through the RSYNC on line 3 and the HMOVE
+        // on line 5, to the end of line 8, so both writes fall inside what is watched. (Corrected
+        // by task 10's review: the first version began watching at line 6, after both writes, so
+        // a fault that dropped the steps on an HMOVE line still passed.)
+        var tia = new Tia();
+        tia.Write(Audc0, 0x4);
+        tia.Write(Audv0, 15);
+        int line = 0;
+        while (line < 2)
         {
-            double before = scene.Tia.SoundLevel;
-            scene.Tia.Tick();
-            if (scene.Tia.SoundLevel != before)
+            tia.Tick();
+            if (tia.HorizontalCounter == 0)
             {
-                clocks.Add(scene.Tia.HorizontalCounter);
+                line++;
             }
         }
 
-        // Six lines, two steps each, every one a toggle (AUDC 4 past its start-up).
-        Assert.Equal(12, clocks.Count);
-        Assert.All(clocks, c => Assert.Contains(c, new[] { 36, 148 }));
+        var changes = new List<(int Line, int Clock)>();
+        while (line < 9)
+        {
+            if (line == 3 && tia.HorizontalCounter == 100)
+            {
+                tia.Write(Rsync, 0);
+            }
+            else if (line == 5 && tia.HorizontalCounter == 8)
+            {
+                tia.Write(Hmove, 0);
+            }
+
+            double before = tia.SoundLevel;
+            tia.Tick();
+            if (tia.HorizontalCounter == 0)
+            {
+                line++;
+            }
+            else if (tia.SoundLevel != before)
+            {
+                changes.Add((line, tia.HorizontalCounter));
+            }
+        }
+
+        // Every step is a toggle (AUDC 4 past its start-up), at colour clock 36 or 148 of its line
+        // and nowhere else. RSYNC on line 3 ends that line at about colour clock 103, before its
+        // step at 148, and the next line steps at 36 and 148 of its own count; the HMOVE line steps
+        // at both, as every line does.
+        Assert.All(changes, c => Assert.Contains(c.Clock, new[] { 36, 148 }));
+        Assert.Contains((3, 36), changes);
+        Assert.DoesNotContain((3, 148), changes);
+        foreach (int l in new[] { 2, 4, 5, 6, 7, 8 })
+        {
+            Assert.Contains((l, 36), changes);
+            Assert.Contains((l, 148), changes);
+        }
+
+        Assert.Equal(13, changes.Count);
     }
 
     [Fact]

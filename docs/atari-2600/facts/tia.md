@@ -500,7 +500,7 @@ The SPG says not to change the motion registers for 24 cycles after HMOVE, as "U
 
 - The audio clock is a two-phase clock, `AΦ1` and `AΦ2`, made by the horizontal sync counter [from TIA schematic sheet 1: "AUDIO CLOCKS (Φ1 - Φ2)"]. On the sheet, `AΦ2` comes out of a two-input delay fed by the RHS and CNT decodes [from TIA schematic sheet 1]. jigo2600's reading of the same sheet gives `AΦ1 = D2(SHS, LRHB)` and `AΦ2 = D2(RHS, CNT)`, so each phase fires twice a line [from jigo2600 Visual Objects, its signal table].
 - The decodes sit at horizontal counts 4 (SHS), 8 (RHS), 18 (LRHB) and 36 (CNT), that is colour clocks 16, 32, 72 and 144 from the start of the line [from Towers, the HSync counter table]. A `D2` delays by one count, four colour clocks [inferring from Towers: "delayed 4 CLK" for the decoded lines; jigo2600 Visual Objects]. So `AΦ1` is high at colour clocks 20 to 23 and 76 to 79, and `AΦ2` at 36 to 39 and 148 to 151 [from jigo2600 Visual Objects, its table; agrees with the inference].
-- The counters and the output change on `AΦ2` [from jigo2600 Sound: dual-phase logic takes its new value when phase 2 is high]. **The model steps each channel at colour clocks 36 and 148 of every line.** The two steps are 112 and 116 colour clocks apart, not evenly spaced [inferring from the clocks above; jigo2600 Sound also says the TIA's samples "are not exactly evenly spaced"].
+- The counters and the output change on `AΦ2` [from jigo2600 Sound: dual-phase logic takes its new value when phase 2 is high]. **The model steps each channel at colour clocks 36 and 148 of every line.** The two steps are 112 and 116 colour clocks apart, not evenly spaced [inferring from the clocks above; jigo2600 Sound also says the TIA's samples come at uneven intervals].
 - LRHB is a decode of the counter, and the HMOVE latch only chooses whether it ends the blank [from jigo2600 Visual Objects]. So the audio clock does not move with HMOVE [inferring]. RSYNC resets the horizontal counter [from Towers], so it shifts the audio clocks with the line [inferring].
 - Dan confirmed on 14 October 2026 that jigo2600's written analyses (its `doc/TIA_*.md` files) may be read as a source of facts only, with no code or text copied (spec, "Where the code comes from"); that covers Visual Objects here.
 - Rate: two steps per 228 colour clocks, the colour clock divided by 114: 31399.5 Hz on NTSC (3.579545 MHz / 114) and 31113.1 Hz on PAL (3.546894 MHz / 114) [from 2k6specs, "AUDF"]. Stolberg gives 31440 Hz and 31200 Hz, computed from 262 lines at 60 Hz and 312 at 50 Hz [from Stolberg freqform]; those are the nominal frame rates, not the clock, and the sheet follows 2k6specs.
@@ -508,19 +508,19 @@ The SPG says not to change the motion registers for 24 cycles after HMOVE, as "U
 ### 18.3 The divider
 
 - A 5-bit counter advances by one, modulo 32, on each audio step. When it equals `AUDF` it is reset to 0 and one divided pulse is made. So the divided clock fires every `AUDF + 1` audio steps [from jigo2600 Sound].
-- When a write makes `AUDF` smaller than the counter's present value, the counter runs on through 31 and wraps before it matches [inferring from jigo2600 Sound: "advances by one unit (modulo 32)" and is "compared to the value of AUDFx"].
+- When a write makes `AUDF` smaller than the counter's present value, the counter runs on through 31 and wraps before it matches [inferring from jigo2600 Sound, which has the counter count up by one, modulo 32, and compare itself with `AUDF`].
 - The divider's value at power on and the exact audio step on which the first divided pulse comes after a write are not documented [guessing - verify]. The model starts the counter at 0.
 
 ### 18.4 The noise-tone generator
 
 The structure, read from the schematic: a block labelled "AUDIO NOISE GEN." holds five dual-phase delay stages (`D1`) in a chain, and below it four latch stages labelled Q6 to Q9; the four `AUDC` bits feed the logic that controls both [from TIA schematic sheet 4]. This is the guide's "nine bit shift counter" as two parts, five bits and four bits [from SPG TIA 1A 11.B; jigo2600 Sound; Galloway 2003 saw the same five-bit section "with taps on bits 2 and 4"].
 
-The logic below is jigo2600's reading of that sheet, restated [from jigo2600 Sound]. Name the nine bits `C0` to `C8`. `C0` to `C4` are the 5-bit counter ("poly5"), `C0` the newest; `C5` to `C8` are the 4-bit counter ("poly4"), `C5` the newest. The channel's output bit is `C8`. Write `A` for the 4-bit `AUDC`, `A[1:0]` for its low two bits and `A[3:2]` for its high two.
+The logic below is jigo2600's reading of that sheet, restated [from jigo2600 Sound]. Name the nine bits `C0` to `C8`. `C0` to `C4` are the 5-bit counter (poly5), `C0` the newest; `C5` to `C8` are the 4-bit counter (poly4), `C5` the newest. The channel's output bit is `C8`. Write `A` for the 4-bit `AUDC`, `A[1:0]` for its low two bits and `A[3:2]` for its high two.
 
 On each divided pulse:
 
 1. **Poly5 shifts.** `C1` to `C4` take the old `C0` to `C3`. The new `C0` is:
-   - 1 if `A` = 0 ("flood with 1");
+   - 1 if `A` = 0 (every new bit is 1);
    - otherwise, if `A[1:0]` = 0: `C8 XOR C4`, or 1 if all nine bits are 0 (the two counters chained into one 9-bit counter);
    - otherwise: `C2 XOR C4`, or 1 if `C0` to `C4` are all 0 (a 5-bit counter on its own).
 2. **Poly4 is clocked or not.** It shifts only when its clock condition holds:
@@ -583,7 +583,7 @@ Derived by stepping the rules of 18.4 from all nine bits 1, with `AUDF` = 0 so t
 
 ### 18.8 The sound in the model, as task 10 built it
 
-`TiaSound` holds the two channels: each its nine bits and its divider count, stepped by the rules of 18.3 and 18.4, the divider compared with `AUDF` at the step itself (the latch between the compare and the pulse, which jigo2600 Sound describes, is not modelled apart from the step it delays). `Tia` steps both on the horizontal sync counter's step that leaves count 8 (RHS) or count 36 (CNT), so the new output bits hold from colour clocks 36 and 148; RSYNC moves those with the line, and HMOVE does not. The level is the mix of 18.7, `s` / 30, worked out at each step and at each `AUDV` write, which takes effect from the colour clock it lands on (a choice: the volume gates the drivers directly, and no source says it waits for the audio clock [guessing - verify]). `AUDC`, `AUDF` and `AUDV` use their low four, five and four bits. Only at those points is the sample buffer told, with the colour clocks since it was last told, so the sound adds nothing to the colour clocks between. The machine's samples, their resampler and its choice by measurement are in the task 10 journal entry (`docs/journal/2026-10-14-the-atari-2600-sound.md`).
+`TiaSound` holds the two channels: each its nine bits and its divider count, stepped by the rules of 18.3 and 18.4, the divider compared with `AUDF` at the step itself (the latch between the compare and the pulse, which jigo2600 Sound describes, is not modelled apart from the step it delays [guessing - verify]). `Tia` steps both on the horizontal sync counter's step that leaves count 8 (RHS) or count 36 (CNT), so the new output bits hold from colour clocks 36 and 148; RSYNC moves those with the line, and HMOVE does not. The level is the mix of 18.7, `s` / 30 (linear, a choice [guessing - verify]), worked out at each step and at each `AUDV` write, which takes effect from the colour clock it lands on (a choice: the volume gates the drivers directly, and no source says it waits for the audio clock [guessing - verify]). `AUDC`, `AUDF` and `AUDV` use their low four, five and four bits. Only at those points is the sample buffer told, with the colour clocks since it was last told, so the sound adds nothing to the colour clocks between. No filter of the console's or the television's is modelled, because no source read gives one, so the samples run from 0 to 1 and a held level is a steady offset [guessing - verify]. The machine's samples, their resampler and its choice by measurement are in the task 10 journal entry (`docs/journal/2026-10-14-the-atari-2600-sound.md`).
 
 ## 19. The colour signal and the palette
 

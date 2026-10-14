@@ -6,6 +6,8 @@ Written on 14 October 2026 and committed at about 20:21 UTC, before any launch. 
 
 Added on 14 October 2026, after the first run: that run and its verdict are in the journal entry [the speed milestone](../../docs/journal/2026-10-14-the-atari-2600-speed-milestone.md). The text above and below is as it was committed before the launch.
 
+Amended on 14 October 2026, after the first result was seen (task 10's review): [`analyse.py`](analyse.py) rounds each AOT median to the two decimal places it prints before it judges it, so the figure judged against the lines below is the printed, two-decimal figure, not the unrounded median. This rule did not say so; this note was made after the first result, and it changes no verdict: every lower AOT median so far is under 10, and none lies within a rounding step of 10 or 25.
+
 ## Items 9 and 10, as the plan fixes them
 
 **9. The speed milestone's rule (the NES plan's):** the AOT median, as a multiple of real time from `Region.CpuHz`, on the bench program in item 10. At least 25 times: continue. From 10 to 25: continue, and the page's headroom line says so. Under 10: stop and tell Dan before the sound is built.

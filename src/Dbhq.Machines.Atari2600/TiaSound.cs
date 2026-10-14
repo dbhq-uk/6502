@@ -17,7 +17,9 @@ namespace Dbhq.Machines.Atari2600;
 /// <b>The divider</b> (section 18.3): on each step the counter is compared with <c>AUDF</c>; if they
 /// match, the step makes a divided pulse and the counter goes to 0, and otherwise it counts on,
 /// modulo 32. So the pulse comes every <c>AUDF</c> + 1 steps, and a write that puts <c>AUDF</c>
-/// under the count lets the counter run on through 31 first.
+/// under the count lets the counter run on through 31 first. The compare is made at the step
+/// itself: jigo2600's reading puts a latch, sampled on the audio clock's other phase, between the
+/// compare and the pulse, which is not modelled [guessing - verify].
 /// </para>
 /// <para>
 /// <b>The noise-tone generator</b> (section 18.4): on each divided pulse every new bit is worked

@@ -225,7 +225,8 @@ public sealed class Tia : IReportsState
 
     /// <summary>
     /// The sound's level now, from 0 to 1: the two channels' mix, linear in
-    /// <c>AUDV0</c> x bit 0 + <c>AUDV1</c> x bit 1 (tia.md section 18.7, the curve a choice).
+    /// <c>AUDV0</c> x bit 0 + <c>AUDV1</c> x bit 1 (tia.md section 18.7, the curve a choice
+    /// [guessing - verify]).
     /// </summary>
     public double SoundLevel => TiaSound.Level(_mix);
 
