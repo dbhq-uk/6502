@@ -19,7 +19,7 @@ namespace Dbhq.Machines.Atari2600.Boards;
 /// written once.
 /// </para>
 /// </remarks>
-public abstract class BankedBoard : IBoard
+public abstract class BankedBoard : IBoard, IReportsState
 {
     private const int BankSize = 0x1000;
 
@@ -67,6 +67,16 @@ public abstract class BankedBoard : IBoard
 
     /// <inheritdoc />
     public void PowerOn() => Select(_banks - 1);
+
+    /// <inheritdoc />
+    void IReportsState.Report(IStateSink sink)
+    {
+        sink.Skip(nameof(_image), StateReport.Image);
+        sink.Skip(nameof(_firstHotspot), StateReport.Fixed);
+        sink.Skip(nameof(_banks), StateReport.Fixed);
+        sink.Add(nameof(_base), _base);
+        sink.Add(nameof(Bank), Bank);
+    }
 
     private void Select(int bank)
     {

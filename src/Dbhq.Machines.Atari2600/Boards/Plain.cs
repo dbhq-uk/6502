@@ -5,7 +5,7 @@ namespace Dbhq.Machines.Atari2600.Boards;
 /// the board does not wire A11. Nothing switches and a write changes nothing.
 /// </summary>
 /// <remarks>Built from <c>docs/atari-2600/facts/cartridge.md</c> section 1.</remarks>
-public sealed class Plain : IBoard
+public sealed class Plain : IBoard, IReportsState
 {
     private readonly byte[] _image;
     private readonly int _mask;
@@ -29,5 +29,12 @@ public sealed class Plain : IBoard
     /// <inheritdoc />
     public void PowerOn()
     {
+    }
+
+    /// <inheritdoc />
+    void IReportsState.Report(IStateSink sink)
+    {
+        sink.Skip(nameof(_image), StateReport.Image);
+        sink.Skip(nameof(_mask), StateReport.Fixed);
     }
 }

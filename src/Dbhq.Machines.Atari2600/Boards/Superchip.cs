@@ -20,7 +20,7 @@ namespace Dbhq.Machines.Atari2600.Boards;
 /// the window, so it would do nothing with it.
 /// </para>
 /// </remarks>
-public sealed class Superchip : IBoard
+public sealed class Superchip : IBoard, IReportsState
 {
     /// <summary>The RAM's size in bytes.</summary>
     public const int RamSize = 128;
@@ -76,5 +76,12 @@ public sealed class Superchip : IBoard
     {
         _board.PowerOn();
         Array.Clear(_ram);
+    }
+
+    /// <inheritdoc />
+    void IReportsState.Report(IStateSink sink)
+    {
+        sink.Add(nameof(_board), _board);
+        sink.Add(nameof(_ram), _ram);
     }
 }

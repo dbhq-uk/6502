@@ -15,7 +15,7 @@ namespace Dbhq.Machines.Atari2600.Boards;
 /// <item><description>The board powers on in its last bank, bank 2, a choice (section 8).</description></item>
 /// </list>
 /// </remarks>
-public sealed class Fa : IBoard
+public sealed class Fa : IBoard, IReportsState
 {
     /// <summary>The RAM's size in bytes.</summary>
     public const int RamSize = 256;
@@ -83,6 +83,15 @@ public sealed class Fa : IBoard
     {
         Select(Banks - 1);
         Array.Clear(_ram);
+    }
+
+    /// <inheritdoc />
+    void IReportsState.Report(IStateSink sink)
+    {
+        sink.Skip(nameof(_image), StateReport.Image);
+        sink.Add(nameof(_ram), _ram);
+        sink.Add(nameof(_base), _base);
+        sink.Add(nameof(Bank), Bank);
     }
 
     private void Select(int bank)

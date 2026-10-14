@@ -21,7 +21,7 @@ namespace Dbhq.Machines.Atari2600;
 /// A0 to A4 only, so any address in the I/O half may be passed whole, mirrors included.
 /// </para>
 /// </remarks>
-public sealed class Riot6532
+public sealed class Riot6532 : IReportsState
 {
     /// <summary>The RAM's size in bytes.</summary>
     public const int RamSize = 128;
@@ -286,6 +286,29 @@ public sealed class Riot6532
         _timerFlagSetThisCycle = false;
         _edgeFlag = false;
         _pa7 = (PortAPins & 0x80) != 0;
+    }
+
+    /// <inheritdoc />
+    void IReportsState.Report(IStateSink sink)
+    {
+        sink.Add(nameof(_ram), _ram);
+        sink.Add(nameof(_ora), _ora);
+        sink.Add(nameof(_ddra), _ddra);
+        sink.Add(nameof(_orb), _orb);
+        sink.Add(nameof(_ddrb), _ddrb);
+        sink.Add(nameof(_portAInput), _portAInput);
+        sink.Add(nameof(PortBInput), PortBInput);
+        sink.Add(nameof(_count), _count);
+        sink.Add(nameof(_divider), _divider);
+        sink.Add(nameof(_untilDecrement), _untilDecrement);
+        sink.Add(nameof(_freeRunning), _freeRunning);
+        sink.Add(nameof(_timerFlag), _timerFlag);
+        sink.Add(nameof(_timerFlagSetThisCycle), _timerFlagSetThisCycle);
+        sink.Add(nameof(_timerInterruptEnabled), _timerInterruptEnabled);
+        sink.Add(nameof(_edgeFlag), _edgeFlag);
+        sink.Add(nameof(_edgeInterruptEnabled), _edgeInterruptEnabled);
+        sink.Add(nameof(_edgePositive), _edgePositive);
+        sink.Add(nameof(_pa7), _pa7);
     }
 
     /// <summary>The flag register: bit 7 the timer flag, bit 6 the edge flag, bits 5 to 0 zero.</summary>
