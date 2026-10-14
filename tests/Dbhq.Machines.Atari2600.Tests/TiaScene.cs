@@ -31,6 +31,13 @@ internal static class Reg
     public const int Vdelbl = 0x27;
     public const int Resmp0 = 0x28;
     public const int Resmp1 = 0x29;
+    public const int Hmp0 = 0x20;
+    public const int Hmp1 = 0x21;
+    public const int Hmm0 = 0x22;
+    public const int Hmm1 = 0x23;
+    public const int Hmbl = 0x24;
+    public const int Hmove = 0x2A;
+    public const int Hmclr = 0x2B;
     public const int Cxclr = 0x2C;
 
     // Read registers (section 2.2).

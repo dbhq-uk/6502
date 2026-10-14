@@ -76,6 +76,32 @@ public class TiaBallTests
         Assert.Empty(Lit(rows[2], Pf));
     }
 
+    /// <summary>
+    /// The suite's <c>collision/resbl-kill</c> (tia.md section 12): a RESBL landing at colour clock 90
+    /// erases a ball pixel parked from clock 91 on, the pixel on that kill clock included, and spares
+    /// the one at 90, so the erasure acts a clock after the write lands (the model cuts every
+    /// object's start so, <see cref="TiaMissileTests"/>). The parked pixel, and
+    /// whether it lights on the line of the second strobe.
+    /// </summary>
+    public static TheoryData<int, bool> Kills() => new()
+    {
+        { 20, true },
+        { 22, true },
+        { 23, false },
+        { 25, false },
+        { 31, false },
+    };
+
+    [Theory]
+    [MemberData(nameof(Kills))]
+    public void Section_12_a_resbl_erases_the_ball_from_the_clock_after_it_lands(int parked, bool lights)
+    {
+        byte[][] rows = new TiaScene().Write(Reg.Enabl, 0x02).At(0, parked + 64, Reg.Resbl, 0).At(2, 90, Reg.Resbl, 0).Rows(3);
+        Assert.Equal([parked], Lit(rows[1], Pf).Where(x => x >= 2));
+        Assert.Equal(lights, Lit(rows[2], Pf).Contains(parked));
+        Assert.Contains(26, Lit(rows[2], Pf));
+    }
+
     [Fact]
     public void Section_12_the_ball_takes_the_playfields_colour()
     {

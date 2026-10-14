@@ -13,7 +13,7 @@ namespace Dbhq.Machines.Atari2600.Tests;
 /// </summary>
 public class SuiteSelfTests(ITestOutputHelper output)
 {
-    /// <summary>The trusted self-tests that pass from task 4 and task 6 (suite.md sections 5.1 to 5.7, and section 9's tasks).</summary>
+    /// <summary>The trusted self-tests that pass from tasks 4, 6 and 7 (suite.md sections 5.1 to 5.7, and section 9's tasks).</summary>
     public static readonly string[] Trusted =
     [
         // cpu/, task 4 (suite.md 5.1).
@@ -68,15 +68,29 @@ public class SuiteSelfTests(ITestOutputHelper output)
         "collision/per-pixel",
         "collision/reset-phase",
 
-        // Two that pass from task 6, before the task suite.md gives them, and are not claimed as
-        // task 6's: their task must keep them passing. cpu/partial-drive (task 9) reads only the
-        // inputs at rest, which task 5 fixed (a dumped INPT0 reads 0, an open fire button 1), and
-        // its collision checks are task 6's. collision/blank-gating (task 7) passes on a visible
-        // overlap: with HMOVE doing nothing, its group 2 missiles meet at pixel 2, not in the blank,
-        // so its pass does not show latching in the blank. Task 7 must prove the blank mechanism;
-        // until then TiaCollisionTests.Section_14_the_latches_set_in_the_blank is its only guard.
+        // One that passes from task 6, before the task suite.md gives it, and is not claimed as
+        // task 6's: task 9 must keep it passing. cpu/partial-drive (task 9) reads only the inputs
+        // at rest, which task 5 fixed (a dumped INPT0 reads 0, an open fire button 1), and its
+        // collision checks are task 6's.
         "cpu/partial-drive",
+
+        // Task 7, HMOVE and the motion clocks: the rows suite.md section 9 gives task 7, but the
+        // four collision/merge-delivery tests in NotYet. collision/blank-gating passed from task 6
+        // on a visible overlap; with HMOVE its group 2 missiles meet inside the blank, and a fault
+        // that stops the latches in the blank now fails it (the task 7 journal entry).
+        "tia-timing/hmove-apply",
+        "tia-timing/hmove-line-aligned",
+        "tia-timing/hmove-reset-merge",
+        "tia-timing/hmove-walk",
+        "tia-render/missile-copies",
+        "tia-render/missile-reset-lock",
         "collision/blank-gating",
+        "collision/blanked-reset",
+        "collision/copy-adjacency",
+        "collision/hmove-edge",
+        "collision/latency-swallow",
+        "collision/resbl-kill",
+        "collision/stuck-drift",
     ];
 
     /// <summary>
@@ -87,25 +101,15 @@ public class SuiteSelfTests(ITestOutputHelper output)
     /// </summary>
     public static readonly (string Test, int Task, byte Code, byte Observed, byte Expected)[] NotYet =
     [
-        // The trusted self-tests in tia-timing/, tia-render/ and collision/ that use HMOVE, which
-        // task 7 builds (suite.md sections 5.4 to 5.6 and 10). Their first failures were read on
-        // 14 October 2026, after task 6.
-        ("tia-timing/hmove-apply", 7, 0x01, 0xFF, 0x01),
-        ("tia-timing/hmove-line-aligned", 7, 0x02, 0x40, 0x00),
-        ("tia-timing/hmove-reset-merge", 7, 0x01, 0xFF, 0x0F),
-        ("tia-timing/hmove-walk", 7, 0x01, 0x00, 0xC0),
-        ("tia-render/missile-copies", 7, 0x16, 0x00, 0x40),
-        ("tia-render/missile-reset-lock", 7, 0x01, 0x00, 0x01),
-        ("collision/blanked-reset", 7, 0x02, 0x00, 0x20),
-        ("collision/copy-adjacency", 7, 0x01, 0xFF, 0xE0),
-        ("collision/hmove-edge", 7, 0x01, 0x00, 0xF8),
-        ("collision/latency-swallow", 7, 0x12, 0x00, 0x80),
-        ("collision/merge-delivery-replant", 7, 0x01, 0x00, 0x4D),
-        ("collision/merge-delivery-stretch", 7, 0x02, 0x00, 0x3E),
-        ("collision/merge-delivery-train", 7, 0x02, 0x01, 0x7F),
-        ("collision/merge-delivery", 7, 0x01, 0x44, 0x7B),
-        ("collision/resbl-kill", 7, 0x03, 0x00, 0x20),
-        ("collision/stuck-drift", 7, 0x02, 0x00, 0x80),
+        // The four trusted self-tests that measure when a motion step merged on the drawn line
+        // reaches a player's scan counter (suite.md section 5.6; tia.md section 16 and open item
+        // 12). Task 7 built HMOVE and they still fail: the suite states the rules only as tables
+        // of the scan's state, from one console, and no mechanism in the fact sheets gives them, so
+        // task 11 triages them. Their failures were read on 14 October 2026, after task 7.
+        ("collision/merge-delivery-replant", 11, 0x03, 0x49, 0x4D),
+        ("collision/merge-delivery-stretch", 11, 0x03, 0x2A, 0x3E),
+        ("collision/merge-delivery-train", 11, 0x04, 0x47, 0x7F),
+        ("collision/merge-delivery", 11, 0x04, 0x53, 0x7B),
     ];
 
     /// <summary>

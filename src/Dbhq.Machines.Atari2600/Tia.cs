@@ -90,6 +90,10 @@ public sealed class Tia : IReportsState
     private const int Vdelbl = 0x27;
     private const int Resmp0 = 0x28;
     private const int Resmp1 = 0x29;
+    private const int Hmp0 = 0x20;
+    private const int Hmbl = 0x24;
+    private const int Hmove = 0x2A;
+    private const int Hmclr = 0x2B;
     private const int Cxclr = 0x2C;
 
     // The six serial outputs, as bits of the mask the collision table is indexed by.
@@ -102,6 +106,7 @@ public sealed class Tia : IReportsState
 
     // The decoded states of the horizontal sync counter, as Towers prints them (tia.md section 3).
     private const int Rhb = 0b011100;
+    private const int Lrhb = 0b010111;
     private const int Shb = 0b010100;
     private const int Illegal = 0b111111;
 
@@ -123,6 +128,7 @@ public sealed class Tia : IReportsState
     private readonly TiaMissile _missile0 = new();
     private readonly TiaMissile _missile1 = new();
     private readonly TiaBall _ball = new();
+    private readonly TiaMotion _motion = new();
     private readonly FrameBuffer _frame = new();
 
     // The horizontal sync counter's state, and which of its four colour clocks the next Tick runs.
@@ -192,6 +198,9 @@ public sealed class Tia : IReportsState
     /// <summary>The ball, for the tests.</summary>
     internal TiaBall Ball => _ball;
 
+    /// <summary>HMOVE and the motion clocks, for the tests.</summary>
+    internal TiaMotion Motion => _motion;
+
     /// <summary>True while the horizontal blank is on, for the colour clock the next <see cref="Tick"/> runs.</summary>
     internal bool HorizontalBlank => _hblank;
 
@@ -258,6 +267,16 @@ public sealed class Tia : IReportsState
         }
 
         byte[] r = _registers;
+
+        // HMOVE's extra clocks act before the pixel is latched (TiaMotion); an object given one
+        // takes no motion clock at the end of this colour clock, so on the drawn line the two merge.
+        bool motionClock = !_hblank;
+        int extra = _motion.Tick(_phase, r);
+        if (extra != 0)
+        {
+            ClockObjects(extra, motionClock: true);
+        }
+
         int lit = 0;
         if (_player0.Output(r[Refp0], r[Vdelp0]))
         {
@@ -303,22 +322,11 @@ public sealed class Tia : IReportsState
             _frame.Put((int)x, (byte)(colour & 0xFE));
         }
 
-        // The objects' counters run on MOTCK, while the blank is off; a player's lock point resets
-        // its missile's counter when RESMP is set (sections 9 and 11).
-        bool motionClock = !_hblank;
-        if (_player0.Clock(motionClock, r[Nusiz0]) && (r[Resmp0] & 0x02) != 0)
-        {
-            _missile0.LockToPlayer();
-        }
-
-        if (_player1.Clock(motionClock, r[Nusiz1]) && (r[Resmp1] & 0x02) != 0)
-        {
-            _missile1.LockToPlayer();
-        }
-
-        _missile0.Clock(motionClock, r[Nusiz0]);
-        _missile1.Clock(motionClock, r[Nusiz1]);
-        _ball.Clock(motionClock);
+        // The objects' counters run on MOTCK, while the blank is off, but for those an extra clock
+        // has stepped already.
+        ClockObjects(~extra & 0x1F, motionClock);
+        _player0.SeeRegisters();
+        _player1.SeeRegisters();
 
         _vblank = (r[Vblank] & 0x02) != 0;
         _clock++;
@@ -418,6 +426,13 @@ public sealed class Tia : IReportsState
             case Pf2:
                 _playfield.Write(register, value);
                 break;
+            case Hmove:
+                _motion.Strobe();
+                break;
+            case Hmclr:
+                // HMCLR sets the five motion registers to 0, and not the more-motion latches (section 15).
+                Array.Clear(_registers, Hmp0, Hmbl - Hmp0 + 1);
+                break;
             case Cxclr:
                 _collisions = 0;
                 break;
@@ -442,6 +457,7 @@ public sealed class Tia : IReportsState
         _missile0.PowerOn();
         _missile1.PowerOn();
         _ball.PowerOn();
+        _motion.PowerOn();
         _frame.PowerOn();
         _counter = 0;
         _phase = 0;
@@ -463,6 +479,7 @@ public sealed class Tia : IReportsState
         sink.Add(nameof(_missile0), _missile0);
         sink.Add(nameof(_missile1), _missile1);
         sink.Add(nameof(_ball), _ball);
+        sink.Add(nameof(_motion), _motion);
         sink.Add(nameof(_frame), _frame);
         sink.Add(nameof(_counter), _counter);
         sink.Add(nameof(_phase), _phase);
@@ -478,8 +495,9 @@ public sealed class Tia : IReportsState
     private void Step()
     {
         int state = _counter;
-        if (state == Rhb)
+        if (state == (_motion.Extended ? Lrhb : Rhb))
         {
+            // RHB ends the blank at colour clock 68, or LRHB at 76 when HMOVE's latch is set (section 15).
             _hblank = false;
         }
 
@@ -490,6 +508,7 @@ public sealed class Tia : IReportsState
             _counter = 0;
             _clock = 0;
             _hblank = true;
+            _motion.LineStart();
             _frame.NextLine();
             return;
         }
@@ -531,6 +550,37 @@ public sealed class Tia : IReportsState
         }
 
         return (lit & (PfBit | BlBit)) != 0 ? Colupf : Colubk;
+    }
+
+    // A clock of each object in mask (TiaMotion's bits): a player's lock point resets its missile's
+    // counter when RESMP is set (sections 9 and 11), so the players go first.
+    private void ClockObjects(int mask, bool motionClock)
+    {
+        byte[] r = _registers;
+        if ((mask & TiaMotion.P0) != 0 && _player0.Clock(motionClock, r[Nusiz0]) && (r[Resmp0] & 0x02) != 0)
+        {
+            _missile0.LockToPlayer();
+        }
+
+        if ((mask & TiaMotion.P1) != 0 && _player1.Clock(motionClock, r[Nusiz1]) && (r[Resmp1] & 0x02) != 0)
+        {
+            _missile1.LockToPlayer();
+        }
+
+        if ((mask & TiaMotion.M0) != 0)
+        {
+            _missile0.Clock(motionClock, r[Nusiz0]);
+        }
+
+        if ((mask & TiaMotion.M1) != 0)
+        {
+            _missile1.Clock(motionClock, r[Nusiz1]);
+        }
+
+        if ((mask & TiaMotion.Bl) != 0)
+        {
+            _ball.Clock(motionClock);
+        }
     }
 
     // The fifteen latches each pair of outputs sets (tia.md section 2.2): bit 2r + 1 is read

@@ -96,6 +96,31 @@ public class TiaMissileTests
         Assert.Equal([41], Lit(rows[2], P0));
     }
 
+    /// <summary>
+    /// The suite's <c>hmove-values</c> header and picture [recorded], a RESM0 landing at colour clock
+    /// 81 (pixel 13) on a line where the old dot is at <c>old</c>: what that line draws. A dot at or
+    /// left of the reset's clock is already drawn, the one on the clock itself included, as
+    /// <c>resbl-kill</c> finds for the ball; a start in flight is carried to land 4 clocks after the
+    /// reset, at 17.
+    /// </summary>
+    public static TheoryData<int, int[]> ResetRaces() => new()
+    {
+        { 12, [12] },
+        { 13, [13] },
+        { 14, [17] },
+        { 16, [17] },
+    };
+
+    [Theory]
+    [MemberData(nameof(ResetRaces))]
+    public void Section_9_a_reset_cuts_the_missile_off_from_the_clock_after_it_lands(int old, int[] drawn)
+    {
+        byte[][] rows = new TiaScene().Write(Reg.Enam0, 0x02).At(0, old + 64, Reg.Resm0, 0).At(2, 81, Reg.Resm0, 0).Rows(4);
+        Assert.Equal([old], Lit(rows[1], P0));
+        Assert.Equal(drawn, Lit(rows[2], P0));
+        Assert.Equal([17], Lit(rows[3], P0));
+    }
+
     [Fact]
     public void Section_9_the_counter_keeps_running_under_vblank()
     {

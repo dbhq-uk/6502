@@ -92,8 +92,10 @@ public sealed class TiaPlayer : IReportsState
     }
 
     /// <summary>
-    /// The end of a colour clock: the scan counter moves if its gate lets MOTCK through, the
-    /// position counter is clocked, and the registers are seen as they now stand. Returns true when
+    /// A clock of the player: the scan counter moves if its gate lets it through, and the position
+    /// counter is clocked. <paramref name="motionClock"/> is MOTCK, or an extra clock from HMOVE
+    /// (<see cref="TiaMotion"/>), which the TIA takes before the pixel and the motion clock at the
+    /// end of a colour clock. Returns true when
     /// the scan counter has just reached <c>%010</c> in the main copy, where RESMP resets the
     /// missile (see the remarks).
     /// </summary>
@@ -123,9 +125,14 @@ public sealed class TiaPlayer : IReportsState
         }
 
         _counter.Clock(motionClock, TiaPositionCounter.Copies(nusiz));
+        return lockPoint;
+    }
+
+    /// <summary>The end of a colour clock: the graphics registers are seen as they now stand.</summary>
+    internal void SeeRegisters()
+    {
         _seenNew = _new;
         _seenOld = _old;
-        return lockPoint;
     }
 
     internal void PowerOn()

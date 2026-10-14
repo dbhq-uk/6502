@@ -82,6 +82,9 @@ internal sealed class TiaPositionCounter : IReportsState
     // A start the player's graphics have not taken yet (section 10's extra clock).
     private bool _startUntaken;
 
+    // A reset landed: the start is cut off at the end of the clock it landed on.
+    private bool _cutLate;
+
     internal TiaPositionCounter()
     {
     }
@@ -123,16 +126,17 @@ internal sealed class TiaPositionCounter : IReportsState
     /// A reset strobe has landed: the counter is held for four clocks and then starts at count 0.
     /// The ball's reset also sends a start (<paramref name="sendsStart"/>, tia.md section 12), so
     /// the ball draws where its count restarts, on the same line. A start being drawn, or one a
-    /// player's scan counter has not taken yet, is cut off [guessing - verify: the suite's
-    /// <c>collision/resbl-kill</c>, task 7's, says a ball pixel not yet shown is erased; the model
-    /// does the same for every object]; a decode already held rides through.
+    /// player's scan counter has not taken yet, is cut off; a decode already held rides through.
+    /// The cut comes at the end of the clock the write lands on, so that clock's pixel still shows
+    /// and the next is erased: the "kill clock" of the suite's <c>collision/resbl-kill</c> for the
+    /// ball, and for a missile its <c>hmove-values</c> header and picture, whose dot on the reset's
+    /// own clock is "already drawn" [inferring from the two; for players guessing - verify].
     /// </summary>
     internal void Reset(bool sendsStart)
     {
         _reset = ResetClocks;
-        _start = false;
-        _startBefore = false;
         _startUntaken = false;
+        _cutLate = true;
         if (sendsStart)
         {
             _held = Main;
@@ -170,6 +174,13 @@ internal sealed class TiaPositionCounter : IReportsState
     {
         if (_reset > 0)
         {
+            if (_cutLate)
+            {
+                _cutLate = false;
+                _start = false;
+                _startBefore = false;
+            }
+
             if (_reset > ResetMotionClocks || motionClock)
             {
                 if (--_reset == 0)
@@ -206,6 +217,7 @@ internal sealed class TiaPositionCounter : IReportsState
         _startBefore = false;
         _startMain = false;
         _startUntaken = false;
+        _cutLate = false;
     }
 
     /// <inheritdoc />
@@ -219,6 +231,7 @@ internal sealed class TiaPositionCounter : IReportsState
         sink.Add(nameof(_startBefore), _startBefore);
         sink.Add(nameof(_startMain), _startMain);
         sink.Add(nameof(_startUntaken), _startUntaken);
+        sink.Add(nameof(_cutLate), _cutLate);
     }
 
     // The decode the counter makes on entering a count (tia.md section 9).
