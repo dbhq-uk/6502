@@ -12,6 +12,7 @@
   </Folder>
   <Folder Name="/src/">
     <Project Path="src/Dbhq.Cpu6502/Dbhq.Cpu6502.csproj" />
+    <Project Path="src/Dbhq.Machines.Atari2600.Wasm/Dbhq.Machines.Atari2600.Wasm.csproj" />
     <Project Path="src/Dbhq.Machines.Atari2600/Dbhq.Machines.Atari2600.csproj" />
     <Project Path="src/Dbhq.Machines.BbcMicro.Wasm/Dbhq.Machines.BbcMicro.Wasm.csproj" />
     <Project Path="src/Dbhq.Machines.BbcMicro/Dbhq.Machines.BbcMicro.csproj" />

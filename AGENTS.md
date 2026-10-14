@@ -21,7 +21,8 @@ src/Dbhq.Machines.Nes/      # the NES, NTSC and PAL, on the core; its PPU is cau
 src/Dbhq.Machines.Nes.Wasm/  # the NES as .NET WebAssembly: NesHost, for its page (site/public/nes.js) and the speed bench
 src/Dbhq.Machines.Electron/  # the Acorn Electron: its ULA, keyboard, screen, sound and cassette, on the core
 src/Dbhq.Machines.Electron.Wasm/  # the Electron as .NET WebAssembly, for its page (site/public/electron.js) and the speed bench
-src/Dbhq.Machines.Atari2600/  # the Atari 2600, NTSC and PAL, on the core, being built task by task (docs/superpowers/plans/2026-10-14-atari-2600.md); src/Dbhq.Machines.Atari2600.Wasm/ arrives with its task 8
+src/Dbhq.Machines.Atari2600/  # the Atari 2600, NTSC and PAL, on the core, being built task by task (docs/superpowers/plans/2026-10-14-atari-2600.md)
+src/Dbhq.Machines.Atari2600.Wasm/  # the Atari 2600 as .NET WebAssembly: Atari2600Host, for the speed bench (bench/atari-2600-speed/, task 8) and, from task 13, its page
 machines/                   # registry.json, and per machine its "try it" program, which the page shows and the acceptance test runs (machines/kim-1/teletype.json is the KIM-1's teletype session, which its page shows and its tests and browser check run; machines/nes/ holds the NES's, and its recorded frame hashes)
   bbc-micro/discs/          # the BBC Micro page's preset discs: one folder each with its image, licence, README and (if copyleft) source; manifest.json lists them
   atari-2600/               # from the Atari 2600's tasks 11 and 12: try-it.json, expected-frames.json, suite-outcomes.json, and cartridges/ with the bundled homebrew in its own folder, as the discs are kept
