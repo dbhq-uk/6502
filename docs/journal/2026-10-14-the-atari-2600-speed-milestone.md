@@ -67,3 +67,26 @@ The lower AOT median is 8.22 times real time, under the rule's line of 10, so **
 ## The review, and one fix to `analyse.py`
 
 Task 8's review found that `analyse.py` printed each median to two decimal places but judged the unrounded value, so a median of 24.9999 printed as 25.00 and was judged CONTINUE, HEADROOM, and one of 9.9999 printed as 10.00 and was judged STOP. Test first: two synthetic launches files in a scratch folder outside the repository, with AOT medians of 24.9999 and 9.9999, gave `25.00` with `CONTINUE, HEADROOM` and `10.00` with `STOP` before the fix (`python3 -I bench/atari-2600-speed/analyse.py <file>`, 14 October 2026). Now each AOT median is rounded to the two places it is printed with before it is judged, and the same files give `CONTINUE` and `CONTINUE, HEADROOM`. The first run's verdict does not change: its lower median, 8.22, is the same rounded. `rule.md` keeps its text as committed before the launch, with a dated pointer to this entry added.
+
+## The run again after the sound, and a control
+
+The plan's task 10 asks for this workflow to be run again once the sound is built, and its figure recorded beside the first. Dan had already decided to carry on past the STOP; the run is a record, and the verdict line is printed by the same rule. Two runs were started by hand on 14 October 2026, each given a commit:
+
+```sh
+gh workflow run atari-2600-speed-run.yml --repo dbhq-uk/6502 --ref main -f ref=0ea88f29e7200a36e1c36d450a1579f9c27cc6dd
+gh workflow run atari-2600-speed-run.yml --repo dbhq-uk/6502 --ref main -f ref=d34110845828d48aafc1e40e26ea07d991b94242
+```
+
+- **With the sound**: run [38646805950](https://github.com/dbhq-uk/6502/actions/runs/38646805950), commit `0ea88f2` (task 10's head), host recorded at 22:19:51 UTC.
+- **A control, without it**: run [38647501100](https://github.com/dbhq-uk/6502/actions/runs/38647501100), commit `d341108` (task 9's head, the last before the sound), host recorded at 22:25:47 UTC. It was not asked for. It was started because the first run landed on a different processor from task 8's, so its figure alone could not say what the sound cost.
+
+Both hosts were GitHub-hosted runners, image `ubuntu24` 20261012.334.1, Ubuntu 24.04.5 LTS, 4 CPUs, an **AMD EPYC 7763** under Microsoft's hypervisor; task 8's run had an AMD EPYC 9V45. The load gate let every launch through with the one-minute load under 1.00, and every launch counted on its first try. The figures, times real time, as `analyse.py` printed them in each artefact's `analysis.txt`:
+
+| Launch | Task 8, `7812989`, EPYC 9V45 (median) | Control, `d341108`, EPYC 7763: five runs; median | With the sound, `0ea88f2`, EPYC 7763: five runs; median |
+|---|---|---|---|
+| AOT, NTSC | 8.40 | 4.80 4.82 4.52 4.76 4.80; 4.80 | 4.53 4.55 4.51 4.52 4.52; 4.52 |
+| AOT, PAL | 8.22 | 4.89 4.86 4.89 4.88 4.90; 4.89 | 4.69 4.65 4.74 4.79 4.73; 4.73 |
+| Interpreter, NTSC | 0.58 | 0.24 0.24 0.25 0.24 0.24; 0.24 | 0.24 0.24 0.23 0.23 0.23; 0.23 |
+| Interpreter, PAL | 0.58 | 0.25 0.25 0.25 0.25 0.25; 0.25 | 0.25 0.25 0.25 0.25 0.25; 0.25 |
+
+**With the sound, the lower AOT median is 4.52 times real time, and the verdict is STOP**, as it was. Most of the fall from 8.22 is the host: on the same processor model the build without the sound gave 4.80 (its lower median, NTSC). Against that control the sound costs about 6 per cent on NTSC (4.80 to 4.52) and about 3 per cent on PAL (4.89 to 4.73). That is one run of each, on two runners of the same type, and the control's own NTSC runs spread from 4.52 to 4.82, so the cost is of that order and not measured more finely than that. The speed pass (#130) starts from these figures.

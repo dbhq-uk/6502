@@ -124,3 +124,7 @@ In all, 38 faults were planted and 32 were caught on the first run. The six that
 The pass was first started with tests whose loops waited for a level change; the fault N4, a tone that never changes, made two of them wait for ever, and that run was stopped. Their loops are now bounded (above), and the table is from the runs after that.
 
 The site's tests (`cd site && npm test`, 14 October 2026) pass every journal and copy check; the ten that fail here need the machines' WebAssembly built into the site, which this box does not do, and they are the same ten that failed in task 9's run.
+
+## The speed, after the sound
+
+The plan asks for task 8's workflow to be run again after the sound, and its figure recorded beside the first. It is in [the speed milestone's entry](2026-10-14-the-atari-2600-speed-milestone.md), "The run again after the sound, and a control", with both runs' links, commits and hosts: run 38646805950 on `0ea88f2` gave a lower AOT median of 4.52 times real time, still STOP, on an AMD EPYC 7763, where task 8's 8.22 was on an EPYC 9V45; a control run of the commit before the sound on the same processor model gave 4.80. Nothing was timed on this box.
