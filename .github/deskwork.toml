@@ -1,0 +1,29 @@
+# deskwork: how agents file issues, record what blocks what, and keep the roadmap.
+# The skill reads this file; it does nothing in this repository unless enabled is true.
+enabled = true
+
+# The roadmap, written and committed by `deskwork roadmap`.
+roadmap = "roadmap.md"
+
+# Where designs live. An issue links to a spec here rather than carrying the design.
+designs = "docs/superpowers/specs/"
+
+# The organisation's issue types.
+issue_types = ["Bug", "Feature", "Task"]
+
+# On every issue deskwork files: filed and not yet reviewed. A person removes it
+# once the issue has been read and accepted.
+triage_label = "triage"
+
+[labels]
+# capture --area X applies the label area:X. These are kinds of work that cut
+# across machines. The machines keep their own labels (kim-1, bbc-micro, nes,
+# electron, atari-2600) and the site keeps `site`; they are not repeated here.
+area = ["core", "ci", "models", "speed", "rights"]
+
+# The Projects v2 board is not set yet: the gh token lacked the project scope
+# on 14 October 2026. To add it: gh auth refresh -s project, create the org
+# board "6502" (Status: Triage, Backlog, Next, In progress, Done), put its node
+# id below, run init and then intake.
+# project = "PVT_..."
+# triage_status = "Triage"
