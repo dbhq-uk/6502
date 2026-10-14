@@ -35,6 +35,9 @@
 // points mirrored. Then every photograph in the photographs section must load,
 // from this site.
 //
+// Then the teletype, on the same page: scripts/browser-check-kim1-tty.mjs
+// says what it checks.
+//
 // Then the BBC Micro, in the same browser, on the same server and watched the
 // same way: scripts/browser-check-bbc.mjs says what it checks. Then the NES,
 // the same way again: scripts/browser-check-nes.mjs.
@@ -53,6 +56,7 @@ import sharp from 'sharp';
 import { loadTryIt, parseKeys } from '../src/lib/machines.mjs';
 import { checkBbcMicro } from './browser-check-bbc.mjs';
 import { checkNes } from './browser-check-nes.mjs';
+import { checkKim1Teletype } from './browser-check-kim1-tty.mjs';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const site = path.resolve(here, '..');
@@ -717,6 +721,11 @@ try {
   }
   console.log(`photographs section: ${count} photographs; ${loaded.map((g) => `${g.file} ${g.ok ? 'loaded' : 'NOT LOADED'} ${g.src} ${g.natural}`).join('; ')}`);
   if (count < 2) problems.push(`the photographs section shows ${count} photographs`);
+
+  // ---- The teletype: scripts/browser-check-kim1-tty.mjs says what it checks ----
+  const ttyStarted = Date.now();
+  await checkKim1Teletype({ page, problems, timeout: STEP_TIMEOUT_MS });
+  console.log(`teletype checks took ${Date.now() - ttyStarted} ms`);
 
   // A phone: one finger scrolls the page until a tap focuses the model.
   const phone = await browser.newContext({ viewport: { width: 390, height: 780 }, hasTouch: true, isMobile: true, deviceScaleFactor: 2 });

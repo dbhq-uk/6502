@@ -213,6 +213,12 @@ jobs:
           PASS=$(count pass); FAILED=$(count fail)
           echo "pass=${PASS:-unread} fail=${FAILED:-unread}"
           [ "${FAILED:-1}" = "0" ]
+          # 496 as at 14 Oct 2026, measured once main (the NES models' notes and the
+          # BBC Micro's robustness, pull requests 93 and 94) was merged into the KIM-1
+          # teletype;
+          # 483 as at 13 Oct 2026, read from the passing count in CI's log of
+          # the KIM-1 teletype branch after main was merged into it (the site job's
+          # pass=483);
           # 486 as at 14 Oct 2026, measured once main (pull requests 84, 89 and 90)
           # was merged into the NES models' notes;
           # 482 as at 13 Oct 2026, with the NES models' notes (issue 81: seven tests,
@@ -248,7 +254,7 @@ jobs:
           # Adding tests is expected; losing them is the failure this floor catches.
           # Raise the number when the suite grows, here and in the same step of
           # deploy-site.yml, which must hold the same number.
-          [ "${PASS:-0}" -ge 486 ]
+          [ "${PASS:-0}" -ge 496 ]
       # The KIM-1 page in a real browser: the built site served on 127.0.0.1
       # with its own CSP, the try-it program clicked in through the page's own
       # keypad, and the digits read back. Then the page's photograph loads, and

@@ -188,6 +188,12 @@ jobs:
           PASS=$(count pass); FAILED=$(count fail)
           echo "pass=${PASS:-unread} fail=${FAILED:-unread}"
           [ "${FAILED:-1}" = "0" ]
+          # 496 as at 14 Oct 2026, measured once main (the NES models' notes and the
+          # BBC Micro's robustness, pull requests 93 and 94) was merged into the KIM-1
+          # teletype;
+          # 483 as at 13 Oct 2026, read from the passing count in CI's log of
+          # the KIM-1 teletype branch after main was merged into it (the site job's
+          # pass=483);
           # 486 as at 14 Oct 2026, measured once main (pull requests 84, 89 and 90)
           # was merged into the NES models' notes;
           # 482 as at 13 Oct 2026, with the NES models' notes (issue 81: seven tests,
@@ -223,7 +229,7 @@ jobs:
           # Adding tests is expected; losing them is the failure this floor catches.
           # Raise the number when the suite grows, here and in the same step of
           # validate.yml, which must hold the same number.
-          [ "${PASS:-0}" -ge 486 ]
+          [ "${PASS:-0}" -ge 496 ]
 
       # The same floor as "Every machine file must be serving" below, checked on
       # the build itself, so a build that is missing a machine fails here and
@@ -333,7 +339,7 @@ jobs:
           # a file new in this deploy can answer 404 for a few seconds (the BBC
           # Micro's two merges on 4 Oct 2026 both met it). Each try has its own
           # cache-buster. A file that never reaches 200 still fails.
-          for f in sitemap-index.xml sitemap-0.xml robots.txt analytics.js consent.js machines-table.js table-sort.js chip.js kim-1.js machine-host.js bbc-micro.js bbc-keys.js bbc-audio.js nes.js nes-keys.js nes-audio.js model-loader.js models/kim-1.js models/kim-1-tracks.webp models/nes-famicom-case.js models/nes-famicom-board.js models/nes-famicom-board-tracks.webp; do
+          for f in sitemap-index.xml sitemap-0.xml robots.txt analytics.js consent.js machines-table.js table-sort.js chip.js kim-1.js machine-host.js teletype-paper.js bbc-micro.js bbc-keys.js bbc-audio.js nes.js nes-keys.js nes-audio.js model-loader.js models/kim-1.js models/kim-1-tracks.webp models/nes-famicom-case.js models/nes-famicom-board.js models/nes-famicom-board-tracks.webp; do
             TRY=0
             while :; do
               CODE=$(curl -s --max-time 20 --retry 3 --retry-delay 5 -o /dev/null -w "%{http_code}" "https://6502.dbhq.uk/${f}?cb=${GITHUB_SHA}-${TRY}")

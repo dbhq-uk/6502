@@ -19,7 +19,7 @@ src/Dbhq.Machines.BbcMicro/  # the BBC Micro Model B: its chips, keyboard, scree
 src/Dbhq.Machines.BbcMicro.Wasm/  # the BBC Micro as .NET WebAssembly; the ROMs are given to it as bytes
 src/Dbhq.Machines.Nes/      # the NES, NTSC and PAL, on the core; its PPU is caught up lazily (rule 1), whole lines with no sprite on them at once
 src/Dbhq.Machines.Nes.Wasm/  # the NES as .NET WebAssembly: NesHost, for its page (site/public/nes.js) and the speed bench
-machines/                   # registry.json, and per machine its "try it" program, which the page shows and the acceptance test runs (machines/nes/ holds the NES's, and its recorded frame hashes)
+machines/                   # registry.json, and per machine its "try it" program, which the page shows and the acceptance test runs (machines/kim-1/teletype.json is the KIM-1's teletype session, which its page shows and its tests and browser check run; machines/nes/ holds the NES's, and its recorded frame hashes)
   bbc-micro/discs/          # the BBC Micro page's preset discs: one folder each with its image, licence, README and (if copyleft) source; manifest.json lists them
 site/                       # 6502.dbhq.uk: the Astro site, its tests, and the scripts that build the machines into it
   src/models/               # the 3D models, one browser module each with its layout, generated parts and notes: kim-1, and the NES's nes-famicom-case (outside) and nes-famicom-board (inside)

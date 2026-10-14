@@ -78,4 +78,139 @@ public sealed class Kim1KeystrokesTests
         keys.RunUntilIdle();
         Assert.Equal("000000", machine.ReadDisplay());
     }
+
+    /// <summary>
+    /// The page can press a key on the keypad and type at the teletype in one
+    /// go. The keypad goes first, and the teletype's key is held until the last
+    /// tap has been up for its rest.
+    /// </summary>
+    [Fact]
+    public void TeletypeKeysWaitForTheKeypadTapsQueuedBeforeThem()
+    {
+        var machine = new Kim1Session().Machine;
+        machine.Mode = Kim1Mode.Teletype;
+        var keys = new Kim1Keystrokes(machine);
+
+        keys.Tap("RS");
+        keys.TypeAtTeletype("\u007f");
+        Assert.Equal(1, keys.HeldForTeletype);
+        Assert.False(keys.Idle, "idle with a key still held for the teletype");
+        Assert.False(keys.TeletypeIdle, "the teletype is idle with a key held for it");
+
+        keys.Run(2 * Hold - 100);
+        Assert.Equal(1, keys.HeldForTeletype);
+        Assert.Equal(0, machine.Teletype.Queued);
+        Assert.False(machine.Teletype.Sending);
+        Assert.False(keys.TeletypeIdle, "the teletype is idle while the key waits for the keypad");
+
+        keys.Run(200);
+        Assert.Equal(0, keys.HeldForTeletype);
+        Assert.True(machine.Teletype.Queued == 1 || machine.Teletype.Sending, "the key was not handed to the teletype");
+        Assert.False(keys.TeletypeIdle, "the teletype is idle at the handover, with the key not yet sent");
+
+        // And the monitor, which was reset by RS and had time to start, answers it.
+        keys.RunUntilIdle();
+        do
+        {
+            machine.Run(10_000);
+        }
+        while (!machine.Teletype.Idle(machine.Cycles));
+        Assert.Contains("KIM", machine.ReadTeletype());
+        Assert.True(keys.TeletypeIdle);
+    }
+
+    [Fact]
+    public void TeletypeKeysQueuedBeforeATapWaitForTapsQueuedAfterTheCallToo()
+    {
+        var machine = new Kim1Session().Machine;
+        var keys = new Kim1Keystrokes(machine);
+
+        keys.TypeAtTeletype("A");
+        keys.Tap("RS");
+        keys.Run(1);
+        Assert.Equal(1, keys.HeldForTeletype);
+        keys.RunUntilIdle();
+        Assert.Equal(0, keys.HeldForTeletype);
+        Assert.True(machine.Cycles >= 2 * Hold, "the key went before the tap queued after it was played and rested");
+    }
+
+    [Fact]
+    public void TeletypeKeysWithNoTapsBeforeThemGoOnTheNextRun()
+    {
+        var machine = new Kim1Session().Machine;
+        var keys = new Kim1Keystrokes(machine);
+
+        keys.TypeAtTeletype("A");
+        keys.Run(1);
+        Assert.Equal(0, keys.HeldForTeletype);
+        Assert.True(machine.Teletype.Queued == 1 || machine.Teletype.Sending);
+
+        // A held key can be dropped, as a terminal swapped for another drops its own.
+        keys.Tap("RS");
+        keys.TypeAtTeletype("B");
+        keys.DropHeldForTeletype();
+        Assert.Equal(0, keys.HeldForTeletype);
+    }
+
+    /// <summary>
+    /// Stopping a running program with ST and typing at the teletype in one go:
+    /// the monitor takes a moment to start printing KIM, and a character sent
+    /// into that moment is garbled, which the teletype's quiet-line rule cannot
+    /// prevent because the answer has not begun. Held until ST is done, the
+    /// characters arrive after the answer.
+    /// </summary>
+    [Fact]
+    public void AStopKeyAndTypingQueuedTogetherAreNotGarbled()
+    {
+        var kim = StopAndType(hold: true);
+
+        Assert.Equal(["KIM", "020A 4C 0212", "0212 3C"], kim.Paper.Last(3));
+        Assert.Equal(0, kim.Machine.Teletype.FramingErrors);
+    }
+
+    /// <summary>
+    /// The same session with the characters sent straight to the teletype, as
+    /// the page did before the hold: the first character of the address is lost
+    /// and the printer sees a framing error. This is what the hold is for, and
+    /// what the test above would catch if the hold stopped working.
+    /// </summary>
+    [Fact]
+    public void WithoutTheHoldAStopKeyAndTypingQueuedTogetherAreGarbled()
+    {
+        var kim = StopAndType(hold: false);
+
+        Assert.NotEqual(["KIM", "020A 4C 0212", "0212 3C"], kim.Paper.Last(3));
+        Assert.True(kim.Machine.Teletype.FramingErrors > 0);
+    }
+
+    private static Kim1Session StopAndType(bool hold)
+    {
+        var kim = new Kim1Session();
+        kim.Machine.Mode = Kim1Mode.Teletype;
+        kim.Keys("[RS]");
+        kim.Type("[RUBOUT]");
+        kim.Type("17FA[SPACE]00.1C.");
+        kim.Type("0200[SPACE]AD.10.02.18.6D.11.02.8D.12.02.4C.0A.02.");
+        kim.Type("0210[SPACE]27.15.");
+        kim.Type("0200[SPACE]G");
+
+        kim.Keystrokes.Tap("ST");
+        string typed = Kim1Teletype.Parse("0212[SPACE]");
+        if (hold)
+        {
+            kim.Keystrokes.TypeAtTeletype(typed);
+        }
+        else
+        {
+            kim.Machine.Teletype.Send(typed);
+        }
+
+        do
+        {
+            kim.Keystrokes.Run(10_000);
+        }
+        while (!kim.Keystrokes.Idle || !kim.Machine.Teletype.Idle(kim.Machine.Cycles));
+        kim.Print();
+        return kim;
+    }
 }
