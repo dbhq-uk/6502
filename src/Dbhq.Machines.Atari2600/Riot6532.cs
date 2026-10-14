@@ -66,8 +66,9 @@ public sealed class Riot6532
     }
 
     /// <summary>
-    /// What the outside world puts on port B's pins: on the 2600, the console switches, active low,
-    /// with PB2, PB4 and PB5 unconnected, so 1 (riot.md section 10).
+    /// What the outside world puts on port B's pins: on the 2600, the console switches, active low.
+    /// PB2, PB4 and PB5 are unconnected and read 1 here, through the chip's pull-ups (riot.md section
+    /// 10); no source states the value read on a 2600 [guessing - verify] (section 12 item 6).
     /// </summary>
     public byte PortBInput { get; set; } = 0xFF;
 
@@ -262,8 +263,9 @@ public sealed class Riot6532
     /// interrupts off and arms the negative edge (riot.md section 9). The rest is not stated by any
     /// source, so the model picks fixed values that make runs repeat, recorded in
     /// <c>docs/known-differences.md</c>: the RAM clear; both flags clear; the count at <c>$00</c> at
-    /// divide by 1, so the first cycle passes zero, sets the timer flag and starts the free run, as
-    /// the real timer has been free-running since its own reset ended, before the CPU's.
+    /// divide by 1, so the first cycle passes zero, sets the timer flag and starts the free run. The
+    /// real timer is taken to have been running since the RIOT's own reset ended, before the CPU's,
+    /// which rests on the two reset circuits' RC values [guessing - verify] (riot.md section 9).
     /// </summary>
     public void PowerOn()
     {
