@@ -176,7 +176,8 @@ public sealed class Tia : IReportsState
 
     /// <summary>
     /// The power-on state, none of which a source gives: every register 0, the latches clear, and
-    /// the counter at colour clock 0, a choice recorded in <c>docs/known-differences.md</c>.
+    /// the counter at colour clock 0, a choice recorded in <c>docs/known-differences.md</c>
+    /// [guessing - verify].
     /// </summary>
     public void PowerOn()
     {

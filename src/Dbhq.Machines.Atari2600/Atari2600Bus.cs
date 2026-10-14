@@ -34,13 +34,16 @@ namespace Dbhq.Machines.Atari2600;
 /// <para>
 /// <b>The WSYNC halt</b> (section 5) is the NES's DMA halt in shape: a write to WSYNC sets the
 /// TIA's latch, and the next <see cref="Read"/> repeats its read, each repeat a whole cycle through
-/// <see cref="Cycle"/>, until the TIA reaches the line's start; then it makes the read. A write is
-/// never held, so <c>DEC WSYNC</c> writes twice and halts on the next read.
+/// <see cref="Cycle"/>, until the TIA reaches the line's start; then it makes the read. Each
+/// repeat reaches the cartridge as an access, as the 6502 data sheet's held address suggests and no
+/// 2600 source confirms (bus.md section 8 item 2) [guessing - verify]. A write is never held, so
+/// <c>DEC WSYNC</c> writes twice and halts on the next read.
 /// </para>
 /// <para>
 /// <b>The floating bus</b> (section 4). The bus keeps the last byte driven onto it, read or
 /// written. A TIA read drives only the lines <see cref="Tia.DrivenLines"/> names; the rest are that
-/// byte. Every other chip drives all eight. At power on the byte is <c>$00</c>, a choice.
+/// byte. Every other chip drives all eight. At power on the byte is <c>$00</c>, a choice: no source gives it (bus.md section 8 item 3)
+/// [guessing - verify].
 /// </para>
 /// </remarks>
 public sealed class Atari2600Bus : Bus, IReportsState
@@ -207,7 +210,7 @@ public sealed class Atari2600Bus : Bus, IReportsState
 
     /// <summary>
     /// The power-on state: the TIA, the RIOT and the board at theirs, the counts at zero and the
-    /// data bus at <c>$00</c> (bus.md section 8 item 3, a choice).
+    /// data bus at <c>$00</c> (bus.md section 8 item 3, a choice) [guessing - verify].
     /// </summary>
     internal void PowerOn()
     {
@@ -309,7 +312,8 @@ public sealed class Atari2600Bus : Bus, IReportsState
 
     // The CPU's read of address held while RDY is low: the same read, a cycle at a time, until the
     // cycle about to run starts the line (Tia.HaltReleaseDue). Each is a full bus access, so the
-    // board and the chips see it (bus.md section 5; section 8 item 2 for the board).
+    // board and the chips see it (bus.md section 5; section 8 item 2 for the board, where that the
+    // cartridge sees the held reads is [guessing - verify]).
     private void Halt(ushort address)
     {
         while (!_tia.HaltReleaseDue)

@@ -7,7 +7,9 @@ namespace Dbhq.Machines.Atari2600.Tests;
 /// a write to WSYNC holds RDY low until colour clock 0 of the next line; the 6507 stops only on a
 /// read, so the next read is repeated, a whole cycle each time, until then. Cycle k of a line runs
 /// colour clocks 3k - 3 to 3k - 1 (tia.md section 4, the split task 5 settles), so from power on,
-/// with the TIA at colour clock 0, the bus's n-th call is cycle n of the first line.
+/// with the TIA at colour clock 0, the bus's n-th call is cycle n of the first line. The held reads
+/// are seen through <see cref="RecordingBoard"/>, which stands in for the observer here: the
+/// observer is told of TIA and RIOT accesses and bank switches, not of plain cartridge reads.
 /// </summary>
 public class WsyncHaltTests
 {

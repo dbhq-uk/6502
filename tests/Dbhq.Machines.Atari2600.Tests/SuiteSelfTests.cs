@@ -50,18 +50,23 @@ public class SuiteSelfTests(ITestOutputHelper output)
     ];
 
     /// <summary>
-    /// Trusted self-tests in the folders run here whose parts come in a later task, with that task
-    /// (suite.md section 5.1): they run, and must not pass yet.
+    /// Trusted self-tests in the folders run here whose parts come in a later task, with the next
+    /// task that must run them again (suite.md section 5.1). Each must fail, in both regions, with
+    /// the CODE, OBSERVED and EXPECTED written beside it, the first check that needs a part not built
+    /// yet: so a hang, a pass or a different failure is seen. <c>cpu/partial-drive</c> fails first
+    /// at CODE <c>$05</c>, a collision check, which task 6 builds; it passes only after task 9's
+    /// inputs (suite.md section 1.6), so task 6 moves it to its next failure.
     /// </summary>
-    public static readonly (string Test, int Task)[] NotYet =
+    public static readonly (string Test, int Task, byte Code, byte Observed, byte Expected)[] NotYet =
     [
-        ("cpu/partial-drive", 9),
-        ("cpu/rmw-strobe", 6),
-        ("cpu/stack-aliases-tia", 6),
+        ("cpu/partial-drive", 6, 0x05, 0x10, 0x50),
+        ("cpu/rmw-strobe", 6, 0x01, 0x00, 0x04),
+        ("cpu/stack-aliases-tia", 6, 0x03, 0x00, 0x80),
     ];
 
     /// <summary>
-    /// The recorded cartridge tests (the plan's trust table): run and shown, never gating here.
+    /// The recorded cartridge tests (the plan's trust table): run and shown, never gating here, so
+    /// their test asserts nothing about the outcome.
     /// Task 11 records their outcomes in <c>machines/atari-2600/suite-outcomes.json</c>.
     /// </summary>
     public static readonly string[] Recorded =
@@ -89,12 +94,14 @@ public class SuiteSelfTests(ITestOutputHelper output)
 
     [Theory]
     [MemberData(nameof(NotYetRows))]
-    public void Trusted_self_test_waiting_for_a_later_task_does_not_pass_yet(string test, string region)
+    public void Trusted_self_test_waiting_for_a_later_task_fails_where_expected(string test, string region)
     {
-        int task = NotYet.Single(row => row.Test == test).Task;
+        var row = NotYet.Single(row => row.Test == test);
         SuiteOutcome outcome = SuiteRunner.Run(test, TestPrograms.RegionNamed(region));
-        output.WriteLine($"{outcome} (waits for task {task})");
+        output.WriteLine($"{outcome} (task {row.Task} runs it next)");
         Assert.False(outcome.Passed, $"{outcome}: it passes now, so move it from NotYet to Trusted");
+        Assert.True(outcome.Failed, $"{outcome}: no verdict, where a fail at CODE ${row.Code:X2} was expected");
+        Assert.Equal((row.Code, row.Observed, row.Expected), (outcome.Code, outcome.Observed, outcome.Expected));
     }
 
     [Theory]

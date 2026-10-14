@@ -74,6 +74,9 @@ public class StateReportTests
 
         string plain = Run(rom, region, observe: false, reference: false);
         Assert.Equal(plain, Run(rom, region, observe: true, reference: false));
+
+        // Vacuous until the speed pass: every build is the per-colour-clock reference now, so the
+        // option has nothing to change yet. It holds the place of the gate the pass will need.
         Assert.Equal(plain, Run(rom, region, observe: false, reference: true));
     }
 

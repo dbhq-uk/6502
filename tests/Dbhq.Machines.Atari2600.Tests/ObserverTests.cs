@@ -68,6 +68,19 @@ public class ObserverTests
     }
 
     [Fact]
+    public void The_observer_is_told_the_thirteen_bit_address()
+    {
+        // LDA $E280: the core puts out $E280; the 6507 has no A13 to A15, so the bus keeps $0280,
+        // SWCHA, and that is the address the observer hears (bus.md section 1). The one place the
+        // mask shows outside the parts, which decode their own low lines.
+        Atari2600 machine = TestPrograms.Machine(Region.Ntsc, 0xAD, 0x80, 0xE2, 0x4C, 0x03, 0xF0);
+        var observer = new Recorder();
+        machine.Bus.Observer = observer;
+        machine.Step();
+        Assert.Equal(["read $0280"], observer.Accesses);
+    }
+
+    [Fact]
     public void A_halt_is_told_as_it_ends_with_the_cycle_count()
     {
         // STA WSYNC; NOP; JMP to the NOP.
