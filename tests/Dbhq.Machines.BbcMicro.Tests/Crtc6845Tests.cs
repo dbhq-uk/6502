@@ -420,6 +420,69 @@ public class Crtc6845Tests
     }
 
     [Fact]
+    public void AHandlerOfTheChipsEventThatWritesToItIsRefusedAndTheChipCarriesOn()
+    {
+        // The chip raises its events while it catches up, and stands still for them; a write from
+        // inside one would change the state the catch-up is working through. It is refused with a
+        // message that says so, and the refusal does not leave the chip stuck: the guard is let go
+        // as the exception passes, so the next look and the next write work.
+        Crtc6845 crtc = Programmed(0);
+        bool armed = true;
+        int handled = 0;
+        crtc.FrameStarted += () =>
+        {
+            handled++;
+            if (armed)
+            {
+                Write(crtc, 5, 1);
+            }
+        };
+
+        var thrown = Assert.Throws<InvalidOperationException>(() =>
+        {
+            for (int t = 0; t < 200_000; t++)
+            {
+                crtc.Tick();
+                _ = crtc.VSync;
+            }
+        });
+
+        Assert.Contains("wrote to it", thrown.Message);
+        Assert.Equal(1, handled);
+
+        armed = false;
+        Write(crtc, 5, 1);
+        for (int t = 0; t < 200_000; t++)
+        {
+            crtc.Tick();
+            _ = crtc.VSync;
+        }
+        Assert.True(handled > 1, "no frame started after the refused write");
+    }
+
+    [Fact]
+    public void AHandlerWritingR16OrAboveIsNotRefusedBecauseItChangesNothing()
+    {
+        // The refusal is for a data write that would change a register. R16 and above take nothing
+        // and the chip returns before the guard, so a handler that writes one is not refused.
+        Crtc6845 crtc = Programmed(0);
+        int handled = 0;
+        crtc.FrameStarted += () =>
+        {
+            handled++;
+            Write(crtc, 17, 0xFF);
+        };
+
+        for (int t = 0; t < 200_000 && handled == 0; t++)
+        {
+            crtc.Tick();
+            _ = crtc.VSync;
+        }
+
+        Assert.Equal(1, handled);
+    }
+
+    [Fact]
     public void OnlyR12ToR17ReadBack()
     {
         // The HD6845S datasheet: R12 and R13 can be read on the S (not the R), with R12's top two
