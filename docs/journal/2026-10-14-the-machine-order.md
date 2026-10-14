@@ -1,7 +1,7 @@
 ---
 title: "The order of the machines after the Atari 2600"
 date: 2026-10-14
-summary: "Dan fixed the order of the machines after the Atari VCS: the Atari 8-bit family next, then the BBC Master, the Commodore 64, the Apple II, the VIC-20, the PET, the Apple I and the Oric. It follows the research memo of the day before. The Commodore 64 starts only when its ROM question is settled."
+summary: "Dan fixed the order of the machines after the Atari VCS: the Atari eight-bit family next, then the BBC Master, the Commodore 64, the Apple II, the VIC-20, the PET, the Apple I and the Oric. It follows the research memo of the day before. The Commodore 64 starts only when its ROM question is settled."
 order: 60
 ---
 
