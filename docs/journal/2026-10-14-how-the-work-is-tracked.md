@@ -41,7 +41,7 @@ Each blocker was recorded with `deskwork link` and a reason. The four Atari 2600
 
 ## Not done, and why
 
-- **The board.** Dan asked for a Projects v2 board as well. The GitHub token lacked the `project` scope when this was done, so the board was not created and the config leaves `project` commented out, with a note saying how to finish: grant the scope, create the board, put its id in the config, and run `deskwork init` and `deskwork intake`.
+- **The board.** Dan asked for a Projects v2 board as well. The token lacked the `project` scope at first. Later the same day the account was switched (the old name `dandcg` had been renamed to `grinidx`) and logged in again with the scope, and the org board "6502" (https://github.com/orgs/dbhq-uk/projects/1) was made, linked to this repository, and its node id put in `.github/deskwork.toml`. `deskwork init` added the Triage option to Status, so its options are GitHub's three (Todo, In Progress, Done) plus Triage, not the five first planned (Backlog and Next were left out: the roadmap file says what is next). `deskwork intake` then put all 89 open issues on the board and `doctor` reported no drift. The count of 89 is the day's count, from the roadmap's first line, not a claim about now.
 - **A mistake, caught.** Two issues filed one after the other (#117 and #118) had their labels and their places in the roadmap's order swapped by number. Reading each title back found it before the roadmap was written, and both were corrected.
 - **Nothing was closed, assigned or prioritised** beyond the labels above. #44 stays open: its last item, five wording nits from a review, was never written down and cannot be recovered, and a comment on it says so.
 
