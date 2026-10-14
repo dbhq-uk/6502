@@ -30,7 +30,8 @@
 // was traced or measured from, saying what it took from each. The credit is
 // built from the machine's registry entry, the same `photos`, `drawings` and
 // `references` the photographs section and the registry check read, so they
-// cannot disagree. A reference is a source that is not committed (a flatbed
+// cannot disagree. An author whose byline asks for a link (Chris's Acorns) has
+// `authorUrl`, and the name is that link. A reference is a source that is not committed (a flatbed
 // scan, a photograph whose source states no licence); it is credited as a
 // drawing is, after the drawings. A model whose results file lists the
 // `sources` it was made from (the NES's board and case: each with its address
@@ -45,7 +46,7 @@
 // then the entry's `legendWords`, which say what a mark means.
 import { MODELS, CONTROLS, CONTROLS_DESCRIPTION, TRACK_BUTTONS, regionProblems, regionViews } from '../models/models.mjs';
 
-interface Source { author: string; sourceUrl: string; licence: string | null; licenceUrl?: string; used: string; caption?: string; title?: string; sha256?: string }
+interface Source { author: string; authorUrl?: string; sourceUrl: string; licence: string | null; licenceUrl?: string; used: string; caption?: string; title?: string; sha256?: string }
 interface Props {
   /** The model's module, as the machine claims it in the registry. */
   module: string;
@@ -127,7 +128,7 @@ const consoles = views.length > 1;
         {v.note.paragraphs.map((p) => <p>{p}</p>)}
         <p>What it was traced and measured from:</p>
         <ul class="model-credit" data-model-credit>
-          {sources.map((s) => <li data-model-source>{s.used.charAt(0).toUpperCase() + s.used.slice(1)}: from <a href={s.sourceUrl}>{s.what}</a>, by {s.author}, {s.licence === null ? 'no licence stated' : s.licenceUrl ? <a href={s.licenceUrl}>{s.licence}</a> : s.licence}.</li>)}
+          {sources.map((s) => <li data-model-source>{s.used.charAt(0).toUpperCase() + s.used.slice(1)}: from <a href={s.sourceUrl}>{s.what}</a>, by {s.authorUrl ? <a href={s.authorUrl}>{s.author}</a> : s.author}, {s.licence === null ? 'no licence stated' : s.licenceUrl ? <a href={s.licenceUrl}>{s.licence}</a> : s.licence}.</li>)}
         </ul>
         <p>What it does not show, or shows less well:</p>
         <ul class="model-limits" data-model-limits>

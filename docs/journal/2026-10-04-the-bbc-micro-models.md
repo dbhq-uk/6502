@@ -1822,7 +1822,7 @@ The outside model's drawing, its words and its results file are built, and none 
 
 ### The words
 
-The caption starts "Model, not a photograph.", reads every size and count from the layout, and says the size is the Service Manual's, "though three measures on the photographs read the case a few per cent wider, which is not resolved". The note's first paragraph is `sizeSentence()`: the manual's size, taken from its Model B+ section to hold for the Model B, then the three measures with their figures from the results file (the keys' scale on O1's top, the scale the opening's front corners imply, the case's width on O2's D socket scale), that the first two are not independent, and that it is not resolved and nothing was rescaled. Then the keys' mapping and O1's and O3's held-out figures, the colours read by eye with the clustering's agreement, the triangulated heights and the check point (with the words for a failed check ready, held by a test, though it passed), the front edge's check as not measurable and why, and the rear check with what it does and does not test. The limits list the size again, the front edge, the typical values, the caps' shape, the legends (one each, the shifted symbols not drawn), the badge's owl not drawn, the parts not measured and not drawn, and that the inside's copper is traced to look at, with its connections not verified.
+The caption starts "Model, not a photograph.", reads every size and count from the layout, and says the size is the Service Manual's, "though three measures on the photographs read the case a few per cent wider, which is not resolved" (corrected in the review below: the measures point different ways). The note's first paragraph is `sizeSentence()`: the manual's size, taken from its Model B+ section to hold for the Model B, then the three measures with their figures from the results file (the keys' scale on O1's top, the scale the opening's front corners imply, the case's width on O2's D socket scale), that the first two are not independent, and that it is not resolved and nothing was rescaled. Then the keys' mapping and O1's and O3's held-out figures, the colours read by eye with the clustering's agreement, the triangulated heights and the check point (with the words for a failed check ready, held by a test, though it passed), the front edge's check as not measurable and why, and the rear check with what it does and does not test. The limits list the size again, the front edge, the typical values, the caps' shape, the legends (one each, the shifted symbols not drawn), the badge's owl not drawn, the parts not measured and not drawn, and that the inside's copper is traced to look at, with its connections not verified.
 
 ### What was checked, and how
 
@@ -1894,14 +1894,14 @@ The BBC Micro's two models go on its page together, as the NES's did: the two th
 
 The site was built before this task (`git archive 2eba934` into a scratch folder, with this tree's `public/machines/` and `src/data/results.json`, `npm run build`) and after. The KIM-1's and the NES's pages are the same byte for byte with their `<style>` elements taken out; every other file in `dist` outside `machines/` is the same, but the three new files under `models/`.
 
-`node scripts/page-weight.mjs /machines/bbc-micro/`, 13 October 2026, before and after (bytes, then gzipped at level 9):
+`node scripts/page-weight.mjs /machines/bbc-micro/`, before (13 October 2026) and after (re-measured on 14 October 2026, on the tree of the review's fixes below: the first figures, taken on `0d5d7a6`, went stale with the click fix and the review's words), in bytes, then gzipped at level 9:
 
 | | Before | After |
 |---|---|---|
-| When it opens, total | 161,029; 60,965 | 211,188; 71,860 |
-| The page's HTML | 84,802; 18,387 | 131,470; 27,752 |
+| When it opens, total | 161,029; 60,965 | 211,509; 71,971 |
+| The page's HTML | 84,802; 18,387 | 131,791; 27,863 |
 | `/model-loader.js` | not loaded | 3,491; 1,530 |
-| Later: `/models/bbc-micro-case.js` | | 644,571; 166,447 |
+| Later: `/models/bbc-micro-case.js` | | 644,623; 166,480 |
 | Later: `/models/bbc-micro-board.js` | | 660,224; 169,046 |
 | Later: `/models/bbc-micro-board-tracks.webp` | | 376,968; 377,106 |
 
@@ -1931,3 +1931,14 @@ The failure was the model's, not the check's: **a click on the model's C before 
 **Round 4** (Validate run 38486096965, on `93c5fc7`): green, every job, the site suite 563 passed. The view from under the case rested (polar 3.142, 50.9% drawn); `*CAT` marked IC78 and its row; `*DUMP HELLO` showed IC88, the DFS, framed. Reading the log I found my own mistake in the round 3 change: the frames seen were gathered from the `*CAT` on, and in this run the `*CAT` had already framed IC88, so the `*DUMP` step judged what the `*CAT` had shown. The set of frames is now emptied before `*DUMP`, so the step judges what `*DUMP` shows; this was pushed and run again (below).
 
 **Round 5** (Validate run 38487089331, on `7fab362`, 14 October 2026): green, every job, the site suite 563 passed. This time `*CAT` marked IC78 and its row and did not frame the DFS (BASIC, IC52, only), and `*DUMP HELLO` then framed IC88 on its own, the screen still printing the file (`0010 52 4F 57 53 45 52 20 43 ROWSER C`): the case round 3 met, now judged on what pages the DFS long enough to be seen. The view from under the case rested again (polar 3.142, 50.9% drawn). The KIM-1's, the BBC Micro's machine and the NES's sections passed unchanged in all five rounds.
+
+### Task 9b's review, and what was changed (14 October 2026)
+
+The review found nothing critical: the page honest, the credits right, the weights matching, the deploy list exact. What it found, and what was done, each test changed first and seen to fail against the code as it was, then seen to fail with the fix undone one thing at a time in a scratch copy outside the repository (its log not committed):
+
+- **The limits were not pinned.** Changing "point different ways" to "are close", or "could not be measured" to "matches", in the case's notes passed every test, because the page test compared the page with the notes, which a rebuild makes agree. The words test now holds every limit of both notes by its key phrases, in the notes as `made()` writes them and on the page. Shown: the first of those breaks, built, fails it on the limit's own phrase; so does dropping "not as a netlist" from the board's first limit.
+- **The guard for a page without a model had lost its power.** It had been a real running machine with no model whose built page was read; task 9b replaced it with source patterns on `[id].astro`. It now renders the machine page itself through Astro's container and Vite's module loader (`tests/render-page.mjs`), for the BBC Micro's record with its claim taken away, and finds no model section, no loader and no "Used for the model"; the same render of the real record has all three. Shown: the loader on every page, the section on every page, and the photographs always saying what the model took, each fail it.
+- **The `*DUMP` step and its disc** are pinned: the frames are cleared before `*DUMP`, and `dumpDisc()` is the test disc but for a file of 2 KB. Shown: each undone fails the browser check's test.
+- **Minors.** D1's licence now reads "Copyright Acorn Computers Limited 1985: may not be adapted or reproduced without Acorn's prior written approval: facts read from it, nothing copied", and the credits test compares each licence in full, with the terms `sources.json` records the source stating, and a photograph's licence as `sources.json` has it (shown: the old D1 wording, and a photograph's licence changed, each fail). Chris's Acorns' byline links its site: a credit may carry `authorUrl`, which `ModelPanel.astro` makes the author's name a link and the registry requires to be a web link (shown: no link, and the rule removed, each fail); the KIM-1's and the NES's pages are unchanged, having none. The note said the x scale's verdict as "which the plan judges between pass and stop"; it is now in a visitor's words, `VERDICT_WORDS` in the board's notes (shown: the old words fail two tests). The photographs' README no longer says the outside is not on the page, `site/README.md` no longer types the counted chips' number, and the 9a section's "a few per cent wider" is marked corrected. The page weights above are re-measured.
+
+`cd site && npm test` on 14 October 2026: 564 tests, 563 passed, 0 failed, one to-do. No test was added, only changed, so the floors stay at 562.

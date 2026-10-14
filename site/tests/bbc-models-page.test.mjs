@@ -28,6 +28,15 @@ const registry = json(path.join(ROOT, 'machines', 'registry.json'));
 const bbc = registry.machines.find((m) => m.id === 'bbc-micro');
 const html = page('/machines/bbc-micro/')?.html ?? '';
 const flat = (s) => s.replace(/\s+/g, ' ').trim();
+// The licences the credits give for sources that state one: the registry's short form, and the terms that
+// sources.json records each source stating, which the short form must not go beyond.
+const CHRIS = 'CC BY-SA 3.0, as the site\'s home page states (an older paragraph on the same page asks to be asked first)';
+const LICENCES = {
+  D1: { short: 'Copyright Acorn Computers Limited 1985: may not be adapted or reproduced without Acorn\'s prior written approval: facts read from it, nothing copied', terms: [/^Copyright ACORN Computers Limited 1985\./, /may be adapted or reproduced/, /prior written approval/] },
+  K1: { short: 'MIT', terms: [/^MIT License/] },
+  I6: { short: CHRIS, terms: [/CC-BY-SA 3\.0/, /please ask me first/] },
+  'O8-I': { short: CHRIS, terms: [/CC-BY-SA 3\.0/, /please ask me first/] },
+};
 
 test('the two entries and every module they bundle import in Node and export what the page uses; a module that fails to import fails here', async () => {
   for (const file of [`${BOARD}.js`, `${CASE}.js`]) {
@@ -90,11 +99,17 @@ test('each view credits exactly the sources its results file lists, each once, a
       const r = at[0];
       const item = items.find((i) => i.includes(`href="${r.sourceUrl.replace(/&/g, '&amp;')}"`));
       assert.ok(item, `${module}: no credit links ${s.id} (${r.sourceUrl})`);
-      const text = visibleText(item);
+      const text = visibleText(item).replace(/\s+([.,:])/g, '$1');
       assert.ok(text.includes(`by ${s.author}`), `${module}: ${s.id}'s credit does not name ${s.author}: ${text}`);
       // sources.json records a source that states no licence as null or as "none stated"; the page says "no licence stated".
       if (s.licence === null || /^none stated/i.test(s.licence)) assert.match(text, /no licence stated\.$/, `${module}: ${s.id}`);
-      else assert.ok(s.licence.startsWith(r.licence.split(',')[0]), `${module}: ${s.id}'s licence "${r.licence}" is not sources.json's "${s.licence.slice(0, 40)}"`);
+      else if (r.file) assert.equal(r.licence, s.licence, `${module}: ${s.id}, a photograph on the page, is not credited with its licence as sources.json records it`);
+      else {
+        // Said short on the page, in full here: the registry's words, and the terms sources.json records the source stating.
+        assert.equal(r.licence, LICENCES[s.id]?.short, `${module}: ${s.id}'s licence is "${r.licence}"`);
+        for (const term of LICENCES[s.id].terms) assert.match(s.licence, term, `${module}: sources.json does not record ${s.id} stating ${term}`);
+        assert.ok(text.endsWith(`${r.licence}.`), `${module}: ${s.id}'s credit does not end with its licence: ${text}`);
+      }
       // A reference is not committed, so it names the SHA-256 of the original measured, and when it was fetched.
       if (r.sha256 !== undefined || !r.file) {
         assert.equal(r.sha256, s.sha256, `${s.id}: the SHA-256 is not the original's`);
@@ -113,6 +128,12 @@ test('each view credits exactly the sources its results file lists, each once, a
     assert.match(r.author, /^Chris Whytehead \(Chris's Acorns\)$/);
     assert.match(r.licence, /^CC BY-SA 3\.0/);
     assert.match(r.licence, /ask/, `${id}: the older sentence on the same site asking to be asked first is not said`);
+    // The byline links the site, as its licence asks; and on the page the author's name is that link.
+    assert.equal(r.authorUrl, 'http://chrisacorns.computinghistory.org.uk/');
+    for (const module of [BOARD, CASE]) {
+      const item = [...modelPanel(html, module).matchAll(/<li data-model-source>([\s\S]*?)<\/li>/g)].map((m) => m[1]).find((i) => i.includes(`href="${r.sourceUrl}"`));
+      if (item) assert.ok(item.includes(`by <a href="${r.authorUrl}">${r.author.replace(/'/g, '&#39;')}</a>`), `${id}'s credit does not link Chris's Acorns: ${item}`);
+    }
   }
   assert.match(bbc.references.find((x) => x.sha256 === sources.find((s) => s.id === 'K1').sha256).sourceUrl, /^https:\/\/github\.com\/dbhq-uk\/bbc-keyboard\//);
 });
@@ -127,6 +148,24 @@ test('the words that must reach the page do: each caption, note and limit word f
   for (const [text, about, note, own] of [[inside, boardLayout.describe(), boardNotes.made(boardFigures), [boardLayout.TRACKS_HELP, ...boardLayout.LEGEND_WORDS]], [outside, caseLayout.describe(), caseNotes.made(caseFigures), [caseLayout.HELP]]]) {
     for (const s of [about, ...note.paragraphs, ...note.limits, ...own]) assert.ok(text.includes(flat(s)), `the page does not say: ${s.slice(0, 120)}`);
   }
+  // Every limit, by its key phrase, in the notes as made() writes them and on the page (review of task 9b): a limit
+  // reworded to say less fails here even when the page is built from it.
+  const LIMITS = {
+    outside: [[/the Service Manual's, not measured/, /measures point different ways/, /that is not resolved/], [/front edge's check could not be measured/], [/^These are typical, not measured:/], [/tapered blocks with flat tops, not sculpted/], [/shifted symbols[^.]*are not drawn/, /space bar is blank/, /not in Acorn's or the BBC's lettering/], [/owl[^.]*is not drawn/], [/not measured are not drawn/], [/copper is traced to look at, with its connections not verified/]],
+    inside: [[/traced to look at, not as a netlist: its connections are not verified/], [/print hides the copper under it/, /drawn as print only/], [/typical ones for their packages, not measured/], [/plain cylinders and boxes of typical sizes/], [/are not drawn\.$/], [/traced to look at, has \d+ pixels to the millimetre/]],
+  };
+  for (const [view, note, text] of [['outside', caseNotes.made(caseFigures), outside], ['inside', boardNotes.made(boardFigures), inside]]) {
+    assert.equal(note.limits.length, LIMITS[view].length, `${view}: a limit added or dropped`);
+    note.limits.forEach((limit, i) => {
+      for (const phrase of LIMITS[view][i]) {
+        assert.match(limit, phrase, `${view}'s limit ${i + 1} does not say ${phrase}: ${limit}`);
+        assert.match(text, new RegExp(phrase.source.replace(/^\^|\$$/g, '')), `${view}'s page does not say ${phrase}`);
+      }
+    });
+  }
+  // The note says the x scale's verdict in a visitor's words, not the plan's (review of task 9b).
+  assert.doesNotMatch(inside, /the plan judges/);
+  assert.ok(inside.includes(boardNotes.VERDICT_WORDS[boardFigures.scale.xVerdict]), 'the x scale\'s verdict is not in a visitor\'s words');
   // The inside: its copper traced to look at, its connections not verified, beside the two checks that failed (the nets, and I5).
   assert.match(inside, /traced to look at[^.]*not verified/);
   assert.match(inside, /ground pins of \d+ chips[^.]*failed/);
@@ -202,7 +241,7 @@ test('nothing of either model is in the page\'s first load, and each later file 
   assert.ok(fs.statSync(path.join(DIST, MODELS[BOARD].texture)).size <= 600_000, 'the track map');
 });
 
-test('the browser check runs the BBC Micro\'s models after its machine, with the NES\'s settled() imported, not copied, and the other machines\' sections as they were', () => {
+test('the browser check runs the BBC Micro\'s models after its machine, with the NES\'s settled() imported, not copied, and the other machines\' sections as they were', async () => {
   const main = read(path.join(process.cwd(), 'scripts', 'browser-check.mjs'));
   assert.match(main, /import \{ checkBbcMicro, checkBbcModels \} from '\.\/browser-check-bbc\.mjs';/);
   assert.match(main, /await checkBbcMicro\(\{ browser, watch, problems, origin \}\);\s*await checkBbcModels\(\{ browser, watch, problems, origin \}\);/);
@@ -211,5 +250,13 @@ test('the browser check runs the BBC Micro\'s models after its machine, with the
   assert.doesNotMatch(check, /const settled = /);
   assert.match(check, /export async function checkBbcModels\(/);
   // What it checks, by the problems it can report.
+  // The *DUMP step judges only what *DUMP shows, on a file long enough to keep the DFS paged for seconds.
+  assert.match(check, /await page\.evaluate\(\(\) => window\.bbcInside\.paged\.clear\(\)\);\s*await type\(\['Shift\+Quote', 'KeyD'/);
+  const { dumpDisc, testDisc } = await import('../scripts/browser-check-bbc.mjs');
+  const d = dumpDisc();
+  assert.equal(d[256 + 8 + 5], 8, 'the file is not 2 KB');
+  assert.equal(d[256 + 8 + 4], 0);
+  assert.equal(d[256 + 8 + 7], 2);
+  assert.deepEqual([...d.slice(0, 512)].map((b, i) => (i === 256 + 8 + 5 ? 1 : b)), [...testDisc().slice(0, 512)], 'the catalogue is not the test disc\'s but for the length');
   for (const what of ['before the visitor reached it', 'fetched the inside', 'canvas is blank', 'caps lock', 'cassette motor', 'did not put A down', 'did not type C', 'under the case', 'Right on the Outside tab', 'IC78', 'the DFS', 'reduced motion', 'Tab never left']) assert.ok(check.includes(what), what);
 });

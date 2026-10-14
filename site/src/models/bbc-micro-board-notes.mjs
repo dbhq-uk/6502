@@ -16,6 +16,17 @@ const n = (v) => v.toLocaleString('en-GB');
 const list = (refs) => (refs.length < 2 ? refs.join('') : `${refs.slice(0, -1).join(', ')} and ${refs[refs.length - 1]}`);
 
 /**
+ * A scale check's verdict in a visitor's words: the check was set before the
+ * figure was measured, with a figure it passes at and a worse one at which it
+ * would have stopped the work.
+ */
+export const VERDICT_WORDS = {
+  pass: 'which passes the check set for it before it was measured',
+  'between pass and stop': 'which falls short of the figure its check, set before it was measured, passes at, but not as far as the figure at which it would have stopped the work',
+  stop: 'which is past the figure at which its check, set before it was measured, stops the work',
+};
+
+/**
  * The sentence every note gives on the copper: that it is not a netlist, what
  * its nets check found, and what the comparison with a photograph of a
  * populated board found, both failed.
@@ -36,7 +47,7 @@ export function made(figures) {
   const { board, scale, solder, copper, parts } = figures;
   const i5 = copper.i5Registration;
   const paragraphs = [
-    `The board is an Issue 7, ${cm(board.widthMm)} by ${cm(board.depthMm)} cm, measured from flatbed scans of a bare board, both faces, shared by amb5l. The scale was taken from the pin rows of the chips and the connectors, each row held out of the fit in turn: down the board, the median error over ${scale.yRows} rows of 40-pin chips is ${mm(scale.yMedianMm)}; across it, over the ${scale.xRows} rows long enough to be scored, each scaled to a 40-pin row's length, the median is ${mm(scale.xMedianMm)}, which the plan judges ${scale.xVerdict}, and the largest ${mm(scale.xLargestMm)}, on ${scale.xLargestRow}; the two scales agree to ${per(scale.xyPct)}.`,
+    `The board is an Issue 7, ${cm(board.widthMm)} by ${cm(board.depthMm)} cm, measured from flatbed scans of a bare board, both faces, shared by amb5l. The scale was taken from the pin rows of the chips and the connectors, each row held out of the fit in turn: down the board, the median error over ${scale.yRows} rows of 40-pin chips is ${mm(scale.yMedianMm)}; across it, over the ${scale.xRows} rows long enough to be scored, each scaled to a 40-pin row's length, the median is ${mm(scale.xMedianMm)}, ${VERDICT_WORDS[scale.xVerdict]}, and the largest ${mm(scale.xLargestMm)}, on ${scale.xLargestRow}; the two scales agree to ${per(scale.xyPct)}.`,
     `The solder side's scan was turned over and fitted to the component side on ${n(solder.holes)} holes found on both. On holes held out of the fit, the median error is ${mm(solder.heldOutMedianMm)}, and nine in ten are within ${mm(solder.heldOutP90Mm)}.`,
     `The copper of both faces and the printed legend were traced from the two scans into one map, ${copper.mapPxPerMm} pixels to the millimetre, to look at, with its connections not verified: the traced copper covers ${pc(copper.top)} of the component side and ${pc(copper.bottom)} of the solder side, and of the ${n(copper.drills)} drilled holes, ${pc1(copper.drillsTop)} sit in it on the component side and ${pc1(copper.drillsBottom)} on the solder side, which every hole with a pad must. ${copperSentence(figures)} The photograph was registered to the scan on ${i5.points} chip pins of ${i5.chips} chips, each chip held out in turn, to ${mm(i5.heldOutMedianMm)} at the median; that figure is optimistic, and not an independent check, because the pins were chosen where they fitted well.`,
     `Every chip is placed on its footprint in the scan, and named from table 8.1 of Acorn's Service Manual: ${parts.ics} chips have a place there, and the model draws the ${parts.fitted} fitted, ${parts.socketed} of them in sockets the manual names. ${partsSentence(figures)}`,

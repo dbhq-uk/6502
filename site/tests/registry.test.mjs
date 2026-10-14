@@ -275,6 +275,9 @@ test('a reference the model was measured from, kept out of the repository, is cr
   assert.match(one({ sha256: undefined }), /references\[0\]: sha256 must be the SHA-256 of the original, 64 hex digits/);
   assert.match(one({ sha256: 'A'.repeat(64) }), /references\[0\]: sha256 must be/);
   assert.match(one({ sha256: 'a'.repeat(63) }), /references\[0\]: sha256 must be/);
+  // A byline may link its author's site (Chris's Acorns asks for one): an http or https link, when given.
+  assert.equal(one({ authorUrl: 'http://example.org/' }), '');
+  assert.match(one({ authorUrl: 'example.org' }), /references\[0\]: authorUrl, when given, must be an http or https link/);
   assert.match(check(registry(machine({ references: {} }))), /references must be a list/);
   assert.match(check(registry(machine({ references: ['a scan'] }))), /references\[0\]: a reference must be an object/);
   assert.deepEqual(referenceProblems(reference(), 'r'), []);

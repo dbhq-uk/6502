@@ -492,18 +492,25 @@ test('every model a machine claims is in the map, with that machine and that vie
   assert.deepEqual(modelsOf({ id: 'x' }), []);
 });
 
-test('a machine\'s page shows the model section exactly when the machine claims a model, with that model\'s module', () => {
+test('a machine\'s page shows the model section exactly when the machine claims a model, with that model\'s module', async () => {
   const running = registry.machines.filter((m) => m.status === 'running');
   // Since the BBC Micro claimed its models (task 9b of its plan, 13 October 2026), every running machine has one, so
-  // the page without a model is held on a made-up machine that claims none: it has no models, and the page renders
-  // the model section, the loader and the photographs' "used for the model" only for a machine that has them.
-  const none = { id: 'made-up', status: 'running', photos: [] };
-  assert.deepEqual(modelsOf(none), []);
-  const machinePage = fs.readFileSync(path.join(process.cwd(), 'src', 'pages', 'machines', '[id].astro'), 'utf8');
-  assert.match(machinePage, /const models = modelsOf\(machine\);\s*const hasModels = models\.length > 0;/);
-  assert.match(machinePage, /\.\.\.\(hasModels \? \['\/model-loader\.js'\] : \[\]\)/);
-  assert.match(machinePage, /\{hasModels && <MachineModel models=\{models\}/);
-  assert.match(machinePage, /<MachinePhotos machine=\{machine\} model=\{hasModels\} \/>/);
+  // the page without a model is rendered here from the machine page itself, through Astro's container, for the BBC
+  // Micro's record with its claim taken away (its record before task 9b): no model section, no loader and no "used
+  // for the model" under its photographs. The same render of the real record has all three, so the render is the
+  // page's.
+  assert.deepEqual(modelsOf({ id: 'made-up', status: 'running', photos: [] }), []);
+  const { renderMachinePage } = await import('./render-page.mjs');
+  const real = registry.machines.find((m) => m.id === 'bbc-micro');
+  const { models: _m, case: _c, ...unclaimed } = structuredClone(real);
+  const [without, withModels] = await renderMachinePage([unclaimed, real]);
+  assert.ok(without.includes('<h1') && without.includes('data-bbc'), 'the page without a model did not render');
+  assert.doesNotMatch(without, /<section class="model"/, 'a machine with no model has a model section');
+  assert.doesNotMatch(without, /model-loader\.js/, 'a machine with no model loads the model loader');
+  assert.doesNotMatch(without, /Used for the model/, 'a machine with no model says what the model took from its photographs');
+  assert.match(withModels, /<section class="model"/);
+  assert.match(withModels, /src="\/model-loader\.js"/);
+  assert.match(withModels, /Used for the model/);
   for (const m of running) {
     const built = page(`/machines/${m.id}/`)?.html ?? '';
     assert.ok(built, `/machines/${m.id}/ was not built`);

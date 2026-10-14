@@ -1237,7 +1237,10 @@ test('the note is made() from the results file, every figure in it read from the
   for (const v of [f.scale.yMedianMm, f.scale.xMedianMm, f.scale.xLargestMm, f.solder.heldOutMedianMm, f.solder.heldOutP90Mm, f.copper.i5Registration.heldOutMedianMm, f.parts.manual.maxMm, f.parts.manual.medianMm]) assert.ok(text.includes(mm(v)), `${mm(v)} is not in the note`);
   for (const v of [f.copper.top, f.copper.bottom]) assert.ok(text.includes(pc(v)), `${pc(v)} is not in the note`);
   assert.ok(text.includes(f.solder.holes.toLocaleString('en-GB')));
-  assert.ok(text.includes(f.scale.xVerdict), 'the x scale\'s verdict');
+  // the x scale's verdict, in a visitor's words (review of task 9b), one for each verdict the check can give
+  assert.deepEqual(Object.keys(notes.VERDICT_WORDS).sort(), ['between pass and stop', 'pass', 'stop']);
+  assert.ok(text.includes(notes.VERDICT_WORDS[f.scale.xVerdict]), 'the x scale\'s verdict');
+  assert.doesNotMatch(text, /the plan judges/);
   const sentence = notes.copperSentence(f);
   assert.ok(text.includes(sentence));
   const n = f.copper.nets;

@@ -22,7 +22,7 @@ resized copy of the source, which is a derivative under that licence.
 is in its section below and on the page. The analysis that does it is in
 `tools/kim1-model/` (its `README.md` says how to run it), and the journal for 2
 October 2026 has every figure. The BBC Micro's main photograph, `bbc-micro.webp`, is
-shown and nothing is taken from it. Its five others are measured, on their full-size originals, for its outside model (task 8 of its models plan, 13 October 2026; the model is not on the page yet), in `tools/bbc-micro-model/` (the journal for 4 October 2026, task 8, has every figure). The NES has two: its board's model,
+shown and nothing is taken from it. Its five others are measured, on their full-size originals, for its outside model (task 8 of its models plan, 13 October 2026; on the page since task 9b), in `tools/bbc-micro-model/` (the journal for 4 October 2026, task 8, has every figure). The NES has two: its board's model,
 which takes nothing from the photographs here, being measured from scans and
 photographs that are not committed, listed in their own section below; and its
 outside's, which takes from `nes.webp`, `nes-rear-right.webp`, `nes-pal-front.webp` and
