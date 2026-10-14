@@ -46,7 +46,7 @@ function element(attrs = {}) {
     ...attrs,
     addEventListener: (type, fn) => (listeners[type] ??= []).push(fn),
     fire: (type, event = {}) => (listeners[type] ?? []).forEach((fn) => fn(event)),
-    focus() { el.focused += 1; },
+    focus(options) { el.focused += 1; el.focusOptions = options; },
   };
   return el;
 }
@@ -100,7 +100,10 @@ function browser({
     Date: class extends Date { static now() { return now; } },
   };
   window.window = window;
-  vm.runInNewContext(analyticsSrc, window);
+  // The page loads analytics.js as type="module", where a top-level function is
+  // not a global. Run as a classic script it would be, and `window.gtag = gtag`
+  // could be deleted without a test noticing. A strict function scope is the module's.
+  vm.runInNewContext(`(function () { "use strict";\n${analyticsSrc}\n})();`, window);
   if (withNotice) vm.runInNewContext(consentSrc, window);
   // gtag pushes Arguments objects; turn each into a plain array to compare.
   // Array.from, so the arrays belong to this realm and deepEqual can compare them.
@@ -134,6 +137,15 @@ test('a new visitor on the live host is measured, configured for analytics only'
   assert.equal(config[2]?.allow_google_signals, false, 'Google Signals is not off in the config');
   assert.equal(config[2]?.allow_ad_personalization_signals, false, 'ad personalisation is not off in the config');
   assert.ok(calls.indexOf(def) < calls.indexOf(config), 'the consent default must come before the config');
+  // The whole order, not only consent before config: gtag.js wants js between them.
+  assert.deepEqual(calls.map((c) => c[0]), ['consent', 'js', 'config'], 'the calls are not consent, js, config in that order');
+  assert.ok(calls[1][1] instanceof b.window.Date, 'the js call carries no date');
+  // gtag.js reads Arguments objects from the data layer and ignores plain arrays,
+  // and calls() flattens both to arrays, so the type is checked on the raw entries.
+  assert.ok(b.window.dataLayer.length > 0, 'nothing reached the data layer');
+  for (const entry of b.window.dataLayer) assert.equal(Object.prototype.toString.call(entry), '[object Arguments]', 'a data layer entry is not an Arguments object');
+  assert.equal(typeof b.window.gtag, 'function', 'window.gtag is not a function');
+  assert.equal(b.appended[0].async, true, 'the injected script is not async');
   assert.equal(b.writes.length, 0, 'a cookie was written before the visitor answered');
   assert.equal(b.api.choice(), null);
 });
@@ -283,6 +295,12 @@ test('off the estate the choice cookie is host-only', () => {
   const choice = b.writes.find((w) => w.startsWith('dbhq_analytics='));
   assert.ok(choice, 'no choice cookie was written');
   assert.ok(!/Domain=/i.test(choice), 'a pages.dev preview tried to set a dbhq.uk cookie');
+  // A host that only ends in dbhq.uk is not on the estate: an unanchored test would let it set the cookie.
+  const lookalike = browser({ hostname: 'evil-dbhq.uk' });
+  lookalike.api.optOut();
+  const lookalikeChoice = lookalike.writes.find((w) => w.startsWith('dbhq_analytics='));
+  assert.ok(lookalikeChoice, 'no choice cookie was written on evil-dbhq.uk');
+  assert.ok(!/Domain=/i.test(lookalikeChoice), 'evil-dbhq.uk tried to set a dbhq.uk cookie');
   // And on the estate it is not: the positive control for the line above.
   const live = browser();
   live.api.optOut();
@@ -306,6 +324,30 @@ test('the notice shows on a first visit, says nothing about state, and OK keeps 
   assert.ok(tagLoaded(b));
 });
 
+test('after a first-visit OK or Opt out, focus goes to Cookie settings and does not scroll the page', () => {
+  for (const button of ['on', 'off']) {
+    const b = browser({ withNotice: true });
+    const { box, settings } = b.notice;
+    assert.equal(settings.focused, 0, 'Cookie settings took focus before the notice was answered');
+    b.notice[button].fire('click');
+    assert.equal(box.hidden, true);
+    assert.equal(settings.focused, 1, `focus was lost after ${button === 'on' ? 'OK' : 'Opt out'}: it fell to the top of the page`);
+    assert.equal(settings.focusOptions?.preventScroll, true, 'focusing Cookie settings scrolls the page to the footer');
+    assert.equal(box.focused, 0, 'the hidden notice was focused');
+  }
+});
+
+test('a reopened notice returns focus to Cookie settings on a choice and on Escape', () => {
+  const b = browser({ withNotice: true, cookies: { dbhq_analytics: 'on' } });
+  const { settings, off } = b.notice;
+  settings.fire('click');
+  off.fire('click');
+  assert.equal(settings.focused, 1, 'focus did not return to Cookie settings after a reopen');
+  settings.fire('click');
+  b.notice.box.fire('keydown', { key: 'Escape' });
+  assert.equal(settings.focused, 2, 'Escape on a reopened notice did not return focus');
+});
+
 test('the notice does not show to a visitor who has chosen, either way', () => {
   for (const choice of ['on', 'off']) {
     const b = browser({ withNotice: true, cookies: { dbhq_analytics: choice } });
@@ -323,6 +365,7 @@ test('Opt out in the notice stops analytics, and Cookie settings reopens it to t
   assert.equal(box.hidden, true, 'Opt out did not close the notice');
   assert.equal(b.jar.get('dbhq_analytics'), 'off');
   assert.equal(b.window[`ga-disable-${MEASUREMENT_ID}`], true);
+  assert.equal(settings.focused, 1, 'focus was lost after the first-visit Opt out');
 
   settings.fire('click');
   assert.equal(box.hidden, false, 'Cookie settings did not reopen the notice');
@@ -333,7 +376,7 @@ test('Opt out in the notice stops analytics, and Cookie settings reopens it to t
 
   on.fire('click');
   assert.equal(box.hidden, true);
-  assert.equal(settings.focused, 1, 'focus did not return to Cookie settings');
+  assert.equal(settings.focused, 2, 'focus did not return to Cookie settings');
   assert.equal(b.jar.get('dbhq_analytics'), 'on');
   assert.equal(b.window[`ga-disable-${MEASUREMENT_ID}`], false);
 
@@ -377,6 +420,27 @@ test('every page ships the notice hidden, with OK and Opt out, and it is not a m
   }
   assert.ok(!/\.showModal\s*\(/.test(consentSrc), 'consent.js opens the notice as a modal');
   assert.ok(!/::backdrop|\binert\b/.test(component), 'the notice dims or disables the page');
+});
+
+test('the status line is a live region, so a reopened notice can be heard to change', () => {
+  assert.match(component, /<p\b[^>]*data-analytics-status[^>]*\srole="status"/, 'the status line has no role=status');
+  for (const p of all) {
+    const status = noticeOn(p.html)?.match(/<p\b[^>]*data-analytics-status[^>]*>/)?.[0];
+    assert.ok(status, `${p.url}: no status line`);
+    assert.match(status, /\srole="status"/, `${p.url}: the status line is not a live region`);
+  }
+});
+
+test('the notice comes straight after the skip link, so a keyboard visitor reaches it before the page and not after the footer', () => {
+  for (const p of all) {
+    const skip = p.html.indexOf('class="skip"');
+    const notice = p.html.indexOf('data-analytics-notice');
+    const header = p.html.indexOf('<header');
+    const main = p.html.indexOf('<main');
+    const footer = p.html.indexOf('<footer');
+    assert.ok(skip >= 0 && skip < notice, `${p.url}: the skip link must stay the first stop`);
+    assert.ok(notice < header && notice < main && notice < footer, `${p.url}: the notice is after the page content in the DOM`);
+  }
 });
 
 test('Opt out is as easy as OK: the same size, side by side, and Opt out first', () => {

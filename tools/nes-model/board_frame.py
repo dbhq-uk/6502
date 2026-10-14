@@ -201,6 +201,44 @@ def length_mm(d, sx, sy):
     return float(math.hypot(d[0] / sx, d[1] / sy))
 
 
+def corner_offsets(corners, frame, marks_px):
+    """How far each corner the fit found, mapped back through the frame to
+    the scan's pixels, is from the mark it came from, in millimetres. The
+    marks only say where to look; the fit moves a corner to where its two
+    edges' lines meet, so a large offset is a corner the light put
+    somewhere else than the eye did."""
+    d = frame.to_px(corners) - np.asarray(marks_px, float).reshape(-1, 2)
+    return [length_mm(v, frame.sx, frame.sy) for v in d]
+
+
+FAR_CORNER_MM = 0.5
+
+
+def note_far_corners(edges, offsets, limit=FAR_CORNER_MM):
+    """Writes a note on each edge both of whose end corners (edge i runs from
+    corner i to corner i + 1, the last round to the first) are more than
+    `limit` from their marks, so the file says which edge carries the most
+    doubt. Figures in the note come from `offsets`."""
+    n = len(offsets)
+    for i, e in enumerate(edges):
+        a, b = offsets[i], offsets[(i + 1) % n]
+        if a > limit and b > limit:
+            e['note'] = (f'Corners {i} and {(i + 1) % n} are {a:.2f} and {b:.2f} mm from where they were marked, over the {limit} mm that '
+                         'the marks are good to by eye. On the NES-CPU-10 scan this is the short stretch at the step in the right edge, whose edge lies in '
+                         'deep shadow, so the light puts its ends less surely than the other edges\'. Recorded, not judged')
+
+
+def largest_footprint(held):
+    """The footprint whose spacing is furthest from its own, with the sign:
+    negative is a spacing read narrow. Recorded, not judged: the verdict is
+    on the median."""
+    big = max(held, key=lambda h: abs(h['errPct']))
+    side = 'narrow' if big['errPct'] < 0 else 'wide'
+    return {'ref': big['ref'], 'errPct': big['errPct'],
+            'note': f'{big["ref"]} is the footprint furthest from its own spacing, {abs(big["errPct"]):.2f} per cent {side}. Recorded, not '
+                    'judged: the verdict is on the median of them all'}
+
+
 def linear_light(rgb):
     """Luminance in linear light (the scanner's blur mixes light, not the
     stored sRGB numbers), 0 to 1."""
@@ -871,6 +909,8 @@ def measure(rgb, rows, footprints, outline_marks, px_per_mm=NOMINAL_PX_PER_MM):
         n['x'] -= o[0]
         n['y'] -= o[1]
     width, depth = (corners.max(0) - corners.min(0)).tolist()
+    off = corner_offsets(corners, frame, outline_marks['corners'])
+    note_far_corners(edges, off)
 
     L, C = lid_and_chroma(rgb)
     filled, _, inside = board_mask(L, C)
@@ -909,6 +949,7 @@ def measure(rgb, rows, footprints, outline_marks, px_per_mm=NOMINAL_PX_PER_MM):
             'errPct600': ysum['errPct600'],
             'errPct300': ysum['errPct300'],
             'refusedPairs': {f['ref']: f['refusedPairs'] for f in fps if f['refusedPairs']},
+            'largest': largest_footprint(hy),
         },
         'xFromPadCentroids': dict(xcent, what='The same rows from the solder\'s centroids, first pad to last (task 0\'s way): recorded, not judged'),
         'yFromPadCentroids': dict(ycent, what='The same spacings from the pads\' solder centroids, not the drills: recorded, not judged'),
@@ -928,6 +969,13 @@ def measure(rgb, rows, footprints, outline_marks, px_per_mm=NOMINAL_PX_PER_MM):
                   'refused': r['refused'], 'usable': r['d'] is not None} for r in rows],
         'board': {'widthMm': float(width), 'depthMm': float(depth)},
         'corners': corners.tolist(),
+        'cornersAgainstMarks': {
+            'what': 'Each corner above, mapped back through the frame to the scan\'s pixels, against the mark it was fitted from (marks.json), in '
+                    'millimetres. The marks are placed by eye and say only where to look, so a corner over 0.5 mm from its mark is noted on its '
+                    'edge; the site test asks that none be over 1.0 mm. Recorded, not judged',
+            'mm': off,
+            'max': max(off),
+        },
         'edges': edges,
         'notches': notches,
         'outline': outline.tolist(),

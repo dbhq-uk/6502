@@ -1297,8 +1297,10 @@ solder side. `/tmp/nesvenv/bin/python -m pytest tools/nes-model/tests -q`:
 map is committed, WebP, the size and SHA-256 `copper.json` gives, inside
 600,000 bytes, red and green each 10 to 50 per cent and blue under 15; the
 verdicts `copper.json` records are the ones its figures give; coverage and
-drills pass (the nets row is not asserted to pass: it failed, as above);
-every IC has its GND and +5V pins with a source; and `NOTICE.md` and the
+drills pass (the nets row is not asserted to pass: it failed, as above. That
+test let the verdict be either value; after review it was replaced by one that
+pins the verdict to FAIL, below, so the failure is now asserted, not just
+allowed); every IC has its GND and +5V pins with a source; and `NOTICE.md` and the
 photographs' README name the map, the TAPR Open Hardware License and
 OpenTendo. With `copper.json`'s nets verdict set to pass and its map's
 SHA-256 changed, an IC's GND pin changed and the licence's name taken out of
@@ -1367,7 +1369,10 @@ writes the same map, byte for byte.
 
 **One output change.** `copper.json`'s `pinNets` stored each net as Python's
 text for a tuple, such as `('b', 795)`. `board_trace.py` now writes a plain
-label, `bottom:795`, and was run once to rewrite the file (`cd
+label, `bottom:795` (the script after this change has SHA-256
+`53225a47467bb46e3689cc319608fe577d1c6d50fca5eb9513ecf2447dd16000`, the same
+at the commit that made the change and on main, checked on 13 October 2026
+with `sha256sum`), and was run once to rewrite the file (`cd
 tools/nes-model && NES_MODEL_INPUTS=/tmp/nes-inputs nice -n 10
 /tmp/nesvenv/bin/python board_trace.py --map-ppm 10`): it printed the same
 seven lines as before; the map's SHA-256
@@ -2060,6 +2065,14 @@ only that sentence changed in them.
   once for each repeat of that read (one or two, by the cycle the DMA
   starts on) and once for its own. A mutation that counted a repeated read
   once failed it in the two cases with two repeats; restored, 1,537 pass.
+  Corrected 13 October 2026: the review of the branch recorded that three
+  tests failed under its mutation, one of them an existing test, and that the
+  two even-parity cases pin only the cycle count and the single repeat (one
+  halted read, so counting repeats once and counting them each give the same
+  answer there). The review's exact mutation was not kept. Two made again on
+  13 October (see
+  [the NES models' notes](2026-10-13-the-nes-models-notes.md)) failed two and
+  four of this theory's cases, and no existing test.
 - The page: six tests drive `nes.js` from `prepare` to running, in a fake
   browser with a fake .NET runtime and the panel test's made-up host. Red
   against the script as it was: all six failed. Green: 33 of 33 in the file.
@@ -2428,13 +2441,15 @@ not figures about the project: they differ from run to run.
 ### After review, the same day
 
 - **Corrected 6 October 2026, after review: the very high first rate after a
-  region change is the game, not the page catching up.** The entry above
+  region change is most likely the game, not the page catching up** (reworded
+  on 13 October 2026: the sample's length was not recorded, so what follows
+  agrees with the figure and does not prove it). The entry above
   says the 32,311 PPU accesses a second were "most likely the page catching
   up on frames", and the bullet before it gives that sample as an example of
   the bursts. Both are wrong about the cause. The run loop never catches up:
   `site/public/machine-host.js` runs each animation frame for the real time
   since the last, capped at `MAX_FRAME_MS`, 100 ms of machine time, and drops
-  the rest. The cause is Lan Master's reset code. Checked in
+  the rest. The most likely cause is Lan Master's reset code. Checked in
   `roms/nes/Lan_Master.nes` (40,976 bytes, SHA-256
   `becfeafb80479c330333c9e9385417f68f3c88e85443dfb37b05ae9283f3ea45`, NROM, two
   16 KB banks) with a short Python read of the file, 6 October 2026: the reset

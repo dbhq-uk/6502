@@ -458,6 +458,18 @@ function pageHost() {
 let pages = 0;
 
 /**
+ * Waits until `done()` is true, for at most `ms` of real time. The page's
+ * start-up awaits real work (a dynamic import, a file read), which finishes in
+ * a time that depends on the host's load, so a fixed number of event-loop
+ * turns is not a wait: on a busy runner it ran out first and failed the test
+ * with the panel still loading (issue 91).
+ */
+async function until(done, ms = 10_000) {
+  const end = Date.now() + ms;
+  while (!done() && Date.now() < end) await new Promise((resolve) => setTimeout(resolve, 2));
+}
+
+/**
  * The NES page with one panel and `host` as its machine, the script loaded
  * fresh. Returns the panel, its elements by selector, the events it dispatched
  * as [type, detail, the host's region when it came], and start(), which
@@ -501,7 +513,7 @@ async function nesPage(t, host) {
   await import(`${pathToFileURL(path.join(PUBLIC, 'nes.js')).href}?page=${++pages}`);
   const start = async () => {
     panel.querySelector('[data-nes-start]').click();
-    for (let i = 0; i < 1000 && panel.dataset.state !== 'running'; i++) await new Promise((resolve) => setImmediate(resolve));
+    await until(() => panel.dataset.state === 'running');
     assert.equal(panel.dataset.state, 'running', `the page did not start: ${panel.querySelector('[data-nes-status]').textContent}`);
   };
   return { panel, radios, events, start, el: (selector) => panel.querySelector(selector) };
@@ -589,7 +601,7 @@ test('a new cartridge while the machine runs is a new machine: nes:start, and ne
   const file = el('[data-nes-file]');
   file.files = [new File([new Uint8Array(16)], 'other.nes')];
   file.dispatchEvent(new Event('change'));
-  for (let i = 0; i < 100 && events.length < 2; i++) await new Promise((resolve) => setImmediate(resolve));
+  await until(() => events.length >= 2);
   assert.deepEqual(events, [['nes:region', { region: 'ntsc' }, 'NTSC'], ['nes:start', null, 'NTSC']]);
   assert.equal(panel.dataset.cartridge, 'other.nes');
 });

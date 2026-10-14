@@ -170,6 +170,8 @@ test('frame.json\'s outline is closed, starts at the origin, and is the board\'s
   const ys = o.map((p) => p[1]);
   const w = Math.max(...xs) - Math.min(...xs);
   const d = Math.max(...ys) - Math.min(...ys);
+  // These two cannot fail on their own: board is the corners' extent, and the outline's points are the corners and the notches
+  // between them. They check that the file agrees with itself; the check against the marks is the next test.
   assert.ok(Math.abs(w - frame.board.widthMm) <= 0.5, `outline width ${w} against ${frame.board.widthMm}`);
   assert.ok(Math.abs(d - frame.board.depthMm) <= 0.5, `outline depth ${d} against ${frame.board.depthMm}`);
   // a sanity bound: the KiCad file is a redrawing, compared and never drawn
@@ -179,6 +181,41 @@ test('frame.json\'s outline is closed, starts at the origin, and is the board\'s
   // the corners are on the outline, and every notch's circle crosses its edge
   for (const c of frame.corners) assert.ok(o.some((p) => Math.hypot(p[0] - c[0], p[1] - c[1]) < 1e-3), `corner ${c} is not on the outline`);
   assert.equal(frame.notches.length, 3);
+});
+
+// Each corner the fit found, put through the frame back to the scan, is where the eye marked it, to the marks' own accuracy
+// (marks.json: "to about half a millimetre"). The marks are an input the fit does not move, so this can fail, which the
+// board's size above cannot.
+test('frame.json\'s corners, mapped through its frame, lie within 1.0 mm of the corners marked in marks.json, and the ones over 0.5 mm are noted', () => {
+  const marked = JSON.parse(fs.readFileSync(path.join(TOOL, 'data', 'marks.json'), 'utf8')).outline.corners
+    .toSorted((p, q) => p.corner - q.corner);
+  assert.equal(marked.length, frame.corners.length);
+  const t = (frame.rotationDeg * Math.PI) / 180;
+  const { x: sx, y: sy } = frame.pxPerMm;
+  const off = frame.corners.map(([x, y], i) => {
+    const px = frame.origin[0] + sx * (Math.cos(t) * x - Math.sin(t) * y);
+    const py = frame.origin[1] + sy * (Math.sin(t) * x + Math.cos(t) * y);
+    return Math.hypot((px - marked[i].at[0]) / sx, (py - marked[i].at[1]) / sy);
+  });
+  off.forEach((mm, i) => assert.ok(mm <= 1.0, `corner ${i} is ${mm.toFixed(2)} mm from its mark`));
+  // The file records them, and notes an edge both of whose ends are over 0.5 mm.
+  const rec = frame.cornersAgainstMarks;
+  off.forEach((mm, i) => assert.ok(Math.abs(rec.mm[i] - mm) < 2e-3, `corner ${i}: recorded ${rec.mm[i]}, recomputed ${mm}`));
+  assert.ok(Math.abs(rec.max - Math.max(...off)) < 2e-3);
+  frame.edges.forEach((e, i) => {
+    const far = off[i] > 0.5 && off[(i + 1) % off.length] > 0.5;
+    assert.equal('note' in e, far, `edge ${i}`);
+  });
+  assert.ok(frame.edges[6].note.startsWith(`Corners 6 and 7 are ${off[6].toFixed(2)} and ${off[7].toFixed(2)} mm`), 'the step in the right edge, in deep shadow');
+});
+
+test('frame.json names the footprint furthest from its spacing, with its sign, and says it is recorded and not judged', () => {
+  const fp = frame.heldOutY.footprints;
+  const big = fp.reduce((a, b) => (Math.abs(b.errPct) > Math.abs(a.errPct) ? b : a));
+  assert.equal(frame.heldOutY.largest.ref, big.ref);
+  assert.equal(frame.heldOutY.largest.errPct, big.errPct);
+  assert.ok(big.errPct < 0 && big.ref === 'U6', 'U6, read narrow');
+  assert.ok(frame.heldOutY.largest.note.startsWith(`${big.ref} is the footprint furthest from its own spacing, ${Math.abs(big.errPct).toFixed(2)} per cent narrow. Recorded, not judged`));
 });
 
 test('frame.json\'s holes are inside the board, and its rectified copy is never committed', () => {
@@ -629,10 +666,13 @@ test('every part is inside the board\'s outline; a body that runs past it is one
     for (const k of f.pads) assert.ok(insidePolygon(outline, [registration.pads[k].x, registration.pads[k].y]), `${name}: its pad ${k}`);
     if (corners(c).some((p) => !insidePolygon(outline, p))) {
       over.push(name);
-      // A body over the edge is anchored on its own pads: it covers every pad of its footprint, and its nearest pad is within
-      // 15 mm of the edge. 15 mm was chosen after seeing the data (5 Oct 2026, task 5's review): the overhanging bodies' nearest
-      // pads lie 1.7 (P1), 4.8 (P4), 4.9 (P5), 8.9 (P6) and 11.9 mm (P3, the modulator's pins) from the edge, and an IC's or
-      // the expansion socket's 18 mm or more; so it holds what the photographs show and refuses a box slid off its pads.
+      // A body over the edge is anchored on its own pads: it covers every pad of its footprint. That check does the work: with
+      // P5's body slid 14 mm off its pads it fails, and with the covers-all-pads line taken out, the 15 mm bound below passes
+      // (13 Oct 2026, by hand). The bound reads the footprint's pads and not the body, so it cannot see a slid box. It only
+      // says that a part allowed to overhang has a pad near the edge, which is loose by design: 15 mm was chosen after seeing
+      // the data (5 Oct 2026, task 5's review), the overhanging bodies' nearest pads lying 1.7 (P1), 4.8 (P4), 4.9 (P5), 8.9
+      // (P6) and 11.9 mm (P3, the modulator's pins) from the edge, and an IC's or the expansion socket's 18 mm or more. It is
+      // left at 15 and not tightened to 12, which would be fitted to those five.
       const pads = f.pads.map((k) => [registration.pads[k].x, registration.pads[k].y]);
       for (const q of pads) assert.ok(within(c, q), `${name} does not cover its pad at ${q}`);
       const near = Math.min(...pads.map((q) => edgeDistance(outline, q)));
@@ -1168,7 +1208,7 @@ test('the model reads the machine through panel.nes, takes a fresh baseline on n
   // The caption, the note and the legend's parts switch together, the names stay hidden, and the stage's name and description follow.
   // Since fix round 1 of task 9 this is followRegion, in ./regions.mjs, which both NES models call.
   const regionsSrc = fs.readFileSync(path.join(process.cwd(), 'src', 'models', 'regions.mjs'), 'utf8');
-  assert.match(boardModule, /region = followRegion\(root, REGIONS, next, region\);/);
+  assert.match(boardModule, /region = followRegion\(root, REGIONS, next, region, \(\) => settled\(\)\);/);
   assert.match(regionsSrc, /for \(const el of root\.querySelectorAll\('\[data-model-region\]'\)\) if \(!el\.hasAttribute\('data-model-label'\)\) el\.hidden = el\.dataset\.modelRegion !== region;/);
   assert.match(regionsSrc, /stage\.setAttribute\('aria-label', name\)/);
   // The caption's own id, which carries the view's suffix in a tab panel (task 9): found by its console, not built.
@@ -1300,7 +1340,7 @@ test('the outside model follows the machine: the light and POWER from panel.nes.
   assert.match(caseModule, /const running = \(\) => nes\(\)\?\.running\?\.\(\) === true;/);
   // The region the page has when the view mounts, not when the page loaded (Review Focus 3).
   assert.match(caseModule, /const regionNow = \(\) => nes\(\)\?\.region\?\.\(\)\?\.toLowerCase\(\) \?\? REGIONS\[0\];\s*setRegion\(regionNow\(\)\);/);
-  assert.match(caseModule, /region = followRegion\(root, REGIONS, next, region\);/);
+  assert.match(caseModule, /region = followRegion\(root, REGIONS, next, region, \(\) => \(running\(\) \? STATUS\.running : STATUS\.idle\)\);/);
   assert.match(caseModule, /panel\?\.addEventListener\('nes:region', \(e\) => setRegion\(e\.detail\?\.region\)\);/);
   assert.match(caseModule, /panel\?\.addEventListener\('nes:reset', \(\) => \{/);
   assert.match(caseModule, /setTimeout\(\(\) => \{ reset\.position\.z = reset\.userData\.out;[^}]*\}, PRESS_MS\)/);
@@ -1531,8 +1571,8 @@ test('each console\'s part in ic-table.json is the one the fact sheet\'s table r
 test('a change of console leaves nothing of the other console on either model: only its own parts shown, each chip printed with its part', () => {
   // The PAL crystal and modulator left showing after a change to NTSC, or a chip left printed with the PAL part, passed:
   // the browser check reads the legend, which followRegion switches, and not the scene.
-  assert.match(boardModule, /const setRegion = \(next\) => \{\s*const was = region;\s*region = followRegion\(root, REGIONS, next, region\);\s*if \(region === was\) return;\s*for \(const r of REGIONS\) consoles\[r\]\.visible = r === region;\s*for \(const \{ ic, label \} of chips\.values\(\)\) label\.print\(ic\.parts\[region\]\);\s*\};/);
-  assert.match(caseModule, /const setRegion = \(next\) => \{\s*const was = region;\s*region = followRegion\(root, REGIONS, next, region\);\s*if \(region === was\) return;\s*for \(const r of REGIONS\) consoles\[r\]\.visible = words\[r\]\.visible = r === region;\s*for \(const button of buttons\.values\(\)\) for \(const child of button\.children\) if \(child\.userData\.region\) child\.visible = child\.userData\.region === region;\s*\};/);
+  assert.match(boardModule, /const setRegion = \(next\) => \{\s*const was = region;\s*region = followRegion\(root, REGIONS, next, region, [^;]*\);\s*if \(region === was\) return;\s*for \(const r of REGIONS\) consoles\[r\]\.visible = r === region;\s*for \(const \{ ic, label \} of chips\.values\(\)\) label\.print\(ic\.parts\[region\]\);\s*\};/);
+  assert.match(caseModule, /const setRegion = \(next\) => \{\s*const was = region;\s*region = followRegion\(root, REGIONS, next, region, [^;]*\);\s*if \(region === was\) return;\s*for \(const r of REGIONS\) consoles\[r\]\.visible = words\[r\]\.visible = r === region;\s*for \(const button of buttons\.values\(\)\) for \(const child of button\.children\) if \(child\.userData\.region\) child\.visible = child\.userData\.region === region;\s*\};/);
 });
 
 test('the board model draws the console the page has when it mounts, not the first one (Review Focus 3)', () => {
@@ -1563,4 +1603,93 @@ test('each console\'s caption on the case gives the case\'s size from case.json,
     const rest = about.replace(/\bNESE?-001\b/g, '').replace(/\bthree\.js\b/g, '');
     for (const n of rest.match(/\d+(?:\.\d+)?/g) ?? []) assert.ok(want.includes(n) || words.includes(n), `${r}: ${n} is typed in the caption`);
   }
+});
+
+// ---- Issue 81: what the outside model's note admits, and U9's jobs, checked ----
+
+// Each simplification the outside's note lists is what the module does. The wording of the note is tested above; these
+// read the module, so the note cannot say "square" while the code rounds the corners.
+test('the outside model is as simple as its note says: square corners, a flat rear window, and ribs and panels as lines', () => {
+  const limits = [caseNotes.made(caseFigures, 'ntsc').limits, caseNotes.made(caseFigures, 'pal').limits].flat().join(' ');
+  assert.match(limits, /the corners are drawn square/);
+  assert.match(limits, /The rear's window is drawn flat on the rear face/);
+  assert.match(limits, /The underside's ribs are drawn as lines/);
+  // Square corners: the shells are polygons extruded without a bevel, and nothing in the module rounds or curves.
+  assert.match(caseModule, /new ExtrudeGeometry\(shape, \{ depth: S\(CASE\.depth\), bevelEnabled: false \}\)/);
+  assert.doesNotMatch(caseModule, /RoundedBoxGeometry|bevelEnabled: true|bevelSize|quadraticCurveTo|bezierCurveTo|absarc|\.arc\(/);
+  // A flat window: a panel SKIN proud of the rear face and no deeper (onRear's default), and the module never reads how far the window is set back.
+  assert.match(caseModule, /onRear\(win\.x, win\.z, win\.w, win\.h, M\.band\);/);
+  assert.doesNotMatch(caseModule, /windowSetBack/);
+  assert.ok(caseFigures.rear.windowSetBackMm > 0, 'the set-back is measured, and still not drawn');
+  // Ribs as lines: the underside's straps, panels and bumps are all drawn through rect(), which builds LineSegments.
+  assert.match(caseModule, /const rect = \(r\) => \{[\s\S]*?return new LineSegments\(g, line\('model-nes-band'\)\);\s*\};/);
+  assert.match(caseModule, /group\.add\(cover, rect\(u\.coverInner\), \.\.\.u\.straps\.map\(rect\), \.\.\.u\.panels\.map\(rect\), \.\.\.Object\.values\(u\.bumps\)\.map\(rect\)\);/);
+});
+
+// "Tints the greys a little green": the stage's two lights that are not white are green-led, and together they are a
+// small part of all the light. "A little" is read as under a third of the lights' strength, a line drawn on 13 October 2026.
+test('the stage\'s light tints the greys a little green, as the outside model\'s note says', () => {
+  const stage = fs.readFileSync(path.join(process.cwd(), 'src', 'models', 'stage.mjs'), 'utf8');
+  const css = fs.readFileSync(path.join(process.cwd(), 'src', 'styles', 'tokens.css'), 'utf8');
+  const colour = (name) => {
+    const hex = new RegExp(`--${name}:\\s*#([0-9a-f]{6})`, 'i').exec(css)?.[1];
+    assert.ok(hex, `token ${name}`);
+    return [0, 2, 4].map((i) => parseInt(hex.slice(i, i + 2), 16));
+  };
+  const lights = [...stage.matchAll(/new (AmbientLight|DirectionalLight|HemisphereLight)\(token\('([a-z0-9-]+)'\)(?:, token\('([a-z0-9-]+)'\))?, ([\d.]+)\)/g)]
+    .map(([, kind, a, b, k]) => ({ kind, colour: a, ground: b, strength: Number(k) }));
+  assert.ok(lights.length >= 5, 'the lights were found');
+  const tinted = lights.filter((l) => l.colour !== 'white' || (l.ground && l.ground !== 'white'));
+  const green = (n) => { const [r, g, b] = colour(n); return g > r && g > b; };
+  assert.deepEqual(tinted.map((l) => [l.kind, l.ground ?? l.colour]).sort(), [['DirectionalLight', 'mint'], ['HemisphereLight', 'moss-70']].sort());
+  for (const l of tinted) assert.ok(green(l.ground ?? l.colour), `${l.ground ?? l.colour} leads in green`);
+  const total = lights.reduce((s, l) => s + l.strength, 0);
+  const share = tinted.reduce((s, l) => s + l.strength, 0) / total;
+  assert.ok(share < 1 / 3, `the green lights are ${(100 * share).toFixed(0)} per cent of the light`);
+  assert.match(caseNotes.made(caseFigures, 'ntsc').limits.join(' '), /tints the greys a little green/);
+});
+
+// "Strong perspective" for the PAL photographs' lens: the lens is a wide one on the camera's sensor. The camera is the file's
+// own XMP model, ILCE-7RM4 (Sony alpha 7R IV), a full-frame sensor 35.7 mm wide (Sony's published figure, 13 Oct 2026; not
+// measured here). A lens of 24 mm or less on full frame is called ultra-wide, the line used for "strong".
+test('the PAL photographs\' 20 mm lens is an ultra-wide one on its full-frame camera, so "strong perspective" is fair', () => {
+  const SENSOR_WIDTH_MM = 35.7;
+  for (const id of ['O4', 'O10']) {
+    const s = sources.find((x) => x.id === id);
+    assert.match(s.focalLengthFrom, /ILCE-7RM4/, id);
+    assert.equal(s.focalLengthMm, caseFigures.palLensMm);
+    assert.ok(s.focalLengthMm <= 24, `${id}: ${s.focalLengthMm} mm`);
+    const fov = (2 * Math.atan(SENSOR_WIDTH_MM / 2 / s.focalLengthMm) * 180) / Math.PI;
+    assert.ok(fov > 80, `${id}: the field of view across the frame is ${fov.toFixed(1)} degrees`);
+  }
+  assert.equal(caseData.boardInCase.o9.xmp['tiff:Model'], 'ILCE-7RM4');
+  assert.match(caseNotes.made(caseFigures, 'pal').limits.join(' '), /with strong perspective/);
+});
+
+// U9's jobs (tools/nes-model/board_nets.py reads them from OpenTendo's KiCad nets, I2, as numbers).
+test('U9\'s jobs are read from the redrawing\'s nets by a script and hold: each pin the right way round, each part on its net', () => {
+  const nets = JSON.parse(fs.readFileSync(path.join(TOOL, 'data', 'u9-nets.json'), 'utf8'));
+  assert.equal(nets.source.id, 'I2');
+  assert.equal(nets.source.sha256, sources.find((s) => s.id === 'I2').sha256, 'read from the file the sources record');
+  assert.ok(nets.jobs.length >= 3);
+  for (const j of nets.jobs) {
+    assert.ok(j.holds, j.job);
+    assert.equal(j.in.type, 'input', `${j.job}: its input pin`);
+    assert.equal(j.out.type, 'output', `${j.job}: its output pin`);
+    // what the job says it reaches is what the pins' nets list
+    assert.deepEqual(nets.pins[j.in.pin].with.filter((w) => j.in.with.includes(w)), j.in.with, j.job);
+    assert.deepEqual(nets.pins[j.out.pin].with.filter((w) => j.out.with.includes(w)), j.out.with, j.job);
+  }
+  // The page's three jobs, each found by what it names, on the parts the page calls by those names.
+  const role = (ref) => icTable.ics.find((i) => i.ref === ref).role;
+  const job = (re) => nets.jobs.find((j) => re.test(j.job));
+  const a13 = job(/address line A13/);
+  assert.match(role(a13.in.with[0].split('.')[0]), /picture processing unit/);
+  const reset = job(/reset line/);
+  assert.deepEqual(reset.in.with.map((w) => w.split('.')[0]).sort(), ['U10', 'U5', 'U6']);
+  assert.match(role('U6'), /processor/);
+  const lockout = job(/clocks the lockout chip/);
+  assert.match(role(lockout.out.with[0].split('.')[0]), /lockout chip/);
+  assert.match(layout.LEGEND_WORDS.join(' '), /U9, the hex inverter, inverts the PPU's address line A13 and the reset line and clocks the lockout chip/);
+  assert.equal(icTable.ics.find((i) => i.ref === 'U9').role.startsWith('the hex inverter'), true);
 });
