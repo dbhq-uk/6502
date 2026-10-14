@@ -3,7 +3,7 @@ namespace Dbhq.Machines.Atari2600;
 /// <summary>What a machine is built with, beyond its cartridge and region.</summary>
 public sealed class Atari2600Options
 {
-    /// <summary>The host's sample rate, in samples a second. The sound arrives in task 10; until then it is kept and not used.</summary>
+    /// <summary>The host's sample rate, in samples a second: <see cref="Atari2600.Sound"/> makes samples at this rate. It must be above 0.</summary>
     public int SampleRate { get; init; } = 48_000;
 
     /// <summary>

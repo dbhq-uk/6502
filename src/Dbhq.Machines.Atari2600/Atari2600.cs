@@ -14,6 +14,7 @@ namespace Dbhq.Machines.Atari2600;
 public sealed class Atari2600
 {
     /// <summary>A machine with <paramref name="cartridge"/> in it, in <paramref name="region"/> or else NTSC.</summary>
+    /// <exception cref="ArgumentOutOfRangeException">The options' sample rate is not above 0.</exception>
     public Atari2600(Cartridge cartridge, Region? region = null, Atari2600Options? options = null)
     {
         ArgumentNullException.ThrowIfNull(cartridge);
@@ -27,6 +28,13 @@ public sealed class Atari2600
     public Atari2600Bus Bus { get; }
 
     public Cpu Cpu { get; }
+
+    /// <summary>
+    /// The sound, as samples at the options' sample rate, for the page to read: the bus's
+    /// <see cref="Atari2600Bus.Sound"/>. <see cref="Run"/> and <see cref="RunFrames"/> leave it
+    /// holding the sound of all the time they ran.
+    /// </summary>
+    public SampleBuffer Sound => Bus.Sound;
 
     /// <summary>
     /// Switches on: the chips go to their power-on state, the CPU's registers start at zero, and its
@@ -72,7 +80,11 @@ public sealed class Atari2600
     /// <exception cref="ArgumentOutOfRangeException"><paramref name="state"/> has a bit that names no switch.</exception>
     public void SetSwitches(ConsoleSwitches state) => _controllers.SetSwitches(state);
 
-    /// <summary>Runs one instruction and returns the CPU cycles it took, a WSYNC halt before it included.</summary>
+    /// <summary>
+    /// Runs one instruction and returns the CPU cycles it took, a WSYNC halt before it included.
+    /// The sound is made as the channels step, so after a step it may stop up to one audio step,
+    /// 116 colour clocks, short of now; <see cref="Atari2600Bus.CatchUpSound"/> brings it up.
+    /// </summary>
     public int Step()
     {
         long start = Bus.Cycles;
@@ -80,7 +92,7 @@ public sealed class Atari2600
         return (int)(Bus.Cycles - start);
     }
 
-    /// <summary>Runs whole instructions until at least <paramref name="cycles"/> more cycles have passed.</summary>
+    /// <summary>Runs whole instructions until at least <paramref name="cycles"/> more cycles have passed, then brings the sound up to now.</summary>
     public void Run(long cycles)
     {
         long end = Bus.Cycles + cycles;
@@ -88,11 +100,13 @@ public sealed class Atari2600
         {
             Step();
         }
+
+        Bus.CatchUpSound();
     }
 
     /// <summary>
     /// Runs whole instructions until <paramref name="frames"/> more frames have ended, and stops at
-    /// the instruction in which the last ends.
+    /// the instruction in which the last ends, then brings the sound up to now.
     /// </summary>
     /// <exception cref="ArgumentOutOfRangeException"><paramref name="frames"/> is negative.</exception>
     public void RunFrames(int frames)
@@ -103,5 +117,7 @@ public sealed class Atari2600
         {
             Step();
         }
+
+        Bus.CatchUpSound();
     }
 }

@@ -38,7 +38,7 @@ public class StateReportTests
         var (problems, checkedTypes) = StateCompleteness.Check(machine.Bus);
 
         Assert.True(problems.Count == 0, string.Join("\n", problems));
-        foreach (Type part in new[] { typeof(Atari2600Bus), typeof(Tia), typeof(TiaPlayer), typeof(TiaMissile), typeof(TiaBall), typeof(TiaPositionCounter), typeof(TiaMotion), typeof(Riot6532), machine.Bus.Board.GetType() })
+        foreach (Type part in new[] { typeof(Atari2600Bus), typeof(Tia), typeof(TiaPlayer), typeof(TiaMissile), typeof(TiaBall), typeof(TiaPositionCounter), typeof(TiaMotion), typeof(TiaSound), typeof(SampleBuffer), typeof(Riot6532), machine.Bus.Board.GetType() })
         {
             Assert.Contains(part, checkedTypes);
         }

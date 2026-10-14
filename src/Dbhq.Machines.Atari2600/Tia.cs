@@ -5,8 +5,8 @@ namespace Dbhq.Machines.Atari2600;
 /// counter and the blank it decodes, WSYNC's latch that holds the CPU's RDY low, RSYNC, VSYNC ending
 /// a frame, VBLANK, the playfield, the two players, the two missiles and the ball, priority and
 /// score mode, the fifteen collision latches, and a frame of colour numbers written a pixel a
-/// colour clock; with the lines each read drives; HMOVE (task 7) and the six input ports (task 9).
-/// Task 10 adds the sound.
+/// colour clock; with the lines each read drives; HMOVE (task 7), the six input ports (task 9) and
+/// the two sound channels (task 10).
 /// </summary>
 /// <remarks>
 /// <para>
@@ -44,6 +44,15 @@ namespace Dbhq.Machines.Atari2600;
 /// counters are clocked by MOTCK, which runs while the blank is off; RSYNC restarts the line and
 /// not them (section 6).
 /// </para>
+/// <para>
+/// <b>The sound</b> (section 18). The audio clock's phase two comes from the horizontal sync
+/// counter's RHS and CNT decodes, one count late, so the counter's step that leaves count 8 or count
+/// 36 steps both channels (<see cref="TiaSound"/>): colour clocks 36 and 148 of a line, moved by
+/// RSYNC with the line and not by HMOVE. The mixed level changes there, or when a volume is
+/// written, and only then is the sample buffer told, with the colour clocks since it was last told,
+/// counted from the line's own clock and carried over each line's start: nothing is added to the
+/// colour clocks between.
+/// </para>
 /// </remarks>
 public sealed class Tia : IReportsState
 {
@@ -80,6 +89,12 @@ public sealed class Tia : IReportsState
     private const int Resm0 = 0x12;
     private const int Resm1 = 0x13;
     private const int Resbl = 0x14;
+    private const int Audc0 = 0x15;
+    private const int Audc1 = 0x16;
+    private const int Audf0 = 0x17;
+    private const int Audf1 = 0x18;
+    private const int Audv0 = 0x19;
+    private const int Audv1 = 0x1A;
     private const int Grp0 = 0x1B;
     private const int Grp1 = 0x1C;
     private const int Enam0 = 0x1D;
@@ -105,6 +120,8 @@ public sealed class Tia : IReportsState
     private const int PfBit = 32;
 
     // The decoded states of the horizontal sync counter, as Towers prints them (tia.md section 3).
+    private const int Rhs = 0b110111;
+    private const int Cnt = 0b101100;
     private const int Rhb = 0b011100;
     private const int Lrhb = 0b010111;
     private const int Shb = 0b010100;
@@ -130,6 +147,16 @@ public sealed class Tia : IReportsState
     private readonly TiaBall _ball = new();
     private readonly TiaMotion _motion = new();
     private readonly FrameBuffer _frame = new();
+    private readonly TiaSound _audio = new();
+
+    // Where the samples go, or null for a TIA alone.
+    private readonly SampleBuffer? _samples;
+
+    // The two channels' mix as the pads see it, 0 to 30 (TiaSound.Mix); the line's colour clock at
+    // which the sample buffer was last told; and the colour clocks carried over line starts since.
+    private int _mix;
+    private int _soundMark;
+    private int _soundCarry;
 
     // The horizontal sync counter's state, and which of its four colour clocks the next Tick runs.
     private int _counter;
@@ -161,8 +188,18 @@ public sealed class Tia : IReportsState
     private byte _firePins = FireBoth;
     private byte _fireLatches = FireBoth;
 
-    /// <summary>A chip at its power-on state (<see cref="PowerOn"/>).</summary>
-    public Tia() => PowerOn();
+    /// <summary>A chip at its power-on state (<see cref="PowerOn"/>), its sound made and not kept.</summary>
+    public Tia()
+        : this(null)
+    {
+    }
+
+    /// <summary>A chip at its power-on state whose sound goes to <paramref name="samples"/>, the bus's.</summary>
+    internal Tia(SampleBuffer? samples)
+    {
+        _samples = samples;
+        PowerOn();
+    }
 
     /// <summary>
     /// The colour clock of the line the next <see cref="Tick"/> runs, 0 to 227; 0 starts the
@@ -185,6 +222,15 @@ public sealed class Tia : IReportsState
 
     /// <summary>The picture as drawn: the frame being drawn, and the last finished.</summary>
     public FrameBuffer Frame => _frame;
+
+    /// <summary>
+    /// The sound's level now, from 0 to 1: the two channels' mix, linear in
+    /// <c>AUDV0</c> x bit 0 + <c>AUDV1</c> x bit 1 (tia.md section 18.7, the curve a choice).
+    /// </summary>
+    public double SoundLevel => TiaSound.Level(_mix);
+
+    /// <summary>The two sound channels, for the tests.</summary>
+    internal TiaSound Audio => _audio;
 
     /// <summary>The playfield, for the tests.</summary>
     internal TiaPlayfield Playfield => _playfield;
@@ -466,6 +512,18 @@ public sealed class Tia : IReportsState
             case Pf2:
                 _playfield.Write(register, value);
                 break;
+            case Audv0:
+            case Audv1:
+                // The volume gates the pad's drivers directly, so the level changes from the clock
+                // the write lands on, not at the next audio step (tia.md section 18.7) [guessing - verify].
+                int mix = TiaSound.Mix(_audio.Output0, _registers[Audv0], _audio.Output1, _registers[Audv1]);
+                if (mix != _mix)
+                {
+                    _mix = mix;
+                    TellSamples();
+                }
+
+                break;
             case Hmove:
                 _motion.Strobe();
                 break;
@@ -500,6 +558,10 @@ public sealed class Tia : IReportsState
         _ball.PowerOn();
         _motion.PowerOn();
         _frame.PowerOn();
+        _audio.PowerOn();
+        _mix = 0;
+        _soundMark = 0;
+        _soundCarry = 0;
         _counter = 0;
         _phase = 0;
         _clock = 0;
@@ -523,6 +585,11 @@ public sealed class Tia : IReportsState
         sink.Add(nameof(_ball), _ball);
         sink.Add(nameof(_motion), _motion);
         sink.Add(nameof(_frame), _frame);
+        sink.Add(nameof(_audio), _audio);
+        sink.Skip(nameof(_samples), "the bus's sample buffer, which the bus reports");
+        sink.Add(nameof(_mix), _mix);
+        sink.Add(nameof(_soundMark), _soundMark);
+        sink.Add(nameof(_soundCarry), _soundCarry);
         sink.Add(nameof(_counter), _counter);
         sink.Add(nameof(_phase), _phase);
         sink.Add(nameof(_clock), _clock);
@@ -550,6 +617,12 @@ public sealed class Tia : IReportsState
     private void Step()
     {
         int state = _counter;
+        if (state is Rhs or Cnt)
+        {
+            // The audio clock's phase two, one count after RHS or CNT (section 18.2).
+            AudioStep();
+        }
+
         if (state == (_motion.Extended ? Lrhb : Rhb))
         {
             // RHB ends the blank at colour clock 68, or LRHB at 76 when HMOVE's latch is set (section 15).
@@ -558,7 +631,10 @@ public sealed class Tia : IReportsState
 
         if (_rsync || state == Shb)
         {
-            // A line starts: the counter at 000000, the blank on, a new row of the frame.
+            // A line starts: the counter at 000000, the blank on, a new row of the frame. The colour
+            // clocks the sample buffer has not been told of carry over.
+            _soundCarry += _clock - _soundMark;
+            _soundMark = 0;
             _rsync = false;
             _counter = 0;
             _clock = 0;
@@ -569,6 +645,31 @@ public sealed class Tia : IReportsState
         }
 
         _counter = NextState(state);
+    }
+
+    /// <summary>
+    /// Tells the sample buffer of the colour clocks that have passed since it was last told, at the
+    /// level that held, so its samples reach now: for the machine at the end of a run, and before
+    /// the region switch changes the clock. The level does not change.
+    /// </summary>
+    internal void CatchUpSound() => TellSamples();
+
+    // One audio step: both channels stepped with their registers as written, the mix taken, and
+    // the sample buffer told.
+    private void AudioStep()
+    {
+        byte[] r = _registers;
+        _audio.Step(r[Audc0], r[Audf0], r[Audc1], r[Audf1]);
+        _mix = TiaSound.Mix(_audio.Output0, r[Audv0], _audio.Output1, r[Audv1]);
+        TellSamples();
+    }
+
+    // The colour clocks since the buffer was last told, at the level it had, and the level from now.
+    private void TellSamples()
+    {
+        _samples?.Add(_soundCarry + _clock - _soundMark, TiaSound.Level(_mix));
+        _soundCarry = 0;
+        _soundMark = _clock;
     }
 
     /// <summary>

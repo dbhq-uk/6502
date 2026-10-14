@@ -58,6 +58,7 @@ public sealed class Atari2600Bus : Bus, IReportsState
     private readonly Tia _tia;
     private readonly Riot6532 _riot;
     private readonly IBoard _board;
+    private readonly SampleBuffer _sound;
 
     // Atari2600Options.PerColourClockReference: every build is the reference until the speed pass.
     private readonly bool _perColourClockReference;
@@ -81,11 +82,14 @@ public sealed class Atari2600Bus : Bus, IReportsState
     {
         ArgumentNullException.ThrowIfNull(board);
         ArgumentNullException.ThrowIfNull(region);
+        options ??= new Atari2600Options();
         _board = board;
         _region = region;
-        _tia = new Tia();
+        int sampleRate = options.SampleRate;
+        _sound = new SampleBuffer(sampleRate, region.CpuHz, Math.Max(1, sampleRate / 4));
+        _tia = new Tia(_sound);
         _riot = new Riot6532();
-        _perColourClockReference = (options ?? new Atari2600Options()).PerColourClockReference;
+        _perColourClockReference = options.PerColourClockReference;
     }
 
     /// <summary>The parts a CPU access can reach (<see cref="Decode"/>).</summary>
@@ -114,8 +118,16 @@ public sealed class Atari2600Bus : Bus, IReportsState
     public IBoard Board => _board;
 
     /// <summary>
+    /// The sound, as samples at the options' rate, made by the TIA as its channels step, inside the
+    /// cycles in which they step. It holds a quarter of a second, as the NES's does: a page reads
+    /// it once a frame, and a reader that stops loses the oldest.
+    /// </summary>
+    public SampleBuffer Sound => _sound;
+
+    /// <summary>
     /// The region, switched at once with no restart: the two consoles differ in nothing a program
-    /// can see (region.md section 5), so nothing in the bus changes with it.
+    /// can see (region.md section 5). Only the sound's clock changes with it: the samples are
+    /// brought up to now at the old clock, and timed by the new one from here.
     /// </summary>
     public Region Region
     {
@@ -123,6 +135,8 @@ public sealed class Atari2600Bus : Bus, IReportsState
         set
         {
             ArgumentNullException.ThrowIfNull(value);
+            _tia.CatchUpSound();
+            _sound.CpuHz = value.CpuHz;
             _region = value;
         }
     }
@@ -221,15 +235,25 @@ public sealed class Atari2600Bus : Bus, IReportsState
         }
     }
 
+    /// <summary>
+    /// Brings the samples up to now: the colour clocks since the channels last stepped, at the level
+    /// that held. The machine does it at the end of each run, so a host reads the sound of all the
+    /// time it ran; the samples are the same however the runs divide the time
+    /// (<see cref="SampleBuffer"/>).
+    /// </summary>
+    public void CatchUpSound() => _tia.CatchUpSound();
+
     /// <summary>Puts a byte in the RIOT's RAM (<paramref name="offset"/> 0 to 127) with no cycle, for a test to set up memory.</summary>
     public void PokeRam(int offset, byte value) => _riot.WriteRam(offset, value);
 
     /// <summary>
-    /// The power-on state: the TIA, the RIOT and the board at theirs, the counts at zero and the
-    /// data bus at <c>$00</c> (bus.md section 8 item 3, a choice) [guessing - verify].
+    /// The power-on state: the TIA, the RIOT and the board at theirs, the counts at zero, the
+    /// samples emptied, and the data bus at <c>$00</c> (bus.md section 8 item 3, a choice)
+    /// [guessing - verify].
     /// </summary>
     internal void PowerOn()
     {
+        _sound.Clear();
         _tia.PowerOn();
         _riot.PowerOn();
         _board.PowerOn();
@@ -353,6 +377,7 @@ public sealed class Atari2600Bus : Bus, IReportsState
         sink.Add(nameof(_tia), _tia);
         sink.Add(nameof(_riot), _riot);
         sink.Add(nameof(_board), _board as IReportsState ?? throw new InvalidOperationException("the board does not report its state"));
+        sink.Add(nameof(_sound), _sound);
         sink.Skip(nameof(_perColourClockReference), StateReport.Fixed);
         sink.Add(nameof(_region), _region.ColourClockHz);
         sink.Add(nameof(_cycles), _cycles);

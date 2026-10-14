@@ -28,8 +28,8 @@ public static partial class Atari2600Host
 
     /// <summary>
     /// Builds a console with the cartridge file <paramref name="rom"/> in it, in
-    /// <paramref name="region"/> ("NTSC" or "PAL"), with <paramref name="sampleRate"/> for the
-    /// sound to come (task 10), switches it on, and returns one sentence naming the board it chose.
+    /// <paramref name="region"/> ("NTSC" or "PAL"), its sound made at <paramref name="sampleRate"/>
+    /// samples a second (task 13 hands the samples to the page), switches it on, and returns one sentence naming the board it chose.
     /// A file no modelled board takes throws the cartridge's own sentence, and the machine running,
     /// if any, is kept.
     /// </summary>
