@@ -156,6 +156,18 @@ def test_the_manual_check_fails_a_swap_of_two_chips_only_12_mm_apart():
     assert board_parts.manual_check(pts, manual, limit=10.0)['verdict'] == 'fail'
 
 
+def test_the_manual_check_s_own_limit_is_the_plan_s_ten_millimetres():
+    # Added in task 10 (14 October 2026): with the limit loosened to 20 mm in the module, every test passed, each
+    # passing its own limit; the run uses the module's. A swap 12 mm apart fails at it, and its limit is 10 mm.
+    pts = grid_points()
+    pts['IC40'] = (pts['IC3'][0], pts['IC3'][1] + 12.0)
+    manual = manual_from(pts)
+    manual['IC3'], manual['IC40'] = manual['IC40'], manual['IC3']
+    got = board_parts.manual_check(pts, manual)
+    assert got['limitMm'] == 10.0
+    assert got['verdict'] == 'fail'
+
+
 @pytest.mark.parametrize('truth', board_parts.CONVENTIONS)
 def test_settling_the_convention_finds_the_one_the_manual_used(truth):
     # IC51 and IC52 (28-pin, 600 mil), IC20 (16-pin) and IC21 (14-pin), placed as on the board

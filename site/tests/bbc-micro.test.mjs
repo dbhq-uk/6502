@@ -368,6 +368,20 @@ test('leds() reads the host\'s three bits: the cassette motor, CAPS LOCK and SHI
   assert.deepEqual(state.leds(), { motor: true, caps: false, shiftLock: false }, 'leds() is not read afresh each time');
 });
 
+// Added in task 10 of the models plan (14 October 2026), for a mutation that survived: BbcLeds' two lock values
+// swapped in C# passed every test, the C# tests reading the lights by name and the page's tests by made-up bits.
+test('leds() decodes the bits the host sends: BbcLeds\' values in BbcChip.cs, which BbcHost.Leds() returns as they are', () => {
+  const chip = fs.readFileSync(path.join(REPO_ROOT, 'src', 'Dbhq.Machines.BbcMicro', 'BbcChip.cs'), 'utf8');
+  const body = chip.slice(chip.indexOf('public enum BbcLeds'));
+  const value = (name) => Number(body.match(new RegExp(`^\\s+${name} = (\\d+),`, 'm'))?.[1]);
+  const off = { motor: false, caps: false, shiftLock: false };
+  assert.deepEqual(lights(value('CassetteMotor')), { ...off, motor: true });
+  assert.deepEqual(lights(value('CapsLock')), { ...off, caps: true });
+  assert.deepEqual(lights(value('ShiftLock')), { ...off, shiftLock: true });
+  const host = fs.readFileSync(path.join(REPO_ROOT, 'src', 'Dbhq.Machines.BbcMicro.Wasm', 'Program.cs'), 'utf8');
+  assert.match(host, /public static int Leds\(\) => \(int\)Machine\.Bus\.Leds;/);
+});
+
 test('accessCounts() and romSlot() are the host\'s, read afresh each time', () => {
   let counts = new Int32Array([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
   let slot = 15;

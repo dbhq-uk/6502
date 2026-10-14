@@ -1,14 +1,6 @@
 # Notices
 
-This repository is MIT (see `LICENSE`). Five things in it were taken from
-outside under different terms, or rest on work that states none, and are
-recorded here: the teletext glyph table, the BBC Micro's preset discs, the NES
-board's track map, traced from OpenTendo's scans of a bare board under the TAPR
-Open Hardware License, the BBC Micro board's track map, traced from amb5l's
-scans of a bare board, which state no licence, and the BBC Micro's key centres, read from Dominic Beesley's keyboard under the MIT licence, whose notice is kept below. The
-system ROMs, and the NES's bundled homebrew, Lan Master, which its author
-released into the public domain, are recorded separately, in
-[`roms/README.md`](roms/README.md).
+This repository is MIT (see `LICENSE`). What in it was taken from outside under different terms, or rests on work that states none, is recorded here, a section each: the teletext glyph table, the BBC Micro's preset discs, the NES board's track map, traced from OpenTendo's scans of a bare board under the TAPR Open Hardware License, the BBC Micro board's track map, traced from amb5l's scans of a bare board, which state no licence, the BBC Micro board's IC table, facts from Acorn's Service Manual, its parts, read from two photographs of populated boards, and the BBC Micro's key centres, read from Dominic Beesley's keyboard under the MIT licence, whose notice is kept below. The system ROMs, and the NES's bundled homebrew, Lan Master, which its author released into the public domain, are recorded separately, in [`roms/README.md`](roms/README.md).
 
 ## The SAA5050 teletext glyph table, from Bedstead
 

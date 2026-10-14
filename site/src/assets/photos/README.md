@@ -18,15 +18,7 @@ in for one: generated images live in `../imagery/`, are captioned
 below and on the page, or none, where the source states none. A file here is a
 resized copy of the source, which is a derivative under that licence.
 
-**What the 3D model takes from each**, for a machine that has one (the KIM-1),
-is in its section below and on the page. The analysis that does it is in
-`tools/kim1-model/` (its `README.md` says how to run it), and the journal for 2
-October 2026 has every figure. The BBC Micro's main photograph, `bbc-micro.webp`, is
-shown and nothing is taken from it. Its five others are measured, on their full-size originals, for its outside model (task 8 of its models plan, 13 October 2026; on the page since task 9b), in `tools/bbc-micro-model/` (the journal for 4 October 2026, task 8, has every figure). The NES has two: its board's model,
-which takes nothing from the photographs here, being measured from scans and
-photographs that are not committed, listed in their own section below; and its
-outside's, which takes from `nes.webp`, `nes-rear-right.webp`, `nes-pal-front.webp` and
-`nes-pal-underside.webp`, each measured on its full-size original.
+**What the 3D models take from each**, for a machine that has them (the KIM-1, the BBC Micro and the NES), is in its section below and on the page. The KIM-1's analysis is in `tools/kim1-model/` (its `README.md` says how to run it), and the journal for 2 October 2026 has every figure. The BBC Micro's main photograph, `bbc-micro.webp`, is shown and nothing is taken from it. The others listed for it below are measured, on their full-size originals, for its outside model (task 8 of its models plan, 13 October 2026; on the page since task 9b), in `tools/bbc-micro-model/` (the journal for 4 October 2026, task 8, has every figure). The NES has two: its board's model, which takes nothing from the photographs here, being measured from scans and photographs that are not committed, listed in their own section below; and its outside's, which takes from `nes.webp`, `nes-rear-right.webp`, `nes-pal-front.webp` and `nes-pal-underside.webp`, each measured on its full-size original.
 
 ## kim-1.webp
 

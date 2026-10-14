@@ -260,3 +260,18 @@ test('the browser check runs the BBC Micro\'s models after its machine, with the
   assert.deepEqual([...d.slice(0, 512)].map((b, i) => (i === 256 + 8 + 5 ? 1 : b)), [...testDisc().slice(0, 512)], 'the catalogue is not the test disc\'s but for the length');
   for (const what of ['before the visitor reached it', 'fetched the inside', 'canvas is blank', 'caps lock', 'cassette motor', 'did not put A down', 'did not type C', 'under the case', 'Right on the Outside tab', 'IC78', 'the DFS', 'reduced motion', 'Tab never left']) assert.ok(check.includes(what), what);
 });
+
+// Added in task 10 (14 October 2026), for three mutations of the browser check that survived every node test: the
+// DFS looked for in BASIC's slot, the *CAT judged on the legend row alone, and *MOTOR 0 not judged. The check runs
+// only in a browser, in CI, so these lines are held by their text, as the *DUMP step's are above: a judgement
+// weakened in another way is still for review and the check's own log to catch.
+test('the browser check\'s judgements on the inside and the lights are the ones the plan fixed: the DFS by its slot, IC78 marked on the model and in its row, and the motor light both on and off', async () => {
+  const check = read(path.join(process.cwd(), 'scripts', 'browser-check-bbc.mjs'));
+  const { PAGED_SLOTS } = await import('../src/models/bbc-micro-board-layout.mjs');
+  const dfsSlot = Object.keys(PAGED_SLOTS).find((slot) => PAGED_SLOTS[slot] === 'DFS');
+  assert.match(check, new RegExp(`const dfs = pagedRef\\(${dfsSlot}\\);`), 'the DFS is not looked for in its own slot');
+  assert.match(check, /if \(!cat\.accessed\.includes\('IC78'\) \|\| !cat\.rows\.includes\('IC78'\)\) problem\(/, 'the *CAT is not judged on both the mark and the row');
+  assert.match(check, /if \(!dump\.paged\.includes\(dfs\)\) problem\(/);
+  assert.match(check, /if \(!motorOn\) problem\(/);
+  assert.match(check, /if \(!motorOff\) problem\(/);
+});

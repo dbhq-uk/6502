@@ -443,7 +443,7 @@ A day's spike, before any pipeline is built. If any STOP threshold is crossed, t
     - Fail: in any case the interval's upper end is below 0.98.
     - Otherwise inconclusive, with one more batch allowed.
     - A FAIL is recorded and Dan is told. The machine is not changed to pass without his say.
-- **Runs here:** C# and the fingerprint. The browser check runs in CI. The speed run waits for the host Dan names, and until then it is owed: it is listed in Deferred, and the pull request does not merge without it.
+- **Runs here:** C# and the fingerprint. The browser check runs in CI. The speed run waits for the host Dan names, and until then it is owed: it is listed in Deferred, and the pull request does not merge without it. (Superseded on 13 October 2026: the run was made in CI and passed, "The speed run, 13 October 2026" below.)
 - **Size:** medium, 2, plus 1 for the speed run.
 - **Review focus:**
   1. No cycle or chip behaviour changed.
@@ -702,7 +702,7 @@ The largest task. If its first review sends it back more than twice, split it at
   - The map's `BUDGETS` entry missing.
   - A `references` entry without `sha256`.
   - Task 4's pinned nets result changed without the plan's words.
-- **Step 3's speed** is task 6's run, on the host Dan named. If it has not run, the pull request is not marked ready.
+- **Step 3's speed** is task 6's run, on the host Dan named. If it has not run, the pull request is not marked ready. **Done:** the run was made in CI on 13 October 2026 and passed (task 6's outcome, "The speed run, 13 October 2026"); in task 10, on 14 October 2026, `git diff 0d9e1ab..HEAD -- src/` printed nothing, so no change to the machine since the run asks for it to be repeated.
 - **"What Dan must be told"** gains:
   - Chris's Acorns' photographs are CC BY-SA 3.0 as that site states, with an older sentence asking to be asked first.
   - Whether the copper is a verified trace or traced to look at.
@@ -720,6 +720,14 @@ The largest task. If its first review sends it back more than twice, split it at
 - [ ] **Step 5: Final review.** `superpowers:requesting-code-review` on the whole branch against the design and this plan, on the most capable model, with one question first: does any page, doc or journal sentence claim more than a test or a recorded measurement shows? Apply what it finds in one fix wave and have it re-checked.
 - [ ] **Step 6: Mark the pull request ready.** Only once `Validate` is green on the last commit. Do not merge.
 - [ ] **Step 7: Journal and commit** `test(models): the mutation pass, the models' known limits, and the record`. Push. Report to Dan (below).
+
+**Notes added 14 October 2026, during task 10.**
+
+- **Step 1.** The pass ran in a scratch worktree, one fault at a time, by `tools/probes/bbc_models_mutations.py`, over every mutation listed here and in the re-plan, mapped to the code as it is, and more (the modules, the credits, the tools' judges and generators, the browser check's node-testable parts); the table is in the journal, "Task 10". Eight survived (two keys' names swapped in all three files, `BbcLeds`' lock values swapped in C#, a figure typed into each note, a credit that stopped saying the copper is traced to look at, and three of the browser check's judgements); each now has a test, shown failing on its fault. Four more are caught only by the method's hash pins, which `docs/known-differences.md` says.
+- **Step 2.** `docs/known-differences.md` has "The BBC Micro: its two 3D models, where they stop", checked against both notes' limits.
+- **Step 3.** The page weights are in the journal. The speed is task 6's CI run, which passed; `git diff 0d9e1ab..HEAD -- src/` prints nothing, so it covers the machine on this branch.
+- **Step 4.** README, `AGENTS.md`'s layout, `NOTICE.md`'s opening, `site/README.md`, the family document's BBC line, the photographs' README and the tool's README; `DESIGN.md` read and unchanged.
+- **Steps 5 and 6** are not done in this task: the final review is a separate reviewer's, and the pull request stays a draft.
 
 ---
 
@@ -740,7 +748,7 @@ Nothing here needs a decision from him now; the choices are taken (`models.md`, 
 
 Recorded here, not built:
 
-- **Added 13 October 2026 (the re-plan):** task 6's browser speed run, owed until Dan names its host; the pull request does not merge without it. Its rule and the script that applies it were committed before any launch (`bench/bbc-micro-speed/chip-counters/`, task 6's outcome). A copper re-trace under a new check fixed before it runs, if task 4's nets check fails (as the NES's #78).
+- **Added 13 October 2026 (the re-plan):** task 6's browser speed run, owed until Dan names its host; the pull request does not merge without it. **Done 13 October 2026, in CI** (run 38472729370, base `8a30791`, after `0d9e1ab`): PASS, as task 6's outcome records. Checked in task 10 (14 October 2026): `git diff 0d9e1ab..HEAD -- src/` prints nothing, so the machine the run measured is the machine on this branch. Its rule and the script that applies it were committed before any launch (`bench/bbc-micro-speed/chip-counters/`, task 6's outcome). A copper re-trace under a new check fixed before it runs, if task 4's nets check fails (as the NES's #78).
 
 - A shared three.js chunk for the two bundles (needs a deploy list that tolerates hashed names).
 - Measured heights for the inside, from a pair of photographs of a populated Issue 7 board, if one is found.

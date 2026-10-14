@@ -19,8 +19,7 @@ node scripts/measure-kim1-photo.mjs <photo>     # the KIM-1 board's scale and si
 
 The KIM-1 model's measurements are made offline, in Python, by
 `tools/kim1-model/` at the repository root (its README says how to run them);
-their outputs are committed and the build never runs them. The NES's two
-models are measured the same way, by `tools/nes-model/`.
+their outputs are committed and the build never runs them. The NES's two models are measured the same way, by `tools/nes-model/`, and the BBC Micro's two by `tools/bbc-micro-model/`.
 
 Needs Node 22.22 or later (`engines` in `package.json`). `dev` and `preview` serve
 on `127.0.0.1`. To reach them from another machine, set `SITE_HOST` to the address
@@ -58,6 +57,8 @@ off; that a tiny test cartridge it builds from bytes, never a game, goes in
 through the picker and turns the screen its colour; and that a text file and a
 file over the size limit are each refused with a sentence while the machine
 carries on. Its 3D models: before Start nothing under `/models/` is fetched until the visitor scrolls to them, and then the outside's bundle alone; the outside draws, its light dark and POWER out, and a click on its RESET leaves the machine stopped; a click on its POWER starts the machine, then the light is lit and POWER in; the page's Reset puts RESET down, a click on RESET resets the machine, and from below the case is drawn; with the inside not loaded, the page goes to PAL and choosing Inside loads it drawing PAL; the board's own checks, in its panel; Left and Right move between the tabs and each view keeps its camera, and Tab leaves the section; and with reduced motion both views load and switch.
+
+For the BBC Micro's 3D models (`checkBbcModels` in `scripts/browser-check-bbc.mjs`, run after the machine's own checks), it checks that nothing under `/models/` is fetched until the visitor scrolls to the models, and then the outside's bundle alone, with the inside's panel hidden; that the outside draws, its lights dark before Start, and a click on its C before Start presses nothing and says the machine is not running; that after the boot the CAPS LOCK light is lit, the on-screen CAPS LOCK puts it out and lights it again, and `*MOTOR 1` and `*MOTOR 0` light and put out the cassette motor's light; that the on-screen A, a real key held on the screen and a click on the model's C each put their key down on the model, the click typing C on the machine once; that the case is drawn from below; that Right on the tabs selects the inside, which only then fetches its bundle and track map and draws; that pointing at IC78 names it and marks its legend row; that `*CAT` marks IC78 and its row, and that `*DUMP` of a 2 KB file on a disc of its own frames the DFS as the paged ROM, judged only on what `*DUMP` shows; that the two track buttons work and, from below, the solder side's copper shows where the track map puts it and not where a mirrored map would; that each view keeps its camera across the tabs and Tab leaves the section; and that with reduced motion both views load and switch. A camera that never comes to rest is waited for with the NES check's `settled()`, imported.
 
 `npm run machines` needs the .NET 10 SDK with the `wasm-tools` workload
 (`dotnet workload install wasm-tools`), because the machines are compiled ahead

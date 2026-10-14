@@ -1435,6 +1435,23 @@ test('the keys are K1\'s centres put in the case by the recorded turn and shift,
   assert.equal(keysJson.colours.agree, keysJson.keys.filter((k) => k.colour === k.colourClustered).length);
 });
 
+// Added in task 10 (14 October 2026), for a mutation that survived: two keys' names swapped the same way in
+// keys.json, case.json and the parts module passed every test, which compared the files with each other. The
+// record here is the page's own: the on-screen keys, ON_SCREEN_ROWS, in the machine's layout row by row.
+test('the case\'s keys are the machine\'s layout: each main row of the on-screen keys is one row of keycaps, in the same order left to right', async () => {
+  const { ON_SCREEN_ROWS } = await import('../public/bbc-keys.js');
+  const main = ON_SCREEN_ROWS.filter((row) => !row.includes('Left'));
+  assert.equal(main.length, ON_SCREEN_ROWS.length - 1, 'the cursor block is not one row of its own');
+  for (const keys of [caseParts.KEYS.keys, caseJson.keys, keysJson.keys]) {
+    for (const row of main) {
+      const caps = keys.filter((k) => row.includes(k.name));
+      assert.equal(caps.length, row.length, `not every key of ${row.join(' ')} is a keycap`);
+      assert.equal(new Set(caps.map((k) => k.row)).size, 1, `${row.join(' ')} is not one row of keycaps`);
+      assert.deepEqual([...caps].sort((a, b) => a.x - b.x).map((k) => k.name), row, `the keycaps of ${row[0]}'s row are not in the machine's order`);
+    }
+  }
+});
+
 test('the rear ports are in O2\'s order, each scored one within 2.0 mm of its socket plus the board\'s offset, on the D shell\'s scale', () => {
   assert.deepEqual(caseJson.rearOrder, ['UHF out', 'video out', 'RGB', 'RS423', 'cassette', 'analogue in', 'econet']);
   const posts = caseMarks.o2.dsubPosts;
@@ -1915,4 +1932,35 @@ test('the outside\'s scene, words and results are .mjs modules with no mount, pu
   assert.match(src, /from '\.\/bbc-micro-case-layout\.mjs'/);
   assert.doesNotMatch(src, /bbc-micro-case-notes/);
   assert.doesNotMatch(fs.readFileSync(CASE_LAYOUT_MJS, 'utf8'), /node:/);
+});
+
+// Added in task 10 (14 October 2026), for two mutations that survived: a figure typed into a note's code (the I5
+// registration's median in the board's, the case top's scale in the case's), equal to the results file's, passed
+// every test, which looked for the right figures in the words and changed only a few fields. Here every number in
+// the results file is moved, and no number in either note may stay put but the few that are words, not figures.
+test('neither note types a figure: with every number in its results file moved, every number in its words moves too', () => {
+  const moved = (o) => (Array.isArray(o) ? o.map(moved)
+    : o && typeof o === 'object' ? Object.fromEntries(Object.entries(o).map(([k, v]) => [k, moved(v)]))
+      : typeof o === 'number' ? (Number.isInteger(o) ? o + 1000 : o * 1.37 + 0.011) : o);
+  const words = (m) => [...m.paragraphs, ...m.limits].join(' ');
+  const numbers = (text) => [...text.matchAll(/(?<![A-Za-z\d.+])\d[\d,]*(?:\.\d+)?/g)].map((m) => m[0].replace(/,$/, ''));
+  // Words with a digit in them, not figures: the board's issue, table 8.1, a 40-pin row, the 15-way D socket.
+  const FIXED = { board: ['7', '8.1', '40'], case: ['15'] };
+  for (const [name, mod, figures] of [['board', notes, boardFigures], ['case', caseNotes, caseFigures]]) {
+    const after = new Set(numbers(words(mod.made(moved(figures)))));
+    const stayed = [...new Set(numbers(words(mod.made(figures))))].filter((n) => after.has(n) && !FIXED[name].includes(n));
+    assert.deepEqual(stayed, [], `the ${name}'s note keeps ${stayed.join(', ')} when its results file moves: a figure typed by hand`);
+    for (const n of FIXED[name]) assert.ok(numbers(words(mod.made(figures))).includes(n), `${n} is no longer in the ${name}'s note: take it out of FIXED`);
+  }
+});
+
+// Added in task 10 (14 October 2026), for a mutation that survived: I1's credit on the page lost "traced to look
+// at, with their connections not verified" and every test passed, the copper test reading the model's own words
+// and not the credits, which the page shows under the same model.
+test('every credit of the BBC Micro\'s that speaks of the copper says it is traced to look at and not verified, or names the check that failed', () => {
+  const registry = JSON.parse(fs.readFileSync(path.join(REPO_ROOT, 'machines', 'registry.json'), 'utf8'));
+  const bbc = registry.machines.find((m) => m.id === 'bbc-micro');
+  const said = [...bbc.references, ...bbc.photos].map((c) => c.used).filter((u) => /copper|track/i.test(u));
+  assert.ok(said.length >= 3, `only ${said.length} credits speak of the copper`);
+  for (const u of said) assert.ok((/to look at/.test(u) && /not verified/.test(u)) || /failed/.test(u), `a credit speaks of the copper without saying it is traced to look at and not verified: ${u}`);
 });
