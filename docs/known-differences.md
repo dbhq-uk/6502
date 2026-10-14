@@ -1605,3 +1605,17 @@ that moves any of them fails until the words move too.
 - **The objects' power-on state**: every counter at count 0 and quarter 0, nothing held or drawing, every register 0. No source gives it `[guessing - verify]`.
 
 **How the tests treat it.** `TiaPlayerTests` holds the landing table, the cycle 69 case, the copies held through a reset, the scan counter and RESMP; `TiaMissileTests` and `TiaBallTests` the missiles' and the ball's landings and widths; `TiaPriorityTests` priority and score mode; `TiaCollisionTests` the latches.
+
+## The Atari 2600: HMOVE and the motion clocks, where the model stops
+
+**What.** Task 7 of the Atari 2600 plan: HMOVE, the ripple counter, the more-motion latches, the comb and the extra clocks, built from `docs/atari-2600/facts/tia.md` sections 15 to 17 and recorded in its section 17.1. Where the sources are silent, the model makes a choice:
+
+- **HMOVE is taken on the first grid clock at least four colour clocks after the write lands**, and its comparisons read each motion register on the grid clock before the pulse they decide. These are fits to Mott's table and the suite's headers, not a reading of the schematic `[guessing - verify]`.
+- **An extra clock acts on the colour clock after its slot, before that clock's pixel**, so on the drawn line it merges with the motion clock into one early step, which skips one pixel of the object's state and shows the next twice. That gives the suite's residues for a one-pixel dot `[inferring from jigo2600's reading of the schematic; guessing - verify]`.
+- **Every object takes a merged step the same way, players included.** The suite's trusted `collision/merge-delivery`, `merge-delivery-replant`, `merge-delivery-stretch` and `merge-delivery-train` state that a player's scan counter takes or refuses a merged step by its own state; the model does not, and the four fail. They wait for task 11's triage, and they are not moved to recorded without Dan (`tia.md` open item 12). The same difference shows as single pixels in the recorded pictures of `hmove-stuck-player`, `-stretch`, `-straddle` and `-widths`.
+- **An HMOVE while the count runs does not start it again**; it sets the latches again `[inferring from jigo2600; guessing - verify]`.
+- **A reset cuts off its object's start at the end of the clock it lands on**, from the suite's `resbl-kill` (the ball) and `hmove-values` (a missile), applied to players too `[for players guessing - verify]`.
+- **A player reset landing at colour clock 69 still lands at pixel 6**, where the suite measured 7: `merge-delivery-replant` states the measurement but fails first on its merge rules, so it does not decide the mechanism (`tia.md` open item 7).
+- **The PAL pictures of `harness/calibration` and `tia-render/colors` mismatch by the partition rule** because the suite's PAL references draw hues 0, 1, 14 and 15 as one grey, so colour numbers the TIA keeps apart share one reference colour. That is the rule meeting the PAL palette, not the TIA; the counts are task 7's journal entry's and task 11 records them.
+
+**How the tests treat it.** `TiaMotionTests` holds sections 15 to 17's worked examples and section 16's table; `TiaBallTests` and `TiaMissileTests` the reset's cut; `SuiteSelfTests` keeps the four `merge-delivery` tests failing exactly as they do now; `ScreenshotTests` reports every picture's count.
