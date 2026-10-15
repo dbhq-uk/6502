@@ -295,7 +295,11 @@ jobs:
       # bbc-audio.js are the BBC Micro's page: its driver, the key table the
       # driver imports, and the sound worklet it loads with addModule, which no
       # import names. nes.js, nes-keys.js and nes-audio.js are the NES's page,
-      # the same three for the same reasons. electron.js, electron-keys.js and
+      # the same three for the same reasons. cartridge-picker.js, region-line.js,
+      # gamepads.js, touch-pad.js and sound-output.js are the console parts nes.js
+      # imports, shared with the Atari 2600's page since its task 13, and
+      # sample-worklet.js is the ring nes-audio.js imports in the audio thread,
+      # which no page names. electron.js, electron-keys.js and
       # electron-audio.js are the Electron's, the same three.
       # site/tests/build.test.mjs derives the required list from the built pages.
       # analytics.js and consent.js are in this list for a sharp reason. A 404 on
@@ -314,7 +318,7 @@ jobs:
           # a file new in this deploy can answer 404 for a few seconds (the BBC
           # Micro's two merges on 4 Oct 2026 both met it). Each try has its own
           # cache-buster. A file that never reaches 200 still fails.
-          for f in sitemap-index.xml sitemap-0.xml robots.txt analytics.js consent.js machines-table.js table-sort.js chip.js kim-1.js machine-host.js teletype-paper.js bbc-micro.js bbc-keys.js bbc-audio.js nes.js nes-keys.js nes-audio.js electron.js electron-keys.js electron-audio.js model-loader.js models/kim-1.js models/kim-1-tracks.webp models/nes-famicom-case.js models/nes-famicom-board.js models/nes-famicom-board-tracks.webp models/bbc-micro-case.js models/bbc-micro-board.js models/bbc-micro-board-tracks.webp; do
+          for f in sitemap-index.xml sitemap-0.xml robots.txt analytics.js consent.js machines-table.js table-sort.js chip.js kim-1.js machine-host.js teletype-paper.js bbc-micro.js bbc-keys.js bbc-audio.js nes.js nes-keys.js nes-audio.js cartridge-picker.js region-line.js gamepads.js touch-pad.js sound-output.js sample-worklet.js electron.js electron-keys.js electron-audio.js model-loader.js models/kim-1.js models/kim-1-tracks.webp models/nes-famicom-case.js models/nes-famicom-board.js models/nes-famicom-board-tracks.webp models/bbc-micro-case.js models/bbc-micro-board.js models/bbc-micro-board-tracks.webp; do
             TRY=0
             while :; do
               CODE=$(curl -s --max-time 20 --retry 3 --retry-delay 5 -o /dev/null -w "%{http_code}" "https://6502.dbhq.uk/${f}?cb=${GITHUB_SHA}-${TRY}")
