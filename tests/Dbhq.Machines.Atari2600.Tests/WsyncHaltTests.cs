@@ -135,4 +135,42 @@ public class WsyncHaltTests
         Assert.Equal(6, machine.Bus.Tia.HorizontalCounter);
         Assert.Equal(2, observer.Halts.Count);
     }
+
+    [Theory]
+    [MemberData(nameof(TestPrograms.Regions), MemberType = typeof(TestPrograms))]
+    public void Section_5_dec_wsync_across_a_line_end_its_second_write_halts_a_whole_line(string regionName)
+    {
+        // bus.md section 5: both writes of a read-modify-write strobe WSYNC. Here the first lands on
+        // cycle 76, the line's last, and the second on cycle 1 of the next line, after the line's
+        // start has released the first. So the second alone halts the next fetch, for the rest of
+        // that line; a bus that lost the second write would not halt at all (task 15's M5). No
+        // source states this case; it follows from the sheet's two rules [inferring].
+        // STA WSYNC; 36 NOPs; DEC WSYNC; NOP; JMP to the NOP.
+        byte[] code = [0x85, 0x02, .. Enumerable.Repeat((byte)0xEA, 36), 0xC6, 0x02, 0xEA, 0x4C, 0x28, 0xF0];
+        Atari2600 machine = TestPrograms.Machine(TestPrograms.RegionNamed(regionName), code);
+        var observer = new ObserverTests.Recorder();
+        machine.Bus.Observer = observer;
+
+        // STA WSYNC, then the NOPs from cycle 1: the first waits for the line, and the 36 take
+        // cycles 1 to 72.
+        machine.Step();
+        for (int i = 0; i < 36; i++)
+        {
+            machine.Step();
+        }
+
+        Assert.Equal(216, machine.Bus.Tia.HorizontalCounter);
+
+        // DEC WSYNC: fetch on cycle 73, operand 74, the read of $02 on 75, the old byte written
+        // back on 76 and the new one on cycle 1 of the next line.
+        Assert.Equal(5, machine.Step());
+        Assert.Equal(3, machine.Bus.Tia.HorizontalCounter);
+        Assert.Equal(["write $0002", "read $0002", "write $0002", "write $0002"], observer.Accesses);
+
+        // The NOP's fetch waits from cycle 2 to the end of that line: 75 halted cycles, then the
+        // fetch on cycle 1 and the NOP's second cycle.
+        Assert.Equal(75 + 2, machine.Step());
+        Assert.Equal(6, machine.Bus.Tia.HorizontalCounter);
+        Assert.Equal(2, observer.Halts.Count);
+    }
 }
