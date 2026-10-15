@@ -418,25 +418,17 @@ public sealed class Kim1Teletype
     {
         bool mark = _outputMark;
         int n = _receiveSample;
-        if (n == 0)
-        {
-            // A start bit is a space held from its falling edge to its middle:
-            // a mark in between has already ended the attempt (UpdateOutput).
-            // The line can only be a mark here if nothing moved it.
-            if (mark)
-            {
-                EndReceive(cycle);
-                return;
-            }
-        }
-        else if (n <= 8)
+        // n == 0 is the middle of the start bit: nothing to read. A mark
+        // before it has already ended the attempt (UpdateOutput), so the line
+        // is a space here.
+        if (n is >= 1 and <= 8)
         {
             if (mark)
             {
                 _receiveByte |= 1 << (n - 1);
             }
         }
-        else
+        else if (n > 8)
         {
             if (mark)
             {

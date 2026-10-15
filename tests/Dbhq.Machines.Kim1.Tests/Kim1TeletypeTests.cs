@@ -62,12 +62,16 @@ public sealed class Kim1TeletypeTests(ITestOutputHelper output)
         var kim = new Kim1Session();
         kim.Keys("[RS]");
         Assert.NotEqual("       ", kim.Display);
+        int edges = 0;
+        kim.Machine.Teletype.OutputChanged += (_, _) => edges++;
         kim.Machine.Mode = Kim1Mode.Teletype;
         kim.Machine.Run(cyclesBeforeRs);
         kim.Print();
 
-        // The monitor really did start to print (its output is on the line),
-        // but nothing on it is a character at 110 baud.
+        // The monitor really did start to print (its output is on the line:
+        // 30,000 cycles of it is well over fifty edges), but nothing on it is
+        // a character at 110 baud.
+        Assert.True(edges > 50, $"the monitor put only {edges} edges on the line");
         Assert.Equal("", kim.Printed);
         Assert.Equal(0, kim.Machine.Teletype.FramingErrors);
 
