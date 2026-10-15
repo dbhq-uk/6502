@@ -11,7 +11,7 @@ A record of the reviews of tasks 2, 6, 7, and 8 and 9 of [the Atari 2600 plan](.
 
 ## The pattern
 
-Every task from 1 to 14 had a review whose findings landed as a commit of their own (`git log --format='%h %s' origin/main..HEAD | grep review`, 15 October 2026), and task 15's is the final review of the whole branch. By the review notes kept while the branch was built, none of the reviews found a Critical issue. What they found was the same few kinds of thing, in this order as the build went on: claims that went further than their evidence, guesses that did not carry `[guessing - verify]`, and then tests that could not fail. The final review of the whole branch found more of the first two (below).
+Every task from 1 to 14 had a review whose findings landed as a commit of their own (`git log --format='%h %s' origin/main..HEAD | grep review`, 15 October 2026), and task 15's is the final review of the whole branch. By the controller's notes, which are not committed, none of the task reviews reported a Critical finding; the task 6 review did change behaviour (a reset now cuts off an untaken start), as a minor fault. What they found was the same few kinds of thing, in this order as the build went on: claims that went further than their evidence, guesses that did not carry `[guessing - verify]`, and then tests that could not fail. The final review of the whole branch found more of the first two (below).
 
 ## Task 2, the cartridge and the boards (`8ed0a0f`)
 
@@ -54,7 +54,7 @@ The final review of the branch, at `340eb34`, found no Critical issue either. It
 
 ### The four ported faults, run alone
 
-Each was run on 15 October 2026 with `python3 -I tools/probes/atari-2600/<script> <id>` on the code of `2885a5d`; the accessors' deletion, made while they ran, touches none of the four. The scripts copy only what their own task's tests needed, so on today's code the scratch copy's baseline already fails in `Atari2600AcceptanceTests`, `BootTests`, `PagePathTests`, `SuiteRecordedTests` and `SuiteSelfTests`, which read `machines/` and `docs/` (162 cases for the three scripts that print the count). A fault is read by the files that fail beyond those. Each script's header now says so.
+Each was run on 15 October 2026 with `python3 -I tools/probes/atari-2600/<script> <id>` on the code of `2885a5d`; the accessors' deletion, made while they ran, touches none of the four. The scripts copy only what their own task's tests needed, so on today's code the scratch copy's baseline already fails in `Atari2600AcceptanceTests`, `BootTests`, `PagePathTests`, `SuiteRecordedTests` and `SuiteSelfTests`, which read `machines/` and `docs/` (162 cases, in the three that print it). A fault is read by the files that fail beyond those. Each script's header now says so.
 
 | Fault | What it plants now | Caught beyond the baseline by |
 |---|---|---|

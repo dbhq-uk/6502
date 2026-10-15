@@ -334,9 +334,8 @@ public class TiaMotionTests
     [Fact]
     public void A_second_hmove_while_the_pulses_run_does_not_restart_the_count_jigo2600_a_choice()
     {
-        // [inferring from jigo2600, Visual Objects: "triggering SEC multiple times while the
-        // counter is running has no effect" on the counter; the latches are set again; guessing -
-        // verify.] With HMM0 $00, a second HMOVE on cycle 12 of the same line still stops the
+        // [inferring from jigo2600, Visual Objects, paraphrased: SEC repeated while the counter runs
+        // leaves the counter alone; the latches are set again; guessing - verify.] With HMM0 $00, a second HMOVE on cycle 12 of the same line still stops the
         // pulses at the first count's eighth, so the missile does not move; a count started again
         // would give fourteen pulses in the blank and move it 6 left.
         byte[][] rows = Missile(80).At(2, 9, Reg.Hmove, 0).At(2, 36, Reg.Hmove, 0).Rows(4);

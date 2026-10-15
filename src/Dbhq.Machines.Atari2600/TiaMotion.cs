@@ -38,8 +38,8 @@ namespace Dbhq.Machines.Atari2600;
 /// <b>When an extra clock acts.</b> The grid clocks are colour clocks 2, 6, ..., 226 of a line, one
 /// after the slots 1, 5, ..., 225 the suite counts, because an extra clock rises with the colour
 /// clock and so steps the object before its pixel is latched, half a clock ahead of a motion clock
-/// (jigo2600, Visual Objects: the extra clock's edge is "in sync with CLK, not CLKP", and "the levels
-/// are updated before" the pixel latch). In the blank it moves the object one pixel left. On the
+/// (jigo2600, Visual Objects, paraphrased: the extra clock's edge follows the colour clock CLK, not
+/// the pixel clock CLKP, and the object's levels change before the pixel latch takes them). In the blank it moves the object one pixel left. On the
 /// drawn line it merges with that clock's motion clock into one early step, so the object does not
 /// move, but its pixel for that clock is skipped and the next one shown twice: a one-pixel dot two
 /// clocks after a slot is swallowed and one three after is widened (section 16) [inferring: the

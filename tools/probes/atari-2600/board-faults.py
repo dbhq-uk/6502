@@ -9,7 +9,7 @@ Needs dotnet on PATH (or in ~/.dotnet).
 
 A record of its day. Its copy list predates the tests that read machines/ and docs/, so on later
 code the scratch copy's baseline fails in Atari2600AcceptanceTests, BootTests, PagePathTests,
-SuiteRecordedTests and SuiteSelfTests (162 cases on 15 October 2026), and a fault is read by the
+SuiteRecordedTests and SuiteSelfTests, and a fault is read by the
 files beyond those. R4 stopped matching when Region gained its hue angle (task 5); it was ported on 15 October 2026
 (the final review's fix wave) and, run alone, RegionTests caught it."""
 import os, re, shutil, subprocess, sys, tempfile
