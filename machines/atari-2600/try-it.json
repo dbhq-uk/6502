@@ -9,7 +9,7 @@
   "steps": [
     {
       "do": "Press Start on the page.",
-      "says": "The machine switches on with 2048 2600 in it. Its title shows the tiles 2, 0, 4, 8 and 2, 6, 0, 0 in two rows, their colours changing every frame, with the author's name, CHESTERBR, under them."
+      "says": "The machine switches on with 2048 2600 in it. Its title shows the tiles 2, 0, 4, 8 and 2, 6, 0, 0 in two rows, their colours changing every frame, with his handle, CHEST over ERBR, under them."
     },
     {
       "do": "Press the left fire button.",

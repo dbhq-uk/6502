@@ -55,11 +55,11 @@ Nothing. The image is byte for byte the file at the address above, and the licen
 
 ## The file's history
 
-`2048.bin` was last changed on 8 April 2014, in commit `0694b5464e` ("fixed 'always party' bug"). That is after the two contributions the repository's README credits: Ben Combee's fix (commit `2590aaf12b`, 25 March 2014, "Fixed the bug that prevented the last tile from being picked") and SvOlli's PAL support (commit `020c75b105`, 28 March 2014, "PAL support via TV TYPE switch (by @SvOlli)"). The README licenses every contribution under the same terms (the last paragraph quoted above). The source's one later change, `c8050d0d3c` on 2 September 2014, adds only a comment about a known score bug, which the author left in "to avoid generating a deviant binary from the one that is already on the wild (including physical carts from GDG)". The bundled game has that bug.
+`2048.bin` was last changed on 8 April 2014, in commit `0694b5464e` ("fixed 'always party' bug"). That is after the two contributions the repository's README credits: Ben Combee's fix to `2048.asm` (commit `2590aaf12b`, 25 March 2014, which the README credits as "Fixed the bug that prevented the last tile from being picked"; the binary was rebuilt with it the same day, in `5d3d8b4ed4`, "build with @unwiredben's fix") and SvOlli's PAL support (commit `020c75b105`, 28 March 2014, "PAL support via TV TYPE switch (by @SvOlli)"). The README licenses every contribution under the same terms (the last paragraph quoted above). The source's one later change, `c8050d0d3c` on 2 September 2014, adds only a comment about a known score bug, which the author left in "to avoid generating a deviant binary from the one that is already on the wild (including physical carts from GDG)". The bundled game has that bug.
 
 ## The cartridge art is not in the ROM
 
-The repository's README credits the cartridge art separately: "Cartridge Art © 2014 by Jenn Harrison". That art is the label pictures in the repository (`cart-main.jpg`, `cart-orig.jpg`, `cart-small.jpg` and `cart-top.jpg`), which are not bundled, shown or committed here. The picture the ROM draws, the title screen and the tiles, comes from `graphics.asm`, which the author's `graphics_gen.rb` generates, both under his copyright and the MIT licence. So the separate copyright in the art does not reach anything this repository ships.
+The repository's README credits the cartridge art separately: "Cartridge Art © 2014 by Jenn Harrison". That art is the label pictures in the repository (`cart-main.jpg`, `cart-orig.jpg`, `cart-small.jpg` and `cart-top.jpg`, named in the repository's tree at the pinned commit), which are not bundled, shown or committed here. None of it is in the ROM.
 
 ## How it runs
 

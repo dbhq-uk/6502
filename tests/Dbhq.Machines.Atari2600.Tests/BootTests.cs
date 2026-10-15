@@ -21,7 +21,10 @@ public sealed class BootTests(ITestOutputHelper output)
         Cartridge cartridge = Cartridge.Load(BootCheck.Rom());
 
         Assert.Equal("2K", cartridge.BoardName);
-        Assert.Equal("machines/atari-2600/cartridges/2048/2048.bin", Pins.Atari2600HomebrewPath);
+        // The pin names the game in its own folder, so the folder's licence and README are the game's.
+        string pinned = Path.GetFullPath(Path.Combine(RepoPaths.Root, Pins.Atari2600HomebrewPath));
+        Assert.Equal(Path.GetFullPath(Path.Combine(Folder, "2048.bin")), pinned);
+        Assert.True(File.Exists(pinned), $"{pinned} is missing");
     }
 
     [Fact]
@@ -38,7 +41,7 @@ public sealed class BootTests(ITestOutputHelper output)
 
         string readme = File.ReadAllText(Path.Combine(Folder, "README.md"));
         Assert.Contains(Pins.Atari2600HomebrewSha256, readme, StringComparison.Ordinal);
-        Assert.Contains(Commit, readme, StringComparison.Ordinal);
+        Assert.Contains(Pins.Atari2600HomebrewCommit, readme, StringComparison.Ordinal);
         Assert.Contains("the cartridge art is not in the ROM", readme, StringComparison.OrdinalIgnoreCase);
     }
 
@@ -53,7 +56,7 @@ public sealed class BootTests(ITestOutputHelper output)
         Assert.Equal("MIT", game.GetProperty("licence").GetString());
         Assert.Equal(Pins.Atari2600HomebrewSha256, game.GetProperty("sha256").GetString());
         Assert.Equal(rom.Length, game.GetProperty("bytes").GetInt32());
-        Assert.Equal(Commit, game.GetProperty("commit").GetString());
+        Assert.Equal(Pins.Atari2600HomebrewCommit, game.GetProperty("commit").GetString());
         Assert.Equal(Cartridge.Load(rom).BoardName, game.GetProperty("board").GetString());
 
         using JsonDocument list = JsonDocument.Parse(File.ReadAllText(Path.Combine(Folder, "..", "manifest.json")));
@@ -71,7 +74,7 @@ public sealed class BootTests(ITestOutputHelper output)
         string notice = File.ReadAllText(Path.Combine(RepoPaths.Root, "NOTICE.md"));
         Assert.Contains("Copyright (c) 2014 Carlos Duarte do Nascimento (Chester)", notice, StringComparison.Ordinal);
         Assert.Contains("Original 2048 game Copyright (c) 2014 Gabriele Cirulli", notice, StringComparison.Ordinal);
-        Assert.Contains(Commit, notice, StringComparison.Ordinal);
+        Assert.Contains(Pins.Atari2600HomebrewCommit, notice, StringComparison.Ordinal);
 
         string roms = File.ReadAllText(Path.Combine(RepoPaths.Root, "roms", "README.md"));
         Assert.Contains("machines/atari-2600/cartridges/2048/", roms, StringComparison.Ordinal);
@@ -167,6 +170,4 @@ public sealed class BootTests(ITestOutputHelper output)
 
         return new Picture(width, picture.Height * scale, pixels);
     }
-
-    private const string Commit ="35de3c1b3b7bc4c3aadc8cf7fe630050a6984761";
 }

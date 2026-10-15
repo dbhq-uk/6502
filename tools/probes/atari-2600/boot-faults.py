@@ -31,6 +31,8 @@ FAULTS = [
     ("G7 the notice loses the second copyright line", "NOTICE.md", [("Original 2048 game Copyright (c) 2014 Gabriele Cirulli", "Original 2048 game by Gabriele Cirulli")]),
     ("G8 roms/README.md loses its pointer", "roms/README.md", [("[`machines/atari-2600/cartridges/2048/`](../machines/atari-2600/cartridges/2048/)", "the cartridge folder")]),
     ("G9 the try-it names another file", "machines/atari-2600/try-it.json", [('"rom": "machines/atari-2600/cartridges/2048/2048.bin"', '"rom": "machines/atari-2600/cartridges/2048/2048.a26"')]),
+    ("G10 the pin names the game outside its folder", "tests/Dbhq.Cpu6502.TestSupport/Pins.cs", [('Atari2600HomebrewPath = "machines/atari-2600/cartridges/2048/2048.bin"', 'Atari2600HomebrewPath = "machines/atari-2600/2048.bin"')]),
+    ("G11 the game's pinned commit changed", "tests/Dbhq.Cpu6502.TestSupport/Pins.cs", [('Atari2600HomebrewCommit = "35de3c1b3b', 'Atari2600HomebrewCommit = "35de3c1b3c')]),
     ("F1 the NTSC window's hash changed by hand", FRAMES, [('"rgba": {\n    "NTSC": "8', '"rgba": {\n    "NTSC": "9')]),
     ("F2 the PAL colours' hash changed by hand", FRAMES, [('"PAL": "4eda', '"PAL": "5eda')]),
     ("F3 the NTSC frame count changed by hand", FRAMES, [('"NTSC": 120', '"NTSC": 121')]),

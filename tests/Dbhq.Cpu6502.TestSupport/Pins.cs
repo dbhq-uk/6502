@@ -256,4 +256,8 @@ public static class Pins
     // repository-relative and the hash is checked every time the file is read.
     public const string Atari2600HomebrewPath = "machines/atari-2600/cartridges/2048/2048.bin";
     public const string Atari2600HomebrewSha256 = "c85dc2204299b0a29209d3f80ae112678c171dab216719593625647d2436f1e1";
+
+    // The commit of chesterbr/2048-2600 the game was fetched from, which its README, its manifest
+    // and NOTICE.md each name; the game's tests check they name this one.
+    public const string Atari2600HomebrewCommit = "35de3c1b3b7bc4c3aadc8cf7fe630050a6984761";
 }
