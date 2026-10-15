@@ -36,3 +36,5 @@ The text in the built HTML, folded parts included, fell much less, because almos
 ## What the tests hold
 
 `site/tests/machine-pages-shape.test.mjs` is new: the same order on every running machine's page, every reference part closed with a label, the head never folded and the photograph's credit in it, the rights line visible, short and true to the registry, and the full rights, every photograph's source and every issue link still in the page. The page tests that matched a section heading, such as "What is not modelled", now find the part by its id and check its label and that it is closed (`pagePart` and `foldOf` in `site/tests/helpers.mjs`). Every link, credit, licence and issue they asserted is still asserted.
+
+The first CI run found one thing the local tests could not: the real-browser checks load every photograph, and a photograph inside a closed `<details>` is not loaded until it is opened. The five browser checks now open the photographs by clicking their summary, as a visitor would, before they check each one loads from this site. The test floor moved to the pass count that run printed.

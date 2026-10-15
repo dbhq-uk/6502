@@ -714,7 +714,9 @@ try {
   await settle();
   await page.evaluate(() => document.activeElement?.blur());
 
-  // ---- The photographs section: every photograph loads, from this site ----
+  // ---- The photographs: every photograph loads, from this site ----
+  // They are a closed part of the reference at the foot of the page, so they are opened as a visitor opens them.
+  await page.locator('#photos > summary').click();
   const items = page.locator('[data-photo-item-img]');
   const count = await items.count();
   const loaded = [];
