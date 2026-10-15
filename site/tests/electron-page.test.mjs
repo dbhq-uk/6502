@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
-import { page, visibleText, DIST } from './helpers.mjs';
+import { page, visibleText, DIST, pagePart, foldOf } from './helpers.mjs';
 import { counts, loadRegistry, REPO_ROOT } from '../src/lib/registry.mjs';
 import { loadTryIt, runningMachines, runningSentence } from '../src/lib/machines.mjs';
 import { electronRoms } from '../src/lib/pins.mjs';
@@ -18,10 +18,8 @@ import { ON_SCREEN_ROWS, STICKY, legend } from '../public/electron-keys.js';
 
 const html = page('/machines/electron/')?.html ?? '';
 const machine = loadRegistry().machines.find((m) => m.id === 'electron');
-const section = (id) => {
-  const at = html.indexOf(`aria-labelledby="${id}"`);
-  return at < 0 ? '' : html.slice(at, html.indexOf('</section>', at));
-};
+// A section, or a closed part of the reference at the foot of the page (helpers.mjs).
+const section = (id) => pagePart(html, id);
 const panel = (() => {
   const at = html.indexOf('<div class="electron"');
   return at < 0 ? '' : html.slice(at, html.indexOf('</fieldset>', at) + '</fieldset>'.length);
@@ -160,7 +158,7 @@ test('the cassette recorder: insert, blank, rewind and save, nothing uploaded, a
 
 test('the page lists the four parts left out, each linked to its issue', () => {
   const list = section('left-out');
-  assert.match(list, /<h2 id="left-out">What is not modelled<\/h2>/);
+  assert.deepEqual(foldOf(list), { summary: 'What is modelled, and what is not', open: false }, 'the parts left out are not a closed part of the reference');
   const items = [...list.matchAll(/<li>([^<]*)<a href="([^"]+)">issue (\d+)<\/a><\/li>/g)];
   assert.deepEqual(items.map((m) => [decode(m[1]).replace(/: $/, '').toLowerCase(), m[2], Number(m[3])]), NOT_MODELLED.map((m) => [m.part.toLowerCase(), issueUrl(m.issue), m.issue]));
   // The four issues filed with the page on 5 October 2026: the Plus 1, the Plus 3, the ports, and 300 baud tapes.
@@ -169,7 +167,7 @@ test('the page lists the four parts left out, each linked to its issue', () => {
 
 test('the page says whose ROMs it runs, in the registry\'s words: documented and not cleared, the elkjs licence not a licence for them, and removed if a holder asks', () => {
   const rom = section('rom');
-  assert.match(rom, /<h2 id="rom">Whose ROMs these are<\/h2>/);
+  assert.deepEqual(foldOf(rom), { summary: 'Whose ROMs these are', open: false }, 'the full rights are not a closed part of the reference');
   const text = decode(visibleText(rom));
   assert.ok(text.includes(machine.rights), 'the rights text is not the registry\'s');
   assert.match(machine.rights, /Acorn/);

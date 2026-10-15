@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
-import { page, visibleText, DIST } from './helpers.mjs';
+import { page, visibleText, DIST, pagePart, foldOf } from './helpers.mjs';
 import { counts, loadRegistry, validateRegistry, REPO_ROOT } from '../src/lib/registry.mjs';
 import { loadTryIt, machineDownloadBytes, runningMachines, runningSentence } from '../src/lib/machines.mjs';
 import { atari2600Roms } from '../src/lib/pins.mjs';
@@ -22,10 +22,8 @@ const machine = registry.machines.find((m) => m.id === 'atari-2600');
 const results = JSON.parse(fs.readFileSync(path.join(process.cwd(), 'src', 'data', 'results.json'), 'utf8'));
 const program = loadTryIt('atari-2600');
 const [game] = atari2600Roms();
-const section = (id) => {
-  const at = html.indexOf(`aria-labelledby="${id}"`);
-  return at < 0 ? '' : html.slice(at, html.indexOf('</section>', at));
-};
+// A section, or a closed part of the reference at the foot of the page (helpers.mjs).
+const section = (id) => pagePart(html, id);
 const panel = (() => {
   const at = html.indexOf('<div class="vcs"');
   return at < 0 ? '' : html.slice(at, html.lastIndexOf('</fieldset>') + '</fieldset>'.length);
@@ -173,7 +171,7 @@ test('the page says what the two regions are, that the page never changes the re
 
 test('the page says how it is checked, and that a trusted result is the behaviour of the one console the suite was checked on', () => {
   const checked = section('checked');
-  assert.match(checked, /<h2 id="checked">How it is checked<\/h2>/);
+  assert.deepEqual(foldOf(checked), { summary: 'How it is checked', open: false }, 'how it is checked is not a closed part of the reference');
   const text = decode(visibleText(checked));
   assert.ok(text.includes('So a trusted result is the behaviour of the one console the suite was checked on, not of every Atari 2600.'));
   assert.match(text, /The suite's notes say its tests were checked on one console, a PAL console from Australia/);
@@ -188,7 +186,7 @@ test('the page says how it is checked, and that a trusted result is the behaviou
 
 test('the page lists the parts left out, each linked to its issue, every board not modelled with its own, and the 3D models\' issue', () => {
   const list = section('left-out');
-  assert.match(list, /<h2 id="left-out">What is not modelled<\/h2>/);
+  assert.deepEqual(foldOf(list), { summary: 'What is modelled, and what is not', open: false }, 'the parts left out are not a closed part of the reference');
   const lists = [...list.matchAll(/<ul\b[^>]*>([\s\S]*?)<\/ul>/g)].map((m) => [...m[1].matchAll(/<li>([^<]*)<a href="([^"]+)">issue (\d+)<\/a><\/li>/g)]);
   assert.equal(lists.length, 2);
   assert.deepEqual(lists[0].map((m) => [decode(m[1]).replace(/: $/, '').toLowerCase(), m[2], Number(m[3])]), NOT_MODELLED.map((m) => [m.part.toLowerCase(), issueUrl(m.issue), m.issue]));
@@ -198,7 +196,7 @@ test('the page lists the parts left out, each linked to its issue, every board n
 
 test('the page says whose game it runs, in the registry\'s words, where the copy is, and links its licence', () => {
   const rom = section('rom');
-  assert.match(rom, /<h2 id="rom">Whose game this is<\/h2>/);
+  assert.deepEqual(foldOf(rom), { summary: 'Whose game this is', open: false }, 'the full rights are not a closed part of the reference');
   const text = decode(visibleText(rom));
   assert.ok(text.includes(machine.rights), 'the rights text is not the registry\'s');
   assert.ok(rom.includes(`href="${game.url}"`), 'the copy in the repository is not linked');

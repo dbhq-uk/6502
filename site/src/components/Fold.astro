@@ -1,0 +1,42 @@
+---
+// A closed <details> for reference on a machine's page: what is not modelled,
+// how it is checked, the full rights, the photographs and the like. The facts
+// and links stay in the page, for the tests, for search and for anyone who
+// opens it, but they do not push the machine down the screen. The summary is
+// the label a screen reader reads out, so it says plainly what is inside.
+//
+// Two looks: a row of the reference list under the machine, between hairlines,
+// or `quiet`, a line of small print inside the machine's own panel.
+//
+// The style is scoped here, so only the details and its summary carry this
+// component's data-astro-cid attribute; what is slotted in keeps its own markup.
+// It sets no text colour, so it adds no pair to the contrast table.
+interface Props {
+  /** The label: what the reader finds inside. */
+  summary: string;
+  /** Small print inside a panel, with no rules above and below. */
+  quiet?: boolean;
+  id?: string;
+  class?: string;
+  [attr: `data-${string}`]: string | undefined;
+}
+const { summary, quiet = false, class: cls, ...rest } = Astro.props;
+---
+
+<details class:list={['fold', { quiet }, cls]} {...rest}>
+  <summary>{summary}</summary>
+  <slot />
+</details>
+
+<style>
+  .fold { border-top: 1px solid var(--hairline); }
+  .fold:not(.quiet):last-child { border-bottom: 1px solid var(--hairline); }
+  .fold:not(.quiet) + .fold:not(.quiet) { margin-top: 0; }
+  .fold > summary { cursor: pointer; padding: 12px 0; font-weight: 500; }
+  .fold > summary:hover { text-decoration: underline; text-underline-offset: 3px; }
+  .fold > :global(:not(summary)) { margin-top: 0.75em; }
+  .fold > :global(:last-child:not(summary)) { margin-bottom: 20px; }
+  .fold.quiet { border-top: 0; margin-bottom: 1em; }
+  .fold.quiet > summary { padding: 2px 0; }
+  .fold.quiet > :global(:last-child:not(summary)) { margin-bottom: 4px; }
+</style>

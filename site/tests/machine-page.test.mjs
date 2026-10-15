@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
-import { page, visibleText, DIST } from './helpers.mjs';
+import { page, visibleText, DIST, pagePart, foldOf } from './helpers.mjs';
 import { loadRegistry } from '../src/lib/registry.mjs';
 import { KIM1_KEYS, TELETYPE_KEYS, loadTeletype, loadTryIt, parseKeys, parseTeletype, teletypeChars } from '../src/lib/machines.mjs';
 import { loadResults } from '../src/lib/results.mjs';
@@ -347,15 +347,12 @@ test('the photograph is credited on the page from the registry: its author, a li
   assert.match(text, /taken \d{1,2} \w+ \d{4}|taken \w+ \d{4}|taken \d{4}/, 'the caption does not say when it was taken');
 });
 
-// Every photograph the page uses, in the photographs section, each credited.
-const gallery = (() => {
-  const at = html.indexOf('<section class="photos"');
-  return at < 0 ? '' : html.slice(at, html.indexOf('</section>', at));
-})();
+// Every photograph the page uses, in a closed part of the reference at the foot of the page, each credited.
+const gallery = pagePart(html, 'photos');
 
 test('the photographs section shows every photograph in the registry, main one first, each from this site, lazily, with its alt text and size set', () => {
-  assert.ok(gallery, 'the page has no photographs section');
-  assert.match(gallery, /<h2 id="photos">Photographs of the original<\/h2>/);
+  assert.ok(gallery, 'the page has no photographs');
+  assert.deepEqual(foldOf(gallery), { summary: `The ${['', 'one', 'two', 'three', 'four', 'five', 'six'][kim.photos.length]} photographs of the original, and their credits`, open: false });
   const figures = [...gallery.matchAll(/<figure class="photo photo-item"[^>]*data-photo-file="([^"]+)"[^>]*>([\s\S]*?)<\/figure>/g)];
   assert.deepEqual(figures.map((f) => f[1]), kim.photos.map((p) => p.file), 'the section does not show the registry\'s photographs, in its order');
   for (const [, file, body] of figures) {

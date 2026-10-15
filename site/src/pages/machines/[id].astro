@@ -8,6 +8,7 @@ import Atari2600Panel from '../../components/Atari2600Panel.astro';
 import MachinePhoto from '../../components/MachinePhoto.astro';
 import MachineModel from '../../components/MachineModel.astro';
 import MachinePhotos from '../../components/MachinePhotos.astro';
+import Fold from '../../components/Fold.astro';
 import { modelsOf } from '../../models/models.mjs';
 import { registry, results } from '../../lib/data.mjs';
 import { fmt } from '../../lib/figures.mjs';
@@ -96,7 +97,18 @@ const VCS_GAME_FOLDER_URL = 'https://github.com/dbhq-uk/6502/tree/main/machines/
 const symbols = bbc ? symbolTable() : [];
 const electronSymbols = electron ? electronSymbolTable() : [];
 const notOnAPc = Object.entries(NOT_ON_A_PC).reduce((groups, [key, why]) => groups.set(why, [...(groups.get(why) ?? []), legend(key)]), new Map());
+// Every page has the same shape: the head, the machine, Try it, how to type at
+// it (the KIM-1's teletype, the Acorns' keyboards), the 3D models, and then one
+// section of reference, each part a closed <details> (Fold.astro): what is
+// modelled and what is not, how it is checked, the discs' credits, the
+// photographs and the full rights. Under the machine, one short line says whose
+// ROM or game it runs; it is never folded. The full rights, in the registry's
+// own words, are in the reference (machines/registry.json, `rights`).
+const romsWord = bbc || electron ? 'Whose ROMs these are' : nes || vcs ? 'Whose game this is' : 'Whose ROM this is';
+const noPermission = 'no licence or permission from any holder was found';
+if ((kim || bbc || electron) && !machine.rights.includes(noPermission)) throw new Error(`machine ${machine.id}: its rights no longer say "${noPermission}", and its short rights line does`);
 ---
+
 
 <Base title={machine.name} description={description} scripts={scripts}>
   <section class="machine-head">
@@ -105,7 +117,6 @@ const notOnAPc = Object.entries(NOT_ON_A_PC).reduce((groups, [key, why]) => grou
         <p class="meta"><a href="/machines/">All machines</a></p>
         <h1>{machine.name}</h1>
         <p>{machine.year}, {machine.maker}, {machine.cpu}.</p>
-        {machine.notes && <p>{machine.notes}</p>}
         <p>{acceptanceSummary(machine, results, fmt)}</p>
       </div>
       <MachinePhoto machine={machine} photo={machine.photos[0]} main />
@@ -116,18 +127,32 @@ const notOnAPc = Object.entries(NOT_ON_A_PC).reduce((groups, [key, why]) => grou
     <div class="wrap narrow">
       <h2 id="run">The machine</h2>
       <Panel base={base} {...panelProps} />
-      {nes && (
-        <div class="prose">
-        <p>The NES was sold in two kinds, and both are here: NTSC, the console of North America and Japan, and PAL, the console of Europe and Australia, whose CPU runs slower and which draws 50 pictures a second rather than about 60. Each cartridge starts in the region its file names, or NTSC when the file does not say, and the line under the region control says which and why.</p>
-        <p>The NES takes more work to run than the KIM-1 or the BBC Micro: its picture chip is run one dot at a time, three dots for every CPU cycle on NTSC, so it needs a fast computer to run at full speed. The line under the screen says how fast this browser runs it, measured while it runs, and a computer that cannot keep up runs it slower than the real console and says so. Making it faster is <a href={issueUrl(NES_ISSUES.speed)}>issue {NES_ISSUES.speed}</a>.</p>
-        </div>
-      )}
-      {vcs && (
-        <div class="prose">
-        <p>The Atari 2600 was made for both kinds of television, and both are here: NTSC, the console of North America and Japan, and PAL, the console of Europe and Australia, whose clock is a little slower and whose games draw more lines a frame. A cartridge file has nothing in it to say which it was made for, so the machine starts as NTSC. The lines under the region control give the lines the last frame had, and suggest PAL when a game's frames are PAL's length; the page never changes the region by itself. Changing it changes the colours and the clock at once, with no restart.</p>
-        <p>The Atari 2600 has no frame buffer: its program draws each line as the beam crosses the screen, so its picture chip, the TIA, is run one colour clock at a time, three for every CPU cycle. That takes a fast computer to run at full speed. The line under the screen says how fast this browser runs it, measured while it runs, and a computer that cannot keep up runs it slower than the real console and says so. Making it faster is <a href={issueUrl(VCS_ISSUES.speed)}>issue {VCS_ISSUES.speed}</a>.</p>
-        </div>
-      )}
+      <div class="prose" style="margin-top: 24px">
+        <p class="rights-line" data-rights-line>
+          {kim && <>The monitor ROM is MOS Technology's, and {noPermission}.</>}
+          {bbc && <>The ROMs are Acorn's: MOS 1.20, BBC BASIC 2 and DFS 1.20. Their position is documented, not cleared: {noPermission}.</>}
+          {electron && <>The ROMs are Acorn's: OS 1.00 and BBC BASIC 2. Their position is documented, not cleared: {noPermission}.</>}
+          {nes && <>The game in it is {program.title}, by {program.author}, released into the {program.licence}. Commercial games are not bundled: load your own.</>}
+          {vcs && <>The game in it is {program.title}, by {program.author}, under the <a href={program.licenceUrl}>{program.licence} licence</a>. Commercial games are not bundled: load your own.</>}
+          {' '}<a href="#rom">{romsWord}</a> has the rest.
+        </p>
+        {nes && (
+          <>
+            <p>The picture chip runs one dot at a time, three dots for every CPU cycle on NTSC, so it needs a fast computer to run at full speed. The line under the screen says how fast this browser runs it, measured while it runs, and a computer that cannot keep up runs it slower than the real console. Making it faster is <a href={issueUrl(NES_ISSUES.speed)}>issue {NES_ISSUES.speed}</a>.</p>
+            <Fold summary="NTSC and PAL, the two regions" quiet>
+              <p>The NES was sold in two kinds, and both are here: NTSC, for North America and Japan, and PAL, for Europe and Australia, whose CPU runs slower and which draws 50 pictures a second rather than about 60. Each cartridge starts in the region its file names, or NTSC when the file does not say, and the line under the region control says which and why.</p>
+            </Fold>
+          </>
+        )}
+        {vcs && (
+          <>
+            <p>The Atari 2600 has no frame buffer: its program draws each line as the beam crosses the screen. So its picture chip, the TIA, runs one colour clock at a time, three for every CPU cycle. That takes a fast computer to run at full speed. The line under the screen says how fast this browser runs it, measured while it runs, and a computer that cannot keep up runs it slower than the real console. Making it faster is <a href={issueUrl(VCS_ISSUES.speed)}>issue {VCS_ISSUES.speed}</a>.</p>
+            <Fold summary="NTSC and PAL, the two regions" quiet>
+              <p>The console was made for both kinds of television: NTSC, the console of North America and Japan, and PAL, the console of Europe and Australia, whose clock is a little slower and whose games draw more lines a frame. A cartridge file does not say which it was made for, so the machine starts as NTSC. The lines under the region control give the lines the last frame had, and suggest PAL when a game's frames are PAL's length, but the page never changes the region by itself. Changing it changes the colours and the clock at once, with no restart.</p>
+            </Fold>
+          </>
+        )}
+      </div>
     </div>
   </section>
 
@@ -136,7 +161,7 @@ const notOnAPc = Object.entries(NOT_ON_A_PC).reduce((groups, [key, why]) => grou
       <div class="wrap narrow">
         <h2 id="try">Try it</h2>
         <div class="prose">
-        <p>Type these keys in order, by clicking them or with the keyboard. After each line the digits should show what is written beside it: x is any digit, and blank means dark. This is the program the acceptance test types in, from the same file, so the two cannot disagree.</p>
+        <p>Type these keys in order, on the keypad or on your keyboard: with focus on the machine, 0 to 9 and A to F press the same keys. After each line the digits should show what is beside it: x is any digit, and blank means dark. The acceptance test types the same program, from the same file, so the two cannot disagree.</p>
         <ol class="steps">
           {program.steps.map((step) => (
             <li>
@@ -146,7 +171,6 @@ const notOnAPc = Object.entries(NOT_ON_A_PC).reduce((groups, [key, why]) => grou
             </li>
           ))}
         </ol>
-        <p>With focus on the machine, the keys 0 to 9 and A to F on a keyboard press the same keys on the keypad.</p>
         </div>
       </div>
     </section>
@@ -157,19 +181,25 @@ const notOnAPc = Object.entries(NOT_ON_A_PC).reduce((groups, [key, why]) => grou
       <div class="wrap narrow">
         <h2 id="teletype">The teletype</h2>
         <div class="prose">
-        <p>Most KIM-1s were used from a teletype, a Teletype Model 33 or a terminal like one, on the board's 20 mA current loops: the monitor prints on it and reads from it at ten characters a second, sending and timing every bit itself on two pins of the 6530. The machine here has that terminal. Turn the TTY switch on, press RS, then RUB OUT: the monitor times the RUB OUT to learn the line's speed, and prints KIM. The paper shows what the machine printed, decoded from the bits it sent, and what you type, which the board's wiring echoes back to the printer as a real one does.</p>
-        <p>Type in the field under the paper. It types in capitals, as the Teletype did; Enter is RETURN and Backspace is RUB OUT, and LF has a button of its own. Keys typed while the monitor is printing wait their turn, so none is lost. The commands are the User Manual's: four hex digits and SPACE open an address, two hex digits and a full stop store a byte and move on, RETURN moves on without storing, LF moves back, G runs from the open address, and RUB OUT starts again. The speed can be raised to 300 or 1200 baud; press RS and RUB OUT after changing it, so the monitor measures it again.</p>
-        <p>This session enters the try-it program through the teletype, runs it and reads the result back. After each line the paper should end with what is written beside it: x is any hex digit. It is the session Kim1TeletypeTests types in, from the same file, so the two cannot disagree; that suite has {fmt(teletypeTests.passed)} tests passing.</p>
-        <ol class="steps">
-          {teletype.steps.map((step) => (
-            <li>
-              {step.keypad && <p class="tty-keys">On the keypad: {parseKeys(step.keypad).map((k) => <kbd>{k}</kbd>)}</p>}
-              {step.type && <p class="tty-keys">At the teletype: {parseTeletype(step.type).map((p) => <kbd>{p.key ? ttyKeyNames[p.key] : p.text}</kbd>)}</p>}
-              <p>{step.says}</p>
-              <pre class="tty-prints"><code>{step.prints.join('\n')}</code></pre>
-            </li>
-          ))}
-        </ol>
+        <p>Most KIM-1s were used from a teletype, a Teletype Model 33 or a terminal like one, on the board's 20 mA current loops. The monitor prints and reads at ten characters a second, timing every bit itself on two pins of the 6530. To use it, turn the TTY switch on, press RS, then RUB OUT: the monitor times the RUB OUT to learn the line's speed, and prints KIM.</p>
+        <p>Type in the field under the paper. It types in capitals, as the Teletype did. Enter is RETURN, Backspace is RUB OUT, and LF has its own button. Keys typed while the monitor prints wait their turn, so none is lost.</p>
+        <p>The commands are the User Manual's: four hex digits and SPACE open an address, two hex digits and a full stop store a byte and move on, RETURN moves on without storing, LF moves back, G runs from the open address, and RUB OUT starts again.</p>
+        <Fold summary="The paper, and the speed of the line" quiet>
+          <p>The paper shows what the machine printed, decoded from the bits it sent, and what you type, which the board's wiring echoes back to the printer as a real one does. The speed can be raised to 300 or 1200 baud. Press RS and RUB OUT after changing it, so the monitor measures it again.</p>
+        </Fold>
+        <Fold summary="The try-it program at the teletype, step by step" quiet>
+          <p>This session enters the try-it program through the teletype, runs it and reads the result back. After each line the paper should end with what is beside it: x is any hex digit. Kim1TeletypeTests types the same session, from the same file, so the two cannot disagree; that suite has {fmt(teletypeTests.passed)} tests passing.</p>
+          <ol class="steps">
+            {teletype.steps.map((step) => (
+              <li>
+                {step.keypad && <p class="tty-keys">On the keypad: {parseKeys(step.keypad).map((k) => <kbd>{k}</kbd>)}</p>}
+                {step.type && <p class="tty-keys">At the teletype: {parseTeletype(step.type).map((p) => <kbd>{p.key ? ttyKeyNames[p.key] : p.text}</kbd>)}</p>}
+                <p>{step.says}</p>
+                <pre class="tty-prints"><code>{step.prints.join('\n')}</code></pre>
+              </li>
+            ))}
+          </ol>
+        </Fold>
         </div>
       </div>
     </section>
@@ -180,12 +210,12 @@ const notOnAPc = Object.entries(NOT_ON_A_PC).reduce((groups, [key, why]) => grou
       <div class="wrap narrow">
         <h2 id="try">Try it</h2>
         <div class="prose">
-        <p>Press Start, then type these lines, pressing Return at the end of each. This is the program the acceptance test types in, from the same file, so the two cannot disagree.</p>
+        <p>Press Start, then type these lines, pressing Return after each. The acceptance test types the same program, from the same file, so the two cannot disagree.</p>
         <pre class="bbc-program"><code>{program.lines.join('\n')}</code></pre>
         <p>The screen should then show:</p>
         <pre class="bbc-program"><code>{program.shows.join('\n')}</code></pre>
-        <p>The machine starts with CAPS LOCK on, as the real one does, so letters come out as capitals. Some symbols are not where a PC keyboard has them: the table below says where each one is.</p>
-        {electron && <p>The Electron's BASIC is the BBC Micro's, byte for byte, so this is the same program as on the BBC Micro's page, and it prints the same. Then save it to tape and load it back, as the cassette recorder above says.</p>}
+        <p>The machine starts with CAPS LOCK on, as the real one does, so letters come out as capitals. Some symbols are not where a PC keyboard has them: <a href="#keyboard">the keyboard</a> says where each one is.</p>
+        {electron && <p>The Electron's BASIC is the BBC Micro's, byte for byte, so this program prints the same on both. Then save it to tape and load it back, as the cassette recorder says.</p>}
         </div>
       </div>
     </section>
@@ -196,7 +226,7 @@ const notOnAPc = Object.entries(NOT_ON_A_PC).reduce((groups, [key, why]) => grou
       <div class="wrap narrow">
         <h2 id="try">Try it</h2>
         <div class="prose">
-        <p>Start puts {program.title}, by {program.author}, in the console and switches it on. This is the cartridge the acceptance test boots, from the same file, and its first picture is checked against the one recorded.</p>
+        <p>Start puts {program.title}, by {program.author}, in the console and switches it on. The acceptance test boots the same cartridge, from the same file, and checks its first picture against the one recorded.</p>
         <ol class="steps">
           {program.steps.map((step) => (
             <li>
@@ -214,19 +244,7 @@ const notOnAPc = Object.entries(NOT_ON_A_PC).reduce((groups, [key, why]) => grou
             ))}
           </tbody>
         </table>
-        <p>To play something else, load your own .nes file with the button under the screen, or drop it on the page. It is read in this tab and not uploaded. The machine runs cartridges on the six boards most of the library used; a file it cannot run is refused with a sentence saying why, and the game already in carries on.</p>
-        </div>
-      </div>
-    </section>
-  )}
-
-  {vcs && (
-    <section aria-labelledby="checked">
-      <div class="wrap narrow">
-        <h2 id="checked">How it is checked</h2>
-        <div class="prose">
-        <p>The acceptance test runs the test cartridges of <a href={VCS_SUITE_URL}>missingno-vcs-tests</a>, a suite for the console's chips, from this project's copy of it, in both regions. The tests the design trusts, the self-tests of the chips and the cartridge tests for the plain boards and F8, F6 and F4, must pass. The rest are recorded: the cartridge tests whose own notes say they are untested on a console or only report what they find, and the comparisons with the suite's reference pictures. What each recorded test gives is kept in the repository, and a change fails the build. The tests for cartridge boards and for SECAM, which are not modelled, are not run. The acceptance test also starts {program.title} from power on in each region and checks its picture against the one recorded, pixel for pixel.</p>
-        <p>The suite's notes say its tests were checked on one console, a PAL console from Australia, and the TIA is known to behave differently from chip to chip and between models of the console. So a trusted result is the behaviour of the one console the suite was checked on, not of every Atari 2600. The suite's photographs of that console's screen are not compared yet: <a href={issueUrl(VCS_ISSUES.captures)}>issue {VCS_ISSUES.captures}</a>. Where this machine knowingly differs from the suite or the documents it was built from, <a href={KNOWN_DIFFERENCES_URL}>the list of known differences</a> says so.</p>
+        <p>To play something else, load your own .nes file with the button under the screen, or drop it on the page. It is read in this tab and not uploaded. The machine runs cartridges on the six boards most of the library used. A file it cannot run is refused with the reason, and the game already in carries on.</p>
         </div>
       </div>
     </section>
@@ -237,7 +255,7 @@ const notOnAPc = Object.entries(NOT_ON_A_PC).reduce((groups, [key, why]) => grou
       <div class="wrap narrow">
         <h2 id="try">Try it</h2>
         <div class="prose">
-        <p>Start puts {program.title}, by {program.author}, in the console and switches it on. This is the cartridge the acceptance test boots, from the same file, and its picture is checked against the one recorded.</p>
+        <p>Start puts {program.title}, by {program.author}, in the console and switches it on. The acceptance test boots the same cartridge, from the same file, and checks its picture against the one recorded.</p>
         <ol class="steps">
           {program.steps.map((step) => (
             <li>
@@ -256,7 +274,7 @@ const notOnAPc = Object.entries(NOT_ON_A_PC).reduce((groups, [key, why]) => grou
           </tbody>
         </table>
         <p data-vcs-credit>{program.credit} Its licence: <a href={program.licenceUrl}>{program.licence}</a>.</p>
-        <p>To play something else, load your own cartridge file with the button under the screen, or drop it on the page. It is read in this tab and not uploaded. The board is chosen by the file's size; a file the machine cannot run is refused with a sentence saying why, and the game already in carries on.</p>
+        <p>To play something else, load your own cartridge file with the button under the screen, or drop it on the page. It is read in this tab and not uploaded. The board is chosen by the file's size. A file the machine cannot run is refused with the reason, and the game already in carries on.</p>
         </div>
       </div>
     </section>
@@ -267,21 +285,23 @@ const notOnAPc = Object.entries(NOT_ON_A_PC).reduce((groups, [key, why]) => grou
       <div class="wrap narrow">
         <h2 id="keyboard">The keyboard</h2>
         <div class="prose">
-        <p>Every key the BBC Micro has is in the on-screen keys under the screen, in the machine's own layout, for a phone, a tablet or a mouse. Tap SHIFT or CTRL and it stays down for the next key you tap, then lets go, so SHIFT and then 2 types a double quote; tap it again to let go without typing.</p>
-        <p>Each key on your keyboard presses the BBC Micro's key in the same place, so the symbols are where the BBC Micro has them, not where your keyboard prints them. A few PC keys stand in for keys of their own: Backspace and Delete for DELETE, Enter for RETURN, End for COPY, the arrow keys for the cursor keys, and Esc for ESCAPE. The Break button, or the Pause key, is BREAK.</p>
-        <table class="bbc-symbols">
-          <caption>Where the symbols are</caption>
-          <thead><tr><th scope="col">To type</th><th scope="col">On the BBC Micro</th><th scope="col">On your keyboard</th></tr></thead>
-          <tbody>
-            {symbols.map((s) => (
-              <tr><td><kbd>{s.character}</kbd></td><td>{s.bbc}</td><td>{s.pc ?? 'not on a PC keyboard here'}</td></tr>
-            ))}
-          </tbody>
-        </table>
-        <p>Your keyboard presses every key but these, which are on the on-screen keys only:</p>
-        <ul>
-          {[...notOnAPc].map(([why, keys]) => <li>{keys.join(', ')}: {why}.</li>)}
-        </ul>
+        <p>Each key on your keyboard presses the BBC Micro's key in the same place, so the symbols are where the BBC Micro has them, not where your keyboard prints them. Backspace and Delete are DELETE, Enter is RETURN, End is COPY, the arrow keys are the cursor keys and Esc is ESCAPE. The Break button, or the Pause key, is BREAK.</p>
+        <p>The on-screen keys under the screen have every key, in the machine's own layout, for a phone, a tablet or a mouse. Tap SHIFT or CTRL and it stays down for the next key you tap, so SHIFT then 2 types a double quote; tap it again to let go without typing.</p>
+        <Fold summary="Where each symbol is, and the keys only on screen" quiet>
+          <table class="bbc-symbols">
+            <caption>Where the symbols are</caption>
+            <thead><tr><th scope="col">To type</th><th scope="col">On the BBC Micro</th><th scope="col">On your keyboard</th></tr></thead>
+            <tbody>
+              {symbols.map((s) => (
+                <tr><td><kbd>{s.character}</kbd></td><td>{s.bbc}</td><td>{s.pc ?? 'not on a PC keyboard here'}</td></tr>
+              ))}
+            </tbody>
+          </table>
+          <p>Your keyboard presses every key but these, which are on the on-screen keys only:</p>
+          <ul>
+            {[...notOnAPc].map(([why, keys]) => <li>{keys.join(', ')}: {why}.</li>)}
+          </ul>
+        </Fold>
         </div>
       </div>
     </section>
@@ -292,99 +312,20 @@ const notOnAPc = Object.entries(NOT_ON_A_PC).reduce((groups, [key, why]) => grou
       <div class="wrap narrow">
         <h2 id="keyboard">The keyboard</h2>
         <div class="prose">
-        <p>Every key the Electron has is in the on-screen keys under the screen, for a phone, a tablet or a mouse. Tap SHIFT or CTRL and it stays down for the next key you tap, then lets go, so SHIFT and then 2 types a double quote; tap it again to let go without typing.</p>
-        <p>CAPS LK and FUNC are one key on the Electron. On screen, tap it and then another key, and that key is pressed with FUNC: FUNC and a digit is one of the function keys, and FUNC and a letter types a BASIC keyword (FUNC and K types CHAIN). Tap it twice instead and it is pressed alone, which turns CAPS LOCK on or off. Your own Caps Lock key does that too.</p>
-        <p>Each key on your keyboard presses the Electron's key in the same place, so the symbols are where the Electron has them, not where your keyboard prints them. A few PC keys stand in for keys of their own: Backspace and Delete for DELETE, Enter for RETURN, End for COPY, the arrow keys for the cursor keys, and Esc for ESCAPE. The Break button, or the Pause key, is BREAK. Your keyboard presses every key the Electron has, so no key is on the on-screen keys only.</p>
-        <table class="electron-symbols">
-          <caption>Where the symbols are</caption>
-          <thead><tr><th scope="col">To type</th><th scope="col">On the Electron</th><th scope="col">On your keyboard</th></tr></thead>
-          <tbody>
-            {electronSymbols.map((s) => (
-              <tr><td><kbd>{s.character}</kbd></td><td>{s.electron}</td><td>{s.pc ?? 'not on a PC keyboard here'}</td></tr>
-            ))}
-          </tbody>
-        </table>
-        </div>
-      </div>
-    </section>
-  )}
-
-  {bbc && (
-    <section aria-labelledby="discs">
-      <div class="wrap narrow">
-        <h2 id="discs">Credits and licences for the discs</h2>
-        <div class="prose">
-        <p>The discs in the library are other people's software. Each is shared here under its author's own licence, not under this project's MIT licence, and each is credited below with a link to its licence and to its author. Each disc's folder in the repository keeps its licence text, a note of where the image came from and its SHA-256, and, where the licence asks for it, its source.</p>
-        <p>Only discs whose authors have written down that they may be shared are in the library. Commercial games are not, because nobody who holds their rights has said so. A disc image of your own, of anything, goes in with Insert a disc.</p>
-        <ul class="bbc-credits">
-          {library.discs.map((d) => (
-            <li data-bbc-credit={d.slug}>
-              <b>{d.title}</b>, {d.author}, {d.year}. Licence: <a href={discLicenceUrl(d)}>{d.licence}</a>. <a href={d.sourceUrl}>The author's page</a>{needsSource(d) && <>; <a href={discSourceUrl(d)}>the source</a></>}; <a href={discFolderUrl(d)}>the disc's folder</a>.{d.note && <> {d.note}</>}
-            </li>
-          ))}
-        </ul>
-        </div>
-      </div>
-    </section>
-  )}
-
-  {bbc && (
-    <section aria-labelledby="left-out">
-      <div class="wrap narrow">
-        <h2 id="left-out">What is not modelled</h2>
-        <div class="prose">
-        <p>These parts of the Model B are left out. Each has an issue that says what it would take.</p>
-        <ul>
-          {NOT_MODELLED.map((m) => <li>{m.part[0].toUpperCase() + m.part.slice(1)}: <a href={issueUrl(m.issue)}>issue {m.issue}</a></li>)}
-        </ul>
-        </div>
-      </div>
-    </section>
-  )}
-
-  {nes && (
-    <section aria-labelledby="left-out">
-      <div class="wrap narrow">
-        <h2 id="left-out">What is not modelled</h2>
-        <div class="prose">
-        <p>These parts of the NES and the Famicom are left out. Each has an issue that says what it would take.</p>
-        <ul>
-          {NES_NOT_MODELLED.map((m) => <li>{m.part[0].toUpperCase() + m.part.slice(1)}: <a href={issueUrl(m.issue)}>issue {m.issue}</a></li>)}
-        </ul>
-        <p>Saving is not built, so a page reload loses battery RAM: a game that saves its progress on the cartridge loses it when the page is reloaded or closed. The NES's 3D models, the outside and the board, are a project of their own: <a href={issueUrl(NES_ISSUES.models)}>issue {NES_ISSUES.models}</a>. Both are below, as two views of the same console: the outside and the inside.</p>
-        </div>
-      </div>
-    </section>
-  )}
-
-  {vcs && (
-    <section aria-labelledby="left-out">
-      <div class="wrap narrow">
-        <h2 id="left-out">What is not modelled</h2>
-        <div class="prose">
-        <p>These parts of the Atari 2600, and of what plugged into it, are left out. Each has an issue that says what it would take.</p>
-        <ul>
-          {VCS_NOT_MODELLED.map((m) => <li>{m.part[0].toUpperCase() + m.part.slice(1)}: <a href={issueUrl(m.issue)}>issue {m.issue}</a></li>)}
-        </ul>
-        <p>The cartridge boards that are not modelled, one issue each. A game made for one of them whose file is the size of a modelled board runs as that board, and does not work.</p>
-        <ul class="vcs-boards">
-          {VCS_BOARDS.map((b) => <li>{b.board}: <a href={issueUrl(b.issue)}>issue {b.issue}</a></li>)}
-        </ul>
-        <p>The Atari 2600's 3D models, the outside and the board, are a project of their own: <a href={issueUrl(VCS_ISSUES.models)}>issue {VCS_ISSUES.models}</a>.</p>
-        </div>
-      </div>
-    </section>
-  )}
-
-  {electron && (
-    <section aria-labelledby="left-out">
-      <div class="wrap narrow">
-        <h2 id="left-out">What is not modelled</h2>
-        <div class="prose">
-        <p>These parts of the Electron, and the add-ons it took, are left out. Each has an issue that says what it would take.</p>
-        <ul>
-          {ELECTRON_NOT_MODELLED.map((m) => <li>{m.part[0].toUpperCase() + m.part.slice(1)}: <a href={issueUrl(m.issue)}>issue {m.issue}</a></li>)}
-        </ul>
+        <p>Each key on your keyboard presses the Electron's key in the same place, so the symbols are where the Electron has them, not where your keyboard prints them. Backspace and Delete are DELETE, Enter is RETURN, End is COPY, the arrow keys are the cursor keys and Esc is ESCAPE. The Break button, or the Pause key, is BREAK. Your keyboard presses every key the Electron has, so no key is on the on-screen keys only.</p>
+        <p>The on-screen keys under the screen have every key, for a phone, a tablet or a mouse. Tap SHIFT or CTRL and it stays down for the next key you tap, so SHIFT then 2 types a double quote; tap it again to let go without typing.</p>
+        <p>CAPS LK and FUNC are one key on the Electron. On screen, tap it and then another key, and that key is pressed with FUNC: FUNC and a digit is a function key, and FUNC and a letter types a BASIC keyword (FUNC and K types CHAIN). Tap it twice instead and it is pressed alone, which turns CAPS LOCK on or off. Your own Caps Lock key does that too.</p>
+        <Fold summary="Where each symbol is" quiet>
+          <table class="electron-symbols">
+            <caption>Where the symbols are</caption>
+            <thead><tr><th scope="col">To type</th><th scope="col">On the Electron</th><th scope="col">On your keyboard</th></tr></thead>
+            <tbody>
+              {electronSymbols.map((s) => (
+                <tr><td><kbd>{s.character}</kbd></td><td>{s.electron}</td><td>{s.pc ?? 'not on a PC keyboard here'}</td></tr>
+              ))}
+            </tbody>
+          </table>
+        </Fold>
         </div>
       </div>
     </section>
@@ -392,25 +333,59 @@ const notOnAPc = Object.entries(NOT_ON_A_PC).reduce((groups, [key, why]) => grou
 
   {hasModels && <MachineModel models={models} photos={machine.photos} drawings={machine.drawings} references={machine.references} />}
 
-  <MachinePhotos machine={machine} model={hasModels} />
-
-  <section aria-labelledby="rom">
+  <section class="machine-more" aria-labelledby="more">
     <div class="wrap narrow">
-      <h2 id="rom">{bbc || electron ? 'Whose ROMs these are' : nes || vcs ? 'Whose game this is' : 'Whose ROM this is'}</h2>
+      <h2 id="more">About the {machine.name}</h2>
       <div class="prose">
-      <p>{machine.rights}</p>
-      {roms.length > 0 && (
-        <ul class="roms">
-          {roms.map((r) => <li>{romLabel(r)}: <a href={r.url}>the copy in the repository</a>, SHA-256 <code>{r.sha256}</code></li>)}
-        </ul>
+      <Fold id="left-out" summary="What is modelled, and what is not">
+        <p>{machine.notes}</p>
+        {(bbc || nes || vcs || electron) && <p>Each part left out has an issue that says what it would take:</p>}
+        {bbc && <ul>{NOT_MODELLED.map((m) => <li>{m.part[0].toUpperCase() + m.part.slice(1)}: <a href={issueUrl(m.issue)}>issue {m.issue}</a></li>)}</ul>}
+        {nes && <ul>{NES_NOT_MODELLED.map((m) => <li>{m.part[0].toUpperCase() + m.part.slice(1)}: <a href={issueUrl(m.issue)}>issue {m.issue}</a></li>)}</ul>}
+        {electron && <ul>{ELECTRON_NOT_MODELLED.map((m) => <li>{m.part[0].toUpperCase() + m.part.slice(1)}: <a href={issueUrl(m.issue)}>issue {m.issue}</a></li>)}</ul>}
+        {vcs && <ul>{VCS_NOT_MODELLED.map((m) => <li>{m.part[0].toUpperCase() + m.part.slice(1)}: <a href={issueUrl(m.issue)}>issue {m.issue}</a></li>)}</ul>}
+        {vcs && (
+          <>
+            <p>The cartridge boards that are not modelled, one issue each. A game made for one of them whose file is the size of a modelled board runs as that board, and does not work.</p>
+            <ul class="vcs-boards">
+              {VCS_BOARDS.map((b) => <li>{b.board}: <a href={issueUrl(b.issue)}>issue {b.issue}</a></li>)}
+            </ul>
+            <p>The 3D models, the outside and the board, are a project of their own: <a href={issueUrl(VCS_ISSUES.models)}>issue {VCS_ISSUES.models}</a>.</p>
+          </>
+        )}
+        {nes && <p>Saving is not built, so a page reload loses battery RAM: a game that saves its progress on the cartridge loses it when the page is reloaded or closed. The 3D models, the outside and the board, are a project of their own: <a href={issueUrl(NES_ISSUES.models)}>issue {NES_ISSUES.models}</a>.</p>}
+      </Fold>
+      {vcs && (
+        <Fold id="checked" summary="How it is checked">
+          <p>The acceptance test runs the test cartridges of <a href={VCS_SUITE_URL}>missingno-vcs-tests</a>, a suite for the console's chips, from this project's copy, in both regions. The tests the design trusts must pass: the chips' self-tests and the cartridge tests for the plain boards and F8, F6 and F4. The rest are recorded: the cartridge tests whose own notes say they are untested on a console or only report what they find, and the comparisons with the suite's reference pictures. The repository keeps what each recorded test gives, and a change fails the build. The tests for cartridge boards and for SECAM, which are not modelled, are not run. The acceptance test also starts {program.title} from power on in each region and checks its picture against the one recorded, pixel for pixel.</p>
+          <p>The suite's notes say its tests were checked on one console, a PAL console from Australia, and the TIA is known to behave differently from chip to chip and between models of the console. So a trusted result is the behaviour of the one console the suite was checked on, not of every Atari 2600. The suite's photographs of that console's screen are not compared yet: <a href={issueUrl(VCS_ISSUES.captures)}>issue {VCS_ISSUES.captures}</a>. Where this machine knowingly differs from the suite or the documents it was built from, <a href={KNOWN_DIFFERENCES_URL}>the list of known differences</a> says so.</p>
+        </Fold>
       )}
-      {bbc || electron
-        ? <p>The ROMs are kept in the repository, in <code>roms/</code>, with where they came from. Each is checked against its hash when the site is built, and served from this site beside the emulator.</p>
-        : nes
-        ? <p>The game is kept in the repository, in <code>roms/</code>, with where it came from. It is checked against its hash when the site is built, and served from this site beside the emulator.</p>
-        : vcs
-        ? <p>The game is kept in the repository in a folder of its own, <a href={VCS_GAME_FOLDER_URL}><code>machines/atari-2600/cartridges/2048/</code></a>, with its licence as its author published it, <a href={program.licenceUrl}>the {program.licence} licence</a>, and where it came from. It is checked against its hash when the site is built, and served from this site beside the emulator.</p>
-        : <p>The ROM is kept in the repository, in <code>roms/</code>, with where it came from. It is checked against its hash when the site is built, and served from this site beside the emulator.</p>}
+      {bbc && (
+        <Fold id="discs" summary="Credits and licences for the discs">
+          <p>The discs in the library are other people's software. Each is shared here under its author's own licence, not under this project's MIT licence, and is credited below with links to its licence and its author. Each disc's folder in the repository keeps its licence text, where the image came from and its SHA-256, and, where the licence asks for it, its source.</p>
+          <p>Only discs whose authors have written down that they may be shared are in the library. Commercial games are not, because nobody who holds their rights has said so. A disc image of your own, of anything, goes in with Insert a disc.</p>
+          <ul class="bbc-credits">
+            {library.discs.map((d) => (
+              <li data-bbc-credit={d.slug}>
+                <b>{d.title}</b>, {d.author}, {d.year}. Licence: <a href={discLicenceUrl(d)}>{d.licence}</a>. <a href={d.sourceUrl}>The author's page</a>{needsSource(d) && <>; <a href={discSourceUrl(d)}>the source</a></>}; <a href={discFolderUrl(d)}>the disc's folder</a>.{d.note && <> {d.note}</>}
+              </li>
+            ))}
+          </ul>
+        </Fold>
+      )}
+      <MachinePhotos machine={machine} model={hasModels} />
+      <Fold id="rom" summary={romsWord}>
+        <p>{machine.rights}</p>
+        {roms.length > 0 && (
+          <ul class="roms">
+            {roms.map((r) => <li>{romLabel(r)}: <a href={r.url}>the copy in the repository</a>, SHA-256 <code>{r.sha256}</code></li>)}
+          </ul>
+        )}
+        {vcs
+          ? <p>The game's folder, <a href={VCS_GAME_FOLDER_URL}><code>machines/atari-2600/cartridges/2048/</code></a>, keeps its licence as its author published it, <a href={program.licenceUrl}>the {program.licence} licence</a>, and where it came from. The site checks it against its hash when it is built, and serves it beside the emulator.</p>
+          : <p>{bbc || electron ? 'The ROMs are' : nes ? 'The game is' : 'The ROM is'} kept in the repository, in <code>roms/</code>, with where {bbc || electron ? 'they' : 'it'} came from. The site checks {bbc || electron ? 'each' : 'it'} against its hash when it is built, and serves {bbc || electron ? 'them' : 'it'} beside the emulator.</p>}
+      </Fold>
       </div>
     </div>
   </section>

@@ -279,16 +279,21 @@ Not used.
 - Draft: `1536x864`, quality low. Prompt: "A dark 1970s single-board computer seen from above at a slight angle: six red-orange seven-segment LED digits glowing in a row above a hex keypad of small square keys, black background, soft phosphor-green edge light (#ddffdc), one lime (#7fee64) glint, macro photography, shallow depth of field, no text, no logos, no letters on the keys"
 - Final: not made, dropped: it is not a KIM-1 (twelve keys where the board has twenty-four) and reads as one
 
+## The shape of a machine page
+
+Every machine page has the same shape, so the site reads as one product (Dan, 15 October 2026: "too much text where the app is; keep everything concise"). The visitor came to run the machine, so around it there is only what it is, its controls, how to start, and one short line under it that says whose ROM or game it runs and links the full rights. That line is never folded.
+
+The order is the head (what the machine is, its acceptance count, its photograph and credit), the machine, Try it, how to type at it (the KIM-1's teletype, the Acorns' keyboards), the 3D models, and then one section, "About the" machine, of reference: what is modelled and what is not with each issue, how it is checked, the discs' credits, the photographs and the full rights. Each part of it is a closed `<details>` (`src/components/Fold.astro`) whose summary is a plain label, because a screen reader reads it out. The facts, links and credits stay in the page; they just do not push the machine down the screen. Long small print inside a panel or a section (the disc drive's, how long a tape takes, the symbols table) uses the same component, quiet, with no rules. The fold sets no text colour, so it adds nothing to the contrast table, and its style is scoped to the details and its summary, so the markup around it is unchanged. `tests/machine-pages-shape.test.mjs` holds all of this.
+
 ## The photographs
 
 Every machine page shows a photograph of the original device in its head,
 beside the machine's details, and credits it underneath (issue 28; Dan,
 2 October 2026). Rights are not a gate; the credit is. A machine may have
 several (Dan, 2 October 2026: "cross-reference multiple photos"): the first in
-its registry list is the main one, in the head, and a section of its own,
-"Photographs of the original", below the model shows every one, main one
-first, each with the same credit and a line saying what the 3D model took
-from it. The photographs live in
+its registry list is the main one, in the head, and a closed part of the
+reference at the foot of the page shows every one, main one first, each with
+the same credit and a line saying what the 3D model took from it. The photographs live in
 `src/assets/photos/`, apart from the generated imagery, and the two folders
 never share a file.
 
