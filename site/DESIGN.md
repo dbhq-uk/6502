@@ -25,6 +25,7 @@ paper, ink, an amber phosphor, a Basedash-style serif look, and this.
   all open licence and self-hosted through Fontsource, so nothing loads from a
   font host. The reference's own display face is a custom one; Inter Tight stands
   in for it.
+- **Layout: the width is used, and only running text is held to a measure** (15 October 2026, after Dan found the margins too big). Every page shares one container, `--max` 1320 pixels with `--pad` of 16 to 32 pixels each side, and a section has `--section`, 32 to 64 pixels, above and below it. A reading section (`.narrow`, `.prose`) used to be an 860-pixel strip centred in the container, which left wide dead margins on a desktop and squeezed the machine panels into it. Now it takes the whole container, left-aligned with the header, so a machine's panel, its tables, its code and its photographs use the full width. Only paragraphs, list items and the panels' notes are held to `--measure`, 33em, about 74 characters of Inter at any size; a cap in `ch` is not used for Inter text, because 72ch is about 90 characters of it. The machine head puts its text at the measure on the left and the photograph at the container's right edge, in line with the panel. A machine's screen is as wide as its panel but never taller than the window under the header (`--screen-fit`), and the NES and Atari 2600 pads keep the width of a real pad, centred. The journal list runs in two columns where two fit at a readable width. `tests/layout.test.mjs` holds these numbers.
 - **Contrast:** the reference's dimmest text colour, `#697368`, measures 4.25 to 1
   on black, under the 4.5 that AA asks of small text. It is lightened to
   `#737d72` (4.91). A test computes every text pair from the real tokens, and for text on the
@@ -314,7 +315,7 @@ never share a file.
   the canvas.
 - Below 760 pixels it drops under the details, no wider than 360 pixels.
 - **The photographs section is a plain grid** of the same figures, as many
-  columns of at least 220 pixels as fit, on the page's narrow measure; the
+  columns of at least 260 pixels as fit, across the container; the
   head's photograph and its copy in the grid ask for the same widths, so it is
   fetched once. Every image in the grid loads lazily.
 

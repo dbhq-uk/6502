@@ -23,7 +23,8 @@ a:hover { color: var(--white); }
 .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 
 .wrap { max-width: var(--max); margin: 0 auto; padding: 0 var(--pad); }
-.narrow { max-width: 860px; }
+/* A reading section. It once capped the container at 860 pixels, centred, which left wide dead margins and squeezed the machine panels; now the section takes the whole container, left-aligned with the header, and only its text is held to the measure. Panels, tables, code and photographs use the full width. */
+.narrow > p, .narrow > ul, .narrow > ol { max-width: var(--measure); }
 
 h1, h2, h3 { font-family: var(--font-head); color: var(--white); font-weight: 500; letter-spacing: -0.02em; }
 h1 { font-size: clamp(44px, 6.4vw, 76px); line-height: 1; }
@@ -53,12 +54,12 @@ h3 { font-size: 20px; line-height: 1.3; }
 .btns { display: flex; gap: 12px; flex-wrap: wrap; }
 
 /* sections */
-section { padding: clamp(56px, 7vw, 96px) 0; }
-.head { text-align: center; margin-bottom: 40px; }
-.head p { margin: 14px auto 0; max-width: 56ch; font-size: 18px; }
-.hero { text-align: center; padding: clamp(64px, 9vw, 120px) 0 clamp(24px, 3vw, 40px); }
+section { padding: var(--section) 0; }
+.head { text-align: center; margin-bottom: 32px; }
+.head p { margin: 14px auto 0; max-width: var(--measure); font-size: 18px; }
+.hero { text-align: center; padding: clamp(40px, 6vw, 80px) 0 clamp(16px, 2vw, 32px); }
 .hero h1 { max-width: 15ch; margin: 0 auto 24px; }
-.hero .lede { font-size: 20px; color: var(--moss-80); max-width: 54ch; margin: 0 auto 36px; }
+.hero .lede { font-size: 20px; color: var(--moss-80); max-width: var(--measure); margin: 0 auto 32px; }
 .hero .btns { justify-content: center; }
 .dieimg { display: block; width: min(1000px, 92vw); height: auto; margin: 0 auto; -webkit-mask-image: radial-gradient(ellipse 62% 66% at 50% 50%, #000 55%, transparent 100%); mask-image: radial-gradient(ellipse 62% 66% at 50% 50%, #000 55%, transparent 100%); }
 .figure-caption { font-family: var(--font-mono); font-size: 11.5px; color: var(--sage-40); text-align: center; padding: 0 0 18px; letter-spacing: 0; }
@@ -85,7 +86,7 @@ section { padding: clamp(56px, 7vw, 96px) 0; }
 .two { display: grid; grid-template-columns: 1fr 1fr; gap: clamp(24px, 4vw, 56px); align-items: center; }
 @media (max-width: 900px) { .two { grid-template-columns: 1fr; } }
 .two h2 { margin-bottom: 16px; }
-.two p { font-size: 18px; margin: 0 0 14px; }
+.two p { font-size: 18px; margin: 0 0 14px; max-width: var(--measure); }
 
 /* the imagery behind sections */
 .proof { position: relative; }
@@ -99,10 +100,10 @@ section { padding: clamp(56px, 7vw, 96px) 0; }
 /* --sage-40 is 3.4 to 1 on the brightest pixel of the traces under their overlay; the sage-60 below is 6.0. */
 .tex .note { color: var(--sage-60); }
 
-/* journal */
-.entries { max-width: 860px; margin: 0 auto; }
-.entry { display: grid; grid-template-columns: 130px 1fr; gap: 24px; padding: 26px 0; border-top: 1px solid var(--hairline); }
-.entry:first-child { border-top: 0; }
+/* journal: the entries fill the container, two columns side by side where two fit at a readable width, one below that; every entry has its hairline above it, so the two columns' rules line up. */
+.entries { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 540px), 1fr)); column-gap: 48px; }
+.entry { display: grid; grid-template-columns: 110px minmax(0, 1fr); gap: 20px; padding: 22px 0; border-top: 1px solid var(--hairline); }
+.entry p { max-width: var(--measure); }
 .entry time { font-family: var(--font-mono); font-size: 12.5px; color: var(--deep); padding-top: 5px; letter-spacing: 0; }
 .entry h2, .entry h3 { font-size: 24px; line-height: 1.3; margin-bottom: 6px; }
 .entry h2 a, .entry h3 a { color: var(--white); text-decoration: none; }
@@ -110,13 +111,17 @@ section { padding: clamp(56px, 7vw, 96px) 0; }
 @media (max-width: 900px) { .entry { grid-template-columns: 1fr; gap: 4px; } }
 
 /* rendered markdown: journal entries and the two documents */
-.prose { max-width: 860px; margin: 0 auto; }
+/* The block takes the container; its running text, at any depth, is held to the measure, left-aligned. Tables, code and figures inside it keep the full width. */
+.prose :is(p, li, blockquote, dd, h2, h3) { max-width: var(--measure); }
 .prose > * + * { margin-top: 1em; }
-.prose h2 { margin-top: 2em; font-size: 30px; }
+.wrap > h1 + .prose { margin-top: 24px; }
+.prose h2 { margin-top: 1.5em; font-size: 30px; }
 .prose h3 { margin-top: 1.6em; }
 .prose ul, .prose ol { padding-left: 1.4em; }
 .prose li + li { margin-top: 0.35em; }
-.prose code { font-family: var(--font-mono); font-size: 0.9em; color: var(--white); background: var(--iron); padding: 0.1em 0.4em; border-radius: 4px; letter-spacing: 0; }
+/* A long hash or identifier breaks rather than push a phone's page sideways. */
+.prose { overflow-wrap: break-word; }
+.prose code { overflow-wrap: anywhere; font-family: var(--font-mono); font-size: 0.9em; color: var(--white); background: var(--iron); padding: 0.1em 0.4em; border-radius: 4px; letter-spacing: 0; }
 .prose pre { background: var(--iron); border: 1px solid var(--circuit); border-radius: var(--r-window); padding: 18px 20px; overflow: auto; }
 .prose pre code { background: none; padding: 0; }
 .prose table { width: 100%; border-collapse: collapse; font-size: 15px; display: block; overflow-x: auto; }
@@ -142,7 +147,7 @@ table.data { width: 100%; border-collapse: collapse; font-size: 15px; }
 .status.running { background: var(--white); border-color: var(--white); color: var(--iron); }
 .count { font-family: var(--font-mono); font-size: 12.5px; color: var(--sage-40); margin-top: 14px; letter-spacing: 0; }
 
-footer { border-top: 1px solid var(--hairline); padding: 40px 0 64px; color: var(--deep); font-size: 14px; }
+footer { border-top: 1px solid var(--hairline); padding: 32px 0 48px; color: var(--deep); font-size: 14px; }
 footer p { max-width: 78ch; margin: 0 0 10px; }
 footer a { color: var(--fern); }
 footer .linkbtn { background: none; border: 0; padding: 0; font: inherit; color: var(--fern); text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
@@ -200,14 +205,14 @@ footer .linkbtn:hover { color: var(--white); }
 .kim1-tty select:disabled, .kim1-tty-input input:disabled { border-style: dashed; color: var(--moss-70); }
 .kim1 .btn { min-height: 44px; }
 .kim1 .btn:disabled { cursor: default; border-style: dashed; background: var(--iron); color: var(--moss-70); }
-.kim1-tty-about { color: var(--sage-60); font-size: 14px; max-width: 72ch; }
+.kim1-tty-about { color: var(--sage-60); font-size: 14px; max-width: var(--measure); }
 .kim1-paper { min-height: 10.5em; max-height: 24em; overflow: auto; padding: 12px 14px; font-family: var(--font-mono); font-size: 14px; letter-spacing: 0; line-height: 1.5; color: var(--white); background: var(--void); border: 1px solid var(--hairline); border-radius: var(--r-card); }
 .kim1-paper > div { white-space: pre; min-height: 1.5em; }
 /* The BBC Micro's page: the screen on the black canvas, its controls and the disc drive below, on an iron panel like the KIM-1's. No lime but Start, the page's one fill, and the screen's focus ring. */
 .bbc { margin-top: 24px; padding: clamp(16px, 4vw, 32px); display: grid; gap: 14px; background: var(--iron); border: 1px solid var(--circuit); border-radius: var(--r-window); }
 .bbc-screen { background: var(--void); border: 1px solid var(--hairline); border-radius: var(--r-card); padding: clamp(6px, 1.5vw, 14px); outline-offset: 3px; }
 /* The framebuffer is 640 by 512; the television showed it four wide by three high. */
-.bbc-screen canvas { display: block; width: 100%; height: auto; aspect-ratio: 4 / 3; background: var(--void); }
+.bbc-screen canvas { display: block; width: 100%; max-width: calc(var(--screen-fit) * 4 / 3); margin: 0 auto; height: auto; aspect-ratio: 4 / 3; background: var(--void); }
 /* Focus is what hands the keyboard to the machine, so a mouse click, which does not raise :focus-visible, shows the ring too. */
 .bbc-screen:focus { outline: 2px solid var(--lime); }
 /* On a phone the keys are taller than the screen they share the page with, and none can be under 44 pixels, so the running machine's picture is pinned under the site header while the keys scroll past it. The panel is a column then, because a sticky item moves only inside its own grid area. --bbc-pin is the header's height and --bbc-screen-height the screen's, which the driver sets: the page's scroll-padding-top already clears the header, so a control's scroll-margin-top clears the screen as well, and a key that takes the focus is never behind it. */
@@ -217,7 +222,7 @@ footer .linkbtn:hover { color: var(--white); }
 .bbc .btn[hidden] { display: none; }
 .bbc-status { color: var(--moss-80); }
 .bbc-line { color: var(--moss-80); font-size: 14px; }
-.bbc-note { color: var(--sage-60); font-size: 14px; max-width: 72ch; }
+.bbc-note { color: var(--sage-60); font-size: 14px; max-width: var(--measure); }
 .bbc-note kbd { font-family: var(--font-mono); font-size: 13px; letter-spacing: 0; color: var(--white); }
 .bbc-speed { color: var(--sage-60); font-family: var(--font-mono); font-size: 12.5px; letter-spacing: 0; max-width: 60ch; }
 .bbc-speed:empty { display: none; }
@@ -229,7 +234,7 @@ footer .linkbtn:hover { color: var(--white); }
 .bbc-preset-label { color: var(--white); font-size: 14px; }
 .bbc-presets select { justify-self: start; max-width: 100%; min-height: 44px; font: inherit; font-size: 14px; color: var(--white); background: var(--iron); border: 1px solid var(--circuit); border-radius: 8px; padding: 8px 12px; }
 .bbc-presets select:disabled { border-style: dashed; color: var(--moss-70); }
-.bbc-preset-about { color: var(--moss-80); font-size: 14px; max-width: 72ch; }
+.bbc-preset-about { color: var(--moss-80); font-size: 14px; max-width: var(--measure); }
 .bbc-preset-disc { display: grid; gap: 6px; }
 .bbc-preset-disc[hidden] { display: none; }
 .bbc-preset-disc b { color: var(--white); font-weight: 500; }
@@ -252,7 +257,7 @@ footer .linkbtn:hover { color: var(--white); }
 .electron { margin-top: 24px; padding: clamp(16px, 4vw, 32px); display: grid; gap: 14px; background: var(--iron); border: 1px solid var(--circuit); border-radius: var(--r-window); }
 .electron-screen { background: var(--void); border: 1px solid var(--hairline); border-radius: var(--r-card); padding: clamp(6px, 1.5vw, 14px); outline-offset: 3px; }
 /* The framebuffer is 640 by 256, one row a scan line; the television showed it four wide by three high, so each row is drawn about twice as tall as a pixel is wide. */
-.electron-screen canvas { display: block; width: 100%; height: auto; aspect-ratio: 4 / 3; background: var(--void); }
+.electron-screen canvas { display: block; width: 100%; max-width: calc(var(--screen-fit) * 4 / 3); margin: 0 auto; height: auto; aspect-ratio: 4 / 3; background: var(--void); }
 /* Focus is what hands the keyboard to the machine, as on the BBC Micro's page. */
 .electron-screen:focus { outline: 2px solid var(--lime); }
 .electron-controls { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; }
@@ -260,7 +265,7 @@ footer .linkbtn:hover { color: var(--white); }
 .electron .btn[hidden] { display: none; }
 .electron-status { color: var(--moss-80); }
 .electron-line { color: var(--moss-80); font-size: 14px; }
-.electron-note { color: var(--sage-60); font-size: 14px; max-width: 72ch; }
+.electron-note { color: var(--sage-60); font-size: 14px; max-width: var(--measure); }
 .electron-note kbd { font-family: var(--font-mono); font-size: 13px; letter-spacing: 0; color: var(--white); }
 .electron-speed { color: var(--sage-60); font-family: var(--font-mono); font-size: 12.5px; letter-spacing: 0; max-width: 60ch; }
 .electron-speed:empty { display: none; }
@@ -282,7 +287,7 @@ footer .linkbtn:hover { color: var(--white); }
 .nes { margin-top: 24px; padding: clamp(16px, 4vw, 32px); display: grid; gap: 14px; background: var(--iron); border: 1px solid var(--circuit); border-radius: var(--r-window); }
 .nes-screen { background: var(--void); border: 1px solid var(--hairline); border-radius: var(--r-card); padding: clamp(6px, 1.5vw, 14px); outline-offset: 3px; }
 /* The picture is 256 by 240; NTSC's pixels are 8:7, so it shows 2048 by 1680 in shape, and public/nes.js sets the region's own (PAL's are wider). Square pixels stay square when scaled up. */
-.nes-screen canvas { display: block; width: 100%; max-width: 900px; margin: 0 auto; height: auto; aspect-ratio: 2048 / 1680; background: var(--void); image-rendering: pixelated; }
+.nes-screen canvas { display: block; width: 100%; max-width: min(900px, var(--screen-fit) * 2048 / 1680); margin: 0 auto; height: auto; aspect-ratio: 2048 / 1680; background: var(--void); image-rendering: pixelated; }
 /* Focus is what hands the keyboard to the machine, so a mouse click, which does not raise :focus-visible, shows the ring too. */
 .nes-screen:focus { outline: 2px solid var(--lime); }
 .nes-controls { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; }
@@ -291,7 +296,7 @@ footer .linkbtn:hover { color: var(--white); }
 .nes-status { color: var(--moss-80); }
 .nes-line { color: var(--moss-80); font-size: 14px; }
 .nes-line:empty { display: none; }
-.nes-note { color: var(--sage-60); font-size: 14px; max-width: 72ch; }
+.nes-note { color: var(--sage-60); font-size: 14px; max-width: var(--measure); }
 .nes-speed { color: var(--sage-60); font-family: var(--font-mono); font-size: 12.5px; letter-spacing: 0; max-width: 60ch; }
 .nes-speed:empty { display: none; }
 .nes-region, .nes-cartridge { margin: 0; padding: 14px 16px 16px; display: grid; gap: 12px; border: 1px solid var(--hairline); border-radius: var(--r-card); }
@@ -299,20 +304,22 @@ footer .linkbtn:hover { color: var(--white); }
 .nes-choice { display: inline-flex; align-items: center; gap: 8px; color: var(--white); font-size: 14px; }
 .nes-choice input { width: 16px; height: 16px; margin: 0; }
 /* Controller 1 for touch: the d-pad on the left, Select and Start in the middle, B and A on the right, as on the pad. Each button at least 44 pixels; touch-action none so a held finger neither scrolls nor zooms. No lime: no button matters more than another. */
-.nes-pad { display: grid; grid-template-columns: repeat(3, 52px) 1fr repeat(2, 72px) 1fr repeat(2, 60px); grid-template-areas: ". up . . . . . . ." "left . right . select start . b a" ". down . . . . . . ."; gap: 6px; justify-content: center; align-items: center; }
+/* The pad is held to the width of a real one, centred under the screen, so the d-pad and B and A do not drift to the panel's far edges on a wide page. */
+.nes-pad { width: min(100%, 640px); justify-self: center; display: grid; grid-template-columns: repeat(3, 52px) 1fr repeat(2, 72px) 1fr repeat(2, 60px); grid-template-areas: ". up . . . . . . ." "left . right . select start . b a" ". down . . . . . . ."; gap: 6px; justify-content: center; align-items: center; }
 .nes-button { min-width: 44px; min-height: 44px; padding: 0 6px; font-family: var(--font-mono); font-size: 13px; letter-spacing: 0; color: var(--white); background: var(--veil); border: 1px solid var(--circuit); border-radius: 8px; cursor: pointer; touch-action: none; user-select: none; -webkit-user-select: none; transition: background 0.15s ease-out; }
 .nes-button:hover { background: var(--card); }
 .nes-button:active { background: var(--void); }
 .nes-button:disabled { cursor: default; border-style: dashed; background: var(--iron); color: var(--moss-70); }
 .nes-up { grid-area: up; } .nes-down { grid-area: down; } .nes-left { grid-area: left; } .nes-right { grid-area: right; }
 .nes-select { grid-area: select; } .nes-start { grid-area: start; } .nes-b { grid-area: b; border-radius: 50%; } .nes-a { grid-area: a; border-radius: 50%; }
-@media (max-width: 560px) { .nes-pad { grid-template-columns: repeat(3, 48px) repeat(2, 1fr) repeat(2, 52px); grid-template-areas: ". up . . . . ." "left . right . . b a" ". down . select start . ."; } }
+/* On a phone Select and Start drop below, each across two columns, so the pad fits a 390-pixel screen with every button still 44 pixels or more; before 15 October 2026 it was 394 pixels wide in a 324-pixel panel and pushed the page sideways. */
+@media (max-width: 560px) { .nes-pad { grid-template-columns: repeat(3, 44px) repeat(2, minmax(0, 1fr)) repeat(2, 48px); grid-template-areas: ". up . . . . ." "left . right . . b a" ". down . select select start start"; gap: 4px; } }
 @media (prefers-reduced-motion: reduce) { .nes-button { transition: none; } }
 /* The Atari 2600's page, as the NES's: the screen on the black canvas, its controls, the console switches, joystick 1 as buttons, the region and the cartridge below, on the iron panel. No lime but Start and the screen's focus ring. */
 .vcs { margin-top: 24px; padding: clamp(16px, 4vw, 32px); display: grid; gap: 14px; background: var(--iron); border: 1px solid var(--circuit); border-radius: var(--r-window); }
 .vcs-screen { background: var(--void); border: 1px solid var(--hairline); border-radius: var(--r-card); padding: clamp(6px, 1.5vw, 14px); outline-offset: 3px; }
 /* The picture is 160 pixels by NTSC's 228 lines; NTSC's pixels are 12:7, so it shows 1920 by 1596 in shape, and public/atari-2600.js sets the region's own window and shape (PAL's is taller, its pixels wider). */
-.vcs-screen canvas { display: block; width: 100%; max-width: 900px; margin: 0 auto; height: auto; aspect-ratio: 1920 / 1596; background: var(--void); image-rendering: pixelated; }
+.vcs-screen canvas { display: block; width: 100%; max-width: min(900px, var(--screen-fit) * 1920 / 1596); margin: 0 auto; height: auto; aspect-ratio: 1920 / 1596; background: var(--void); image-rendering: pixelated; }
 .vcs-screen:focus { outline: 2px solid var(--lime); }
 .vcs-controls { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; }
 .vcs .btn:disabled { cursor: default; border-style: dashed; background: var(--iron); color: var(--moss-70); }
@@ -321,7 +328,7 @@ footer .linkbtn:hover { color: var(--white); }
 .vcs-status { color: var(--moss-80); }
 .vcs-line { color: var(--moss-80); font-size: 14px; }
 .vcs-line:empty { display: none; }
-.vcs-note { color: var(--sage-60); font-size: 14px; max-width: 72ch; }
+.vcs-note { color: var(--sage-60); font-size: 14px; max-width: var(--measure); }
 .vcs-speed { color: var(--sage-60); font-family: var(--font-mono); font-size: 12.5px; letter-spacing: 0; max-width: 60ch; }
 .vcs-speed:empty { display: none; }
 .vcs-region, .vcs-cartridge, .vcs-switches { margin: 0; padding: 14px 16px 16px; display: grid; gap: 12px; border: 1px solid var(--hairline); border-radius: var(--r-card); }
@@ -329,7 +336,7 @@ footer .linkbtn:hover { color: var(--white); }
 .vcs-choice { display: inline-flex; align-items: center; gap: 8px; color: var(--white); font-size: 14px; }
 .vcs-choice input { width: 16px; height: 16px; margin: 0; }
 /* Joystick 1 for touch: the four directions on the left and the fire button on the right. Each button at least 44 pixels; touch-action none so a held finger neither scrolls nor zooms. */
-.vcs-pad { display: grid; grid-template-columns: repeat(3, 52px) 1fr 72px; grid-template-areas: ". up . . ." "left . right . fire" ". down . . ."; gap: 6px; justify-content: center; align-items: center; }
+.vcs-pad { width: min(100%, 420px); justify-self: center; display: grid; grid-template-columns: repeat(3, 52px) 1fr 72px; grid-template-areas: ". up . . ." "left . right . fire" ". down . . ."; gap: 6px; justify-content: center; align-items: center; }
 .vcs-button { min-width: 44px; min-height: 44px; padding: 0 6px; font-family: var(--font-mono); font-size: 13px; letter-spacing: 0; color: var(--white); background: var(--veil); border: 1px solid var(--circuit); border-radius: 8px; cursor: pointer; touch-action: none; user-select: none; -webkit-user-select: none; transition: background 0.15s ease-out; }
 .vcs-button:hover { background: var(--card); }
 .vcs-button:active { background: var(--void); }
@@ -345,16 +352,21 @@ footer .linkbtn:hover { color: var(--white); }
 .steps .tty-keys { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-bottom: 6px; }
 .prose .steps .tty-prints { margin: 6px 0 0; padding: 10px 14px; border-radius: var(--r-card); }
 .roms code { overflow-wrap: anywhere; }
+/* The Atari 2600's list of boards not modelled is many short lines: on a wide page it runs in columns rather than down a narrow strip. */
+.vcs-boards { columns: 11em; column-gap: 32px; }
+.prose .vcs-boards li + li { margin-top: 0; }
+.vcs-boards li { break-inside: avoid; padding-bottom: 0.35em; }
 .machine-head p { margin-top: 12px; }
 /* The head: the machine's details, and beside them a photograph of the original. */
-.machine-intro { display: grid; grid-template-columns: minmax(0, 1fr) 300px; gap: clamp(24px, 4vw, 48px); align-items: start; }
-@media (max-width: 760px) { .machine-intro { grid-template-columns: 1fr; } }
+/* The text at the measure on the left, the photograph at the container's right edge, in line with the panel below it. */
+.machine-intro { display: grid; grid-template-columns: minmax(0, var(--measure)) 360px; justify-content: space-between; gap: clamp(24px, 4vw, 48px); align-items: start; }
+@media (max-width: 760px) { .machine-intro { grid-template-columns: minmax(0, 1fr); } }
 .photo { margin: 0; max-width: 360px; justify-self: center; }
 .photo img { width: 100%; height: auto; border: 1px solid var(--hairline); border-radius: var(--r-card); background: var(--iron); }
 .photo figcaption { display: grid; gap: 4px; padding: 10px 0 0; text-align: left; }
 /* Every photograph the page uses, main one first, each credited: a grid of the same figures. */
 .photos-intro { margin: 24px 0 20px; }
-.photo-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 28px 24px; align-items: start; }
+.photo-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 28px 24px; align-items: start; }
 .photo-grid .photo { max-width: none; justify-self: stretch; }
 /* The 3D model: hidden in the markup, shown by public/model-loader.js. */
 .model-stage { position: relative; padding: 0; height: min(64vh, 560px); min-height: 340px; margin-top: 24px; background: var(--void); border: 1px solid var(--circuit); border-radius: var(--r-window); overflow: hidden; outline-offset: 3px; }
