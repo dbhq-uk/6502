@@ -725,14 +725,39 @@
       "id": "atari-2600",
       "name": "Atari 2600",
       "year": 1977,
-      "maker": null,
+      "maker": "Atari",
       "category": "console",
-      "cpu": "6507",
+      "cpu": "6507 at 1.19 MHz (NTSC), 1.18 MHz (PAL)",
       "core": "nmos",
-      "status": "planned",
-      "acceptance": null,
-      "rights": null,
-      "notes": null
+      "status": "running",
+      "acceptance": "Atari2600AcceptanceTests",
+      "rights": "The Atari 2600 has no system ROM: the console runs whatever cartridge is in it. Commercial games are not bundled and never will be: load your own, which is read in this tab and not uploaded. The cartridge Start puts in is 2048 2600, by Carlos Duarte do Nascimento (Chester), a port of Gabriele Cirulli's 2048, which its author released under the MIT licence: his repository's LICENSE says \"Copyright (c) 2014 Carlos Duarte do Nascimento (Chester)\", and its source carries the same licence with a second line, \"Original 2048 game Copyright (c) 2014 Gabriele Cirulli\". Our copy is the author's own build, 2048.bin, unchanged, from his repository at commit 35de3c1b3b7bc4c3aadc8cf7fe630050a6984761: https://raw.githubusercontent.com/chesterbr/2048-2600/35de3c1b3b7bc4c3aadc8cf7fe630050a6984761/2048.bin, SHA-256 c85dc2204299b0a29209d3f80ae112678c171dab216719593625647d2436f1e1. The cartridge art, by Jenn Harrison, is not in the ROM and is not shown here. The game is kept in this repository under machines/atari-2600/cartridges/2048/, with its licence as its author published it and where it came from, its notice is in NOTICE.md, and it is checked by SHA-256 each time it is read.",
+      "notes": "The picture drawn a colour clock at a time, as the TIA draws it, the TIA's two sound channels, two joysticks and the console switches, NTSC and PAL, and the cartridge boards 2K, 4K, F8, F6, F4 and FA, and F8, F6 and F4 with the Superchip, chosen by the file's size. Not modelled: SECAM, the paddles, the keypads, the driving controller and the other peripherals, the analogue quirks of the picture, the other cartridge boards, and choosing the board from the image itself.",
+      "case": true,
+      "photos": [
+        {
+          "file": "atari-2600.webp",
+          "author": "Evan-Amos",
+          "sourceUrl": "https://commons.wikimedia.org/wiki/File:Atari-2600-Light-Sixer-FL.jpg",
+          "licence": "Public domain",
+          "date": "2014-11-22",
+          "caption": "an original Atari 2600 with six switches on its front, the model its file page calls the Light Sixer",
+          "alt": "An original Atari 2600 seen from the front left and a little above on a white background: a black case with a ribbed top and a strip of wood grain across its front, with the Atari symbol and name at its right end, and across the back a raised black panel edged in orange holding six silver switches, labelled power, tv type, left difficulty, right difficulty, game select and game reset, either side of the empty cartridge slot and the words video computer system.",
+          "fetched": "2026-10-15",
+          "used": "the photograph of the machine at the head of its page; nothing is traced or measured from it, because the Atari 2600's 3D models are not built yet"
+        },
+        {
+          "file": "atari-2600-four-switch.webp",
+          "author": "Evan-Amos",
+          "sourceUrl": "https://commons.wikimedia.org/wiki/File:Atari-2600-Wood-4Sw-Set.jpg",
+          "licence": "Public domain",
+          "date": "2011-02-28",
+          "caption": "a later Atari 2600, the four-switch console with wood veneer, which its file page dates to 1980 to 1982, with its standard joystick",
+          "alt": "An Atari 2600 seen from the front left and above on a white background, with a joystick in front of it: a black case with a ribbed top and a strip of wood grain across its front with the Atari symbol and name, and across the back a raised black panel edged in orange with four silver switches, POWER and TV TYPE at the left and GAME SELECT and GAME RESET at the right, either side of the empty cartridge slot and the words VIDEO COMPUTER SYSTEM. The joystick, at the front left, is a square black base with a black stick, an orange fire button at one corner and a ring of orange dashes marked TOP, and its cable runs round to the back of the console.",
+          "fetched": "2026-10-15",
+          "used": "the second photograph, of the later four-switch console beside the joystick the page's controls stand in for; nothing is traced or measured from it"
+        }
+      ]
     },
     {
       "id": "atari-5200",

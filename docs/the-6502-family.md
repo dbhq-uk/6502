@@ -175,7 +175,7 @@ The BBC Micro's 6502 second processor, attached through Acorn's Tube interface, 
 
 | Machine | Year | CPU | Core |
 |---|---|---|---|
-| Atari 2600 | 1977 | 6507 | Core |
+| **Atari 2600** | 1977 | 6507 | Core |
 | Atari 5200 | 1982 | 6502C "Sally" | Core |
 | **NES** | 1983 | Ricoh 2A03 (NTSC), 2A07 (PAL) | Core, no decimal |
 | Atari 7800 | 1986 | 6502C "Sally" | Core |
@@ -190,6 +190,8 @@ console has the 2A07. Famicom clones, such as the Dendy that was widely sold in
 Russia from 1992, and the NES-on-a-chip plug-and-play TV games carry
 2A03-compatible CPUs. The NES, in both its NTSC and PAL forms, is the third
 machine this project built, and it runs in the browser.
+
+The Atari 2600, sold first as the Atari Video Computer System, has a 6507: an NMOS 6502 in a smaller package, with 13 address lines and no interrupt pins. It is the fifth machine this project built, in both its NTSC and PAL forms, and it runs in the browser.
 
 ## Arcade
 

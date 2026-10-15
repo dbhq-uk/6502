@@ -4,6 +4,7 @@ import Kim1Panel from '../../components/Kim1Panel.astro';
 import BbcPanel from '../../components/BbcPanel.astro';
 import NesPanel from '../../components/NesPanel.astro';
 import ElectronPanel from '../../components/ElectronPanel.astro';
+import Atari2600Panel from '../../components/Atari2600Panel.astro';
 import MachinePhoto from '../../components/MachinePhoto.astro';
 import MachineModel from '../../components/MachineModel.astro';
 import MachinePhotos from '../../components/MachinePhotos.astro';
@@ -11,13 +12,14 @@ import { modelsOf } from '../../models/models.mjs';
 import { registry, results } from '../../lib/data.mjs';
 import { fmt } from '../../lib/figures.mjs';
 import { acceptanceSummary, loadTeletype, loadTryIt, machineDownloadBytes, parseKeys, parseTeletype, runningMachines } from '../../lib/machines.mjs';
-import { bbcRoms, electronRoms, kim1Roms, nesRoms } from '../../lib/pins.mjs';
+import { atari2600Roms, bbcRoms, electronRoms, kim1Roms, nesRoms } from '../../lib/pins.mjs';
 import { NOT_MODELLED, downloadBytes, issueUrl, symbolTable } from '../../lib/bbc-micro.mjs';
 import { discFolderUrl, discLibrary, discLicenceUrl, discSourceUrl, needsSource } from '../../lib/bbc-discs.mjs';
 import { NOT_ON_A_PC, legend } from '../../../public/bbc-keys.js';
 import { NOT_MODELLED as NES_NOT_MODELLED, ELSEWHERE as NES_ISSUES } from '../../lib/nes.mjs';
 import { KEYS as NES_KEYS, KEY_NAMES as NES_KEY_NAMES } from '../../../public/nes-keys.js';
 import { NOT_MODELLED as ELECTRON_NOT_MODELLED, downloadBytes as electronDownloadBytes, symbolTable as electronSymbolTable } from '../../lib/electron.mjs';
+import { BOARDS as VCS_BOARDS, ELSEWHERE as VCS_ISSUES, NOT_MODELLED as VCS_NOT_MODELLED, controlKeys as vcsKeysFor } from '../../lib/atari-2600.mjs';
 
 // One page for each machine that runs, and only those. "Running" means it runs
 // in the browser, so a running machine with no panel to run it in stops the
@@ -26,7 +28,7 @@ export function getStaticPaths() {
   return runningMachines(registry).map((m) => ({ params: { id: m.id }, props: { machine: m } }));
 }
 const { machine } = Astro.props;
-const Panel = { 'kim-1': Kim1Panel, 'bbc-micro': BbcPanel, nes: NesPanel, electron: ElectronPanel }[machine.id];
+const Panel = { 'kim-1': Kim1Panel, 'bbc-micro': BbcPanel, nes: NesPanel, electron: ElectronPanel, 'atari-2600': Atari2600Panel }[machine.id];
 if (!Panel) throw new Error(`machine ${machine.id} is running but has no panel in src/pages/machines/[id].astro, so its page could not run it`);
 // The photograph is required of every running machine (the registry check
 // stops the build without one). The 3D model is shown for a machine that claims
@@ -38,7 +40,7 @@ const models = modelsOf(machine);
 const hasModels = models.length > 0;
 // A machine's models are one section (src/components/MachineModel.astro): its
 // board alone as it always was, or a case's views, outside and inside, as tabs.
-const scripts = [...({ 'kim-1': ['/kim-1.js'], 'bbc-micro': ['/bbc-micro.js'], nes: ['/nes.js'], electron: ['/electron.js'] }[machine.id] ?? []), ...(hasModels ? ['/model-loader.js'] : [])];
+const scripts = [...({ 'kim-1': ['/kim-1.js'], 'bbc-micro': ['/bbc-micro.js'], nes: ['/nes.js'], electron: ['/electron.js'], 'atari-2600': ['/atari-2600.js'] }[machine.id] ?? []), ...(hasModels ? ['/model-loader.js'] : [])];
 const base = `/machines/${machine.id}/`;
 const clockMhz = Number(/([\d.]+) MHz/.exec(machine.cpu ?? '')?.[1]);
 if (!(clockMhz > 0)) throw new Error(`machine ${machine.id}: its cpu field names no clock in MHz, and the page runs it at that clock`);
@@ -53,7 +55,8 @@ const ttyKeyNames = { SPACE: 'SPACE', CR: 'RETURN', LF: 'LF', RUBOUT: 'RUB OUT' 
 const bbc = machine.id === 'bbc-micro';
 const nes = machine.id === 'nes';
 const electron = machine.id === 'electron';
-const roms = kim ? kim1Roms() : bbc ? bbcRoms() : nes ? nesRoms() : electron ? electronRoms() : [];
+const vcs = machine.id === 'atari-2600';
+const roms = kim ? kim1Roms() : bbc ? bbcRoms() : nes ? nesRoms() : electron ? electronRoms() : vcs ? atari2600Roms() : [];
 // The KIM-1's, the BBC Micro's and the Electron's panels run at the clock above.
 // The BBC Micro's and the Electron's are also given their ROM files and the size
 // of their download, read from the build (src/lib/bbc-micro.mjs and
@@ -62,11 +65,13 @@ const roms = kim ? kim1Roms() : bbc ? bbcRoms() : nes ? nesRoms() : electron ? e
 // The NES's takes its clock from the machine, which changes with the region
 // (NesHost.CpuHz), so it is given only the cartridge Start puts in, with its
 // title from the try-it file, and the size of its download, read from the
-// build the same way.
+// build the same way. So is the Atari 2600's, whose clock also follows its
+// region (Atari2600Host.CpuHz).
 const library = bbc ? discLibrary() : null;
 const panelProps = bbc ? { clockMhz, roms: roms.map((r) => r.file), download: downloadBytes(), library }
   : nes ? { rom: { file: roms[0].file, title: program.title }, download: machineDownloadBytes('nes') }
   : electron ? { clockMhz, roms: roms.map((r) => r.file), download: electronDownloadBytes() }
+  : vcs ? { rom: { file: roms[0].file, title: program.title }, download: machineDownloadBytes('atari-2600') }
   : { clockMhz };
 const description = bbc
   ? `${machine.name}, running on the 6502 core in the browser, with its own ROMs. Type BBC BASIC in on its keyboard and run it.`
@@ -74,7 +79,9 @@ const description = bbc
     ? `${machine.name}, running on the 6502 core in the browser, NTSC or PAL, with a public-domain game in it. Play it with the keyboard, a gamepad or the on-screen pad, or load your own cartridge.`
     : electron
       ? `The Acorn ${machine.name}, running on the 6502 core in the browser, with its own ROMs. Type BBC BASIC in on its keyboard, run it, and save it to tape.`
-      : `${machine.name}, running on the 6502 core in the browser, with its own ROM. Type a program in on its keypad and run it.`;
+      : vcs
+        ? `The ${machine.name}, running on the 6502 core in the browser, NTSC or PAL, with a homebrew game under the MIT licence in it. Play it with the keyboard, a gamepad or the on-screen joystick, or load your own cartridge.`
+        : `${machine.name}, running on the 6502 core in the browser, with its own ROM. Type a program in on its keypad and run it.`;
 // The keys that press a button of the NES pad, from the map the page script uses.
 const nesKeysFor = (button: string) => {
   const buttons = button === 'D-pad' ? ['Up', 'Down', 'Left', 'Right'] : [button];
@@ -82,6 +89,10 @@ const nesKeysFor = (button: string) => {
   return names.length < 2 ? names.join('') : `${names.slice(0, -1).join(', ')} and ${names.at(-1)}`;
 };
 const romLabel = (r: { chip?: string; name?: string; file: string }) => r.chip ?? r.name ?? `${program.title}, by ${program.author}`;
+// The Atari 2600's suite, as this project's fork holds it; the list of known differences; the game's folder.
+const VCS_SUITE_URL = 'https://github.com/dbhq-uk/missingno-vcs-tests';
+const KNOWN_DIFFERENCES_URL = 'https://github.com/dbhq-uk/6502/blob/main/docs/known-differences.md';
+const VCS_GAME_FOLDER_URL = 'https://github.com/dbhq-uk/6502/tree/main/machines/atari-2600/cartridges/2048';
 const symbols = bbc ? symbolTable() : [];
 const electronSymbols = electron ? electronSymbolTable() : [];
 const notOnAPc = Object.entries(NOT_ON_A_PC).reduce((groups, [key, why]) => groups.set(why, [...(groups.get(why) ?? []), legend(key)]), new Map());
@@ -109,6 +120,12 @@ const notOnAPc = Object.entries(NOT_ON_A_PC).reduce((groups, [key, why]) => grou
         <div class="prose">
         <p>The NES was sold in two kinds, and both are here: NTSC, the console of North America and Japan, and PAL, the console of Europe and Australia, whose CPU runs slower and which draws 50 pictures a second rather than about 60. Each cartridge starts in the region its file names, or NTSC when the file does not say, and the line under the region control says which and why.</p>
         <p>The NES takes more work to run than the KIM-1 or the BBC Micro: its picture chip is run one dot at a time, three dots for every CPU cycle on NTSC, so it needs a fast computer to run at full speed. The line under the screen says how fast this browser runs it, measured while it runs, and a computer that cannot keep up runs it slower than the real console and says so. Making it faster is <a href={issueUrl(NES_ISSUES.speed)}>issue {NES_ISSUES.speed}</a>.</p>
+        </div>
+      )}
+      {vcs && (
+        <div class="prose">
+        <p>The Atari 2600 was made for both kinds of television, and both are here: NTSC, the console of North America and Japan, and PAL, the console of Europe and Australia, whose clock is a little slower and whose games draw more lines a frame. A cartridge file has nothing in it to say which it was made for, so the machine starts as NTSC. The lines under the region control give the lines the last frame had, and suggest PAL when a game's frames are PAL's length; the page never changes the region by itself. Changing it changes the colours and the clock at once, with no restart.</p>
+        <p>The Atari 2600 has no frame buffer: its program draws each line as the beam crosses the screen, so its picture chip, the TIA, is run one colour clock at a time, three for every CPU cycle. That takes a fast computer to run at full speed. The line under the screen says how fast this browser runs it, measured while it runs, and a computer that cannot keep up runs it slower than the real console and says so. Making it faster is <a href={issueUrl(VCS_ISSUES.speed)}>issue {VCS_ISSUES.speed}</a>.</p>
         </div>
       )}
     </div>
@@ -198,6 +215,48 @@ const notOnAPc = Object.entries(NOT_ON_A_PC).reduce((groups, [key, why]) => grou
           </tbody>
         </table>
         <p>To play something else, load your own .nes file with the button under the screen, or drop it on the page. It is read in this tab and not uploaded. The machine runs cartridges on the six boards most of the library used; a file it cannot run is refused with a sentence saying why, and the game already in carries on.</p>
+        </div>
+      </div>
+    </section>
+  )}
+
+  {vcs && (
+    <section aria-labelledby="checked">
+      <div class="wrap narrow">
+        <h2 id="checked">How it is checked</h2>
+        <div class="prose">
+        <p>The acceptance test runs the test cartridges of <a href={VCS_SUITE_URL}>missingno-vcs-tests</a>, a suite for the console's chips, from this project's copy of it, in both regions. The tests the design trusts, the self-tests of the chips and the cartridge tests for the plain boards and F8, F6 and F4, must pass. The rest are recorded: the cartridge tests whose own notes say they are untested on a console or only report what they find, and the comparisons with the suite's reference pictures. What each recorded test gives is kept in the repository, and a change fails the build. The tests for cartridge boards and for SECAM, which are not modelled, are not run. The acceptance test also starts {program.title} from power on in each region and checks its picture against the one recorded, pixel for pixel.</p>
+        <p>The suite's notes say its tests were checked on one console, a PAL console from Australia, and the TIA is known to behave differently from chip to chip and between models of the console. So a trusted result is the behaviour of the one console the suite was checked on, not of every Atari 2600. The suite's photographs of that console's screen are not compared yet: <a href={issueUrl(VCS_ISSUES.captures)}>issue {VCS_ISSUES.captures}</a>. Where this machine knowingly differs from the suite or the documents it was built from, <a href={KNOWN_DIFFERENCES_URL}>the list of known differences</a> says so.</p>
+        </div>
+      </div>
+    </section>
+  )}
+
+  {program && vcs && (
+    <section aria-labelledby="try">
+      <div class="wrap narrow">
+        <h2 id="try">Try it</h2>
+        <div class="prose">
+        <p>Start puts {program.title}, by {program.author}, in the console and switches it on. This is the cartridge the acceptance test boots, from the same file, and its picture is checked against the one recorded.</p>
+        <ol class="steps">
+          {program.steps.map((step) => (
+            <li>
+              <p>{step.do}</p>
+              <p>{step.says}</p>
+            </li>
+          ))}
+        </ol>
+        <table class="nes-pad-table">
+          <caption>The controls in {program.title}</caption>
+          <thead><tr><th scope="col">On the console</th><th scope="col">What it does</th><th scope="col">On your keyboard</th></tr></thead>
+          <tbody>
+            {program.controls.map((c) => (
+              <tr><td>{c.button}</td><td>{c.does[0].toUpperCase() + c.does.slice(1)}</td><td>{vcsKeysFor(c.button)}</td></tr>
+            ))}
+          </tbody>
+        </table>
+        <p data-vcs-credit>{program.credit} Its licence: <a href={program.licenceUrl}>{program.licence}</a>.</p>
+        <p>To play something else, load your own cartridge file with the button under the screen, or drop it on the page. It is read in this tab and not uploaded. The board is chosen by the file's size; a file the machine cannot run is refused with a sentence saying why, and the game already in carries on.</p>
         </div>
       </div>
     </section>
@@ -298,6 +357,25 @@ const notOnAPc = Object.entries(NOT_ON_A_PC).reduce((groups, [key, why]) => grou
     </section>
   )}
 
+  {vcs && (
+    <section aria-labelledby="left-out">
+      <div class="wrap narrow">
+        <h2 id="left-out">What is not modelled</h2>
+        <div class="prose">
+        <p>These parts of the Atari 2600, and of what plugged into it, are left out. Each has an issue that says what it would take.</p>
+        <ul>
+          {VCS_NOT_MODELLED.map((m) => <li>{m.part[0].toUpperCase() + m.part.slice(1)}: <a href={issueUrl(m.issue)}>issue {m.issue}</a></li>)}
+        </ul>
+        <p>The cartridge boards that are not modelled, one issue each. A game made for one of them whose file is the size of a modelled board runs as that board, and does not work.</p>
+        <ul class="vcs-boards">
+          {VCS_BOARDS.map((b) => <li>{b.board}: <a href={issueUrl(b.issue)}>issue {b.issue}</a></li>)}
+        </ul>
+        <p>The Atari 2600's 3D models, the outside and the board, are a project of their own: <a href={issueUrl(VCS_ISSUES.models)}>issue {VCS_ISSUES.models}</a>.</p>
+        </div>
+      </div>
+    </section>
+  )}
+
   {electron && (
     <section aria-labelledby="left-out">
       <div class="wrap narrow">
@@ -318,7 +396,7 @@ const notOnAPc = Object.entries(NOT_ON_A_PC).reduce((groups, [key, why]) => grou
 
   <section aria-labelledby="rom">
     <div class="wrap narrow">
-      <h2 id="rom">{bbc || electron ? 'Whose ROMs these are' : nes ? 'Whose game this is' : 'Whose ROM this is'}</h2>
+      <h2 id="rom">{bbc || electron ? 'Whose ROMs these are' : nes || vcs ? 'Whose game this is' : 'Whose ROM this is'}</h2>
       <div class="prose">
       <p>{machine.rights}</p>
       {roms.length > 0 && (
@@ -330,6 +408,8 @@ const notOnAPc = Object.entries(NOT_ON_A_PC).reduce((groups, [key, why]) => grou
         ? <p>The ROMs are kept in the repository, in <code>roms/</code>, with where they came from. Each is checked against its hash when the site is built, and served from this site beside the emulator.</p>
         : nes
         ? <p>The game is kept in the repository, in <code>roms/</code>, with where it came from. It is checked against its hash when the site is built, and served from this site beside the emulator.</p>
+        : vcs
+        ? <p>The game is kept in the repository in a folder of its own, <a href={VCS_GAME_FOLDER_URL}><code>machines/atari-2600/cartridges/2048/</code></a>, with its licence as its author published it, <a href={program.licenceUrl}>the {program.licence} licence</a>, and where it came from. It is checked against its hash when the site is built, and served from this site beside the emulator.</p>
         : <p>The ROM is kept in the repository, in <code>roms/</code>, with where it came from. It is checked against its hash when the site is built, and served from this site beside the emulator.</p>}
       </div>
     </div>

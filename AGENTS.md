@@ -6,7 +6,7 @@ Guidance for AI agents (and people) working in this repository.
 
 A cycle-accurate 6502 core in C# on .NET 10, covering the NMOS 6502 and the
 CMOS 65C02, and the machines built on it: the KIM-1 first, then the BBC Micro,
-then the NES, then the Acorn Electron, then the Atari 2600 (being built), with the Atari 8-bit family next and the rest after it in the order of [`docs/journal/2026-10-14-the-machine-order.md`](docs/journal/2026-10-14-the-machine-order.md). Built in public, with the journey written up at 6502.dbhq.uk.
+then the NES, then the Acorn Electron, then the Atari 2600, with the Atari 8-bit family next and the rest after it in the order of [`docs/journal/2026-10-14-the-machine-order.md`](docs/journal/2026-10-14-the-machine-order.md). Built in public, with the journey written up at 6502.dbhq.uk.
 
 ## Layout
 
@@ -21,14 +21,14 @@ src/Dbhq.Machines.Nes/      # the NES, NTSC and PAL, on the core; its PPU is cau
 src/Dbhq.Machines.Nes.Wasm/  # the NES as .NET WebAssembly: NesHost, for its page (site/public/nes.js) and the speed bench
 src/Dbhq.Machines.Electron/  # the Acorn Electron: its ULA, keyboard, screen, sound and cassette, on the core
 src/Dbhq.Machines.Electron.Wasm/  # the Electron as .NET WebAssembly, for its page (site/public/electron.js) and the speed bench
-src/Dbhq.Machines.Atari2600/  # the Atari 2600, NTSC and PAL, on the core, being built task by task (docs/superpowers/plans/2026-10-14-atari-2600.md)
-src/Dbhq.Machines.Atari2600.Wasm/  # the Atari 2600 as .NET WebAssembly: Atari2600Host, for the speed bench (bench/atari-2600-speed/, task 8) and, from task 13, its page
+src/Dbhq.Machines.Atari2600/  # the Atari 2600, NTSC and PAL, on the core, built task by task (docs/superpowers/plans/2026-10-14-atari-2600.md); its speed pass is issue 130
+src/Dbhq.Machines.Atari2600.Wasm/  # the Atari 2600 as .NET WebAssembly: Atari2600Host, for its page (site/public/atari-2600.js) and the speed bench (bench/atari-2600-speed/)
 machines/                   # registry.json, and per machine its "try it" program, which the page shows and the acceptance test runs (machines/kim-1/teletype.json is the KIM-1's teletype session, which its page shows and its tests and browser check run; machines/nes/ holds the NES's, and its recorded frame hashes)
   bbc-micro/discs/          # the BBC Micro page's preset discs: one folder each with its image, licence, README and (if copyleft) source; manifest.json lists them
   atari-2600/               # from the Atari 2600's tasks 11 and 12: try-it.json, expected-frames.json, suite-outcomes.json, and cartridges/ with the bundled homebrew in its own folder, as the discs are kept
 site/                       # 6502.dbhq.uk: the Astro site, its tests, and the scripts that build the machines into it
   src/models/               # the 3D models, one browser module each with its layout, generated parts and notes: kim-1, the NES's nes-famicom-case (outside) and nes-famicom-board (inside), and the BBC Micro's bbc-micro-case (outside) and bbc-micro-board (inside), whose drawing is in their -scene.mjs modules; access.mjs is the chip-access sampler both boards share
-  tests/                    # the site's node tests, one file per subject, each listed in site/README.md (the BBC Micro's models: bbc-models, bbc-models-load and bbc-models-page; the shared sampler: access)
+  tests/                    # the site's node tests, one file per subject, each listed in site/README.md (the BBC Micro's models: bbc-models, bbc-models-load and bbc-models-page; the shared sampler: access; the Atari 2600: atari-2600, atari-2600-page, atari-2600-panel and browser-check-atari-2600)
 tests/                      # the tests and the library they share, one project per machine (TestSupport's Atari2600Suite.cs and atari-2600-suite.manifest pin the Atari 2600's test suite, from two dbhq-uk forks)
 bench/                      # the speed benchmarks (native, and the browser speed checks), run locally and never in CI, except speed workflows that are started by hand and never part of a pull request check, one per machine that needs one and each approved by Dan when it is built; the .NET ones are in the solution, so CI builds them (bench/nes-speed/ from the NES's task 6; in it, differential/ is the gate for the NES's lazy chips and CI's nes-gate job runs it against its baseline on amd64, lazy-chips/ their measurements, and chip-counters/ the NES models' counters' speed run on ARM; bench/atari-2600-speed/ from the Atari 2600's task 8, run on a GitHub runner by the hand-started workflow atari-2600-speed-run.yml, approved by Dan on 14 October 2026; bench/bbc-micro-speed/ the BBC Micro's, with chip-counters/ the rule for its models' counters and the one run of it, on a GitHub runner by the hand-started workflow bbc-speed-run.yml, the first such workflow, approved by Dan on 13 October 2026)
 tools/                      # scripts that make test data and check assumptions

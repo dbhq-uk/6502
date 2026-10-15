@@ -21,7 +21,8 @@
 // Select are held while pressed, and the colour and difficulty switches flip
 // on each press and stay, each button saying where it is.
 //
-// Task 14 puts this panel on the machine's page; until then no page uses it.
+// The machine's page (src/pages/machines/[id].astro) shows it, since task 14,
+// once the registry says the Atari 2600 runs.
 import { issueUrl, megabytes } from '../lib/bbc-micro.mjs';
 import { KEY_NAMES, STICK_KEYS, SWITCH_KEYS, WIDTH, WINDOWS } from '../../public/atari-2600-keys.js';
 

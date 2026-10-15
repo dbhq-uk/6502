@@ -214,6 +214,16 @@ the two pages then change apart: a fix to one panel cannot move the other.
   on-screen keys works every time. The BBC Micro's page is left as it is.
 - The new text colours are in the contrast table in `tests/design.test.mjs`.
 
+## The Atari 2600 page
+
+The fifth machine page: the panel built on 15 October 2026 in task 13 of the Atari 2600 plan, and the page around it in task 14, shown once the registry says the Atari 2600 runs. Its head has the credited photograph of an original console, and the photographs section has a second, the later four-switch console with its joystick. The panel is the NES's again, rule for rule, under its own class names (`.vcs-*`), with the console switches where the NES has Reset and Power, so a change to one panel cannot move the other.
+
+- **The screen is a canvas, and it is the machine's own picture,** 160 pixels wide and the region's window tall, the colour numbers the TIA drew through the region's computed palette, scaled up with `image-rendering: pixelated` and shown in the region's pixel shape, wide and short. Nothing is added, and the line under it says it models the picture and is not a CRT.
+- **Start is the page's one lime fill,** and the screen's focus ring is the other lime, as on the NES's page, because focus is the keyboard. The site test that rations the lime names `.vcs-screen:focus`.
+- **The console switches are buttons in a hairline box,** shown where they are: Reset and Select held while pressed, the colour and difficulty switches flipping and saying their position, `aria-pressed` on each.
+- **Joystick 1 is real buttons under the screen,** for a phone or a mouse, at least 44 pixels each, held while a finger is on them.
+- **The rest of the page uses the site's prose,** as the NES's does: the try-it steps, the controls as a table that reuses the NES's `.nes-pad-table` for its caption (the same markup, for the same kind of table), the game's credit with its licence linked, a section saying how the machine is checked and that a trusted result is the behaviour of the one console the suite was checked on, and the parts and the cartridge boards left out, each with its issue.
+
 ## The imagery
 
 Three generated images, made with the `imager` skill on 30 September 2026 with

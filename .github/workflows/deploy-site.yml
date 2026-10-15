@@ -49,9 +49,10 @@ permissions:
 
 jobs:
   # The machines' browser builds, in a job of their own that holds no token:
-  # the KIM-1, the BBC Micro, the NES and the Electron as .NET WebAssembly,
-  # compiled ahead of time, and their ROMs (for the NES, its bundled game), read
-  # from roms/ and checked against the pins in Pins.cs. The same job as
+  # the KIM-1, the BBC Micro, the NES, the Electron and the Atari 2600 as .NET
+  # WebAssembly, compiled ahead of time, and their ROMs (for the NES and the
+  # Atari 2600, the game each page puts in), read from roms/ and
+  # machines/atari-2600/cartridges/ and checked against the pins in Pins.cs. The same job as
   # validate.yml's. The deploy job puts its output where the Astro build copies
   # it into dist.
   machines:
@@ -69,7 +70,8 @@ jobs:
       # workload version is in the keys, so moving the pin rebuilds every one. The
       # BBC Micro's build also publishes its preset discs, so its key hashes
       # machines/bbc-micro/discs/ too: a disc added or changed is never served
-      # from a stale cache.
+      # from a stale cache. The Atari 2600's publishes its bundled game, so its
+      # key hashes machines/atari-2600/cartridges/ for the same reason.
       - name: Cache the KIM-1's browser build
         id: kim-1
         uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
@@ -94,6 +96,12 @@ jobs:
         with:
           path: site/public/machines/electron
           key: machine-electron-sdk-10.0.400-wasm-tools-10.0.401-${{ hashFiles('src/Dbhq.Machines.Electron/**', 'src/Dbhq.Machines.Electron.Wasm/**', 'src/Dbhq.Cpu6502/**', 'Directory.Build.props', 'tests/Dbhq.Cpu6502.TestSupport/Pins.cs', 'site/scripts/build-machines.mjs', 'site/src/lib/pins.mjs', 'site/src/lib/machines.mjs') }}
+      - name: Cache the Atari 2600's browser build
+        id: atari-2600
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
+        with:
+          path: site/public/machines/atari-2600
+          key: machine-atari-2600-sdk-10.0.400-wasm-tools-10.0.401-${{ hashFiles('src/Dbhq.Machines.Atari2600/**', 'src/Dbhq.Machines.Atari2600.Wasm/**', 'src/Dbhq.Cpu6502/**', 'Directory.Build.props', 'tests/Dbhq.Cpu6502.TestSupport/Pins.cs', 'site/scripts/build-machines.mjs', 'site/src/lib/pins.mjs', 'site/src/lib/machines.mjs', 'machines/atari-2600/cartridges/**') }}
       # The machines whose cache missed, by registry id, for the build below.
       - name: Which machines to build
         id: which
@@ -102,12 +110,14 @@ jobs:
           BBC_HIT: ${{ steps.bbc-micro.outputs.cache-hit }}
           NES_HIT: ${{ steps.nes.outputs.cache-hit }}
           ELECTRON_HIT: ${{ steps.electron.outputs.cache-hit }}
+          ATARI2600_HIT: ${{ steps.atari-2600.outputs.cache-hit }}
         run: |
           IDS=""
           [ "$KIM1_HIT" = "true" ] || IDS="$IDS kim-1"
           [ "$BBC_HIT" = "true" ] || IDS="$IDS bbc-micro"
           [ "$NES_HIT" = "true" ] || IDS="$IDS nes"
           [ "$ELECTRON_HIT" = "true" ] || IDS="$IDS electron"
+          [ "$ATARI2600_HIT" = "true" ] || IDS="$IDS atari-2600"
           echo "building:${IDS:- none, all restored}"
           echo "ids=${IDS# }" >> "$GITHUB_OUTPUT"
       # The SDK is pinned here, not left at 10.0.x, because a workload version
@@ -123,8 +133,8 @@ jobs:
         uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version: '22.22'
-      # Every machine whose cache missed: the KIM-1, the BBC Micro, the NES and
-      # the Electron. A machine's files are published with the site, but linked
+      # Every machine whose cache missed: the KIM-1, the BBC Micro, the NES, the
+      # Electron and the Atari 2600. A machine's files are published with the site, but linked
       # from no page until the registry says it runs.
       - if: steps.which.outputs.ids != ''
         name: Build the machines and fetch their ROMs
@@ -221,7 +231,7 @@ jobs:
           [ "$BUILT" -eq "$DISCS" ] || { echo "the build has ${BUILT} of the ${DISCS} preset discs"; exit 1; }
           COUNT=$(find dist/machines -type f ! -name index.html | wc -l)
           echo "machine files in the build: ${COUNT}"
-          [ "$COUNT" -ge $((40 + DISCS)) ] || { echo "only $COUNT machine files in the build - a machine is missing"; exit 1; }
+          [ "$COUNT" -ge $((49 + DISCS)) ] || { echo "only $COUNT machine files in the build - a machine is missing"; exit 1; }
 
       - name: Deploy to Cloudflare Pages
         working-directory: site
@@ -375,6 +385,10 @@ jobs:
             esac
             COUNT=$((COUNT + 1))
           done
+          # With the Atari 2600 (15 Oct 2026) the floor is 49: its four runtime
+          # files, CoreLib, the core, the machine and its host, and its bundled
+          # game, 2048.bin, nine more. Its own build publishes 11 (ten framework
+          # files and the game, in a local build without AOT on 15 Oct 2026).
           # 69 files as at 13 Oct 2026, measured in the build with the Electron
           # switched on: the KIM-1's 13, the BBC Micro's 30 (three ROMs, ten
           # framework files and 17 discs), the NES's 12 and the Electron's 14
@@ -395,7 +409,7 @@ jobs:
           # floor adds one for each disc in the manifest, read here rather than
           # typed, so a missing disc fails as a missing machine does.
           DISCS=$(node -p "require('../../machines/bbc-micro/discs/manifest.json').discs.length")
-          [ "$COUNT" -ge $((40 + DISCS)) ] || { echo "only $COUNT machine files found, fewer than 40 and ${DISCS} discs - the derivation is broken"; exit 1; }
+          [ "$COUNT" -ge $((49 + DISCS)) ] || { echo "only $COUNT machine files found, fewer than 49 and ${DISCS} discs - the derivation is broken"; exit 1; }
           [ "$FAIL" = "0" ]
 
       # Headers only apply at the Cloudflare edge, so they can only be checked

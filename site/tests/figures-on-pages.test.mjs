@@ -44,8 +44,10 @@ function allowedNumbers() {
     ...Object.values(results.suites).flatMap((s) => [fmt(s.passed), fmt(s.failed), fmt(s.skipped)]),
     ...modes.flatMap((m) => [...m.runs.map((r) => fmt1(r.mhz)), fmt1(best(m)), fmt1(best(m) / REFERENCE_MHZ), fmt(m.runs.length)]),
     fmt(registry.machines.length),
-    // a machine's year and any numbers in its CPU field, shown on the home page's first three machines
-    ...registry.machines.flatMap((m) => [String(m.year), ...numbersIn(m.cpu ?? ''), ...numbersIn(m.notes ?? '')]),
+    // a machine's year and any numbers in its CPU field, shown on the home page's first three machines, and
+    // any in its name, which the home page's sentence on which machines run reads from the registry (the
+    // Atari 2600, since 15 October 2026)
+    ...registry.machines.flatMap((m) => [String(m.year), ...numbersIn(m.cpu ?? ''), ...numbersIn(m.notes ?? ''), ...numbersIn(m.name ?? '')]),
     // the description of the measurement, written in the data file
     ...numbersIn(measurements.machine.description), ...numbersIn(measurements.machine.browser), ...numbersIn(measurements.workload),
     // dates and the commit are generated text

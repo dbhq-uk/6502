@@ -63,4 +63,4 @@ The repository's README credits the cartridge art separately: "Cartridge Art © 
 
 ## How it runs
 
-The Atari 2600's page is to run it on Start (tasks 13 and 14 of the plan). `BootTests` and `Atari2600AcceptanceTests` in `tests/Dbhq.Machines.Atari2600.Tests/` run it from power on in both regions, NTSC with the colour switch at colour and PAL with it at black and white, which is how the game is told to make PAL frames (its README: "just change the TV TYPE switch to the B/W position (the COLOR position is NTSC)"), and compare its picture with `machines/atari-2600/expected-frames.json`. Sound was not listened to.
+The Atari 2600's page runs it on Start (since task 14 of the plan), and credits it with a link to its licence. `BootTests` and `Atari2600AcceptanceTests` in `tests/Dbhq.Machines.Atari2600.Tests/` run it from power on in both regions, NTSC with the colour switch at colour and PAL with it at black and white, which is how the game is told to make PAL frames (its README: "just change the TV TYPE switch to the B/W position (the COLOR position is NTSC)"), and compare its picture with `machines/atari-2600/expected-frames.json`. Sound was not listened to.
