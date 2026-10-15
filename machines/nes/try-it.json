@@ -7,7 +7,7 @@
   "steps": [
     {
       "do": "Press Start on the page.",
-      "says": "The machine switches on with Lan Master in it. The title fades in within a second and its music plays: the name in a blue band, PD2011 Shiru under it, and a menu of START, CODE, SFX and BGM with a blinking square by START."
+      "says": "The machine switches on with Lan Master in it. The title fades in within a second, and its music plays: the name in a blue band, PD2011 Shiru under it, and a menu of START, CODE, SFX and BGM with a blinking square by START."
     },
     {
       "do": "Press Start or A on the pad.",
@@ -19,14 +19,14 @@
     },
     {
       "do": "Press Start during a level.",
-      "says": "The game pauses, with RESUME, RESTART and MAIN MENU, and the pass code of the level reached. CODE on the title screen takes a pass code, to carry on from that level later."
+      "says": "The game pauses, with RESUME, RESTART and MAIN MENU and the level's pass code. Enter that code under CODE on the title screen to carry on from that level later."
     }
   ],
   "controls": [
-    { "button": "D-pad", "does": "moves the square on the board, and up and down in the menu" },
+    { "button": "D-pad", "does": "moves the square on the board; in the menu, moves up and down" },
     { "button": "A", "does": "turns the piece a quarter turn; in the menu, chooses" },
     { "button": "B", "does": "turns the piece a quarter turn the other way; in the menu, chooses" },
     { "button": "Select", "does": "turns the piece half way round; in the menu, moves down" },
-    { "button": "Start", "does": "pauses, with the pass code; in a menu, chooses" }
+    { "button": "Start", "does": "pauses and shows the pass code; in a menu, chooses" }
   ]
 }

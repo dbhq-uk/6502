@@ -9,30 +9,30 @@
   "steps": [
     {
       "do": "Press Start on the page.",
-      "says": "The machine switches on with 2048 2600 in it. Its title shows the tiles 2, 0, 4, 8 and 2, 6, 0, 0 in two rows, their colours changing every frame, with his handle, CHEST over ERBR, under them."
+      "says": "The machine switches on with 2048 2600 in it. The title shows the tiles in two rows, 2, 0, 4, 8 over 2, 6, 0, 0, the tiles changing colour every frame, with the author's handle, CHEST over ERBR, below them."
     },
     {
       "do": "Press the left fire button.",
-      "says": "A one-player game starts: a grey board of four by four cells with one 2 tile on it, and the score, at zero, above it."
+      "says": "A one-player game starts: a grey board of four by four cells with one 2 tile, and the score, at zero, above it."
     },
     {
       "do": "Push the joystick up, down, left or right.",
-      "says": "Every tile slides as far as it can that way, two tiles of the same value that meet join into one of twice the value, and a new tile appears. The game ends when no move is left."
+      "says": "Every tile slides as far as it can that way. Two equal tiles that meet join into one of twice the value, and a new tile appears. The game ends when no move is left."
     },
     {
-      "do": "On the title, press the right fire button, or press GAME SELECT.",
-      "says": "The right fire button starts a two-player game, in which the players take turns on one board. GAME SELECT switches between the one-player and the two-player game, and the game it chooses starts at once."
+      "do": "On the title, press the right fire button or GAME SELECT.",
+      "says": "The right fire button starts a two-player game, the players taking turns on one board. GAME SELECT switches between the one-player and two-player game, and the game it chooses starts at once."
     },
     {
       "do": "If the page is set to PAL, flip the colour switch to black and white.",
-      "says": "The game makes PAL frames only with the switch at black and white, as its author's README says; at colour it makes NTSC frames."
+      "says": "The game makes PAL frames only with the switch at black and white, as its author's README says. At colour it makes NTSC frames."
     }
   ],
   "controls": [
     { "button": "Joystick", "does": "shifts every tile on the board one way" },
     { "button": "Left fire button", "does": "on the title, starts a one-player game; when a game is over, starts it again" },
     { "button": "Right fire button", "does": "on the title, starts a two-player game; when a game is over, starts it again" },
-    { "button": "GAME SELECT", "does": "switches between the one-player and the two-player game, which starts at once" },
-    { "button": "Colour switch", "does": "at black and white the game makes PAL frames, and at colour NTSC frames" }
+    { "button": "GAME SELECT", "does": "switches between the one-player and two-player game, which starts at once" },
+    { "button": "Colour switch", "does": "at black and white the game makes PAL frames; at colour it makes NTSC frames" }
   ]
 }
