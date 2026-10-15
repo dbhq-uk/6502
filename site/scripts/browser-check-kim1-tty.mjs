@@ -107,6 +107,13 @@ export async function checkKim1Teletype({ page, problems, timeout }) {
   const logOn = await settled(['KIM', 'xxxx xx']);
   console.log(`teletype at ${await page.locator('[data-kim1-baud]').inputValue()} baud: RS and RUB OUT printed ${JSON.stringify(logOn.shown)} (${Date.now() - t0} ms)`);
   if (!logOn.pass) problems.push(`teletype at 110 baud: RS and RUB OUT printed ${JSON.stringify(logOn.shown)}, not KIM and an address`);
+  // The paper was cleared before the switch went on, so its head is the log-on
+  // and nothing else: RUB OUT's echo prints nothing, CR LF leaves the first
+  // line blank, and KIM is the second. A stray character before it (issue 120:
+  // the monitor's burst at about 15,000 baud, once read as a ~) fails this.
+  const head = (await paperText()).split('\n').slice(0, 2);
+  console.log(`teletype at 110 baud: the paper's first two lines are ${JSON.stringify(head)}`);
+  if (head[0] !== '' || head[1] !== 'KIM') problems.push(`teletype at 110 baud: the paper should open with a blank line and KIM, not ${JSON.stringify(head)}`);
   const t1 = Date.now();
   await type('0002[SPACE]');
   const opened = await settled(['xxxx xx 0002', '0002 xx']);
