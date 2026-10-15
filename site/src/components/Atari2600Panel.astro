@@ -1,0 +1,105 @@
+---
+// The Atari 2600: its screen, the controls a person at the console has (the
+// console switches, the power switch, the region, the cartridge slot and the
+// sound), joystick 1 as buttons for touch, and the line that says how fast
+// this browser runs it. public/atari-2600.js brings it to life when the
+// visitor presses Start, and downloads nothing before then. Without
+// JavaScript every control is disabled and the status line says why.
+//
+// The canvas is 160 pixels wide (FrameBuffer.Width) and NTSC's window tall,
+// from the table the script uses (WINDOWS in public/atari-2600-keys.js,
+// checked against Region.cs by tests/atari-2600-panel.test.mjs). The
+// stylesheet shows it in NTSC's pixel shape, 12:7, and the script sets the
+// region's own window and shape when the region changes.
+//
+// The screen is where the keyboard goes: with focus on it, the keys play the
+// two joysticks and work the switches. The script makes it focusable once the
+// machine runs; Tab is never taken and Escape lets go, so focus can always
+// move on.
+//
+// The console switches are shown in the positions they are in: Reset and
+// Select are held while pressed, and the colour and difficulty switches flip
+// on each press and stay, each button saying where it is.
+//
+// Task 14 puts this panel on the machine's page; until then no page uses it.
+import { issueUrl, megabytes } from '../lib/bbc-micro.mjs';
+import { KEY_NAMES, STICK_KEYS, SWITCH_KEYS, WIDTH, WINDOWS } from '../../public/atari-2600-keys.js';
+
+interface Props {
+  /** Where the machine's files are served from, /machines/atari-2600/. */
+  base: string;
+  /** The cartridge Start loads, a file under base, and its title; null to wait for the visitor's. */
+  rom: { file: string; title: string } | null;
+  /** The bytes the Start button downloads, read from the build, or null when this build has no machine. */
+  download: number | null;
+}
+const { base, rom, download } = Astro.props;
+
+// The keys for each input and switch, from the maps the script uses, so the two cannot differ.
+const stickKey = (stick: number, input: string) => Object.entries(STICK_KEYS).filter(([, k]) => k.stick === stick && k.input === input).map(([code]) => KEY_NAMES[code as keyof typeof KEY_NAMES]).join(' or ');
+const switchKey = (name: string) => Object.entries(SWITCH_KEYS).filter(([, s]) => s === name).map(([code]) => KEY_NAMES[code as keyof typeof KEY_NAMES]).join(' or ');
+const directions = (stick: number) => ['Up', 'Down', 'Left', 'Right'].map((d) => stickKey(stick, d)).join(', ');
+const pad = [
+  { input: 'Up', legend: 'Up', area: 'up' },
+  { input: 'Left', legend: 'Left', area: 'left' },
+  { input: 'Right', legend: 'Right', area: 'right' },
+  { input: 'Down', legend: 'Down', area: 'down' },
+  { input: 'Fire', legend: 'Fire', area: 'fire' },
+];
+const ntsc = WINDOWS.NTSC;
+// Atari 2600: detect the board from the image, not only its size.
+const BOARD_ISSUE = 126;
+---
+
+<div class="vcs" data-vcs data-base={base} data-rom={rom?.file} data-rom-title={rom?.title} data-download={download ?? undefined} data-state="static">
+  <div class="vcs-screen" data-vcs-screen role="application" aria-label="The Atari 2600's screen" aria-describedby="vcs-keys">
+    <canvas data-vcs-canvas width={WIDTH} height={ntsc.lines}></canvas>
+  </div>
+  <p class="vcs-note">The picture is the machine's own, pixel for pixel, as its TIA draws it, through a palette computed from each region's colour signal, and shown in the region's pixel shape, wide and short. It models the picture and is not a CRT: no scan lines, no glow, no curve and no colour bleed. A frame shorter or longer than a television's is shown as it is.</p>
+  <p class="vcs-note" id="vcs-keys">With the screen focused, joystick 1 is {directions(0)} to move and {stickKey(0, 'Fire')} to fire, and joystick 2 is {directions(1)} and {stickKey(1, 'Fire')}. {switchKey('Reset')} holds Reset and {switchKey('Select')} holds Select; {switchKey('BlackAndWhite')} flips the colour switch, {switchKey('LeftDifficultyA')} the left difficulty and {switchKey('RightDifficultyA')} the right. Tab moves on and Escape lets go, so the page never keeps the keyboard. Gamepads work too, in the browser's standard layout: the first is joystick 1 and the second joystick 2, the d-pad or the left stick moves, the bottom face button fires, and the middle pair are Select and Reset. Every key held goes to the machine as it is, opposite directions together included.</p>
+  <div class="vcs-controls">
+    <button type="button" class="btn pill" data-vcs-start disabled>Start the Atari 2600{download !== null && `, a download of up to ${megabytes(download)} MB`}</button>
+    <button type="button" class="btn small" data-vcs-power disabled>Power off and on</button>
+    <button type="button" class="btn small" data-vcs-sound aria-pressed="false" disabled>Turn sound on</button>
+  </div>
+  <p class="vcs-status" role="status" data-vcs-status>The Atari 2600 runs in your browser, and it needs JavaScript to do that. With JavaScript off, the page is shown, but nothing runs.</p>
+  <p class="vcs-line" data-vcs-sound-status aria-live="polite">Sound is off.</p>
+  <p class="vcs-line" data-vcs-power-line aria-live="polite"></p>
+  <p class="vcs-speed" data-vcs-speed></p>
+  <fieldset class="vcs-switches">
+    <legend>The console switches</legend>
+    <div class="vcs-controls">
+      <button type="button" class="btn small" data-vcs-hold="Reset" aria-pressed="false" disabled>Reset ({switchKey('Reset')})</button>
+      <button type="button" class="btn small" data-vcs-hold="Select" aria-pressed="false" disabled>Select ({switchKey('Select')})</button>
+      <button type="button" class="btn small" data-vcs-toggle="BlackAndWhite" aria-pressed="false" disabled>Colour</button>
+      <button type="button" class="btn small" data-vcs-toggle="LeftDifficultyA" aria-pressed="false" disabled>Left difficulty B</button>
+      <button type="button" class="btn small" data-vcs-toggle="RightDifficultyA" aria-pressed="false" disabled>Right difficulty B</button>
+    </div>
+    <p class="vcs-note">Reset and Select are held while pressed and spring back, as on the console. The colour switch ({switchKey('BlackAndWhite')}) and the two difficulty switches ({switchKey('LeftDifficultyA')} and {switchKey('RightDifficultyA')}) flip on each press and stay where they are put; each button says where its switch is. Power off and on keeps them where they are.</p>
+  </fieldset>
+  <div class="vcs-pad" role="group" aria-label="Joystick 1">
+    {pad.map((p) => (
+      <button type="button" class={`vcs-button vcs-${p.area}`} data-vcs-button={p.input} disabled>{p.legend}</button>
+    ))}
+  </div>
+  <p class="vcs-line" data-vcs-pads aria-live="polite"></p>
+  <fieldset class="vcs-region">
+    <legend>The region</legend>
+    <div class="vcs-controls">
+      <label class="vcs-choice"><input type="radio" name="vcs-region" value="NTSC" data-vcs-region checked disabled /> NTSC, the console of North America and Japan</label>
+      <label class="vcs-choice"><input type="radio" name="vcs-region" value="PAL" data-vcs-region disabled /> PAL, the console of Europe and Australia</label>
+    </div>
+    <p class="vcs-line" data-vcs-region-line aria-live="polite">A cartridge has nothing in it to say which region it was made for, so the machine starts as NTSC. Changing the region changes the colours and the clock at once, with no restart.</p>
+    <p class="vcs-line" data-vcs-lines></p>
+    <p class="vcs-line" data-vcs-suggest aria-live="polite"></p>
+  </fieldset>
+  <fieldset class="vcs-cartridge">
+    <legend>The cartridge</legend>
+    <div class="vcs-controls">
+      <button type="button" class="btn small" data-vcs-choose disabled>Load a cartridge file</button>
+      <input type="file" accept=".a26,.bin,.rom" data-vcs-file hidden />
+    </div>
+    <p class="vcs-line" data-vcs-cartridge aria-live="polite">{rom ? `Start puts ${rom.title} in.` : 'Start, then choose a cartridge file.'}</p>
+    <p class="vcs-note">Drop a cartridge file on the page, or press Load a cartridge file. The file is read in this tab and is not uploaded anywhere. A cartridge file has no header, so the board is chosen by the file's size, and the line above says which. A game made for another board of the same size will not run: choosing the board from the file itself is <a href={issueUrl(BOARD_ISSUE)}>issue {BOARD_ISSUE}</a>.</p>
+  </fieldset>
+</div>

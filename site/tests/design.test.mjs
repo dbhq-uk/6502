@@ -194,6 +194,18 @@ const ON = {
   // pressed; disabled, before the machine runs, iron.
   '.nes-button': ['veil', 'card', 'void'],
   '.nes-button:disabled': ['iron'],
+  // The Atari 2600's page, as the NES's: its lines on the iron panel, a disabled
+  // button dashed on iron, a switch that is on lit on the card, and joystick 1's
+  // buttons on the veil, lit on the card and pressed on the void.
+  '.vcs .btn:disabled': ['iron'],
+  '.vcs-status': ['iron'],
+  '.vcs-line': ['iron'],
+  '.vcs-note': ['iron'],
+  '.vcs-speed': ['iron'],
+  '.vcs-region legend, .vcs-cartridge legend, .vcs-switches legend': ['iron'],
+  '.vcs-choice': ['iron'],
+  '.vcs-button': ['veil', 'card', 'void'],
+  '.vcs-button:disabled': ['iron'],
   // The machine page's 3D model: its label sits on an iron tag over the canvas,
   // and its status line on the black canvas.
   '.model-tag': ['iron'],

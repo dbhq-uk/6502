@@ -145,7 +145,7 @@ test('there is no inline script: the CSP allows none', () => {
 // and so has the NES's, whose keyboard is its controller 1, and so does the Electron's.
 // Any other rule that takes the lime fails here,
 // so a further use has to be argued for in this test.
-const LIME_RULES = new Set(['.btn.pill', '.btn.pill:hover', '.win .k', ':focus-visible', '.data th button:focus-visible', '.model-stage[data-active]', '.bbc-screen:focus', '.nes-screen:focus', '.electron-screen:focus']);
+const LIME_RULES = new Set(['.btn.pill', '.btn.pill:hover', '.win .k', ':focus-visible', '.data th button:focus-visible', '.model-stage[data-active]', '.bbc-screen:focus', '.nes-screen:focus', '.electron-screen:focus', '.vcs-screen:focus']);
 
 test('the lime accent fills at most one element on any page, and its other uses are named', () => {
   for (const p of all) assert.ok((p.html.match(/class="[^"]*\bpill\b/g) ?? []).length <= 1, `${p.url} uses the lime more than once`);
