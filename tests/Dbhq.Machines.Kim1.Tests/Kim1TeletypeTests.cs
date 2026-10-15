@@ -43,6 +43,45 @@ public sealed class Kim1TeletypeTests(ITestOutputHelper output)
     }
 
     /// <summary>
+    /// Issue 120, found in the browser. The page lets the switch go to TTY
+    /// while the monitor is running in keypad mode, with the display lit, and
+    /// only then presses RS and RUB OUT. The monitor passes through its start
+    /// routine, sees the switch, and prints CR LF, KIM and the open cell at
+    /// once, on a delay count left over from a keypad-mode reset
+    /// (CNTH30 = $FF, so a bit lasts about 64 cycles): about 15,000 baud,
+    /// which a Teletype Model 33 at 110 baud cannot read. The printer once
+    /// took a space on the line at the middle of a start bit for the start of a
+    /// character and printed ~ from the burst, at the head of the paper.
+    /// </summary>
+    [Theory]
+    [InlineData(30_000)]
+    [InlineData(100_000)]
+    [InlineData(1_000_000)]
+    public void ClosingTheSwitchOnARunningMonitorPrintsNothingAt110BaudAndTheLogOnIsClean(long cyclesBeforeRs)
+    {
+        var kim = new Kim1Session();
+        kim.Keys("[RS]");
+        Assert.NotEqual("       ", kim.Display);
+        int edges = 0;
+        kim.Machine.Teletype.OutputChanged += (_, _) => edges++;
+        kim.Machine.Mode = Kim1Mode.Teletype;
+        kim.Machine.Run(cyclesBeforeRs);
+        kim.Print();
+
+        // The monitor really did start to print (its output is on the line:
+        // 30,000 cycles of it is well over fifty edges), but nothing on it is
+        // a character at 110 baud.
+        Assert.True(edges > 50, $"the monitor put only {edges} edges on the line");
+        Assert.Equal("", kim.Printed);
+        Assert.Equal(0, kim.Machine.Teletype.FramingErrors);
+
+        kim.LogOn();
+        Assert.Equal($"\u007F\r\n{Pad}KIM\r\n{Pad}0000 00 ", kim.Printed);
+        Assert.Equal(["", "KIM", "0000 00"], kim.Paper.Lines);
+        Assert.Equal(0, kim.Machine.Teletype.FramingErrors);
+    }
+
+    /// <summary>
     /// RS turns every 6530 port pin into an input, and an input pin is pulled
     /// up, so PB0 holds the printer loop at a mark until the monitor sets the
     /// port up again: a reset prints nothing, and the line is never left at a

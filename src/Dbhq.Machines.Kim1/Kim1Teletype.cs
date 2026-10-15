@@ -27,7 +27,9 @@ namespace Dbhq.Machines.Kim1;
 /// significant first, and stop bits (mark). The keyboard sends seven bits of
 /// ASCII with the eighth a mark, and two stop bits, as a Teletype Model 33
 /// does; the monitor's GETCH reads eight bits and drops the eighth. The
-/// printer reads eight bits and keeps seven.
+/// printer reads eight bits and keeps seven. A start bit is a space held
+/// unbroken from its falling edge to its middle; a mark inside that half bit
+/// makes it a glitch, as a selector magnet that never held would.
 /// </para>
 /// <para>
 /// <b>The clock.</b> The bus calls <see cref="Advance"/> at the start of every
@@ -388,7 +390,17 @@ public sealed class Kim1Teletype
         _outputMark = mark;
         _lastOutputEdge = cycle;
         OutputChanged?.Invoke(cycle, mark);
-        if (!mark && !_receiving)
+        if (mark && _receiving && _receiveSample == 0)
+        {
+            // Back to a mark before the middle of the start bit: the selector
+            // magnet never held, so this is a glitch, not a character. The
+            // monitor does this to the line when its delay count is left over
+            // from a keypad-mode reset: it sends at about 15,000 baud, and a
+            // receiver that looks only at the middle of the start bit would
+            // find a space there by chance and print noise from the burst.
+            EndReceive(cycle);
+        }
+        else if (!mark && !_receiving)
         {
             // A falling edge: perhaps a start bit. It is checked at its middle.
             _receiving = true;
@@ -406,23 +418,17 @@ public sealed class Kim1Teletype
     {
         bool mark = _outputMark;
         int n = _receiveSample;
-        if (n == 0)
-        {
-            if (mark)
-            {
-                // Back to a mark by the middle of the start bit: a glitch, not a character.
-                EndReceive(cycle);
-                return;
-            }
-        }
-        else if (n <= 8)
+        // n == 0 is the middle of the start bit: nothing to read. A mark
+        // before it has already ended the attempt (UpdateOutput), so the line
+        // is a space here.
+        if (n is >= 1 and <= 8)
         {
             if (mark)
             {
                 _receiveByte |= 1 << (n - 1);
             }
         }
-        else
+        else if (n > 8)
         {
             if (mark)
             {

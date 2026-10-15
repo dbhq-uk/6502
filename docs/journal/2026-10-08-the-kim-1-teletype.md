@@ -387,6 +387,8 @@ After these fixes, 13 October 2026: `dotnet build -c Release` gave 0 warnings, `
 
 CI's log of the browser check on `7de3519` (read on 13 October 2026) shows every teletype step passing at 1200 baud, after RS and RUB OUT at 110 baud. It also shows the first thing on the paper at 110 baud as a `~`, where the unit tests show nothing for the RUB OUT echo (the paper does not print DEL). It has not been explained; it is probably the RUB OUT's timing against the reset, since a held key now starts at the end of a frame, and the log-on that followed was correct.
 
+Explained on 15 October 2026, and the guess was wrong: the `~` came from the monitor's burst when the switch is closed on a running monitor, read as a character by the printer. See [the stray tilde](2026-10-15-the-teletype-stray-tilde.md).
+
 ## Limitations
 
 - **No electrics.** The 20 mA loops are levels, not currents: no loop

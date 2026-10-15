@@ -107,6 +107,40 @@ public sealed class Kim1TeletypeLineTests
         Assert.False(tty.Receiving);
     }
 
+    /// <summary>
+    /// Issue 120. A start bit is a space held from its falling edge to its
+    /// middle. Pulses of space that each end before the middle of a bit are
+    /// noise, even when one of them happens to be on the line at the middle
+    /// of a start bit that began earlier, as the monitor's burst at about
+    /// 15,000 baud is to a printer at 110.
+    /// </summary>
+    [Fact]
+    public void SpacesThatEachEndBeforeTheMiddleOfAStartBitAreNotACharacter()
+    {
+        var tty = new Kim1Teletype();
+
+        // Space for 3,000 cycles, mark for 100, twenty times. The first fall
+        // is at 1,000, so the middle of its start bit, 4,545 cycles on, is in
+        // a space again; so is each later sample a bit apart. A receiver that
+        // looks only at the middle of the start bit takes this for a start
+        // bit and then for a character with a space for a stop bit.
+        long cycle = 1_000;
+        for (int pulse = 0; pulse < 20; pulse++)
+        {
+            Tick(tty, cycle, cycle + 3_000);
+            tty.Drive(cycle + 3_000, pb0: true, pb5: true);
+            Tick(tty, cycle + 3_000, cycle + 3_100);
+            tty.Drive(cycle + 3_100, pb0: false, pb5: true);
+            cycle += 3_100;
+        }
+
+        tty.Drive(cycle, pb0: true, pb5: true);
+        Tick(tty, cycle, cycle + 200_000);
+        Assert.Equal("", tty.Drain());
+        Assert.Equal(0, tty.FramingErrors);
+        Assert.False(tty.Receiving);
+    }
+
     [Fact]
     public void PB5HighHoldsPA7AtAMarkAndKeepsTheKeyboardOffThePrinter()
     {
