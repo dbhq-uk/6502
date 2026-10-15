@@ -308,6 +308,34 @@ footer .linkbtn:hover { color: var(--white); }
 .nes-select { grid-area: select; } .nes-start { grid-area: start; } .nes-b { grid-area: b; border-radius: 50%; } .nes-a { grid-area: a; border-radius: 50%; }
 @media (max-width: 560px) { .nes-pad { grid-template-columns: repeat(3, 48px) repeat(2, 1fr) repeat(2, 52px); grid-template-areas: ". up . . . . ." "left . right . . b a" ". down . select start . ."; } }
 @media (prefers-reduced-motion: reduce) { .nes-button { transition: none; } }
+/* The Atari 2600's page, as the NES's: the screen on the black canvas, its controls, the console switches, joystick 1 as buttons, the region and the cartridge below, on the iron panel. No lime but Start and the screen's focus ring. */
+.vcs { margin-top: 24px; padding: clamp(16px, 4vw, 32px); display: grid; gap: 14px; background: var(--iron); border: 1px solid var(--circuit); border-radius: var(--r-window); }
+.vcs-screen { background: var(--void); border: 1px solid var(--hairline); border-radius: var(--r-card); padding: clamp(6px, 1.5vw, 14px); outline-offset: 3px; }
+/* The picture is 160 pixels by NTSC's 228 lines; NTSC's pixels are 12:7, so it shows 1920 by 1596 in shape, and public/atari-2600.js sets the region's own window and shape (PAL's is taller, its pixels wider). */
+.vcs-screen canvas { display: block; width: 100%; max-width: 900px; margin: 0 auto; height: auto; aspect-ratio: 1920 / 1596; background: var(--void); image-rendering: pixelated; }
+.vcs-screen:focus { outline: 2px solid var(--lime); }
+.vcs-controls { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; }
+.vcs .btn:disabled { cursor: default; border-style: dashed; background: var(--iron); color: var(--moss-70); }
+.vcs .btn[hidden] { display: none; }
+.vcs .btn[aria-pressed="true"] { background: var(--card); border-color: var(--white); }
+.vcs-status { color: var(--moss-80); }
+.vcs-line { color: var(--moss-80); font-size: 14px; }
+.vcs-line:empty { display: none; }
+.vcs-note { color: var(--sage-60); font-size: 14px; max-width: 72ch; }
+.vcs-speed { color: var(--sage-60); font-family: var(--font-mono); font-size: 12.5px; letter-spacing: 0; max-width: 60ch; }
+.vcs-speed:empty { display: none; }
+.vcs-region, .vcs-cartridge, .vcs-switches { margin: 0; padding: 14px 16px 16px; display: grid; gap: 12px; border: 1px solid var(--hairline); border-radius: var(--r-card); }
+.vcs-region legend, .vcs-cartridge legend, .vcs-switches legend { padding: 0 6px; color: var(--white); font-weight: 500; }
+.vcs-choice { display: inline-flex; align-items: center; gap: 8px; color: var(--white); font-size: 14px; }
+.vcs-choice input { width: 16px; height: 16px; margin: 0; }
+/* Joystick 1 for touch: the four directions on the left and the fire button on the right. Each button at least 44 pixels; touch-action none so a held finger neither scrolls nor zooms. */
+.vcs-pad { display: grid; grid-template-columns: repeat(3, 52px) 1fr 72px; grid-template-areas: ". up . . ." "left . right . fire" ". down . . ."; gap: 6px; justify-content: center; align-items: center; }
+.vcs-button { min-width: 44px; min-height: 44px; padding: 0 6px; font-family: var(--font-mono); font-size: 13px; letter-spacing: 0; color: var(--white); background: var(--veil); border: 1px solid var(--circuit); border-radius: 8px; cursor: pointer; touch-action: none; user-select: none; -webkit-user-select: none; transition: background 0.15s ease-out; }
+.vcs-button:hover { background: var(--card); }
+.vcs-button:active { background: var(--void); }
+.vcs-button:disabled { cursor: default; border-style: dashed; background: var(--iron); color: var(--moss-70); }
+.vcs-up { grid-area: up; } .vcs-down { grid-area: down; } .vcs-left { grid-area: left; } .vcs-right { grid-area: right; } .vcs-fire { grid-area: fire; border-radius: 50%; }
+@media (prefers-reduced-motion: reduce) { .vcs-button { transition: none; } }
 .prose .steps { display: grid; gap: 18px; }
 .prose .steps li + li { margin-top: 0; }
 .steps p { margin: 0; }

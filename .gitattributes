@@ -9,3 +9,11 @@ roms/README.md -binary diff text
 machines/bbc-micro/discs/** binary
 machines/bbc-micro/discs/*/README.md text eol=lf diff merge
 machines/bbc-micro/discs/manifest.json text eol=lf diff merge
+
+# The Atari 2600's bundled cartridges are the same: other people's files, kept byte
+# for byte (their hashes are in machines/atari-2600/cartridges/manifest.json). The
+# READMEs and the manifests are ours.
+machines/atari-2600/cartridges/** binary
+machines/atari-2600/cartridges/*/README.md text eol=lf diff merge
+machines/atari-2600/cartridges/*/manifest.json text eol=lf diff merge
+machines/atari-2600/cartridges/manifest.json text eol=lf diff merge

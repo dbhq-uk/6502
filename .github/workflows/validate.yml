@@ -97,9 +97,10 @@ jobs:
           dotnet run --no-build --configuration Release --project bench/nes-speed/differential -- --check "${files[0]}" --oracle
 
   # The machines' browser builds, alongside the tests: the KIM-1, the BBC
-  # Micro, the NES and the Electron as .NET WebAssembly, compiled ahead of
-  # time, and their ROMs (for the NES, its bundled game), read from roms/ and
-  # checked against the pins in Pins.cs. The site job below puts them where the
+  # Micro, the NES, the Electron and the Atari 2600 as .NET WebAssembly,
+  # compiled ahead of time, and their ROMs (for the NES and the Atari 2600, the
+  # game each page puts in), read from roms/ and machines/atari-2600/cartridges/
+  # and checked against the pins in Pins.cs. The site job below puts them where the
   # Astro build copies them into dist. Nothing here is committed.
   machines:
     runs-on: ubuntu-latest
@@ -115,7 +116,8 @@ jobs:
       # workload version is in the keys, so moving the pin rebuilds every one. The
       # BBC Micro's build also publishes its preset discs, so its key hashes
       # machines/bbc-micro/discs/ too: a disc added or changed is never served
-      # from a stale cache.
+      # from a stale cache. The Atari 2600's publishes its bundled game, so its
+      # key hashes machines/atari-2600/cartridges/ for the same reason.
       - name: Cache the KIM-1's browser build
         id: kim-1
         uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
@@ -140,6 +142,12 @@ jobs:
         with:
           path: site/public/machines/electron
           key: machine-electron-sdk-10.0.400-wasm-tools-10.0.401-${{ hashFiles('src/Dbhq.Machines.Electron/**', 'src/Dbhq.Machines.Electron.Wasm/**', 'src/Dbhq.Cpu6502/**', 'Directory.Build.props', 'tests/Dbhq.Cpu6502.TestSupport/Pins.cs', 'site/scripts/build-machines.mjs', 'site/src/lib/pins.mjs', 'site/src/lib/machines.mjs') }}
+      - name: Cache the Atari 2600's browser build
+        id: atari-2600
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
+        with:
+          path: site/public/machines/atari-2600
+          key: machine-atari-2600-sdk-10.0.400-wasm-tools-10.0.401-${{ hashFiles('src/Dbhq.Machines.Atari2600/**', 'src/Dbhq.Machines.Atari2600.Wasm/**', 'src/Dbhq.Cpu6502/**', 'Directory.Build.props', 'tests/Dbhq.Cpu6502.TestSupport/Pins.cs', 'site/scripts/build-machines.mjs', 'site/src/lib/pins.mjs', 'site/src/lib/machines.mjs', 'machines/atari-2600/cartridges/**') }}
       # The machines whose cache missed, by registry id, for the build below.
       - name: Which machines to build
         id: which
@@ -148,12 +156,14 @@ jobs:
           BBC_HIT: ${{ steps.bbc-micro.outputs.cache-hit }}
           NES_HIT: ${{ steps.nes.outputs.cache-hit }}
           ELECTRON_HIT: ${{ steps.electron.outputs.cache-hit }}
+          ATARI2600_HIT: ${{ steps.atari-2600.outputs.cache-hit }}
         run: |
           IDS=""
           [ "$KIM1_HIT" = "true" ] || IDS="$IDS kim-1"
           [ "$BBC_HIT" = "true" ] || IDS="$IDS bbc-micro"
           [ "$NES_HIT" = "true" ] || IDS="$IDS nes"
           [ "$ELECTRON_HIT" = "true" ] || IDS="$IDS electron"
+          [ "$ATARI2600_HIT" = "true" ] || IDS="$IDS atari-2600"
           echo "building:${IDS:- none, all restored}"
           echo "ids=${IDS# }" >> "$GITHUB_OUTPUT"
       # The SDK is pinned here, not left at 10.0.x, because a workload version
@@ -169,8 +179,8 @@ jobs:
         uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version: '22.22'
-      # Every machine whose cache missed: the KIM-1, the BBC Micro, the NES and
-      # the Electron. A machine's files are published with the site, but linked
+      # Every machine whose cache missed: the KIM-1, the BBC Micro, the NES, the
+      # Electron and the Atari 2600. A machine's files are published with the site, but linked
       # from no page until the registry says it runs.
       - if: steps.which.outputs.ids != ''
         name: Build the machines and fetch their ROMs
@@ -254,7 +264,15 @@ jobs:
       # keys shows 42, damaged tapes are refused in the reader's words, and a
       # program saved with SAVE downloads, drops back in, LOADs and runs
       # (scripts/browser-check-electron.mjs).
-      - name: The KIM-1, the BBC Micro, the NES and the Electron run in a browser
+      # Then the Atari 2600's page: Start puts 2048 2600 in, the frame recorded in
+      # machines/atari-2600/expected-frames.json is on the canvas to the pixel in
+      # both regions with the recorded switches, the region switched with the loop
+      # held keeps the frame and changes only its colours, the fire button, the
+      # joystick and Reset through the page change the picture, a test cartridge
+      # from the suite's fork, hash-checked, goes in through the picker, and a bad
+      # file and one too big are refused with the machine carrying on
+      # (scripts/browser-check-atari-2600.mjs).
+      - name: The KIM-1, the BBC Micro, the NES, the Electron and the Atari 2600 run in a browser
         working-directory: site
         run: node scripts/browser-check.mjs
 

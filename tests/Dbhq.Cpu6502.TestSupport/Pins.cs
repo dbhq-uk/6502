@@ -195,6 +195,17 @@ public static class Pins
         ["other/snow.nes"] = "7db551e868b2c0182941bd68adc447c2f0668098a4425e8e170b20e4327b7210",
     };
 
+    // The Atari 2600's test suite, missingno-vcs-tests (MIT), from two forks, each at one
+    // commit: dbhq-uk/missingno-vcs-tests gives the tests' sources, their headers and the
+    // reference pictures; dbhq-uk/missingno gives the built binaries, which the suite's own
+    // repository does not hold, and nothing else of it is read. Every file is listed with its
+    // git blob hash in atari-2600-suite.manifest (written by tools/atari-2600-suite-manifest.sh
+    // from the forks' trees at these commits), and the manifest's own SHA-256 is pinned here, so
+    // every file is pinned through this one file (Atari2600Suite.Read checks both).
+    public const string Atari2600SuiteCommit = "891c079976a2f68033ca4af2fe2fd85aaf1906c9";
+    public const string Atari2600BinariesCommit = "a4159f47ce7ef6f9c3d5402a8c58b18940045adc";
+    public const string Atari2600SuiteManifestSha256 = "712efc45a303b42577362ad172416af8d669f3c470e97a2d4c9fa1728b73e532";
+
     // The KIM-1 monitor ROM, MOS Technology's, as Hans Otten dumped it from
     // real 6530-002 and 6530-003 chips, with their $00 filler bytes. The files
     // are committed under roms/, with where they came from and what is known
@@ -235,4 +246,18 @@ public static class Pins
     // is read.
     public const string NesHomebrewPath = "roms/nes/Lan_Master.nes";
     public const string NesHomebrewSha256 = "becfeafb80479c330333c9e9385417f68f3c88e85443dfb37b05ae9283f3ea45";
+
+    // The Atari 2600's bundled game: 2048 2600, by Carlos Duarte do Nascimento (Chester), under
+    // the MIT licence, the author's own build of it from chesterbr/2048-2600 at commit
+    // 35de3c1b3b7bc4c3aadc8cf7fe630050a6984761, fetched once by hand. It is committed in its own
+    // folder, machines/atari-2600/cartridges/2048/, with its licence and its provenance in the
+    // folder's README (AGENTS.md rules 3 and 4, which cover a bundled cartridge as they cover a
+    // disc), and its notice in NOTICE.md. The Atari 2600 has no system ROM. The path is
+    // repository-relative and the hash is checked every time the file is read.
+    public const string Atari2600HomebrewPath = "machines/atari-2600/cartridges/2048/2048.bin";
+    public const string Atari2600HomebrewSha256 = "c85dc2204299b0a29209d3f80ae112678c171dab216719593625647d2436f1e1";
+
+    // The commit of chesterbr/2048-2600 the game was fetched from, which its README, its manifest
+    // and NOTICE.md each name; the game's tests check they name this one.
+    public const string Atari2600HomebrewCommit = "35de3c1b3b7bc4c3aadc8cf7fe630050a6984761";
 }

@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!--
+    The Atari 2600 (the Atari VCS), NTSC and PAL, on the core's Nmos6502. Built task by task from
+    docs/superpowers/plans/2026-10-14-atari-2600.md, each chip from its fact sheet in
+    docs/atari-2600/facts/ and never from another emulator's code. There is no system ROM: the
+    cartridge is given to the machine as bytes (AGENTS.md rules 3 and 4).
+  -->
+  <ItemGroup>
+    <ProjectReference Include="../Dbhq.Cpu6502/Dbhq.Cpu6502.csproj" />
+  </ItemGroup>
+
+  <!-- The state reports and the observer (task 4) are internal: for the tests only. -->
+  <ItemGroup>
+    <InternalsVisibleTo Include="Dbhq.Machines.Atari2600.Tests" />
+  </ItemGroup>
+</Project>

@@ -6,7 +6,7 @@ import path from 'node:path';
 import crypto from 'node:crypto';
 import { spawnSync } from 'node:child_process';
 import { MACHINE_BUILDS, machineBuilds, readRom } from '../src/lib/machines.mjs';
-import { bbcRoms, electronRoms, kim1Roms, nesRoms, pin } from '../src/lib/pins.mjs';
+import { atari2600Roms, bbcRoms, electronRoms, kim1Roms, nesRoms, pin } from '../src/lib/pins.mjs';
 import { REPO_ROOT } from '../src/lib/registry.mjs';
 
 // scripts/build-machines.mjs publishes a machine by its registry id, with the
@@ -16,8 +16,8 @@ import { REPO_ROOT } from '../src/lib/registry.mjs';
 
 const sha256 = (bytes) => crypto.createHash('sha256').update(bytes).digest('hex');
 
-test('the builds are the KIM-1, the BBC Micro, the NES and the Electron, each from its own WebAssembly project, by its registry id', () => {
-  assert.deepEqual(Object.keys(MACHINE_BUILDS), ['kim-1', 'bbc-micro', 'nes', 'electron']);
+test('the builds are the KIM-1, the BBC Micro, the NES, the Electron and the Atari 2600, each from its own WebAssembly project, by its registry id', () => {
+  assert.deepEqual(Object.keys(MACHINE_BUILDS), ['kim-1', 'bbc-micro', 'nes', 'electron', 'atari-2600']);
   for (const { project } of Object.values(MACHINE_BUILDS)) assert.ok(fs.existsSync(path.join(REPO_ROOT, 'src', project, `${project}.csproj`)), `no project ${project}`);
   const ids = JSON.parse(fs.readFileSync(path.join(REPO_ROOT, 'machines', 'registry.json'), 'utf8')).machines.map((m) => m.id);
   for (const id of Object.keys(MACHINE_BUILDS)) assert.ok(ids.includes(id), `${id} is not a registry id`);
@@ -26,6 +26,8 @@ test('the builds are the KIM-1, the BBC Micro, the NES and the Electron, each fr
   assert.equal(MACHINE_BUILDS.nes.roms, nesRoms);
   assert.equal(MACHINE_BUILDS.electron.roms, electronRoms);
   assert.equal(MACHINE_BUILDS.electron.discs, false);
+  assert.equal(MACHINE_BUILDS['atari-2600'].roms, atari2600Roms);
+  assert.equal(MACHINE_BUILDS['atari-2600'].discs, false);
 });
 
 test('the NES\'s one file is its bundled game, the pin in Pins.cs, which NesHost.Load takes, and the file in roms/ matches its pin', () => {
@@ -95,8 +97,9 @@ test('the machines to build are named, each once, and a name with no build is re
   assert.deepEqual(machineBuilds(['bbc-micro', 'kim-1', 'bbc-micro']).map((b) => b.id), ['bbc-micro', 'kim-1']);
   assert.deepEqual(machineBuilds(['electron']).map((b) => b.id), ['electron']);
   assert.deepEqual(machineBuilds(['nes']).map((b) => b.id), ['nes']);
-  assert.throws(() => machineBuilds([]), /name the machines to build: kim-1, bbc-micro, nes or electron, or several/);
-  assert.throws(() => machineBuilds(['apple-ii']), /no build for "apple-ii": the machines are kim-1, bbc-micro, nes and electron/);
+  assert.deepEqual(machineBuilds(['atari-2600']).map((b) => b.id), ['atari-2600']);
+  assert.throws(() => machineBuilds([]), /name the machines to build: kim-1, bbc-micro, nes, electron or atari-2600, or several/);
+  assert.throws(() => machineBuilds(['apple-ii']), /no build for "apple-ii": the machines are kim-1, bbc-micro, nes, electron and atari-2600/);
 });
 
 /**

@@ -32,7 +32,7 @@ const dateParts = (d) => [String(d.getUTCDate()), String(d.getUTCFullYear())];
 // The figures a page may show, each computed from the data. Two literals name
 // things: the chip ("6502") and the reference machine's clock, which is the
 // site's own choice (the design's target is 25 times real speed, for the core alone). Nothing else is allowed, so a typed number fails.
-function allowedNumbers() {
+function allowedNumbers({ names = true } = {}) {
   const modes = Object.values(measurements.modes);
   const generated = new Date(results.generated);
   return new Set([
@@ -46,6 +46,10 @@ function allowedNumbers() {
     fmt(registry.machines.length),
     // a machine's year and any numbers in its CPU field, shown on the home page's first three machines
     ...registry.machines.flatMap((m) => [String(m.year), ...numbersIn(m.cpu ?? ''), ...numbersIn(m.notes ?? '')]),
+    // any number in the name of a machine that runs, which the home page's sentence on which machines run
+    // reads from the registry (the Atari 2600, since 15 October 2026); only those, so a number typed from
+    // the name of a machine that does not run, such as the Atari 7800's, still fails (task 14's review)
+    ...(names ? registry.machines.filter((m) => m.status === 'running').flatMap((m) => numbersIn(m.name ?? '')) : []),
     // the description of the measurement, written in the data file
     ...numbersIn(measurements.machine.description), ...numbersIn(measurements.machine.browser), ...numbersIn(measurements.workload),
     // dates and the commit are generated text
@@ -70,6 +74,15 @@ test('every number on the home and status pages is a generated figure or a named
     const stray = numbersIn(text).filter((n) => !allowed.has(n));
     assert.deepEqual(stray, [], `${url} shows numbers that are not generated figures`);
   }
+});
+
+test('only a running machine lends the numbers in its name, so a number typed from a name that does not run fails', () => {
+  const allowed = allowedNumbers();
+  const others = allowedNumbers({ names: false });
+  const running = new Set(registry.machines.filter((m) => m.status === 'running').flatMap((m) => numbersIn(m.name ?? '')));
+  const lent = registry.machines.filter((m) => m.status !== 'running').flatMap((m) => numbersIn(m.name ?? '')).filter((n) => !others.has(n) && !running.has(n));
+  assert.ok(lent.length > 0, 'no name of a machine that does not run has a number of its own, so this test checks nothing');
+  assert.deepEqual(lent.filter((n) => allowed.has(n)), [], 'numbers from the names of machines that do not run are allowed');
 });
 
 const cardValues = (html) => [...html.matchAll(/<div class="card">\s*<b>([^<]*)<\/b>/g)].map((m) => m[1].trim());

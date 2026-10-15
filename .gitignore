@@ -46,3 +46,6 @@ bench/nes-speed/publish/
 
 # Published output of the Acorn Electron browser speed check, made locally.
 bench/electron-speed/publish/
+
+# Published output of the Atari 2600 browser speed check, made locally.
+bench/atari-2600-speed/publish/

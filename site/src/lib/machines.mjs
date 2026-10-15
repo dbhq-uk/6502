@@ -2,7 +2,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
 import { REPO_ROOT, SITE_ROOT } from './registry.mjs';
-import { kim1Roms, bbcRoms, nesRoms, electronRoms } from './pins.mjs';
+import { kim1Roms, bbcRoms, nesRoms, electronRoms, atari2600Roms } from './pins.mjs';
 
 // The rules about which machines get a page, kept out of the templates so a
 // test can run them on a made-up registry.
@@ -109,7 +109,7 @@ export function loadTeletype(id, root = REPO_ROOT) {
  * Kim1Keystrokes.Parse reads them. The BBC Micro's and the Electron's are BASIC
  * (BASIC_TRY_IT): `lines` to type, each followed by RETURN, and `shows`, what the
  * screen shows after them, each line plain printable text. The NES's is a game to
- * play: see checkNesTryIt.
+ * play: see checkNesTryIt. The Atari 2600's is a game too: see checkAtari2600TryIt.
  */
 export function loadTryIt(id, root = REPO_ROOT) {
   const file = path.join(root, 'machines', id, 'try-it.json');
@@ -124,6 +124,7 @@ export function loadTryIt(id, root = REPO_ROOT) {
     return program;
   }
   if (id === 'nes') return checkNesTryIt(program, root);
+  if (id === 'atari-2600') return checkAtari2600TryIt(program, root);
   for (const step of program.steps) parseKeys(step.keys);
   return program;
 }
@@ -164,6 +165,43 @@ function checkNesTryIt(program, root) {
 }
 
 /**
+ * The controls a try-it file may name for the Atari 2600: the console's own,
+ * a joystick and its two players' fire buttons, and the switches on its front.
+ * Typed here rather than read from public/atari-2600-keys.js, because the build
+ * script imports this file and reads nothing under public/;
+ * tests/atari-2600.test.mjs checks each has its key on the page's map.
+ */
+export const ATARI_2600_CONTROLS = ['Joystick', 'Left fire button', 'Right fire button', 'GAME RESET', 'GAME SELECT', 'Colour switch', 'Left difficulty switch', 'Right difficulty switch'];
+
+/**
+ * The Atari 2600's try-it file, in the NES's shape: the game Start puts in
+ * (`rom`, the pinned file, read and checked against its hash, with its `title`,
+ * `author`, `licence` and `licenceUrl`, the address of the licence as its author
+ * published it, and the `credit` the page gives), `steps` of what to do and
+ * what the page then shows, and `controls`, what each of the console's controls
+ * does in the game (one of ATARI_2600_CONTROLS).
+ */
+function checkAtari2600TryIt(program, root) {
+  const where = 'machines/atari-2600/try-it.json';
+  for (const name of ['title', 'author', 'licence', 'credit']) if (!words(program[name])) throw new Error(`${where}: needs its ${name}, the bundled game's`);
+  if (!/^https:\/\/\S+$/.test(program.licenceUrl ?? '')) throw new Error(`${where}: needs its licenceUrl, an https link to the licence as its author published it`);
+  if (!Array.isArray(program.steps) || program.steps.length === 0) throw new Error(`${where}: steps must be a list of { do, says }`);
+  program.steps.forEach((step, i) => {
+    if (!words(step?.do) || !words(step?.says)) throw new Error(`${where}: step ${i + 1} needs do and says, each a sentence`);
+  });
+  if (!Array.isArray(program.controls) || program.controls.length === 0) throw new Error(`${where}: controls must be a list of { button, does }`);
+  program.controls.forEach((control, i) => {
+    if (!words(control?.button) || !words(control?.does)) throw new Error(`${where}: control ${i + 1} needs button and does`);
+    if (!ATARI_2600_CONTROLS.includes(control.button)) throw new Error(`${where}: "${control.button}" is not one of the console's controls`);
+  });
+  // Last, as it reads the file: the game named is the pinned one, and its bytes are the pin's.
+  const [game] = atari2600Roms();
+  if (program.rom !== game.path) throw new Error(`${where}: names ${program.rom}, not the pinned ${game.path}`);
+  readRom(game, root);
+  return program;
+}
+
+/**
  * The home page's sentence about which machines run, true for none, one or
  * many: "None runs in the browser yet." or "Running in the browser now: KIM-1."
  * The names come from the registry, so the sentence cannot claim more than it holds.
@@ -181,13 +219,16 @@ export function runningSentence(registry) {
  * the order the host's Load takes them, as their pins in Pins.cs give them.
  * `discs` is true for a machine with preset discs: the BBC Micro's, listed in
  * machines/bbc-micro/discs/manifest.json (src/lib/bbc-micro.mjs). The
- * Electron's BASIC is the BBC Micro's file, so both publish a copy of it.
+ * Electron's BASIC is the BBC Micro's file, so both publish a copy of it. The
+ * Atari 2600, like the NES, has no system ROM: it publishes the game its page
+ * puts in, from machines/atari-2600/cartridges/.
  */
 export const MACHINE_BUILDS = {
   'kim-1': { project: 'Dbhq.Machines.Kim1.Wasm', roms: kim1Roms, discs: false },
   'bbc-micro': { project: 'Dbhq.Machines.BbcMicro.Wasm', roms: bbcRoms, discs: true },
   nes: { project: 'Dbhq.Machines.Nes.Wasm', roms: nesRoms, discs: false },
   electron: { project: 'Dbhq.Machines.Electron.Wasm', roms: electronRoms, discs: false },
+  'atari-2600': { project: 'Dbhq.Machines.Atari2600.Wasm', roms: atari2600Roms, discs: false },
 };
 
 /** The build for each id named, in the order named. Throws on an id with no build, or on none at all. */

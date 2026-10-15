@@ -45,6 +45,25 @@ export function nesRoms(source = fs.readFileSync(PINS_FILE, 'utf8')) {
 }
 
 /**
+ * The Atari 2600's one file: no system ROM, but the game its page puts in when
+ * Start is pressed, 2048 2600, kept in its own folder under
+ * machines/atari-2600/cartridges/ with its licence and provenance (AGENTS.md
+ * rule 4). As a list, in the shape of the NES's: its name in the Pins.cs
+ * constants (`rom`), the file name the page loads it by, its repository path,
+ * GitHub link and SHA-256.
+ */
+export function atari2600Roms(source = fs.readFileSync(PINS_FILE, 'utf8')) {
+  const relative = pin('Atari2600HomebrewPath', source);
+  return [{
+    rom: 'homebrew',
+    file: path.posix.basename(relative),
+    path: relative,
+    url: `https://github.com/dbhq-uk/6502/blob/main/${relative}`,
+    sha256: pin('Atari2600HomebrewSha256', source),
+  }];
+}
+
+/**
  * The BBC Micro's three 16 KB ROMs, in the order BbcHost.Load takes them: the
  * operating system, BASIC and the Disc Filing System. Each with its name in the
  * Pins.cs constants (`rom`), what it is (`name`, as roms/README.md says), the

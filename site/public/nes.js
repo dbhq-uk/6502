@@ -8,6 +8,15 @@
 // The page works without this file: the panel is drawn, every control is
 // disabled, and the status line says the machine needs JavaScript.
 //
+// SHARED PARTS. The cartridge slot (cartridge-picker.js), the region radios
+// (region-line.js), the gamepad poll (gamepads.js), the on-screen buttons
+// (touch-pad.js), the sound button (sound-output.js) and the worklet's ring
+// (sample-worklet.js, through nes-audio.js) were moved out of this file and
+// nes-audio.js, unchanged in what they do, when the Atari 2600 became the
+// second console to need them (the Atari 2600 plan's task 13). This file keeps
+// the NES's own: its buttons and keys, its cartridge and region rules, its
+// picture, and its page. What its tests import from here, it still exports.
+//
 // NOTHING DOWNLOADS UNTIL START. The machine is megabytes, so the page loads
 // none of it until the visitor asks: the Start button says how much it is,
 // from the built files (the page gives the figure, as the BBC Micro's does).
@@ -112,9 +121,16 @@
 //                  other region. nes:start follows it.
 import { startMachine } from '/machine-host.js';
 import { BUTTONS, KEYS, GAMEPAD_BUTTONS } from '/nes-keys.js';
+import { bytes, dropTarget, firstCartridge, messageOf, picker, readRom, sizeRefusal } from '/cartridge-picker.js';
+import { connected, gamepadBits, watchPads } from '/gamepads.js';
+import { checkRegion, wireRegion } from '/region-line.js';
+import { soundOutput } from '/sound-output.js';
+import { holdButtons } from '/touch-pad.js';
 
 // The buttons, the keys and the gamepad's buttons: nes-keys.js, shared with the panel's markup.
 export { BUTTONS, KEYS, GAMEPAD_BUTTONS };
+// The cartridge slot's rules, shared with the Atari 2600's page since its task 13: cartridge-picker.js.
+export { firstCartridge, readRom, sizeRefusal };
 
 // The sample rate the machine makes its sound at, and the rate the page asks
 // the browser to play it at, so it is not resampled twice. The machine's default.
@@ -127,9 +143,6 @@ const WIDTH = 256;
 const HEIGHT = 240;
 const PIXEL = { NTSC: [8, 7], PAL: [355, 256] };
 
-const fmt = (n) => n.toLocaleString('en-GB');
-const messageOf = (error) => (typeof error?.message === 'string' && error.message) || String(error) || 'it could not be read';
-
 // ---- The pure parts, exported for tests/nes-panel.test.mjs ----
 
 /** The buttons held by a set of button names. */
@@ -141,11 +154,7 @@ const maskOf = (names) => {
 
 /** The buttons a gamepad holds, read through GAMEPAD_BUTTONS. */
 export function gamepadMask(gamepad) {
-  let mask = 0;
-  for (const [index, name] of Object.entries(GAMEPAD_BUTTONS)) {
-    if (gamepad?.buttons?.[index]?.pressed) mask |= BUTTONS[name];
-  }
-  return mask;
+  return gamepadBits(gamepad, GAMEPAD_BUTTONS, BUTTONS);
 }
 
 /**
@@ -172,19 +181,6 @@ export function loadCartridge(host, bytes, region, sampleRate) {
   } catch (error) {
     return { ok: false, message: messageOf(error) };
   }
-}
-
-/**
- * The first cartridge: the bundled one, `bundled` (a promise of its bytes, or
- * of null), is tried with `use` before `openPicker` opens the picker, so a
- * file the visitor chooses is never replaced by it. Without one, or if it will
- * not load, the picker opens and `waitForFile` waits for the visitor's.
- */
-export async function firstCartridge(bundled, use, openPicker, waitForFile) {
-  const data = await bundled;
-  const loaded = Boolean(data) && use(data);
-  openPicker();
-  if (!loaded) await waitForFile();
 }
 
 /** The line for a cartridge put in; the line under the region control is the host's sentence. */
@@ -215,23 +211,6 @@ export function showShape(canvas, region) {
   const { width, height } = pictureShape(region);
   canvas.style.aspectRatio = `${width} / ${height}`;
   canvas.dataset.region = region;
-}
-
-/** The line refusing a file over `limit` bytes, or null when it fits. */
-export function sizeRefusal(file, limit) {
-  if (file.size <= limit) return null;
-  return `${file.name} is ${fmt(file.size)} bytes, more than the ${fmt(limit)} bytes of the largest file this machine loads, so it was not read.`;
-}
-
-/** Reads a chosen file, unless it is over `limit` bytes: { ok, bytes } or { ok: false, line }. */
-export async function readRom(file, limit) {
-  const refusal = sizeRefusal(file, limit);
-  if (refusal) return { ok: false, line: refusal };
-  try {
-    return { ok: true, bytes: new Uint8Array(await file.arrayBuffer()) };
-  } catch (error) {
-    return { ok: false, line: `${file.name} could not be read: ${messageOf(error)}` };
-  }
 }
 
 // ---- The keyboard and the on-screen pad ----
@@ -274,38 +253,7 @@ export function keyboard(screen, onMask) {
  * long enough for a game to read it.
  */
 export function touchPad(panel, onMask) {
-  const held = new Set();
-  const send = () => onMask(maskOf(held));
-  for (const b of panel.querySelectorAll('[data-nes-button]')) {
-    const name = b.dataset.nesButton;
-    const release = () => {
-      if (held.delete(name)) send();
-    };
-    b.disabled = false;
-    b.addEventListener('pointerdown', (event) => {
-      event.preventDefault();
-      // Captured, so the button hears its finger lift even off its edge; a pointer the browser
-      // no longer tracks cannot be, and the button is held all the same.
-      try {
-        b.setPointerCapture?.(event.pointerId);
-      } catch {
-        // Nothing to capture.
-      }
-      held.add(name);
-      send();
-    });
-    b.addEventListener('pointerup', release);
-    b.addEventListener('pointercancel', release);
-    b.addEventListener('lostpointercapture', release);
-    b.addEventListener('contextmenu', (event) => event.preventDefault());
-    b.addEventListener('click', (event) => {
-      // detail 0 is a click from the keyboard; a pointer's was handled above.
-      if (event.detail !== 0) return;
-      held.add(name);
-      send();
-      setTimeout(release, 150);
-    });
-  }
+  holdButtons(panel.querySelectorAll('[data-nes-button]'), (b) => b.dataset.nesButton, (held) => onMask(maskOf(held)));
 }
 
 // ---- The page ----
@@ -335,16 +283,7 @@ function prepare(panel) {
   // A file dropped on the page goes in once the machine is up (run() sets
   // panel.putRom). Before that it is refused here, rather than the browser
   // leaving the page to show it.
-  document.addEventListener('dragover', (event) => {
-    if ([...(event.dataTransfer?.types ?? [])].includes('Files')) event.preventDefault();
-  });
-  document.addEventListener('drop', (event) => {
-    if (!event.dataTransfer?.files.length) return;
-    event.preventDefault();
-    if (panel.putRom) panel.putRom(event.dataTransfer.files[0]);
-    else if (panel.dataset.state === 'ready') say('Press Start first, then drop the file on the page again.', 'ready');
-    else if (panel.dataset.state === 'loading') say('The NES is still loading. Drop the file on the page again once it runs.', 'loading');
-  });
+  dropTarget(panel, say, 'NES');
   start.addEventListener('click', () => run(panel, say), { once: true });
 }
 
@@ -368,7 +307,14 @@ async function run(panel, say) {
   const context = canvas.getContext('2d');
   const image = context.createImageData(WIDTH, HEIGHT);
   const pixels = new Uint8Array(image.data.buffer);
-  const sound = soundOutput(panel);
+  const sound = soundOutput({
+    panel,
+    button: panel.querySelector('[data-nes-sound]'),
+    line: panel.querySelector('[data-nes-sound-status]'),
+    module: '/nes-audio.js',
+    processor: 'nes-sound',
+    rate: SAMPLE_RATE,
+  });
   const input = { keys: 0, touch: 0, sent: [-1, -1] };
   let shown = -1;
   let clockMhz = 0;
@@ -392,7 +338,7 @@ async function run(panel, say) {
     }
   };
   const onFrame = () => {
-    sendButtons(padMasks(input, navigator.getGamepads?.() ?? []));
+    sendButtons(padMasks(input, connected()));
     if (host.Frames() !== shown) paint();
     if (sound.on) host.Sound();
   };
@@ -402,7 +348,7 @@ async function run(panel, say) {
     region = result.region;
     clockMhz = host.CpuHz() / 1e6;
     showShape(canvas, region);
-    for (const r of radios) r.checked = r.value === region;
+    checkRegion(radios, region);
     panel.dataset.region = region;
     input.sent = [-1, -1];
     shown = -1;
@@ -451,7 +397,11 @@ async function run(panel, say) {
         sound: (view) => sound.play(view),
       });
       host = nes;
-      await firstCartridge(bundled, (data) => use(data, bundledName), () => picker(panel, put), () => {
+      await firstCartridge(bundled, (data) => use(data, bundledName), () => {
+        picker(panel.querySelector('[data-nes-choose]'), panel.querySelector('[data-nes-file]'), put);
+        // A file dropped anywhere on the page goes in too (prepare() listens).
+        panel.putRom = put;
+      }, () => {
         say('Choose a .nes file, or drop one on the page: the NES starts once it has a cartridge.', 'waiting');
         return new Promise((resolve) => { cartridgeArrived = resolve; });
       });
@@ -474,25 +424,22 @@ async function run(panel, say) {
   screen.tabIndex = 0;
   screen.addEventListener('focus', () => { panel.dataset.typing = 'true'; });
   screen.addEventListener('blur', () => { delete panel.dataset.typing; });
-  pads(panel);
+  watchPads(panel.querySelector('[data-nes-pads]'), 'controller');
 
-  for (const r of radios) {
-    r.disabled = false;
-    r.addEventListener('change', () => {
-      if (!r.checked || r.value === region || rom === null) return;
-      const result = loadCartridge(host, rom, r.value, SAMPLE_RATE);
-      if (!result.ok) {
-        regionLine.textContent = `The region could not change: ${result.message}`;
-        for (const other of radios) other.checked = other.value === region;
-        return;
-      }
-      loaded(result);
-      regionLine.textContent = regionChangeLine(result);
-      // A new machine: the region first, so a model redraws, then its counters from zero.
-      announceRegion(panel, region);
-      announce(panel, 'start');
-    });
-  }
+  wireRegion(radios, () => region, (value) => {
+    if (rom === null) return true;
+    const result = loadCartridge(host, rom, value, SAMPLE_RATE);
+    if (!result.ok) {
+      regionLine.textContent = `The region could not change: ${result.message}`;
+      return false;
+    }
+    loaded(result);
+    regionLine.textContent = regionChangeLine(result);
+    // A new machine: the region first, so a model redraws, then its counters from zero.
+    announceRegion(panel, region);
+    announce(panel, 'start');
+    return true;
+  });
   const line = panel.querySelector('[data-nes-power-line]');
   const reset = panel.querySelector('[data-nes-reset]');
   const power = panel.querySelector('[data-nes-power]');
@@ -533,109 +480,4 @@ async function run(panel, say) {
   say('Running. The screen has the keyboard: play with the keys below, or press Tab to move on.', 'running');
   // Start was the visitor asking to play, so the keyboard goes to the machine.
   screen.focus({ preventScroll: true });
-}
-
-// ---- The cartridge picker ----
-
-function picker(panel, put) {
-  const choose = panel.querySelector('[data-nes-choose]');
-  const file = panel.querySelector('[data-nes-file]');
-  choose.disabled = false;
-  choose.addEventListener('click', () => file.click());
-  file.addEventListener('change', () => {
-    if (file.files.length > 0) put(file.files[0]);
-    file.value = '';
-  });
-  // A file dropped anywhere on the page goes in too (prepare() listens).
-  panel.putRom = put;
-}
-
-// ---- Gamepads ----
-
-function pads(panel) {
-  const line = panel.querySelector('[data-nes-pads]');
-  const describe = () => {
-    const found = [...(navigator.getGamepads?.() ?? [])].slice(0, 2);
-    const named = found.map((g, i) => (g ? `controller ${i + 1} is ${g.id}` : null)).filter(Boolean);
-    line.textContent = named.length > 0
-      ? `Gamepads: ${named.join('; ')}.`
-      : 'No gamepad yet: plug one in and press a button on it, and the first is controller 1, the second controller 2.';
-  };
-  window.addEventListener('gamepadconnected', describe);
-  window.addEventListener('gamepaddisconnected', describe);
-  describe();
-}
-
-// ---- The sound ----
-
-function soundOutput(panel) {
-  const button = panel.querySelector('[data-nes-sound]');
-  const line = panel.querySelector('[data-nes-sound-status]');
-  return {
-    on: false,
-    machine: null,
-    context: null,
-    node: null,
-    async turnOn() {
-      // Made inside the click, as browsers ask, at the machine's own rate.
-      this.context ??= new AudioContext({ sampleRate: SAMPLE_RATE });
-      if (!this.node) {
-        await this.context.audioWorklet.addModule('/nes-audio.js');
-        this.node = new AudioWorkletNode(this.context, 'nes-sound', { numberOfInputs: 0, outputChannelCount: [1] });
-        this.node.connect(this.context.destination);
-      }
-      this.fresh();
-      await this.context.resume();
-      this.on = true;
-    },
-    async turnOff() {
-      this.on = false;
-      await this.context?.suspend();
-    },
-    // What was made while the sound was off, or the page hidden, is not played late.
-    fresh() {
-      this.machine.DropSound();
-      this.node?.port.postMessage({ flush: true });
-    },
-    play(view) {
-      const samples = new Float32Array(view.byteLength / 4);
-      view.copyTo(new Uint8Array(samples.buffer));
-      this.node.port.postMessage(samples, [samples.buffer]);
-    },
-    pause() {
-      if (this.on) this.context.suspend();
-    },
-    resume() {
-      if (!this.on) return;
-      this.fresh();
-      this.context.resume();
-    },
-    wire() {
-      button.disabled = false;
-      button.addEventListener('click', async () => {
-        button.disabled = true;
-        try {
-          if (this.on) await this.turnOff();
-          else await this.turnOn();
-        } catch (error) {
-          this.on = false;
-          line.textContent = `Sound could not start, so it is off: ${messageOf(error)}`;
-          panel.dataset.sound = 'failed';
-          button.disabled = false;
-          return;
-        }
-        button.textContent = this.on ? 'Turn sound off' : 'Turn sound on';
-        button.setAttribute('aria-pressed', String(this.on));
-        line.textContent = this.on ? 'Sound is on.' : 'Sound is off.';
-        panel.dataset.sound = this.on ? 'on' : 'off';
-        button.disabled = false;
-      });
-    },
-  };
-}
-
-async function bytes(url) {
-  const response = await fetch(url);
-  if (!response.ok) throw new Error(`${url} answered ${response.status}`);
-  return new Uint8Array(await response.arrayBuffer());
 }
