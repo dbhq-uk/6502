@@ -15,8 +15,9 @@ namespace Dbhq.Machines.Atari2600.Tests;
 /// <remarks>
 /// <para>
 /// <b>What is recorded.</b> The four cartridge self-tests whose boards' behaviour the suite's
-/// headers call untested on hardware or a diagnostic (<see cref="SelfTests"/>), and every screenshot
-/// test (<see cref="ScreenshotRunner.Tests"/>), each in both regions (<c>suite.md</c> section 1.3).
+/// headers call untested on hardware or a diagnostic, the four trusted self-tests moved here with
+/// Dan's agreement (<see cref="MovedFromTrusted"/>), and every screenshot test
+/// (<see cref="ScreenshotRunner.Tests"/>), each in both regions (<c>suite.md</c> section 1.3).
 /// </para>
 /// <para>
 /// <b>A self-test's outcome</b> is <c>"pass"</c>; or, for a test whose header reports a measurement
@@ -40,13 +41,33 @@ internal static class SuiteOutcomes
     /// <summary>The command that records the file, for messages.</summary>
     public const string RecordCommand = "ATARI_RECORD=1 dotnet test tests/Dbhq.Machines.Atari2600.Tests --filter Record";
 
-    /// <summary>The recorded cartridge self-tests (the plan's trust table; <c>suite.md</c> section 5.7).</summary>
+    /// <summary>
+    /// Trusted self-tests the model does not pass, moved to the recorded tests one at a time with
+    /// Dan's agreement on 15 October 2026, each with its <c>docs/known-differences.md</c> entry (the
+    /// plan's trust table: "A trusted test that fails is fixed, or moves to recorded with a
+    /// known-differences entry giving its cause and Dan's agreement"). All four measure when a
+    /// motion step merged on the drawn line reaches a player's pattern scan, which no source read
+    /// describes (<c>tia.md</c> open item 12; the task 11 journal entry has the evidence).
+    /// </summary>
+    public static readonly string[] MovedFromTrusted =
+    [
+        "collision/merge-delivery",
+        "collision/merge-delivery-replant",
+        "collision/merge-delivery-stretch",
+        "collision/merge-delivery-train",
+    ];
+
+    /// <summary>
+    /// The recorded self-tests: the cartridge tests the plan's trust table records (<c>suite.md</c>
+    /// section 5.7), and <see cref="MovedFromTrusted"/>.
+    /// </summary>
     public static readonly string[] SelfTests =
     [
         "cartridge/bank-fa",
         "cartridge/bank-hotspot-window",
         "cartridge/power-on-bank",
         "cartridge/ram-superchip",
+        .. MovedFromTrusted,
     ];
 
     /// <summary>

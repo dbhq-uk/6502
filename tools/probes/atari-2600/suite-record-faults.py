@@ -21,14 +21,16 @@ FAULTS = [
     ("O1 a screenshot count changed by hand: PAL calibration one fewer", OUT, [('"PAL": 407', '"PAL": 406')]),
     ("O2 a self-test outcome changed by hand: the power-on bank read as bank 0", OUT, [('"observed": "$B1"', '"observed": "$A0"')]),
     ("O3 a recorded pass changed by hand to a fail", OUT, [('"NTSC": "pass"', '"NTSC": {\n        "outcome": "fail",\n        "code": "$0C",\n        "observed": "$00",\n        "expected": "$01"\n      }')]),
-    ("O4 a recorded test left out of the file", OUT, [('    },\n    "cartridge/ram-superchip": {\n      "NTSC": "pass",\n      "PAL": "pass"\n    }\n', '    }\n')]),
+    ("O4 a recorded test left out of the file", OUT, [('    "cartridge/ram-superchip": {\n      "NTSC": "pass",\n      "PAL": "pass"\n    },\n', '')]),
     ("O5 the pins in the file changed", OUT, [('"suiteCommit": "891c', '"suiteCommit": "991c')]),
     ("R1 a pass recorded without the OBSERVED its header reports", REC, [('public static readonly string[] ObservedOnPass = ["cartridge/power-on-bank"];', 'public static readonly string[] ObservedOnPass = [];')]),
     ("R2 a no verdict recorded as a pass", REC, [(': new JsonObject { ["outcome"] = "no verdict", ["result"] = Hex(run.Result) };', ': JsonValue.Create("pass");')]),
     ("T1 a not-run test missing from NotRun", SELF, [('        ("cartridge/bank-e0", 131),\n', '')]),
     ("T2 a trusted test missing from Trusted", SELF, [('        "riot/timer",\n', '')]),
     ("T3 a recorded cartridge test listed as not run too", SELF, [('        ("cartridge/bank-e0", 131),\n', '        ("cartridge/bank-e0", 131),\n        ("cartridge/bank-fa", 107),\n')]),
-    ("T4 a not-yet test listed as not run instead", SELF, [('        ("collision/merge-delivery-train", 11, 0x04, 0x47, 0x7F),\n', ''), ('        ("cartridge/bank-e0", 131),\n', '        ("cartridge/bank-e0", 131),\n        ("collision/merge-delivery-train", 107),\n')]),
+    ("T4 a moved test kept in Trusted too", SELF, [('        "collision/stuck-drift",\n', '        "collision/stuck-drift",\n        "collision/merge-delivery",\n')]),
+    ("T5 a moved test dropped from the moved list", REC, [('        "collision/merge-delivery-train",\n    ];', '    ];')]),
+    ("O6 a moved test's recorded code changed by hand", OUT, [('"code": "$04",\n        "observed": "$53"', '"code": "$05",\n        "observed": "$53"')]),
 ]
 
 def run(cmd, **kw):

@@ -25,6 +25,62 @@
     "cartridge/ram-superchip": {
       "NTSC": "pass",
       "PAL": "pass"
+    },
+    "collision/merge-delivery": {
+      "NTSC": {
+        "outcome": "fail",
+        "code": "$04",
+        "observed": "$53",
+        "expected": "$7B"
+      },
+      "PAL": {
+        "outcome": "fail",
+        "code": "$04",
+        "observed": "$53",
+        "expected": "$7B"
+      }
+    },
+    "collision/merge-delivery-replant": {
+      "NTSC": {
+        "outcome": "fail",
+        "code": "$03",
+        "observed": "$49",
+        "expected": "$4D"
+      },
+      "PAL": {
+        "outcome": "fail",
+        "code": "$03",
+        "observed": "$49",
+        "expected": "$4D"
+      }
+    },
+    "collision/merge-delivery-stretch": {
+      "NTSC": {
+        "outcome": "fail",
+        "code": "$03",
+        "observed": "$2A",
+        "expected": "$3E"
+      },
+      "PAL": {
+        "outcome": "fail",
+        "code": "$03",
+        "observed": "$2A",
+        "expected": "$3E"
+      }
+    },
+    "collision/merge-delivery-train": {
+      "NTSC": {
+        "outcome": "fail",
+        "code": "$04",
+        "observed": "$47",
+        "expected": "$7F"
+      },
+      "PAL": {
+        "outcome": "fail",
+        "code": "$04",
+        "observed": "$47",
+        "expected": "$7F"
+      }
     }
   },
   "screenshots": {

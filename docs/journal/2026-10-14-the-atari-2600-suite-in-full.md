@@ -1,7 +1,7 @@
 ---
 title: "The Atari VCS's suite in full: what each test showed"
 date: 2026-10-14
-summary: "The eleventh task of the Atari VCS: every test of the console's test suite that the trust split runs, run in both regions, with the outcomes of the recorded tests written by a recorder and checked in CI. Every trusted test passes but four about a player's pattern scan under a merged motion step, which still fail and wait for Dan, one at a time. Two PAL pictures differ only because the reference draws several colours in one grey."
+summary: "The eleventh task of the Atari VCS: every test of the console's test suite that the trust split runs, run in both regions, with the outcomes of the recorded tests written by a recorder and checked in CI. Four trusted tests about a player's pattern scan under a merged motion step fail, and Dan agreed, one test at a time, to record them with the cause written down. Two PAL pictures differ only because the reference draws several colours in one grey."
 order: 65
 ---
 
@@ -11,26 +11,26 @@ Task 11 of [the Atari 2600 plan](../superpowers/plans/2026-10-14-atari-2600.md):
 
 Before it, as its own commit (`37e0a52`), task 10's review was folded in: a sound test that could not see the HMOVE line now can, guesses are tagged, and the speed milestone's claims are cut to what its runs show. [The task 10 entry](2026-10-14-the-atari-2600-sound.md) and [the speed milestone entry](2026-10-14-the-atari-2600-speed-milestone.md) say what changed.
 
-**One change to the plan's steps, by the controller:** a trusted test the model cannot pass stays where it is, on the not-yet list with its exact failure, and is not moved to recorded by this task. For each one, the evidence is written here so that Dan can be asked one test at a time; a test moves only on his answer.
+**One change to the plan's steps, by the controller:** a trusted test the model cannot pass stays where it is, on the not-yet list with its exact failure, and is not moved to recorded by this task. For each one, the evidence is written here so that Dan can be asked one test at a time; a test moves only on his answer. **Dan's answer, 15 October 2026**, given one test at a time with the evidence below: move all four `collision/merge-delivery` tests to recorded. Each now has its `docs/known-differences.md` entry, its outcome is the recorder's, and the not-yet list is empty and gone.
 
 ## What was built
 
 - **`SuiteOutcomes`** runs each recorded test once per region and keeps its outcome, and builds the whole file. A self-test's outcome is `"pass"`; a pass with the OBSERVED byte for a test whose header reports a measurement on a pass (`power-on-bank`, `suite.md` section 2); a fail with CODE, OBSERVED and EXPECTED; or no verdict with the byte at `$80`. A screenshot test's outcome is its count of mismatched pixels by the partition rule. The file also names the two pinned commits and the manifest's hash, so outcomes recorded under one pin are never compared under another.
 - **`SuiteRecordedTests`** has a row per recorded test and region that compares the machine's outcome with the file, and `Record_the_suite_outcomes`, the recorder: with `ATARI_RECORD=1` it writes the file, and otherwise it checks that the committed file is byte for byte what it would write, as the NES's `RecordTheBootFrames` does. So the file is the recorder's (`AGENTS.md` rule 5), and a test left out of it, or one it holds that is not recorded, fails.
-- **`SuiteSelfTests`** keeps every trusted self-test, both regions. The four recorded cartridge rows moved to `SuiteRecordedTests`. `NotRun` lists the tests of boards not modelled with each board's issue, taken from `suite.md` section 5.8. `The_trust_split_places_every_test_in_the_suite_exactly_once` reads every source in the pinned manifest and checks that each is trusted (in `Trusted` or `NotYet`), recorded, or not run, as the plan's trust table puts it, and nothing else. Nothing is skipped silently.
+- **`SuiteSelfTests`** keeps every trusted self-test, both regions. The four recorded cartridge rows moved to `SuiteRecordedTests`. `NotRun` lists the tests of boards not modelled with each board's issue, taken from `suite.md` section 5.8. `The_trust_split_places_every_test_in_the_suite_exactly_once` reads every source in the pinned manifest and checks that each is trusted (in `Trusted`), recorded, or not run, as the plan's trust table puts it, and nothing else; a test the split trusts leaves `Trusted` only through `SuiteOutcomes.MovedFromTrusted`, the four Dan agreed to move. Nothing is skipped silently.
 
 ## Decisions
 
 - **The rows do not compare while the recorder writes.** With `ATARI_RECORD=1`, `--filter Record` also runs the rows, in no fixed order with the recorder, and the file on disk may be the one being replaced; so a row then shows its outcome and asserts nothing. The variable is never set in CI. Chosen over a filter that runs the recorder alone, because the plan's command is `--filter Record`.
-- **The not-yet rows keep their task number, 11**, and their comment says they wait for Dan. Chosen over moving them, which the controller's change forbids, and over a new number, which would claim a later task fixes them.
+- **The not-yet rows kept their task number, 11, until Dan answered**, chosen over moving them, which the controller's change forbade. Once he had, **the list was removed, not left empty**: an xUnit theory with no rows fails as having no data, and an empty list with no theory would check nothing. The moved tests are named in `SuiteOutcomes.MovedFromTrusted`, with the date and the rule, so the trust-split check can tell a test Dan moved from one left out.
 - **The partition rule is not changed for PAL.** The suite's README says a screenshot test is compared "pixel-exact" against missingno's renders, and says nothing of a frame drawn with another palette, so it gives no rule to put in place of the plan's item 5. The PAL counts are recorded as they are (below).
 - **OBSERVED is recorded on a pass only where the header says it carries a measurement.** `bank-fa` also leaves a byte at `$82` on its pass, which its header does not describe; recording it would make the file depend on scratch bytes.
 
 ## The sweep
 
-The plan's step 2, on 14 October 2026: `dotnet test -c Release tests/Dbhq.Machines.Atari2600.Tests --filter "FullyQualifiedName~SuiteSelfTests|FullyQualifiedName~SuiteRecordedTests|FullyQualifiedName~ScreenshotTests" --logger "console;verbosity=detailed"`, before and after the code above, with the same outcomes.
+The plan's step 2, on 14 October 2026 and again on 15 October after the move: `dotnet test -c Release tests/Dbhq.Machines.Atari2600.Tests --filter "FullyQualifiedName~SuiteSelfTests|FullyQualifiedName~SuiteRecordedTests|FullyQualifiedName~ScreenshotTests" --logger "console;verbosity=detailed"`, before and after the code above, with the same outcomes.
 
-**Trusted.** Every trusted self-test in `SuiteSelfTests.Trusted` passes in both regions: `cpu/`, `riot/`, `harness/sanity`, the four trusted cartridge tests, and every `tia-timing/`, `tia-render/` and `collision/` self-test but four. The four fail, in both regions, with the same bytes as after task 7:
+**Trusted.** Every trusted self-test in `SuiteSelfTests.Trusted` passes in both regions: `cpu/`, `riot/`, `harness/sanity`, the four trusted cartridge tests, and every `tia-timing/`, `tia-render/` and `collision/` self-test but four. The four failed, in both regions, with the same bytes as after task 7, and are now recorded with Dan's agreement:
 
 | Test | Region | CODE | OBSERVED | EXPECTED |
 |---|---|---|---|---|
@@ -39,7 +39,7 @@ The plan's step 2, on 14 October 2026: `dotnet test -c Release tests/Dbhq.Machin
 | `collision/merge-delivery-stretch` | both | `$03` | `$2A` | `$3E` |
 | `collision/merge-delivery-train` | both | `$04` | `$47` | `$7F` |
 
-**Recorded**, as `suite-outcomes.json` holds them, made from that file by a throwaway script and not typed:
+**Recorded**, as `suite-outcomes.json` holds them after the recorder's run of 15 October 2026 (`ATARI_RECORD=1 dotnet test -c Release tests/Dbhq.Machines.Atari2600.Tests --filter Record`), made from that file by a throwaway script and not typed:
 
 | Test | Kind | NTSC | PAL |
 |---|---|---|---|
@@ -47,6 +47,10 @@ The plan's step 2, on 14 October 2026: `dotnet test -c Release tests/Dbhq.Machin
 | `cartridge/bank-hotspot-window` | self-test | pass | pass |
 | `cartridge/power-on-bank` | self-test | pass, OBSERVED `$B1` | pass, OBSERVED `$B1` |
 | `cartridge/ram-superchip` | self-test | pass | pass |
+| `collision/merge-delivery` | self-test | fail, CODE `$04`, OBSERVED `$53`, EXPECTED `$7B` | fail, CODE `$04`, OBSERVED `$53`, EXPECTED `$7B` |
+| `collision/merge-delivery-replant` | self-test | fail, CODE `$03`, OBSERVED `$49`, EXPECTED `$4D` | fail, CODE `$03`, OBSERVED `$49`, EXPECTED `$4D` |
+| `collision/merge-delivery-stretch` | self-test | fail, CODE `$03`, OBSERVED `$2A`, EXPECTED `$3E` | fail, CODE `$03`, OBSERVED `$2A`, EXPECTED `$3E` |
+| `collision/merge-delivery-train` | self-test | fail, CODE `$04`, OBSERVED `$47`, EXPECTED `$7F` | fail, CODE `$04`, OBSERVED `$47`, EXPECTED `$7F` |
 | `harness/calibration` | screenshot, mismatched pixels | 0 | 407 |
 | `tia-render/colors` | screenshot, mismatched pixels | 0 | 3680 |
 | `tia-render/draw-delay` | screenshot, mismatched pixels | 0 | 0 |
@@ -77,9 +81,9 @@ The plan's step 2, on 14 October 2026: `dotnet test -c Release tests/Dbhq.Machin
 
 **Not run:** the tests of boards not modelled (`SuiteSelfTests.NotRun`, `suite.md` section 5.8, each with its issue) and every SECAM build (#106).
 
-## The four trusted tests that fail: the evidence for Dan
+## The four trusted tests that fail: the evidence Dan was given, and his answer
 
-Each is trusted by the spec's table: it is a self-test in `collision/`, checked on the suite's console, and its header does not say it is untested on hardware. Each stays on the not-yet list, failing exactly as above, until Dan says whether it moves to recorded with a `known-differences.md` entry. They share one cause, so the cause and what was tried come first, then each test.
+Each is trusted by the spec's table: it is a self-test in `collision/`, checked on the suite's console, and its header does not say it is untested on hardware. Each stayed on the not-yet list, failing exactly as above, until Dan said whether it moves to recorded with a `known-differences.md` entry; on 15 October 2026 he agreed for each, one at a time. They share one cause, so the cause and what was tried come first, then each test.
 
 ### The cause they share
 
@@ -135,7 +139,7 @@ Every other picture gives no mismatch in either region.
 
 ## The tests, test first
 
-`SuiteOutcomes`, `SuiteRecordedTests` and the new `SuiteSelfTests` facts were written before the file existed. On 14 October 2026, `dotnet test -c Release tests/Dbhq.Machines.Atari2600.Tests --filter "FullyQualifiedName~SuiteRecordedTests|FullyQualifiedName~SuiteSelfTests"` failed every recorded row and the recorder, each for want of `suite-outcomes.json`, and passed the trust-split check. Then `ATARI_RECORD=1 dotnet test -c Release tests/Dbhq.Machines.Atari2600.Tests --filter Record` wrote the file, and without the variable the whole project passed.
+`SuiteOutcomes`, `SuiteRecordedTests` and the new `SuiteSelfTests` facts were written before the file existed. On 14 October 2026, `dotnet test -c Release tests/Dbhq.Machines.Atari2600.Tests --filter "FullyQualifiedName~SuiteRecordedTests|FullyQualifiedName~SuiteSelfTests"` failed every recorded row and the recorder, each for want of `suite-outcomes.json`, and passed the trust-split check. Then `ATARI_RECORD=1 dotnet test -c Release tests/Dbhq.Machines.Atari2600.Tests --filter Record` wrote the file, and without the variable the whole project passed. On 15 October 2026, after Dan's answer, the four tests were added to `SuiteOutcomes.MovedFromTrusted` and the not-yet list removed first: the same filter then failed the eight new rows and the recorder, because the file did not hold the four yet. The recorder was run again, and the whole project passed.
 
 ## Every test file shown able to fail
 
@@ -153,10 +157,22 @@ The fault pass ran on 14 October 2026 in a scratch copy outside the repository (
 | T1 | a not-run test missing from `NotRun` | `SuiteSelfTests` (1) |
 | T2 | a trusted test missing from `Trusted` | `SuiteSelfTests` (1) |
 | T3 | a recorded cartridge test listed as not run too | `SuiteSelfTests` (2) |
-| T4 | a not-yet test listed as not run instead | `SuiteSelfTests` (1) |
+| T4 | a not-yet test listed as not run instead (first pass only; the list is gone) | `SuiteSelfTests` (1) |
 
 In all, 11 faults were planted and 10 were caught on the first run. **R2 survived it**: none of the recorded self-tests ends without a verdict, so the shape of a no verdict was never written. `SuiteRecordedTests.Each_kind_of_self_test_outcome_is_recorded_in_its_own_shape` now builds each shape from made-up runs. Run again (`... suite-record-faults.py <scratch> R2`), it caught R2. None survives.
 
+**After the move, 15 October 2026**, the pass was run again on the tree with the four moved (`python3 -I tools/probes/atari-2600/suite-record-faults.py <scratch>`), with T4 replaced and three faults added for the moved tests. O4's text had to follow the file, where `ram-superchip` is no longer the last self-test, and was run again alone (`... <scratch> O4`). Every fault was caught; the figures that changed:
+
+| Fault | Planted | Test files that failed |
+|---|---|---|
+| O4 | a recorded test left out of the file (run alone) | `SuiteRecordedTests` (3) |
+| R1 | a pass recorded without the OBSERVED its header reports | `SuiteRecordedTests` (4) |
+| T4 | a moved test kept in `Trusted` too | `SuiteSelfTests` (4), among them the trusted row of `collision/merge-delivery` in both regions |
+| T5 | a moved test dropped from the moved list | `SuiteRecordedTests` (1), `SuiteSelfTests` (1) |
+| O6 | a moved test's recorded code changed by hand | `SuiteRecordedTests` (2) |
+
+The others gave the same figures as the first pass. None survives. O1 to O6 are the plan's step 4: a recorded value changed by hand fails CI's test.
+
 ## Where this leaves the task
 
-The recorded outcomes are the recorder's and CI fails on a change. Every trusted self-test passes in both regions but the four above, which stay trusted and failing until Dan answers for each. When he does, a test he agrees to move goes to the recorded tests with its `known-differences.md` entry and its outcome recorded, and this entry says so.
+Every trusted self-test in `SuiteSelfTests` passes in both regions, and the not-yet list is gone. Every recorded outcome, the four moved tests included, is the recorder's, and CI fails on a change (the O faults above). The commands, all on this box in Release: the sweep, `dotnet test -c Release tests/Dbhq.Machines.Atari2600.Tests --filter "SuiteSelfTests|SuiteRecordedTests" --logger "console;verbosity=detailed"`; the recorder, `ATARI_RECORD=1 dotnet test -c Release tests/Dbhq.Machines.Atari2600.Tests --filter Record`; the fault pass, `python3 -I tools/probes/atari-2600/suite-record-faults.py <scratch>`.

@@ -7,10 +7,10 @@ namespace Dbhq.Machines.Atari2600.Tests;
 /// The suite's trusted self-tests, through the real bus, each in its own region (the plan's "The
 /// suite's results, and what each one gates"; <c>docs/atari-2600/facts/suite.md</c>). A row is
 /// added by the task that builds the last part its test needs, as <c>suite.md</c> section 5 places
-/// it; a trusted test the model does not pass yet is in <see cref="NotYet"/> with its failure,
-/// and must fail exactly so until it moves. A trusted test leaves <see cref="NotYet"/> only by
-/// passing, or, with Dan's agreement and a <c>docs/known-differences.md</c> entry, by moving to
-/// the recorded tests (<see cref="SuiteRecordedTests"/>). <see cref="NotRun"/> lists the tests of
+/// it. Tasks 4 to 10 kept a "not yet" list here of trusted tests whose parts were not built, each
+/// failing exactly as written; task 11 emptied it, and removed it: every trusted test passes but
+/// four, which moved to the recorded tests with Dan's agreement on 15 October 2026
+/// (<see cref="SuiteOutcomes.MovedFromTrusted"/>). <see cref="NotRun"/> lists the tests of
 /// boards not modelled, with each board's issue, and
 /// <see cref="The_trust_split_places_every_test_in_the_suite_exactly_once"/> checks that nothing
 /// is left out.
@@ -79,7 +79,8 @@ public class SuiteSelfTests(ITestOutputHelper output)
         "cpu/partial-drive",
 
         // Task 7, HMOVE and the motion clocks: the rows suite.md section 9 gives task 7, but the
-        // four collision/merge-delivery tests in NotYet. collision/blank-gating passed from task 6
+        // four collision/merge-delivery tests, recorded since 15 October 2026 with Dan's
+        // agreement (SuiteOutcomes.MovedFromTrusted). collision/blank-gating passed from task 6
         // on a visible overlap; with HMOVE its group 2 missiles meet inside the blank, and a fault
         // that stops the latches in the blank now fails it (the task 7 journal entry).
         "tia-timing/hmove-apply",
@@ -95,28 +96,6 @@ public class SuiteSelfTests(ITestOutputHelper output)
         "collision/latency-swallow",
         "collision/resbl-kill",
         "collision/stuck-drift",
-    ];
-
-    /// <summary>
-    /// Trusted self-tests in the folders run here whose parts come in a later task, with the next
-    /// task that must run them again (suite.md section 5.1). Each must fail, in both regions, with
-    /// the CODE, OBSERVED and EXPECTED written beside it, the first check that needs a part not built
-    /// yet: so a hang, a pass or a different failure is seen.
-    /// </summary>
-    public static readonly (string Test, int Task, byte Code, byte Observed, byte Expected)[] NotYet =
-    [
-        // The four trusted self-tests that measure when a motion step merged on the drawn line
-        // reaches a player's scan counter (suite.md section 5.6; tia.md section 16 and open item
-        // 12). Task 7 built HMOVE and they still fail: the suite states the rules only as tables
-        // of the scan's state, from one console, and no mechanism in the fact sheets gives them.
-        // Their failures were read on 14 October 2026, after task 7, and again in task 11, which
-        // triaged them and found no mechanism either (the task 11 journal entry). They stay here,
-        // failing exactly so, until Dan answers for each, one test at a time, whether it moves to
-        // the recorded tests with a known-differences entry.
-        ("collision/merge-delivery-replant", 11, 0x03, 0x49, 0x4D),
-        ("collision/merge-delivery-stretch", 11, 0x03, 0x2A, 0x3E),
-        ("collision/merge-delivery-train", 11, 0x04, 0x47, 0x7F),
-        ("collision/merge-delivery", 11, 0x04, 0x53, 0x7B),
     ];
 
     /// <summary>
@@ -174,7 +153,6 @@ public class SuiteSelfTests(ITestOutputHelper output)
 
     public static TheoryData<string, string> TrustedRows() => Rows(Trusted);
 
-    public static TheoryData<string, string> NotYetRows() => Rows(NotYet.Select(row => row.Test));
 
 
     [Theory]
@@ -186,22 +164,10 @@ public class SuiteSelfTests(ITestOutputHelper output)
         Assert.True(outcome.Passed, outcome.ToString());
     }
 
-    [Theory]
-    [MemberData(nameof(NotYetRows))]
-    public void Trusted_self_test_waiting_for_a_later_task_fails_where_expected(string test, string region)
-    {
-        var row = NotYet.Single(row => row.Test == test);
-        SuiteOutcome outcome = SuiteRunner.Run(test, TestPrograms.RegionNamed(region));
-        output.WriteLine($"{outcome} (task {row.Task} runs it next)");
-        Assert.False(outcome.Passed, $"{outcome}: it passes now, so move it from NotYet to Trusted");
-        Assert.True(outcome.Failed, $"{outcome}: no verdict, where a fail at CODE ${row.Code:X2} was expected");
-        Assert.Equal((row.Code, row.Observed, row.Expected), (outcome.Code, outcome.Observed, outcome.Expected));
-    }
-
     [Fact]
     public void No_test_is_in_two_lists()
     {
-        string[] all = [.. Trusted, .. NotYet.Select(row => row.Test), .. SuiteOutcomes.SelfTests, .. ScreenshotRunner.Tests, .. NotRun.Select(row => row.Test)];
+        string[] all = [.. Trusted, .. SuiteOutcomes.SelfTests, .. ScreenshotRunner.Tests, .. NotRun.Select(row => row.Test)];
         Assert.Equal(all.Length, all.Distinct(StringComparer.Ordinal).Count());
         foreach (string test in all)
         {
@@ -214,7 +180,8 @@ public class SuiteSelfTests(ITestOutputHelper output)
     /// The trust split, applied to every source in the pinned suite (the plan's trust table;
     /// <c>suite.md</c> section 1.3): a screenshot test is recorded; a self-test in a trusted folder,
     /// <c>harness/sanity</c> and the four trusted cartridge tests are trusted, and so in
-    /// <see cref="Trusted"/> or <see cref="NotYet"/>; the recorded cartridge tests are recorded; and
+    /// <see cref="Trusted"/>, unless Dan agreed to move it to recorded
+    /// (<see cref="SuiteOutcomes.MovedFromTrusted"/>); the recorded cartridge tests are recorded; and
     /// every other cartridge test is in <see cref="NotRun"/>. So no test is skipped silently.
     /// </summary>
     [Fact]
@@ -222,15 +189,18 @@ public class SuiteSelfTests(ITestOutputHelper output)
     {
         string[] sources = [.. Dbhq.Cpu6502.TestSupport.Atari2600Suite.Names.Where(name => name.EndsWith(".asm", StringComparison.Ordinal)).Select(name => name[..^".asm".Length])];
         Assert.NotEmpty(sources);
-        HashSet<string> trusted = [.. Trusted, .. NotYet.Select(row => row.Test)];
+        HashSet<string> trusted = [.. Trusted];
         HashSet<string> screenshots = [.. ScreenshotRunner.Tests];
         HashSet<string> notRun = [.. NotRun.Select(row => row.Test)];
         foreach (string test in sources)
         {
             bool screenshot = screenshots.Contains(test);
+            bool moved = SuiteOutcomes.MovedFromTrusted.Contains(test);
             bool trustedBySplit = !screenshot && (TrustedFolders.Any(folder => test.StartsWith(folder, StringComparison.Ordinal)) || test == "harness/sanity" || TrustedCartridge.Contains(test));
             bool recordedBySplit = screenshot || SuiteOutcomes.SelfTests.Contains(test);
-            Assert.True(trustedBySplit == trusted.Contains(test), $"{test}: trusted by the split is {trustedBySplit}, in Trusted or NotYet is {trusted.Contains(test)}");
+            Assert.True(!moved || trustedBySplit, $"{test}: moved from trusted, but the split does not trust it");
+            Assert.True((trustedBySplit && !moved) == trusted.Contains(test), $"{test}: trusted by the split and not moved is {trustedBySplit && !moved}, in Trusted is {trusted.Contains(test)}");
+            Assert.True(!moved || recordedBySplit, $"{test}: moved from trusted, so it must be a recorded self-test");
             Assert.True((!trustedBySplit && !recordedBySplit) == notRun.Contains(test), $"{test}: neither trusted nor recorded by the split, so it must be in NotRun, and only then");
         }
 
