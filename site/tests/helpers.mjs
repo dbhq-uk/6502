@@ -52,5 +52,25 @@ export function modelPanel(html, module) {
     return html.slice(tab, tab + 1 + end);
   }
   const at = html.search(new RegExp(`<section class="model"[^>]*\\bdata-model="${module}"`));
-  return at < 0 ? '' : html.slice(at, html.indexOf('<section class="photos"', at));
+  return at < 0 ? '' : html.slice(at, html.indexOf('<section class="machine-more"', at));
+}
+
+/**
+ * One part of a machine page, by its id: a section, from its
+ * aria-labelledby="<id>" to the section's end, or a part of the reference at
+ * the foot of the page, a <details id="<id>"> (src/components/Fold.astro), to
+ * the end of the details. '' when the page has no such part.
+ */
+export function pagePart(html, id) {
+  const at = html.indexOf(`aria-labelledby="${id}"`);
+  if (at >= 0) return html.slice(at, html.indexOf('</section>', at));
+  const fold = html.search(new RegExp(`<details\\b[^>]*\\bid="${id}"`));
+  return fold < 0 ? '' : html.slice(fold, html.indexOf('</details>', fold) + '</details>'.length);
+}
+
+/** A reference part's label, the text of its <summary>, and whether it is open when the page loads: '' and false when it is not a <details>. */
+export function foldOf(part) {
+  const tag = /^<details\b[^>]*>/.exec(part)?.[0];
+  if (!tag) return { summary: '', open: false };
+  return { summary: visibleText(/<summary\b[^>]*>([\s\S]*?)<\/summary>/.exec(part)?.[1] ?? ''), open: /\sopen(?:[\s=>])/.test(tag) };
 }

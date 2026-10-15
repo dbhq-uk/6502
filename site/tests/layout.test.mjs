@@ -43,6 +43,10 @@ test('a reading section takes the whole container and only its text is held to t
     assert.doesNotMatch(rule(selector), /max-width/, `${selector} caps its own width again`);
   }
   assert.doesNotMatch(global, /max-width: 860px/);
+  // No selector that names a reading section may cap its width in pixels, however it is written.
+  for (const r of rules.filter((r) => /\.narrow/.test(r.selector))) {
+    assert.doesNotMatch(r.body, /max-width: \d+px/, `${r.selector} caps its width in pixels`);
+  }
   // The text is held to the measure: a reading section's own paragraphs and lists,
   // rendered markdown at any depth, the machine head, the journal list and every
   // panel's notes.

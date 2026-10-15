@@ -56,14 +56,14 @@ const BOARD_ISSUE = 126;
   <div class="vcs-screen" data-vcs-screen role="application" aria-label="The Atari 2600's screen" aria-describedby="vcs-keys">
     <canvas data-vcs-canvas width={WIDTH} height={ntsc.lines}></canvas>
   </div>
-  <p class="vcs-note">The picture is the machine's own, pixel for pixel, as its TIA draws it, through a palette computed from each region's colour signal, and shown in the region's pixel shape, wide and short. It models the picture and is not a CRT: no scan lines, no glow, no curve and no colour bleed. A frame shorter or longer than a television's is shown as it is.</p>
-  <p class="vcs-note" id="vcs-keys">With the screen focused, joystick 1 is {directions(0)} to move and {stickKey(0, 'Fire')} to fire, and joystick 2 is {directions(1)} and {stickKey(1, 'Fire')}. {switchKey('Reset')} holds Reset and {switchKey('Select')} holds Select; {switchKey('BlackAndWhite')} flips the colour switch, {switchKey('LeftDifficultyA')} the left difficulty and {switchKey('RightDifficultyA')} the right. Tab moves on and Escape lets go, so the page never keeps the keyboard. Gamepads work too, in the browser's standard layout: the first is joystick 1 and the second joystick 2, the d-pad or the left stick moves, the bottom face button fires, and the middle pair are Select and Reset. Every key held goes to the machine as it is, opposite directions together included.</p>
+  <p class="vcs-note">The picture is the machine's own, pixel for pixel, as its TIA draws it, through a palette computed from each region's colour signal, in the region's pixel shape, wide and short. It models the picture and is not a CRT: no scan lines, glow, curve or colour bleed. A frame shorter or longer than a television's is shown as it is.</p>
+  <p class="vcs-note" id="vcs-keys">With the screen focused, joystick 1 is {directions(0)} to move and {stickKey(0, 'Fire')} to fire, and joystick 2 is {directions(1)} and {stickKey(1, 'Fire')}. {switchKey('Reset')} holds Reset and {switchKey('Select')} holds Select; {switchKey('BlackAndWhite')} flips the colour switch, {switchKey('LeftDifficultyA')} the left difficulty and {switchKey('RightDifficultyA')} the right. Tab moves on and Escape lets go, so the page never keeps the keyboard. Gamepads work too, in the browser's standard layout: the first is joystick 1 and the second joystick 2. The d-pad or the left stick moves, the bottom face button fires, and the middle pair are Select and Reset. Every key held goes to the machine as it is, opposite directions together included.</p>
   <div class="vcs-controls">
     <button type="button" class="btn pill" data-vcs-start disabled>Start the Atari 2600{download !== null && `, a download of up to ${megabytes(download)} MB`}</button>
     <button type="button" class="btn small" data-vcs-power disabled>Power off and on</button>
     <button type="button" class="btn small" data-vcs-sound aria-pressed="false" disabled>Turn sound on</button>
   </div>
-  <p class="vcs-status" role="status" data-vcs-status>The Atari 2600 runs in your browser, and it needs JavaScript to do that. With JavaScript off, the page is shown, but nothing runs.</p>
+  <p class="vcs-status" role="status" data-vcs-status>The Atari 2600 runs in your browser and needs JavaScript. Without it, the page is shown, but nothing runs.</p>
   <p class="vcs-line" data-vcs-sound-status aria-live="polite">Sound is off.</p>
   <p class="vcs-line" data-vcs-power-line aria-live="polite"></p>
   <p class="vcs-speed" data-vcs-speed></p>
@@ -76,7 +76,7 @@ const BOARD_ISSUE = 126;
       <button type="button" class="btn small" data-vcs-toggle="LeftDifficultyA" aria-pressed="false" disabled>Left difficulty B</button>
       <button type="button" class="btn small" data-vcs-toggle="RightDifficultyA" aria-pressed="false" disabled>Right difficulty B</button>
     </div>
-    <p class="vcs-note">Reset and Select are held while pressed and spring back, as on the console. The colour switch ({switchKey('BlackAndWhite')}) and the two difficulty switches ({switchKey('LeftDifficultyA')} and {switchKey('RightDifficultyA')}) flip on each press and stay where they are put; each button says where its switch is. Power off and on keeps them where they are.</p>
+    <p class="vcs-note">Reset and Select are held while pressed and spring back, as on the console. The colour switch ({switchKey('BlackAndWhite')}) and the two difficulty switches ({switchKey('LeftDifficultyA')} and {switchKey('RightDifficultyA')}) flip on each press and stay; each button says where its switch is. Power off and on leaves them as they are.</p>
   </fieldset>
   <div class="vcs-pad" role="group" aria-label="Joystick 1">
     {pad.map((p) => (
@@ -101,6 +101,6 @@ const BOARD_ISSUE = 126;
       <input type="file" accept=".a26,.bin,.rom" data-vcs-file hidden />
     </div>
     <p class="vcs-line" data-vcs-cartridge aria-live="polite">{rom ? `Start puts ${rom.title} in.` : 'Start, then choose a cartridge file.'}</p>
-    <p class="vcs-note">Drop a cartridge file on the page, or press Load a cartridge file. The file is read in this tab and is not uploaded anywhere. A cartridge file has no header, so the board is chosen by the file's size, and the line above says which. A game made for another board of the same size will not run: choosing the board from the file itself is <a href={issueUrl(BOARD_ISSUE)}>issue {BOARD_ISSUE}</a>.</p>
+    <p class="vcs-note">Drop a cartridge file on the page, or press Load a cartridge file. It is read in this tab and is not uploaded anywhere. A cartridge file has no header, so the board is chosen by the file's size, and the line above says which. A game made for another board of the same size will not run: choosing the board from the file itself is <a href={issueUrl(BOARD_ISSUE)}>issue {BOARD_ISSUE}</a>.</p>
   </fieldset>
 </div>

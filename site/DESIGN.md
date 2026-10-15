@@ -25,7 +25,7 @@ paper, ink, an amber phosphor, a Basedash-style serif look, and this.
   all open licence and self-hosted through Fontsource, so nothing loads from a
   font host. The reference's own display face is a custom one; Inter Tight stands
   in for it.
-- **Layout: the width is used, and only running text is held to a measure** (15 October 2026, after Dan found the margins too big). Every page shares one container, `--max` 1320 pixels with `--pad` of 16 to 32 pixels each side, and a section has `--section`, 32 to 64 pixels, above and below it. A reading section (`.narrow`, `.prose`) used to be an 860-pixel strip centred in the container, which left wide dead margins on a desktop and squeezed the machine panels into it. Now it takes the whole container, left-aligned with the header, so a machine's panel, its tables, its code and its photographs use the full width. Only paragraphs, list items and the panels' notes are held to `--measure`, 33em, about 72 characters of Inter at any size; a cap in `ch` is not used for Inter text, because 72ch is about 90 characters of it. The machine head puts its text at the measure on the left and the photograph at the container's right edge, in line with the panel. A machine's screen is as wide as its panel but never taller than the window under the header (`--screen-fit`), and the NES and Atari 2600 pads keep the width of a real pad, centred. The journal list runs in two columns where two fit at a readable width. `tests/layout.test.mjs` holds these numbers.
+- **Layout: the width is used, and only running text is held to a measure** (15 October 2026, after Dan found the margins too big). Every page shares one container, `--max` 1320 pixels with `--pad` of 16 to 32 pixels each side, and a section has `--section`, 32 to 64 pixels, above and below it. A reading section (`.narrow`, `.prose`) used to be an 860-pixel strip centred in the container, which left wide dead margins on a desktop and squeezed the machine panels into it. Now it takes the whole container, left-aligned with the header, so a machine's panel, its tables, its code and its photographs use the full width. Only paragraphs, list items and the panels' notes are held to `--measure`, 33em, about 74 characters of Inter at any size; a cap in `ch` is not used for Inter text, because 72ch is about 90 characters of it. The machine head puts its text at the measure on the left and the photograph at the container's right edge, in line with the panel. A machine's screen is as wide as its panel but never taller than the window under the header (`--screen-fit`), and the NES and Atari 2600 pads keep the width of a real pad, centred. The journal list runs in two columns where two fit at a readable width. `tests/layout.test.mjs` holds these numbers.
 - **Contrast:** the reference's dimmest text colour, `#697368`, measures 4.25 to 1
   on black, under the 4.5 that AA asks of small text. It is lightened to
   `#737d72` (4.91). A test computes every text pair from the real tokens, and for text on the
@@ -280,16 +280,21 @@ Not used.
 - Draft: `1536x864`, quality low. Prompt: "A dark 1970s single-board computer seen from above at a slight angle: six red-orange seven-segment LED digits glowing in a row above a hex keypad of small square keys, black background, soft phosphor-green edge light (#ddffdc), one lime (#7fee64) glint, macro photography, shallow depth of field, no text, no logos, no letters on the keys"
 - Final: not made, dropped: it is not a KIM-1 (twelve keys where the board has twenty-four) and reads as one
 
+## The shape of a machine page
+
+Every machine page has the same shape, so the site reads as one product (Dan, 15 October 2026: "too much text where the app is; keep everything concise"). The visitor came to run the machine, so around it there is only what it is, its controls, how to start, and one short line under it that says whose ROM or game it runs and links the full rights. That line is never folded.
+
+The order is the head (what the machine is, its acceptance count, its photograph and credit), the machine, Try it, how to type at it (the KIM-1's teletype, the Acorns' keyboards), the 3D models, and then one section, "About the" machine, of reference: what is modelled and what is not with each issue, how it is checked, the discs' credits, the photographs and the full rights. Each part of it is a closed `<details>` (`src/components/Fold.astro`) whose summary is a plain label, because a screen reader reads it out. The facts, links and credits stay in the page; they just do not push the machine down the screen. Long small print inside a panel or a section (the disc drive's, how long a tape takes, the symbols table) uses the same component, quiet, with no rules. The fold sets no text colour, so it adds nothing to the contrast table, and its style is scoped to the details and its summary, so the markup around it is unchanged. `tests/machine-pages-shape.test.mjs` holds all of this.
+
 ## The photographs
 
 Every machine page shows a photograph of the original device in its head,
 beside the machine's details, and credits it underneath (issue 28; Dan,
 2 October 2026). Rights are not a gate; the credit is. A machine may have
 several (Dan, 2 October 2026: "cross-reference multiple photos"): the first in
-its registry list is the main one, in the head, and a section of its own,
-"Photographs of the original", below the model shows every one, main one
-first, each with the same credit and a line saying what the 3D model took
-from it. The photographs live in
+its registry list is the main one, in the head, and a closed part of the
+reference at the foot of the page shows every one, main one first, each with
+the same credit and a line saying what the 3D model took from it. The photographs live in
 `src/assets/photos/`, apart from the generated imagery, and the two folders
 never share a file.
 

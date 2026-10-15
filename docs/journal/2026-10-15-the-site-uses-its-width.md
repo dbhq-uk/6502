@@ -37,7 +37,7 @@ Taking the screenshots at 390 pixels showed that four of the seven pages photogr
 - **The Atari 2600 page.** A long hash in the rights paragraph did not break.
 - **The status page and a journal entry.** Long test names in `code` did not break.
 
-Running text in `.prose` now breaks a long word rather than overflow, and `code` there may break anywhere. After the change no page of the built site, all 98 of them, is wider than the window at 390 or at 1024 pixels wide; a script outside the repository loaded each one and compared its scroll width with the window's.
+Running text in `.prose` now breaks a long word rather than overflow, and `code` there may break anywhere. After the change no page of the built site, all 100 pages the build made when it was checked, is wider than the window at 390 or at 1024 pixels wide; a script outside the repository loaded each one and compared its scroll width with the window's.
 
 ## What was checked
 

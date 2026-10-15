@@ -115,7 +115,7 @@
 
   /* layout (15 October 2026: the margins were too big). --max is the container
      every page shares; --pad is its side padding; --section the space above and
-     below a section. --measure caps a paragraph at about 72 characters: Inter's
+     below a section. --measure caps a paragraph at about 74 characters: Inter's
      average character, with the body's letter-spacing, is about 0.45em wide, so
      33em is the measure at any font size, where 72ch would be about 90.
      tests/layout.test.mjs holds all four. */

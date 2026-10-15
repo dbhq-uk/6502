@@ -48,6 +48,8 @@
 //
 // Then the Atari 2600, the same way again: scripts/browser-check-atari-2600.mjs.
 //
+// Then, on each machine's page, links into the folded reference: scripts/browser-check-folds.mjs.
+//
 //   node scripts/browser-check.mjs [--throttle N] [--measure seconds]
 //
 // --throttle N slows the browser's CPU N times (Chrome's own CPU throttling),
@@ -64,6 +66,7 @@ import { checkBbcMicro, checkBbcModels } from './browser-check-bbc.mjs';
 import { checkNes } from './browser-check-nes.mjs';
 import { checkElectron } from './browser-check-electron.mjs';
 import { checkAtari2600 } from './browser-check-atari-2600.mjs';
+import { checkFoldLinks } from './browser-check-folds.mjs';
 import { checkKim1Teletype } from './browser-check-kim1-tty.mjs';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
@@ -714,7 +717,9 @@ try {
   await settle();
   await page.evaluate(() => document.activeElement?.blur());
 
-  // ---- The photographs section: every photograph loads, from this site ----
+  // ---- The photographs: every photograph loads, from this site ----
+  // They are a closed part of the reference at the foot of the page, so they are opened as a visitor opens them.
+  await page.locator('#photos > summary').click();
   const items = page.locator('[data-photo-item-img]');
   const count = await items.count();
   const loaded = [];
@@ -848,6 +853,15 @@ try {
 
   // ---- The Atari 2600 ----
   await checkAtari2600({ browser, watch, problems, origin });
+
+  // ---- Links into the folded reference, on every machine's page ----
+  const rom = { rom: '[data-rights-line] a[href="#rom"]' };
+  const symbols = { ...rom, symbols: 'a[href="#symbols"]' };
+  await checkFoldLinks({ browser, watch, problems, origin, machine: 'kim-1', folds: ['rom', 'left-out', 'photos'], links: rom });
+  await checkFoldLinks({ browser, watch, problems, origin, machine: 'bbc-micro', folds: ['rom', 'left-out', 'discs', 'photos', 'symbols'], links: symbols });
+  await checkFoldLinks({ browser, watch, problems, origin, machine: 'nes', folds: ['rom', 'left-out', 'photos'], links: rom });
+  await checkFoldLinks({ browser, watch, problems, origin, machine: 'electron', folds: ['rom', 'left-out', 'photos', 'symbols'], links: symbols });
+  await checkFoldLinks({ browser, watch, problems, origin, machine: 'atari-2600', folds: ['rom', 'left-out', 'checked', 'photos'], links: rom });
 } catch (error) {
   problems.push(error.message);
 } finally {
