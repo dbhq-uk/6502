@@ -60,12 +60,6 @@ public sealed class TiaPlayer : IReportsState
     /// <summary>The position counter, for the tests and task 7's motion.</summary>
     internal TiaPositionCounter Counter => _counter;
 
-    /// <summary>The "new" graphics register, written by GRPx.</summary>
-    internal byte New => _new;
-
-    /// <summary>The "old" graphics register, copied from the new one by the other player's GRP write.</summary>
-    internal byte Old => _old;
-
     /// <summary>A RESPx strobe has landed (tia.md section 9): no start of its own.</summary>
     internal void Reset() => _counter.Reset(sendsStart: false);
 

@@ -95,9 +95,6 @@ internal sealed class TiaPositionCounter : IReportsState
     /// <summary>The counter's place in its sequence, 0 to 39.</summary>
     internal int Count => _count;
 
-    /// <summary>True while a reset holds the counter.</summary>
-    internal bool Resetting => _reset > 0;
-
     /// <summary>The start signal: active for the four clocks of the count it began.</summary>
     internal bool Start => _start;
 

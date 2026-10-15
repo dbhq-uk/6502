@@ -7,7 +7,14 @@ A fault no test file catches shows as SURVIVED. Standard library only.
 
 SCRATCH_DIR defaults to a new temporary directory; FAULT_IDs (B1, T4, ...) pick some faults only.
 The suite's files are copied from the repository's .testdata cache when it has them, so the scratch
-copy need not fetch them again. Needs dotnet on PATH (or in ~/.dotnet)."""
+copy need not fetch them again. Needs dotnet on PATH (or in ~/.dotnet).
+
+A record of its day. Its copy list predates the tests that read machines/ and docs/, so on later
+code the scratch copy's baseline fails in Atari2600AcceptanceTests, BootTests, PagePathTests,
+SuiteRecordedTests and SuiteSelfTests (162 cases on 15 October 2026), and a fault is read by the
+files beyond those. T7 stopped matching when task 9 gave the TIA its fire buttons; it was ported on
+15 October 2026 (the final review's fix wave) and, run alone, Atari2600BusTests, ControllersTests and
+TiaInputTests caught it."""
 import collections, os, re, shutil, subprocess, sys, tempfile
 
 SRC = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", ".."))
@@ -81,7 +88,7 @@ FAULTS = [
     ("T4 the line limit one line late", D + "FrameBuffer.cs", "        if (++_row == MaxLines)\n", "        if (++_row == MaxLines + 1)\n"),
     ("T5 CXCLR clears nothing", TIA, "            case Cxclr:\n                _collisions = 0;\n", "            case Cxclr:\n"),
     ("T6 CXBLPF drives D6", TIA, "        0x06 => 0x80,\n", ""),
-    ("T7 a fire button reads pressed", TIA, "        return register is 0x0C or 0x0D ? (byte)0x80 : (byte)0x00;", "        return 0x00;"),
+    ("T7 a fire button reads pressed", TIA, "        return (byte)(((level >> (register - 0x0C)) & 1) << 7);", "        return 0x00;"),
     ("T8 a collision register's D7 and D6 swapped", TIA,
      "            return (byte)(((_collisions >> (2 * register)) & 0x03) << 6);",
      "            int pair = (_collisions >> (2 * register)) & 0x03;\n            return (byte)(((pair >> 1) | ((pair & 1) << 1)) << 6);"),

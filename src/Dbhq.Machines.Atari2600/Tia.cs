@@ -233,27 +233,6 @@ public sealed class Tia : IReportsState
     /// <summary>The two sound channels, for the tests.</summary>
     internal TiaSound Audio => _audio;
 
-    /// <summary>The playfield, for the tests.</summary>
-    internal TiaPlayfield Playfield => _playfield;
-
-    /// <summary>Player 0, for the tests.</summary>
-    internal TiaPlayer Player0 => _player0;
-
-    /// <summary>Player 1, for the tests.</summary>
-    internal TiaPlayer Player1 => _player1;
-
-    /// <summary>Missile 0, for the tests.</summary>
-    internal TiaMissile Missile0 => _missile0;
-
-    /// <summary>Missile 1, for the tests.</summary>
-    internal TiaMissile Missile1 => _missile1;
-
-    /// <summary>The ball, for the tests.</summary>
-    internal TiaBall Ball => _ball;
-
-    /// <summary>HMOVE and the motion clocks, for the tests.</summary>
-    internal TiaMotion Motion => _motion;
-
     /// <summary>True while the horizontal blank is on, for the colour clock the next <see cref="Tick"/> runs.</summary>
     internal bool HorizontalBlank => _hblank;
 

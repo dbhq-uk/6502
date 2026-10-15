@@ -9,7 +9,14 @@ Standard library only.
 
 SCRATCH_DIR defaults to a new temporary directory; FAULT_IDs (R1, C4, ...) pick some faults only.
 The suite's files are copied from the repository's .testdata cache when it has them, so the scratch
-copy need not fetch them again. Needs dotnet on PATH (or in ~/.dotnet)."""
+copy need not fetch them again. Needs dotnet on PATH (or in ~/.dotnet).
+
+A record of its day. Its copy list predates the tests that read machines/ and docs/, so on later
+code the scratch copy's baseline fails in Atari2600AcceptanceTests, BootTests, PagePathTests,
+SuiteRecordedTests and SuiteSelfTests (162 cases on 15 October 2026), and a fault is read by the
+files beyond those. R4 stopped matching when task 6's review changed Reset; it was ported on
+15 October 2026 (the final review's fix wave) and, run alone, TiaMissileTests and TiaPlayerTests
+caught it."""
 import collections, os, re, shutil, subprocess, sys, tempfile
 
 SRC = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", ".."))
@@ -21,7 +28,7 @@ FAULTS = [
     ("R1 a reset holds the counter three clocks", CTR, [("    private const int ResetClocks = 4;", "    private const int ResetClocks = 3;")]),
     ("R2 a reset is colour clocks only", CTR, [("    private const int ResetMotionClocks = 2;", "    private const int ResetMotionClocks = 0;")]),
     ("R3 a reset is MOTCK clocks only", CTR, [("    private const int ResetMotionClocks = 2;", "    private const int ResetMotionClocks = 4;")]),
-    ("R4 a held decode is dropped by a reset", CTR, [("        _startBefore = false;\n        if (sendsStart)", "        _startBefore = false;\n        _held = None;\n        if (sendsStart)")]),
+    ("R4 a held decode is dropped by a reset", CTR, [("        _cutLate = true;\n        if (sendsStart)", "        _cutLate = true;\n        _held = None;\n        if (sendsStart)")]),
     ("R5 RESBL sends no start", BL, [("_counter.Reset(sendsStart: true);", "_counter.Reset(sendsStart: false);")]),
     ("R6 RESP0 and RESP1 send a start", PL, [("_counter.Reset(sendsStart: false);", "_counter.Reset(sendsStart: true);")]),
     ("D1 the close copy decoded a count late", CTR, [("        3 => Close,", "        4 => Close,")]),

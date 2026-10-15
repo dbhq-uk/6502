@@ -5,7 +5,13 @@ suite's pin checks) and print which test classes failed. Standard library only.
     python3 -I tools/probes/atari-2600/board-faults.py [SCRATCH_DIR] [FAULT_ID ...]
 
 SCRATCH_DIR defaults to a new temporary directory; FAULT_IDs (R1, K4, ...) pick some faults only.
-Needs dotnet on PATH (or in ~/.dotnet)."""
+Needs dotnet on PATH (or in ~/.dotnet).
+
+A record of its day. Its copy list predates the tests that read machines/ and docs/, so on later
+code the scratch copy's baseline fails in Atari2600AcceptanceTests, BootTests, PagePathTests,
+SuiteRecordedTests and SuiteSelfTests (162 cases on 15 October 2026), and a fault is read by the
+files beyond those. R4 stopped matching when Region gained its hue angle (task 5); it was ported on 15 October 2026
+(the final review's fix wave) and, run alone, RegionTests caught it."""
 import os, re, shutil, subprocess, sys, tempfile
 
 SRC = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", ".."))
@@ -16,7 +22,7 @@ FAULTS = [
     ("R1 PAL clock typed as Korth's", B + "Region.cs", "colourClockHz: 4_433_618.75 * 4 / 5,", "colourClockHz: 3_546_894.0,"),
     ("R2 CPU clock a quarter", B + "Region.cs", "public double CpuHz => ColourClockHz / 3;", "public double CpuHz => ColourClockHz / 4;"),
     ("R3 NTSC window a line late", B + "Region.cs", "firstShownLine: 19,", "firstShownLine: 20,"),
-    ("R4 PAL pixel 2:1", B + "Region.cs", "pixelWidth: 52,\n        pixelHeight: 25);", "pixelWidth: 2,\n        pixelHeight: 1);"),
+    ("R4 PAL pixel 2:1", B + "Region.cs", "pixelWidth: 52,\n        pixelHeight: 25,", "pixelWidth: 2,\n        pixelHeight: 1,"),
     ("R5 PAL nominal lines 313", B + "Region.cs", "nominalLines: 312,", "nominalLines: 313,"),
     ("C1 filler checked in bank 0 only", B + "Cartridge.cs", "for (int bank = 0; bank < file.Length; bank += BankSize)", "for (int bank = 0; bank < BankSize; bank += BankSize)"),
     ("C2 filler 128 bytes", B + "Cartridge.cs", "private const int FillerSize = 256;", "private const int FillerSize = 128;"),

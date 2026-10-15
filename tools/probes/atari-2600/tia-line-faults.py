@@ -8,7 +8,14 @@ Standard library only.
 
 SCRATCH_DIR defaults to a new temporary directory; FAULT_IDs (L1, P4, ...) pick some faults only.
 The suite's files are copied from the repository's .testdata cache when it has them, so the scratch
-copy need not fetch them again. Needs dotnet on PATH (or in ~/.dotnet)."""
+copy need not fetch them again. Needs dotnet on PATH (or in ~/.dotnet).
+
+A record of its day. Its copy list predates the tests that read machines/ and docs/, so on later
+code the scratch copy's baseline fails in Atari2600AcceptanceTests, BootTests, PagePathTests,
+SuiteRecordedTests and SuiteSelfTests (162 cases on 15 October 2026), and a fault is read by the
+files beyond those. L1 stopped matching when task 7 made HMOVE choose where the blank ends; it was
+ported on 15 October 2026 (the final review's fix wave) and, run alone, TiaLineTests, FrameBufferTests
+and the TIA's object tests caught it."""
 import collections, os, re, shutil, subprocess, sys, tempfile
 
 SRC = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", ".."))
@@ -17,7 +24,7 @@ BUS, TIA, PF, PAL, FB, REG = D + "Atari2600Bus.cs", D + "Tia.cs", D + "TiaPlayfi
 
 FAULTS = [
     # (id and name, file, [(old, new), ...])
-    ("L1 the blank ends on LRHB, at 76", TIA, [("        if (state == Rhb)\n", "        if (state == 0b010111)\n")]),
+    ("L1 the blank ends on LRHB, at 76", TIA, [("        if (state == (_motion.Extended ? Lrhb : Rhb))\n", "        if (state == Lrhb)\n")]),
     ("L2 the line ends a count early", TIA, [("    private const int Shb = 0b010100;", "    private const int Shb = 0b101001;")]),
     ("L3 RSYNC restarts the line four clocks after the write", TIA, [("                _phase = 1;\n", "                _phase = 0;\n")]),
     ("L4 RSYNC does nothing", TIA, [("                _rsync = true;\n", "")]),
