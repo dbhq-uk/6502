@@ -151,6 +151,13 @@ public class SuiteSelfTests(ITestOutputHelper output)
     /// <summary>The trusted cartridge tests, on the boards of task 2 (the plan's trust table).</summary>
     private static readonly string[] TrustedCartridge = ["cartridge/mirror-2k", "cartridge/bank-f8", "cartridge/bank-f6", "cartridge/bank-f4"];
 
+    /// <summary>
+    /// The recorded cartridge tests, whose headers the plan's trust table does not vouch for. Typed
+    /// here, apart from <see cref="SuiteOutcomes.SelfTests"/>, so a test moved into that list from
+    /// <see cref="NotRun"/> fails the split check (task 11's review).
+    /// </summary>
+    private static readonly string[] RecordedCartridge = ["cartridge/bank-fa", "cartridge/bank-hotspot-window", "cartridge/power-on-bank", "cartridge/ram-superchip"];
+
     public static TheoryData<string, string> TrustedRows() => Rows(Trusted);
 
 
@@ -197,7 +204,8 @@ public class SuiteSelfTests(ITestOutputHelper output)
             bool screenshot = screenshots.Contains(test);
             bool moved = SuiteOutcomes.MovedFromTrusted.Contains(test);
             bool trustedBySplit = !screenshot && (TrustedFolders.Any(folder => test.StartsWith(folder, StringComparison.Ordinal)) || test == "harness/sanity" || TrustedCartridge.Contains(test));
-            bool recordedBySplit = screenshot || SuiteOutcomes.SelfTests.Contains(test);
+            bool recordedBySplit = screenshot || RecordedCartridge.Contains(test) || moved;
+            Assert.True((RecordedCartridge.Contains(test) || moved) == SuiteOutcomes.SelfTests.Contains(test), $"{test}: a recorded cartridge test or moved from trusted is {RecordedCartridge.Contains(test) || moved}, in SuiteOutcomes.SelfTests is {SuiteOutcomes.SelfTests.Contains(test)}");
             Assert.True(!moved || trustedBySplit, $"{test}: moved from trusted, but the split does not trust it");
             Assert.True((trustedBySplit && !moved) == trusted.Contains(test), $"{test}: trusted by the split and not moved is {trustedBySplit && !moved}, in Trusted is {trusted.Contains(test)}");
             Assert.True(!moved || recordedBySplit, $"{test}: moved from trusted, so it must be a recorded self-test");
@@ -205,6 +213,21 @@ public class SuiteSelfTests(ITestOutputHelper output)
         }
 
         Assert.Equal(sources.Length, trusted.Count + screenshots.Count + SuiteOutcomes.SelfTests.Length + notRun.Count);
+    }
+
+    /// <summary>
+    /// Each test moved from trusted to recorded has its <c>docs/known-differences.md</c> entry, as the
+    /// plan's trust table asks ("moves to recorded with a known-differences entry giving its cause and
+    /// Dan's agreement"): its name appears there (task 11's review).
+    /// </summary>
+    [Fact]
+    public void Each_test_moved_from_trusted_is_named_in_the_known_differences()
+    {
+        string known = File.ReadAllText(Path.Combine(Dbhq.Cpu6502.TestSupport.RepoPaths.Root, "docs", "known-differences.md"));
+        foreach (string test in SuiteOutcomes.MovedFromTrusted)
+        {
+            Assert.True(known.Contains($"`{test}`", StringComparison.Ordinal), $"{test} moved from trusted, but docs/known-differences.md does not name it");
+        }
     }
 
     private static TheoryData<string, string> Rows(IEnumerable<string> tests)

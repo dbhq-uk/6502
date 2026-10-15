@@ -73,15 +73,12 @@ public class SuiteRecordedTests(ITestOutputHelper output)
         output.WriteLine($"wrote {SuiteOutcomes.FilePath}");
     }
 
-    // While the recorder writes the file (ATARI_RECORD=1, never in CI), the file on disk may be the
-    // one being replaced, so a row only shows its outcome; every other run compares it.
+    // Every row compares, the recorder's run included: it compares with the file as it stood when
+    // the run began (SuiteOutcomes.Recorded), so the recorder writing the file in the same run
+    // cannot race it, and a run with ATARI_RECORD=1 cannot pass a changed outcome vacuously (task
+    // 11's review). A changed outcome then fails while it is recorded, which is the point.
     private static void AssertRecorded(string kind, string test, string region, JsonNode outcome)
     {
-        if (SuiteOutcomes.Recording)
-        {
-            return;
-        }
-
         JsonNode? recorded = SuiteOutcomes.Recorded(kind, test, region);
         Assert.True(recorded is not null, $"{test} ({region}) is not in {SuiteOutcomes.FilePath}: record it with {SuiteOutcomes.RecordCommand}");
         Assert.True(JsonNode.DeepEquals(recorded, outcome), $"{test} ({region}) gave {outcome.ToJsonString()} where {recorded!.ToJsonString()} is recorded. Say why in the journal, then record it again with {SuiteOutcomes.RecordCommand}.");

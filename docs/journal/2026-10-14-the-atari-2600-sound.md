@@ -131,7 +131,7 @@ The plan asks for task 8's workflow to be run again after the sound, and its fig
 
 ## Task 10's review
 
-A review of task 10 (up to `fe363f6`) found eight things, folded in as one commit before task 11 with no change of behaviour:
+A review of task 10 (up to `fe363f6`) found eight things, given here in five groups and folded in as one commit before task 11 with no change of behaviour:
 
 - **A test that could not fail.** `TiaSoundTests.Section_18_2_RSYNC_moves_the_audio_clocks_with_the_line_and_HMOVE_does_not` wrote RSYNC on line 3 and HMOVE on line 5 and began watching at line 6, so it saw neither. With the fault the review planted, the audio steps skipped while HMOVE's latch is set (`state is Rhs or Cnt && !_motion.Extended`), every sound test passed. The test now watches lines 2 to 8, with both writes inside, and checks each line's two steps, the step RSYNC cuts off on line 3 included. Planted again in a scratch copy on 14 October 2026, the fault fails it, and only it, among the sound tests (`dotnet test -c Release tests/Dbhq.Machines.Atari2600.Tests --filter FullyQualifiedName~TiaSoundTests`).
 - **The resamplers were committed after the rule**, not "written and measured" after it, and the test's feed deviated from the rule's signal by passing a held level every 1,024 colour clocks; both are said above.

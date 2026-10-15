@@ -160,17 +160,26 @@ internal static class SuiteOutcomes
     /// <paramref name="kind"/> (<c>selfTests</c> or <c>screenshots</c>), or null if the file does
     /// not hold it.
     /// </summary>
-    /// <exception cref="FileNotFoundException">The file has not been recorded.</exception>
+    /// <remarks>
+    /// The file is read as it stood when this class was first used in the run, which is before the
+    /// recorder in <see cref="SuiteRecordedTests"/> can write it (it calls <see cref="Text"/> first),
+    /// so a row run beside the recorder still compares with the committed outcomes.
+    /// </remarks>
+    /// <exception cref="FileNotFoundException">The file had not been recorded when the run began.</exception>
     public static JsonNode? Recorded(string kind, string test, string region)
     {
-        if (!File.Exists(FilePath))
+        if (Committed is null)
         {
             throw new FileNotFoundException($"{FilePath} does not exist: record it with {RecordCommand}.", FilePath);
         }
 
-        JsonNode? file = JsonNode.Parse(File.ReadAllText(FilePath));
-        return file?[kind]?[test]?[region]?.DeepClone();
+        return Committed[kind]?[test]?[region]?.DeepClone();
     }
+
+    // The file as it stood when the class was first used (see Recorded): a static field is set
+    // before any static field of the class is first read, and the recorder reads them in Text
+    // before it writes.
+    private static readonly JsonNode? Committed = File.Exists(FilePath) ? JsonNode.Parse(File.ReadAllText(FilePath)) : null;
 
     private static string Hex(byte value) => string.Create(CultureInfo.InvariantCulture, $"${value:X2}");
 }
