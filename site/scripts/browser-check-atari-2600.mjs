@@ -24,8 +24,9 @@
 // Then the loop runs on its own. Through the page's keyboard handling, on the
 // focused screen: the left fire button (Space) starts a game, and the picture
 // becomes the board, which changes far more than the title does by itself;
-// joystick 1 left (the left arrow) moves its tiles, which changes the picture
-// more than twice as much as the board changes by itself; and Reset, held
+// joystick 1 left and then right (the arrow keys; the game's one tile may be
+// against an edge, where one way moves nothing) moves its tiles, which changes
+// the picture more than twice as much as the board changes by itself; and Reset, held
 // through the panel's button, changes it again. The headroom line appears, and
 // the sound turns on and off. Then a test cartridge from the suite's fork,
 // harness/calibration, fetched at the pinned commit and checked against the
@@ -246,13 +247,17 @@ export async function checkAtari2600({ browser, watch, problems, origin }) {
   await press('Space');
   const board = await look(1500);
   const boardLater = await look(500);
+  // The new game's one tile may already be against the left edge, where left moves nothing (the first CI run,
+  // 15 October 2026), so the joystick goes left and then right: one of the two moves it.
   await press('ArrowLeft');
+  await page.waitForTimeout(500);
+  await press('ArrowRight');
   const moved = await look(1500);
   const pixels = WIDTH * WINDOWS.NTSC.lines;
   const byItself = { title: differing(title.pixels, titleLater.pixels), board: differing(board.pixels, boardLater.pixels) };
   const byFire = differing(titleLater.pixels, board.pixels);
   const byStick = differing(boardLater.pixels, moved.pixels);
-  console.log(`atari-2600: frames ${title.frames}, ${titleLater.frames}, ${board.frames}, ${moved.frames}; of ${pixels} pixels, the title changed ${byItself.title} by itself in half a second, fire (Space) changed ${byFire}; the board changed ${byItself.board} by itself in half a second, joystick 1 left (the left arrow) changed ${byStick}`);
+  console.log(`atari-2600: frames ${title.frames}, ${titleLater.frames}, ${board.frames}, ${moved.frames}; of ${pixels} pixels, the title changed ${byItself.title} by itself in half a second, fire (Space) changed ${byFire}; the board changed ${byItself.board} by itself in half a second, joystick 1 left and then right (the arrow keys) changed ${byStick}`);
   if (!(moved.frames > title.frames + 60)) problems.push(`atari-2600: the picture is not being redrawn (frames ${title.frames} then ${moved.frames})`);
   if (!(byFire > 2 * byItself.title && byFire > 500)) problems.push(`atari-2600: the fire button on the keyboard did not start a game (${byFire} pixels changed, ${byItself.title} by itself)`);
   if (!(byStick > 0 && byStick > 2 * byItself.board)) problems.push(`atari-2600: joystick 1 on the keyboard did not move the tiles (${byStick} pixels changed, ${byItself.board} by itself)`);
