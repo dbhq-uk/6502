@@ -12,7 +12,7 @@
 // keyboard handling, by where the keys are on the BBC (* is SHIFT and the key
 // where a PC has '), shows 42 and lights more of the canvas; the headroom line
 // appears; Tab moves focus off the machine; PRINT "A" tapped on the on-screen
-// keys alone, SHIFT latched for each quote, prints A; the sound button turns sound on and off without an error; a disc
+// keys alone, SHIFT latched for each quote, prints A; at 390 pixels wide, with the last key scrolled into view, the whole screen is still in view above it (pinned under the site header); the sound button turns sound on and off without an error; a disc
 // image put in through the file input lists its catalogue with *CAT; Save disc
 // downloads the same bytes; and Break restarts the machine.
 //
@@ -187,6 +187,65 @@ export async function checkBbcMicro({ browser, watch, problems, origin }) {
     const i = r.indexOf('>PRINT "A"');
     console.log(`bbc: tapped PRINT "A" and RETURN on the on-screen keys: the screen shows "${r[i]}", then "${r[i + 1].trim()}"`);
   }
+
+  // On a phone the keys are taller than the screen they share the page with, so
+  // the picture is pinned under the site header: with the last row of keys
+  // scrolled into view, the whole screen is still in view above it.
+  const wide = page.viewportSize();
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.locator('[data-bbc-key="Delete"]').scrollIntoViewIfNeeded();
+  const phone = await page.evaluate(() => {
+    const box = (s) => document.querySelector(s).getBoundingClientRect();
+    return { header: box('.top').bottom, screen: box('[data-bbc-screen]'), key: box('[data-bbc-key="Delete"]'), height: innerHeight, across: document.documentElement.scrollWidth, keys: box('.bbc-keys').height, lines: new Set([...document.querySelectorAll('.bbc-key')].map((k) => Math.round(k.getBoundingClientRect().top + scrollY))).size };
+  });
+  console.log(`bbc: at 390 wide, with the last key in view: the screen runs from ${Math.round(phone.screen.top)} to ${Math.round(phone.screen.bottom)}, the header ends at ${Math.round(phone.header)}, the key is at ${Math.round(phone.key.top)} of ${phone.height}; the key block is ${Math.round(phone.keys)} px tall in ${phone.lines} lines`);
+  if (phone.screen.top < phone.header - 1 || phone.screen.bottom > phone.key.top) problems.push(`bbc: at 390 wide the screen is not in view above the last key (screen ${Math.round(phone.screen.top)} to ${Math.round(phone.screen.bottom)}, header ends ${Math.round(phone.header)}, key at ${Math.round(phone.key.top)})`);
+  if (phone.key.bottom > phone.height) problems.push('bbc: at 390 wide the last key is not in view');
+  if (phone.across > 390) problems.push(`bbc: at 390 wide the page is ${phone.across} wide`);
+  // The pinned screen must not hide the key that has the focus (WCAG 2.2, 2.4.11):
+  // Shift+Tab from the last key back to the screen, then Tab forward to it again,
+  // and at every stop the focused control is not wholly behind the screen, nor
+  // under the header. The page scrolls smoothly, so each stop waits for it to rest.
+  const rest = () => page.evaluate(() => new Promise((resolve) => {
+    let last = -1;
+    let same = 0;
+    const look = () => {
+      same = scrollY === last ? same + 1 : 0;
+      last = scrollY;
+      if (same >= 5) resolve();
+      else requestAnimationFrame(look);
+    };
+    look();
+  }));
+  const hidden = [];
+  let stops = 0;
+  const examine = async () => {
+    await rest();
+    const r = await page.evaluate(() => {
+      const el = document.activeElement;
+      const e = el.getBoundingClientRect();
+      const s = document.querySelector('[data-bbc-screen]').getBoundingClientRect();
+      const h = document.querySelector('.top').getBoundingClientRect();
+      return { name: el.dataset.bbcKey ?? el.dataset.bbcBreak ?? el.getAttribute('aria-label') ?? el.textContent.trim().slice(0, 20), screen: el.hasAttribute('data-bbc-screen'), top: e.top, bottom: e.bottom, screenTop: s.top, screenBottom: s.bottom, header: h.bottom };
+    });
+    stops++;
+    if (!r.screen && ((r.top >= r.screenTop - 1 && r.bottom <= r.screenBottom + 1) || r.top < r.header - 1)) hidden.push(`${r.name} at ${Math.round(r.top)} to ${Math.round(r.bottom)}, the screen ${Math.round(r.screenTop)} to ${Math.round(r.screenBottom)}`);
+    return r;
+  };
+  await page.locator('[data-bbc-key="Delete"]').focus();
+  for (let i = 0; i < 120; i++) {
+    await page.keyboard.press('Shift+Tab');
+    if ((await examine()).screen) break;
+  }
+  for (let i = 0; i < 120; i++) {
+    await page.keyboard.press('Tab');
+    const r = await examine();
+    if (r.name === 'Delete') break;
+  }
+  console.log(`bbc: at 390 wide, Shift+Tab back to the screen and Tab forward again: ${stops} stops, ${hidden.length} with the focused control behind the screen or the header`);
+  if (hidden.length > 0) problems.push(`bbc: at 390 wide the pinned screen hides the focused control at ${hidden.length} of ${stops} stops, the first being ${hidden[0]}`);
+  await page.setViewportSize(wide);
+  await page.evaluate(() => window.scrollTo(0, 0));
 
   // Sound on, then off: headless Chrome may play nothing, but nothing may fail.
   const sound = page.locator('[data-bbc-sound]');

@@ -14,8 +14,8 @@ namespace Dbhq.Machines.BbcMicro;
 /// <para>
 /// <b>Registers.</b> <see cref="WriteAddress"/> picks one of R0 to R17 (five bits; 18 to 31 are
 /// nothing) and <see cref="WriteData"/> writes it. R0 to R15 are writable, R16 and R17 are not.
-/// R12 to R17 read back, as the HD6845S datasheet says ("Start Address Register: possible to
-/// read" in its comparison with the HD6845R), with R12 and R14 six bits wide; R16 and R17, the
+/// R12 to R15 read back, as the HD6845S datasheet says ("Start Address Register: possible to
+/// read" in its comparison with the HD6845R), with R12 and R14 six bits wide. R16 and R17, the
 /// light pen, are never strobed and read 0. R0 to R11 are write only and read <c>$00</c>, which
 /// nobody has measured (<c>video.md</c> section 6, item 8).
 /// </para>

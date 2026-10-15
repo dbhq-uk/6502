@@ -483,7 +483,7 @@ public class Crtc6845Tests
     }
 
     [Fact]
-    public void OnlyR12ToR17ReadBack()
+    public void OnlyR12ToR15ReadBack()
     {
         // The HD6845S datasheet: R12 and R13 can be read on the S (not the R), with R12's top two
         // bits 0; R14 and R15 read; R16 and R17 are the light pen, never strobed here. R0 to R11

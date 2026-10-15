@@ -210,6 +210,8 @@ footer .linkbtn:hover { color: var(--white); }
 .bbc-screen canvas { display: block; width: 100%; height: auto; aspect-ratio: 4 / 3; background: var(--void); }
 /* Focus is what hands the keyboard to the machine, so a mouse click, which does not raise :focus-visible, shows the ring too. */
 .bbc-screen:focus { outline: 2px solid var(--lime); }
+/* On a phone the keys are taller than the screen they share the page with, and none can be under 44 pixels, so the running machine's picture is pinned under the site header while the keys scroll past it. The panel is a column then, because a sticky item moves only inside its own grid area. --bbc-pin is the header's height and --bbc-screen-height the screen's, which the driver sets: the page's scroll-padding-top already clears the header, so a control's scroll-margin-top clears the screen as well, and a key that takes the focus is never behind it. */
+@media (max-width: 480px) and (min-height: 560px) { .bbc[data-state="running"] { display: flex; flex-direction: column; } .bbc[data-state="running"] .bbc-screen { position: sticky; top: var(--bbc-pin, 130px); z-index: 5; } .bbc[data-state="running"] .bbc-key, .bbc[data-state="running"] [data-bbc-break], .bbc[data-state="running"] [data-bbc-sound] { scroll-margin-top: calc(var(--bbc-screen-height, 0px) + 8px); } }
 .bbc-controls { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; }
 .bbc .btn:disabled { cursor: default; border-style: dashed; background: var(--iron); color: var(--moss-70); }
 .bbc .btn[hidden] { display: none; }
