@@ -52,7 +52,10 @@
 //   say        say(text, state): the page's status line. The host calls it only
 //              when the machine cannot start: "The <name> could not start: <the
 //              reason>", with state "failed".
-//   speedEl    Where the headroom sentence goes, once a second.
+//   speedEl    Where the headroom sentence goes, once a second. Once the
+//              machine has started, the host puts the element in a line that
+//              keeps its height whatever the sentence says (THE LINE'S HEIGHT,
+//              below).
 //
 //   It resolves to { host, stop, hold }, host being the class above, or to null
 //   when the machine could not start. It resolves before the first frame runs,
@@ -78,8 +81,72 @@
 //   M of 1:         "Running at the board's own N MHz, with little to spare in this browser."
 //   M of 0:         "Running at A MHz, slower than the board's N MHz: this browser cannot keep up."
 // where A is the actual speed. "the board's" is clockOf.
+//
+// THE LINE'S HEIGHT. The sentence changes once a second, and on a narrow screen
+// one more digit, or a different kind of sentence, can wrap it onto one more
+// line. Everything under it then moves, and a browser that anchors its scroll
+// moves the page to make up for it: on a phone the KIM-1's page moved 19 px, one
+// line of the sentence, under a finger on its 3D model (issue 80). So the host
+// wraps speedEl in a .speed-line, and puts under the sentence, in the same grid
+// cell and hidden, a room: the longest sentence of each kind on this clock
+// (speedRoom), each in a paragraph with speedEl's classes, so it wraps as the
+// sentence does. The line is as tall as the tallest of them, and the sentence,
+// whose figures are never wider than the room's, is never taller than that.
 
 export const MAX_FRAME_MS = 100;
+
+// The multiple the room is made for: more than any browser runs these machines.
+// A larger one, if it ever came, would be taken into the room as it arrived.
+export const ROOM_TIMES = 9999;
+
+const SAY = {
+  spare: (clockMhz, clockOf, times) => `Running at ${clockOf} own ${fmt(clockMhz)} MHz. This browser could run it about ${fmt(times)} times as fast.`,
+  little: (clockMhz, clockOf) => `Running at ${clockOf} own ${fmt(clockMhz)} MHz, with little to spare in this browser.`,
+  behind: (clockMhz, clockOf, actual) => `Running at ${actual.toFixed(2)} MHz, slower than ${clockOf} ${fmt(clockMhz)} MHz: this browser cannot keep up.`,
+};
+
+// The headroom sentence for a browser that runs the machine at `capacity` MHz
+// flat out and is running it at `actual` MHz, on a clock of `clockMhz`.
+export function speedSentence(capacity, actual, clockMhz, clockOf = "the board's") {
+  const times = Math.floor(capacity / clockMhz);
+  return times >= 2 ? SAY.spare(clockMhz, clockOf, times) : times === 1 ? SAY.little(clockMhz, clockOf) : SAY.behind(clockMhz, clockOf, actual);
+}
+
+// The room: the longest sentence of each kind on this clock. A browser behind
+// the clock runs slower than it, so its figure has no more digits than the
+// clock's; `seen` is the latest reading, taken in should it ever be wider.
+export function speedRoom(clockMhz, clockOf = "the board's", seen = { times: 0, actual: 0 }) {
+  return [
+    SAY.spare(clockMhz, clockOf, Math.max(ROOM_TIMES, seen.times)),
+    SAY.little(clockMhz, clockOf),
+    SAY.behind(clockMhz, clockOf, Math.max(clockMhz, seen.actual)),
+  ];
+}
+
+// Wraps speedEl in its line and returns the function that fills the room. Does
+// nothing to an element that is not in a document.
+function holdLine(speedEl) {
+  const doc = speedEl.ownerDocument;
+  if (!doc || !speedEl.parentNode) return () => {};
+  const line = doc.createElement('div');
+  line.className = 'speed-line';
+  const room = doc.createElement('div');
+  room.className = 'speed-room';
+  room.setAttribute('aria-hidden', 'true');
+  speedEl.replaceWith(line);
+  line.append(speedEl, room);
+  let held = '';
+  return (sentences) => {
+    if (sentences.join('\n') === held) return;
+    held = sentences.join('\n');
+    room.replaceChildren(...sentences.map((s) => {
+      const p = doc.createElement('p');
+      p.className = speedEl.className;
+      p.textContent = s;
+      return p;
+    }));
+  };
+}
 
 export async function startMachine({ panel, base, name, assembly, hostClass, load, clockMhz, clockOf = "the board's", onFrame, onPause, onResume, say, speedEl }) {
   const clock = typeof clockMhz === 'function' ? clockMhz : () => clockMhz;
@@ -95,6 +162,10 @@ export async function startMachine({ panel, base, name, assembly, hostClass, loa
     say(`The ${name} could not start: ${error.message}`, 'failed');
     return null;
   }
+
+  // The line keeps its height from the start: the room is there before the first sentence.
+  const room = holdLine(speedEl);
+  if (clock() > 0) room(speedRoom(clock(), clockOf));
 
   let last = 0;
   let cycles = host.Cycles();
@@ -141,12 +212,9 @@ export async function startMachine({ panel, base, name, assembly, hostClass, loa
     const clockMhz = clock();
     panel.dataset.capacityMhz = capacity.toFixed(2);
     panel.dataset.actualMhz = actual.toFixed(2);
-    const times = Math.floor(capacity / clockMhz);
-    speedEl.textContent = times >= 2
-      ? `Running at ${clockOf} own ${fmt(clockMhz)} MHz. This browser could run it about ${fmt(times)} times as fast.`
-      : times === 1
-        ? `Running at ${clockOf} own ${fmt(clockMhz)} MHz, with little to spare in this browser.`
-        : `Running at ${actual.toFixed(2)} MHz, slower than ${clockOf} ${fmt(clockMhz)} MHz: this browser cannot keep up.`;
+    // The room first, so the line is already tall enough when the sentence changes.
+    room(speedRoom(clockMhz, clockOf, { times: Math.floor(capacity / clockMhz), actual }));
+    speedEl.textContent = speedSentence(capacity, actual, clockMhz, clockOf);
   };
 
   // From now: the time a hidden page was away is not run, and not counted.

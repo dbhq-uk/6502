@@ -18,7 +18,7 @@ import { pathToFileURL } from 'node:url';
 // the budget, as a real machine finishing its last instruction does, so the
 // test can tell the cycles it ran from the cycles it was asked for.
 
-const { startMachine, MAX_FRAME_MS } = await import(pathToFileURL(path.join(process.cwd(), 'public', 'machine-host.js')).href);
+const { startMachine, MAX_FRAME_MS, ROOM_TIMES, speedRoom, speedSentence } = await import(pathToFileURL(path.join(process.cwd(), 'public', 'machine-host.js')).href);
 
 const OVERRUN = 3;
 
@@ -450,4 +450,141 @@ test('cycles the machine runs outside the loop while held are not counted as the
   assert.equal(frames.at(-1).cycles, machine.runs.at(-1) + OVERRUN, 'the first frame after the hold counted the cycles run while held');
   untilReport(browser, panel);
   assert.equal(panel.dataset.capacityMhz, '5.00', 'the cycles run while held inflated the speed');
+});
+
+// ---- The speed line keeps its height (issue 80) ----
+
+// How many lines a sentence takes on a line `width` characters wide, in a
+// monospaced face (the speed lines are set in one), breaking only at spaces and
+// filling each line as far as it goes, as a browser does with this text.
+const linesAt = (sentence, width) => {
+  let lines = 1;
+  let used = 0;
+  for (const word of sentence.split(' ')) {
+    const need = used === 0 ? word.length : used + 1 + word.length;
+    if (need > width && used > 0) {
+      lines++;
+      used = word.length;
+    } else used = need;
+  }
+  return lines;
+};
+
+// Every width of figure each kind of sentence can have: the multiple from 2 to
+// the room's, at each number of digits, and a browser behind the clock from a
+// standstill to just under it.
+const sentencesOn = (clockMhz, clockOf) => {
+  const capacities = [2, 9, 10, 99, 100, 999, 1000, 9999].map((m) => (m + 0.5) * clockMhz);
+  return [
+    ...capacities.map((c) => speedSentence(c, clockMhz, clockMhz, clockOf)),
+    speedSentence(1.5 * clockMhz, clockMhz, clockMhz, clockOf),
+    ...[0, 0.5, 0.99].map((f) => speedSentence(f * clockMhz, f * clockMhz, clockMhz, clockOf)),
+  ];
+};
+const CLOCKS = [[1, "the board's"], [2, "the BBC Micro's"], [2, "the Electron's"], [1.789773, "the NES's"], [1.662607, "the NES's"]];
+
+/** Where in a line of `width` characters a sentence is taller than the tallest of the room, or null. */
+function tallerThanTheRoom(room, clockMhz, clockOf) {
+  for (let width = 8; width <= 200; width++) {
+    const tallest = Math.max(...room.map((s) => linesAt(s, width)));
+    for (const s of sentencesOn(clockMhz, clockOf)) if (linesAt(s, width) > tallest) return `${width} characters: "${s}"`;
+  }
+  return null;
+}
+
+test('the speed sentences are the ones the host writes, figure for figure', () => {
+  assert.equal(speedSentence(5, 1, 1), "Running at the board's own 1 MHz. This browser could run it about 5 times as fast.");
+  assert.equal(speedSentence(1.5, 1, 1), "Running at the board's own 1 MHz, with little to spare in this browser.");
+  assert.equal(speedSentence(0.5, 0.5, 1, "the BBC Micro's"), "Running at 0.50 MHz, slower than the BBC Micro's 1 MHz: this browser cannot keep up.");
+});
+
+test('on a line of any width, no sentence wraps to more lines than the tallest of the room, on every machine\'s clock', () => {
+  for (const [clockMhz, clockOf] of CLOCKS) assert.equal(tallerThanTheRoom(speedRoom(clockMhz, clockOf), clockMhz, clockOf), null, clockOf);
+  // The check can fail: a room made for a multiple of 2 is too short, and so, on the BBC Micro's clock, is one without the sentence of a browser behind it.
+  const [spare, little, behind] = speedRoom(1, "the board's");
+  assert.notEqual(tallerThanTheRoom([spare.replace('9,999', '2'), little, behind], 1, "the board's"), null);
+  const bbc = speedRoom(2, "the BBC Micro's");
+  assert.notEqual(tallerThanTheRoom(bbc.slice(0, 2), 2, "the BBC Micro's"), null);
+});
+
+test('the room takes in a reading wider than it was made for', () => {
+  assert.equal(ROOM_TIMES, 9999);
+  const [spare, , behind] = speedRoom(1, "the board's", { times: 12_345, actual: 10.5 });
+  assert.match(spare, /about 12,345 times/);
+  assert.match(behind, /^Running at 10\.50 MHz/);
+  assert.match(speedRoom(1, "the board's", { times: 3, actual: 0.4 })[0], /about 9,999 times/);
+});
+
+/** Just enough of a document for the host's speed line: elements with children, classes, attributes and text. */
+function fakeDocument() {
+  const doc = {};
+  const element = (tag) => ({
+    tag,
+    ownerDocument: doc,
+    parentNode: null,
+    children: [],
+    className: '',
+    attributes: {},
+    textContent: '',
+    setAttribute(name, value) { this.attributes[name] = value; },
+    append(...kids) {
+      for (const k of kids) {
+        if (k.parentNode) k.parentNode.children.splice(k.parentNode.children.indexOf(k), 1);
+        k.parentNode = this;
+        this.children.push(k);
+      }
+    },
+    replaceWith(other) {
+      const parent = this.parentNode;
+      parent.children[parent.children.indexOf(this)] = other;
+      other.parentNode = parent;
+      this.parentNode = null;
+    },
+    replaceChildren(...kids) {
+      for (const k of this.children) k.parentNode = null;
+      this.children = [];
+      this.append(...kids);
+    },
+  });
+  doc.createElement = element;
+  return doc;
+}
+
+test('once started, the speed element sits in a line with a hidden room of the longest sentences, in its own classes, before the first sentence', async (t) => {
+  const browser = fakeBrowser(t);
+  const machine = fakeMachine(browser, 5);
+  const doc = fakeDocument();
+  const panelEl = doc.createElement('div');
+  const speedEl = doc.createElement('p');
+  speedEl.className = 'kim1-speed';
+  panelEl.append(speedEl);
+  const { panel } = await start(browser, { exports: { FakeHost: machine }, speedEl });
+  const [line] = panelEl.children;
+  assert.equal(line.className, 'speed-line');
+  const [first, room] = line.children;
+  assert.equal(first, speedEl);
+  assert.equal(room.className, 'speed-room');
+  assert.equal(room.attributes['aria-hidden'], 'true');
+  assert.equal(speedEl.textContent, '', 'a sentence was written before the first second was measured');
+  assert.deepEqual(room.children.map((p) => [p.tag, p.className, p.textContent]), speedRoom(1, "the board's").map((s) => ['p', 'kim1-speed', s]));
+  // A reading inside the room leaves it as it was; one wider takes it in.
+  const before = [...room.children];
+  untilReport(browser, panel);
+  assert.equal(speedEl.textContent, "Running at the board's own 1 MHz. This browser could run it about 5 times as fast.");
+  assert.deepEqual(room.children, before);
+  machine.capacityMhz = 20_000;
+  delete panel.dataset.capacityMhz;
+  untilReport(browser, panel);
+  assert.match(room.children[0].textContent, /about 1\d,\d{3} times|about 20,000 times/);
+});
+
+test('a machine that cannot start leaves the speed element where it was', async (t) => {
+  const browser = fakeBrowser(t);
+  const machine = fakeMachine(browser, 5);
+  const doc = fakeDocument();
+  const panelEl = doc.createElement('div');
+  const speedEl = doc.createElement('p');
+  panelEl.append(speedEl);
+  await start(browser, { exports: { FakeHost: machine }, base: NO_RUNTIME, speedEl });
+  assert.deepEqual(panelEl.children, [speedEl]);
 });
