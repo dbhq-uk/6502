@@ -122,7 +122,10 @@ public class CrtcEquivalenceTests
     /// cycle n at 2 MHz. The clock is given a phase, because the CPU's cycle at a look is not
     /// always the even one the character falls on. The oracle is ticked a character at a time;
     /// both lazy chips must raise every VSYNC edge, with its level, and every frame start at the
-    /// cycle the oracle's character puts it in. A reset carries the cycle it was made in.
+    /// cycle the oracle's character puts it in. A reset carries the cycle it was made in. At each
+    /// look every output must match the oracle's too, which is the only place the outputs are
+    /// compared with the chip counting its characters from the clock rather than its own ticks,
+    /// and so the only check of them at 1 MHz.
     /// </summary>
     [Theory]
     [InlineData(false, 0)]
@@ -168,6 +171,15 @@ public class CrtcEquivalenceTests
         void Compare(int which, string name, long characters)
         {
             chips[which].Sync();
+            Crtc6845 chip = chips[which];
+            var expectedOutputs = (oracle.MemoryAddress, oracle.RasterAddress, oracle.DisplayEnable, oracle.HSync, oracle.VSync, oracle.Cursor, oracle.LineStartAddress, oracle.VerticalDisplay);
+            var outputs = (chip.MemoryAddress, chip.RasterAddress, chip.DisplayEnable, chip.HSync, chip.VSync, chip.Cursor, chip.LineStartAddress, chip.VerticalDisplay);
+            if (expectedOutputs != outputs)
+            {
+                Assert.Fail($"{name} at character {characters}, cycle {clock.Cycles}: expected outputs {expectedOutputs}, was {outputs}");
+            }
+
+
             Assert.True(edges[which].Count == expectedEdges.Count && frames[which].Count == expectedFrames.Count,
                 $"{name} at character {characters}: {edges[which].Count} edges and {frames[which].Count} frame starts, expected {expectedEdges.Count} and {expectedFrames.Count}");
             for (; comparedEdges[which] < expectedEdges.Count; comparedEdges[which]++)
