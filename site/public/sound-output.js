@@ -17,7 +17,8 @@
 //   rate       the sample rate the machine makes its sound at, which the page asks
 //              the browser to play it at, so it is not resampled twice
 //   transform  optional: called on each frame's samples, a Float32Array, before
-//              they are posted, to change them in place
+//              they are posted, to change them in place; if it has a reset(),
+//              fresh() calls it, so a transform with a state starts again
 // It gives an object whose `machine` the page sets to the host once it runs:
 // the host's Sound() hands the page a view of the samples, which play(view)
 // posts, and its DropSound() throws away what was made while sound was off.
@@ -46,10 +47,12 @@ export function soundOutput({ panel, button, line, module, processor, rate, tran
       this.on = false;
       await this.context?.suspend();
     },
-    // What was made while the sound was off, or the page hidden, is not played late.
+    // What was made while the sound was off, or the page hidden, is not played late,
+    // and the transform, if it keeps a state (the Atari 2600's high-pass), starts again.
     fresh() {
       this.machine.DropSound();
       this.node?.port.postMessage({ flush: true });
+      transform?.reset?.();
     },
     play(view) {
       const samples = new Float32Array(view.byteLength / 4);

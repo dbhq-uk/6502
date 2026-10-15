@@ -104,6 +104,23 @@ The fault pass ran on 15 October 2026 in a scratch copy outside the repository (
 
 `nes-panel.test.mjs`, unedited, catches S1, S3, S4, S5, S6 and S8. It misses S2 and S7, parts only the Atari 2600's page uses, and S9 and S10, which no NES test exercised before the move either.
 
+## Task 13's review, folded in, and main merged in
+
+**The date.** This entry is dated 14 October 2026, as every entry of the Atari 2600's build is, so the series reads as one working day on the site; everything in it was done on 15 October 2026, as its first line says.
+
+**Validate on the task's commit.** The pull request's own checks did not run on `a8e9067`, because the branch had fallen into conflict with `main`. Validate was started by hand on it (run 38695611469, `workflow_dispatch`, 15 October 2026) and passed, the NES's browser check unedited among it; its site step counted 676 tests, 675 passing and one to-do (`pass=675 fail=0` in its log).
+
+**Main merged in** (`0e863f8`, 15 October 2026), as a merge commit so the commits a review names keep their ids. It brought the hand-started Atari 2600 speed workflow (#170), the roadmap refresh and the entry on the machines' order (#167), and the KIM-1's phone step (#166), which made every machine's speed line keep its height, the Atari 2600's included. One file conflicted, `site/tests/floor.json`: 675 here and 647 on `main`. The merged tree was measured with `npm test` on the development box: 681 tests and one to-do, 670 passing and 10 failing only because this box does not build the machines' WebAssembly, so 680 for CI; the floor was set to 680, for Validate's count on the merge commit to confirm. Journal orders for 14 October stayed one each.
+
+A review of this task (commits up to `a8e9067`) found these, folded in on 15 October 2026 in their own commit:
+
+- **`PagePathTests` compared the page's path with a live run** (`BootCheck.Run`), not with `expected-frames.json`, so a fault that changed every run alike passed it: the review planted three that did. It now compares both hashes with the committed file, through `BootCheck.AssertHashesAreTheRecorded`, which `AssertFrameIsTheRecordedOne` also calls; and it hashes the window's bytes as they lie in memory, which is what `Atari2600Host.Picture` hands the canvas, and checks they are `BootCheck.RgbaBytes`. The host itself cannot run in a test (its `JSImport` needs a browser). Two of the three faults, the CPU not reset at power on and the chips not powered on, still passed: the bundled game starts the same from either (its BRK vector is its start, and it clears the chips itself), so its frame cannot tell. A new case compares the whole state, CPU and every chip by the state report, of a machine played and then powered off and on with a fresh one powered on, and checks a fresh power on leaves the CPU at the cartridge's reset vector with the stack pointer at `$FD` and interrupts masked. The three faults were added to `tools/probes/atari-2600/boot-faults.py` as M4 to M6 and run (`python3 -I tools/probes/atari-2600/boot-faults.py <scratch> M4 M5 M6`): all three are now caught by `PagePathTests`, and by other files as before.
+- **The panel test's `stepTo` case held nothing**, so `stepTo` sending the inputs as held, not let go, passed. It now holds joystick 1 left and fire, joystick 2 up and Reset first, and checks both joysticks and Reset are let go, and the colour switch kept, before the power cycle. Fault A16 in `panel-faults.py` is that change; it is caught.
+- **The sound's high-pass thumped when the sound was turned on**: it started from zero, so a level already held came through as a step. Its first sample now seeds it, and the shared sound output's `fresh()` calls the transform's `reset()` when it has one, so it starts again whenever what plays starts afresh. The test was written first and failed. Faults S11 (`fresh()` does not reset) and A17 (no seed) are in `panel-faults.py`; both are caught.
+- **The deploy's list of served scripts** gains `atari-2600.js` and `atari-2600-keys.js`, which `build.test.mjs` would ask for once the page shows the panel (task 14).
+- **`nes-audio.js`'s header** says that its import of `sample-worklet.js` also registers the Atari 2600's processor, `sample-ring`, in the NES's audio thread, and why that is harmless.
+- **Tidying.** The site README's row for `nes-panel.test.mjs` had its closing pipe before its last sentence; the comment above the board issue in `Atari2600Panel.astro` and the lime rule's comment in `site.test.mjs` now say what they mean.
+
 ## Commands
 
 All on 15 October 2026, on the development box, in the worktree:

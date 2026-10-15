@@ -103,17 +103,36 @@ public static class BootCheck
     /// </summary>
     public static void AssertFrameIsTheRecordedOne(Region region)
     {
-        Assert.True(Committed is not null, $"{ExpectedPath} does not exist. Record it with {SuiteOutcomes.RecordCommand}, look at the pictures it writes, and commit it.");
-        using JsonDocument file = JsonDocument.Parse(Committed);
-        JsonElement root = file.RootElement;
+        BootRun run = Run(region);
+        AssertHashesAreTheRecorded(region, run.ColoursSha256, run.RgbaSha256);
+    }
+
+    /// <summary>
+    /// <paramref name="coloursSha256"/> and <paramref name="rgbaSha256"/>, a frame's two hashes
+    /// however it was reached, are the ones recorded for <paramref name="region"/> in
+    /// <see cref="ExpectedPath"/>, once the file is checked to be for this ROM, this frame count and
+    /// these switches. The committed file is the reference, not another run of the machine, so a
+    /// fault that changes every run alike still fails.
+    /// </summary>
+    public static void AssertHashesAreTheRecorded(Region region, string coloursSha256, string rgbaSha256)
+    {
+        JsonElement root = RecordedFile();
         Assert.Equal(Pins.Atari2600HomebrewPath, root.GetProperty("rom").GetString());
         int frames = root.GetProperty("frames").GetProperty(region.Name).GetInt32();
         Assert.True(frames == Frames(region), $"{region.Name}: the recording is of frame {frames} and the check runs {Frames(region)}: record it again");
         Assert.Equal(SwitchName(region), root.GetProperty("switches").GetProperty(region.Name).GetString());
+        Assert.Equal(root.GetProperty("colours").GetProperty(region.Name).GetString(), coloursSha256);
+        Assert.Equal(root.GetProperty("rgba").GetProperty(region.Name).GetString(), rgbaSha256);
+    }
 
-        BootRun run = Run(region);
-        Assert.Equal(root.GetProperty("colours").GetProperty(region.Name).GetString(), run.ColoursSha256);
-        Assert.Equal(root.GetProperty("rgba").GetProperty(region.Name).GetString(), run.RgbaSha256);
+    /// <summary>The colour numbers' hash recorded for <paramref name="region"/> in <see cref="ExpectedPath"/>.</summary>
+    public static string RecordedColours(Region region) => RecordedFile().GetProperty("colours").GetProperty(region.Name).GetString()!;
+
+    private static JsonElement RecordedFile()
+    {
+        Assert.True(Committed is not null, $"{ExpectedPath} does not exist. Record it with {SuiteOutcomes.RecordCommand}, look at the pictures it writes, and commit it.");
+        using JsonDocument file = JsonDocument.Parse(Committed);
+        return file.RootElement.Clone();
     }
 
     /// <summary>The frame is not blank: it holds more than one colour number (the plan's task 12, step 4).</summary>

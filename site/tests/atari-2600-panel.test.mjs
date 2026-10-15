@@ -345,6 +345,34 @@ test('the sound\'s steady offset is taken out: a held level falls to silence, an
   assert.deepEqual([...halves], [...whole]);
 });
 
+test('the offset does not thump when the sound starts: the first sample seeds the high-pass, and fresh() starts it again (task 13\'s review)', () => {
+  const RATE = 48_000;
+  // Sound turned on with the volume left at a held level: silence, from the very first sample.
+  const block = dcBlocker(RATE);
+  const first = new Float32Array(64).fill(0.6);
+  block(first);
+  assert.deepEqual([...first], new Array(64).fill(0), 'the first samples of a held level are not silent');
+  // A step after that still comes through, and decays.
+  const step = new Float32Array(4).fill(0.9);
+  block(step);
+  assert.ok(step[0] > 0.29, `the step came through as ${step[0]}`);
+  // Started again (the page's fresh()), at another held level: silent again from its first sample.
+  block.reset();
+  const again = new Float32Array(16).fill(0.2);
+  block(again);
+  assert.deepEqual([...again], new Array(16).fill(0), 'the high-pass carried its old state across a fresh start');
+  // The shared sound output starts the page's transform again when it starts afresh.
+  let resets = 0;
+  const transform = Object.assign(() => {}, { reset: () => { resets++; } });
+  const out = soundOut.soundOutput({ transform });
+  out.machine = { DropSound: () => 0 };
+  out.fresh();
+  assert.equal(resets, 1);
+  // A transform with no reset, and no transform, are fine.
+  Object.assign(soundOut.soundOutput({ transform: () => {} }), { machine: { DropSound: () => 0 } }).fresh();
+  Object.assign(soundOut.soundOutput({}), { machine: { DropSound: () => 0 } }).fresh();
+});
+
 test('the shared sound button posts each frame\'s samples through the page\'s transform, in their own buffer', () => {
   const posted = [];
   const out = soundOut.soundOutput({ transform: (samples) => { for (let i = 0; i < samples.length; i++) samples[i] -= 0.5; } });
@@ -689,13 +717,22 @@ test('a refused file leaves the machine as it was, and an oversized one is not r
 
 test('stepTo lets go of the joysticks and of Reset and Select, keeps the switches that stay, powers off and on, and runs exactly n frames', async (t) => {
   const host = fakeHost();
-  const { panel, toggles, start } = await vcsPage(t, host);
+  const { panel, toggles, holds, start, el } = await vcsPage(t, host);
   await start();
   toggles[0].click();
+  // Held when the check calls it: joystick 1 left and fire on the keys, joystick 2 up, and Reset on its button.
+  const screen = el('[data-vcs-screen]');
+  for (const code of ['ArrowLeft', 'Space', 'KeyW']) screen.dispatchEvent(Object.assign(new Event('keydown'), { code, repeat: false }));
+  holds[0].dispatchEvent(Object.assign(new Event('pointerdown'), { pointerId: 1 }));
+  assert.deepEqual(host.calls.filter((c) => c[0] === 'SetJoystick').slice(-2).map((c) => c[1]).sort(), [0, 1]);
+  assert.deepEqual(host.calls.at(-1), ['SetSwitches', SWITCHES.BlackAndWhite | SWITCHES.Reset]);
   host.calls.length = 0;
   assert.equal(panel.vcs.stepTo(100), 100);
+  // Both joysticks and Reset let go, the colour switch kept at black and white, all before the power cycle.
+  const before = host.calls.slice(0, host.calls.findIndex((c) => c[0] === 'PowerCycle'));
+  assert.deepEqual(before.filter((c) => c[0] === 'SetJoystick').sort(), [['SetJoystick', 0, 0], ['SetJoystick', 1, 0]]);
+  assert.deepEqual(before.filter((c) => c[0] === 'SetSwitches'), [['SetSwitches', SWITCHES.BlackAndWhite]]);
   assert.deepEqual(host.calls.filter((c) => c[0] === 'PowerCycle' || c[0] === 'RunFrames'), [['PowerCycle'], ['RunFrames', 100]]);
-  // Nothing was held, so nothing changed but the power and the frames; the colour switch stayed at black and white.
   assert.ok(!host.calls.some((c) => c[0] === 'SetSwitches' && c[1] !== SWITCHES.BlackAndWhite));
   assert.equal(panel.dataset.frames, '100');
 });

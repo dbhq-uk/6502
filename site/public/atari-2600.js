@@ -237,20 +237,34 @@ export const badFileLine = (name, result, running) =>
 /**
  * A high-pass that takes out a steady offset: a function that changes a
  * Float32Array of samples at `rate` in place, keeping its state from one call
- * to the next. y[n] = x[n] - x[n-1] + a y[n-1], with a set by the corner.
+ * to the next. y[n] = x[n] - x[n-1] + a y[n-1], with a set by the corner. Its
+ * first sample, and the first after reset(), seeds x[n-1] with itself, so a
+ * level already held when the sound starts plays as silence from its first
+ * sample rather than as a step that thumps and decays (task 13's review).
+ * soundOutput's fresh() calls reset(), whenever what plays starts afresh.
  */
 export function dcBlocker(rate, cornerHz = DC_CORNER_HZ) {
   const a = Math.exp((-2 * Math.PI * cornerHz) / rate);
   let x1 = 0;
   let y1 = 0;
-  return (samples) => {
+  let seeded = false;
+  const block = (samples) => {
     for (let i = 0; i < samples.length; i++) {
       const x = samples[i];
+      if (!seeded) {
+        x1 = x;
+        seeded = true;
+      }
       y1 = x - x1 + a * y1;
       x1 = x;
       samples[i] = y1;
     }
   };
+  block.reset = () => {
+    seeded = false;
+    y1 = 0;
+  };
+  return block;
 }
 
 // ---- The keyboard ----

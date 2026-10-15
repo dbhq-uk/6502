@@ -1,3 +1,5 @@
+using System.Runtime.InteropServices;
+using System.Security.Cryptography;
 using Xunit;
 
 namespace Dbhq.Machines.Atari2600.Tests;
@@ -40,12 +42,58 @@ public sealed class PagePathTests
         machine.PowerOn();
         machine.RunFrames(BootCheck.Frames(region));
 
+        // The picture as Atari2600Host.Picture hands it to the page: the region's window through
+        // ToRgba, and its bytes as they lie in memory, which is what the canvas is given. The host
+        // itself runs only in a browser (its JSImport), so its two lines are repeated here.
         uint[] window = new uint[FrameBuffer.Width * region.ShownLines];
         machine.Bus.Tia.Frame.ToRgba(region, window);
-        BootRun recorded = BootCheck.Run(region);
-        Assert.Equal(recorded.ColoursSha256, Convert.ToHexStringLower(System.Security.Cryptography.SHA256.HashData(machine.Bus.Tia.Frame.ColourNumbers)));
-        Assert.Equal(recorded.RgbaSha256, Convert.ToHexStringLower(System.Security.Cryptography.SHA256.HashData(BootCheck.RgbaBytes(window))));
+        byte[] canvas = MemoryMarshal.AsBytes(window.AsSpan()).ToArray();
+        Assert.Equal(BootCheck.RgbaBytes(window), canvas);
+
+        // Compared with the committed file, not with another run, so a fault that changes every run
+        // alike (the picture, the power on) fails here as it does in the browser.
+        BootCheck.AssertHashesAreTheRecorded(
+            region,
+            Convert.ToHexStringLower(SHA256.HashData(machine.Bus.Tia.Frame.ColourNumbers)),
+            Convert.ToHexStringLower(SHA256.HashData(canvas)));
     }
+
+    [Theory]
+    [MemberData(nameof(Regions))]
+    public void Power_off_and_on_after_play_leaves_the_machine_as_a_fresh_one_powered_on(string name)
+    {
+        // The bundled game starts the same from a CPU that was not reset or chips that were not
+        // powered on (its BRK vector is its start, and it clears the chips itself), so its frame
+        // cannot tell (task 13's review: those two faults passed the frame). The page's power off
+        // and on must still be the console's, so the whole state is compared, CPU and every chip.
+        Region region = Named(name);
+        var played = new Atari2600(Cartridge.Load(BootCheck.Rom()), region);
+        played.PowerOn();
+        played.SetJoystick(0, Joystick.Left | Joystick.Fire);
+        played.SetSwitches(ConsoleSwitches.Reset | ConsoleSwitches.Select);
+        played.RunFrames(20);
+        played.SetJoystick(0, Joystick.None);
+        played.SetSwitches(BootCheck.Switches(region));
+        played.PowerOn();
+
+        var fresh = new Atari2600(Cartridge.Load(BootCheck.Rom()), region);
+        fresh.SetSwitches(BootCheck.Switches(region));
+        fresh.PowerOn();
+
+        Assert.Equal(State(fresh), State(played));
+
+        // And a fresh power on is the console's: the CPU has run its reset, so it is at the
+        // cartridge's reset vector ($1FFC, the last four bytes but two of the image) with three
+        // pushes' worth taken off the stack pointer and interrupts masked.
+        byte[] rom = BootCheck.Rom();
+        ushort vector = (ushort)(rom[^4] | (rom[^3] << 8));
+        Assert.Equal(vector, played.Cpu.PC);
+        Assert.Equal(0xFD, played.Cpu.S);
+        Assert.Equal(0x04, played.Cpu.P & 0x04);
+    }
+
+    private static string State(Atari2600 machine) =>
+        $"{machine.Cpu.PC:X4} {machine.Cpu.A:X2} {machine.Cpu.X:X2} {machine.Cpu.Y:X2} {machine.Cpu.S:X2} {machine.Cpu.P:X2} {StateReportTests.Hash(machine.Bus)}";
 
     [Theory]
     [MemberData(nameof(Regions))]
@@ -57,12 +105,12 @@ public sealed class PagePathTests
         machine.SetSwitches(BootCheck.Switches(region));
         machine.PowerOn();
         machine.RunFrames(BootCheck.Frames(region) - 1);
-        string before = Convert.ToHexStringLower(System.Security.Cryptography.SHA256.HashData(machine.Bus.Tia.Frame.ColourNumbers));
+        string before = Convert.ToHexStringLower(SHA256.HashData(machine.Bus.Tia.Frame.ColourNumbers));
         machine.RunFrames(2);
-        string after = Convert.ToHexStringLower(System.Security.Cryptography.SHA256.HashData(machine.Bus.Tia.Frame.ColourNumbers));
+        string after = Convert.ToHexStringLower(SHA256.HashData(machine.Bus.Tia.Frame.ColourNumbers));
 
-        BootRun recorded = BootCheck.Run(region);
-        Assert.NotEqual(recorded.ColoursSha256, before);
-        Assert.NotEqual(recorded.ColoursSha256, after);
+        string recorded = BootCheck.RecordedColours(region);
+        Assert.NotEqual(recorded, before);
+        Assert.NotEqual(recorded, after);
     }
 }

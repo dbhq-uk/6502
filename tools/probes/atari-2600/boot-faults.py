@@ -42,6 +42,11 @@ FAULTS = [
     ("M1 the machine draws every colour with bit 1 set", M + "FrameBuffer.cs", [("internal void Put(int x, byte colour) => _drawing[(_row * Width) + x] = colour;", "internal void Put(int x, byte colour) => _drawing[(_row * Width) + x] = (byte)(colour | 2);")]),
     ("M2 the machine draws nothing", M + "FrameBuffer.cs", [("internal void Put(int x, byte colour) => _drawing[(_row * Width) + x] = colour;", "internal void Put(int x, byte colour) => _drawing[(_row * Width) + x] = 0;")]),
     ("M3 the sound makes half its samples", M + "SampleBuffer.cs", [("_clocksPerSample = 3 * value / SampleRate;", "_clocksPerSample = 6 * value / SampleRate;")]),
+    # Task 13's review: three faults that changed every run alike, so PagePathTests, which then compared the page's path with a
+    # live run, passed them; it now compares with the committed file.
+    ("M4 the picture's window one line lower", M + "FrameBuffer.cs", [("int source = region.FirstShownLine + row;", "int source = region.FirstShownLine + row + 1;")]),
+    ("M5 power on does not reset the CPU", M + "Atari2600.cs", [("        Cpu.Cycles = 0;\n        Cpu.Reset();\n", "        Cpu.Cycles = 0;\n")]),
+    ("M6 power on leaves the chips as they were", M + "Atari2600.cs", [("        Bus.PowerOn();\n        Cpu.A = 0;", "        Cpu.A = 0;")]),
     ("A1 a recorded outcome changed by hand", OUTCOMES, [('"code": "$04",\n        "observed": "$53"', '"code": "$05",\n        "observed": "$53"')]),
     ("A2 a trusted test missing from Trusted", T + "SuiteSelfTests.cs", [('        "riot/timer",\n', '')]),
 ]
