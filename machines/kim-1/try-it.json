@@ -4,12 +4,12 @@
     {
       "keys": "[RS]",
       "display": "xxxx xx",
-      "says": "Reset. The monitor starts and shows an address and the byte stored there."
+      "says": "Reset. The monitor starts and shows an address and the byte there."
     },
     {
       "keys": "[AD] 17FA [DA] 00 [+] 1C",
       "display": "17FB 1C",
-      "says": "Point the NMI vector at the monitor, at $1C00, so that ST can stop a program. The manual's section 4.6 asks for this before ST is used."
+      "says": "Point the NMI vector at the monitor, at $1C00, so ST can stop a program. The manual's section 4.6 asks for this before ST is used."
     },
     {
       "keys": "[AD] 0200 [DA] AD [+] 10 [+] 02 [+] 18 [+] 6D [+] 11 [+] 02 [+] 8D [+] 12 [+] 02 [+] 4C [+] 0A [+] 02",
@@ -24,12 +24,12 @@
     {
       "keys": "[AD] 0200 [GO]",
       "display": "       ",
-      "says": "Run it from $0200. A running program does not scan the display, so the digits go dark."
+      "says": "Run it from $0200. The digits go dark, because a running program does not scan the display."
     },
     {
       "keys": "[ST]",
       "display": "020A 4C",
-      "says": "Stop it. The monitor shows where the program stopped: the JMP at $020A."
+      "says": "Stop it. The monitor shows where it stopped: the JMP at $020A."
     },
     {
       "keys": "[AD] 0212",
