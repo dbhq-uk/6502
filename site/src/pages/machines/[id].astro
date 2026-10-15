@@ -41,7 +41,7 @@ const models = modelsOf(machine);
 const hasModels = models.length > 0;
 // A machine's models are one section (src/components/MachineModel.astro): its
 // board alone as it always was, or a case's views, outside and inside, as tabs.
-const scripts = [...({ 'kim-1': ['/kim-1.js'], 'bbc-micro': ['/bbc-micro.js'], nes: ['/nes.js'], electron: ['/electron.js'], 'atari-2600': ['/atari-2600.js'] }[machine.id] ?? []), ...(hasModels ? ['/model-loader.js'] : [])];
+const scripts = [...({ 'kim-1': ['/kim-1.js'], 'bbc-micro': ['/bbc-micro.js'], nes: ['/nes.js'], electron: ['/electron.js'], 'atari-2600': ['/atari-2600.js'] }[machine.id] ?? []), ...(hasModels ? ['/model-loader.js'] : []), '/fold-open.js'];
 const base = `/machines/${machine.id}/`;
 const clockMhz = Number(/([\d.]+) MHz/.exec(machine.cpu ?? '')?.[1]);
 if (!(clockMhz > 0)) throw new Error(`machine ${machine.id}: its cpu field names no clock in MHz, and the page runs it at that clock`);
@@ -107,6 +107,13 @@ const notOnAPc = Object.entries(NOT_ON_A_PC).reduce((groups, [key, why]) => grou
 const romsWord = bbc || electron ? 'Whose ROMs these are' : nes || vcs ? 'Whose game this is' : 'Whose ROM this is';
 const noPermission = 'no licence or permission from any holder was found';
 if ((kim || bbc || electron) && !machine.rights.includes(noPermission)) throw new Error(`machine ${machine.id}: its rights no longer say "${noPermission}", and its short rights line does`);
+if (kim && !machine.rights.includes('who holds it now was not established')) throw new Error('machine kim-1: its rights no longer say who holds the ROM now was not established, and its short rights line does');
+// The head says what the machine models, from the first sentence of the registry's
+// notes. What is not modelled is the second sentence, "Not modelled: ...", and goes
+// in the reference, as the list of parts with their issues where there is one.
+const [modelled, notModelled, ...extra] = machine.notes.split(/(?<=\.)\s+(?=Not modelled)/);
+if (!modelled || !notModelled?.startsWith('Not modelled:') || extra.length) throw new Error(`machine ${machine.id}: its notes are not "what is modelled. Not modelled: what is not.", and the page splits them there`);
+const modelsLine = `It models ${modelled[0].toLowerCase()}${modelled.slice(1)}`;
 ---
 
 
@@ -118,6 +125,7 @@ if ((kim || bbc || electron) && !machine.rights.includes(noPermission)) throw ne
         <h1>{machine.name}</h1>
         <p>{machine.year}, {machine.maker}, {machine.cpu}.</p>
         <p>{acceptanceSummary(machine, results, fmt)}</p>
+        <p>{modelsLine}</p>
       </div>
       <MachinePhoto machine={machine} photo={machine.photos[0]} main />
     </div>
@@ -129,16 +137,16 @@ if ((kim || bbc || electron) && !machine.rights.includes(noPermission)) throw ne
       <Panel base={base} {...panelProps} />
       <div class="prose" style="margin-top: 24px">
         <p class="rights-line" data-rights-line>
-          {kim && <>The monitor ROM is MOS Technology's, and {noPermission}.</>}
+          {kim && <>The monitor ROM is MOS Technology's. Who holds it now was not established. No licence or permission from any holder was found.</>}
           {bbc && <>The ROMs are Acorn's: MOS 1.20, BBC BASIC 2 and DFS 1.20. Their position is documented, not cleared: {noPermission}.</>}
           {electron && <>The ROMs are Acorn's: OS 1.00 and BBC BASIC 2. Their position is documented, not cleared: {noPermission}.</>}
-          {nes && <>The game in it is {program.title}, by {program.author}, released into the {program.licence}. Commercial games are not bundled: load your own.</>}
-          {vcs && <>The game in it is {program.title}, by {program.author}, under the <a href={program.licenceUrl}>{program.licence} licence</a>. Commercial games are not bundled: load your own.</>}
-          {' '}<a href="#rom">{romsWord}</a> has the rest.
+          {nes && <>The game in it is {program.title}, by {program.author}, released into the {program.licence}. Commercial games are not bundled and never will be: load your own.</>}
+          {vcs && <>The game in it is {program.title}, by {program.author}, under the <a href={program.licenceUrl}>{program.licence} licence</a>. Commercial games are not bundled and never will be: load your own.</>}
+          {' '}Full rights: <a href="#rom">{romsWord}</a>.
         </p>
         {nes && (
           <>
-            <p>The picture chip runs one dot at a time, three dots for every CPU cycle on NTSC, so it needs a fast computer to run at full speed. The line under the screen says how fast this browser runs it, measured while it runs, and a computer that cannot keep up runs it slower than the real console. Making it faster is <a href={issueUrl(NES_ISSUES.speed)}>issue {NES_ISSUES.speed}</a>.</p>
+            <p>The picture chip runs one dot at a time, three dots for every CPU cycle on NTSC, so it needs a fast computer to run at full speed. The line under the screen says how fast this browser runs it, measured while it runs, and a computer that cannot keep up runs it slower than the real console and says so. Making it faster is <a href={issueUrl(NES_ISSUES.speed)}>issue {NES_ISSUES.speed}</a>.</p>
             <Fold summary="NTSC and PAL, the two regions" quiet>
               <p>The NES was sold in two kinds, and both are here: NTSC, for North America and Japan, and PAL, for Europe and Australia, whose CPU runs slower and which draws 50 pictures a second rather than about 60. Each cartridge starts in the region its file names, or NTSC when the file does not say, and the line under the region control says which and why.</p>
             </Fold>
@@ -146,7 +154,7 @@ if ((kim || bbc || electron) && !machine.rights.includes(noPermission)) throw ne
         )}
         {vcs && (
           <>
-            <p>The Atari 2600 has no frame buffer: its program draws each line as the beam crosses the screen. So its picture chip, the TIA, runs one colour clock at a time, three for every CPU cycle. That takes a fast computer to run at full speed. The line under the screen says how fast this browser runs it, measured while it runs, and a computer that cannot keep up runs it slower than the real console. Making it faster is <a href={issueUrl(VCS_ISSUES.speed)}>issue {VCS_ISSUES.speed}</a>.</p>
+            <p>The Atari 2600 has no frame buffer: its program draws each line as the beam crosses the screen. So its picture chip, the TIA, runs one colour clock at a time, three for every CPU cycle. That takes a fast computer to run at full speed. The line under the screen says how fast this browser runs it, measured while it runs, and a computer that cannot keep up runs it slower than the real console and says so. Making it faster is <a href={issueUrl(VCS_ISSUES.speed)}>issue {VCS_ISSUES.speed}</a>.</p>
             <Fold summary="NTSC and PAL, the two regions" quiet>
               <p>The console was made for both kinds of television: NTSC, the console of North America and Japan, and PAL, the console of Europe and Australia, whose clock is a little slower and whose games draw more lines a frame. A cartridge file does not say which it was made for, so the machine starts as NTSC. The lines under the region control give the lines the last frame had, and suggest PAL when a game's frames are PAL's length, but the page never changes the region by itself. Changing it changes the colours and the clock at once, with no restart.</p>
             </Fold>
@@ -181,7 +189,7 @@ if ((kim || bbc || electron) && !machine.rights.includes(noPermission)) throw ne
       <div class="wrap narrow">
         <h2 id="teletype">The teletype</h2>
         <div class="prose">
-        <p>Most KIM-1s were used from a teletype, a Teletype Model 33 or a terminal like one, on the board's 20 mA current loops. The monitor prints and reads at ten characters a second, timing every bit itself on two pins of the 6530. To use it, turn the TTY switch on, press RS, then RUB OUT: the monitor times the RUB OUT to learn the line's speed, and prints KIM.</p>
+        <p>Most KIM-1s were used from a teletype, a Teletype Model 33 or a terminal like one, on the board's 20 mA current loops. The monitor prints and reads at ten characters a second, sending and timing every bit itself on two pins of the 6530. To use it, turn the TTY switch on, press RS, then RUB OUT: the monitor times the RUB OUT to learn the line's speed, and prints KIM.</p>
         <p>Type in the field under the paper. It types in capitals, as the Teletype did. Enter is RETURN, Backspace is RUB OUT, and LF has its own button. Keys typed while the monitor prints wait their turn, so none is lost.</p>
         <p>The commands are the User Manual's: four hex digits and SPACE open an address, two hex digits and a full stop store a byte and move on, RETURN moves on without storing, LF moves back, G runs from the open address, and RUB OUT starts again.</p>
         <Fold summary="The paper, and the speed of the line" quiet>
@@ -214,7 +222,7 @@ if ((kim || bbc || electron) && !machine.rights.includes(noPermission)) throw ne
         <pre class="bbc-program"><code>{program.lines.join('\n')}</code></pre>
         <p>The screen should then show:</p>
         <pre class="bbc-program"><code>{program.shows.join('\n')}</code></pre>
-        <p>The machine starts with CAPS LOCK on, as the real one does, so letters come out as capitals. Some symbols are not where a PC keyboard has them: <a href="#keyboard">the keyboard</a> says where each one is.</p>
+        <p>The machine starts with CAPS LOCK on, as the real one does, so letters come out as capitals. Some symbols are not where a PC keyboard has them: <a href="#symbols">the table of symbols</a> says where each one is.</p>
         {electron && <p>The Electron's BASIC is the BBC Micro's, byte for byte, so this program prints the same on both. Then save it to tape and load it back, as the cassette recorder says.</p>}
         </div>
       </div>
@@ -287,7 +295,7 @@ if ((kim || bbc || electron) && !machine.rights.includes(noPermission)) throw ne
         <div class="prose">
         <p>Each key on your keyboard presses the BBC Micro's key in the same place, so the symbols are where the BBC Micro has them, not where your keyboard prints them. Backspace and Delete are DELETE, Enter is RETURN, End is COPY, the arrow keys are the cursor keys and Esc is ESCAPE. The Break button, or the Pause key, is BREAK.</p>
         <p>The on-screen keys under the screen have every key, in the machine's own layout, for a phone, a tablet or a mouse. Tap SHIFT or CTRL and it stays down for the next key you tap, so SHIFT then 2 types a double quote; tap it again to let go without typing.</p>
-        <Fold summary="Where each symbol is, and the keys only on screen" quiet>
+        <Fold id="symbols" summary="Where each symbol is, and the keys only on screen" quiet>
           <table class="bbc-symbols">
             <caption>Where the symbols are</caption>
             <thead><tr><th scope="col">To type</th><th scope="col">On the BBC Micro</th><th scope="col">On your keyboard</th></tr></thead>
@@ -315,7 +323,7 @@ if ((kim || bbc || electron) && !machine.rights.includes(noPermission)) throw ne
         <p>Each key on your keyboard presses the Electron's key in the same place, so the symbols are where the Electron has them, not where your keyboard prints them. Backspace and Delete are DELETE, Enter is RETURN, End is COPY, the arrow keys are the cursor keys and Esc is ESCAPE. The Break button, or the Pause key, is BREAK. Your keyboard presses every key the Electron has, so no key is on the on-screen keys only.</p>
         <p>The on-screen keys under the screen have every key, for a phone, a tablet or a mouse. Tap SHIFT or CTRL and it stays down for the next key you tap, so SHIFT then 2 types a double quote; tap it again to let go without typing.</p>
         <p>CAPS LK and FUNC are one key on the Electron. On screen, tap it and then another key, and that key is pressed with FUNC: FUNC and a digit is a function key, and FUNC and a letter types a BASIC keyword (FUNC and K types CHAIN). Tap it twice instead and it is pressed alone, which turns CAPS LOCK on or off. Your own Caps Lock key does that too.</p>
-        <Fold summary="Where each symbol is" quiet>
+        <Fold id="symbols" summary="Where each symbol is" quiet>
           <table class="electron-symbols">
             <caption>Where the symbols are</caption>
             <thead><tr><th scope="col">To type</th><th scope="col">On the Electron</th><th scope="col">On your keyboard</th></tr></thead>
@@ -338,8 +346,8 @@ if ((kim || bbc || electron) && !machine.rights.includes(noPermission)) throw ne
       <h2 id="more">About the {machine.name}</h2>
       <div class="prose">
       <Fold id="left-out" summary="What is modelled, and what is not">
-        <p>{machine.notes}</p>
-        {(bbc || nes || vcs || electron) && <p>Each part left out has an issue that says what it would take:</p>}
+        {!(bbc || nes || vcs || electron) && <p>{notModelled}</p>}
+        {(bbc || nes || vcs || electron) && <p>Not modelled, each part with an issue that says what it would take:</p>}
         {bbc && <ul>{NOT_MODELLED.map((m) => <li>{m.part[0].toUpperCase() + m.part.slice(1)}: <a href={issueUrl(m.issue)}>issue {m.issue}</a></li>)}</ul>}
         {nes && <ul>{NES_NOT_MODELLED.map((m) => <li>{m.part[0].toUpperCase() + m.part.slice(1)}: <a href={issueUrl(m.issue)}>issue {m.issue}</a></li>)}</ul>}
         {electron && <ul>{ELECTRON_NOT_MODELLED.map((m) => <li>{m.part[0].toUpperCase() + m.part.slice(1)}: <a href={issueUrl(m.issue)}>issue {m.issue}</a></li>)}</ul>}

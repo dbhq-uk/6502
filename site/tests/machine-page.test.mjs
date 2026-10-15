@@ -164,7 +164,9 @@ test('the page says the teletype is modelled, and the registry says only the cas
   assert.match(kim.notes, /Not modelled: the cassette interface and the expansion bus\./);
   assert.match(kim.notes, /teletype/);
   const text = visibleText(html);
-  assert.ok(text.includes(kim.notes), 'the page does not show the registry\'s notes');
+  const [modelled, notModelled] = kim.notes.split(/(?<=\.)\s+(?=Not modelled)/);
+  assert.ok(text.includes(`It models ${modelled[0].toLowerCase()}${modelled.slice(1)}`), 'the page does not show what the registry\'s notes say is modelled');
+  assert.ok(text.includes(notModelled), 'the page does not show what the registry\'s notes say is not modelled');
   assert.doesNotMatch(text, /teletype[^.]*not modelled/i);
 });
 

@@ -106,8 +106,8 @@ const { base, clockMhz, roms, download, library } = Astro.props;
       <label class="bbc-protect"><input type="checkbox" role="switch" data-bbc-protect disabled /> Write-protect</label>
     </div>
     <p class="bbc-line" data-bbc-drive aria-live="polite">Drive 0 is empty.</p>
-    <p class="bbc-note">Insert and run puts the disc in drive 0 and starts it as the BBC Micro does, with SHIFT held through BREAK. Insert in drive 0 only puts it in, for <kbd>*CAT</kbd> and <kbd>*RUN</kbd>. Or use a disc of your own: drop a .ssd or .dsd disc image on the page, or press Insert a disc. The file is read in this tab and is not uploaded anywhere.</p>
-    <Fold class="bbc-note" summary="More about the disc drive" quiet>
+    <p class="bbc-note">Insert and run puts the disc in drive 0 and starts it as the BBC Micro does, with SHIFT held through BREAK. Insert in drive 0 only puts it in, for <kbd>*CAT</kbd> and <kbd>*RUN</kbd>. Or use a disc of your own: drop a .ssd or .dsd disc image on the page, or press Insert a disc. The file is read in this tab and is not uploaded anywhere. Anything written to a disc is lost unless you press Save disc.</p>
+    <Fold class="bbc-note" summary="Disc drive limits" quiet>
       <p>A library disc's image is fetched from this site when you insert it, not before. It goes in writable unless Write-protect is on, so a game can keep its high scores on it until the disc is changed or the page is left. Save disc downloads the disc as it now stands, which is the only way to keep what was written to it.</p>
       <p>The page has drive 0 only: the controller and DFS have a second drive, and the page does not offer it.</p>
       <p>DFS remembers the catalogue of the last disc it read until the drive stops, a moment after the last disc command, as on the real machine. So after changing discs, type <kbd>*CAT</kbd> first, or DFS may still list the old one.</p>

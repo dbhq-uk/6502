@@ -144,6 +144,14 @@ test('the disc drive: insert, blank, save, eject and write-protect, drive 0 only
   assert.match(text, /after changing discs, type \*CAT first/);
 });
 
+test('the one caveat that costs a visitor their work, that a disc is lost unless saved, is said in the open, and the other limits are in a fold named for them', () => {
+  const fold = /<details\b[^>]*>\s*<summary\b[^>]*>([^<]*)<\/summary>[\s\S]*?<\/details>/.exec(panel);
+  assert.equal(fold?.[1], 'Disc drive limits');
+  const open = visibleText(panel.replace(fold[0], ' '));
+  assert.match(open, /Anything written to a disc is lost unless you press Save disc\./);
+  for (const limit of [/The page has drive 0 only/, /type \*CAT first/]) assert.doesNotMatch(open, limit);
+});
+
 test('the page lists the six parts left out, each linked to its issue', () => {
   const list = section('left-out');
   assert.deepEqual(foldOf(list), { summary: 'What is modelled, and what is not', open: false }, 'the parts left out are not a closed part of the reference');

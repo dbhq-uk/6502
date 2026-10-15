@@ -23,8 +23,10 @@
 // in a view's panel it is only that view's own words, and the controls, which
 // are the same for every view, are said once under the panels.
 //
-// Under it, how the model was made, in a closed <details> (Fold.astro) under
-// its heading, because it is reference: what it was measured from, with the
+// Under it, how the model was made. Under its heading, in the open, is one
+// line crediting the author and licence of everything it was traced from, with
+// a link to the fold; the fold is a closed <details> (Fold.astro), labelled with
+// the view it is about, because it is reference: what it was measured from, with the
 // figures that say how well (from src/data/<id>-model.json, which the
 // measuring scripts write, so nothing here is typed by hand), what it still
 // does not show, and a credit for every photograph, drawing and reference it
@@ -83,6 +85,14 @@ const sources = [
 // The chip legend, one list of rows for each console the model draws, in the same order.
 const legends = model.legend ? views.map((v) => model.legend(v.region ?? undefined)) : null;
 const consoles = views.length > 1;
+// Which view of the machine this panel is, for the label of its fold: the machine's one model is its board.
+const viewName = suffix === '' ? 'board' : suffix.slice(1);
+// The credit that stays in the open, under the heading, whatever the fold holds: who made the photographs,
+// drawings and scans the model was traced from, and under what licence, once for each author and licence.
+// The licence is its name here, up to the first note on it; the fold has the whole text.
+const licenceName = (licence: string | null) => licence === null ? 'no licence stated' : licence.replace(/\s*[(:,].*$/, '');
+const credited: Source[] = [];
+for (const s of sources) if (!credited.some((c) => c.author === s.author && licenceName(c.licence) === licenceName(s.licence))) credited.push(s);
 ---
 
     <section class="model-stage" data-model-stage tabindex="0" aria-label={first.label} aria-description={CONTROLS_DESCRIPTION} aria-describedby={`model-about${suffix}${first.suffix}`}>
@@ -127,7 +137,14 @@ const consoles = views.length > 1;
     {views.map((v) => v.note && (
       <div class="model-made prose" data-model-made data-model-region={v.region} hidden={v.hidden}>
         <h3 id={`model-made${suffix}${v.suffix}`}>How the model was made</h3>
-        <Fold summary="What it was measured from, its sources and its limits" quiet>
+        {credited.length > 0 && (
+          <p class="model-byline" data-model-byline>
+            Traced and measured from the work of {credited.map((s, i) => (
+              <>{i > 0 && (i === credited.length - 1 ? ' and ' : ', ')}{s.authorUrl ? <a href={s.authorUrl}>{s.author}</a> : s.author} ({s.licenceUrl ? <a href={s.licenceUrl}>{licenceName(s.licence)}</a> : licenceName(s.licence)})</>
+            ))}. <a href={`#model-sources${suffix}${v.suffix}`}>What was taken from each</a>.
+          </p>
+        )}
+        <Fold id={`model-sources${suffix}${v.suffix}`} summary={`What the ${viewName} was measured from, its sources and its limits`} quiet>
           {v.note.paragraphs.map((p) => <p>{p}</p>)}
           <p>What it was traced and measured from:</p>
           <ul class="model-credit" data-model-credit>
