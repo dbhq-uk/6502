@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
-import { page, visibleText, DIST } from './helpers.mjs';
+import { page, visibleText, DIST, pagePart, foldOf } from './helpers.mjs';
 import { counts, loadRegistry, REPO_ROOT } from '../src/lib/registry.mjs';
 import { loadTryIt, runningMachines, runningSentence } from '../src/lib/machines.mjs';
 import { bbcRoms } from '../src/lib/pins.mjs';
@@ -16,10 +16,8 @@ import { NOT_ON_A_PC, ON_SCREEN_ROWS, legend } from '../public/bbc-keys.js';
 
 const html = page('/machines/bbc-micro/')?.html ?? '';
 const machine = loadRegistry().machines.find((m) => m.id === 'bbc-micro');
-const section = (id) => {
-  const at = html.indexOf(`aria-labelledby="${id}"`);
-  return at < 0 ? '' : html.slice(at, html.indexOf('</section>', at));
-};
+// A section, or a closed part of the reference at the foot of the page (helpers.mjs).
+const section = (id) => pagePart(html, id);
 const panel = (() => {
   const at = html.indexOf('<div class="bbc"');
   return at < 0 ? '' : html.slice(at, html.indexOf('</fieldset>', at));
@@ -146,16 +144,24 @@ test('the disc drive: insert, blank, save, eject and write-protect, drive 0 only
   assert.match(text, /after changing discs, type \*CAT first/);
 });
 
+test('the one caveat that costs a visitor their work, that a disc is lost unless saved, is said in the open, and the other limits are in a fold named for them', () => {
+  const fold = /<details\b[^>]*>\s*<summary\b[^>]*>([^<]*)<\/summary>[\s\S]*?<\/details>/.exec(panel);
+  assert.equal(fold?.[1], 'Disc drive limits');
+  const open = visibleText(panel.replace(fold[0], ' '));
+  assert.match(open, /Anything written to a disc is lost unless you press Save disc\./);
+  for (const limit of [/The page has drive 0 only/, /type \*CAT first/]) assert.doesNotMatch(open, limit);
+});
+
 test('the page lists the six parts left out, each linked to its issue', () => {
   const list = section('left-out');
-  assert.match(list, /<h2 id="left-out">What is not modelled<\/h2>/);
+  assert.deepEqual(foldOf(list), { summary: 'What is modelled, and what is not', open: false }, 'the parts left out are not a closed part of the reference');
   const items = [...list.matchAll(/<li>([^<]*)<a href="([^"]+)">issue (\d+)<\/a><\/li>/g)];
   assert.deepEqual(items.map((m) => [decode(m[1]).replace(/: $/, '').toLowerCase(), m[2], Number(m[3])]), NOT_MODELLED.map((m) => [m.part.toLowerCase(), issueUrl(m.issue), m.issue]));
 });
 
 test('the page says whose ROMs it runs, in the registry\'s words: documented and not cleared, and removed if a holder asks', () => {
   const rom = section('rom');
-  assert.match(rom, /<h2 id="rom">Whose ROMs these are<\/h2>/);
+  assert.deepEqual(foldOf(rom), { summary: 'Whose ROMs these are', open: false }, 'the full rights are not a closed part of the reference');
   const text = visibleText(rom);
   assert.ok(text.includes(machine.rights), 'the rights text is not the registry\'s');
   assert.match(machine.rights, /Acorn/);

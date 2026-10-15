@@ -282,7 +282,9 @@ export async function checkNes({ browser, watch, problems, origin }) {
   const limit = await page.evaluate(() => document.querySelector('[data-nes]').nes.host.MaxRomBytes());
   await refuse({ name: 'huge.nes', mimeType: 'application/octet-stream', buffer: Buffer.alloc(limit + 1) }, /^huge\.nes is [\d,]+ bytes, more than the [\d,]+ bytes of the largest file this machine loads, so it was not read\./);
 
-  // Every image on the page loads, from this site.
+  // Every image on the page loads, from this site. The photographs are a closed part of the reference
+  // at the foot of the page, so they are opened first, as a visitor opens them.
+  await page.locator('#photos > summary').click();
   const images = await page.evaluate(async () => {
     const all = [...document.images];
     for (const i of all) { i.loading = 'eager'; i.scrollIntoView(); }

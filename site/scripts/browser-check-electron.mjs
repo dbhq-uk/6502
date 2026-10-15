@@ -298,7 +298,9 @@ export async function checkElectron({ browser, watch, problems, origin }) {
   await waitRows((r) => r.includes('Acorn Electron') && !r.includes('>RUN') && prompt(r), 'Break did not restart the machine');
   console.log(`electron: after Break: ${JSON.stringify((await rows()).filter((x) => x !== ''))}`);
 
-  // Every image on the page loads, from this site.
+  // Every image on the page loads, from this site. The photographs are a closed part of the reference
+  // at the foot of the page, so they are opened first, as a visitor opens them.
+  await page.locator('#photos > summary').click();
   const images = await page.evaluate(async () => {
     const all = [...document.images];
     for (const i of all) { i.loading = 'eager'; i.scrollIntoView(); }

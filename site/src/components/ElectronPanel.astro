@@ -23,6 +23,7 @@
 // records what the OS saves, and Save tape downloads it. How long a tape takes
 // is the machine's own figure, from the journal (TAPE_TIMES in
 // src/lib/electron.mjs), never typed here.
+import Fold from './Fold.astro';
 import { TAPE_TIMES, machineSeconds, megabytes } from '../lib/electron.mjs';
 import { ON_SCREEN_ROWS, STICKY, legend, spokenName } from '../../public/electron-keys.js';
 
@@ -43,14 +44,14 @@ const { base, clockMhz, roms, download } = Astro.props;
   <div class="electron-screen" data-electron-screen role="application" aria-label="The Electron's screen" aria-describedby="electron-typing">
     <canvas data-electron-canvas width="640" height="256"></canvas>
   </div>
-  <p class="electron-note">The picture is the machine's own, pixel for pixel, as the model of its ULA draws it, shown in the television's shape. It models the picture, not a television: no scan lines, no glow and no curve.</p>
-  <p class="electron-note" id="electron-typing">With the screen focused, your keyboard types into the Electron, key for key by where the keys are, and the machine's own keys further down type by a tap or a click. Tab moves on, so the page never keeps the keyboard.</p>
+  <p class="electron-note">The picture is the machine's own, pixel for pixel, as the model of its ULA draws it, in the television's shape. It models the picture, not a television: no scan lines, glow or curve.</p>
+  <p class="electron-note" id="electron-typing">With the screen focused, your keyboard types into the Electron, each key by its place, and the machine's own keys below take a tap or a click. Tab moves on, so the page never keeps the keyboard.</p>
   <div class="electron-controls">
     <button type="button" class="btn pill" data-electron-start disabled>Start the Electron{download !== null && `, a download of up to ${megabytes(download)} MB`}</button>
     <button type="button" class="btn small" data-electron-break disabled>Break</button>
     <button type="button" class="btn small" data-electron-sound disabled>Turn sound on</button>
   </div>
-  <p class="electron-status" role="status" data-electron-status>The Electron runs in your browser, and it needs JavaScript to do that. With JavaScript off, the page and the program below are shown, but nothing runs.</p>
+  <p class="electron-status" role="status" data-electron-status>The Electron runs in your browser and needs JavaScript. Without it, the page and the program below are shown, but nothing runs.</p>
   <p class="electron-line" data-electron-sound-status aria-live="polite">Sound is off.</p>
   <p class="electron-speed" data-electron-speed></p>
   <div class="electron-keys" role="group" aria-label="The Electron's keys">
@@ -77,7 +78,10 @@ const { base, clockMhz, roms, download } = Astro.props;
     </div>
     <p class="electron-line" data-electron-tape aria-live="polite">No tape in the recorder.</p>
     <p class="electron-line" data-electron-motor>Motor off.</p>
-    <p class="electron-note">A tape plays at the Electron's own pace, as a cassette does, and nothing is sped up. In the machine's own test on {TAPE_TIMES.measured}, saving a one-line program took {machineSeconds(TAPE_TIMES.saveCycles)} seconds of the Electron's time, from RETURN to the motor stopping, and loading it back {machineSeconds(TAPE_TIMES.loadCycles)} seconds (<a href={TAPE_TIMES.journal}>the journal</a> has the run). Most of that is the steady tone the OS writes before and after a program; the program itself goes at 1,200 baud, 120 bytes a second, in blocks of 256 bytes with a short tone between them.</p>
     <p class="electron-note">To save: press Blank tape, type <kbd>SAVE "NAME"</kbd> and press RETURN, then RETURN again when the machine says RECORD then RETURN. When the prompt is back, Save tape downloads the tape as a .uef file. To load: drop a .uef tape image on the page, or press Insert a tape, then type <kbd>LOAD ""</kbd> and press RETURN. The file is read in this tab and is not uploaded anywhere. A tape the machine cannot read is refused with the reason, and the tape that was in stays in.</p>
+    <p class="electron-note">A tape plays at the Electron's own pace, as a cassette does, and nothing is sped up.</p>
+    <Fold class="electron-note" summary="How long a tape takes" quiet>
+      <p>In the machine's own test on {TAPE_TIMES.measured}, saving a one-line program took {machineSeconds(TAPE_TIMES.saveCycles)} seconds of the Electron's time, from RETURN to the motor stopping, and loading it back {machineSeconds(TAPE_TIMES.loadCycles)} seconds (<a href={TAPE_TIMES.journal}>the journal</a> has the run). Most of that is the steady tone the OS writes before and after a program. The program itself goes at 1,200 baud, 120 bytes a second, in blocks of 256 bytes with a short tone between them.</p>
+    </Fold>
   </fieldset>
 </div>

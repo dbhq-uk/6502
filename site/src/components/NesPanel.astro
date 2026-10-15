@@ -50,15 +50,15 @@ const pad = [
   <div class="nes-screen" data-nes-screen role="application" aria-label="The NES's screen" aria-describedby="nes-keys">
     <canvas data-nes-canvas width="256" height="240"></canvas>
   </div>
-  <p class="nes-note">The picture is the machine's own, pixel for pixel, as its PPU draws it, shown in the region's pixel shape: 8:7 on NTSC, wider on PAL. It models the picture, not a television: no scan lines, no glow, no curve and no colour bleed.</p>
-  <p class="nes-note" id="nes-keys">With the screen focused, the keyboard is controller 1: {list(['Up', 'Down', 'Left', 'Right'].map(keyFor))} for the d-pad, {keyFor('B')} for B, {keyFor('A')} for A, {keyFor('Select')} for Select and {keyFor('Start')} for Start. Tab moves on and Escape lets go, so the page never keeps the keyboard. A gamepad works too, read in the browser's standard layout: the bottom face button is A, the left one B, the middle pair Select and Start, and the first gamepad is controller 1, the second controller 2.</p>
+  <p class="nes-note">The picture is the machine's own, pixel for pixel, as its PPU draws it, in the region's pixel shape: 8:7 on NTSC, wider on PAL. It models the picture, not a television: no scan lines, glow, curve or colour bleed.</p>
+  <p class="nes-note" id="nes-keys">With the screen focused, the keyboard is controller 1: {list(['Up', 'Down', 'Left', 'Right'].map(keyFor))} for the d-pad, {keyFor('B')} for B, {keyFor('A')} for A, {keyFor('Select')} for Select and {keyFor('Start')} for Start. Tab moves on and Escape lets go, so the page never keeps the keyboard. Gamepads work too, in the browser's standard layout: the bottom face button is A, the left one B, the middle pair Select and Start. The first gamepad is controller 1, the second controller 2.</p>
   <div class="nes-controls">
     <button type="button" class="btn pill" data-nes-start disabled>Start the NES{download !== null && `, a download of up to ${megabytes(download)} MB`}</button>
     <button type="button" class="btn small" data-nes-reset disabled>Reset</button>
     <button type="button" class="btn small" data-nes-power disabled>Power off and on</button>
     <button type="button" class="btn small" data-nes-sound aria-pressed="false" disabled>Turn sound on</button>
   </div>
-  <p class="nes-status" role="status" data-nes-status>The NES runs in your browser, and it needs JavaScript to do that. With JavaScript off, the page is shown, but nothing runs.</p>
+  <p class="nes-status" role="status" data-nes-status>The NES runs in your browser and needs JavaScript. Without it, the page is shown, but nothing runs.</p>
   <p class="nes-line" data-nes-sound-status aria-live="polite">Sound is off.</p>
   <p class="nes-line" data-nes-power-line aria-live="polite"></p>
   <p class="nes-speed" data-nes-speed></p>
@@ -83,7 +83,7 @@ const pad = [
       <input type="file" accept=".nes" data-nes-file hidden />
     </div>
     <p class="nes-line" data-nes-cartridge aria-live="polite">{rom ? `Start puts ${rom.title} in.` : 'Start, then choose a .nes file.'}</p>
-    <p class="nes-note">Drop a .nes file on the page, or press Load a .nes file. The file is read in this tab and is not uploaded anywhere. Reset starts the game again and keeps the cartridge's RAM; Power off and on clears it.</p>
+    <p class="nes-note">Drop a .nes file on the page, or press Load a .nes file. It is read in this tab and is not uploaded anywhere. Reset starts the game again and keeps the cartridge's RAM; Power off and on clears it.</p>
     <p class="nes-note">Saving is not built, so a page reload loses battery RAM: a game's saved progress is gone when the page is reloaded or closed.</p>
   </fieldset>
 </div>

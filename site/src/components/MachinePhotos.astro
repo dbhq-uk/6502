@@ -2,8 +2,11 @@
 // Every photograph of the original machine the page uses, main photograph first,
 // each credited and, for a machine with a 3D model, with what the model took
 // from it: the machine's `photos` list in machines/registry.json, in order. The
-// main one is also in the page's head; here it is in the company of the rest.
-// They load lazily, so the section adds nothing to the page's first load.
+// main one is also in the page's head, with its credit beside it; here it is in
+// the company of the rest. They are reference, so they sit in a closed <details>
+// (Fold.astro) in the page's last section, each credit under its own
+// photograph. They load lazily, so they add nothing to the page's first load.
+import Fold from './Fold.astro';
 import MachinePhoto from './MachinePhoto.astro';
 import type { Photo } from './MachinePhoto.astro';
 
@@ -17,12 +20,9 @@ const n = machine.photos.length;
 const WORDS = ['no', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten'];
 ---
 
-<section class="photos" aria-labelledby="photos" data-photos={machine.id}>
-  <div class="wrap narrow">
-    <h2 id="photos">Photographs of the original</h2>
-    <p class="photos-intro">{n === 1 ? 'The photograph' : `The ${WORDS[n] ?? n} photographs`} of the original {machine.name} that this page uses, {n === 1 ? 'credited' : 'each credited'} as its source gives it.{model && (n === 1 ? ' Under it is what the 3D model above took from it.' : ' Under each is what the 3D model above took from it.')}</p>
-    <div class="photo-grid">
-      {machine.photos.map((photo) => <MachinePhoto machine={machine} photo={photo} used={model} />)}
-    </div>
+<Fold id="photos" class="photos" data-photos={machine.id} summary={n === 1 ? 'The photograph of the original, and its credit' : `The ${WORDS[n] ?? n} photographs of the original, and their credits`}>
+  <p class="photos-intro">{n === 1 ? 'Credited' : 'Each is credited'} as its source gives it.{model && (n === 1 ? ' Under it is what the 3D model took from it.' : ' Under each is what the 3D model took from it.')}</p>
+  <div class="photo-grid">
+    {machine.photos.map((photo) => <MachinePhoto machine={machine} photo={photo} used={model} />)}
   </div>
-</section>
+</Fold>
