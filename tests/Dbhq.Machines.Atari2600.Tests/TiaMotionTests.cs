@@ -332,7 +332,7 @@ public class TiaMotionTests
     }
 
     [Fact]
-    public void Section_15_hmove_strobed_while_the_pulses_run_does_not_restart_the_count()
+    public void A_second_hmove_while_the_pulses_run_does_not_restart_the_count_jigo2600_a_choice()
     {
         // [inferring from jigo2600, Visual Objects: "triggering SEC multiple times while the
         // counter is running has no effect" on the counter; the latches are set again; guessing -

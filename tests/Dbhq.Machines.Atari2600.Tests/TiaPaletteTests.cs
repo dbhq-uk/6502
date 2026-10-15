@@ -104,7 +104,7 @@ public class TiaPaletteTests
     }
 
     [Fact]
-    public void Section_19_3_ntsc_hue_15_lands_on_hue_1_and_every_other_hue_is_a_colour()
+    public void Section_19_3_the_models_step_puts_ntsc_hue_15_on_hue_1_and_every_other_hue_is_a_colour()
     {
         // The model's step is 360/14 degrees (tia.md section 19.3, a choice).
         TiaPalette palette = Region.Ntsc.Palette;

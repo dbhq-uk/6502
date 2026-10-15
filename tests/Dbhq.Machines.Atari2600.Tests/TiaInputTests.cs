@@ -161,7 +161,7 @@ public class TiaInputTests
     }
 
     [Fact]
-    public void Section_20_2_power_on_disables_the_latch_and_keeps_the_pins()
+    public void Section_20_2_power_on_disables_the_latch_and_keeps_the_pins_a_choice()
     {
         // The latch's power-on state is a choice (tia.md open item 13): disabled, so the port reads
         // the pin. A button held through a power cycle is still held: the pins are the outside world.

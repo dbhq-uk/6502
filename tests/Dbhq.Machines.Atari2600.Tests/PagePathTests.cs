@@ -65,7 +65,7 @@ public sealed class PagePathTests
         // The bundled game starts the same from a CPU that was not reset or chips that were not
         // powered on (its BRK vector is its start, and it clears the chips itself), so its frame
         // cannot tell (task 13's review: those two faults passed the frame). The page's power off
-        // and on must still be the console's, so the whole state is compared, CPU and every chip.
+        // and on must still be a fresh power on's, so the whole state is compared, CPU and every chip.
         Region region = Named(name);
         var played = new Atari2600(Cartridge.Load(BootCheck.Rom()), region);
         played.PowerOn();
@@ -82,7 +82,7 @@ public sealed class PagePathTests
 
         Assert.Equal(State(fresh), State(played));
 
-        // And a fresh power on is the console's: the CPU has run its reset, so it is at the
+        // And a fresh power on runs the CPU's reset, so the CPU is at the
         // cartridge's reset vector ($1FFC, the last four bytes but two of the image) with three
         // pushes' worth taken off the stack pointer and interrupts masked.
         byte[] rom = BootCheck.Rom();

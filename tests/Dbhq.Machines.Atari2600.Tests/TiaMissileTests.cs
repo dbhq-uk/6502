@@ -122,7 +122,7 @@ public class TiaMissileTests
     }
 
     [Fact]
-    public void Section_9_the_counter_keeps_running_under_vblank()
+    public void Section_7_the_counter_keeps_running_under_vblank()
     {
         // tia.md section 7 [inferring]: VBLANK hides the missile and does not stop its counter.
         var scene = new TiaScene().Write(Reg.Enam0, 0x02).At(0, 102, Reg.Resm0, 0).At(1, 0, Reg.Vblank, 0x02);

@@ -166,7 +166,7 @@ public class TiaLineTests
     }
 
     [Fact]
-    public void Section_6_rsync_restarts_the_line_three_clocks_after_the_write()
+    public void Section_6_the_model_restarts_the_line_three_clocks_after_rsync_a_choice()
     {
         // tia.md section 6's worked example: RSYNC written on cycle 36, W 108. The restart is a
         // choice [guessing - verify], three clocks after W (the sheet's "about 4", and see
@@ -245,7 +245,7 @@ public class TiaLineTests
     }
 
     [Fact]
-    public void Section_6_the_line_rsync_starts_releases_a_pending_wsync()
+    public void Section_6_the_line_rsync_starts_releases_a_pending_wsync_the_models_choice()
     {
         // tia.md open item 1 asks whether it does; the model releases RDY at every line start,
         // RSYNC's included [guessing - verify].
@@ -261,7 +261,7 @@ public class TiaLineTests
     }
 
     [Fact]
-    public void Section_7_vsync_on_then_off_ends_a_frame_and_the_line_it_ends_on_is_row_0()
+    public void Section_7_vsync_on_then_off_ends_a_frame_and_the_plans_item_4_makes_that_line_row_0()
     {
         var tia = new Tia();
 

@@ -216,7 +216,7 @@ public class TiaPlayerTests
     }
 
     [Fact]
-    public void Section_10_a_start_while_the_player_is_drawing_restarts_its_scan()
+    public void Section_10_a_start_while_the_player_is_drawing_restarts_its_scan_in_the_model()
     {
         // A quad player from pixel 4 (scan count 0 from clock 72); NUSIZ0 = %001 written at clock
         // 84, as its scan reaches 3, makes it single width with a close copy, whose decode is
@@ -229,7 +229,7 @@ public class TiaPlayerTests
     }
 
     [Fact]
-    public void Section_9_a_reset_cuts_off_a_start_the_scan_has_not_taken()
+    public void Section_9_a_reset_cuts_off_a_start_the_scan_has_not_taken_as_the_ball_measures_a_choice_for_players()
     {
         // A player at 145 with a close copy: the copy's start comes as each line ends and waits
         // through the next line's blank for the scan counter's first clock, to draw at pixels 1 to

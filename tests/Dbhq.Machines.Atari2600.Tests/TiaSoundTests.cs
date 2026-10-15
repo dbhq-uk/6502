@@ -176,7 +176,7 @@ public class TiaSoundTests
     }
 
     [Fact]
-    public void Section_18_4_power_on_is_all_nine_bits_1_and_the_dividers_at_0()
+    public void Section_18_4_power_on_is_all_nine_bits_1_and_the_dividers_at_0_the_models_choice()
     {
         var sound = new TiaSound();
         for (int i = 0; i < 37; i++)

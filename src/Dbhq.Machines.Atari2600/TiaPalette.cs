@@ -26,7 +26,7 @@ namespace Dbhq.Machines.Atari2600;
 /// <b>PAL</b> (section 19.5): hues 0, 1, 14 and 15 have no colour; the even hues 2 to 12 sit at
 /// <c>165° - (H - 2) / 2 x 30°</c>, and each odd hue 3 to 13 is the mirror of the even hue before
 /// it, <c>-(165° - (H - 3) / 2 x 30°)</c>. Fitted to the documented names and the colours the
-/// suite's author confirmed on a PAL console [guessing - verify].
+/// suite's include/region.h records as hardware-confirmed on a PAL console [guessing - verify].
 /// </para>
 /// <para>
 /// What a television shows depends on its controls and on the console's delay setting, so these

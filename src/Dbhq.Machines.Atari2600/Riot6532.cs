@@ -130,7 +130,7 @@ public sealed class Riot6532 : IReportsState
         {
             // In the free run the count wraps past $00 again with the flag still set. That is not
             // a new interrupt, so a read on that cycle clears the flag as any other does
-            // [guessing - verify]: no source or suite test reaches it.
+            // [guessing - verify]: no source or suite test reaches it; Riot6532Tests holds the choice.
             return;
         }
 
