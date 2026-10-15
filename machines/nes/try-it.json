@@ -7,7 +7,7 @@
   "steps": [
     {
       "do": "Press Start on the page.",
-      "says": "The machine switches on with Lan Master in it. Within a second the title fades in and its music plays: the name in a blue band, PD2011 Shiru under it, and a menu of START, CODE, SFX and BGM with a blinking square by START."
+      "says": "The machine switches on with Lan Master in it. The title fades in within a second, and its music plays: the name in a blue band, PD2011 Shiru under it, and a menu of START, CODE, SFX and BGM with a blinking square by START."
     },
     {
       "do": "Press Start or A on the pad.",

@@ -9,7 +9,7 @@
   "steps": [
     {
       "do": "Press Start on the page.",
-      "says": "The machine switches on with 2048 2600 in it. The title shows the tiles 2, 0, 4, 8 over 2, 6, 0, 0, changing colour every frame, with the author's handle, CHEST over ERBR, below them."
+      "says": "The machine switches on with 2048 2600 in it. The title shows the tiles in two rows, 2, 0, 4, 8 over 2, 6, 0, 0, the tiles changing colour every frame, with the author's handle, CHEST over ERBR, below them."
     },
     {
       "do": "Press the left fire button.",
@@ -33,6 +33,6 @@
     { "button": "Left fire button", "does": "on the title, starts a one-player game; when a game is over, starts it again" },
     { "button": "Right fire button", "does": "on the title, starts a two-player game; when a game is over, starts it again" },
     { "button": "GAME SELECT", "does": "switches between the one-player and two-player game, which starts at once" },
-    { "button": "Colour switch", "does": "black and white makes PAL frames; colour makes NTSC frames" }
+    { "button": "Colour switch", "does": "at black and white the game makes PAL frames; at colour it makes NTSC frames" }
   ]
 }

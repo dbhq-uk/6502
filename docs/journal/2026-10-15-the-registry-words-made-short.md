@@ -15,19 +15,23 @@ Words per running machine in the fields the site prints, counted before and afte
 
 | Machine | Rights | Notes | Captions and alt | Try it | Total before | Total after |
 |---|---|---|---|---|---|---|
-| KIM-1 | 65 to 65 | 42 to 42 | 293 to 220 | 112 to 109 | 512 | 436 |
-| BBC Micro | 101 to 101 | 49 to 49 | 562 to 336 | none | 712 | 486 |
+| KIM-1 | 65 to 65 | 42 to 42 | 293 to 265 | 112 to 109 | 512 | 481 |
+| BBC Micro | 101 to 101 | 49 to 49 | 562 to 436 | none | 712 | 586 |
 | Electron | 140 to 137 | 55 to 55 | 90 to 60 | none | 285 | 252 |
-| Atari 2600 | 167 to 165 | 84 to 81 | 255 to 148 | 320 to 303 | 826 | 697 |
-| NES | 148 to 151 | 62 to 60 | 390 to 273 | 219 to 217 | 819 | 701 |
+| Atari 2600 | 167 to 165 | 84 to 81 | 255 to 156 | 320 to 313 | 826 | 715 |
+| NES | 148 to 153 | 62 to 60 | 390 to 330 | 219 to 217 | 819 | 760 |
 
 ## What was decided
 
-- **The alt text took most of the cut.** It is not on the screen, but a screen reader reads all of it, and the longest ran past a hundred words for one photograph. Each now names what the photograph is of, from where, and the parts a reader would look for: the switches' labels, the ports' names, the words on the case. Positions of minor parts and repeated colours went.
-- **The rights changed least, on purpose.** Each still names the holder, the copyright lines, where our copy came from, the commit, the address, the SHA-256 and what is not known, including "no licence or permission from any holder was found". Only run-on sentences were split, and the NES's reason for using the Internet Archive now comes before the address it explains. The KIM-1's is unchanged: its "who holds it now" does not say whether "it" is the copyright or the ROM, and a shorter sentence would have had to choose. The Atari 2600's game credit in its try-it file is unchanged for the same reason: it is a credit line.
-- **The notes became lists with semicolons** where the Atari 2600's and the NES's ran several items with commas inside items together. The KIM-1's, the BBC Micro's and the Electron's were already plain lists and are unchanged.
-- **The try-it steps lost words, not steps.** Each still says what to press and what the screen then shows, because a visitor checks the machine against it.
-- **Left as they were:** the photographs' and references' `used` text and the references' titles, which are credits saying what was taken from each source and which the model tests read phrase by phrase; the planned machines' notes and the chip table, which are already a line each; the try-it files' `about`, which the site does not print; the KIM-1's teletype session; and the BBC Micro's disc library text, which is already one line per disc.
+The alt text took most of the cut. It is not on the screen, but a screen reader reads all of it, and the longest ran past a hundred words for one photograph. Each now names what the photograph is of, from where, and the parts a reader would look for: the switches' labels, the ports' names, the words on the case, and the viewing angle and positions that tell a visitor what the picture shows. A review put back several details that the first cut had dropped, among them the Econet socket, which a shorter list had made look like part of the D socket.
+
+The rights changed least, on purpose. Each still names the holder, the copyright lines, where our copy came from, the commit, the address, the SHA-256 and what is not known, including "no licence or permission from any holder was found". They changed only in commas, clause order and where two sentences are split; the NES's reason for using the Internet Archive now comes before the address it explains. The KIM-1's "who holds it now" does not say whether "it" is the copyright or the ROM, and a shorter sentence would have had to choose, so it keeps its original wording and lost one comma. The Atari 2600's game credit in its try-it file is unchanged because it is a credit line.
+
+The notes became lists with semicolons where the Atari 2600's and the NES's ran several items with commas inside items together. The KIM-1's, the BBC Micro's and the Electron's were already plain lists and are unchanged.
+
+The try-it steps lost words, not steps. Each still says what to press and what the screen then shows, because a visitor checks the machine against it.
+
+Left as they were: the photographs' and references' `used` text and the references' titles, which are credits saying what was taken from each source and which the model tests read phrase by phrase; the planned machines' notes and the chip table, which are already a line each; the try-it files' `about`, which the site does not print; the KIM-1's teletype session; and the BBC Micro's disc library text, which is already one line per disc.
 
 ## What the tests hold
 
