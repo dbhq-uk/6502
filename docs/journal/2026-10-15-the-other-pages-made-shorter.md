@@ -2,7 +2,7 @@
 title: "The home, about, status and inside pages made shorter"
 date: 2026-10-15
 summary: "Part of the site tidy pass. The home page now says what the project is, which machines run and where to start, in about half the words. The about, status and inside pages keep every fact in fewer, plainer sentences. Every figure is still computed."
-order: 63
+order: 64
 ---
 
 # 15 October 2026: the home, about, status and inside pages made shorter
@@ -11,7 +11,7 @@ Dan asked for the whole site to be concise, plain and easier to read. This entry
 
 ## What changed
 
-The home page leads with what the project is and a button that goes to the machines. Its machines section now lists every machine that runs, from the registry, each with its year and CPU, in the order they were built for. It used to show the first three planned machines with their long notes; those notes are on each machine's own page. The journal list on the home page shows titles and dates only, and the summaries stay on the journal index. The proof section's heading no longer argues with nobody ("A difference is a number, not an argument" became "Checked cycle by cycle"). The status cards and the speed card say the same with fewer words.
+The home page leads with what the project is and two buttons. The lime one now reads "Run a machine" and goes to the machines; it used to read "Read the journal", which is now the plain second button. The "See where it stands" button, which jumped to the status section, went: that section is on the same page and the header links to the status page. Its machines section now lists every machine that runs, from the registry, each with its year and CPU, in priority order, then registry order, as a list, with no "Running" label on each card because the heading and the sentence above them already say it. It used to show the three machines first in line (the KIM-1, the BBC Micro and the NES, all running) with their long notes; those notes are on each machine's own page. The journal list on the home page shows titles and dates only, and the summaries stay on the journal index. The proof section's heading, "A difference is a number, not an argument", became "Checked cycle by cycle". The status cards and the speed card say the same with fewer words.
 
 The about page's licence paragraph became a short list, one item per kind of thing that is somebody else's. Every fact in it stayed: the ROMs and their hashes, the photographs' licences, the bundled software and its authors' permission, the visitor's own games, and the pinned test programs.
 

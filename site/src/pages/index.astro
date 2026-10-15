@@ -12,7 +12,7 @@ import { machineHref, runningMachines, runningSentence } from '../lib/machines.m
 const entries = (await getCollection('journal'))
   .sort(newestFirst)
   .slice(0, 3);
-// The machines that run, in the order they were built for (priority first), then the registry's order.
+// The machines that run, in priority order, then the registry's order.
 const running = runningMachines(registry)
   .map((m, i) => ({ m, i }))
   .sort((a, b) => (a.m.priority ?? Infinity) - (b.m.priority ?? Infinity) || a.i - b.i)
@@ -42,15 +42,14 @@ const suites = Object.entries(results.suites).sort(([, a], [, b]) => b.passed - 
         <h2>Run one in your browser</h2>
         <p>{runningSentence(registry)}</p>
       </div>
-      <div class="grid3">
+      <ul class="machine-list">
         {running.map((m) => (
-          <div class="card">
-            <span class="chip on">Running</span>
+          <li class="card">
             <h3><a href={machineHref(m)}>{m.name}</a></h3>
             <p>{m.year}, {m.cpu}</p>
-          </div>
+          </li>
         ))}
-      </div>
+      </ul>
       <p class="note"><a href="/machines/">All {fmt(registry.machines.length)} machines in the family</a></p>
     </div>
   </section>
@@ -65,7 +64,7 @@ const suites = Object.entries(results.suites).sort(([, a], [, b]) => b.passed - 
       <div class="grid3">
         <Card value={`${fmt(fig.machinesImplemented)} of ${fmt(fig.machinesInScope)}`} title="Machines implemented" text="A machine counts only once it runs in the browser and passes an automated test." />
         <Card value={fmt(fig.variants)} title="Variants of the core" text="The NMOS 6502, the NES's 2A03, and three 65C02s." />
-        <Card value={fmt(fig.testsPassing)} title="Tests passing" text="On the commit shown below." />
+        <Card value={fmt(fig.testsPassing)} title="Tests passing" text="From the latest test run, on the commit shown below." />
         <Card value={`${fmt1(fig.speedAot)} times`} title={`Against a ${REFERENCE_MHZ} MHz machine, in the browser`} text={`Best of ${fmt(measurements.modes.aot.runs.length)} runs, compiled ahead of time, on one machine, collected ${shortDate(new Date(measurements.collected))}. The design target is at least ${fmt(fig.speedTarget)} times real speed, for the core alone. Against this site's ${REFERENCE_MHZ} MHz reference it is ${targetVerdict(fig.speedNative)} natively and ${targetVerdict(fig.speedAot)} in the browser.`} />
       </div>
       <p class="note">Test run on commit {results.commit?.slice(0, 7) ?? 'unknown'}. <a href="/status/">Full status</a></p>
@@ -106,3 +105,11 @@ const suites = Object.entries(results.suites).sort(([, a], [, b]) => b.passed - 
 
   <p class="figure-caption">Illustration: the textured backgrounds behind the proof and machines sections are generated, not measurements</p>
 </Base>
+
+<style is:global>
+  /* Five machines run now: five across when there is room, else three and two, so no card sits alone on a row. */
+  .machine-list { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; }
+  @media (min-width: 640px) { .machine-list { grid-template-columns: repeat(3, 1fr); } }
+  @media (min-width: 1100px) { .machine-list { grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); } }
+  @media (max-width: 400px) { .machine-list { grid-template-columns: 1fr; } }
+</style>
