@@ -119,9 +119,13 @@ disc drive in a hairline box of its own.
   under 44 pixels, so on a window up to 480 pixels wide and at least 560 tall
   they are taller than the screen they share the page with. Once the machine
   runs, the screen is sticky under the site header, whose height the driver
-  gives the stylesheet as `--bbc-pin`, and the keys scroll past it. Nothing
-  about its look changes: it is the same black panel with the same edge, and the
-  lime stays on its focus ring.
+  gives the stylesheet as `--bbc-pin`, and the keys scroll past it. A key, Break
+  or the sound button that takes the focus is scrolled clear of the screen as
+  well (`scroll-margin-top` from `--bbc-screen-height`). It is the same black
+  panel with the same edge, and the lime stays on its focus ring. On a window
+  about 360 by 560, or a phone whose toolbars collapse as the page scrolls, the
+  window's height crosses the 560 pixels the rule asks for, so the pin can
+  switch on and off; that is accepted.
 - **The library of discs** sits at the top of the disc drive's box, above the
   visitor's own-file controls and separated from them by a hairline. It is a
   native `<select>` with its own label, grouped by kind with `<optgroup>`

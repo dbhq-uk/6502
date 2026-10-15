@@ -216,9 +216,13 @@ test('on a phone the screen stays in view under the site header while the machin
   // A sticky item only moves inside its own grid area, so the panel is a column while the machine runs.
   assert.match(phone, /\.bbc\[data-state="running"\] \{[^}]*display: flex; flex-direction: column;/);
   assert.match(phone, /\.bbc\[data-state="running"\] \.bbc-screen \{[^}]*position: sticky; top: var\(--bbc-pin, 130px\);[^}]*z-index: 5;/);
+  // A key, Break or the sound button that takes the focus is scrolled out from under the screen as well as the header.
+  assert.match(phone, /\.bbc\[data-state="running"\] \.bbc-key, \.bbc\[data-state="running"\] \[data-bbc-break\], \.bbc\[data-state="running"\] \[data-bbc-sound\] \{ scroll-margin-top: calc\(var\(--bbc-screen-height, 0px\) \+ 8px\); \}/);
   // Not before Start, when the screen is blank, and not on a wide page, where the keys fit beside it.
   assert.doesNotMatch(css.replace(phone, ''), /\.bbc\[data-state="running"\] \.bbc-screen \{[^}]*sticky/);
   // The header is two lines on a phone and one on a tablet, so the driver reads its height rather than guess it.
   const driver = fs.readFileSync(path.join(process.cwd(), 'public', 'bbc-micro.js'), 'utf8');
   assert.match(driver, /setProperty\('--bbc-pin', `\$\{[^}]*getBoundingClientRect\(\)\.height[^}]*\}px`\)/);
+  assert.match(driver, /setProperty\('--bbc-screen-height', `\$\{[^}]*getBoundingClientRect\(\)\.height[^}]*\}px`\)/);
+  assert.match(driver, /if \('ResizeObserver' in window\) \{/);
 });

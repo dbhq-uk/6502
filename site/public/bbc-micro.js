@@ -108,13 +108,22 @@ function prepare(panel) {
     panel.dataset.state = state;
   };
   // The screen is pinned under the site header on a phone (global.css), so the
-  // stylesheet needs the header's height, which is two lines there and one on a
-  // tablet.
+  // stylesheet needs two sizes: the header's height, which is two lines there and
+  // one on a tablet, to pin the screen below it, and the screen's own height, so
+  // that a key which takes the focus is scrolled out from under the screen and
+  // not only out from under the header. A browser without ResizeObserver reads
+  // them once.
   const header = document.querySelector('.top');
-  if (header) {
-    const pin = () => panel.style.setProperty('--bbc-pin', `${Math.round(header.getBoundingClientRect().height)}px`);
-    pin();
-    new ResizeObserver(pin).observe(header);
+  const screenBox = panel.querySelector('[data-bbc-screen]');
+  const measure = () => {
+    if (header) panel.style.setProperty('--bbc-pin', `${Math.round(header.getBoundingClientRect().height)}px`);
+    panel.style.setProperty('--bbc-screen-height', `${Math.round(screenBox.getBoundingClientRect().height)}px`);
+  };
+  measure();
+  if ('ResizeObserver' in window) {
+    const sizes = new ResizeObserver(measure);
+    if (header) sizes.observe(header);
+    sizes.observe(screenBox);
   }
   library(panel);
   if (!panel.dataset.download) {
