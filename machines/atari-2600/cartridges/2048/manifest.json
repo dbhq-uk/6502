@@ -1,0 +1,23 @@
+{
+  "slug": "2048",
+  "title": "2048 2600",
+  "author": "Carlos Duarte do Nascimento (Chester)",
+  "year": "2014",
+  "kind": "game",
+  "description": "A port of Gabriele Cirulli's 2048 to the Atari VCS: shift the tiles on a four by four board, and two tiles of the same value join into one of twice the value.",
+  "controls": "the left fire button starts a one-player game and the right a two-player one; the joystick shifts the tiles; GAME SELECT switches between the modes",
+  "file": "2048.bin",
+  "board": "2K",
+  "licence": "MIT",
+  "licenceFile": "LICENSE",
+  "licenceStatement": "The MIT License (MIT) Copyright (c) 2014 Carlos Duarte do Nascimento (Chester) Original 2048 game Copyright (c) 2014 Gabriele Cirulli Permission is hereby granted, free of charge, to any person obtaining a copy of this software ...",
+  "licenceUrl": "https://github.com/chesterbr/2048-2600/blob/35de3c1b3b7bc4c3aadc8cf7fe630050a6984761/LICENSE",
+  "sourceUrl": "https://github.com/chesterbr/2048-2600",
+  "commit": "35de3c1b3b7bc4c3aadc8cf7fe630050a6984761",
+  "imageFrom": "https://raw.githubusercontent.com/chesterbr/2048-2600/35de3c1b3b7bc4c3aadc8cf7fe630050a6984761/2048.bin",
+  "fetched": "2026-10-15",
+  "sha256": "c85dc2204299b0a29209d3f80ae112678c171dab216719593625647d2436f1e1",
+  "bytes": 2048,
+  "changed": "nothing",
+  "artNotInRom": "The cartridge art, by Jenn Harrison, is the label pictures in the repository and is not in the ROM; none of it is bundled."
+}

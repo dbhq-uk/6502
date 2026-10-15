@@ -1,0 +1,20 @@
+{
+  "about": "Written by the recorder (ATARI_RECORD=1 dotnet test tests/Dbhq.Machines.Atari2600.Tests --filter Record), never by hand. The picture of the bundled game after the given frames from power on with the colour switch as given, in each region: colours hashes the whole frame as TIA colour numbers, and rgba the window of the region as the canvas of the page holds it, which the browser check compares.",
+  "rom": "machines/atari-2600/cartridges/2048/2048.bin",
+  "frames": {
+    "NTSC": 120,
+    "PAL": 100
+  },
+  "switches": {
+    "NTSC": "colour",
+    "PAL": "black and white"
+  },
+  "colours": {
+    "NTSC": "fd91f6d5cdfc19e0c99116b16cc1a0fba2a5278ceb9d9d83dd734ca21860e154",
+    "PAL": "4eda698cc11a206b9c4552cc591b831ad173e732a4b459c286a7a12bc43d8900"
+  },
+  "rgba": {
+    "NTSC": "8393e75c275fab4dec4213992711ea0c286c445b6319274f9823d47177f8f916",
+    "PAL": "adbf425e7a7ad44bdd5795d9cdb85e302c214ab9fcc5f154b40852ceca483a70"
+  }
+}

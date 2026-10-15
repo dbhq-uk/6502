@@ -246,4 +246,14 @@ public static class Pins
     // is read.
     public const string NesHomebrewPath = "roms/nes/Lan_Master.nes";
     public const string NesHomebrewSha256 = "becfeafb80479c330333c9e9385417f68f3c88e85443dfb37b05ae9283f3ea45";
+
+    // The Atari 2600's bundled game: 2048 2600, by Carlos Duarte do Nascimento (Chester), under
+    // the MIT licence, the author's own build of it from chesterbr/2048-2600 at commit
+    // 35de3c1b3b7bc4c3aadc8cf7fe630050a6984761, fetched once by hand. It is committed in its own
+    // folder, machines/atari-2600/cartridges/2048/, with its licence and its provenance in the
+    // folder's README (AGENTS.md rules 3 and 4, which cover a bundled cartridge as they cover a
+    // disc), and its notice in NOTICE.md. The Atari 2600 has no system ROM. The path is
+    // repository-relative and the hash is checked every time the file is read.
+    public const string Atari2600HomebrewPath = "machines/atari-2600/cartridges/2048/2048.bin";
+    public const string Atari2600HomebrewSha256 = "c85dc2204299b0a29209d3f80ae112678c171dab216719593625647d2436f1e1";
 }

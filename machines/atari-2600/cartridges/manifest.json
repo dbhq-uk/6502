@@ -1,0 +1,14 @@
+{
+  "about": "The cartridges the Atari 2600's page bundles, one folder each under AGENTS.md rule 4: the image, its licence as its author published it, a README with the provenance, and a manifest.json with the SPDX licence id. Each image's SHA-256 is checked every time it is read.",
+  "cartridges": [
+    {
+      "slug": "2048",
+      "title": "2048 2600",
+      "author": "Carlos Duarte do Nascimento (Chester)",
+      "path": "2048/2048.bin",
+      "licence": "MIT",
+      "sha256": "c85dc2204299b0a29209d3f80ae112678c171dab216719593625647d2436f1e1",
+      "default": true
+    }
+  ]
+}

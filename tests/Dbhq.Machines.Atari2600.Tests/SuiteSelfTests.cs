@@ -1,3 +1,4 @@
+using System.Collections.Concurrent;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -158,17 +159,27 @@ public class SuiteSelfTests(ITestOutputHelper output)
     /// </summary>
     private static readonly string[] RecordedCartridge = ["cartridge/bank-fa", "cartridge/bank-hotspot-window", "cartridge/power-on-bank", "cartridge/ram-superchip"];
 
+    private static readonly ConcurrentDictionary<string, Lazy<SuiteOutcome>> TrustedRuns = new();
+
     public static TheoryData<string, string> TrustedRows() => Rows(Trusted);
 
-
+    /// <summary>
+    /// The trusted self-test <paramref name="test"/> gives <c>$A5</c> at <c>$80</c> within the limit in
+    /// <paramref name="region"/>. Each run is made once and kept, so <see cref="Atari2600AcceptanceTests"/>,
+    /// which calls this too, does not run the suite a second time in a whole run of the project.
+    /// </summary>
+    internal static void AssertTrustedPasses(string test, string region, Action<string> log)
+    {
+        SuiteOutcome outcome = TrustedRuns.GetOrAdd($"{test} {region}", _ => new Lazy<SuiteOutcome>(() => SuiteRunner.Run(test, TestPrograms.RegionNamed(region)))).Value;
+        log(outcome.ToString());
+        Assert.True(outcome.Passed, outcome.ToString());
+    }
 
     [Theory]
     [MemberData(nameof(TrustedRows))]
     public void Trusted_self_test_passes(string test, string region)
     {
-        SuiteOutcome outcome = SuiteRunner.Run(test, TestPrograms.RegionNamed(region));
-        output.WriteLine(outcome.ToString());
-        Assert.True(outcome.Passed, outcome.ToString());
+        AssertTrustedPasses(test, region, output.WriteLine);
     }
 
     [Fact]
@@ -193,6 +204,12 @@ public class SuiteSelfTests(ITestOutputHelper output)
     /// </summary>
     [Fact]
     public void The_trust_split_places_every_test_in_the_suite_exactly_once()
+    {
+        AssertTheTrustSplitPlacesEveryTestOnce();
+    }
+
+    /// <summary>The check <see cref="The_trust_split_places_every_test_in_the_suite_exactly_once"/> makes, for <see cref="Atari2600AcceptanceTests"/> to call too.</summary>
+    internal static void AssertTheTrustSplitPlacesEveryTestOnce()
     {
         string[] sources = [.. Dbhq.Cpu6502.TestSupport.Atari2600Suite.Names.Where(name => name.EndsWith(".asm", StringComparison.Ordinal)).Select(name => name[..^".asm".Length])];
         Assert.NotEmpty(sources);

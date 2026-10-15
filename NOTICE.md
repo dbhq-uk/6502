@@ -1,6 +1,6 @@
 # Notices
 
-This repository is MIT (see `LICENSE`). What in it was taken from outside under different terms, or rests on work that states none, is recorded here, a section each: the teletext glyph table, the BBC Micro's preset discs, the NES board's track map, traced from OpenTendo's scans of a bare board under the TAPR Open Hardware License, the BBC Micro board's track map, traced from amb5l's scans of a bare board, which state no licence, the BBC Micro board's IC table, facts from Acorn's Service Manual, its parts, read from two photographs of populated boards, and the BBC Micro's key centres, read from Dominic Beesley's keyboard under the MIT licence, whose notice is kept below. The system ROMs, and the NES's bundled homebrew, Lan Master, which its author released into the public domain, are recorded separately, in [`roms/README.md`](roms/README.md).
+This repository is MIT (see `LICENSE`). What in it was taken from outside under different terms, or rests on work that states none, is recorded here, a section each: the teletext glyph table, the BBC Micro's preset discs, the NES board's track map, traced from OpenTendo's scans of a bare board under the TAPR Open Hardware License, the BBC Micro board's track map, traced from amb5l's scans of a bare board, which state no licence, the BBC Micro board's IC table, facts from Acorn's Service Manual, its parts, read from two photographs of populated boards, the BBC Micro's key centres, read from Dominic Beesley's keyboard under the MIT licence, whose notice is kept below, and the Atari 2600's bundled game, 2048 2600, by Carlos Duarte do Nascimento under the MIT licence, whose notice is kept below too. The system ROMs, and the NES's bundled homebrew, Lan Master, which its author released into the public domain, are recorded separately, in [`roms/README.md`](roms/README.md).
 
 ## The SAA5050 teletext glyph table, from Bedstead
 
@@ -190,3 +190,35 @@ SOFTWARE.
 ```
 
 The outside model's other readings are ours: the words and places read on Chris Whytehead's underside photograph from Chris's Acorns (O8-I, CC BY-SA 3.0 as that site states, credited, not committed), and one dimension of a D-subminiature shell read from TE Connectivity's drawing 1757819 (a fact; nothing of the drawing is copied).
+
+## The Atari 2600's bundled game, 2048 2600, by Carlos Duarte do Nascimento (MIT)
+
+[`machines/atari-2600/cartridges/2048/2048.bin`](machines/atari-2600/cartridges/2048/) is 2048 2600, a port of Gabriele Cirulli's 2048 to the Atari VCS by Carlos Duarte do Nascimento (Chester), the author's own build as his repository, https://github.com/chesterbr/2048-2600, holds it at commit `35de3c1b3b7bc4c3aadc8cf7fe630050a6984761`, fetched from https://raw.githubusercontent.com/chesterbr/2048-2600/35de3c1b3b7bc4c3aadc8cf7fe630050a6984761/2048.bin. It is not under this repository's MIT licence but under its own, the MIT licence, and is redistributed on its terms. Its source, `2048.asm`, carries the licence with both copyright lines, and the notice is kept here as the source carries it:
+
+```
+The MIT License (MIT)
+
+Copyright (c) 2014 Carlos Duarte do Nascimento (Chester)
+
+Original 2048 game Copyright (c) 2014 Gabriele Cirulli
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+```
+
+The repository's `LICENSE`, kept byte for byte beside the game, has the first copyright line only. The cartridge art, which the repository's README credits to Jenn Harrison, is not in the ROM and nothing of it is bundled. Where the file came from, its SHA-256 and its history are in the folder's [README](machines/atari-2600/cartridges/2048/README.md).

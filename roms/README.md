@@ -140,3 +140,7 @@ GPL-2.0 and says nothing about the ROMs, so **that licence is not a licence for
 them**. No permission from any holder was found. The ROM is here because Dan
 decided on 1 October 2026 that a ROM is used when its position is documented, and
 this is that document. If a rights holder asks for it to be removed, it will be.
+
+## Atari 2600: no system ROM, and its bundled game is elsewhere
+
+The Atari 2600 has no system ROM, so nothing is here for it. The one cartridge its page runs before a visitor loads their own, 2048 2600 by Carlos Duarte do Nascimento (Chester), under the MIT licence, is a bundled program rather than a system ROM, so it is kept as `AGENTS.md` rule 4 asks of one, in its own folder, [`machines/atari-2600/cartridges/2048/`](../machines/atari-2600/cartridges/2048/), with its licence as the author published it and a README giving where it came from, its SHA-256 (`c85dc2204299b0a29209d3f80ae112678c171dab216719593625647d2436f1e1`), its history and its rights. Its notice is in [`NOTICE.md`](../NOTICE.md). The NES's Lan Master, above, predates that rule and stays here.

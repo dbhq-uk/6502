@@ -20,17 +20,29 @@ public class SuiteRecordedTests(ITestOutputHelper output)
     [MemberData(nameof(SelfTestRows))]
     public void Recorded_self_test_gives_its_recorded_outcome(string test, string region)
     {
-        JsonNode outcome = SuiteOutcomes.SelfTestOutcome(test, region);
-        output.WriteLine($"{test} ({region}): {outcome.ToJsonString()}");
-        AssertRecorded("selfTests", test, region, outcome);
+        AssertSelfTestGivesItsRecordedOutcome(test, region, output.WriteLine);
     }
 
     [Theory]
     [MemberData(nameof(ScreenshotRows))]
     public void Screenshot_test_gives_its_recorded_mismatch_count(string test, string region)
     {
+        AssertScreenshotGivesItsRecordedCount(test, region, output.WriteLine);
+    }
+
+    /// <summary>The recorded self-test <paramref name="test"/> gives, in <paramref name="region"/>, the outcome the file holds. <see cref="Atari2600AcceptanceTests"/> calls it too.</summary>
+    internal static void AssertSelfTestGivesItsRecordedOutcome(string test, string region, Action<string> log)
+    {
+        JsonNode outcome = SuiteOutcomes.SelfTestOutcome(test, region);
+        log($"{test} ({region}): {outcome.ToJsonString()}");
+        AssertRecorded("selfTests", test, region, outcome);
+    }
+
+    /// <summary>The screenshot test <paramref name="test"/> gives, in <paramref name="region"/>, the mismatch count the file holds. <see cref="Atari2600AcceptanceTests"/> calls it too.</summary>
+    internal static void AssertScreenshotGivesItsRecordedCount(string test, string region, Action<string> log)
+    {
         JsonNode outcome = JsonValue.Create(SuiteOutcomes.ScreenshotOutcome(test, region));
-        output.WriteLine($"{test} ({region}): {outcome.ToJsonString()} mismatched pixels");
+        log($"{test} ({region}): {outcome.ToJsonString()} mismatched pixels");
         AssertRecorded("screenshots", test, region, outcome);
     }
 

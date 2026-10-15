@@ -1,0 +1,38 @@
+{
+  "about": "What a visitor does with the Atari 2600 on its page at 6502.dbhq.uk: nothing to load, press Start, and play the bundled game, 2048 2600, by Carlos Duarte do Nascimento (Chester), under the MIT licence (machines/atari-2600/cartridges/2048/README.md). The page renders these steps and the controls. The controls are the console's joysticks and switches; the keys and the gamepad buttons that work them are the page's own map, shown beside it. Atari2600AcceptanceTests boots the same file and checks its picture against machines/atari-2600/expected-frames.json, which the browser check also reads.",
+  "rom": "machines/atari-2600/cartridges/2048/2048.bin",
+  "title": "2048 2600",
+  "author": "Carlos Duarte do Nascimento (Chester)",
+  "licence": "MIT",
+  "licenceUrl": "https://github.com/chesterbr/2048-2600/blob/35de3c1b3b7bc4c3aadc8cf7fe630050a6984761/LICENSE",
+  "credit": "2048 2600 is by Carlos Duarte do Nascimento (Chester), with PAL support by SvOlli and a fix by Ben Combee, under the MIT licence. It is a port of 2048 by Gabriele Cirulli. The cartridge art, by Jenn Harrison, is not part of the game and is not shown here.",
+  "steps": [
+    {
+      "do": "Press Start on the page.",
+      "says": "The machine switches on with 2048 2600 in it. Its title shows the tiles 2, 0, 4, 8 and 2, 6, 0, 0 in two rows, their colours changing every frame, with the author's name, CHESTERBR, under them."
+    },
+    {
+      "do": "Press the left fire button.",
+      "says": "A one-player game starts: a grey board of four by four cells with one 2 tile on it, and the score, at zero, above it."
+    },
+    {
+      "do": "Push the joystick up, down, left or right.",
+      "says": "Every tile slides as far as it can that way, two tiles of the same value that meet join into one of twice the value, and a new tile appears. The game ends when no move is left."
+    },
+    {
+      "do": "On the title, press the right fire button, or press GAME SELECT.",
+      "says": "The right fire button starts a two-player game, in which the players take turns on one board. GAME SELECT switches between the one-player and the two-player game, and the game it chooses starts at once."
+    },
+    {
+      "do": "If the page is set to PAL, flip the colour switch to black and white.",
+      "says": "The game makes PAL frames only with the switch at black and white, as its author's README says; at colour it makes NTSC frames."
+    }
+  ],
+  "controls": [
+    { "button": "Joystick", "does": "shifts every tile on the board one way" },
+    { "button": "Left fire button", "does": "on the title, starts a one-player game; when a game is over, starts it again" },
+    { "button": "Right fire button", "does": "on the title, starts a two-player game; when a game is over, starts it again" },
+    { "button": "GAME SELECT", "does": "switches between the one-player and the two-player game, which starts at once" },
+    { "button": "Colour switch", "does": "at black and white the game makes PAL frames, and at colour NTSC frames" }
+  ]
+}
