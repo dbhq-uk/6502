@@ -631,7 +631,7 @@ let pages = 0;
 
 /** The BBC Micro's page with one panel, one Break button and the on-screen A key, and `host` as its machine. */
 async function bbcPage(t, host) {
-  const saved = ['document', 'window', 'fetch', 'requestAnimationFrame', 'cancelAnimationFrame'].map((k) => [k, Object.getOwnPropertyDescriptor(globalThis, k)]);
+  const saved = ['document', 'window', 'fetch', 'requestAnimationFrame', 'cancelAnimationFrame', 'ResizeObserver'].map((k) => [k, Object.getOwnPropertyDescriptor(globalThis, k)]);
   t.after(() => {
     for (const [k, d] of saved) {
       if (d) Object.defineProperty(globalThis, k, d);
@@ -643,6 +643,10 @@ async function bbcPage(t, host) {
   const breakButton = new FakeElement();
   const keyA = new FakeElement({ dataset: { bbcKey: 'A' } });
   const panel = new FakeElement({ dataset: { download: '3.1 MB', base: PAGE_BASE, clockMhz: '2', roms: 'os.rom basic.rom dfs.rom' } });
+  // The site header, as tall as the test says, and the stylesheet's custom properties on the panel.
+  const header = { height: 130, getBoundingClientRect() { return { height: this.height }; } };
+  panel.style = { setProperty(name, value) { this[name] = value; } };
+  const watchers = [];
   panel.querySelectorAll = (selector) => (selector === '[data-bbc-break]' ? [breakButton] : selector === '[data-bbc-key]' ? [keyA] : []);
   panel.querySelector = (selector) => {
     if (!elements.has(selector)) {
@@ -657,8 +661,9 @@ async function bbcPage(t, host) {
     panel.addEventListener(type, (event) => events.push([type, event.detail ?? null, Boolean(panel.bbc)]));
   }
   const define = (k, value) => Object.defineProperty(globalThis, k, { value, configurable: true, writable: true });
-  define('document', { hidden: false, querySelectorAll: (s) => (s === '[data-bbc]' ? [panel] : []), addEventListener() {}, removeEventListener() {} });
+  define('document', { hidden: false, querySelector: (s) => (s === '.top' ? header : null), querySelectorAll: (s) => (s === '[data-bbc]' ? [panel] : []), addEventListener() {}, removeEventListener() {} });
   define('window', { addEventListener() {} });
+  define('ResizeObserver', class { constructor(callback) { watchers.push(callback); } observe() {} });
   define('fetch', async () => ({ ok: true, arrayBuffer: async () => new ArrayBuffer(16) }));
   define('requestAnimationFrame', () => 1);
   define('cancelAnimationFrame', () => {});
@@ -671,7 +676,7 @@ async function bbcPage(t, host) {
     await until(() => panel.dataset.state === 'running');
     assert.equal(panel.dataset.state, 'running', `the page did not start: ${panel.querySelector('[data-bbc-status]').textContent}`);
   };
-  return { panel, events, start, breakButton, keyA };
+  return { panel, events, start, breakButton, keyA, header, resize: () => watchers.forEach((w) => w()) };
 }
 
 /** A BbcHost for the whole page: what Start and the panel's controls call, recorded. */
@@ -716,4 +721,13 @@ test('on the running page the on-screen keys, the Break button and panel.bbc.tap
   assert.deepEqual(host.calls.filter((c) => c[0] !== 'Load'), [
     ['down', BBC_KEYS.A], ['up', BBC_KEYS.A], ['down', BBC_KEYS.A], ['up', BBC_KEYS.A], ['break'], ['break'],
   ]);
+});
+
+test('the page gives the stylesheet the site header\'s height as --bbc-pin, from the start and again when the header changes, so the pinned screen sits just under it', async (t) => {
+  const { panel, header, resize } = await bbcPage(t, pageHost());
+  assert.equal(panel.style['--bbc-pin'], '130px');
+  // A tablet's header is one line: the links no longer wrap.
+  header.height = 96.5;
+  resize();
+  assert.equal(panel.style['--bbc-pin'], '97px');
 });

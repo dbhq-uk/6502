@@ -115,6 +115,13 @@ disc drive in a hairline box of its own.
   latch for one key; latched, the key is filled `--card` with a `--white` edge, a
   change of shape as well as colour, and says so with `aria-pressed`. No key
   takes the lime.
+- **On a phone the running machine's screen is pinned.** The keys cannot be
+  under 44 pixels, so on a window up to 480 pixels wide and at least 560 tall
+  they are taller than the screen they share the page with. Once the machine
+  runs, the screen is sticky under the site header, whose height the driver
+  gives the stylesheet as `--bbc-pin`, and the keys scroll past it. Nothing
+  about its look changes: it is the same black panel with the same edge, and the
+  lime stays on its focus ring.
 - **The library of discs** sits at the top of the disc drive's box, above the
   visitor's own-file controls and separated from them by a hairline. It is a
   native `<select>` with its own label, grouped by kind with `<optgroup>`

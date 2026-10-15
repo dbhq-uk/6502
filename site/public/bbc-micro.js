@@ -107,6 +107,15 @@ function prepare(panel) {
     status.textContent = text;
     panel.dataset.state = state;
   };
+  // The screen is pinned under the site header on a phone (global.css), so the
+  // stylesheet needs the header's height, which is two lines there and one on a
+  // tablet.
+  const header = document.querySelector('.top');
+  if (header) {
+    const pin = () => panel.style.setProperty('--bbc-pin', `${Math.round(header.getBoundingClientRect().height)}px`);
+    pin();
+    new ResizeObserver(pin).observe(header);
+  }
   library(panel);
   if (!panel.dataset.download) {
     say('This copy of the site was built without the BBC Micro\'s files, so it cannot run here.', 'missing');

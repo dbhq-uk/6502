@@ -12,7 +12,7 @@
 // keyboard handling, by where the keys are on the BBC (* is SHIFT and the key
 // where a PC has '), shows 42 and lights more of the canvas; the headroom line
 // appears; Tab moves focus off the machine; PRINT "A" tapped on the on-screen
-// keys alone, SHIFT latched for each quote, prints A; the sound button turns sound on and off without an error; a disc
+// keys alone, SHIFT latched for each quote, prints A; at 390 pixels wide, with the last key scrolled into view, the whole screen is still in view above it (pinned under the site header); the sound button turns sound on and off without an error; a disc
 // image put in through the file input lists its catalogue with *CAT; Save disc
 // downloads the same bytes; and Break restarts the machine.
 //
@@ -187,6 +187,23 @@ export async function checkBbcMicro({ browser, watch, problems, origin }) {
     const i = r.indexOf('>PRINT "A"');
     console.log(`bbc: tapped PRINT "A" and RETURN on the on-screen keys: the screen shows "${r[i]}", then "${r[i + 1].trim()}"`);
   }
+
+  // On a phone the keys are taller than the screen they share the page with, so
+  // the picture is pinned under the site header: with the last row of keys
+  // scrolled into view, the whole screen is still in view above it.
+  const wide = page.viewportSize();
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.locator('[data-bbc-key="Delete"]').scrollIntoViewIfNeeded();
+  const phone = await page.evaluate(() => {
+    const box = (s) => document.querySelector(s).getBoundingClientRect();
+    return { header: box('.top').bottom, screen: box('[data-bbc-screen]'), key: box('[data-bbc-key="Delete"]'), height: innerHeight, across: document.documentElement.scrollWidth };
+  });
+  console.log(`bbc: at 390 wide, with the last key in view: the screen runs from ${Math.round(phone.screen.top)} to ${Math.round(phone.screen.bottom)}, the header ends at ${Math.round(phone.header)}, the key is at ${Math.round(phone.key.top)} of ${phone.height}`);
+  if (phone.screen.top < phone.header - 1 || phone.screen.bottom > phone.key.top) problems.push(`bbc: at 390 wide the screen is not in view above the last key (screen ${Math.round(phone.screen.top)} to ${Math.round(phone.screen.bottom)}, header ends ${Math.round(phone.header)}, key at ${Math.round(phone.key.top)})`);
+  if (phone.key.bottom > phone.height) problems.push('bbc: at 390 wide the last key is not in view');
+  if (phone.across > 390) problems.push(`bbc: at 390 wide the page is ${phone.across} wide`);
+  await page.setViewportSize(wide);
+  await page.evaluate(() => window.scrollTo(0, 0));
 
   // Sound on, then off: headless Chrome may play nothing, but nothing may fail.
   const sound = page.locator('[data-bbc-sound]');

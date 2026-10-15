@@ -206,3 +206,19 @@ test('the on-screen keys: every key once, in the machine\'s rows, real buttons d
   const css = fs.readFileSync(path.join(process.cwd(), 'src', 'styles', 'global.css'), 'utf8');
   assert.match(css, /\.bbc-key \{[^}]*min-width: 44px; min-height: 44px;/, 'a key is under 44 pixels');
 });
+
+test('on a phone the screen stays in view under the site header while the machine runs and the keys scroll past it', () => {
+  // The keys are 44 pixels tall at least, so on a phone they cannot be made short
+  // enough to share the screen with the picture. The picture is pinned instead.
+  const css = fs.readFileSync(path.join(process.cwd(), 'src', 'styles', 'global.css'), 'utf8');
+  const phone = /@media \(max-width: 480px\) and \(min-height: 560px\) \{([^\n]*)\}\s*$/m.exec(css)?.[1] ?? '';
+  assert.ok(phone, 'there is no rule for a phone that is tall enough to pin the screen');
+  // A sticky item only moves inside its own grid area, so the panel is a column while the machine runs.
+  assert.match(phone, /\.bbc\[data-state="running"\] \{[^}]*display: flex; flex-direction: column;/);
+  assert.match(phone, /\.bbc\[data-state="running"\] \.bbc-screen \{[^}]*position: sticky; top: var\(--bbc-pin, 130px\);[^}]*z-index: 5;/);
+  // Not before Start, when the screen is blank, and not on a wide page, where the keys fit beside it.
+  assert.doesNotMatch(css.replace(phone, ''), /\.bbc\[data-state="running"\] \.bbc-screen \{[^}]*sticky/);
+  // The header is two lines on a phone and one on a tablet, so the driver reads its height rather than guess it.
+  const driver = fs.readFileSync(path.join(process.cwd(), 'public', 'bbc-micro.js'), 'utf8');
+  assert.match(driver, /setProperty\('--bbc-pin', `\$\{[^}]*getBoundingClientRect\(\)\.height[^}]*\}px`\)/);
+});
