@@ -41,7 +41,8 @@ public enum ConsoleSwitches
 /// <b>Port A</b>: the left stick (0) on D7 to D4, right, left, down and up; the right stick (1) on D3
 /// to D0 in the same order. A held direction grounds its pin. <b>Port B</b>: D7 the right
 /// difficulty (1 at A), D6 the left (1 at A), D3 colour (0 at black and white), D1 Select and D0
-/// Reset (0 pressed); D2, D4 and D5 are not connected and float high through the chip's pull-ups.
+/// Reset (0 pressed); D2, D4 and D5 are not connected and float high through the chip's pull-ups
+/// (riot.md section 12 item 6) [guessing - verify].
 /// </para>
 /// <para>
 /// What the pins do when the program makes them outputs is the chips' business: the RIOT reads a

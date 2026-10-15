@@ -1,7 +1,7 @@
 ---
 title: "The Atari VCS's regions, its cartridge and its boards"
 date: 2026-10-14
-summary: "The second task of the Atari VCS: the two regions' clocks, picture window and pixel shape; the cartridge, its board chosen by the file's size and the Superchip by its filler; and Atari's and CBS's bank switching boards, each tested alone against images the tests build and through the core's own bus accesses. Every test was shown able to fail by breaking the code on purpose, one fault at a time."
+summary: "The second task of the Atari VCS: the two regions' clocks, picture window and pixel shape; the cartridge, its board chosen by the file's size and the Superchip by its filler; and Atari's and CBS's bank switching boards, each tested alone against images the tests build and through the core's own bus accesses. Every test file was shown able to fail by breaking the code on purpose, one fault at a time."
 order: 54
 ---
 

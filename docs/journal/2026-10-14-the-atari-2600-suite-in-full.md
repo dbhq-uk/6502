@@ -109,16 +109,16 @@ On the drawn line, an extra motion clock from HMOVE that falls on an object's ow
 ### `collision/merge-delivery-replant`
 
 - **Header.** "A RESP0 write that lands while the start decode for that player is already running does not corrupt the delivery. The pattern still appears, kept in place or shifted whole per one fixed per-landing-clock profile, and the merge pixel is never deleted." Twelve legs at quad width (three park columns by four reset clocks, 63, 66, 69 and 72), each with a stuck motion train putting a step on the start decode; a missile probes the merge pixel. PASS is the profile `$4D` for legs 1 to 8 and `$E0` for legs 9 to 12 and the flags; on a fail CODE is the first wrong leg and OBSERVED and EXPECTED the byte that differs. This header has no "region-independent" line (`suite.md` section 7.3); it fails the same in both regions.
-- **Observed.** CODE `$03`, OBSERVED `$49`, EXPECTED `$4D`, both regions. `$49` is merge pixels on legs 1, 4 and 7; the console has them on legs 1, 3, 4 and 7. Leg 3 is the first park column with the RESP0 landing at colour clock 69; the model deletes its merge pixel, which the header says never happens.
+- **Observed.** CODE `$03`, OBSERVED `$49`, EXPECTED `$4D`, both regions. `$49` is merge pixels on legs 1, 4 and 7; the suite's expected byte has them on legs 1, 3, 4 and 7. Leg 3 is the first park column with the RESP0 landing at colour clock 69; the model deletes its merge pixel, which the header says never happens.
 - **Sheet.** `tia.md` sections 9, 10 and 17.1, open items 7 and 12.
 - **Cause.** The shared one; and not open item 7, by the diagnostic above.
 
 ### `collision/merge-delivery-stretch`
 
 - **Header.** "Whether a lone merged motion step advances a double-width player's pattern scan depends on which pattern bit is starting. The start decode and every second bit take the advance, at either phase of the step grid. The other bits refuse it, even at their own phase." Six legs at NUSIZ `$05`, two missile probes each; CODE `$01` to `$06` is probe A of a leg, with OBSERVED all six A bits against EXPECTED `$3E`.
-- **Observed.** CODE `$03`, OBSERVED `$2A`, EXPECTED `$3E`, both regions. `$2A` is probe A lit on legs 2, 4 and 6; the console also has legs 3 and 5. Leg 3 is the first bit's first clock and leg 5 the third bit's: the header says both refuse the advance, so the bit's second clock is kept and probe A lit. The model takes the advance there, as on every bit.
+- **Observed.** CODE `$03`, OBSERVED `$2A`, EXPECTED `$3E`, both regions. `$2A` is probe A lit on legs 2, 4 and 6; the suite's expected byte also has legs 3 and 5. Leg 3 is the first bit's first clock and leg 5 the third bit's: the header says both refuse the advance, so the bit's second clock is kept and probe A lit. The model takes the advance there, as on every bit.
 - **Sheet.** `tia.md` sections 10 and 17.1, open item 12.
-- **Cause.** The shared one, at double width: the console's scan treats odd and even bits differently under a merged step, and no source read says how.
+- **Cause.** The shared one, at double width: in the suite's console the scan treats odd and even bits differently under a merged step, and no source read says how.
 
 ### `collision/merge-delivery-train`
 

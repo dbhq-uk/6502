@@ -59,7 +59,7 @@ Nothing. The image is byte for byte the file at the address above, and the licen
 
 ## The cartridge art is not in the ROM
 
-The repository's README credits the cartridge art separately: "Cartridge Art © 2014 by Jenn Harrison". That art is the label pictures in the repository (`cart-main.jpg`, `cart-orig.jpg`, `cart-small.jpg` and `cart-top.jpg`, named in the repository's tree at the pinned commit), which are not bundled, shown or committed here. None of it is in the ROM.
+The repository's README credits the cartridge art separately: "Cartridge Art © 2014 by Jenn Harrison". That art is the label pictures in the repository (`cart-main.jpg`, `cart-orig.jpg`, `cart-small.jpg` and `cart-top.jpg`, named in the repository's tree at the pinned commit), which are not bundled, shown or committed here. None of it is in the ROM, on the design's rights pass of 14 October 2026.
 
 ## How it runs
 
