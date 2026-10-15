@@ -113,7 +113,18 @@
   --r-btn: 12px;
   --r-pill: 9999px;
 
-  /* layout */
-  --max: 1280px;
-  --pad: clamp(20px, 5vw, 40px);
+  /* layout (15 October 2026: the margins were too big). --max is the container
+     every page shares; --pad is its side padding; --section the space above and
+     below a section. --measure caps a paragraph at about 72 characters: Inter's
+     average character, with the body's letter-spacing, is about 0.45em wide, so
+     33em is the measure at any font size, where 72ch would be about 90.
+     tests/layout.test.mjs holds all four. */
+  --max: 1320px;
+  --pad: clamp(16px, 4vw, 32px);
+  --section: clamp(32px, 4.5vw, 64px);
+  --measure: 33em;
+  /* A machine's screen is as wide as its panel, but never taller than this: the
+     window under the header, with room for the first row of controls. Each
+     screen turns it into a width by its own shape. */
+  --screen-fit: max(240px, 100svh - 180px);
 }
