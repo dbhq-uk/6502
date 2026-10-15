@@ -23,7 +23,7 @@ const models = path.join(process.cwd(), 'src', 'models');
 const html = page('/machines/kim-1/')?.html ?? '';
 const section = (() => {
   const at = html.indexOf('<section class="model"');
-  return at < 0 ? '' : html.slice(at, html.indexOf('<section class="photos"', at));
+  return at < 0 ? '' : html.slice(at, html.indexOf('<section class="machine-more"', at));
 })();
 // What the model was measured from, and how well: the committed results of tools/kim1-model/.
 const figures = JSON.parse(fs.readFileSync(path.join(process.cwd(), 'src', 'data', 'kim-1-model.json'), 'utf8'));
@@ -532,7 +532,7 @@ test('a machine with a case has one model section: a tab list named Views of the
   for (const m of tabbed) {
     const built = page(`/machines/${m.id}/`)?.html ?? '';
     const at = built.indexOf('<section class="model"');
-    const section = built.slice(at, built.indexOf('<section class="photos"', at));
+    const section = built.slice(at, built.indexOf('<section class="machine-more"', at));
     const views = modelsOf(m).map((c) => c.view);
     assert.match(section, /^<section class="model" aria-labelledby="model" data-model-section hidden>/, `${m.id}: the section is not hidden in the markup, or not the views' section`);
     assert.match(section, /<h2 id="model">Models of the machine<\/h2>/);

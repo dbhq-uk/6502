@@ -5,7 +5,7 @@ import os from 'node:os';
 import path from 'node:path';
 import crypto from 'node:crypto';
 import { execFileSync } from 'node:child_process';
-import { page, visibleText, DIST } from './helpers.mjs';
+import { page, visibleText, DIST, pagePart, foldOf } from './helpers.mjs';
 import { REPO_ROOT } from '../src/lib/registry.mjs';
 import {
   COPYLEFT, DISCS_DIR, DISCS_FOLDER, DISC_KINDS, DISC_LICENCES, discFolderUrl, discLibrary, discLicenceUrl, discProblems, discSourceUrl,
@@ -27,10 +27,8 @@ const panel = (() => {
   const at = html.indexOf('<div class="bbc"');
   return at < 0 ? '' : html.slice(at, html.indexOf('</fieldset>', at));
 })();
-const section = (id) => {
-  const at = html.indexOf(`aria-labelledby="${id}"`);
-  return at < 0 ? '' : html.slice(at, html.indexOf('</section>', at));
-};
+// A section, or a closed part of the reference at the foot of the page (helpers.mjs).
+const section = (id) => pagePart(html, id);
 
 // The titles docs/bbc-micro/facts/discs.md says to avoid: commercial, non-commercial,
 // no rights-holder statement, someone else's content, or hosted only by a mirror.
@@ -267,7 +265,7 @@ test('the visitor\'s own disc stays as it was: the file input, drop, blank, save
 
 test('the page credits every disc without anything loaded, says they are not MIT, and that commercial games are load-your-own', () => {
   const credits = section('discs');
-  assert.match(credits, /<h2 id="discs">Credits and licences for the discs<\/h2>/);
+  assert.deepEqual(foldOf(credits), { summary: 'Credits and licences for the discs', open: false }, 'the discs\' credits are not a closed part of the reference');
   const text = decode(visibleText(credits));
   assert.match(text, /not under this project's MIT licence/);
   assert.match(text, /Commercial games are not/);
