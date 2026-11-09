@@ -62,7 +62,7 @@ jobs:
           git -C repo archive "$COMMIT" | tar -x -C tree
           [[ -f tree/bench/atari-2600-speed/rule.md ]] || { echo "$COMMIT has no bench/atari-2600-speed/rule.md" >&2; exit 1; }
       # The SDK and the workload pinned as validate.yml pins them.
-      - uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6
+      - uses: actions/setup-dotnet@0f4a354dd5547a28c70b7853dbd95d5b67886e73 # v6
         with:
           dotnet-version: '10.0.400'
       - name: The wasm-tools workload, pinned
